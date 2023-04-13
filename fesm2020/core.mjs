@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.7+sha-1d761bd
+ * @license Angular v15.2.7+sha-f266a05
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -402,29 +402,14 @@ function getOwnDefinition(type, field) {
 function getInheritedInjectableDef(type) {
     const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
     if (def) {
-        const typeName = getTypeName(type);
         ngDevMode &&
-            console.warn(`DEPRECATED: DI is instantiating a token "${typeName}" that inherits its @Injectable decorator but does not provide one itself.\n` +
-                `This will become an error in a future version of Angular. Please add @Injectable() to the "${typeName}" class.`);
+            console.warn(`DEPRECATED: DI is instantiating a token "${type.name}" that inherits its @Injectable decorator but does not provide one itself.\n` +
+                `This will become an error in a future version of Angular. Please add @Injectable() to the "${type.name}" class.`);
         return def;
     }
     else {
         return null;
     }
-}
-/** Gets the name of a type, accounting for some cross-browser differences. */
-function getTypeName(type) {
-    // `Function.prototype.name` behaves differently between IE and other browsers. In most browsers
-    // it'll always return the name of the function itself, no matter how many other functions it
-    // inherits from. On IE the function doesn't have its own `name` property, but it takes it from
-    // the lowest level in the prototype chain. E.g. if we have `class Foo extends Parent` most
-    // browsers will evaluate `Foo.name` to `Foo` while IE will return `Parent`. We work around
-    // the issue by converting the function to a string and parsing its name out that way via a regex.
-    if (type.hasOwnProperty('name')) {
-        return type.name;
-    }
-    const match = ('' + type).match(/^function\s*([^\s(]+)/);
-    return match === null ? '' : match[1];
 }
 /**
  * Read the injector def type in a way which is immune to accidentally reading inherited value.
@@ -4878,8 +4863,8 @@ function validateElementIsKnown(element, lView, tagName, schemas, hasDirectives)
         // as a custom element. Note that unknown elements with a dash in their name won't be instances
         // of HTMLUnknownElement in browsers that support web components.
         const isUnknown = 
-        // Note that we can't check for `typeof HTMLUnknownElement === 'function'`,
-        // because while most browsers return 'function', IE returns 'object'.
+        // Note that we can't check for `typeof HTMLUnknownElement === 'function'` because
+        // Domino doesn't expose HTMLUnknownElement globally.
         (typeof HTMLUnknownElement !== 'undefined' && HTMLUnknownElement &&
             element instanceof HTMLUnknownElement) ||
             (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
@@ -4936,8 +4921,7 @@ function isPropertyValid(element, propName, tagName, schemas) {
     if (matchingSchemas(schemas, tagName) || propName in element || isAnimationProp(propName)) {
         return true;
     }
-    // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
-    // need to account for both here, while being careful with `typeof null` also returning 'object'.
+    // Note: `typeof Node` returns 'function' in most browsers, but is undefined with domino.
     return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
 }
 /**
@@ -8347,7 +8331,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.7+sha-1d761bd');
+const VERSION = new Version('15.2.7+sha-f266a05');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25833,16 +25817,11 @@ class DebugElement extends DebugNode {
                 i += 2;
             }
         }
-        const eAttrs = element.attributes;
-        for (let i = 0; i < eAttrs.length; i++) {
-            const attr = eAttrs[i];
-            const lowercaseName = attr.name.toLowerCase();
+        for (const attr of element.attributes) {
             // Make sure that we don't assign the same attribute both in its
             // case-sensitive form and the lower-cased one from the browser.
-            if (lowercaseTNodeAttrs.indexOf(lowercaseName) === -1) {
-                // Save the lowercase name to align the behavior between browsers.
-                // IE preserves the case, while all other browser convert it to lower case.
-                attributes[lowercaseName] = attr.value;
+            if (!lowercaseTNodeAttrs.includes(attr.name)) {
+                attributes[attr.name] = attr.value;
             }
         }
         return attributes;
