@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.0+sha-970e8b4
+ * @license Angular v16.0.0-rc.0+sha-87549af
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32,14 +32,14 @@ export declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoType
  *
  * @developerPreview
  */
-export declare function toObservable<T>(source: Signal<T>, options?: toObservableOptions): Observable<T>;
+export declare function toObservable<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
 
 /**
  * Options for `toObservable`.
  *
  * @developerPreview
  */
-export declare interface toObservableOptions {
+export declare interface ToObservableOptions {
     /**
      * The `Injector` to use when creating the effect.
      *
