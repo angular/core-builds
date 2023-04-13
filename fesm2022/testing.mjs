@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-90166be
+ * @license Angular v16.1.0-next.0+sha-2d0fcd6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3879,6 +3879,12 @@ class WritableSignalImpl extends ReactiveNode {
         this.producerMayHaveChanged();
         postSignalSetFn?.();
     }
+    asReadonly() {
+        if (this.readonlySignal === undefined) {
+            this.readonlySignal = createSignalFromFunction(this, () => this.signal());
+        }
+        return this.readonlySignal;
+    }
     signal() {
         this.producerAccessed();
         return this.value;
@@ -3897,6 +3903,7 @@ function signal(initialValue, options) {
         set: signalNode.set.bind(signalNode),
         update: signalNode.update.bind(signalNode),
         mutate: signalNode.mutate.bind(signalNode),
+        asReadonly: signalNode.asReadonly.bind(signalNode)
     });
     return signalFn;
 }
@@ -10348,7 +10355,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-90166be');
+const VERSION = new Version('16.1.0-next.0+sha-2d0fcd6');
 
 // This default value is when checking the hierarchy for a token.
 //

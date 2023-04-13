@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-90166be
+ * @license Angular v16.1.0-next.0+sha-2d0fcd6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10081,6 +10081,12 @@ export declare interface WritableSignal<T> extends Signal<T> {
      * notify any dependents.
      */
     mutate(mutatorFn: (value: T) => void): void;
+    /**
+     * Returns a readonly version of this signal. Readonly signals can be accessed to read their value
+     * but can't be changed using set, update or mutate methods. The readonly signals do _not_ have
+     * any built-in mechanism that would prevent deep-mutation of their value.
+     */
+    asReadonly(): Signal<T>;
 }
 
 /**
