@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.0+sha-4721c48
+ * @license Angular v16.0.0-rc.0+sha-970e8b4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -771,29 +771,14 @@ function getOwnDefinition(type, field) {
 function getInheritedInjectableDef(type) {
     const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
     if (def) {
-        const typeName = getTypeName(type);
         ngDevMode &&
-            console.warn(`DEPRECATED: DI is instantiating a token "${typeName}" that inherits its @Injectable decorator but does not provide one itself.\n` +
-                `This will become an error in a future version of Angular. Please add @Injectable() to the "${typeName}" class.`);
+            console.warn(`DEPRECATED: DI is instantiating a token "${type.name}" that inherits its @Injectable decorator but does not provide one itself.\n` +
+                `This will become an error in a future version of Angular. Please add @Injectable() to the "${type.name}" class.`);
         return def;
     }
     else {
         return null;
     }
-}
-/** Gets the name of a type, accounting for some cross-browser differences. */
-function getTypeName(type) {
-    // `Function.prototype.name` behaves differently between IE and other browsers. In most browsers
-    // it'll always return the name of the function itself, no matter how many other functions it
-    // inherits from. On IE the function doesn't have its own `name` property, but it takes it from
-    // the lowest level in the prototype chain. E.g. if we have `class Foo extends Parent` most
-    // browsers will evaluate `Foo.name` to `Foo` while IE will return `Parent`. We work around
-    // the issue by converting the function to a string and parsing its name out that way via a regex.
-    if (type.hasOwnProperty('name')) {
-        return type.name;
-    }
-    const match = ('' + type).match(/^function\s*([^\s(]+)/);
-    return match === null ? '' : match[1];
 }
 /**
  * Read the injector def type in a way which is immune to accidentally reading inherited value.
@@ -6314,8 +6299,8 @@ function validateElementIsKnown(element, lView, tagName, schemas, hasDirectives)
         // as a custom element. Note that unknown elements with a dash in their name won't be instances
         // of HTMLUnknownElement in browsers that support web components.
         const isUnknown = 
-        // Note that we can't check for `typeof HTMLUnknownElement === 'function'`,
-        // because while most browsers return 'function', IE returns 'object'.
+        // Note that we can't check for `typeof HTMLUnknownElement === 'function'` because
+        // Domino doesn't expose HTMLUnknownElement globally.
         (typeof HTMLUnknownElement !== 'undefined' && HTMLUnknownElement &&
             element instanceof HTMLUnknownElement) ||
             (typeof customElements !== 'undefined' && tagName.indexOf('-') > -1 &&
@@ -6372,8 +6357,7 @@ function isPropertyValid(element, propName, tagName, schemas) {
     if (matchingSchemas(schemas, tagName) || propName in element || isAnimationProp(propName)) {
         return true;
     }
-    // Note: `typeof Node` returns 'function' in most browsers, but on IE it is 'object' so we
-    // need to account for both here, while being careful with `typeof null` also returning 'object'.
+    // Note: `typeof Node` returns 'function' in most browsers, but is undefined with domino.
     return typeof Node === 'undefined' || Node === null || !(element instanceof Node);
 }
 /**
@@ -10364,7 +10348,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-rc.0+sha-4721c48');
+const VERSION = new Version('16.0.0-rc.0+sha-970e8b4');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10514,9 +10498,10 @@ function isInSkipHydrationBlock(tNode) {
 
 const NG_DEV_MODE$1 = typeof ngDevMode === 'undefined' || !!ngDevMode;
 /**
- * Internal token that specifies whether hydration is enabled.
+ * Internal token that specifies whether DOM reuse logic
+ * during hydration is enabled.
  */
-const IS_HYDRATION_FEATURE_ENABLED = new InjectionToken(NG_DEV_MODE$1 ? 'IS_HYDRATION_FEATURE_ENABLED' : '');
+const IS_HYDRATION_DOM_REUSE_ENABLED = new InjectionToken(NG_DEV_MODE$1 ? 'IS_HYDRATION_DOM_REUSE_ENABLED' : '');
 // By default (in client rendering mode), we remove all the contents
 // of the host element and render an application after that.
 const PRESERVE_HOST_CONTENT_DEFAULT = false;
