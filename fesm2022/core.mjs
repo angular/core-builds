@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-2d0fcd6
+ * @license Angular v16.1.0-next.0+sha-2c22e6f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3018,6 +3018,9 @@ function updateTransplantedViewCount(lContainer, amount) {
  * Stores a LView-specific destroy callback.
  */
 function storeLViewOnDestroy(lView, onDestroyCallback) {
+    if ((lView[FLAGS] & 256 /* LViewFlags.Destroyed */) === 256 /* LViewFlags.Destroyed */) {
+        throw new RuntimeError(911 /* RuntimeErrorCode.VIEW_ALREADY_DESTROYED */, ngDevMode && 'View has already been destroyed.');
+    }
     if (lView[ON_DESTROY_HOOKS] === null) {
         lView[ON_DESTROY_HOOKS] = [];
     }
@@ -8998,6 +9001,7 @@ class R3Injector extends EnvironmentInjector {
         }
     }
     onDestroy(callback) {
+        this.assertNotDestroyed();
         this._onDestroyHooks.push(callback);
         return () => this.removeOnDestroy(callback);
     }
@@ -9959,7 +9963,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-2d0fcd6');
+const VERSION = new Version('16.1.0-next.0+sha-2c22e6f');
 
 // This default value is when checking the hierarchy for a token.
 //
