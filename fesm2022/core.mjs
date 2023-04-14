@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.0+sha-c34d7e0
+ * @license Angular v16.0.0-rc.1+sha-31e1264
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9963,7 +9963,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-rc.0+sha-c34d7e0');
+const VERSION = new Version('16.0.0-rc.1+sha-31e1264');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10111,12 +10111,11 @@ function isInSkipHydrationBlock(tNode) {
     return false;
 }
 
-const NG_DEV_MODE$1 = typeof ngDevMode === 'undefined' || !!ngDevMode;
 /**
  * Internal token that specifies whether DOM reuse logic
  * during hydration is enabled.
  */
-const IS_HYDRATION_DOM_REUSE_ENABLED = new InjectionToken(NG_DEV_MODE$1 ? 'IS_HYDRATION_DOM_REUSE_ENABLED' : '');
+const IS_HYDRATION_DOM_REUSE_ENABLED = new InjectionToken((typeof ngDevMode === 'undefined' || !!ngDevMode) ? 'IS_HYDRATION_DOM_REUSE_ENABLED' : '');
 // By default (in client rendering mode), we remove all the contents
 // of the host element and render an application after that.
 const PRESERVE_HOST_CONTENT_DEFAULT = false;
@@ -10124,7 +10123,7 @@ const PRESERVE_HOST_CONTENT_DEFAULT = false;
  * Internal token that indicates whether host element content should be
  * retained during the bootstrap.
  */
-const PRESERVE_HOST_CONTENT = new InjectionToken(NG_DEV_MODE$1 ? 'PRESERVE_HOST_CONTENT' : '', {
+const PRESERVE_HOST_CONTENT = new InjectionToken((typeof ngDevMode === 'undefined' || !!ngDevMode) ? 'PRESERVE_HOST_CONTENT' : '', {
     providedIn: 'root',
     factory: () => PRESERVE_HOST_CONTENT_DEFAULT,
 });
@@ -10282,7 +10281,6 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
     return { propName: undefined, oldValue, newValue };
 }
 
-const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
 class ReactiveLViewConsumer extends ReactiveNode {
     constructor() {
         super(...arguments);
@@ -10290,11 +10288,12 @@ class ReactiveLViewConsumer extends ReactiveNode {
         this._lView = null;
     }
     set lView(lView) {
-        NG_DEV_MODE && assertEqual(this._lView, null, 'Consumer already associated with a view.');
+        (typeof ngDevMode === 'undefined' || ngDevMode) &&
+            assertEqual(this._lView, null, 'Consumer already associated with a view.');
         this._lView = lView;
     }
     onConsumerDependencyMayHaveChanged() {
-        NG_DEV_MODE &&
+        (typeof ngDevMode === 'undefined' || ngDevMode) &&
             assertDefined(this._lView, 'Updating a signal during template or host binding execution is not allowed.');
         markViewDirty(this._lView);
     }
@@ -10712,8 +10711,9 @@ function processHostBindingOpCodes(tView, lView) {
         }
     }
     finally {
-        lView[REACTIVE_HOST_BINDING_CONSUMER] === null &&
+        if (lView[REACTIVE_HOST_BINDING_CONSUMER] === null) {
             commitLViewConsumerIfHasProducers(lView, REACTIVE_HOST_BINDING_CONSUMER);
+        }
         setSelectedIndex(-1);
     }
 }
@@ -10768,7 +10768,6 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, enviro
     lView[ID] = getUniqueLViewId();
     lView[HYDRATION] = hydrationInfo;
     lView[EMBEDDED_VIEW_INJECTOR] = embeddedViewInjector;
-    lView[REACTIVE_TEMPLATE_CONSUMER] = null;
     ngDevMode &&
         assertEqual(tView.type == 2 /* TViewType.Embedded */ ? parentLView !== null : true, true, 'Embedded views must have parentLView');
     lView[DECLARATION_COMPONENT_VIEW] =
