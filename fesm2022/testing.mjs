@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-aebf115
+ * @license Angular v16.1.0-next.0+sha-b4e83ca
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10359,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-aebf115');
+const VERSION = new Version('16.1.0-next.0+sha-b4e83ca');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10507,11 +10507,12 @@ function isInSkipHydrationBlock(tNode) {
     return false;
 }
 
+const NG_DEV_MODE$1 = typeof ngDevMode === 'undefined' || !!ngDevMode;
 /**
  * Internal token that specifies whether DOM reuse logic
  * during hydration is enabled.
  */
-const IS_HYDRATION_DOM_REUSE_ENABLED = new InjectionToken((typeof ngDevMode === 'undefined' || !!ngDevMode) ? 'IS_HYDRATION_DOM_REUSE_ENABLED' : '');
+const IS_HYDRATION_DOM_REUSE_ENABLED = new InjectionToken(NG_DEV_MODE$1 ? 'IS_HYDRATION_DOM_REUSE_ENABLED' : '');
 // By default (in client rendering mode), we remove all the contents
 // of the host element and render an application after that.
 const PRESERVE_HOST_CONTENT_DEFAULT = false;
@@ -10519,7 +10520,7 @@ const PRESERVE_HOST_CONTENT_DEFAULT = false;
  * Internal token that indicates whether host element content should be
  * retained during the bootstrap.
  */
-const PRESERVE_HOST_CONTENT = new InjectionToken((typeof ngDevMode === 'undefined' || !!ngDevMode) ? 'PRESERVE_HOST_CONTENT' : '', {
+const PRESERVE_HOST_CONTENT = new InjectionToken(NG_DEV_MODE$1 ? 'PRESERVE_HOST_CONTENT' : '', {
     providedIn: 'root',
     factory: () => PRESERVE_HOST_CONTENT_DEFAULT,
 });
@@ -10629,6 +10630,7 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
     return { propName: undefined, oldValue, newValue };
 }
 
+const NG_DEV_MODE = typeof ngDevMode === 'undefined' || ngDevMode;
 class ReactiveLViewConsumer extends ReactiveNode {
     constructor() {
         super(...arguments);
@@ -10636,12 +10638,11 @@ class ReactiveLViewConsumer extends ReactiveNode {
         this._lView = null;
     }
     set lView(lView) {
-        (typeof ngDevMode === 'undefined' || ngDevMode) &&
-            assertEqual(this._lView, null, 'Consumer already associated with a view.');
+        NG_DEV_MODE && assertEqual(this._lView, null, 'Consumer already associated with a view.');
         this._lView = lView;
     }
     onConsumerDependencyMayHaveChanged() {
-        (typeof ngDevMode === 'undefined' || ngDevMode) &&
+        NG_DEV_MODE &&
             assertDefined(this._lView, 'Updating a signal during template or host binding execution is not allowed.');
         markViewDirty(this._lView);
     }
