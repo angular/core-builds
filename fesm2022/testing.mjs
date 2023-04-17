@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-49386de
+ * @license Angular v16.1.0-next.0+sha-a49279d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10359,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-49386de');
+const VERSION = new Version('16.1.0-next.0+sha-a49279d');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -12718,7 +12718,7 @@ class EffectManager {
         this.queue = new Map();
     }
     create(effectFn, destroyRef, allowSignalWrites) {
-        const zone = Zone.current;
+        const zone = (typeof Zone === 'undefined') ? null : Zone.current;
         const watch = new Watch(effectFn, (watch) => {
             if (!this.all.has(watch)) {
                 return;
@@ -12746,7 +12746,12 @@ class EffectManager {
         }
         for (const [watch, zone] of this.queue) {
             this.queue.delete(watch);
-            zone.run(() => watch.run());
+            if (zone) {
+                zone.run(() => watch.run());
+            }
+            else {
+                watch.run();
+            }
         }
     }
     get isQueueEmpty() {
