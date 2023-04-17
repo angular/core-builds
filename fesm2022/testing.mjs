@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.1+sha-449c011
+ * @license Angular v16.0.0-rc.1+sha-14d2747
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10359,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-rc.1+sha-449c011');
+const VERSION = new Version('16.0.0-rc.1+sha-14d2747');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -12827,6 +12827,21 @@ function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
                 if (lViewFirstChildTNode !== null) {
                     collectNativeNodes(lViewInAContainer[TVIEW], lViewInAContainer, lViewFirstChildTNode, result);
                 }
+            }
+            // When an LContainer is created, the anchor (comment) node is:
+            // - (1) either reused in case of an ElementContainer (<ng-container>)
+            // - (2) or a new comment node is created
+            // In the first case, the anchor comment node would be added to the final
+            // list by the code above (`result.push(unwrapRNode(lNode))`), but the second
+            // case requires extra handling: the anchor node needs to be added to the
+            // final list manually. See additional information in the `createAnchorNode`
+            // function in the `view_container_ref.ts`.
+            //
+            // In the first case, the same reference would be stored in the `NATIVE`
+            // and `HOST` slots in an LContainer. Otherwise, this is the second case and
+            // we should add an element to the final list.
+            if (lNode[NATIVE] !== lNode[HOST]) {
+                result.push(lNode[NATIVE]);
             }
         }
         const tNodeType = tNode.type;
