@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.1+sha-4ee286b
+ * @license Angular v16.0.0-rc.1+sha-003e7d1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -275,7 +275,6 @@ export declare class ApplicationInitStatus {
     readonly done = false;
     readonly donePromise: Promise<any>;
     private readonly appInits;
-    constructor();
     static ɵfac: i0.ɵɵFactoryDeclaration<ApplicationInitStatus, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<ApplicationInitStatus>;
 }
