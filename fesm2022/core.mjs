@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-b7392f9
+ * @license Angular v16.1.0-next.0+sha-1816c89
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9963,7 +9963,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-b7392f9');
+const VERSION = new Version('16.1.0-next.0+sha-1816c89');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20198,11 +20198,10 @@ const MARKER = `�`;
 const SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
 const PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
 /**
- * Angular Dart introduced &ngsp; as a placeholder for non-removable space, see:
- * https://github.com/dart-lang/angular/blob/0bb611387d29d65b5af7f9d2515ab571fd3fbee4/_tests/test/compiler/preserve_whitespace_test.dart#L25-L32
- * In Angular Dart &ngsp; is converted to the 0xE500 PUA (Private Use Areas) unicode character
- * and later on replaced by a space. We are re-implementing the same idea here, since translations
- * might contain this special character.
+ * Angular uses the special entity &ngsp; as a placeholder for non-removable space.
+ * It's replaced by the 0xE500 PUA (Private Use Areas) unicode character and later on replaced by a
+ * space.
+ * We are re-implementing the same idea since translations might contain this special character.
  */
 const NGSP_UNICODE_REGEXP = /\uE500/g;
 function replaceNgsp(value) {
