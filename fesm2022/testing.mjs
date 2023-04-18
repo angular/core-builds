@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.1+sha-003e7d1
+ * @license Angular v16.0.0-rc.1+sha-8219857
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10359,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-rc.1+sha-003e7d1');
+const VERSION = new Version('16.0.0-rc.1+sha-8219857');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11413,10 +11413,21 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         }
         const preHookType = isUpdatePhase ? 2 /* ProfilerEvent.TemplateUpdateStart */ : 0 /* ProfilerEvent.TemplateCreateStart */;
         profiler(preHookType, context);
-        consumer.runInContext(templateFn, rf, context);
+        if (isUpdatePhase) {
+            consumer.runInContext(templateFn, rf, context);
+        }
+        else {
+            const prevConsumer = setActiveConsumer(null);
+            try {
+                templateFn(rf, context);
+            }
+            finally {
+                setActiveConsumer(prevConsumer);
+            }
+        }
     }
     finally {
-        if (lView[REACTIVE_TEMPLATE_CONSUMER] === null) {
+        if (isUpdatePhase && lView[REACTIVE_TEMPLATE_CONSUMER] === null) {
             commitLViewConsumerIfHasProducers(lView, REACTIVE_TEMPLATE_CONSUMER);
         }
         setSelectedIndex(prevSelectedIndex);
@@ -20535,11 +20546,10 @@ const MARKER = `�`;
 const SUBTEMPLATE_REGEXP = /�\/?\*(\d+:\d+)�/gi;
 const PH_REGEXP = /�(\/?[#*]\d+):?\d*�/gi;
 /**
- * Angular Dart introduced &ngsp; as a placeholder for non-removable space, see:
- * https://github.com/dart-lang/angular/blob/0bb611387d29d65b5af7f9d2515ab571fd3fbee4/_tests/test/compiler/preserve_whitespace_test.dart#L25-L32
- * In Angular Dart &ngsp; is converted to the 0xE500 PUA (Private Use Areas) unicode character
- * and later on replaced by a space. We are re-implementing the same idea here, since translations
- * might contain this special character.
+ * Angular uses the special entity &ngsp; as a placeholder for non-removable space.
+ * It's replaced by the 0xE500 PUA (Private Use Areas) unicode character and later on replaced by a
+ * space.
+ * We are re-implementing the same idea since translations might contain this special character.
  */
 const NGSP_UNICODE_REGEXP = /\uE500/g;
 function replaceNgsp(value) {
