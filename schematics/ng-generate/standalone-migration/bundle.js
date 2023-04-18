@@ -2093,6 +2093,7 @@ var FixupExpression = class extends Expression {
   constructor(resolved) {
     super(resolved.type);
     this.resolved = resolved;
+    this.shared = false;
     this.original = resolved;
   }
   visitExpression(visitor, context) {
@@ -3978,11 +3979,12 @@ var Container = class {
   }
 };
 var Icu2 = class {
-  constructor(expression, type, cases, sourceSpan) {
+  constructor(expression, type, cases, sourceSpan, expressionPlaceholder) {
     this.expression = expression;
     this.type = type;
     this.cases = cases;
     this.sourceSpan = sourceSpan;
+    this.expressionPlaceholder = expressionPlaceholder;
   }
   visit(visitor, context) {
     return visitor.visitIcu(this, context);
@@ -4035,8 +4037,7 @@ var CloneVisitor = class {
   visitIcu(icu, context) {
     const cases = {};
     Object.keys(icu.cases).forEach((key) => cases[key] = icu.cases[key].visit(this, context));
-    const msg = new Icu2(icu.expression, icu.type, cases, icu.sourceSpan);
-    msg.expressionPlaceholder = icu.expressionPlaceholder;
+    const msg = new Icu2(icu.expression, icu.type, cases, icu.sourceSpan, icu.expressionPlaceholder);
     return msg;
   }
   visitTagPlaceholder(ph, context) {
@@ -18170,7 +18171,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.1.0-next.0+sha-34b796f");
+var VERSION2 = new Version("16.1.0-next.0+sha-d4ef207");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -18480,6 +18481,7 @@ function _parseMessageMeta(i18n) {
 var XmlTagDefinition = class {
   constructor() {
     this.closedByParent = false;
+    this.implicitNamespacePrefix = null;
     this.isVoid = false;
     this.ignoreFirstLf = false;
     this.canSelfClose = true;
@@ -18818,6 +18820,9 @@ ${errors.join("\n")}`);
   }
 };
 var _WriteVisitor2 = class {
+  constructor() {
+    this._nextPlaceholderId = 0;
+  }
   visitText(text2, context) {
     return [new Text3(text2.value)];
   }
@@ -19485,7 +19490,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-34b796f"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-d4ef207"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -19554,7 +19559,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-34b796f"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-d4ef207"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -19736,7 +19741,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-34b796f"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-d4ef207"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -19759,7 +19764,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-34b796f"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-d4ef207"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -19797,7 +19802,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-34b796f"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-d4ef207"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -19818,7 +19823,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-34b796f"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-d4ef207"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -19853,7 +19858,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-34b796f"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-d4ef207"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -19870,7 +19875,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.1.0-next.0+sha-34b796f");
+var VERSION3 = new Version("16.1.0-next.0+sha-d4ef207");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
