@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-ec30674
+ * @license Angular v16.1.0-next.0+sha-b7392f9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10359,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-ec30674');
+const VERSION = new Version('16.1.0-next.0+sha-b7392f9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11413,10 +11413,21 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         }
         const preHookType = isUpdatePhase ? 2 /* ProfilerEvent.TemplateUpdateStart */ : 0 /* ProfilerEvent.TemplateCreateStart */;
         profiler(preHookType, context);
-        consumer.runInContext(templateFn, rf, context);
+        if (isUpdatePhase) {
+            consumer.runInContext(templateFn, rf, context);
+        }
+        else {
+            const prevConsumer = setActiveConsumer(null);
+            try {
+                templateFn(rf, context);
+            }
+            finally {
+                setActiveConsumer(prevConsumer);
+            }
+        }
     }
     finally {
-        if (lView[REACTIVE_TEMPLATE_CONSUMER] === null) {
+        if (isUpdatePhase && lView[REACTIVE_TEMPLATE_CONSUMER] === null) {
             commitLViewConsumerIfHasProducers(lView, REACTIVE_TEMPLATE_CONSUMER);
         }
         setSelectedIndex(prevSelectedIndex);
