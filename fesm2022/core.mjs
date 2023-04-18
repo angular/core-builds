@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-fb1161f
+ * @license Angular v16.1.0-next.0+sha-882ca66
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9963,7 +9963,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-fb1161f');
+const VERSION = new Version('16.1.0-next.0+sha-882ca66');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29538,7 +29538,10 @@ function serializeLView(lView, context) {
                 //     live DOM has exactly the same state as it was before serialization.
                 if (tNode.type & 1 /* TNodeType.Text */) {
                     const rNode = unwrapRNode(lView[i]);
-                    if (rNode.textContent?.replace(/\s/gm, '') === '') {
+                    // Collect this node as required special annotation only when its
+                    // contents is empty. Otherwise, such text node would be present on
+                    // the client after server-side rendering and no special handling needed.
+                    if (rNode.textContent === '') {
                         context.corruptedTextNodes.set(rNode, "ngetn" /* TextNodeMarker.EmptyNode */);
                     }
                     else if (rNode.nextSibling?.nodeType === Node.TEXT_NODE) {
