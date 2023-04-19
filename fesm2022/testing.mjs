@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-4175f6f
+ * @license Angular v16.1.0-next.0+sha-efb3c68
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10359,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-4175f6f');
+const VERSION = new Version('16.1.0-next.0+sha-efb3c68');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -15258,7 +15258,7 @@ function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, t
     const hydrationInfo = lView[HYDRATION];
     if (hydrationInfo) {
         const noOffsetIndex = index - HEADER_OFFSET;
-        ssrId = (hydrationInfo && hydrationInfo.data[TEMPLATES]?.[noOffsetIndex]) ?? null;
+        ssrId = hydrationInfo.data[TEMPLATES]?.[noOffsetIndex] ?? null;
     }
     // TODO(pk): refactor getOrCreateTNode to have the "create" only version
     const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
