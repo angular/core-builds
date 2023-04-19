@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-726d8a8
+ * @license Angular v16.1.0-next.0+sha-1dc919a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9963,7 +9963,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-726d8a8');
+const VERSION = new Version('16.1.0-next.0+sha-1dc919a');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11092,13 +11092,19 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
 //////////////////////////
 function executeContentQueries(tView, tNode, lView) {
     if (isContentQueryHost(tNode)) {
-        const start = tNode.directiveStart;
-        const end = tNode.directiveEnd;
-        for (let directiveIndex = start; directiveIndex < end; directiveIndex++) {
-            const def = tView.data[directiveIndex];
-            if (def.contentQueries) {
-                def.contentQueries(1 /* RenderFlags.Create */, lView[directiveIndex], directiveIndex);
+        const prevConsumer = setActiveConsumer(null);
+        try {
+            const start = tNode.directiveStart;
+            const end = tNode.directiveEnd;
+            for (let directiveIndex = start; directiveIndex < end; directiveIndex++) {
+                const def = tView.data[directiveIndex];
+                if (def.contentQueries) {
+                    def.contentQueries(1 /* RenderFlags.Create */, lView[directiveIndex], directiveIndex);
+                }
             }
+        }
+        finally {
+            setActiveConsumer(prevConsumer);
         }
     }
 }
@@ -11918,22 +11924,30 @@ function setElementAttribute(renderer, element, namespace, tagName, name, value,
 function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode, initialInputData) {
     const initialInputs = initialInputData[directiveIndex];
     if (initialInputs !== null) {
-        const setInput = def.setInput;
         for (let i = 0; i < initialInputs.length;) {
             const publicName = initialInputs[i++];
             const privateName = initialInputs[i++];
             const value = initialInputs[i++];
-            if (setInput !== null) {
-                def.setInput(instance, value, publicName, privateName);
-            }
-            else {
-                instance[privateName] = value;
-            }
+            writeToDirectiveInput(def, instance, publicName, privateName, value);
             if (ngDevMode) {
                 const nativeElement = getNativeByTNode(tNode, lView);
                 setNgReflectProperty(lView, nativeElement, tNode.type, privateName, value);
             }
         }
+    }
+}
+function writeToDirectiveInput(def, instance, publicName, privateName, value) {
+    const prevConsumer = setActiveConsumer(null);
+    try {
+        if (def.setInput !== null) {
+            def.setInput(instance, value, publicName, privateName);
+        }
+        else {
+            instance[privateName] = value;
+        }
+    }
+    finally {
+        setActiveConsumer(prevConsumer);
     }
 }
 /**
@@ -12230,7 +12244,13 @@ function checkNoChangesInternal(tView, lView, context, notifyErrorHandler = true
 function executeViewQueryFn(flags, viewQueryFn, component) {
     ngDevMode && assertDefined(viewQueryFn, 'View queries function to execute must be defined.');
     setCurrentQueryIndex(0);
-    viewQueryFn(flags, component);
+    const prevConsumer = setActiveConsumer(null);
+    try {
+        viewQueryFn(flags, component);
+    }
+    finally {
+        setActiveConsumer(prevConsumer);
+    }
 }
 ///////////////////////////////
 //// Bindings & interpolations
@@ -12318,12 +12338,7 @@ function setInputsForProperty(tView, lView, inputs, publicName, value) {
         const instance = lView[index];
         ngDevMode && assertIndexInRange(lView, index);
         const def = tView.data[index];
-        if (def.setInput !== null) {
-            def.setInput(instance, value, publicName, privateName);
-        }
-        else {
-            instance[privateName] = value;
-        }
+        writeToDirectiveInput(def, instance, publicName, privateName, value);
     }
 }
 /**
