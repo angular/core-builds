@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-856a0ec
+ * @license Angular v16.1.0-next.0+sha-c029c67
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24,7 +24,8 @@ function takeUntilDestroyed(destroyRef) {
         destroyRef = inject(DestroyRef);
     }
     const destroyed$ = new Observable(observer => {
-        destroyRef.onDestroy(observer.next.bind(observer));
+        const unregisterFn = destroyRef.onDestroy(observer.next.bind(observer));
+        return unregisterFn;
     });
     return (source) => {
         return source.pipe(takeUntil(destroyed$));
