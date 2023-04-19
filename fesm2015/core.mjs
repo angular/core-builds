@@ -1,5 +1,5 @@
 /**
- * @license Angular v15.2.7+sha-0454158
+ * @license Angular v15.2.7+sha-2fff8fa
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8308,7 +8308,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('15.2.7+sha-0454158');
+const VERSION = new Version('15.2.7+sha-2fff8fa');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -15392,7 +15392,7 @@ function styleStringParser(keyValueArray, text) {
  * @codeGenApi
  */
 function ɵɵclassMap(classes) {
-    checkStylingMap(keyValueArraySet, classStringParser, classes, true);
+    checkStylingMap(classKeyValueArraySet, classStringParser, classes, true);
 }
 /**
  * Parse text as class and add values to KeyValueArray.
@@ -15833,6 +15833,26 @@ function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
  */
 function styleKeyValueArraySet(keyValueArray, key, value) {
     keyValueArraySet(keyValueArray, key, unwrapSafeValue(value));
+}
+/**
+ * Class-binding-specific function for setting the `value` for a `key`.
+ *
+ * See: `keyValueArraySet` for details
+ *
+ * @param keyValueArray KeyValueArray to add to.
+ * @param key Style key to add.
+ * @param value The value to set.
+ */
+function classKeyValueArraySet(keyValueArray, key, value) {
+    // We use `classList.add` to eventually add the CSS classes to the DOM node. Any value passed into
+    // `add` is stringified and added to the `class` attribute, e.g. even null, undefined or numbers
+    // will be added. Stringify the key here so that our internal data structure matches the value in
+    // the DOM. The only exceptions are empty strings and strings that contain spaces for which
+    // the browser throws an error. We ignore such values, because the error is somewhat cryptic.
+    const stringKey = String(key);
+    if (stringKey !== '' && !stringKey.includes(' ')) {
+        keyValueArraySet(keyValueArray, stringKey, value);
+    }
 }
 /**
  * Update map based styling.
