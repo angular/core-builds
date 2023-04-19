@@ -1,10 +1,10 @@
 /**
- * @license Angular v16.1.0-next.0+sha-38661a6
+ * @license Angular v16.1.0-next.0+sha-195aaa6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, provideZoneChangeDetection, Compiler, COMPILER_OPTIONS, ɵNgModuleFactory, ɵisEnvironmentProviders, ModuleWithComponentFactories, ɵconvertToBitFlags, Injector as Injector$1, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, EnvironmentInjector as EnvironmentInjector$1, NgZone, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, provideZoneChangeDetection, Compiler, COMPILER_OPTIONS, Injector as Injector$1, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, EnvironmentInjector as EnvironmentInjector$1, NgZone, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 import { Subject, Subscription } from 'rxjs';
 
@@ -10359,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-38661a6');
+const VERSION = new Version('16.1.0-next.0+sha-195aaa6');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25697,12 +25697,7 @@ class TestBedCompiler {
         if (this.compilerProviders !== null) {
             providers.push(...this.compilerProviders);
         }
-        // TODO(ocombe): make this work with an Injector directly instead of creating a module for it
-        class CompilerModule {
-        }
-        ɵcompileNgModuleDefs(CompilerModule, { providers });
-        const CompilerModuleFactory = new ɵNgModuleFactory(CompilerModule);
-        this._injector = CompilerModuleFactory.create(this.platform.injector).injector;
+        this._injector = Injector$1.create({ providers, parent: this.platform.injector });
         return this._injector;
     }
     // get overrides for a specific provider (if any)
