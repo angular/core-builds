@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-efb3c68
+ * @license Angular v16.1.0-next.0+sha-338c7d9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9963,7 +9963,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-efb3c68');
+const VERSION = new Version('16.1.0-next.0+sha-338c7d9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14778,10 +14778,10 @@ function locateRNodeByPath(path, lView) {
     const [referenceNode, ...navigationInstructions] = decompressNodeLocation(path);
     let ref;
     if (referenceNode === REFERENCE_NODE_HOST) {
-        ref = lView[0];
+        ref = lView[DECLARATION_COMPONENT_VIEW][HOST];
     }
     else if (referenceNode === REFERENCE_NODE_BODY) {
-        ref = ɵɵresolveBody(lView[0]);
+        ref = ɵɵresolveBody(lView[DECLARATION_COMPONENT_VIEW][HOST]);
     }
     else {
         const parentElementId = Number(referenceNode);
@@ -14825,6 +14825,7 @@ function navigateBetween(start, finish) {
 }
 /**
  * Calculates a path between 2 sibling nodes (generates a number of `NextSibling` navigations).
+ * Returns `null` if no such path exists between the given nodes.
  */
 function navigateBetweenSiblings(start, finish) {
     const nav = [];
@@ -14832,7 +14833,10 @@ function navigateBetweenSiblings(start, finish) {
     for (node = start; node != null && node !== finish; node = node.nextSibling) {
         nav.push(NodeNavigationStep.NextSibling);
     }
-    return node === null ? [] : nav;
+    // If the `node` becomes `null` or `undefined` at the end, that means that we
+    // didn't find the `end` node, thus return `null` (which would trigger serialization
+    // error to be produced).
+    return node == null ? null : nav;
 }
 /**
  * Calculates a path between 2 nodes in terms of `nextSibling` and `firstChild`
@@ -14855,10 +14859,11 @@ function calcPathForNode(tNode, lView) {
     let parentIndex;
     let parentRNode;
     let referenceNodeName;
-    if (parentTNode === null) {
-        // No parent TNode - use host element as a reference node.
+    if (parentTNode === null || !(parentTNode.type & 3 /* TNodeType.AnyRNode */)) {
+        // If there is no parent TNode or a parent TNode does not represent an RNode
+        // (i.e. not a DOM node), use component host element as a reference node.
         parentIndex = referenceNodeName = REFERENCE_NODE_HOST;
-        parentRNode = lView[HOST];
+        parentRNode = lView[DECLARATION_COMPONENT_VIEW][HOST];
     }
     else {
         // Use parent TNode as a reference node.
