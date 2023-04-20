@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-da1ed98
+ * @license Angular v16.1.0-next.0+sha-bbc2efc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9963,7 +9963,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-da1ed98');
+const VERSION = new Version('16.1.0-next.0+sha-bbc2efc');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14926,17 +14926,11 @@ function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, t
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
     const tViewConsts = tView.consts;
-    let ssrId = null;
-    const hydrationInfo = lView[HYDRATION];
-    if (hydrationInfo) {
-        const noOffsetIndex = index - HEADER_OFFSET;
-        ssrId = hydrationInfo.data[TEMPLATES]?.[noOffsetIndex] ?? null;
-    }
     // TODO(pk): refactor getOrCreateTNode to have the "create" only version
     const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
     resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     registerPostOrderHooks(tView, tNode);
-    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts, ssrId);
+    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts, null /* ssrId */);
     if (tView.queries !== null) {
         tView.queries.template(tView, tNode);
         embeddedTView.queries = tView.queries.embeddedTView(tNode);
@@ -15002,6 +14996,24 @@ function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     // Regular creation mode.
     if (isNodeCreationMode) {
         return createContainerAnchorImpl(tView, lView, tNode, index);
+    }
+    const ssrId = hydrationInfo.data[TEMPLATES]?.[index] ?? null;
+    // Apply `ssrId` value to the underlying TView if it was not previously set.
+    //
+    // There might be situations when the same component is present in a template
+    // multiple times and some instances are opted-out of using hydration via
+    // `ngSkipHydration` attribute. In this scenario, at the time a TView is created,
+    // the `ssrId` might be `null` (if the first component is opted-out of hydration).
+    // The code below makes sure that the `ssrId` is applied to the TView if it's still
+    // `null` and verifies we never try to override it with a different value.
+    if (ssrId !== null && tNode.tView !== null) {
+        if (tNode.tView.ssrId === null) {
+            tNode.tView.ssrId = ssrId;
+        }
+        else {
+            ngDevMode &&
+                assertEqual(tNode.tView.ssrId, ssrId, 'Unexpected value of the `ssrId` for this TView');
+        }
     }
     // Hydration mode, looking up existing elements in DOM.
     const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
