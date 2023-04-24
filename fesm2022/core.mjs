@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.2+sha-da681ee
+ * @license Angular v16.0.0-rc.2+sha-9172e63
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9963,7 +9963,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-rc.2+sha-da681ee');
+const VERSION = new Version('16.0.0-rc.2+sha-9172e63');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14380,7 +14380,7 @@ function invalidSkipHydrationHost(rNode) {
         'that doesn\'t act as a component host. Hydration can be ' +
         'skipped only on per-component basis.\n\n';
     const actual = `${describeDomFromNode(rNode)}\n\n`;
-    const footer = 'Please move the `ngSkipHydration` attribute to the component host element.';
+    const footer = 'Please move the `ngSkipHydration` attribute to the component host element.\n\n';
     const message = header + actual + footer;
     return new RuntimeError(-504 /* RuntimeErrorCode.INVALID_SKIP_HYDRATION_HOST */, message);
 }
@@ -14566,7 +14566,7 @@ function getHydrationErrorFooter(componentClassName) {
     return `To fix this problem:\n` +
         `  * check ${componentInfo} component for hydration-related issues\n` +
         `  * or skip hydration by adding the \`ngSkipHydration\` attribute ` +
-        `to its host node in a template`;
+        `to its host node in a template\n\n`;
 }
 /**
  * An attribute related note for hydration errors
