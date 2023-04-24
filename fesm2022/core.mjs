@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.2+sha-0ade007
+ * @license Angular v16.0.0-rc.2+sha-da681ee
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9963,7 +9963,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-rc.2+sha-0ade007');
+const VERSION = new Version('16.0.0-rc.2+sha-da681ee');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25277,8 +25277,13 @@ class ApplicationInitStatus {
             this.resolve = res;
             this.reject = rej;
         });
-        // TODO: Throw RuntimeErrorCode.INVALID_MULTI_PROVIDER if appInits is not an array
         this.appInits = inject(APP_INITIALIZER, { optional: true }) ?? [];
+        if ((typeof ngDevMode === 'undefined' || ngDevMode) && !Array.isArray(this.appInits)) {
+            throw new RuntimeError(-209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `APP_INITIALIZER` token value ' +
+                `(expected an array, but got ${typeof this.appInits}). ` +
+                'Please check that the `APP_INITIALIZER` token is configured as a ' +
+                '`multi: true` provider.');
+        }
     }
     /** @internal */
     runInitializers() {
@@ -25321,7 +25326,7 @@ class ApplicationInitStatus {
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
-    }], null, null); })();
+    }], function () { return []; }, null); })();
 
 class Console {
     log(message) {
