@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-eb5bc95
+ * @license Angular v16.1.0-next.0+sha-3bcbfec
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7503,6 +7503,14 @@ export declare function runInInjectionContext<ReturnT>(injector: Injector, fn: (
  * error codes which have guides, which might leak into runtime code.
  *
  * Full list of available error guides can be found at https://angular.io/errors.
+ *
+ * Error code ranges per package:
+ *  - core (this package): 100-999
+ *  - forms: 1000-1999
+ *  - common: 2000-2999
+ *  - animations: 3000-3999
+ *  - router: 4000-4999
+ *  - platform-browser: 5000-5500
  */
 declare const enum RuntimeErrorCode {
     EXPRESSION_CHANGED_AFTER_CHECKED = -100,
