@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-e40a640
+ * @license Angular v16.1.0-next.0+sha-5607e0f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10359,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-e40a640');
+const VERSION = new Version('16.1.0-next.0+sha-5607e0f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -26214,9 +26214,7 @@ class TestBedImpl {
         if (!componentDef) {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been compiled.`);
         }
-        // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
         const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
-        // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
         const autoDetect = this.inject(ComponentFixtureAutoDetect, false);
         const ngZone = noNgZone ? null : this.inject(NgZone, null);
         const componentFactory = new ɵRender3ComponentFactory(componentDef);

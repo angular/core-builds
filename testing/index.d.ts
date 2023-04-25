@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-e40a640
+ * @license Angular v16.1.0-next.0+sha-5607e0f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -119,12 +119,12 @@ export declare class ComponentFixture<T> {
 /**
  * @publicApi
  */
-export declare const ComponentFixtureAutoDetect: InjectionToken<boolean[]>;
+export declare const ComponentFixtureAutoDetect: InjectionToken<boolean>;
 
 /**
  * @publicApi
  */
-export declare const ComponentFixtureNoNgZone: InjectionToken<boolean[]>;
+export declare const ComponentFixtureNoNgZone: InjectionToken<boolean>;
 
 /**
  * Discard all remaining periodic tasks.
