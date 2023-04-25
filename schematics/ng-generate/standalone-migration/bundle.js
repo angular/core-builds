@@ -17517,6 +17517,9 @@ function baseDirectiveFields(meta, constantPool, bindingParser) {
   if (meta.isStandalone) {
     definitionMap.set("standalone", literal(true));
   }
+  if (meta.isSignal) {
+    definitionMap.set("signals", literal(true));
+  }
   return definitionMap;
 }
 function addFeatures(definitionMap, meta) {
@@ -17642,6 +17645,7 @@ function createComponentType(meta) {
   typeParams.push(stringArrayAsType(meta.template.ngContentSelectors));
   typeParams.push(expressionType(literal(meta.isStandalone)));
   typeParams.push(createHostDirectivesType(meta));
+  typeParams.push(expressionType(literal(meta.isSignal)));
   return expressionType(importExpr(Identifiers.ComponentDeclaration, typeParams));
 }
 function compileDeclarationList(list, mode) {
@@ -17741,6 +17745,7 @@ function createDirectiveType(meta) {
   typeParams.push(NONE_TYPE);
   typeParams.push(expressionType(literal(meta.isStandalone)));
   typeParams.push(createHostDirectivesType(meta));
+  typeParams.push(expressionType(literal(meta.isSignal)));
   return expressionType(importExpr(Identifiers.DirectiveDeclaration, typeParams));
 }
 function createViewQueriesFunction(viewQueries, constantPool, name) {
@@ -18273,7 +18278,7 @@ function convertDirectiveFacadeToMetadata(facade) {
   });
 }
 function convertDeclareDirectiveFacadeToMetadata(declaration, typeSourceSpan) {
-  var _a2, _b, _c, _d, _e, _f, _g, _h;
+  var _a2, _b, _c, _d, _e, _f, _g, _h, _i;
   return {
     name: declaration.type.name,
     type: wrapReference(declaration.type),
@@ -18292,6 +18297,7 @@ function convertDeclareDirectiveFacadeToMetadata(declaration, typeSourceSpan) {
     typeArgumentCount: 0,
     fullInheritance: false,
     isStandalone: (_h = declaration.isStandalone) != null ? _h : false,
+    isSignal: (_i = declaration.isSignal) != null ? _i : false,
     hostDirectives: convertHostDirectivesToMetadata(declaration)
   };
 }
@@ -18540,7 +18546,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.1.0-next.0+sha-f5dd3b4");
+var VERSION2 = new Version("16.1.0-next.0+sha-5214df4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -19859,7 +19865,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-f5dd3b4"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-5214df4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -19928,10 +19934,13 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-f5dd3b4"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-5214df4"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
+  }
+  if (meta.isSignal) {
+    definitionMap.set("isSignal", literal(meta.isSignal));
   }
   if (meta.selector !== null) {
     definitionMap.set("selector", literal(meta.selector));
@@ -20110,7 +20119,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-f5dd3b4"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-5214df4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -20133,7 +20142,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-f5dd3b4"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-5214df4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -20171,7 +20180,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-f5dd3b4"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-5214df4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -20192,7 +20201,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-f5dd3b4"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-5214df4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -20227,7 +20236,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.1.0-next.0+sha-f5dd3b4"));
+  definitionMap.set("version", literal("16.1.0-next.0+sha-5214df4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -20244,7 +20253,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.1.0-next.0+sha-f5dd3b4");
+var VERSION3 = new Version("16.1.0-next.0+sha-5214df4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -22468,7 +22477,7 @@ var DtsMetadataReader = class {
     };
   }
   getDirectiveMetadata(ref) {
-    var _a2;
+    var _a2, _b;
     const clazz = ref.node;
     const def = this.reflector.getMembersOfClass(clazz).find((field) => field.isStatic && (field.name === "\u0275cmp" || field.name === "\u0275dir"));
     if (def === void 0) {
@@ -22485,6 +22494,7 @@ var DtsMetadataReader = class {
     const inputs = ClassPropertyMapping.fromMappedObject(readInputsType(def.type.typeArguments[3]));
     const outputs = ClassPropertyMapping.fromMappedObject(readMapType(def.type.typeArguments[4], readStringType));
     const hostDirectives = def.type.typeArguments.length > 8 ? readHostDirectivesType(this.checker, def.type.typeArguments[8], ref.bestGuessOwningModule) : null;
+    const isSignal = def.type.typeArguments.length > 9 && ((_b = readBooleanType(def.type.typeArguments[9])) != null ? _b : false);
     return __spreadProps(__spreadValues({
       kind: MetaKind.Directive,
       matchSource: MatchSource.Selector,
@@ -22503,6 +22513,7 @@ var DtsMetadataReader = class {
       isStructural,
       animationTriggerNames: null,
       isStandalone,
+      isSignal,
       imports: null,
       schemas: null,
       decorator: null,
@@ -26867,6 +26878,15 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
     }
     isStandalone = resolved;
   }
+  let isSignal = false;
+  if (directive.has("signals")) {
+    const expr = directive.get("signals");
+    const resolved = evaluator.evaluate(expr);
+    if (typeof resolved !== "boolean") {
+      throw createValueHasWrongTypeError(expr, resolved, `signals flag must be a boolean`);
+    }
+    isSignal = resolved;
+  }
   const usesInheritance = reflector.hasBaseClass(clazz);
   const sourceFile = clazz.getSourceFile();
   const type = wrapTypeReference(reflector, clazz);
@@ -26895,6 +26915,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
     exportAs,
     providers,
     isStandalone,
+    isSignal,
     hostDirectives: (hostDirectives == null ? void 0 : hostDirectives.map((hostDir) => toHostDirectiveMetadata(hostDir, sourceFile, refEmitter))) || null
   };
   return {
@@ -27444,6 +27465,7 @@ var DirectiveDecoratorHandler = class {
       isStructural: analysis.isStructural,
       animationTriggerNames: null,
       isStandalone: analysis.meta.isStandalone,
+      isSignal: analysis.meta.isSignal,
       imports: null,
       schemas: null,
       decorator: analysis.decorator,
@@ -28854,6 +28876,7 @@ var ComponentDecoratorHandler = class {
       isPoisoned: analysis.isPoisoned,
       isStructural: false,
       isStandalone: analysis.meta.isStandalone,
+      isSignal: analysis.meta.isSignal,
       imports: analysis.resolvedImports,
       animationTriggerNames: analysis.animationTriggerNames,
       schemas: analysis.schemas,

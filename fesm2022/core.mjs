@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-f5dd3b4
+ * @license Angular v16.1.0-next.0+sha-5214df4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1610,6 +1610,7 @@ function ɵɵdefineComponent(componentDefinition) {
             pipeDefs: null,
             dependencies: baseDef.standalone && componentDefinition.dependencies || null,
             getStandaloneInjector: null,
+            signals: componentDefinition.signals ?? false,
             data: componentDefinition.data || {},
             encapsulation: componentDefinition.encapsulation || ViewEncapsulation$1.Emulated,
             styles: componentDefinition.styles || EMPTY_ARRAY,
@@ -1852,6 +1853,7 @@ function getNgDirectiveDef(directiveDefinition) {
         declaredInputs,
         exportAs: directiveDefinition.exportAs || null,
         standalone: directiveDefinition.standalone === true,
+        signals: directiveDefinition.signals === true,
         selectors: directiveDefinition.selectors || EMPTY_ARRAY,
         viewQuery: directiveDefinition.viewQuery || null,
         features: directiveDefinition.features || null,
@@ -9963,7 +9965,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-f5dd3b4');
+const VERSION = new Version('16.1.0-next.0+sha-5214df4');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -24911,6 +24913,7 @@ function directiveMetadata(type, metadata) {
         providers: metadata.providers || null,
         viewQueries: extractQueriesMetadata(type, propMetadata, isViewQuery),
         isStandalone: !!metadata.standalone,
+        isSignal: !!metadata.signals,
         hostDirectives: metadata.hostDirectives?.map(directive => typeof directive === 'function' ? { directive } : directive) ||
             null
     };
@@ -30147,6 +30150,9 @@ function reflectComponentType(component) {
         },
         get isStandalone() {
             return componentDef.standalone;
+        },
+        get isSignal() {
+            return componentDef.signals;
         },
     };
 }

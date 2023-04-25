@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-f5dd3b4
+ * @license Angular v16.1.0-next.0+sha-5214df4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2851,6 +2851,10 @@ declare interface DirectiveDefinition<T> {
      * Whether this directive/component is standalone.
      */
     standalone?: boolean;
+    /**
+     * Whether this directive/component is signal-based.
+     */
+    signals?: boolean;
 }
 
 declare type DirectiveDefList = (ɵDirectiveDef<any> | ɵComponentDef<any>)[];
@@ -6818,6 +6822,7 @@ declare interface R3DeclareDirectiveFacade {
     usesOnChanges?: boolean;
     isStandalone?: boolean;
     hostDirectives?: R3HostDirectiveMetadataFacade[] | null;
+    isSignal?: boolean;
 }
 
 declare interface R3DeclareFactoryFacade {
@@ -10441,6 +10446,8 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
     };
     /** Whether or not this component's ChangeDetectionStrategy is OnPush */
     readonly onPush: boolean;
+    /** Whether or not this component is signal-based. */
+    readonly signals: boolean;
     /**
      * Registry of directives and components that may be found in this view.
      *
@@ -10650,6 +10657,10 @@ export declare interface ɵDirectiveDef<T> {
      * Whether this directive (or component) is standalone.
      */
     readonly standalone: boolean;
+    /**
+     * Whether this directive (or component) uses the signals authoring experience.
+     */
+    readonly signals: boolean;
     /**
      * Factory function used to create a new directive instance. Will be null initially.
      * Populated when the factory is first requested by directive instantiation logic.
@@ -12461,7 +12472,7 @@ export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportA
     };
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never> = unknown;
+}, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
 
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -12639,7 +12650,7 @@ export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportA
     };
 }, OutputMap extends {
     [key: string]: string;
-}, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false, HostDirectives = never> = unknown;
+}, QueryFields extends string[], NgContentSelectors extends never = never, IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
 
 /**
  * Returns the value associated to the given token from the injectors.
