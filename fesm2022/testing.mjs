@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.2+sha-022ed5a
+ * @license Angular v16.0.0-rc.2+sha-9e0a651
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -840,9 +840,9 @@ function formatRuntimeError(code, message) {
     // generate a link to the error details page on angular.io.
     // We also prepend `0` to non-compile-time errors.
     const fullCode = `NG0${Math.abs(code)}`;
-    let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
+    let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
     if (ngDevMode && code < 0) {
-        const addPeriodSeparator = !errorMessage.match(/[.,;!?]$/);
+        const addPeriodSeparator = !errorMessage.match(/[.,;!?\n]$/);
         const separator = addPeriodSeparator ? '.' : '';
         errorMessage =
             `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
@@ -10359,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-rc.2+sha-022ed5a');
+const VERSION = new Version('16.0.0-rc.2+sha-9e0a651');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14669,9 +14669,16 @@ function validateSiblingNodeExists(node) {
 /**
  * Validates that a node exists or throws
  */
-function validateNodeExists(node) {
+function validateNodeExists(node, lView = null, tNode = null) {
     if (!node) {
-        throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, `Hydration expected an element to be present at this location.`);
+        const header = 'During hydration, Angular expected an element to be present at this location.\n\n';
+        let expected = '';
+        let footer = '';
+        if (lView !== null && tNode !== null) {
+            expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
+            footer = getHydrationErrorFooter();
+        }
+        throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
     }
 }
 /**
@@ -14913,6 +14920,7 @@ function getHydrationErrorFooter(componentClassName) {
     const componentInfo = componentClassName ? `the "${componentClassName}"` : 'corresponding';
     return `To fix this problem:\n` +
         `  * check ${componentInfo} component for hydration-related issues\n` +
+        `  * check to see if your template has valid HTML structure\n` +
         `  * or skip hydration by adding the \`ngSkipHydration\` attribute ` +
         `to its host node in a template\n\n`;
 }
@@ -15365,7 +15373,7 @@ function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     }
     // Hydration mode, looking up existing elements in DOM.
     const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
-    ngDevMode && validateNodeExists(currentRNode);
+    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
     setSegmentHead(hydrationInfo, index, currentRNode);
     const viewContainerSize = calcSerializedContainerSize(hydrationInfo, index);
     const comment = siblingAfter(viewContainerSize, currentRNode);
@@ -15599,7 +15607,7 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, inde
         // `<div #vcrTarget>` is represented in the DOM as `<div></div>...<!--container-->`,
         // so while processing a `<div>` instruction, point to the next sibling as a
         // start of a segment.
-        ngDevMode && validateNodeExists(native.nextSibling);
+        ngDevMode && validateNodeExists(native.nextSibling, lView, tNode);
         setSegmentHead(hydrationInfo, index, native.nextSibling);
     }
     // Checks if the skip hydration attribute is present during hydration so we know to
@@ -15744,7 +15752,7 @@ function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
     }
     // Hydration mode, looking up existing elements in DOM.
     const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
-    ngDevMode && validateNodeExists(currentRNode);
+    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
     const ngContainerSize = getNgContainerSize(hydrationInfo, index);
     ngDevMode &&
         assertNumber(ngContainerSize, 'Unexpected state: hydrating an <ng-container>, ' +
@@ -26214,9 +26222,7 @@ class TestBedImpl {
         if (!componentDef) {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been compiled.`);
         }
-        // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
         const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
-        // TODO: Don't cast as `InjectionToken<boolean>`, proper type is boolean[]
         const autoDetect = this.inject(ComponentFixtureAutoDetect, false);
         const ngZone = noNgZone ? null : this.inject(NgZone, null);
         const componentFactory = new ɵRender3ComponentFactory(componentDef);

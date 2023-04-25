@@ -1,11 +1,11 @@
 /**
- * @license Angular v16.0.0-rc.2+sha-022ed5a
+ * @license Angular v16.0.0-rc.2+sha-9e0a651
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { assertInInjectionContext, inject, DestroyRef, Injector, effect, signal as signal$1, computed as computed$1 } from '@angular/core';
-import { Observable } from 'rxjs';
+import { assertInInjectionContext, inject, DestroyRef, Injector, effect, untracked as untracked$1, signal as signal$1, computed as computed$1 } from '@angular/core';
+import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 /**
@@ -44,22 +44,23 @@ function takeUntilDestroyed(destroyRef) {
 function toObservable(source, options) {
     !options?.injector && assertInInjectionContext(toObservable);
     const injector = options?.injector ?? inject(Injector);
-    // Creating a new `Observable` allows the creation of the effect to be lazy. This allows for all
-    // references to `source` to be dropped if the `Observable` is fully unsubscribed and thrown away.
-    return new Observable(observer => {
-        const watcher = effect(() => {
-            let value;
-            try {
-                value = source();
-            }
-            catch (err) {
-                observer.error(err);
-                return;
-            }
-            observer.next(value);
-        }, { injector, manualCleanup: true, allowSignalWrites: true });
-        return () => watcher.destroy();
+    const subject = new ReplaySubject(1);
+    const watcher = effect(() => {
+        let value;
+        try {
+            value = source();
+        }
+        catch (err) {
+            untracked$1(() => subject.error(err));
+            return;
+        }
+        untracked$1(() => subject.next(value));
+    }, { injector, manualCleanup: true });
+    injector.get(DestroyRef).onDestroy(() => {
+        watcher.destroy();
+        subject.complete();
     });
+    return subject.asObservable();
 }
 
 /**
@@ -106,9 +107,9 @@ function formatRuntimeError(code, message) {
     // generate a link to the error details page on angular.io.
     // We also prepend `0` to non-compile-time errors.
     const fullCode = `NG0${Math.abs(code)}`;
-    let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
+    let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
     if (ngDevMode && code < 0) {
-        const addPeriodSeparator = !errorMessage.match(/[.,;!?]$/);
+        const addPeriodSeparator = !errorMessage.match(/[.,;!?\n]$/);
         const separator = addPeriodSeparator ? '.' : '';
         errorMessage =
             `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
