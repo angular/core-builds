@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-fed4b9d
+ * @license Angular v16.1.0-next.0+sha-8a2739f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -107,9 +107,9 @@ function formatRuntimeError(code, message) {
     // generate a link to the error details page on angular.io.
     // We also prepend `0` to non-compile-time errors.
     const fullCode = `NG0${Math.abs(code)}`;
-    let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
+    let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
     if (ngDevMode && code < 0) {
-        const addPeriodSeparator = !errorMessage.match(/[.,;!?]$/);
+        const addPeriodSeparator = !errorMessage.match(/[.,;!?\n]$/);
         const separator = addPeriodSeparator ? '.' : '';
         errorMessage =
             `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
