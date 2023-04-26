@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.2+sha-d26d410
+ * @license Angular v16.0.0-rc.2+sha-cc099e7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7571,7 +7571,8 @@ declare const enum RuntimeErrorCode {
     MISSING_ZONEJS = 908,
     UNEXPECTED_ZONE_STATE = 909,
     UNSAFE_IFRAME_ATTRS = -910,
-    VIEW_ALREADY_DESTROYED = 911
+    VIEW_ALREADY_DESTROYED = 911,
+    COMPONENT_ID_COLLISION = -912
 }
 
 /**
