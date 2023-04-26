@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.2+sha-cc099e7
+ * @license Angular v16.0.0-rc.2+sha-2505018
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2306,6 +2306,8 @@ declare interface DehydratedView {
 }
 
 declare type DependencyTypeList = (ɵDirectiveType<any> | ɵComponentType<any> | PipeType<any> | Type<any>)[];
+
+declare const DESCENDANT_VIEWS_TO_REFRESH = 5;
 
 /**
  * Array of destroy hooks that should be executed for a view and their directive indices.
@@ -5038,7 +5040,7 @@ declare interface LContainer extends Array<any> {
      * change detection we should still descend to find those children to refresh, even if the parents
      * are not `Dirty`/`CheckAlways`.
      */
-    [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
+    [DESCENDANT_VIEWS_TO_REFRESH]: number;
     /**
      * A collection of views created based on the underlying `<ng-template>` element but inserted into
      * a different `LContainer`. We need to track views created from a given declaration point since
@@ -5391,7 +5393,7 @@ declare interface LView<T = unknown> extends Array<any> {
      * change detection we should still descend to find those children to refresh, even if the parents
      * are not `Dirty`/`CheckAlways`.
      */
-    [TRANSPLANTED_VIEWS_TO_REFRESH]: number;
+    [DESCENDANT_VIEWS_TO_REFRESH]: number;
     /** Unique ID of the view. Used for `__ngContext__` lookups in the `LView` registry. */
     [ID]: number;
     /**
@@ -5469,10 +5471,12 @@ declare const enum LViewFlags {
     /** Whether or not this view is the root view */
     IsRoot = 512,
     /**
-     * Whether this moved LView was needs to be refreshed at the insertion location because the
-     * declaration was dirty.
+     * Whether this moved LView was needs to be refreshed. Similar to the Dirty flag, but used for
+     * transplanted and signal views where the parent/ancestor views are not marked dirty as well.
+     * i.e. "Refresh just this view". Used in conjunction with the DESCENDANT_VIEWS_TO_REFRESH
+     * counter.
      */
-    RefreshTransplantedView = 1024,
+    RefreshView = 1024,
     /** Indicates that the view **or any of its ancestors** have an embedded view injector. */
     HasEmbeddedViewInjector = 2048,
     /**
@@ -9090,8 +9094,6 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  * @publicApi
  */
 export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
-
-declare const TRANSPLANTED_VIEWS_TO_REFRESH = 5;
 
 
 /**

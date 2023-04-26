@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.2+sha-cc099e7
+ * @license Angular v16.0.0-rc.2+sha-2505018
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1939,7 +1939,7 @@ const TVIEW = 1;
 const FLAGS = 2;
 const PARENT = 3;
 const NEXT = 4;
-const TRANSPLANTED_VIEWS_TO_REFRESH = 5;
+const DESCENDANT_VIEWS_TO_REFRESH = 5;
 const T_HOST = 6;
 const CLEANUP = 7;
 const CONTEXT = 8;
@@ -1992,7 +1992,7 @@ const TYPE = 1;
  * that the `MOVED_VIEWS` are transplanted and on-push.
  */
 const HAS_TRANSPLANTED_VIEWS = 2;
-// PARENT, NEXT, TRANSPLANTED_VIEWS_TO_REFRESH are indices 3, 4, and 5
+// PARENT, NEXT, DESCENDANT_VIEWS_TO_REFRESH are indices 3, 4, and 5
 // As we already have these constants in LView, we don't need to re-create them.
 // T_HOST is index 6
 // We already have this constants in LView, we don't need to re-create it.
@@ -2994,20 +2994,44 @@ function resetPreOrderHookFlags(lView) {
     lView[PREORDER_HOOK_FLAGS] = 0;
 }
 /**
- * Updates the `TRANSPLANTED_VIEWS_TO_REFRESH` counter on the `LContainer` as well as the parents
- * whose
+ * Adds the `RefreshView` flag from the lView and updates DESCENDANT_VIEWS_TO_REFRESH counters of
+ * parents.
+ */
+function markViewForRefresh(lView) {
+    if ((lView[FLAGS] & 1024 /* LViewFlags.RefreshView */) === 0) {
+        lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
+        updateViewsToRefresh(lView, 1);
+    }
+}
+/**
+ * Removes the `RefreshView` flag from the lView and updates DESCENDANT_VIEWS_TO_REFRESH counters of
+ * parents.
+ */
+function clearViewRefreshFlag(lView) {
+    if (lView[FLAGS] & 1024 /* LViewFlags.RefreshView */) {
+        lView[FLAGS] &= ~1024 /* LViewFlags.RefreshView */;
+        updateViewsToRefresh(lView, -1);
+    }
+}
+/**
+ * Updates the `DESCENDANT_VIEWS_TO_REFRESH` counter on the parents of the `LView` as well as the
+ * parents above that whose
  *  1. counter goes from 0 to 1, indicating that there is a new child that has a view to refresh
  *  or
  *  2. counter goes from 1 to 0, indicating there are no more descendant views to refresh
  */
-function updateTransplantedViewCount(lContainer, amount) {
-    lContainer[TRANSPLANTED_VIEWS_TO_REFRESH] += amount;
-    let viewOrContainer = lContainer;
-    let parent = lContainer[PARENT];
+function updateViewsToRefresh(lView, amount) {
+    let parent = lView[PARENT];
+    if (parent === null) {
+        return;
+    }
+    parent[DESCENDANT_VIEWS_TO_REFRESH] += amount;
+    let viewOrContainer = parent;
+    parent = parent[PARENT];
     while (parent !== null &&
-        ((amount === 1 && viewOrContainer[TRANSPLANTED_VIEWS_TO_REFRESH] === 1) ||
-            (amount === -1 && viewOrContainer[TRANSPLANTED_VIEWS_TO_REFRESH] === 0))) {
-        parent[TRANSPLANTED_VIEWS_TO_REFRESH] += amount;
+        ((amount === 1 && viewOrContainer[DESCENDANT_VIEWS_TO_REFRESH] === 1) ||
+            (amount === -1 && viewOrContainer[DESCENDANT_VIEWS_TO_REFRESH] === 0))) {
+        parent[DESCENDANT_VIEWS_TO_REFRESH] += amount;
         viewOrContainer = parent;
         parent = parent[PARENT];
     }
@@ -6851,12 +6875,8 @@ function detachMovedView(declarationContainer, lView) {
     const insertionLContainer = lView[PARENT];
     ngDevMode && assertLContainer(insertionLContainer);
     // If the view was marked for refresh but then detached before it was checked (where the flag
-    // would be cleared and the counter decremented), we need to decrement the view counter here
-    // instead.
-    if (lView[FLAGS] & 1024 /* LViewFlags.RefreshTransplantedView */) {
-        lView[FLAGS] &= ~1024 /* LViewFlags.RefreshTransplantedView */;
-        updateTransplantedViewCount(insertionLContainer, -1);
-    }
+    // would be cleared and the counter decremented), we need to update the status here.
+    clearViewRefreshFlag(lView);
     movedViews.splice(declarationViewIndex, 1);
 }
 /**
@@ -9961,7 +9981,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0-rc.2+sha-cc099e7');
+const VERSION = new Version('16.0.0-rc.2+sha-2505018');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11041,10 +11061,7 @@ function refreshView(tView, lView, templateFn, context) {
         if (!isInCheckNoChangesPass) {
             lView[FLAGS] &= ~(64 /* LViewFlags.Dirty */ | 8 /* LViewFlags.FirstLViewPass */);
         }
-        if (lView[FLAGS] & 1024 /* LViewFlags.RefreshTransplantedView */) {
-            lView[FLAGS] &= ~1024 /* LViewFlags.RefreshTransplantedView */;
-            updateTransplantedViewCount(lView[PARENT], -1);
-        }
+        clearViewRefreshFlag(lView);
     }
     finally {
         leaveView();
@@ -12063,16 +12080,12 @@ function markTransplantedViewsForRefresh(lView) {
             const movedLView = movedViews[i];
             const insertionLContainer = movedLView[PARENT];
             ngDevMode && assertLContainer(insertionLContainer);
-            // We don't want to increment the counter if the moved LView was already marked for
-            // refresh.
-            if ((movedLView[FLAGS] & 1024 /* LViewFlags.RefreshTransplantedView */) === 0) {
-                updateTransplantedViewCount(insertionLContainer, 1);
-            }
+            markViewForRefresh(movedLView);
             // Note, it is possible that the `movedViews` is tracking views that are transplanted *and*
             // those that aren't (declaration component === insertion component). In the latter case,
             // it's fine to add the flag, as we will clear it immediately in
             // `refreshEmbeddedViews` for the view currently being refreshed.
-            movedLView[FLAGS] |= 1024 /* LViewFlags.RefreshTransplantedView */;
+            movedLView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
         }
     }
 }
@@ -12091,7 +12104,7 @@ function refreshComponent(hostLView, componentHostIdx) {
         if (componentView[FLAGS] & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */)) {
             refreshView(tView, componentView, tView.template, componentView[CONTEXT]);
         }
-        else if (componentView[TRANSPLANTED_VIEWS_TO_REFRESH] > 0) {
+        else if (componentView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
             // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
             refreshContainsDirtyView(componentView);
         }
@@ -12108,12 +12121,12 @@ function refreshContainsDirtyView(lView) {
         for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             const embeddedLView = lContainer[i];
             if (viewAttachedToChangeDetector(embeddedLView)) {
-                if (embeddedLView[FLAGS] & 1024 /* LViewFlags.RefreshTransplantedView */) {
+                if (embeddedLView[FLAGS] & 1024 /* LViewFlags.RefreshView */) {
                     const embeddedTView = embeddedLView[TVIEW];
                     ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
                     refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
                 }
-                else if (embeddedLView[TRANSPLANTED_VIEWS_TO_REFRESH] > 0) {
+                else if (embeddedLView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
                     refreshContainsDirtyView(embeddedLView);
                 }
             }
@@ -12127,7 +12140,7 @@ function refreshContainsDirtyView(lView) {
             const componentView = getComponentLViewByIndex(components[i], lView);
             // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
             if (viewAttachedToChangeDetector(componentView) &&
-                componentView[TRANSPLANTED_VIEWS_TO_REFRESH] > 0) {
+                componentView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
                 refreshContainsDirtyView(componentView);
             }
         }
