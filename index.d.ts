@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.2+sha-9e0a651
+ * @license Angular v16.0.0-rc.2+sha-d26d410
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5479,6 +5479,9 @@ declare const enum LViewFlags {
      * Index of the current init phase on last 21 bits
      */
     IndexWithinInitPhaseIncrementer = 4096,
+    /**
+     * This is the count of the bits the 1 was shifted above (base 10)
+     */
     IndexWithinInitPhaseShift = 12,
     IndexWithinInitPhaseReset = 4095
 }
