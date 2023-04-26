@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-2d1691a
+ * @license Angular v16.1.0-next.0+sha-08949c7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3186,10 +3186,8 @@ function getComponentId(componentDef) {
         if (GENERATED_COMP_IDS.has(compId)) {
             const previousCompDefType = GENERATED_COMP_IDS.get(compId);
             if (previousCompDefType !== componentDef.type) {
-                // TODO: use `formatRuntimeError` to have an error code and we can later on create an error
-                // guide to explain this further.
-                console.warn(`Component ID generation collision detected. Components '${previousCompDefType.name}' and '${componentDef.type.name}' with selector '${stringifyCSSSelectorList(componentDef
-                    .selectors)}' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID.`);
+                console.warn(formatRuntimeError(-912 /* RuntimeErrorCode.COMPONENT_ID_COLLISION */, `Component ID generation collision detected. Components '${previousCompDefType.name}' and '${componentDef.type.name}' with selector '${stringifyCSSSelectorList(componentDef
+                    .selectors)}' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID.`));
             }
         }
         else {
@@ -10361,7 +10359,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-2d1691a');
+const VERSION = new Version('16.1.0-next.0+sha-08949c7');
 
 // This default value is when checking the hierarchy for a token.
 //
