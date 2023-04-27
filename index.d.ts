@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-9b24bb9
+ * @license Angular v16.1.0-next.0+sha-599f339
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10545,7 +10545,6 @@ export declare const ɵDEFAULT_LOCALE_ID = "en-US";
 export declare const ɵdefaultIterableDiffers: IterableDiffers;
 
 export declare const ɵdefaultKeyValueDiffers: KeyValueDiffers;
-
 
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).

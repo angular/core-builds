@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-9b24bb9
+ * @license Angular v16.1.0-next.0+sha-599f339
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10379,7 +10379,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-9b24bb9');
+const VERSION = new Version('16.1.0-next.0+sha-599f339');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11085,36 +11085,6 @@ function processHostBindingOpCodes(tView, lView) {
         setSelectedIndex(-1);
     }
 }
-/** Refreshes all content queries declared by directives in a given view */
-function refreshContentQueries(tView, lView) {
-    const contentQueries = tView.contentQueries;
-    if (contentQueries !== null) {
-        for (let i = 0; i < contentQueries.length; i += 2) {
-            const queryStartIdx = contentQueries[i];
-            const directiveDefIdx = contentQueries[i + 1];
-            if (directiveDefIdx !== -1) {
-                const directiveDef = tView.data[directiveDefIdx];
-                ngDevMode && assertDefined(directiveDef, 'DirectiveDef not found.');
-                ngDevMode &&
-                    assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
-                setCurrentQueryIndex(queryStartIdx);
-                directiveDef.contentQueries(2 /* RenderFlags.Update */, lView[directiveDefIdx], directiveDefIdx);
-            }
-        }
-    }
-}
-/** Refreshes child components in the current view (update mode). */
-function refreshChildComponents(hostLView, components) {
-    for (let i = 0; i < components.length; i++) {
-        refreshComponent(hostLView, components[i]);
-    }
-}
-/** Renders child components in the current view (creation mode). */
-function renderChildComponents(hostLView, components) {
-    for (let i = 0; i < components.length; i++) {
-        renderComponent(hostLView, components[i]);
-    }
-}
 function createLView(parentLView, tView, context, flags, host, tHostNode, environment, renderer, injector, embeddedViewInjector, hydrationInfo) {
     const lView = tView.blueprint.slice();
     lView[HOST] = host;
@@ -11230,192 +11200,6 @@ function allocExpando(tView, lView, numSlotsToAlloc, initialValue) {
         tView.data.push(null);
     }
     return allocIdx;
-}
-//////////////////////////
-//// Render
-//////////////////////////
-/**
- * Processes a view in the creation mode. This includes a number of steps in a specific order:
- * - creating view query functions (if any);
- * - executing a template function in the creation mode;
- * - updating static queries (if any);
- * - creating child components defined in a given view.
- */
-function renderView(tView, lView, context) {
-    ngDevMode && assertEqual(isCreationMode(lView), true, 'Should be run in creation mode');
-    enterView(lView);
-    try {
-        const viewQuery = tView.viewQuery;
-        if (viewQuery !== null) {
-            executeViewQueryFn(1 /* RenderFlags.Create */, viewQuery, context);
-        }
-        // Execute a template associated with this view, if it exists. A template function might not be
-        // defined for the root component views.
-        const templateFn = tView.template;
-        if (templateFn !== null) {
-            executeTemplate(tView, lView, templateFn, 1 /* RenderFlags.Create */, context);
-        }
-        // This needs to be set before children are processed to support recursive components.
-        // This must be set to false immediately after the first creation run because in an
-        // ngFor loop, all the views will be created together before update mode runs and turns
-        // off firstCreatePass. If we don't set it here, instances will perform directive
-        // matching, etc again and again.
-        if (tView.firstCreatePass) {
-            tView.firstCreatePass = false;
-        }
-        // We resolve content queries specifically marked as `static` in creation mode. Dynamic
-        // content queries are resolved during change detection (i.e. update mode), after embedded
-        // views are refreshed (see block above).
-        if (tView.staticContentQueries) {
-            refreshContentQueries(tView, lView);
-        }
-        // We must materialize query results before child components are processed
-        // in case a child component has projected a container. The LContainer needs
-        // to exist so the embedded views are properly attached by the container.
-        if (tView.staticViewQueries) {
-            executeViewQueryFn(2 /* RenderFlags.Update */, tView.viewQuery, context);
-        }
-        // Render child component views.
-        const components = tView.components;
-        if (components !== null) {
-            renderChildComponents(lView, components);
-        }
-    }
-    catch (error) {
-        // If we didn't manage to get past the first template pass due to
-        // an error, mark the view as corrupted so we can try to recover.
-        if (tView.firstCreatePass) {
-            tView.incompleteFirstPass = true;
-            tView.firstCreatePass = false;
-        }
-        throw error;
-    }
-    finally {
-        lView[FLAGS] &= ~4 /* LViewFlags.CreationMode */;
-        leaveView();
-    }
-}
-/**
- * Processes a view in update mode. This includes a number of steps in a specific order:
- * - executing a template function in update mode;
- * - executing hooks;
- * - refreshing queries;
- * - setting host bindings;
- * - refreshing child (embedded and component) views.
- */
-function refreshView(tView, lView, templateFn, context) {
-    ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
-    const flags = lView[FLAGS];
-    if ((flags & 256 /* LViewFlags.Destroyed */) === 256 /* LViewFlags.Destroyed */)
-        return;
-    // Check no changes mode is a dev only mode used to verify that bindings have not changed
-    // since they were assigned. We do not want to execute lifecycle hooks in that mode.
-    const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
-    !isInCheckNoChangesPass && lView[ENVIRONMENT].effectManager?.flush();
-    enterView(lView);
-    try {
-        resetPreOrderHookFlags(lView);
-        setBindingIndex(tView.bindingStartIndex);
-        if (templateFn !== null) {
-            executeTemplate(tView, lView, templateFn, 2 /* RenderFlags.Update */, context);
-        }
-        const hooksInitPhaseCompleted = (flags & 3 /* LViewFlags.InitPhaseStateMask */) === 3 /* InitPhaseState.InitPhaseCompleted */;
-        // execute pre-order hooks (OnInit, OnChanges, DoCheck)
-        // PERF WARNING: do NOT extract this to a separate function without running benchmarks
-        if (!isInCheckNoChangesPass) {
-            if (hooksInitPhaseCompleted) {
-                const preOrderCheckHooks = tView.preOrderCheckHooks;
-                if (preOrderCheckHooks !== null) {
-                    executeCheckHooks(lView, preOrderCheckHooks, null);
-                }
-            }
-            else {
-                const preOrderHooks = tView.preOrderHooks;
-                if (preOrderHooks !== null) {
-                    executeInitAndCheckHooks(lView, preOrderHooks, 0 /* InitPhaseState.OnInitHooksToBeRun */, null);
-                }
-                incrementInitPhaseFlags(lView, 0 /* InitPhaseState.OnInitHooksToBeRun */);
-            }
-        }
-        // First mark transplanted views that are declared in this lView as needing a refresh at their
-        // insertion points. This is needed to avoid the situation where the template is defined in this
-        // `LView` but its declaration appears after the insertion component.
-        markTransplantedViewsForRefresh(lView);
-        refreshEmbeddedViews(lView);
-        // Content query results must be refreshed before content hooks are called.
-        if (tView.contentQueries !== null) {
-            refreshContentQueries(tView, lView);
-        }
-        // execute content hooks (AfterContentInit, AfterContentChecked)
-        // PERF WARNING: do NOT extract this to a separate function without running benchmarks
-        if (!isInCheckNoChangesPass) {
-            if (hooksInitPhaseCompleted) {
-                const contentCheckHooks = tView.contentCheckHooks;
-                if (contentCheckHooks !== null) {
-                    executeCheckHooks(lView, contentCheckHooks);
-                }
-            }
-            else {
-                const contentHooks = tView.contentHooks;
-                if (contentHooks !== null) {
-                    executeInitAndCheckHooks(lView, contentHooks, 1 /* InitPhaseState.AfterContentInitHooksToBeRun */);
-                }
-                incrementInitPhaseFlags(lView, 1 /* InitPhaseState.AfterContentInitHooksToBeRun */);
-            }
-        }
-        processHostBindingOpCodes(tView, lView);
-        // Refresh child component views.
-        const components = tView.components;
-        if (components !== null) {
-            refreshChildComponents(lView, components);
-        }
-        // View queries must execute after refreshing child components because a template in this view
-        // could be inserted in a child component. If the view query executes before child component
-        // refresh, the template might not yet be inserted.
-        const viewQuery = tView.viewQuery;
-        if (viewQuery !== null) {
-            executeViewQueryFn(2 /* RenderFlags.Update */, viewQuery, context);
-        }
-        // execute view hooks (AfterViewInit, AfterViewChecked)
-        // PERF WARNING: do NOT extract this to a separate function without running benchmarks
-        if (!isInCheckNoChangesPass) {
-            if (hooksInitPhaseCompleted) {
-                const viewCheckHooks = tView.viewCheckHooks;
-                if (viewCheckHooks !== null) {
-                    executeCheckHooks(lView, viewCheckHooks);
-                }
-            }
-            else {
-                const viewHooks = tView.viewHooks;
-                if (viewHooks !== null) {
-                    executeInitAndCheckHooks(lView, viewHooks, 2 /* InitPhaseState.AfterViewInitHooksToBeRun */);
-                }
-                incrementInitPhaseFlags(lView, 2 /* InitPhaseState.AfterViewInitHooksToBeRun */);
-            }
-        }
-        if (tView.firstUpdatePass === true) {
-            // We need to make sure that we only flip the flag on successful `refreshView` only
-            // Don't do this in `finally` block.
-            // If we did this in `finally` block then an exception could block the execution of styling
-            // instructions which in turn would be unable to insert themselves into the styling linked
-            // list. The result of this would be that if the exception would not be throw on subsequent CD
-            // the styling would be unable to process it data and reflect to the DOM.
-            tView.firstUpdatePass = false;
-        }
-        // Do not reset the dirty state when running in check no changes mode. We don't want components
-        // to behave differently depending on whether check no changes is enabled or not. For example:
-        // Marking an OnPush component as dirty from within the `ngAfterViewInit` hook in order to
-        // refresh a `NgClass` binding should work. If we would reset the dirty state in the check
-        // no changes cycle, the component would be not be dirty for the next update pass. This would
-        // be different in production mode where the component dirty state is not reset.
-        if (!isInCheckNoChangesPass) {
-            lView[FLAGS] &= ~(64 /* LViewFlags.Dirty */ | 8 /* LViewFlags.FirstLViewPass */);
-        }
-        clearViewRefreshFlag(lView);
-    }
-    finally {
-        leaveView();
-    }
 }
 function executeTemplate(tView, lView, templateFn, rf, context) {
     const consumer = getReactiveLViewConsumer(lView, REACTIVE_TEMPLATE_CONSUMER);
@@ -12399,145 +12183,22 @@ function createLContainer(hostNative, currentView, native, tNode) {
         assertEqual(lContainer.length, CONTAINER_HEADER_OFFSET, 'Should allocate correct number of slots for LContainer header.');
     return lContainer;
 }
-/**
- * Goes over embedded views (ones created through ViewContainerRef APIs) and refreshes
- * them by executing an associated template function.
- */
-function refreshEmbeddedViews(lView) {
-    for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
-        for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-            const embeddedLView = lContainer[i];
-            const embeddedTView = embeddedLView[TVIEW];
-            ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
-            if (viewAttachedToChangeDetector(embeddedLView)) {
-                refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
+/** Refreshes all content queries declared by directives in a given view */
+function refreshContentQueries(tView, lView) {
+    const contentQueries = tView.contentQueries;
+    if (contentQueries !== null) {
+        for (let i = 0; i < contentQueries.length; i += 2) {
+            const queryStartIdx = contentQueries[i];
+            const directiveDefIdx = contentQueries[i + 1];
+            if (directiveDefIdx !== -1) {
+                const directiveDef = tView.data[directiveDefIdx];
+                ngDevMode && assertDefined(directiveDef, 'DirectiveDef not found.');
+                ngDevMode &&
+                    assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
+                setCurrentQueryIndex(queryStartIdx);
+                directiveDef.contentQueries(2 /* RenderFlags.Update */, lView[directiveDefIdx], directiveDefIdx);
             }
         }
-    }
-}
-/**
- * Mark transplanted views as needing to be refreshed at their insertion points.
- *
- * @param lView The `LView` that may have transplanted views.
- */
-function markTransplantedViewsForRefresh(lView) {
-    for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
-        if (!lContainer[HAS_TRANSPLANTED_VIEWS])
-            continue;
-        const movedViews = lContainer[MOVED_VIEWS];
-        ngDevMode && assertDefined(movedViews, 'Transplanted View flags set but missing MOVED_VIEWS');
-        for (let i = 0; i < movedViews.length; i++) {
-            const movedLView = movedViews[i];
-            const insertionLContainer = movedLView[PARENT];
-            ngDevMode && assertLContainer(insertionLContainer);
-            markViewForRefresh(movedLView);
-            // Note, it is possible that the `movedViews` is tracking views that are transplanted *and*
-            // those that aren't (declaration component === insertion component). In the latter case,
-            // it's fine to add the flag, as we will clear it immediately in
-            // `refreshEmbeddedViews` for the view currently being refreshed.
-            movedLView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
-        }
-    }
-}
-/////////////
-/**
- * Refreshes components by entering the component view and processing its bindings, queries, etc.
- *
- * @param componentHostIdx  Element index in LView[] (adjusted for HEADER_OFFSET)
- */
-function refreshComponent(hostLView, componentHostIdx) {
-    ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
-    const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
-    // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
-    if (viewAttachedToChangeDetector(componentView)) {
-        const tView = componentView[TVIEW];
-        if (componentView[FLAGS] & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */)) {
-            refreshView(tView, componentView, tView.template, componentView[CONTEXT]);
-        }
-        else if (componentView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
-            // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
-            refreshContainsDirtyView(componentView);
-        }
-    }
-}
-/**
- * Refreshes all transplanted views marked with `LViewFlags.RefreshTransplantedView` that are
- * children or descendants of the given lView.
- *
- * @param lView The lView which contains descendant transplanted views that need to be refreshed.
- */
-function refreshContainsDirtyView(lView) {
-    for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
-        for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-            const embeddedLView = lContainer[i];
-            if (viewAttachedToChangeDetector(embeddedLView)) {
-                if (embeddedLView[FLAGS] & 1024 /* LViewFlags.RefreshView */) {
-                    const embeddedTView = embeddedLView[TVIEW];
-                    ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
-                    refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
-                }
-                else if (embeddedLView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
-                    refreshContainsDirtyView(embeddedLView);
-                }
-            }
-        }
-    }
-    const tView = lView[TVIEW];
-    // Refresh child component views.
-    const components = tView.components;
-    if (components !== null) {
-        for (let i = 0; i < components.length; i++) {
-            const componentView = getComponentLViewByIndex(components[i], lView);
-            // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
-            if (viewAttachedToChangeDetector(componentView) &&
-                componentView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
-                refreshContainsDirtyView(componentView);
-            }
-        }
-    }
-}
-function renderComponent(hostLView, componentHostIdx) {
-    ngDevMode && assertEqual(isCreationMode(hostLView), true, 'Should be run in creation mode');
-    const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
-    const componentTView = componentView[TVIEW];
-    syncViewWithBlueprint(componentTView, componentView);
-    const hostRNode = componentView[HOST];
-    // Populate an LView with hydration info retrieved from the DOM via TransferState.
-    if (hostRNode !== null && componentView[HYDRATION] === null) {
-        componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR$1]);
-    }
-    renderView(componentTView, componentView, componentView[CONTEXT]);
-}
-/**
- * Syncs an LView instance with its blueprint if they have gotten out of sync.
- *
- * Typically, blueprints and their view instances should always be in sync, so the loop here
- * will be skipped. However, consider this case of two components side-by-side:
- *
- * App template:
- * ```
- * <comp></comp>
- * <comp></comp>
- * ```
- *
- * The following will happen:
- * 1. App template begins processing.
- * 2. First <comp> is matched as a component and its LView is created.
- * 3. Second <comp> is matched as a component and its LView is created.
- * 4. App template completes processing, so it's time to check child templates.
- * 5. First <comp> template is checked. It has a directive, so its def is pushed to blueprint.
- * 6. Second <comp> template is checked. Its blueprint has been updated by the first
- * <comp> template, but its LView was created before this update, so it is out of sync.
- *
- * Note that embedded views inside ngFor loops will never be out of sync because these views
- * are processed as soon as they are created.
- *
- * @param tView The `TView` that contains the blueprint for syncing
- * @param lView The view to sync
- */
-function syncViewWithBlueprint(tView, lView) {
-    for (let i = lView.length; i < tView.blueprint.length; i++) {
-        lView.push(tView.blueprint[i]);
     }
 }
 /**
@@ -12568,40 +12229,6 @@ function addToViewTree(lView, lViewOrLContainer) {
 ///////////////////////////////
 //// Change detection
 ///////////////////////////////
-function detectChangesInternal(tView, lView, context, notifyErrorHandler = true) {
-    const rendererFactory = lView[ENVIRONMENT].rendererFactory;
-    // Check no changes mode is a dev only mode used to verify that bindings have not changed
-    // since they were assigned. We do not want to invoke renderer factory functions in that mode
-    // to avoid any possible side-effects.
-    const checkNoChangesMode = !!ngDevMode && isInCheckNoChangesMode();
-    if (!checkNoChangesMode && rendererFactory.begin)
-        rendererFactory.begin();
-    try {
-        refreshView(tView, lView, tView.template, context);
-    }
-    catch (error) {
-        if (notifyErrorHandler) {
-            handleError(lView, error);
-        }
-        throw error;
-    }
-    finally {
-        if (!checkNoChangesMode && rendererFactory.end)
-            rendererFactory.end();
-        // One final flush of the effects queue to catch any effects created in `ngAfterViewInit` or
-        // other post-order hooks.
-        !checkNoChangesMode && lView[ENVIRONMENT].effectManager?.flush();
-    }
-}
-function checkNoChangesInternal(tView, lView, context, notifyErrorHandler = true) {
-    setIsInCheckNoChangesMode(true);
-    try {
-        detectChangesInternal(tView, lView, context, notifyErrorHandler);
-    }
-    finally {
-        setIsInCheckNoChangesMode(false);
-    }
-}
 function executeViewQueryFn(flags, viewQueryFn, component) {
     ngDevMode && assertDefined(viewQueryFn, 'View queries function to execute must be defined.');
     setCurrentQueryIndex(0);
@@ -12712,6 +12339,118 @@ function textBindingInternal(lView, index, value) {
     const element = getNativeByIndex(index, lView);
     ngDevMode && assertDefined(element, 'native element should exist');
     updateTextNode(lView[RENDERER], element, value);
+}
+
+function renderComponent(hostLView, componentHostIdx) {
+    ngDevMode && assertEqual(isCreationMode(hostLView), true, 'Should be run in creation mode');
+    const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
+    const componentTView = componentView[TVIEW];
+    syncViewWithBlueprint(componentTView, componentView);
+    const hostRNode = componentView[HOST];
+    // Populate an LView with hydration info retrieved from the DOM via TransferState.
+    if (hostRNode !== null && componentView[HYDRATION] === null) {
+        componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR$1]);
+    }
+    renderView(componentTView, componentView, componentView[CONTEXT]);
+}
+/**
+ * Syncs an LView instance with its blueprint if they have gotten out of sync.
+ *
+ * Typically, blueprints and their view instances should always be in sync, so the loop here
+ * will be skipped. However, consider this case of two components side-by-side:
+ *
+ * App template:
+ * ```
+ * <comp></comp>
+ * <comp></comp>
+ * ```
+ *
+ * The following will happen:
+ * 1. App template begins processing.
+ * 2. First <comp> is matched as a component and its LView is created.
+ * 3. Second <comp> is matched as a component and its LView is created.
+ * 4. App template completes processing, so it's time to check child templates.
+ * 5. First <comp> template is checked. It has a directive, so its def is pushed to blueprint.
+ * 6. Second <comp> template is checked. Its blueprint has been updated by the first
+ * <comp> template, but its LView was created before this update, so it is out of sync.
+ *
+ * Note that embedded views inside ngFor loops will never be out of sync because these views
+ * are processed as soon as they are created.
+ *
+ * @param tView The `TView` that contains the blueprint for syncing
+ * @param lView The view to sync
+ */
+function syncViewWithBlueprint(tView, lView) {
+    for (let i = lView.length; i < tView.blueprint.length; i++) {
+        lView.push(tView.blueprint[i]);
+    }
+}
+/**
+ * Processes a view in the creation mode. This includes a number of steps in a specific order:
+ * - creating view query functions (if any);
+ * - executing a template function in the creation mode;
+ * - updating static queries (if any);
+ * - creating child components defined in a given view.
+ */
+function renderView(tView, lView, context) {
+    ngDevMode && assertEqual(isCreationMode(lView), true, 'Should be run in creation mode');
+    enterView(lView);
+    try {
+        const viewQuery = tView.viewQuery;
+        if (viewQuery !== null) {
+            executeViewQueryFn(1 /* RenderFlags.Create */, viewQuery, context);
+        }
+        // Execute a template associated with this view, if it exists. A template function might not be
+        // defined for the root component views.
+        const templateFn = tView.template;
+        if (templateFn !== null) {
+            executeTemplate(tView, lView, templateFn, 1 /* RenderFlags.Create */, context);
+        }
+        // This needs to be set before children are processed to support recursive components.
+        // This must be set to false immediately after the first creation run because in an
+        // ngFor loop, all the views will be created together before update mode runs and turns
+        // off firstCreatePass. If we don't set it here, instances will perform directive
+        // matching, etc again and again.
+        if (tView.firstCreatePass) {
+            tView.firstCreatePass = false;
+        }
+        // We resolve content queries specifically marked as `static` in creation mode. Dynamic
+        // content queries are resolved during change detection (i.e. update mode), after embedded
+        // views are refreshed (see block above).
+        if (tView.staticContentQueries) {
+            refreshContentQueries(tView, lView);
+        }
+        // We must materialize query results before child components are processed
+        // in case a child component has projected a container. The LContainer needs
+        // to exist so the embedded views are properly attached by the container.
+        if (tView.staticViewQueries) {
+            executeViewQueryFn(2 /* RenderFlags.Update */, tView.viewQuery, context);
+        }
+        // Render child component views.
+        const components = tView.components;
+        if (components !== null) {
+            renderChildComponents(lView, components);
+        }
+    }
+    catch (error) {
+        // If we didn't manage to get past the first template pass due to
+        // an error, mark the view as corrupted so we can try to recover.
+        if (tView.firstCreatePass) {
+            tView.incompleteFirstPass = true;
+            tView.firstCreatePass = false;
+        }
+        throw error;
+    }
+    finally {
+        lView[FLAGS] &= ~4 /* LViewFlags.CreationMode */;
+        leaveView();
+    }
+}
+/** Renders child components in the current view (creation mode). */
+function renderChildComponents(hostLView, components) {
+    for (let i = 0; i < components.length; i++) {
+        renderComponent(hostLView, components[i]);
+    }
 }
 
 /**
@@ -12913,6 +12652,271 @@ function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
         tNode = isProjection ? tNode.projectionNext : tNode.next;
     }
     return result;
+}
+
+function detectChangesInternal(tView, lView, context, notifyErrorHandler = true) {
+    const rendererFactory = lView[ENVIRONMENT].rendererFactory;
+    // Check no changes mode is a dev only mode used to verify that bindings have not changed
+    // since they were assigned. We do not want to invoke renderer factory functions in that mode
+    // to avoid any possible side-effects.
+    const checkNoChangesMode = !!ngDevMode && isInCheckNoChangesMode();
+    if (!checkNoChangesMode && rendererFactory.begin)
+        rendererFactory.begin();
+    try {
+        refreshView(tView, lView, tView.template, context);
+    }
+    catch (error) {
+        if (notifyErrorHandler) {
+            handleError(lView, error);
+        }
+        throw error;
+    }
+    finally {
+        if (!checkNoChangesMode && rendererFactory.end)
+            rendererFactory.end();
+        // One final flush of the effects queue to catch any effects created in `ngAfterViewInit` or
+        // other post-order hooks.
+        !checkNoChangesMode && lView[ENVIRONMENT].effectManager?.flush();
+    }
+}
+function checkNoChangesInternal(tView, lView, context, notifyErrorHandler = true) {
+    setIsInCheckNoChangesMode(true);
+    try {
+        detectChangesInternal(tView, lView, context, notifyErrorHandler);
+    }
+    finally {
+        setIsInCheckNoChangesMode(false);
+    }
+}
+/**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component.
+ *
+ * @param component The component which the change detection should be performed on.
+ */
+function detectChanges(component) {
+    const view = getComponentViewByInstance(component);
+    detectChangesInternal(view[TVIEW], view, component);
+}
+/**
+ * Processes a view in update mode. This includes a number of steps in a specific order:
+ * - executing a template function in update mode;
+ * - executing hooks;
+ * - refreshing queries;
+ * - setting host bindings;
+ * - refreshing child (embedded and component) views.
+ */
+function refreshView(tView, lView, templateFn, context) {
+    ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
+    const flags = lView[FLAGS];
+    if ((flags & 256 /* LViewFlags.Destroyed */) === 256 /* LViewFlags.Destroyed */)
+        return;
+    // Check no changes mode is a dev only mode used to verify that bindings have not changed
+    // since they were assigned. We do not want to execute lifecycle hooks in that mode.
+    const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
+    !isInCheckNoChangesPass && lView[ENVIRONMENT].effectManager?.flush();
+    enterView(lView);
+    try {
+        resetPreOrderHookFlags(lView);
+        setBindingIndex(tView.bindingStartIndex);
+        if (templateFn !== null) {
+            executeTemplate(tView, lView, templateFn, 2 /* RenderFlags.Update */, context);
+        }
+        const hooksInitPhaseCompleted = (flags & 3 /* LViewFlags.InitPhaseStateMask */) === 3 /* InitPhaseState.InitPhaseCompleted */;
+        // execute pre-order hooks (OnInit, OnChanges, DoCheck)
+        // PERF WARNING: do NOT extract this to a separate function without running benchmarks
+        if (!isInCheckNoChangesPass) {
+            if (hooksInitPhaseCompleted) {
+                const preOrderCheckHooks = tView.preOrderCheckHooks;
+                if (preOrderCheckHooks !== null) {
+                    executeCheckHooks(lView, preOrderCheckHooks, null);
+                }
+            }
+            else {
+                const preOrderHooks = tView.preOrderHooks;
+                if (preOrderHooks !== null) {
+                    executeInitAndCheckHooks(lView, preOrderHooks, 0 /* InitPhaseState.OnInitHooksToBeRun */, null);
+                }
+                incrementInitPhaseFlags(lView, 0 /* InitPhaseState.OnInitHooksToBeRun */);
+            }
+        }
+        // First mark transplanted views that are declared in this lView as needing a refresh at their
+        // insertion points. This is needed to avoid the situation where the template is defined in this
+        // `LView` but its declaration appears after the insertion component.
+        markTransplantedViewsForRefresh(lView);
+        refreshEmbeddedViews(lView);
+        // Content query results must be refreshed before content hooks are called.
+        if (tView.contentQueries !== null) {
+            refreshContentQueries(tView, lView);
+        }
+        // execute content hooks (AfterContentInit, AfterContentChecked)
+        // PERF WARNING: do NOT extract this to a separate function without running benchmarks
+        if (!isInCheckNoChangesPass) {
+            if (hooksInitPhaseCompleted) {
+                const contentCheckHooks = tView.contentCheckHooks;
+                if (contentCheckHooks !== null) {
+                    executeCheckHooks(lView, contentCheckHooks);
+                }
+            }
+            else {
+                const contentHooks = tView.contentHooks;
+                if (contentHooks !== null) {
+                    executeInitAndCheckHooks(lView, contentHooks, 1 /* InitPhaseState.AfterContentInitHooksToBeRun */);
+                }
+                incrementInitPhaseFlags(lView, 1 /* InitPhaseState.AfterContentInitHooksToBeRun */);
+            }
+        }
+        processHostBindingOpCodes(tView, lView);
+        // Refresh child component views.
+        const components = tView.components;
+        if (components !== null) {
+            refreshChildComponents(lView, components);
+        }
+        // View queries must execute after refreshing child components because a template in this view
+        // could be inserted in a child component. If the view query executes before child component
+        // refresh, the template might not yet be inserted.
+        const viewQuery = tView.viewQuery;
+        if (viewQuery !== null) {
+            executeViewQueryFn(2 /* RenderFlags.Update */, viewQuery, context);
+        }
+        // execute view hooks (AfterViewInit, AfterViewChecked)
+        // PERF WARNING: do NOT extract this to a separate function without running benchmarks
+        if (!isInCheckNoChangesPass) {
+            if (hooksInitPhaseCompleted) {
+                const viewCheckHooks = tView.viewCheckHooks;
+                if (viewCheckHooks !== null) {
+                    executeCheckHooks(lView, viewCheckHooks);
+                }
+            }
+            else {
+                const viewHooks = tView.viewHooks;
+                if (viewHooks !== null) {
+                    executeInitAndCheckHooks(lView, viewHooks, 2 /* InitPhaseState.AfterViewInitHooksToBeRun */);
+                }
+                incrementInitPhaseFlags(lView, 2 /* InitPhaseState.AfterViewInitHooksToBeRun */);
+            }
+        }
+        if (tView.firstUpdatePass === true) {
+            // We need to make sure that we only flip the flag on successful `refreshView` only
+            // Don't do this in `finally` block.
+            // If we did this in `finally` block then an exception could block the execution of styling
+            // instructions which in turn would be unable to insert themselves into the styling linked
+            // list. The result of this would be that if the exception would not be throw on subsequent CD
+            // the styling would be unable to process it data and reflect to the DOM.
+            tView.firstUpdatePass = false;
+        }
+        // Do not reset the dirty state when running in check no changes mode. We don't want components
+        // to behave differently depending on whether check no changes is enabled or not. For example:
+        // Marking an OnPush component as dirty from within the `ngAfterViewInit` hook in order to
+        // refresh a `NgClass` binding should work. If we would reset the dirty state in the check
+        // no changes cycle, the component would be not be dirty for the next update pass. This would
+        // be different in production mode where the component dirty state is not reset.
+        if (!isInCheckNoChangesPass) {
+            lView[FLAGS] &= ~(64 /* LViewFlags.Dirty */ | 8 /* LViewFlags.FirstLViewPass */);
+        }
+        clearViewRefreshFlag(lView);
+    }
+    finally {
+        leaveView();
+    }
+}
+/**
+ * Goes over embedded views (ones created through ViewContainerRef APIs) and refreshes
+ * them by executing an associated template function.
+ */
+function refreshEmbeddedViews(lView) {
+    for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
+        for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+            const embeddedLView = lContainer[i];
+            const embeddedTView = embeddedLView[TVIEW];
+            ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
+            if (viewAttachedToChangeDetector(embeddedLView)) {
+                refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
+            }
+        }
+    }
+}
+/**
+ * Mark transplanted views as needing to be refreshed at their insertion points.
+ *
+ * @param lView The `LView` that may have transplanted views.
+ */
+function markTransplantedViewsForRefresh(lView) {
+    for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
+        if (!lContainer[HAS_TRANSPLANTED_VIEWS])
+            continue;
+        const movedViews = lContainer[MOVED_VIEWS];
+        ngDevMode && assertDefined(movedViews, 'Transplanted View flags set but missing MOVED_VIEWS');
+        for (let i = 0; i < movedViews.length; i++) {
+            const movedLView = movedViews[i];
+            const insertionLContainer = movedLView[PARENT];
+            ngDevMode && assertLContainer(insertionLContainer);
+            markViewForRefresh(movedLView);
+        }
+    }
+}
+/**
+ * Refreshes components by entering the component view and processing its bindings, queries, etc.
+ *
+ * @param componentHostIdx  Element index in LView[] (adjusted for HEADER_OFFSET)
+ */
+function refreshComponent(hostLView, componentHostIdx) {
+    ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
+    const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
+    // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
+    if (viewAttachedToChangeDetector(componentView)) {
+        const tView = componentView[TVIEW];
+        if (componentView[FLAGS] & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */)) {
+            refreshView(tView, componentView, tView.template, componentView[CONTEXT]);
+        }
+        else if (componentView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
+            // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
+            refreshContainsDirtyView(componentView);
+        }
+    }
+}
+/**
+ * Refreshes all transplanted views marked with `LViewFlags.RefreshTransplantedView` that are
+ * children or descendants of the given lView.
+ *
+ * @param lView The lView which contains descendant transplanted views that need to be refreshed.
+ */
+function refreshContainsDirtyView(lView) {
+    for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
+        for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+            const embeddedLView = lContainer[i];
+            if (viewAttachedToChangeDetector(embeddedLView)) {
+                if (embeddedLView[FLAGS] & 1024 /* LViewFlags.RefreshView */) {
+                    const embeddedTView = embeddedLView[TVIEW];
+                    ngDevMode && assertDefined(embeddedTView, 'TView must be allocated');
+                    refreshView(embeddedTView, embeddedLView, embeddedTView.template, embeddedLView[CONTEXT]);
+                }
+                else if (embeddedLView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
+                    refreshContainsDirtyView(embeddedLView);
+                }
+            }
+        }
+    }
+    const tView = lView[TVIEW];
+    // Refresh child component views.
+    const components = tView.components;
+    if (components !== null) {
+        for (let i = 0; i < components.length; i++) {
+            const componentView = getComponentLViewByIndex(components[i], lView);
+            // Only attached components that are CheckAlways or OnPush and dirty should be refreshed
+            if (viewAttachedToChangeDetector(componentView) &&
+                componentView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
+                refreshContainsDirtyView(componentView);
+            }
+        }
+    }
+}
+/** Refreshes child components in the current view (update mode). */
+function refreshChildComponents(hostLView, components) {
+    for (let i = 0; i < components.length; i++) {
+        refreshComponent(hostLView, components[i]);
+    }
 }
 
 class ViewRef {
@@ -14595,18 +14599,6 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
         }
     }
     return ɵɵattributeInterpolateV;
-}
-
-/**
- * Synchronously perform change detection on a component (and possibly its sub-components).
- *
- * This function triggers change detection in a synchronous way on a component.
- *
- * @param component The component which the change detection should be performed on.
- */
-function detectChanges(component) {
-    const view = getComponentViewByInstance(component);
-    detectChangesInternal(view[TVIEW], view, component);
 }
 
 const AT_THIS_LOCATION = '<-- AT THIS LOCATION';
