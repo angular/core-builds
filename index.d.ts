@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-720ad5f
+ * @license Angular v16.1.0-next.0+sha-5671234
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5483,15 +5483,17 @@ declare const enum LViewFlags {
     RefreshView = 1024,
     /** Indicates that the view **or any of its ancestors** have an embedded view injector. */
     HasEmbeddedViewInjector = 2048,
+    /** Indicates that the view was created with `signals: true`. */
+    SignalView = 4096,
     /**
      * Index of the current init phase on last 21 bits
      */
-    IndexWithinInitPhaseIncrementer = 4096,
+    IndexWithinInitPhaseIncrementer = 8192,
     /**
      * This is the count of the bits the 1 was shifted above (base 10)
      */
-    IndexWithinInitPhaseShift = 12,
-    IndexWithinInitPhaseReset = 4095
+    IndexWithinInitPhaseShift = 13,
+    IndexWithinInitPhaseReset = 8191
 }
 
 /**

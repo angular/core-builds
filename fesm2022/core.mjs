@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-720ad5f
+ * @license Angular v16.1.0-next.0+sha-5671234
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3743,7 +3743,7 @@ function incrementInitPhaseFlags(lView, initPhase) {
         assertNotEqual(initPhase, 3 /* InitPhaseState.InitPhaseCompleted */, 'Init hooks phase should not be incremented after all init hooks have been run.');
     let flags = lView[FLAGS];
     if ((flags & 3 /* LViewFlags.InitPhaseStateMask */) === initPhase) {
-        flags &= 4095 /* LViewFlags.IndexWithinInitPhaseReset */;
+        flags &= 8191 /* LViewFlags.IndexWithinInitPhaseReset */;
         flags += 1 /* LViewFlags.InitPhaseStateIncrementer */;
         lView[FLAGS] = flags;
     }
@@ -3824,12 +3824,12 @@ function callHook(currentView, initPhase, arr, i) {
     const directiveIndex = isInitHook ? -arr[i] : arr[i];
     const directive = currentView[directiveIndex];
     if (isInitHook) {
-        const indexWithintInitPhase = currentView[FLAGS] >> 12 /* LViewFlags.IndexWithinInitPhaseShift */;
+        const indexWithintInitPhase = currentView[FLAGS] >> 13 /* LViewFlags.IndexWithinInitPhaseShift */;
         // The init phase state must be always checked here as it may have been recursively updated.
         if (indexWithintInitPhase <
             (currentView[PREORDER_HOOK_FLAGS] >> 16 /* PreOrderHookFlags.NumberOfInitHooksCalledShift */) &&
             (currentView[FLAGS] & 3 /* LViewFlags.InitPhaseStateMask */) === initPhase) {
-            currentView[FLAGS] += 4096 /* LViewFlags.IndexWithinInitPhaseIncrementer */;
+            currentView[FLAGS] += 8192 /* LViewFlags.IndexWithinInitPhaseIncrementer */;
             callHookInternal(directive, hook);
         }
     }
@@ -9983,7 +9983,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-720ad5f');
+const VERSION = new Version('16.1.0-next.0+sha-5671234');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11687,7 +11687,14 @@ function addComponentLogic(lView, hostTNode, def) {
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     const rendererFactory = lView[ENVIRONMENT].rendererFactory;
-    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, native, hostTNode, null, rendererFactory.createRenderer(native, def), null, null, null));
+    let lViewFlags = 16 /* LViewFlags.CheckAlways */;
+    if (def.signals) {
+        lViewFlags = 4096 /* LViewFlags.SignalView */;
+    }
+    else if (def.onPush) {
+        lViewFlags = 64 /* LViewFlags.Dirty */;
+    }
+    const componentView = addToViewTree(lView, createLView(lView, tView, null, lViewFlags, native, hostTNode, null, rendererFactory.createRenderer(native, def), null, null, null));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
     lView[hostTNode.index] = componentView;
@@ -12967,8 +12974,12 @@ class ComponentFactory extends ComponentFactory$1 {
         const hostRNode = rootSelectorOrNode ?
             locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation, rootViewInjector) :
             createElementNode(hostRenderer, elementName, getNamespace(elementName));
-        const rootFlags = this.componentDef.onPush ? 64 /* LViewFlags.Dirty */ | 512 /* LViewFlags.IsRoot */ :
+        // Signal components use the granular "RefreshView"  for change detection
+        const signalFlags = (4096 /* LViewFlags.SignalView */ | 512 /* LViewFlags.IsRoot */);
+        // Non-signal components use the traditional "CheckAlways or OnPush/Dirty" change detection
+        const nonSignalFlags = this.componentDef.onPush ? 64 /* LViewFlags.Dirty */ | 512 /* LViewFlags.IsRoot */ :
             16 /* LViewFlags.CheckAlways */ | 512 /* LViewFlags.IsRoot */;
+        const rootFlags = this.componentDef.signals ? signalFlags : nonSignalFlags;
         // Create the root view. Uses empty TView and ContentTemplate.
         const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null, null);
         const rootLView = createLView(null, rootTView, null, rootFlags, null, null, environment, hostRenderer, rootViewInjector, null, null);
@@ -13111,7 +13122,14 @@ function createRootComponentView(tNode, hostRNode, rootComponentDef, rootDirecti
         hydrationInfo = retrieveHydrationInfo(hostRNode, rootView[INJECTOR$1]);
     }
     const viewRenderer = environment.rendererFactory.createRenderer(hostRNode, rootComponentDef);
-    const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, rootComponentDef.onPush ? 64 /* LViewFlags.Dirty */ : 16 /* LViewFlags.CheckAlways */, rootView[tNode.index], tNode, environment, viewRenderer, null, null, hydrationInfo);
+    let lViewFlags = 16 /* LViewFlags.CheckAlways */;
+    if (rootComponentDef.signals) {
+        lViewFlags = 4096 /* LViewFlags.SignalView */;
+    }
+    else if (rootComponentDef.onPush) {
+        lViewFlags = 64 /* LViewFlags.Dirty */;
+    }
+    const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, lViewFlags, rootView[tNode.index], tNode, environment, viewRenderer, null, null, hydrationInfo);
     if (tView.firstCreatePass) {
         markAsComponentHost(tView, tNode, rootDirectives.length - 1);
     }
@@ -22848,8 +22866,11 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
      * @internal
      */
     createEmbeddedViewImpl(context, injector, hydrationInfo) {
+        // Embedded views follow the change detection strategy of the view they're declared in.
+        const isSignalView = this._declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
+        const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
         const embeddedTView = this._declarationTContainer.tView;
-        const embeddedLView = createLView(this._declarationLView, embeddedTView, context, 16 /* LViewFlags.CheckAlways */, null, embeddedTView.declTNode, null, null, null, injector || null, hydrationInfo || null);
+        const embeddedLView = createLView(this._declarationLView, embeddedTView, context, viewFlags, null, embeddedTView.declTNode, null, null, null, injector || null, hydrationInfo || null);
         const declarationLContainer = this._declarationLView[this._declarationTContainer.index];
         ngDevMode && assertLContainer(declarationLContainer);
         embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
