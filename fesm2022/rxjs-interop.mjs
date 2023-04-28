@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.3+sha-cb5c4e0
+ * @license Angular v16.0.0-rc.3+sha-d5fb3ad
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -37,7 +37,7 @@ function takeUntilDestroyed(destroyRef) {
  *
  * The signal's value will be propagated into the `Observable`'s subscribers using an `effect`.
  *
- * `toObservable` must be called in an injection context.
+ * `toObservable` must be called in an injection context unless an injector is provided via options.
  *
  * @developerPreview
  */
@@ -764,9 +764,10 @@ class Watch extends ReactiveNode {
     }
 }
 
-// toSignal(Observable<Animal>) -> Signal<Animal|undefined>
 function toSignal(source, options) {
-    assertInInjectionContext(toSignal);
+    const requiresCleanup = !options?.manualCleanup;
+    requiresCleanup && !options?.injector && assertInInjectionContext(toSignal);
+    const cleanupRef = requiresCleanup ? options?.injector?.get(DestroyRef) ?? inject(DestroyRef) : null;
     // Note: T is the Observable value type, and U is the initial value type. They don't have to be
     // the same - the returned signal gives values of type `T`.
     let state;
@@ -787,8 +788,8 @@ function toSignal(source, options) {
     if (ngDevMode && options?.requireSync && untracked(state).kind === 0 /* StateKind.NoValue */) {
         throw new RuntimeError(601 /* RuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
     }
-    // Unsubscribe when the current context is destroyed.
-    inject(DestroyRef).onDestroy(sub.unsubscribe.bind(sub));
+    // Unsubscribe when the current context is destroyed, if requested.
+    cleanupRef?.onDestroy(sub.unsubscribe.bind(sub));
     // The actual returned signal is a `computed` of the `State` signal, which maps the various states
     // to either values or errors.
     return computed$1(() => {

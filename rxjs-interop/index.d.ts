@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.3+sha-cb5c4e0
+ * @license Angular v16.0.0-rc.3+sha-d5fb3ad
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28,7 +28,7 @@ export declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoType
  *
  * The signal's value will be propagated into the `Observable`'s subscribers using an `effect`.
  *
- * `toObservable` must be called in an injection context.
+ * `toObservable` must be called in an injection context unless an injector is provided via options.
  *
  * @developerPreview
  */
@@ -41,7 +41,7 @@ export declare function toObservable<T>(source: Signal<T>, options?: ToObservabl
  */
 export declare interface ToObservableOptions {
     /**
-     * The `Injector` to use when creating the effect.
+     * The `Injector` to use when creating the underlying `effect` which watches the signal.
      *
      * If this isn't specified, the current injection context will be used.
      */
@@ -56,16 +56,17 @@ export declare interface ToObservableOptions {
  * have the most recent value emitted by the subscription, and will throw an error if the
  * `Observable` errors.
  *
- * The subscription will last for the lifetime of the current injection context. That is, if
- * `toSignal` is called from a component context, the subscription will be cleaned up when the
- * component is destroyed. When called outside of a component, the current `EnvironmentInjector`'s
- * lifetime will be used (which is typically the lifetime of the application itself).
+ * Before the `Observable` emits its first value, the `Signal` will return `undefined`. To avoid
+ * this, either an `initialValue` can be passed or the `requireSync` option enabled.
  *
- * If the `Observable` does not produce a value before the `Signal` is read, the `Signal` will throw
- * an error. To avoid this, use a synchronous `Observable` (potentially created with the `startWith`
- * operator) or pass an initial value to `toSignal` as the second argument.
+ * By default, the subscription will be automatically cleaned up when the current injection context
+ * is destroyed. For example, when `toObservable` is called during the construction of a component,
+ * the subscription will be cleaned up when the component is destroyed. If an injection context is
+ * not available, an explicit `Injector` can be passed instead.
  *
- * `toSignal` must be called in an injection context.
+ * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
+ * option can be specified instead, which disables the automatic subscription teardown. No injection
+ * context is needed in this configuration as well.
  */
 export declare function toSignal<T>(source: Observable<T>): Signal<T | undefined>;
 
@@ -77,26 +78,116 @@ export declare function toSignal<T>(source: Observable<T>): Signal<T | undefined
  * have the most recent value emitted by the subscription, and will throw an error if the
  * `Observable` errors.
  *
- * The subscription will last for the lifetime of the current injection context. That is, if
- * `toSignal` is called from a component context, the subscription will be cleaned up when the
- * component is destroyed. When called outside of a component, the current `EnvironmentInjector`'s
- * lifetime will be used (which is typically the lifetime of the application itself).
- *
  * Before the `Observable` emits its first value, the `Signal` will return the configured
- * `initialValue`. If the `Observable` is known to produce a value before the `Signal` will be read,
- * `initialValue` does not need to be passed.
+ * `initialValue`, or `undefined` if no `initialValue` is provided. If the `Observable` is
+ * guaranteed to emit synchronously, then the `requireSync` option can be passed instead.
  *
- * `toSignal` must be called in an injection context.
+ * By default, the subscription will be automatically cleaned up when the current injection context
+ * is destroyed. For example, when `toObservable` is called during the construction of a component,
+ * the subscription will be cleaned up when the component is destroyed. If an injection context is
+ * not available, an explicit `Injector` can be passed instead.
+ *
+ * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
+ * option can be specified instead, which disables the automatic subscription teardown. No injection
+ * context is needed in this configuration as well.
  *
  * @developerPreview
  */
-export declare function toSignal<T, U extends T | null | undefined>(source: Observable<T>, options: {
+export declare function toSignal<T>(source: Observable<T>, options?: ToSignalOptions<undefined> & {
+    requireSync?: false;
+}): Signal<T | undefined>;
+
+/**
+ * Get the current value of an `Observable` as a reactive `Signal`.
+ *
+ * `toSignal` returns a `Signal` which provides synchronous reactive access to values produced
+ * by the given `Observable`, by subscribing to that `Observable`. The returned `Signal` will always
+ * have the most recent value emitted by the subscription, and will throw an error if the
+ * `Observable` errors.
+ *
+ * Before the `Observable` emits its first value, the `Signal` will return the configured
+ * `initialValue`. If the `Observable` is guaranteed to emit synchronously, then the `requireSync`
+ * option can be passed instead.
+ *
+ * By default, the subscription will be automatically cleaned up when the current injection context
+ * is destroyed. For example, when `toObservable` is called during the construction of a component,
+ * the subscription will be cleaned up when the component is destroyed. If an injection context is
+ * not available, an explicit `Injector` can be passed instead.
+ *
+ * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
+ * option can be specified instead, which disables the automatic subscription teardown. No injection
+ * context is needed in this configuration as well.
+ *
+ * @developerPreview
+ */
+export declare function toSignal<T, U extends T | null | undefined>(source: Observable<T>, options: ToSignalOptions<U> & {
     initialValue: U;
     requireSync?: false;
 }): Signal<T | U>;
 
-export declare function toSignal<T>(source: Observable<T>, options: {
+/**
+ * Get the current value of an `Observable` as a reactive `Signal`.
+ *
+ * `toSignal` returns a `Signal` which provides synchronous reactive access to values produced
+ * by the given `Observable`, by subscribing to that `Observable`. The returned `Signal` will always
+ * have the most recent value emitted by the subscription, and will throw an error if the
+ * `Observable` errors.
+ *
+ * With `requireSync` set to `true`, `toSignal` will assert that the `Observable` produces a value
+ * immediately upon subscription. No `initialValue` is needed in this case, and the returned signal
+ * does not include an `undefined` type.
+ *
+ * By default, the subscription will be automatically cleaned up when the current injection context
+ * is destroyed. For example, when `toObservable` is called during the construction of a component,
+ * the subscription will be cleaned up when the component is destroyed. If an injection context is
+ * not available, an explicit `Injector` can be passed instead.
+ *
+ * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
+ * option can be specified instead, which disables the automatic subscription teardown. No injection
+ * context is needed in this configuration as well.
+ *
+ * @developerPreview
+ */
+export declare function toSignal<T>(source: Observable<T>, options: ToSignalOptions<undefined> & {
     requireSync: true;
 }): Signal<T>;
+
+/**
+ * Options for `toSignal`.
+ *
+ * @publicApi
+ */
+export declare interface ToSignalOptions<T> {
+    /**
+     * Initial value for the signal produced by `toSignal`.
+     *
+     * This will be the value of the signal until the observable emits its first value.
+     */
+    initialValue?: T;
+    /**
+     * Whether to require that the observable emits synchronously when `toSignal` subscribes.
+     *
+     * If this is `true`, `toSignal` will assert that the observable produces a value immediately upon
+     * subscription. Setting this option removes the need to either deal with `undefined` in the
+     * signal type or provide an `initialValue`, at the cost of a runtime error if this requirement is
+     * not met.
+     */
+    requireSync?: boolean;
+    /**
+     * `Injector` which will provide the `DestroyRef` used to clean up the Observable subscription.
+     *
+     * If this is not provided, a `DestroyRef` will be retrieved from the current injection context,
+     * unless manual cleanup is requested.
+     */
+    injector?: Injector;
+    /**
+     * Whether the subscription should be automatically cleaned up (via `DestroyRef`) when
+     * `toObservable`'s creation context is destroyed.
+     *
+     * If manual cleanup is enabled, then `DestroyRef` is not used, and the subscription will persist
+     * until the `Observable` itself completes.
+     */
+    manualCleanup?: boolean;
+}
 
 export { }
