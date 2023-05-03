@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0-rc.4+sha-796273d
+ * @license Angular v16.0.0-rc.4+sha-b381ad7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -572,7 +572,6 @@ export declare interface Attribute {
 /**
  * Attribute decorator and metadata.
  *
- * @Annotation
  * @publicApi
  */
 export declare const Attribute: AttributeDecorator;
@@ -1062,7 +1061,7 @@ export declare interface Component extends Directive {
 /**
  * Component decorator and metadata.
  *
- * @Annotation
+
  * @publicApi
  */
 export declare const Component: ComponentDecorator;
@@ -1208,7 +1207,6 @@ export declare interface ComponentDecorator {
      * To preserve sequences of whitespace characters, use the
      * `ngPreserveWhitespaces` attribute.
      *
-     * @Annotation
      */
     (obj: Component): TypeDecorator;
     /**
@@ -1575,7 +1573,7 @@ export declare type ContentChild = Query;
  * ContentChild decorator and metadata.
  *
  *
- * @Annotation
+
  *
  * @publicApi
  */
@@ -1635,7 +1633,6 @@ export declare interface ContentChildDecorator {
      *
      * {@example core/di/ts/contentChild/content_child_example.ts region='Component'}
      *
-     * @Annotation
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
@@ -1653,7 +1650,6 @@ export declare interface ContentChildDecorator {
  * Type of the ContentChildren metadata.
  *
  *
- * @Annotation
  * @publicApi
  */
 export declare type ContentChildren = Query;
@@ -1662,7 +1658,6 @@ export declare type ContentChildren = Query;
  * ContentChildren decorator and metadata.
  *
  *
- * @Annotation
  * @publicApi
  */
 export declare const ContentChildren: ContentChildrenDecorator;
@@ -1733,7 +1728,6 @@ export declare interface ContentChildrenDecorator {
      *
      * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
      *
-     * @Annotation
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
         descendants?: boolean;
@@ -2369,7 +2363,6 @@ export declare abstract class DestroyRef {
 /**
  * Directive decorator and metadata.
  *
- * @Annotation
  * @publicApi
  */
 export declare interface Directive {
@@ -2548,7 +2541,6 @@ export declare interface Directive {
      * }
      * ```
      *
-     * @Annotation
      */
     queries?: {
         [key: string]: any;
@@ -2698,7 +2690,6 @@ export declare interface DirectiveDecorator {
      *    accessible for components outside of the NgModule.
      *
      *
-     * @Annotation
      */
     (obj?: Directive): TypeDecorator;
     /**
@@ -3555,7 +3546,7 @@ export declare interface Host {
 /**
  * Host decorator and metadata.
  *
- * @Annotation
+
  * @publicApi
  */
 export declare const Host: HostDecorator;
@@ -3573,7 +3564,7 @@ export declare interface HostBinding {
 }
 
 /**
- * @Annotation
+
  * @publicApi
  */
 export declare const HostBinding: HostBindingDecorator;
@@ -3819,7 +3810,7 @@ export declare interface HostListener {
  * The global target names that can be used to prefix an event name are
  * `document:`, `window:` and `body:`.
  *
- * @Annotation
+
  * @publicApi
  */
 export declare const HostListener: HostListenerDecorator;
@@ -4180,7 +4171,6 @@ export declare interface Inject {
 /**
  * Inject decorator and metadata.
  *
- * @Annotation
  * @publicApi
  */
 export declare const Inject: InjectDecorator;
@@ -4264,7 +4254,6 @@ export declare interface Injectable {
 /**
  * Injectable decorator and metadata.
  *
- * @Annotation
  * @publicApi
  */
 export declare const Injectable: InjectableDecorator;
@@ -4611,7 +4600,7 @@ export declare interface Input {
 }
 
 /**
- * @Annotation
+
  * @publicApi
  */
 export declare const Input: InputDecorator;
@@ -5771,7 +5760,6 @@ export declare interface NgModule {
 }
 
 /**
- * @Annotation
  */
 export declare const NgModule: NgModuleDecorator;
 
@@ -6170,7 +6158,7 @@ export declare interface Optional {
 /**
  * Optional decorator and metadata.
  *
- * @Annotation
+
  * @publicApi
  */
 export declare const Optional: OptionalDecorator;
@@ -6215,7 +6203,7 @@ export declare interface Output {
 }
 
 /**
- * @Annotation
+
  * @publicApi
  */
 export declare const Output: OutputDecorator;
@@ -6289,7 +6277,7 @@ export declare interface Pipe {
 }
 
 /**
- * @Annotation
+
  * @publicApi
  */
 export declare const Pipe: PipeDecorator;
@@ -7651,7 +7639,7 @@ export declare interface Self {
 /**
  * Self decorator and metadata.
  *
- * @Annotation
+
  * @publicApi
  */
 export declare const Self: SelfDecorator;
@@ -7846,7 +7834,7 @@ export declare interface SkipSelf {
 /**
  * `SkipSelf` decorator and metadata.
  *
- * @Annotation
+
  * @publicApi
  */
 export declare const SkipSelf: SkipSelfDecorator;
@@ -9670,7 +9658,7 @@ export declare type ViewChild = Query;
 /**
  * ViewChild decorator and metadata.
  *
- * @Annotation
+
  * @publicApi
  */
 export declare const ViewChild: ViewChildDecorator;
@@ -9725,7 +9713,6 @@ export declare interface ViewChildDecorator {
      *
      * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'}
      *
-     * @Annotation
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
@@ -9747,7 +9734,7 @@ export declare type ViewChildren = Query;
 /**
  * ViewChildren decorator and metadata.
  *
- * @Annotation
+
  * @publicApi
  */
 export declare const ViewChildren: ViewChildrenDecorator;
@@ -9809,7 +9796,6 @@ export declare interface ViewChildrenDecorator {
      *
      * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'}
      *
-     * @Annotation
      */
     (selector: ProviderToken<unknown> | Function | string, opts?: {
         read?: any;
