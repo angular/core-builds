@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-adf3f6a
+ * @license Angular v16.1.0-next.0+sha-80fe08b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6385,7 +6385,7 @@ function isPropertyValid(element, propName, tagName, schemas) {
     if (schemas === null)
         return true;
     // The property is considered valid if the element matches the schema, it exists on the element,
-    // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
+    // or it is synthetic.
     if (matchingSchemas(schemas, tagName) || propName in element || isAnimationProp(propName)) {
         return true;
     }
@@ -8126,7 +8126,7 @@ function ɵɵvalidateIframeAttribute(attrValue, tagName, attrName) {
  * When running ivy outside of a browser environment, it is necessary to call `setDocument()` to
  * tell ivy what the global `document` is.
  *
- * Angular does this for us in each of the standard platforms (`Browser`, `Server`, and `WebWorker`)
+ * Angular does this for us in each of the standard platforms (`Browser` and `Server`)
  * by calling `setDocument()` when providing the `DOCUMENT` token.
  */
 let DOCUMENT = undefined;
@@ -10377,7 +10377,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-adf3f6a');
+const VERSION = new Version('16.1.0-next.0+sha-80fe08b');
 
 // This default value is when checking the hierarchy for a token.
 //
