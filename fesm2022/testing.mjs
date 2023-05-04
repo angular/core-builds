@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-6024b66
+ * @license Angular v16.1.0-next.0+sha-2180a69
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10377,7 +10377,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-6024b66');
+const VERSION = new Version('16.1.0-next.0+sha-2180a69');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -26150,7 +26150,7 @@ class TestBedImpl {
     }
     configureCompiler(config) {
         if (config.useJit != null) {
-            throw new Error('the Render3 compiler JiT mode is not configurable !');
+            throw new Error('JIT compiler is not configurable via TestBed APIs.');
         }
         if (config.providers !== undefined) {
             this.compiler.setCompilerProviders(config.providers);
@@ -26158,7 +26158,7 @@ class TestBedImpl {
         return this;
     }
     configureTestingModule(moduleDef) {
-        this.assertNotInstantiated('R3TestBed.configureTestingModule', 'configure the test module');
+        this.assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         // Trigger module scoping queue flush before executing other TestBed operations in a test.
         // This is needed for the first test invocation to ensure that globally declared modules have
         // their components scoped properly. See the `checkGlobalCompilationFinished` function
@@ -26212,7 +26212,7 @@ class TestBedImpl {
         return this;
     }
     overrideTemplateUsingTestingModule(component, template) {
-        this.assertNotInstantiated('R3TestBed.overrideTemplateUsingTestingModule', 'Cannot override template when the test module has already been instantiated');
+        this.assertNotInstantiated('TestBed.overrideTemplateUsingTestingModule', 'Cannot override template when the test module has already been instantiated');
         this.compiler.overrideTemplateUsingTestingModule(component, template);
         return this;
     }
