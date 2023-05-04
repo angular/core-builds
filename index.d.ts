@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0+sha-f3bb680
+ * @license Angular v16.0.0+sha-f28580a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2999,25 +2999,14 @@ declare interface ELEMENT_MARKER {
  */
 export declare class ElementRef<T = any> {
     /**
-     * The underlying native element or `null` if direct access to native elements is not supported
-     * (e.g. when the application runs in a web worker).
-     *
      * <div class="callout is-critical">
      *   <header>Use with caution</header>
      *   <p>
      *    Use this API as the last resort when direct access to DOM is needed. Use templating and
      *    data-binding provided by Angular instead. Alternatively you can take a look at {@link
-     * Renderer2}
-     *    which provides API that can safely be used even when direct access to native elements is not
-     *    supported.
-     *   </p>
-     *   <p>
-     *    Relying on direct DOM access creates tight coupling between your application and rendering
-     *    layers which will make it impossible to separate the two and deploy your application into a
-     *    web worker.
+     * Renderer2} which provides an API that can be safely used.
      *   </p>
      * </div>
-     *
      */
     nativeElement: T;
     constructor(nativeElement: T);
@@ -7250,7 +7239,6 @@ export declare abstract class Renderer2 {
      * in the host element's DOM.
      * @param node The child node to query.
      * @returns The parent node, or null if there is no parent.
-     * For WebWorkers, always returns true.
      * This is because the check is synchronous,
      * and the caller can't rely on checking for null.
      */
@@ -7259,7 +7247,6 @@ export declare abstract class Renderer2 {
      * Implement this callback to get the next sibling node of a given node
      * in the host element's DOM.
      * @returns The sibling node, or null if there is no sibling.
-     * For WebWorkers, always returns a value.
      * This is because the check is synchronous,
      * and the caller can't rely on checking for null.
      */

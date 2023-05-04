@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0+sha-f3bb680
+ * @license Angular v16.0.0+sha-f28580a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6383,7 +6383,7 @@ function isPropertyValid(element, propName, tagName, schemas) {
     if (schemas === null)
         return true;
     // The property is considered valid if the element matches the schema, it exists on the element,
-    // or it is synthetic, and we are in a browser context (web worker nodes should be skipped).
+    // or it is synthetic.
     if (matchingSchemas(schemas, tagName) || propName in element || isAnimationProp(propName)) {
         return true;
     }
@@ -8124,7 +8124,7 @@ function ɵɵvalidateIframeAttribute(attrValue, tagName, attrName) {
  * When running ivy outside of a browser environment, it is necessary to call `setDocument()` to
  * tell ivy what the global `document` is.
  *
- * Angular does this for us in each of the standard platforms (`Browser`, `Server`, and `WebWorker`)
+ * Angular does this for us in each of the standard platforms (`Browser` and `Server`)
  * by calling `setDocument()` when providing the `DOCUMENT` token.
  */
 let DOCUMENT = undefined;
@@ -10375,7 +10375,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0+sha-f3bb680');
+const VERSION = new Version('16.0.0+sha-f28580a');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -26127,7 +26127,7 @@ class TestBedImpl {
     }
     configureCompiler(config) {
         if (config.useJit != null) {
-            throw new Error('the Render3 compiler JiT mode is not configurable !');
+            throw new Error('JIT compiler is not configurable via TestBed APIs.');
         }
         if (config.providers !== undefined) {
             this.compiler.setCompilerProviders(config.providers);
@@ -26135,7 +26135,7 @@ class TestBedImpl {
         return this;
     }
     configureTestingModule(moduleDef) {
-        this.assertNotInstantiated('R3TestBed.configureTestingModule', 'configure the test module');
+        this.assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         // Trigger module scoping queue flush before executing other TestBed operations in a test.
         // This is needed for the first test invocation to ensure that globally declared modules have
         // their components scoped properly. See the `checkGlobalCompilationFinished` function
@@ -26189,7 +26189,7 @@ class TestBedImpl {
         return this;
     }
     overrideTemplateUsingTestingModule(component, template) {
-        this.assertNotInstantiated('R3TestBed.overrideTemplateUsingTestingModule', 'Cannot override template when the test module has already been instantiated');
+        this.assertNotInstantiated('TestBed.overrideTemplateUsingTestingModule', 'Cannot override template when the test module has already been instantiated');
         this.compiler.overrideTemplateUsingTestingModule(component, template);
         return this;
     }
