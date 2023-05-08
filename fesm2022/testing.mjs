@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0+sha-2f03eef
+ * @license Angular v16.0.0+sha-da7ff37
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2042,6 +2042,7 @@ function formatError(text, obj, injectorErrorName, source = null) {
 /**
  * Inject decorator and metadata.
  *
+ * @Annotation
  * @publicApi
  */
 const Inject = attachInjectFlag(
@@ -2051,7 +2052,7 @@ makeParamDecorator('Inject', (token) => ({ token })), -1 /* DecoratorFlags.Injec
 /**
  * Optional decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const Optional = 
@@ -2061,7 +2062,7 @@ attachInjectFlag(makeParamDecorator('Optional'), 8 /* InternalInjectFlags.Option
 /**
  * Self decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const Self = 
@@ -2071,7 +2072,7 @@ attachInjectFlag(makeParamDecorator('Self'), 2 /* InternalInjectFlags.Self */);
 /**
  * `SkipSelf` decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const SkipSelf = 
@@ -2081,7 +2082,7 @@ attachInjectFlag(makeParamDecorator('SkipSelf'), 4 /* InternalInjectFlags.SkipSe
 /**
  * Host decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const Host = 
@@ -6083,6 +6084,7 @@ function ɵɵinjectAttribute(attrNameToInject) {
 /**
  * Attribute decorator and metadata.
  *
+ * @Annotation
  * @publicApi
  */
 const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attributeName, __NG_ELEMENT_ID__: () => ɵɵinjectAttribute(attributeName) }));
@@ -10375,7 +10377,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0+sha-2f03eef');
+const VERSION = new Version('16.0.0+sha-da7ff37');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10912,6 +10914,7 @@ function getInjectableMetadata(type, srcMeta) {
 /**
  * Injectable decorator and metadata.
  *
+ * @Annotation
  * @publicApi
  */
 const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => compileInjectable(type, meta));
