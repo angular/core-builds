@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-cd90e4c
+ * @license Angular v16.1.0-next.0+sha-46a3692
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7526,6 +7526,7 @@ declare const enum RuntimeErrorCode {
     PROVIDER_IN_WRONG_CONTEXT = 207,
     MISSING_INJECTION_TOKEN = 208,
     INVALID_MULTI_PROVIDER = -209,
+    MISSING_DOCUMENT = 210,
     MULTIPLE_COMPONENTS_MATCH = -300,
     EXPORT_NOT_FOUND = -301,
     PIPE_NOT_FOUND = -302,
