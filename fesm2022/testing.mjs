@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0+sha-da7ff37
+ * @license Angular v16.0.0+sha-fe653c2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -941,10 +941,7 @@ function throwError(msg, actual, expected, comparison) {
         (comparison == null ? '' : ` [Expected=> ${expected} ${comparison} ${actual} <=Actual]`));
 }
 function assertDomNode(node) {
-    // If we're in a worker, `Node` will not be defined.
-    if (!(typeof Node !== 'undefined' && node instanceof Node) &&
-        !(typeof node === 'object' && node != null &&
-            node.constructor.name === 'WebWorkerRenderNode')) {
+    if (!(node instanceof Node)) {
         throwError(`The provided value must be an instance of a DOM Node but got ${stringify(node)}`);
     }
 }
@@ -8153,12 +8150,13 @@ function getDocument() {
     else if (typeof document !== 'undefined') {
         return document;
     }
+    throw new RuntimeError(210 /* RuntimeErrorCode.MISSING_DOCUMENT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+        `The document object is not available in this context. Make sure the DOCUMENT injection token is provided.`);
     // No "document" can be found. This should only happen if we are running ivy outside Angular and
     // the current platform is not a browser. Since this is not a supported scenario at the moment
     // this should not happen in Angular apps.
     // Once we support running ivy outside of Angular we will need to publish `setDocument()` as a
-    // public API. Meanwhile we just return `undefined` and let the application fail.
-    return undefined;
+    // public API.
 }
 
 /**
@@ -9864,7 +9862,9 @@ function makeStateKey(key) {
 }
 function initTransferState() {
     const transferState = new TransferState();
-    transferState.store = retrieveTransferredState(getDocument(), inject$1(APP_ID));
+    if (inject$1(PLATFORM_ID) === 'browser') {
+        transferState.store = retrieveTransferredState(getDocument(), inject$1(APP_ID));
+    }
     return transferState;
 }
 /**
@@ -9953,17 +9953,16 @@ function retrieveTransferredState(doc, appId) {
     // Locate the script tag with the JSON data transferred from the server.
     // The id of the script tag is set to the Angular appId + 'state'.
     const script = doc.getElementById(appId + '-state');
-    let initialState = {};
-    if (script && script.textContent) {
+    if (script?.textContent) {
         try {
             // Avoid using any here as it triggers lint errors in google3 (any is not allowed).
-            initialState = JSON.parse(unescapeTransferStateContent(script.textContent));
+            return JSON.parse(unescapeTransferStateContent(script.textContent));
         }
         catch (e) {
             console.warn('Exception while restoring TransferState for app ' + appId, e);
         }
     }
-    return initialState;
+    return {};
 }
 
 /** Encodes that the node lookup should start from the host node of this component. */
@@ -10377,7 +10376,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0+sha-da7ff37');
+const VERSION = new Version('16.0.0+sha-fe653c2');
 
 // This default value is when checking the hierarchy for a token.
 //

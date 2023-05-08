@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.0+sha-da7ff37
+ * @license Angular v16.0.0+sha-fe653c2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -302,10 +302,7 @@ function throwError(msg, actual, expected, comparison) {
         (comparison == null ? '' : ` [Expected=> ${expected} ${comparison} ${actual} <=Actual]`));
 }
 function assertDomNode(node) {
-    // If we're in a worker, `Node` will not be defined.
-    if (!(typeof Node !== 'undefined' && node instanceof Node) &&
-        !(typeof node === 'object' && node != null &&
-            node.constructor.name === 'WebWorkerRenderNode')) {
+    if (!(node instanceof Node)) {
         throwError(`The provided value must be an instance of a DOM Node but got ${stringify(node)}`);
     }
 }
@@ -7757,12 +7754,13 @@ function getDocument() {
     else if (typeof document !== 'undefined') {
         return document;
     }
+    throw new RuntimeError(210 /* RuntimeErrorCode.MISSING_DOCUMENT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+        `The document object is not available in this context. Make sure the DOCUMENT injection token is provided.`);
     // No "document" can be found. This should only happen if we are running ivy outside Angular and
     // the current platform is not a browser. Since this is not a supported scenario at the moment
     // this should not happen in Angular apps.
     // Once we support running ivy outside of Angular we will need to publish `setDocument()` as a
-    // public API. Meanwhile we just return `undefined` and let the application fail.
-    return undefined;
+    // public API.
 }
 
 /**
@@ -9468,7 +9466,9 @@ function makeStateKey(key) {
 }
 function initTransferState() {
     const transferState = new TransferState();
-    transferState.store = retrieveTransferredState(getDocument(), inject(APP_ID));
+    if (inject(PLATFORM_ID) === 'browser') {
+        transferState.store = retrieveTransferredState(getDocument(), inject(APP_ID));
+    }
     return transferState;
 }
 /**
@@ -9557,17 +9557,16 @@ function retrieveTransferredState(doc, appId) {
     // Locate the script tag with the JSON data transferred from the server.
     // The id of the script tag is set to the Angular appId + 'state'.
     const script = doc.getElementById(appId + '-state');
-    let initialState = {};
-    if (script && script.textContent) {
+    if (script?.textContent) {
         try {
             // Avoid using any here as it triggers lint errors in google3 (any is not allowed).
-            initialState = JSON.parse(unescapeTransferStateContent(script.textContent));
+            return JSON.parse(unescapeTransferStateContent(script.textContent));
         }
         catch (e) {
             console.warn('Exception while restoring TransferState for app ' + appId, e);
         }
     }
-    return initialState;
+    return {};
 }
 
 /** Encodes that the node lookup should start from the host node of this component. */
@@ -9981,7 +9980,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.0+sha-da7ff37');
+const VERSION = new Version('16.0.0+sha-fe653c2');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -26650,64 +26649,69 @@ function runPlatformInitializers(injector) {
  * @returns A promise that returns an `ApplicationRef` instance once resolved.
  */
 function internalCreateApplication(config) {
-    const { rootComponent, appProviders, platformProviders } = config;
-    if ((typeof ngDevMode === 'undefined' || ngDevMode) && rootComponent !== undefined) {
-        assertStandaloneComponentType(rootComponent);
-    }
-    const platformInjector = createOrReusePlatformInjector(platformProviders);
-    // Create root application injector based on a set of providers configured at the platform
-    // bootstrap level as well as providers passed to the bootstrap call by a user.
-    const allAppProviders = [
-        provideZoneChangeDetection(),
-        ...(appProviders || []),
-    ];
-    const adapter = new EnvironmentNgModuleRefAdapter({
-        providers: allAppProviders,
-        parent: platformInjector,
-        debugName: (typeof ngDevMode === 'undefined' || ngDevMode) ? 'Environment Injector' : '',
-        // We skip environment initializers because we need to run them inside the NgZone, which happens
-        // after we get the NgZone instance from the Injector.
-        runEnvironmentInitializers: false,
-    });
-    const envInjector = adapter.injector;
-    const ngZone = envInjector.get(NgZone);
-    return ngZone.run(() => {
-        envInjector.resolveInjectorInitializers();
-        const exceptionHandler = envInjector.get(ErrorHandler, null);
-        if ((typeof ngDevMode === 'undefined' || ngDevMode) && !exceptionHandler) {
-            throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No `ErrorHandler` found in the Dependency Injection tree.');
+    try {
+        const { rootComponent, appProviders, platformProviders } = config;
+        if ((typeof ngDevMode === 'undefined' || ngDevMode) && rootComponent !== undefined) {
+            assertStandaloneComponentType(rootComponent);
         }
-        let onErrorSubscription;
-        ngZone.runOutsideAngular(() => {
-            onErrorSubscription = ngZone.onError.subscribe({
-                next: (error) => {
-                    exceptionHandler.handleError(error);
-                }
+        const platformInjector = createOrReusePlatformInjector(platformProviders);
+        // Create root application injector based on a set of providers configured at the platform
+        // bootstrap level as well as providers passed to the bootstrap call by a user.
+        const allAppProviders = [
+            provideZoneChangeDetection(),
+            ...(appProviders || []),
+        ];
+        const adapter = new EnvironmentNgModuleRefAdapter({
+            providers: allAppProviders,
+            parent: platformInjector,
+            debugName: (typeof ngDevMode === 'undefined' || ngDevMode) ? 'Environment Injector' : '',
+            // We skip environment initializers because we need to run them inside the NgZone, which
+            // happens after we get the NgZone instance from the Injector.
+            runEnvironmentInitializers: false,
+        });
+        const envInjector = adapter.injector;
+        const ngZone = envInjector.get(NgZone);
+        return ngZone.run(() => {
+            envInjector.resolveInjectorInitializers();
+            const exceptionHandler = envInjector.get(ErrorHandler, null);
+            if ((typeof ngDevMode === 'undefined' || ngDevMode) && !exceptionHandler) {
+                throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No `ErrorHandler` found in the Dependency Injection tree.');
+            }
+            let onErrorSubscription;
+            ngZone.runOutsideAngular(() => {
+                onErrorSubscription = ngZone.onError.subscribe({
+                    next: (error) => {
+                        exceptionHandler.handleError(error);
+                    }
+                });
+            });
+            // If the whole platform is destroyed, invoke the `destroy` method
+            // for all bootstrapped applications as well.
+            const destroyListener = () => envInjector.destroy();
+            const onPlatformDestroyListeners = platformInjector.get(PLATFORM_DESTROY_LISTENERS);
+            onPlatformDestroyListeners.add(destroyListener);
+            envInjector.onDestroy(() => {
+                onErrorSubscription.unsubscribe();
+                onPlatformDestroyListeners.delete(destroyListener);
+            });
+            return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
+                const initStatus = envInjector.get(ApplicationInitStatus);
+                initStatus.runInitializers();
+                return initStatus.donePromise.then(() => {
+                    const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
+                    setLocaleId(localeId || DEFAULT_LOCALE_ID);
+                    const appRef = envInjector.get(ApplicationRef);
+                    if (rootComponent !== undefined) {
+                        appRef.bootstrap(rootComponent);
+                    }
+                    return appRef;
+                });
             });
         });
-        // If the whole platform is destroyed, invoke the `destroy` method
-        // for all bootstrapped applications as well.
-        const destroyListener = () => envInjector.destroy();
-        const onPlatformDestroyListeners = platformInjector.get(PLATFORM_DESTROY_LISTENERS);
-        onPlatformDestroyListeners.add(destroyListener);
-        envInjector.onDestroy(() => {
-            onErrorSubscription.unsubscribe();
-            onPlatformDestroyListeners.delete(destroyListener);
-        });
-        return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
-            const initStatus = envInjector.get(ApplicationInitStatus);
-            initStatus.runInitializers();
-            return initStatus.donePromise.then(() => {
-                const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
-                setLocaleId(localeId || DEFAULT_LOCALE_ID);
-                const appRef = envInjector.get(ApplicationRef);
-                if (rootComponent !== undefined) {
-                    appRef.bootstrap(rootComponent);
-                }
-                return appRef;
-            });
-        });
-    });
+    }
+    catch (e) {
+        return Promise.reject(e);
+    }
 }
 /**
  * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
