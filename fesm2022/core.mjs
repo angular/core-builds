@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-80fe08b
+ * @license Angular v16.1.0-next.0+sha-9d4842c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4940,6 +4940,7 @@ function makePropDecorator(name, props, parentClass, additionalProcessing) {
 /**
  * Attribute decorator and metadata.
  *
+ * @Annotation
  * @publicApi
  */
 const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attributeName, __NG_ELEMENT_ID__: () => ɵɵinjectAttribute(attributeName) }));
@@ -4963,6 +4964,7 @@ class Query {
  * ContentChildren decorator and metadata.
  *
  *
+ * @Annotation
  * @publicApi
  */
 const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {}) => ({
@@ -4977,7 +4979,7 @@ const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {
  * ContentChild decorator and metadata.
  *
  *
-
+ * @Annotation
  *
  * @publicApi
  */
@@ -4985,7 +4987,7 @@ const ContentChild = makePropDecorator('ContentChild', (selector, data = {}) => 
 /**
  * ViewChildren decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => ({
@@ -4999,7 +5001,7 @@ const ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => 
 /**
  * ViewChild decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const ViewChild = makePropDecorator('ViewChild', (selector, data) => ({ selector, first: true, isViewQuery: true, descendants: true, ...data }), Query);
@@ -5586,6 +5588,7 @@ function getParentCtor(ctor) {
 /**
  * Inject decorator and metadata.
  *
+ * @Annotation
  * @publicApi
  */
 const Inject = attachInjectFlag(
@@ -5595,7 +5598,7 @@ makeParamDecorator('Inject', (token) => ({ token })), -1 /* DecoratorFlags.Injec
 /**
  * Optional decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const Optional = 
@@ -5605,7 +5608,7 @@ attachInjectFlag(makeParamDecorator('Optional'), 8 /* InternalInjectFlags.Option
 /**
  * Self decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const Self = 
@@ -5615,7 +5618,7 @@ attachInjectFlag(makeParamDecorator('Self'), 2 /* InternalInjectFlags.Self */);
 /**
  * `SkipSelf` decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const SkipSelf = 
@@ -5625,7 +5628,7 @@ attachInjectFlag(makeParamDecorator('SkipSelf'), 4 /* InternalInjectFlags.SkipSe
 /**
  * Host decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const Host = 
@@ -9980,7 +9983,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-80fe08b');
+const VERSION = new Version('16.1.0-next.0+sha-9d4842c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10565,6 +10568,7 @@ function getInjectableMetadata(type, srcMeta) {
 /**
  * Injectable decorator and metadata.
  *
+ * @Annotation
  * @publicApi
  */
 const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => compileInjectable(type, meta));
@@ -25086,17 +25090,17 @@ const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undef
 /**
  * Component decorator and metadata.
  *
-
+ * @Annotation
  * @publicApi
  */
 const Component = makeDecorator('Component', (c = {}) => ({ changeDetection: ChangeDetectionStrategy.Default, ...c }), Directive, undefined, (type, meta) => compileComponent(type, meta));
 /**
-
+ * @Annotation
  * @publicApi
  */
 const Pipe = makeDecorator('Pipe', (p) => ({ pure: true, ...p }), undefined, undefined, (type, meta) => compilePipe(type, meta));
 /**
-
+ * @Annotation
  * @publicApi
  */
 const Input = makePropDecorator('Input', (arg) => {
@@ -25106,12 +25110,12 @@ const Input = makePropDecorator('Input', (arg) => {
     return typeof arg === 'string' ? { alias: arg } : arg;
 });
 /**
-
+ * @Annotation
  * @publicApi
  */
 const Output = makePropDecorator('Output', (alias) => ({ alias }));
 /**
-
+ * @Annotation
  * @publicApi
  */
 const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
@@ -25177,12 +25181,13 @@ const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ ho
  * The global target names that can be used to prefix an event name are
  * `document:`, `window:` and `body:`.
  *
-
+ * @Annotation
  * @publicApi
  */
 const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ eventName, args }));
 
 /**
+ * @Annotation
  */
 const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, 
 /**
