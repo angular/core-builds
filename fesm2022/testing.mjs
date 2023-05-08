@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-9d4842c
+ * @license Angular v16.1.0-next.0+sha-73fcf9f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -941,10 +941,7 @@ function throwError(msg, actual, expected, comparison) {
         (comparison == null ? '' : ` [Expected=> ${expected} ${comparison} ${actual} <=Actual]`));
 }
 function assertDomNode(node) {
-    // If we're in a worker, `Node` will not be defined.
-    if (!(typeof Node !== 'undefined' && node instanceof Node) &&
-        !(typeof node === 'object' && node != null &&
-            node.constructor.name === 'WebWorkerRenderNode')) {
+    if (!(node instanceof Node)) {
         throwError(`The provided value must be an instance of a DOM Node but got ${stringify(node)}`);
     }
 }
@@ -10379,7 +10376,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-9d4842c');
+const VERSION = new Version('16.1.0-next.0+sha-73fcf9f');
 
 // This default value is when checking the hierarchy for a token.
 //
