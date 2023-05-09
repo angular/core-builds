@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-55dfe80
+ * @license Angular v16.1.0-next.0+sha-570114e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4727,7 +4727,7 @@ function ɵɵgetInheritedFactory(type) {
         // (no Angular decorator on the superclass) or there is no constructor at all
         // in the inheritance chain. Since the two cases cannot be distinguished, the
         // latter has to be assumed.
-        return (t) => new t();
+        return t => new t();
     });
 }
 function getFactoryOf(type) {
@@ -9687,12 +9687,6 @@ function getComponentLViewForHydration(viewRef) {
     if (isRootView(lView)) {
         lView = lView[HEADER_OFFSET];
     }
-    // If a `ViewContainerRef` was injected in a component class, this resulted
-    // in an LContainer creation at that location. In this case, the component
-    // LView is in the LContainer's `HOST` slot.
-    if (isLContainer(lView)) {
-        lView = lView[HOST];
-    }
     return lView;
 }
 function getTextNodeContent(node) {
@@ -9988,7 +9982,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-55dfe80');
+const VERSION = new Version('16.1.0-next.0+sha-570114e');
 
 // This default value is when checking the hierarchy for a token.
 //
