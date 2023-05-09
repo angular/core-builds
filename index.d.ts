@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-822b307
+ * @license Angular v16.1.0-next.0+sha-55dfe80
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8713,7 +8713,7 @@ declare const enum TNodeFlags {
     hasClassInput = 8,
     /** Bit #5 - This bit is set if the node has any "style" inputs */
     hasStyleInput = 16,
-    /** Bit #6 - This bit is set if the node has been detached by i18n */
+    /** Bit #6 This bit is set if the node has been detached by i18n */
     isDetached = 32,
     /**
      * Bit #7 - This bit is set if the node has directives with host bindings.
@@ -8721,11 +8721,7 @@ declare const enum TNodeFlags {
      * This flags allows us to guard host-binding logic and invoke it only on nodes
      * that actually have directives with host bindings.
      */
-    hasHostBindings = 64,
-    /**
-     * Bit #8 - This bit is set if the node is a located inside skip hydration block.
-     */
-    inSkipHydrationBlock = 128
+    hasHostBindings = 64
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-822b307
+ * @license Angular v16.1.0-next.0+sha-55dfe80
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6131,59 +6131,6 @@ function matchingSchemas(schemas, tagName) {
 }
 
 /**
- * The name of an attribute that can be added to the hydration boundary node
- * (component host node) to disable hydration for the content within that boundary.
- */
-const SKIP_HYDRATION_ATTR_NAME = 'ngSkipHydration';
-/**
- * Helper function to check if a given node has the 'ngSkipHydration' attribute
- */
-function hasNgSkipHydrationAttr(tNode) {
-    const SKIP_HYDRATION_ATTR_NAME_LOWER_CASE = SKIP_HYDRATION_ATTR_NAME.toLowerCase();
-    const attrs = tNode.mergedAttrs;
-    if (attrs === null)
-        return false;
-    // only ever look at the attribute name and skip the values
-    for (let i = 0; i < attrs.length; i += 2) {
-        const value = attrs[i];
-        // This is a marker, which means that the static attributes section is over,
-        // so we can exit early.
-        if (typeof value === 'number')
-            return false;
-        if (typeof value === 'string' && value.toLowerCase() === SKIP_HYDRATION_ATTR_NAME_LOWER_CASE) {
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * Checks whether a TNode has a flag to indicate that it's a part of
- * a skip hydration block.
- */
-function hasInSkipHydrationBlockFlag(tNode) {
-    return (tNode.flags & 128 /* TNodeFlags.inSkipHydrationBlock */) === 128 /* TNodeFlags.inSkipHydrationBlock */;
-}
-/**
- * Helper function that determines if a given node is within a skip hydration block
- * by navigating up the TNode tree to see if any parent nodes have skip hydration
- * attribute.
- *
- * TODO(akushnir): this function should contain the logic of `hasInSkipHydrationBlockFlag`,
- * there is no need to traverse parent nodes when we have a TNode flag (which would also
- * make this lookup O(1)).
- */
-function isInSkipHydrationBlock(tNode) {
-    let currentTNode = tNode.parent;
-    while (currentTNode) {
-        if (hasNgSkipHydrationAttr(currentTNode)) {
-            return true;
-        }
-        currentTNode = currentTNode.parent;
-    }
-    return false;
-}
-
-/**
  * Flags for renderer-specific style modifiers.
  * @publicApi
  */
@@ -7482,11 +7429,6 @@ function applyProjectionRecursive(renderer, action, lView, tProjectionNode, pare
     else {
         let nodeToProject = nodeToProjectOrRNodes;
         const projectedComponentLView = componentLView[PARENT];
-        // If a parent <ng-content> is located within a skip hydration block,
-        // annotate an actual node that is being projected with the same flag too.
-        if (hasInSkipHydrationBlockFlag(tProjectionNode)) {
-            nodeToProject.flags |= 128 /* TNodeFlags.inSkipHydrationBlock */;
-        }
         applyNodes(renderer, action, nodeToProject, projectedComponentLView, parentRElement, beforeNode, true);
     }
 }
@@ -10046,7 +9988,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-822b307');
+const VERSION = new Version('16.1.0-next.0+sha-55dfe80');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10150,6 +10092,48 @@ class ErrorHandler {
         }
         return e || null;
     }
+}
+
+/**
+ * The name of an attribute that can be added to the hydration boundary node
+ * (component host node) to disable hydration for the content within that boundary.
+ */
+const SKIP_HYDRATION_ATTR_NAME = 'ngSkipHydration';
+/**
+ * Helper function to check if a given node has the 'ngSkipHydration' attribute
+ */
+function hasNgSkipHydrationAttr(tNode) {
+    const SKIP_HYDRATION_ATTR_NAME_LOWER_CASE = SKIP_HYDRATION_ATTR_NAME.toLowerCase();
+    const attrs = tNode.mergedAttrs;
+    if (attrs === null)
+        return false;
+    // only ever look at the attribute name and skip the values
+    for (let i = 0; i < attrs.length; i += 2) {
+        const value = attrs[i];
+        // This is a marker, which means that the static attributes section is over,
+        // so we can exit early.
+        if (typeof value === 'number')
+            return false;
+        if (typeof value === 'string' && value.toLowerCase() === SKIP_HYDRATION_ATTR_NAME_LOWER_CASE) {
+            return true;
+        }
+    }
+    return false;
+}
+/**
+ * Helper function that determines if a given node is within a skip hydration block
+ * by navigating up the TNode tree to see if any parent nodes have skip hydration
+ * attribute.
+ */
+function isInSkipHydrationBlock(tNode) {
+    let currentTNode = tNode.parent;
+    while (currentTNode) {
+        if (hasNgSkipHydrationAttr(currentTNode)) {
+            return true;
+        }
+        currentTNode = currentTNode.parent;
+    }
+    return false;
 }
 
 /**
@@ -11146,10 +11130,6 @@ function createTNode(tView, tParent, type, index, value, attrs) {
     ngDevMode && ngDevMode.tNode++;
     ngDevMode && tParent && assertTNodeForTView(tParent, tView);
     let injectorIndex = tParent ? tParent.injectorIndex : -1;
-    let flags = 0;
-    if (isInSkipHydrationBlock$1()) {
-        flags |= 128 /* TNodeFlags.inSkipHydrationBlock */;
-    }
     const tNode = {
         type,
         index,
@@ -11160,7 +11140,7 @@ function createTNode(tView, tParent, type, index, value, attrs) {
         directiveStylingLast: -1,
         componentOffset: -1,
         propertyBindings: null,
-        flags,
+        flags: 0,
         providerIndexes: 0,
         value: value,
         attrs: attrs,
@@ -23153,11 +23133,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
         }
         const hydrationInfo = findMatchingDehydratedView(this._lContainer, templateRef.ssrId);
         const viewRef = templateRef.createEmbeddedViewImpl(context || {}, injector, hydrationInfo);
-        // If there is a matching dehydrated view, but the host TNode is located in the skip
-        // hydration block, this means that the content was detached (as a part of the skip
-        // hydration logic) and it needs to be appended into the DOM.
-        const skipDomInsertion = !!hydrationInfo && !hasInSkipHydrationBlockFlag(this._hostTNode);
-        this.insertImpl(viewRef, index, skipDomInsertion);
+        this.insertImpl(viewRef, index, !!hydrationInfo);
         return viewRef;
     }
     createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, environmentInjector) {
@@ -23231,11 +23207,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
         const dehydratedView = findMatchingDehydratedView(this._lContainer, componentDef?.id ?? null);
         const rNode = dehydratedView?.firstChild ?? null;
         const componentRef = componentFactory.create(contextInjector, projectableNodes, rNode, environmentInjector);
-        // If there is a matching dehydrated view, but the host TNode is located in the skip
-        // hydration block, this means that the content was detached (as a part of the skip
-        // hydration logic) and it needs to be appended into the DOM.
-        const skipDomInsertion = !!dehydratedView && !hasInSkipHydrationBlockFlag(this._hostTNode);
-        this.insertImpl(componentRef.hostView, index, skipDomInsertion);
+        this.insertImpl(componentRef.hostView, index, !!dehydratedView);
         return componentRef;
     }
     insert(viewRef, index) {
@@ -23409,10 +23381,8 @@ function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
         return;
     const hydrationInfo = hostLView[HYDRATION];
     const noOffsetIndex = hostTNode.index - HEADER_OFFSET;
-    // TODO(akushnir): this should really be a single condition, refactor the code
-    // to use `hasInSkipHydrationBlockFlag` logic inside `isInSkipHydrationBlock`.
-    const skipHydration = isInSkipHydrationBlock(hostTNode) || hasInSkipHydrationBlockFlag(hostTNode);
-    const isNodeCreationMode = !hydrationInfo || skipHydration || isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock(hostTNode) ||
+        isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
     // Regular creation mode.
     if (isNodeCreationMode) {
         return createAnchorNode(lContainer, hostLView, hostTNode, slotValue);
