@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-2ef473c
+ * @license Angular v16.1.0-next.0+sha-822b307
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3156,7 +3156,7 @@ function getComponentId(componentDef) {
     // Example:
     // https://github.com/angular/components/blob/d9f82c8f95309e77a6d82fd574c65871e91354c2/src/material/core/option/option.ts#L248
     // https://github.com/angular/components/blob/285f46dc2b4c5b127d356cb7c4714b221f03ce50/src/material/legacy-core/option/option.ts#L32
-    const hashSelectors = JSON.stringify([
+    const hashSelectors = [
         componentDef.selectors,
         componentDef.ngContentSelectors,
         componentDef.hostVars,
@@ -3166,16 +3166,12 @@ function getComponentId(componentDef) {
         componentDef.decls,
         componentDef.encapsulation,
         componentDef.standalone,
-        componentDef.signals,
-        componentDef.exportAs,
-        componentDef.inputs,
-        componentDef.outputs,
         // We cannot use 'componentDef.type.name' as the name of the symbol will change and will not
         // match in the server and browser bundles.
         Object.getOwnPropertyNames(componentDef.type.prototype),
         !!componentDef.contentQueries,
         !!componentDef.viewQuery,
-    ]);
+    ].join('|');
     for (const char of hashSelectors) {
         hash = Math.imul(31, hash) + char.charCodeAt(0) << 0;
     }
@@ -10446,7 +10442,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-2ef473c');
+const VERSION = new Version('16.1.0-next.0+sha-822b307');
 
 // This default value is when checking the hierarchy for a token.
 //
