@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-e4ad067
+ * @license Angular v16.1.0-next.0+sha-6945aff
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10050,7 +10050,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-e4ad067');
+const VERSION = new Version('16.1.0-next.0+sha-6945aff');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29870,7 +29870,7 @@ function printHydrationStats(injector) {
         `and ${ngDevMode.hydratedNodes} node(s), ` +
         `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
         `Note: this feature is in Developer Preview mode. ` +
-        `Learn more at https://next.angular.io/guide/hydration.`;
+        `Learn more at https://angular.io/guide/hydration.`;
     // tslint:disable-next-line:no-console
     console.log(message);
 }
