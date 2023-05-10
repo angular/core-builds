@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.1+sha-9005717
+ * @license Angular v16.0.1+sha-74099d4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3084,7 +3084,7 @@ function getPipeDef$1(type) {
 /**
  * Checks whether a given Component, Directive or Pipe is marked as standalone.
  * This will return false if passed anything other than a Component, Directive, or Pipe class
- * See this guide for additional information: https://angular.io/guide/standalone-components
+ * See [this guide](/guide/standalone-components) for additional information:
  *
  * @param type A reference to a Component, Directive or Pipe.
  * @publicApi
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.1+sha-9005717');
+const VERSION = new Version('16.0.1+sha-74099d4');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19566,7 +19566,7 @@ function getLocaleCurrencyCode(locale) {
  * @param locale A locale code for the locale format rules to use.
  * @returns The plural function for the locale.
  * @see `NgPlural`
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n-overview)
+ * @see [Internationalization (i18n) Guide](/guide/i18n-overview)
  */
 function getLocalePluralCase(locale) {
     const data = findLocaleData(locale);
