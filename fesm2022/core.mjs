@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-143b851
+ * @license Angular v16.1.0-next.0+sha-5db170c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1821,7 +1821,7 @@ function getPipeDef$1(type) {
 /**
  * Checks whether a given Component, Directive or Pipe is marked as standalone.
  * This will return false if passed anything other than a Component, Directive, or Pipe class
- * See this guide for additional information: https://angular.io/guide/standalone-components
+ * See [this guide](/guide/standalone-components) for additional information:
  *
  * @param type A reference to a Component, Directive or Pipe.
  * @publicApi
@@ -10034,7 +10034,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-143b851');
+const VERSION = new Version('16.1.0-next.0+sha-5db170c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19223,7 +19223,7 @@ function getLocaleCurrencyCode(locale) {
  * @param locale A locale code for the locale format rules to use.
  * @returns The plural function for the locale.
  * @see `NgPlural`
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n-overview)
+ * @see [Internationalization (i18n) Guide](/guide/i18n-overview)
  */
 function getLocalePluralCase(locale) {
     const data = findLocaleData(locale);
@@ -30105,12 +30105,12 @@ function ɵɵngDeclarePipe(decl) {
  * @param component Component class reference.
  * @param options Set of options to use:
  *  * `environmentInjector`: An `EnvironmentInjector` instance to be used for the component, see
- * additional info about it at https://angular.io/guide/standalone-components#environment-injectors.
+ * additional info about it [here](/guide/standalone-components#environment-injectors).
  *  * `hostElement` (optional): A DOM node that should act as a host node for the component. If not
  * provided, Angular creates one based on the tag name used in the component selector (and falls
  * back to using `div` if selector doesn't have tag name info).
- *  * `elementInjector` (optional): An `ElementInjector` instance, see additional info about it at
- * https://angular.io/guide/hierarchical-dependency-injection#elementinjector.
+ *  * `elementInjector` (optional): An `ElementInjector` instance, see additional info about it
+ * [here](/guide/hierarchical-dependency-injection#elementinjector).
  *  * `projectableNodes` (optional): A list of DOM nodes that should be projected through
  *                      [`<ng-content>`](api/core/ng-content) of the new component instance.
  * @returns ComponentRef instance that represents a given Component.
