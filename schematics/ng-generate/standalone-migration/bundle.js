@@ -1881,6 +1881,9 @@ var RecursiveAstVisitor = class {
   visitMapType(type, context) {
     return this.visitType(type, context);
   }
+  visitTransplantedType(type, context) {
+    return type;
+  }
   visitWrappedNodeExpr(ast, context) {
     return ast;
   }
@@ -3922,7 +3925,7 @@ function visitAll(visitor, nodes) {
   const result = [];
   if (visitor.visit) {
     for (const node of nodes) {
-      const newNode = visitor.visit(node) || node.visit(visitor);
+      visitor.visit(node) || node.visit(visitor);
     }
   } else {
     for (const node of nodes) {
@@ -18540,7 +18543,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.0.0+sha-fe653c2");
+var VERSION2 = new Version("16.0.0+sha-c9657bd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -19859,7 +19862,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.0.0+sha-fe653c2"));
+  definitionMap.set("version", literal("16.0.0+sha-c9657bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -19928,7 +19931,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.0.0+sha-fe653c2"));
+  definitionMap.set("version", literal("16.0.0+sha-c9657bd"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -20110,7 +20113,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.0.0+sha-fe653c2"));
+  definitionMap.set("version", literal("16.0.0+sha-c9657bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -20133,7 +20136,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.0.0+sha-fe653c2"));
+  definitionMap.set("version", literal("16.0.0+sha-c9657bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -20171,7 +20174,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.0.0+sha-fe653c2"));
+  definitionMap.set("version", literal("16.0.0+sha-c9657bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -20192,7 +20195,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.0.0+sha-fe653c2"));
+  definitionMap.set("version", literal("16.0.0+sha-c9657bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -20227,7 +20230,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.0.0+sha-fe653c2"));
+  definitionMap.set("version", literal("16.0.0+sha-c9657bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -20244,7 +20247,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.0.0+sha-fe653c2");
+var VERSION3 = new Version("16.0.0+sha-c9657bd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -25974,12 +25977,15 @@ function createRange(span) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/translator/src/type_translator.mjs
 var import_typescript40 = __toESM(require("typescript"), 1);
-function translateType(type, imports) {
-  return type.visitType(new TypeTranslatorVisitor(imports), new Context(false));
+function translateType(type, contextFile, reflector, refEmitter, imports) {
+  return type.visitType(new TypeTranslatorVisitor(imports, contextFile, reflector, refEmitter), new Context(false));
 }
 var TypeTranslatorVisitor = class {
-  constructor(imports) {
+  constructor(imports, contextFile, reflector, refEmitter) {
     this.imports = imports;
+    this.contextFile = contextFile;
+    this.reflector = reflector;
+    this.refEmitter = refEmitter;
   }
   visitBuiltinType(type, context) {
     switch (type.name) {
@@ -26019,6 +26025,12 @@ var TypeTranslatorVisitor = class {
     const typeArgs = type.valueType !== null ? this.translateType(type.valueType, context) : import_typescript40.default.factory.createKeywordTypeNode(import_typescript40.default.SyntaxKind.UnknownKeyword);
     const indexSignature = import_typescript40.default.factory.createIndexSignature(void 0, [parameter], typeArgs);
     return import_typescript40.default.factory.createTypeLiteralNode([indexSignature]);
+  }
+  visitTransplantedType(ast, context) {
+    if (!import_typescript40.default.isTypeNode(ast.type)) {
+      throw new Error(`A TransplantedType must wrap a TypeNode`);
+    }
+    return this.translateTransplantedTypeNode(ast.type, context);
   }
   visitReadVarExpr(ast, context) {
     if (ast.name === null) {
@@ -26144,6 +26156,38 @@ var TypeTranslatorVisitor = class {
       throw new Error(`An Expression must translate to a TypeNode, but was ${import_typescript40.default.SyntaxKind[typeNode.kind]}`);
     }
     return typeNode;
+  }
+  translateTransplantedTypeReferenceNode(node, context) {
+    const declaration = this.reflector.getDeclarationOfIdentifier(node.typeName);
+    if (declaration === null) {
+      throw new Error(`Unable to statically determine the declaration file of type node ${node.typeName.text}`);
+    }
+    const emittedType = this.refEmitter.emit(new Reference2(declaration.node), this.contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports);
+    assertSuccessfulReferenceEmit(emittedType, node, "type");
+    const result = emittedType.expression.visitExpression(this, context);
+    if (!import_typescript40.default.isTypeReferenceNode(result)) {
+      throw new Error(`Expected TypeReferenceNode when referencing the type for ${node.typeName.text}, but received ${import_typescript40.default.SyntaxKind[result.kind]}`);
+    }
+    if (node.typeArguments === void 0 || node.typeArguments.length === 0) {
+      return result;
+    }
+    const translatedArgs = node.typeArguments.map((arg) => this.translateTransplantedTypeNode(arg, context));
+    return import_typescript40.default.factory.updateTypeReferenceNode(result, result.typeName, import_typescript40.default.factory.createNodeArray(translatedArgs));
+  }
+  translateTransplantedTypeNode(rootNode, context) {
+    const factory8 = (transformContext) => (root) => {
+      const walk = (node) => {
+        if (import_typescript40.default.isTypeReferenceNode(node) && import_typescript40.default.isIdentifier(node.typeName)) {
+          const translated = this.translateTransplantedTypeReferenceNode(node, context);
+          if (translated !== node) {
+            return translated;
+          }
+        }
+        return import_typescript40.default.visitEachChild(node, walk, transformContext);
+      };
+      return import_typescript40.default.visitNode(root, walk);
+    };
+    return import_typescript40.default.transform(rootNode, [factory8]).transformed[0];
   }
 };
 
@@ -26398,9 +26442,9 @@ var DtsTransformRegistry = class {
     return transforms;
   }
 };
-function declarationTransformFactory(transformRegistry, importRewriter, importPrefix) {
+function declarationTransformFactory(transformRegistry, reflector, refEmitter, importRewriter, importPrefix) {
   return (context) => {
-    const transformer = new DtsTransformer(context, importRewriter, importPrefix);
+    const transformer = new DtsTransformer(context, reflector, refEmitter, importRewriter, importPrefix);
     return (fileOrBundle) => {
       if (import_typescript43.default.isBundle(fileOrBundle)) {
         return fileOrBundle;
@@ -26414,8 +26458,10 @@ function declarationTransformFactory(transformRegistry, importRewriter, importPr
   };
 }
 var DtsTransformer = class {
-  constructor(ctx, importRewriter, importPrefix) {
+  constructor(ctx, reflector, refEmitter, importRewriter, importPrefix) {
     this.ctx = ctx;
+    this.reflector = reflector;
+    this.refEmitter = refEmitter;
     this.importRewriter = importRewriter;
     this.importPrefix = importPrefix;
   }
@@ -26454,7 +26500,7 @@ var DtsTransformer = class {
     for (const transform of transforms) {
       if (transform.transformClass !== void 0) {
         const inputMembers = clazz === newClazz ? elements : newClazz.members;
-        newClazz = transform.transformClass(newClazz, inputMembers, imports);
+        newClazz = transform.transformClass(newClazz, inputMembers, this.reflector, this.refEmitter, imports);
       }
     }
     if (elementsChanged && clazz === newClazz) {
@@ -26486,7 +26532,7 @@ var IvyDeclarationDtsTransform = class {
   addFields(decl, fields) {
     this.declarationFields.set(decl, fields);
   }
-  transformClass(clazz, members, imports) {
+  transformClass(clazz, members, reflector, refEmitter, imports) {
     const original = import_typescript43.default.getOriginalNode(clazz);
     if (!this.declarationFields.has(original)) {
       return clazz;
@@ -26494,7 +26540,7 @@ var IvyDeclarationDtsTransform = class {
     const fields = this.declarationFields.get(original);
     const newMembers = fields.map((decl) => {
       const modifiers = [import_typescript43.default.factory.createModifier(import_typescript43.default.SyntaxKind.StaticKeyword)];
-      const typeRef = translateType(decl.type, imports);
+      const typeRef = translateType(decl.type, original.getSourceFile(), reflector, refEmitter, imports);
       markForEmitAsSingleLine(typeRef);
       return import_typescript43.default.factory.createPropertyDeclaration(
         modifiers,
@@ -32129,7 +32175,7 @@ var Environment = class {
   referenceType(ref) {
     const ngExpr = this.refEmitter.emit(ref, this.contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports);
     assertSuccessfulReferenceEmit(ngExpr, this.contextFile, "symbol");
-    return translateType(new ExpressionType(ngExpr.expression), this.importManager);
+    return translateType(new ExpressionType(ngExpr.expression), this.contextFile, this.reflector, this.refEmitter, this.importManager);
   }
   emitTypeParameters(declaration) {
     const emitter = new TypeParameterEmitter(declaration.typeParameters, this.reflector);
@@ -32137,7 +32183,10 @@ var Environment = class {
   }
   referenceExternalType(moduleName, name, typeParams) {
     const external = new ExternalExpr({ moduleName, name });
-    return translateType(new ExpressionType(external, TypeModifier.None, typeParams), this.importManager);
+    return translateType(new ExpressionType(external, TypeModifier.None, typeParams), this.contextFile, this.reflector, this.refEmitter, this.importManager);
+  }
+  referenceTransplantedType(type) {
+    return translateType(type, this.contextFile, this.reflector, this.refEmitter, this.importManager);
   }
   getPreludeStatements() {
     return [
@@ -36012,7 +36061,7 @@ var NgCompiler = class {
     ];
     const afterDeclarations = [];
     if (compilation.dtsTransforms !== null) {
-      afterDeclarations.push(declarationTransformFactory(compilation.dtsTransforms, importRewriter));
+      afterDeclarations.push(declarationTransformFactory(compilation.dtsTransforms, compilation.reflector, compilation.refEmitter, importRewriter));
     }
     if (compilation.aliasingHost !== null && compilation.aliasingHost.aliasExportsInDts) {
       afterDeclarations.push(aliasTransformFactory(compilation.traitCompiler.exportStatements));
