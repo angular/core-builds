@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.1+sha-b9aeb85
+ * @license Angular v16.0.1+sha-9005717
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9884,26 +9884,6 @@ const ENABLED_SSR_FEATURES = new InjectionToken((typeof ngDevMode === 'undefined
     factory: () => new Set(),
 });
 
-function escapeTransferStateContent(text) {
-    const escapedText = {
-        '&': '&a;',
-        '"': '&q;',
-        '\'': '&s;',
-        '<': '&l;',
-        '>': '&g;',
-    };
-    return text.replace(/[&"'<>]/g, s => escapedText[s]);
-}
-function unescapeTransferStateContent(text) {
-    const unescapedText = {
-        '&a;': '&',
-        '&q;': '"',
-        '&s;': '\'',
-        '&l;': '<',
-        '&g;': '>',
-    };
-    return text.replace(/&[^;]+;/g, s => unescapedText[s]);
-}
 /**
  * Create a `StateKey<T>` that can be used to store value of type T with `TransferState`.
  *
@@ -10007,7 +9987,9 @@ class TransferState {
                 }
             }
         }
-        return JSON.stringify(this.store);
+        // Escape script tag to avoid break out of <script> tag in serialized output.
+        // Encoding of `<` is the same behaviour as G3 script_builders.
+        return JSON.stringify(this.store).replace(/</g, '\\u003C');
     }
 }
 function retrieveTransferredState(doc, appId) {
@@ -10017,7 +9999,9 @@ function retrieveTransferredState(doc, appId) {
     if (script?.textContent) {
         try {
             // Avoid using any here as it triggers lint errors in google3 (any is not allowed).
-            return JSON.parse(unescapeTransferStateContent(script.textContent));
+            // Decoding of `<` is done of the box by browsers and node.js, same behaviour as G3
+            // script_builders.
+            return JSON.parse(script.textContent);
         }
         catch (e) {
             console.warn('Exception while restoring TransferState for app ' + appId, e);
@@ -10443,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.1+sha-b9aeb85');
+const VERSION = new Version('16.0.1+sha-9005717');
 
 // This default value is when checking the hierarchy for a token.
 //

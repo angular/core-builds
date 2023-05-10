@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.1+sha-b9aeb85
+ * @license Angular v16.0.1+sha-9005717
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7868,6 +7868,7 @@ export declare interface SkipSelfDecorator {
     new (): SkipSelf;
 }
 
+
 /**
  * A type-safe key to use with `TransferState`.
  *
@@ -10688,9 +10689,6 @@ export declare interface ɵDirectiveType<T> extends Type<T> {
  */
 export declare const ɵENABLED_SSR_FEATURES: InjectionToken<Set<string>>;
 
-
-export declare function ɵescapeTransferStateContent(text: string): string;
-
 /**
  * Index of each type of locale data from the extra locale data array
  */
@@ -11557,8 +11555,6 @@ export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
  * (either a NgModule or a standalone component / directive / pipe).
  */
 export declare function ɵtransitiveScopesFor<T>(type: Type<T>): ɵNgModuleTransitiveScopes;
-
-export declare function ɵunescapeTransferStateContent(text: string): string;
 
 /**
  * Helper function to remove all the locale data from `LOCALE_DATA`.
