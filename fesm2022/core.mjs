@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.1+sha-74099d4
+ * @license Angular v16.0.1+sha-d5be23e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7063,12 +7063,14 @@ function processCleanups(tView, lView) {
     }
     const destroyHooks = lView[ON_DESTROY_HOOKS];
     if (destroyHooks !== null) {
+        // Reset the ON_DESTROY_HOOKS array before iterating over it to prevent hooks that unregister
+        // themselves from mutating the array during iteration.
+        lView[ON_DESTROY_HOOKS] = null;
         for (let i = 0; i < destroyHooks.length; i++) {
             const destroyHooksFn = destroyHooks[i];
             ngDevMode && assertFunction(destroyHooksFn, 'Expecting destroy hook to be a function.');
             destroyHooksFn();
         }
-        lView[ON_DESTROY_HOOKS] = null;
     }
 }
 /** Calls onDestroy hooks for this view */
@@ -9065,7 +9067,11 @@ class R3Injector extends EnvironmentInjector {
             for (const service of this._ngOnDestroyHooks) {
                 service.ngOnDestroy();
             }
-            for (const hook of this._onDestroyHooks) {
+            const onDestroyHooks = this._onDestroyHooks;
+            // Reset the _onDestroyHooks array before iterating over it to prevent hooks that unregister
+            // themselves from mutating the array during iteration.
+            this._onDestroyHooks = [];
+            for (const hook of onDestroyHooks) {
                 hook();
             }
         }
@@ -9074,7 +9080,6 @@ class R3Injector extends EnvironmentInjector {
             this.records.clear();
             this._ngOnDestroyHooks.clear();
             this.injectorDefTypes.clear();
-            this._onDestroyHooks.length = 0;
         }
     }
     onDestroy(callback) {
@@ -10031,7 +10036,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.1+sha-74099d4');
+const VERSION = new Version('16.0.1+sha-d5be23e');
 
 // This default value is when checking the hierarchy for a token.
 //
