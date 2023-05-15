@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.1+sha-ee08121
+ * @license Angular v16.0.1+sha-37acd37
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10432,7 +10432,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.1+sha-ee08121');
+const VERSION = new Version('16.0.1+sha-37acd37');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -16037,8 +16037,6 @@ function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault)
         }
         if (wrapWithPreventDefault && result === false) {
             e.preventDefault();
-            // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
-            e.returnValue = false;
         }
         return result;
     };
