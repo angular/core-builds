@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-fab7f39
+ * @license Angular v16.1.0-next.0+sha-165b8b6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -124,10 +124,12 @@ function formatRuntimeError(code, message) {
  */
 const SIGNAL = Symbol('SIGNAL');
 /**
- * Checks if the given `value` function is a reactive `Signal`.
+ * Checks if the given `value` is a reactive `Signal`.
+ *
+ * @developerPreview
  */
 function isSignal(value) {
-    return value[SIGNAL] !== undefined;
+    return typeof value === 'function' && value[SIGNAL] !== undefined;
 }
 /**
  * Converts `fn` into a marked signal function (where `isSignal(fn)` will be `true`), and

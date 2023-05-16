@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-fab7f39
+ * @license Angular v16.1.0-next.0+sha-165b8b6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4689,9 +4689,11 @@ declare interface InternalViewRef extends ViewRef {
 export declare function isDevMode(): boolean;
 
 /**
- * Checks if the given `value` function is a reactive `Signal`.
+ * Checks if the given `value` is a reactive `Signal`.
+ *
+ * @developerPreview
  */
-export declare function isSignal(value: Function): value is Signal<unknown>;
+export declare function isSignal(value: unknown): value is Signal<unknown>;
 
 /**
  * Checks whether a given Component, Directive or Pipe is marked as standalone.

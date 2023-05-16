@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-fab7f39
+ * @license Angular v16.1.0-next.0+sha-165b8b6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2169,10 +2169,12 @@ function getFactoryDef(type, throwNotFound) {
  */
 const SIGNAL = Symbol('SIGNAL');
 /**
- * Checks if the given `value` function is a reactive `Signal`.
+ * Checks if the given `value` is a reactive `Signal`.
+ *
+ * @developerPreview
  */
 function isSignal(value) {
-    return value[SIGNAL] !== undefined;
+    return typeof value === 'function' && value[SIGNAL] !== undefined;
 }
 /**
  * Converts `fn` into a marked signal function (where `isSignal(fn)` will be `true`), and
@@ -10039,7 +10041,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-fab7f39');
+const VERSION = new Version('16.1.0-next.0+sha-165b8b6');
 
 // This default value is when checking the hierarchy for a token.
 //
