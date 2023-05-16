@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-cd86eb4
+ * @license Angular v16.1.0-next.0+sha-7c790f7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10437,7 +10437,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.0+sha-cd86eb4');
+const VERSION = new Version('16.1.0-next.0+sha-7c790f7');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10604,9 +10604,11 @@ function throwMultipleComponentError(tNode, first, second) {
         `${stringifyForError(second)}`);
 }
 /** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
-function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName) {
+function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName, lView) {
+    const hostComponentDef = getDeclarationComponentDef(lView);
+    const componentClassName = hostComponentDef?.type?.name;
     const field = propName ? ` for '${propName}'` : '';
-    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${oldValue}'. Current value: '${currValue}'.`;
+    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${oldValue}'. Current value: '${currValue}'.${componentClassName ? ` Expression location: ${componentClassName} component` : ''}`;
     if (creationMode) {
         msg +=
             ` It seems like the view has been created after its parent and its children have been dirty checked.` +
@@ -14059,7 +14061,7 @@ function bindingUpdated(lView, bindingIndex, value) {
             const oldValueToCompare = oldValue !== NO_CHANGE ? oldValue : undefined;
             if (!devModeEqual(oldValueToCompare, value)) {
                 const details = getExpressionChangedErrorDetails(lView, bindingIndex, oldValueToCompare, value);
-                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, details.oldValue, details.newValue, details.propName);
+                throwErrorIfNoChangesMode(oldValue === NO_CHANGE, details.oldValue, details.newValue, details.propName, lView);
             }
             // There was a change, but the `devModeEqual` decided that the change is exempt from an error.
             // For this reason we exit as if no change. The early exit is needed to prevent the changed
