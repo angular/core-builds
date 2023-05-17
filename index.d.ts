@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.1+sha-656c953
+ * @license Angular v16.0.1+sha-5bf1abf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7549,6 +7549,7 @@ declare const enum RuntimeErrorCode {
     UNSUPPORTED_PROJECTION_DOM_NODES = -503,
     INVALID_SKIP_HYDRATION_HOST = -504,
     MISSING_HYDRATION_ANNOTATIONS = -505,
+    HYDRATION_STABLE_TIMEDOUT = -506,
     SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
     REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
     INVALID_I18N_STRUCTURE = 700,
