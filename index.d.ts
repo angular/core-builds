@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.0+sha-c69ef4e
+ * @license Angular v16.1.0-next.0+sha-bb48756
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -710,7 +710,7 @@ declare type ChangeDetectionStrategy_2 = number;
  *
  * The following example sets the `OnPush` change-detection strategy for a component
  * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval. See [live demo](https://plnkr.co/edit/GC512b?p=preview).
+ * after an interval.
  *
  * <code-example path="core/ts/change_detect/change-detection.ts"
  * region="mark-for-check"></code-example>
