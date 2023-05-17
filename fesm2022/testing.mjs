@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.1+sha-5bf1abf
+ * @license Angular v16.0.1+sha-c1016d4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3164,6 +3164,9 @@ function getComponentId(componentDef) {
         componentDef.decls,
         componentDef.encapsulation,
         componentDef.standalone,
+        componentDef.exportAs,
+        JSON.stringify(componentDef.inputs),
+        JSON.stringify(componentDef.outputs),
         // We cannot use 'componentDef.type.name' as the name of the symbol will change and will not
         // match in the server and browser bundles.
         Object.getOwnPropertyNames(componentDef.type.prototype),
@@ -10431,7 +10434,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.1+sha-5bf1abf');
+const VERSION = new Version('16.0.1+sha-c1016d4');
 
 // This default value is when checking the hierarchy for a token.
 //
