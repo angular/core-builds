@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.1+sha-3eafb4b
+ * @license Angular v16.0.1+sha-656c953
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10035,7 +10035,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.1+sha-3eafb4b');
+const VERSION = new Version('16.0.1+sha-656c953');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -27549,7 +27549,7 @@ function noModuleError(id) {
  *
  * The following example sets the `OnPush` change-detection strategy for a component
  * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval. See [live demo](https://plnkr.co/edit/GC512b?p=preview).
+ * after an interval.
  *
  * <code-example path="core/ts/change_detect/change-detection.ts"
  * region="mark-for-check"></code-example>
