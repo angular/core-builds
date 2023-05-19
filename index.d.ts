@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.2+sha-b89fae1
+ * @license Angular v16.0.2+sha-14588ab
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3424,9 +3424,36 @@ declare const FLAGS = 2;
  * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
  * a query is not yet defined.
  *
+ * `forwardRef` is also used to break circularities in standalone components imports.
+ *
  * @usageNotes
- * ### Example
+ * ### Circular dependency example
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
+ *
+ * ### Circular standalone reference import example
+ * ```ts
+ * @Component({
+ *   standalone: true,
+ *   imports: [ChildComponent],
+ *   selector: 'app-parent',
+ *   template: `<app-child [hideParent]="hideParent"></app-child>`,
+ * })
+ * export class ParentComponent {
+ *   @Input() hideParent: boolean;
+ * }
+ *
+ *
+ * @Component({
+ *   standalone: true,
+ *   imports: [CommonModule, forwardRef(() => ParentComponent)],
+ *   selector: 'app-child',
+ *   template: `<app-parent *ngIf="!hideParent"></app-parent>`,
+ * })
+ * export class ChildComponent {
+ *   @Input() hideParent: boolean;
+ * }
+ * ```
+ *
  * @publicApi
  */
 export declare function forwardRef(forwardRefFn: ForwardRefFn): Type<any>;
