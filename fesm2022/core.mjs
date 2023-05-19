@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.1+sha-8b44ba3
+ * @license Angular v16.1.0-next.1+sha-24d803b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -74,9 +74,36 @@ const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafe
  * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
  * a query is not yet defined.
  *
+ * `forwardRef` is also used to break circularities in standalone components imports.
+ *
  * @usageNotes
- * ### Example
+ * ### Circular dependency example
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
+ *
+ * ### Circular standalone reference import example
+ * ```ts
+ * @Component({
+ *   standalone: true,
+ *   imports: [ChildComponent],
+ *   selector: 'app-parent',
+ *   template: `<app-child [hideParent]="hideParent"></app-child>`,
+ * })
+ * export class ParentComponent {
+ *   @Input() hideParent: boolean;
+ * }
+ *
+ *
+ * @Component({
+ *   standalone: true,
+ *   imports: [CommonModule, forwardRef(() => ParentComponent)],
+ *   selector: 'app-child',
+ *   template: `<app-parent *ngIf="!hideParent"></app-parent>`,
+ * })
+ * export class ChildComponent {
+ *   @Input() hideParent: boolean;
+ * }
+ * ```
+ *
  * @publicApi
  */
 function forwardRef(forwardRefFn) {
@@ -10041,7 +10068,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.1+sha-8b44ba3');
+const VERSION = new Version('16.1.0-next.1+sha-24d803b');
 
 // This default value is when checking the hierarchy for a token.
 //
