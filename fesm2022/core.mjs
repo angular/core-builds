@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.1+sha-46128fe
+ * @license Angular v16.1.0-next.1+sha-8b44ba3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10041,7 +10041,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.1+sha-46128fe');
+const VERSION = new Version('16.1.0-next.1+sha-8b44ba3');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13605,7 +13605,7 @@ function validateMappings(bindingType, def, hostDirectiveBindings) {
                 throw new RuntimeError(311 /* RuntimeErrorCode.HOST_DIRECTIVE_UNDEFINED_BINDING */, `Directive ${className} does not have an ${bindingType} with a public name of ${publicName}.`);
             }
             const remappedPublicName = hostDirectiveBindings[publicName];
-            if (bindings.hasOwnProperty(remappedPublicName) &&
+            if (bindings.hasOwnProperty(remappedPublicName) && remappedPublicName !== publicName &&
                 bindings[remappedPublicName] !== publicName) {
                 throw new RuntimeError(312 /* RuntimeErrorCode.HOST_DIRECTIVE_CONFLICTING_ALIAS */, `Cannot alias ${bindingType} ${publicName} of host directive ${className} to ${remappedPublicName}, because it already has a different ${bindingType} with the same public name.`);
             }
