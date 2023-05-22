@@ -744,6 +744,91 @@ function parseSelectorToR3Selector(selector) {
   return selector ? CssSelector.parse(selector).map(parserSelectorToR3Selector) : [];
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/output/output_ast.mjs
+var output_ast_exports = {};
+__export(output_ast_exports, {
+  ArrayType: () => ArrayType,
+  BOOL_TYPE: () => BOOL_TYPE,
+  BinaryOperator: () => BinaryOperator,
+  BinaryOperatorExpr: () => BinaryOperatorExpr,
+  BuiltinType: () => BuiltinType,
+  BuiltinTypeName: () => BuiltinTypeName,
+  CommaExpr: () => CommaExpr,
+  ConditionalExpr: () => ConditionalExpr,
+  DYNAMIC_TYPE: () => DYNAMIC_TYPE,
+  DeclareFunctionStmt: () => DeclareFunctionStmt,
+  DeclareVarStmt: () => DeclareVarStmt,
+  Expression: () => Expression,
+  ExpressionStatement: () => ExpressionStatement,
+  ExpressionType: () => ExpressionType,
+  ExternalExpr: () => ExternalExpr,
+  ExternalReference: () => ExternalReference,
+  FUNCTION_TYPE: () => FUNCTION_TYPE,
+  FnParam: () => FnParam,
+  FunctionExpr: () => FunctionExpr,
+  INFERRED_TYPE: () => INFERRED_TYPE,
+  INT_TYPE: () => INT_TYPE,
+  IfStmt: () => IfStmt,
+  InstantiateExpr: () => InstantiateExpr,
+  InvokeFunctionExpr: () => InvokeFunctionExpr,
+  JSDocComment: () => JSDocComment,
+  LeadingComment: () => LeadingComment,
+  LiteralArrayExpr: () => LiteralArrayExpr,
+  LiteralExpr: () => LiteralExpr,
+  LiteralMapEntry: () => LiteralMapEntry,
+  LiteralMapExpr: () => LiteralMapExpr,
+  LiteralPiece: () => LiteralPiece,
+  LocalizedString: () => LocalizedString,
+  MapType: () => MapType,
+  NONE_TYPE: () => NONE_TYPE,
+  NULL_EXPR: () => NULL_EXPR,
+  NUMBER_TYPE: () => NUMBER_TYPE,
+  NotExpr: () => NotExpr,
+  PlaceholderPiece: () => PlaceholderPiece,
+  ReadKeyExpr: () => ReadKeyExpr,
+  ReadPropExpr: () => ReadPropExpr,
+  ReadVarExpr: () => ReadVarExpr,
+  RecursiveAstVisitor: () => RecursiveAstVisitor,
+  ReturnStatement: () => ReturnStatement,
+  STRING_TYPE: () => STRING_TYPE,
+  Statement: () => Statement,
+  StmtModifier: () => StmtModifier,
+  TYPED_NULL_EXPR: () => TYPED_NULL_EXPR,
+  TaggedTemplateExpr: () => TaggedTemplateExpr,
+  TemplateLiteral: () => TemplateLiteral,
+  TemplateLiteralElement: () => TemplateLiteralElement,
+  TransplantedType: () => TransplantedType,
+  Type: () => Type,
+  TypeModifier: () => TypeModifier,
+  TypeofExpr: () => TypeofExpr,
+  UnaryOperator: () => UnaryOperator,
+  UnaryOperatorExpr: () => UnaryOperatorExpr,
+  WrappedNodeExpr: () => WrappedNodeExpr,
+  WriteKeyExpr: () => WriteKeyExpr,
+  WritePropExpr: () => WritePropExpr,
+  WriteVarExpr: () => WriteVarExpr,
+  areAllEquivalent: () => areAllEquivalent,
+  expressionType: () => expressionType,
+  fn: () => fn,
+  ifStmt: () => ifStmt,
+  importExpr: () => importExpr,
+  importType: () => importType,
+  isNull: () => isNull,
+  jsDocComment: () => jsDocComment,
+  leadingComment: () => leadingComment,
+  literal: () => literal,
+  literalArr: () => literalArr,
+  literalMap: () => literalMap,
+  localizedString: () => localizedString,
+  not: () => not,
+  nullSafeIsEquivalent: () => nullSafeIsEquivalent,
+  taggedTemplate: () => taggedTemplate,
+  transplantedType: () => transplantedType,
+  typeofExpr: () => typeofExpr,
+  unary: () => unary,
+  variable: () => variable
+});
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/big_integer.mjs
 var BigInteger = class {
   static zero() {
@@ -1141,6 +1226,33 @@ var ExpressionType = class extends Type {
   }
   visitType(visitor, context) {
     return visitor.visitExpressionType(this, context);
+  }
+};
+var ArrayType = class extends Type {
+  constructor(of, modifiers) {
+    super(modifiers);
+    this.of = of;
+  }
+  visitType(visitor, context) {
+    return visitor.visitArrayType(this, context);
+  }
+};
+var MapType = class extends Type {
+  constructor(valueType, modifiers) {
+    super(modifiers);
+    this.valueType = valueType || null;
+  }
+  visitType(visitor, context) {
+    return visitor.visitMapType(this, context);
+  }
+};
+var TransplantedType = class extends Type {
+  constructor(type, modifiers) {
+    super(modifiers);
+    this.type = type;
+  }
+  visitType(visitor, context) {
+    return visitor.visitTransplantedType(this, context);
   }
 };
 var DYNAMIC_TYPE = new BuiltinType(BuiltinTypeName.Dynamic);
@@ -1744,6 +1856,21 @@ var LiteralMapExpr = class extends Expression {
     return visitor.visitLiteralMapExpr(this, context);
   }
 };
+var CommaExpr = class extends Expression {
+  constructor(parts, sourceSpan) {
+    super(parts[parts.length - 1].type, sourceSpan);
+    this.parts = parts;
+  }
+  isEquivalent(e) {
+    return e instanceof CommaExpr && areAllEquivalent(this.parts, e.parts);
+  }
+  isConstant() {
+    return false;
+  }
+  visitExpression(visitor, context) {
+    return visitor.visitCommaExpr(this, context);
+  }
+};
 var NULL_EXPR = new LiteralExpr(null, null, null);
 var TYPED_NULL_EXPR = new LiteralExpr(null, INFERRED_TYPE, null);
 var StmtModifier;
@@ -2016,6 +2143,9 @@ var RecursiveAstVisitor = class {
     stmts.forEach((stmt) => stmt.visitStatement(this, context));
   }
 };
+function leadingComment(text2, multiline = false, trailingNewline = true) {
+  return new LeadingComment(text2, multiline, trailingNewline);
+}
 function jsDocComment(tags = []) {
   return new JSDocComment(tags);
 }
@@ -2025,8 +2155,14 @@ function variable(name, type, sourceSpan) {
 function importExpr(id, typeParams = null, sourceSpan) {
   return new ExternalExpr(id, null, typeParams, sourceSpan);
 }
+function importType(id, typeParams, typeModifiers) {
+  return id != null ? expressionType(importExpr(id, typeParams, null), typeModifiers) : null;
+}
 function expressionType(expr, typeModifiers, typeParams) {
   return new ExpressionType(expr, typeModifiers, typeParams);
+}
+function transplantedType(type, typeModifiers) {
+  return new TransplantedType(type, typeModifiers);
 }
 function typeofExpr(expr) {
   return new TypeofExpr(expr);
@@ -2036,6 +2172,9 @@ function literalArr(values, type, sourceSpan) {
 }
 function literalMap(values, type = null) {
   return new LiteralMapExpr(values.map((e) => new LiteralMapEntry(e.key, e.value, e.quoted)), type, null);
+}
+function unary(operator, expr, type, sourceSpan) {
+  return new UnaryOperatorExpr(operator, expr, type, sourceSpan);
 }
 function not(expr, sourceSpan) {
   return new NotExpr(expr, sourceSpan);
@@ -2773,6 +2912,9 @@ var Identifiers = _Identifiers;
 })();
 (() => {
   _Identifiers.HostDirectivesFeature = { name: "\u0275\u0275HostDirectivesFeature", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.InputTransformsFeatureFeature = { name: "\u0275\u0275InputTransformsFeature", moduleName: CORE };
 })();
 (() => {
   _Identifiers.listener = { name: "\u0275\u0275listener", moduleName: CORE };
@@ -4582,22 +4724,30 @@ function conditionallyCreateDirectiveBindingLiteral(map, keepDeclared) {
     let declaredName;
     let publicName;
     let minifiedName;
-    let needsDeclaredName;
+    let expressionValue;
     if (typeof value === "string") {
       declaredName = key;
       minifiedName = key;
       publicName = value;
-      needsDeclaredName = false;
+      expressionValue = asLiteral(publicName);
     } else {
       minifiedName = key;
       declaredName = value.classPropertyName;
       publicName = value.bindingPropertyName;
-      needsDeclaredName = publicName !== declaredName;
+      if (keepDeclared && (publicName !== declaredName || value.transformFunction != null)) {
+        const expressionKeys = [asLiteral(publicName), asLiteral(declaredName)];
+        if (value.transformFunction != null) {
+          expressionKeys.push(value.transformFunction);
+        }
+        expressionValue = literalArr(expressionKeys);
+      } else {
+        expressionValue = asLiteral(publicName);
+      }
     }
     return {
       key: minifiedName,
       quoted: UNSAFE_OBJECT_KEY_NAME_REGEXP.test(minifiedName),
-      value: keepDeclared && needsDeclaredName ? literalArr([asLiteral(publicName), asLiteral(declaredName)]) : asLiteral(publicName)
+      value: expressionValue
     };
   }));
 }
@@ -17656,6 +17806,7 @@ function addFeatures(definitionMap, meta) {
   const features = [];
   const providers = meta.providers;
   const viewProviders = meta.viewProviders;
+  const inputKeys = Object.keys(meta.inputs);
   if (providers || viewProviders) {
     const args = [providers || new LiteralArrayExpr([])];
     if (viewProviders) {
@@ -17677,6 +17828,12 @@ function addFeatures(definitionMap, meta) {
   }
   if ((_a2 = meta.hostDirectives) == null ? void 0 : _a2.length) {
     features.push(importExpr(Identifiers.HostDirectivesFeature).callFn([createHostDirectivesFeatureArg(meta.hostDirectives)]));
+  }
+  for (const key of inputKeys) {
+    if (meta.inputs[key].transformFunction !== null) {
+      features.push(importExpr(Identifiers.InputTransformsFeatureFeature));
+      break;
+    }
   }
   if (features.length) {
     definitionMap.set("features", literalArr(features));
@@ -18383,7 +18540,8 @@ function convertDirectiveFacadeToMetadata(facade) {
           inputsFromType[field] = {
             bindingPropertyName: ann.alias || field,
             classPropertyName: field,
-            required: ann.required || false
+            required: ann.required || false,
+            transformFunction: null
           };
         } else if (isOutput(ann)) {
           outputsFromType[field] = ann.alias || field;
@@ -18619,7 +18777,21 @@ function isOutput(value) {
 function inputsMappingToInputMetadata(inputs) {
   return Object.keys(inputs).reduce((result, key) => {
     const value = inputs[key];
-    result[key] = typeof value === "string" ? { bindingPropertyName: value, classPropertyName: value, required: false } : { bindingPropertyName: value[0], classPropertyName: value[1], required: false };
+    if (typeof value === "string") {
+      result[key] = {
+        bindingPropertyName: value,
+        classPropertyName: value,
+        required: false,
+        transformFunction: null
+      };
+    } else {
+      result[key] = {
+        bindingPropertyName: value[0],
+        classPropertyName: value[1],
+        required: false,
+        transformFunction: null
+      };
+    }
     return result;
   }, {});
 }
@@ -18627,12 +18799,13 @@ function parseInputsArray(values) {
   return values.reduce((results, value) => {
     if (typeof value === "string") {
       const [bindingPropertyName, classPropertyName] = parseMappingString(value);
-      results[classPropertyName] = { bindingPropertyName, classPropertyName, required: false };
+      results[classPropertyName] = { bindingPropertyName, classPropertyName, required: false, transformFunction: null };
     } else {
       results[value.name] = {
         bindingPropertyName: value.alias || value.name,
         classPropertyName: value.name,
-        required: value.required || false
+        required: value.required || false,
+        transformFunction: null
       };
     }
     return results;
@@ -18675,7 +18848,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.1.0-next.1+sha-d0a5530");
+var VERSION2 = new Version("16.1.0-next.1+sha-f6da091");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -19994,7 +20167,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.1.0-next.1+sha-d0a5530"));
+  definitionMap.set("version", literal("16.1.0-next.1+sha-f6da091"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -20063,7 +20236,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.1.0-next.1+sha-d0a5530"));
+  definitionMap.set("version", literal("16.1.0-next.1+sha-f6da091"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -20248,7 +20421,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.1.0-next.1+sha-d0a5530"));
+  definitionMap.set("version", literal("16.1.0-next.1+sha-f6da091"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -20271,7 +20444,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.1.0-next.1+sha-d0a5530"));
+  definitionMap.set("version", literal("16.1.0-next.1+sha-f6da091"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -20309,7 +20482,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.1.0-next.1+sha-d0a5530"));
+  definitionMap.set("version", literal("16.1.0-next.1+sha-f6da091"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -20330,7 +20503,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.1.0-next.1+sha-d0a5530"));
+  definitionMap.set("version", literal("16.1.0-next.1+sha-f6da091"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -20365,7 +20538,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.1.0-next.1+sha-d0a5530"));
+  definitionMap.set("version", literal("16.1.0-next.1+sha-f6da091"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -20382,7 +20555,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.1.0-next.1+sha-d0a5530");
+var VERSION3 = new Version("16.1.0-next.1+sha-f6da091");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -20538,6 +20711,7 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["HOST_DIRECTIVE_UNDEFINED_BINDING"] = 2017] = "HOST_DIRECTIVE_UNDEFINED_BINDING";
   ErrorCode2[ErrorCode2["HOST_DIRECTIVE_CONFLICTING_ALIAS"] = 2018] = "HOST_DIRECTIVE_CONFLICTING_ALIAS";
   ErrorCode2[ErrorCode2["HOST_DIRECTIVE_MISSING_REQUIRED_BINDING"] = 2019] = "HOST_DIRECTIVE_MISSING_REQUIRED_BINDING";
+  ErrorCode2[ErrorCode2["CONFLICTING_INPUT_TRANSFORM"] = 2020] = "CONFLICTING_INPUT_TRANSFORM";
   ErrorCode2[ErrorCode2["SYMBOL_NOT_EXPORTED"] = 3001] = "SYMBOL_NOT_EXPORTED";
   ErrorCode2[ErrorCode2["IMPORT_CYCLE_DETECTED"] = 3003] = "IMPORT_CYCLE_DETECTED";
   ErrorCode2[ErrorCode2["IMPORT_GENERATION_FAILURE"] = 3004] = "IMPORT_GENERATION_FAILURE";
@@ -21496,12 +21670,12 @@ function createSourceSpan(node) {
   const parseSf = new ParseSourceFile(sf.getFullText(), sf.fileName);
   return new ParseSourceSpan(new ParseLocation(parseSf, startOffset, startLine + 1, startCol + 1), new ParseLocation(parseSf, endOffset, endLine + 1, endCol + 1));
 }
-function compileResults(fac, def, metadataStmt, propName) {
+function compileResults(fac, def, metadataStmt, propName, additionalFields) {
   const statements = def.statements;
   if (metadataStmt !== null) {
     statements.push(metadataStmt);
   }
-  return [
+  const results = [
     fac,
     {
       name: propName,
@@ -21510,6 +21684,10 @@ function compileResults(fac, def, metadataStmt, propName) {
       type: def.type
     }
   ];
+  if (additionalFields !== null) {
+    results.push(...additionalFields);
+  }
+  return results;
 }
 function toFactoryMetadata(meta, target) {
   return {
@@ -22000,9 +22178,12 @@ var TypeScriptReflectionHost = class {
     if (node.body !== void 0) {
       body = import_typescript18.default.isBlock(node.body) ? Array.from(node.body.statements) : [import_typescript18.default.factory.createReturnStatement(node.body)];
     }
+    const type = this.checker.getTypeAtLocation(node);
+    const signatures = this.checker.getSignaturesOfType(type, import_typescript18.default.SignatureKind.Call);
     return {
       node,
       body,
+      signatureCount: signatures.length,
       typeParameters: node.typeParameters === void 0 ? null : Array.from(node.typeParameters),
       parameters: node.parameters.map((param) => {
         const name = parameterName(param.name);
@@ -22375,10 +22556,10 @@ var ClassPropertyMapping = class {
     }
     return obj;
   }
-  toJointMappedObject() {
+  toJointMappedObject(transform) {
     const obj = {};
     for (const [classPropertyName, inputOrOutput] of this.forwardMap) {
-      obj[classPropertyName] = inputOrOutput;
+      obj[classPropertyName] = transform(inputOrOutput);
     }
     return obj;
   }
@@ -22481,7 +22662,7 @@ function extractDirectiveTypeCheckMeta(node, inputs, reflector) {
   const restrictedInputFields = /* @__PURE__ */ new Set();
   const stringLiteralInputFields = /* @__PURE__ */ new Set();
   const undeclaredInputFields = /* @__PURE__ */ new Set();
-  for (const classPropertyName of inputs.classPropertyNames) {
+  for (const { classPropertyName, transform } of inputs) {
     const field = members.find((member) => member.name === classPropertyName);
     if (field === void 0 || field.node === null) {
       undeclaredInputFields.add(classPropertyName);
@@ -22492,6 +22673,9 @@ function extractDirectiveTypeCheckMeta(node, inputs, reflector) {
     }
     if (field.nameNode !== null && import_typescript20.default.isStringLiteral(field.nameNode)) {
       stringLiteralInputFields.add(classPropertyName);
+    }
+    if (transform !== null) {
+      coercedInputFields.add(classPropertyName);
     }
   }
   const arity = reflector.getGenericArityOfClass(node);
@@ -22686,21 +22870,24 @@ function readInputsType(type) {
         continue;
       }
       const stringValue = readStringType(member.type);
+      const classPropertyName = member.name.text;
       if (stringValue != null) {
-        inputsMap[member.name.text] = {
+        inputsMap[classPropertyName] = {
           bindingPropertyName: stringValue,
-          classPropertyName: member.name.text,
-          required: false
+          classPropertyName,
+          required: false,
+          transform: null
         };
       } else {
         const config = readMapType(member.type, (innerValue) => {
           var _a2;
           return (_a2 = readStringType(innerValue)) != null ? _a2 : readBooleanType(innerValue);
         });
-        inputsMap[member.name.text] = {
-          classPropertyName: member.name.text,
+        inputsMap[classPropertyName] = {
+          classPropertyName,
           bindingPropertyName: config.alias,
-          required: config.required
+          required: config.required,
+          transform: null
         };
       }
     }
@@ -23029,7 +23216,8 @@ function resolveInput(bindingName, binding) {
   return {
     bindingPropertyName: bindingName,
     classPropertyName: binding.classPropertyName,
-    required: binding.required
+    required: binding.required,
+    transform: binding.transform
   };
 }
 function resolveOutput(bindingName) {
@@ -24329,6 +24517,22 @@ function extractSchemas(rawExpr, evaluator, context) {
     }
   }
   return schemas;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/common/src/input_transforms.mjs
+function compileInputTransformFields(inputs) {
+  const extraFields = [];
+  for (const input of inputs) {
+    if (input.transform) {
+      extraFields.push({
+        name: `ngAcceptInputType_${input.classPropertyName}`,
+        type: output_ast_exports.transplantedType(input.transform.type),
+        statements: [],
+        initializer: null
+      });
+    }
+  }
+  return extraFields;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/component/src/handler.mjs
@@ -26814,6 +27018,9 @@ var IvyTransformationVisitor = class extends Visitor {
     const statements = [];
     const members = [...node.members];
     for (const field of this.classCompilationMap.get(node)) {
+      if (field.initializer === null) {
+        continue;
+      }
       const exprNode = translateExpression(field.initializer, this.importManager, translateOptions);
       const property2 = import_typescript45.default.factory.createPropertyDeclaration([import_typescript45.default.factory.createToken(import_typescript45.default.SyntaxKind.StaticKeyword)], field.name, void 0, void 0, exprNode);
       if (this.isClosureCompilerEnabled) {
@@ -27002,8 +27209,8 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
   const members = reflector.getMembersOfClass(clazz);
   const decoratedElements = members.filter((member) => !member.isStatic && member.decorators !== null);
   const coreModule = isCore ? void 0 : "@angular/core";
-  const inputsFromMeta = parseInputsArray2(directive, evaluator);
-  const inputsFromFields = parseInputFields(filterToMembersWithDecorator(decoratedElements, "Input", coreModule), evaluator);
+  const inputsFromMeta = parseInputsArray2(clazz, directive, evaluator, reflector, refEmitter);
+  const inputsFromFields = parseInputFields(clazz, filterToMembersWithDecorator(decoratedElements, "Input", coreModule), evaluator, reflector, refEmitter);
   const inputs = ClassPropertyMapping.fromMappedObject(__spreadValues(__spreadValues({}, inputsFromMeta), inputsFromFields));
   const outputsFromMeta = parseOutputsArray(directive, evaluator);
   const outputsFromFields = parseOutputFields(filterToMembersWithDecorator(decoratedElements, "Output", coreModule), evaluator);
@@ -27079,7 +27286,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
     lifecycle: {
       usesOnChanges
     },
-    inputs: inputs.toJointMappedObject(),
+    inputs: inputs.toJointMappedObject(toR3InputMetadata),
     outputs: outputs.toDirectMappedObject(),
     queries,
     viewQueries,
@@ -27315,7 +27522,7 @@ function parseDecoratedFields(fields, evaluator, callback) {
     }
   }
 }
-function parseInputsArray2(decoratorMetadata, evaluator) {
+function parseInputsArray2(clazz, decoratorMetadata, evaluator, reflector, refEmitter) {
   const inputsField = decoratorMetadata.get("inputs");
   if (inputsField === void 0) {
     return {};
@@ -27329,18 +27536,32 @@ function parseInputsArray2(decoratorMetadata, evaluator) {
     const value = inputsArray[i];
     if (typeof value === "string") {
       const [bindingPropertyName, classPropertyName] = parseMappingString2(value);
-      inputs[classPropertyName] = { bindingPropertyName, classPropertyName, required: false };
+      inputs[classPropertyName] = {
+        bindingPropertyName,
+        classPropertyName,
+        required: false,
+        transform: null
+      };
     } else if (value instanceof Map) {
       const name = value.get("name");
       const alias = value.get("alias");
       const required = value.get("required");
+      let transform = null;
       if (typeof name !== "string") {
         throw createValueHasWrongTypeError(inputsField, name, `Value at position ${i} of @Directive.inputs array must have a "name" property`);
+      }
+      if (value.has("transform")) {
+        const transformValue = value.get("transform");
+        if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference2)) {
+          throw createValueHasWrongTypeError(inputsField, transformValue, `Transform of value at position ${i} of @Directive.inputs array must be a function`);
+        }
+        transform = parseInputTransformFunction(clazz, name, transformValue, reflector, refEmitter);
       }
       inputs[name] = {
         classPropertyName: name,
         bindingPropertyName: typeof alias === "string" ? alias : name,
-        required: required === true
+        required: required === true,
+        transform
       };
     } else {
       throw createValueHasWrongTypeError(inputsField, value, `@Directive.inputs array can only contain strings or object literals`);
@@ -27348,11 +27569,12 @@ function parseInputsArray2(decoratorMetadata, evaluator) {
   }
   return inputs;
 }
-function parseInputFields(inputMembers, evaluator) {
+function parseInputFields(clazz, inputMembers, evaluator, reflector, refEmitter) {
   const inputs = {};
   parseDecoratedFields(inputMembers, evaluator, (classPropertyName, options, decorator) => {
     let bindingPropertyName;
     let required = false;
+    let transform = null;
     if (options === null) {
       bindingPropertyName = classPropertyName;
     } else if (typeof options === "string") {
@@ -27361,12 +27583,71 @@ function parseInputFields(inputMembers, evaluator) {
       const aliasInConfig = options.get("alias");
       bindingPropertyName = typeof aliasInConfig === "string" ? aliasInConfig : classPropertyName;
       required = options.get("required") === true;
+      if (options.has("transform")) {
+        const transformValue = options.get("transform");
+        if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference2)) {
+          throw createValueHasWrongTypeError(decorator.node, transformValue, `Input transform must be a function`);
+        }
+        transform = parseInputTransformFunction(clazz, classPropertyName, transformValue, reflector, refEmitter);
+      }
     } else {
       throw createValueHasWrongTypeError(decorator.node, options, `@${decorator.name} decorator argument must resolve to a string or an object literal`);
     }
-    inputs[classPropertyName] = { bindingPropertyName, classPropertyName, required };
+    inputs[classPropertyName] = { bindingPropertyName, classPropertyName, required, transform };
   });
   return inputs;
+}
+function parseInputTransformFunction(clazz, classPropertyName, value, reflector, refEmitter) {
+  var _a2;
+  const definition = reflector.getDefinitionOfFunction(value.node);
+  if (definition === null) {
+    throw createValueHasWrongTypeError(value.node, value, "Input transform must be a function");
+  }
+  if (definition.typeParameters !== null && definition.typeParameters.length > 0) {
+    throw createValueHasWrongTypeError(value.node, value, "Input transform function cannot be generic");
+  }
+  if (definition.signatureCount > 1) {
+    throw createValueHasWrongTypeError(value.node, value, "Input transform function cannot have multiple signatures");
+  }
+  const members = reflector.getMembersOfClass(clazz);
+  for (const member of members) {
+    const conflictingName = `ngAcceptInputType_${classPropertyName}`;
+    if (member.name === conflictingName && member.isStatic) {
+      throw new FatalDiagnosticError(ErrorCode.CONFLICTING_INPUT_TRANSFORM, value.node, `Class cannot have both a transform function on Input ${classPropertyName} and a static member called ${conflictingName}`);
+    }
+  }
+  const node = value instanceof Reference2 ? value.getIdentityIn(clazz.getSourceFile()) : value.node;
+  if (node === null) {
+    throw createValueHasWrongTypeError(value.node, value, "Input transform function could not be referenced");
+  }
+  const firstParam = ((_a2 = definition.parameters[0]) == null ? void 0 : _a2.name) === "this" ? definition.parameters[1] : definition.parameters[0];
+  if (!firstParam) {
+    return { node, type: import_typescript46.default.factory.createKeywordTypeNode(import_typescript46.default.SyntaxKind.UnknownKeyword) };
+  }
+  if (!firstParam.type) {
+    throw createValueHasWrongTypeError(value.node, value, "Input transform function first parameter must have a type");
+  }
+  if (firstParam.node.dotDotDotToken) {
+    throw createValueHasWrongTypeError(value.node, value, "Input transform function first parameter cannot be a spread parameter");
+  }
+  assertEmittableInputType(firstParam.type, clazz.getSourceFile(), reflector, refEmitter);
+  return { node, type: firstParam.type };
+}
+function assertEmittableInputType(type, contextFile, reflector, refEmitter) {
+  (function walk(node) {
+    if (import_typescript46.default.isTypeReferenceNode(node) && import_typescript46.default.isIdentifier(node.typeName)) {
+      const declaration = reflector.getDeclarationOfIdentifier(node.typeName);
+      if (declaration !== null) {
+        if (declaration.node.getSourceFile() !== contextFile) {
+          const emittedType = refEmitter.emit(new Reference2(declaration.node), contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports);
+          assertSuccessfulReferenceEmit(emittedType, node, "type");
+        } else if (!reflector.isStaticallyExported(declaration.node)) {
+          throw new FatalDiagnosticError(ErrorCode.SYMBOL_NOT_EXPORTED, type, `Symbol must be exported in order to be used as the type of an Input transform function`, [makeRelatedInformation(declaration.node, `The symbol is declared here.`)]);
+        }
+      }
+    }
+    node.forEachChild(walk);
+  })(type);
 }
 function parseOutputsArray(directive, evaluator) {
   const metaValues = parseFieldStringArrayValue(directive, "outputs", evaluator);
@@ -27452,6 +27733,14 @@ function toHostDirectiveMetadata(hostDirective, context, refEmitter) {
     isForwardReference: hostDirective.isForwardReference,
     inputs: hostDirective.inputs || null,
     outputs: hostDirective.outputs || null
+  };
+}
+function toR3InputMetadata(mapping) {
+  return {
+    classPropertyName: mapping.classPropertyName,
+    bindingPropertyName: mapping.bindingPropertyName,
+    required: mapping.required,
+    transformFunction: mapping.transform !== null ? new WrappedNodeExpr(mapping.transform.node) : null
   };
 }
 
@@ -27674,14 +27963,16 @@ var DirectiveDecoratorHandler = class {
   compileFull(node, analysis, resolution, pool) {
     const fac = compileNgFactoryDefField(toFactoryMetadata(analysis.meta, FactoryTarget.Directive));
     const def = compileDirectiveFromMetadata(analysis.meta, pool, makeBindingParser());
+    const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275dir");
+    return compileResults(fac, def, classMetadata, "\u0275dir", inputTransformFields);
   }
   compilePartial(node, analysis, resolution) {
     const fac = compileDeclareFactory(toFactoryMetadata(analysis.meta, FactoryTarget.Directive));
     const def = compileDeclareDirectiveFromMetadata(analysis.meta);
+    const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileDeclareClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275dir");
+    return compileResults(fac, def, classMetadata, "\u0275dir", inputTransformFields);
   }
   findClassFieldWithAngularFeatures(node) {
     return this.reflector.getMembersOfClass(node).find((member) => {
@@ -29321,8 +29612,9 @@ var ComponentDecoratorHandler = class {
     const meta = __spreadValues(__spreadValues({}, analysis.meta), resolution);
     const fac = compileNgFactoryDefField(toFactoryMetadata(meta, FactoryTarget.Component));
     const def = compileComponentFromMetadata(meta, pool, makeBindingParser());
+    const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275cmp");
+    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields);
   }
   compilePartial(node, analysis, resolution) {
     if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
@@ -29336,9 +29628,10 @@ var ComponentDecoratorHandler = class {
     };
     const meta = __spreadValues(__spreadValues({}, analysis.meta), resolution);
     const fac = compileDeclareFactory(toFactoryMetadata(meta, FactoryTarget.Component));
+    const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const def = compileDeclareComponentFromMetadata(meta, analysis.template, templateInfo);
     const classMetadata = analysis.classMetadata !== null ? compileDeclareClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275cmp");
+    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields);
   }
   _checkForCyclicImport(importedFile, expr, origin) {
     const imported = resolveImportedFile(this.moduleResolver, importedFile, expr, origin);
@@ -29728,13 +30021,13 @@ var PipeDecoratorHandler = class {
     const fac = compileNgFactoryDefField(toFactoryMetadata(analysis.meta, FactoryTarget.Pipe));
     const def = compilePipeFromMetadata(analysis.meta);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275pipe");
+    return compileResults(fac, def, classMetadata, "\u0275pipe", null);
   }
   compilePartial(node, analysis) {
     const fac = compileDeclareFactory(toFactoryMetadata(analysis.meta, FactoryTarget.Pipe));
     const def = compileDeclarePipeFromMetadata(analysis.meta);
     const classMetadata = analysis.classMetadata !== null ? compileDeclareClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275pipe");
+    return compileResults(fac, def, classMetadata, "\u0275pipe", null);
   }
 };
 
@@ -32196,18 +32489,17 @@ function generateInlineTypeCtor(node, meta) {
 }
 function constructTypeCtorParameter(node, meta, rawType) {
   let initType = null;
-  const keys = meta.fields.inputs;
   const plainKeys = [];
   const coercedKeys = [];
-  for (const key of keys) {
-    if (!meta.coercedInputFields.has(key)) {
-      plainKeys.push(import_typescript75.default.factory.createLiteralTypeNode(import_typescript75.default.factory.createStringLiteral(key)));
+  for (const { classPropertyName, transform } of meta.fields.inputs) {
+    if (!meta.coercedInputFields.has(classPropertyName)) {
+      plainKeys.push(import_typescript75.default.factory.createLiteralTypeNode(import_typescript75.default.factory.createStringLiteral(classPropertyName)));
     } else {
       coercedKeys.push(import_typescript75.default.factory.createPropertySignature(
         void 0,
-        key,
+        classPropertyName,
         void 0,
-        tsCreateTypeQueryForCoercedInput(rawType.typeName, key)
+        transform == null ? tsCreateTypeQueryForCoercedInput(rawType.typeName, classPropertyName) : transform.type
       ));
     }
   }
@@ -32288,8 +32580,7 @@ var Environment = class {
         fnName,
         body: true,
         fields: {
-          inputs: dir.inputs.classPropertyNames,
-          outputs: dir.outputs.classPropertyNames,
+          inputs: dir.inputs,
           queries: dir.queries
         },
         coercedInputFields: dir.coercedInputFields
@@ -33250,18 +33541,23 @@ var TcbDirectiveInputsOp = class extends TcbOp {
     for (const attr of boundAttrs) {
       const expr = widenBinding(translateInput(attr.attribute, this.tcb, this.scope), this.tcb);
       let assignment = wrapForDiagnostics(expr);
-      for (const { fieldName, required } of attr.inputs) {
+      for (const { fieldName, required, transformType } of attr.inputs) {
         let target;
         if (required) {
           seenRequiredInputs.add(fieldName);
         }
         if (this.dir.coercedInputFields.has(fieldName)) {
-          const dirTypeRef = this.tcb.env.referenceType(this.dir.ref);
-          if (!import_typescript81.default.isTypeReferenceNode(dirTypeRef)) {
-            throw new Error(`Expected TypeReferenceNode from reference to ${this.dir.ref.debugName}`);
+          let type;
+          if (transformType) {
+            type = this.tcb.env.referenceTransplantedType(new TransplantedType(transformType));
+          } else {
+            const dirTypeRef = this.tcb.env.referenceType(this.dir.ref);
+            if (!import_typescript81.default.isTypeReferenceNode(dirTypeRef)) {
+              throw new Error(`Expected TypeReferenceNode from reference to ${this.dir.ref.debugName}`);
+            }
+            type = tsCreateTypeQueryForCoercedInput(dirTypeRef.typeName, fieldName);
           }
           const id = this.tcb.allocateId();
-          const type = tsCreateTypeQueryForCoercedInput(dirTypeRef.typeName, fieldName);
           this.scope.addStatement(tsDeclareVariable(id, type));
           target = id;
         } else if (this.dir.undeclaredInputFields.has(fieldName)) {
@@ -33918,7 +34214,14 @@ function getBoundAttributes(directive, node) {
     if (inputs !== null) {
       boundInputs.push({
         attribute: attr,
-        inputs: inputs.map((input) => ({ fieldName: input.classPropertyName, required: input.required }))
+        inputs: inputs.map((input) => {
+          var _a2;
+          return {
+            fieldName: input.classPropertyName,
+            required: input.required,
+            transformType: ((_a2 = input.transform) == null ? void 0 : _a2.type) || null
+          };
+        })
       });
     }
   };
@@ -34097,8 +34400,7 @@ var TypeCheckContextImpl = class {
           fnName: "ngTypeCtor",
           body: !dirNode.getSourceFile().isDeclarationFile,
           fields: {
-            inputs: dir.inputs.classPropertyNames,
-            outputs: dir.outputs.classPropertyNames,
+            inputs: dir.inputs,
             queries: dir.queries
           },
           coercedInputFields: dir.coercedInputFields

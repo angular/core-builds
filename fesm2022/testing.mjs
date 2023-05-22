@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.1+sha-d0a5530
+ * @license Angular v16.1.0-next.1+sha-f6da091
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10464,7 +10464,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.1+sha-d0a5530');
+const VERSION = new Version('16.1.0-next.1+sha-f6da091');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13987,6 +13987,12 @@ function validateMappings(bindingType, def, hostDirectiveBindings) {
         }
     }
 }
+
+// TODO(crisbeto): move input transforms runtime functionality here.
+/**
+ * @codeGenApi
+ */
+function ɵɵInputTransformsFeature(definition) { }
 
 function isIterable(obj) {
     return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
@@ -24312,6 +24318,7 @@ const angularCoreEnv = (() => ({
     'ɵɵProvidersFeature': ɵɵProvidersFeature,
     'ɵɵCopyDefinitionFeature': ɵɵCopyDefinitionFeature,
     'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
+    'ɵɵInputTransformsFeature': ɵɵInputTransformsFeature,
     'ɵɵStandaloneFeature': ɵɵStandaloneFeature,
     'ɵɵnextContext': ɵɵnextContext,
     'ɵɵnamespaceHTML': ɵɵnamespaceHTML,
