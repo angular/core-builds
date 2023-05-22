@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.2+sha-d963ecd
+ * @license Angular v16.0.2+sha-5574e47
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10461,7 +10461,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.2+sha-d963ecd');
+const VERSION = new Version('16.0.2+sha-5574e47');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -24779,16 +24779,16 @@ function computeCombinedExports(type) {
     if (ngModuleDef === null) {
         return [type];
     }
-    return [...flatten$1(maybeUnwrapFn$1(ngModuleDef.exports).map((type) => {
-            const ngModuleDef = getNgModuleDef(type);
-            if (ngModuleDef) {
-                verifySemanticsOfNgModuleDef(type, false);
-                return computeCombinedExports(type);
-            }
-            else {
-                return type;
-            }
-        }))];
+    return flatten$1(maybeUnwrapFn$1(ngModuleDef.exports).map((type) => {
+        const ngModuleDef = getNgModuleDef(type);
+        if (ngModuleDef) {
+            verifySemanticsOfNgModuleDef(type, false);
+            return computeCombinedExports(type);
+        }
+        else {
+            return type;
+        }
+    }));
 }
 /**
  * Some declared components may be compiled asynchronously, and thus may not have their
