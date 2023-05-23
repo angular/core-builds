@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.0.2+sha-f40ecc0
+ * @license Angular v16.0.2+sha-c11041e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10461,7 +10461,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.2+sha-f40ecc0');
+const VERSION = new Version('16.0.2+sha-c11041e');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10603,6 +10603,10 @@ function normalizeDebugBindingValue(value) {
     }
 }
 
+/**
+ * The max length of the string representation of a value in an error message
+ */
+const VALUE_STRING_LENGTH_LIMIT = 200;
 /** Verifies that a given type is a Standalone Component. */
 function assertStandaloneComponentType(type) {
     assertComponentDef(type);
@@ -10632,13 +10636,27 @@ function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName, 
     const hostComponentDef = getDeclarationComponentDef(lView);
     const componentClassName = hostComponentDef?.type?.name;
     const field = propName ? ` for '${propName}'` : '';
-    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${oldValue}'. Current value: '${currValue}'.${componentClassName ? ` Expression location: ${componentClassName} component` : ''}`;
+    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${formatValue(oldValue)}'. Current value: '${formatValue(currValue)}'.${componentClassName ? ` Expression location: ${componentClassName} component` : ''}`;
     if (creationMode) {
         msg +=
             ` It seems like the view has been created after its parent and its children have been dirty checked.` +
                 ` Has it been created in a change detection hook?`;
     }
     throw new RuntimeError(-100 /* RuntimeErrorCode.EXPRESSION_CHANGED_AFTER_CHECKED */, msg);
+}
+function formatValue(value) {
+    let strValue = String(value);
+    // JSON.stringify will throw on circular references
+    try {
+        if (Array.isArray(value) || strValue === '[object Object]') {
+            strValue = JSON.stringify(value);
+        }
+    }
+    catch (error) {
+    }
+    return strValue.length > VALUE_STRING_LENGTH_LIMIT ?
+        (strValue.substring(0, VALUE_STRING_LENGTH_LIMIT) + '…') :
+        strValue;
 }
 function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
     const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
