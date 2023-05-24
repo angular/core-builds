@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.1+sha-5fd4bf6
+ * @license Angular v16.1.0-next.1+sha-75fdbcb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5713,7 +5713,10 @@ function getOrCreateInjectable(tNode, lView, token, flags = InjectFlags.Default,
     if (tNode !== null) {
         // If the view or any of its ancestors have an embedded
         // view injector, we have to look it up there first.
-        if (lView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */) {
+        if (lView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */ &&
+            // The token must be present on the current node injector when the `Self`
+            // flag is set, so the lookup on embedded view injector(s) can be skipped.
+            !(flags & InjectFlags.Self)) {
             const embeddedInjectorValue = lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, NOT_FOUND);
             if (embeddedInjectorValue !== NOT_FOUND) {
                 return embeddedInjectorValue;
@@ -10464,7 +10467,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.1+sha-5fd4bf6');
+const VERSION = new Version('16.1.0-next.1+sha-75fdbcb');
 
 // This default value is when checking the hierarchy for a token.
 //
