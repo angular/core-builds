@@ -1,10 +1,11 @@
 /**
- * @license Angular v16.0.3+sha-f517d18
+ * @license Angular v16.0.3+sha-f26c9a2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
 
+import { BehaviorSubject } from 'rxjs';
 import { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { Subscribable } from 'rxjs';
@@ -392,6 +393,7 @@ export declare class ApplicationRef {
     private _destroyed;
     private _destroyListeners;
     private readonly internalErrorHandler;
+    private readonly zoneIsStable;
     /**
      * Indicates whether this instance was destroyed.
      */
@@ -10868,17 +10870,11 @@ export declare const ɵglobal: any;
  */
 export declare class ɵInitialRenderPendingTasks implements OnDestroy {
     private taskId;
-    private collection;
-    private ngZone;
-    private resolve;
-    private promise;
-    get whenAllTasksComplete(): Promise<void>;
-    completed: boolean;
-    constructor();
+    private pendingTasks;
+    hasPendingTasks: BehaviorSubject<boolean>;
     add(): number;
     remove(taskId: number): void;
     ngOnDestroy(): void;
-    private complete;
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵInitialRenderPendingTasks, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<ɵInitialRenderPendingTasks>;
 }

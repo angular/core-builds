@@ -1,11 +1,11 @@
 /**
- * @license Angular v16.0.3+sha-f517d18
+ * @license Angular v16.0.3+sha-f26c9a2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { Subject, Subscription, Observable, merge as merge$1 } from 'rxjs';
-import { share, first } from 'rxjs/operators';
+import { Subject, Subscription, BehaviorSubject, Observable, merge as merge$1, of } from 'rxjs';
+import { share, mergeMap, distinctUntilChanged, first } from 'rxjs/operators';
 
 function getClosureSafeProperty(objWithPropertyToExtract) {
     for (let key in objWithPropertyToExtract) {
@@ -10068,7 +10068,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.0.3+sha-f517d18');
+const VERSION = new Version('16.0.3+sha-f26c9a2');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25607,6 +25607,45 @@ var MissingTranslationStrategy;
 })(MissingTranslationStrategy || (MissingTranslationStrategy = {}));
 
 /**
+ * *Internal* service that keeps track of pending tasks happening in the system
+ * during the initial rendering. No tasks are tracked after an initial
+ * rendering.
+ *
+ * This information is needed to make sure that the serialization on the server
+ * is delayed until all tasks in the queue (such as an initial navigation or a
+ * pending HTTP request) are completed.
+ */
+class InitialRenderPendingTasks {
+    constructor() {
+        this.taskId = 0;
+        this.pendingTasks = new Set();
+        this.hasPendingTasks = new BehaviorSubject(false);
+    }
+    add() {
+        this.hasPendingTasks.next(true);
+        const taskId = this.taskId++;
+        this.pendingTasks.add(taskId);
+        return taskId;
+    }
+    remove(taskId) {
+        this.pendingTasks.delete(taskId);
+        if (this.pendingTasks.size === 0) {
+            this.hasPendingTasks.next(false);
+        }
+    }
+    ngOnDestroy() {
+        this.pendingTasks.clear();
+        this.hasPendingTasks.next(false);
+    }
+    static { this.ɵfac = function InitialRenderPendingTasks_Factory(t) { return new (t || InitialRenderPendingTasks)(); }; }
+    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: InitialRenderPendingTasks, factory: InitialRenderPendingTasks.ɵfac, providedIn: 'root' }); }
+}
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(InitialRenderPendingTasks, [{
+        type: Injectable,
+        args: [{ providedIn: 'root' }]
+    }], null, null); })();
+
+/**
  * Combination of NgModuleFactory and ComponentFactories.
  *
  * @publicApi
@@ -27165,6 +27204,7 @@ class ApplicationRef {
         /** @internal */
         this._views = [];
         this.internalErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
+        this.zoneIsStable = inject(ZONE_IS_STABLE_OBSERVABLE);
         /**
          * Get a list of component types registered to this application.
          * This list is populated even before the component is created.
@@ -27177,7 +27217,8 @@ class ApplicationRef {
         /**
          * Returns an Observable that indicates when the application is stable or unstable.
          */
-        this.isStable = inject(ZONE_IS_STABLE_OBSERVABLE);
+        this.isStable = inject(InitialRenderPendingTasks)
+            .hasPendingTasks.pipe(mergeMap(hasPendingTasks => hasPendingTasks ? of(false) : this.zoneIsStable), distinctUntilChanged(), share());
         this._injector = inject(EnvironmentInjector);
     }
     /**
@@ -29792,69 +29833,6 @@ function isDisconnectedNode(tNode, lView) {
 }
 
 /**
- * *Internal* service that keeps track of pending tasks happening in the system
- * during the initial rendering. No tasks are tracked after an initial
- * rendering.
- *
- * This information is needed to make sure that the serialization on the server
- * is delayed until all tasks in the queue (such as an initial navigation or a
- * pending HTTP request) are completed.
- */
-class InitialRenderPendingTasks {
-    get whenAllTasksComplete() {
-        if (this.collection.size === 0) {
-            this.complete();
-        }
-        return this.promise;
-    }
-    constructor() {
-        this.taskId = 0;
-        this.collection = new Set();
-        this.ngZone = inject(NgZone);
-        this.completed = false;
-        // Run outside of the Angular zone to avoid triggering
-        // extra change detection cycles.
-        this.ngZone.runOutsideAngular(() => {
-            this.promise = new Promise((resolve) => {
-                this.resolve = resolve;
-            });
-        });
-    }
-    add() {
-        if (this.completed) {
-            // Indicates that the task was added after
-            // the task queue completion, so it's a noop.
-            return -1;
-        }
-        const taskId = this.taskId++;
-        this.collection.add(taskId);
-        return taskId;
-    }
-    remove(taskId) {
-        if (this.completed)
-            return;
-        this.collection.delete(taskId);
-        if (this.collection.size === 0) {
-            this.complete();
-        }
-    }
-    ngOnDestroy() {
-        this.complete();
-        this.collection.clear();
-    }
-    complete() {
-        this.completed = true;
-        this.resolve();
-    }
-    static { this.ɵfac = function InitialRenderPendingTasks_Factory(t) { return new (t || InitialRenderPendingTasks)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: InitialRenderPendingTasks, factory: InitialRenderPendingTasks.ɵfac, providedIn: 'root' }); }
-}
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(InitialRenderPendingTasks, [{
-        type: Injectable,
-        args: [{ providedIn: 'root' }]
-    }], function () { return []; }, null); })();
-
-/**
  * Indicates whether the hydration-related code was added,
  * prevents adding it multiple times.
  */
@@ -29912,7 +29890,7 @@ function printHydrationStats(injector) {
 /**
  * Returns a Promise that is resolved when an application becomes stable.
  */
-function whenStable(appRef, pendingTasks, injector) {
+function whenStable(appRef, injector) {
     const isStablePromise = appRef.isStable.pipe(first((isStable) => isStable)).toPromise();
     if (typeof ngDevMode !== 'undefined' && ngDevMode) {
         const timeoutTime = APPLICATION_IS_STABLE_TIMEOUT;
@@ -29926,8 +29904,7 @@ function whenStable(appRef, pendingTasks, injector) {
         });
         isStablePromise.finally(() => clearTimeout(timeoutId));
     }
-    const pendingTasksPromise = pendingTasks.whenAllTasksComplete;
-    return Promise.allSettled([isStablePromise, pendingTasksPromise]);
+    return isStablePromise.then(() => { });
 }
 /**
  * Returns a set of providers required to setup hydration support
@@ -29996,10 +29973,9 @@ function withDomHydration() {
             useFactory: () => {
                 if (isBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
                     const appRef = inject(ApplicationRef);
-                    const pendingTasks = inject(InitialRenderPendingTasks);
                     const injector = inject(Injector);
                     return () => {
-                        whenStable(appRef, pendingTasks, injector).then(() => {
+                        whenStable(appRef, injector).then(() => {
                             // Wait until an app becomes stable and cleanup all views that
                             // were not claimed during the application bootstrap process.
                             // The timing is similar to when we start the serialization process
