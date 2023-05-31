@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.2+sha-25b6b97
+ * @license Angular v16.1.0-next.2+sha-069498c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -611,6 +611,16 @@ export declare interface AttributeDecorator {
     (name: string): any;
     new (name: string): Attribute;
 }
+
+
+/**
+ * Transforms a value (typically a string) to a boolean.
+ * Intended to be used as a transform function of an input.
+ * @param value Value to be transformed.
+ *
+ * @publicApi
+ */
+export declare function booleanAttribute(value: unknown): boolean;
 
 /**
  * Provides additional options to the bootstrapping process.
@@ -2446,6 +2456,7 @@ export declare interface Directive {
         name: string;
         alias?: string;
         required?: boolean;
+        transform?: (value: any) => any;
     } | string)[];
     /**
      * Enumerates the set of event-bound output properties.
@@ -2733,7 +2744,7 @@ declare interface DirectiveDefinition<T> {
     /**
      * A map of input names.
      *
-     * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
+     * The format is in: `{[actualPropertyName: string]:(string|[string, string, Function])}`.
      *
      * Given:
      * ```
@@ -2743,6 +2754,9 @@ declare interface DirectiveDefinition<T> {
      *
      *   @Input('publicInput2')
      *   declaredInput2: string;
+     *
+     *   @Input({transform: (value: boolean) => value ? 1 : 0})
+     *   transformedInput3: number;
      * }
      * ```
      *
@@ -2751,6 +2765,11 @@ declare interface DirectiveDefinition<T> {
      * {
      *   publicInput1: 'publicInput1',
      *   declaredInput2: ['declaredInput2', 'publicInput2'],
+     *   transformedInput3: [
+     *     'transformedInput3',
+     *     'transformedInput3',
+     *     (value: boolean) => value ? 1 : 0
+     *   ]
      * }
      * ```
      *
@@ -2759,6 +2778,11 @@ declare interface DirectiveDefinition<T> {
      * {
      *   minifiedPublicInput1: 'publicInput1',
      *   minifiedDeclaredInput2: [ 'publicInput2', 'declaredInput2'],
+     *   minifiedTransformedInput3: [
+     *     'transformedInput3',
+     *     'transformedInput3',
+     *     (value: boolean) => value ? 1 : 0
+     *   ]
      * }
      * ```
      *
@@ -2774,7 +2798,7 @@ declare interface DirectiveDefinition<T> {
      *    API will be simplified to be consistent with `output`.
      */
     inputs?: {
-        [P in keyof T]?: string | [string, string];
+        [P in keyof T]?: string | [string, string, InputTransformFunction?];
     };
     /**
      * A map of output names.
@@ -4631,6 +4655,10 @@ export declare interface Input {
      * Whether the input is required for the directive to function.
      */
     required?: boolean;
+    /**
+     * Function with which to transform the input value before assigning it to the directive instance.
+     */
+    transform?: (value: any) => any;
 }
 
 /**
@@ -4692,7 +4720,10 @@ export declare interface InputDecorator {
     new (arg?: string | Input): any;
 }
 
-declare type InputTransformFunction = any;
+/** Function that can be used to transform incoming input values. */
+declare type InputTransformFunction = (value: any) => any;
+
+declare type InputTransformFunction_2 = any;
 
 /**
  * See `TNode.insertBeforeIndex`
@@ -6102,6 +6133,16 @@ declare const NODES = "n";
 
 declare const NUM_ROOT_NODES = "r";
 
+/**
+ * Transforms a value (typically a string) to a number.
+ * Intended to be used as a transform function of an input.
+ * @param value Value to be transformed.
+ * @param fallbackValue Value to use if the provided value can't be parsed as a number.
+ *
+ * @publicApi
+ */
+export declare function numberAttribute(value: unknown, fallbackValue?: number): number;
+
 declare const ON_DESTROY_HOOKS = 21;
 
 /**
@@ -6831,7 +6872,7 @@ declare interface R3DeclareDirectiveFacade {
         [classPropertyName: string]: string | [
         bindingPropertyName: string,
         classPropertyName: string,
-        transformFunction?: InputTransformFunction
+        transformFunction?: InputTransformFunction_2
         ];
     };
     outputs?: {
@@ -10374,10 +10415,6 @@ export declare const enum ɵBypassType {
 
 export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
 
-
-/** Coerces a value (typically a string) to a boolean. */
-export declare function ɵcoerceToBoolean(value: unknown): boolean;
-
 /**
  * Compile an Angular component according to its decorator metadata, and patch the resulting
  * component def (ɵcmp) onto the component type.
@@ -10614,6 +10651,21 @@ export declare interface ɵDirectiveDef<T> {
      */
     readonly inputs: {
         [P in keyof T]: string;
+    };
+    /**
+     * A dictionary mapping the private names of inputs to their transformation functions.
+     * Note: the private names are used for the keys, rather than the public ones, because public
+     * names can be re-aliased in host directives which would invalidate the lookup.
+     */
+    readonly inputTransforms: {
+        [classPropertyName: string]: InputTransformFunction;
+    } | null;
+    /**
+     * Contains the raw input information produced by the compiler. Can be
+     * used to do further processing after the `inputs` have been inverted.
+     */
+    readonly inputConfig: {
+        [classPropertyName: string]: string | [string, string, InputTransformFunction?];
     };
     /**
      * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
@@ -13106,9 +13158,14 @@ export declare interface ɵɵInjectorDef<T> {
 }
 
 /**
+ * Decorates the directive definition with support for input transform functions.
+ *
+ * If the directive uses inheritance, the feature should be included before the
+ * `InheritDefinitionFeature` to ensure that the `inputTransforms` field is populated.
+ *
  * @codeGenApi
  */
-export declare function ɵɵInputTransformsFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
+export declare function ɵɵInputTransformsFeature(definition: ɵDirectiveDef<unknown>): void;
 
 /**
  * Throws an error indicating that a factory function could not be generated by the compiler for a

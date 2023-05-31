@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-next.2+sha-25b6b97
+ * @license Angular v16.1.0-next.2+sha-069498c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3139,6 +3139,8 @@ function getNgDirectiveDef(directiveDefinition) {
         hostAttrs: directiveDefinition.hostAttrs || null,
         contentQueries: directiveDefinition.contentQueries || null,
         declaredInputs,
+        inputTransforms: null,
+        inputConfig: directiveDefinition.inputs || EMPTY_OBJ,
         exportAs: directiveDefinition.exportAs || null,
         standalone: directiveDefinition.standalone === true,
         signals: directiveDefinition.signals === true,
@@ -10467,7 +10469,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.2+sha-25b6b97');
+const VERSION = new Version('16.1.0-next.2+sha-069498c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -12165,6 +12167,10 @@ function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode, initial
 function writeToDirectiveInput(def, instance, publicName, privateName, value) {
     const prevConsumer = setActiveConsumer(null);
     try {
+        const inputTransforms = def.inputTransforms;
+        if (inputTransforms !== null && inputTransforms.hasOwnProperty(privateName)) {
+            value = inputTransforms[privateName].call(instance, value);
+        }
         if (def.setInput !== null) {
             def.setInput(instance, value, publicName, privateName);
         }
@@ -13670,6 +13676,7 @@ function ɵɵInheritDefinitionFeature(definition) {
                 // would've justified object creation. Unwrap them if necessary.
                 const writeableDef = definition;
                 writeableDef.inputs = maybeUnwrapEmpty(definition.inputs);
+                writeableDef.inputTransforms = maybeUnwrapEmpty(definition.inputTransforms);
                 writeableDef.declaredInputs = maybeUnwrapEmpty(definition.declaredInputs);
                 writeableDef.outputs = maybeUnwrapEmpty(definition.outputs);
                 // Merge hostBindings
@@ -13684,6 +13691,12 @@ function ɵɵInheritDefinitionFeature(definition) {
                 fillProperties(definition.inputs, superDef.inputs);
                 fillProperties(definition.declaredInputs, superDef.declaredInputs);
                 fillProperties(definition.outputs, superDef.outputs);
+                if (superDef.inputTransforms !== null) {
+                    if (writeableDef.inputTransforms === null) {
+                        writeableDef.inputTransforms = {};
+                    }
+                    fillProperties(writeableDef.inputTransforms, superDef.inputTransforms);
+                }
                 // Merge animations metadata.
                 // If `superDef` is a Component, the `data` field is present (defaults to an empty object).
                 if (isComponentDef(superDef) && superDef.data.animation) {
@@ -14009,11 +14022,30 @@ function validateMappings(bindingType, def, hostDirectiveBindings) {
     }
 }
 
-// TODO(crisbeto): move input transforms runtime functionality here.
 /**
+ * Decorates the directive definition with support for input transform functions.
+ *
+ * If the directive uses inheritance, the feature should be included before the
+ * `InheritDefinitionFeature` to ensure that the `inputTransforms` field is populated.
+ *
  * @codeGenApi
  */
-function ɵɵInputTransformsFeature(definition) { }
+function ɵɵInputTransformsFeature(definition) {
+    const inputs = definition.inputConfig;
+    const inputTransforms = {};
+    for (const minifiedKey in inputs) {
+        if (inputs.hasOwnProperty(minifiedKey)) {
+            // Note: the private names are used for the keys, rather than the public ones, because public
+            // names can be re-aliased in host directives which would invalidate the lookup.
+            const value = inputs[minifiedKey];
+            if (Array.isArray(value) && value[2]) {
+                inputTransforms[minifiedKey] = value[2];
+            }
+        }
+    }
+    definition.inputTransforms =
+        inputTransforms;
+}
 
 function isIterable(obj) {
     return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
