@@ -6802,11 +6802,21 @@ var ShadowCss = class {
     this._animationDeclarationKeyframesRe = /(^|\s+)(?:(?:(['"])((?:\\\\|\\\2|(?!\2).)+)\2)|(-?[A-Za-z][\w\-]*))(?=[,\s]|$)/g;
   }
   shimCssText(cssText, selector, hostSelector = "") {
-    const commentsWithHash = extractCommentsWithHash(cssText);
-    cssText = stripComments(cssText);
+    const comments = [];
+    cssText = cssText.replace(_commentRe, (m) => {
+      var _a2;
+      if (m.match(_commentWithHashRe)) {
+        comments.push(m);
+      } else {
+        const newLinesMatches = m.match(_newLinesRe);
+        comments.push(((_a2 = newLinesMatches == null ? void 0 : newLinesMatches.join("")) != null ? _a2 : "") + "\n");
+      }
+      return COMMENT_PLACEHOLDER;
+    });
     cssText = this._insertDirectives(cssText);
     const scopedCssText = this._scopeCssText(cssText, selector, hostSelector);
-    return [scopedCssText, ...commentsWithHash].join("\n");
+    let commentIdx = 0;
+    return scopedCssText.replace(_commentWithHashPlaceHolderRe, () => comments[commentIdx++]);
   }
   _insertDirectives(cssText) {
     cssText = this._insertPolyfillDirectivesInCssText(cssText);
@@ -7071,17 +7081,14 @@ var _selectorReSuffix = "([>\\s~+[.,{:][\\s\\S]*)?$";
 var _polyfillHostRe = /-shadowcsshost/gim;
 var _colonHostRe = /:host/gim;
 var _colonHostContextRe = /:host-context/gim;
+var _newLinesRe = /\r?\n/g;
 var _commentRe = /\/\*[\s\S]*?\*\//g;
+var _commentWithHashRe = /\/\*\s*#\s*source(Mapping)?URL=/g;
+var COMMENT_PLACEHOLDER = "%COMMENT%";
+var _commentWithHashPlaceHolderRe = new RegExp(COMMENT_PLACEHOLDER, "g");
 var _placeholderRe = /__ph-(\d+)__/g;
-function stripComments(input) {
-  return input.replace(_commentRe, "");
-}
-var _commentWithHashRe = /\/\*\s*#\s*source(Mapping)?URL=[\s\S]+?\*\//g;
-function extractCommentsWithHash(input) {
-  return input.match(_commentWithHashRe) || [];
-}
 var BLOCK_PLACEHOLDER = "%BLOCK%";
-var _ruleRe = /(\s*)([^;\{\}]+?)(\s*)((?:{%BLOCK%}?\s*;?)|(?:\s*;))/g;
+var _ruleRe = new RegExp(`(\\s*(?:${COMMENT_PLACEHOLDER}\\s*)*)([^;\\{\\}]+?)(\\s*)((?:{%BLOCK%}?\\s*;?)|(?:\\s*;))`, "g");
 var CONTENT_PAIRS = /* @__PURE__ */ new Map([["{", "}"]]);
 var COMMA_IN_PLACEHOLDER = "%COMMA_IN_PLACEHOLDER%";
 var SEMI_IN_PLACEHOLDER = "%SEMI_IN_PLACEHOLDER%";
@@ -18543,7 +18550,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.0.3+sha-9e68a62");
+var VERSION2 = new Version("16.0.4+sha-703b8fc");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -19862,7 +19869,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.0.3+sha-9e68a62"));
+  definitionMap.set("version", literal("16.0.4+sha-703b8fc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -19931,7 +19938,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.0.3+sha-9e68a62"));
+  definitionMap.set("version", literal("16.0.4+sha-703b8fc"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -20113,7 +20120,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.0.3+sha-9e68a62"));
+  definitionMap.set("version", literal("16.0.4+sha-703b8fc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -20136,7 +20143,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.0.3+sha-9e68a62"));
+  definitionMap.set("version", literal("16.0.4+sha-703b8fc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -20174,7 +20181,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.0.3+sha-9e68a62"));
+  definitionMap.set("version", literal("16.0.4+sha-703b8fc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -20195,7 +20202,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.0.3+sha-9e68a62"));
+  definitionMap.set("version", literal("16.0.4+sha-703b8fc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -20230,7 +20237,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.0.3+sha-9e68a62"));
+  definitionMap.set("version", literal("16.0.4+sha-703b8fc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -20247,7 +20254,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.0.3+sha-9e68a62");
+var VERSION3 = new Version("16.0.4+sha-703b8fc");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
