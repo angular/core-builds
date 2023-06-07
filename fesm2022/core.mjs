@@ -1,11 +1,11 @@
 /**
- * @license Angular v16.1.0-next.3+sha-b3d2295
+ * @license Angular v16.1.0-next.3+sha-0875b51
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { Subject, Subscription, BehaviorSubject, Observable, merge as merge$1, of } from 'rxjs';
-import { share, mergeMap, distinctUntilChanged, first } from 'rxjs/operators';
+import { share, switchMap, distinctUntilChanged, first } from 'rxjs/operators';
 
 function getClosureSafeProperty(objWithPropertyToExtract) {
     for (let key in objWithPropertyToExtract) {
@@ -10073,7 +10073,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-next.3+sha-b3d2295');
+const VERSION = new Version('16.1.0-next.3+sha-0875b51');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -24886,7 +24886,7 @@ function getStandaloneDefFunctions(type, imports) {
             // Standalone components are always able to self-reference, so include the component's own
             // definition in its `directiveDefs`.
             cachedDirectiveDefs = [getComponentDef(type)];
-            const seen = new Set();
+            const seen = new Set([type]);
             for (const rawDep of imports) {
                 ngDevMode && verifyStandaloneImport(rawDep, type);
                 const dep = resolveForwardRef(rawDep);
@@ -27266,7 +27266,7 @@ class ApplicationRef {
          * Returns an Observable that indicates when the application is stable or unstable.
          */
         this.isStable = inject(InitialRenderPendingTasks)
-            .hasPendingTasks.pipe(mergeMap(hasPendingTasks => hasPendingTasks ? of(false) : this.zoneIsStable), distinctUntilChanged(), share());
+            .hasPendingTasks.pipe(switchMap(hasPendingTasks => hasPendingTasks ? of(false) : this.zoneIsStable), distinctUntilChanged(), share());
         this._injector = inject(EnvironmentInjector);
     }
     /**
