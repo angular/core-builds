@@ -7461,7 +7461,10 @@ var ElementAttributes = class {
     this.known.add(name);
     const array = this.arrayFor(kind);
     array.push(...getAttributeNameLiterals(name));
-    if (value !== null) {
+    if (kind === ElementAttributeKind.Attribute || kind === ElementAttributeKind.Style) {
+      if (value === null) {
+        throw Error("Attribute & style element attributes must have a value");
+      }
       array.push(value);
     }
   }
@@ -7510,6 +7513,7 @@ var OpKind;
   OpKind2[OpKind2["InterpolateProperty"] = 14] = "InterpolateProperty";
   OpKind2[OpKind2["Advance"] = 15] = "Advance";
   OpKind2[OpKind2["Pipe"] = 16] = "Pipe";
+  OpKind2[OpKind2["Attribute"] = 17] = "Attribute";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -7896,6 +7900,11 @@ function transformExpressionsInOp(op, transform, flags) {
     case OpKind.Statement:
       transformExpressionsInStatement(op.statement, transform, flags);
       break;
+    case OpKind.Attribute:
+      if (op.value) {
+        transformExpressionsInExpression(op.value, transform, flags);
+      }
+      break;
     case OpKind.Variable:
       op.initializer = transformExpressionsInExpression(op.initializer, transform, flags);
       break;
@@ -8165,6 +8174,16 @@ var NEW_OP = {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/create.mjs
+var elementContainerOpKinds = /* @__PURE__ */ new Set([
+  OpKind.Element,
+  OpKind.ElementStart,
+  OpKind.Container,
+  OpKind.ContainerStart,
+  OpKind.Template
+]);
+function isElementOrContainerOp(op) {
+  return elementContainerOpKinds.has(op.kind);
+}
 function createElementStartOp(tag, xref) {
   return __spreadValues(__spreadValues({
     kind: OpKind.ElementStart,
@@ -8225,18 +8244,29 @@ function createInterpolateTextOp(xref, strings, expressions) {
     expressions
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
-function createPropertyOp(xref, name, expression) {
+function createPropertyOp(xref, bindingKind, name, expression) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.Property,
     target: xref,
+    bindingKind,
     name,
     expression
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
-function createInterpolatePropertyOp(xref, name, strings, expressions) {
+function createAttributeOp(target, attributeKind, name, value) {
+  return __spreadValues({
+    kind: OpKind.Attribute,
+    target,
+    attributeKind,
+    name,
+    value
+  }, NEW_OP);
+}
+function createInterpolatePropertyOp(xref, bindingKind, name, strings, expressions) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.InterpolateProperty,
     target: xref,
+    bindingKind,
     name,
     strings,
     expressions
@@ -8247,6 +8277,181 @@ function createAdvanceOp(delta) {
     kind: OpKind.Advance,
     delta
   }, NEW_OP);
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/var_counting.mjs
+function phaseVarCounting(cpl) {
+  for (const [_, view] of cpl.views) {
+    let varCount = 0;
+    for (const op of view.ops()) {
+      if (hasConsumesVarsTrait(op)) {
+        varCount += varsUsedByOp(op);
+      }
+      visitExpressionsInOp(op, (expr) => {
+        if (!isIrExpression(expr)) {
+          return;
+        }
+        if (hasUsesVarOffsetTrait(expr)) {
+          expr.varOffset = varCount;
+        }
+        if (hasConsumesVarsTrait(expr)) {
+          varCount += varsUsedByIrExpression(expr);
+        }
+      });
+    }
+    view.vars = varCount;
+  }
+  for (const [_, view] of cpl.views) {
+    for (const op of view.create) {
+      if (op.kind !== OpKind.Template) {
+        continue;
+      }
+      const childView = cpl.views.get(op.xref);
+      op.vars = childView.vars;
+    }
+  }
+}
+function varsUsedByOp(op) {
+  switch (op.kind) {
+    case OpKind.Property:
+      return 1;
+    case OpKind.InterpolateText:
+      return op.expressions.length;
+    case OpKind.InterpolateProperty:
+      return 1 + op.expressions.length;
+    default:
+      throw new Error(`Unhandled op: ${OpKind[op.kind]}`);
+  }
+}
+function varsUsedByIrExpression(expr) {
+  switch (expr.kind) {
+    case ExpressionKind.PureFunctionExpr:
+      return 1 + expr.args.length;
+    case ExpressionKind.PipeBinding:
+      return 1 + expr.args.length;
+    case ExpressionKind.PipeBindingVariadic:
+      return 1 + expr.numArgs;
+    default:
+      throw new Error(`AssertionError: unhandled ConsumesVarsTrait expression ${expr.constructor.name}`);
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/align_pipe_variadic_var_offset.mjs
+function phaseAlignPipeVariadicVarOffset(cpl) {
+  for (const view of cpl.views.values()) {
+    for (const op of view.update) {
+      visitExpressionsInOp(op, (expr) => {
+        if (!(expr instanceof PipeBindingVariadicExpr)) {
+          return expr;
+        }
+        if (!(expr.args instanceof PureFunctionExpr)) {
+          return expr;
+        }
+        if (expr.varOffset === null || expr.args.varOffset === null) {
+          throw new Error(`Must run after variable counting`);
+        }
+        expr.varOffset = expr.args.varOffset;
+        expr.args.varOffset = expr.varOffset + varsUsedByIrExpression(expr);
+      });
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/attribute_extraction.mjs
+function lookupElement(elements, xref) {
+  const el = elements.get(xref);
+  if (el === void 0) {
+    throw new Error("All attributes should have an element-like target.");
+  }
+  return el;
+}
+function phaseAttributeExtraction(cpl, compatibility) {
+  for (const [_, view] of cpl.views) {
+    populateElementAttributes(view, compatibility);
+  }
+}
+function populateElementAttributes(view, compatibility) {
+  const elements = /* @__PURE__ */ new Map();
+  for (const op of view.create) {
+    if (!isElementOrContainerOp(op)) {
+      continue;
+    }
+    elements.set(op.xref, op);
+  }
+  for (const op of view.ops()) {
+    let ownerOp;
+    switch (op.kind) {
+      case OpKind.Attribute:
+        ownerOp = lookupElement(elements, op.target);
+        assertIsElementAttributes(ownerOp.attributes);
+        let extractable = compatibility ? op.value instanceof LiteralExpr && typeof op.value.value === "string" : op.value.isConstant();
+        if (extractable) {
+          ownerOp.attributes.add(op.attributeKind, op.name, op.value);
+          OpList.remove(op);
+        }
+        break;
+      case OpKind.Property:
+      case OpKind.InterpolateProperty:
+        ownerOp = lookupElement(elements, op.target);
+        assertIsElementAttributes(ownerOp.attributes);
+        ownerOp.attributes.add(op.bindingKind, op.name, null);
+        break;
+      case OpKind.Listener:
+        ownerOp = lookupElement(elements, op.target);
+        assertIsElementAttributes(ownerOp.attributes);
+        ownerOp.attributes.add(ElementAttributeKind.Binding, op.name, null);
+        if (ownerOp.kind === OpKind.Template) {
+          OpList.remove(op);
+        }
+        break;
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/chaining.mjs
+var CHAINABLE = /* @__PURE__ */ new Set([
+  Identifiers.elementStart,
+  Identifiers.elementEnd,
+  Identifiers.property,
+  Identifiers.elementContainerStart,
+  Identifiers.elementContainerEnd,
+  Identifiers.elementContainer
+]);
+function phaseChaining(cpl) {
+  for (const [_, view] of cpl.views) {
+    chainOperationsInList(view.create);
+    chainOperationsInList(view.update);
+  }
+}
+function chainOperationsInList(opList) {
+  let chain = null;
+  for (const op of opList) {
+    if (op.kind !== OpKind.Statement || !(op.statement instanceof ExpressionStatement)) {
+      chain = null;
+      continue;
+    }
+    if (!(op.statement.expr instanceof InvokeFunctionExpr) || !(op.statement.expr.fn instanceof ExternalExpr)) {
+      chain = null;
+      continue;
+    }
+    const instruction = op.statement.expr.fn.value;
+    if (!CHAINABLE.has(instruction)) {
+      chain = null;
+      continue;
+    }
+    if (chain !== null && chain.instruction === instruction) {
+      const expression = chain.expression.callFn(op.statement.expr.args, op.statement.expr.sourceSpan, op.statement.expr.pure);
+      chain.expression = expression;
+      chain.op.statement = expression.toStmt();
+      OpList.remove(op);
+    } else {
+      chain = {
+        op,
+        instruction,
+        expression: op.statement.expr
+      };
+    }
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/const_collection.mjs
@@ -8341,6 +8546,388 @@ function phaseGenerateAdvance(cpl) {
       }
     }
   }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_variables.mjs
+function phaseGenerateVariables(cpl) {
+  recursivelyProcessView(cpl.root, null);
+}
+function recursivelyProcessView(view, parentScope) {
+  const scope = getScopeForView(view, parentScope);
+  if (view.parent !== null) {
+  }
+  for (const op of view.create) {
+    switch (op.kind) {
+      case OpKind.Template:
+        recursivelyProcessView(view.tpl.views.get(op.xref), scope);
+        break;
+      case OpKind.Listener:
+        op.handlerOps.prepend(generateVariablesInScopeForView(view, scope));
+        break;
+    }
+  }
+  const preambleOps = generateVariablesInScopeForView(view, scope);
+  view.update.prepend(preambleOps);
+}
+function getScopeForView(view, parent) {
+  const scope = {
+    view: view.xref,
+    viewContextVariable: {
+      kind: SemanticVariableKind.Context,
+      name: null,
+      view: view.xref
+    },
+    contextVariables: /* @__PURE__ */ new Map(),
+    references: [],
+    parent
+  };
+  for (const identifier of view.contextVariables.keys()) {
+    scope.contextVariables.set(identifier, {
+      kind: SemanticVariableKind.Identifier,
+      name: null,
+      identifier
+    });
+  }
+  for (const op of view.create) {
+    switch (op.kind) {
+      case OpKind.Element:
+      case OpKind.ElementStart:
+      case OpKind.Template:
+        if (!Array.isArray(op.localRefs)) {
+          throw new Error(`AssertionError: expected localRefs to be an array`);
+        }
+        for (let offset = 0; offset < op.localRefs.length; offset++) {
+          scope.references.push({
+            name: op.localRefs[offset].name,
+            targetId: op.xref,
+            offset,
+            variable: {
+              kind: SemanticVariableKind.Identifier,
+              name: null,
+              identifier: op.localRefs[offset].name
+            }
+          });
+        }
+        break;
+    }
+  }
+  return scope;
+}
+function generateVariablesInScopeForView(view, scope) {
+  const newOps = [];
+  if (scope.view !== view.xref) {
+    newOps.push(createVariableOp(view.tpl.allocateXrefId(), scope.viewContextVariable, new NextContextExpr()));
+  }
+  for (const [name, value] of view.tpl.views.get(scope.view).contextVariables) {
+    newOps.push(createVariableOp(view.tpl.allocateXrefId(), scope.contextVariables.get(name), new ReadPropExpr(new ContextExpr(scope.view), value)));
+  }
+  for (const ref of scope.references) {
+    newOps.push(createVariableOp(view.tpl.allocateXrefId(), ref.variable, new ReferenceExpr(ref.targetId, ref.offset)));
+  }
+  if (scope.parent !== null) {
+    newOps.push(...generateVariablesInScopeForView(view, scope.parent));
+  }
+  return newOps;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/local_refs.mjs
+function phaseLocalRefs(cpl) {
+  for (const view of cpl.views.values()) {
+    for (const op of view.create) {
+      switch (op.kind) {
+        case OpKind.ElementStart:
+        case OpKind.Element:
+        case OpKind.Template:
+          if (!Array.isArray(op.localRefs)) {
+            throw new Error(`AssertionError: expected localRefs to be an array still`);
+          }
+          op.numSlotsUsed += op.localRefs.length;
+          if (op.localRefs.length > 0) {
+            const localRefs = serializeLocalRefs(op.localRefs);
+            op.localRefs = cpl.addConst(localRefs);
+          } else {
+            op.localRefs = null;
+          }
+          break;
+      }
+    }
+  }
+}
+function serializeLocalRefs(refs) {
+  const constRefs = [];
+  for (const ref of refs) {
+    constRefs.push(literal(ref.name), literal(ref.target));
+  }
+  return literalArr(constRefs);
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/naming.mjs
+function phaseNaming(cpl) {
+  addNamesToView(cpl.root, cpl.componentName, { index: 0 });
+}
+function addNamesToView(view, baseName, state) {
+  if (view.fnName === null) {
+    view.fnName = `${baseName}_Template`;
+  }
+  const varNames = /* @__PURE__ */ new Map();
+  for (const op of view.ops()) {
+    switch (op.kind) {
+      case OpKind.Listener:
+        if (op.handlerFnName === null) {
+          if (op.slot === null) {
+            throw new Error(`Expected a slot to be assigned`);
+          }
+          op.handlerFnName = `${view.fnName}_${op.tag}_${op.name}_${op.slot}_listener`;
+        }
+        break;
+      case OpKind.Variable:
+        varNames.set(op.xref, getVariableName(op.variable, state));
+        break;
+      case OpKind.Template:
+        const childView = view.tpl.views.get(op.xref);
+        if (op.slot === null) {
+          throw new Error(`Expected slot to be assigned`);
+        }
+        const safeTagName = op.tag.replace("-", "_");
+        addNamesToView(childView, `${baseName}_${safeTagName}_${op.slot}`, state);
+        break;
+    }
+  }
+  for (const op of view.ops()) {
+    visitExpressionsInOp(op, (expr) => {
+      if (!(expr instanceof ReadVariableExpr) || expr.name !== null) {
+        return;
+      }
+      if (!varNames.has(expr.xref)) {
+        throw new Error(`Variable ${expr.xref} not yet named`);
+      }
+      expr.name = varNames.get(expr.xref);
+    });
+  }
+}
+function getVariableName(variable2, state) {
+  if (variable2.name === null) {
+    switch (variable2.kind) {
+      case SemanticVariableKind.Identifier:
+        variable2.name = `${variable2.identifier}_${state.index++}`;
+        break;
+      default:
+        variable2.name = `_r${state.index++}`;
+        break;
+    }
+  }
+  return variable2.name;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/next_context_merging.mjs
+function phaseMergeNextContext(cpl) {
+  for (const view of cpl.views.values()) {
+    for (const op of view.create) {
+      if (op.kind === OpKind.Listener) {
+        mergeNextContextsInOps(op.handlerOps);
+      }
+    }
+    mergeNextContextsInOps(view.update);
+  }
+}
+function mergeNextContextsInOps(ops) {
+  for (const op of ops) {
+    if (op.kind !== OpKind.Statement || !(op.statement instanceof ExpressionStatement) || !(op.statement.expr instanceof NextContextExpr)) {
+      continue;
+    }
+    const mergeSteps = op.statement.expr.steps;
+    let tryToMerge = true;
+    for (let candidate = op.next; candidate.kind !== OpKind.ListEnd && tryToMerge; candidate = candidate.next) {
+      visitExpressionsInOp(candidate, (expr, flags) => {
+        if (!isIrExpression(expr)) {
+          return expr;
+        }
+        if (!tryToMerge) {
+          return;
+        }
+        if (flags & VisitorContextFlag.InChildOperation) {
+          return;
+        }
+        switch (expr.kind) {
+          case ExpressionKind.NextContext:
+            expr.steps += mergeSteps;
+            OpList.remove(op);
+            tryToMerge = false;
+            break;
+          case ExpressionKind.GetCurrentView:
+          case ExpressionKind.Reference:
+            tryToMerge = false;
+            break;
+        }
+      });
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/ng_container.mjs
+var CONTAINER_TAG = "ng-container";
+function phaseNgContainer(cpl) {
+  for (const [_, view] of cpl.views) {
+    const updatedElementXrefs = /* @__PURE__ */ new Set();
+    for (const op of view.create) {
+      if (op.kind === OpKind.ElementStart && op.tag === CONTAINER_TAG) {
+        op.kind = OpKind.ContainerStart;
+        updatedElementXrefs.add(op.xref);
+      }
+      if (op.kind === OpKind.ElementEnd && updatedElementXrefs.has(op.xref)) {
+        op.kind = OpKind.ContainerEnd;
+      }
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_creation.mjs
+function phasePipeCreation(cpl) {
+  for (const view of cpl.views.values()) {
+    processPipeBindingsInView(view);
+  }
+}
+function processPipeBindingsInView(view) {
+  for (const updateOp of view.update) {
+    visitExpressionsInOp(updateOp, (expr, flags) => {
+      if (!isIrExpression(expr)) {
+        return;
+      }
+      if (expr.kind !== ExpressionKind.PipeBinding) {
+        return;
+      }
+      if (flags & VisitorContextFlag.InChildOperation) {
+        throw new Error(`AssertionError: pipe bindings should not appear in child expressions`);
+      }
+      if (!hasDependsOnSlotContextTrait(updateOp)) {
+        throw new Error(`AssertionError: pipe binding associated with non-slot operation ${OpKind[updateOp.kind]}`);
+      }
+      addPipeToCreationBlock(view, updateOp.target, expr);
+    });
+  }
+}
+function addPipeToCreationBlock(view, afterTargetXref, binding) {
+  for (let op = view.create.head.next; op.kind !== OpKind.ListEnd; op = op.next) {
+    if (!hasConsumesSlotTrait(op)) {
+      continue;
+    }
+    if (op.xref !== afterTargetXref) {
+      continue;
+    }
+    while (op.next.kind === OpKind.Pipe) {
+      op = op.next;
+    }
+    const pipe2 = createPipeOp(binding.target, binding.name);
+    OpList.insertBefore(pipe2, op.next);
+    return;
+  }
+  throw new Error(`AssertionError: unable to find insertion point for pipe ${binding.name}`);
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_variadic.mjs
+function phasePipeVariadic(cpl) {
+  for (const view of cpl.views.values()) {
+    for (const op of view.update) {
+      transformExpressionsInOp(op, (expr) => {
+        if (!(expr instanceof PipeBindingExpr)) {
+          return expr;
+        }
+        if (expr.args.length <= 4) {
+          return expr;
+        }
+        return new PipeBindingVariadicExpr(expr.target, expr.name, literalArr(expr.args), expr.args.length);
+      }, VisitorContextFlag.None);
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pure_function_extraction.mjs
+function phasePureFunctionExtraction(cpl) {
+  for (const view of cpl.views.values()) {
+    for (const op of view.ops()) {
+      visitExpressionsInOp(op, (expr) => {
+        if (!(expr instanceof PureFunctionExpr) || expr.body === null) {
+          return;
+        }
+        const constantDef = new PureFunctionConstant(expr.args.length);
+        expr.fn = cpl.pool.getSharedConstant(constantDef, expr.body);
+        expr.body = null;
+      });
+    }
+  }
+}
+var PureFunctionConstant = class extends GenericKeyFn {
+  constructor(numArgs) {
+    super();
+    this.numArgs = numArgs;
+  }
+  keyOf(expr) {
+    if (expr instanceof PureFunctionParameterExpr) {
+      return `param(${expr.index})`;
+    } else {
+      return super.keyOf(expr);
+    }
+  }
+  toSharedConstantDeclaration(declName, keyExpr) {
+    const fnParams = [];
+    for (let idx = 0; idx < this.numArgs; idx++) {
+      fnParams.push(new FnParam("_p" + idx));
+    }
+    const returnExpr = transformExpressionsInExpression(keyExpr, (expr) => {
+      if (!(expr instanceof PureFunctionParameterExpr)) {
+        return expr;
+      }
+      return variable("_p" + expr.index);
+    }, VisitorContextFlag.None);
+    return new DeclareFunctionStmt(declName, fnParams, [new ReturnStatement(returnExpr)]);
+  }
+};
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pure_literal_structures.mjs
+function phasePureLiteralStructures(cpl) {
+  for (const view of cpl.views.values()) {
+    for (const op of view.update) {
+      transformExpressionsInOp(op, (expr, flags) => {
+        if (flags & VisitorContextFlag.InChildOperation) {
+          return expr;
+        }
+        if (expr instanceof LiteralArrayExpr) {
+          return transformLiteralArray(expr);
+        } else if (expr instanceof LiteralMapExpr) {
+          return transformLiteralMap(expr);
+        }
+        return expr;
+      }, VisitorContextFlag.None);
+    }
+  }
+}
+function transformLiteralArray(expr) {
+  const derivedEntries = [];
+  const nonConstantArgs = [];
+  for (const entry of expr.entries) {
+    if (entry.isConstant()) {
+      derivedEntries.push(entry);
+    } else {
+      const idx = nonConstantArgs.length;
+      nonConstantArgs.push(entry);
+      derivedEntries.push(new PureFunctionParameterExpr(idx));
+    }
+  }
+  return new PureFunctionExpr(literalArr(derivedEntries), nonConstantArgs);
+}
+function transformLiteralMap(expr) {
+  let derivedEntries = [];
+  const nonConstantArgs = [];
+  for (const entry of expr.entries) {
+    if (entry.value.isConstant()) {
+      derivedEntries.push(entry);
+    } else {
+      const idx = nonConstantArgs.length;
+      nonConstantArgs.push(entry.value);
+      derivedEntries.push(new LiteralMapEntry(entry.key, new PureFunctionParameterExpr(idx), entry.quoted));
+    }
+  }
+  return new PureFunctionExpr(literalMap(derivedEntries), nonConstantArgs);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/instruction.mjs
@@ -8726,6 +9313,130 @@ var LookForEventVisitor = class extends RecursiveAstVisitor {
   }
 };
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_contexts.mjs
+function phaseResolveContexts(cpl) {
+  for (const view of cpl.views.values()) {
+    processLexicalScope(view, view.create);
+    processLexicalScope(view, view.update);
+  }
+}
+function processLexicalScope(view, ops) {
+  const scope = /* @__PURE__ */ new Map();
+  scope.set(view.xref, variable("ctx"));
+  for (const op of ops) {
+    switch (op.kind) {
+      case OpKind.Variable:
+        switch (op.variable.kind) {
+          case SemanticVariableKind.Context:
+            scope.set(op.variable.view, new ReadVariableExpr(op.xref));
+            break;
+        }
+        break;
+      case OpKind.Listener:
+        processLexicalScope(view, op.handlerOps);
+        break;
+    }
+  }
+  for (const op of ops) {
+    transformExpressionsInOp(op, (expr) => {
+      if (expr instanceof ContextExpr) {
+        if (!scope.has(expr.view)) {
+          throw new Error(`No context found for reference to view ${expr.view} from view ${view.xref}`);
+        }
+        return scope.get(expr.view);
+      } else {
+        return expr;
+      }
+    }, VisitorContextFlag.None);
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_names.mjs
+function phaseResolveNames(cpl) {
+  for (const [_, view] of cpl.views) {
+    processLexicalScope2(view, view.create, null);
+    processLexicalScope2(view, view.update, null);
+  }
+}
+function processLexicalScope2(view, ops, savedView) {
+  const scope = /* @__PURE__ */ new Map();
+  for (const op of ops) {
+    switch (op.kind) {
+      case OpKind.Variable:
+        switch (op.variable.kind) {
+          case SemanticVariableKind.Identifier:
+            if (scope.has(op.variable.identifier)) {
+              continue;
+            }
+            scope.set(op.variable.identifier, op.xref);
+            break;
+          case SemanticVariableKind.SavedView:
+            savedView = {
+              view: op.variable.view,
+              variable: op.xref
+            };
+            break;
+        }
+        break;
+      case OpKind.Listener:
+        processLexicalScope2(view, op.handlerOps, savedView);
+        break;
+    }
+  }
+  for (const op of ops) {
+    transformExpressionsInOp(op, (expr) => {
+      if (expr instanceof LexicalReadExpr) {
+        if (scope.has(expr.name)) {
+          return new ReadVariableExpr(scope.get(expr.name));
+        } else {
+          return new ReadPropExpr(new ContextExpr(view.tpl.root.xref), expr.name);
+        }
+      } else if (expr instanceof RestoreViewExpr && typeof expr.view === "number") {
+        if (savedView === null || savedView.view !== expr.view) {
+          throw new Error(`AssertionError: no saved view ${expr.view} from view ${view.xref}`);
+        }
+        expr.view = new ReadVariableExpr(savedView.variable);
+        return expr;
+      } else {
+        return expr;
+      }
+    }, VisitorContextFlag.None);
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/save_restore_view.mjs
+function phaseSaveRestoreView(cpl) {
+  for (const view of cpl.views.values()) {
+    if (view === cpl.root) {
+      continue;
+    }
+    view.create.prepend([
+      createVariableOp(view.tpl.allocateXrefId(), {
+        kind: SemanticVariableKind.SavedView,
+        name: null,
+        view: view.xref
+      }, new GetCurrentViewExpr())
+    ]);
+    for (const op of view.create) {
+      if (op.kind !== OpKind.Listener) {
+        continue;
+      }
+      op.handlerOps.prepend([
+        createVariableOp(view.tpl.allocateXrefId(), {
+          kind: SemanticVariableKind.Context,
+          name: null,
+          view: view.xref
+        }, new RestoreViewExpr(view.xref))
+      ]);
+      for (const handlerOp of op.handlerOps) {
+        if (handlerOp.kind === OpKind.Statement && handlerOp.statement instanceof ReturnStatement) {
+          handlerOp.statement.value = new ResetViewExpr(handlerOp.statement.value);
+        }
+      }
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/slot_allocation.mjs
 function phaseSlotAllocation(cpl) {
   const slotMap = /* @__PURE__ */ new Map();
@@ -8766,325 +9477,6 @@ function phaseSlotAllocation(cpl) {
         expr.slot = slotMap.get(expr.target);
       });
     }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/var_counting.mjs
-function phaseVarCounting(cpl) {
-  for (const [_, view] of cpl.views) {
-    let varCount = 0;
-    for (const op of view.ops()) {
-      if (hasConsumesVarsTrait(op)) {
-        varCount += varsUsedByOp(op);
-      }
-      visitExpressionsInOp(op, (expr) => {
-        if (!isIrExpression(expr)) {
-          return;
-        }
-        if (hasUsesVarOffsetTrait(expr)) {
-          expr.varOffset = varCount;
-        }
-        if (hasConsumesVarsTrait(expr)) {
-          varCount += varsUsedByIrExpression(expr);
-        }
-      });
-    }
-    view.vars = varCount;
-  }
-  for (const [_, view] of cpl.views) {
-    for (const op of view.create) {
-      if (op.kind !== OpKind.Template) {
-        continue;
-      }
-      const childView = cpl.views.get(op.xref);
-      op.vars = childView.vars;
-    }
-  }
-}
-function varsUsedByOp(op) {
-  switch (op.kind) {
-    case OpKind.Property:
-      return 1;
-    case OpKind.InterpolateText:
-      return op.expressions.length;
-    case OpKind.InterpolateProperty:
-      return 1 + op.expressions.length;
-    default:
-      throw new Error(`Unhandled op: ${OpKind[op.kind]}`);
-  }
-}
-function varsUsedByIrExpression(expr) {
-  switch (expr.kind) {
-    case ExpressionKind.PureFunctionExpr:
-      return 1 + expr.args.length;
-    case ExpressionKind.PipeBinding:
-      return 1 + expr.args.length;
-    case ExpressionKind.PipeBindingVariadic:
-      return 1 + expr.numArgs;
-    default:
-      throw new Error(`AssertionError: unhandled ConsumesVarsTrait expression ${expr.constructor.name}`);
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/naming.mjs
-function phaseNaming(cpl) {
-  addNamesToView(cpl.root, cpl.componentName, { index: 0 });
-}
-function addNamesToView(view, baseName, state) {
-  if (view.fnName === null) {
-    view.fnName = `${baseName}_Template`;
-  }
-  const varNames = /* @__PURE__ */ new Map();
-  for (const op of view.ops()) {
-    switch (op.kind) {
-      case OpKind.Listener:
-        if (op.handlerFnName === null) {
-          if (op.slot === null) {
-            throw new Error(`Expected a slot to be assigned`);
-          }
-          op.handlerFnName = `${view.fnName}_${op.tag}_${op.name}_${op.slot}_listener`;
-        }
-        break;
-      case OpKind.Variable:
-        varNames.set(op.xref, getVariableName(op.variable, state));
-        break;
-      case OpKind.Template:
-        const childView = view.tpl.views.get(op.xref);
-        if (op.slot === null) {
-          throw new Error(`Expected slot to be assigned`);
-        }
-        const safeTagName = op.tag.replace("-", "_");
-        addNamesToView(childView, `${baseName}_${safeTagName}_${op.slot}`, state);
-        break;
-    }
-  }
-  for (const op of view.ops()) {
-    visitExpressionsInOp(op, (expr) => {
-      if (!(expr instanceof ReadVariableExpr) || expr.name !== null) {
-        return;
-      }
-      if (!varNames.has(expr.xref)) {
-        throw new Error(`Variable ${expr.xref} not yet named`);
-      }
-      expr.name = varNames.get(expr.xref);
-    });
-  }
-}
-function getVariableName(variable2, state) {
-  if (variable2.name === null) {
-    switch (variable2.kind) {
-      case SemanticVariableKind.Identifier:
-        variable2.name = `${variable2.identifier}_${state.index++}`;
-        break;
-      default:
-        variable2.name = `_r${state.index++}`;
-        break;
-    }
-  }
-  return variable2.name;
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/local_refs.mjs
-function phaseLocalRefs(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.create) {
-      switch (op.kind) {
-        case OpKind.ElementStart:
-        case OpKind.Element:
-        case OpKind.Template:
-          if (!Array.isArray(op.localRefs)) {
-            throw new Error(`AssertionError: expected localRefs to be an array still`);
-          }
-          op.numSlotsUsed += op.localRefs.length;
-          if (op.localRefs.length > 0) {
-            const localRefs = serializeLocalRefs(op.localRefs);
-            op.localRefs = cpl.addConst(localRefs);
-          } else {
-            op.localRefs = null;
-          }
-          break;
-      }
-    }
-  }
-}
-function serializeLocalRefs(refs) {
-  const constRefs = [];
-  for (const ref of refs) {
-    constRefs.push(literal(ref.name), literal(ref.target));
-  }
-  return literalArr(constRefs);
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_variables.mjs
-function phaseGenerateVariables(cpl) {
-  recursivelyProcessView(cpl.root, null);
-}
-function recursivelyProcessView(view, parentScope) {
-  const scope = getScopeForView(view, parentScope);
-  if (view.parent !== null) {
-  }
-  for (const op of view.create) {
-    switch (op.kind) {
-      case OpKind.Template:
-        recursivelyProcessView(view.tpl.views.get(op.xref), scope);
-        break;
-      case OpKind.Listener:
-        op.handlerOps.prepend(generateVariablesInScopeForView(view, scope));
-        break;
-    }
-  }
-  const preambleOps = generateVariablesInScopeForView(view, scope);
-  view.update.prepend(preambleOps);
-}
-function getScopeForView(view, parent) {
-  const scope = {
-    view: view.xref,
-    viewContextVariable: {
-      kind: SemanticVariableKind.Context,
-      name: null,
-      view: view.xref
-    },
-    contextVariables: /* @__PURE__ */ new Map(),
-    references: [],
-    parent
-  };
-  for (const identifier of view.contextVariables.keys()) {
-    scope.contextVariables.set(identifier, {
-      kind: SemanticVariableKind.Identifier,
-      name: null,
-      identifier
-    });
-  }
-  for (const op of view.create) {
-    switch (op.kind) {
-      case OpKind.Element:
-      case OpKind.ElementStart:
-      case OpKind.Template:
-        if (!Array.isArray(op.localRefs)) {
-          throw new Error(`AssertionError: expected localRefs to be an array`);
-        }
-        for (let offset = 0; offset < op.localRefs.length; offset++) {
-          scope.references.push({
-            name: op.localRefs[offset].name,
-            targetId: op.xref,
-            offset,
-            variable: {
-              kind: SemanticVariableKind.Identifier,
-              name: null,
-              identifier: op.localRefs[offset].name
-            }
-          });
-        }
-        break;
-    }
-  }
-  return scope;
-}
-function generateVariablesInScopeForView(view, scope) {
-  const newOps = [];
-  if (scope.view !== view.xref) {
-    newOps.push(createVariableOp(view.tpl.allocateXrefId(), scope.viewContextVariable, new NextContextExpr()));
-  }
-  for (const [name, value] of view.tpl.views.get(scope.view).contextVariables) {
-    newOps.push(createVariableOp(view.tpl.allocateXrefId(), scope.contextVariables.get(name), new ReadPropExpr(new ContextExpr(scope.view), value)));
-  }
-  for (const ref of scope.references) {
-    newOps.push(createVariableOp(view.tpl.allocateXrefId(), ref.variable, new ReferenceExpr(ref.targetId, ref.offset)));
-  }
-  if (scope.parent !== null) {
-    newOps.push(...generateVariablesInScopeForView(view, scope.parent));
-  }
-  return newOps;
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_names.mjs
-function phaseResolveNames(cpl) {
-  for (const [_, view] of cpl.views) {
-    processLexicalScope(view, view.create, null);
-    processLexicalScope(view, view.update, null);
-  }
-}
-function processLexicalScope(view, ops, savedView) {
-  const scope = /* @__PURE__ */ new Map();
-  for (const op of ops) {
-    switch (op.kind) {
-      case OpKind.Variable:
-        switch (op.variable.kind) {
-          case SemanticVariableKind.Identifier:
-            if (scope.has(op.variable.identifier)) {
-              continue;
-            }
-            scope.set(op.variable.identifier, op.xref);
-            break;
-          case SemanticVariableKind.SavedView:
-            savedView = {
-              view: op.variable.view,
-              variable: op.xref
-            };
-            break;
-        }
-        break;
-      case OpKind.Listener:
-        processLexicalScope(view, op.handlerOps, savedView);
-        break;
-    }
-  }
-  for (const op of ops) {
-    transformExpressionsInOp(op, (expr) => {
-      if (expr instanceof LexicalReadExpr) {
-        if (scope.has(expr.name)) {
-          return new ReadVariableExpr(scope.get(expr.name));
-        } else {
-          return new ReadPropExpr(new ContextExpr(view.tpl.root.xref), expr.name);
-        }
-      } else if (expr instanceof RestoreViewExpr && typeof expr.view === "number") {
-        if (savedView === null || savedView.view !== expr.view) {
-          throw new Error(`AssertionError: no saved view ${expr.view} from view ${view.xref}`);
-        }
-        expr.view = new ReadVariableExpr(savedView.variable);
-        return expr;
-      } else {
-        return expr;
-      }
-    }, VisitorContextFlag.None);
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_contexts.mjs
-function phaseResolveContexts(cpl) {
-  for (const view of cpl.views.values()) {
-    processLexicalScope2(view, view.create);
-    processLexicalScope2(view, view.update);
-  }
-}
-function processLexicalScope2(view, ops) {
-  const scope = /* @__PURE__ */ new Map();
-  scope.set(view.xref, variable("ctx"));
-  for (const op of ops) {
-    switch (op.kind) {
-      case OpKind.Variable:
-        switch (op.variable.kind) {
-          case SemanticVariableKind.Context:
-            scope.set(op.variable.view, new ReadVariableExpr(op.xref));
-            break;
-        }
-        break;
-      case OpKind.Listener:
-        processLexicalScope2(view, op.handlerOps);
-        break;
-    }
-  }
-  for (const op of ops) {
-    transformExpressionsInOp(op, (expr) => {
-      if (expr instanceof ContextExpr) {
-        if (!scope.has(expr.view)) {
-          throw new Error(`No context found for reference to view ${expr.view} from view ${view.xref}`);
-        }
-        return scope.get(expr.view);
-      } else {
-        return expr;
-      }
-    }, VisitorContextFlag.None);
   }
 }
 
@@ -9298,319 +9690,9 @@ function allowConservativeInlining(decl, target) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/chaining.mjs
-var CHAINABLE = /* @__PURE__ */ new Set([
-  Identifiers.elementStart,
-  Identifiers.elementEnd,
-  Identifiers.property,
-  Identifiers.elementContainerStart,
-  Identifiers.elementContainerEnd,
-  Identifiers.elementContainer
-]);
-function phaseChaining(cpl) {
-  for (const [_, view] of cpl.views) {
-    chainOperationsInList(view.create);
-    chainOperationsInList(view.update);
-  }
-}
-function chainOperationsInList(opList) {
-  let chain = null;
-  for (const op of opList) {
-    if (op.kind !== OpKind.Statement || !(op.statement instanceof ExpressionStatement)) {
-      chain = null;
-      continue;
-    }
-    if (!(op.statement.expr instanceof InvokeFunctionExpr) || !(op.statement.expr.fn instanceof ExternalExpr)) {
-      chain = null;
-      continue;
-    }
-    const instruction = op.statement.expr.fn.value;
-    if (!CHAINABLE.has(instruction)) {
-      chain = null;
-      continue;
-    }
-    if (chain !== null && chain.instruction === instruction) {
-      const expression = chain.expression.callFn(op.statement.expr.args, op.statement.expr.sourceSpan, op.statement.expr.pure);
-      chain.expression = expression;
-      chain.op.statement = expression.toStmt();
-      OpList.remove(op);
-    } else {
-      chain = {
-        op,
-        instruction,
-        expression: op.statement.expr
-      };
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/next_context_merging.mjs
-function phaseMergeNextContext(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.create) {
-      if (op.kind === OpKind.Listener) {
-        mergeNextContextsInOps(op.handlerOps);
-      }
-    }
-    mergeNextContextsInOps(view.update);
-  }
-}
-function mergeNextContextsInOps(ops) {
-  for (const op of ops) {
-    if (op.kind !== OpKind.Statement || !(op.statement instanceof ExpressionStatement) || !(op.statement.expr instanceof NextContextExpr)) {
-      continue;
-    }
-    const mergeSteps = op.statement.expr.steps;
-    let tryToMerge = true;
-    for (let candidate = op.next; candidate.kind !== OpKind.ListEnd && tryToMerge; candidate = candidate.next) {
-      visitExpressionsInOp(candidate, (expr, flags) => {
-        if (!isIrExpression(expr)) {
-          return expr;
-        }
-        if (!tryToMerge) {
-          return;
-        }
-        if (flags & VisitorContextFlag.InChildOperation) {
-          return;
-        }
-        switch (expr.kind) {
-          case ExpressionKind.NextContext:
-            expr.steps += mergeSteps;
-            OpList.remove(op);
-            tryToMerge = false;
-            break;
-          case ExpressionKind.GetCurrentView:
-          case ExpressionKind.Reference:
-            tryToMerge = false;
-            break;
-        }
-      });
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/ng_container.mjs
-var CONTAINER_TAG = "ng-container";
-function phaseNgContainer(cpl) {
-  for (const [_, view] of cpl.views) {
-    const updatedElementXrefs = /* @__PURE__ */ new Set();
-    for (const op of view.create) {
-      if (op.kind === OpKind.ElementStart && op.tag === CONTAINER_TAG) {
-        op.kind = OpKind.ContainerStart;
-        updatedElementXrefs.add(op.xref);
-      }
-      if (op.kind === OpKind.ElementEnd && updatedElementXrefs.has(op.xref)) {
-        op.kind = OpKind.ContainerEnd;
-      }
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/save_restore_view.mjs
-function phaseSaveRestoreView(cpl) {
-  for (const view of cpl.views.values()) {
-    if (view === cpl.root) {
-      continue;
-    }
-    view.create.prepend([
-      createVariableOp(view.tpl.allocateXrefId(), {
-        kind: SemanticVariableKind.SavedView,
-        name: null,
-        view: view.xref
-      }, new GetCurrentViewExpr())
-    ]);
-    for (const op of view.create) {
-      if (op.kind !== OpKind.Listener) {
-        continue;
-      }
-      op.handlerOps.prepend([
-        createVariableOp(view.tpl.allocateXrefId(), {
-          kind: SemanticVariableKind.Context,
-          name: null,
-          view: view.xref
-        }, new RestoreViewExpr(view.xref))
-      ]);
-      for (const handlerOp of op.handlerOps) {
-        if (handlerOp.kind === OpKind.Statement && handlerOp.statement instanceof ReturnStatement) {
-          handlerOp.statement.value = new ResetViewExpr(handlerOp.statement.value);
-        }
-      }
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pure_function_extraction.mjs
-function phasePureFunctionExtraction(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.ops()) {
-      visitExpressionsInOp(op, (expr) => {
-        if (!(expr instanceof PureFunctionExpr) || expr.body === null) {
-          return;
-        }
-        const constantDef = new PureFunctionConstant(expr.args.length);
-        expr.fn = cpl.pool.getSharedConstant(constantDef, expr.body);
-        expr.body = null;
-      });
-    }
-  }
-}
-var PureFunctionConstant = class extends GenericKeyFn {
-  constructor(numArgs) {
-    super();
-    this.numArgs = numArgs;
-  }
-  keyOf(expr) {
-    if (expr instanceof PureFunctionParameterExpr) {
-      return `param(${expr.index})`;
-    } else {
-      return super.keyOf(expr);
-    }
-  }
-  toSharedConstantDeclaration(declName, keyExpr) {
-    const fnParams = [];
-    for (let idx = 0; idx < this.numArgs; idx++) {
-      fnParams.push(new FnParam("_p" + idx));
-    }
-    const returnExpr = transformExpressionsInExpression(keyExpr, (expr) => {
-      if (!(expr instanceof PureFunctionParameterExpr)) {
-        return expr;
-      }
-      return variable("_p" + expr.index);
-    }, VisitorContextFlag.None);
-    return new DeclareFunctionStmt(declName, fnParams, [new ReturnStatement(returnExpr)]);
-  }
-};
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_creation.mjs
-function phasePipeCreation(cpl) {
-  for (const view of cpl.views.values()) {
-    processPipeBindingsInView(view);
-  }
-}
-function processPipeBindingsInView(view) {
-  for (const updateOp of view.update) {
-    visitExpressionsInOp(updateOp, (expr, flags) => {
-      if (!isIrExpression(expr)) {
-        return;
-      }
-      if (expr.kind !== ExpressionKind.PipeBinding) {
-        return;
-      }
-      if (flags & VisitorContextFlag.InChildOperation) {
-        throw new Error(`AssertionError: pipe bindings should not appear in child expressions`);
-      }
-      if (!hasDependsOnSlotContextTrait(updateOp)) {
-        throw new Error(`AssertionError: pipe binding associated with non-slot operation ${OpKind[updateOp.kind]}`);
-      }
-      addPipeToCreationBlock(view, updateOp.target, expr);
-    });
-  }
-}
-function addPipeToCreationBlock(view, afterTargetXref, binding) {
-  for (let op = view.create.head.next; op.kind !== OpKind.ListEnd; op = op.next) {
-    if (!hasConsumesSlotTrait(op)) {
-      continue;
-    }
-    if (op.xref !== afterTargetXref) {
-      continue;
-    }
-    while (op.next.kind === OpKind.Pipe) {
-      op = op.next;
-    }
-    const pipe2 = createPipeOp(binding.target, binding.name);
-    OpList.insertBefore(pipe2, op.next);
-    return;
-  }
-  throw new Error(`AssertionError: unable to find insertion point for pipe ${binding.name}`);
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_variadic.mjs
-function phasePipeVariadic(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.update) {
-      transformExpressionsInOp(op, (expr) => {
-        if (!(expr instanceof PipeBindingExpr)) {
-          return expr;
-        }
-        if (expr.args.length <= 4) {
-          return expr;
-        }
-        return new PipeBindingVariadicExpr(expr.target, expr.name, literalArr(expr.args), expr.args.length);
-      }, VisitorContextFlag.None);
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pure_literal_structures.mjs
-function phasePureLiteralStructures(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.update) {
-      transformExpressionsInOp(op, (expr, flags) => {
-        if (flags & VisitorContextFlag.InChildOperation) {
-          return expr;
-        }
-        if (expr instanceof LiteralArrayExpr) {
-          return transformLiteralArray(expr);
-        } else if (expr instanceof LiteralMapExpr) {
-          return transformLiteralMap(expr);
-        }
-        return expr;
-      }, VisitorContextFlag.None);
-    }
-  }
-}
-function transformLiteralArray(expr) {
-  const derivedEntries = [];
-  const nonConstantArgs = [];
-  for (const entry of expr.entries) {
-    if (entry.isConstant()) {
-      derivedEntries.push(entry);
-    } else {
-      const idx = nonConstantArgs.length;
-      nonConstantArgs.push(entry);
-      derivedEntries.push(new PureFunctionParameterExpr(idx));
-    }
-  }
-  return new PureFunctionExpr(literalArr(derivedEntries), nonConstantArgs);
-}
-function transformLiteralMap(expr) {
-  let derivedEntries = [];
-  const nonConstantArgs = [];
-  for (const entry of expr.entries) {
-    if (entry.value.isConstant()) {
-      derivedEntries.push(entry);
-    } else {
-      const idx = nonConstantArgs.length;
-      nonConstantArgs.push(entry.value);
-      derivedEntries.push(new LiteralMapEntry(entry.key, new PureFunctionParameterExpr(idx), entry.quoted));
-    }
-  }
-  return new PureFunctionExpr(literalMap(derivedEntries), nonConstantArgs);
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/align_pipe_variadic_var_offset.mjs
-function phaseAlignPipeVariadicVarOffset(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.update) {
-      visitExpressionsInOp(op, (expr) => {
-        if (!(expr instanceof PipeBindingVariadicExpr)) {
-          return expr;
-        }
-        if (!(expr.args instanceof PureFunctionExpr)) {
-          return expr;
-        }
-        if (expr.varOffset === null || expr.args.varOffset === null) {
-          throw new Error(`Must run after variable counting`);
-        }
-        expr.varOffset = expr.args.varOffset;
-        expr.args.varOffset = expr.varOffset + varsUsedByIrExpression(expr);
-      });
-    }
-  }
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/emit.mjs
 function transformTemplate(cpl) {
+  phaseAttributeExtraction(cpl, true);
   phasePipeCreation(cpl);
   phasePipeVariadic(cpl);
   phasePureLiteralStructures(cpl);
@@ -9799,7 +9881,6 @@ function ingestElement(view, element2) {
   const id = view.tpl.allocateXrefId();
   const startOp = createElementStartOp(element2.name, id);
   view.create.push(startOp);
-  ingestAttributes(startOp, element2);
   ingestBindings(view, startOp, element2);
   ingestReferences(startOp, element2);
   ingestNodes(view, element2.children);
@@ -9810,7 +9891,6 @@ function ingestTemplate(view, tmpl) {
   const childView = view.tpl.allocateView(view.xref);
   const tplOp = createTemplateOp(childView.xref, (_a2 = tmpl.tagName) != null ? _a2 : "ng-template");
   view.create.push(tplOp);
-  ingestAttributes(tplOp, tmpl);
   ingestBindings(view, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
   ingestNodes(childView, tmpl.children);
@@ -9885,69 +9965,67 @@ function convertAst(ast, cpl) {
     throw new Error(`Unhandled expression type: ${ast.constructor.name}`);
   }
 }
-function ingestAttributes(op, element2) {
-  assertIsElementAttributes(op.attributes);
-  for (const attr of element2.attributes) {
-    op.attributes.add(ElementAttributeKind.Attribute, attr.name, literal(attr.value));
-  }
-  for (const input of element2.inputs) {
-    op.attributes.add(ElementAttributeKind.Binding, input.name, null);
-  }
-  for (const output of element2.outputs) {
-    op.attributes.add(ElementAttributeKind.Binding, output.name, null);
-  }
-  if (element2 instanceof Template) {
-    for (const attr of element2.templateAttrs) {
-      op.attributes.add(ElementAttributeKind.Template, attr.name, null);
-    }
-  }
-}
 function ingestBindings(view, op, element2) {
   if (element2 instanceof Template) {
-    for (const attr of [...element2.templateAttrs, ...element2.inputs]) {
-      if (!(attr instanceof BoundAttribute)) {
-        continue;
-      }
-      ingestPropertyBinding(view, op.xref, attr.name, attr.value);
-    }
-  } else {
-    for (const input of element2.inputs) {
-      ingestPropertyBinding(view, op.xref, input.name, input.value);
-    }
-    for (const output of element2.outputs) {
-      const listenerOp = createListenerOp(op.xref, output.name, op.tag);
-      let inputExprs;
-      let handler = output.handler;
-      if (handler instanceof ASTWithSource) {
-        handler = handler.ast;
-      }
-      if (handler instanceof Chain) {
-        inputExprs = handler.expressions;
+    for (const attr of element2.templateAttrs) {
+      if (attr instanceof TextAttribute) {
+        view.update.push(createAttributeOp(op.xref, ElementAttributeKind.Template, attr.name, literal(attr.value)));
       } else {
-        inputExprs = [handler];
+        ingestPropertyBinding(view, op.xref, ElementAttributeKind.Template, attr);
       }
-      if (inputExprs.length === 0) {
-        throw new Error("Expected listener to have non-empty expression list.");
-      }
-      const expressions = inputExprs.map((expr) => convertAst(expr, view.tpl));
-      const returnExpr = expressions.pop();
-      for (const expr of expressions) {
-        const stmtOp = createStatementOp(new ExpressionStatement(expr));
-        listenerOp.handlerOps.push(stmtOp);
-      }
-      listenerOp.handlerOps.push(createStatementOp(new ReturnStatement(returnExpr)));
-      view.create.push(listenerOp);
     }
   }
+  for (const attr of element2.attributes) {
+    view.update.push(createAttributeOp(op.xref, ElementAttributeKind.Attribute, attr.name, literal(attr.value)));
+  }
+  for (const input of element2.inputs) {
+    ingestPropertyBinding(view, op.xref, ElementAttributeKind.Binding, input);
+  }
+  for (const output of element2.outputs) {
+    const listenerOp = createListenerOp(op.xref, output.name, op.tag);
+    let inputExprs;
+    let handler = output.handler;
+    if (handler instanceof ASTWithSource) {
+      handler = handler.ast;
+    }
+    if (handler instanceof Chain) {
+      inputExprs = handler.expressions;
+    } else {
+      inputExprs = [handler];
+    }
+    if (inputExprs.length === 0) {
+      throw new Error("Expected listener to have non-empty expression list.");
+    }
+    const expressions = inputExprs.map((expr) => convertAst(expr, view.tpl));
+    const returnExpr = expressions.pop();
+    for (const expr of expressions) {
+      const stmtOp = createStatementOp(new ExpressionStatement(expr));
+      listenerOp.handlerOps.push(stmtOp);
+    }
+    listenerOp.handlerOps.push(createStatementOp(new ReturnStatement(returnExpr)));
+    view.create.push(listenerOp);
+  }
 }
-function ingestPropertyBinding(view, xref, name, value) {
+function ingestPropertyBinding(view, xref, bindingKind, { name, value, type }) {
   if (value instanceof ASTWithSource) {
     value = value.ast;
   }
   if (value instanceof Interpolation) {
-    view.update.push(createInterpolatePropertyOp(xref, name, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl))));
+    switch (type) {
+      case 0:
+        view.update.push(createInterpolatePropertyOp(xref, bindingKind, name, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl))));
+        break;
+      default:
+        throw Error(`Interpolated property binding type not handled: ${type}`);
+    }
   } else {
-    view.update.push(createPropertyOp(xref, name, convertAst(value, view.tpl)));
+    switch (type) {
+      case 0:
+        view.update.push(createPropertyOp(xref, bindingKind, name, convertAst(value, view.tpl)));
+        break;
+      default:
+        throw Error(`Property binding type not handled: ${type}`);
+    }
   }
 }
 function ingestReferences(op, element2) {
@@ -19402,7 +19480,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.2.0-next.0+sha-1f0d529");
+var VERSION2 = new Version("16.2.0-next.0+sha-15ab146");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -20721,7 +20799,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-1f0d529"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-15ab146"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -20790,7 +20868,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-1f0d529"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-15ab146"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -20975,7 +21053,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-1f0d529"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-15ab146"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -20998,7 +21076,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-1f0d529"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-15ab146"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -21036,7 +21114,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-1f0d529"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-15ab146"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -21057,7 +21135,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-1f0d529"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-15ab146"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -21092,7 +21170,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-1f0d529"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-15ab146"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -21109,7 +21187,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.2.0-next.0+sha-1f0d529");
+var VERSION3 = new Version("16.2.0-next.0+sha-15ab146");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
