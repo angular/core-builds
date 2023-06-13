@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-rc.0+sha-f13ecd5
+ * @license Angular v16.1.0-rc.0+sha-b90f2b1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7197,6 +7197,7 @@ declare interface RElement extends RNode {
     className: string;
     tagName: string;
     textContent: string | null;
+    hasAttribute(name: string): boolean;
     getAttribute(name: string): string | null;
     setAttribute(name: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     removeAttribute(name: string): void;

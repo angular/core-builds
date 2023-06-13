@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0-rc.0+sha-f13ecd5
+ * @license Angular v16.1.0-rc.0+sha-b90f2b1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3339,6 +3339,9 @@ function isRootView(target) {
 function isProjectionTNode(tNode) {
     return (tNode.type & 16 /* TNodeType.Projection */) === 16 /* TNodeType.Projection */;
 }
+function hasI18n(lView) {
+    return (lView[FLAGS] & 32 /* LViewFlags.HasI18n */) === 32 /* LViewFlags.HasI18n */;
+}
 
 // [Assert functions do not constraint type when they are guarded by a truthy
 // expression.](https://github.com/microsoft/TypeScript/issues/37295)
@@ -6570,9 +6573,9 @@ function matchingSchemas(schemas, tagName) {
  */
 const SKIP_HYDRATION_ATTR_NAME = 'ngSkipHydration';
 /**
- * Helper function to check if a given node has the 'ngSkipHydration' attribute
+ * Helper function to check if a given TNode has the 'ngSkipHydration' attribute.
  */
-function hasNgSkipHydrationAttr(tNode) {
+function hasSkipHydrationAttrOnTNode(tNode) {
     const SKIP_HYDRATION_ATTR_NAME_LOWER_CASE = SKIP_HYDRATION_ATTR_NAME.toLowerCase();
     const attrs = tNode.mergedAttrs;
     if (attrs === null)
@@ -6589,6 +6592,12 @@ function hasNgSkipHydrationAttr(tNode) {
         }
     }
     return false;
+}
+/**
+ * Helper function to check if a given RElement has the 'ngSkipHydration' attribute.
+ */
+function hasSkipHydrationAttrOnRElement(rNode) {
+    return rNode.hasAttribute(SKIP_HYDRATION_ATTR_NAME);
 }
 /**
  * Checks whether a TNode has a flag to indicate that it's a part of
@@ -6609,7 +6618,7 @@ function hasInSkipHydrationBlockFlag(tNode) {
 function isInSkipHydrationBlock(tNode) {
     let currentTNode = tNode.parent;
     while (currentTNode) {
-        if (hasNgSkipHydrationAttr(currentTNode)) {
+        if (hasSkipHydrationAttrOnTNode(currentTNode)) {
             return true;
         }
         currentTNode = currentTNode.parent;
@@ -10469,7 +10478,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0-rc.0+sha-f13ecd5');
+const VERSION = new Version('16.1.0-rc.0+sha-b90f2b1');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11490,7 +11499,7 @@ let _applyRootElementTransformImpl = (rootElement) => null;
  * @param rootElement the app root HTML Element
  */
 function applyRootElementTransformImpl(rootElement) {
-    if (rootElement.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
+    if (hasSkipHydrationAttrOnRElement(rootElement)) {
         // Handle a situation when the `ngSkipHydration` attribute is applied
         // to the root node of an application. In this case, we should clear
         // the contents and render everything from scratch.
@@ -15726,8 +15735,11 @@ function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, inde
         setSegmentHead(hydrationInfo, index, native.nextSibling);
     }
     // Checks if the skip hydration attribute is present during hydration so we know to
-    // skip attempting to hydrate this block.
-    if (hydrationInfo && hasNgSkipHydrationAttr(tNode)) {
+    // skip attempting to hydrate this block. We check both TNode and RElement for an
+    // attribute: the RElement case is needed for i18n cases, when we add it to host
+    // elements during the annotation phase (after all internal data structures are setup).
+    if (hydrationInfo &&
+        (hasSkipHydrationAttrOnTNode(tNode) || hasSkipHydrationAttrOnRElement(native))) {
         if (isComponentHost(tNode)) {
             enterSkipHydrationBlock(tNode);
             // Since this isn't hydratable, we need to empty the node
