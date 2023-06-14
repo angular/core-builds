@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.0+sha-c31fe76
+ * @license Angular v16.2.0-next.0+sha-8d42747
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10432,6 +10432,13 @@ class RendererFactory2 {
  * @publicApi
  */
 class Renderer2 {
+    constructor() {
+        /**
+         * If null or undefined, the view engine won't call it.
+         * This is used as a performance optimization for production mode.
+         */
+        this.destroyNode = null;
+    }
     /**
      * @internal
      * @nocollapse
@@ -10478,7 +10485,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.0+sha-c31fe76');
+const VERSION = new Version('16.2.0-next.0+sha-8d42747');
 
 // This default value is when checking the hierarchy for a token.
 //
