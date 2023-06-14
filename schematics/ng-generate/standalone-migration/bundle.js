@@ -19402,7 +19402,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.1.0+sha-e94f387");
+var VERSION2 = new Version("16.1.0+sha-5e1d844");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -20721,7 +20721,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.1.0+sha-e94f387"));
+  definitionMap.set("version", literal("16.1.0+sha-5e1d844"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -20790,7 +20790,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.1.0+sha-e94f387"));
+  definitionMap.set("version", literal("16.1.0+sha-5e1d844"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -20975,7 +20975,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.1.0+sha-e94f387"));
+  definitionMap.set("version", literal("16.1.0+sha-5e1d844"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -20998,7 +20998,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.1.0+sha-e94f387"));
+  definitionMap.set("version", literal("16.1.0+sha-5e1d844"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -21036,7 +21036,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.1.0+sha-e94f387"));
+  definitionMap.set("version", literal("16.1.0+sha-5e1d844"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -21057,7 +21057,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.1.0+sha-e94f387"));
+  definitionMap.set("version", literal("16.1.0+sha-5e1d844"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -21092,7 +21092,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.1.0+sha-e94f387"));
+  definitionMap.set("version", literal("16.1.0+sha-5e1d844"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -21109,7 +21109,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.1.0+sha-e94f387");
+var VERSION3 = new Version("16.1.0+sha-5e1d844");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -26399,7 +26399,7 @@ var TraitCompiler = class {
           case TraitState.Skipped:
             continue;
           case TraitState.Pending:
-            throw new Error(`Resolving a trait that hasn't been analyzed: ${clazz.name.text} / ${Object.getPrototypeOf(trait.handler).constructor.name}`);
+            throw new Error(`Resolving a trait that hasn't been analyzed: ${clazz.name.text} / ${trait.handler.name}`);
           case TraitState.Resolved:
             throw new Error(`Resolving an already resolved trait`);
         }
@@ -28418,7 +28418,7 @@ var DirectiveDecoratorHandler = class {
     this.annotateForClosureCompiler = annotateForClosureCompiler;
     this.perf = perf;
     this.precedence = HandlerPrecedence.PRIMARY;
-    this.name = DirectiveDecoratorHandler.name;
+    this.name = "DirectiveDecoratorHandler";
   }
   detect(node, decorators) {
     if (!decorators) {
@@ -28697,7 +28697,7 @@ var NgModuleDecoratorHandler = class {
     this.injectableRegistry = injectableRegistry;
     this.perf = perf;
     this.precedence = HandlerPrecedence.PRIMARY;
-    this.name = NgModuleDecoratorHandler.name;
+    this.name = "NgModuleDecoratorHandler";
   }
   detect(node, decorators) {
     if (!decorators) {
@@ -29618,7 +29618,7 @@ var ComponentDecoratorHandler = class {
     this.preanalyzeTemplateCache = /* @__PURE__ */ new Map();
     this.preanalyzeStylesCache = /* @__PURE__ */ new Map();
     this.precedence = HandlerPrecedence.PRIMARY;
-    this.name = ComponentDecoratorHandler.name;
+    this.name = "ComponentDecoratorHandler";
     this.extractTemplateOptions = {
       enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
       i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
@@ -30243,7 +30243,7 @@ var InjectableDecoratorHandler = class {
     this.perf = perf;
     this.errorOnDuplicateProv = errorOnDuplicateProv;
     this.precedence = HandlerPrecedence.SHARED;
-    this.name = InjectableDecoratorHandler.name;
+    this.name = "InjectableDecoratorHandler";
   }
   detect(node, decorators) {
     if (!decorators) {
@@ -30472,7 +30472,7 @@ var PipeDecoratorHandler = class {
     this.isCore = isCore;
     this.perf = perf;
     this.precedence = HandlerPrecedence.PRIMARY;
-    this.name = PipeDecoratorHandler.name;
+    this.name = "PipeDecoratorHandler";
   }
   detect(node, decorators) {
     if (!decorators) {
@@ -36215,6 +36215,9 @@ var TemplateTypeCheckerImpl = class {
     }
     const emitted = emittedRef.expression;
     if (emitted instanceof WrappedNodeExpr) {
+      if (refTo.node === inContext) {
+        return null;
+      }
       let isForwardReference = false;
       if (emitted.node.getStart() > inContext.getStart()) {
         const declaration = (_b2 = (_a2 = this.programDriver.getProgram().getTypeChecker().getTypeAtLocation(emitted.node).getSymbol()) == null ? void 0 : _a2.declarations) == null ? void 0 : _b2[0];
