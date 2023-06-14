@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0+sha-f48c0bc
+ * @license Angular v16.1.0+sha-0a72df6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,6 +10,7 @@ import { Injector } from '@angular/core';
 import { MonoTypeOperatorFunction } from 'rxjs';
 import { Observable } from 'rxjs';
 import { Signal } from '@angular/core';
+import { Subscribable } from 'rxjs';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
@@ -68,7 +69,7 @@ export declare interface ToObservableOptions {
  * option can be specified instead, which disables the automatic subscription teardown. No injection
  * context is needed in this configuration as well.
  */
-export declare function toSignal<T>(source: Observable<T>): Signal<T | undefined>;
+export declare function toSignal<T>(source: Observable<T> | Subscribable<T>): Signal<T | undefined>;
 
 /**
  * Get the current value of an `Observable` as a reactive `Signal`.
@@ -93,7 +94,7 @@ export declare function toSignal<T>(source: Observable<T>): Signal<T | undefined
  *
  * @developerPreview
  */
-export declare function toSignal<T>(source: Observable<T>, options?: ToSignalOptions<undefined> & {
+export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options?: ToSignalOptions<undefined> & {
     requireSync?: false;
 }): Signal<T | undefined>;
 
@@ -120,7 +121,7 @@ export declare function toSignal<T>(source: Observable<T>, options?: ToSignalOpt
  *
  * @developerPreview
  */
-export declare function toSignal<T, U extends T | null | undefined>(source: Observable<T>, options: ToSignalOptions<U> & {
+export declare function toSignal<T, U extends T | null | undefined>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions<U> & {
     initialValue: U;
     requireSync?: false;
 }): Signal<T | U>;
@@ -148,7 +149,7 @@ export declare function toSignal<T, U extends T | null | undefined>(source: Obse
  *
  * @developerPreview
  */
-export declare function toSignal<T>(source: Observable<T>, options: ToSignalOptions<undefined> & {
+export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions<undefined> & {
     requireSync: true;
 }): Signal<T>;
 

@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0+sha-f48c0bc
+ * @license Angular v16.1.0+sha-0a72df6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29,7 +29,7 @@ export declare interface AbstractType<T> extends Function {
  * completed checking all content of a directive. It will run after the content
  * has been checked and most of the time it's during a change detection cycle.
  *
- * @see `AfterViewChecked`
+ * @see {@link AfterViewChecked}
  * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
@@ -55,8 +55,8 @@ export declare interface AfterContentChecked {
  * all content of a directive. It will run only once when the projected content is initialized.
  * Define an `ngAfterContentInit()` method to handle any additional initialization tasks.
  *
- * @see `OnInit`
- * @see `AfterViewInit`
+ * @see {@link OnInit}
+ * @see {@link AfterViewInit}
  * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
@@ -82,7 +82,7 @@ export declare interface AfterContentInit {
  * A lifecycle hook that is called after the default change detector has
  * completed checking a component's view for changes.
  *
- * @see `AfterContentChecked`
+ * @see {@link AfterContentChecked}
  * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
@@ -108,8 +108,8 @@ export declare interface AfterViewChecked {
  * a component's view.
  * Define an `ngAfterViewInit()` method to handle any additional initialization tasks.
  *
- * @see `OnInit`
- * @see `AfterContentInit`
+ * @see {@link OnInit}
+ * @see {@link AfterContentInit}
  * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
@@ -152,7 +152,7 @@ export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<((compRef: Component
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") representing a string ID, used
  * primarily for prefixing application attributes and CSS styles when
- * {@link ViewEncapsulation#Emulated ViewEncapsulation.Emulated} is being used.
+ * {@link ViewEncapsulation#Emulated} is being used.
  *
  * The token is needed in cases when multiple applications are bootstrapped on a page
  * (for example, using `bootstrapApplication` calls). In this case, ensure that those applications
@@ -194,7 +194,7 @@ export declare const APP_ID: InjectionToken<string>;
  * The function is executed during the application bootstrap process,
  * and the needed data is available on startup.
  *
- * @see `ApplicationInitStatus`
+ * @see {@link ApplicationInitStatus}
  *
  * @usageNotes
  *
@@ -752,7 +752,7 @@ declare type ChangeDetectionStrategy_2 = number;
  */
 export declare abstract class ChangeDetectorRef {
     /**
-     * When a view uses the {@link ChangeDetectionStrategy#OnPush OnPush} (checkOnce)
+     * When a view uses the {@link ChangeDetectionStrategy#OnPush} (checkOnce)
      * change detection strategy, explicitly marks the view as changed so that
      * it can be checked again.
      *
@@ -778,8 +778,7 @@ export declare abstract class ChangeDetectorRef {
      */
     abstract detach(): void;
     /**
-     * Checks this view and its children. Use in combination with {@link ChangeDetectorRef#detach
-     * detach}
+     * Checks this view and its children. Use in combination with {@link ChangeDetectorRef#detach}
      * to implement local change detection checks.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
@@ -1683,7 +1682,7 @@ export declare const ContentChildren: ContentChildrenDecorator;
 /**
  * Type of the ContentChildren decorator / constructor function.
  *
- * @see `ContentChildren`.
+ * @see {@link ContentChildren}.
  * @publicApi
  */
 export declare interface ContentChildrenDecorator {
@@ -2937,7 +2936,7 @@ export declare interface DoBootstrap {
  * Typically, you should not use both `DoCheck` and `OnChanges` to respond to
  * changes on the same input.
  *
- * @see `OnChanges`
+ * @see {@link OnChanges}
  * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
@@ -3064,7 +3063,7 @@ declare const EMBEDDED_VIEW_INJECTOR = 20;
  * a view cannot. Change the structure of elements by inserting, moving, or
  * removing nested views in a view container.
  *
- * @see `ViewContainerRef`
+ * @see {@link ViewContainerRef}
  *
  * @usageNotes
  *
@@ -3206,8 +3205,8 @@ export declare abstract class EnvironmentInjector implements Injector {
  *
  * This wrapper type prevents access to the `Provider`s inside.
  *
- * @see `makeEnvironmentProviders`
- * @see `importProvidersFrom`
+ * @see {@link makeEnvironmentProviders}
+ * @see {@link importProvidersFrom}
  *
  * @publicApi
  */
@@ -3368,7 +3367,7 @@ export declare interface ExistingProvider extends ExistingSansProvider {
 /**
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
- * @see `ExistingProvider`
+ * @see {@link ExistingProvider}
  * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @publicApi
@@ -3428,7 +3427,7 @@ export declare interface FactoryProvider extends FactorySansProvider {
 /**
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
  *
- * @see `FactoryProvider`
+ * @see {@link FactoryProvider}
  * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
  * @publicApi
@@ -4124,7 +4123,7 @@ declare const ID = 19;
  * This type cannot be directly implemented. It's returned from the `importProvidersFrom` function
  * and serves to prevent the extracted NgModule providers from being used in the wrong contexts.
  *
- * @see `importProvidersFrom`
+ * @see {@link importProvidersFrom}
  *
  * @publicApi
  * @deprecated replaced by `EnvironmentProviders`
@@ -4525,7 +4524,7 @@ export declare const INJECTOR: InjectionToken<Injector>;
  * dependencies of various types with [injection tokens](guide/glossary#di-token).
  *
  * @see ["DI Providers"](guide/dependency-injection-providers).
- * @see `StaticProvider`
+ * @see {@link StaticProvider}
  *
  * @usageNotes
  *
@@ -6150,8 +6149,8 @@ declare const ON_DESTROY_HOOKS = 21;
  * A lifecycle hook that is called when any data-bound property of a directive changes.
  * Define an `ngOnChanges()` method to handle the changes.
  *
- * @see `DoCheck`
- * @see `OnInit`
+ * @see {@link DoCheck}
+ * @see {@link OnInit}
  * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
@@ -6201,7 +6200,7 @@ export declare interface OnDestroy {
  * all data-bound properties of a directive.
  * Define an `ngOnInit()` method to handle any additional initialization tasks.
  *
- * @see `AfterContentInit`
+ * @see {@link AfterContentInit}
  * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
  *
  * @usageNotes
@@ -6613,7 +6612,7 @@ declare type PropertyAliasValue = (number | string)[];
  * Describes how the `Injector` should be configured.
  * @see ["Dependency Injection Guide"](guide/dependency-injection).
  *
- * @see `StaticProvider`
+ * @see {@link StaticProvider}
  *
  * @publicApi
  */
@@ -6682,10 +6681,10 @@ export declare interface Query {
 /**
  * Base class for query metadata.
  *
- * @see `ContentChildren`.
- * @see `ContentChild`.
- * @see `ViewChildren`.
- * @see `ViewChild`.
+ * @see {@link ContentChildren}.
+ * @see {@link ContentChild}.
+ * @see {@link ViewChildren}.
+ * @see {@link ViewChild}.
  *
  * @publicApi
  */
@@ -7511,7 +7510,7 @@ export declare interface RendererType2 {
  *
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
  *
- * @see `forwardRef`
+ * @see {@link forwardRef}
  * @publicApi
  */
 export declare function resolveForwardRef<T>(type: T): T;
@@ -7675,7 +7674,9 @@ declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => 
 /**
  * A schema definition associated with an NgModule.
  *
- * @see `@NgModule`, `CUSTOM_ELEMENTS_SCHEMA`, `NO_ERRORS_SCHEMA`
+ * @see {@link NgModule}
+ * @see {@link CUSTOM_ELEMENTS_SCHEMA}
+ * @see {@link NO_ERRORS_SCHEMA}
  *
  * @param name The name of a defined schema.
  *
@@ -7754,8 +7755,8 @@ export declare interface SelfDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="Self">
      * </code-example>
      *
-     * @see `SkipSelf`
-     * @see `Optional`
+     * @see {@link SkipSelf}
+     * @see {@link Optional}
      *
      */
     (): any;
@@ -7883,7 +7884,7 @@ export declare function signal<T>(initialValue: T, options?: CreateSignalOptions
  * property on a directive instance. Passed as a value in a
  * {@link SimpleChanges} object to the `ngOnChanges` hook.
  *
- * @see `OnChanges`
+ * @see {@link OnChanges}
  *
  * @publicApi
  */
@@ -7903,7 +7904,7 @@ export declare class SimpleChange {
  * at the declared property name they belong to on a Directive or Component. This is
  * the type passed to the `ngOnChanges` hook.
  *
- * @see `OnChanges`
+ * @see {@link OnChanges}
  *
  * @publicApi
  */
@@ -7948,8 +7949,8 @@ export declare interface SkipSelfDecorator {
      * </code-example>
      *
      * @see [Dependency Injection guide](guide/dependency-injection-in-action#skip).
-     * @see `Self`
-     * @see `Optional`
+     * @see {@link Self}
+     * @see {@link Optional}
      *
      */
     (): any;
@@ -8029,7 +8030,7 @@ export declare interface StaticClassSansProvider {
  * Describes how an `Injector` should be configured as static (that is, without reflection).
  * A static provider provides tokens to an injector for various types of dependencies.
  *
- * @see `Injector.create()`.
+ * @see {@link Injector.create()}.
  * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
  *
  * @publicApi
@@ -8168,7 +8169,7 @@ declare const TEMPLATE_ID = "i";
  * You can also use a `Query` to find a `TemplateRef` associated with
  * a component or a directive.
  *
- * @see `ViewContainerRef`
+ * @see {@link ViewContainerRef}
  * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
  *
  * @publicApi
@@ -9759,7 +9760,7 @@ export declare const ViewChild: ViewChildDecorator;
 /**
  * Type of the ViewChild decorator / constructor function.
  *
- * @see `ViewChild`.
+ * @see {@link ViewChild}.
  * @publicApi
  */
 export declare interface ViewChildDecorator {
@@ -9836,7 +9837,7 @@ export declare const ViewChildren: ViewChildrenDecorator;
 /**
  * Type of the ViewChildren decorator / constructor function.
  *
- * @see `ViewChildren`.
+ * @see {@link ViewChildren}.
  *
  * @publicApi
  */
@@ -9912,8 +9913,8 @@ export declare interface ViewChildrenDecorator {
  * A view container instance can contain other view containers,
  * creating a [view hierarchy](guide/glossary#view-hierarchy).
  *
- * @see `ComponentRef`
- * @see `EmbeddedViewRef`
+ * @see {@link ComponentRef}
+ * @see {@link EmbeddedViewRef}
  *
  * @publicApi
  */
@@ -10911,7 +10912,7 @@ export declare function ɵgetLocaleCurrencyCode(locale: string): string | null;
  * for a given locale.
  * @param locale A locale code for the locale format rules to use.
  * @returns The plural function for the locale.
- * @see `NgPlural`
+ * @see {@link NgPlural}
  * @see [Internationalization (i18n) Guide](/guide/i18n-overview)
  */
 export declare function ɵgetLocalePluralCase(locale: string): (value: number) => number;
@@ -11703,7 +11704,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
     /**
      * Marks a view and all of its ancestors dirty.
      *
-     * This can be used to ensure an {@link ChangeDetectionStrategy#OnPush OnPush} component is
+     * This can be used to ensure an {@link ChangeDetectionStrategy#OnPush} component is
      * checked when it needs to be re-rendered but the two normal triggers haven't marked it
      * dirty (i.e. inputs haven't changed and events haven't fired in the view).
      *
@@ -11737,7 +11738,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
      *
      * Detached views will not be checked during change detection runs until they are
      * re-attached, even if they are dirty. `detach` can be used in combination with
-     * {@link ChangeDetectorRef#detectChanges detectChanges} to implement local change
+     * {@link ChangeDetectorRef#detectChanges} to implement local change
      * detection checks.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
@@ -11790,7 +11791,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
      * Re-attaches a view to the change detection tree.
      *
      * This can be used to re-attach views that were previously detached from the tree
-     * using {@link ChangeDetectorRef#detach detach}. Views are attached to the tree by default.
+     * using {@link ChangeDetectorRef#detach}. Views are attached to the tree by default.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      *
@@ -11846,7 +11847,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
     /**
      * Checks the view and its children.
      *
-     * This can also be used in combination with {@link ChangeDetectorRef#detach detach} to implement
+     * This can also be used in combination with {@link ChangeDetectorRef#detach} to implement
      * local change detection checks.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
@@ -11862,7 +11863,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
      * We can do that by detaching the component's change detector and doing a local change detection
      * check every five seconds.
      *
-     * See {@link ChangeDetectorRef#detach detach} for more information.
+     * See {@link ChangeDetectorRef#detach} for more information.
      */
     detectChanges(): void;
     /**

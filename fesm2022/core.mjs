@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0+sha-f48c0bc
+ * @license Angular v16.1.0+sha-0a72df6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -123,7 +123,7 @@ function forwardRef(forwardRefFn) {
  *
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
  *
- * @see `forwardRef`
+ * @see {@link forwardRef}
  * @publicApi
  */
 function resolveForwardRef(type) {
@@ -2766,7 +2766,7 @@ class Watch extends ReactiveNode {
  * property on a directive instance. Passed as a value in a
  * {@link SimpleChanges} object to the `ngOnChanges` hook.
  *
- * @see `OnChanges`
+ * @see {@link OnChanges}
  *
  * @publicApi
  */
@@ -4989,10 +4989,10 @@ const emitDistinctChangesOnlyDefaultValue = true;
 /**
  * Base class for query metadata.
  *
- * @see `ContentChildren`.
- * @see `ContentChild`.
- * @see `ViewChildren`.
- * @see `ViewChild`.
+ * @see {@link ContentChildren}.
+ * @see {@link ContentChild}.
+ * @see {@link ViewChildren}.
+ * @see {@link ViewChild}.
  *
  * @publicApi
  */
@@ -9436,7 +9436,7 @@ function forEachSingleProvider(providers, fn) {
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") representing a string ID, used
  * primarily for prefixing application attributes and CSS styles when
- * {@link ViewEncapsulation#Emulated ViewEncapsulation.Emulated} is being used.
+ * {@link ViewEncapsulation#Emulated} is being used.
  *
  * The token is needed in cases when multiple applications are bootstrapped on a page
  * (for example, using `bootstrapApplication` calls). In this case, ensure that those applications
@@ -10082,7 +10082,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0+sha-f48c0bc');
+const VERSION = new Version('16.1.0+sha-0a72df6');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10680,7 +10680,7 @@ function createInjectorWithoutInjectorInstances(defType, parent = null, addition
  * dependencies of various types with [injection tokens](guide/glossary#di-token).
  *
  * @see ["DI Providers"](guide/dependency-injection-providers).
- * @see `StaticProvider`
+ * @see {@link StaticProvider}
  *
  * @usageNotes
  *
@@ -12713,7 +12713,7 @@ class ViewRef$1 {
     /**
      * Marks a view and all of its ancestors dirty.
      *
-     * This can be used to ensure an {@link ChangeDetectionStrategy#OnPush OnPush} component is
+     * This can be used to ensure an {@link ChangeDetectionStrategy#OnPush} component is
      * checked when it needs to be re-rendered but the two normal triggers haven't marked it
      * dirty (i.e. inputs haven't changed and events haven't fired in the view).
      *
@@ -12749,7 +12749,7 @@ class ViewRef$1 {
      *
      * Detached views will not be checked during change detection runs until they are
      * re-attached, even if they are dirty. `detach` can be used in combination with
-     * {@link ChangeDetectorRef#detectChanges detectChanges} to implement local change
+     * {@link ChangeDetectorRef#detectChanges} to implement local change
      * detection checks.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
@@ -12804,7 +12804,7 @@ class ViewRef$1 {
      * Re-attaches a view to the change detection tree.
      *
      * This can be used to re-attach views that were previously detached from the tree
-     * using {@link ChangeDetectorRef#detach detach}. Views are attached to the tree by default.
+     * using {@link ChangeDetectorRef#detach}. Views are attached to the tree by default.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      *
@@ -12862,7 +12862,7 @@ class ViewRef$1 {
     /**
      * Checks the view and its children.
      *
-     * This can also be used in combination with {@link ChangeDetectorRef#detach detach} to implement
+     * This can also be used in combination with {@link ChangeDetectorRef#detach} to implement
      * local change detection checks.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
@@ -12878,7 +12878,7 @@ class ViewRef$1 {
      * We can do that by detaching the component's change detector and doing a local change detection
      * check every five seconds.
      *
-     * See {@link ChangeDetectorRef#detach detach} for more information.
+     * See {@link ChangeDetectorRef#detach} for more information.
      */
     detectChanges() {
         detectChangesInternal(this._lView[TVIEW], this._lView, this.context);
@@ -19327,7 +19327,7 @@ function getLocaleCurrencyCode(locale) {
  * for a given locale.
  * @param locale A locale code for the locale format rules to use.
  * @returns The plural function for the locale.
- * @see `NgPlural`
+ * @see {@link NgPlural}
  * @see [Internationalization (i18n) Guide](/guide/i18n-overview)
  */
 function getLocalePluralCase(locale) {
@@ -22930,7 +22930,7 @@ class QueryList {
  * You can also use a `Query` to find a `TemplateRef` associated with
  * a component or a directive.
  *
- * @see `ViewContainerRef`
+ * @see {@link ViewContainerRef}
  * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
  *
  * @publicApi
@@ -23170,8 +23170,8 @@ function findMatchingDehydratedView(lContainer, template) {
  * A view container instance can contain other view containers,
  * creating a [view hierarchy](guide/glossary#view-hierarchy).
  *
- * @see `ComponentRef`
- * @see `EmbeddedViewRef`
+ * @see {@link ComponentRef}
+ * @see {@link EmbeddedViewRef}
  *
  * @publicApi
  */
@@ -25354,7 +25354,7 @@ const ITS_JUST_ANGULAR = true;
  * The function is executed during the application bootstrap process,
  * and the needed data is available on startup.
  *
- * @see `ApplicationInitStatus`
+ * @see {@link ApplicationInitStatus}
  *
  * @usageNotes
  *
@@ -27782,7 +27782,7 @@ class ViewRef extends ChangeDetectorRef {
  * a view cannot. Change the structure of elements by inserting, moving, or
  * removing nested views in a view container.
  *
- * @see `ViewContainerRef`
+ * @see {@link ViewContainerRef}
  *
  * @usageNotes
  *
