@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.0+sha-0a72df6
+ * @license Angular v16.1.0+sha-9ff5572
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10036,6 +10036,13 @@ class RendererFactory2 {
  * @publicApi
  */
 class Renderer2 {
+    constructor() {
+        /**
+         * If null or undefined, the view engine won't call it.
+         * This is used as a performance optimization for production mode.
+         */
+        this.destroyNode = null;
+    }
     /**
      * @internal
      * @nocollapse
@@ -10082,7 +10089,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.0+sha-0a72df6');
+const VERSION = new Version('16.1.0+sha-9ff5572');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -28580,6 +28587,7 @@ class DefaultIterableDiffer {
             this.length = index;
         }
         this._truncate(record);
+        // @ts-expect-error overwriting a readonly member
         this.collection = collection;
         return this.isDirty;
     }
