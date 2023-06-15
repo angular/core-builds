@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.0+sha-cec5cd6
+ * @license Angular v16.2.0-next.0+sha-4550fe4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10089,7 +10089,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.0+sha-cec5cd6');
+const VERSION = new Version('16.2.0-next.0+sha-4550fe4');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25898,19 +25898,6 @@ function publishGlobalUtil(name, fn) {
     }
 }
 
-const promise = (() => Promise.resolve(0))();
-function scheduleMicroTask(fn) {
-    if (typeof Zone === 'undefined') {
-        // use promise to schedule microTask instead of use Zone
-        promise.then(() => {
-            fn && fn.apply(null, null);
-        });
-    }
-    else {
-        Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
-    }
-}
-
 function noop(...args) {
     // Do nothing.
 }
@@ -26371,7 +26358,7 @@ function isStableFactory() {
                 NgZone.assertNotInAngularZone();
                 // Check whether there are no pending macro/micro tasks in the next tick
                 // to allow for NgZone to update the state.
-                scheduleMicroTask(() => {
+                queueMicrotask(() => {
                     if (!_stable && !zone.hasPendingMacrotasks && !zone.hasPendingMicrotasks) {
                         _stable = true;
                         observer.next(true);
@@ -26468,7 +26455,7 @@ class Testability {
             this._ngZone.onStable.subscribe({
                 next: () => {
                     NgZone.assertNotInAngularZone();
-                    scheduleMicroTask(() => {
+                    queueMicrotask(() => {
                         this._isZoneStable = true;
                         this._runCallbacksIfReady();
                     });
@@ -26506,7 +26493,7 @@ class Testability {
     _runCallbacksIfReady() {
         if (this.isStable()) {
             // Schedules the call backs in a new frame so that it is always async.
-            scheduleMicroTask(() => {
+            queueMicrotask(() => {
                 while (this._callbacks.length !== 0) {
                     let cb = this._callbacks.pop();
                     clearTimeout(cb.timeoutId);

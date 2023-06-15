@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.0+sha-cec5cd6
+ * @license Angular v16.2.0-next.0+sha-4550fe4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -102,7 +102,7 @@ class ComponentFixture {
                             // If so check whether there are no pending macrotasks before resolving.
                             // Do this check in the next tick so that ngZone gets a chance to update the state of
                             // pending macrotasks.
-                            scheduleMicroTask(() => {
+                            queueMicrotask(() => {
                                 if (!ngZone.hasPendingMacrotasks) {
                                     if (this._promise !== null) {
                                         this._resolve(true);
@@ -230,9 +230,6 @@ class ComponentFixture {
             this._isDestroyed = true;
         }
     }
-}
-function scheduleMicroTask(fn) {
-    Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
 }
 
 const _Zone = typeof Zone !== 'undefined' ? Zone : null;
@@ -10485,7 +10482,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.0+sha-cec5cd6');
+const VERSION = new Version('16.2.0-next.0+sha-4550fe4');
 
 // This default value is when checking the hierarchy for a token.
 //
