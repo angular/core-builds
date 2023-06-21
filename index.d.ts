@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.0+sha-4596577
+ * @license Angular v16.2.0-next.0+sha-7d7fc48
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5897,6 +5897,21 @@ export declare abstract class NgModuleRef<T> {
      * Registers a callback to be executed when the module is destroyed.
      */
     abstract onDestroy(callback: () => void): void;
+}
+
+/**
+ * NgModule scope info as provided by NgModule decorator.
+ */
+declare interface NgModuleScopeInfoFromDecorator {
+    /** List of components, directives, and pipes declared by this module. */
+    declarations?: Type<any>[] | (() => Type<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports?: Type<any>[] | (() => Type<any>[]);
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
+    exports?: Type<any>[] | (() => Type<any>[]);
 }
 
 /**
@@ -14279,17 +14294,7 @@ export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, direct
  *
  * @codeGenApi
  */
-export declare function ɵɵsetNgModuleScope(type: any, scope: {
-    /** List of components, directives, and pipes declared by this module. */
-    declarations?: Type<any>[] | (() => Type<any>[]);
-    /** List of modules or `ModuleWithProviders` imported by this module. */
-    imports?: Type<any>[] | (() => Type<any>[]);
-    /**
-     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
-     * module.
-     */
-    exports?: Type<any>[] | (() => Type<any>[]);
-}): unknown;
+export declare function ɵɵsetNgModuleScope(type: any, scope: NgModuleScopeInfoFromDecorator): unknown;
 
 /**
  * A feature that acts as a setup code for the {@link StandaloneService}.
