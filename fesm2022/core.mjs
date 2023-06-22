@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.0+sha-30154ae
+ * @license Angular v16.2.0-next.0+sha-d64864e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10089,7 +10089,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.0+sha-30154ae');
+const VERSION = new Version('16.2.0-next.0+sha-d64864e');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13000,7 +13000,17 @@ class ChainedInjector {
  */
 class ComponentFactory extends ComponentFactory$1 {
     get inputs() {
-        return toRefArray(this.componentDef.inputs);
+        const componentDef = this.componentDef;
+        const inputTransforms = componentDef.inputTransforms;
+        const refArray = toRefArray(componentDef.inputs);
+        if (inputTransforms !== null) {
+            for (const input of refArray) {
+                if (inputTransforms.hasOwnProperty(input.propName)) {
+                    input.transform = inputTransforms[input.propName];
+                }
+            }
+        }
+        return refArray;
     }
     get outputs() {
         return toRefArray(this.componentDef.outputs);
