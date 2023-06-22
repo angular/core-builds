@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.2+sha-174f669
+ * @license Angular v16.1.2+sha-e1bbe47
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1368,6 +1368,7 @@ declare abstract class ComponentFactory<C> {
     abstract get inputs(): {
         propName: string;
         templateName: string;
+        transform?: (value: any) => any;
     }[];
     /**
      * The outputs of the component.
@@ -1438,6 +1439,7 @@ export declare interface ComponentMirror<C> {
     get inputs(): ReadonlyArray<{
         readonly propName: string;
         readonly templateName: string;
+        readonly transform?: (value: any) => any;
     }>;
     /**
      * The outputs of the component.
@@ -11396,6 +11398,7 @@ export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
     get inputs(): {
         propName: string;
         templateName: string;
+        transform?: (value: any) => any;
     }[];
     get outputs(): {
         propName: string;
