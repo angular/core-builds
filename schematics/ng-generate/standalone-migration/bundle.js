@@ -7594,10 +7594,14 @@ var OpKind;
   OpKind2[OpKind2["Listener"] = 11] = "Listener";
   OpKind2[OpKind2["InterpolateText"] = 12] = "InterpolateText";
   OpKind2[OpKind2["Property"] = 13] = "Property";
-  OpKind2[OpKind2["InterpolateProperty"] = 14] = "InterpolateProperty";
-  OpKind2[OpKind2["Advance"] = 15] = "Advance";
-  OpKind2[OpKind2["Pipe"] = 16] = "Pipe";
-  OpKind2[OpKind2["Attribute"] = 17] = "Attribute";
+  OpKind2[OpKind2["StyleProp"] = 14] = "StyleProp";
+  OpKind2[OpKind2["StyleMap"] = 15] = "StyleMap";
+  OpKind2[OpKind2["InterpolateProperty"] = 16] = "InterpolateProperty";
+  OpKind2[OpKind2["InterpolateStyleProp"] = 17] = "InterpolateStyleProp";
+  OpKind2[OpKind2["InterpolateStyleMap"] = 18] = "InterpolateStyleMap";
+  OpKind2[OpKind2["Advance"] = 19] = "Advance";
+  OpKind2[OpKind2["Pipe"] = 20] = "Pipe";
+  OpKind2[OpKind2["Attribute"] = 21] = "Attribute";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -7617,6 +7621,7 @@ var ExpressionKind;
   ExpressionKind2[ExpressionKind2["SafeKeyedRead"] = 13] = "SafeKeyedRead";
   ExpressionKind2[ExpressionKind2["SafeInvokeFunction"] = 14] = "SafeInvokeFunction";
   ExpressionKind2[ExpressionKind2["SafeTernaryExpr"] = 15] = "SafeTernaryExpr";
+  ExpressionKind2[ExpressionKind2["EmptyExpr"] = 16] = "EmptyExpr";
 })(ExpressionKind || (ExpressionKind = {}));
 var SemanticVariableKind;
 (function(SemanticVariableKind2) {
@@ -8111,6 +8116,25 @@ var SafeTernaryExpr = class extends ExpressionBase {
     return new SafeTernaryExpr(this.guard.clone(), this.expr.clone());
   }
 };
+var EmptyExpr2 = class extends ExpressionBase {
+  constructor() {
+    super(...arguments);
+    this.kind = ExpressionKind.EmptyExpr;
+  }
+  visitExpression(visitor, context) {
+  }
+  isEquivalent(e) {
+    return e instanceof EmptyExpr2;
+  }
+  isConstant() {
+    return true;
+  }
+  clone() {
+    return new EmptyExpr2();
+  }
+  transformInternalExpressions() {
+  }
+};
 function visitExpressionsInOp(op, visitor) {
   transformExpressionsInOp(op, (expr, flags) => {
     visitor(expr, flags);
@@ -8125,9 +8149,14 @@ var VisitorContextFlag;
 function transformExpressionsInOp(op, transform, flags) {
   switch (op.kind) {
     case OpKind.Property:
+    case OpKind.StyleProp:
+    case OpKind.StyleMap:
       op.expression = transformExpressionsInExpression(op.expression, transform, flags);
       break;
     case OpKind.InterpolateProperty:
+    case OpKind.InterpolateStyleProp:
+    case OpKind.InterpolateStyleMap:
+    case OpKind.InterpolateText:
       for (let i = 0; i < op.expressions.length; i++) {
         op.expressions[i] = transformExpressionsInExpression(op.expressions[i], transform, flags);
       }
@@ -8142,11 +8171,6 @@ function transformExpressionsInOp(op, transform, flags) {
       break;
     case OpKind.Variable:
       op.initializer = transformExpressionsInExpression(op.initializer, transform, flags);
-      break;
-    case OpKind.InterpolateText:
-      for (let i = 0; i < op.expressions.length; i++) {
-        op.expressions[i] = transformExpressionsInExpression(op.expressions[i], transform, flags);
-      }
       break;
     case OpKind.Listener:
       for (const innerOp of op.handlerOps) {
@@ -8488,6 +8512,22 @@ function createPropertyOp(xref, bindingKind, name, expression) {
     expression
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
+function createStylePropOp(xref, name, expression, unit) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.StyleProp,
+    target: xref,
+    name,
+    expression,
+    unit
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createStyleMapOp(xref, expression) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.StyleMap,
+    target: xref,
+    expression
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
 function createAttributeOp(target, attributeKind, name, value) {
   return __spreadValues({
     kind: OpKind.Attribute,
@@ -8503,6 +8543,24 @@ function createInterpolatePropertyOp(xref, bindingKind, name, strings, expressio
     target: xref,
     bindingKind,
     name,
+    strings,
+    expressions
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createInterpolateStylePropOp(xref, name, strings, expressions, unit) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.InterpolateStyleProp,
+    target: xref,
+    name,
+    strings,
+    expressions,
+    unit
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createInterpolateStyleMapOp(xref, strings, expressions) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.InterpolateStyleMap,
+    target: xref,
     strings,
     expressions
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
@@ -8549,10 +8607,14 @@ function phaseVarCounting(cpl) {
 function varsUsedByOp(op) {
   switch (op.kind) {
     case OpKind.Property:
+    case OpKind.StyleProp:
+    case OpKind.StyleMap:
       return 1;
     case OpKind.InterpolateText:
       return op.expressions.length;
     case OpKind.InterpolateProperty:
+    case OpKind.InterpolateStyleProp:
+    case OpKind.InterpolateStyleMap:
       return 1 + op.expressions.length;
     default:
       throw new Error(`Unhandled op: ${OpKind[op.kind]}`);
@@ -8593,6 +8655,11 @@ function phaseAlignPipeVariadicVarOffset(cpl) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/attribute_extraction.mjs
+function phaseAttributeExtraction(cpl, compatibility) {
+  for (const [_, view] of cpl.views) {
+    populateElementAttributes(view, compatibility);
+  }
+}
 function lookupElement(elements, xref) {
   const el = elements.get(xref);
   if (el === void 0) {
@@ -8600,10 +8667,12 @@ function lookupElement(elements, xref) {
   }
   return el;
 }
-function phaseAttributeExtraction(cpl, compatibility) {
-  for (const [_, view] of cpl.views) {
-    populateElementAttributes(view, compatibility);
+function removeIfExpressionIsEmpty(op, expression) {
+  if (expression instanceof EmptyExpr2) {
+    OpList.remove(op);
+    return true;
   }
+  return false;
 }
 function populateElementAttributes(view, compatibility) {
   const elements = /* @__PURE__ */ new Map();
@@ -8626,10 +8695,22 @@ function populateElementAttributes(view, compatibility) {
         }
         break;
       case OpKind.Property:
+        ownerOp = lookupElement(elements, op.target);
+        assertIsElementAttributes(ownerOp.attributes);
+        removeIfExpressionIsEmpty(op, op.expression);
+        ownerOp.attributes.add(op.bindingKind, op.name, null);
+        break;
       case OpKind.InterpolateProperty:
         ownerOp = lookupElement(elements, op.target);
         assertIsElementAttributes(ownerOp.attributes);
         ownerOp.attributes.add(op.bindingKind, op.name, null);
+        break;
+      case OpKind.StyleProp:
+        ownerOp = lookupElement(elements, op.target);
+        assertIsElementAttributes(ownerOp.attributes);
+        if (removeIfExpressionIsEmpty(op, op.expression) && compatibility) {
+          ownerOp.attributes.add(ElementAttributeKind.Binding, op.name, null);
+        }
         break;
       case OpKind.Listener:
         ownerOp = lookupElement(elements, op.target);
@@ -8648,6 +8729,7 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.elementStart,
   Identifiers.elementEnd,
   Identifiers.property,
+  Identifiers.styleProp,
   Identifiers.elementContainerStart,
   Identifiers.elementContainerEnd,
   Identifiers.elementContainer
@@ -9274,6 +9356,16 @@ function property(name, expression) {
     expression
   ]);
 }
+function styleProp(name, expression, unit) {
+  const args = [literal(name), expression];
+  if (unit !== null) {
+    args.push(literal(unit));
+  }
+  return call(Identifiers.styleProp, args);
+}
+function styleMap(expression) {
+  return call(Identifiers.styleMap, [expression]);
+}
 var PIPE_BINDINGS = [
   Identifiers.pipeBind1,
   Identifiers.pipeBind2,
@@ -9315,6 +9407,28 @@ function textInterpolate(strings, expressions) {
   return callVariadicInstruction(TEXT_INTERPOLATE_CONFIG, [], interpolationArgs);
 }
 function propertyInterpolate(name, strings, expressions) {
+  const interpolationArgs = collateInterpolationArgs(strings, expressions);
+  return callVariadicInstruction(PROPERTY_INTERPOLATE_CONFIG, [literal(name)], interpolationArgs);
+}
+function stylePropInterpolate(name, strings, expressions, unit) {
+  const interpolationArgs = collateInterpolationArgs(strings, expressions);
+  const extraArgs = [];
+  if (unit !== null) {
+    extraArgs.push(literal(unit));
+  }
+  return callVariadicInstruction(STYLE_PROP_INTERPOLATE_CONFIG, [literal(name)], interpolationArgs, extraArgs);
+}
+function styleMapInterpolate(strings, expressions) {
+  const interpolationArgs = collateInterpolationArgs(strings, expressions);
+  return callVariadicInstruction(STYLE_MAP_INTERPOLATE_CONFIG, [], interpolationArgs);
+}
+function pureFunction(varOffset, fn2, args) {
+  return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [
+    literal(varOffset),
+    fn2
+  ], args);
+}
+function collateInterpolationArgs(strings, expressions) {
   if (strings.length < 1 || expressions.length !== strings.length - 1) {
     throw new Error(`AssertionError: expected specific shape of args for strings/expressions in interpolation`);
   }
@@ -9328,13 +9442,7 @@ function propertyInterpolate(name, strings, expressions) {
     }
     interpolationArgs.push(literal(strings[idx]));
   }
-  return callVariadicInstruction(PROPERTY_INTERPOLATE_CONFIG, [literal(name)], interpolationArgs);
-}
-function pureFunction(varOffset, fn2, args) {
-  return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [
-    literal(varOffset),
-    fn2
-  ], args);
+  return interpolationArgs;
 }
 function call(instruction, args) {
   return createStatementOp(importExpr(instruction).callFn(args).toStmt());
@@ -9379,6 +9487,52 @@ var PROPERTY_INTERPOLATE_CONFIG = {
     return (n - 1) / 2;
   }
 };
+var STYLE_PROP_INTERPOLATE_CONFIG = {
+  constant: [
+    null,
+    Identifiers.stylePropInterpolate1,
+    Identifiers.stylePropInterpolate2,
+    Identifiers.stylePropInterpolate3,
+    Identifiers.stylePropInterpolate4,
+    Identifiers.stylePropInterpolate5,
+    Identifiers.stylePropInterpolate6,
+    Identifiers.stylePropInterpolate7,
+    Identifiers.stylePropInterpolate8
+  ],
+  variable: Identifiers.stylePropInterpolateV,
+  mapping: (n) => {
+    if (n % 2 === 0) {
+      throw new Error(`Expected odd number of arguments`);
+    }
+    if (n < 3) {
+      throw new Error(`Expected at least 3 arguments`);
+    }
+    return (n - 1) / 2;
+  }
+};
+var STYLE_MAP_INTERPOLATE_CONFIG = {
+  constant: [
+    null,
+    Identifiers.styleMapInterpolate1,
+    Identifiers.styleMapInterpolate2,
+    Identifiers.styleMapInterpolate3,
+    Identifiers.styleMapInterpolate4,
+    Identifiers.styleMapInterpolate5,
+    Identifiers.styleMapInterpolate6,
+    Identifiers.styleMapInterpolate7,
+    Identifiers.styleMapInterpolate8
+  ],
+  variable: Identifiers.styleMapInterpolateV,
+  mapping: (n) => {
+    if (n % 2 === 0) {
+      throw new Error(`Expected odd number of arguments`);
+    }
+    if (n < 3) {
+      throw new Error(`Expected at least 3 arguments`);
+    }
+    return (n - 1) / 2;
+  }
+};
 var PURE_FUNCTION_CONFIG = {
   constant: [
     Identifiers.pureFunction0,
@@ -9394,18 +9548,26 @@ var PURE_FUNCTION_CONFIG = {
   variable: Identifiers.pureFunctionV,
   mapping: (n) => n
 };
-function callVariadicInstructionExpr(config, baseArgs, interpolationArgs) {
+function callVariadicInstructionExpr(config, baseArgs, interpolationArgs, extraArgs = []) {
   const n = config.mapping(interpolationArgs.length);
   if (n < config.constant.length) {
-    return importExpr(config.constant[n]).callFn([...baseArgs, ...interpolationArgs]);
+    return importExpr(config.constant[n]).callFn([
+      ...baseArgs,
+      ...interpolationArgs,
+      ...extraArgs
+    ]);
   } else if (config.variable !== null) {
-    return importExpr(config.variable).callFn([...baseArgs, literalArr(interpolationArgs)]);
+    return importExpr(config.variable).callFn([
+      ...baseArgs,
+      literalArr(interpolationArgs),
+      ...extraArgs
+    ]);
   } else {
     throw new Error(`AssertionError: unable to call variadic function`);
   }
 }
-function callVariadicInstruction(config, baseArgs, interpolationArgs) {
-  return createStatementOp(callVariadicInstructionExpr(config, baseArgs, interpolationArgs).toStmt());
+function callVariadicInstruction(config, baseArgs, interpolationArgs, extraArgs = []) {
+  return createStatementOp(callVariadicInstructionExpr(config, baseArgs, interpolationArgs, extraArgs).toStmt());
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/reify.mjs
@@ -9474,8 +9636,20 @@ function reifyUpdateOperations(_view, ops) {
       case OpKind.Property:
         OpList.replace(op, property(op.name, op.expression));
         break;
+      case OpKind.StyleProp:
+        OpList.replace(op, styleProp(op.name, op.expression, op.unit));
+        break;
+      case OpKind.StyleMap:
+        OpList.replace(op, styleMap(op.expression));
+        break;
       case OpKind.InterpolateProperty:
         OpList.replace(op, propertyInterpolate(op.name, op.strings, op.expressions));
+        break;
+      case OpKind.InterpolateStyleProp:
+        OpList.replace(op, stylePropInterpolate(op.name, op.strings, op.expressions, op.unit));
+        break;
+      case OpKind.InterpolateStyleMap:
+        OpList.replace(op, styleMapInterpolate(op.strings, op.expressions));
         break;
       case OpKind.InterpolateText:
         OpList.replace(op, textInterpolate(op.strings, op.expressions));
@@ -10290,6 +10464,8 @@ function convertAst(ast, cpl) {
     return new SafePropertyReadExpr(convertAst(ast.receiver, cpl), ast.name);
   } else if (ast instanceof SafeCall) {
     return new SafeInvokeFunctionExpr(convertAst(ast.receiver, cpl), ast.args.map((a) => convertAst(a, cpl)));
+  } else if (ast instanceof EmptyExpr) {
+    return new EmptyExpr2();
   } else {
     throw new Error(`Unhandled expression type: ${ast.constructor.name}`);
   }
@@ -10335,14 +10511,27 @@ function ingestBindings(view, op, element2) {
     view.create.push(listenerOp);
   }
 }
-function ingestPropertyBinding(view, xref, bindingKind, { name, value, type }) {
+function ingestPropertyBinding(view, xref, bindingKind, { name, value, type, unit }) {
   if (value instanceof ASTWithSource) {
     value = value.ast;
   }
   if (value instanceof Interpolation) {
     switch (type) {
       case 0:
-        view.update.push(createInterpolatePropertyOp(xref, bindingKind, name, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl))));
+        if (name === "style") {
+          if (bindingKind !== ElementAttributeKind.Binding) {
+            throw Error("Unexpected style binding on ng-template");
+          }
+          view.update.push(createInterpolateStyleMapOp(xref, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl))));
+        } else {
+          view.update.push(createInterpolatePropertyOp(xref, bindingKind, name, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl))));
+        }
+        break;
+      case 3:
+        if (bindingKind !== ElementAttributeKind.Binding) {
+          throw Error("Unexpected style binding on ng-template");
+        }
+        view.update.push(createInterpolateStylePropOp(xref, name, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl)), unit));
         break;
       default:
         throw Error(`Interpolated property binding type not handled: ${type}`);
@@ -10350,7 +10539,20 @@ function ingestPropertyBinding(view, xref, bindingKind, { name, value, type }) {
   } else {
     switch (type) {
       case 0:
-        view.update.push(createPropertyOp(xref, bindingKind, name, convertAst(value, view.tpl)));
+        if (name === "style") {
+          if (bindingKind !== ElementAttributeKind.Binding) {
+            throw Error("Unexpected style binding on ng-template");
+          }
+          view.update.push(createStyleMapOp(xref, convertAst(value, view.tpl)));
+        } else {
+          view.update.push(createPropertyOp(xref, bindingKind, name, convertAst(value, view.tpl)));
+        }
+        break;
+      case 3:
+        if (bindingKind !== ElementAttributeKind.Binding) {
+          throw Error("Unexpected style binding on ng-template");
+        }
+        view.update.push(createStylePropOp(xref, name, convertAst(value, view.tpl), unit));
         break;
       default:
         throw Error(`Property binding type not handled: ${type}`);
@@ -19813,7 +20015,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.2.0-next.0+sha-452a3e9");
+var VERSION2 = new Version("16.2.0-next.0+sha-060830e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -21132,7 +21334,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-452a3e9"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-060830e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -21201,7 +21403,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-452a3e9"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-060830e"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -21386,7 +21588,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-452a3e9"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-060830e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -21409,7 +21611,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-452a3e9"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-060830e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -21447,7 +21649,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-452a3e9"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-060830e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -21468,7 +21670,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-452a3e9"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-060830e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -21503,7 +21705,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.2.0-next.0+sha-452a3e9"));
+  definitionMap.set("version", literal("16.2.0-next.0+sha-060830e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -21520,7 +21722,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.2.0-next.0+sha-452a3e9");
+var VERSION3 = new Version("16.2.0-next.0+sha-060830e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
