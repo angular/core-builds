@@ -1516,6 +1516,9 @@ var InvokeFunctionExpr = class extends Expression {
     this.args = args;
     this.pure = pure;
   }
+  get receiver() {
+    return this.fn;
+  }
   isEquivalent(e) {
     return e instanceof InvokeFunctionExpr && this.fn.isEquivalent(e.fn) && areAllEquivalent(this.args, e.args) && this.pure === e.pure;
   }
@@ -1840,6 +1843,9 @@ var ReadPropExpr = class extends Expression {
     super(type, sourceSpan);
     this.receiver = receiver;
     this.name = name;
+  }
+  get index() {
+    return this.name;
   }
   isEquivalent(e) {
     return e instanceof ReadPropExpr && this.receiver.isEquivalent(e.receiver) && this.name === e.name;
@@ -7622,6 +7628,8 @@ var ExpressionKind;
   ExpressionKind2[ExpressionKind2["SafeInvokeFunction"] = 14] = "SafeInvokeFunction";
   ExpressionKind2[ExpressionKind2["SafeTernaryExpr"] = 15] = "SafeTernaryExpr";
   ExpressionKind2[ExpressionKind2["EmptyExpr"] = 16] = "EmptyExpr";
+  ExpressionKind2[ExpressionKind2["AssignTemporaryExpr"] = 17] = "AssignTemporaryExpr";
+  ExpressionKind2[ExpressionKind2["ReadTemporaryExpr"] = 18] = "ReadTemporaryExpr";
 })(ExpressionKind || (ExpressionKind = {}));
 var SemanticVariableKind;
 (function(SemanticVariableKind2) {
@@ -8030,7 +8038,11 @@ var SafePropertyReadExpr = class extends ExpressionBase {
     this.name = name;
     this.kind = ExpressionKind.SafePropertyRead;
   }
+  get index() {
+    return this.name;
+  }
   visitExpression(visitor, context) {
+    this.receiver.visitExpression(visitor, context);
   }
   isEquivalent() {
     return false;
@@ -8053,6 +8065,8 @@ var SafeKeyedReadExpr = class extends ExpressionBase {
     this.kind = ExpressionKind.SafeKeyedRead;
   }
   visitExpression(visitor, context) {
+    this.receiver.visitExpression(visitor, context);
+    this.index.visitExpression(visitor, context);
   }
   isEquivalent() {
     return false;
@@ -8076,6 +8090,10 @@ var SafeInvokeFunctionExpr = class extends ExpressionBase {
     this.kind = ExpressionKind.SafeInvokeFunction;
   }
   visitExpression(visitor, context) {
+    this.receiver.visitExpression(visitor, context);
+    for (const a of this.args) {
+      a.visitExpression(visitor, context);
+    }
   }
   isEquivalent() {
     return false;
@@ -8101,6 +8119,8 @@ var SafeTernaryExpr = class extends ExpressionBase {
     this.kind = ExpressionKind.SafeTernaryExpr;
   }
   visitExpression(visitor, context) {
+    this.guard.visitExpression(visitor, context);
+    this.expr.visitExpression(visitor, context);
   }
   isEquivalent() {
     return false;
@@ -8133,6 +8153,55 @@ var EmptyExpr2 = class extends ExpressionBase {
     return new EmptyExpr2();
   }
   transformInternalExpressions() {
+  }
+};
+var AssignTemporaryExpr = class extends ExpressionBase {
+  constructor(expr, xref) {
+    super();
+    this.expr = expr;
+    this.xref = xref;
+    this.kind = ExpressionKind.AssignTemporaryExpr;
+    this.name = null;
+  }
+  visitExpression(visitor, context) {
+    this.expr.visitExpression(visitor, context);
+  }
+  isEquivalent() {
+    return false;
+  }
+  isConstant() {
+    return false;
+  }
+  transformInternalExpressions(transform, flags) {
+    this.expr = transformExpressionsInExpression(this.expr, transform, flags);
+  }
+  clone() {
+    const a = new AssignTemporaryExpr(this.expr, this.xref);
+    a.name = this.name;
+    return a;
+  }
+};
+var ReadTemporaryExpr = class extends ExpressionBase {
+  constructor(xref) {
+    super();
+    this.xref = xref;
+    this.kind = ExpressionKind.ReadTemporaryExpr;
+    this.name = null;
+  }
+  visitExpression(visitor, context) {
+  }
+  isEquivalent() {
+    return this.xref === this.xref;
+  }
+  isConstant() {
+    return false;
+  }
+  transformInternalExpressions(transform, flags) {
+  }
+  clone() {
+    const r = new ReadTemporaryExpr(this.xref);
+    r.name = this.name;
+    return r;
   }
 };
 function visitExpressionsInOp(op, visitor) {
@@ -8240,6 +8309,10 @@ function transformExpressionsInStatement(stmt, transform, flags) {
     stmt.expr = transformExpressionsInExpression(stmt.expr, transform, flags);
   } else if (stmt instanceof ReturnStatement) {
     stmt.value = transformExpressionsInExpression(stmt.value, transform, flags);
+  } else if (stmt instanceof DeclareVarStmt) {
+    if (stmt.value !== void 0) {
+      stmt.value = transformExpressionsInExpression(stmt.value, transform, flags);
+    }
   } else {
     throw new Error(`Unhandled statement kind: ${stmt.constructor.name}`);
   }
@@ -8873,7 +8946,9 @@ function phaseNullishCoalescing(cpl) {
         if (!(expr instanceof BinaryOperatorExpr) || expr.operator !== BinaryOperator.NullishCoalesce) {
           return expr;
         }
-        return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.And, new BinaryOperatorExpr(BinaryOperator.NotIdentical, expr.lhs, NULL_EXPR), new BinaryOperatorExpr(BinaryOperator.NotIdentical, expr.lhs, new LiteralExpr(void 0))), expr.lhs, expr.rhs);
+        const assignment = new AssignTemporaryExpr(expr.lhs.clone(), cpl.allocateXrefId());
+        const read = new ReadTemporaryExpr(assignment.xref);
+        return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.And, new BinaryOperatorExpr(BinaryOperator.NotIdentical, assignment, NULL_EXPR), new BinaryOperatorExpr(BinaryOperator.NotIdentical, read, new LiteralExpr(void 0))), read.clone(), expr.rhs);
       }, VisitorContextFlag.None);
     }
   }
@@ -9692,6 +9767,16 @@ function reifyIrExpression(expr) {
         throw new Error(`Read of unnamed variable ${expr.xref}`);
       }
       return variable(expr.name);
+    case ExpressionKind.ReadTemporaryExpr:
+      if (expr.name === null) {
+        throw new Error(`Read of unnamed temporary ${expr.xref}`);
+      }
+      return variable(expr.name);
+    case ExpressionKind.AssignTemporaryExpr:
+      if (expr.name === null) {
+        throw new Error(`Assign of unnamed temporary ${expr.xref}`);
+      }
+      return variable(expr.name).set(expr.expr);
     case ExpressionKind.PureFunctionExpr:
       if (expr.fn === null) {
         throw new Error(`AssertionError: expected PureFunctions to have been extracted`);
@@ -10114,19 +10199,77 @@ function allowConservativeInlining(decl, target) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/expand_safe_reads.mjs
-function phaseExpandSafeReads(cpl) {
+function phaseExpandSafeReads(cpl, compatibility) {
   for (const [_, view] of cpl.views) {
     for (const op of view.ops()) {
-      transformExpressionsInOp(op, safeTransform, VisitorContextFlag.None);
+      transformExpressionsInOp(op, (e) => safeTransform(e, { cpl, compatibility }), VisitorContextFlag.None);
       transformExpressionsInOp(op, ternaryTransform, VisitorContextFlag.None);
     }
   }
+}
+var requiresTemporary = [
+  InvokeFunctionExpr,
+  LiteralArrayExpr,
+  LiteralMapExpr,
+  SafeInvokeFunctionExpr,
+  PipeBindingExpr
+].map((e) => e.constructor.name);
+function needsTemporaryInSafeAccess(e) {
+  if (e instanceof UnaryOperatorExpr) {
+    return needsTemporaryInSafeAccess(e.expr);
+  } else if (e instanceof BinaryOperatorExpr) {
+    return needsTemporaryInSafeAccess(e.lhs) || needsTemporaryInSafeAccess(e.rhs);
+  } else if (e instanceof ConditionalExpr) {
+    if (e.falseCase && needsTemporaryInSafeAccess(e.falseCase))
+      return true;
+    return needsTemporaryInSafeAccess(e.condition) || needsTemporaryInSafeAccess(e.trueCase);
+  } else if (e instanceof NotExpr) {
+    return needsTemporaryInSafeAccess(e.condition);
+  } else if (e instanceof AssignTemporaryExpr) {
+    return needsTemporaryInSafeAccess(e.expr);
+  } else if (e instanceof ReadPropExpr) {
+    return needsTemporaryInSafeAccess(e.receiver);
+  } else if (e instanceof ReadKeyExpr) {
+    return needsTemporaryInSafeAccess(e.receiver) || needsTemporaryInSafeAccess(e.index);
+  }
+  return e instanceof InvokeFunctionExpr || e instanceof LiteralArrayExpr || e instanceof LiteralMapExpr || e instanceof SafeInvokeFunctionExpr || e instanceof PipeBindingExpr;
+}
+function temporariesIn(e) {
+  const temporaries = /* @__PURE__ */ new Set();
+  transformExpressionsInExpression(e, (e2) => {
+    if (e2 instanceof AssignTemporaryExpr) {
+      temporaries.add(e2.xref);
+    }
+    return e2;
+  }, VisitorContextFlag.None);
+  return temporaries;
+}
+function eliminateTemporaryAssignments(e, tmps, ctx) {
+  transformExpressionsInExpression(e, (e2) => {
+    if (e2 instanceof AssignTemporaryExpr && tmps.has(e2.xref)) {
+      const read = new ReadTemporaryExpr(e2.xref);
+      return ctx.compatibility ? new AssignTemporaryExpr(read, read.xref) : read;
+    }
+    return e2;
+  }, VisitorContextFlag.None);
+  return e;
+}
+function safeTernaryWithTemporary(guard, body, ctx) {
+  let result;
+  if (needsTemporaryInSafeAccess(guard)) {
+    const xref = ctx.cpl.allocateXrefId();
+    result = [new AssignTemporaryExpr(guard, xref), new ReadTemporaryExpr(xref)];
+  } else {
+    result = [guard, guard.clone()];
+    eliminateTemporaryAssignments(result[1], temporariesIn(result[0]), ctx);
+  }
+  return new SafeTernaryExpr(result[0], body(result[1]));
 }
 function isSafeAccessExpression(e) {
   return e instanceof SafePropertyReadExpr || e instanceof SafeKeyedReadExpr;
 }
 function isUnsafeAccessExpression(e) {
-  return e instanceof ReadPropExpr || e instanceof ReadKeyExpr;
+  return e instanceof ReadPropExpr || e instanceof ReadKeyExpr || e instanceof InvokeFunctionExpr;
 }
 function isAccessExpression(e) {
   return isSafeAccessExpression(e) || isUnsafeAccessExpression(e);
@@ -10141,7 +10284,7 @@ function deepestSafeTernary(e) {
   }
   return null;
 }
-function safeTransform(e) {
+function safeTransform(e, ctx) {
   if (e instanceof SafeInvokeFunctionExpr) {
     return new InvokeFunctionExpr(e.receiver, e.args);
   }
@@ -10150,6 +10293,10 @@ function safeTransform(e) {
   }
   const dst = deepestSafeTernary(e);
   if (dst) {
+    if (e instanceof InvokeFunctionExpr) {
+      dst.expr = dst.expr.callFn(e.args);
+      return e.receiver;
+    }
     if (e instanceof ReadPropExpr) {
       dst.expr = dst.expr.prop(e.name);
       return e.receiver;
@@ -10159,19 +10306,19 @@ function safeTransform(e) {
       return e.receiver;
     }
     if (e instanceof SafePropertyReadExpr) {
-      dst.expr = new SafeTernaryExpr(dst.expr.clone(), dst.expr.prop(e.name));
+      dst.expr = safeTernaryWithTemporary(dst.expr, (r) => r.prop(e.name), ctx);
       return e.receiver;
     }
     if (e instanceof SafeKeyedReadExpr) {
-      dst.expr = new SafeTernaryExpr(dst.expr.clone(), dst.expr.key(e.index));
+      dst.expr = safeTernaryWithTemporary(dst.expr, (r) => r.key(e.index), ctx);
       return e.receiver;
     }
   } else {
     if (e instanceof SafePropertyReadExpr) {
-      return new SafeTernaryExpr(e.receiver.clone(), e.receiver.prop(e.name));
+      return safeTernaryWithTemporary(e.receiver, (r) => r.prop(e.name), ctx);
     }
     if (e instanceof SafeKeyedReadExpr) {
-      return new SafeTernaryExpr(e.receiver.clone(), e.receiver.key(e.index));
+      return safeTernaryWithTemporary(e.receiver, (r) => r.key(e.index), ctx);
     }
   }
   return e;
@@ -10181,6 +10328,39 @@ function ternaryTransform(e) {
     return e;
   }
   return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.Equals, e.guard, NULL_EXPR), NULL_EXPR, e.expr);
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/temporary_variables.mjs
+function phaseTemporaryVariables(cpl) {
+  for (const view of cpl.views.values()) {
+    let opCount = 0;
+    let generatedStatements = [];
+    for (const op of view.ops()) {
+      let count = 0;
+      let xrefs = /* @__PURE__ */ new Set();
+      let defs = /* @__PURE__ */ new Map();
+      visitExpressionsInOp(op, (expr) => {
+        if (expr instanceof ReadTemporaryExpr || expr instanceof AssignTemporaryExpr) {
+          xrefs.add(expr.xref);
+        }
+      });
+      for (const xref of xrefs) {
+        defs.set(xref, `tmp_${opCount}_${count++}`);
+      }
+      visitExpressionsInOp(op, (expr) => {
+        if (expr instanceof ReadTemporaryExpr || expr instanceof AssignTemporaryExpr) {
+          const name = defs.get(expr.xref);
+          if (name === void 0) {
+            throw new Error("Found xref with unassigned name");
+          }
+          expr.name = name;
+        }
+      });
+      generatedStatements.push(...Array.from(defs.values()).map((name) => createStatementOp(new DeclareVarStmt(name))));
+      opCount++;
+    }
+    view.update.prepend(generatedStatements);
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/emit.mjs
@@ -10196,7 +10376,8 @@ function transformTemplate(cpl) {
   phaseLocalRefs(cpl);
   phaseConstCollection(cpl);
   phaseNullishCoalescing(cpl);
-  phaseExpandSafeReads(cpl);
+  phaseExpandSafeReads(cpl, true);
+  phaseTemporaryVariables(cpl);
   phaseSlotAllocation(cpl);
   phaseVarCounting(cpl);
   phaseGenerateAdvance(cpl);
@@ -20015,7 +20196,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.2.0-next.1+sha-a5bd5dd");
+var VERSION2 = new Version("16.2.0-next.1+sha-29bf476");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -21334,7 +21515,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-a5bd5dd"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-29bf476"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -21403,7 +21584,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-a5bd5dd"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-29bf476"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -21588,7 +21769,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-a5bd5dd"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-29bf476"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -21611,7 +21792,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-a5bd5dd"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-29bf476"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -21649,7 +21830,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-a5bd5dd"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-29bf476"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -21670,7 +21851,7 @@ function compileDeclareNgModuleFromMetadata(meta) {
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-a5bd5dd"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-29bf476"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -21705,7 +21886,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-a5bd5dd"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-29bf476"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -21722,7 +21903,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.2.0-next.1+sha-a5bd5dd");
+var VERSION3 = new Version("16.2.0-next.1+sha-29bf476");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
