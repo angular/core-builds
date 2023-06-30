@@ -5433,37 +5433,47 @@ var R3SelectorScopeMode;
   R3SelectorScopeMode2[R3SelectorScopeMode2["SideEffect"] = 1] = "SideEffect";
   R3SelectorScopeMode2[R3SelectorScopeMode2["Omit"] = 2] = "Omit";
 })(R3SelectorScopeMode || (R3SelectorScopeMode = {}));
+var R3NgModuleMetadataKind;
+(function(R3NgModuleMetadataKind2) {
+  R3NgModuleMetadataKind2[R3NgModuleMetadataKind2["Global"] = 0] = "Global";
+  R3NgModuleMetadataKind2[R3NgModuleMetadataKind2["Local"] = 1] = "Local";
+})(R3NgModuleMetadataKind || (R3NgModuleMetadataKind = {}));
 function compileNgModule(meta) {
-  const { type: moduleType, bootstrap, declarations, imports, exports, schemas, containsForwardDecls, selectorScopeMode, id } = meta;
   const statements = [];
   const definitionMap = new DefinitionMap();
-  definitionMap.set("type", moduleType.value);
-  if (bootstrap.length > 0) {
-    definitionMap.set("bootstrap", refsToArray(bootstrap, containsForwardDecls));
+  definitionMap.set("type", meta.type.value);
+  if (meta.kind === R3NgModuleMetadataKind.Global) {
+    if (meta.bootstrap.length > 0) {
+      definitionMap.set("bootstrap", refsToArray(meta.bootstrap, meta.containsForwardDecls));
+    }
+  } else {
+    if (meta.bootstrapExpression) {
+      definitionMap.set("bootstrap", meta.bootstrapExpression);
+    }
   }
-  if (selectorScopeMode === R3SelectorScopeMode.Inline) {
-    if (declarations.length > 0) {
-      definitionMap.set("declarations", refsToArray(declarations, containsForwardDecls));
+  if (meta.selectorScopeMode === R3SelectorScopeMode.Inline) {
+    if (meta.declarations.length > 0) {
+      definitionMap.set("declarations", refsToArray(meta.declarations, meta.containsForwardDecls));
     }
-    if (imports.length > 0) {
-      definitionMap.set("imports", refsToArray(imports, containsForwardDecls));
+    if (meta.imports.length > 0) {
+      definitionMap.set("imports", refsToArray(meta.imports, meta.containsForwardDecls));
     }
-    if (exports.length > 0) {
-      definitionMap.set("exports", refsToArray(exports, containsForwardDecls));
+    if (meta.exports.length > 0) {
+      definitionMap.set("exports", refsToArray(meta.exports, meta.containsForwardDecls));
     }
-  } else if (selectorScopeMode === R3SelectorScopeMode.SideEffect) {
+  } else if (meta.selectorScopeMode === R3SelectorScopeMode.SideEffect) {
     const setNgModuleScopeCall = generateSetNgModuleScopeCall(meta);
     if (setNgModuleScopeCall !== null) {
       statements.push(setNgModuleScopeCall);
     }
   } else {
   }
-  if (schemas !== null && schemas.length > 0) {
-    definitionMap.set("schemas", literalArr(schemas.map((ref) => ref.value)));
+  if (meta.schemas !== null && meta.schemas.length > 0) {
+    definitionMap.set("schemas", literalArr(meta.schemas.map((ref) => ref.value)));
   }
-  if (id !== null) {
-    definitionMap.set("id", id);
-    statements.push(importExpr(Identifiers.registerNgModuleType).callFn([moduleType.value, id]).toStmt());
+  if (meta.id !== null) {
+    definitionMap.set("id", meta.id);
+    statements.push(importExpr(Identifiers.registerNgModuleType).callFn([meta.type.value, meta.id]).toStmt());
   }
   const expression = importExpr(Identifiers.defineNgModule).callFn([definitionMap.toLiteralMap()], void 0, true);
   const type = createNgModuleType(meta);
@@ -5492,7 +5502,11 @@ function compileNgModuleDeclarationExpression(meta) {
   }
   return importExpr(Identifiers.defineNgModule).callFn([definitionMap.toLiteralMap()]);
 }
-function createNgModuleType({ type: moduleType, declarations, exports, imports, includeImportTypes, publicDeclarationTypes }) {
+function createNgModuleType(meta) {
+  if (meta.kind === R3NgModuleMetadataKind.Local) {
+    return new ExpressionType(meta.type.value);
+  }
+  const { type: moduleType, declarations, exports, imports, includeImportTypes, publicDeclarationTypes } = meta;
   return new ExpressionType(importExpr(Identifiers.NgModuleDeclaration, [
     new ExpressionType(moduleType.type),
     publicDeclarationTypes === null ? tupleTypeOf(declarations) : tupleOfTypes(publicDeclarationTypes),
@@ -5501,23 +5515,40 @@ function createNgModuleType({ type: moduleType, declarations, exports, imports, 
   ]));
 }
 function generateSetNgModuleScopeCall(meta) {
-  const { type: moduleType, declarations, imports, exports, containsForwardDecls } = meta;
   const scopeMap = new DefinitionMap();
-  if (declarations.length > 0) {
-    scopeMap.set("declarations", refsToArray(declarations, containsForwardDecls));
+  if (meta.kind === R3NgModuleMetadataKind.Global) {
+    if (meta.declarations.length > 0) {
+      scopeMap.set("declarations", refsToArray(meta.declarations, meta.containsForwardDecls));
+    }
+  } else {
+    if (meta.declarationsExpression) {
+      scopeMap.set("declarations", meta.declarationsExpression);
+    }
   }
-  if (imports.length > 0) {
-    scopeMap.set("imports", refsToArray(imports, containsForwardDecls));
+  if (meta.kind === R3NgModuleMetadataKind.Global) {
+    if (meta.imports.length > 0) {
+      scopeMap.set("imports", refsToArray(meta.imports, meta.containsForwardDecls));
+    }
+  } else {
+    if (meta.importsExpression) {
+      scopeMap.set("imports", meta.importsExpression);
+    }
   }
-  if (exports.length > 0) {
-    scopeMap.set("exports", refsToArray(exports, containsForwardDecls));
+  if (meta.kind === R3NgModuleMetadataKind.Global) {
+    if (meta.exports.length > 0) {
+      scopeMap.set("exports", refsToArray(meta.exports, meta.containsForwardDecls));
+    }
+  } else {
+    if (meta.exportsExpression) {
+      scopeMap.set("exports", meta.exportsExpression);
+    }
   }
   if (Object.keys(scopeMap.values).length === 0) {
     return null;
   }
   const fnCall = new InvokeFunctionExpr(
     importExpr(Identifiers.setNgModuleScope),
-    [moduleType.value, scopeMap.toLiteralMap()]
+    [meta.type.value, scopeMap.toLiteralMap()]
   );
   const guardedCall = jitOnlyGuardedExpression(fnCall);
   const iife = new FunctionExpr(
@@ -18961,6 +18992,7 @@ var CompilerFacadeImpl = class {
   }
   compileNgModule(angularCoreEnv, sourceMapUrl, facade) {
     const meta = {
+      kind: R3NgModuleMetadataKind.Global,
       type: wrapReference(facade.type),
       bootstrap: facade.bootstrap.map(wrapReference),
       declarations: facade.declarations.map(wrapReference),
@@ -19406,7 +19438,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.1.3+sha-4073cc0");
+var VERSION2 = new Version("16.1.3+sha-b9c28ca");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -20725,7 +20757,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.1.3+sha-4073cc0"));
+  definitionMap.set("version", literal("16.1.3+sha-b9c28ca"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -20794,7 +20826,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.1.3+sha-4073cc0"));
+  definitionMap.set("version", literal("16.1.3+sha-b9c28ca"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -20979,7 +21011,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.1.3+sha-4073cc0"));
+  definitionMap.set("version", literal("16.1.3+sha-b9c28ca"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -21002,7 +21034,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.1.3+sha-4073cc0"));
+  definitionMap.set("version", literal("16.1.3+sha-b9c28ca"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -21040,7 +21072,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.1.3+sha-4073cc0"));
+  definitionMap.set("version", literal("16.1.3+sha-b9c28ca"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -21060,8 +21092,11 @@ function compileDeclareNgModuleFromMetadata(meta) {
 }
 function createNgModuleDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
+  if (meta.kind === R3NgModuleMetadataKind.Local) {
+    throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
+  }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.1.3+sha-4073cc0"));
+  definitionMap.set("version", literal("16.1.3+sha-b9c28ca"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -21096,7 +21131,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.1.3+sha-4073cc0"));
+  definitionMap.set("version", literal("16.1.3+sha-b9c28ca"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -21113,7 +21148,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.1.3+sha-4073cc0");
+var VERSION3 = new Version("16.1.3+sha-b9c28ca");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -28681,7 +28716,7 @@ var NgModuleSymbol = class extends SemanticSymbol {
   }
 };
 var NgModuleDecoratorHandler = class {
-  constructor(reflector, evaluator, metaReader, metaRegistry, scopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, annotateForClosureCompiler, onlyPublishPublicTypings, injectableRegistry, perf, includeClassMetadata) {
+  constructor(reflector, evaluator, metaReader, metaRegistry, scopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, annotateForClosureCompiler, onlyPublishPublicTypings, injectableRegistry, perf, includeClassMetadata, compilationMode) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaReader = metaReader;
@@ -28697,6 +28732,7 @@ var NgModuleDecoratorHandler = class {
     this.injectableRegistry = injectableRegistry;
     this.perf = perf;
     this.includeClassMetadata = includeClassMetadata;
+    this.compilationMode = compilationMode;
     this.precedence = HandlerPrecedence.PRIMARY;
     this.name = "NgModuleDecoratorHandler";
   }
@@ -28716,7 +28752,7 @@ var NgModuleDecoratorHandler = class {
     }
   }
   analyze(node, decorator) {
-    var _a2;
+    var _a2, _b2, _c2, _d2, _e2;
     this.perf.eventCount(PerfEvent.AnalyzeNgModule);
     const name = node.name.text;
     if (decorator.args === null || decorator.args.length > 1) {
@@ -28736,9 +28772,8 @@ var NgModuleDecoratorHandler = class {
     ]);
     const diagnostics = [];
     let declarationRefs = [];
-    let rawDeclarations = null;
-    if (ngModule.has("declarations")) {
-      rawDeclarations = ngModule.get("declarations");
+    const rawDeclarations = (_a2 = ngModule.get("declarations")) != null ? _a2 : null;
+    if (this.compilationMode !== CompilationMode.LOCAL && rawDeclarations !== null) {
       const declarationMeta = this.evaluator.evaluate(rawDeclarations, forwardRefResolver);
       declarationRefs = this.resolveTypeList(rawDeclarations, declarationMeta, name, "declarations", 0).references;
       for (const ref of declarationRefs) {
@@ -28752,33 +28787,31 @@ var NgModuleDecoratorHandler = class {
       return { diagnostics };
     }
     let importRefs = [];
-    let rawImports = null;
-    if (ngModule.has("imports")) {
-      rawImports = ngModule.get("imports");
+    let rawImports = (_b2 = ngModule.get("imports")) != null ? _b2 : null;
+    if (this.compilationMode !== CompilationMode.LOCAL && rawImports !== null) {
       const importsMeta = this.evaluator.evaluate(rawImports, moduleResolvers);
       importRefs = this.resolveTypeList(rawImports, importsMeta, name, "imports", 0).references;
     }
     let exportRefs = [];
-    let rawExports = null;
-    if (ngModule.has("exports")) {
-      rawExports = ngModule.get("exports");
+    const rawExports = (_c2 = ngModule.get("exports")) != null ? _c2 : null;
+    if (this.compilationMode !== CompilationMode.LOCAL && rawExports !== null) {
       const exportsMeta = this.evaluator.evaluate(rawExports, moduleResolvers);
       exportRefs = this.resolveTypeList(rawExports, exportsMeta, name, "exports", 0).references;
       this.referencesRegistry.add(node, ...exportRefs);
     }
     let bootstrapRefs = [];
-    if (ngModule.has("bootstrap")) {
-      const expr = ngModule.get("bootstrap");
-      const bootstrapMeta = this.evaluator.evaluate(expr, forwardRefResolver);
-      bootstrapRefs = this.resolveTypeList(expr, bootstrapMeta, name, "bootstrap", 0).references;
+    const rawBootstrap = (_d2 = ngModule.get("bootstrap")) != null ? _d2 : null;
+    if (this.compilationMode !== CompilationMode.LOCAL && rawBootstrap !== null) {
+      const bootstrapMeta = this.evaluator.evaluate(rawBootstrap, forwardRefResolver);
+      bootstrapRefs = this.resolveTypeList(rawBootstrap, bootstrapMeta, name, "bootstrap", 0).references;
       for (const ref of bootstrapRefs) {
         const dirMeta = this.metaReader.getDirectiveMetadata(ref);
         if (dirMeta == null ? void 0 : dirMeta.isStandalone) {
-          diagnostics.push(makeStandaloneBootstrapDiagnostic(node, ref, expr));
+          diagnostics.push(makeStandaloneBootstrapDiagnostic(node, ref, rawBootstrap));
         }
       }
     }
-    const schemas = ngModule.has("schemas") ? extractSchemas(ngModule.get("schemas"), this.evaluator, "NgModule") : [];
+    const schemas = this.compilationMode !== CompilationMode.LOCAL && ngModule.has("schemas") ? extractSchemas(ngModule.get("schemas"), this.evaluator, "NgModule") : [];
     let id = null;
     if (ngModule.has("id")) {
       const idExpr = ngModule.get("id");
@@ -28807,26 +28840,42 @@ var NgModuleDecoratorHandler = class {
     const isForwardReference = (ref) => isExpressionForwardReference(ref.value, node.name, valueContext);
     const containsForwardDecls = bootstrap.some(isForwardReference) || declarations.some(isForwardReference) || imports.some(isForwardReference) || exports.some(isForwardReference);
     const type = wrapTypeReference(this.reflector, node);
-    const ngModuleMetadata = {
-      type,
-      bootstrap,
-      declarations,
-      publicDeclarationTypes: this.onlyPublishPublicTypings ? exportedDeclarations : null,
-      exports,
-      imports,
-      includeImportTypes: !this.onlyPublishPublicTypings,
-      containsForwardDecls,
-      id,
-      selectorScopeMode: R3SelectorScopeMode.SideEffect,
-      schemas: []
-    };
+    let ngModuleMetadata;
+    if (this.compilationMode === CompilationMode.LOCAL) {
+      ngModuleMetadata = {
+        kind: R3NgModuleMetadataKind.Local,
+        type,
+        bootstrapExpression: rawBootstrap ? new WrappedNodeExpr(rawBootstrap) : null,
+        declarationsExpression: rawDeclarations ? new WrappedNodeExpr(rawDeclarations) : null,
+        exportsExpression: rawExports ? new WrappedNodeExpr(rawExports) : null,
+        importsExpression: rawImports ? new WrappedNodeExpr(rawImports) : null,
+        id,
+        selectorScopeMode: R3SelectorScopeMode.SideEffect,
+        schemas: []
+      };
+    } else {
+      ngModuleMetadata = {
+        kind: R3NgModuleMetadataKind.Global,
+        type,
+        bootstrap,
+        declarations,
+        publicDeclarationTypes: this.onlyPublishPublicTypings ? exportedDeclarations : null,
+        exports,
+        imports,
+        includeImportTypes: !this.onlyPublishPublicTypings,
+        containsForwardDecls,
+        id,
+        selectorScopeMode: R3SelectorScopeMode.SideEffect,
+        schemas: []
+      };
+    }
     const rawProviders = ngModule.has("providers") ? ngModule.get("providers") : null;
     let wrappedProviders = null;
     if (rawProviders !== null && (!import_typescript48.default.isArrayLiteralExpression(rawProviders) || rawProviders.elements.length > 0)) {
       wrappedProviders = new WrappedNodeExpr(this.annotateForClosureCompiler ? wrapFunctionExpressionsInParens(rawProviders) : rawProviders);
     }
     const topLevelImports = [];
-    if (ngModule.has("imports")) {
+    if (this.compilationMode !== CompilationMode.LOCAL && ngModule.has("imports")) {
       const rawImports2 = unwrapExpression(ngModule.get("imports"));
       let topLevelExpressions = [];
       if (import_typescript48.default.isArrayLiteralExpression(rawImports2)) {
@@ -28885,7 +28934,7 @@ var NgModuleDecoratorHandler = class {
         classMetadata: this.includeClassMetadata ? extractClassMetadata(node, this.reflector, this.isCore, this.annotateForClosureCompiler) : null,
         factorySymbolName: node.name.text,
         remoteScopesMayRequireCycleProtection,
-        decorator: (_a2 = decorator == null ? void 0 : decorator.node) != null ? _a2 : null
+        decorator: (_e2 = decorator == null ? void 0 : decorator.node) != null ? _e2 : null
       }
     };
   }
@@ -37355,7 +37404,7 @@ var NgCompiler = class {
       new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, supportTestBed),
       new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder, supportTestBed),
       new InjectableDecoratorHandler(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, this.delegatingPerfRecorder, supportTestBed),
-      new NgModuleDecoratorHandler(reflector, evaluator, metaReader, metaRegistry, ngModuleScopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, this.closureCompilerEnabled, (_b2 = this.options.onlyPublishPublicTypingsForNgModules) != null ? _b2 : false, injectableRegistry, this.delegatingPerfRecorder, supportTestBed)
+      new NgModuleDecoratorHandler(reflector, evaluator, metaReader, metaRegistry, ngModuleScopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, this.closureCompilerEnabled, (_b2 = this.options.onlyPublishPublicTypingsForNgModules) != null ? _b2 : false, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, compilationMode)
     ];
     const traitCompiler = new TraitCompiler(handlers, reflector, this.delegatingPerfRecorder, this.incrementalCompilation, this.options.compileNonExportedClasses !== false, compilationMode, dtsTransforms, semanticDepGraphUpdater, this.adapter);
     const notifyingDriver = new NotifyingProgramDriverWrapper(this.programDriver, (program) => {
