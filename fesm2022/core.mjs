@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-00f0149
+ * @license Angular v16.2.0-next.1+sha-b66a16e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10089,7 +10089,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.1+sha-00f0149');
+const VERSION = new Version('16.2.0-next.1+sha-b66a16e');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25913,11 +25913,26 @@ function noop(...args) {
 }
 
 function getNativeRequestAnimationFrame() {
-    let nativeRequestAnimationFrame = _global['requestAnimationFrame'];
-    let nativeCancelAnimationFrame = _global['cancelAnimationFrame'];
+    // Note: the `getNativeRequestAnimationFrame` is used in the `NgZone` class, but we cannot use the
+    // `inject` function. The `NgZone` instance may be created manually, and thus the injection
+    // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
+    // available because otherwise, we'll fall back to `setTimeout`.
+    const isBrowser = typeof _global['requestAnimationFrame'] === 'function';
+    // Note: `requestAnimationFrame` is unavailable when the code runs in the Node.js environment. We
+    // use `setTimeout` because no changes are required other than checking if the current platform is
+    // the browser. `setTimeout` is a well-established API that is available in both environments.
+    // `requestAnimationFrame` is used in the browser to coalesce event tasks since event tasks are
+    // usually executed within the same rendering frame (but this is more implementation details of
+    // browsers).
+    let nativeRequestAnimationFrame = _global[isBrowser ? 'requestAnimationFrame' : 'setTimeout'];
+    let nativeCancelAnimationFrame = _global[isBrowser ? 'cancelAnimationFrame' : 'clearTimeout'];
     if (typeof Zone !== 'undefined' && nativeRequestAnimationFrame && nativeCancelAnimationFrame) {
-        // use unpatched version of requestAnimationFrame(native delegate) if possible
-        // to avoid another Change detection
+        // Note: zone.js sets original implementations on patched APIs behind the
+        // `__zone_symbol__OriginalDelegate` key (see `attachOriginToPatched`). Given the following
+        // example: `window.requestAnimationFrame.__zone_symbol__OriginalDelegate`; this would return an
+        // unpatched implementation of the `requestAnimationFrame`, which isn't intercepted by the
+        // Angular zone. We use the unpatched implementation to avoid another change detection when
+        // coalescing tasks.
         const unpatchedRequestAnimationFrame = nativeRequestAnimationFrame[Zone.__symbol__('OriginalDelegate')];
         if (unpatchedRequestAnimationFrame) {
             nativeRequestAnimationFrame = unpatchedRequestAnimationFrame;
