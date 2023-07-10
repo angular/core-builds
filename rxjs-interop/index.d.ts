@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.4+sha-1bf99e2
+ * @license Angular v16.1.4+sha-e35cc07
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17,8 +17,8 @@ import { Subscribable } from 'rxjs';
  * etc) is destroyed.
  *
  * @param destroyRef optionally, the `DestroyRef` representing the current context. This can be
- *     passed explicitly to use `takeUntilDestroyed` outside of an injection context. Otherwise, the
- * current `DestroyRef` is injected.
+ *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
+ * context](guide/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
  *
  * @developerPreview
  */
@@ -44,7 +44,8 @@ export declare interface ToObservableOptions {
     /**
      * The `Injector` to use when creating the underlying `effect` which watches the signal.
      *
-     * If this isn't specified, the current injection context will be used.
+     * If this isn't specified, the current [injection context](guide/dependency-injection-context)
+     * will be used.
      */
     injector?: Injector;
 }
@@ -60,10 +61,11 @@ export declare interface ToObservableOptions {
  * Before the `Observable` emits its first value, the `Signal` will return `undefined`. To avoid
  * this, either an `initialValue` can be passed or the `requireSync` option enabled.
  *
- * By default, the subscription will be automatically cleaned up when the current injection context
- * is destroyed. For example, when `toObservable` is called during the construction of a component,
- * the subscription will be cleaned up when the component is destroyed. If an injection context is
- * not available, an explicit `Injector` can be passed instead.
+ * By default, the subscription will be automatically cleaned up when the current [injection
+ * context](guide/dependency-injection-context) is destroyed. For example, when `toObservable` is
+ * called during the construction of a component, the subscription will be cleaned up when the
+ * component is destroyed. If an injection context is not available, an explicit `Injector` can be
+ * passed instead.
  *
  * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
  * option can be specified instead, which disables the automatic subscription teardown. No injection
@@ -110,10 +112,11 @@ export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, opt
  * `initialValue`. If the `Observable` is guaranteed to emit synchronously, then the `requireSync`
  * option can be passed instead.
  *
- * By default, the subscription will be automatically cleaned up when the current injection context
- * is destroyed. For example, when `toObservable` is called during the construction of a component,
- * the subscription will be cleaned up when the component is destroyed. If an injection context is
- * not available, an explicit `Injector` can be passed instead.
+ * By default, the subscription will be automatically cleaned up when the current [injection
+ * context](guide/dependency-injection-context) is destroyed. For example, when `toObservable` is
+ * called during the construction of a component, the subscription will be cleaned up when the
+ * component is destroyed. If an injection context is not available, an explicit `Injector` can be
+ * passed instead.
  *
  * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
  * option can be specified instead, which disables the automatic subscription teardown. No injection

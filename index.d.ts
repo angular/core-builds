@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.4+sha-1bf99e2
+ * @license Angular v16.1.4+sha-e35cc07
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -545,7 +545,8 @@ export declare class ApplicationRef {
 export declare function asNativeElements(debugEls: DebugElement[]): any;
 
 /**
- * Asserts that the current stack frame is within an injection context and has access to `inject`.
+ * Asserts that the current stack frame is within an [injection
+ * context](guide/dependency-injection-context) and has access to `inject`.
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
  *
@@ -1855,7 +1856,8 @@ export declare interface CreateEffectOptions {
     /**
      * The `Injector` in which to create the effect.
      *
-     * If this is not provided, the current injection context will be used instead (via `inject`).
+     * If this is not provided, the current [injection context](guide/dependency-injection-context)
+     * will be used instead (via `inject`).
      */
     injector?: Injector;
     /**
@@ -3185,9 +3187,9 @@ export declare abstract class EnvironmentInjector implements Injector {
     /**
      * Runs the given function in the context of this `EnvironmentInjector`.
      *
-     * Within the function's stack frame, `inject` can be used to inject dependencies from this
-     * injector. Note that `inject` is only usable synchronously, and cannot be used in any
-     * asynchronous callbacks or after any `await` points.
+     * Within the function's stack frame, [`inject`](api/core/inject) can be used to inject
+     * dependencies from this injector. Note that `inject` is only usable synchronously, and cannot be
+     * used in any asynchronous callbacks or after any `await` points.
      *
      * @param fn the closure to be run in the context of this injector
      * @returns the return value of the function, if any
@@ -4406,7 +4408,7 @@ export declare interface InjectDecorator {
  * Injection flags for DI.
  *
  * @publicApi
- * @deprecated use an options object for `inject` instead.
+ * @deprecated use an options object for [`inject`](api/core/inject) instead.
  */
 export declare enum InjectFlags {
     /** Check self and check parent injector if needed */
@@ -4444,7 +4446,7 @@ export declare enum InjectFlags {
  * (possibly by creating) a default value of the parameterized type `T`. This sets up the
  * `InjectionToken` using this factory as a provider as if it was defined explicitly in the
  * application's root injector. If the factory function, which takes zero arguments, needs to inject
- * dependencies, it can do so using the `inject` function.
+ * dependencies, it can do so using the [`inject`](api/core/inject) function.
  * As you can see in the Tree-shakable InjectionToken example below.
  *
  * Additionally, if a `factory` is specified you can also specify the `providedIn` option, which
@@ -4485,7 +4487,7 @@ export declare class InjectionToken<T> {
 }
 
 /**
- * Type of the options argument to `inject`.
+ * Type of the options argument to [`inject`](api/core/inject).
  *
  * @publicApi
  */
@@ -7563,13 +7565,15 @@ declare interface RText extends RNode {
 }
 
 /**
- * Runs the given function in the context of the given `Injector`.
+ * Runs the given function in the [context](guide/dependency-injection-context) of the given
+ * `Injector`.
  *
- * Within the function's stack frame, `inject` can be used to inject dependencies from the given
- * `Injector`. Note that `inject` is only usable synchronously, and cannot be used in any
- * asynchronous callbacks or after any `await` points.
+ * Within the function's stack frame, [`inject`](api/core/inject) can be used to inject dependencies
+ * from the given `Injector`. Note that `inject` is only usable synchronously, and cannot be used in
+ * any asynchronous callbacks or after any `await` points.
  *
- * @param injector the injector which will satisfy calls to `inject` while `fn` is executing
+ * @param injector the injector which will satisfy calls to [`inject`](api/core/inject) while `fn`
+ *     is executing
  * @param fn the closure to be run in the context of `injector`
  * @returns the return value of the function, if any
  * @publicApi
@@ -8180,8 +8184,8 @@ export declare abstract class TemplateRef<C> {
     /**
      * The anchor element in the parent view for this embedded view.
      *
-     * The data-binding and injection contexts of embedded views created from this `TemplateRef`
-     * inherit from the contexts of this location.
+     * The data-binding and [injection contexts](guide/dependency-injection-context) of embedded views
+     * created from this `TemplateRef` inherit from the contexts of this location.
      *
      * Typically new embedded views are attached to the view container of this location, but in
      * advanced use-cases, the view can be attached to a different container while keeping the
@@ -12639,7 +12643,8 @@ export declare function ɵɵdefineDirective<T>(directiveDefinition: DirectiveDef
  *   with an `@NgModule` or other `InjectorType`, or by specifying that this injectable should be
  *   provided in the `'root'` injector, which will be the application-level injector in most apps.
  * * `factory` gives the zero argument function which will create an instance of the injectable.
- *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
+ *   The factory can call [`inject`](api/core/inject) to access the `Injector` and request injection
+ * of dependencies.
  *
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
