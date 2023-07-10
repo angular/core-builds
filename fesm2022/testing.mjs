@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-c4103cf
+ * @license Angular v16.2.0-next.1+sha-394ca3b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -726,7 +726,8 @@ function isForwardRef(fn) {
  *   with an `@NgModule` or other `InjectorType`, or by specifying that this injectable should be
  *   provided in the `'root'` injector, which will be the application-level injector in most apps.
  * * `factory` gives the zero argument function which will create an instance of the injectable.
- *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
+ *   The factory can call [`inject`](api/core/inject) to access the `Injector` and request injection
+ * of dependencies.
  *
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
@@ -1761,7 +1762,7 @@ function throwProviderNotFoundError(token, injectorName) {
  * Injection flags for DI.
  *
  * @publicApi
- * @deprecated use an options object for `inject` instead.
+ * @deprecated use an options object for [`inject`](api/core/inject) instead.
  */
 var InjectFlags;
 (function (InjectFlags) {
@@ -1895,13 +1896,14 @@ Please check that 1) the type for the parameter at index ${index} is correct and
 }
 /**
  * Injects a token from the currently active injector.
- * `inject` is only supported during instantiation of a dependency by the DI system. It can be used
- * during:
+ * `inject` is only supported in a [injection context](/guide/dependency-injection-context). It can
+ * be used during:
  * - Construction (via the `constructor`) of a class being instantiated by the DI system, such
  * as an `@Injectable` or `@Component`.
  * - In the initializer for fields of such classes.
  * - In the factory function specified for `useFactory` of a `Provider` or an `@Injectable`.
  * - In the `factory` function specified for an `InjectionToken`.
+ * - In a stackframe of a function call in a DI context
  *
  * @param token A token that represents a dependency that should be injected.
  * @param flags Optional flags that control how injection is executed.
@@ -9062,7 +9064,7 @@ function getSanitizer() {
  * (possibly by creating) a default value of the parameterized type `T`. This sets up the
  * `InjectionToken` using this factory as a provider as if it was defined explicitly in the
  * application's root injector. If the factory function, which takes zero arguments, needs to inject
- * dependencies, it can do so using the `inject` function.
+ * dependencies, it can do so using the [`inject`](api/core/inject) function.
  * As you can see in the Tree-shakable InjectionToken example below.
  *
  * Additionally, if a `factory` is specified you can also specify the `providedIn` option, which
@@ -10482,7 +10484,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.1+sha-c4103cf');
+const VERSION = new Version('16.2.0-next.1+sha-394ca3b');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10858,13 +10860,15 @@ function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
 }
 
 /**
- * Runs the given function in the context of the given `Injector`.
+ * Runs the given function in the [context](guide/dependency-injection-context) of the given
+ * `Injector`.
  *
- * Within the function's stack frame, `inject` can be used to inject dependencies from the given
- * `Injector`. Note that `inject` is only usable synchronously, and cannot be used in any
- * asynchronous callbacks or after any `await` points.
+ * Within the function's stack frame, [`inject`](api/core/inject) can be used to inject dependencies
+ * from the given `Injector`. Note that `inject` is only usable synchronously, and cannot be used in
+ * any asynchronous callbacks or after any `await` points.
  *
- * @param injector the injector which will satisfy calls to `inject` while `fn` is executing
+ * @param injector the injector which will satisfy calls to [`inject`](api/core/inject) while `fn`
+ *     is executing
  * @param fn the closure to be run in the context of `injector`
  * @returns the return value of the function, if any
  * @publicApi
@@ -10884,7 +10888,8 @@ function runInInjectionContext(injector, fn) {
     }
 }
 /**
- * Asserts that the current stack frame is within an injection context and has access to `inject`.
+ * Asserts that the current stack frame is within an [injection
+ * context](guide/dependency-injection-context) and has access to `inject`.
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
  *

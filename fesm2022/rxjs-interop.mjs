@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-c4103cf
+ * @license Angular v16.2.0-next.1+sha-394ca3b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13,8 +13,8 @@ import { takeUntil } from 'rxjs/operators';
  * etc) is destroyed.
  *
  * @param destroyRef optionally, the `DestroyRef` representing the current context. This can be
- *     passed explicitly to use `takeUntilDestroyed` outside of an injection context. Otherwise, the
- * current `DestroyRef` is injected.
+ *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
+ * context](guide/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
  *
  * @developerPreview
  */
