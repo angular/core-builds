@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-5828eb9
+ * @license Angular v16.2.0-next.1+sha-1ec2aa9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6035,8 +6035,17 @@ export declare class NgZone {
         shouldCoalesceEventChangeDetection?: boolean | undefined;
         shouldCoalesceRunChangeDetection?: boolean | undefined;
     });
+    /**
+     This method checks whether the method call happens within an Angular Zone instance.
+     */
     static isInAngularZone(): boolean;
+    /**
+     Assures that the method is called within the Angular Zone, otherwise throws an error.
+     */
     static assertInAngularZone(): void;
+    /**
+     Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+     */
     static assertNotInAngularZone(): void;
     /**
      * Executes the `fn` function synchronously within the Angular zone and returns value returned by

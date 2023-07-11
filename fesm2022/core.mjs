@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-5828eb9
+ * @license Angular v16.2.0-next.1+sha-1ec2aa9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10100,7 +10100,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.1+sha-5828eb9');
+const VERSION = new Version('16.2.0-next.1+sha-1ec2aa9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -26112,15 +26112,24 @@ class NgZone {
         self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
         forkInnerZoneWithAngularBehavior(self);
     }
+    /**
+      This method checks whether the method call happens within an Angular Zone instance.
+    */
     static isInAngularZone() {
         // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
         return typeof Zone !== 'undefined' && Zone.current.get('isAngularZone') === true;
     }
+    /**
+      Assures that the method is called within the Angular Zone, otherwise throws an error.
+    */
     static assertInAngularZone() {
         if (!NgZone.isInAngularZone()) {
             throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
         }
     }
+    /**
+      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+    */
     static assertNotInAngularZone() {
         if (NgZone.isInAngularZone()) {
             throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
