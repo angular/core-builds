@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-61be62d
+ * @license Angular v16.2.0-next.1+sha-5d6ec03
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3349,13 +3349,8 @@ function assertTNodeForLView(tNode, lView) {
 }
 function assertTNodeForTView(tNode, tView) {
     assertTNode(tNode);
-    const tData = tView.data;
-    for (let i = HEADER_OFFSET; i < tData.length; i++) {
-        if (tData[i] === tNode) {
-            return;
-        }
-    }
-    throwError('This TNode does not belong to this TView.');
+    tNode.hasOwnProperty('tView_') &&
+        assertEqual(tNode.tView_, tView, 'This TNode does not belong to this TView.');
 }
 function assertTNode(tNode) {
     assertDefined(tNode, 'TNode must be defined');
@@ -10493,7 +10488,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.1+sha-61be62d');
+const VERSION = new Version('16.2.0-next.1+sha-5d6ec03');
 
 // This default value is when checking the hierarchy for a token.
 //
