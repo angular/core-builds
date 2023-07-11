@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-1ec2aa9
+ * @license Angular v16.2.0-next.1+sha-3dafc14
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7649,6 +7649,7 @@ declare const enum RuntimeErrorCode {
     HOST_DIRECTIVE_COMPONENT = 310,
     HOST_DIRECTIVE_UNDEFINED_BINDING = 311,
     HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
+    MULTIPLE_MATCHING_PIPES = 313,
     MULTIPLE_PLATFORMS = 400,
     PLATFORM_NOT_FOUND = 401,
     MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
