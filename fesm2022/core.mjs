@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-a14bdfe
+ * @license Angular v16.2.0-next.1+sha-1837efb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10100,7 +10100,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.1+sha-a14bdfe');
+const VERSION = new Version('16.2.0-next.1+sha-1837efb');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -22610,6 +22610,13 @@ function ɵɵpipe(index, pipeName) {
  */
 function getPipeDef(name, registry) {
     if (registry) {
+        if (ngDevMode) {
+            const pipes = registry.filter(pipe => pipe.name === name);
+            // TODO: Throw an error in the next major
+            if (pipes.length > 1) {
+                console.warn(formatRuntimeError(313 /* RuntimeErrorCode.MULTIPLE_MATCHING_PIPES */, getMultipleMatchingPipesMessage(name)));
+            }
+        }
         for (let i = registry.length - 1; i >= 0; i--) {
             const pipeDef = registry[i];
             if (name === pipeDef.name) {
@@ -22620,6 +22627,23 @@ function getPipeDef(name, registry) {
     if (ngDevMode) {
         throw new RuntimeError(-302 /* RuntimeErrorCode.PIPE_NOT_FOUND */, getPipeNotFoundErrorMessage(name));
     }
+}
+/**
+ * Generates a helpful error message for the user when multiple pipes match the name.
+ *
+ * @param name Name of the pipe
+ * @returns The error message
+ */
+function getMultipleMatchingPipesMessage(name) {
+    const lView = getLView();
+    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+    const context = declarationLView[CONTEXT];
+    const hostIsStandalone = isHostComponentStandalone(lView);
+    const componentInfoMessage = context ? ` in the '${context.constructor.name}' component` : '';
+    const verifyMessage = `check ${hostIsStandalone ? '\'@Component.imports\' of this component' :
+        'the imports of this module'}`;
+    const errorMessage = `Multiple pipes match the name \`${name}\`${componentInfoMessage}. ${verifyMessage}`;
+    return errorMessage;
 }
 /**
  * Generates a helpful error message for the user when a pipe is not found.
@@ -26112,15 +26136,24 @@ class NgZone {
         self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
         forkInnerZoneWithAngularBehavior(self);
     }
+    /**
+      This method checks whether the method call happens within an Angular Zone instance.
+    */
     static isInAngularZone() {
         // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
         return typeof Zone !== 'undefined' && Zone.current.get('isAngularZone') === true;
     }
+    /**
+      Assures that the method is called within the Angular Zone, otherwise throws an error.
+    */
     static assertInAngularZone() {
         if (!NgZone.isInAngularZone()) {
             throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
         }
     }
+    /**
+      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+    */
     static assertNotInAngularZone() {
         if (NgZone.isInAngularZone()) {
             throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
