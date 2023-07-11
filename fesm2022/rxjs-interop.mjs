@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-8758517
+ * @license Angular v16.2.0-next.1+sha-61be62d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -353,7 +353,9 @@ class ReactiveNode {
     consumerPollProducersForChange() {
         for (const [producerId, edge] of this.producers) {
             const producer = edge.producerNode.deref();
-            if (producer === undefined || edge.atTrackingVersion !== this.trackingVersion) {
+            // On Safari < 16.1 deref can return null, we need to check for null also.
+            // See https://github.com/WebKit/WebKit/commit/44c15ba58912faab38b534fef909dd9e13e095e0
+            if (producer == null || edge.atTrackingVersion !== this.trackingVersion) {
                 // This dependency edge is stale, so remove it.
                 this.producers.delete(producerId);
                 producer?.consumers.delete(this.id);
@@ -378,7 +380,9 @@ class ReactiveNode {
         try {
             for (const [consumerId, edge] of this.consumers) {
                 const consumer = edge.consumerNode.deref();
-                if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
+                // On Safari < 16.1 deref can return null, we need to check for null also.
+                // See https://github.com/WebKit/WebKit/commit/44c15ba58912faab38b534fef909dd9e13e095e0
+                if (consumer == null || consumer.trackingVersion !== edge.atTrackingVersion) {
                     this.consumers.delete(consumerId);
                     consumer?.producers.delete(this.id);
                     continue;

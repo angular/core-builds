@@ -15273,8 +15273,8 @@ var _Tokenizer = class {
     const range = options.range || { endPos: _file.content.length, startPos: 0, startLine: 0, startCol: 0 };
     this._cursor = options.escapedString ? new EscapedCharacterCursor(_file, range) : new PlainCharacterCursor(_file, range);
     this._preserveLineEndings = options.preserveLineEndings || false;
-    this._escapedString = options.escapedString || false;
     this._i18nNormalizeLineEndingsInICUs = options.i18nNormalizeLineEndingsInICUs || false;
+    this._tokenizeBlocks = options.tokenizeBlocks || false;
     try {
       this._cursor.init();
     } catch (e) {
@@ -15305,6 +15305,12 @@ var _Tokenizer = class {
           } else {
             this._consumeTagOpen(start);
           }
+        } else if (this._tokenizeBlocks && this._attemptStr("{#")) {
+          this._consumeBlockGroupOpen(start);
+        } else if (this._tokenizeBlocks && this._attemptStr("{/")) {
+          this._consumeBlockGroupClose(start);
+        } else if (this._tokenizeBlocks && this._attemptStr("{:")) {
+          this._consumeBlock(start);
         } else if (!(this._tokenizeIcu && this._tokenizeExpansionForm())) {
           this._consumeWithInterpolation(5, 8, () => this._isTextEnd(), () => this._isTagStart());
         }
@@ -15314,6 +15320,55 @@ var _Tokenizer = class {
     }
     this._beginToken(24);
     this._endToken([]);
+  }
+  _consumeBlockGroupOpen(start) {
+    this._beginToken(25, start);
+    const nameCursor = this._cursor.clone();
+    this._attemptCharCodeUntilFn((code) => !isBlockNameChar(code));
+    this._endToken([this._cursor.getChars(nameCursor)]);
+    this._consumeBlockParameters();
+    this._beginToken(26);
+    this._requireCharCode($RBRACE);
+    this._endToken([]);
+  }
+  _consumeBlockGroupClose(start) {
+    this._beginToken(27, start);
+    const nameCursor = this._cursor.clone();
+    this._attemptCharCodeUntilFn((code) => !isBlockNameChar(code));
+    const name = this._cursor.getChars(nameCursor);
+    this._requireCharCode($RBRACE);
+    this._endToken([name]);
+  }
+  _consumeBlock(start) {
+    this._beginToken(29, start);
+    const nameCursor = this._cursor.clone();
+    this._attemptCharCodeUntilFn((code) => !isBlockNameChar(code));
+    this._endToken([this._cursor.getChars(nameCursor)]);
+    this._consumeBlockParameters();
+    this._beginToken(30);
+    this._requireCharCode($RBRACE);
+    this._endToken([]);
+  }
+  _consumeBlockParameters() {
+    this._attemptCharCodeUntilFn(isBlockParameterChar);
+    while (this._cursor.peek() !== $RBRACE && this._cursor.peek() !== $EOF) {
+      this._beginToken(28);
+      const start = this._cursor.clone();
+      let inQuote = null;
+      while (this._cursor.peek() !== $SEMICOLON && this._cursor.peek() !== $RBRACE && this._cursor.peek() !== $EOF || inQuote !== null) {
+        const char = this._cursor.peek();
+        if (char === $BACKSLASH) {
+          this._cursor.advance();
+        } else if (char === inQuote) {
+          inQuote = null;
+        } else if (inQuote === null && isQuote(char)) {
+          inQuote = char;
+        }
+        this._cursor.advance();
+      }
+      this._endToken([this._cursor.getChars(start)]);
+      this._attemptCharCodeUntilFn(isBlockParameterChar);
+    }
   }
   _tokenizeExpansionForm() {
     if (this.isExpansionFormStart()) {
@@ -15623,7 +15678,6 @@ var _Tokenizer = class {
     this._endToken(prefixAndName);
   }
   _consumeAttributeValue() {
-    let value;
     if (this._cursor.peek() === $SQ || this._cursor.peek() === $DQ) {
       const quoteChar = this._cursor.peek();
       this._consumeQuote(quoteChar);
@@ -15766,7 +15820,7 @@ var _Tokenizer = class {
     return this._processCarriageReturns(end.getChars(start));
   }
   _isTextEnd() {
-    if (this._isTagStart() || this._cursor.peek() === $EOF) {
+    if (this._isTagStart() || this._isBlockStart() || this._cursor.peek() === $EOF) {
       return true;
     }
     if (this._tokenizeIcu && !this._inInterpolation) {
@@ -15785,6 +15839,21 @@ var _Tokenizer = class {
       tmp.advance();
       const code = tmp.peek();
       if ($a <= code && code <= $z || $A <= code && code <= $Z || code === $SLASH || code === $BANG) {
+        return true;
+      }
+    }
+    return false;
+  }
+  _isBlockStart() {
+    if (this._tokenizeBlocks && this._cursor.peek() === $LBRACE) {
+      const tmp = this._cursor.clone();
+      tmp.advance();
+      const next = tmp.peek();
+      if (next !== $BANG && next !== $SLASH && next !== $COLON) {
+        return false;
+      }
+      tmp.advance();
+      if (isBlockNameChar(tmp.peek())) {
         return true;
       }
     }
@@ -15837,6 +15906,12 @@ function compareCharCodeCaseInsensitive(code1, code2) {
 }
 function toUpperCaseCharCode(code) {
   return code >= $a && code <= $z ? code - $a + $A : code;
+}
+function isBlockNameChar(code) {
+  return isAsciiLetter(code) || isDigit(code) || code === $_;
+}
+function isBlockParameterChar(code) {
+  return code !== $SEMICOLON && isNotWhitespace(code);
 }
 function mergeTextTokens(srcTokens) {
   const dstTokens = [];
@@ -20313,7 +20388,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.2.0-next.1+sha-8758517");
+var VERSION2 = new Version("16.2.0-next.1+sha-61be62d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -21632,7 +21707,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-8758517"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-61be62d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -21701,7 +21776,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-8758517"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-61be62d"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -21886,7 +21961,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-8758517"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-61be62d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -21909,7 +21984,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-8758517"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-61be62d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -21947,7 +22022,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-8758517"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-61be62d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -21971,7 +22046,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-8758517"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-61be62d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -22006,7 +22081,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-8758517"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-61be62d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -22023,7 +22098,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.2.0-next.1+sha-8758517");
+var VERSION3 = new Version("16.2.0-next.1+sha-61be62d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
