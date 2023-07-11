@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.4+sha-e35cc07
+ * @license Angular v16.1.4+sha-de01f75
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5555,7 +5555,7 @@ declare const enum LViewFlags {
 
 /**
  * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
- * referenced in `@Component in a component injector.
+ * referenced in `@Component` in a component injector.
  */
 export declare function makeEnvironmentProviders(providers: (Provider | EnvironmentProviders)[]): EnvironmentProviders;
 
@@ -6020,8 +6020,17 @@ export declare class NgZone {
         shouldCoalesceEventChangeDetection?: boolean | undefined;
         shouldCoalesceRunChangeDetection?: boolean | undefined;
     });
+    /**
+     This method checks whether the method call happens within an Angular Zone instance.
+     */
     static isInAngularZone(): boolean;
+    /**
+     Assures that the method is called within the Angular Zone, otherwise throws an error.
+     */
     static assertInAngularZone(): void;
+    /**
+     Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+     */
     static assertNotInAngularZone(): void;
     /**
      * Executes the `fn` function synchronously within the Angular zone and returns value returned by
@@ -7625,6 +7634,7 @@ declare const enum RuntimeErrorCode {
     HOST_DIRECTIVE_COMPONENT = 310,
     HOST_DIRECTIVE_UNDEFINED_BINDING = 311,
     HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
+    MULTIPLE_MATCHING_PIPES = 313,
     MULTIPLE_PLATFORMS = 400,
     PLATFORM_NOT_FOUND = 401,
     MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,

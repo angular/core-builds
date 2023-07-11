@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.4+sha-e35cc07
+ * @license Angular v16.1.4+sha-de01f75
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2088,8 +2088,13 @@ function assertTNodeForLView(tNode, lView) {
 }
 function assertTNodeForTView(tNode, tView) {
     assertTNode(tNode);
-    tNode.hasOwnProperty('tView_') &&
-        assertEqual(tNode.tView_, tView, 'This TNode does not belong to this TView.');
+    const tData = tView.data;
+    for (let i = HEADER_OFFSET; i < tData.length; i++) {
+        if (tData[i] === tNode) {
+            return;
+        }
+    }
+    throwError('This TNode does not belong to this TView.');
 }
 function assertTNode(tNode) {
     assertDefined(tNode, 'TNode must be defined');
@@ -2350,7 +2355,9 @@ class ReactiveNode {
     consumerPollProducersForChange() {
         for (const [producerId, edge] of this.producers) {
             const producer = edge.producerNode.deref();
-            if (producer === undefined || edge.atTrackingVersion !== this.trackingVersion) {
+            // On Safari < 16.1 deref can return null, we need to check for null also.
+            // See https://github.com/WebKit/WebKit/commit/44c15ba58912faab38b534fef909dd9e13e095e0
+            if (producer == null || edge.atTrackingVersion !== this.trackingVersion) {
                 // This dependency edge is stale, so remove it.
                 this.producers.delete(producerId);
                 producer?.consumers.delete(this.id);
@@ -2375,7 +2382,9 @@ class ReactiveNode {
         try {
             for (const [consumerId, edge] of this.consumers) {
                 const consumer = edge.consumerNode.deref();
-                if (consumer === undefined || consumer.trackingVersion !== edge.atTrackingVersion) {
+                // On Safari < 16.1 deref can return null, we need to check for null also.
+                // See https://github.com/WebKit/WebKit/commit/44c15ba58912faab38b534fef909dd9e13e095e0
+                if (consumer == null || consumer.trackingVersion !== edge.atTrackingVersion) {
                     this.consumers.delete(consumerId);
                     consumer?.producers.delete(this.id);
                     continue;
@@ -8769,7 +8778,7 @@ class NullInjector {
 
 /**
  * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
- * referenced in `@Component in a component injector.
+ * referenced in `@Component` in a component injector.
  */
 function makeEnvironmentProviders(providers) {
     return {
@@ -10091,7 +10100,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.4+sha-e35cc07');
+const VERSION = new Version('16.1.4+sha-de01f75');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -22601,6 +22610,13 @@ function ɵɵpipe(index, pipeName) {
  */
 function getPipeDef(name, registry) {
     if (registry) {
+        if (ngDevMode) {
+            const pipes = registry.filter(pipe => pipe.name === name);
+            // TODO: Throw an error in the next major
+            if (pipes.length > 1) {
+                console.warn(formatRuntimeError(313 /* RuntimeErrorCode.MULTIPLE_MATCHING_PIPES */, getMultipleMatchingPipesMessage(name)));
+            }
+        }
         for (let i = registry.length - 1; i >= 0; i--) {
             const pipeDef = registry[i];
             if (name === pipeDef.name) {
@@ -22611,6 +22627,23 @@ function getPipeDef(name, registry) {
     if (ngDevMode) {
         throw new RuntimeError(-302 /* RuntimeErrorCode.PIPE_NOT_FOUND */, getPipeNotFoundErrorMessage(name));
     }
+}
+/**
+ * Generates a helpful error message for the user when multiple pipes match the name.
+ *
+ * @param name Name of the pipe
+ * @returns The error message
+ */
+function getMultipleMatchingPipesMessage(name) {
+    const lView = getLView();
+    const declarationLView = lView[DECLARATION_COMPONENT_VIEW];
+    const context = declarationLView[CONTEXT];
+    const hostIsStandalone = isHostComponentStandalone(lView);
+    const componentInfoMessage = context ? ` in the '${context.constructor.name}' component` : '';
+    const verifyMessage = `check ${hostIsStandalone ? '\'@Component.imports\' of this component' :
+        'the imports of this module'}`;
+    const errorMessage = `Multiple pipes match the name \`${name}\`${componentInfoMessage}. ${verifyMessage}`;
+    return errorMessage;
 }
 /**
  * Generates a helpful error message for the user when a pipe is not found.
@@ -26103,15 +26136,24 @@ class NgZone {
         self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
         forkInnerZoneWithAngularBehavior(self);
     }
+    /**
+      This method checks whether the method call happens within an Angular Zone instance.
+    */
     static isInAngularZone() {
         // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
         return typeof Zone !== 'undefined' && Zone.current.get('isAngularZone') === true;
     }
+    /**
+      Assures that the method is called within the Angular Zone, otherwise throws an error.
+    */
     static assertInAngularZone() {
         if (!NgZone.isInAngularZone()) {
             throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
         }
     }
+    /**
+      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+    */
     static assertNotInAngularZone() {
         if (NgZone.isInAngularZone()) {
             throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
