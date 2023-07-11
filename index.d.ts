@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.1+sha-5d6ec03
+ * @license Angular v16.2.0-next.1+sha-ef45fa8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5555,7 +5555,7 @@ declare const enum LViewFlags {
 
 /**
  * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
- * referenced in `@Component in a component injector.
+ * referenced in `@Component` in a component injector.
  */
 export declare function makeEnvironmentProviders(providers: (Provider | EnvironmentProviders)[]): EnvironmentProviders;
 
