@@ -12599,6 +12599,39 @@ var Comment2 = class {
     return visitor.visitComment(this, context);
   }
 };
+var BlockGroup = class {
+  constructor(blocks, sourceSpan, startSourceSpan, endSourceSpan = null) {
+    this.blocks = blocks;
+    this.sourceSpan = sourceSpan;
+    this.startSourceSpan = startSourceSpan;
+    this.endSourceSpan = endSourceSpan;
+  }
+  visit(visitor, context) {
+    return visitor.visitBlockGroup(this, context);
+  }
+};
+var Block = class {
+  constructor(name, parameters, children, sourceSpan, startSourceSpan, endSourceSpan = null) {
+    this.name = name;
+    this.parameters = parameters;
+    this.children = children;
+    this.sourceSpan = sourceSpan;
+    this.startSourceSpan = startSourceSpan;
+    this.endSourceSpan = endSourceSpan;
+  }
+  visit(visitor, context) {
+    return visitor.visitBlock(this, context);
+  }
+};
+var BlockParameter = class {
+  constructor(expression, sourceSpan) {
+    this.expression = expression;
+    this.sourceSpan = sourceSpan;
+  }
+  visit(visitor, context) {
+    return visitor.visitBlockParameter(this, context);
+  }
+};
 function visitAll2(visitor, nodes, context = null) {
   const result = [];
   const visit2 = visitor.visit ? (ast) => visitor.visit(ast, context) || ast.visit(visitor, context) : (ast) => ast.visit(visitor, context);
@@ -16159,7 +16192,7 @@ var _TreeBuilder = class {
     this.tokens = tokens;
     this.getTagDefinition = getTagDefinition;
     this._index = -1;
-    this._elementStack = [];
+    this._containerStack = [];
     this.rootNodes = [];
     this.errors = [];
     this._advance();
@@ -16181,6 +16214,15 @@ var _TreeBuilder = class {
         this._consumeText(this._advance());
       } else if (this._peek.type === 19) {
         this._consumeExpansion(this._advance());
+      } else if (this._peek.type === 25) {
+        this._closeVoidElement();
+        this._consumeBlockGroupOpen(this._advance());
+      } else if (this._peek.type === 29) {
+        this._closeVoidElement();
+        this._consumeBlock(this._advance(), 30);
+      } else if (this._peek.type === 27) {
+        this._closeVoidElement();
+        this._consumeBlockGroupClose(this._advance());
       } else {
         this._advance();
       }
@@ -16287,7 +16329,11 @@ var _TreeBuilder = class {
     const startSpan = token.sourceSpan;
     let text2 = token.parts[0];
     if (text2.length > 0 && text2[0] === "\n") {
-      const parent = this._getParentElement();
+      const parent = this._getContainer();
+      if (parent instanceof BlockGroup) {
+        this.errors.push(TreeError.create(null, startSpan, "Text cannot be placed directly inside of a block group."));
+        return null;
+      }
       if (parent != null && parent.children.length === 0 && this.getTagDefinition(parent.name).ignoreFirstLf) {
         text2 = text2.substring(1);
         tokens[0] = { type: token.type, sourceSpan: token.sourceSpan, parts: [text2] };
@@ -16310,9 +16356,9 @@ var _TreeBuilder = class {
     }
   }
   _closeVoidElement() {
-    const el = this._getParentElement();
-    if (el && this.getTagDefinition(el.name).isVoid) {
-      this._elementStack.pop();
+    const el = this._getContainer();
+    if (el instanceof Element2 && this.getTagDefinition(el.name).isVoid) {
+      this._containerStack.pop();
     }
   }
   _consumeStartTag(startTagToken) {
@@ -16321,7 +16367,7 @@ var _TreeBuilder = class {
     while (this._peek.type === 14) {
       attrs.push(this._consumeAttr(this._advance()));
     }
-    const fullName = this._getElementFullName(prefix, name, this._getParentElement());
+    const fullName = this._getElementFullName(prefix, name, this._getClosestParentElement());
     let selfClosing = false;
     if (this._peek.type === 2) {
       this._advance();
@@ -16338,42 +16384,44 @@ var _TreeBuilder = class {
     const span = new ParseSourceSpan(startTagToken.sourceSpan.start, end, startTagToken.sourceSpan.fullStart);
     const startSpan = new ParseSourceSpan(startTagToken.sourceSpan.start, end, startTagToken.sourceSpan.fullStart);
     const el = new Element2(fullName, attrs, [], span, startSpan, void 0);
-    this._pushElement(el);
+    const parentEl = this._getContainer();
+    this._pushContainer(el, parentEl instanceof Element2 && this.getTagDefinition(parentEl.name).isClosedByChild(el.name));
     if (selfClosing) {
-      this._popElement(fullName, span);
+      this._popContainer(fullName, Element2, span);
     } else if (startTagToken.type === 4) {
-      this._popElement(fullName, null);
+      this._popContainer(fullName, Element2, null);
       this.errors.push(TreeError.create(fullName, span, `Opening tag "${fullName}" not terminated.`));
     }
   }
-  _pushElement(el) {
-    const parentEl = this._getParentElement();
-    if (parentEl && this.getTagDefinition(parentEl.name).isClosedByChild(el.name)) {
-      this._elementStack.pop();
+  _pushContainer(node, isClosedByChild) {
+    if (isClosedByChild) {
+      this._containerStack.pop();
     }
-    this._addToParent(el);
-    this._elementStack.push(el);
+    this._addToParent(node);
+    this._containerStack.push(node);
   }
   _consumeEndTag(endTagToken) {
-    const fullName = this._getElementFullName(endTagToken.parts[0], endTagToken.parts[1], this._getParentElement());
+    const fullName = this._getElementFullName(endTagToken.parts[0], endTagToken.parts[1], this._getClosestParentElement());
     if (this.getTagDefinition(fullName).isVoid) {
       this.errors.push(TreeError.create(fullName, endTagToken.sourceSpan, `Void elements do not have end tags "${endTagToken.parts[1]}"`));
-    } else if (!this._popElement(fullName, endTagToken.sourceSpan)) {
+    } else if (!this._popContainer(fullName, Element2, endTagToken.sourceSpan)) {
       const errMsg = `Unexpected closing tag "${fullName}". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags`;
       this.errors.push(TreeError.create(fullName, endTagToken.sourceSpan, errMsg));
     }
   }
-  _popElement(fullName, endSourceSpan) {
+  _popContainer(fullName, expectedType, endSourceSpan) {
+    var _a2;
     let unexpectedCloseTagDetected = false;
-    for (let stackIndex = this._elementStack.length - 1; stackIndex >= 0; stackIndex--) {
-      const el = this._elementStack[stackIndex];
-      if (el.name === fullName) {
-        el.endSourceSpan = endSourceSpan;
-        el.sourceSpan.end = endSourceSpan !== null ? endSourceSpan.end : el.sourceSpan.end;
-        this._elementStack.splice(stackIndex, this._elementStack.length - stackIndex);
+    for (let stackIndex = this._containerStack.length - 1; stackIndex >= 0; stackIndex--) {
+      const node = this._containerStack[stackIndex];
+      const name = node instanceof BlockGroup ? (_a2 = node.blocks[0]) == null ? void 0 : _a2.name : node.name;
+      if (name === fullName && node instanceof expectedType) {
+        node.endSourceSpan = endSourceSpan;
+        node.sourceSpan.end = endSourceSpan !== null ? endSourceSpan.end : node.sourceSpan.end;
+        this._containerStack.splice(stackIndex, this._containerStack.length - stackIndex);
         return !unexpectedCloseTagDetected;
       }
-      if (!this.getTagDefinition(el.name).closedByParent) {
+      if (node instanceof BlockGroup || node instanceof Element2 && !this.getTagDefinition(node.name).closedByParent) {
         unexpectedCloseTagDetected = true;
       }
     }
@@ -16413,15 +16461,74 @@ var _TreeBuilder = class {
     const valueSpan = valueStartSpan && valueEnd && new ParseSourceSpan(valueStartSpan.start, valueEnd, valueStartSpan.fullStart);
     return new Attribute(fullName, value, new ParseSourceSpan(attrName.sourceSpan.start, attrEnd, attrName.sourceSpan.fullStart), attrName.sourceSpan, valueSpan, valueTokens.length > 0 ? valueTokens : void 0, void 0);
   }
-  _getParentElement() {
-    return this._elementStack.length > 0 ? this._elementStack[this._elementStack.length - 1] : null;
+  _consumeBlockGroupOpen(token) {
+    const end = this._peek.sourceSpan.fullStart;
+    const span = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
+    const startSpan = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
+    const blockGroup = new BlockGroup([], span, startSpan, null);
+    this._pushContainer(blockGroup, false);
+    const implicitBlock = this._consumeBlock(token, 26);
+    startSpan.end = implicitBlock.startSourceSpan.end;
+  }
+  _consumeBlock(token, closeToken) {
+    this._conditionallyClosePreviousBlock();
+    const parameters = [];
+    while (this._peek.type === 28) {
+      const paramToken = this._advance();
+      parameters.push(new BlockParameter(paramToken.parts[0], paramToken.sourceSpan));
+    }
+    if (this._peek.type === closeToken) {
+      this._advance();
+    }
+    const end = this._peek.sourceSpan.fullStart;
+    const span = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
+    const startSpan = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
+    const block = new Block(token.parts[0], parameters, [], span, startSpan);
+    const parent = this._getContainer();
+    if (!(parent instanceof BlockGroup)) {
+      this.errors.push(TreeError.create(block.name, block.sourceSpan, "Blocks can only be placed inside of block groups."));
+    } else {
+      parent.blocks.push(block);
+      this._containerStack.push(block);
+    }
+    return block;
+  }
+  _consumeBlockGroupClose(token) {
+    const name = token.parts[0];
+    const previousContainer = this._getContainer();
+    this._conditionallyClosePreviousBlock();
+    if (!this._popContainer(name, BlockGroup, token.sourceSpan)) {
+      const context = previousContainer instanceof Element2 ? `There is an unclosed "${previousContainer.name}" HTML tag named that may have to be closed first.` : `The block may have been closed earlier.`;
+      this.errors.push(TreeError.create(name, token.sourceSpan, `Unexpected closing block "${name}". ${context}`));
+    }
+  }
+  _conditionallyClosePreviousBlock() {
+    const container = this._getContainer();
+    if (container instanceof Block) {
+      const lastChild = container.children.length ? container.children[container.children.length - 1] : null;
+      const endSpan = lastChild === null ? null : new ParseSourceSpan(lastChild.sourceSpan.end, lastChild.sourceSpan.end);
+      this._popContainer(container.name, Block, endSpan);
+    }
+  }
+  _getContainer() {
+    return this._containerStack.length > 0 ? this._containerStack[this._containerStack.length - 1] : null;
+  }
+  _getClosestParentElement() {
+    for (let i = this._containerStack.length - 1; i > -1; i--) {
+      if (this._containerStack[i] instanceof Element2) {
+        return this._containerStack[i];
+      }
+    }
+    return null;
   }
   _addToParent(node) {
-    const parent = this._getParentElement();
-    if (parent != null) {
-      parent.children.push(node);
-    } else {
+    const parent = this._getContainer();
+    if (parent === null) {
       this.rootNodes.push(node);
+    } else if (parent instanceof BlockGroup) {
+      this.errors.push(TreeError.create(null, node.sourceSpan, "Block groups can only contain blocks."));
+    } else {
+      parent.children.push(node);
     }
   }
   _getElementFullName(prefix, localName, parentElement) {
@@ -16504,6 +16611,15 @@ var WhitespaceVisitor = class {
   }
   visitExpansionCase(expansionCase, context) {
     return expansionCase;
+  }
+  visitBlockGroup(group, context) {
+    return new BlockGroup(visitAllWithSiblings(this, group.blocks), group.sourceSpan, group.startSourceSpan, group.endSourceSpan);
+  }
+  visitBlock(block, context) {
+    return new Block(block.name, block.parameters, visitAllWithSiblings(this, block.children), block.sourceSpan, block.startSourceSpan);
+  }
+  visitBlockParameter(parameter, context) {
+    return parameter;
   }
 };
 function createWhitespaceProcessedTextToken({ type, parts, sourceSpan }) {
@@ -17119,6 +17235,15 @@ var HtmlAstToIvyAst = class {
     }
     return null;
   }
+  visitBlockGroup(group, context) {
+    throw new Error("TODO");
+  }
+  visitBlock(block, context) {
+    throw new Error("TODO");
+  }
+  visitBlockParameter(parameter, context) {
+    throw new Error("TODO");
+  }
   extractAttributes(elementName, properties, i18nPropsMeta) {
     const bound = [];
     const literal3 = [];
@@ -17272,6 +17397,15 @@ var NonBindableVisitor = class {
   }
   visitExpansionCase(expansionCase) {
     return null;
+  }
+  visitBlockGroup(group, context) {
+    throw new Error("TODO");
+  }
+  visitBlock(block, context) {
+    throw new Error("TODO");
+  }
+  visitBlockParameter(parameter, context) {
+    throw new Error("TODO");
   }
 };
 var NON_BINDABLE_VISITOR = new NonBindableVisitor();
@@ -17641,6 +17775,18 @@ var _I18nVisitor = class {
   visitExpansionCase(_icuCase, _context) {
     throw new Error("Unreachable code");
   }
+  visitBlockGroup(group, context) {
+    const children = visitAll2(this, group.blocks, context);
+    const node = new Container(children, group.sourceSpan);
+    return context.visitNodeFn(group, node);
+  }
+  visitBlock(block, context) {
+    const children = visitAll2(this, block.children, context);
+    const node = new Container(children, block.sourceSpan);
+    return context.visitNodeFn(block, node);
+  }
+  visitBlockParameter(_parameter, _context) {
+  }
   _visitTextWithInterpolation(tokens, sourceSpan, context, previousI18n) {
     const nodes = [];
     let hasInterpolation = false;
@@ -17816,6 +17962,17 @@ var I18nMetaVisitor = class {
   }
   visitExpansionCase(expansionCase) {
     return expansionCase;
+  }
+  visitBlockGroup(group, context) {
+    visitAll2(this, group.blocks, context);
+    return group;
+  }
+  visitBlock(block, context) {
+    visitAll2(this, block.children, context);
+    return block;
+  }
+  visitBlockParameter(parameter, context) {
+    return parameter;
   }
   _parseMetadata(meta) {
     return typeof meta === "string" ? parseI18nMeta(meta) : meta instanceof Message ? meta : {};
@@ -20388,7 +20545,7 @@ function publishFacade(global2) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.2.0-next.1+sha-5bd530a");
+var VERSION2 = new Version("16.2.0-next.1+sha-6cac41f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -20560,6 +20717,14 @@ var _Visitor3 = class {
   visitAttribute(attribute2, context) {
     throw new Error("unreachable code");
   }
+  visitBlockGroup(group, context) {
+    visitAll2(this, group.blocks, context);
+  }
+  visitBlock(block, context) {
+    visitAll2(this, block.children, context);
+  }
+  visitBlockParameter(parameter, context) {
+  }
   _init(mode, interpolationConfig) {
     this._mode = mode;
     this._inI18nBlock = false;
@@ -20724,8 +20889,8 @@ var XmlParser = class extends Parser2 {
   constructor() {
     super(getXmlTagDefinition);
   }
-  parse(source, url, options) {
-    return super.parse(source, url, options);
+  parse(source, url, options = {}) {
+    return super.parse(source, url, __spreadProps(__spreadValues({}, options), { tokenizeBlocks: false }));
   }
 };
 
@@ -20905,6 +21070,12 @@ var XliffParser = class {
   }
   visitExpansionCase(expansionCase, context) {
   }
+  visitBlockGroup(group, context) {
+  }
+  visitBlock(block, context) {
+  }
+  visitBlockParameter(parameter, context) {
+  }
   _addError(node, message) {
     this._errors.push(new I18nError(node.sourceSpan, message));
   }
@@ -20953,6 +21124,12 @@ var XmlToI18n = class {
   visitComment(comment, context) {
   }
   visitAttribute(attribute2, context) {
+  }
+  visitBlockGroup(group, context) {
+  }
+  visitBlock(block, context) {
+  }
+  visitBlockParameter(parameter, context) {
   }
   _addError(node, message) {
     this._errors.push(new I18nError(node.sourceSpan, message));
@@ -21176,6 +21353,12 @@ var Xliff2Parser = class {
   }
   visitExpansionCase(expansionCase, context) {
   }
+  visitBlockGroup(group, context) {
+  }
+  visitBlock(block, context) {
+  }
+  visitBlockParameter(parameter, context) {
+  }
   _addError(node, message) {
     this._errors.push(new I18nError(node.sourceSpan, message));
   }
@@ -21239,6 +21422,12 @@ var XmlToI18n2 = class {
   visitComment(comment, context) {
   }
   visitAttribute(attribute2, context) {
+  }
+  visitBlockGroup(group, context) {
+  }
+  visitBlock(block, context) {
+  }
+  visitBlockParameter(parameter, context) {
   }
   _addError(node, message) {
     this._errors.push(new I18nError(node.sourceSpan, message));
@@ -21707,7 +21896,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-5bd530a"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-6cac41f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -21776,7 +21965,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-5bd530a"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-6cac41f"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -21961,7 +22150,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-5bd530a"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-6cac41f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -21984,7 +22173,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-5bd530a"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-6cac41f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -22022,7 +22211,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-5bd530a"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-6cac41f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -22046,7 +22235,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-5bd530a"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-6cac41f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -22081,7 +22270,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.2.0-next.1+sha-5bd530a"));
+  definitionMap.set("version", literal("16.2.0-next.1+sha-6cac41f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -22098,7 +22287,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.2.0-next.1+sha-5bd530a");
+var VERSION3 = new Version("16.2.0-next.1+sha-6cac41f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
