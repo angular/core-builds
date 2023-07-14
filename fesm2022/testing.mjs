@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.2+sha-451d6c0
+ * @license Angular v16.2.0-next.2+sha-67df5a9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -520,15 +520,7 @@ function componentDefResolved(type) {
     componentDefPendingResolution.delete(type);
 }
 
-// Always use __globalThis if available, which is the spec-defined global variable across all
-// environments, then fallback to __global first, because in Node tests both __global and
-// __window may be defined and _global should be __global in that case. Note: Typeof/Instanceof
-// checks are considered side-effects in Terser. We explicitly mark this as side-effect free:
-// https://github.com/terser/terser/issues/250.
-const _global$1 = ( /* @__PURE__ */(() => (typeof globalThis !== 'undefined' && globalThis) ||
-    (typeof global !== 'undefined' && global) || (typeof window !== 'undefined' && window) ||
-    (typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-        self instanceof WorkerGlobalScope && self))());
+const _global = globalThis;
 
 var FactoryTarget;
 (function (FactoryTarget) {
@@ -553,7 +545,7 @@ var ViewEncapsulation$1;
 })(ViewEncapsulation$1 || (ViewEncapsulation$1 = {}));
 
 function getCompilerFacade(request) {
-    const globalNg = _global$1['ng'];
+    const globalNg = _global['ng'];
     if (globalNg && globalNg.ɵcompilerFacade) {
         return globalNg.ɵcompilerFacade;
     }
@@ -1429,7 +1421,7 @@ function isDelegateCtor(typeStr) {
 }
 class ReflectionCapabilities {
     constructor(reflect) {
-        this._reflect = reflect || _global$1['Reflect'];
+        this._reflect = reflect || _global['Reflect'];
     }
     factory(t) {
         return (...args) => new t(...args);
@@ -1656,7 +1648,7 @@ function ngDevModeResetPerfCounters() {
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
     const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
-    _global$1['ngDevMode'] = allowNgDevModeTrue && newCounters;
+    _global['ngDevMode'] = allowNgDevModeTrue && newCounters;
     return newCounters;
 }
 /**
@@ -3519,7 +3511,7 @@ class LeakyRef {
 // `WeakRef` is not always defined in every TS environment where Angular is compiled. Instead,
 // read it off of the global context if available.
 // tslint:disable-next-line: no-toplevel-property-access
-let WeakRefImpl = _global$1['WeakRef'] ?? LeakyRef;
+let WeakRefImpl = _global['WeakRef'] ?? LeakyRef;
 function newWeakRef(value) {
     if (typeof ngDevMode !== 'undefined' && ngDevMode && WeakRefImpl === undefined) {
         throw new Error(`Angular requires a browser which supports the 'WeakRef' API`);
@@ -8091,9 +8083,9 @@ let policy$1;
 function getPolicy$1() {
     if (policy$1 === undefined) {
         policy$1 = null;
-        if (_global$1.trustedTypes) {
+        if (_global.trustedTypes) {
             try {
-                policy$1 = _global$1.trustedTypes.createPolicy('angular', {
+                policy$1 = _global.trustedTypes.createPolicy('angular', {
                     createHTML: (s) => s,
                     createScript: (s) => s,
                     createScriptURL: (s) => s,
@@ -8156,7 +8148,7 @@ function newTrustedFunctionForDev(...args) {
     if (typeof ngDevMode === 'undefined') {
         throw new Error('newTrustedFunctionForDev should never be called in production');
     }
-    if (!_global$1.trustedTypes) {
+    if (!_global.trustedTypes) {
         // In environments that don't support Trusted Types, fall back to the most
         // straightforward implementation:
         return new Function(...args);
@@ -8173,7 +8165,7 @@ function newTrustedFunctionForDev(...args) {
     // Using eval directly confuses the compiler and prevents this module from
     // being stripped out of JS binaries even if not used. The global['eval']
     // indirection fixes that.
-    const fn = _global$1['eval'](trustedScriptFromString(body));
+    const fn = _global['eval'](trustedScriptFromString(body));
     if (fn.bind === undefined) {
         // Workaround for a browser bug that only exists in Chrome 83, where passing
         // a TrustedScript to eval just returns the TrustedScript back without
@@ -8186,7 +8178,7 @@ function newTrustedFunctionForDev(...args) {
     // 1. Stringifying the resulting function should return its source code
     fn.toString = () => body;
     // 2. When calling the resulting function, `this` should refer to `global`
-    return fn.bind(_global$1);
+    return fn.bind(_global);
     // When Trusted Types support in Function constructors is widely available,
     // the implementation of this function can be simplified to:
     // return new Function(...args.map(a => trustedScriptFromString(a)));
@@ -8298,9 +8290,9 @@ let policy;
 function getPolicy() {
     if (policy === undefined) {
         policy = null;
-        if (_global$1.trustedTypes) {
+        if (_global.trustedTypes) {
             try {
-                policy = _global$1.trustedTypes
+                policy = _global.trustedTypes
                     .createPolicy('angular#unsafe-bypass', {
                     createHTML: (s) => s,
                     createScript: (s) => s,
@@ -10493,7 +10485,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.2+sha-451d6c0');
+const VERSION = new Version('16.2.0-next.2+sha-67df5a9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19622,7 +19614,7 @@ if (typeof ngI18nClosureMode === 'undefined') {
     // NOTE: we need to have it in IIFE so that the tree-shaker is happy.
     (function () {
         // tslint:disable-next-line:no-toplevel-property-access
-        _global$1['ngI18nClosureMode'] =
+        _global['ngI18nClosureMode'] =
             // TODO(FW-1250): validate that this actually, you know, works.
             // tslint:disable-next-line:no-toplevel-property-access
             typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
@@ -19716,8 +19708,8 @@ function getLocalePluralCase(locale) {
  */
 function getLocaleData(normalizedLocale) {
     if (!(normalizedLocale in LOCALE_DATA)) {
-        LOCALE_DATA[normalizedLocale] = _global$1.ng && _global$1.ng.common && _global$1.ng.common.locales &&
-            _global$1.ng.common.locales[normalizedLocale];
+        LOCALE_DATA[normalizedLocale] = _global.ng && _global.ng.common && _global.ng.common.locales &&
+            _global.ng.common.locales[normalizedLocale];
     }
     return LOCALE_DATA[normalizedLocale];
 }
@@ -26625,17 +26617,12 @@ function withModule(moduleDef, fn) {
  * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
  * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
  */
-const _global = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
-if (_global.beforeEach) {
-    _global.beforeEach(getCleanupHook(false));
-}
+beforeEach(getCleanupHook(false));
 // We provide both a `beforeEach` and `afterEach`, because the updated behavior for
 // tearing down the module is supposed to run after the test so that we can associate
 // teardown errors with the correct test.
-if (_global.afterEach) {
-    _global.afterEach(getCleanupHook(true));
-}
+afterEach(getCleanupHook(true));
 function getCleanupHook(expectedTeardownValue) {
     return () => {
         const testBed = TestBedImpl.INSTANCE;
