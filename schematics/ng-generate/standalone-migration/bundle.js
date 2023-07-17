@@ -7632,14 +7632,17 @@ var OpKind;
   OpKind2[OpKind2["InterpolateText"] = 12] = "InterpolateText";
   OpKind2[OpKind2["Property"] = 13] = "Property";
   OpKind2[OpKind2["StyleProp"] = 14] = "StyleProp";
-  OpKind2[OpKind2["StyleMap"] = 15] = "StyleMap";
-  OpKind2[OpKind2["InterpolateProperty"] = 16] = "InterpolateProperty";
-  OpKind2[OpKind2["InterpolateStyleProp"] = 17] = "InterpolateStyleProp";
-  OpKind2[OpKind2["InterpolateStyleMap"] = 18] = "InterpolateStyleMap";
-  OpKind2[OpKind2["Advance"] = 19] = "Advance";
-  OpKind2[OpKind2["Pipe"] = 20] = "Pipe";
-  OpKind2[OpKind2["Attribute"] = 21] = "Attribute";
-  OpKind2[OpKind2["InterpolateAttribute"] = 22] = "InterpolateAttribute";
+  OpKind2[OpKind2["ClassProp"] = 15] = "ClassProp";
+  OpKind2[OpKind2["StyleMap"] = 16] = "StyleMap";
+  OpKind2[OpKind2["ClassMap"] = 17] = "ClassMap";
+  OpKind2[OpKind2["InterpolateProperty"] = 18] = "InterpolateProperty";
+  OpKind2[OpKind2["InterpolateStyleProp"] = 19] = "InterpolateStyleProp";
+  OpKind2[OpKind2["InterpolateStyleMap"] = 20] = "InterpolateStyleMap";
+  OpKind2[OpKind2["InterpolateClassMap"] = 21] = "InterpolateClassMap";
+  OpKind2[OpKind2["Advance"] = 22] = "Advance";
+  OpKind2[OpKind2["Pipe"] = 23] = "Pipe";
+  OpKind2[OpKind2["Attribute"] = 24] = "Attribute";
+  OpKind2[OpKind2["InterpolateAttribute"] = 25] = "InterpolateAttribute";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -8252,11 +8255,14 @@ function transformExpressionsInOp(op, transform, flags) {
     case OpKind.Property:
     case OpKind.StyleProp:
     case OpKind.StyleMap:
+    case OpKind.ClassProp:
+    case OpKind.ClassMap:
       op.expression = transformExpressionsInExpression(op.expression, transform, flags);
       break;
     case OpKind.InterpolateProperty:
     case OpKind.InterpolateStyleProp:
     case OpKind.InterpolateStyleMap:
+    case OpKind.InterpolateClassMap:
     case OpKind.InterpolateText:
       for (let i = 0; i < op.expressions.length; i++) {
         op.expressions[i] = transformExpressionsInExpression(op.expressions[i], transform, flags);
@@ -8631,9 +8637,24 @@ function createStylePropOp(xref, name, expression, unit) {
     unit
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
+function createClassPropOp(xref, name, expression) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.ClassProp,
+    target: xref,
+    name,
+    expression
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
 function createStyleMapOp(xref, expression) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.StyleMap,
+    target: xref,
+    expression
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createClassMapOp(xref, expression) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.ClassMap,
     target: xref,
     expression
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
@@ -8685,6 +8706,14 @@ function createInterpolateStyleMapOp(xref, strings, expressions) {
     expressions
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
+function createInterpolateClassMapOp(xref, strings, expressions) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.InterpolateClassMap,
+    target: xref,
+    strings,
+    expressions
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
 function createAdvanceOp(delta) {
   return __spreadValues({
     kind: OpKind.Advance,
@@ -8727,19 +8756,23 @@ function phaseVarCounting(cpl) {
 function varsUsedByOp(op) {
   switch (op.kind) {
     case OpKind.Property:
-    case OpKind.StyleProp:
-    case OpKind.StyleMap:
-      return 1;
     case OpKind.Attribute:
       return 1;
+    case OpKind.StyleProp:
+    case OpKind.ClassProp:
+    case OpKind.StyleMap:
+    case OpKind.ClassMap:
+      return 2;
     case OpKind.InterpolateText:
       return op.expressions.length;
     case OpKind.InterpolateProperty:
-    case OpKind.InterpolateStyleProp:
-    case OpKind.InterpolateStyleMap:
       return 1 + op.expressions.length;
     case OpKind.InterpolateAttribute:
       return 1 + op.expressions.length;
+    case OpKind.InterpolateStyleProp:
+    case OpKind.InterpolateStyleMap:
+    case OpKind.InterpolateClassMap:
+      return 2 + op.expressions.length;
     default:
       throw new Error(`Unhandled op: ${OpKind[op.kind]}`);
   }
@@ -8830,6 +8863,7 @@ function populateElementAttributes(view, compatibility) {
         ownerOp.attributes.add(op.bindingKind, op.name, null);
         break;
       case OpKind.StyleProp:
+      case OpKind.ClassProp:
         ownerOp = lookupElement(elements, op.target);
         assertIsElementAttributes(ownerOp.attributes);
         if (removeIfExpressionIsEmpty(op, op.expression) && compatibility) {
@@ -8855,6 +8889,16 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.property,
   Identifiers.styleProp,
   Identifiers.attribute,
+  Identifiers.stylePropInterpolate1,
+  Identifiers.stylePropInterpolate2,
+  Identifiers.stylePropInterpolate3,
+  Identifiers.stylePropInterpolate4,
+  Identifiers.stylePropInterpolate5,
+  Identifiers.stylePropInterpolate6,
+  Identifiers.stylePropInterpolate7,
+  Identifiers.stylePropInterpolate8,
+  Identifiers.stylePropInterpolateV,
+  Identifiers.classProp,
   Identifiers.elementContainerStart,
   Identifiers.elementContainerEnd,
   Identifiers.elementContainer
@@ -8958,6 +9002,138 @@ function phaseEmptyElements(cpl) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/expand_safe_reads.mjs
+function phaseExpandSafeReads(cpl, compatibility) {
+  for (const [_, view] of cpl.views) {
+    for (const op of view.ops()) {
+      transformExpressionsInOp(op, (e) => safeTransform(e, { cpl, compatibility }), VisitorContextFlag.None);
+      transformExpressionsInOp(op, ternaryTransform, VisitorContextFlag.None);
+    }
+  }
+}
+var requiresTemporary = [
+  InvokeFunctionExpr,
+  LiteralArrayExpr,
+  LiteralMapExpr,
+  SafeInvokeFunctionExpr,
+  PipeBindingExpr
+].map((e) => e.constructor.name);
+function needsTemporaryInSafeAccess(e) {
+  if (e instanceof UnaryOperatorExpr) {
+    return needsTemporaryInSafeAccess(e.expr);
+  } else if (e instanceof BinaryOperatorExpr) {
+    return needsTemporaryInSafeAccess(e.lhs) || needsTemporaryInSafeAccess(e.rhs);
+  } else if (e instanceof ConditionalExpr) {
+    if (e.falseCase && needsTemporaryInSafeAccess(e.falseCase))
+      return true;
+    return needsTemporaryInSafeAccess(e.condition) || needsTemporaryInSafeAccess(e.trueCase);
+  } else if (e instanceof NotExpr) {
+    return needsTemporaryInSafeAccess(e.condition);
+  } else if (e instanceof AssignTemporaryExpr) {
+    return needsTemporaryInSafeAccess(e.expr);
+  } else if (e instanceof ReadPropExpr) {
+    return needsTemporaryInSafeAccess(e.receiver);
+  } else if (e instanceof ReadKeyExpr) {
+    return needsTemporaryInSafeAccess(e.receiver) || needsTemporaryInSafeAccess(e.index);
+  }
+  return e instanceof InvokeFunctionExpr || e instanceof LiteralArrayExpr || e instanceof LiteralMapExpr || e instanceof SafeInvokeFunctionExpr || e instanceof PipeBindingExpr;
+}
+function temporariesIn(e) {
+  const temporaries = /* @__PURE__ */ new Set();
+  transformExpressionsInExpression(e, (e2) => {
+    if (e2 instanceof AssignTemporaryExpr) {
+      temporaries.add(e2.xref);
+    }
+    return e2;
+  }, VisitorContextFlag.None);
+  return temporaries;
+}
+function eliminateTemporaryAssignments(e, tmps, ctx) {
+  transformExpressionsInExpression(e, (e2) => {
+    if (e2 instanceof AssignTemporaryExpr && tmps.has(e2.xref)) {
+      const read = new ReadTemporaryExpr(e2.xref);
+      return ctx.compatibility ? new AssignTemporaryExpr(read, read.xref) : read;
+    }
+    return e2;
+  }, VisitorContextFlag.None);
+  return e;
+}
+function safeTernaryWithTemporary(guard, body, ctx) {
+  let result;
+  if (needsTemporaryInSafeAccess(guard)) {
+    const xref = ctx.cpl.allocateXrefId();
+    result = [new AssignTemporaryExpr(guard, xref), new ReadTemporaryExpr(xref)];
+  } else {
+    result = [guard, guard.clone()];
+    eliminateTemporaryAssignments(result[1], temporariesIn(result[0]), ctx);
+  }
+  return new SafeTernaryExpr(result[0], body(result[1]));
+}
+function isSafeAccessExpression(e) {
+  return e instanceof SafePropertyReadExpr || e instanceof SafeKeyedReadExpr;
+}
+function isUnsafeAccessExpression(e) {
+  return e instanceof ReadPropExpr || e instanceof ReadKeyExpr || e instanceof InvokeFunctionExpr;
+}
+function isAccessExpression(e) {
+  return isSafeAccessExpression(e) || isUnsafeAccessExpression(e);
+}
+function deepestSafeTernary(e) {
+  if (isAccessExpression(e) && e.receiver instanceof SafeTernaryExpr) {
+    let st = e.receiver;
+    while (st.expr instanceof SafeTernaryExpr) {
+      st = st.expr;
+    }
+    return st;
+  }
+  return null;
+}
+function safeTransform(e, ctx) {
+  if (e instanceof SafeInvokeFunctionExpr) {
+    return new InvokeFunctionExpr(e.receiver, e.args);
+  }
+  if (!isAccessExpression(e)) {
+    return e;
+  }
+  const dst = deepestSafeTernary(e);
+  if (dst) {
+    if (e instanceof InvokeFunctionExpr) {
+      dst.expr = dst.expr.callFn(e.args);
+      return e.receiver;
+    }
+    if (e instanceof ReadPropExpr) {
+      dst.expr = dst.expr.prop(e.name);
+      return e.receiver;
+    }
+    if (e instanceof ReadKeyExpr) {
+      dst.expr = dst.expr.key(e.index);
+      return e.receiver;
+    }
+    if (e instanceof SafePropertyReadExpr) {
+      dst.expr = safeTernaryWithTemporary(dst.expr, (r) => r.prop(e.name), ctx);
+      return e.receiver;
+    }
+    if (e instanceof SafeKeyedReadExpr) {
+      dst.expr = safeTernaryWithTemporary(dst.expr, (r) => r.key(e.index), ctx);
+      return e.receiver;
+    }
+  } else {
+    if (e instanceof SafePropertyReadExpr) {
+      return safeTernaryWithTemporary(e.receiver, (r) => r.prop(e.name), ctx);
+    }
+    if (e instanceof SafeKeyedReadExpr) {
+      return safeTernaryWithTemporary(e.receiver, (r) => r.key(e.index), ctx);
+    }
+  }
+  return e;
+}
+function ternaryTransform(e) {
+  if (!(e instanceof SafeTernaryExpr)) {
+    return e;
+  }
+  return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.Equals, e.guard, NULL_EXPR), NULL_EXPR, e.expr);
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_advance.mjs
 function phaseGenerateAdvance(cpl) {
   for (const [_, view] of cpl.views) {
@@ -8986,22 +9162,6 @@ function phaseGenerateAdvance(cpl) {
         OpList.insertBefore(createAdvanceOp(delta), op);
         slotContext = slot;
       }
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/nullish_coalescing.mjs
-function phaseNullishCoalescing(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.ops()) {
-      transformExpressionsInOp(op, (expr) => {
-        if (!(expr instanceof BinaryOperatorExpr) || expr.operator !== BinaryOperator.NullishCoalesce) {
-          return expr;
-        }
-        const assignment = new AssignTemporaryExpr(expr.lhs.clone(), cpl.allocateXrefId());
-        const read = new ReadTemporaryExpr(assignment.xref);
-        return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.And, new BinaryOperatorExpr(BinaryOperator.NotIdentical, assignment, NULL_EXPR), new BinaryOperatorExpr(BinaryOperator.NotIdentical, read, new LiteralExpr(void 0))), read.clone(), expr.rhs);
-      }, VisitorContextFlag.None);
     }
   }
 }
@@ -9117,11 +9277,72 @@ function serializeLocalRefs(refs) {
   return literalArr(constRefs);
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/naming.mjs
-function phaseNaming(cpl) {
-  addNamesToView(cpl.root, cpl.componentName, { index: 0 });
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/style_parser.mjs
+function parse(value) {
+  const styles = [];
+  let i = 0;
+  let parenDepth = 0;
+  let quote = 0;
+  let valueStart = 0;
+  let propStart = 0;
+  let currentProp = null;
+  while (i < value.length) {
+    const token = value.charCodeAt(i++);
+    switch (token) {
+      case 40:
+        parenDepth++;
+        break;
+      case 41:
+        parenDepth--;
+        break;
+      case 39:
+        if (quote === 0) {
+          quote = 39;
+        } else if (quote === 39 && value.charCodeAt(i - 1) !== 92) {
+          quote = 0;
+        }
+        break;
+      case 34:
+        if (quote === 0) {
+          quote = 34;
+        } else if (quote === 34 && value.charCodeAt(i - 1) !== 92) {
+          quote = 0;
+        }
+        break;
+      case 58:
+        if (!currentProp && parenDepth === 0 && quote === 0) {
+          currentProp = hyphenate(value.substring(propStart, i - 1).trim());
+          valueStart = i;
+        }
+        break;
+      case 59:
+        if (currentProp && valueStart > 0 && parenDepth === 0 && quote === 0) {
+          const styleVal = value.substring(valueStart, i - 1).trim();
+          styles.push(currentProp, styleVal);
+          propStart = i;
+          valueStart = 0;
+          currentProp = null;
+        }
+        break;
+    }
+  }
+  if (currentProp && valueStart) {
+    const styleVal = value.slice(valueStart).trim();
+    styles.push(currentProp, styleVal);
+  }
+  return styles;
 }
-function addNamesToView(view, baseName, state) {
+function hyphenate(value) {
+  return value.replace(/[a-z][A-Z]/g, (v) => {
+    return v.charAt(0) + "-" + v.charAt(1);
+  }).toLowerCase();
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/naming.mjs
+function phaseNaming(cpl, compatibility) {
+  addNamesToView(cpl.root, cpl.componentName, { index: 0 }, compatibility);
+}
+function addNamesToView(view, baseName, state, compatibility) {
   if (view.fnName === null) {
     view.fnName = sanitizeIdentifier(`${baseName}_Template`);
   }
@@ -9144,7 +9365,19 @@ function addNamesToView(view, baseName, state) {
         if (op.slot === null) {
           throw new Error(`Expected slot to be assigned`);
         }
-        addNamesToView(childView, `${baseName}_${op.tag}_${op.slot}`, state);
+        addNamesToView(childView, `${baseName}_${op.tag}_${op.slot}`, state, compatibility);
+        break;
+      case OpKind.StyleProp:
+      case OpKind.InterpolateStyleProp:
+        op.name = normalizeStylePropName(op.name);
+        if (compatibility) {
+          op.name = stripImportant(op.name);
+        }
+        break;
+      case OpKind.ClassProp:
+        if (compatibility) {
+          op.name = stripImportant(op.name);
+        }
         break;
     }
   }
@@ -9172,6 +9405,16 @@ function getVariableName(variable2, state) {
     }
   }
   return variable2.name;
+}
+function normalizeStylePropName(name) {
+  return name.startsWith("--") ? name : hyphenate(name);
+}
+function stripImportant(name) {
+  const importantIndex = name.indexOf("!important");
+  if (importantIndex > -1) {
+    return name.substring(0, importantIndex);
+  }
+  return name;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/next_context_merging.mjs
@@ -9236,6 +9479,22 @@ function phaseNgContainer(cpl) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/nullish_coalescing.mjs
+function phaseNullishCoalescing(cpl) {
+  for (const view of cpl.views.values()) {
+    for (const op of view.ops()) {
+      transformExpressionsInOp(op, (expr) => {
+        if (!(expr instanceof BinaryOperatorExpr) || expr.operator !== BinaryOperator.NullishCoalesce) {
+          return expr;
+        }
+        const assignment = new AssignTemporaryExpr(expr.lhs.clone(), cpl.allocateXrefId());
+        const read = new ReadTemporaryExpr(assignment.xref);
+        return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.And, new BinaryOperatorExpr(BinaryOperator.NotIdentical, assignment, NULL_EXPR), new BinaryOperatorExpr(BinaryOperator.NotIdentical, read, new LiteralExpr(void 0))), read.clone(), expr.rhs);
+      }, VisitorContextFlag.None);
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_creation.mjs
 function phasePipeCreation(cpl) {
   for (const view of cpl.views.values()) {
@@ -9294,6 +9553,51 @@ function phasePipeVariadic(cpl) {
       }, VisitorContextFlag.None);
     }
   }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/property_ordering.mjs
+var ORDERING = [
+  { kinds: /* @__PURE__ */ new Set([OpKind.StyleMap, OpKind.InterpolateStyleMap]), transform: keepLast },
+  { kinds: /* @__PURE__ */ new Set([OpKind.ClassMap, OpKind.InterpolateClassMap]), transform: keepLast },
+  { kinds: /* @__PURE__ */ new Set([OpKind.StyleProp, OpKind.InterpolateStyleProp]) },
+  { kinds: /* @__PURE__ */ new Set([OpKind.ClassProp]) },
+  { kinds: /* @__PURE__ */ new Set([OpKind.InterpolateProperty]) },
+  { kinds: /* @__PURE__ */ new Set([OpKind.Property]) },
+  { kinds: /* @__PURE__ */ new Set([OpKind.Attribute, OpKind.InterpolateAttribute]) }
+];
+var handledOpKinds = new Set(ORDERING.flatMap((group) => [...group.kinds]));
+function phasePropertyOrdering(cpl) {
+  for (const [_, view] of cpl.views) {
+    let opsToOrder = [];
+    for (const op of view.update) {
+      if (handledOpKinds.has(op.kind)) {
+        opsToOrder.push(op);
+        OpList.remove(op);
+      } else {
+        for (const orderedOp of reorder(opsToOrder)) {
+          OpList.insertBefore(orderedOp, op);
+        }
+        opsToOrder = [];
+      }
+    }
+    for (const orderedOp of reorder(opsToOrder)) {
+      view.update.push(orderedOp);
+    }
+  }
+}
+function reorder(ops) {
+  const groups = Array.from(ORDERING, () => new Array());
+  for (const op of ops) {
+    const groupIndex = ORDERING.findIndex((o) => o.kinds.has(op.kind));
+    groups[groupIndex].push(op);
+  }
+  return groups.flatMap((group, i) => {
+    const transform = ORDERING[i].transform;
+    return transform ? transform(group) : group;
+  });
+}
+function keepLast(ops) {
+  return ops.slice(ops.length - 1);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pure_function_extraction.mjs
@@ -9490,8 +9794,14 @@ function styleProp(name, expression, unit) {
   }
   return call(Identifiers.styleProp, args);
 }
+function classProp(name, expression) {
+  return call(Identifiers.classProp, [literal(name), expression]);
+}
 function styleMap(expression) {
   return call(Identifiers.styleMap, [expression]);
+}
+function classMap(expression) {
+  return call(Identifiers.classMap, [expression]);
 }
 var PIPE_BINDINGS = [
   Identifiers.pipeBind1,
@@ -9552,6 +9862,10 @@ function stylePropInterpolate(name, strings, expressions, unit) {
 function styleMapInterpolate(strings, expressions) {
   const interpolationArgs = collateInterpolationArgs(strings, expressions);
   return callVariadicInstruction(STYLE_MAP_INTERPOLATE_CONFIG, [], interpolationArgs);
+}
+function classMapInterpolate(strings, expressions) {
+  const interpolationArgs = collateInterpolationArgs(strings, expressions);
+  return callVariadicInstruction(CLASS_MAP_INTERPOLATE_CONFIG, [], interpolationArgs);
 }
 function pureFunction(varOffset, fn2, args) {
   return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [
@@ -9620,7 +9934,7 @@ var PROPERTY_INTERPOLATE_CONFIG = {
 };
 var STYLE_PROP_INTERPOLATE_CONFIG = {
   constant: [
-    null,
+    Identifiers.styleProp,
     Identifiers.stylePropInterpolate1,
     Identifiers.stylePropInterpolate2,
     Identifiers.stylePropInterpolate3,
@@ -9634,9 +9948,6 @@ var STYLE_PROP_INTERPOLATE_CONFIG = {
   mapping: (n) => {
     if (n % 2 === 0) {
       throw new Error(`Expected odd number of arguments`);
-    }
-    if (n < 3) {
-      throw new Error(`Expected at least 3 arguments`);
     }
     return (n - 1) / 2;
   }
@@ -9663,7 +9974,7 @@ var ATTRIBUTE_INTERPOLATE_CONFIG = {
 };
 var STYLE_MAP_INTERPOLATE_CONFIG = {
   constant: [
-    null,
+    Identifiers.styleMap,
     Identifiers.styleMapInterpolate1,
     Identifiers.styleMapInterpolate2,
     Identifiers.styleMapInterpolate3,
@@ -9678,8 +9989,25 @@ var STYLE_MAP_INTERPOLATE_CONFIG = {
     if (n % 2 === 0) {
       throw new Error(`Expected odd number of arguments`);
     }
-    if (n < 3) {
-      throw new Error(`Expected at least 3 arguments`);
+    return (n - 1) / 2;
+  }
+};
+var CLASS_MAP_INTERPOLATE_CONFIG = {
+  constant: [
+    Identifiers.classMap,
+    Identifiers.classMapInterpolate1,
+    Identifiers.classMapInterpolate2,
+    Identifiers.classMapInterpolate3,
+    Identifiers.classMapInterpolate4,
+    Identifiers.classMapInterpolate5,
+    Identifiers.classMapInterpolate6,
+    Identifiers.classMapInterpolate7,
+    Identifiers.classMapInterpolate8
+  ],
+  variable: Identifiers.classMapInterpolateV,
+  mapping: (n) => {
+    if (n % 2 === 0) {
+      throw new Error(`Expected odd number of arguments`);
     }
     return (n - 1) / 2;
   }
@@ -9790,8 +10118,14 @@ function reifyUpdateOperations(_view, ops) {
       case OpKind.StyleProp:
         OpList.replace(op, styleProp(op.name, op.expression, op.unit));
         break;
+      case OpKind.ClassProp:
+        OpList.replace(op, classProp(op.name, op.expression));
+        break;
       case OpKind.StyleMap:
         OpList.replace(op, styleMap(op.expression));
+        break;
+      case OpKind.ClassMap:
+        OpList.replace(op, classMap(op.expression));
         break;
       case OpKind.InterpolateProperty:
         OpList.replace(op, propertyInterpolate(op.name, op.strings, op.expressions));
@@ -9801,6 +10135,9 @@ function reifyUpdateOperations(_view, ops) {
         break;
       case OpKind.InterpolateStyleMap:
         OpList.replace(op, styleMapInterpolate(op.strings, op.expressions));
+        break;
+      case OpKind.InterpolateClassMap:
+        OpList.replace(op, classMapInterpolate(op.strings, op.expressions));
         break;
       case OpKind.InterpolateText:
         OpList.replace(op, textInterpolate(op.strings, op.expressions));
@@ -10089,6 +10426,39 @@ function phaseSlotAllocation(cpl) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/temporary_variables.mjs
+function phaseTemporaryVariables(cpl) {
+  for (const view of cpl.views.values()) {
+    let opCount = 0;
+    let generatedStatements = [];
+    for (const op of view.ops()) {
+      let count = 0;
+      let xrefs = /* @__PURE__ */ new Set();
+      let defs = /* @__PURE__ */ new Map();
+      visitExpressionsInOp(op, (expr) => {
+        if (expr instanceof ReadTemporaryExpr || expr instanceof AssignTemporaryExpr) {
+          xrefs.add(expr.xref);
+        }
+      });
+      for (const xref of xrefs) {
+        defs.set(xref, `tmp_${opCount}_${count++}`);
+      }
+      visitExpressionsInOp(op, (expr) => {
+        if (expr instanceof ReadTemporaryExpr || expr instanceof AssignTemporaryExpr) {
+          const name = defs.get(expr.xref);
+          if (name === void 0) {
+            throw new Error("Found xref with unassigned name");
+          }
+          expr.name = name;
+        }
+      });
+      generatedStatements.push(...Array.from(defs.values()).map((name) => createStatementOp(new DeclareVarStmt(name))));
+      opCount++;
+    }
+    view.update.prepend(generatedStatements);
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/variable_optimization.mjs
 function phaseVariableOptimization(cpl, options) {
   for (const [_, view] of cpl.views) {
@@ -10299,171 +10669,6 @@ function allowConservativeInlining(decl, target) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/expand_safe_reads.mjs
-function phaseExpandSafeReads(cpl, compatibility) {
-  for (const [_, view] of cpl.views) {
-    for (const op of view.ops()) {
-      transformExpressionsInOp(op, (e) => safeTransform(e, { cpl, compatibility }), VisitorContextFlag.None);
-      transformExpressionsInOp(op, ternaryTransform, VisitorContextFlag.None);
-    }
-  }
-}
-var requiresTemporary = [
-  InvokeFunctionExpr,
-  LiteralArrayExpr,
-  LiteralMapExpr,
-  SafeInvokeFunctionExpr,
-  PipeBindingExpr
-].map((e) => e.constructor.name);
-function needsTemporaryInSafeAccess(e) {
-  if (e instanceof UnaryOperatorExpr) {
-    return needsTemporaryInSafeAccess(e.expr);
-  } else if (e instanceof BinaryOperatorExpr) {
-    return needsTemporaryInSafeAccess(e.lhs) || needsTemporaryInSafeAccess(e.rhs);
-  } else if (e instanceof ConditionalExpr) {
-    if (e.falseCase && needsTemporaryInSafeAccess(e.falseCase))
-      return true;
-    return needsTemporaryInSafeAccess(e.condition) || needsTemporaryInSafeAccess(e.trueCase);
-  } else if (e instanceof NotExpr) {
-    return needsTemporaryInSafeAccess(e.condition);
-  } else if (e instanceof AssignTemporaryExpr) {
-    return needsTemporaryInSafeAccess(e.expr);
-  } else if (e instanceof ReadPropExpr) {
-    return needsTemporaryInSafeAccess(e.receiver);
-  } else if (e instanceof ReadKeyExpr) {
-    return needsTemporaryInSafeAccess(e.receiver) || needsTemporaryInSafeAccess(e.index);
-  }
-  return e instanceof InvokeFunctionExpr || e instanceof LiteralArrayExpr || e instanceof LiteralMapExpr || e instanceof SafeInvokeFunctionExpr || e instanceof PipeBindingExpr;
-}
-function temporariesIn(e) {
-  const temporaries = /* @__PURE__ */ new Set();
-  transformExpressionsInExpression(e, (e2) => {
-    if (e2 instanceof AssignTemporaryExpr) {
-      temporaries.add(e2.xref);
-    }
-    return e2;
-  }, VisitorContextFlag.None);
-  return temporaries;
-}
-function eliminateTemporaryAssignments(e, tmps, ctx) {
-  transformExpressionsInExpression(e, (e2) => {
-    if (e2 instanceof AssignTemporaryExpr && tmps.has(e2.xref)) {
-      const read = new ReadTemporaryExpr(e2.xref);
-      return ctx.compatibility ? new AssignTemporaryExpr(read, read.xref) : read;
-    }
-    return e2;
-  }, VisitorContextFlag.None);
-  return e;
-}
-function safeTernaryWithTemporary(guard, body, ctx) {
-  let result;
-  if (needsTemporaryInSafeAccess(guard)) {
-    const xref = ctx.cpl.allocateXrefId();
-    result = [new AssignTemporaryExpr(guard, xref), new ReadTemporaryExpr(xref)];
-  } else {
-    result = [guard, guard.clone()];
-    eliminateTemporaryAssignments(result[1], temporariesIn(result[0]), ctx);
-  }
-  return new SafeTernaryExpr(result[0], body(result[1]));
-}
-function isSafeAccessExpression(e) {
-  return e instanceof SafePropertyReadExpr || e instanceof SafeKeyedReadExpr;
-}
-function isUnsafeAccessExpression(e) {
-  return e instanceof ReadPropExpr || e instanceof ReadKeyExpr || e instanceof InvokeFunctionExpr;
-}
-function isAccessExpression(e) {
-  return isSafeAccessExpression(e) || isUnsafeAccessExpression(e);
-}
-function deepestSafeTernary(e) {
-  if (isAccessExpression(e) && e.receiver instanceof SafeTernaryExpr) {
-    let st = e.receiver;
-    while (st.expr instanceof SafeTernaryExpr) {
-      st = st.expr;
-    }
-    return st;
-  }
-  return null;
-}
-function safeTransform(e, ctx) {
-  if (e instanceof SafeInvokeFunctionExpr) {
-    return new InvokeFunctionExpr(e.receiver, e.args);
-  }
-  if (!isAccessExpression(e)) {
-    return e;
-  }
-  const dst = deepestSafeTernary(e);
-  if (dst) {
-    if (e instanceof InvokeFunctionExpr) {
-      dst.expr = dst.expr.callFn(e.args);
-      return e.receiver;
-    }
-    if (e instanceof ReadPropExpr) {
-      dst.expr = dst.expr.prop(e.name);
-      return e.receiver;
-    }
-    if (e instanceof ReadKeyExpr) {
-      dst.expr = dst.expr.key(e.index);
-      return e.receiver;
-    }
-    if (e instanceof SafePropertyReadExpr) {
-      dst.expr = safeTernaryWithTemporary(dst.expr, (r) => r.prop(e.name), ctx);
-      return e.receiver;
-    }
-    if (e instanceof SafeKeyedReadExpr) {
-      dst.expr = safeTernaryWithTemporary(dst.expr, (r) => r.key(e.index), ctx);
-      return e.receiver;
-    }
-  } else {
-    if (e instanceof SafePropertyReadExpr) {
-      return safeTernaryWithTemporary(e.receiver, (r) => r.prop(e.name), ctx);
-    }
-    if (e instanceof SafeKeyedReadExpr) {
-      return safeTernaryWithTemporary(e.receiver, (r) => r.key(e.index), ctx);
-    }
-  }
-  return e;
-}
-function ternaryTransform(e) {
-  if (!(e instanceof SafeTernaryExpr)) {
-    return e;
-  }
-  return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.Equals, e.guard, NULL_EXPR), NULL_EXPR, e.expr);
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/temporary_variables.mjs
-function phaseTemporaryVariables(cpl) {
-  for (const view of cpl.views.values()) {
-    let opCount = 0;
-    let generatedStatements = [];
-    for (const op of view.ops()) {
-      let count = 0;
-      let xrefs = /* @__PURE__ */ new Set();
-      let defs = /* @__PURE__ */ new Map();
-      visitExpressionsInOp(op, (expr) => {
-        if (expr instanceof ReadTemporaryExpr || expr instanceof AssignTemporaryExpr) {
-          xrefs.add(expr.xref);
-        }
-      });
-      for (const xref of xrefs) {
-        defs.set(xref, `tmp_${opCount}_${count++}`);
-      }
-      visitExpressionsInOp(op, (expr) => {
-        if (expr instanceof ReadTemporaryExpr || expr instanceof AssignTemporaryExpr) {
-          const name = defs.get(expr.xref);
-          if (name === void 0) {
-            throw new Error("Found xref with unassigned name");
-          }
-          expr.name = name;
-        }
-      });
-      generatedStatements.push(...Array.from(defs.values()).map((name) => createStatementOp(new DeclareVarStmt(name))));
-      opCount++;
-    }
-    view.update.prepend(generatedStatements);
-  }
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/emit.mjs
 function transformTemplate(cpl) {
   phaseAttributeExtraction(cpl, true);
@@ -10482,13 +10687,14 @@ function transformTemplate(cpl) {
   phaseSlotAllocation(cpl);
   phaseVarCounting(cpl);
   phaseGenerateAdvance(cpl);
-  phaseNaming(cpl);
+  phaseNaming(cpl, true);
   phaseVariableOptimization(cpl, { conservative: true });
   phaseMergeNextContext(cpl);
   phaseNgContainer(cpl);
   phaseEmptyElements(cpl);
   phasePureFunctionExtraction(cpl);
   phaseAlignPipeVariadicVarOffset(cpl);
+  phasePropertyOrdering(cpl);
   phaseReify(cpl);
   phaseChaining(cpl);
 }
@@ -10805,6 +11011,11 @@ function ingestPropertyBinding(view, xref, bindingKind, { name, value, type, uni
             throw Error("Unexpected style binding on ng-template");
           }
           view.update.push(createInterpolateStyleMapOp(xref, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl))));
+        } else if (name === "class") {
+          if (bindingKind !== ElementAttributeKind.Binding) {
+            throw Error("Unexpected class binding on ng-template");
+          }
+          view.update.push(createInterpolateClassMapOp(xref, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl))));
         } else {
           view.update.push(createInterpolatePropertyOp(xref, bindingKind, name, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl))));
         }
@@ -10822,6 +11033,9 @@ function ingestPropertyBinding(view, xref, bindingKind, { name, value, type, uni
         const attributeInterpolate2 = createInterpolateAttributeOp(xref, bindingKind, name, value.strings, value.expressions.map((expr) => convertAst(expr, view.tpl)));
         view.update.push(attributeInterpolate2);
         break;
+      case 2:
+        throw Error("Unexpected interpolation in class property binding");
+      case 4:
       default:
         throw Error(`Interpolated property binding type not handled: ${type}`);
     }
@@ -10833,6 +11047,11 @@ function ingestPropertyBinding(view, xref, bindingKind, { name, value, type, uni
             throw Error("Unexpected style binding on ng-template");
           }
           view.update.push(createStyleMapOp(xref, convertAst(value, view.tpl)));
+        } else if (name === "class") {
+          if (bindingKind !== ElementAttributeKind.Binding) {
+            throw Error("Unexpected class binding on ng-template");
+          }
+          view.update.push(createClassMapOp(xref, convertAst(value, view.tpl)));
         } else {
           view.update.push(createPropertyOp(xref, bindingKind, name, convertAst(value, view.tpl)));
         }
@@ -10850,6 +11069,13 @@ function ingestPropertyBinding(view, xref, bindingKind, { name, value, type, uni
         const attrOp = createAttributeOp(xref, bindingKind, name, convertAst(value, view.tpl));
         view.update.push(attrOp);
         break;
+      case 2:
+        if (bindingKind !== ElementAttributeKind.Binding) {
+          throw Error("Unexpected class binding on ng-template");
+        }
+        view.update.push(createClassPropOp(xref, name, convertAst(value, view.tpl)));
+        break;
+      case 4:
       default:
         throw Error(`Property binding type not handled: ${type}`);
     }
@@ -10872,67 +11098,6 @@ function assertIsArray(value) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/switch/index.mjs
 var USE_TEMPLATE_PIPELINE = false;
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/style_parser.mjs
-function parse(value) {
-  const styles = [];
-  let i = 0;
-  let parenDepth = 0;
-  let quote = 0;
-  let valueStart = 0;
-  let propStart = 0;
-  let currentProp = null;
-  while (i < value.length) {
-    const token = value.charCodeAt(i++);
-    switch (token) {
-      case 40:
-        parenDepth++;
-        break;
-      case 41:
-        parenDepth--;
-        break;
-      case 39:
-        if (quote === 0) {
-          quote = 39;
-        } else if (quote === 39 && value.charCodeAt(i - 1) !== 92) {
-          quote = 0;
-        }
-        break;
-      case 34:
-        if (quote === 0) {
-          quote = 34;
-        } else if (quote === 34 && value.charCodeAt(i - 1) !== 92) {
-          quote = 0;
-        }
-        break;
-      case 58:
-        if (!currentProp && parenDepth === 0 && quote === 0) {
-          currentProp = hyphenate(value.substring(propStart, i - 1).trim());
-          valueStart = i;
-        }
-        break;
-      case 59:
-        if (currentProp && valueStart > 0 && parenDepth === 0 && quote === 0) {
-          const styleVal = value.substring(valueStart, i - 1).trim();
-          styles.push(currentProp, styleVal);
-          propStart = i;
-          valueStart = 0;
-          currentProp = null;
-        }
-        break;
-    }
-  }
-  if (currentProp && valueStart) {
-    const styleVal = value.slice(valueStart).trim();
-    styles.push(currentProp, styleVal);
-  }
-  return styles;
-}
-function hyphenate(value) {
-  return value.replace(/[a-z][A-Z]/g, (v) => {
-    return v.charAt(0) + "-" + v.charAt(1);
-  }).toLowerCase();
-}
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/styling_builder.mjs
 var IMPORTANT_FLAG = "!important";
@@ -20544,7 +20709,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.2.0-next.2+sha-c5608e5");
+var VERSION2 = new Version("16.2.0-next.2+sha-f1cb971");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -21895,7 +22060,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.2.0-next.2+sha-c5608e5"));
+  definitionMap.set("version", literal("16.2.0-next.2+sha-f1cb971"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -21964,7 +22129,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.2.0-next.2+sha-c5608e5"));
+  definitionMap.set("version", literal("16.2.0-next.2+sha-f1cb971"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -22149,7 +22314,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.2.0-next.2+sha-c5608e5"));
+  definitionMap.set("version", literal("16.2.0-next.2+sha-f1cb971"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -22172,7 +22337,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.2.0-next.2+sha-c5608e5"));
+  definitionMap.set("version", literal("16.2.0-next.2+sha-f1cb971"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -22210,7 +22375,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.2.0-next.2+sha-c5608e5"));
+  definitionMap.set("version", literal("16.2.0-next.2+sha-f1cb971"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -22234,7 +22399,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.2.0-next.2+sha-c5608e5"));
+  definitionMap.set("version", literal("16.2.0-next.2+sha-f1cb971"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -22269,7 +22434,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.2.0-next.2+sha-c5608e5"));
+  definitionMap.set("version", literal("16.2.0-next.2+sha-f1cb971"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -22286,7 +22451,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.2.0-next.2+sha-c5608e5");
+var VERSION3 = new Version("16.2.0-next.2+sha-f1cb971");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
