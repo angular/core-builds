@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.2+sha-89c84bf
+ * @license Angular v16.2.0-next.2+sha-1ec3a2b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10485,7 +10485,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.2+sha-89c84bf');
+const VERSION = new Version('16.2.0-next.2+sha-1ec3a2b');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -24560,15 +24560,6 @@ function isModuleWithProviders$1(value) {
 }
 function isNgModule$1(value) {
     return !!getNgModuleDef(value);
-}
-function isPipe(value) {
-    return !!getPipeDef$1(value);
-}
-function isDirective(value) {
-    return !!getDirectiveDef(value);
-}
-function isComponent(value) {
-    return !!getComponentDef$1(value);
 }
 
 const moduleQueue = [];
