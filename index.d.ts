@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.2+sha-1ec3a2b
+ * @license Angular v16.2.0-next.2+sha-7410d68
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7682,7 +7682,8 @@ declare const enum RuntimeErrorCode {
     UNEXPECTED_ZONE_STATE = 909,
     UNSAFE_IFRAME_ATTRS = -910,
     VIEW_ALREADY_DESTROYED = 911,
-    COMPONENT_ID_COLLISION = -912
+    COMPONENT_ID_COLLISION = -912,
+    RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000
 }
 
 /**
