@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.6+sha-7cfc365
+ * @license Angular v16.1.6+sha-de0d3d7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1685,7 +1685,7 @@ export declare const ContentChildren: ContentChildrenDecorator;
 /**
  * Type of the ContentChildren decorator / constructor function.
  *
- * @see {@link ContentChildren}.
+ * @see {@link ContentChildren}
  * @publicApi
  */
 export declare interface ContentChildrenDecorator {
@@ -6694,10 +6694,10 @@ export declare interface Query {
 /**
  * Base class for query metadata.
  *
- * @see {@link ContentChildren}.
- * @see {@link ContentChild}.
- * @see {@link ViewChildren}.
- * @see {@link ViewChild}.
+ * @see {@link ContentChildren}
+ * @see {@link ContentChild}
+ * @see {@link ViewChildren}
+ * @see {@link ViewChild}
  *
  * @publicApi
  */
@@ -8046,7 +8046,7 @@ export declare interface StaticClassSansProvider {
  * Describes how an `Injector` should be configured as static (that is, without reflection).
  * A static provider provides tokens to an injector for various types of dependencies.
  *
- * @see {@link Injector.create()}.
+ * @see {@link Injector.create()}
  * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
  *
  * @publicApi
@@ -9776,7 +9776,7 @@ export declare const ViewChild: ViewChildDecorator;
 /**
  * Type of the ViewChild decorator / constructor function.
  *
- * @see {@link ViewChild}.
+ * @see {@link ViewChild}
  * @publicApi
  */
 export declare interface ViewChildDecorator {
@@ -9853,7 +9853,7 @@ export declare const ViewChildren: ViewChildrenDecorator;
 /**
  * Type of the ViewChildren decorator / constructor function.
  *
- * @see {@link ViewChildren}.
+ * @see {@link ViewChildren}
  *
  * @publicApi
  */

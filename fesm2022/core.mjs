@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.6+sha-7cfc365
+ * @license Angular v16.1.6+sha-de0d3d7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5000,10 +5000,10 @@ const emitDistinctChangesOnlyDefaultValue = true;
 /**
  * Base class for query metadata.
  *
- * @see {@link ContentChildren}.
- * @see {@link ContentChild}.
- * @see {@link ViewChildren}.
- * @see {@link ViewChild}.
+ * @see {@link ContentChildren}
+ * @see {@link ContentChild}
+ * @see {@link ViewChildren}
+ * @see {@link ViewChild}
  *
  * @publicApi
  */
@@ -10100,7 +10100,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.6+sha-7cfc365');
+const VERSION = new Version('16.1.6+sha-de0d3d7');
 
 // This default value is when checking the hierarchy for a token.
 //
