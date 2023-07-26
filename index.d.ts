@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.7+sha-07969d1
+ * @license Angular v16.1.7+sha-21299d9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -617,6 +617,10 @@ export declare interface AttributeDecorator {
 /**
  * Transforms a value (typically a string) to a boolean.
  * Intended to be used as a transform function of an input.
+ *
+ *  @usageNotes
+ *   @Input({ transform: booleanAttribute }) status!: boolean;
+ *
  * @param value Value to be transformed.
  *
  * @publicApi
@@ -4690,20 +4694,26 @@ export declare interface InputDecorator {
      * one of which is given a special binding name.
      *
      * ```typescript
+     * import { Component, Input, numberAttribute, booleanAttribute } from '@angular/core';
      * @Component({
      *   selector: 'bank-account',
      *   template: `
      *     Bank Name: {{bankName}}
      *     Account Id: {{id}}
+     *     Account Status: {{status ? 'Active' : 'InActive'}}
      *   `
      * })
      * class BankAccount {
      *   // This property is bound using its original name.
-     *   @Input() bankName: string;
-     *   // this property value is bound to a different property name
+     *   // Defining argument required as true inside the Input Decorator
+     *   // makes this property deceleration as mandatory
+     *   @Input({ required: true }) bankName!: string;
+     *   // Argument alias makes this property value is bound to a different property name
      *   // when this component is instantiated in a template.
-     *   @Input('account-id') id: string;
-     *
+     *   // Argument transform convert the input value from string to number
+     *   @Input({ alias:'account-id', transform: numberAttribute }) id: number;
+     *   // Argument transform the input value from string to boolean
+     *   @Input({ transform: booleanAttribute }) status: boolean;
      *   // this property is not bound, and is not automatically updated by Angular
      *   normalizedBankName: string;
      * }
@@ -4711,7 +4721,7 @@ export declare interface InputDecorator {
      * @Component({
      *   selector: 'app',
      *   template: `
-     *     <bank-account bankName="RBC" account-id="4747"></bank-account>
+     *     <bank-account bankName="RBC" account-id="4747" status="true"></bank-account>
      *   `
      * })
      * class App {}
@@ -6150,6 +6160,9 @@ declare const NUM_ROOT_NODES = "r";
  * Intended to be used as a transform function of an input.
  * @param value Value to be transformed.
  * @param fallbackValue Value to use if the provided value can't be parsed as a number.
+ *
+ *  @usageNotes
+ *  @Input({ transform: numberAttribute }) id!: number;
  *
  * @publicApi
  */

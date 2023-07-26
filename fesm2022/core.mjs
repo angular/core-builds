@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.7+sha-07969d1
+ * @license Angular v16.1.7+sha-21299d9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10100,7 +10100,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.7+sha-07969d1');
+const VERSION = new Version('16.1.7+sha-21299d9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -30133,6 +30133,10 @@ function logWarningOnStableTimedout(time, console) {
 /**
  * Transforms a value (typically a string) to a boolean.
  * Intended to be used as a transform function of an input.
+ *
+ *  @usageNotes
+ *   @Input({ transform: booleanAttribute }) status!: boolean;
+ *
  * @param value Value to be transformed.
  *
  * @publicApi
@@ -30145,6 +30149,9 @@ function booleanAttribute(value) {
  * Intended to be used as a transform function of an input.
  * @param value Value to be transformed.
  * @param fallbackValue Value to use if the provided value can't be parsed as a number.
+ *
+ *  @usageNotes
+ *  @Input({ transform: numberAttribute }) id!: number;
  *
  * @publicApi
  */
