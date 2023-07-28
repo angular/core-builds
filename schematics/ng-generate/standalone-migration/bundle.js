@@ -7763,19 +7763,22 @@ var OpKind;
   OpKind2[OpKind2["ContainerStart"] = 7] = "ContainerStart";
   OpKind2[OpKind2["Container"] = 8] = "Container";
   OpKind2[OpKind2["ContainerEnd"] = 9] = "ContainerEnd";
-  OpKind2[OpKind2["Text"] = 10] = "Text";
-  OpKind2[OpKind2["Listener"] = 11] = "Listener";
-  OpKind2[OpKind2["InterpolateText"] = 12] = "InterpolateText";
-  OpKind2[OpKind2["Binding"] = 13] = "Binding";
-  OpKind2[OpKind2["Property"] = 14] = "Property";
-  OpKind2[OpKind2["StyleProp"] = 15] = "StyleProp";
-  OpKind2[OpKind2["ClassProp"] = 16] = "ClassProp";
-  OpKind2[OpKind2["StyleMap"] = 17] = "StyleMap";
-  OpKind2[OpKind2["ClassMap"] = 18] = "ClassMap";
-  OpKind2[OpKind2["Advance"] = 19] = "Advance";
-  OpKind2[OpKind2["Pipe"] = 20] = "Pipe";
-  OpKind2[OpKind2["Attribute"] = 21] = "Attribute";
-  OpKind2[OpKind2["HostProperty"] = 22] = "HostProperty";
+  OpKind2[OpKind2["DisableBindings"] = 10] = "DisableBindings";
+  OpKind2[OpKind2["EnableBindings"] = 11] = "EnableBindings";
+  OpKind2[OpKind2["Text"] = 12] = "Text";
+  OpKind2[OpKind2["Listener"] = 13] = "Listener";
+  OpKind2[OpKind2["InterpolateText"] = 14] = "InterpolateText";
+  OpKind2[OpKind2["Binding"] = 15] = "Binding";
+  OpKind2[OpKind2["Property"] = 16] = "Property";
+  OpKind2[OpKind2["StyleProp"] = 17] = "StyleProp";
+  OpKind2[OpKind2["ClassProp"] = 18] = "ClassProp";
+  OpKind2[OpKind2["StyleMap"] = 19] = "StyleMap";
+  OpKind2[OpKind2["ClassMap"] = 20] = "ClassMap";
+  OpKind2[OpKind2["Advance"] = 21] = "Advance";
+  OpKind2[OpKind2["Pipe"] = 22] = "Pipe";
+  OpKind2[OpKind2["Attribute"] = 23] = "Attribute";
+  OpKind2[OpKind2["HostProperty"] = 24] = "HostProperty";
+  OpKind2[OpKind2["Namespace"] = 25] = "Namespace";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -8541,9 +8544,12 @@ function transformExpressionsInOp(op, transform, flags) {
     case OpKind.ContainerStart:
     case OpKind.ContainerEnd:
     case OpKind.Template:
+    case OpKind.DisableBindings:
+    case OpKind.EnableBindings:
     case OpKind.Text:
     case OpKind.Pipe:
     case OpKind.Advance:
+    case OpKind.Namespace:
       break;
     default:
       throw new Error(`AssertionError: transformExpressionsInOp doesn't handle ${OpKind[op.kind]}`);
@@ -8735,19 +8741,32 @@ var _OpList = class {
     op.prev = null;
     op.next = null;
   }
-  static insertBefore(op, before) {
-    _OpList.assertIsOwned(before);
-    if (before.prev === null) {
+  static insertBefore(op, target) {
+    _OpList.assertIsOwned(target);
+    if (target.prev === null) {
       throw new Error(`AssertionError: illegal operation on list start`);
     }
     _OpList.assertIsNotEnd(op);
     _OpList.assertIsUnowned(op);
-    op.debugListId = before.debugListId;
+    op.debugListId = target.debugListId;
     op.prev = null;
-    before.prev.next = op;
-    op.prev = before.prev;
-    op.next = before;
-    before.prev = op;
+    target.prev.next = op;
+    op.prev = target.prev;
+    op.next = target;
+    target.prev = op;
+  }
+  static insertAfter(op, target) {
+    _OpList.assertIsOwned(target);
+    if (target.next === null) {
+      throw new Error(`AssertionError: illegal operation on list end`);
+    }
+    _OpList.assertIsNotEnd(op);
+    _OpList.assertIsUnowned(op);
+    op.debugListId = target.debugListId;
+    target.next.prev = op;
+    op.next = target.next;
+    op.prev = target;
+    target.next = op;
   }
   static assertIsUnowned(op) {
     if (op.debugListId !== null) {
@@ -8783,17 +8802,19 @@ var elementContainerOpKinds = /* @__PURE__ */ new Set([
 function isElementOrContainerOp(op) {
   return elementContainerOpKinds.has(op.kind);
 }
-function createElementStartOp(tag, xref, sourceSpan) {
+function createElementStartOp(tag, xref, namespace, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.ElementStart,
     xref,
     tag,
     attributes: new ElementAttributes(),
     localRefs: [],
+    nonBindable: false,
+    namespace,
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createTemplateOp(xref, tag, sourceSpan) {
+function createTemplateOp(xref, tag, namespace, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Template,
     xref,
@@ -8802,6 +8823,8 @@ function createTemplateOp(xref, tag, sourceSpan) {
     decls: null,
     vars: null,
     localRefs: [],
+    nonBindable: false,
+    namespace,
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
@@ -8810,6 +8833,18 @@ function createElementEndOp(xref, sourceSpan) {
     kind: OpKind.ElementEnd,
     xref,
     sourceSpan
+  }, NEW_OP);
+}
+function createDisableBindingsOp(xref) {
+  return __spreadValues({
+    kind: OpKind.DisableBindings,
+    xref
+  }, NEW_OP);
+}
+function createEnableBindingsOp(xref) {
+  return __spreadValues({
+    kind: OpKind.EnableBindings,
+    xref
   }, NEW_OP);
 }
 function createTextOp(xref, initialValue, sourceSpan) {
@@ -8837,6 +8872,18 @@ function createPipeOp(xref, name) {
     xref,
     name
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
+}
+var Namespace;
+(function(Namespace2) {
+  Namespace2[Namespace2["HTML"] = 0] = "HTML";
+  Namespace2[Namespace2["SVG"] = 1] = "SVG";
+  Namespace2[Namespace2["Math"] = 2] = "Math";
+})(Namespace || (Namespace = {}));
+function createNamespaceOp(namespace) {
+  return __spreadValues({
+    kind: OpKind.Namespace,
+    active: namespace
+  }, NEW_OP);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/host.mjs
@@ -9112,7 +9159,8 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.classProp,
   Identifiers.elementContainerStart,
   Identifiers.elementContainerEnd,
-  Identifiers.elementContainer
+  Identifiers.elementContainer,
+  Identifiers.listener
 ]);
 function phaseChaining(job) {
   for (const unit of job.units) {
@@ -9549,6 +9597,49 @@ function hyphenate(value) {
   }).toLowerCase();
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/conversion.mjs
+var BINARY_OPERATORS = /* @__PURE__ */ new Map([
+  ["&&", BinaryOperator.And],
+  [">", BinaryOperator.Bigger],
+  [">=", BinaryOperator.BiggerEquals],
+  ["&", BinaryOperator.BitwiseAnd],
+  ["/", BinaryOperator.Divide],
+  ["==", BinaryOperator.Equals],
+  ["===", BinaryOperator.Identical],
+  ["<", BinaryOperator.Lower],
+  ["<=", BinaryOperator.LowerEquals],
+  ["-", BinaryOperator.Minus],
+  ["%", BinaryOperator.Modulo],
+  ["*", BinaryOperator.Multiply],
+  ["!=", BinaryOperator.NotEquals],
+  ["!==", BinaryOperator.NotIdentical],
+  ["??", BinaryOperator.NullishCoalesce],
+  ["||", BinaryOperator.Or],
+  ["+", BinaryOperator.Plus]
+]);
+var NAMESPACES = /* @__PURE__ */ new Map([["svg", Namespace.SVG], ["math", Namespace.Math]]);
+function namespaceForKey(namespacePrefixKey) {
+  var _a2;
+  if (namespacePrefixKey === null) {
+    return Namespace.HTML;
+  }
+  return (_a2 = NAMESPACES.get(namespacePrefixKey)) != null ? _a2 : Namespace.HTML;
+}
+function keyForNamespace(namespace) {
+  for (const [k, n] of NAMESPACES.entries()) {
+    if (n === namespace) {
+      return k;
+    }
+  }
+  return null;
+}
+function prefixWithNamespace(strippedTag, namespace) {
+  if (namespace === Namespace.HTML) {
+    return strippedTag;
+  }
+  return `:${keyForNamespace(namespace)}:${strippedTag}`;
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/naming.mjs
 function phaseNaming(cpl) {
   addNamesToView(cpl.root, cpl.componentName, { index: 0 }, cpl.compatibility === CompatibilityMode.TemplateDefinitionBuilder);
@@ -9580,7 +9671,7 @@ function addNamesToView(unit, baseName, state, compatibility) {
         if (op.slot === null) {
           throw new Error(`Expected slot to be assigned`);
         }
-        addNamesToView(childView, `${baseName}_${op.tag}_${op.slot}`, state, compatibility);
+        addNamesToView(childView, `${baseName}_${prefixWithNamespace(op.tag, op.namespace)}_${op.slot}`, state, compatibility);
         break;
       case OpKind.StyleProp:
         op.name = normalizeStylePropName(op.name);
@@ -9965,6 +10056,12 @@ function template(slot, templateFnRef, decls, vars, tag, constIndex, sourceSpan)
     literal(constIndex)
   ], sourceSpan);
 }
+function disableBindings() {
+  return call(Identifiers.disableBindings, [], null);
+}
+function enableBindings() {
+  return call(Identifiers.enableBindings, [], null);
+}
 function listener(name, handlerFn) {
   return call(Identifiers.listener, [
     literal(name),
@@ -9976,6 +10073,15 @@ function pipe(slot, name) {
     literal(slot),
     literal(name)
   ], null);
+}
+function namespaceHTML() {
+  return call(Identifiers.namespaceHTML, [], null);
+}
+function namespaceSVG() {
+  return call(Identifiers.namespaceSVG, [], null);
+}
+function namespaceMath() {
+  return call(Identifiers.namespaceMathML, [], null);
 }
 function advance(delta, sourceSpan) {
   return call(Identifiers.advance, [
@@ -10316,6 +10422,12 @@ function reifyCreateOperations(unit, ops) {
         const childView = unit.job.views.get(op.xref);
         OpList.replace(op, template(op.slot, variable(childView.fnName), childView.decls, childView.vars, op.tag, op.attributes, op.sourceSpan));
         break;
+      case OpKind.DisableBindings:
+        OpList.replace(op, disableBindings());
+        break;
+      case OpKind.EnableBindings:
+        OpList.replace(op, enableBindings());
+        break;
       case OpKind.Pipe:
         OpList.replace(op, pipe(op.slot, op.name));
         break;
@@ -10328,6 +10440,19 @@ function reifyCreateOperations(unit, ops) {
           throw new Error(`AssertionError: unnamed variable ${op.xref}`);
         }
         OpList.replace(op, createStatementOp(new DeclareVarStmt(op.variable.name, op.initializer, void 0, StmtModifier.Final)));
+        break;
+      case OpKind.Namespace:
+        switch (op.active) {
+          case Namespace.HTML:
+            OpList.replace(op, namespaceHTML());
+            break;
+          case Namespace.SVG:
+            OpList.replace(op, namespaceSVG());
+            break;
+          case Namespace.Math:
+            OpList.replace(op, namespaceMath());
+            break;
+        }
         break;
       case OpKind.Statement:
         break;
@@ -10661,10 +10786,10 @@ function phaseSlotAllocation(cpl) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/temporary_variables.mjs
 function phaseTemporaryVariables(cpl) {
-  for (const view of cpl.views.values()) {
+  for (const unit of cpl.units) {
     let opCount = 0;
     let generatedStatements = [];
-    for (const op of view.ops()) {
+    for (const op of unit.ops()) {
       let count = 0;
       let xrefs = /* @__PURE__ */ new Set();
       let defs = /* @__PURE__ */ new Map();
@@ -10688,7 +10813,7 @@ function phaseTemporaryVariables(cpl) {
       generatedStatements.push(...Array.from(defs.values()).map((name) => createStatementOp(new DeclareVarStmt(name))));
       opCount++;
     }
-    view.update.prepend(generatedStatements);
+    unit.update.prepend(generatedStatements);
   }
 }
 
@@ -10942,15 +11067,37 @@ function resolveDollarEvent(view, ops) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/binding_specialization.mjs
+function lookupElement2(elements, xref) {
+  const el = elements.get(xref);
+  if (el === void 0) {
+    throw new Error("All attributes should have an element-like target.");
+  }
+  return el;
+}
 function phaseBindingSpecialization(job) {
+  const elements = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
-    for (const op of unit.update) {
+    for (const op of unit.create) {
+      if (!isElementOrContainerOp(op)) {
+        continue;
+      }
+      elements.set(op.xref, op);
+    }
+  }
+  for (const unit of job.units) {
+    for (const op of unit.ops()) {
       if (op.kind !== OpKind.Binding) {
         continue;
       }
       switch (op.bindingKind) {
         case BindingKind.Attribute:
-          OpList.replace(op, createAttributeOp(op.target, op.name, op.expression, op.isTemplate, op.sourceSpan));
+          if (op.name === "ngNonBindable") {
+            OpList.remove(op);
+            const target = lookupElement2(elements, op.target);
+            target.nonBindable = true;
+          } else {
+            OpList.replace(op, createAttributeOp(op.target, op.name, op.expression, op.isTemplate, op.sourceSpan));
+          }
           break;
         case BindingKind.Property:
           if (job instanceof HostBindingCompilationJob) {
@@ -11092,8 +11239,55 @@ function parseProperty(name) {
   return { property: property2, suffix };
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/nonbindable.mjs
+function lookupElement3(elements, xref) {
+  const el = elements.get(xref);
+  if (el === void 0) {
+    throw new Error("All attributes should have an element-like target.");
+  }
+  return el;
+}
+function phaseNonbindable(job) {
+  const elements = /* @__PURE__ */ new Map();
+  for (const view of job.units) {
+    for (const op of view.create) {
+      if (!isElementOrContainerOp(op)) {
+        continue;
+      }
+      elements.set(op.xref, op);
+    }
+  }
+  for (const [_, view] of job.views) {
+    for (const op of view.create) {
+      if ((op.kind === OpKind.ElementStart || op.kind === OpKind.ContainerStart) && op.nonBindable) {
+        OpList.insertAfter(createDisableBindingsOp(op.xref), op);
+      }
+      if ((op.kind === OpKind.ElementEnd || op.kind === OpKind.ContainerEnd) && lookupElement3(elements, op.xref).nonBindable) {
+        OpList.insertBefore(createEnableBindingsOp(op.xref), op);
+      }
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/namespace.mjs
+function phaseNamespace(job) {
+  for (const [_, view] of job.views) {
+    let activeNamespace = Namespace.HTML;
+    for (const op of view.create) {
+      if (op.kind !== OpKind.Element && op.kind !== OpKind.ElementStart) {
+        continue;
+      }
+      if (op.namespace !== activeNamespace) {
+        OpList.insertBefore(createNamespaceOp(op.namespace), op);
+        activeNamespace = op.namespace;
+      }
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/emit.mjs
 function transformTemplate(job) {
+  phaseNamespace(job);
   phaseStyleBindingSpecialization(job);
   phaseBindingSpecialization(job);
   phaseAttributeExtraction(job);
@@ -11121,6 +11315,7 @@ function transformTemplate(job) {
   phaseMergeNextContext(job);
   phaseNgContainer(job);
   phaseEmptyElements(job);
+  phaseNonbindable(job);
   phasePureFunctionExtraction(job);
   phaseAlignPipeVariadicVarOffset(job);
   phasePropertyOrdering(job);
@@ -11134,6 +11329,7 @@ function transformHostBinding(job) {
   phasePureLiteralStructures(job);
   phaseNullishCoalescing(job);
   phaseExpandSafeReads(job);
+  phaseTemporaryVariables(job);
   phaseVarCounting(job);
   phaseVariableOptimization(job);
   phaseResolveNames(job);
@@ -11239,27 +11435,6 @@ function emitHostBindingFunction(job) {
   );
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/conversion.mjs
-var BINARY_OPERATORS = /* @__PURE__ */ new Map([
-  ["&&", BinaryOperator.And],
-  [">", BinaryOperator.Bigger],
-  [">=", BinaryOperator.BiggerEquals],
-  ["&", BinaryOperator.BitwiseAnd],
-  ["/", BinaryOperator.Divide],
-  ["==", BinaryOperator.Equals],
-  ["===", BinaryOperator.Identical],
-  ["<", BinaryOperator.Lower],
-  ["<=", BinaryOperator.LowerEquals],
-  ["-", BinaryOperator.Minus],
-  ["%", BinaryOperator.Modulo],
-  ["*", BinaryOperator.Multiply],
-  ["!=", BinaryOperator.NotEquals],
-  ["!==", BinaryOperator.NotIdentical],
-  ["??", BinaryOperator.NullishCoalesce],
-  ["||", BinaryOperator.Or],
-  ["+", BinaryOperator.Plus]
-]);
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/ingest.mjs
 var compatibilityMode = CompatibilityMode.TemplateDefinitionBuilder;
 function ingestComponent(componentName, template2, constantPool) {
@@ -11286,7 +11461,12 @@ function ingestHostProperty(job, property2) {
   } else {
     expression = convertAst(ast, job);
   }
-  job.update.push(createBindingOp(job.root.xref, BindingKind.Property, property2.name, expression, null, false, property2.sourceSpan));
+  let bindingKind = BindingKind.Property;
+  if (property2.name.startsWith("attr.")) {
+    property2.name = property2.name.substring("attr.".length);
+    bindingKind = BindingKind.Attribute;
+  }
+  job.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, false, property2.sourceSpan));
 }
 function ingestHostEvent(job, event) {
 }
@@ -11311,7 +11491,8 @@ function ingestElement(view, element2) {
     staticAttributes[attr.name] = attr.value;
   }
   const id = view.job.allocateXrefId();
-  const startOp = createElementStartOp(element2.name, id, element2.startSourceSpan);
+  const [namespaceKey, elementName] = splitNsName(element2.name);
+  const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element2.startSourceSpan);
   view.create.push(startOp);
   ingestBindings(view, startOp, element2);
   ingestReferences(startOp, element2);
@@ -11319,9 +11500,13 @@ function ingestElement(view, element2) {
   view.create.push(createElementEndOp(id, element2.endSourceSpan));
 }
 function ingestTemplate(view, tmpl) {
-  var _a2;
   const childView = view.job.allocateView(view.xref);
-  const tplOp = createTemplateOp(childView.xref, (_a2 = tmpl.tagName) != null ? _a2 : "ng-template", tmpl.startSourceSpan);
+  let tagNameWithoutNamespace = tmpl.tagName;
+  let namespacePrefix = "";
+  if (tmpl.tagName) {
+    [namespacePrefix, tagNameWithoutNamespace] = splitNsName(tmpl.tagName);
+  }
+  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace != null ? tagNameWithoutNamespace : "ng-template", namespaceForKey(namespacePrefix), tmpl.startSourceSpan);
   view.create.push(tplOp);
   ingestBindings(view, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
@@ -21517,7 +21702,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.2.0-next.4+sha-1c553ee");
+var VERSION2 = new Version("16.2.0-next.4+sha-5061311");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -22927,7 +23112,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-1c553ee"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-5061311"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -22996,7 +23181,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-1c553ee"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-5061311"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -23181,7 +23366,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-1c553ee"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-5061311"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -23204,7 +23389,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-1c553ee"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-5061311"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -23242,7 +23427,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-1c553ee"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-5061311"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -23266,7 +23451,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-1c553ee"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-5061311"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -23301,7 +23486,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-1c553ee"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-5061311"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -23318,7 +23503,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.2.0-next.4+sha-1c553ee");
+var VERSION3 = new Version("16.2.0-next.4+sha-5061311");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
