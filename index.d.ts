@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-5061311
+ * @license Angular v16.2.0-next.4+sha-cdaa2a8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4608,7 +4608,7 @@ export declare abstract class Injector {
      *
      */
     static create(options: {
-        providers: StaticProvider[];
+        providers: Array<Provider | StaticProvider>;
         parent?: Injector;
         name?: string;
     }): Injector;
@@ -10633,7 +10633,7 @@ export declare function ɵconvertToBitFlags(flags: InjectOptions | InjectFlags |
  *
  * @publicApi
  */
-export declare function ɵcreateInjector(defType: any, parent?: Injector | null, additionalProviders?: StaticProvider[] | null, name?: string): Injector;
+export declare function ɵcreateInjector(defType: any, parent?: Injector | null, additionalProviders?: Array<Provider | StaticProvider> | null, name?: string): Injector;
 
 /**
  * A list of CssSelectors.
