@@ -7903,12 +7903,13 @@ function createBindingOp(target, kind, name, expression, unit, isTemplate, sourc
     sourceSpan
   }, NEW_OP);
 }
-function createPropertyOp(target, name, expression, isTemplate, sourceSpan) {
+function createPropertyOp(target, name, expression, isAnimationTrigger, isTemplate, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.Property,
     target,
     name,
     expression,
+    isAnimationTrigger,
     isTemplate,
     sourceSpan
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
@@ -8863,7 +8864,22 @@ function createListenerOp(target, name, tag) {
     name,
     handlerOps: new OpList(),
     handlerFnName: null,
-    consumesDollarEvent: false
+    consumesDollarEvent: false,
+    isAnimationListener: false,
+    animationPhase: null
+  }, NEW_OP), TRAIT_USES_SLOT_INDEX);
+}
+function createListenerOpForAnimation(target, name, animationPhase, tag) {
+  return __spreadValues(__spreadValues({
+    kind: OpKind.Listener,
+    target,
+    tag,
+    name,
+    handlerOps: new OpList(),
+    handlerFnName: null,
+    consumesDollarEvent: false,
+    isAnimationListener: true,
+    animationPhase
   }, NEW_OP), TRAIT_USES_SLOT_INDEX);
 }
 function createPipeOp(xref, name) {
@@ -9118,6 +9134,9 @@ function populateElementAttributes(view) {
         }
         break;
       case OpKind.Property:
+        if (op.isAnimationTrigger) {
+          continue;
+        }
         ownerOp = lookupElement(elements, op.target);
         assertIsElementAttributes(ownerOp.attributes);
         ownerOp.attributes.add(op.isTemplate ? BindingKind.Template : BindingKind.Property, op.name, null);
@@ -9131,6 +9150,9 @@ function populateElementAttributes(view) {
         }
         break;
       case OpKind.Listener:
+        if (op.isAnimationListener) {
+          continue;
+        }
         ownerOp = lookupElement(elements, op.target);
         assertIsElementAttributes(ownerOp.attributes);
         ownerOp.attributes.add(BindingKind.Property, op.name, null);
@@ -9143,6 +9165,7 @@ function populateElementAttributes(view) {
 var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.elementStart,
   Identifiers.elementEnd,
+  Identifiers.element,
   Identifiers.property,
   Identifiers.hostProperty,
   Identifiers.styleProp,
@@ -9157,6 +9180,7 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.stylePropInterpolate8,
   Identifiers.stylePropInterpolateV,
   Identifiers.classProp,
+  Identifiers.listener,
   Identifiers.elementContainerStart,
   Identifiers.elementContainerEnd,
   Identifiers.elementContainer,
@@ -9651,13 +9675,23 @@ function addNamesToView(unit, baseName, state, compatibility) {
   const varNames = /* @__PURE__ */ new Map();
   for (const op of unit.ops()) {
     switch (op.kind) {
+      case OpKind.Property:
+        if (op.isAnimationTrigger) {
+          op.name = "@" + op.name;
+        }
+        break;
       case OpKind.Listener:
         if (op.handlerFnName === null) {
           if (op.slot === null) {
             throw new Error(`Expected a slot to be assigned`);
           }
           const safeTagName = op.tag.replace("-", "_");
-          op.handlerFnName = sanitizeIdentifier(`${unit.fnName}_${safeTagName}_${op.name}_${op.slot}_listener`);
+          if (op.isAnimationListener) {
+            op.handlerFnName = sanitizeIdentifier(`${unit.fnName}_${safeTagName}_animation_${op.name}_${op.animationPhase}_${op.slot}_listener`);
+            op.name = `@${op.name}.${op.animationPhase}`;
+          } else {
+            op.handlerFnName = sanitizeIdentifier(`${unit.fnName}_${safeTagName}_${op.name}_${op.slot}_listener`);
+          }
         }
         break;
       case OpKind.Variable:
@@ -11100,10 +11134,11 @@ function phaseBindingSpecialization(job) {
           }
           break;
         case BindingKind.Property:
+        case BindingKind.Animation:
           if (job instanceof HostBindingCompilationJob) {
             OpList.replace(op, createHostPropertyOp(op.name, op.expression, op.sourceSpan));
           } else {
-            OpList.replace(op, createPropertyOp(op.target, op.name, op.expression, op.isTemplate, op.sourceSpan));
+            OpList.replace(op, createPropertyOp(op.target, op.name, op.expression, op.bindingKind === BindingKind.Animation, op.isTemplate, op.sourceSpan));
           }
           break;
         case BindingKind.I18n:
@@ -11609,7 +11644,15 @@ function ingestBindings(view, op, element2) {
     ingestBinding(view, op.xref, input.name, input.value, input.type, input.unit, input.sourceSpan, false);
   }
   for (const output of element2.outputs) {
-    const listenerOp = createListenerOp(op.xref, output.name, op.tag);
+    let listenerOp;
+    if (output.type === 1) {
+      if (output.phase === null) {
+        throw Error("Animation listener should have a phase");
+      }
+      listenerOp = createListenerOpForAnimation(op.xref, output.name, output.phase, op.tag);
+    } else {
+      listenerOp = createListenerOp(op.xref, output.name, op.tag);
+    }
     let inputExprs;
     let handler = output.handler;
     if (handler instanceof ASTWithSource) {
@@ -21175,6 +21218,7 @@ var ResourceLoader = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/jit_compiler_facade.mjs
+var enabledBlockTypes;
 var CompilerFacadeImpl = class {
   constructor(jitEvaluator = new JitEvaluator()) {
     this.jitEvaluator = jitEvaluator;
@@ -21545,11 +21589,7 @@ function convertPipeDeclarationToMetadata(pipe2) {
 }
 function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces, interpolation) {
   const interpolationConfig = interpolation ? InterpolationConfig.fromArray(interpolation) : DEFAULT_INTERPOLATION_CONFIG;
-  const parsed = parseTemplate(template2, sourceMapUrl, {
-    preserveWhitespaces,
-    interpolationConfig,
-    enabledBlockTypes: /* @__PURE__ */ new Set()
-  });
+  const parsed = parseTemplate(template2, sourceMapUrl, { preserveWhitespaces, interpolationConfig, enabledBlockTypes });
   if (parsed.errors !== null) {
     const errors = parsed.errors.map((err) => err.toString()).join(", ");
     throw new Error(`Errors during JIT compilation of template for ${typeName}: ${errors}`);
@@ -21703,7 +21743,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.2.0-next.4+sha-6755f53");
+var VERSION2 = new Version("16.2.0-next.4+sha-f71851a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -23113,7 +23153,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-6755f53"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-f71851a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -23182,7 +23222,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-6755f53"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-f71851a"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -23367,7 +23407,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-6755f53"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-f71851a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -23390,7 +23430,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-6755f53"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-f71851a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -23428,7 +23468,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-6755f53"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-f71851a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -23452,7 +23492,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-6755f53"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-f71851a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -23487,7 +23527,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.2.0-next.4+sha-6755f53"));
+  definitionMap.set("version", literal("16.2.0-next.4+sha-f71851a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -23504,7 +23544,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.2.0-next.4+sha-6755f53");
+var VERSION3 = new Version("16.2.0-next.4+sha-f71851a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -32036,7 +32076,7 @@ function isLikelyModuleWithProviders(value) {
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/component/src/handler.mjs
 var EMPTY_ARRAY2 = [];
 var ComponentDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, enabledBlockTypes, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode) {
+  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, enabledBlockTypes2, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -32055,7 +32095,7 @@ var ComponentDecoratorHandler = class {
     this.enableI18nLegacyMessageIdFormat = enableI18nLegacyMessageIdFormat;
     this.usePoisonedData = usePoisonedData;
     this.i18nNormalizeLineEndingsInICUs = i18nNormalizeLineEndingsInICUs;
-    this.enabledBlockTypes = enabledBlockTypes;
+    this.enabledBlockTypes = enabledBlockTypes2;
     this.moduleResolver = moduleResolver;
     this.cycleAnalyzer = cycleAnalyzer;
     this.cycleHandlingStrategy = cycleHandlingStrategy;
