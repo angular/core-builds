@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-c1052cf
+ * @license Angular v16.2.0-next.4+sha-4d8cc70
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1686,6 +1686,100 @@ function initNgDevMode() {
     return false;
 }
 
+let _injectorProfilerContext;
+function getInjectorProfilerContext() {
+    !ngDevMode && throwError('getInjectorProfilerContext should never be called in production mode');
+    return _injectorProfilerContext;
+}
+function setInjectorProfilerContext(context) {
+    !ngDevMode && throwError('setInjectorProfilerContext should never be called in production mode');
+    const previous = _injectorProfilerContext;
+    _injectorProfilerContext = context;
+    return previous;
+}
+let injectorProfilerCallback = null;
+/**
+ * Sets the callback function which will be invoked during certain DI events within the
+ * runtime (for example: injecting services, creating injectable instances, configuring providers)
+ *
+ * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+ * The contract of the function might be changed in any release and/or the function can be removed
+ * completely.
+ *
+ * @param profiler function provided by the caller or null value to disable profiling.
+ */
+const setInjectorProfiler = (injectorProfiler) => {
+    !ngDevMode && throwError('setInjectorProfiler should never be called in production mode');
+    injectorProfilerCallback = injectorProfiler;
+};
+/**
+ * Injector profiler function which emits on DI events executed by the runtime.
+ *
+ * @param event InjectorProfilerEvent corresponding to the DI event being emitted
+ */
+function injectorProfiler(event) {
+    !ngDevMode && throwError('Injector profiler should never be called in production mode');
+    if (injectorProfilerCallback != null /* both `null` and `undefined` */) {
+        injectorProfilerCallback(event);
+    }
+}
+/**
+ * Emits an InjectorProfilerEventType.ProviderConfigured to the injector profiler. The data in the
+ * emitted event includes the raw provider, as well as the token that provider is providing.
+ *
+ * @param provider A provider object
+ */
+function emitProviderConfiguredEvent(provider, isViewProvider = false) {
+    !ngDevMode && throwError('Injector profiler should never be called in production mode');
+    injectorProfiler({
+        type: 2 /* InjectorProfilerEventType.ProviderConfigured */,
+        context: getInjectorProfilerContext(),
+        providerRecord: {
+            token: typeof provider === 'function' ? provider : resolveForwardRef(provider.provide),
+            provider,
+            isViewProvider
+        }
+    });
+}
+/**
+ * Emits an event to the injector profiler with the instance that was created. Note that
+ * the injector associated with this emission can be accessed by using getDebugInjectContext()
+ *
+ * @param instance an object created by an injector
+ */
+function emitInstanceCreatedByInjectorEvent(instance) {
+    !ngDevMode && throwError('Injector profiler should never be called in production mode');
+    injectorProfiler({
+        type: 1 /* InjectorProfilerEventType.InstanceCreatedByInjector */,
+        context: getInjectorProfilerContext(),
+        instance: { value: instance }
+    });
+}
+/**
+ * @param token DI token associated with injected service
+ * @param value the instance of the injected service (i.e the result of `inject(token)`)
+ * @param flags the flags that the token was injected with
+ */
+function emitInjectEvent(token, value, flags) {
+    !ngDevMode && throwError('Injector profiler should never be called in production mode');
+    injectorProfiler({
+        type: 0 /* InjectorProfilerEventType.Inject */,
+        context: getInjectorProfilerContext(),
+        service: { token, value, flags }
+    });
+}
+function runInInjectorProfilerContext(injector, token, callback) {
+    !ngDevMode &&
+        throwError('runInInjectorProfilerContext should never be called in production mode');
+    const prevInjectContext = setInjectorProfilerContext({ injector, token });
+    try {
+        callback();
+    }
+    finally {
+        setInjectorProfilerContext(prevInjectContext);
+    }
+}
+
 function isEnvironmentProviders(value) {
     return value && !!value.ɵproviders;
 }
@@ -1864,7 +1958,9 @@ function injectInjectorOnly(token, flags = InjectFlags.Default) {
         return injectRootLimpMode(token, undefined, flags);
     }
     else {
-        return _currentInjector.get(token, flags & InjectFlags.Optional ? null : undefined, flags);
+        const value = _currentInjector.get(token, flags & InjectFlags.Optional ? null : undefined, flags);
+        ngDevMode && emitInjectEvent(token, value, flags);
+        return value;
     }
 }
 function ɵɵinject(token, flags = InjectFlags.Default) {
@@ -5759,7 +5855,18 @@ function lookupTokenUsingNodeInjector(tNode, lView, token, flags, notFoundValue)
                 lookupTokenUsingModuleInjector(lView, token, flags, notFoundValue);
         }
         try {
-            const value = bloomHash(flags);
+            let value;
+            if (ngDevMode) {
+                runInInjectorProfilerContext(new NodeInjector(getCurrentTNode(), getLView()), token, () => {
+                    value = bloomHash(flags);
+                    if (value != null) {
+                        emitInstanceCreatedByInjectorEvent(value);
+                    }
+                });
+            }
+            else {
+                value = bloomHash(flags);
+            }
             if (value == null && !(flags & InjectFlags.Optional)) {
                 throwProviderNotFoundError(token);
             }
@@ -5914,12 +6021,23 @@ function getNodeInjectable(lView, tView, index, tNode) {
         }
         const previousIncludeViewProviders = setIncludeViewProviders(factory.canSeeViewProviders);
         factory.resolving = true;
+        let prevInjectContext;
+        if (ngDevMode) {
+            // tData indexes mirror the concrete instances in its corresponding LView.
+            // lView[index] here is either the injectable instace itself or a factory,
+            // therefore tData[index] is the constructor of that injectable or a
+            // definition object that contains the constructor in a `.type` field.
+            const token = tData[index].type || tData[index];
+            const injector = new NodeInjector(tNode, lView);
+            prevInjectContext = setInjectorProfilerContext({ injector, token });
+        }
         const previousInjectImplementation = factory.injectImpl ? setInjectImplementation(factory.injectImpl) : null;
         const success = enterDI(lView, tNode, InjectFlags.Default);
         ngDevMode &&
             assertEqual(success, true, 'Because flags do not contain \`SkipSelf\' we expect this to always succeed.');
         try {
             value = lView[index] = factory.factory(undefined, tData, lView, tNode);
+            ngDevMode && emitInstanceCreatedByInjectorEvent(value);
             // This code path is hit for both directives and providers.
             // For perf reasons, we want to avoid searching for hooks on providers.
             // It does no harm to try (the hooks just won't exist), but the extra
@@ -5932,6 +6050,7 @@ function getNodeInjectable(lView, tView, index, tNode) {
             }
         }
         finally {
+            ngDevMode && setInjectorProfilerContext(prevInjectContext);
             previousInjectImplementation !== null &&
                 setInjectImplementation(previousInjectImplementation);
             setIncludeViewProviders(previousIncludeViewProviders);
@@ -5992,6 +6111,12 @@ function bloomHasToken(bloomHash, injectorIndex, injectorView) {
 /** Returns true if flags prevent parent injector from being searched for tokens */
 function shouldSearchParent(flags, isFirstHostTNode) {
     return !(flags & InjectFlags.Self) && !(flags & InjectFlags.Host && isFirstHostTNode);
+}
+function getNodeInjectorLView(nodeInjector) {
+    return nodeInjector._lView;
+}
+function getNodeInjectorTNode(nodeInjector) {
+    return nodeInjector._tNode;
 }
 class NodeInjector {
     constructor(_tNode, _lView) {
@@ -9220,6 +9345,9 @@ function internalImportProvidersFrom(checkForStandaloneCmp, ...sources) {
     const providersOut = [];
     const dedup = new Set(); // already seen types
     let injectorTypesWithProviders;
+    const collectProviders = (provider) => {
+        providersOut.push(provider);
+    };
     deepForEach(sources, source => {
         if ((typeof ngDevMode === 'undefined' || ngDevMode) && checkForStandaloneCmp) {
             const cmpDef = getComponentDef$1(source);
@@ -9229,14 +9357,14 @@ function internalImportProvidersFrom(checkForStandaloneCmp, ...sources) {
         }
         // Narrow `source` to access the internal type analogue for `ModuleWithProviders`.
         const internalSource = source;
-        if (walkProviderTree(internalSource, providersOut, [], dedup)) {
+        if (walkProviderTree(internalSource, collectProviders, [], dedup)) {
             injectorTypesWithProviders ||= [];
             injectorTypesWithProviders.push(internalSource);
         }
     });
     // Collect all providers from `ModuleWithProviders` types.
     if (injectorTypesWithProviders !== undefined) {
-        processInjectorTypesWithProviders(injectorTypesWithProviders, providersOut);
+        processInjectorTypesWithProviders(injectorTypesWithProviders, collectProviders);
     }
     return providersOut;
 }
@@ -9244,12 +9372,12 @@ function internalImportProvidersFrom(checkForStandaloneCmp, ...sources) {
  * Collects all providers from the list of `ModuleWithProviders` and appends them to the provided
  * array.
  */
-function processInjectorTypesWithProviders(typesWithProviders, providersOut) {
+function processInjectorTypesWithProviders(typesWithProviders, visitor) {
     for (let i = 0; i < typesWithProviders.length; i++) {
         const { ngModule, providers } = typesWithProviders[i];
         deepForEachProvider(providers, provider => {
             ngDevMode && validateProvider(provider, providers || EMPTY_ARRAY, ngModule);
-            providersOut.push(provider);
+            visitor(provider, ngModule);
         });
     }
 }
@@ -9262,7 +9390,7 @@ function processInjectorTypesWithProviders(typesWithProviders, providersOut) {
  * to be processed. This allows us to process providers of injector types after all imports of
  * an injector definition are processed. (following View Engine semantics: see FW-1349)
  */
-function walkProviderTree(container, providersOut, parents, dedup) {
+function walkProviderTree(container, visitor, parents, dedup) {
     container = resolveForwardRef(container);
     if (!container)
         return false;
@@ -9310,7 +9438,7 @@ function walkProviderTree(container, providersOut, parents, dedup) {
         if (cmpDef.dependencies) {
             const deps = typeof cmpDef.dependencies === 'function' ? cmpDef.dependencies() : cmpDef.dependencies;
             for (const dep of deps) {
-                walkProviderTree(dep, providersOut, parents, dedup);
+                walkProviderTree(dep, visitor, parents, dedup);
             }
         }
     }
@@ -9325,7 +9453,7 @@ function walkProviderTree(container, providersOut, parents, dedup) {
             let importTypesWithProviders;
             try {
                 deepForEach(injDef.imports, imported => {
-                    if (walkProviderTree(imported, providersOut, parents, dedup)) {
+                    if (walkProviderTree(imported, visitor, parents, dedup)) {
                         importTypesWithProviders ||= [];
                         // If the processed import is an injector type with providers, we store it in the
                         // list of import types with providers, so that we can process those afterwards.
@@ -9341,7 +9469,7 @@ function walkProviderTree(container, providersOut, parents, dedup) {
             // after all imported modules are processed. This is similar to how View Engine
             // processes/merges module imports in the metadata resolver. See: FW-1349.
             if (importTypesWithProviders !== undefined) {
-                processInjectorTypesWithProviders(importTypesWithProviders, providersOut);
+                processInjectorTypesWithProviders(importTypesWithProviders, visitor);
             }
         }
         if (!isDuplicate) {
@@ -9351,14 +9479,12 @@ function walkProviderTree(container, providersOut, parents, dedup) {
             // Append extra providers to make more info available for consumers (to retrieve an injector
             // type), as well as internally (to calculate an injection scope correctly and eagerly
             // instantiate a `defType` when an injector is created).
-            providersOut.push(
             // Provider to create `defType` using its factory.
-            { provide: defType, useFactory: factory, deps: EMPTY_ARRAY }, 
+            visitor({ provide: defType, useFactory: factory, deps: EMPTY_ARRAY }, defType);
             // Make this `defType` available to an internal logic that calculates injector scope.
-            { provide: INJECTOR_DEF_TYPES, useValue: defType, multi: true }, 
-            // Provider to eagerly instantiate `defType` via `ENVIRONMENT_INITIALIZER`.
-            { provide: ENVIRONMENT_INITIALIZER, useValue: () => ɵɵinject(defType), multi: true } //
-            );
+            visitor({ provide: INJECTOR_DEF_TYPES, useValue: defType, multi: true }, defType);
+            // Provider to eagerly instantiate `defType` via `INJECTOR_INITIALIZER`.
+            visitor({ provide: ENVIRONMENT_INITIALIZER, useValue: () => ɵɵinject(defType), multi: true }, defType);
         }
         // Next, include providers listed on the definition itself.
         const defProviders = injDef.providers;
@@ -9366,7 +9492,7 @@ function walkProviderTree(container, providersOut, parents, dedup) {
             const injectorType = container;
             deepForEachProvider(defProviders, provider => {
                 ngDevMode && validateProvider(provider, defProviders, injectorType);
-                providersOut.push(provider);
+                visitor(provider, injectorType);
             });
         }
     }
@@ -9533,12 +9659,17 @@ class R3Injector extends EnvironmentInjector {
         this.assertNotDestroyed();
         const previousInjector = setCurrentInjector(this);
         const previousInjectImplementation = setInjectImplementation(undefined);
+        let prevInjectContext;
+        if (ngDevMode) {
+            prevInjectContext = setInjectorProfilerContext({ injector: this, token: null });
+        }
         try {
             return fn();
         }
         finally {
             setCurrentInjector(previousInjector);
             setInjectImplementation(previousInjectImplementation);
+            ngDevMode && setInjectorProfilerContext(prevInjectContext);
         }
     }
     get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
@@ -9548,6 +9679,10 @@ class R3Injector extends EnvironmentInjector {
         }
         flags = convertToBitFlags(flags);
         // Set the injection context.
+        let prevInjectContext;
+        if (ngDevMode) {
+            prevInjectContext = setInjectorProfilerContext({ injector: this, token: token });
+        }
         const previousInjector = setCurrentInjector(this);
         const previousInjectImplementation = setInjectImplementation(undefined);
         try {
@@ -9605,12 +9740,17 @@ class R3Injector extends EnvironmentInjector {
             // Lastly, restore the previous injection context.
             setInjectImplementation(previousInjectImplementation);
             setCurrentInjector(previousInjector);
+            ngDevMode && setInjectorProfilerContext(prevInjectContext);
         }
     }
     /** @internal */
     resolveInjectorInitializers() {
         const previousInjector = setCurrentInjector(this);
         const previousInjectImplementation = setInjectImplementation(undefined);
+        let prevInjectContext;
+        if (ngDevMode) {
+            prevInjectContext = setInjectorProfilerContext({ injector: this, token: null });
+        }
         try {
             const initializers = this.get(ENVIRONMENT_INITIALIZER.multi, EMPTY_ARRAY, InjectFlags.Self);
             if (ngDevMode && !Array.isArray(initializers)) {
@@ -9626,6 +9766,7 @@ class R3Injector extends EnvironmentInjector {
         finally {
             setCurrentInjector(previousInjector);
             setInjectImplementation(previousInjectImplementation);
+            ngDevMode && setInjectorProfilerContext(prevInjectContext);
         }
     }
     toString() {
@@ -9651,6 +9792,17 @@ class R3Injector extends EnvironmentInjector {
         let token = isTypeProvider(provider) ? provider : resolveForwardRef(provider && provider.provide);
         // Construct a `Record` for the provider.
         const record = providerToRecord(provider);
+        if (ngDevMode) {
+            runInInjectorProfilerContext(this, token, () => {
+                // Emit InjectorProfilerEventType.Create if provider is a value provider because
+                // these are the only providers that do not go through the value hydration logic
+                // where this event would normally be emitted from.
+                if (isValueProvider(provider)) {
+                    emitInstanceCreatedByInjectorEvent(provider.useValue);
+                }
+                emitProviderConfiguredEvent(provider);
+            });
+        }
         if (!isTypeProvider(provider) && provider.multi === true) {
             // If the provider indicates that it's a multi-provider, process it specially.
             // First check whether it's been defined already.
@@ -9683,7 +9835,15 @@ class R3Injector extends EnvironmentInjector {
         }
         else if (record.value === NOT_YET) {
             record.value = CIRCULAR;
-            record.value = record.factory();
+            if (ngDevMode) {
+                runInInjectorProfilerContext(this, token, () => {
+                    record.value = record.factory();
+                    emitInstanceCreatedByInjectorEvent(record.value);
+                });
+            }
+            else {
+                record.value = record.factory();
+            }
         }
         if (typeof record.value === 'object' && record.value && hasOnDestroy(record.value)) {
             this._ngOnDestroyHooks.add(record.value);
@@ -10485,7 +10645,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.4+sha-c1052cf');
+const VERSION = new Version('16.2.0-next.4+sha-4d8cc70');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10878,6 +11038,10 @@ function runInInjectionContext(injector, fn) {
     if (injector instanceof R3Injector) {
         injector.assertNotDestroyed();
     }
+    let prevInjectorProfilerContext;
+    if (ngDevMode) {
+        prevInjectorProfilerContext = setInjectorProfilerContext({ injector, token: null });
+    }
     const prevInjector = setCurrentInjector(injector);
     const previousInjectImplementation = setInjectImplementation(undefined);
     try {
@@ -10885,6 +11049,7 @@ function runInInjectionContext(injector, fn) {
     }
     finally {
         setCurrentInjector(prevInjector);
+        ngDevMode && setInjectorProfilerContext(prevInjectorProfilerContext);
         setInjectImplementation(previousInjectImplementation);
     }
 }
@@ -11114,7 +11279,9 @@ function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
         return ɵɵinject(token, flags);
     }
     const tNode = getCurrentTNode();
-    return getOrCreateInjectable(tNode, lView, resolveForwardRef(token), flags);
+    const value = getOrCreateInjectable(tNode, lView, resolveForwardRef(token), flags);
+    ngDevMode && emitInjectEvent(token, value, flags);
+    return value;
 }
 /**
  * Throws an error indicating that a factory function could not be generated by the compiler for a
@@ -21699,9 +21866,15 @@ function resolveProvider(provider, tInjectables, lInjectablesBlueprint, isCompon
     else {
         const tView = getTView();
         const lView = getLView();
-        let token = isTypeProvider(provider) ? provider : resolveForwardRef(provider.provide);
-        let providerFactory = providerToFactory(provider);
         const tNode = getCurrentTNode();
+        let token = isTypeProvider(provider) ? provider : resolveForwardRef(provider.provide);
+        const providerFactory = providerToFactory(provider);
+        if (ngDevMode) {
+            const injector = new NodeInjector(tNode, lView);
+            runInInjectorProfilerContext(injector, token, () => {
+                emitProviderConfiguredEvent(provider, isViewProvider);
+            });
+        }
         const beginIndex = tNode.providerIndexes & 1048575 /* TNodeProviderIndexes.ProvidersStartIndexMask */;
         const endIndex = tNode.directiveStart;
         const cptViewProvidersCount = tNode.providerIndexes >> 20 /* TNodeProviderIndexes.CptViewProvidersCountShift */;
@@ -22921,6 +23094,13 @@ function ɵɵpipe(index, pipeName) {
         pipeDef = tView.data[adjustedIndex];
     }
     const pipeFactory = pipeDef.factory || (pipeDef.factory = getFactoryDef(pipeDef.type, true));
+    let previousInjectorProfilerContext;
+    if (ngDevMode) {
+        previousInjectorProfilerContext = setInjectorProfilerContext({
+            injector: new NodeInjector(getCurrentTNode(), getLView()),
+            token: pipeDef.type
+        });
+    }
     const previousInjectImplementation = setInjectImplementation(ɵɵdirectiveInject);
     try {
         // DI for pipes is supposed to behave like directives when placed on a component
@@ -22935,6 +23115,7 @@ function ɵɵpipe(index, pipeName) {
         // we have to restore the injector implementation in finally, just in case the creation of the
         // pipe throws an error.
         setInjectImplementation(previousInjectImplementation);
+        ngDevMode && setInjectorProfilerContext(previousInjectorProfilerContext);
     }
 }
 /**

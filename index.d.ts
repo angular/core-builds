@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-c1052cf
+ * @license Angular v16.2.0-next.4+sha-4d8cc70
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11008,6 +11008,24 @@ export declare function ɵinjectChangeDetectorRef(flags: InjectFlags): ChangeDet
 export declare const ɵINJECTOR_SCOPE: InjectionToken<InjectorScope | null>;
 
 /**
+ * An object that defines an injection context for the injector profiler.
+ */
+export declare interface ɵInjectorProfilerContext {
+    /**
+     *  The Injector that service is being injected into.
+     *      - Example: if ModuleA --provides--> ServiceA --injects--> ServiceB
+     *                 then inject(ServiceB) in ServiceA has ModuleA as an injector context
+     */
+    injector: Injector;
+    /**
+     *  The class where the constructor that is calling `inject` is located
+     *      - Example: if ModuleA --provides--> ServiceA --injects--> ServiceB
+     *                 then inject(ServiceB) in ServiceA has ServiceA as a construction context
+     */
+    token: Type<unknown> | null;
+}
+
+/**
  * Internal create application API that implements the core application creation logic and optional
  * bootstrap logic.
  *
@@ -11649,6 +11667,8 @@ export declare function ɵsetCurrentInjector(injector: Injector | null | undefin
  * @param document The object representing the global `document` in this environment.
  */
 export declare function ɵsetDocument(document: Document | undefined): void;
+
+export declare function ɵsetInjectorProfilerContext(context: ɵInjectorProfilerContext): ɵInjectorProfilerContext;
 
 
 /**
