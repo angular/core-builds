@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.7+sha-db0f653
+ * @license Angular v16.1.7+sha-7d579b9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9055,12 +9055,12 @@ const CIRCULAR = {};
 /**
  * A lazily initialized NullInjector.
  */
-let NULL_INJECTOR$1 = undefined;
+let NULL_INJECTOR = undefined;
 function getNullInjector() {
-    if (NULL_INJECTOR$1 === undefined) {
-        NULL_INJECTOR$1 = new NullInjector();
+    if (NULL_INJECTOR === undefined) {
+        NULL_INJECTOR = new NullInjector();
     }
-    return NULL_INJECTOR$1;
+    return NULL_INJECTOR;
 }
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
@@ -10100,7 +10100,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.1.7+sha-db0f653');
+const VERSION = new Version('16.1.7+sha-7d579b9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10673,8 +10673,6 @@ const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, 
 
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
- *
- * @publicApi
  */
 function createInjector(defType, parent = null, additionalProviders = null, name) {
     const injector = createInjectorWithoutInjectorInstances(defType, parent, additionalProviders, name);
@@ -13183,12 +13181,6 @@ class ComponentRef extends ComponentRef$1 {
         this.hostView.onDestroy(callback);
     }
 }
-// TODO: A hack to not pull in the NullInjector from @angular/core.
-const NULL_INJECTOR = {
-    get: (token, notFoundValue) => {
-        throwProviderNotFoundError(token, 'NullInjector');
-    }
-};
 /** Creates a TNode that can be used to instantiate a root component. */
 function createRootComponentTNode(lView, rNode) {
     const tView = lView[TVIEW];
