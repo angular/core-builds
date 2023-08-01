@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-d86e637
+ * @license Angular v16.2.0-next.4+sha-e53d4ec
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -75,6 +75,129 @@ export declare interface AfterContentInit {
      * It is invoked only once when the directive is instantiated.
      */
     ngAfterContentInit(): void;
+}
+
+/**
+ * Register a callback to be invoked the next time the application
+ * finishes rendering.
+ *
+ * Note that the callback will run
+ * - in the order it was registered
+ * - on browser platforms only
+ *
+ * <div class="alert is-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param callback A callback function to register
+ *
+ * @usageNotes
+ *
+ * Use `afterNextRender` to read or write the DOM once,
+ * for example to initialize a non-Angular library.
+ *
+ * ### Example
+ * ```ts
+ * @Component({
+ *   selector: 'my-chart-cmp',
+ *   template: `<div #chart>{{ ... }}</div>`,
+ * })
+ * export class MyChartCmp {
+ *   @ViewChild('chart') chartRef: ElementRef;
+ *   chart: MyChart|null;
+ *
+ *   constructor() {
+ *     afterNextRender(() => {
+ *       this.chart = new MyChart(this.chartRef.nativeElement);
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+export declare function afterNextRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
+
+/**
+ * Register a callback to be invoked each time the application
+ * finishes rendering.
+ *
+ * Note that the callback will run
+ * - in the order it was registered
+ * - once per render
+ * - on browser platforms only
+ *
+ * <div class="alert is-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param callback A callback function to register
+ *
+ * @usageNotes
+ *
+ * Use `afterRender` to read or write the DOM after each render.
+ *
+ * ### Example
+ * ```ts
+ * @Component({
+ *   selector: 'my-cmp',
+ *   template: `<span #content>{{ ... }}</span>`,
+ * })
+ * export class MyComponent {
+ *   @ViewChild('content') contentRef: ElementRef;
+ *
+ *   constructor() {
+ *     afterRender(() => {
+ *       console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+export declare function afterRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
+
+/**
+ * A wrapper around a function to be used as an after render callback.
+ * @private
+ */
+declare class AfterRenderCallback {
+    private callback;
+    constructor(callback: VoidFunction);
+    invoke(): void;
+}
+
+/**
+ * Options passed to `afterRender` and `afterNextRender`.
+ *
+ * @developerPreview
+ */
+export declare interface AfterRenderOptions {
+    /**
+     * The `Injector` to use during creation.
+     *
+     * If this is not provided, the current injection context will be used instead (via `inject`).
+     */
+    injector?: Injector;
+}
+
+/**
+ * A callback that runs after render.
+ *
+ * @developerPreview
+ */
+export declare interface AfterRenderRef {
+    /**
+     * Shut down the callback, preventing it from being called again.
+     */
+    destroy(): void;
 }
 
 /**
@@ -619,8 +742,9 @@ export declare interface AttributeDecorator {
  * Intended to be used as a transform function of an input.
  *
  *  @usageNotes
- *   @Input({ transform: booleanAttribute }) status!: boolean;
- *
+ *  ```typescript
+ *  @Input({ transform: booleanAttribute }) status!: boolean;
+ *  ```
  * @param value Value to be transformed.
  *
  * @publicApi
@@ -5507,6 +5631,8 @@ declare interface LViewEnvironment {
     sanitizer: Sanitizer | null;
     /** Container for reactivity system `effect`s. */
     effectManager: EffectManager | null;
+    /** Container for after render hooks */
+    afterRenderEventManager: ɵAfterRenderEventManager | null;
 }
 
 /** Flags associated with an LView (saved in LView[FLAGS]) */
@@ -6179,7 +6305,9 @@ declare const NUM_ROOT_NODES = "r";
  * @param fallbackValue Value to use if the provided value can't be parsed as a number.
  *
  *  @usageNotes
+ *  ```typescript
  *  @Input({ transform: numberAttribute }) id!: number;
+ *  ```
  *
  * @publicApi
  */
@@ -7641,6 +7769,7 @@ export declare function runInInjectionContext<ReturnT>(injector: Injector, fn: (
 declare const enum RuntimeErrorCode {
     EXPRESSION_CHANGED_AFTER_CHECKED = -100,
     RECURSIVE_APPLICATION_REF_TICK = 101,
+    RECURSIVE_APPLICATION_RENDER = 102,
     CYCLIC_DI_DEPENDENCY = -200,
     PROVIDER_NOT_FOUND = -201,
     INVALID_FACTORY_DEPENDENCY = 202,
@@ -10242,6 +10371,31 @@ export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string
 
 
 export declare function ɵ_sanitizeUrl(url: string): string;
+
+/**
+ * Implements `afterRender` and `afterNextRender` callback manager logic.
+ */
+export declare class ɵAfterRenderEventManager {
+    private callbacks;
+    private deferredCallbacks;
+    private renderDepth;
+    private runningCallbacks;
+    /**
+     * Mark the beginning of a render operation (i.e. CD cycle).
+     * Throws if called from an `afterRender` callback.
+     */
+    begin(): void;
+    /**
+     * Mark the end of a render operation. Registered callbacks
+     * are invoked if there are no more pending operations.
+     */
+    end(): void;
+    register(callback: AfterRenderCallback): void;
+    unregister(callback: AfterRenderCallback): void;
+    ngOnDestroy(): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
 
 /**
  * Internal token to indicate whether having multiple bootstrapped platform should be allowed (only
