@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-2274d15
+ * @license Angular v16.2.0-next.4+sha-737ed23
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3827,14 +3827,14 @@ function registerPostOrderHooks(tView, tNode) {
  * This is done by storing and maintaining flags in the view: the {@link InitPhaseState},
  * and the index within that phase. They can be seen as a cursor in the following structure:
  * [[onInit1, onInit2], [afterContentInit1], [afterViewInit1, afterViewInit2, afterViewInit3]]
- * They are are stored as flags in LView[FLAGS].
+ * They are stored as flags in LView[FLAGS].
  *
  * 2. Pre-order hooks can be executed in batches, because of the select instruction.
  * To be able to pause and resume their execution, we also need some state about the hook's array
  * that is being processed:
  * - the index of the next hook to be executed
  * - the number of init hooks already found in the processed part of the  array
- * They are are stored as flags in LView[PREORDER_HOOK_FLAGS].
+ * They are stored as flags in LView[PREORDER_HOOK_FLAGS].
  */
 /**
  * Executes pre-order check hooks ( OnChanges, DoChanges) given a view where all the init hooks were
@@ -10252,7 +10252,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.4+sha-2274d15');
+const VERSION = new Version('16.2.0-next.4+sha-737ed23');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -23498,7 +23498,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
         let index;
         // This function supports 2 signatures and we need to handle options correctly for both:
         //   1. When first argument is a Component type. This signature also requires extra
-        //      options to be provided as as object (more ergonomic option).
+        //      options to be provided as object (more ergonomic option).
         //   2. First argument is a Component factory. In this case extra options are represented as
         //      positional arguments. This signature is less ergonomic and will be deprecated.
         if (isComponentFactory) {
