@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-4d8cc70
+ * @license Angular v16.2.0-next.4+sha-efb486e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10645,7 +10645,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.4+sha-4d8cc70');
+const VERSION = new Version('16.2.0-next.4+sha-efb486e');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -21802,6 +21802,18 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
     return i18nPostprocess(message, replacements);
 }
 
+/**
+ * Creates runtime data structures for `{#defer}` blocks.
+ *
+ * @param index The index of the defer block in the data array
+ * @param deferredDepsFn Function that contains dependencies for this defer block
+ *
+ * @codeGenApi
+ */
+function ɵɵdefer(index, deferredDepsFn) {
+    // TODO: implement runtime logic.
+}
+
 /*
  * This file re-exports all symbols contained in this directory.
  *
@@ -24695,6 +24707,7 @@ const angularCoreEnv = (() => ({
     'ɵɵclassProp': ɵɵclassProp,
     'ɵɵadvance': ɵɵadvance,
     'ɵɵtemplate': ɵɵtemplate,
+    'ɵɵdefer': ɵɵdefer,
     'ɵɵtext': ɵɵtext,
     'ɵɵtextInterpolate': ɵɵtextInterpolate,
     'ɵɵtextInterpolate1': ɵɵtextInterpolate1,

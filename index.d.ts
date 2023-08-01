@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-4d8cc70
+ * @license Angular v16.2.0-next.4+sha-efb486e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2267,6 +2267,8 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     get isDirty(): boolean;
     private _addToRemovals;
 }
+
+declare type DeferredDepsFn = () => Array<Promise<Type<unknown>> | Type<unknown>>;
 
 /**
  * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
@@ -12653,6 +12655,16 @@ export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: P
  * @codeGenApi
  */
 export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
+
+/**
+ * Creates runtime data structures for `{#defer}` blocks.
+ *
+ * @param index The index of the defer block in the data array
+ * @param deferredDepsFn Function that contains dependencies for this defer block
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵdefer(index: number, deferredDepsFn: DeferredDepsFn | null): void;
 
 /**
  * Create a component definition object.
