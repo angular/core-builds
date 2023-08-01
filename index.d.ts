@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.1.7+sha-7d579b9
+ * @license Angular v16.1.7+sha-8ffa85f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -619,8 +619,9 @@ export declare interface AttributeDecorator {
  * Intended to be used as a transform function of an input.
  *
  *  @usageNotes
- *   @Input({ transform: booleanAttribute }) status!: boolean;
- *
+ *  ```typescript
+ *  @Input({ transform: booleanAttribute }) status!: boolean;
+ *  ```
  * @param value Value to be transformed.
  *
  * @publicApi
@@ -6162,7 +6163,9 @@ declare const NUM_ROOT_NODES = "r";
  * @param fallbackValue Value to use if the provided value can't be parsed as a number.
  *
  *  @usageNotes
+ *  ```typescript
  *  @Input({ transform: numberAttribute }) id!: number;
+ *  ```
  *
  * @publicApi
  */
