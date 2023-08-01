@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-a871e23
+ * @license Angular v16.2.0-next.4+sha-9d59764
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10632,8 +10632,6 @@ export declare function ɵconvertToBitFlags(flags: InjectOptions | InjectFlags |
 
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
- *
- * @publicApi
  */
 export declare function ɵcreateInjector(defType: any, parent?: Injector | null, additionalProviders?: Array<Provider | StaticProvider> | null, name?: string): Injector;
 

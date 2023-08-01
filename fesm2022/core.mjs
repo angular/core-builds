@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-a871e23
+ * @license Angular v16.2.0-next.4+sha-9d59764
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10252,7 +10252,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.4+sha-a871e23');
+const VERSION = new Version('16.2.0-next.4+sha-9d59764');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10830,8 +10830,6 @@ const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, 
 
 /**
  * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
- *
- * @publicApi
  */
 function createInjector(defType, parent = null, additionalProviders = null, name) {
     const injector = createInjectorWithoutInjectorInstances(defType, parent, additionalProviders, name);
