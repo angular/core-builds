@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-next.4+sha-8913d3e
+ * @license Angular v16.2.0-next.4+sha-2d52d5e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10252,7 +10252,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0-next.4+sha-8913d3e');
+const VERSION = new Version('16.2.0-next.4+sha-2d52d5e');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10272,408 +10272,6 @@ const VERSION = new Version('16.2.0-next.4+sha-8913d3e');
 // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
 // - mod2.injector.get(token, default)
 const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
-
-/**
- * Marks current view and all ancestors dirty.
- *
- * Returns the root view because it is found as a byproduct of marking the view tree
- * dirty, and can be used by methods that consume markViewDirty() to easily schedule
- * change detection. Otherwise, such methods would need to traverse up the view tree
- * an additional time to get the root view and schedule a tick on it.
- *
- * @param lView The starting LView to mark dirty
- * @returns the root LView
- */
-function markViewDirty(lView) {
-    while (lView) {
-        lView[FLAGS] |= 64 /* LViewFlags.Dirty */;
-        const parent = getLViewParent(lView);
-        // Stop traversing up as soon as you find a root view that wasn't attached to any container
-        if (isRootView(lView) && !parent) {
-            return lView;
-        }
-        // continue otherwise
-        lView = parent;
-    }
-    return null;
-}
-
-const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
-function wrappedError(message, originalError) {
-    const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
-    const error = Error(msg);
-    error[ERROR_ORIGINAL_ERROR] = originalError;
-    return error;
-}
-function getOriginalError(error) {
-    return error[ERROR_ORIGINAL_ERROR];
-}
-
-/**
- * Provides a hook for centralized exception handling.
- *
- * The default implementation of `ErrorHandler` prints error messages to the `console`. To
- * intercept error handling, write a custom exception handler that replaces this default as
- * appropriate for your app.
- *
- * @usageNotes
- * ### Example
- *
- * ```
- * class MyErrorHandler implements ErrorHandler {
- *   handleError(error) {
- *     // do something with the exception
- *   }
- * }
- *
- * @NgModule({
- *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
- * })
- * class MyModule {}
- * ```
- *
- * @publicApi
- */
-class ErrorHandler {
-    constructor() {
-        /**
-         * @internal
-         */
-        this._console = console;
-    }
-    handleError(error) {
-        const originalError = this._findOriginalError(error);
-        this._console.error('ERROR', error);
-        if (originalError) {
-            this._console.error('ORIGINAL ERROR', originalError);
-        }
-    }
-    /** @internal */
-    _findOriginalError(error) {
-        let e = error && getOriginalError(error);
-        while (e && getOriginalError(e)) {
-            e = getOriginalError(e);
-        }
-        return e || null;
-    }
-}
-
-/**
- * Internal token that specifies whether DOM reuse logic
- * during hydration is enabled.
- */
-const IS_HYDRATION_DOM_REUSE_ENABLED = new InjectionToken((typeof ngDevMode === 'undefined' || !!ngDevMode) ? 'IS_HYDRATION_DOM_REUSE_ENABLED' : '');
-// By default (in client rendering mode), we remove all the contents
-// of the host element and render an application after that.
-const PRESERVE_HOST_CONTENT_DEFAULT = false;
-/**
- * Internal token that indicates whether host element content should be
- * retained during the bootstrap.
- */
-const PRESERVE_HOST_CONTENT = new InjectionToken((typeof ngDevMode === 'undefined' || !!ngDevMode) ? 'PRESERVE_HOST_CONTENT' : '', {
-    providedIn: 'root',
-    factory: () => PRESERVE_HOST_CONTENT_DEFAULT,
-});
-
-function normalizeDebugBindingName(name) {
-    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
-    return `ng-reflect-${name}`;
-}
-const CAMEL_CASE_REGEXP = /([A-Z])/g;
-function camelCaseToDashCase(input) {
-    return input.replace(CAMEL_CASE_REGEXP, (...m) => '-' + m[1].toLowerCase());
-}
-function normalizeDebugBindingValue(value) {
-    try {
-        // Limit the size of the value as otherwise the DOM just gets polluted.
-        return value != null ? value.toString().slice(0, 30) : value;
-    }
-    catch (e) {
-        return '[ERROR] Exception while trying to serialize the value';
-    }
-}
-
-/**
- *
- * @codeGenApi
- */
-function ɵɵresolveWindow(element) {
-    return element.ownerDocument.defaultView;
-}
-/**
- *
- * @codeGenApi
- */
-function ɵɵresolveDocument(element) {
-    return element.ownerDocument;
-}
-/**
- *
- * @codeGenApi
- */
-function ɵɵresolveBody(element) {
-    return element.ownerDocument.body;
-}
-/**
- * The special delimiter we use to separate property names, prefixes, and suffixes
- * in property binding metadata. See storeBindingMetadata().
- *
- * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
- * because it is a very uncommon character that is unlikely to be part of a user's
- * property names or interpolation strings. If it is in fact used in a property
- * binding, DebugElement.properties will not return the correct value for that
- * binding. However, there should be no runtime effect for real applications.
- *
- * This character is typically rendered as a question mark inside of a diamond.
- * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
- *
- */
-const INTERPOLATION_DELIMITER = `�`;
-/**
- * Unwrap a value which might be behind a closure (for forward declaration reasons).
- */
-function maybeUnwrapFn(value) {
-    if (value instanceof Function) {
-        return value();
-    }
-    else {
-        return value;
-    }
-}
-
-/**
- * The max length of the string representation of a value in an error message
- */
-const VALUE_STRING_LENGTH_LIMIT = 200;
-/** Verifies that a given type is a Standalone Component. */
-function assertStandaloneComponentType(type) {
-    assertComponentDef(type);
-    const componentDef = getComponentDef(type);
-    if (!componentDef.standalone) {
-        throw new RuntimeError(907 /* RuntimeErrorCode.TYPE_IS_NOT_STANDALONE */, `The ${stringifyForError(type)} component is not marked as standalone, ` +
-            `but Angular expects to have a standalone component here. ` +
-            `Please make sure the ${stringifyForError(type)} component has ` +
-            `the \`standalone: true\` flag in the decorator.`);
-    }
-}
-/** Verifies whether a given type is a component */
-function assertComponentDef(type) {
-    if (!getComponentDef(type)) {
-        throw new RuntimeError(906 /* RuntimeErrorCode.MISSING_GENERATED_DEF */, `The ${stringifyForError(type)} is not an Angular component, ` +
-            `make sure it has the \`@Component\` decorator.`);
-    }
-}
-/** Called when there are multiple component selectors that match a given node */
-function throwMultipleComponentError(tNode, first, second) {
-    throw new RuntimeError(-300 /* RuntimeErrorCode.MULTIPLE_COMPONENTS_MATCH */, `Multiple components match node with tagname ${tNode.value}: ` +
-        `${stringifyForError(first)} and ` +
-        `${stringifyForError(second)}`);
-}
-/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
-function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName, lView) {
-    const hostComponentDef = getDeclarationComponentDef(lView);
-    const componentClassName = hostComponentDef?.type?.name;
-    const field = propName ? ` for '${propName}'` : '';
-    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${formatValue(oldValue)}'. Current value: '${formatValue(currValue)}'.${componentClassName ? ` Expression location: ${componentClassName} component` : ''}`;
-    if (creationMode) {
-        msg +=
-            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
-                ` Has it been created in a change detection hook?`;
-    }
-    throw new RuntimeError(-100 /* RuntimeErrorCode.EXPRESSION_CHANGED_AFTER_CHECKED */, msg);
-}
-function formatValue(value) {
-    let strValue = String(value);
-    // JSON.stringify will throw on circular references
-    try {
-        if (Array.isArray(value) || strValue === '[object Object]') {
-            strValue = JSON.stringify(value);
-        }
-    }
-    catch (error) {
-    }
-    return strValue.length > VALUE_STRING_LENGTH_LIMIT ?
-        (strValue.substring(0, VALUE_STRING_LENGTH_LIMIT) + '…') :
-        strValue;
-}
-function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
-    const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
-    let oldValue = prefix, newValue = prefix;
-    for (let i = 0; i < chunks.length; i++) {
-        const slotIdx = rootIndex + i;
-        oldValue += `${lView[slotIdx]}${chunks[i]}`;
-        newValue += `${slotIdx === expressionIndex ? changedValue : lView[slotIdx]}${chunks[i]}`;
-    }
-    return { propName, oldValue, newValue };
-}
-/**
- * Constructs an object that contains details for the ExpressionChangedAfterItHasBeenCheckedError:
- * - property name (for property bindings or interpolations)
- * - old and new values, enriched using information from metadata
- *
- * More information on the metadata storage format can be found in `storePropertyBindingMetadata`
- * function description.
- */
-function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValue) {
-    const tData = lView[TVIEW].data;
-    const metadata = tData[bindingIndex];
-    if (typeof metadata === 'string') {
-        // metadata for property interpolation
-        if (metadata.indexOf(INTERPOLATION_DELIMITER) > -1) {
-            return constructDetailsForInterpolation(lView, bindingIndex, bindingIndex, metadata, newValue);
-        }
-        // metadata for property binding
-        return { propName: metadata, oldValue, newValue };
-    }
-    // metadata is not available for this expression, check if this expression is a part of the
-    // property interpolation by going from the current binding index left and look for a string that
-    // contains INTERPOLATION_DELIMITER, the layout in tView.data for this case will look like this:
-    // [..., 'id�Prefix � and � suffix', null, null, null, ...]
-    if (metadata === null) {
-        let idx = bindingIndex - 1;
-        while (typeof tData[idx] !== 'string' && tData[idx + 1] === null) {
-            idx--;
-        }
-        const meta = tData[idx];
-        if (typeof meta === 'string') {
-            const matches = meta.match(new RegExp(INTERPOLATION_DELIMITER, 'g'));
-            // first interpolation delimiter separates property name from interpolation parts (in case of
-            // property interpolations), so we subtract one from total number of found delimiters
-            if (matches && (matches.length - 1) > bindingIndex - idx) {
-                return constructDetailsForInterpolation(lView, idx, bindingIndex, meta, newValue);
-            }
-        }
-    }
-    return { propName: undefined, oldValue, newValue };
-}
-
-class ReactiveLViewConsumer extends ReactiveNode {
-    constructor() {
-        super(...arguments);
-        this.consumerAllowSignalWrites = false;
-        this._lView = null;
-    }
-    set lView(lView) {
-        (typeof ngDevMode === 'undefined' || ngDevMode) &&
-            assertEqual(this._lView, null, 'Consumer already associated with a view.');
-        this._lView = lView;
-    }
-    onConsumerDependencyMayHaveChanged() {
-        (typeof ngDevMode === 'undefined' || ngDevMode) &&
-            assertDefined(this._lView, 'Updating a signal during template or host binding execution is not allowed.');
-        markViewDirty(this._lView);
-    }
-    onProducerUpdateValueVersion() {
-        // This type doesn't implement the producer side of a `ReactiveNode`.
-    }
-    get hasReadASignal() {
-        return this.hasProducers;
-    }
-    runInContext(fn, rf, ctx) {
-        const prevConsumer = setActiveConsumer(this);
-        this.trackingVersion++;
-        try {
-            fn(rf, ctx);
-        }
-        finally {
-            setActiveConsumer(prevConsumer);
-        }
-    }
-    destroy() {
-        // Incrementing the version means that every producer which tries to update this consumer will
-        // consider its record stale, and not notify.
-        this.trackingVersion++;
-    }
-}
-let currentConsumer = null;
-function getOrCreateCurrentLViewConsumer() {
-    currentConsumer ??= new ReactiveLViewConsumer();
-    return currentConsumer;
-}
-/**
- * Create a new template consumer pointing at the specified LView.
- * Sometimes, a previously created consumer may be reused, in order to save on allocations. In that
- * case, the LView will be updated.
- */
-function getReactiveLViewConsumer(lView, slot) {
-    return lView[slot] ?? getOrCreateCurrentLViewConsumer();
-}
-/**
- * Assigns the `currentTemplateContext` to its LView's `REACTIVE_CONSUMER` slot if there are tracked
- * producers.
- *
- * The presence of producers means that a signal was read while the consumer was the active
- * consumer.
- *
- * If no producers are present, we do not assign the current template context. This also means we
- * can just reuse the template context for the next LView.
- */
-function commitLViewConsumerIfHasProducers(lView, slot) {
-    const consumer = getOrCreateCurrentLViewConsumer();
-    if (!consumer.hasReadASignal) {
-        return;
-    }
-    lView[slot] = currentConsumer;
-    consumer.lView = lView;
-    currentConsumer = new ReactiveLViewConsumer();
-}
-
-/** A special value which designates that a value has not changed. */
-const NO_CHANGE = (typeof ngDevMode === 'undefined' || ngDevMode) ? { __brand__: 'NO_CHANGE' } : {};
-
-/**
- * Advances to an element for later binding instructions.
- *
- * Used in conjunction with instructions like {@link property} to act on elements with specified
- * indices, for example those created with {@link element} or {@link elementStart}.
- *
- * ```ts
- * (rf: RenderFlags, ctx: any) => {
- *   if (rf & 1) {
- *     text(0, 'Hello');
- *     text(1, 'Goodbye')
- *     element(2, 'div');
- *   }
- *   if (rf & 2) {
- *     advance(2); // Advance twice to the <div>.
- *     property('title', 'test');
- *   }
- *  }
- * ```
- * @param delta Number of elements to advance forwards by.
- *
- * @codeGenApi
- */
-function ɵɵadvance(delta) {
-    ngDevMode && assertGreaterThan(delta, 0, 'Can only advance forward');
-    selectIndexInternal(getTView(), getLView(), getSelectedIndex() + delta, !!ngDevMode && isInCheckNoChangesMode());
-}
-function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
-    ngDevMode && assertIndexInDeclRange(lView, index);
-    // Flush the initial hooks for elements in the view that have been added up to this point.
-    // PERF WARNING: do NOT extract this to a separate function without running benchmarks
-    if (!checkNoChangesMode) {
-        const hooksInitPhaseCompleted = (lView[FLAGS] & 3 /* LViewFlags.InitPhaseStateMask */) === 3 /* InitPhaseState.InitPhaseCompleted */;
-        if (hooksInitPhaseCompleted) {
-            const preOrderCheckHooks = tView.preOrderCheckHooks;
-            if (preOrderCheckHooks !== null) {
-                executeCheckHooks(lView, preOrderCheckHooks, index);
-            }
-        }
-        else {
-            const preOrderHooks = tView.preOrderHooks;
-            if (preOrderHooks !== null) {
-                executeInitAndCheckHooks(lView, preOrderHooks, 0 /* InitPhaseState.OnInitHooksToBeRun */, index);
-            }
-        }
-    }
-    // We must set the selected index *after* running the hooks, because hooks may have side-effects
-    // that cause other template functions to run, thus updating the selected index, which is global
-    // state. If we run `setSelectedIndex` *before* we run the hooks, in some cases the selected index
-    // will be altered by the time we leave the `ɵɵadvance` instruction.
-    setSelectedIndex(index);
-}
 
 /**
  * Runs the given function in the [context](guide/dependency-injection-context) of the given
@@ -10921,6 +10519,648 @@ class Injector {
  * Remove this file once the above is solved or wait until `ngc` is deleted and then it should be
  * safe to delete this file.
  */
+
+/**
+ * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
+ * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
+ * is injected in a component or directive, the callbacks run when that component or
+ * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
+ *
+ * @publicApi
+ */
+class DestroyRef {
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ELEMENT_ID__ = injectDestroyRef; }
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ENV_ID__ = (injector) => injector; }
+}
+class NodeInjectorDestroyRef extends DestroyRef {
+    constructor(_lView) {
+        super();
+        this._lView = _lView;
+    }
+    onDestroy(callback) {
+        storeLViewOnDestroy(this._lView, callback);
+        return () => removeLViewOnDestroy(this._lView, callback);
+    }
+}
+function injectDestroyRef() {
+    return new NodeInjectorDestroyRef(getLView());
+}
+
+/**
+ *
+ * @codeGenApi
+ */
+function ɵɵresolveWindow(element) {
+    return element.ownerDocument.defaultView;
+}
+/**
+ *
+ * @codeGenApi
+ */
+function ɵɵresolveDocument(element) {
+    return element.ownerDocument;
+}
+/**
+ *
+ * @codeGenApi
+ */
+function ɵɵresolveBody(element) {
+    return element.ownerDocument.body;
+}
+/**
+ * The special delimiter we use to separate property names, prefixes, and suffixes
+ * in property binding metadata. See storeBindingMetadata().
+ *
+ * We intentionally use the Unicode "REPLACEMENT CHARACTER" (U+FFFD) as a delimiter
+ * because it is a very uncommon character that is unlikely to be part of a user's
+ * property names or interpolation strings. If it is in fact used in a property
+ * binding, DebugElement.properties will not return the correct value for that
+ * binding. However, there should be no runtime effect for real applications.
+ *
+ * This character is typically rendered as a question mark inside of a diamond.
+ * See https://en.wikipedia.org/wiki/Specials_(Unicode_block)
+ *
+ */
+const INTERPOLATION_DELIMITER = `�`;
+/**
+ * Unwrap a value which might be behind a closure (for forward declaration reasons).
+ */
+function maybeUnwrapFn(value) {
+    if (value instanceof Function) {
+        return value();
+    }
+    else {
+        return value;
+    }
+}
+/**
+ * Detects whether the code is invoked in a browser.
+ * Later on, this check should be replaced with a tree-shakable
+ * flag (e.g. `!isServer`).
+ */
+function isPlatformBrowser(injector) {
+    return (injector ?? inject(Injector)).get(PLATFORM_ID) === 'browser';
+}
+
+/**
+ * Register a callback to be invoked each time the application
+ * finishes rendering.
+ *
+ * Note that the callback will run
+ * - in the order it was registered
+ * - once per render
+ * - on browser platforms only
+ *
+ * <div class="alert is-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param callback A callback function to register
+ *
+ * @usageNotes
+ *
+ * Use `afterRender` to read or write the DOM after each render.
+ *
+ * ### Example
+ * ```ts
+ * @Component({
+ *   selector: 'my-cmp',
+ *   template: `<span #content>{{ ... }}</span>`,
+ * })
+ * export class MyComponent {
+ *   @ViewChild('content') contentRef: ElementRef;
+ *
+ *   constructor() {
+ *     afterRender(() => {
+ *       console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+function afterRender(callback, options) {
+    !options && assertInInjectionContext(afterRender);
+    const injector = options?.injector ?? inject(Injector);
+    if (!isPlatformBrowser(injector)) {
+        return { destroy() { } };
+    }
+    let destroy;
+    const unregisterFn = injector.get(DestroyRef).onDestroy(() => destroy?.());
+    const manager = injector.get(AfterRenderEventManager);
+    const instance = new AfterRenderCallback(callback);
+    destroy = () => {
+        manager.unregister(instance);
+        unregisterFn();
+    };
+    manager.register(instance);
+    return { destroy };
+}
+/**
+ * Register a callback to be invoked the next time the application
+ * finishes rendering.
+ *
+ * Note that the callback will run
+ * - in the order it was registered
+ * - on browser platforms only
+ *
+ * <div class="alert is-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param callback A callback function to register
+ *
+ * @usageNotes
+ *
+ * Use `afterNextRender` to read or write the DOM once,
+ * for example to initialize a non-Angular library.
+ *
+ * ### Example
+ * ```ts
+ * @Component({
+ *   selector: 'my-chart-cmp',
+ *   template: `<div #chart>{{ ... }}</div>`,
+ * })
+ * export class MyChartCmp {
+ *   @ViewChild('chart') chartRef: ElementRef;
+ *   chart: MyChart|null;
+ *
+ *   constructor() {
+ *     afterNextRender(() => {
+ *       this.chart = new MyChart(this.chartRef.nativeElement);
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+function afterNextRender(callback, options) {
+    !options && assertInInjectionContext(afterNextRender);
+    const injector = options?.injector ?? inject(Injector);
+    if (!isPlatformBrowser(injector)) {
+        return { destroy() { } };
+    }
+    let destroy;
+    const unregisterFn = injector.get(DestroyRef).onDestroy(() => destroy?.());
+    const manager = injector.get(AfterRenderEventManager);
+    const instance = new AfterRenderCallback(() => {
+        destroy?.();
+        callback();
+    });
+    destroy = () => {
+        manager.unregister(instance);
+        unregisterFn();
+    };
+    manager.register(instance);
+    return { destroy };
+}
+/**
+ * A wrapper around a function to be used as an after render callback.
+ * @private
+ */
+class AfterRenderCallback {
+    constructor(callback) {
+        this.callback = callback;
+    }
+    invoke() {
+        this.callback();
+    }
+}
+/**
+ * Implements `afterRender` and `afterNextRender` callback manager logic.
+ */
+class AfterRenderEventManager {
+    constructor() {
+        this.callbacks = new Set();
+        this.deferredCallbacks = new Set();
+        this.renderDepth = 0;
+        this.runningCallbacks = false;
+    }
+    /**
+     * Mark the beginning of a render operation (i.e. CD cycle).
+     * Throws if called from an `afterRender` callback.
+     */
+    begin() {
+        if (this.runningCallbacks) {
+            throw new RuntimeError(102 /* RuntimeErrorCode.RECURSIVE_APPLICATION_RENDER */, ngDevMode &&
+                'A new render operation began before the previous operation ended. ' +
+                    'Did you trigger change detection from afterRender or afterNextRender?');
+        }
+        this.renderDepth++;
+    }
+    /**
+     * Mark the end of a render operation. Registered callbacks
+     * are invoked if there are no more pending operations.
+     */
+    end() {
+        this.renderDepth--;
+        if (this.renderDepth === 0) {
+            try {
+                this.runningCallbacks = true;
+                for (const callback of this.callbacks) {
+                    callback.invoke();
+                }
+            }
+            finally {
+                this.runningCallbacks = false;
+                for (const callback of this.deferredCallbacks) {
+                    this.callbacks.add(callback);
+                }
+                this.deferredCallbacks.clear();
+            }
+        }
+    }
+    register(callback) {
+        // If we're currently running callbacks, new callbacks should be deferred
+        // until the next render operation.
+        const target = this.runningCallbacks ? this.deferredCallbacks : this.callbacks;
+        target.add(callback);
+    }
+    unregister(callback) {
+        this.callbacks.delete(callback);
+        this.deferredCallbacks.delete(callback);
+    }
+    ngOnDestroy() {
+        this.callbacks.clear();
+        this.deferredCallbacks.clear();
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: AfterRenderEventManager,
+        providedIn: 'root',
+        factory: () => new AfterRenderEventManager(),
+    }); }
+}
+
+/**
+ * Marks current view and all ancestors dirty.
+ *
+ * Returns the root view because it is found as a byproduct of marking the view tree
+ * dirty, and can be used by methods that consume markViewDirty() to easily schedule
+ * change detection. Otherwise, such methods would need to traverse up the view tree
+ * an additional time to get the root view and schedule a tick on it.
+ *
+ * @param lView The starting LView to mark dirty
+ * @returns the root LView
+ */
+function markViewDirty(lView) {
+    while (lView) {
+        lView[FLAGS] |= 64 /* LViewFlags.Dirty */;
+        const parent = getLViewParent(lView);
+        // Stop traversing up as soon as you find a root view that wasn't attached to any container
+        if (isRootView(lView) && !parent) {
+            return lView;
+        }
+        // continue otherwise
+        lView = parent;
+    }
+    return null;
+}
+
+const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
+function wrappedError(message, originalError) {
+    const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
+    const error = Error(msg);
+    error[ERROR_ORIGINAL_ERROR] = originalError;
+    return error;
+}
+function getOriginalError(error) {
+    return error[ERROR_ORIGINAL_ERROR];
+}
+
+/**
+ * Provides a hook for centralized exception handling.
+ *
+ * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+ * intercept error handling, write a custom exception handler that replaces this default as
+ * appropriate for your app.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```
+ * class MyErrorHandler implements ErrorHandler {
+ *   handleError(error) {
+ *     // do something with the exception
+ *   }
+ * }
+ *
+ * @NgModule({
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ * class MyModule {}
+ * ```
+ *
+ * @publicApi
+ */
+class ErrorHandler {
+    constructor() {
+        /**
+         * @internal
+         */
+        this._console = console;
+    }
+    handleError(error) {
+        const originalError = this._findOriginalError(error);
+        this._console.error('ERROR', error);
+        if (originalError) {
+            this._console.error('ORIGINAL ERROR', originalError);
+        }
+    }
+    /** @internal */
+    _findOriginalError(error) {
+        let e = error && getOriginalError(error);
+        while (e && getOriginalError(e)) {
+            e = getOriginalError(e);
+        }
+        return e || null;
+    }
+}
+
+/**
+ * Internal token that specifies whether DOM reuse logic
+ * during hydration is enabled.
+ */
+const IS_HYDRATION_DOM_REUSE_ENABLED = new InjectionToken((typeof ngDevMode === 'undefined' || !!ngDevMode) ? 'IS_HYDRATION_DOM_REUSE_ENABLED' : '');
+// By default (in client rendering mode), we remove all the contents
+// of the host element and render an application after that.
+const PRESERVE_HOST_CONTENT_DEFAULT = false;
+/**
+ * Internal token that indicates whether host element content should be
+ * retained during the bootstrap.
+ */
+const PRESERVE_HOST_CONTENT = new InjectionToken((typeof ngDevMode === 'undefined' || !!ngDevMode) ? 'PRESERVE_HOST_CONTENT' : '', {
+    providedIn: 'root',
+    factory: () => PRESERVE_HOST_CONTENT_DEFAULT,
+});
+
+function normalizeDebugBindingName(name) {
+    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
+    name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
+    return `ng-reflect-${name}`;
+}
+const CAMEL_CASE_REGEXP = /([A-Z])/g;
+function camelCaseToDashCase(input) {
+    return input.replace(CAMEL_CASE_REGEXP, (...m) => '-' + m[1].toLowerCase());
+}
+function normalizeDebugBindingValue(value) {
+    try {
+        // Limit the size of the value as otherwise the DOM just gets polluted.
+        return value != null ? value.toString().slice(0, 30) : value;
+    }
+    catch (e) {
+        return '[ERROR] Exception while trying to serialize the value';
+    }
+}
+
+/**
+ * The max length of the string representation of a value in an error message
+ */
+const VALUE_STRING_LENGTH_LIMIT = 200;
+/** Verifies that a given type is a Standalone Component. */
+function assertStandaloneComponentType(type) {
+    assertComponentDef(type);
+    const componentDef = getComponentDef(type);
+    if (!componentDef.standalone) {
+        throw new RuntimeError(907 /* RuntimeErrorCode.TYPE_IS_NOT_STANDALONE */, `The ${stringifyForError(type)} component is not marked as standalone, ` +
+            `but Angular expects to have a standalone component here. ` +
+            `Please make sure the ${stringifyForError(type)} component has ` +
+            `the \`standalone: true\` flag in the decorator.`);
+    }
+}
+/** Verifies whether a given type is a component */
+function assertComponentDef(type) {
+    if (!getComponentDef(type)) {
+        throw new RuntimeError(906 /* RuntimeErrorCode.MISSING_GENERATED_DEF */, `The ${stringifyForError(type)} is not an Angular component, ` +
+            `make sure it has the \`@Component\` decorator.`);
+    }
+}
+/** Called when there are multiple component selectors that match a given node */
+function throwMultipleComponentError(tNode, first, second) {
+    throw new RuntimeError(-300 /* RuntimeErrorCode.MULTIPLE_COMPONENTS_MATCH */, `Multiple components match node with tagname ${tNode.value}: ` +
+        `${stringifyForError(first)} and ` +
+        `${stringifyForError(second)}`);
+}
+/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
+function throwErrorIfNoChangesMode(creationMode, oldValue, currValue, propName, lView) {
+    const hostComponentDef = getDeclarationComponentDef(lView);
+    const componentClassName = hostComponentDef?.type?.name;
+    const field = propName ? ` for '${propName}'` : '';
+    let msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value${field}: '${formatValue(oldValue)}'. Current value: '${formatValue(currValue)}'.${componentClassName ? ` Expression location: ${componentClassName} component` : ''}`;
+    if (creationMode) {
+        msg +=
+            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
+                ` Has it been created in a change detection hook?`;
+    }
+    throw new RuntimeError(-100 /* RuntimeErrorCode.EXPRESSION_CHANGED_AFTER_CHECKED */, msg);
+}
+function formatValue(value) {
+    let strValue = String(value);
+    // JSON.stringify will throw on circular references
+    try {
+        if (Array.isArray(value) || strValue === '[object Object]') {
+            strValue = JSON.stringify(value);
+        }
+    }
+    catch (error) {
+    }
+    return strValue.length > VALUE_STRING_LENGTH_LIMIT ?
+        (strValue.substring(0, VALUE_STRING_LENGTH_LIMIT) + '…') :
+        strValue;
+}
+function constructDetailsForInterpolation(lView, rootIndex, expressionIndex, meta, changedValue) {
+    const [propName, prefix, ...chunks] = meta.split(INTERPOLATION_DELIMITER);
+    let oldValue = prefix, newValue = prefix;
+    for (let i = 0; i < chunks.length; i++) {
+        const slotIdx = rootIndex + i;
+        oldValue += `${lView[slotIdx]}${chunks[i]}`;
+        newValue += `${slotIdx === expressionIndex ? changedValue : lView[slotIdx]}${chunks[i]}`;
+    }
+    return { propName, oldValue, newValue };
+}
+/**
+ * Constructs an object that contains details for the ExpressionChangedAfterItHasBeenCheckedError:
+ * - property name (for property bindings or interpolations)
+ * - old and new values, enriched using information from metadata
+ *
+ * More information on the metadata storage format can be found in `storePropertyBindingMetadata`
+ * function description.
+ */
+function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValue) {
+    const tData = lView[TVIEW].data;
+    const metadata = tData[bindingIndex];
+    if (typeof metadata === 'string') {
+        // metadata for property interpolation
+        if (metadata.indexOf(INTERPOLATION_DELIMITER) > -1) {
+            return constructDetailsForInterpolation(lView, bindingIndex, bindingIndex, metadata, newValue);
+        }
+        // metadata for property binding
+        return { propName: metadata, oldValue, newValue };
+    }
+    // metadata is not available for this expression, check if this expression is a part of the
+    // property interpolation by going from the current binding index left and look for a string that
+    // contains INTERPOLATION_DELIMITER, the layout in tView.data for this case will look like this:
+    // [..., 'id�Prefix � and � suffix', null, null, null, ...]
+    if (metadata === null) {
+        let idx = bindingIndex - 1;
+        while (typeof tData[idx] !== 'string' && tData[idx + 1] === null) {
+            idx--;
+        }
+        const meta = tData[idx];
+        if (typeof meta === 'string') {
+            const matches = meta.match(new RegExp(INTERPOLATION_DELIMITER, 'g'));
+            // first interpolation delimiter separates property name from interpolation parts (in case of
+            // property interpolations), so we subtract one from total number of found delimiters
+            if (matches && (matches.length - 1) > bindingIndex - idx) {
+                return constructDetailsForInterpolation(lView, idx, bindingIndex, meta, newValue);
+            }
+        }
+    }
+    return { propName: undefined, oldValue, newValue };
+}
+
+class ReactiveLViewConsumer extends ReactiveNode {
+    constructor() {
+        super(...arguments);
+        this.consumerAllowSignalWrites = false;
+        this._lView = null;
+    }
+    set lView(lView) {
+        (typeof ngDevMode === 'undefined' || ngDevMode) &&
+            assertEqual(this._lView, null, 'Consumer already associated with a view.');
+        this._lView = lView;
+    }
+    onConsumerDependencyMayHaveChanged() {
+        (typeof ngDevMode === 'undefined' || ngDevMode) &&
+            assertDefined(this._lView, 'Updating a signal during template or host binding execution is not allowed.');
+        markViewDirty(this._lView);
+    }
+    onProducerUpdateValueVersion() {
+        // This type doesn't implement the producer side of a `ReactiveNode`.
+    }
+    get hasReadASignal() {
+        return this.hasProducers;
+    }
+    runInContext(fn, rf, ctx) {
+        const prevConsumer = setActiveConsumer(this);
+        this.trackingVersion++;
+        try {
+            fn(rf, ctx);
+        }
+        finally {
+            setActiveConsumer(prevConsumer);
+        }
+    }
+    destroy() {
+        // Incrementing the version means that every producer which tries to update this consumer will
+        // consider its record stale, and not notify.
+        this.trackingVersion++;
+    }
+}
+let currentConsumer = null;
+function getOrCreateCurrentLViewConsumer() {
+    currentConsumer ??= new ReactiveLViewConsumer();
+    return currentConsumer;
+}
+/**
+ * Create a new template consumer pointing at the specified LView.
+ * Sometimes, a previously created consumer may be reused, in order to save on allocations. In that
+ * case, the LView will be updated.
+ */
+function getReactiveLViewConsumer(lView, slot) {
+    return lView[slot] ?? getOrCreateCurrentLViewConsumer();
+}
+/**
+ * Assigns the `currentTemplateContext` to its LView's `REACTIVE_CONSUMER` slot if there are tracked
+ * producers.
+ *
+ * The presence of producers means that a signal was read while the consumer was the active
+ * consumer.
+ *
+ * If no producers are present, we do not assign the current template context. This also means we
+ * can just reuse the template context for the next LView.
+ */
+function commitLViewConsumerIfHasProducers(lView, slot) {
+    const consumer = getOrCreateCurrentLViewConsumer();
+    if (!consumer.hasReadASignal) {
+        return;
+    }
+    lView[slot] = currentConsumer;
+    consumer.lView = lView;
+    currentConsumer = new ReactiveLViewConsumer();
+}
+
+/** A special value which designates that a value has not changed. */
+const NO_CHANGE = (typeof ngDevMode === 'undefined' || ngDevMode) ? { __brand__: 'NO_CHANGE' } : {};
+
+/**
+ * Advances to an element for later binding instructions.
+ *
+ * Used in conjunction with instructions like {@link property} to act on elements with specified
+ * indices, for example those created with {@link element} or {@link elementStart}.
+ *
+ * ```ts
+ * (rf: RenderFlags, ctx: any) => {
+ *   if (rf & 1) {
+ *     text(0, 'Hello');
+ *     text(1, 'Goodbye')
+ *     element(2, 'div');
+ *   }
+ *   if (rf & 2) {
+ *     advance(2); // Advance twice to the <div>.
+ *     property('title', 'test');
+ *   }
+ *  }
+ * ```
+ * @param delta Number of elements to advance forwards by.
+ *
+ * @codeGenApi
+ */
+function ɵɵadvance(delta) {
+    ngDevMode && assertGreaterThan(delta, 0, 'Can only advance forward');
+    selectIndexInternal(getTView(), getLView(), getSelectedIndex() + delta, !!ngDevMode && isInCheckNoChangesMode());
+}
+function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
+    ngDevMode && assertIndexInDeclRange(lView, index);
+    // Flush the initial hooks for elements in the view that have been added up to this point.
+    // PERF WARNING: do NOT extract this to a separate function without running benchmarks
+    if (!checkNoChangesMode) {
+        const hooksInitPhaseCompleted = (lView[FLAGS] & 3 /* LViewFlags.InitPhaseStateMask */) === 3 /* InitPhaseState.InitPhaseCompleted */;
+        if (hooksInitPhaseCompleted) {
+            const preOrderCheckHooks = tView.preOrderCheckHooks;
+            if (preOrderCheckHooks !== null) {
+                executeCheckHooks(lView, preOrderCheckHooks, index);
+            }
+        }
+        else {
+            const preOrderHooks = tView.preOrderHooks;
+            if (preOrderHooks !== null) {
+                executeInitAndCheckHooks(lView, preOrderHooks, 0 /* InitPhaseState.OnInitHooksToBeRun */, index);
+            }
+        }
+    }
+    // We must set the selected index *after* running the hooks, because hooks may have side-effects
+    // that cause other template functions to run, thus updating the selected index, which is global
+    // state. If we run `setSelectedIndex` *before* we run the hooks, in some cases the selected index
+    // will be altered by the time we leave the `ɵɵadvance` instruction.
+    setSelectedIndex(index);
+}
 
 function ɵɵdirectiveInject(token, flags = InjectFlags.Default) {
     const lView = getLView();
@@ -12376,40 +12616,6 @@ function renderChildComponents(hostLView, components) {
 }
 
 /**
- * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
- * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
- * is injected in a component or directive, the callbacks run when that component or
- * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
- *
- * @publicApi
- */
-class DestroyRef {
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static { this.__NG_ELEMENT_ID__ = injectDestroyRef; }
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static { this.__NG_ENV_ID__ = (injector) => injector; }
-}
-class NodeInjectorDestroyRef extends DestroyRef {
-    constructor(_lView) {
-        super();
-        this._lView = _lView;
-    }
-    onDestroy(callback) {
-        storeLViewOnDestroy(this._lView, callback);
-        return () => removeLViewOnDestroy(this._lView, callback);
-    }
-}
-function injectDestroyRef() {
-    return new NodeInjectorDestroyRef(getLView());
-}
-
-/**
  * Tracks all effects registered within a given application and runs them via `flush`.
  */
 class EffectManager {
@@ -12577,13 +12783,17 @@ function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
 }
 
 function detectChangesInternal(tView, lView, context, notifyErrorHandler = true) {
-    const rendererFactory = lView[ENVIRONMENT].rendererFactory;
+    const environment = lView[ENVIRONMENT];
+    const rendererFactory = environment.rendererFactory;
+    const afterRenderEventManager = environment.afterRenderEventManager;
     // Check no changes mode is a dev only mode used to verify that bindings have not changed
     // since they were assigned. We do not want to invoke renderer factory functions in that mode
     // to avoid any possible side-effects.
     const checkNoChangesMode = !!ngDevMode && isInCheckNoChangesMode();
-    if (!checkNoChangesMode && rendererFactory.begin)
-        rendererFactory.begin();
+    if (!checkNoChangesMode) {
+        rendererFactory.begin?.();
+        afterRenderEventManager?.begin();
+    }
     try {
         refreshView(tView, lView, tView.template, context);
     }
@@ -12594,11 +12804,14 @@ function detectChangesInternal(tView, lView, context, notifyErrorHandler = true)
         throw error;
     }
     finally {
-        if (!checkNoChangesMode && rendererFactory.end)
-            rendererFactory.end();
-        // One final flush of the effects queue to catch any effects created in `ngAfterViewInit` or
-        // other post-order hooks.
-        !checkNoChangesMode && lView[ENVIRONMENT].effectManager?.flush();
+        if (!checkNoChangesMode) {
+            rendererFactory.end?.();
+            // One final flush of the effects queue to catch any effects created in `ngAfterViewInit` or
+            // other post-order hooks.
+            environment.effectManager?.flush();
+            // Invoke all callbacks registered via `after*Render`, if needed.
+            afterRenderEventManager?.end();
+        }
     }
 }
 function checkNoChangesInternal(tView, lView, context, notifyErrorHandler = true) {
@@ -13219,10 +13432,12 @@ class ComponentFactory extends ComponentFactory$1 {
         }
         const sanitizer = rootViewInjector.get(Sanitizer, null);
         const effectManager = rootViewInjector.get(EffectManager, null);
+        const afterRenderEventManager = rootViewInjector.get(AfterRenderEventManager, null);
         const environment = {
             rendererFactory,
             sanitizer,
             effectManager,
+            afterRenderEventManager,
         };
         const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
         // Determine a tag name used for creating host elements when this component is created
@@ -30825,14 +31040,6 @@ function enableHydrationRuntimeSupport() {
     }
 }
 /**
- * Detects whether the code is invoked in a browser.
- * Later on, this check should be replaced with a tree-shakable
- * flag (e.g. `!isServer`).
- */
-function isBrowser() {
-    return inject(PLATFORM_ID) === 'browser';
-}
-/**
  * Outputs a message with hydration stats into a console.
  */
 function printHydrationStats(injector) {
@@ -30880,7 +31087,7 @@ function withDomHydration() {
             provide: IS_HYDRATION_DOM_REUSE_ENABLED,
             useFactory: () => {
                 let isEnabled = true;
-                if (isBrowser()) {
+                if (isPlatformBrowser()) {
                     // On the client, verify that the server response contains
                     // hydration annotations. Otherwise, keep hydration disabled.
                     const transferState = inject(TransferState, { optional: true });
@@ -30910,7 +31117,7 @@ function withDomHydration() {
                 // on the client. Moving forward, the `isBrowser` check should
                 // be replaced with a tree-shakable alternative (e.g. `isServer`
                 // flag).
-                if (isBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
+                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
                     enableHydrationRuntimeSupport();
                 }
             },
@@ -30923,13 +31130,13 @@ function withDomHydration() {
                 // environment and when hydration is configured properly.
                 // On a server, an application is rendered from scratch,
                 // so the host content needs to be empty.
-                return isBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED);
+                return isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED);
             }
         },
         {
             provide: APP_BOOTSTRAP_LISTENER,
             useFactory: () => {
-                if (isBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
+                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
                     const appRef = inject(ApplicationRef);
                     const injector = inject(Injector);
                     return () => {
@@ -31280,5 +31487,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, asNativeElements, assertInInjectionContext, assertPlatform, booleanAttribute, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, numberAttribute, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ENABLED_SSR_FEATURES as ɵENABLED_SSR_FEATURES, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, InitialRenderPendingTasks as ɵInitialRenderPendingTasks, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefer, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertPlatform, booleanAttribute, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, numberAttribute, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ENABLED_SSR_FEATURES as ɵENABLED_SSR_FEATURES, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, InitialRenderPendingTasks as ɵInitialRenderPendingTasks, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefer, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map
