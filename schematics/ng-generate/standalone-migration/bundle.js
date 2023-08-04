@@ -4152,17 +4152,32 @@ var DeferredBlockError = class {
 var DeferredBlock = class {
   constructor(children, triggers, prefetchTriggers, placeholder, loading, error2, sourceSpan, startSourceSpan, endSourceSpan) {
     this.children = children;
-    this.triggers = triggers;
-    this.prefetchTriggers = prefetchTriggers;
     this.placeholder = placeholder;
     this.loading = loading;
     this.error = error2;
     this.sourceSpan = sourceSpan;
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
+    this.triggers = triggers;
+    this.prefetchTriggers = prefetchTriggers;
+    this.definedTriggers = Object.keys(triggers);
+    this.definedPrefetchTriggers = Object.keys(prefetchTriggers);
   }
   visit(visitor) {
     return visitor.visitDeferredBlock(this);
+  }
+  visitAll(visitor) {
+    this.visitTriggers(this.definedTriggers, this.triggers, visitor);
+    this.visitTriggers(this.definedPrefetchTriggers, this.prefetchTriggers, visitor);
+    visitAll(visitor, this.children);
+    this.placeholder && visitor.visitDeferredBlockPlaceholder(this.placeholder);
+    this.loading && visitor.visitDeferredBlockLoading(this.loading);
+    this.error && visitor.visitDeferredBlockError(this.error);
+  }
+  visitTriggers(keys, triggers, visitor) {
+    for (const key of keys) {
+      visitor.visitDeferredTrigger(triggers[key]);
+    }
   }
 };
 var Template = class {
@@ -4248,13 +4263,7 @@ var RecursiveVisitor = class {
     visitAll(this, template2.variables);
   }
   visitDeferredBlock(deferred) {
-    var _a2, _b2, _c2;
-    visitAll(this, deferred.triggers);
-    visitAll(this, deferred.prefetchTriggers);
-    visitAll(this, deferred.children);
-    (_a2 = deferred.placeholder) == null ? void 0 : _a2.visit(this);
-    (_b2 = deferred.loading) == null ? void 0 : _b2.visit(this);
-    (_c2 = deferred.error) == null ? void 0 : _c2.visit(this);
+    deferred.visitAll(this);
   }
   visitDeferredBlockPlaceholder(block) {
     visitAll(this, block.children);
@@ -18038,33 +18047,34 @@ var OnTriggerType;
   OnTriggerType2["HOVER"] = "hover";
   OnTriggerType2["VIEWPORT"] = "viewport";
 })(OnTriggerType || (OnTriggerType = {}));
-function parseWhenTrigger({ expression, sourceSpan }, bindingParser, errors) {
+function parseWhenTrigger({ expression, sourceSpan }, bindingParser, triggers, errors) {
   const whenIndex = expression.indexOf("when");
   if (whenIndex === -1) {
     errors.push(new ParseError(sourceSpan, `Could not find "when" keyword in expression`));
-    return null;
+  } else {
+    const start = getTriggerParametersStart(expression, whenIndex + 1);
+    const parsed = bindingParser.parseBinding(expression.slice(start), false, sourceSpan, sourceSpan.start.offset + start);
+    trackTrigger("when", triggers, errors, new BoundDeferredTrigger(parsed, sourceSpan));
   }
-  const start = getTriggerParametersStart(expression, whenIndex + 1);
-  const parsed = bindingParser.parseBinding(expression.slice(start), false, sourceSpan, sourceSpan.start.offset + start);
-  return new BoundDeferredTrigger(parsed, sourceSpan);
 }
-function parseOnTrigger({ expression, sourceSpan }, errors) {
+function parseOnTrigger({ expression, sourceSpan }, triggers, errors) {
   const onIndex = expression.indexOf("on");
   if (onIndex === -1) {
     errors.push(new ParseError(sourceSpan, `Could not find "on" keyword in expression`));
-    return [];
+  } else {
+    const start = getTriggerParametersStart(expression, onIndex + 1);
+    const parser = new OnTriggerParser(expression, start, sourceSpan, triggers, errors);
+    parser.parse();
   }
-  const start = getTriggerParametersStart(expression, onIndex + 1);
-  return new OnTriggerParser(expression, start, sourceSpan, errors).parse();
 }
 var OnTriggerParser = class {
-  constructor(expression, start, span, errors) {
+  constructor(expression, start, span, triggers, errors) {
     this.expression = expression;
     this.start = start;
     this.span = span;
+    this.triggers = triggers;
     this.errors = errors;
     this.index = 0;
-    this.triggers = [];
     this.tokens = new Lexer().tokenize(expression.slice(start));
   }
   parse() {
@@ -18091,7 +18101,6 @@ var OnTriggerParser = class {
       }
       this.advance();
     }
-    return this.triggers;
   }
   advance() {
     this.index++;
@@ -18112,22 +18121,22 @@ var OnTriggerParser = class {
     try {
       switch (identifier.toString()) {
         case OnTriggerType.IDLE:
-          this.triggers.push(createIdleTrigger(parameters, sourceSpan));
+          this.trackTrigger("idle", createIdleTrigger(parameters, sourceSpan));
           break;
         case OnTriggerType.TIMER:
-          this.triggers.push(createTimerTrigger(parameters, sourceSpan));
+          this.trackTrigger("timer", createTimerTrigger(parameters, sourceSpan));
           break;
         case OnTriggerType.INTERACTION:
-          this.triggers.push(createInteractionTrigger(parameters, sourceSpan));
+          this.trackTrigger("interaction", createInteractionTrigger(parameters, sourceSpan));
           break;
         case OnTriggerType.IMMEDIATE:
-          this.triggers.push(createImmediateTrigger(parameters, sourceSpan));
+          this.trackTrigger("immediate", createImmediateTrigger(parameters, sourceSpan));
           break;
         case OnTriggerType.HOVER:
-          this.triggers.push(createHoverTrigger(parameters, sourceSpan));
+          this.trackTrigger("hover", createHoverTrigger(parameters, sourceSpan));
           break;
         case OnTriggerType.VIEWPORT:
-          this.triggers.push(createViewportTrigger(parameters, sourceSpan));
+          this.trackTrigger("viewport", createViewportTrigger(parameters, sourceSpan));
           break;
         default:
           throw new Error(`Unrecognized trigger type "${identifier}"`);
@@ -18179,6 +18188,9 @@ var OnTriggerParser = class {
   tokenText() {
     return this.expression.slice(this.start + this.token().index, this.start + this.token().end);
   }
+  trackTrigger(name, trigger) {
+    trackTrigger(name, this.triggers, this.errors, trigger);
+  }
   error(token, message) {
     const newStart = this.span.start.moveBy(this.start + token.index);
     const newEnd = newStart.moveBy(token.end - token.index);
@@ -18188,6 +18200,13 @@ var OnTriggerParser = class {
     this.error(token, `Unexpected token "${token}"`);
   }
 };
+function trackTrigger(name, allTriggers, errors, trigger) {
+  if (allTriggers[name]) {
+    errors.push(new ParseError(trigger.sourceSpan, `Duplicate "${name}" trigger is not allowed`));
+  } else {
+    allTriggers[name] = trigger;
+  }
+}
 function createIdleTrigger(parameters, sourceSpan) {
   if (parameters.length > 0) {
     throw new Error(`"${OnTriggerType.IDLE}" trigger cannot have parameters`);
@@ -18315,6 +18334,9 @@ function parsePlaceholderBlock(ast, visitor) {
   let minimumTime = null;
   for (const param of ast.parameters) {
     if (MINIMUM_PARAMETER_PATTERN.test(param.expression)) {
+      if (minimumTime != null) {
+        throw new Error(`Placeholder block can only have one "minimum" parameter`);
+      }
       const parsedTime = parseDeferredTime(param.expression.slice(getTriggerParametersStart(param.expression)));
       if (parsedTime === null) {
         throw new Error(`Could not parse time value of parameter "minimum"`);
@@ -18331,12 +18353,18 @@ function parseLoadingBlock(ast, visitor) {
   let minimumTime = null;
   for (const param of ast.parameters) {
     if (AFTER_PARAMETER_PATTERN.test(param.expression)) {
+      if (afterTime != null) {
+        throw new Error(`Loading block can only have one "after" parameter`);
+      }
       const parsedTime = parseDeferredTime(param.expression.slice(getTriggerParametersStart(param.expression)));
       if (parsedTime === null) {
         throw new Error(`Could not parse time value of parameter "after"`);
       }
       afterTime = parsedTime;
     } else if (MINIMUM_PARAMETER_PATTERN.test(param.expression)) {
+      if (minimumTime != null) {
+        throw new Error(`Loading block can only have one "minimum" parameter`);
+      }
       const parsedTime = parseDeferredTime(param.expression.slice(getTriggerParametersStart(param.expression)));
       if (parsedTime === null) {
         throw new Error(`Could not parse time value of parameter "minimum"`);
@@ -18355,19 +18383,17 @@ function parseErrorBlock(ast, visitor) {
   return new DeferredBlockError(visitAll2(visitor, ast.children), ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
 }
 function parsePrimaryTriggers(params, bindingParser, errors) {
-  const triggers = [];
-  const prefetchTriggers = [];
+  const triggers = {};
+  const prefetchTriggers = {};
   for (const param of params) {
     if (WHEN_PARAMETER_PATTERN.test(param.expression)) {
-      const result = parseWhenTrigger(param, bindingParser, errors);
-      result !== null && triggers.push(result);
+      parseWhenTrigger(param, bindingParser, triggers, errors);
     } else if (ON_PARAMETER_PATTERN.test(param.expression)) {
-      triggers.push(...parseOnTrigger(param, errors));
+      parseOnTrigger(param, triggers, errors);
     } else if (PREFETCH_WHEN_PATTERN.test(param.expression)) {
-      const result = parseWhenTrigger(param, bindingParser, errors);
-      result !== null && prefetchTriggers.push(result);
+      parseWhenTrigger(param, bindingParser, prefetchTriggers, errors);
     } else if (PREFETCH_ON_PATTERN.test(param.expression)) {
-      prefetchTriggers.push(...parseOnTrigger(param, errors));
+      parseOnTrigger(param, prefetchTriggers, errors);
     } else {
       errors.push(new ParseError(param.sourceSpan, "Unrecognized trigger"));
     }
@@ -21943,7 +21969,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.3.0-next.0+sha-74974f8");
+var VERSION2 = new Version("16.3.0-next.0+sha-b1f9609");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -23101,9 +23127,10 @@ var DirectiveBinder = class {
   }
   visitDeferredBlock(deferred) {
     var _a2, _b2, _c2;
+    const wasInDeferBlock = this.isInDeferBlock;
     this.isInDeferBlock = true;
     deferred.children.forEach((child) => child.visit(this));
-    this.isInDeferBlock = false;
+    this.isInDeferBlock = wasInDeferBlock;
     (_a2 = deferred.placeholder) == null ? void 0 : _a2.visit(this);
     (_b2 = deferred.loading) == null ? void 0 : _b2.visit(this);
     (_c2 = deferred.error) == null ? void 0 : _c2.visit(this);
@@ -23225,11 +23252,10 @@ var TemplateBinder = class extends RecursiveAstVisitor2 {
   }
   visitDeferredBlock(deferred) {
     this.deferBlocks.add(deferred);
+    const wasInDeferBlock = this.isInDeferBlock;
     this.isInDeferBlock = true;
     deferred.children.forEach(this.visitNode);
-    this.isInDeferBlock = false;
-    deferred.triggers.forEach(this.visitNode);
-    deferred.prefetchTriggers.forEach(this.visitNode);
+    this.isInDeferBlock = wasInDeferBlock;
     deferred.placeholder && this.visitNode(deferred.placeholder);
     deferred.loading && this.visitNode(deferred.loading);
     deferred.error && this.visitNode(deferred.error);
@@ -23385,7 +23411,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-74974f8"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -23454,7 +23480,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-74974f8"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -23639,7 +23665,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-74974f8"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -23662,7 +23688,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-74974f8"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -23700,7 +23726,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-74974f8"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -23724,7 +23750,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-74974f8"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -23759,7 +23785,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-74974f8"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -23776,7 +23802,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.3.0-next.0+sha-74974f8");
+var VERSION3 = new Version("16.3.0-next.0+sha-b1f9609");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -34644,11 +34670,7 @@ var TemplateVisitor = class extends RecursiveVisitor {
     this.identifiers.add(variableIdentifier);
   }
   visitDeferredBlock(deferred) {
-    var _a2, _b2, _c2;
-    this.visitAll(deferred.children);
-    (_a2 = deferred.placeholder) == null ? void 0 : _a2.visit(this);
-    (_b2 = deferred.loading) == null ? void 0 : _b2.visit(this);
-    (_c2 = deferred.error) == null ? void 0 : _c2.visit(this);
+    deferred.visitAll(this);
   }
   visitDeferredBlockPlaceholder(block) {
     this.visitAll(block.children);
@@ -39453,12 +39475,7 @@ var TemplateVisitor2 = class extends RecursiveAstVisitor2 {
   visitIcu(icu) {
   }
   visitDeferredBlock(deferred) {
-    this.visitAllNodes(deferred.children);
-    this.visitAllNodes(deferred.triggers);
-    this.visitAllNodes(deferred.prefetchTriggers);
-    deferred.placeholder && this.visit(deferred.placeholder);
-    deferred.loading && this.visit(deferred.loading);
-    deferred.error && this.visit(deferred.error);
+    deferred.visitAll(this);
   }
   visitDeferredTrigger(trigger) {
     if (trigger instanceof BoundDeferredTrigger) {
