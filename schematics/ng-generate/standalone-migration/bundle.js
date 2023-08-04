@@ -21969,7 +21969,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("16.3.0-next.0+sha-b1f9609");
+var VERSION2 = new Version("16.3.0-next.0+sha-6f506cd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -23411,7 +23411,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-6f506cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -23480,7 +23480,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-6f506cd"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -23665,7 +23665,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-6f506cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -23688,7 +23688,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-6f506cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -23726,7 +23726,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-6f506cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -23750,7 +23750,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-6f506cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -23785,7 +23785,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("16.3.0-next.0+sha-b1f9609"));
+  definitionMap.set("version", literal("16.3.0-next.0+sha-6f506cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -23802,7 +23802,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("16.3.0-next.0+sha-b1f9609");
+var VERSION3 = new Version("16.3.0-next.0+sha-6f506cd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -25638,7 +25638,7 @@ function createSourceSpan(node) {
   const parseSf = new ParseSourceFile(sf.getFullText(), sf.fileName);
   return new ParseSourceSpan(new ParseLocation(parseSf, startOffset, startLine + 1, startCol + 1), new ParseLocation(parseSf, endOffset, endLine + 1, endCol + 1));
 }
-function compileResults(fac, def, metadataStmt, propName, additionalFields) {
+function compileResults(fac, def, metadataStmt, propName, additionalFields, deferrableImports) {
   const statements = def.statements;
   if (metadataStmt !== null) {
     statements.push(metadataStmt);
@@ -25649,7 +25649,8 @@ function compileResults(fac, def, metadataStmt, propName, additionalFields) {
       name: propName,
       initializer: def.expression,
       statements: def.statements,
-      type: def.type
+      type: def.type,
+      deferrableImports
     }
   ];
   if (additionalFields !== null) {
@@ -27715,11 +27716,23 @@ function resolveLiteral(decorator, literalCache) {
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/common/src/factory.mjs
 function compileNgFactoryDefField(metadata) {
   const res = compileFactoryFunction(metadata);
-  return { name: "\u0275fac", initializer: res.expression, statements: res.statements, type: res.type };
+  return {
+    name: "\u0275fac",
+    initializer: res.expression,
+    statements: res.statements,
+    type: res.type,
+    deferrableImports: null
+  };
 }
 function compileDeclareFactory(metadata) {
   const res = compileDeclareFactoryFunction(metadata);
-  return { name: "\u0275fac", initializer: res.expression, statements: res.statements, type: res.type };
+  return {
+    name: "\u0275fac",
+    initializer: res.expression,
+    statements: res.statements,
+    type: res.type,
+    deferrableImports: null
+  };
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/common/src/injectable_registry.mjs
@@ -27878,7 +27891,8 @@ function compileInputTransformFields(inputs) {
         name: `ngAcceptInputType_${input.classPropertyName}`,
         type: output_ast_exports.transplantedType(input.transform.type),
         statements: [],
-        initializer: null
+        initializer: null,
+        deferrableImports: null
       });
     }
   }
@@ -30305,13 +30319,13 @@ var Visitor = class {
   }
   _visit(node, context) {
     let visitedNode = null;
-    node = import_typescript46.default.visitEachChild(node, (child) => this._visit(child, context), context);
+    node = import_typescript46.default.visitEachChild(node, (child) => child && this._visit(child, context), context);
     if (import_typescript46.default.isClassDeclaration(node)) {
       visitedNode = this._visitListEntryNode(node, (node2) => this.visitClassDeclaration(node2));
     } else {
       visitedNode = this.visitOtherNode(node);
     }
-    if (import_typescript46.default.isBlock(visitedNode) || import_typescript46.default.isSourceFile(visitedNode)) {
+    if (visitedNode && (import_typescript46.default.isBlock(visitedNode) || import_typescript46.default.isSourceFile(visitedNode))) {
       visitedNode = this._maybeProcessStatements(visitedNode);
     }
     return visitedNode;
@@ -30358,17 +30372,23 @@ var IvyCompilationVisitor = class extends Visitor {
     this.compilation = compilation;
     this.constantPool = constantPool;
     this.classCompilationMap = /* @__PURE__ */ new Map();
+    this.deferrableImports = /* @__PURE__ */ new Set();
   }
   visitClassDeclaration(node) {
     const result = this.compilation.compile(node, this.constantPool);
     if (result !== null) {
       this.classCompilationMap.set(node, result);
+      for (const classResult of result) {
+        if (classResult.deferrableImports !== null && classResult.deferrableImports.size > 0) {
+          classResult.deferrableImports.forEach((importDecl) => this.deferrableImports.add(importDecl));
+        }
+      }
     }
     return { node };
   }
 };
 var IvyTransformationVisitor = class extends Visitor {
-  constructor(compilation, classCompilationMap, reflector, importManager, recordWrappedNodeExpr, isClosureCompilerEnabled, isCore) {
+  constructor(compilation, classCompilationMap, reflector, importManager, recordWrappedNodeExpr, isClosureCompilerEnabled, isCore, deferrableImports) {
     super();
     this.compilation = compilation;
     this.classCompilationMap = classCompilationMap;
@@ -30377,6 +30397,7 @@ var IvyTransformationVisitor = class extends Visitor {
     this.recordWrappedNodeExpr = recordWrappedNodeExpr;
     this.isClosureCompilerEnabled = isClosureCompilerEnabled;
     this.isCore = isCore;
+    this.deferrableImports = deferrableImports;
   }
   visitClassDeclaration(node) {
     if (!this.classCompilationMap.has(node)) {
@@ -30420,6 +30441,12 @@ var IvyTransformationVisitor = class extends Visitor {
       members.map((member) => this._stripAngularDecorators(member))
     );
     return { node, after: statements };
+  }
+  visitOtherNode(node) {
+    if (import_typescript47.default.isImportDeclaration(node) && this.deferrableImports.has(node)) {
+      return null;
+    }
+    return node;
   }
   _angularCoreDecorators(decl) {
     const decorators = this.reflector.getDecoratorsOfDeclaration(decl);
@@ -30476,7 +30503,7 @@ function transformIvySourceFile(compilation, context, reflector, importRewriter,
   const importManager = new ImportManager(importRewriter);
   const compilationVisitor = new IvyCompilationVisitor(compilation, constantPool);
   visit(file, compilationVisitor, context);
-  const transformationVisitor = new IvyTransformationVisitor(compilation, compilationVisitor.classCompilationMap, reflector, importManager, recordWrappedNode, isClosureCompilerEnabled, isCore);
+  const transformationVisitor = new IvyTransformationVisitor(compilation, compilationVisitor.classCompilationMap, reflector, importManager, recordWrappedNode, isClosureCompilerEnabled, isCore, compilationVisitor.deferrableImports);
   let sf = visit(file, transformationVisitor, context);
   const downlevelTranslatedCode = getLocalizeCompileTarget(context) < import_typescript47.default.ScriptTarget.ES2015;
   const constants = constantPool.statements.map((stmt) => translateStatement(stmt, importManager, {
@@ -31337,21 +31364,21 @@ var DirectiveDecoratorHandler = class {
     const def = compileDirectiveFromMetadata(analysis.meta, pool, makeBindingParser());
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275dir", inputTransformFields);
+    return compileResults(fac, def, classMetadata, "\u0275dir", inputTransformFields, null);
   }
   compilePartial(node, analysis, resolution) {
     const fac = compileDeclareFactory(toFactoryMetadata(analysis.meta, FactoryTarget.Directive));
     const def = compileDeclareDirectiveFromMetadata(analysis.meta);
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileDeclareClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275dir", inputTransformFields);
+    return compileResults(fac, def, classMetadata, "\u0275dir", inputTransformFields, null);
   }
   compileLocal(node, analysis, pool) {
     const fac = compileNgFactoryDefField(toFactoryMetadata(analysis.meta, FactoryTarget.Directive));
     const def = compileDirectiveFromMetadata(analysis.meta, pool, makeBindingParser());
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275dir", inputTransformFields);
+    return compileResults(fac, def, classMetadata, "\u0275dir", inputTransformFields, null);
   }
   findClassFieldWithAngularFeatures(node) {
     return this.reflector.getMembersOfClass(node).find((member) => {
@@ -31913,13 +31940,15 @@ var NgModuleDecoratorHandler = class {
         name: "\u0275mod",
         initializer: ngModuleDef.expression,
         statements: ngModuleDef.statements,
-        type: ngModuleDef.type
+        type: ngModuleDef.type,
+        deferrableImports: null
       },
       {
         name: "\u0275inj",
         initializer: injectorDef.expression,
         statements: injectorDef.statements,
-        type: injectorDef.type
+        type: injectorDef.type,
+        deferrableImports: null
       }
     ];
     return res;
@@ -33058,7 +33087,8 @@ var ComponentDecoratorHandler = class {
     const def = compileComponentFromMetadata(meta, pool, makeBindingParser());
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields);
+    const deferrableImports = this.deferredSymbolTracker.getDeferrableImportDecls();
+    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields, deferrableImports);
   }
   compilePartial(node, analysis, resolution) {
     if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
@@ -33075,7 +33105,7 @@ var ComponentDecoratorHandler = class {
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const def = compileDeclareComponentFromMetadata(meta, analysis.template, templateInfo);
     const classMetadata = analysis.classMetadata !== null ? compileDeclareClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields);
+    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields, null);
   }
   compileLocal(node, analysis, pool) {
     if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
@@ -33091,7 +33121,7 @@ var ComponentDecoratorHandler = class {
     const def = compileComponentFromMetadata(meta, pool, makeBindingParser());
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields);
+    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields, null);
   }
   _checkForCyclicImport(importedFile, expr, origin) {
     const imported = resolveImportedFile(this.moduleResolver, importedFile, expr, origin);
@@ -33286,7 +33316,13 @@ var InjectableDecoratorHandler = class {
     }
     if (\u0275prov === void 0) {
       const res = compileInjectableFn(analysis.meta);
-      results.push({ name: "\u0275prov", initializer: res.expression, statements: res.statements, type: res.type });
+      results.push({
+        name: "\u0275prov",
+        initializer: res.expression,
+        statements: res.statements,
+        type: res.type,
+        deferrableImports: null
+      });
     }
     return results;
   }
@@ -33551,19 +33587,19 @@ var PipeDecoratorHandler = class {
     const fac = compileNgFactoryDefField(toFactoryMetadata(analysis.meta, FactoryTarget.Pipe));
     const def = compilePipeFromMetadata(analysis.meta);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275pipe", null);
+    return compileResults(fac, def, classMetadata, "\u0275pipe", null, null);
   }
   compilePartial(node, analysis) {
     const fac = compileDeclareFactory(toFactoryMetadata(analysis.meta, FactoryTarget.Pipe));
     const def = compileDeclarePipeFromMetadata(analysis.meta);
     const classMetadata = analysis.classMetadata !== null ? compileDeclareClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275pipe", null);
+    return compileResults(fac, def, classMetadata, "\u0275pipe", null, null);
   }
   compileLocal(node, analysis) {
     const fac = compileNgFactoryDefField(toFactoryMetadata(analysis.meta, FactoryTarget.Pipe));
     const def = compilePipeFromMetadata(analysis.meta);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275pipe", null);
+    return compileResults(fac, def, classMetadata, "\u0275pipe", null, null);
   }
 };
 
