@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.3.0-next.0+sha-526e215
+ * @license Angular v16.3.0-next.0+sha-0a38dc3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7809,6 +7809,7 @@ declare const enum RuntimeErrorCode {
     INVALID_SKIP_HYDRATION_HOST = -504,
     MISSING_HYDRATION_ANNOTATIONS = -505,
     HYDRATION_STABLE_TIMEDOUT = -506,
+    MISSING_SSR_CONTENT_INTEGRITY_MARKER = 507,
     SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
     REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
     INVALID_I18N_STRUCTURE = 700,
@@ -11847,6 +11848,11 @@ export declare function ɵsetUnknownElementStrictMode(shouldThrow: boolean): voi
  * (for AOT-compiled ones this check happens at build time).
  */
 export declare function ɵsetUnknownPropertyStrictMode(shouldThrow: boolean): void;
+
+/**
+ * Marker used in a comment node to ensure hydration content integrity
+ */
+export declare const ɵSSR_CONTENT_INTEGRITY_MARKER = "nghm";
 
 /** Store a value in the `data` at a given `index`. */
 export declare function ɵstore<T>(tView: TView, lView: LView, index: number, value: T): void;

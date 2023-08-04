@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.3.0-next.0+sha-526e215
+ * @license Angular v16.3.0-next.0+sha-0a38dc3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10518,6 +10518,10 @@ const NGH_DATA_KEY = makeStateKey(TRANSFER_STATE_TOKEN_ID);
  */
 const NGH_ATTR_NAME = 'ngh';
 /**
+ * Marker used in a comment node to ensure hydration content integrity
+ */
+const SSR_CONTENT_INTEGRITY_MARKER = 'nghm';
+/**
  * Reference to a function that reads `ngh` attribute value from a given RNode
  * and retrieves hydration information from the TransferState using that value
  * as an index. Returns `null` by default, when hydration is not enabled.
@@ -10900,7 +10904,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.3.0-next.0+sha-526e215');
+const VERSION = new Version('16.3.0-next.0+sha-0a38dc3');
 
 // This default value is when checking the hierarchy for a token.
 //
