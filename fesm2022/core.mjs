@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.3.0-next.0+sha-0a38dc3
+ * @license Angular v16.3.0-next.0+sha-f12f906
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6937,7 +6937,7 @@ function createElementNode(renderer, name, namespace) {
  * @param tView The `TView' of the `LView` from which elements should be added or removed
  * @param lView The view from which elements should be added or removed
  */
-function removeViewFromContainer(tView, lView) {
+function removeViewFromDOM(tView, lView) {
     const renderer = lView[RENDERER];
     applyView(tView, lView, renderer, 2 /* WalkTNodeTreeAction.Detach */, null, null);
     lView[HOST] = null;
@@ -6957,7 +6957,7 @@ function removeViewFromContainer(tView, lView) {
  * @param parentNativeNode The parent `RElement` where it should be inserted into.
  * @param beforeNode The node before which elements should be added, if insert mode
  */
-function addViewToContainer(tView, parentTNode, renderer, lView, parentNativeNode, beforeNode) {
+function addViewToDOM(tView, parentTNode, renderer, lView, parentNativeNode, beforeNode) {
     lView[HOST] = parentNativeNode;
     lView[T_HOST] = parentTNode;
     applyView(tView, lView, renderer, 1 /* WalkTNodeTreeAction.Insert */, parentNativeNode, beforeNode);
@@ -6968,7 +6968,7 @@ function addViewToContainer(tView, parentTNode, renderer, lView, parentNativeNod
  * @param tView The `TView' of the `LView` to be detached
  * @param lView the `LView` to be detached.
  */
-function renderDetachView(tView, lView) {
+function detachViewFromDOM(tView, lView) {
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
 /**
@@ -7130,7 +7130,7 @@ function detachView(lContainer, removeIndex) {
             lContainer[indexInContainer - 1][NEXT] = viewToDetach[NEXT];
         }
         const removedLView = removeFromArray(lContainer, CONTAINER_HEADER_OFFSET + removeIndex);
-        removeViewFromContainer(viewToDetach[TVIEW], viewToDetach);
+        removeViewFromDOM(viewToDetach[TVIEW], viewToDetach);
         // notify query that a view has been removed
         const lQueries = removedLView[QUERIES];
         if (lQueries !== null) {
@@ -10256,7 +10256,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.3.0-next.0+sha-0a38dc3');
+const VERSION = new Version('16.3.0-next.0+sha-f12f906');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13297,7 +13297,7 @@ class ViewRef$1 {
     }
     detachFromAppRef() {
         this._appRef = null;
-        renderDetachView(this._lView[TVIEW], this._lView);
+        detachViewFromDOM(this._lView[TVIEW], this._lView);
     }
     attachToAppRef(appRef) {
         if (this._attachedToViewContainer) {
@@ -23368,6 +23368,57 @@ class QueryList {
     }
 }
 
+function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
+    const embeddedTView = templateTNode.tView;
+    ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
+    ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
+    // Embedded views follow the change detection strategy of the view they're declared in.
+    const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
+    const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
+    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.hydrationInfo ?? null);
+    const declarationLContainer = declarationLView[templateTNode.index];
+    ngDevMode && assertLContainer(declarationLContainer);
+    embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
+    const declarationViewLQueries = declarationLView[QUERIES];
+    if (declarationViewLQueries !== null) {
+        embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
+    }
+    // execute creation mode of a view
+    renderView(embeddedTView, embeddedLView, context);
+    return embeddedLView;
+}
+function getLViewFromLContainer(lContainer, index) {
+    const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
+    // avoid reading past the array boundaries
+    if (adjustedIndex < lContainer.length) {
+        const lView = lContainer[adjustedIndex];
+        ngDevMode && assertLView(lView);
+        return lView;
+    }
+    return undefined;
+}
+function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
+    const tView = lView[TVIEW];
+    // insert to the view tree so the new view can be change-detected
+    insertView(tView, lView, lContainer, index);
+    // insert to the view to the DOM tree
+    if (addToDOM) {
+        const beforeNode = getBeforeNodeForView(index, lContainer);
+        const renderer = lView[RENDERER];
+        const parentRNode = nativeParentNode(renderer, lContainer[NATIVE]);
+        if (parentRNode !== null) {
+            addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
+        }
+    }
+}
+function removeLViewFromLContainer(lContainer, index) {
+    const lView = detachView(lContainer, index);
+    if (lView !== undefined) {
+        destroyLView(lView[TVIEW], lView);
+    }
+    return lView;
+}
+
 /**
  * Represents an embedded template that can be used to instantiate embedded views.
  * To instantiate embedded views based on a template, use the `ViewContainerRef`
@@ -23413,25 +23464,13 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
         return this._declarationTContainer.tView?.ssrId || null;
     }
     createEmbeddedView(context, injector) {
-        return this.createEmbeddedViewImpl(context, injector, null);
+        return this.createEmbeddedViewImpl(context, injector);
     }
     /**
      * @internal
      */
     createEmbeddedViewImpl(context, injector, hydrationInfo) {
-        // Embedded views follow the change detection strategy of the view they're declared in.
-        const isSignalView = this._declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
-        const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
-        const embeddedTView = this._declarationTContainer.tView;
-        const embeddedLView = createLView(this._declarationLView, embeddedTView, context, viewFlags, null, embeddedTView.declTNode, null, null, null, injector || null, hydrationInfo || null);
-        const declarationLContainer = this._declarationLView[this._declarationTContainer.index];
-        ngDevMode && assertLContainer(declarationLContainer);
-        embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
-        const declarationViewLQueries = this._declarationLView[QUERIES];
-        if (declarationViewLQueries !== null) {
-            embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
-        }
-        renderView(embeddedTView, embeddedLView, context);
+        const embeddedLView = createAndRenderEmbeddedLView(this._declarationLView, this._declarationTContainer, context, { injector, hydrationInfo });
         return new ViewRef$1(embeddedLView);
     }
 };
@@ -23814,16 +23853,7 @@ const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
         // Logical operation of adding `LView` to `LContainer`
         const adjustedIdx = this._adjustIndex(index);
         const lContainer = this._lContainer;
-        insertView(tView, lView, lContainer, adjustedIdx);
-        // Physical operation of adding the DOM nodes.
-        if (!skipDomInsertion) {
-            const beforeNode = getBeforeNodeForView(adjustedIdx, lContainer);
-            const renderer = lView[RENDERER];
-            const parentRNode = nativeParentNode(renderer, lContainer[NATIVE]);
-            if (parentRNode !== null) {
-                addViewToContainer(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
-            }
-        }
+        addLViewToLContainer(lContainer, lView, adjustedIdx, !skipDomInsertion);
         viewRef.attachToViewContainerRef();
         addToArray(getOrCreateViewRefs(lContainer), adjustedIdx, viewRef);
         return viewRef;
