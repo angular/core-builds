@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0-rc.0+sha-e01549b
+ * @license Angular v16.2.0-rc.0+sha-0ba2b5e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6490,6 +6490,7 @@ export declare interface OutputDecorator {
  * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
  * the application
  * @publicApi
+ * @deprecated
  */
 export declare const PACKAGE_ROOT_URL: InjectionToken<string>;
 
@@ -7809,6 +7810,7 @@ declare const enum RuntimeErrorCode {
     INVALID_SKIP_HYDRATION_HOST = -504,
     MISSING_HYDRATION_ANNOTATIONS = -505,
     HYDRATION_STABLE_TIMEDOUT = -506,
+    MISSING_SSR_CONTENT_INTEGRITY_MARKER = 507,
     SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
     REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
     INVALID_I18N_STRUCTURE = 700,
@@ -11847,6 +11849,11 @@ export declare function ɵsetUnknownElementStrictMode(shouldThrow: boolean): voi
  * (for AOT-compiled ones this check happens at build time).
  */
 export declare function ɵsetUnknownPropertyStrictMode(shouldThrow: boolean): void;
+
+/**
+ * Marker used in a comment node to ensure hydration content integrity
+ */
+export declare const ɵSSR_CONTENT_INTEGRITY_MARKER = "nghm";
 
 /** Store a value in the `data` at a given `index`. */
 export declare function ɵstore<T>(tView: TView, lView: LView, index: number, value: T): void;
