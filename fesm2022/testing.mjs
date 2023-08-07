@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.3.0-next.0+sha-107be11
+ * @license Angular v16.3.0-next.0+sha-55965cb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10529,12 +10529,30 @@ const SSR_CONTENT_INTEGRITY_MARKER = 'nghm';
  *
  * @param rNode Component's host element.
  * @param injector Injector that this component has access to.
+ * @param isRootView Specifies whether we trying to read hydration info for the root view.
  */
-let _retrieveHydrationInfoImpl = (rNode, injector) => null;
-function retrieveHydrationInfoImpl(rNode, injector) {
-    const nghAttrValue = rNode.getAttribute(NGH_ATTR_NAME);
+let _retrieveHydrationInfoImpl = (rNode, injector, isRootView) => null;
+function retrieveHydrationInfoImpl(rNode, injector, isRootView = false) {
+    let nghAttrValue = rNode.getAttribute(NGH_ATTR_NAME);
     if (nghAttrValue == null)
         return null;
+    // For cases when a root component also acts as an anchor node for a ViewContainerRef
+    // (for example, when ViewContainerRef is injected in a root component), there is a need
+    // to serialize information about the component itself, as well as an LContainer that
+    // represents this ViewContainerRef. Effectively, we need to serialize 2 pieces of info:
+    // (1) hydration info for the root component itself and (2) hydration info for the
+    // ViewContainerRef instance (an LContainer). Each piece of information is included into
+    // the hydration data (in the TransferState object) separately, thus we end up with 2 ids.
+    // Since we only have 1 root element, we encode both bits of info into a single string:
+    // ids are separated by the `|` char (e.g. `10|25`, where `10` is the ngh for a component view
+    // and 25 is the `ngh` for a root view which holds LContainer).
+    const [componentViewNgh, rootViewNgh] = nghAttrValue.split('|');
+    nghAttrValue = isRootView ? rootViewNgh : componentViewNgh;
+    if (!nghAttrValue)
+        return null;
+    // We've read one of the ngh ids, keep the remaining one, so that
+    // we can set it back on the DOM element.
+    const remainingNgh = isRootView ? componentViewNgh : (rootViewNgh ? `|${rootViewNgh}` : '');
     let data = {};
     // An element might have an empty `ngh` attribute value (e.g. `<comp ngh="" />`),
     // which means that no special annotations are required. Do not attempt to read
@@ -10556,9 +10574,29 @@ function retrieveHydrationInfoImpl(rNode, injector) {
         data,
         firstChild: rNode.firstChild ?? null,
     };
-    // The `ngh` attribute is cleared from the DOM node now
-    // that the data has been retrieved.
-    rNode.removeAttribute(NGH_ATTR_NAME);
+    if (isRootView) {
+        // If there is hydration info present for the root view, it means that there was
+        // a ViewContainerRef injected in the root component. The root component host element
+        // acted as an anchor node in this scenario. As a result, the DOM nodes that represent
+        // embedded views in this ViewContainerRef are located as siblings to the host node,
+        // i.e. `<app-root /><#VIEW1><#VIEW2>...<!--container-->`. In this case, the current
+        // node becomes the first child of this root view and the next sibling is the first
+        // element in the DOM segment.
+        dehydratedView.firstChild = rNode;
+        // We use `0` here, since this is the slot (right after the HEADER_OFFSET)
+        // where a component LView or an LContainer is located in a root LView.
+        setSegmentHead(dehydratedView, 0, rNode.nextSibling);
+    }
+    if (remainingNgh) {
+        // If we have only used one of the ngh ids, store the remaining one
+        // back on this RNode.
+        rNode.setAttribute(NGH_ATTR_NAME, remainingNgh);
+    }
+    else {
+        // The `ngh` attribute is cleared from the DOM node now
+        // that the data has been retrieved for all indices.
+        rNode.removeAttribute(NGH_ATTR_NAME);
+    }
     // Note: don't check whether this node was claimed for hydration,
     // because this node might've been previously claimed while processing
     // template instructions.
@@ -10576,14 +10614,16 @@ function enableRetrieveHydrationInfoImpl() {
  * Retrieves hydration info by reading the value from the `ngh` attribute
  * and accessing a corresponding slot in TransferState storage.
  */
-function retrieveHydrationInfo(rNode, injector) {
-    return _retrieveHydrationInfoImpl(rNode, injector);
+function retrieveHydrationInfo(rNode, injector, isRootView = false) {
+    return _retrieveHydrationInfoImpl(rNode, injector, isRootView);
 }
 /**
- * Retrieves an instance of a component LView from a given ViewRef.
- * Returns an instance of a component LView or `null` in case of an embedded view.
+ * Retrieves the necessary object from a given ViewRef to serialize:
+ *  - an LView for component views
+ *  - an LContainer for cases when component acts as a ViewContainerRef anchor
+ *  - `null` in case of an embedded view
  */
-function getComponentLViewForHydration(viewRef) {
+function getLNodeForHydration(viewRef) {
     // Reading an internal field from `ViewRef` instance.
     let lView = viewRef._lView;
     const tView = lView[TVIEW];
@@ -10596,12 +10636,6 @@ function getComponentLViewForHydration(viewRef) {
     // LView from the first slot after the header.
     if (isRootView(lView)) {
         lView = lView[HEADER_OFFSET];
-    }
-    // If a `ViewContainerRef` was injected in a component class, this resulted
-    // in an LContainer creation at that location. In this case, the component
-    // LView is in the LContainer's `HOST` slot.
-    if (isLContainer(lView)) {
-        lView = lView[HOST];
     }
     return lView;
 }
@@ -10905,7 +10939,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.3.0-next.0+sha-107be11');
+const VERSION = new Version('16.3.0-next.0+sha-55965cb');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13802,9 +13836,13 @@ class ComponentFactory extends ComponentFactory$1 {
         const nonSignalFlags = this.componentDef.onPush ? 64 /* LViewFlags.Dirty */ | 512 /* LViewFlags.IsRoot */ :
             16 /* LViewFlags.CheckAlways */ | 512 /* LViewFlags.IsRoot */;
         const rootFlags = this.componentDef.signals ? signalFlags : nonSignalFlags;
+        let hydrationInfo = null;
+        if (hostRNode !== null) {
+            hydrationInfo = retrieveHydrationInfo(hostRNode, rootViewInjector, true /* isRootView */);
+        }
         // Create the root view. Uses empty TView and ContentTemplate.
         const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null, null);
-        const rootLView = createLView(null, rootTView, null, rootFlags, null, null, environment, hostRenderer, rootViewInjector, null, null);
+        const rootLView = createLView(null, rootTView, null, rootFlags, null, null, environment, hostRenderer, rootViewInjector, null, hydrationInfo);
         // rootView is the parent when bootstrapping
         // TODO(misko): it looks like we are entering view here but we don't really need to as
         // `renderView` does that. However as the code is written it is needed because
@@ -13931,7 +13969,7 @@ function createRootComponentTNode(lView, rNode) {
 function createRootComponentView(tNode, hostRNode, rootComponentDef, rootDirectives, rootView, environment, hostRenderer) {
     const tView = rootView[TVIEW];
     applyRootComponentStyling(rootDirectives, tNode, hostRNode, hostRenderer);
-    // Hydration info is on the host element and needs to be retreived
+    // Hydration info is on the host element and needs to be retrieved
     // and passed to the component LView.
     let hydrationInfo = null;
     if (hostRNode !== null) {
@@ -23913,11 +23951,20 @@ function cleanupLView(lView) {
 function cleanupDehydratedViews(appRef) {
     const viewRefs = appRef._views;
     for (const viewRef of viewRefs) {
-        const lView = getComponentLViewForHydration(viewRef);
+        const lNode = getLNodeForHydration(viewRef);
         // An `lView` might be `null` if a `ViewRef` represents
         // an embedded view (not a component view).
-        if (lView !== null && lView[HOST] !== null) {
-            cleanupLView(lView);
+        if (lNode !== null && lNode[HOST] !== null) {
+            if (isLView(lNode)) {
+                cleanupLView(lNode);
+            }
+            else {
+                // Cleanup in the root component view
+                const componentLView = lNode[HOST];
+                cleanupLView(componentLView);
+                // Cleanup in all views within this view container
+                cleanupLContainer(lNode);
+            }
             ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
         }
     }
