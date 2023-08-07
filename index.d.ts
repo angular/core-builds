@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.3.0-next.0+sha-f12f906
+ * @license Angular v16.3.0-next.0+sha-107be11
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6490,6 +6490,7 @@ export declare interface OutputDecorator {
  * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
  * the application
  * @publicApi
+ * @deprecated
  */
 export declare const PACKAGE_ROOT_URL: InjectionToken<string>;
 

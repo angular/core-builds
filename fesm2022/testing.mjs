@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.3.0-next.0+sha-f12f906
+ * @license Angular v16.3.0-next.0+sha-107be11
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6547,6 +6547,7 @@ const PLATFORM_ID = new InjectionToken('Platform ID', {
  * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
  * the application
  * @publicApi
+ * @deprecated
  */
 const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
 // We keep this token here, rather than the animations package, so that modules that only care
@@ -10904,7 +10905,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.3.0-next.0+sha-f12f906');
+const VERSION = new Version('16.3.0-next.0+sha-107be11');
 
 // This default value is when checking the hierarchy for a token.
 //
