@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.3.0-next.0+sha-91ea1ba
+ * @license Angular v16.3.0-next.0+sha-1eda1bd
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7186,6 +7186,8 @@ declare class R3Injector extends EnvironmentInjector {
     private removeOnDestroy;
 }
 
+declare type RawScopeInfoFromDecorator = Type<any> | ModuleWithProviders<any> | (() => Type<any>) | (() => ModuleWithProviders<any>);
+
 declare interface RComment extends RNode {
     textContent: string | null;
 }
@@ -13131,6 +13133,8 @@ export declare enum ɵɵFactoryTarget {
     Pipe = 3,
     NgModule = 4
 }
+
+export declare function ɵɵgetComponentDepsFactory(type: Type<any>, rawImports?: RawScopeInfoFromDecorator): () => DependencyTypeList;
 
 /**
  * Returns the current OpaqueViewState instance.

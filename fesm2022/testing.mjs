@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.3.0-next.0+sha-91ea1ba
+ * @license Angular v16.3.0-next.0+sha-1eda1bd
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11232,7 +11232,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.3.0-next.0+sha-91ea1ba');
+const VERSION = new Version('16.3.0-next.0+sha-1eda1bd');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25167,6 +25167,11 @@ function ɵɵtemplateRefExtractor(tNode, lView) {
     return createTemplateRef(tNode, lView);
 }
 
+function ɵɵgetComponentDepsFactory(type, rawImports) {
+    // TODO(pmvald): Implement this runtime using deps tracker.
+    return () => [];
+}
+
 /**
  * A mapping of the @angular/core API surface used in generated expressions to the actual symbols.
  *
@@ -25314,6 +25319,7 @@ const angularCoreEnv = (() => ({
     'ɵɵsetComponentScope': ɵɵsetComponentScope,
     'ɵɵsetNgModuleScope': ɵɵsetNgModuleScope,
     'ɵɵregisterNgModuleType': registerNgModuleType,
+    'ɵɵgetComponentDepsFactory': ɵɵgetComponentDepsFactory,
     'ɵɵsanitizeHtml': ɵɵsanitizeHtml,
     'ɵɵsanitizeStyle': ɵɵsanitizeStyle,
     'ɵɵsanitizeResourceUrl': ɵɵsanitizeResourceUrl,
