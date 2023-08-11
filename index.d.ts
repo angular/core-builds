@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-f3f97f0
+ * @license Angular v17.0.0-next.0+sha-5212b47
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12820,12 +12820,110 @@ export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any
 /**
  * Creates runtime data structures for `{#defer}` blocks.
  *
- * @param index The index of the defer block in the data array
+ * @param deferIndex Index of the underlying deferred block data structure.
+ * @param primaryTemplateIndex Index of the template function with the block's content.
  * @param deferredDepsFn Function that contains dependencies for this defer block
+ * @param loadingIndex Index of the template with the `{:loading}` block content.
+ * @param placeholderIndex Index of the template with the `{:placeholder}` block content.
+ * @param error Index of the template with the `{:error}` block content.
+ * @param loadingConfigIndex Index in the constants array of the configuration of the `{:loading}`
+ *     block.
+ * @param placeholderConfigIndexIndex in the constants array of the configuration of the
+ *     `{:placeholder}` block.
  *
  * @codeGenApi
  */
-export declare function ɵɵdefer(index: number, deferredDepsFn: DeferredDepsFn | null): void;
+export declare function ɵɵdefer(deferIndex: number, primaryTemplateIndex: number, deferredDepsFn?: DeferredDepsFn | null, loadingIndex?: number | null, placeholderIndex?: number | null, errorIndex?: number | null, loadingConfigIndex?: number | null, placeholderConfigIndex?: number | null): void;
+
+/**
+ * Creates runtime data structures for the `on hover` deferred trigger.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferOnHover(): void;
+
+/**
+ * Creates runtime data structures for the `on idle` deferred trigger.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferOnIdle(): void;
+
+/**
+ * Creates runtime data structures for the `on immediate` deferred trigger.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferOnImmediate(): void;
+
+/**
+ * Creates runtime data structures for the `on interaction` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferOnInteraction(target?: unknown): void;
+
+/**
+ * Creates runtime data structures for the `on timer` deferred trigger.
+ * @param delay Amount of time to wait before loading the content.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferOnTimer(delay: number): void;
+
+/**
+ * Creates runtime data structures for the `on viewport` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferOnViewport(target?: unknown): void;
+
+/**
+ * Creates runtime data structures for the `prefetech on hover` deferred trigger.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferPrefetchOnHover(): void;
+
+/**
+ * Creates runtime data structures for the `prefetech on idle` deferred trigger.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferPrefetchOnIdle(): void;
+
+/**
+ * Creates runtime data structures for the `prefetech on immediate` deferred trigger.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferPrefetchOnImmediate(): void;
+
+/**
+ * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferPrefetchOnInteraction(target?: unknown): void;
+
+/**
+ * Creates runtime data structures for the `prefetch on timer` deferred trigger.
+ * @param delay Amount of time to wait before prefetching the content.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferPrefetchOnTimer(delay: number): void;
+
+/**
+ * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferPrefetchOnViewport(target?: unknown): void;
+
+/**
+ * Prefetches the deferred content when a value becomes truthy.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferPrefetchWhen(value: unknown): void;
+
+/**
+ * Loads the deferred content when a value becomes truthy.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferWhen(value: unknown): void;
 
 /**
  * Create a component definition object.

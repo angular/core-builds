@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-f3f97f0
+ * @license Angular v17.0.0-next.0+sha-5212b47
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11232,7 +11232,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.0+sha-f3f97f0');
+const VERSION = new Version('17.0.0-next.0+sha-5212b47');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -22348,14 +22348,96 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
 /**
  * Creates runtime data structures for `{#defer}` blocks.
  *
- * @param index The index of the defer block in the data array
+ * @param deferIndex Index of the underlying deferred block data structure.
+ * @param primaryTemplateIndex Index of the template function with the block's content.
  * @param deferredDepsFn Function that contains dependencies for this defer block
+ * @param loadingIndex Index of the template with the `{:loading}` block content.
+ * @param placeholderIndex Index of the template with the `{:placeholder}` block content.
+ * @param error Index of the template with the `{:error}` block content.
+ * @param loadingConfigIndex Index in the constants array of the configuration of the `{:loading}`
+ *     block.
+ * @param placeholderConfigIndexIndex in the constants array of the configuration of the
+ *     `{:placeholder}` block.
  *
  * @codeGenApi
  */
-function ɵɵdefer(index, deferredDepsFn) {
-    // TODO: implement runtime logic.
-}
+function ɵɵdefer(deferIndex, primaryTemplateIndex, deferredDepsFn, loadingIndex, placeholderIndex, errorIndex, loadingConfigIndex, placeholderConfigIndex) { } // TODO: implement runtime logic.
+/**
+ * Loads the deferred content when a value becomes truthy.
+ * @codeGenApi
+ */
+function ɵɵdeferWhen(value) { } // TODO: implement runtime logic.
+/**
+ * Prefetches the deferred content when a value becomes truthy.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchWhen(value) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on idle` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnIdle() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetech on idle` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnIdle() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on immediate` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnImmediate() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetech on immediate` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnImmediate() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on timer` deferred trigger.
+ * @param delay Amount of time to wait before loading the content.
+ * @codeGenApi
+ */
+function ɵɵdeferOnTimer(delay) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetch on timer` deferred trigger.
+ * @param delay Amount of time to wait before prefetching the content.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnTimer(delay) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on hover` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnHover() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetech on hover` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnHover() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on interaction` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+function ɵɵdeferOnInteraction(target) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnInteraction(target) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on viewport` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+function ɵɵdeferOnViewport(target) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnViewport(target) { } // TODO: implement runtime logic.
 
 /*
  * This file re-exports all symbols contained in this directory.
@@ -25295,6 +25377,20 @@ const angularCoreEnv = (() => ({
     'ɵɵadvance': ɵɵadvance,
     'ɵɵtemplate': ɵɵtemplate,
     'ɵɵdefer': ɵɵdefer,
+    'ɵɵdeferWhen': ɵɵdeferWhen,
+    'ɵɵdeferOnIdle': ɵɵdeferOnIdle,
+    'ɵɵdeferOnImmediate': ɵɵdeferOnImmediate,
+    'ɵɵdeferOnTimer': ɵɵdeferOnTimer,
+    'ɵɵdeferOnHover': ɵɵdeferOnHover,
+    'ɵɵdeferOnInteraction': ɵɵdeferOnInteraction,
+    'ɵɵdeferOnViewport': ɵɵdeferOnViewport,
+    'ɵɵdeferPrefetchWhen': ɵɵdeferPrefetchWhen,
+    'ɵɵdeferPrefetchOnIdle': ɵɵdeferPrefetchOnIdle,
+    'ɵɵdeferPrefetchOnImmediate': ɵɵdeferPrefetchOnImmediate,
+    'ɵɵdeferPrefetchOnTimer': ɵɵdeferPrefetchOnTimer,
+    'ɵɵdeferPrefetchOnHover': ɵɵdeferPrefetchOnHover,
+    'ɵɵdeferPrefetchOnInteraction': ɵɵdeferPrefetchOnInteraction,
+    'ɵɵdeferPrefetchOnViewport': ɵɵdeferPrefetchOnViewport,
     'ɵɵtext': ɵɵtext,
     'ɵɵtextInterpolate': ɵɵtextInterpolate,
     'ɵɵtextInterpolate1': ɵɵtextInterpolate1,

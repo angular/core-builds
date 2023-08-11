@@ -2691,6 +2691,48 @@ var Identifiers = _Identifiers;
   _Identifiers.defer = { name: "\u0275\u0275defer", moduleName: CORE };
 })();
 (() => {
+  _Identifiers.deferWhen = { name: "\u0275\u0275deferWhen", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferOnIdle = { name: "\u0275\u0275deferOnIdle", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferOnImmediate = { name: "\u0275\u0275deferOnImmediate", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferOnTimer = { name: "\u0275\u0275deferOnTimer", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferOnHover = { name: "\u0275\u0275deferOnHover", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferOnInteraction = { name: "\u0275\u0275deferOnInteraction", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferOnViewport = { name: "\u0275\u0275deferOnViewport", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferPrefetchWhen = { name: "\u0275\u0275deferPrefetchWhen", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferPrefetchOnIdle = { name: "\u0275\u0275deferPrefetchOnIdle", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferPrefetchOnImmediate = { name: "\u0275\u0275deferPrefetchOnImmediate", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferPrefetchOnTimer = { name: "\u0275\u0275deferPrefetchOnTimer", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferPrefetchOnHover = { name: "\u0275\u0275deferPrefetchOnHover", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferPrefetchOnInteraction = { name: "\u0275\u0275deferPrefetchOnInteraction", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.deferPrefetchOnViewport = { name: "\u0275\u0275deferPrefetchOnViewport", moduleName: CORE };
+})();
+(() => {
   _Identifiers.text = { name: "\u0275\u0275text", moduleName: CORE };
 })();
 (() => {
@@ -19950,6 +19992,10 @@ var TemplateDefinitionBuilder = class {
     this.visitTextAttribute = invalid;
     this.visitBoundAttribute = invalid;
     this.visitBoundEvent = invalid;
+    this.visitDeferredTrigger = invalid;
+    this.visitDeferredBlockError = invalid;
+    this.visitDeferredBlockLoading = invalid;
+    this.visitDeferredBlockPlaceholder = invalid;
     this._bindingScope = parentBindingScope.nestedScope(level);
     this.fileBasedI18nSuffix = relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_") + "_";
     this._valueConverter = new ValueConverter(constantPool, () => this.allocateDataSlot(), (numSlots) => this.allocatePureFunctionSlots(numSlots), (name, localName, slot, value) => {
@@ -20371,40 +20417,45 @@ var TemplateDefinitionBuilder = class {
       this.creationInstruction(span, isNgContainer2 ? Identifiers.elementContainerEnd : Identifiers.elementEnd);
     }
   }
-  visitTemplate(template2) {
-    var _a2;
-    const NG_TEMPLATE_TAG_NAME = "ng-template";
+  createEmbeddedTemplateFn(tagName, children, contextNameSuffix, sourceSpan, variables = [], attrsExprs, references, i18n) {
     const templateIndex = this.allocateDataSlot();
-    if (this.i18n) {
-      this.i18n.appendTemplate(template2.i18n, templateIndex);
+    if (this.i18n && i18n) {
+      this.i18n.appendTemplate(i18n, templateIndex);
     }
-    const tagNameWithoutNamespace = template2.tagName ? splitNsName(template2.tagName)[1] : template2.tagName;
-    const contextName = `${this.contextName}${template2.tagName ? "_" + sanitizeIdentifier(template2.tagName) : ""}_${templateIndex}`;
+    const contextName = `${this.contextName}${contextNameSuffix}_${templateIndex}`;
     const templateName = `${contextName}_Template`;
     const parameters = [
       literal(templateIndex),
       variable(templateName),
-      literal(tagNameWithoutNamespace)
+      literal(tagName),
+      this.addAttrsToConsts(attrsExprs || null)
     ];
-    const attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, template2.attributes, template2.inputs, template2.outputs, void 0, template2.templateAttrs);
-    parameters.push(this.addAttrsToConsts(attrsExprs));
-    if (template2.references && template2.references.length) {
-      const refs = this.prepareRefsArray(template2.references);
+    if (references && references.length > 0) {
+      const refs = this.prepareRefsArray(references);
       parameters.push(this.addToConsts(refs));
       parameters.push(importExpr(Identifiers.templateRefExtractor));
     }
     const templateVisitor = new TemplateDefinitionBuilder(this.constantPool, this._bindingScope, this.level + 1, contextName, this.i18n, templateIndex, templateName, this._namespace, this.fileBasedI18nSuffix, this.i18nUseExternalIds, this.deferBlocks, this._constants);
     this._nestedTemplateFns.push(() => {
-      const templateFunctionExpr = templateVisitor.buildTemplateFunction(template2.children, template2.variables, this._ngContentReservedSlots.length + this._ngContentSelectorsOffset, template2.i18n);
+      const templateFunctionExpr = templateVisitor.buildTemplateFunction(children, variables, this._ngContentReservedSlots.length + this._ngContentSelectorsOffset, i18n);
       this.constantPool.statements.push(templateFunctionExpr.toDeclStmt(templateName));
       if (templateVisitor._ngContentReservedSlots.length) {
         this._ngContentReservedSlots.push(...templateVisitor._ngContentReservedSlots);
       }
     });
-    this.creationInstruction(template2.sourceSpan, Identifiers.templateCreate, () => {
+    this.creationInstruction(sourceSpan, Identifiers.templateCreate, () => {
       parameters.splice(2, 0, literal(templateVisitor.getConstCount()), literal(templateVisitor.getVarCount()));
       return trimTrailingNulls(parameters);
     });
+    return templateIndex;
+  }
+  visitTemplate(template2) {
+    var _a2;
+    const tagNameWithoutNamespace = template2.tagName ? splitNsName(template2.tagName)[1] : template2.tagName;
+    const contextNameSuffix = template2.tagName ? "_" + sanitizeIdentifier(template2.tagName) : "";
+    const NG_TEMPLATE_TAG_NAME = "ng-template";
+    const attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, template2.attributes, template2.inputs, template2.outputs, void 0, template2.templateAttrs);
+    const templateIndex = this.createEmbeddedTemplateFn(tagNameWithoutNamespace, template2.children, contextNameSuffix, template2.sourceSpan, template2.variables, attrsExprs, template2.references, template2.i18n);
     this.templatePropertyBindings(templateIndex, template2.templateAttrs);
     if (tagNameWithoutNamespace === NG_TEMPLATE_TAG_NAME) {
       const [i18nInputs, inputs] = partitionArray(template2.inputs, hasI18nMeta);
@@ -20471,42 +20522,74 @@ var TemplateDefinitionBuilder = class {
     return null;
   }
   visitDeferredBlock(deferred) {
-    const templateIndex = this.allocateDataSlot();
+    const { loading, placeholder, error: error2, triggers, prefetchTriggers } = deferred;
+    const primaryTemplateIndex = this.createEmbeddedTemplateFn(null, deferred.children, "_Defer", deferred.sourceSpan);
+    const loadingIndex = loading ? this.createEmbeddedTemplateFn(null, loading.children, "_DeferLoading", loading.sourceSpan) : null;
+    const loadingConsts = loading ? trimTrailingNulls([literal(loading.minimumTime), literal(loading.afterTime)]) : null;
+    const placeholderIndex = placeholder ? this.createEmbeddedTemplateFn(null, placeholder.children, "_DeferPlaceholder", placeholder.sourceSpan) : null;
+    const placeholderConsts = placeholder && placeholder.minimumTime !== null ? literalArr([literal(placeholder.minimumTime)]) : null;
+    const errorIndex = error2 ? this.createEmbeddedTemplateFn(null, error2.children, "_DeferError", error2.sourceSpan) : null;
+    const deferredIndex = this.allocateDataSlot();
+    const depsFnName = `${this.contextName}_Defer_${deferredIndex}_DepsFn`;
+    this.creationInstruction(deferred.sourceSpan, Identifiers.defer, trimTrailingNulls([
+      literal(deferredIndex),
+      literal(primaryTemplateIndex),
+      this.createDeferredDepsFunction(depsFnName, deferred),
+      literal(loadingIndex),
+      literal(placeholderIndex),
+      literal(errorIndex),
+      (loadingConsts == null ? void 0 : loadingConsts.length) ? this.addToConsts(literalArr(loadingConsts)) : TYPED_NULL_EXPR,
+      placeholderConsts ? this.addToConsts(placeholderConsts) : TYPED_NULL_EXPR
+    ]));
+    this.createDeferTriggerInstructions(deferredIndex, triggers, false);
+    this.createDeferTriggerInstructions(deferredIndex, prefetchTriggers, true);
+  }
+  createDeferredDepsFunction(name, deferred) {
     const deferredDeps = this.deferBlocks.get(deferred);
-    const contextName = `${this.contextName}_Defer_${templateIndex}`;
-    const depsFnName = `${contextName}_DepsFn`;
-    const parameters = [
-      literal(templateIndex),
-      deferredDeps ? variable(depsFnName) : TYPED_NULL_EXPR
-    ];
-    if (deferredDeps) {
-      const dependencyExp = [];
-      for (const deferredDep of deferredDeps) {
-        if (deferredDep.isDeferrable) {
-          const innerFn = fn([new FnParam("m", DYNAMIC_TYPE)], [new ReturnStatement(variable("m").prop(deferredDep.symbolName))]);
-          const fileName = deferredDep.importPath;
-          const importExpr2 = new DynamicImportExpr(fileName).prop("then").callFn([innerFn]);
-          dependencyExp.push(importExpr2);
-        } else {
-          dependencyExp.push(deferredDep.type);
-        }
-      }
-      const depsFnBody = [];
-      depsFnBody.push(new ReturnStatement(literalArr(dependencyExp)));
-      const depsFnExpr = fn([], depsFnBody, INFERRED_TYPE, null, depsFnName);
-      this.constantPool.statements.push(depsFnExpr.toDeclStmt(depsFnName));
+    if (!deferredDeps || deferredDeps.length === 0) {
+      return TYPED_NULL_EXPR;
     }
-    this.creationInstruction(deferred.sourceSpan, Identifiers.defer, () => {
-      return trimTrailingNulls(parameters);
-    });
+    const dependencyExp = [];
+    for (const deferredDep of deferredDeps) {
+      if (deferredDep.isDeferrable) {
+        const innerFn = fn([new FnParam("m", DYNAMIC_TYPE)], [new ReturnStatement(variable("m").prop(deferredDep.symbolName))]);
+        const importExpr2 = new DynamicImportExpr(deferredDep.importPath).prop("then").callFn([innerFn]);
+        dependencyExp.push(importExpr2);
+      } else {
+        dependencyExp.push(deferredDep.type);
+      }
+    }
+    const depsFnExpr = fn([], [new ReturnStatement(literalArr(dependencyExp))], INFERRED_TYPE, null, name);
+    this.constantPool.statements.push(depsFnExpr.toDeclStmt(name));
+    return variable(name);
   }
-  visitDeferredTrigger(trigger) {
+  createDeferTriggerInstructions(deferredIndex, triggers, prefetch) {
+    const { when, idle, immediate, timer, hover, interaction, viewport } = triggers;
+    if (when) {
+      this.allocateBindingSlots(null);
+      this.updateInstructionWithAdvance(deferredIndex, when.sourceSpan, prefetch ? Identifiers.deferPrefetchWhen : Identifiers.deferWhen, () => this.convertPropertyBinding(when.value));
+    }
+    if (idle || !prefetch && Object.keys(triggers).length === 0) {
+      this.creationInstruction((idle == null ? void 0 : idle.sourceSpan) || null, prefetch ? Identifiers.deferPrefetchOnIdle : Identifiers.deferOnIdle);
+    }
+    if (immediate) {
+      this.creationInstruction(immediate.sourceSpan, prefetch ? Identifiers.deferPrefetchOnImmediate : Identifiers.deferOnImmediate);
+    }
+    if (timer) {
+      this.creationInstruction(timer.sourceSpan, prefetch ? Identifiers.deferPrefetchOnTimer : Identifiers.deferOnTimer, [literal(timer.delay)]);
+    }
+    if (hover) {
+      this.creationInstruction(hover.sourceSpan, prefetch ? Identifiers.deferPrefetchOnHover : Identifiers.deferOnHover);
+    }
+    if (interaction) {
+      this.creationInstruction(interaction.sourceSpan, prefetch ? Identifiers.deferPrefetchOnInteraction : Identifiers.deferOnInteraction, [literal(interaction.reference)]);
+    }
+    if (viewport) {
+      this.creationInstruction(viewport.sourceSpan, prefetch ? Identifiers.deferPrefetchOnViewport : Identifiers.deferOnViewport, [literal(viewport.reference)]);
+    }
   }
-  visitDeferredBlockPlaceholder(block) {
-  }
-  visitDeferredBlockError(block) {
-  }
-  visitDeferredBlockLoading(block) {
+  allocateDataSlot() {
+    return this._dataIndex++;
   }
   visitSwitchBlock(block) {
   }
@@ -20519,9 +20602,6 @@ var TemplateDefinitionBuilder = class {
   visitIfBlock(block) {
   }
   visitIfBlockBranch(block) {
-  }
-  allocateDataSlot() {
-    return this._dataIndex++;
   }
   getConstCount() {
     return this._dataIndex;
@@ -20701,7 +20781,7 @@ var TemplateDefinitionBuilder = class {
     return literal(consts.push(expression) - 1);
   }
   addAttrsToConsts(attrs) {
-    return attrs.length > 0 ? this.addToConsts(literalArr(attrs)) : TYPED_NULL_EXPR;
+    return attrs !== null && attrs.length > 0 ? this.addToConsts(literalArr(attrs)) : TYPED_NULL_EXPR;
   }
   prepareRefsArray(references) {
     if (!references || references.length === 0) {
@@ -22337,7 +22417,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.0+sha-f3f97f0");
+var VERSION2 = new Version("17.0.0-next.0+sha-5212b47");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -23845,7 +23925,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-f3f97f0"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5212b47"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -23914,7 +23994,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-f3f97f0"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5212b47"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24102,7 +24182,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-f3f97f0"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5212b47"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24125,7 +24205,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-f3f97f0"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5212b47"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24163,7 +24243,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-f3f97f0"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5212b47"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -24187,7 +24267,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-f3f97f0"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5212b47"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -24222,7 +24302,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-f3f97f0"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5212b47"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -24239,7 +24319,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.0+sha-f3f97f0");
+var VERSION3 = new Version("17.0.0-next.0+sha-5212b47");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
