@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0+sha-198834b
+ * @license Angular v16.2.0+sha-951ef93
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1984,7 +1984,7 @@ Please check that 1) the type for the parameter at index ${index} is correct and
 }
 /**
  * Injects a token from the currently active injector.
- * `inject` is only supported in a [injection context](/guide/dependency-injection-context). It can
+ * `inject` is only supported in an [injection context](/guide/dependency-injection-context). It can
  * be used during:
  * - Construction (via the `constructor`) of a class being instantiated by the DI system, such
  * as an `@Injectable` or `@Component`.
@@ -10939,7 +10939,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.0+sha-198834b');
+const VERSION = new Version('16.2.0+sha-951ef93');
 
 // This default value is when checking the hierarchy for a token.
 //
