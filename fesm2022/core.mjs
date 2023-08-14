@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-5a2b768
+ * @license Angular v17.0.0-next.0+sha-3b1c1b9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10887,7 +10887,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.0+sha-5a2b768');
+const VERSION = new Version('17.0.0-next.0+sha-3b1c1b9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -31701,10 +31701,10 @@ function verifySsrContentsIntegrity() {
         }
     }
     if (!hydrationMarker) {
-        throw new RuntimeError(507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' && ngDevMode &&
+        throw new RuntimeError(-507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' && ngDevMode &&
             'Angular hydration logic detected that HTML content of this page was modified after it ' +
                 'was produced during server side rendering. Make sure that there are no optimizations ' +
-                'that remove comment nodes from HTML are enabled on your CDN. Angular hydration ' +
+                'that remove comment nodes from HTML enabled on your CDN. Angular hydration ' +
                 'relies on HTML produced by the server, including whitespaces and comment nodes.');
     }
 }
