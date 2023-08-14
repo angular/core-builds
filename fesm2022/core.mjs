@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-f7cfc3b
+ * @license Angular v17.0.0-next.0+sha-8693627
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -761,7 +761,7 @@ Please check that 1) the type for the parameter at index ${index} is correct and
 }
 /**
  * Injects a token from the currently active injector.
- * `inject` is only supported in an [injection context](/guide/dependency-injection-context). It can
+ * `inject` is only supported in a [injection context](/guide/dependency-injection-context). It can
  * be used during:
  * - Construction (via the `constructor`) of a class being instantiated by the DI system, such
  * as an `@Injectable` or `@Component`.
@@ -1741,6 +1741,20 @@ function ɵɵdefineComponent(componentDefinition) {
         return def;
     });
 }
+/**
+ * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
+ * definition, when generating a direct reference in the component file would otherwise create an
+ * import cycle.
+ *
+ * See [this explanation](https://hackmd.io/Odw80D0pR6yfsOjg_7XCJg?view) for more details.
+ *
+ * @codeGenApi
+ */
+function ɵɵsetComponentScope(type, directives, pipes) {
+    const def = type.ɵcmp;
+    def.directiveDefs = extractDefListOrFactory(directives, /* pipeDef */ false);
+    def.pipeDefs = extractDefListOrFactory(pipes, /* pipeDef */ true);
+}
 function extractDirectiveDef(type) {
     return getComponentDef(type) || getDirectiveDef(type);
 }
@@ -1763,6 +1777,24 @@ function ɵɵdefineNgModule(def) {
             id: def.id || null,
         };
         return res;
+    });
+}
+/**
+ * Adds the module metadata that is necessary to compute the module's transitive scope to an
+ * existing module definition.
+ *
+ * Scope metadata of modules is not used in production builds, so calls to this function can be
+ * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
+ * to become eligible for tree-shaking as well.
+ *
+ * @codeGenApi
+ */
+function ɵɵsetNgModuleScope(type, scope) {
+    return noSideEffects(() => {
+        const ngModuleDef = getNgModuleDef(type, true);
+        ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY;
+        ngModuleDef.imports = scope.imports || EMPTY_ARRAY;
+        ngModuleDef.exports = scope.exports || EMPTY_ARRAY;
     });
 }
 /**
@@ -7275,7 +7307,7 @@ function isPlatformBrowser(injector) {
  *
  * @deprecated For migration purposes only, to be removed soon.
  */
-const USE_RUNTIME_DEPS_TRACKER_FOR_JIT = true;
+const USE_RUNTIME_DEPS_TRACKER_FOR_JIT = false;
 /**
  * An implementation of DepsTrackerApi which will be used for JIT and local compilation.
  */
@@ -7315,6 +7347,9 @@ class DepsTracker {
             throw new Error(`Attempting to get component dependencies for a type that is not a component: ${type}`);
         }
         if (def.standalone) {
+            if (!rawImports) {
+                throw new Error('Standalone component should pass its raw import in order to compute its dependencies');
+            }
             const scope = this.getStandaloneComponentScope(type, rawImports);
             if (scope.compilation.isPoisoned) {
                 return { dependencies: [] };
@@ -7356,8 +7391,12 @@ class DepsTracker {
     }
     /** @override */
     clearScopeCacheFor(type) {
-        this.ngModulesScopeCache.delete(type);
-        this.standaloneComponentsScopeCache.delete(type);
+        if (isNgModule(type)) {
+            this.ngModulesScopeCache.delete(type);
+        }
+        else if (isComponent(type)) {
+            this.standaloneComponentsScopeCache.delete(type);
+        }
     }
     /** @override */
     getNgModuleScope(type) {
@@ -7458,7 +7497,7 @@ class DepsTracker {
                 pipes: new Set(),
             },
         };
-        for (const rawImport of rawImports ?? []) {
+        for (const rawImport of rawImports) {
             const imported = resolveForwardRef(rawImport);
             try {
                 verifyStandaloneImport(imported, type);
@@ -10848,7 +10887,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.0+sha-f7cfc3b');
+const VERSION = new Version('17.0.0-next.0+sha-8693627');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -22562,54 +22601,6 @@ function ɵɵStandaloneFeature(definition) {
 }
 
 /**
- * Generated next to NgModules to monkey-patch directive and pipe references onto a component's
- * definition, when generating a direct reference in the component file would otherwise create an
- * import cycle.
- *
- * See [this explanation](https://hackmd.io/Odw80D0pR6yfsOjg_7XCJg?view) for more details.
- *
- * @codeGenApi
- */
-function ɵɵsetComponentScope(type, directives, pipes) {
-    const def = type.ɵcmp;
-    def.directiveDefs = extractDefListOrFactory(directives, /* pipeDef */ false);
-    def.pipeDefs = extractDefListOrFactory(pipes, /* pipeDef */ true);
-}
-/**
- * Adds the module metadata that is necessary to compute the module's transitive scope to an
- * existing module definition.
- *
- * Scope metadata of modules is not used in production builds, so calls to this function can be
- * marked pure to tree-shake it from the bundle, allowing for all referenced declarations
- * to become eligible for tree-shaking as well.
- *
- * @codeGenApi
- */
-function ɵɵsetNgModuleScope(type, scope) {
-    return noSideEffects(() => {
-        const ngModuleDef = getNgModuleDef(type, true);
-        ngModuleDef.declarations = convertToTypeArray(scope.declarations || EMPTY_ARRAY);
-        ngModuleDef.imports = convertToTypeArray(scope.imports || EMPTY_ARRAY);
-        ngModuleDef.exports = convertToTypeArray(scope.exports || EMPTY_ARRAY);
-        depsTracker.registerNgModule(type, scope);
-    });
-}
-function convertToTypeArray(values) {
-    if (typeof values === 'function') {
-        return values;
-    }
-    if (values.some(isForwardRef)) {
-        return () => values.map(resolveForwardRef).map(maybeUnwrapModuleWithProviders);
-    }
-    else {
-        return values.map(maybeUnwrapModuleWithProviders);
-    }
-}
-function maybeUnwrapModuleWithProviders(value) {
-    return isModuleWithProviders(value) ? value.ngModule : value;
-}
-
-/**
  * Retrieves the component instance associated with a given DOM element.
  *
  * @usageNotes
@@ -24914,9 +24905,8 @@ function ɵɵtemplateRefExtractor(tNode, lView) {
 }
 
 function ɵɵgetComponentDepsFactory(type, rawImports) {
-    return () => {
-        return depsTracker.getComponentDependencies(type, rawImports).dependencies;
-    };
+    // TODO(pmvald): Implement this runtime using deps tracker.
+    return () => [];
 }
 
 /**

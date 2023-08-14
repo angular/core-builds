@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-f7cfc3b
+ * @license Angular v17.0.0-next.0+sha-8693627
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6042,26 +6042,18 @@ export declare abstract class NgModuleRef<T> {
 }
 
 /**
- * NgModule scope info as provided by AoT compiler
- *
- * In full compilation Ivy resolved all the "module with providers" and forward refs the whole array
- * if at least one element is forward refed. So we end up with type `Type<any>[]|(() =>
- * Type<any>[])`.
- *
- * In local mode the compiler passes the raw info as they are to the runtime functions as it is not
- * possible to resolve them any further due to limited info at compile time. So we end up with type
- * `RawScopeInfoFromDecorator[]`.
+ * NgModule scope info as provided by NgModule decorator.
  */
 declare interface NgModuleScopeInfoFromDecorator {
     /** List of components, directives, and pipes declared by this module. */
-    declarations?: Type<any>[] | (() => Type<any>[]) | RawScopeInfoFromDecorator[];
-    /** List of modules or `ModuleWithProviders` or standalone components imported by this module. */
-    imports?: Type<any>[] | (() => Type<any>[]) | RawScopeInfoFromDecorator[];
+    declarations?: Type<any>[] | (() => Type<any>[]);
+    /** List of modules or `ModuleWithProviders` imported by this module. */
+    imports?: Type<any>[] | (() => Type<any>[]);
     /**
      * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
      * module.
      */
-    exports?: Type<any>[] | (() => Type<any>[]) | RawScopeInfoFromDecorator[];
+    exports?: Type<any>[] | (() => Type<any>[]);
 }
 
 /**
@@ -7194,11 +7186,6 @@ declare class R3Injector extends EnvironmentInjector {
     private removeOnDestroy;
 }
 
-/**
- * The array element type passed to:
- *  - NgModule's annotation imports/exports/declarations fields
- *  - standalone component annotation imports field
- */
 declare type RawScopeInfoFromDecorator = Type<any> | ModuleWithProviders<any> | (() => Type<any>) | (() => ModuleWithProviders<any>);
 
 declare interface RComment extends RNode {
@@ -13245,7 +13232,7 @@ export declare enum ɵɵFactoryTarget {
     NgModule = 4
 }
 
-export declare function ɵɵgetComponentDepsFactory(type: ɵComponentType<any>, rawImports?: RawScopeInfoFromDecorator[]): () => DependencyTypeList;
+export declare function ɵɵgetComponentDepsFactory(type: Type<any>, rawImports?: RawScopeInfoFromDecorator): () => DependencyTypeList;
 
 /**
  * Returns the current OpaqueViewState instance.
