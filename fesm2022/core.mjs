@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-6791f41
+ * @license Angular v17.0.0-next.0+sha-6145cc1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10887,7 +10887,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.0+sha-6791f41');
+const VERSION = new Version('17.0.0-next.0+sha-6145cc1');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -31733,11 +31733,15 @@ function withDomHydration() {
                     const appRef = inject(ApplicationRef);
                     const injector = inject(Injector);
                     return () => {
+                        // Wait until an app becomes stable and cleanup all views that
+                        // were not claimed during the application bootstrap process.
+                        // The timing is similar to when we start the serialization process
+                        // on the server.
+                        //
+                        // Note: the cleanup task *MUST* be scheduled within the Angular zone
+                        // to ensure that change detection is properly run afterward.
                         whenStable(appRef, injector).then(() => {
-                            // Wait until an app becomes stable and cleanup all views that
-                            // were not claimed during the application bootstrap process.
-                            // The timing is similar to when we start the serialization process
-                            // on the server.
+                            NgZone.assertInAngularZone();
                             cleanupDehydratedViews(appRef);
                             if (typeof ngDevMode !== 'undefined' && ngDevMode) {
                                 printHydrationStats(injector);
