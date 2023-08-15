@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-93675dc
+ * @license Angular v17.0.0-next.0+sha-be3edad
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -270,7 +270,7 @@ export declare const ANIMATION_MODULE_TYPE: InjectionToken<"NoopAnimations" | "B
  *
  * @publicApi
  */
-export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<((compRef: ComponentRef<any>) => void)[]>;
+export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<readonly ((compRef: ComponentRef<any>) => void)[]>;
 
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") representing a string ID, used
@@ -6624,7 +6624,7 @@ export declare const PLATFORM_ID: InjectionToken<Object>;
  * A function that is executed when a platform is initialized.
  * @publicApi
  */
-export declare const PLATFORM_INITIALIZER: InjectionToken<(() => void)[]>;
+export declare const PLATFORM_INITIALIZER: InjectionToken<readonly (() => void)[]>;
 
 /**
  * This platform has to be included in any other platform
