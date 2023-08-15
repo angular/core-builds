@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.0+sha-9f977e0
+ * @license Angular v16.2.0+sha-252b111
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3748,6 +3748,10 @@ export declare const Host: HostDecorator;
 export declare interface HostBinding {
     /**
      * The DOM property that is bound to a data property.
+     * This field also accepts:
+     *   * classes, prefixed by `class.`
+     *   * styles, prefixed by `style.`
+     *   * attributes, prefixed by `attr.`
      */
     hostPropertyName?: string;
 }
@@ -3765,23 +3769,35 @@ export declare const HostBinding: HostBindingDecorator;
  */
 export declare interface HostBindingDecorator {
     /**
-     * Decorator that marks a DOM property as a host-binding property and supplies configuration
-     * metadata.
-     * Angular automatically checks host property bindings during change detection, and
-     * if a binding changes it updates the host element of the directive.
+     * Decorator that marks a DOM property or an element class, style or attribute as a host-binding
+     * property and supplies configuration metadata. Angular automatically checks host bindings during
+     * change detection, and if a binding changes it updates the host element of the directive.
      *
      * @usageNotes
      *
      * The following example creates a directive that sets the `valid` and `invalid`
-     * properties on the DOM element that has an `ngModel` directive on it.
+     * class, a style color, and an id on the DOM element that has an `ngModel` directive on it.
      *
      * ```typescript
      * @Directive({selector: '[ngModel]'})
      * class NgModelStatus {
      *   constructor(public control: NgModel) {}
+     *   // class bindings
      *   @HostBinding('class.valid') get valid() { return this.control.valid; }
      *   @HostBinding('class.invalid') get invalid() { return this.control.invalid; }
-     * }
+     *
+     *   // style binding
+     *   @HostBinding('style.color') get color() { return this.control.valid ? 'green': 'red'; }
+     *
+     *   // style binding also supports a style unit extension
+     *   @HostBinding('style.width.px') @Input() width: number = 500;
+     *
+     *   // attribute binding
+     *   @HostBinding('attr.aria-required')
+     *   @Input() required: boolean = false;
+     *
+     *   // property binding
+     *   @HostBinding('id') get id() { return this.control.value?.length ? 'odd':  'even'; }
      *
      * @Component({
      *   selector: 'app',
