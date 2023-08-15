@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-d4ca651
+ * @license Angular v17.0.0-next.0+sha-2174351
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1738,8 +1738,6 @@ export declare interface ContentChildDecorator {
      * If the content DOM changes, and a new child matches the selector,
      * the property will be updated.
      *
-     * Content queries are set before the `ngAfterContentInit` callback is called.
-     *
      * Does not retrieve elements or directives that are in other components' templates,
      * since a component's template is always a black box to its ancestors.
      *
@@ -1769,6 +1767,17 @@ export declare interface ContentChildDecorator {
      * this query
      *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
      *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
+     *
+     * Difference between dynamic and static queries:
+     *
+     * | Queries                             | Details |
+     * |:---                                 |:---     |
+     * | Dynamic queries \(`static: false`\) | The query resolves before the `ngAfterContentInit()`
+     * callback is called. The result will be updated for changes to your view, such as changes to
+     * `ngIf` and `ngFor` blocks. | | Static queries \(`static: true`\)   | The query resolves once
+     * the view has been created, but before change detection runs (before the `ngOnInit()` callback
+     * is called). The result, though, will never be updated to reflect changes to your view, such as
+     * changes to `ngIf` and `ngFor` blocks.  |
      *
      * @usageNotes
      *
@@ -9951,14 +9960,12 @@ export declare interface ViewChildDecorator {
      * in the view DOM. If the view DOM changes, and a new child matches the selector,
      * the property is updated.
      *
-     * View queries are set before the `ngAfterViewInit` callback is called.
-     *
      * **Metadata Properties**:
      *
      * * **selector** - The directive type or the name used for querying.
      * * **read** - Used to read a different token from the queried elements.
-     * * **static** - True to resolve query results before change detection runs,
-     * false to resolve after change detection. Defaults to false.
+     * * **static** - `true` to resolve query results before change detection runs,
+     * `false` to resolve after change detection. Defaults to `false`.
      *
      *
      * The following selectors are supported.
@@ -9978,6 +9985,17 @@ export declare interface ViewChildDecorator {
      * this query
      *   * Any provider defined through a string token (e.g. `{provide: 'token', useValue: 'val'}`)
      *   * `TemplateRef`, `ElementRef`, and `ViewContainerRef`
+     *
+     * Difference between dynamic and static queries**:
+     *
+     * | Queries                             | Details |
+     * |:---                                 |:---     |
+     * | Dynamic queries \(`static: false`\) | The query resolves before the `ngAfterViewInit()`
+     * callback is called. The result will be updated for changes to your view, such as changes to
+     * `ngIf` and `ngFor` blocks. | | Static queries \(`static: true`\)   | The query resolves once
+     * the view has been created, but before change detection runs (before the `ngOnInit()` callback
+     * is called). The result, though, will never be updated to reflect changes to your view, such as
+     * changes to `ngIf` and `ngFor` blocks. |
      *
      * @usageNotes
      *
