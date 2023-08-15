@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-75561c9
+ * @license Angular v17.0.0-next.0+sha-bcc3c43
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4062,6 +4062,7 @@ declare namespace i0 {
         ɵɵInjectorDeclaration,
         ɵɵNgModuleDeclaration,
         ɵsetClassMetadata as setClassMetadata,
+        ɵsetClassMetadataAsync as setClassMetadataAsync,
         ɵNgModuleFactory as NgModuleFactory,
         ɵnoSideEffects,
         ITS_JUST_ANGULAR
@@ -11847,6 +11848,16 @@ export declare function ɵsetAlternateWeakRefImpl(impl: WeakRefCtor): void;
 export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | null, ctorParameters: (() => any[]) | null, propDecorators: {
     [field: string]: any;
 } | null): void;
+
+/**
+ * Handles the process of applying metadata info to a component class in case
+ * component template had `{#defer}` blocks (thus some dependencies became deferrable).
+ *
+ * @param type Component class where metadata should be added
+ * @param dependencyLoaderFn Function that loads dependencies
+ * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
+ */
+export declare function ɵsetClassMetadataAsync(type: Type<any>, dependencyLoaderFn: () => Array<Promise<Type<unknown>>>, metadataSetterFn: (...types: Type<unknown>[]) => void): Promise<Array<Type<unknown>>>;
 
 export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 

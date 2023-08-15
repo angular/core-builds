@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-75561c9
+ * @license Angular v17.0.0-next.0+sha-bcc3c43
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -389,6 +389,94 @@ function flushMicrotasks() {
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
 }
 
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ */
+function noSideEffects(fn) {
+    return { toString: fn }.toString();
+}
+
+/**
+ * The name of a field that Angular monkey-patches onto a class
+ * to keep track of the Promise that represents dependency loading
+ * state.
+ */
+const ASYNC_COMPONENT_METADATA = '__ngAsyncComponentMetadata__';
+/**
+ * If a given component has unresolved async metadata - this function returns a reference to
+ * a Promise that represents dependency loading. Otherwise - this function returns `null`.
+ */
+function getAsyncClassMetadata(type) {
+    const componentClass = type; // cast to `any`, so that we can monkey-patch it
+    return componentClass[ASYNC_COMPONENT_METADATA] ?? null;
+}
+/**
+ * Handles the process of applying metadata info to a component class in case
+ * component template had `{#defer}` blocks (thus some dependencies became deferrable).
+ *
+ * @param type Component class where metadata should be added
+ * @param dependencyLoaderFn Function that loads dependencies
+ * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
+ */
+function setClassMetadataAsync(type, dependencyLoaderFn, metadataSetterFn) {
+    const componentClass = type; // cast to `any`, so that we can monkey-patch it
+    componentClass[ASYNC_COMPONENT_METADATA] =
+        Promise.all(dependencyLoaderFn()).then(dependencies => {
+            metadataSetterFn(...dependencies);
+            // Metadata is now set, reset field value to indicate that this component
+            // can by used/compiled synchronously.
+            componentClass[ASYNC_COMPONENT_METADATA] = null;
+            return dependencies;
+        });
+    return componentClass[ASYNC_COMPONENT_METADATA];
+}
+/**
+ * Adds decorator, constructor, and property metadata to a given type via static metadata fields
+ * on the type.
+ *
+ * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
+ *
+ * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
+ * being tree-shaken away during production builds.
+ */
+function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
+    return noSideEffects(() => {
+        const clazz = type;
+        if (decorators !== null) {
+            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
+                clazz.decorators.push(...decorators);
+            }
+            else {
+                clazz.decorators = decorators;
+            }
+        }
+        if (ctorParameters !== null) {
+            // Rather than merging, clobber the existing parameters. If other projects exist which
+            // use tsickle-style annotations and reflect over them in the same way, this could
+            // cause issues, but that is vanishingly unlikely.
+            clazz.ctorParameters = ctorParameters;
+        }
+        if (propDecorators !== null) {
+            // The property decorator objects are merged as it is possible different fields have
+            // different decorator types. Decorators on individual fields are not merged, as it's
+            // also incredibly unlikely that a field will be decorated both with an Angular
+            // decorator and a non-Angular decorator that's also been downleveled.
+            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
+                clazz.propDecorators = { ...clazz.propDecorators, ...propDecorators };
+            }
+            else {
+                clazz.propDecorators = propDecorators;
+            }
+        }
+    });
+}
+
 /** Whether test modules should be torn down by default. */
 const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
 /** Whether unknown elements in templates should throw by default. */
@@ -518,19 +606,6 @@ function unwrapResponse(response) {
 }
 function componentDefResolved(type) {
     componentDefPendingResolution.delete(type);
-}
-
-/**
- * Convince closure compiler that the wrapped function has no side-effects.
- *
- * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
- * allow us to execute a function but have closure compiler mark the call as no-side-effects.
- * It is important that the return value for the `noSideEffects` function be assigned
- * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
- * compiler.
- */
-function noSideEffects(fn) {
-    return { toString: fn }.toString();
 }
 
 const ANNOTATIONS = '__annotations__';
@@ -11232,7 +11307,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.0+sha-75561c9');
+const VERSION = new Version('17.0.0-next.0+sha-bcc3c43');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -23423,47 +23498,6 @@ function assertDomElement(value) {
 }
 
 /**
- * Adds decorator, constructor, and property metadata to a given type via static metadata fields
- * on the type.
- *
- * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
- *
- * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
- * being tree-shaken away during production builds.
- */
-function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
-    return noSideEffects(() => {
-        const clazz = type;
-        if (decorators !== null) {
-            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
-                clazz.decorators.push(...decorators);
-            }
-            else {
-                clazz.decorators = decorators;
-            }
-        }
-        if (ctorParameters !== null) {
-            // Rather than merging, clobber the existing parameters. If other projects exist which
-            // use tsickle-style annotations and reflect over them in the same way, this could
-            // cause issues, but that is vanishingly unlikely.
-            clazz.ctorParameters = ctorParameters;
-        }
-        if (propDecorators !== null) {
-            // The property decorator objects are merged as it is possible different fields have
-            // different decorator types. Decorators on individual fields are not merged, as it's
-            // also incredibly unlikely that a field will be decorated both with an Angular
-            // decorator and a non-Angular decorator that's also been downleveled.
-            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
-                clazz.propDecorators = { ...clazz.propDecorators, ...propDecorators };
-            }
-            else {
-                clazz.propDecorators = propDecorators;
-            }
-        }
-    });
-}
-
-/**
  * Bindings for pure functions are stored after regular bindings.
  *
  * |-------decls------|---------vars---------|                 |----- hostVars (dir1) ------|
@@ -26209,9 +26243,11 @@ function isTestingModuleOverride(value) {
 }
 function assertNoStandaloneComponents(types, resolver, location) {
     types.forEach(type => {
-        const component = resolver.resolve(type);
-        if (component && component.standalone) {
-            throw new Error(generateStandaloneInDeclarationsError(type, location));
+        if (!getAsyncClassMetadata(type)) {
+            const component = resolver.resolve(type);
+            if (component && component.standalone) {
+                throw new Error(generateStandaloneInDeclarationsError(type, location));
+            }
         }
     });
 }
@@ -26379,8 +26415,30 @@ class TestBedCompiler {
         // Set the component's scope to be the testing module.
         this.componentToModuleScope.set(type, TestingModuleOverride.OVERRIDE_TEMPLATE);
     }
+    async resolvePendingComponentsWithAsyncMetadata() {
+        if (this.pendingComponents.size === 0)
+            return;
+        const promises = [];
+        for (const component of this.pendingComponents) {
+            const asyncMetadataPromise = getAsyncClassMetadata(component);
+            if (asyncMetadataPromise) {
+                promises.push(asyncMetadataPromise);
+            }
+        }
+        const resolvedDeps = await Promise.all(promises);
+        this.queueTypesFromModulesArray(resolvedDeps.flat(2));
+    }
     async compileComponents() {
         this.clearComponentResolutionQueue();
+        // Wait for all async metadata for components that were
+        // overridden, we need resolved metadata to perform an override
+        // and re-compile a component.
+        await this.resolvePendingComponentsWithAsyncMetadata();
+        // Verify that there were no standalone components present in the `declarations` field
+        // during the `TestBed.configureTestingModule` call. We perform this check here in addition
+        // to the logic in the `configureTestingModule` function, since at this point we have
+        // all async metadata resolved.
+        assertNoStandaloneComponents(this.declarations, this.resolvers.component, '"TestBed.configureTestingModule" call');
         // Run compilers for all queued types.
         let needsAsyncResources = this.compileTypesSync();
         // compileComponents() should not be async unless it needs to be.
@@ -26460,6 +26518,10 @@ class TestBedCompiler {
         // Compile all queued components, directives, pipes.
         let needsAsyncResources = false;
         this.pendingComponents.forEach(declaration => {
+            if (getAsyncClassMetadata(declaration)) {
+                throw new Error(`Component '${declaration.name}' has unresolved metadata. ` +
+                    `Please call \`await TestBed.compileComponents()\` before running this test.`);
+            }
             needsAsyncResources = needsAsyncResources || isComponentDefPendingResolution(declaration);
             const metadata = this.resolvers.component.resolve(declaration);
             if (metadata === null) {
@@ -27341,6 +27403,10 @@ class TestBedImpl {
         const testComponentRenderer = this.inject(TestComponentRenderer);
         const rootElId = `root${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
+        if (getAsyncClassMetadata(type)) {
+            throw new Error(`Component '${type.name}' has unresolved metadata. ` +
+                `Please call \`await TestBed.compileComponents()\` before running this test.`);
+        }
         const componentDef = type.ɵcmp;
         if (!componentDef) {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been compiled.`);

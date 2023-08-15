@@ -3039,6 +3039,9 @@ var Identifiers = _Identifiers;
   _Identifiers.setClassMetadata = { name: "\u0275setClassMetadata", moduleName: CORE };
 })();
 (() => {
+  _Identifiers.setClassMetadataAsync = { name: "\u0275setClassMetadataAsync", moduleName: CORE };
+})();
+(() => {
   _Identifiers.queryRefresh = { name: "\u0275\u0275queryRefresh", moduleName: CORE };
 })();
 (() => {
@@ -22418,7 +22421,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.0+sha-75561c9");
+var VERSION2 = new Version("17.0.0-next.0+sha-bcc3c43");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -23920,13 +23923,42 @@ function compileClassMetadata(metadata) {
   const iife = fn([], [devOnlyGuardedExpression(fnCall).toStmt()]);
   return iife.callFn([]);
 }
+function compileComponentClassMetadata(metadata, deferrableTypes) {
+  var _a2, _b2;
+  if (deferrableTypes.size === 0) {
+    return compileClassMetadata(metadata);
+  }
+  const dynamicImports = [];
+  const importedSymbols = [];
+  for (const [symbolName, importPath] of deferrableTypes) {
+    const innerFn = fn([new FnParam("m", DYNAMIC_TYPE)], [new ReturnStatement(variable("m").prop(symbolName))]);
+    const importExpr2 = new DynamicImportExpr(importPath).prop("then").callFn([innerFn]);
+    dynamicImports.push(importExpr2);
+    importedSymbols.push(new FnParam(symbolName, DYNAMIC_TYPE));
+  }
+  const dependencyLoadingFn = fn([], [new ReturnStatement(literalArr(dynamicImports))]);
+  const setClassMetadataCall = importExpr(Identifiers.setClassMetadata).callFn([
+    metadata.type,
+    metadata.decorators,
+    (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null),
+    (_b2 = metadata.propDecorators) != null ? _b2 : literal(null)
+  ]);
+  const setClassMetaWrapper = fn(importedSymbols, [setClassMetadataCall.toStmt()]);
+  const setClassMetaAsync = importExpr(Identifiers.setClassMetadataAsync).callFn([
+    metadata.type,
+    dependencyLoadingFn,
+    setClassMetaWrapper
+  ]);
+  const iife = fn([], [devOnlyGuardedExpression(setClassMetaAsync).toStmt()]);
+  return iife.callFn([]);
+}
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/partial/class_metadata.mjs
 var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-75561c9"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-bcc3c43"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -23995,7 +24027,7 @@ function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-75561c9"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-bcc3c43"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24183,7 +24215,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-75561c9"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-bcc3c43"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24206,7 +24238,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-75561c9"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-bcc3c43"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24244,7 +24276,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-75561c9"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-bcc3c43"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -24268,7 +24300,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-75561c9"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-bcc3c43"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -24303,7 +24335,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-75561c9"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-bcc3c43"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -24320,7 +24352,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.0+sha-75561c9");
+var VERSION3 = new Version("17.0.0-next.0+sha-bcc3c43");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -26426,6 +26458,7 @@ var CORE_SUPPORTED_SYMBOLS = /* @__PURE__ */ new Map([
   ["\u0275\u0275inject", "\u0275\u0275inject"],
   ["\u0275\u0275FactoryDeclaration", "\u0275\u0275FactoryDeclaration"],
   ["\u0275setClassMetadata", "setClassMetadata"],
+  ["\u0275setClassMetadataAsync", "setClassMetadataAsync"],
   ["\u0275\u0275InjectableDeclaration", "\u0275\u0275InjectableDeclaration"],
   ["\u0275\u0275InjectorDeclaration", "\u0275\u0275InjectorDeclaration"],
   ["\u0275\u0275NgModuleDeclaration", "\u0275\u0275NgModuleDeclaration"],
@@ -30277,9 +30310,9 @@ function decoratorToMetadata(decorator, wrapFunctionsInParens) {
 function isAngularDecorator2(decorator, isCore) {
   return isCore || decorator.import !== null && decorator.import.from === "@angular/core";
 }
-function removeIdentifierReferences(node, name) {
+function removeIdentifierReferences(node, names) {
   const result = import_typescript42.default.transform(node, [(context) => (root) => import_typescript42.default.visitNode(root, function walk(current) {
-    return import_typescript42.default.isIdentifier(current) && current.text === name ? import_typescript42.default.factory.createIdentifier(current.text) : import_typescript42.default.visitEachChild(current, walk, context);
+    return import_typescript42.default.isIdentifier(current) && (typeof names === "string" ? current.text === names : names.has(current.text)) ? import_typescript42.default.factory.createIdentifier(current.text) : import_typescript42.default.visitEachChild(current, walk, context);
   })]);
   return result.transformed[0];
 }
@@ -33611,6 +33644,7 @@ var ComponentDecoratorHandler = class {
     if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
       return [];
     }
+    const deferrableTypes = /* @__PURE__ */ new Map();
     for (const [_, deferBlockDeps] of resolution.deferBlocks) {
       for (const deferBlockDep of deferBlockDeps) {
         const dep = deferBlockDep;
@@ -33619,14 +33653,20 @@ var ComponentDecoratorHandler = class {
         if (importDecl && this.deferredSymbolTracker.canDefer(importDecl)) {
           deferBlockDep.isDeferrable = true;
           deferBlockDep.importPath = importDecl.moduleSpecifier.text;
+          deferrableTypes.set(deferBlockDep.symbolName, deferBlockDep.importPath);
         }
       }
     }
     const meta = __spreadValues(__spreadValues({}, analysis.meta), resolution);
     const fac = compileNgFactoryDefField(toFactoryMetadata(meta, FactoryTarget.Component));
+    if (analysis.classMetadata) {
+      const deferrableSymbols = new Set(deferrableTypes.keys());
+      const rewrittenDecoratorsNode = removeIdentifierReferences(analysis.classMetadata.decorators.node, deferrableSymbols);
+      analysis.classMetadata.decorators = new WrappedNodeExpr(rewrittenDecoratorsNode);
+    }
     const def = compileComponentFromMetadata(meta, pool, makeBindingParser());
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
-    const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
+    const classMetadata = analysis.classMetadata !== null ? compileComponentClassMetadata(analysis.classMetadata, deferrableTypes).toStmt() : null;
     const deferrableImports = this.deferredSymbolTracker.getDeferrableImportDecls();
     return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields, deferrableImports);
   }
