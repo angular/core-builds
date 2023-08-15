@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-6a60a29
+ * @license Angular v17.0.0-next.0+sha-93675dc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10887,7 +10887,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.0+sha-6a60a29');
+const VERSION = new Version('17.0.0-next.0+sha-93675dc');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -15105,2022 +15105,6 @@ function ɵɵattributeInterpolateV(attrName, values, sanitizer, namespace) {
     return ɵɵattributeInterpolateV;
 }
 
-const AT_THIS_LOCATION = '<-- AT THIS LOCATION';
-/**
- * Retrieves a user friendly string for a given TNodeType for use in
- * friendly error messages
- *
- * @param tNodeType
- * @returns
- */
-function getFriendlyStringFromTNodeType(tNodeType) {
-    switch (tNodeType) {
-        case 4 /* TNodeType.Container */:
-            return 'view container';
-        case 2 /* TNodeType.Element */:
-            return 'element';
-        case 8 /* TNodeType.ElementContainer */:
-            return 'ng-container';
-        case 32 /* TNodeType.Icu */:
-            return 'icu';
-        case 64 /* TNodeType.Placeholder */:
-            return 'i18n';
-        case 16 /* TNodeType.Projection */:
-            return 'projection';
-        case 1 /* TNodeType.Text */:
-            return 'text';
-        default:
-            // This should not happen as we cover all possible TNode types above.
-            return '<unknown>';
-    }
-}
-/**
- * Validates that provided nodes match during the hydration process.
- */
-function validateMatchingNode(node, nodeType, tagName, lView, tNode, isViewContainerAnchor = false) {
-    if (!node ||
-        (node.nodeType !== nodeType ||
-            (node.nodeType === Node.ELEMENT_NODE &&
-                node.tagName.toLowerCase() !== tagName?.toLowerCase()))) {
-        const expectedNode = shortRNodeDescription(nodeType, tagName, null);
-        let header = `During hydration Angular expected ${expectedNode} but `;
-        const hostComponentDef = getDeclarationComponentDef(lView);
-        const componentClassName = hostComponentDef?.type?.name;
-        const expected = `Angular expected this DOM:\n\n${describeExpectedDom(lView, tNode, isViewContainerAnchor)}\n\n`;
-        let actual = '';
-        if (!node) {
-            // No node found during hydration.
-            header += `the node was not found.\n\n`;
-        }
-        else {
-            const actualNode = shortRNodeDescription(node.nodeType, node.tagName ?? null, node.textContent ?? null);
-            header += `found ${actualNode}.\n\n`;
-            actual = `Actual DOM is:\n\n${describeDomFromNode(node)}\n\n`;
-        }
-        const footer = getHydrationErrorFooter(componentClassName);
-        const message = header + expected + actual + getHydrationAttributeNote() + footer;
-        throw new RuntimeError(-500 /* RuntimeErrorCode.HYDRATION_NODE_MISMATCH */, message);
-    }
-}
-/**
- * Validates that a given node has sibling nodes
- */
-function validateSiblingNodeExists(node) {
-    validateNodeExists(node);
-    if (!node.nextSibling) {
-        const header = 'During hydration Angular expected more sibling nodes to be present.\n\n';
-        const actual = `Actual DOM is:\n\n${describeDomFromNode(node)}\n\n`;
-        const footer = getHydrationErrorFooter();
-        const message = header + actual + footer;
-        throw new RuntimeError(-501 /* RuntimeErrorCode.HYDRATION_MISSING_SIBLINGS */, message);
-    }
-}
-/**
- * Validates that a node exists or throws
- */
-function validateNodeExists(node, lView = null, tNode = null) {
-    if (!node) {
-        const header = 'During hydration, Angular expected an element to be present at this location.\n\n';
-        let expected = '';
-        let footer = '';
-        if (lView !== null && tNode !== null) {
-            expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
-            footer = getHydrationErrorFooter();
-        }
-        throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
-    }
-}
-/**
- * Builds the hydration error message when a node is not found
- *
- * @param lView the LView where the node exists
- * @param tNode the TNode
- */
-function nodeNotFoundError(lView, tNode) {
-    const header = 'During serialization, Angular was unable to find an element in the DOM:\n\n';
-    const expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
-    const footer = getHydrationErrorFooter();
-    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
-}
-/**
- * Builds a hydration error message when a node is not found at a path location
- *
- * @param host the Host Node
- * @param path the path to the node
- */
-function nodeNotFoundAtPathError(host, path) {
-    const header = `During hydration Angular was unable to locate a node ` +
-        `using the "${path}" path, starting from the ${describeRNode(host)} node.\n\n`;
-    const footer = getHydrationErrorFooter();
-    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + footer);
-}
-/**
- * Builds the hydration error message in the case that dom nodes are created outside of
- * the Angular context and are being used as projected nodes
- *
- * @param lView the LView
- * @param tNode the TNode
- * @returns an error
- */
-function unsupportedProjectionOfDomNodes(rNode) {
-    const header = 'During serialization, Angular detected DOM nodes ' +
-        'that were created outside of Angular context and provided as projectable nodes ' +
-        '(likely via `ViewContainerRef.createComponent` or `createComponent` APIs). ' +
-        'Hydration is not supported for such cases, consider refactoring the code to avoid ' +
-        'this pattern or using `ngSkipHydration` on the host element of the component.\n\n';
-    const actual = `${describeDomFromNode(rNode)}\n\n`;
-    const message = header + actual + getHydrationAttributeNote();
-    return new RuntimeError(-503 /* RuntimeErrorCode.UNSUPPORTED_PROJECTION_DOM_NODES */, message);
-}
-/**
- * Builds the hydration error message in the case that ngSkipHydration was used on a
- * node that is not a component host element or host binding
- *
- * @param rNode the HTML Element
- * @returns an error
- */
-function invalidSkipHydrationHost(rNode) {
-    const header = 'The `ngSkipHydration` flag is applied on a node ' +
-        'that doesn\'t act as a component host. Hydration can be ' +
-        'skipped only on per-component basis.\n\n';
-    const actual = `${describeDomFromNode(rNode)}\n\n`;
-    const footer = 'Please move the `ngSkipHydration` attribute to the component host element.\n\n';
-    const message = header + actual + footer;
-    return new RuntimeError(-504 /* RuntimeErrorCode.INVALID_SKIP_HYDRATION_HOST */, message);
-}
-// Stringification methods
-/**
- * Stringifies a given TNode's attributes
- *
- * @param tNode a provided TNode
- * @returns string
- */
-function stringifyTNodeAttrs(tNode) {
-    const results = [];
-    if (tNode.attrs) {
-        for (let i = 0; i < tNode.attrs.length;) {
-            const attrName = tNode.attrs[i++];
-            // Once we reach the first flag, we know that the list of
-            // attributes is over.
-            if (typeof attrName == 'number') {
-                break;
-            }
-            const attrValue = tNode.attrs[i++];
-            results.push(`${attrName}="${shorten(attrValue)}"`);
-        }
-    }
-    return results.join(' ');
-}
-/**
- * The list of internal attributes that should be filtered out while
- * producing an error message.
- */
-const internalAttrs = new Set(['ngh', 'ng-version', 'ng-server-context']);
-/**
- * Stringifies an HTML Element's attributes
- *
- * @param rNode an HTML Element
- * @returns string
- */
-function stringifyRNodeAttrs(rNode) {
-    const results = [];
-    for (let i = 0; i < rNode.attributes.length; i++) {
-        const attr = rNode.attributes[i];
-        if (internalAttrs.has(attr.name))
-            continue;
-        results.push(`${attr.name}="${shorten(attr.value)}"`);
-    }
-    return results.join(' ');
-}
-// Methods for Describing the DOM
-/**
- * Converts a tNode to a helpful readable string value for use in error messages
- *
- * @param tNode a given TNode
- * @param innerContent the content of the node
- * @returns string
- */
-function describeTNode(tNode, innerContent = '…') {
-    switch (tNode.type) {
-        case 1 /* TNodeType.Text */:
-            const content = tNode.value ? `(${tNode.value})` : '';
-            return `#text${content}`;
-        case 2 /* TNodeType.Element */:
-            const attrs = stringifyTNodeAttrs(tNode);
-            const tag = tNode.value.toLowerCase();
-            return `<${tag}${attrs ? ' ' + attrs : ''}>${innerContent}</${tag}>`;
-        case 8 /* TNodeType.ElementContainer */:
-            return '<!-- ng-container -->';
-        case 4 /* TNodeType.Container */:
-            return '<!-- container -->';
-        default:
-            const typeAsString = getFriendlyStringFromTNodeType(tNode.type);
-            return `#node(${typeAsString})`;
-    }
-}
-/**
- * Converts an RNode to a helpful readable string value for use in error messages
- *
- * @param rNode a given RNode
- * @param innerContent the content of the node
- * @returns string
- */
-function describeRNode(rNode, innerContent = '…') {
-    const node = rNode;
-    switch (node.nodeType) {
-        case Node.ELEMENT_NODE:
-            const tag = node.tagName.toLowerCase();
-            const attrs = stringifyRNodeAttrs(node);
-            return `<${tag}${attrs ? ' ' + attrs : ''}>${innerContent}</${tag}>`;
-        case Node.TEXT_NODE:
-            const content = node.textContent ? shorten(node.textContent) : '';
-            return `#text${content ? `(${content})` : ''}`;
-        case Node.COMMENT_NODE:
-            return `<!-- ${shorten(node.textContent ?? '')} -->`;
-        default:
-            return `#node(${node.nodeType})`;
-    }
-}
-/**
- * Builds the string containing the expected DOM present given the LView and TNode
- * values for a readable error message
- *
- * @param lView the lView containing the DOM
- * @param tNode the tNode
- * @param isViewContainerAnchor boolean
- * @returns string
- */
-function describeExpectedDom(lView, tNode, isViewContainerAnchor) {
-    const spacer = '  ';
-    let content = '';
-    if (tNode.prev) {
-        content += spacer + '…\n';
-        content += spacer + describeTNode(tNode.prev) + '\n';
-    }
-    else if (tNode.type && tNode.type & 12 /* TNodeType.AnyContainer */) {
-        content += spacer + '…\n';
-    }
-    if (isViewContainerAnchor) {
-        content += spacer + describeTNode(tNode) + '\n';
-        content += spacer + `<!-- container -->  ${AT_THIS_LOCATION}\n`;
-    }
-    else {
-        content += spacer + describeTNode(tNode) + `  ${AT_THIS_LOCATION}\n`;
-    }
-    content += spacer + '…\n';
-    const parentRNode = tNode.type ? getParentRElement(lView[TVIEW], tNode, lView) : null;
-    if (parentRNode) {
-        content = describeRNode(parentRNode, '\n' + content);
-    }
-    return content;
-}
-/**
- * Builds the string containing the DOM present around a given RNode for a
- * readable error message
- *
- * @param node the RNode
- * @returns string
- */
-function describeDomFromNode(node) {
-    const spacer = '  ';
-    let content = '';
-    const currentNode = node;
-    if (currentNode.previousSibling) {
-        content += spacer + '…\n';
-        content += spacer + describeRNode(currentNode.previousSibling) + '\n';
-    }
-    content += spacer + describeRNode(currentNode) + `  ${AT_THIS_LOCATION}\n`;
-    if (node.nextSibling) {
-        content += spacer + '…\n';
-    }
-    if (node.parentNode) {
-        content = describeRNode(currentNode.parentNode, '\n' + content);
-    }
-    return content;
-}
-/**
- * Shortens the description of a given RNode by its type for readability
- *
- * @param nodeType the type of node
- * @param tagName the node tag name
- * @param textContent the text content in the node
- * @returns string
- */
-function shortRNodeDescription(nodeType, tagName, textContent) {
-    switch (nodeType) {
-        case Node.ELEMENT_NODE:
-            return `<${tagName.toLowerCase()}>`;
-        case Node.TEXT_NODE:
-            const content = textContent ? ` (with the "${shorten(textContent)}" content)` : '';
-            return `a text node${content}`;
-        case Node.COMMENT_NODE:
-            return 'a comment node';
-        default:
-            return `#node(nodeType=${nodeType})`;
-    }
-}
-/**
- * Builds the footer hydration error message
- *
- * @param componentClassName the name of the component class
- * @returns string
- */
-function getHydrationErrorFooter(componentClassName) {
-    const componentInfo = componentClassName ? `the "${componentClassName}"` : 'corresponding';
-    return `To fix this problem:\n` +
-        `  * check ${componentInfo} component for hydration-related issues\n` +
-        `  * check to see if your template has valid HTML structure\n` +
-        `  * or skip hydration by adding the \`ngSkipHydration\` attribute ` +
-        `to its host node in a template\n\n`;
-}
-/**
- * An attribute related note for hydration errors
- */
-function getHydrationAttributeNote() {
-    return 'Note: attributes are only displayed to better represent the DOM' +
-        ' but have no effect on hydration mismatches.\n\n';
-}
-// Node string utility functions
-/**
- * Strips all newlines out of a given string
- *
- * @param input a string to be cleared of new line characters
- * @returns
- */
-function stripNewlines(input) {
-    return input.replace(/\s+/gm, '');
-}
-/**
- * Reduces a string down to a maximum length of characters with ellipsis for readability
- *
- * @param input a string input
- * @param maxLength a maximum length in characters
- * @returns string
- */
-function shorten(input, maxLength = 50) {
-    if (!input) {
-        return '';
-    }
-    input = stripNewlines(input);
-    return input.length > maxLength ? `${input.substring(0, maxLength - 1)}…` : input;
-}
-
-/**
- * Regexp that extracts a reference node information from the compressed node location.
- * The reference node is represented as either:
- *  - a number which points to an LView slot
- *  - the `b` char which indicates that the lookup should start from the `document.body`
- *  - the `h` char to start lookup from the component host node (`lView[HOST]`)
- */
-const REF_EXTRACTOR_REGEXP = new RegExp(`^(\\d+)*(${REFERENCE_NODE_BODY}|${REFERENCE_NODE_HOST})*(.*)`);
-/**
- * Helper function that takes a reference node location and a set of navigation steps
- * (from the reference node) to a target node and outputs a string that represents
- * a location.
- *
- * For example, given: referenceNode = 'b' (body) and path = ['firstChild', 'firstChild',
- * 'nextSibling'], the function returns: `bf2n`.
- */
-function compressNodeLocation(referenceNode, path) {
-    const result = [referenceNode];
-    for (const segment of path) {
-        const lastIdx = result.length - 1;
-        if (lastIdx > 0 && result[lastIdx - 1] === segment) {
-            // An empty string in a count slot represents 1 occurrence of an instruction.
-            const value = (result[lastIdx] || 1);
-            result[lastIdx] = value + 1;
-        }
-        else {
-            // Adding a new segment to the path.
-            // Using an empty string in a counter field to avoid encoding `1`s
-            // into the path, since they are implicit (e.g. `f1n1` vs `fn`), so
-            // it's enough to have a single char in this case.
-            result.push(segment, '');
-        }
-    }
-    return result.join('');
-}
-/**
- * Helper function that reverts the `compressNodeLocation` and transforms a given
- * string into an array where at 0th position there is a reference node info and
- * after that it contains information (in pairs) about a navigation step and the
- * number of repetitions.
- *
- * For example, the path like 'bf2n' will be transformed to:
- * ['b', 'firstChild', 2, 'nextSibling', 1].
- *
- * This information is later consumed by the code that navigates the DOM to find
- * a given node by its location.
- */
-function decompressNodeLocation(path) {
-    const matches = path.match(REF_EXTRACTOR_REGEXP);
-    const [_, refNodeId, refNodeName, rest] = matches;
-    // If a reference node is represented by an index, transform it to a number.
-    const ref = refNodeId ? parseInt(refNodeId, 10) : refNodeName;
-    const steps = [];
-    // Match all segments in a path.
-    for (const [_, step, count] of rest.matchAll(/(f|n)(\d*)/g)) {
-        const repeat = parseInt(count, 10) || 1;
-        steps.push(step, repeat);
-    }
-    return [ref, ...steps];
-}
-
-/** Whether current TNode is a first node in an <ng-container>. */
-function isFirstElementInNgContainer(tNode) {
-    return !tNode.prev && tNode.parent?.type === 8 /* TNodeType.ElementContainer */;
-}
-/** Returns an instruction index (subtracting HEADER_OFFSET). */
-function getNoOffsetIndex(tNode) {
-    return tNode.index - HEADER_OFFSET;
-}
-/**
- * Locate a node in DOM tree that corresponds to a given TNode.
- *
- * @param hydrationInfo The hydration annotation data
- * @param tView the current tView
- * @param lView the current lView
- * @param tNode the current tNode
- * @returns an RNode that represents a given tNode
- */
-function locateNextRNode(hydrationInfo, tView, lView, tNode) {
-    let native = null;
-    const noOffsetIndex = getNoOffsetIndex(tNode);
-    const nodes = hydrationInfo.data[NODES];
-    if (nodes?.[noOffsetIndex]) {
-        // We know the exact location of the node.
-        native = locateRNodeByPath(nodes[noOffsetIndex], lView);
-    }
-    else if (tView.firstChild === tNode) {
-        // We create a first node in this view, so we use a reference
-        // to the first child in this DOM segment.
-        native = hydrationInfo.firstChild;
-    }
-    else {
-        // Locate a node based on a previous sibling or a parent node.
-        const previousTNodeParent = tNode.prev === null;
-        const previousTNode = (tNode.prev ?? tNode.parent);
-        ngDevMode &&
-            assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
-                'to the previous node or a parent node.');
-        if (isFirstElementInNgContainer(tNode)) {
-            const noOffsetParentIndex = getNoOffsetIndex(tNode.parent);
-            native = getSegmentHead(hydrationInfo, noOffsetParentIndex);
-        }
-        else {
-            let previousRElement = getNativeByTNode(previousTNode, lView);
-            if (previousTNodeParent) {
-                native = previousRElement.firstChild;
-            }
-            else {
-                // If the previous node is an element, but it also has container info,
-                // this means that we are processing a node like `<div #vcrTarget>`, which is
-                // represented in the DOM as `<div></div>...<!--container-->`.
-                // In this case, there are nodes *after* this element and we need to skip
-                // all of them to reach an element that we are looking for.
-                const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
-                const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
-                if (previousTNode.type === 2 /* TNodeType.Element */ && segmentHead) {
-                    const numRootNodesToSkip = calcSerializedContainerSize(hydrationInfo, noOffsetPrevSiblingIndex);
-                    // `+1` stands for an anchor comment node after all the views in this container.
-                    const nodesToSkip = numRootNodesToSkip + 1;
-                    // First node after this segment.
-                    native = siblingAfter(nodesToSkip, segmentHead);
-                }
-                else {
-                    native = previousRElement.nextSibling;
-                }
-            }
-        }
-    }
-    return native;
-}
-/**
- * Skips over a specified number of nodes and returns the next sibling node after that.
- */
-function siblingAfter(skip, from) {
-    let currentNode = from;
-    for (let i = 0; i < skip; i++) {
-        ngDevMode && validateSiblingNodeExists(currentNode);
-        currentNode = currentNode.nextSibling;
-    }
-    return currentNode;
-}
-/**
- * Helper function to produce a string representation of the navigation steps
- * (in terms of `nextSibling` and `firstChild` navigations). Used in error
- * messages in dev mode.
- */
-function stringifyNavigationInstructions(instructions) {
-    const container = [];
-    for (let i = 0; i < instructions.length; i += 2) {
-        const step = instructions[i];
-        const repeat = instructions[i + 1];
-        for (let r = 0; r < repeat; r++) {
-            container.push(step === NodeNavigationStep.FirstChild ? 'firstChild' : 'nextSibling');
-        }
-    }
-    return container.join('.');
-}
-/**
- * Helper function that navigates from a starting point node (the `from` node)
- * using provided set of navigation instructions (within `path` argument).
- */
-function navigateToNode(from, instructions) {
-    let node = from;
-    for (let i = 0; i < instructions.length; i += 2) {
-        const step = instructions[i];
-        const repeat = instructions[i + 1];
-        for (let r = 0; r < repeat; r++) {
-            if (ngDevMode && !node) {
-                throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
-            }
-            switch (step) {
-                case NodeNavigationStep.FirstChild:
-                    node = node.firstChild;
-                    break;
-                case NodeNavigationStep.NextSibling:
-                    node = node.nextSibling;
-                    break;
-            }
-        }
-    }
-    if (ngDevMode && !node) {
-        throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
-    }
-    return node;
-}
-/**
- * Locates an RNode given a set of navigation instructions (which also contains
- * a starting point node info).
- */
-function locateRNodeByPath(path, lView) {
-    const [referenceNode, ...navigationInstructions] = decompressNodeLocation(path);
-    let ref;
-    if (referenceNode === REFERENCE_NODE_HOST) {
-        ref = lView[DECLARATION_COMPONENT_VIEW][HOST];
-    }
-    else if (referenceNode === REFERENCE_NODE_BODY) {
-        ref = ɵɵresolveBody(lView[DECLARATION_COMPONENT_VIEW][HOST]);
-    }
-    else {
-        const parentElementId = Number(referenceNode);
-        ref = unwrapRNode(lView[parentElementId + HEADER_OFFSET]);
-    }
-    return navigateToNode(ref, navigationInstructions);
-}
-/**
- * Generate a list of DOM navigation operations to get from node `start` to node `finish`.
- *
- * Note: assumes that node `start` occurs before node `finish` in an in-order traversal of the DOM
- * tree. That is, we should be able to get from `start` to `finish` purely by using `.firstChild`
- * and `.nextSibling` operations.
- */
-function navigateBetween(start, finish) {
-    if (start === finish) {
-        return [];
-    }
-    else if (start.parentElement == null || finish.parentElement == null) {
-        return null;
-    }
-    else if (start.parentElement === finish.parentElement) {
-        return navigateBetweenSiblings(start, finish);
-    }
-    else {
-        // `finish` is a child of its parent, so the parent will always have a child.
-        const parent = finish.parentElement;
-        const parentPath = navigateBetween(start, parent);
-        const childPath = navigateBetween(parent.firstChild, finish);
-        if (!parentPath || !childPath)
-            return null;
-        return [
-            // First navigate to `finish`'s parent
-            ...parentPath,
-            // Then to its first child.
-            NodeNavigationStep.FirstChild,
-            // And finally from that node to `finish` (maybe a no-op if we're already there).
-            ...childPath,
-        ];
-    }
-}
-/**
- * Calculates a path between 2 sibling nodes (generates a number of `NextSibling` navigations).
- * Returns `null` if no such path exists between the given nodes.
- */
-function navigateBetweenSiblings(start, finish) {
-    const nav = [];
-    let node = null;
-    for (node = start; node != null && node !== finish; node = node.nextSibling) {
-        nav.push(NodeNavigationStep.NextSibling);
-    }
-    // If the `node` becomes `null` or `undefined` at the end, that means that we
-    // didn't find the `end` node, thus return `null` (which would trigger serialization
-    // error to be produced).
-    return node == null ? null : nav;
-}
-/**
- * Calculates a path between 2 nodes in terms of `nextSibling` and `firstChild`
- * navigations:
- * - the `from` node is a known node, used as an starting point for the lookup
- *   (the `fromNodeName` argument is a string representation of the node).
- * - the `to` node is a node that the runtime logic would be looking up,
- *   using the path generated by this function.
- */
-function calcPathBetween(from, to, fromNodeName) {
-    const path = navigateBetween(from, to);
-    return path === null ? null : compressNodeLocation(fromNodeName, path);
-}
-/**
- * Invoked at serialization time (on the server) when a set of navigation
- * instructions needs to be generated for a TNode.
- */
-function calcPathForNode(tNode, lView) {
-    const parentTNode = tNode.parent;
-    let parentIndex;
-    let parentRNode;
-    let referenceNodeName;
-    if (parentTNode === null || !(parentTNode.type & 3 /* TNodeType.AnyRNode */)) {
-        // If there is no parent TNode or a parent TNode does not represent an RNode
-        // (i.e. not a DOM node), use component host element as a reference node.
-        parentIndex = referenceNodeName = REFERENCE_NODE_HOST;
-        parentRNode = lView[DECLARATION_COMPONENT_VIEW][HOST];
-    }
-    else {
-        // Use parent TNode as a reference node.
-        parentIndex = parentTNode.index;
-        parentRNode = unwrapRNode(lView[parentIndex]);
-        referenceNodeName = renderStringify(parentIndex - HEADER_OFFSET);
-    }
-    let rNode = unwrapRNode(lView[tNode.index]);
-    if (tNode.type & 12 /* TNodeType.AnyContainer */) {
-        // For <ng-container> nodes, instead of serializing a reference
-        // to the anchor comment node, serialize a location of the first
-        // DOM element. Paired with the container size (serialized as a part
-        // of `ngh.containers`), it should give enough information for runtime
-        // to hydrate nodes in this container.
-        const firstRNode = getFirstNativeNode(lView, tNode);
-        // If container is not empty, use a reference to the first element,
-        // otherwise, rNode would point to an anchor comment node.
-        if (firstRNode) {
-            rNode = firstRNode;
-        }
-    }
-    let path = calcPathBetween(parentRNode, rNode, referenceNodeName);
-    if (path === null && parentRNode !== rNode) {
-        // Searching for a path between elements within a host node failed.
-        // Trying to find a path to an element starting from the `document.body` instead.
-        //
-        // Important note: this type of reference is relatively unstable, since Angular
-        // may not be able to control parts of the page that the runtime logic navigates
-        // through. This is mostly needed to cover "portals" use-case (like menus, dialog boxes,
-        // etc), where nodes are content-projected (including direct DOM manipulations) outside
-        // of the host node. The better solution is to provide APIs to work with "portals",
-        // at which point this code path would not be needed.
-        const body = parentRNode.ownerDocument.body;
-        path = calcPathBetween(body, rNode, REFERENCE_NODE_BODY);
-        if (path === null) {
-            // If the path is still empty, it's likely that this node is detached and
-            // won't be found during hydration.
-            throw nodeNotFoundError(lView, tNode);
-        }
-    }
-    return path;
-}
-
-function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
-    ngDevMode && assertFirstCreatePass(tView);
-    ngDevMode && ngDevMode.firstCreatePass++;
-    const tViewConsts = tView.consts;
-    // TODO(pk): refactor getOrCreateTNode to have the "create" only version
-    const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
-    resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    registerPostOrderHooks(tView, tNode);
-    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts, null /* ssrId */);
-    if (tView.queries !== null) {
-        tView.queries.template(tView, tNode);
-        embeddedTView.queries = tView.queries.embeddedTView(tNode);
-    }
-    return tNode;
-}
-/**
- * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
- *
- * <ng-template #foo>
- *    <div></div>
- * </ng-template>
- *
- * @param index The index of the container in the data array
- * @param templateFn Inline template
- * @param decls The number of nodes, local refs, and pipes for this template
- * @param vars The number of bindings for this template
- * @param tagName The name of the container element, if applicable
- * @param attrsIndex Index of template attributes in the `consts` array.
- * @param localRefs Index of the local references in the `consts` array.
- * @param localRefExtractor A function which extracts local-refs values from the template.
- *        Defaults to the current element associated with the local-ref.
- *
- * @codeGenApi
- */
-function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex, localRefExtractor) {
-    const lView = getLView();
-    const tView = getTView();
-    const adjustedIndex = index + HEADER_OFFSET;
-    const tNode = tView.firstCreatePass ? templateFirstCreatePass(adjustedIndex, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
-        tView.data[adjustedIndex];
-    setCurrentTNode(tNode, false);
-    const comment = _locateOrCreateContainerAnchor(tView, lView, tNode, index);
-    if (wasLastNodeCreated()) {
-        appendChild(tView, lView, comment, tNode);
-    }
-    attachPatchData(comment, lView);
-    addToViewTree(lView, lView[adjustedIndex] = createLContainer(comment, lView, comment, tNode));
-    if (isDirectiveHost(tNode)) {
-        createDirectivesInstances(tView, lView, tNode);
-    }
-    if (localRefsIndex != null) {
-        saveResolvedLocalsInData(lView, tNode, localRefExtractor);
-    }
-}
-let _locateOrCreateContainerAnchor = createContainerAnchorImpl;
-/**
- * Regular creation mode for LContainers and their anchor (comment) nodes.
- */
-function createContainerAnchorImpl(tView, lView, tNode, index) {
-    lastNodeWasCreated(true);
-    return lView[RENDERER].createComment(ngDevMode ? 'container' : '');
-}
-/**
- * Enables hydration code path (to lookup existing elements in DOM)
- * in addition to the regular creation mode for LContainers and their
- * anchor (comment) nodes.
- */
-function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
-    const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
-    lastNodeWasCreated(isNodeCreationMode);
-    // Regular creation mode.
-    if (isNodeCreationMode) {
-        return createContainerAnchorImpl(tView, lView, tNode, index);
-    }
-    const ssrId = hydrationInfo.data[TEMPLATES]?.[index] ?? null;
-    // Apply `ssrId` value to the underlying TView if it was not previously set.
-    //
-    // There might be situations when the same component is present in a template
-    // multiple times and some instances are opted-out of using hydration via
-    // `ngSkipHydration` attribute. In this scenario, at the time a TView is created,
-    // the `ssrId` might be `null` (if the first component is opted-out of hydration).
-    // The code below makes sure that the `ssrId` is applied to the TView if it's still
-    // `null` and verifies we never try to override it with a different value.
-    if (ssrId !== null && tNode.tView !== null) {
-        if (tNode.tView.ssrId === null) {
-            tNode.tView.ssrId = ssrId;
-        }
-        else {
-            ngDevMode &&
-                assertEqual(tNode.tView.ssrId, ssrId, 'Unexpected value of the `ssrId` for this TView');
-        }
-    }
-    // Hydration mode, looking up existing elements in DOM.
-    const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
-    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
-    setSegmentHead(hydrationInfo, index, currentRNode);
-    const viewContainerSize = calcSerializedContainerSize(hydrationInfo, index);
-    const comment = siblingAfter(viewContainerSize, currentRNode);
-    if (ngDevMode) {
-        validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
-        markRNodeAsClaimedByHydration(comment);
-    }
-    return comment;
-}
-function enableLocateOrCreateContainerAnchorImpl() {
-    _locateOrCreateContainerAnchor = locateOrCreateContainerAnchorImpl;
-}
-
-/** Store a value in the `data` at a given `index`. */
-function store(tView, lView, index, value) {
-    // We don't store any static data for local variables, so the first time
-    // we see the template, we should store as null to avoid a sparse array
-    if (index >= tView.data.length) {
-        tView.data[index] = null;
-        tView.blueprint[index] = null;
-    }
-    lView[index] = value;
-}
-/**
- * Retrieves a local reference from the current contextViewData.
- *
- * If the reference to retrieve is in a parent view, this instruction is used in conjunction
- * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
- *
- * @param index The index of the local ref in contextViewData.
- *
- * @codeGenApi
- */
-function ɵɵreference(index) {
-    const contextLView = getContextLView();
-    return load(contextLView, HEADER_OFFSET + index);
-}
-
-/**
- * Update a property on a selected element.
- *
- * Operates on the element selected by index via the {@link select} instruction.
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
- *
- * @param propName Name of property. Because it is going to DOM, this is not subject to
- *        renaming as part of minification.
- * @param value New value to write.
- * @param sanitizer An optional function used to sanitize the value.
- * @returns This function returns itself so that it may be chained
- * (e.g. `property('name', ctx.name)('title', ctx.title)`)
- *
- * @codeGenApi
- */
-function ɵɵproperty(propName, value, sanitizer) {
-    const lView = getLView();
-    const bindingIndex = nextBindingIndex();
-    if (bindingUpdated(lView, bindingIndex, value)) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, false);
-        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
-    }
-    return ɵɵproperty;
-}
-/**
- * Given `<div style="..." my-dir>` and `MyDir` with `@Input('style')` we need to write to
- * directive input.
- */
-function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isClassBased) {
-    const inputs = tNode.inputs;
-    const property = isClassBased ? 'class' : 'style';
-    // We support both 'class' and `className` hence the fallback.
-    setInputsForProperty(tView, lView, inputs[property], property, value);
-}
-
-function elementStartFirstCreatePass(index, tView, lView, name, attrsIndex, localRefsIndex) {
-    ngDevMode && assertFirstCreatePass(tView);
-    ngDevMode && ngDevMode.firstCreatePass++;
-    const tViewConsts = tView.consts;
-    const attrs = getConstant(tViewConsts, attrsIndex);
-    const tNode = getOrCreateTNode(tView, index, 2 /* TNodeType.Element */, name, attrs);
-    resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    if (tNode.attrs !== null) {
-        computeStaticStyling(tNode, tNode.attrs, false);
-    }
-    if (tNode.mergedAttrs !== null) {
-        computeStaticStyling(tNode, tNode.mergedAttrs, true);
-    }
-    if (tView.queries !== null) {
-        tView.queries.elementStart(tView, tNode);
-    }
-    return tNode;
-}
-/**
- * Create DOM element. The instruction must later be followed by `elementEnd()` call.
- *
- * @param index Index of the element in the LView array
- * @param name Name of the DOM Node
- * @param attrsIndex Index of the element's attributes in the `consts` array.
- * @param localRefsIndex Index of the element's local references in the `consts` array.
- * @returns This function returns itself so that it may be chained.
- *
- * Attributes and localRefs are passed as an array of strings where elements with an even index
- * hold an attribute name and elements with an odd index hold an attribute value, ex.:
- * ['id', 'warning5', 'class', 'alert']
- *
- * @codeGenApi
- */
-function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
-    const lView = getLView();
-    const tView = getTView();
-    const adjustedIndex = HEADER_OFFSET + index;
-    ngDevMode &&
-        assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
-    ngDevMode && assertIndexInRange(lView, adjustedIndex);
-    const renderer = lView[RENDERER];
-    const tNode = tView.firstCreatePass ?
-        elementStartFirstCreatePass(adjustedIndex, tView, lView, name, attrsIndex, localRefsIndex) :
-        tView.data[adjustedIndex];
-    const native = _locateOrCreateElementNode(tView, lView, tNode, renderer, name, index);
-    lView[adjustedIndex] = native;
-    const hasDirectives = isDirectiveHost(tNode);
-    if (ngDevMode && tView.firstCreatePass) {
-        validateElementIsKnown(native, lView, tNode.value, tView.schemas, hasDirectives);
-    }
-    setCurrentTNode(tNode, true);
-    setupStaticAttributes(renderer, native, tNode);
-    if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */ && wasLastNodeCreated()) {
-        // In the i18n case, the translation may have removed this element, so only add it if it is not
-        // detached. See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
-        appendChild(tView, lView, native, tNode);
-    }
-    // any immediate children of a component or template container must be pre-emptively
-    // monkey-patched with the component view data so that the element can be inspected
-    // later on using any element discovery utility methods (see `element_discovery.ts`)
-    if (getElementDepthCount() === 0) {
-        attachPatchData(native, lView);
-    }
-    increaseElementDepthCount();
-    if (hasDirectives) {
-        createDirectivesInstances(tView, lView, tNode);
-        executeContentQueries(tView, tNode, lView);
-    }
-    if (localRefsIndex !== null) {
-        saveResolvedLocalsInData(lView, tNode);
-    }
-    return ɵɵelementStart;
-}
-/**
- * Mark the end of the element.
- * @returns This function returns itself so that it may be chained.
- *
- * @codeGenApi
- */
-function ɵɵelementEnd() {
-    let currentTNode = getCurrentTNode();
-    ngDevMode && assertDefined(currentTNode, 'No parent node to close.');
-    if (isCurrentTNodeParent()) {
-        setCurrentTNodeAsNotParent();
-    }
-    else {
-        ngDevMode && assertHasParent(getCurrentTNode());
-        currentTNode = currentTNode.parent;
-        setCurrentTNode(currentTNode, false);
-    }
-    const tNode = currentTNode;
-    ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */);
-    if (isSkipHydrationRootTNode(tNode)) {
-        leaveSkipHydrationBlock();
-    }
-    decreaseElementDepthCount();
-    const tView = getTView();
-    if (tView.firstCreatePass) {
-        registerPostOrderHooks(tView, currentTNode);
-        if (isContentQueryHost(currentTNode)) {
-            tView.queries.elementEnd(currentTNode);
-        }
-    }
-    if (tNode.classesWithoutHost != null && hasClassInput(tNode)) {
-        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.classesWithoutHost, true);
-    }
-    if (tNode.stylesWithoutHost != null && hasStyleInput(tNode)) {
-        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.stylesWithoutHost, false);
-    }
-    return ɵɵelementEnd;
-}
-/**
- * Creates an empty element using {@link elementStart} and {@link elementEnd}
- *
- * @param index Index of the element in the data array
- * @param name Name of the DOM Node
- * @param attrsIndex Index of the element's attributes in the `consts` array.
- * @param localRefsIndex Index of the element's local references in the `consts` array.
- * @returns This function returns itself so that it may be chained.
- *
- * @codeGenApi
- */
-function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
-    ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
-    ɵɵelementEnd();
-    return ɵɵelement;
-}
-let _locateOrCreateElementNode = (tView, lView, tNode, renderer, name, index) => {
-    lastNodeWasCreated(true);
-    return createElementNode(renderer, name, getNamespace$1());
-};
-/**
- * Enables hydration code path (to lookup existing elements in DOM)
- * in addition to the regular creation mode of element nodes.
- */
-function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, index) {
-    const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
-    lastNodeWasCreated(isNodeCreationMode);
-    // Regular creation mode.
-    if (isNodeCreationMode) {
-        return createElementNode(renderer, name, getNamespace$1());
-    }
-    // Hydration mode, looking up an existing element in DOM.
-    const native = locateNextRNode(hydrationInfo, tView, lView, tNode);
-    ngDevMode && validateMatchingNode(native, Node.ELEMENT_NODE, name, lView, tNode);
-    ngDevMode && markRNodeAsClaimedByHydration(native);
-    // This element might also be an anchor of a view container.
-    if (getSerializedContainerViews(hydrationInfo, index)) {
-        // Important note: this element acts as an anchor, but it's **not** a part
-        // of the embedded view, so we start the segment **after** this element, taking
-        // a reference to the next sibling. For example, the following template:
-        // `<div #vcrTarget>` is represented in the DOM as `<div></div>...<!--container-->`,
-        // so while processing a `<div>` instruction, point to the next sibling as a
-        // start of a segment.
-        ngDevMode && validateNodeExists(native.nextSibling, lView, tNode);
-        setSegmentHead(hydrationInfo, index, native.nextSibling);
-    }
-    // Checks if the skip hydration attribute is present during hydration so we know to
-    // skip attempting to hydrate this block. We check both TNode and RElement for an
-    // attribute: the RElement case is needed for i18n cases, when we add it to host
-    // elements during the annotation phase (after all internal data structures are setup).
-    if (hydrationInfo &&
-        (hasSkipHydrationAttrOnTNode(tNode) || hasSkipHydrationAttrOnRElement(native))) {
-        if (isComponentHost(tNode)) {
-            enterSkipHydrationBlock(tNode);
-            // Since this isn't hydratable, we need to empty the node
-            // so there's no duplicate content after render
-            clearElementContents(native);
-            ngDevMode && ngDevMode.componentsSkippedHydration++;
-        }
-        else if (ngDevMode) {
-            // If this is not a component host, throw an error.
-            // Hydration can be skipped on per-component basis only.
-            throw invalidSkipHydrationHost(native);
-        }
-    }
-    return native;
-}
-function enableLocateOrCreateElementNodeImpl() {
-    _locateOrCreateElementNode = locateOrCreateElementNodeImpl;
-}
-
-function elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, localRefsIndex) {
-    ngDevMode && ngDevMode.firstCreatePass++;
-    const tViewConsts = tView.consts;
-    const attrs = getConstant(tViewConsts, attrsIndex);
-    const tNode = getOrCreateTNode(tView, index, 8 /* TNodeType.ElementContainer */, 'ng-container', attrs);
-    // While ng-container doesn't necessarily support styling, we use the style context to identify
-    // and execute directives on the ng-container.
-    if (attrs !== null) {
-        computeStaticStyling(tNode, attrs, true);
-    }
-    const localRefs = getConstant(tViewConsts, localRefsIndex);
-    resolveDirectives(tView, lView, tNode, localRefs);
-    if (tView.queries !== null) {
-        tView.queries.elementStart(tView, tNode);
-    }
-    return tNode;
-}
-/**
- * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
- * The instruction must later be followed by `elementContainerEnd()` call.
- *
- * @param index Index of the element in the LView array
- * @param attrsIndex Index of the container attributes in the `consts` array.
- * @param localRefsIndex Index of the container's local references in the `consts` array.
- * @returns This function returns itself so that it may be chained.
- *
- * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
- * the DOM (as a comment node can't have attributes). Attributes are here only for directive
- * matching purposes and setting initial inputs of directives.
- *
- * @codeGenApi
- */
-function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
-    const lView = getLView();
-    const tView = getTView();
-    const adjustedIndex = index + HEADER_OFFSET;
-    ngDevMode && assertIndexInRange(lView, adjustedIndex);
-    ngDevMode &&
-        assertEqual(getBindingIndex(), tView.bindingStartIndex, 'element containers should be created before any bindings');
-    const tNode = tView.firstCreatePass ?
-        elementContainerStartFirstCreatePass(adjustedIndex, tView, lView, attrsIndex, localRefsIndex) :
-        tView.data[adjustedIndex];
-    setCurrentTNode(tNode, true);
-    const comment = _locateOrCreateElementContainerNode(tView, lView, tNode, index);
-    lView[adjustedIndex] = comment;
-    if (wasLastNodeCreated()) {
-        appendChild(tView, lView, comment, tNode);
-    }
-    attachPatchData(comment, lView);
-    if (isDirectiveHost(tNode)) {
-        createDirectivesInstances(tView, lView, tNode);
-        executeContentQueries(tView, tNode, lView);
-    }
-    if (localRefsIndex != null) {
-        saveResolvedLocalsInData(lView, tNode);
-    }
-    return ɵɵelementContainerStart;
-}
-/**
- * Mark the end of the <ng-container>.
- * @returns This function returns itself so that it may be chained.
- *
- * @codeGenApi
- */
-function ɵɵelementContainerEnd() {
-    let currentTNode = getCurrentTNode();
-    const tView = getTView();
-    if (isCurrentTNodeParent()) {
-        setCurrentTNodeAsNotParent();
-    }
-    else {
-        ngDevMode && assertHasParent(currentTNode);
-        currentTNode = currentTNode.parent;
-        setCurrentTNode(currentTNode, false);
-    }
-    ngDevMode && assertTNodeType(currentTNode, 8 /* TNodeType.ElementContainer */);
-    if (tView.firstCreatePass) {
-        registerPostOrderHooks(tView, currentTNode);
-        if (isContentQueryHost(currentTNode)) {
-            tView.queries.elementEnd(currentTNode);
-        }
-    }
-    return ɵɵelementContainerEnd;
-}
-/**
- * Creates an empty logical container using {@link elementContainerStart}
- * and {@link elementContainerEnd}
- *
- * @param index Index of the element in the LView array
- * @param attrsIndex Index of the container attributes in the `consts` array.
- * @param localRefsIndex Index of the container's local references in the `consts` array.
- * @returns This function returns itself so that it may be chained.
- *
- * @codeGenApi
- */
-function ɵɵelementContainer(index, attrsIndex, localRefsIndex) {
-    ɵɵelementContainerStart(index, attrsIndex, localRefsIndex);
-    ɵɵelementContainerEnd();
-    return ɵɵelementContainer;
-}
-let _locateOrCreateElementContainerNode = (tView, lView, tNode, index) => {
-    lastNodeWasCreated(true);
-    return createCommentNode(lView[RENDERER], ngDevMode ? 'ng-container' : '');
-};
-/**
- * Enables hydration code path (to lookup existing elements in DOM)
- * in addition to the regular creation mode of comment nodes that
- * represent <ng-container>'s anchor.
- */
-function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
-    let comment;
-    const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
-    lastNodeWasCreated(isNodeCreationMode);
-    // Regular creation mode.
-    if (isNodeCreationMode) {
-        return createCommentNode(lView[RENDERER], ngDevMode ? 'ng-container' : '');
-    }
-    // Hydration mode, looking up existing elements in DOM.
-    const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
-    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
-    const ngContainerSize = getNgContainerSize(hydrationInfo, index);
-    ngDevMode &&
-        assertNumber(ngContainerSize, 'Unexpected state: hydrating an <ng-container>, ' +
-            'but no hydration info is available.');
-    setSegmentHead(hydrationInfo, index, currentRNode);
-    comment = siblingAfter(ngContainerSize, currentRNode);
-    if (ngDevMode) {
-        validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
-        markRNodeAsClaimedByHydration(comment);
-    }
-    return comment;
-}
-function enableLocateOrCreateElementContainerNodeImpl() {
-    _locateOrCreateElementContainerNode = locateOrCreateElementContainerNode;
-}
-
-/**
- * Returns the current OpaqueViewState instance.
- *
- * Used in conjunction with the restoreView() instruction to save a snapshot
- * of the current view and restore it when listeners are invoked. This allows
- * walking the declaration view tree in listeners to get vars from parent views.
- *
- * @codeGenApi
- */
-function ɵɵgetCurrentView() {
-    return getLView();
-}
-
-/**
- * Determine if the argument is shaped like a Promise
- */
-function isPromise(obj) {
-    // allow any Promise/A+ compliant thenable.
-    // It's up to the caller to ensure that obj.then conforms to the spec
-    return !!obj && typeof obj.then === 'function';
-}
-/**
- * Determine if the argument is a Subscribable
- */
-function isSubscribable(obj) {
-    return !!obj && typeof obj.subscribe === 'function';
-}
-
-/**
- * Adds an event listener to the current node.
- *
- * If an output exists on one of the node's directives, it also subscribes to the output
- * and saves the subscription for later cleanup.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener - this argument is a reminder
- *     from the Renderer3 infrastructure and should be removed from the instruction arguments
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- *
- * @codeGenApi
- */
-function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
-    const lView = getLView();
-    const tView = getTView();
-    const tNode = getCurrentTNode();
-    listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, eventTargetResolver);
-    return ɵɵlistener;
-}
-/**
- * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
- *
- * This instruction is for compatibility purposes and is designed to ensure that a
- * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
- * in the component's renderer. Normally all host listeners are evaluated with the
- * parent component's renderer, but, in the case of animation @triggers, they need
- * to be evaluated with the sub component's renderer (because that's where the
- * animation triggers are defined).
- *
- * Do not use this instruction as a replacement for `listener`. This instruction
- * only exists to ensure compatibility with the ViewEngine's host binding behavior.
- *
- * @param eventName Name of the event
- * @param listenerFn The function to be called when event emits
- * @param useCapture Whether or not to use capture in event listener
- * @param eventTargetResolver Function that returns global target information in case this listener
- * should be attached to a global object like window, document or body
- *
- * @codeGenApi
- */
-function ɵɵsyntheticHostListener(eventName, listenerFn) {
-    const tNode = getCurrentTNode();
-    const lView = getLView();
-    const tView = getTView();
-    const currentDef = getCurrentDirectiveDef(tView.data);
-    const renderer = loadComponentRenderer(currentDef, tNode, lView);
-    listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn);
-    return ɵɵsyntheticHostListener;
-}
-/**
- * A utility function that checks if a given element has already an event handler registered for an
- * event with a specified name. The TView.cleanup data structure is used to find out which events
- * are registered for a given element.
- */
-function findExistingListener(tView, lView, eventName, tNodeIdx) {
-    const tCleanup = tView.cleanup;
-    if (tCleanup != null) {
-        for (let i = 0; i < tCleanup.length - 1; i += 2) {
-            const cleanupEventName = tCleanup[i];
-            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
-                // We have found a matching event name on the same node but it might not have been
-                // registered yet, so we must explicitly verify entries in the LView cleanup data
-                // structures.
-                const lCleanup = lView[CLEANUP];
-                const listenerIdxInLCleanup = tCleanup[i + 2];
-                return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
-            }
-            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
-            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
-            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
-            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
-            // documentation of TView.cleanup for more details of this data structure layout.
-            if (typeof cleanupEventName === 'string') {
-                i += 2;
-            }
-        }
-    }
-    return null;
-}
-function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, eventTargetResolver) {
-    const isTNodeDirectiveHost = isDirectiveHost(tNode);
-    const firstCreatePass = tView.firstCreatePass;
-    const tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
-    const context = lView[CONTEXT];
-    // When the ɵɵlistener instruction was generated and is executed we know that there is either a
-    // native listener or a directive output on this element. As such we we know that we will have to
-    // register a listener and store its cleanup function on LView.
-    const lCleanup = getOrCreateLViewCleanup(lView);
-    ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
-    let processOutputs = true;
-    // Adding a native event listener is applicable when:
-    // - The corresponding TNode represents a DOM element.
-    // - The event target has a resolver (usually resulting in a global object,
-    //   such as `window` or `document`).
-    if ((tNode.type & 3 /* TNodeType.AnyRNode */) || eventTargetResolver) {
-        const native = getNativeByTNode(tNode, lView);
-        const target = eventTargetResolver ? eventTargetResolver(native) : native;
-        const lCleanupIndex = lCleanup.length;
-        const idxOrTargetGetter = eventTargetResolver ?
-            (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index])) :
-            tNode.index;
-        // In order to match current behavior, native DOM event listeners must be added for all
-        // events (including outputs).
-        // There might be cases where multiple directives on the same element try to register an event
-        // handler function for the same event. In this situation we want to avoid registration of
-        // several native listeners as each registration would be intercepted by NgZone and
-        // trigger change detection. This would mean that a single user action would result in several
-        // change detections being invoked. To avoid this situation we want to have only one call to
-        // native handler registration (for the same element and same type of event).
-        //
-        // In order to have just one native event handler in presence of multiple handler functions,
-        // we just register a first handler function as a native event listener and then chain
-        // (coalesce) other handler functions on top of the first native handler function.
-        let existingListener = null;
-        // Please note that the coalescing described here doesn't happen for events specifying an
-        // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
-        // view engine.
-        // Also, we don't have to search for existing listeners is there are no directives
-        // matching on a given node as we can't register multiple event handlers for the same event in
-        // a template (this would mean having duplicate attributes).
-        if (!eventTargetResolver && isTNodeDirectiveHost) {
-            existingListener = findExistingListener(tView, lView, eventName, tNode.index);
-        }
-        if (existingListener !== null) {
-            // Attach a new listener to coalesced listeners list, maintaining the order in which
-            // listeners are registered. For performance reasons, we keep a reference to the last
-            // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
-            // the entire set each time we need to add a new listener.
-            const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
-            lastListenerFn.__ngNextListenerFn__ = listenerFn;
-            existingListener.__ngLastListenerFn__ = listenerFn;
-            processOutputs = false;
-        }
-        else {
-            listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
-            const cleanupFn = renderer.listen(target, eventName, listenerFn);
-            ngDevMode && ngDevMode.rendererAddEventListener++;
-            lCleanup.push(listenerFn, cleanupFn);
-            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
-        }
-    }
-    else {
-        // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
-        // ancestors are marked dirty when an event occurs.
-        listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
-    }
-    // subscribe to directive outputs
-    const outputs = tNode.outputs;
-    let props;
-    if (processOutputs && outputs !== null && (props = outputs[eventName])) {
-        const propsLength = props.length;
-        if (propsLength) {
-            for (let i = 0; i < propsLength; i += 2) {
-                const index = props[i];
-                ngDevMode && assertIndexInRange(lView, index);
-                const minifiedName = props[i + 1];
-                const directiveInstance = lView[index];
-                const output = directiveInstance[minifiedName];
-                if (ngDevMode && !isSubscribable(output)) {
-                    throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
-                }
-                const subscription = output.subscribe(listenerFn);
-                const idx = lCleanup.length;
-                lCleanup.push(listenerFn, subscription);
-                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
-            }
-        }
-    }
-}
-function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
-    try {
-        profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
-        // Only explicitly returning false from a listener should preventDefault
-        return listenerFn(e) !== false;
-    }
-    catch (error) {
-        handleError(lView, error);
-        return false;
-    }
-    finally {
-        profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
-    }
-}
-/**
- * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
- * if applicable.
- *
- * @param tNode The TNode associated with this listener
- * @param lView The LView that contains this listener
- * @param listenerFn The listener function to call
- * @param wrapWithPreventDefault Whether or not to prevent default behavior
- * (the procedural renderer does this already, so in those cases, we should skip)
- */
-function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault) {
-    // Note: we are performing most of the work in the listener function itself
-    // to optimize listener registration.
-    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
-        // Ivy uses `Function` as a special token that allows us to unwrap the function
-        // so that it can be invoked programmatically by `DebugNode.triggerEventHandler`.
-        if (e === Function) {
-            return listenerFn;
-        }
-        // In order to be backwards compatible with View Engine, events on component host nodes
-        // must also mark the component view itself dirty (i.e. the view that it owns).
-        const startView = tNode.componentOffset > -1 ? getComponentLViewByIndex(tNode.index, lView) : lView;
-        markViewDirty(startView);
-        let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
-        // A just-invoked listener function might have coalesced listeners so we need to check for
-        // their presence and invoke as needed.
-        let nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
-        while (nextListenerFn) {
-            // We should prevent default if any of the listeners explicitly return false
-            result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
-            nextListenerFn = nextListenerFn.__ngNextListenerFn__;
-        }
-        if (wrapWithPreventDefault && result === false) {
-            e.preventDefault();
-        }
-        return result;
-    };
-}
-
-/**
- * Retrieves a context at the level specified and saves it as the global, contextViewData.
- * Will get the next level up if level is not specified.
- *
- * This is used to save contexts of parent views so they can be bound in embedded views, or
- * in conjunction with reference() to bind a ref from a parent view.
- *
- * @param level The relative level of the view from which to grab context compared to contextVewData
- * @returns context
- *
- * @codeGenApi
- */
-function ɵɵnextContext(level = 1) {
-    return nextContextImpl(level);
-}
-
-/**
- * Checks a given node against matching projection slots and returns the
- * determined slot index. Returns "null" if no slot matched the given node.
- *
- * This function takes into account the parsed ngProjectAs selector from the
- * node's attributes. If present, it will check whether the ngProjectAs selector
- * matches any of the projection slot selectors.
- */
-function matchingProjectionSlotIndex(tNode, projectionSlots) {
-    let wildcardNgContentIndex = null;
-    const ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
-    for (let i = 0; i < projectionSlots.length; i++) {
-        const slotValue = projectionSlots[i];
-        // The last wildcard projection slot should match all nodes which aren't matching
-        // any selector. This is necessary to be backwards compatible with view engine.
-        if (slotValue === '*') {
-            wildcardNgContentIndex = i;
-            continue;
-        }
-        // If we ran into an `ngProjectAs` attribute, we should match its parsed selector
-        // to the list of selectors, otherwise we fall back to matching against the node.
-        if (ngProjectAsAttrVal === null ?
-            isNodeMatchingSelectorList(tNode, slotValue, /* isProjectionMode */ true) :
-            isSelectorInSelectorList(ngProjectAsAttrVal, slotValue)) {
-            return i; // first matching selector "captures" a given node
-        }
-    }
-    return wildcardNgContentIndex;
-}
-/**
- * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
- * It takes all the selectors from the entire component's template and decides where
- * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
- * backed by a selector).
- *
- * This function requires CSS selectors to be provided in 2 forms: parsed (by a compiler) and text,
- * un-parsed form.
- *
- * The parsed form is needed for efficient matching of a node against a given CSS selector.
- * The un-parsed, textual form is needed for support of the ngProjectAs attribute.
- *
- * Having a CSS selector in 2 different formats is not ideal, but alternatives have even more
- * drawbacks:
- * - having only a textual form would require runtime parsing of CSS selectors;
- * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
- * template author).
- *
- * @param projectionSlots? A collection of projection slots. A projection slot can be based
- *        on a parsed CSS selectors or set to the wildcard selector ("*") in order to match
- *        all nodes which do not match any selector. If not specified, a single wildcard
- *        selector projection slot will be defined.
- *
- * @codeGenApi
- */
-function ɵɵprojectionDef(projectionSlots) {
-    const componentNode = getLView()[DECLARATION_COMPONENT_VIEW][T_HOST];
-    if (!componentNode.projection) {
-        // If no explicit projection slots are defined, fall back to a single
-        // projection slot with the wildcard selector.
-        const numProjectionSlots = projectionSlots ? projectionSlots.length : 1;
-        const projectionHeads = componentNode.projection =
-            newArray(numProjectionSlots, null);
-        const tails = projectionHeads.slice();
-        let componentChild = componentNode.child;
-        while (componentChild !== null) {
-            const slotIndex = projectionSlots ? matchingProjectionSlotIndex(componentChild, projectionSlots) : 0;
-            if (slotIndex !== null) {
-                if (tails[slotIndex]) {
-                    tails[slotIndex].projectionNext = componentChild;
-                }
-                else {
-                    projectionHeads[slotIndex] = componentChild;
-                }
-                tails[slotIndex] = componentChild;
-            }
-            componentChild = componentChild.next;
-        }
-    }
-}
-/**
- * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
- * to the projectionDef instruction.
- *
- * @param nodeIndex
- * @param selectorIndex:
- *        - 0 when the selector is `*` (or unspecified as this is the default value),
- *        - 1 based index of the selector from the {@link projectionDef}
- *
- * @codeGenApi
- */
-function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
-    const lView = getLView();
-    const tView = getTView();
-    const tProjectionNode = getOrCreateTNode(tView, HEADER_OFFSET + nodeIndex, 16 /* TNodeType.Projection */, null, attrs || null);
-    // We can't use viewData[HOST_NODE] because projection nodes can be nested in embedded views.
-    if (tProjectionNode.projection === null)
-        tProjectionNode.projection = selectorIndex;
-    // `<ng-content>` has no content
-    setCurrentTNodeAsNotParent();
-    const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
-    if (isNodeCreationMode &&
-        (tProjectionNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
-        // re-distribution of projectable nodes is stored on a component's view level
-        applyProjection(tView, lView, tProjectionNode);
-    }
-}
-
-/**
- *
- * Update an interpolated property on an element with a lone bound value
- *
- * Used when the value passed to a property has 1 interpolated value in it, an no additional text
- * surrounds that interpolated value:
- *
- * ```html
- * <div title="{{v0}}"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate('title', v0);
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate(propName, v0, sanitizer) {
-    ɵɵpropertyInterpolate1(propName, '', v0, '', sanitizer);
-    return ɵɵpropertyInterpolate;
-}
-/**
- *
- * Update an interpolated property on an element with single bound value surrounded by text.
- *
- * Used when the value passed to a property has 1 interpolated value in it:
- *
- * ```html
- * <div title="prefix{{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate1('title', 'prefix', v0, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 1, prefix, suffix);
-    }
-    return ɵɵpropertyInterpolate1;
-}
-/**
- *
- * Update an interpolated property on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 2, prefix, i0, suffix);
-    }
-    return ɵɵpropertyInterpolate2;
-}
-/**
- *
- * Update an interpolated property on an element with 3 bound values surrounded by text.
- *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate3(
- * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 3, prefix, i0, i1, suffix);
-    }
-    return ɵɵpropertyInterpolate3;
-}
-/**
- *
- * Update an interpolated property on an element with 4 bound values surrounded by text.
- *
- * Used when the value passed to a property has 4 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate4(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
-    }
-    return ɵɵpropertyInterpolate4;
-}
-/**
- *
- * Update an interpolated property on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate5(
- * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
-    }
-    return ɵɵpropertyInterpolate5;
-}
-/**
- *
- * Update an interpolated property on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate6(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
-    }
-    return ɵɵpropertyInterpolate6;
-}
-/**
- *
- * Update an interpolated property on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate7(
- *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
-    }
-    return ɵɵpropertyInterpolate7;
-}
-/**
- *
- * Update an interpolated property on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolate8(
- *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param i6 Static value used for concatenation only.
- * @param v7 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
-        ngDevMode &&
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
-    }
-    return ɵɵpropertyInterpolate8;
-}
-/**
- * Update an interpolated property on an element with 9 or more bound values surrounded by text.
- *
- * Used when the number of interpolated values exceeds 8.
- *
- * ```html
- * <div
- *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
- * ```
- *
- * Its compiled representation is::
- *
- * ```ts
- * ɵɵpropertyInterpolateV(
- *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
- *  'suffix']);
- * ```
- *
- * If the property name also exists as an input property on one of the element's directives,
- * the component property will be set instead of the element property. This check must
- * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
- *
- * @param propName The name of the property to update.
- * @param values The collection of values and the strings in between those values, beginning with a
- * string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
- * @param sanitizer An optional sanitizer function
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
-    const lView = getLView();
-    const interpolatedValue = interpolationV(lView, values);
-    if (interpolatedValue !== NO_CHANGE) {
-        const tView = getTView();
-        const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
-        if (ngDevMode) {
-            const interpolationInBetween = [values[0]]; // prefix
-            for (let i = 2; i < values.length; i += 2) {
-                interpolationInBetween.push(values[i]);
-            }
-            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1, ...interpolationInBetween);
-        }
-    }
-    return ɵɵpropertyInterpolateV;
-}
-
 function toTStylingRange(prev, next) {
     ngDevMode && assertNumberInRange(prev, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
     ngDevMode && assertNumberInRange(next, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
@@ -17826,6 +15810,46 @@ function malformedStyleError(text, expecting, index) {
     throw throwError(`Malformed style at location ${index} in string '` + text.substring(0, index) + '[>>' +
         text.substring(index, index + 1) + '<<]' + text.slice(index + 1) +
         `'. Expecting '${expecting}'.`);
+}
+
+/**
+ * Update a property on a selected element.
+ *
+ * Operates on the element selected by index via the {@link select} instruction.
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled
+ *
+ * @param propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `property('name', ctx.name)('title', ctx.title)`)
+ *
+ * @codeGenApi
+ */
+function ɵɵproperty(propName, value, sanitizer) {
+    const lView = getLView();
+    const bindingIndex = nextBindingIndex();
+    if (bindingUpdated(lView, bindingIndex, value)) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, false);
+        ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
+    }
+    return ɵɵproperty;
+}
+/**
+ * Given `<div style="..." my-dir>` and `MyDir` with `@Input('style')` we need to write to
+ * directive input.
+ */
+function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isClassBased) {
+    const inputs = tNode.inputs;
+    const property = isClassBased ? 'class' : 'style';
+    // We support both 'class' and `className` hence the fallback.
+    setInputsForProperty(tView, lView, inputs[property], property, value);
 }
 
 /**
@@ -18621,339 +16645,6 @@ function hasStylingInputShadow(tNode, isClassBased) {
 }
 
 /**
- * Create static text node
- *
- * @param index Index of the node in the data array
- * @param value Static string value to write.
- *
- * @codeGenApi
- */
-function ɵɵtext(index, value = '') {
-    const lView = getLView();
-    const tView = getTView();
-    const adjustedIndex = index + HEADER_OFFSET;
-    ngDevMode &&
-        assertEqual(getBindingIndex(), tView.bindingStartIndex, 'text nodes should be created before any bindings');
-    ngDevMode && assertIndexInRange(lView, adjustedIndex);
-    const tNode = tView.firstCreatePass ?
-        getOrCreateTNode(tView, adjustedIndex, 1 /* TNodeType.Text */, value, null) :
-        tView.data[adjustedIndex];
-    const textNative = _locateOrCreateTextNode(tView, lView, tNode, value, index);
-    lView[adjustedIndex] = textNative;
-    if (wasLastNodeCreated()) {
-        appendChild(tView, lView, textNative, tNode);
-    }
-    // Text nodes are self closing.
-    setCurrentTNode(tNode, false);
-}
-let _locateOrCreateTextNode = (tView, lView, tNode, value, index) => {
-    lastNodeWasCreated(true);
-    return createTextNode(lView[RENDERER], value);
-};
-/**
- * Enables hydration code path (to lookup existing elements in DOM)
- * in addition to the regular creation mode of text nodes.
- */
-function locateOrCreateTextNodeImpl(tView, lView, tNode, value, index) {
-    const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
-    lastNodeWasCreated(isNodeCreationMode);
-    // Regular creation mode.
-    if (isNodeCreationMode) {
-        return createTextNode(lView[RENDERER], value);
-    }
-    // Hydration mode, looking up an existing element in DOM.
-    const textNative = locateNextRNode(hydrationInfo, tView, lView, tNode);
-    ngDevMode && validateMatchingNode(textNative, Node.TEXT_NODE, null, lView, tNode);
-    ngDevMode && markRNodeAsClaimedByHydration(textNative);
-    return textNative;
-}
-function enableLocateOrCreateTextNodeImpl() {
-    _locateOrCreateTextNode = locateOrCreateTextNodeImpl;
-}
-
-/**
- *
- * Update text content with a lone bound value
- *
- * Used when a text node has 1 interpolated value in it, an no additional text
- * surrounds that interpolated value:
- *
- * ```html
- * <div>{{v0}}</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolate(v0);
- * ```
- * @returns itself, so that it may be chained.
- * @see textInterpolateV
- * @codeGenApi
- */
-function ɵɵtextInterpolate(v0) {
-    ɵɵtextInterpolate1('', v0, '');
-    return ɵɵtextInterpolate;
-}
-/**
- *
- * Update text content with single bound value surrounded by other text.
- *
- * Used when a text node has 1 interpolated value in it:
- *
- * ```html
- * <div>prefix{{v0}}suffix</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolate1('prefix', v0, 'suffix');
- * ```
- * @returns itself, so that it may be chained.
- * @see textInterpolateV
- * @codeGenApi
- */
-function ɵɵtextInterpolate1(prefix, v0, suffix) {
-    const lView = getLView();
-    const interpolated = interpolation1(lView, prefix, v0, suffix);
-    if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, getSelectedIndex(), interpolated);
-    }
-    return ɵɵtextInterpolate1;
-}
-/**
- *
- * Update text content with 2 bound values surrounded by other text.
- *
- * Used when a text node has 2 interpolated values in it:
- *
- * ```html
- * <div>prefix{{v0}}-{{v1}}suffix</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolate2('prefix', v0, '-', v1, 'suffix');
- * ```
- * @returns itself, so that it may be chained.
- * @see textInterpolateV
- * @codeGenApi
- */
-function ɵɵtextInterpolate2(prefix, v0, i0, v1, suffix) {
-    const lView = getLView();
-    const interpolated = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, getSelectedIndex(), interpolated);
-    }
-    return ɵɵtextInterpolate2;
-}
-/**
- *
- * Update text content with 3 bound values surrounded by other text.
- *
- * Used when a text node has 3 interpolated values in it:
- *
- * ```html
- * <div>prefix{{v0}}-{{v1}}-{{v2}}suffix</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolate3(
- * 'prefix', v0, '-', v1, '-', v2, 'suffix');
- * ```
- * @returns itself, so that it may be chained.
- * @see textInterpolateV
- * @codeGenApi
- */
-function ɵɵtextInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
-    const lView = getLView();
-    const interpolated = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, getSelectedIndex(), interpolated);
-    }
-    return ɵɵtextInterpolate3;
-}
-/**
- *
- * Update text content with 4 bound values surrounded by other text.
- *
- * Used when a text node has 4 interpolated values in it:
- *
- * ```html
- * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolate4(
- * 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
- * ```
- * @returns itself, so that it may be chained.
- * @see ɵɵtextInterpolateV
- * @codeGenApi
- */
-function ɵɵtextInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-    const lView = getLView();
-    const interpolated = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, getSelectedIndex(), interpolated);
-    }
-    return ɵɵtextInterpolate4;
-}
-/**
- *
- * Update text content with 5 bound values surrounded by other text.
- *
- * Used when a text node has 5 interpolated values in it:
- *
- * ```html
- * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolate5(
- * 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
- * ```
- * @returns itself, so that it may be chained.
- * @see textInterpolateV
- * @codeGenApi
- */
-function ɵɵtextInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-    const lView = getLView();
-    const interpolated = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, getSelectedIndex(), interpolated);
-    }
-    return ɵɵtextInterpolate5;
-}
-/**
- *
- * Update text content with 6 bound values surrounded by other text.
- *
- * Used when a text node has 6 interpolated values in it:
- *
- * ```html
- * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolate6(
- *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
- * ```
- *
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change. @returns itself, so that it may be chained.
- * @see textInterpolateV
- * @codeGenApi
- */
-function ɵɵtextInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-    const lView = getLView();
-    const interpolated = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, getSelectedIndex(), interpolated);
-    }
-    return ɵɵtextInterpolate6;
-}
-/**
- *
- * Update text content with 7 bound values surrounded by other text.
- *
- * Used when a text node has 7 interpolated values in it:
- *
- * ```html
- * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolate7(
- *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
- * ```
- * @returns itself, so that it may be chained.
- * @see textInterpolateV
- * @codeGenApi
- */
-function ɵɵtextInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-    const lView = getLView();
-    const interpolated = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, getSelectedIndex(), interpolated);
-    }
-    return ɵɵtextInterpolate7;
-}
-/**
- *
- * Update text content with 8 bound values surrounded by other text.
- *
- * Used when a text node has 8 interpolated values in it:
- *
- * ```html
- * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolate8(
- *  'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
- * ```
- * @returns itself, so that it may be chained.
- * @see textInterpolateV
- * @codeGenApi
- */
-function ɵɵtextInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-    const lView = getLView();
-    const interpolated = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, getSelectedIndex(), interpolated);
-    }
-    return ɵɵtextInterpolate8;
-}
-/**
- * Update text content with 9 or more bound values other surrounded by text.
- *
- * Used when the number of interpolated values exceeds 8.
- *
- * ```html
- * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix</div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵtextInterpolateV(
- *  ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
- *  'suffix']);
- * ```
- *.
- * @param values The collection of values and the strings in between those values, beginning with
- * a string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
- *
- * @returns itself, so that it may be chained.
- * @codeGenApi
- */
-function ɵɵtextInterpolateV(values) {
-    const lView = getLView();
-    const interpolated = interpolationV(lView, values);
-    if (interpolated !== NO_CHANGE) {
-        textBindingInternal(lView, getSelectedIndex(), interpolated);
-    }
-    return ɵɵtextInterpolateV;
-}
-
-/**
  *
  * Update an interpolated class on an element with single bound value surrounded by text.
  *
@@ -19252,661 +16943,1212 @@ function ɵɵclassMapInterpolateV(values) {
     checkStylingMap(keyValueArraySet, classStringParser, interpolatedValue, true);
 }
 
-/**
- *
- * Update an interpolated style on an element with single bound value surrounded by text.
- *
- * Used when the value passed to a property has 1 interpolated value in it:
- *
- * ```html
- * <div style="key: {{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate1('key: ', v0, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate1(prefix, v0, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
+    const embeddedTView = templateTNode.tView;
+    ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
+    ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
+    // Embedded views follow the change detection strategy of the view they're declared in.
+    const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
+    const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
+    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.hydrationInfo ?? null);
+    const declarationLContainer = declarationLView[templateTNode.index];
+    ngDevMode && assertLContainer(declarationLContainer);
+    embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
+    const declarationViewLQueries = declarationLView[QUERIES];
+    if (declarationViewLQueries !== null) {
+        embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
+    }
+    // execute creation mode of a view
+    renderView(embeddedTView, embeddedLView, context);
+    return embeddedLView;
 }
-/**
- *
- * Update an interpolated style on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate2('key: ', v0, '; key1: ', v1, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate2(prefix, v0, i0, v1, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function getLViewFromLContainer(lContainer, index) {
+    const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
+    // avoid reading past the array boundaries
+    if (adjustedIndex < lContainer.length) {
+        const lView = lContainer[adjustedIndex];
+        ngDevMode && assertLView(lView);
+        return lView;
+    }
+    return undefined;
 }
-/**
- *
- * Update an interpolated style on an element with 3 bound values surrounded by text.
- *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key2: {{v1}}; key2: {{v2}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate3(
- *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    ɵɵstyleMap(interpolatedValue);
+function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
+    const tView = lView[TVIEW];
+    // insert to the view tree so the new view can be change-detected
+    insertView(tView, lView, lContainer, index);
+    // insert to the view to the DOM tree
+    if (addToDOM) {
+        const beforeNode = getBeforeNodeForView(index, lContainer);
+        const renderer = lView[RENDERER];
+        const parentRNode = nativeParentNode(renderer, lContainer[NATIVE]);
+        if (parentRNode !== null) {
+            addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
+        }
+    }
 }
-/**
- *
- * Update an interpolated style on an element with 4 bound values surrounded by text.
- *
- * Used when the value passed to a property has 4 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate4(
- *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    ɵɵstyleMap(interpolatedValue);
-}
-/**
- *
- * Update an interpolated style on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate5(
- *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    ɵɵstyleMap(interpolatedValue);
-}
-/**
- *
- * Update an interpolated style on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}};
- *             key5: {{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate6(
- *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
- *    'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    ɵɵstyleMap(interpolatedValue);
-}
-/**
- *
- * Update an interpolated style on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
- *             key6: {{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate7(
- *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
- *    '; key6: ', v6, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    ɵɵstyleMap(interpolatedValue);
-}
-/**
- *
- * Update an interpolated style on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
- *             key6: {{v6}}; key7: {{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolate8(
- *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
- *    '; key6: ', v6, '; key7: ', v7, 'suffix');
- * ```
- *
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param i6 Static value used for concatenation only.
- * @param v7 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    ɵɵstyleMap(interpolatedValue);
-}
-/**
- * Update an interpolated style on an element with 9 or more bound values surrounded by text.
- *
- * Used when the number of interpolated values exceeds 8.
- *
- * ```html
- * <div
- *  class="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
- *         key6: {{v6}}; key7: {{v7}}; key8: {{v8}}; key9: {{v9}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstyleMapInterpolateV(
- *    ['key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
- *     '; key6: ', v6, '; key7: ', v7, '; key8: ', v8, '; key9: ', v9, 'suffix']);
- * ```
- *.
- * @param values The collection of values and the strings in-between those values, beginning with
- * a string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '; key2: ', value1, '; key2: ', value2, ..., value99, 'suffix']`)
- * @codeGenApi
- */
-function ɵɵstyleMapInterpolateV(values) {
-    const lView = getLView();
-    const interpolatedValue = interpolationV(lView, values);
-    ɵɵstyleMap(interpolatedValue);
+function removeLViewFromLContainer(lContainer, index) {
+    const lView = detachView(lContainer, index);
+    if (lView !== undefined) {
+        destroyLView(lView[TVIEW], lView);
+    }
+    return lView;
 }
 
 /**
+ * The conditional instruction represents the basic building block on the runtime side to support
+ * built-in "if" and "switch". On the high level this instruction is responsible for adding and
+ * removing views selected by a conditional expression.
  *
- * Update an interpolated style property on an element with single bound value surrounded by text.
- *
- * Used when the value passed to a property has 1 interpolated value in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate1(0, 'prefix', v0, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
+ * @param containerIndex index of a container in a host view (indexed from HEADER_OFFSET) where
+ *     conditional views should be inserted.
+ * @param matchingTemplateIndex index of a template TNode representing a conditional view to be
+ *     inserted; -1 represents a special case when there is no view to insert.
  * @codeGenApi
  */
-function ɵɵstylePropInterpolate1(prop, prefix, v0, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate1;
+function ɵɵconditional(containerIndex, matchingTemplateIndex, value) {
+    const hostLView = getLView();
+    const bindingIndex = nextBindingIndex();
+    const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
+    const viewInContainerIdx = 0;
+    if (bindingUpdated(hostLView, bindingIndex, matchingTemplateIndex)) {
+        // The index of the view to show changed - remove the previously displayed one
+        // (it is a noop if there are no active views in a container).
+        removeLViewFromLContainer(lContainer, viewInContainerIdx);
+        // Index -1 is a special case where none of the conditions evaluates to
+        // a truthy value and as the consequence we've got no view to show.
+        if (matchingTemplateIndex !== -1) {
+            const templateTNode = getExistingTNode(hostLView[TVIEW], matchingTemplateIndex);
+            const embeddedLView = createAndRenderEmbeddedLView(hostLView, templateTNode, value);
+            addLViewToLContainer(lContainer, embeddedLView, viewInContainerIdx);
+        }
+    }
+    else {
+        // We might keep displaying the same template but the actual value of the expression could have
+        // changed - re-bind in context.
+        const lView = getLViewFromLContainer(lContainer, viewInContainerIdx);
+        if (lView !== undefined) {
+            lView[CONTEXT] = value;
+        }
+    }
+}
+function getLContainer(lView, index) {
+    const lContainer = lView[index];
+    ngDevMode && assertLContainer(lContainer);
+    return lContainer;
+}
+function getExistingTNode(tView, index) {
+    const tNode = getTNode(tView, index + HEADER_OFFSET);
+    ngDevMode && assertTNode(tNode);
+    return tNode;
+}
+
+/**
+ * Creates runtime data structures for `{#defer}` blocks.
+ *
+ * @param deferIndex Index of the underlying deferred block data structure.
+ * @param primaryTemplateIndex Index of the template function with the block's content.
+ * @param deferredDepsFn Function that contains dependencies for this defer block
+ * @param loadingIndex Index of the template with the `{:loading}` block content.
+ * @param placeholderIndex Index of the template with the `{:placeholder}` block content.
+ * @param error Index of the template with the `{:error}` block content.
+ * @param loadingConfigIndex Index in the constants array of the configuration of the `{:loading}`
+ *     block.
+ * @param placeholderConfigIndexIndex in the constants array of the configuration of the
+ *     `{:placeholder}` block.
+ *
+ * @codeGenApi
+ */
+function ɵɵdefer(deferIndex, primaryTemplateIndex, deferredDepsFn, loadingIndex, placeholderIndex, errorIndex, loadingConfigIndex, placeholderConfigIndex) { } // TODO: implement runtime logic.
+/**
+ * Loads the deferred content when a value becomes truthy.
+ * @codeGenApi
+ */
+function ɵɵdeferWhen(value) { } // TODO: implement runtime logic.
+/**
+ * Prefetches the deferred content when a value becomes truthy.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchWhen(value) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on idle` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnIdle() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetech on idle` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnIdle() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on immediate` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnImmediate() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetech on immediate` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnImmediate() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on timer` deferred trigger.
+ * @param delay Amount of time to wait before loading the content.
+ * @codeGenApi
+ */
+function ɵɵdeferOnTimer(delay) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetch on timer` deferred trigger.
+ * @param delay Amount of time to wait before prefetching the content.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnTimer(delay) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on hover` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnHover() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetech on hover` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnHover() { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on interaction` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+function ɵɵdeferOnInteraction(target) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnInteraction(target) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `on viewport` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+function ɵɵdeferOnViewport(target) { } // TODO: implement runtime logic.
+/**
+ * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
+ * @param target Optional element on which to listen for hover events.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnViewport(target) { } // TODO: implement runtime logic.
+
+const AT_THIS_LOCATION = '<-- AT THIS LOCATION';
+/**
+ * Retrieves a user friendly string for a given TNodeType for use in
+ * friendly error messages
+ *
+ * @param tNodeType
+ * @returns
+ */
+function getFriendlyStringFromTNodeType(tNodeType) {
+    switch (tNodeType) {
+        case 4 /* TNodeType.Container */:
+            return 'view container';
+        case 2 /* TNodeType.Element */:
+            return 'element';
+        case 8 /* TNodeType.ElementContainer */:
+            return 'ng-container';
+        case 32 /* TNodeType.Icu */:
+            return 'icu';
+        case 64 /* TNodeType.Placeholder */:
+            return 'i18n';
+        case 16 /* TNodeType.Projection */:
+            return 'projection';
+        case 1 /* TNodeType.Text */:
+            return 'text';
+        default:
+            // This should not happen as we cover all possible TNode types above.
+            return '<unknown>';
+    }
 }
 /**
- *
- * Update an interpolated style property on an element with 2 bound values surrounded by text.
- *
- * Used when the value passed to a property has 2 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate2(0, 'prefix', v0, '-', v1, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * Validates that provided nodes match during the hydration process.
  */
-function ɵɵstylePropInterpolate2(prop, prefix, v0, i0, v1, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate2;
+function validateMatchingNode(node, nodeType, tagName, lView, tNode, isViewContainerAnchor = false) {
+    if (!node ||
+        (node.nodeType !== nodeType ||
+            (node.nodeType === Node.ELEMENT_NODE &&
+                node.tagName.toLowerCase() !== tagName?.toLowerCase()))) {
+        const expectedNode = shortRNodeDescription(nodeType, tagName, null);
+        let header = `During hydration Angular expected ${expectedNode} but `;
+        const hostComponentDef = getDeclarationComponentDef(lView);
+        const componentClassName = hostComponentDef?.type?.name;
+        const expected = `Angular expected this DOM:\n\n${describeExpectedDom(lView, tNode, isViewContainerAnchor)}\n\n`;
+        let actual = '';
+        if (!node) {
+            // No node found during hydration.
+            header += `the node was not found.\n\n`;
+        }
+        else {
+            const actualNode = shortRNodeDescription(node.nodeType, node.tagName ?? null, node.textContent ?? null);
+            header += `found ${actualNode}.\n\n`;
+            actual = `Actual DOM is:\n\n${describeDomFromNode(node)}\n\n`;
+        }
+        const footer = getHydrationErrorFooter(componentClassName);
+        const message = header + expected + actual + getHydrationAttributeNote() + footer;
+        throw new RuntimeError(-500 /* RuntimeErrorCode.HYDRATION_NODE_MISMATCH */, message);
+    }
 }
 /**
- *
- * Update an interpolated style property on an element with 3 bound values surrounded by text.
- *
- * Used when the value passed to a property has 3 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate3(0, 'prefix', v0, '-', v1, '-', v2, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * Validates that a given node has sibling nodes
  */
-function ɵɵstylePropInterpolate3(prop, prefix, v0, i0, v1, i1, v2, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate3;
+function validateSiblingNodeExists(node) {
+    validateNodeExists(node);
+    if (!node.nextSibling) {
+        const header = 'During hydration Angular expected more sibling nodes to be present.\n\n';
+        const actual = `Actual DOM is:\n\n${describeDomFromNode(node)}\n\n`;
+        const footer = getHydrationErrorFooter();
+        const message = header + actual + footer;
+        throw new RuntimeError(-501 /* RuntimeErrorCode.HYDRATION_MISSING_SIBLINGS */, message);
+    }
 }
 /**
- *
- * Update an interpolated style property on an element with 4 bound values surrounded by text.
- *
- * Used when the value passed to a property has 4 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate4(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * Validates that a node exists or throws
  */
-function ɵɵstylePropInterpolate4(prop, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate4;
+function validateNodeExists(node, lView = null, tNode = null) {
+    if (!node) {
+        const header = 'During hydration, Angular expected an element to be present at this location.\n\n';
+        let expected = '';
+        let footer = '';
+        if (lView !== null && tNode !== null) {
+            expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
+            footer = getHydrationErrorFooter();
+        }
+        throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
+    }
 }
 /**
+ * Builds the hydration error message when a node is not found
  *
- * Update an interpolated style property on an element with 5 bound values surrounded by text.
- *
- * Used when the value passed to a property has 5 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate5(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param lView the LView where the node exists
+ * @param tNode the TNode
  */
-function ɵɵstylePropInterpolate5(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate5;
+function nodeNotFoundError(lView, tNode) {
+    const header = 'During serialization, Angular was unable to find an element in the DOM:\n\n';
+    const expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
+    const footer = getHydrationErrorFooter();
+    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
 }
 /**
+ * Builds a hydration error message when a node is not found at a path location
  *
- * Update an interpolated style property on an element with 6 bound values surrounded by text.
- *
- * Used when the value passed to a property has 6 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate6(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param host the Host Node
+ * @param path the path to the node
  */
-function ɵɵstylePropInterpolate6(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate6;
+function nodeNotFoundAtPathError(host, path) {
+    const header = `During hydration Angular was unable to locate a node ` +
+        `using the "${path}" path, starting from the ${describeRNode(host)} node.\n\n`;
+    const footer = getHydrationErrorFooter();
+    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + footer);
 }
 /**
+ * Builds the hydration error message in the case that dom nodes are created outside of
+ * the Angular context and are being used as projected nodes
  *
- * Update an interpolated style property on an element with 7 bound values surrounded by text.
- *
- * Used when the value passed to a property has 7 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate7(
- *    0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param lView the LView
+ * @param tNode the TNode
+ * @returns an error
  */
-function ɵɵstylePropInterpolate7(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate7;
+function unsupportedProjectionOfDomNodes(rNode) {
+    const header = 'During serialization, Angular detected DOM nodes ' +
+        'that were created outside of Angular context and provided as projectable nodes ' +
+        '(likely via `ViewContainerRef.createComponent` or `createComponent` APIs). ' +
+        'Hydration is not supported for such cases, consider refactoring the code to avoid ' +
+        'this pattern or using `ngSkipHydration` on the host element of the component.\n\n';
+    const actual = `${describeDomFromNode(rNode)}\n\n`;
+    const message = header + actual + getHydrationAttributeNote();
+    return new RuntimeError(-503 /* RuntimeErrorCode.UNSUPPORTED_PROJECTION_DOM_NODES */, message);
 }
 /**
+ * Builds the hydration error message in the case that ngSkipHydration was used on a
+ * node that is not a component host element or host binding
  *
- * Update an interpolated style property on an element with 8 bound values surrounded by text.
- *
- * Used when the value passed to a property has 8 interpolated values in it:
- *
- * ```html
- * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
- * ```
- *
- * Its compiled representation is:
- *
- * ```ts
- * ɵɵstylePropInterpolate8(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6,
- * '-', v7, 'suffix');
- * ```
- *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`.
- * @param prefix Static value used for concatenation only.
- * @param v0 Value checked for change.
- * @param i0 Static value used for concatenation only.
- * @param v1 Value checked for change.
- * @param i1 Static value used for concatenation only.
- * @param v2 Value checked for change.
- * @param i2 Static value used for concatenation only.
- * @param v3 Value checked for change.
- * @param i3 Static value used for concatenation only.
- * @param v4 Value checked for change.
- * @param i4 Static value used for concatenation only.
- * @param v5 Value checked for change.
- * @param i5 Static value used for concatenation only.
- * @param v6 Value checked for change.
- * @param i6 Static value used for concatenation only.
- * @param v7 Value checked for change.
- * @param suffix Static value used for concatenation only.
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
- * @codeGenApi
+ * @param rNode the HTML Element
+ * @returns an error
  */
-function ɵɵstylePropInterpolate8(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, valueSuffix) {
-    const lView = getLView();
-    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolate8;
+function invalidSkipHydrationHost(rNode) {
+    const header = 'The `ngSkipHydration` flag is applied on a node ' +
+        'that doesn\'t act as a component host. Hydration can be ' +
+        'skipped only on per-component basis.\n\n';
+    const actual = `${describeDomFromNode(rNode)}\n\n`;
+    const footer = 'Please move the `ngSkipHydration` attribute to the component host element.\n\n';
+    const message = header + actual + footer;
+    return new RuntimeError(-504 /* RuntimeErrorCode.INVALID_SKIP_HYDRATION_HOST */, message);
+}
+// Stringification methods
+/**
+ * Stringifies a given TNode's attributes
+ *
+ * @param tNode a provided TNode
+ * @returns string
+ */
+function stringifyTNodeAttrs(tNode) {
+    const results = [];
+    if (tNode.attrs) {
+        for (let i = 0; i < tNode.attrs.length;) {
+            const attrName = tNode.attrs[i++];
+            // Once we reach the first flag, we know that the list of
+            // attributes is over.
+            if (typeof attrName == 'number') {
+                break;
+            }
+            const attrValue = tNode.attrs[i++];
+            results.push(`${attrName}="${shorten(attrValue)}"`);
+        }
+    }
+    return results.join(' ');
 }
 /**
- * Update an interpolated style property on an element with 9 or more bound values surrounded by
- * text.
+ * The list of internal attributes that should be filtered out while
+ * producing an error message.
+ */
+const internalAttrs = new Set(['ngh', 'ng-version', 'ng-server-context']);
+/**
+ * Stringifies an HTML Element's attributes
  *
- * Used when the number of interpolated values exceeds 8.
+ * @param rNode an HTML Element
+ * @returns string
+ */
+function stringifyRNodeAttrs(rNode) {
+    const results = [];
+    for (let i = 0; i < rNode.attributes.length; i++) {
+        const attr = rNode.attributes[i];
+        if (internalAttrs.has(attr.name))
+            continue;
+        results.push(`${attr.name}="${shorten(attr.value)}"`);
+    }
+    return results.join(' ');
+}
+// Methods for Describing the DOM
+/**
+ * Converts a tNode to a helpful readable string value for use in error messages
  *
- * ```html
- * <div
- *  style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix">
- * </div>
- * ```
+ * @param tNode a given TNode
+ * @param innerContent the content of the node
+ * @returns string
+ */
+function describeTNode(tNode, innerContent = '…') {
+    switch (tNode.type) {
+        case 1 /* TNodeType.Text */:
+            const content = tNode.value ? `(${tNode.value})` : '';
+            return `#text${content}`;
+        case 2 /* TNodeType.Element */:
+            const attrs = stringifyTNodeAttrs(tNode);
+            const tag = tNode.value.toLowerCase();
+            return `<${tag}${attrs ? ' ' + attrs : ''}>${innerContent}</${tag}>`;
+        case 8 /* TNodeType.ElementContainer */:
+            return '<!-- ng-container -->';
+        case 4 /* TNodeType.Container */:
+            return '<!-- container -->';
+        default:
+            const typeAsString = getFriendlyStringFromTNodeType(tNode.type);
+            return `#node(${typeAsString})`;
+    }
+}
+/**
+ * Converts an RNode to a helpful readable string value for use in error messages
  *
- * Its compiled representation is:
+ * @param rNode a given RNode
+ * @param innerContent the content of the node
+ * @returns string
+ */
+function describeRNode(rNode, innerContent = '…') {
+    const node = rNode;
+    switch (node.nodeType) {
+        case Node.ELEMENT_NODE:
+            const tag = node.tagName.toLowerCase();
+            const attrs = stringifyRNodeAttrs(node);
+            return `<${tag}${attrs ? ' ' + attrs : ''}>${innerContent}</${tag}>`;
+        case Node.TEXT_NODE:
+            const content = node.textContent ? shorten(node.textContent) : '';
+            return `#text${content ? `(${content})` : ''}`;
+        case Node.COMMENT_NODE:
+            return `<!-- ${shorten(node.textContent ?? '')} -->`;
+        default:
+            return `#node(${node.nodeType})`;
+    }
+}
+/**
+ * Builds the string containing the expected DOM present given the LView and TNode
+ * values for a readable error message
  *
- * ```ts
- * ɵɵstylePropInterpolateV(
- *  0, ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
- *  'suffix']);
- * ```
+ * @param lView the lView containing the DOM
+ * @param tNode the tNode
+ * @param isViewContainerAnchor boolean
+ * @returns string
+ */
+function describeExpectedDom(lView, tNode, isViewContainerAnchor) {
+    const spacer = '  ';
+    let content = '';
+    if (tNode.prev) {
+        content += spacer + '…\n';
+        content += spacer + describeTNode(tNode.prev) + '\n';
+    }
+    else if (tNode.type && tNode.type & 12 /* TNodeType.AnyContainer */) {
+        content += spacer + '…\n';
+    }
+    if (isViewContainerAnchor) {
+        content += spacer + describeTNode(tNode) + '\n';
+        content += spacer + `<!-- container -->  ${AT_THIS_LOCATION}\n`;
+    }
+    else {
+        content += spacer + describeTNode(tNode) + `  ${AT_THIS_LOCATION}\n`;
+    }
+    content += spacer + '…\n';
+    const parentRNode = tNode.type ? getParentRElement(lView[TVIEW], tNode, lView) : null;
+    if (parentRNode) {
+        content = describeRNode(parentRNode, '\n' + content);
+    }
+    return content;
+}
+/**
+ * Builds the string containing the DOM present around a given RNode for a
+ * readable error message
  *
- * @param styleIndex Index of style to update. This index value refers to the
- *        index of the style in the style bindings array that was passed into
- *        `styling`..
- * @param values The collection of values and the strings in-between those values, beginning with
- * a string prefix and ending with a string suffix.
- * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
- * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
- * @returns itself, so that it may be chained.
+ * @param node the RNode
+ * @returns string
+ */
+function describeDomFromNode(node) {
+    const spacer = '  ';
+    let content = '';
+    const currentNode = node;
+    if (currentNode.previousSibling) {
+        content += spacer + '…\n';
+        content += spacer + describeRNode(currentNode.previousSibling) + '\n';
+    }
+    content += spacer + describeRNode(currentNode) + `  ${AT_THIS_LOCATION}\n`;
+    if (node.nextSibling) {
+        content += spacer + '…\n';
+    }
+    if (node.parentNode) {
+        content = describeRNode(currentNode.parentNode, '\n' + content);
+    }
+    return content;
+}
+/**
+ * Shortens the description of a given RNode by its type for readability
+ *
+ * @param nodeType the type of node
+ * @param tagName the node tag name
+ * @param textContent the text content in the node
+ * @returns string
+ */
+function shortRNodeDescription(nodeType, tagName, textContent) {
+    switch (nodeType) {
+        case Node.ELEMENT_NODE:
+            return `<${tagName.toLowerCase()}>`;
+        case Node.TEXT_NODE:
+            const content = textContent ? ` (with the "${shorten(textContent)}" content)` : '';
+            return `a text node${content}`;
+        case Node.COMMENT_NODE:
+            return 'a comment node';
+        default:
+            return `#node(nodeType=${nodeType})`;
+    }
+}
+/**
+ * Builds the footer hydration error message
+ *
+ * @param componentClassName the name of the component class
+ * @returns string
+ */
+function getHydrationErrorFooter(componentClassName) {
+    const componentInfo = componentClassName ? `the "${componentClassName}"` : 'corresponding';
+    return `To fix this problem:\n` +
+        `  * check ${componentInfo} component for hydration-related issues\n` +
+        `  * check to see if your template has valid HTML structure\n` +
+        `  * or skip hydration by adding the \`ngSkipHydration\` attribute ` +
+        `to its host node in a template\n\n`;
+}
+/**
+ * An attribute related note for hydration errors
+ */
+function getHydrationAttributeNote() {
+    return 'Note: attributes are only displayed to better represent the DOM' +
+        ' but have no effect on hydration mismatches.\n\n';
+}
+// Node string utility functions
+/**
+ * Strips all newlines out of a given string
+ *
+ * @param input a string to be cleared of new line characters
+ * @returns
+ */
+function stripNewlines(input) {
+    return input.replace(/\s+/gm, '');
+}
+/**
+ * Reduces a string down to a maximum length of characters with ellipsis for readability
+ *
+ * @param input a string input
+ * @param maxLength a maximum length in characters
+ * @returns string
+ */
+function shorten(input, maxLength = 50) {
+    if (!input) {
+        return '';
+    }
+    input = stripNewlines(input);
+    return input.length > maxLength ? `${input.substring(0, maxLength - 1)}…` : input;
+}
+
+/**
+ * Regexp that extracts a reference node information from the compressed node location.
+ * The reference node is represented as either:
+ *  - a number which points to an LView slot
+ *  - the `b` char which indicates that the lookup should start from the `document.body`
+ *  - the `h` char to start lookup from the component host node (`lView[HOST]`)
+ */
+const REF_EXTRACTOR_REGEXP = new RegExp(`^(\\d+)*(${REFERENCE_NODE_BODY}|${REFERENCE_NODE_HOST})*(.*)`);
+/**
+ * Helper function that takes a reference node location and a set of navigation steps
+ * (from the reference node) to a target node and outputs a string that represents
+ * a location.
+ *
+ * For example, given: referenceNode = 'b' (body) and path = ['firstChild', 'firstChild',
+ * 'nextSibling'], the function returns: `bf2n`.
+ */
+function compressNodeLocation(referenceNode, path) {
+    const result = [referenceNode];
+    for (const segment of path) {
+        const lastIdx = result.length - 1;
+        if (lastIdx > 0 && result[lastIdx - 1] === segment) {
+            // An empty string in a count slot represents 1 occurrence of an instruction.
+            const value = (result[lastIdx] || 1);
+            result[lastIdx] = value + 1;
+        }
+        else {
+            // Adding a new segment to the path.
+            // Using an empty string in a counter field to avoid encoding `1`s
+            // into the path, since they are implicit (e.g. `f1n1` vs `fn`), so
+            // it's enough to have a single char in this case.
+            result.push(segment, '');
+        }
+    }
+    return result.join('');
+}
+/**
+ * Helper function that reverts the `compressNodeLocation` and transforms a given
+ * string into an array where at 0th position there is a reference node info and
+ * after that it contains information (in pairs) about a navigation step and the
+ * number of repetitions.
+ *
+ * For example, the path like 'bf2n' will be transformed to:
+ * ['b', 'firstChild', 2, 'nextSibling', 1].
+ *
+ * This information is later consumed by the code that navigates the DOM to find
+ * a given node by its location.
+ */
+function decompressNodeLocation(path) {
+    const matches = path.match(REF_EXTRACTOR_REGEXP);
+    const [_, refNodeId, refNodeName, rest] = matches;
+    // If a reference node is represented by an index, transform it to a number.
+    const ref = refNodeId ? parseInt(refNodeId, 10) : refNodeName;
+    const steps = [];
+    // Match all segments in a path.
+    for (const [_, step, count] of rest.matchAll(/(f|n)(\d*)/g)) {
+        const repeat = parseInt(count, 10) || 1;
+        steps.push(step, repeat);
+    }
+    return [ref, ...steps];
+}
+
+/** Whether current TNode is a first node in an <ng-container>. */
+function isFirstElementInNgContainer(tNode) {
+    return !tNode.prev && tNode.parent?.type === 8 /* TNodeType.ElementContainer */;
+}
+/** Returns an instruction index (subtracting HEADER_OFFSET). */
+function getNoOffsetIndex(tNode) {
+    return tNode.index - HEADER_OFFSET;
+}
+/**
+ * Locate a node in DOM tree that corresponds to a given TNode.
+ *
+ * @param hydrationInfo The hydration annotation data
+ * @param tView the current tView
+ * @param lView the current lView
+ * @param tNode the current tNode
+ * @returns an RNode that represents a given tNode
+ */
+function locateNextRNode(hydrationInfo, tView, lView, tNode) {
+    let native = null;
+    const noOffsetIndex = getNoOffsetIndex(tNode);
+    const nodes = hydrationInfo.data[NODES];
+    if (nodes?.[noOffsetIndex]) {
+        // We know the exact location of the node.
+        native = locateRNodeByPath(nodes[noOffsetIndex], lView);
+    }
+    else if (tView.firstChild === tNode) {
+        // We create a first node in this view, so we use a reference
+        // to the first child in this DOM segment.
+        native = hydrationInfo.firstChild;
+    }
+    else {
+        // Locate a node based on a previous sibling or a parent node.
+        const previousTNodeParent = tNode.prev === null;
+        const previousTNode = (tNode.prev ?? tNode.parent);
+        ngDevMode &&
+            assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
+                'to the previous node or a parent node.');
+        if (isFirstElementInNgContainer(tNode)) {
+            const noOffsetParentIndex = getNoOffsetIndex(tNode.parent);
+            native = getSegmentHead(hydrationInfo, noOffsetParentIndex);
+        }
+        else {
+            let previousRElement = getNativeByTNode(previousTNode, lView);
+            if (previousTNodeParent) {
+                native = previousRElement.firstChild;
+            }
+            else {
+                // If the previous node is an element, but it also has container info,
+                // this means that we are processing a node like `<div #vcrTarget>`, which is
+                // represented in the DOM as `<div></div>...<!--container-->`.
+                // In this case, there are nodes *after* this element and we need to skip
+                // all of them to reach an element that we are looking for.
+                const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
+                const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
+                if (previousTNode.type === 2 /* TNodeType.Element */ && segmentHead) {
+                    const numRootNodesToSkip = calcSerializedContainerSize(hydrationInfo, noOffsetPrevSiblingIndex);
+                    // `+1` stands for an anchor comment node after all the views in this container.
+                    const nodesToSkip = numRootNodesToSkip + 1;
+                    // First node after this segment.
+                    native = siblingAfter(nodesToSkip, segmentHead);
+                }
+                else {
+                    native = previousRElement.nextSibling;
+                }
+            }
+        }
+    }
+    return native;
+}
+/**
+ * Skips over a specified number of nodes and returns the next sibling node after that.
+ */
+function siblingAfter(skip, from) {
+    let currentNode = from;
+    for (let i = 0; i < skip; i++) {
+        ngDevMode && validateSiblingNodeExists(currentNode);
+        currentNode = currentNode.nextSibling;
+    }
+    return currentNode;
+}
+/**
+ * Helper function to produce a string representation of the navigation steps
+ * (in terms of `nextSibling` and `firstChild` navigations). Used in error
+ * messages in dev mode.
+ */
+function stringifyNavigationInstructions(instructions) {
+    const container = [];
+    for (let i = 0; i < instructions.length; i += 2) {
+        const step = instructions[i];
+        const repeat = instructions[i + 1];
+        for (let r = 0; r < repeat; r++) {
+            container.push(step === NodeNavigationStep.FirstChild ? 'firstChild' : 'nextSibling');
+        }
+    }
+    return container.join('.');
+}
+/**
+ * Helper function that navigates from a starting point node (the `from` node)
+ * using provided set of navigation instructions (within `path` argument).
+ */
+function navigateToNode(from, instructions) {
+    let node = from;
+    for (let i = 0; i < instructions.length; i += 2) {
+        const step = instructions[i];
+        const repeat = instructions[i + 1];
+        for (let r = 0; r < repeat; r++) {
+            if (ngDevMode && !node) {
+                throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
+            }
+            switch (step) {
+                case NodeNavigationStep.FirstChild:
+                    node = node.firstChild;
+                    break;
+                case NodeNavigationStep.NextSibling:
+                    node = node.nextSibling;
+                    break;
+            }
+        }
+    }
+    if (ngDevMode && !node) {
+        throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
+    }
+    return node;
+}
+/**
+ * Locates an RNode given a set of navigation instructions (which also contains
+ * a starting point node info).
+ */
+function locateRNodeByPath(path, lView) {
+    const [referenceNode, ...navigationInstructions] = decompressNodeLocation(path);
+    let ref;
+    if (referenceNode === REFERENCE_NODE_HOST) {
+        ref = lView[DECLARATION_COMPONENT_VIEW][HOST];
+    }
+    else if (referenceNode === REFERENCE_NODE_BODY) {
+        ref = ɵɵresolveBody(lView[DECLARATION_COMPONENT_VIEW][HOST]);
+    }
+    else {
+        const parentElementId = Number(referenceNode);
+        ref = unwrapRNode(lView[parentElementId + HEADER_OFFSET]);
+    }
+    return navigateToNode(ref, navigationInstructions);
+}
+/**
+ * Generate a list of DOM navigation operations to get from node `start` to node `finish`.
+ *
+ * Note: assumes that node `start` occurs before node `finish` in an in-order traversal of the DOM
+ * tree. That is, we should be able to get from `start` to `finish` purely by using `.firstChild`
+ * and `.nextSibling` operations.
+ */
+function navigateBetween(start, finish) {
+    if (start === finish) {
+        return [];
+    }
+    else if (start.parentElement == null || finish.parentElement == null) {
+        return null;
+    }
+    else if (start.parentElement === finish.parentElement) {
+        return navigateBetweenSiblings(start, finish);
+    }
+    else {
+        // `finish` is a child of its parent, so the parent will always have a child.
+        const parent = finish.parentElement;
+        const parentPath = navigateBetween(start, parent);
+        const childPath = navigateBetween(parent.firstChild, finish);
+        if (!parentPath || !childPath)
+            return null;
+        return [
+            // First navigate to `finish`'s parent
+            ...parentPath,
+            // Then to its first child.
+            NodeNavigationStep.FirstChild,
+            // And finally from that node to `finish` (maybe a no-op if we're already there).
+            ...childPath,
+        ];
+    }
+}
+/**
+ * Calculates a path between 2 sibling nodes (generates a number of `NextSibling` navigations).
+ * Returns `null` if no such path exists between the given nodes.
+ */
+function navigateBetweenSiblings(start, finish) {
+    const nav = [];
+    let node = null;
+    for (node = start; node != null && node !== finish; node = node.nextSibling) {
+        nav.push(NodeNavigationStep.NextSibling);
+    }
+    // If the `node` becomes `null` or `undefined` at the end, that means that we
+    // didn't find the `end` node, thus return `null` (which would trigger serialization
+    // error to be produced).
+    return node == null ? null : nav;
+}
+/**
+ * Calculates a path between 2 nodes in terms of `nextSibling` and `firstChild`
+ * navigations:
+ * - the `from` node is a known node, used as an starting point for the lookup
+ *   (the `fromNodeName` argument is a string representation of the node).
+ * - the `to` node is a node that the runtime logic would be looking up,
+ *   using the path generated by this function.
+ */
+function calcPathBetween(from, to, fromNodeName) {
+    const path = navigateBetween(from, to);
+    return path === null ? null : compressNodeLocation(fromNodeName, path);
+}
+/**
+ * Invoked at serialization time (on the server) when a set of navigation
+ * instructions needs to be generated for a TNode.
+ */
+function calcPathForNode(tNode, lView) {
+    const parentTNode = tNode.parent;
+    let parentIndex;
+    let parentRNode;
+    let referenceNodeName;
+    if (parentTNode === null || !(parentTNode.type & 3 /* TNodeType.AnyRNode */)) {
+        // If there is no parent TNode or a parent TNode does not represent an RNode
+        // (i.e. not a DOM node), use component host element as a reference node.
+        parentIndex = referenceNodeName = REFERENCE_NODE_HOST;
+        parentRNode = lView[DECLARATION_COMPONENT_VIEW][HOST];
+    }
+    else {
+        // Use parent TNode as a reference node.
+        parentIndex = parentTNode.index;
+        parentRNode = unwrapRNode(lView[parentIndex]);
+        referenceNodeName = renderStringify(parentIndex - HEADER_OFFSET);
+    }
+    let rNode = unwrapRNode(lView[tNode.index]);
+    if (tNode.type & 12 /* TNodeType.AnyContainer */) {
+        // For <ng-container> nodes, instead of serializing a reference
+        // to the anchor comment node, serialize a location of the first
+        // DOM element. Paired with the container size (serialized as a part
+        // of `ngh.containers`), it should give enough information for runtime
+        // to hydrate nodes in this container.
+        const firstRNode = getFirstNativeNode(lView, tNode);
+        // If container is not empty, use a reference to the first element,
+        // otherwise, rNode would point to an anchor comment node.
+        if (firstRNode) {
+            rNode = firstRNode;
+        }
+    }
+    let path = calcPathBetween(parentRNode, rNode, referenceNodeName);
+    if (path === null && parentRNode !== rNode) {
+        // Searching for a path between elements within a host node failed.
+        // Trying to find a path to an element starting from the `document.body` instead.
+        //
+        // Important note: this type of reference is relatively unstable, since Angular
+        // may not be able to control parts of the page that the runtime logic navigates
+        // through. This is mostly needed to cover "portals" use-case (like menus, dialog boxes,
+        // etc), where nodes are content-projected (including direct DOM manipulations) outside
+        // of the host node. The better solution is to provide APIs to work with "portals",
+        // at which point this code path would not be needed.
+        const body = parentRNode.ownerDocument.body;
+        path = calcPathBetween(body, rNode, REFERENCE_NODE_BODY);
+        if (path === null) {
+            // If the path is still empty, it's likely that this node is detached and
+            // won't be found during hydration.
+            throw nodeNotFoundError(lView, tNode);
+        }
+    }
+    return path;
+}
+
+function elementStartFirstCreatePass(index, tView, lView, name, attrsIndex, localRefsIndex) {
+    ngDevMode && assertFirstCreatePass(tView);
+    ngDevMode && ngDevMode.firstCreatePass++;
+    const tViewConsts = tView.consts;
+    const attrs = getConstant(tViewConsts, attrsIndex);
+    const tNode = getOrCreateTNode(tView, index, 2 /* TNodeType.Element */, name, attrs);
+    resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
+    if (tNode.attrs !== null) {
+        computeStaticStyling(tNode, tNode.attrs, false);
+    }
+    if (tNode.mergedAttrs !== null) {
+        computeStaticStyling(tNode, tNode.mergedAttrs, true);
+    }
+    if (tView.queries !== null) {
+        tView.queries.elementStart(tView, tNode);
+    }
+    return tNode;
+}
+/**
+ * Create DOM element. The instruction must later be followed by `elementEnd()` call.
+ *
+ * @param index Index of the element in the LView array
+ * @param name Name of the DOM Node
+ * @param attrsIndex Index of the element's attributes in the `consts` array.
+ * @param localRefsIndex Index of the element's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
+ *
+ * Attributes and localRefs are passed as an array of strings where elements with an even index
+ * hold an attribute name and elements with an odd index hold an attribute value, ex.:
+ * ['id', 'warning5', 'class', 'alert']
+ *
  * @codeGenApi
  */
-function ɵɵstylePropInterpolateV(prop, values, valueSuffix) {
+function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     const lView = getLView();
-    const interpolatedValue = interpolationV(lView, values);
-    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
-    return ɵɵstylePropInterpolateV;
+    const tView = getTView();
+    const adjustedIndex = HEADER_OFFSET + index;
+    ngDevMode &&
+        assertEqual(getBindingIndex(), tView.bindingStartIndex, 'elements should be created before any bindings');
+    ngDevMode && assertIndexInRange(lView, adjustedIndex);
+    const renderer = lView[RENDERER];
+    const tNode = tView.firstCreatePass ?
+        elementStartFirstCreatePass(adjustedIndex, tView, lView, name, attrsIndex, localRefsIndex) :
+        tView.data[adjustedIndex];
+    const native = _locateOrCreateElementNode(tView, lView, tNode, renderer, name, index);
+    lView[adjustedIndex] = native;
+    const hasDirectives = isDirectiveHost(tNode);
+    if (ngDevMode && tView.firstCreatePass) {
+        validateElementIsKnown(native, lView, tNode.value, tView.schemas, hasDirectives);
+    }
+    setCurrentTNode(tNode, true);
+    setupStaticAttributes(renderer, native, tNode);
+    if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */ && wasLastNodeCreated()) {
+        // In the i18n case, the translation may have removed this element, so only add it if it is not
+        // detached. See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
+        appendChild(tView, lView, native, tNode);
+    }
+    // any immediate children of a component or template container must be pre-emptively
+    // monkey-patched with the component view data so that the element can be inspected
+    // later on using any element discovery utility methods (see `element_discovery.ts`)
+    if (getElementDepthCount() === 0) {
+        attachPatchData(native, lView);
+    }
+    increaseElementDepthCount();
+    if (hasDirectives) {
+        createDirectivesInstances(tView, lView, tNode);
+        executeContentQueries(tView, tNode, lView);
+    }
+    if (localRefsIndex !== null) {
+        saveResolvedLocalsInData(lView, tNode);
+    }
+    return ɵɵelementStart;
+}
+/**
+ * Mark the end of the element.
+ * @returns This function returns itself so that it may be chained.
+ *
+ * @codeGenApi
+ */
+function ɵɵelementEnd() {
+    let currentTNode = getCurrentTNode();
+    ngDevMode && assertDefined(currentTNode, 'No parent node to close.');
+    if (isCurrentTNodeParent()) {
+        setCurrentTNodeAsNotParent();
+    }
+    else {
+        ngDevMode && assertHasParent(getCurrentTNode());
+        currentTNode = currentTNode.parent;
+        setCurrentTNode(currentTNode, false);
+    }
+    const tNode = currentTNode;
+    ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */);
+    if (isSkipHydrationRootTNode(tNode)) {
+        leaveSkipHydrationBlock();
+    }
+    decreaseElementDepthCount();
+    const tView = getTView();
+    if (tView.firstCreatePass) {
+        registerPostOrderHooks(tView, currentTNode);
+        if (isContentQueryHost(currentTNode)) {
+            tView.queries.elementEnd(currentTNode);
+        }
+    }
+    if (tNode.classesWithoutHost != null && hasClassInput(tNode)) {
+        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.classesWithoutHost, true);
+    }
+    if (tNode.stylesWithoutHost != null && hasStyleInput(tNode)) {
+        setDirectiveInputsWhichShadowsStyling(tView, tNode, getLView(), tNode.stylesWithoutHost, false);
+    }
+    return ɵɵelementEnd;
+}
+/**
+ * Creates an empty element using {@link elementStart} and {@link elementEnd}
+ *
+ * @param index Index of the element in the data array
+ * @param name Name of the DOM Node
+ * @param attrsIndex Index of the element's attributes in the `consts` array.
+ * @param localRefsIndex Index of the element's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
+ *
+ * @codeGenApi
+ */
+function ɵɵelement(index, name, attrsIndex, localRefsIndex) {
+    ɵɵelementStart(index, name, attrsIndex, localRefsIndex);
+    ɵɵelementEnd();
+    return ɵɵelement;
+}
+let _locateOrCreateElementNode = (tView, lView, tNode, renderer, name, index) => {
+    lastNodeWasCreated(true);
+    return createElementNode(renderer, name, getNamespace$1());
+};
+/**
+ * Enables hydration code path (to lookup existing elements in DOM)
+ * in addition to the regular creation mode of element nodes.
+ */
+function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, index) {
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    lastNodeWasCreated(isNodeCreationMode);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return createElementNode(renderer, name, getNamespace$1());
+    }
+    // Hydration mode, looking up an existing element in DOM.
+    const native = locateNextRNode(hydrationInfo, tView, lView, tNode);
+    ngDevMode && validateMatchingNode(native, Node.ELEMENT_NODE, name, lView, tNode);
+    ngDevMode && markRNodeAsClaimedByHydration(native);
+    // This element might also be an anchor of a view container.
+    if (getSerializedContainerViews(hydrationInfo, index)) {
+        // Important note: this element acts as an anchor, but it's **not** a part
+        // of the embedded view, so we start the segment **after** this element, taking
+        // a reference to the next sibling. For example, the following template:
+        // `<div #vcrTarget>` is represented in the DOM as `<div></div>...<!--container-->`,
+        // so while processing a `<div>` instruction, point to the next sibling as a
+        // start of a segment.
+        ngDevMode && validateNodeExists(native.nextSibling, lView, tNode);
+        setSegmentHead(hydrationInfo, index, native.nextSibling);
+    }
+    // Checks if the skip hydration attribute is present during hydration so we know to
+    // skip attempting to hydrate this block. We check both TNode and RElement for an
+    // attribute: the RElement case is needed for i18n cases, when we add it to host
+    // elements during the annotation phase (after all internal data structures are setup).
+    if (hydrationInfo &&
+        (hasSkipHydrationAttrOnTNode(tNode) || hasSkipHydrationAttrOnRElement(native))) {
+        if (isComponentHost(tNode)) {
+            enterSkipHydrationBlock(tNode);
+            // Since this isn't hydratable, we need to empty the node
+            // so there's no duplicate content after render
+            clearElementContents(native);
+            ngDevMode && ngDevMode.componentsSkippedHydration++;
+        }
+        else if (ngDevMode) {
+            // If this is not a component host, throw an error.
+            // Hydration can be skipped on per-component basis only.
+            throw invalidSkipHydrationHost(native);
+        }
+    }
+    return native;
+}
+function enableLocateOrCreateElementNodeImpl() {
+    _locateOrCreateElementNode = locateOrCreateElementNodeImpl;
+}
+
+function elementContainerStartFirstCreatePass(index, tView, lView, attrsIndex, localRefsIndex) {
+    ngDevMode && ngDevMode.firstCreatePass++;
+    const tViewConsts = tView.consts;
+    const attrs = getConstant(tViewConsts, attrsIndex);
+    const tNode = getOrCreateTNode(tView, index, 8 /* TNodeType.ElementContainer */, 'ng-container', attrs);
+    // While ng-container doesn't necessarily support styling, we use the style context to identify
+    // and execute directives on the ng-container.
+    if (attrs !== null) {
+        computeStaticStyling(tNode, attrs, true);
+    }
+    const localRefs = getConstant(tViewConsts, localRefsIndex);
+    resolveDirectives(tView, lView, tNode, localRefs);
+    if (tView.queries !== null) {
+        tView.queries.elementStart(tView, tNode);
+    }
+    return tNode;
+}
+/**
+ * Creates a logical container for other nodes (<ng-container>) backed by a comment node in the DOM.
+ * The instruction must later be followed by `elementContainerEnd()` call.
+ *
+ * @param index Index of the element in the LView array
+ * @param attrsIndex Index of the container attributes in the `consts` array.
+ * @param localRefsIndex Index of the container's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
+ *
+ * Even if this instruction accepts a set of attributes no actual attribute values are propagated to
+ * the DOM (as a comment node can't have attributes). Attributes are here only for directive
+ * matching purposes and setting initial inputs of directives.
+ *
+ * @codeGenApi
+ */
+function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
+    const lView = getLView();
+    const tView = getTView();
+    const adjustedIndex = index + HEADER_OFFSET;
+    ngDevMode && assertIndexInRange(lView, adjustedIndex);
+    ngDevMode &&
+        assertEqual(getBindingIndex(), tView.bindingStartIndex, 'element containers should be created before any bindings');
+    const tNode = tView.firstCreatePass ?
+        elementContainerStartFirstCreatePass(adjustedIndex, tView, lView, attrsIndex, localRefsIndex) :
+        tView.data[adjustedIndex];
+    setCurrentTNode(tNode, true);
+    const comment = _locateOrCreateElementContainerNode(tView, lView, tNode, index);
+    lView[adjustedIndex] = comment;
+    if (wasLastNodeCreated()) {
+        appendChild(tView, lView, comment, tNode);
+    }
+    attachPatchData(comment, lView);
+    if (isDirectiveHost(tNode)) {
+        createDirectivesInstances(tView, lView, tNode);
+        executeContentQueries(tView, tNode, lView);
+    }
+    if (localRefsIndex != null) {
+        saveResolvedLocalsInData(lView, tNode);
+    }
+    return ɵɵelementContainerStart;
+}
+/**
+ * Mark the end of the <ng-container>.
+ * @returns This function returns itself so that it may be chained.
+ *
+ * @codeGenApi
+ */
+function ɵɵelementContainerEnd() {
+    let currentTNode = getCurrentTNode();
+    const tView = getTView();
+    if (isCurrentTNodeParent()) {
+        setCurrentTNodeAsNotParent();
+    }
+    else {
+        ngDevMode && assertHasParent(currentTNode);
+        currentTNode = currentTNode.parent;
+        setCurrentTNode(currentTNode, false);
+    }
+    ngDevMode && assertTNodeType(currentTNode, 8 /* TNodeType.ElementContainer */);
+    if (tView.firstCreatePass) {
+        registerPostOrderHooks(tView, currentTNode);
+        if (isContentQueryHost(currentTNode)) {
+            tView.queries.elementEnd(currentTNode);
+        }
+    }
+    return ɵɵelementContainerEnd;
+}
+/**
+ * Creates an empty logical container using {@link elementContainerStart}
+ * and {@link elementContainerEnd}
+ *
+ * @param index Index of the element in the LView array
+ * @param attrsIndex Index of the container attributes in the `consts` array.
+ * @param localRefsIndex Index of the container's local references in the `consts` array.
+ * @returns This function returns itself so that it may be chained.
+ *
+ * @codeGenApi
+ */
+function ɵɵelementContainer(index, attrsIndex, localRefsIndex) {
+    ɵɵelementContainerStart(index, attrsIndex, localRefsIndex);
+    ɵɵelementContainerEnd();
+    return ɵɵelementContainer;
+}
+let _locateOrCreateElementContainerNode = (tView, lView, tNode, index) => {
+    lastNodeWasCreated(true);
+    return createCommentNode(lView[RENDERER], ngDevMode ? 'ng-container' : '');
+};
+/**
+ * Enables hydration code path (to lookup existing elements in DOM)
+ * in addition to the regular creation mode of comment nodes that
+ * represent <ng-container>'s anchor.
+ */
+function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
+    let comment;
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    lastNodeWasCreated(isNodeCreationMode);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return createCommentNode(lView[RENDERER], ngDevMode ? 'ng-container' : '');
+    }
+    // Hydration mode, looking up existing elements in DOM.
+    const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
+    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
+    const ngContainerSize = getNgContainerSize(hydrationInfo, index);
+    ngDevMode &&
+        assertNumber(ngContainerSize, 'Unexpected state: hydrating an <ng-container>, ' +
+            'but no hydration info is available.');
+    setSegmentHead(hydrationInfo, index, currentRNode);
+    comment = siblingAfter(ngContainerSize, currentRNode);
+    if (ngDevMode) {
+        validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
+        markRNodeAsClaimedByHydration(comment);
+    }
+    return comment;
+}
+function enableLocateOrCreateElementContainerNodeImpl() {
+    _locateOrCreateElementContainerNode = locateOrCreateElementContainerNode;
+}
+
+/**
+ * Returns the current OpaqueViewState instance.
+ *
+ * Used in conjunction with the restoreView() instruction to save a snapshot
+ * of the current view and restore it when listeners are invoked. This allows
+ * walking the declaration view tree in listeners to get vars from parent views.
+ *
+ * @codeGenApi
+ */
+function ɵɵgetCurrentView() {
+    return getLView();
 }
 
 /**
@@ -22001,98 +20243,1955 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
 }
 
 /**
- * Creates runtime data structures for `{#defer}` blocks.
+ * Determine if the argument is shaped like a Promise
+ */
+function isPromise(obj) {
+    // allow any Promise/A+ compliant thenable.
+    // It's up to the caller to ensure that obj.then conforms to the spec
+    return !!obj && typeof obj.then === 'function';
+}
+/**
+ * Determine if the argument is a Subscribable
+ */
+function isSubscribable(obj) {
+    return !!obj && typeof obj.subscribe === 'function';
+}
+
+/**
+ * Adds an event listener to the current node.
  *
- * @param deferIndex Index of the underlying deferred block data structure.
- * @param primaryTemplateIndex Index of the template function with the block's content.
- * @param deferredDepsFn Function that contains dependencies for this defer block
- * @param loadingIndex Index of the template with the `{:loading}` block content.
- * @param placeholderIndex Index of the template with the `{:placeholder}` block content.
- * @param error Index of the template with the `{:error}` block content.
- * @param loadingConfigIndex Index in the constants array of the configuration of the `{:loading}`
- *     block.
- * @param placeholderConfigIndexIndex in the constants array of the configuration of the
- *     `{:placeholder}` block.
+ * If an output exists on one of the node's directives, it also subscribes to the output
+ * and saves the subscription for later cleanup.
+ *
+ * @param eventName Name of the event
+ * @param listenerFn The function to be called when event emits
+ * @param useCapture Whether or not to use capture in event listener - this argument is a reminder
+ *     from the Renderer3 infrastructure and should be removed from the instruction arguments
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
  *
  * @codeGenApi
  */
-function ɵɵdefer(deferIndex, primaryTemplateIndex, deferredDepsFn, loadingIndex, placeholderIndex, errorIndex, loadingConfigIndex, placeholderConfigIndex) { } // TODO: implement runtime logic.
+function ɵɵlistener(eventName, listenerFn, useCapture, eventTargetResolver) {
+    const lView = getLView();
+    const tView = getTView();
+    const tNode = getCurrentTNode();
+    listenerInternal(tView, lView, lView[RENDERER], tNode, eventName, listenerFn, eventTargetResolver);
+    return ɵɵlistener;
+}
 /**
- * Loads the deferred content when a value becomes truthy.
+ * Registers a synthetic host listener (e.g. `(@foo.start)`) on a component or directive.
+ *
+ * This instruction is for compatibility purposes and is designed to ensure that a
+ * synthetic host listener (e.g. `@HostListener('@foo.start')`) properly gets rendered
+ * in the component's renderer. Normally all host listeners are evaluated with the
+ * parent component's renderer, but, in the case of animation @triggers, they need
+ * to be evaluated with the sub component's renderer (because that's where the
+ * animation triggers are defined).
+ *
+ * Do not use this instruction as a replacement for `listener`. This instruction
+ * only exists to ensure compatibility with the ViewEngine's host binding behavior.
+ *
+ * @param eventName Name of the event
+ * @param listenerFn The function to be called when event emits
+ * @param useCapture Whether or not to use capture in event listener
+ * @param eventTargetResolver Function that returns global target information in case this listener
+ * should be attached to a global object like window, document or body
+ *
  * @codeGenApi
  */
-function ɵɵdeferWhen(value) { } // TODO: implement runtime logic.
+function ɵɵsyntheticHostListener(eventName, listenerFn) {
+    const tNode = getCurrentTNode();
+    const lView = getLView();
+    const tView = getTView();
+    const currentDef = getCurrentDirectiveDef(tView.data);
+    const renderer = loadComponentRenderer(currentDef, tNode, lView);
+    listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn);
+    return ɵɵsyntheticHostListener;
+}
 /**
- * Prefetches the deferred content when a value becomes truthy.
+ * A utility function that checks if a given element has already an event handler registered for an
+ * event with a specified name. The TView.cleanup data structure is used to find out which events
+ * are registered for a given element.
+ */
+function findExistingListener(tView, lView, eventName, tNodeIdx) {
+    const tCleanup = tView.cleanup;
+    if (tCleanup != null) {
+        for (let i = 0; i < tCleanup.length - 1; i += 2) {
+            const cleanupEventName = tCleanup[i];
+            if (cleanupEventName === eventName && tCleanup[i + 1] === tNodeIdx) {
+                // We have found a matching event name on the same node but it might not have been
+                // registered yet, so we must explicitly verify entries in the LView cleanup data
+                // structures.
+                const lCleanup = lView[CLEANUP];
+                const listenerIdxInLCleanup = tCleanup[i + 2];
+                return lCleanup.length > listenerIdxInLCleanup ? lCleanup[listenerIdxInLCleanup] : null;
+            }
+            // TView.cleanup can have a mix of 4-elements entries (for event handler cleanups) or
+            // 2-element entries (for directive and queries destroy hooks). As such we can encounter
+            // blocks of 4 or 2 items in the tView.cleanup and this is why we iterate over 2 elements
+            // first and jump another 2 elements if we detect listeners cleanup (4 elements). Also check
+            // documentation of TView.cleanup for more details of this data structure layout.
+            if (typeof cleanupEventName === 'string') {
+                i += 2;
+            }
+        }
+    }
+    return null;
+}
+function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, eventTargetResolver) {
+    const isTNodeDirectiveHost = isDirectiveHost(tNode);
+    const firstCreatePass = tView.firstCreatePass;
+    const tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
+    const context = lView[CONTEXT];
+    // When the ɵɵlistener instruction was generated and is executed we know that there is either a
+    // native listener or a directive output on this element. As such we we know that we will have to
+    // register a listener and store its cleanup function on LView.
+    const lCleanup = getOrCreateLViewCleanup(lView);
+    ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
+    let processOutputs = true;
+    // Adding a native event listener is applicable when:
+    // - The corresponding TNode represents a DOM element.
+    // - The event target has a resolver (usually resulting in a global object,
+    //   such as `window` or `document`).
+    if ((tNode.type & 3 /* TNodeType.AnyRNode */) || eventTargetResolver) {
+        const native = getNativeByTNode(tNode, lView);
+        const target = eventTargetResolver ? eventTargetResolver(native) : native;
+        const lCleanupIndex = lCleanup.length;
+        const idxOrTargetGetter = eventTargetResolver ?
+            (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index])) :
+            tNode.index;
+        // In order to match current behavior, native DOM event listeners must be added for all
+        // events (including outputs).
+        // There might be cases where multiple directives on the same element try to register an event
+        // handler function for the same event. In this situation we want to avoid registration of
+        // several native listeners as each registration would be intercepted by NgZone and
+        // trigger change detection. This would mean that a single user action would result in several
+        // change detections being invoked. To avoid this situation we want to have only one call to
+        // native handler registration (for the same element and same type of event).
+        //
+        // In order to have just one native event handler in presence of multiple handler functions,
+        // we just register a first handler function as a native event listener and then chain
+        // (coalesce) other handler functions on top of the first native handler function.
+        let existingListener = null;
+        // Please note that the coalescing described here doesn't happen for events specifying an
+        // alternative target (ex. (document:click)) - this is to keep backward compatibility with the
+        // view engine.
+        // Also, we don't have to search for existing listeners is there are no directives
+        // matching on a given node as we can't register multiple event handlers for the same event in
+        // a template (this would mean having duplicate attributes).
+        if (!eventTargetResolver && isTNodeDirectiveHost) {
+            existingListener = findExistingListener(tView, lView, eventName, tNode.index);
+        }
+        if (existingListener !== null) {
+            // Attach a new listener to coalesced listeners list, maintaining the order in which
+            // listeners are registered. For performance reasons, we keep a reference to the last
+            // listener in that list (in `__ngLastListenerFn__` field), so we can avoid going through
+            // the entire set each time we need to add a new listener.
+            const lastListenerFn = existingListener.__ngLastListenerFn__ || existingListener;
+            lastListenerFn.__ngNextListenerFn__ = listenerFn;
+            existingListener.__ngLastListenerFn__ = listenerFn;
+            processOutputs = false;
+        }
+        else {
+            listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
+            const cleanupFn = renderer.listen(target, eventName, listenerFn);
+            ngDevMode && ngDevMode.rendererAddEventListener++;
+            lCleanup.push(listenerFn, cleanupFn);
+            tCleanup && tCleanup.push(eventName, idxOrTargetGetter, lCleanupIndex, lCleanupIndex + 1);
+        }
+    }
+    else {
+        // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
+        // ancestors are marked dirty when an event occurs.
+        listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
+    }
+    // subscribe to directive outputs
+    const outputs = tNode.outputs;
+    let props;
+    if (processOutputs && outputs !== null && (props = outputs[eventName])) {
+        const propsLength = props.length;
+        if (propsLength) {
+            for (let i = 0; i < propsLength; i += 2) {
+                const index = props[i];
+                ngDevMode && assertIndexInRange(lView, index);
+                const minifiedName = props[i + 1];
+                const directiveInstance = lView[index];
+                const output = directiveInstance[minifiedName];
+                if (ngDevMode && !isSubscribable(output)) {
+                    throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
+                }
+                const subscription = output.subscribe(listenerFn);
+                const idx = lCleanup.length;
+                lCleanup.push(listenerFn, subscription);
+                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+            }
+        }
+    }
+}
+function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
+    try {
+        profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
+        // Only explicitly returning false from a listener should preventDefault
+        return listenerFn(e) !== false;
+    }
+    catch (error) {
+        handleError(lView, error);
+        return false;
+    }
+    finally {
+        profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
+    }
+}
+/**
+ * Wraps an event listener with a function that marks ancestors dirty and prevents default behavior,
+ * if applicable.
+ *
+ * @param tNode The TNode associated with this listener
+ * @param lView The LView that contains this listener
+ * @param listenerFn The listener function to call
+ * @param wrapWithPreventDefault Whether or not to prevent default behavior
+ * (the procedural renderer does this already, so in those cases, we should skip)
+ */
+function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault) {
+    // Note: we are performing most of the work in the listener function itself
+    // to optimize listener registration.
+    return function wrapListenerIn_markDirtyAndPreventDefault(e) {
+        // Ivy uses `Function` as a special token that allows us to unwrap the function
+        // so that it can be invoked programmatically by `DebugNode.triggerEventHandler`.
+        if (e === Function) {
+            return listenerFn;
+        }
+        // In order to be backwards compatible with View Engine, events on component host nodes
+        // must also mark the component view itself dirty (i.e. the view that it owns).
+        const startView = tNode.componentOffset > -1 ? getComponentLViewByIndex(tNode.index, lView) : lView;
+        markViewDirty(startView);
+        let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
+        // A just-invoked listener function might have coalesced listeners so we need to check for
+        // their presence and invoke as needed.
+        let nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
+        while (nextListenerFn) {
+            // We should prevent default if any of the listeners explicitly return false
+            result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
+            nextListenerFn = nextListenerFn.__ngNextListenerFn__;
+        }
+        if (wrapWithPreventDefault && result === false) {
+            e.preventDefault();
+        }
+        return result;
+    };
+}
+
+/**
+ * Retrieves a context at the level specified and saves it as the global, contextViewData.
+ * Will get the next level up if level is not specified.
+ *
+ * This is used to save contexts of parent views so they can be bound in embedded views, or
+ * in conjunction with reference() to bind a ref from a parent view.
+ *
+ * @param level The relative level of the view from which to grab context compared to contextVewData
+ * @returns context
+ *
  * @codeGenApi
  */
-function ɵɵdeferPrefetchWhen(value) { } // TODO: implement runtime logic.
+function ɵɵnextContext(level = 1) {
+    return nextContextImpl(level);
+}
+
 /**
- * Creates runtime data structures for the `on idle` deferred trigger.
+ * Checks a given node against matching projection slots and returns the
+ * determined slot index. Returns "null" if no slot matched the given node.
+ *
+ * This function takes into account the parsed ngProjectAs selector from the
+ * node's attributes. If present, it will check whether the ngProjectAs selector
+ * matches any of the projection slot selectors.
+ */
+function matchingProjectionSlotIndex(tNode, projectionSlots) {
+    let wildcardNgContentIndex = null;
+    const ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
+    for (let i = 0; i < projectionSlots.length; i++) {
+        const slotValue = projectionSlots[i];
+        // The last wildcard projection slot should match all nodes which aren't matching
+        // any selector. This is necessary to be backwards compatible with view engine.
+        if (slotValue === '*') {
+            wildcardNgContentIndex = i;
+            continue;
+        }
+        // If we ran into an `ngProjectAs` attribute, we should match its parsed selector
+        // to the list of selectors, otherwise we fall back to matching against the node.
+        if (ngProjectAsAttrVal === null ?
+            isNodeMatchingSelectorList(tNode, slotValue, /* isProjectionMode */ true) :
+            isSelectorInSelectorList(ngProjectAsAttrVal, slotValue)) {
+            return i; // first matching selector "captures" a given node
+        }
+    }
+    return wildcardNgContentIndex;
+}
+/**
+ * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
+ * It takes all the selectors from the entire component's template and decides where
+ * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
+ * backed by a selector).
+ *
+ * This function requires CSS selectors to be provided in 2 forms: parsed (by a compiler) and text,
+ * un-parsed form.
+ *
+ * The parsed form is needed for efficient matching of a node against a given CSS selector.
+ * The un-parsed, textual form is needed for support of the ngProjectAs attribute.
+ *
+ * Having a CSS selector in 2 different formats is not ideal, but alternatives have even more
+ * drawbacks:
+ * - having only a textual form would require runtime parsing of CSS selectors;
+ * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
+ * template author).
+ *
+ * @param projectionSlots? A collection of projection slots. A projection slot can be based
+ *        on a parsed CSS selectors or set to the wildcard selector ("*") in order to match
+ *        all nodes which do not match any selector. If not specified, a single wildcard
+ *        selector projection slot will be defined.
+ *
  * @codeGenApi
  */
-function ɵɵdeferOnIdle() { } // TODO: implement runtime logic.
+function ɵɵprojectionDef(projectionSlots) {
+    const componentNode = getLView()[DECLARATION_COMPONENT_VIEW][T_HOST];
+    if (!componentNode.projection) {
+        // If no explicit projection slots are defined, fall back to a single
+        // projection slot with the wildcard selector.
+        const numProjectionSlots = projectionSlots ? projectionSlots.length : 1;
+        const projectionHeads = componentNode.projection =
+            newArray(numProjectionSlots, null);
+        const tails = projectionHeads.slice();
+        let componentChild = componentNode.child;
+        while (componentChild !== null) {
+            const slotIndex = projectionSlots ? matchingProjectionSlotIndex(componentChild, projectionSlots) : 0;
+            if (slotIndex !== null) {
+                if (tails[slotIndex]) {
+                    tails[slotIndex].projectionNext = componentChild;
+                }
+                else {
+                    projectionHeads[slotIndex] = componentChild;
+                }
+                tails[slotIndex] = componentChild;
+            }
+            componentChild = componentChild.next;
+        }
+    }
+}
 /**
- * Creates runtime data structures for the `prefetech on idle` deferred trigger.
+ * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
+ * to the projectionDef instruction.
+ *
+ * @param nodeIndex
+ * @param selectorIndex:
+ *        - 0 when the selector is `*` (or unspecified as this is the default value),
+ *        - 1 based index of the selector from the {@link projectionDef}
+ *
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnIdle() { } // TODO: implement runtime logic.
+function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
+    const lView = getLView();
+    const tView = getTView();
+    const tProjectionNode = getOrCreateTNode(tView, HEADER_OFFSET + nodeIndex, 16 /* TNodeType.Projection */, null, attrs || null);
+    // We can't use viewData[HOST_NODE] because projection nodes can be nested in embedded views.
+    if (tProjectionNode.projection === null)
+        tProjectionNode.projection = selectorIndex;
+    // `<ng-content>` has no content
+    setCurrentTNodeAsNotParent();
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    if (isNodeCreationMode &&
+        (tProjectionNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
+        // re-distribution of projectable nodes is stored on a component's view level
+        applyProjection(tView, lView, tProjectionNode);
+    }
+}
+
 /**
- * Creates runtime data structures for the `on immediate` deferred trigger.
+ *
+ * Update an interpolated property on an element with a lone bound value
+ *
+ * Used when the value passed to a property has 1 interpolated value in it, an no additional text
+ * surrounds that interpolated value:
+ *
+ * ```html
+ * <div title="{{v0}}"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate('title', v0);
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferOnImmediate() { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolate(propName, v0, sanitizer) {
+    ɵɵpropertyInterpolate1(propName, '', v0, '', sanitizer);
+    return ɵɵpropertyInterpolate;
+}
 /**
- * Creates runtime data structures for the `prefetech on immediate` deferred trigger.
+ *
+ * Update an interpolated property on an element with single bound value surrounded by text.
+ *
+ * Used when the value passed to a property has 1 interpolated value in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate1('title', 'prefix', v0, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnImmediate() { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
+    const lView = getLView();
+    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 1, prefix, suffix);
+    }
+    return ɵɵpropertyInterpolate1;
+}
 /**
- * Creates runtime data structures for the `on timer` deferred trigger.
- * @param delay Amount of time to wait before loading the content.
+ *
+ * Update an interpolated property on an element with 2 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 2 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate2('title', 'prefix', v0, '-', v1, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferOnTimer(delay) { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitizer) {
+    const lView = getLView();
+    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 2, prefix, i0, suffix);
+    }
+    return ɵɵpropertyInterpolate2;
+}
 /**
- * Creates runtime data structures for the `prefetch on timer` deferred trigger.
- * @param delay Amount of time to wait before prefetching the content.
+ *
+ * Update an interpolated property on an element with 3 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 3 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate3(
+ * 'title', 'prefix', v0, '-', v1, '-', v2, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnTimer(delay) { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, sanitizer) {
+    const lView = getLView();
+    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 3, prefix, i0, i1, suffix);
+    }
+    return ɵɵpropertyInterpolate3;
+}
 /**
- * Creates runtime data structures for the `on hover` deferred trigger.
+ *
+ * Update an interpolated property on an element with 4 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 4 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate4(
+ * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferOnHover() { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, sanitizer) {
+    const lView = getLView();
+    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
+    }
+    return ɵɵpropertyInterpolate4;
+}
 /**
- * Creates runtime data structures for the `prefetech on hover` deferred trigger.
+ *
+ * Update an interpolated property on an element with 5 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 5 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate5(
+ * 'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnHover() { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, sanitizer) {
+    const lView = getLView();
+    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
+    }
+    return ɵɵpropertyInterpolate5;
+}
 /**
- * Creates runtime data structures for the `on interaction` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ *
+ * Update an interpolated property on an element with 6 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 6 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate6(
+ *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferOnInteraction(target) { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, sanitizer) {
+    const lView = getLView();
+    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
+    }
+    return ɵɵpropertyInterpolate6;
+}
 /**
- * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ *
+ * Update an interpolated property on an element with 7 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 7 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate7(
+ *    'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnInteraction(target) { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, sanitizer) {
+    const lView = getLView();
+    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
+    }
+    return ɵɵpropertyInterpolate7;
+}
 /**
- * Creates runtime data structures for the `on viewport` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ *
+ * Update an interpolated property on an element with 8 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 8 interpolated values in it:
+ *
+ * ```html
+ * <div title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolate8(
+ *  'title', 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param i6 Static value used for concatenation only.
+ * @param v7 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferOnViewport(target) { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, sanitizer) {
+    const lView = getLView();
+    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    if (interpolatedValue !== NO_CHANGE) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        ngDevMode &&
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
+    }
+    return ɵɵpropertyInterpolate8;
+}
 /**
- * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ * Update an interpolated property on an element with 9 or more bound values surrounded by text.
+ *
+ * Used when the number of interpolated values exceeds 8.
+ *
+ * ```html
+ * <div
+ *  title="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is::
+ *
+ * ```ts
+ * ɵɵpropertyInterpolateV(
+ *  'title', ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+ *  'suffix']);
+ * ```
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new `@Inputs` don't have to be re-compiled.
+ *
+ * @param propName The name of the property to update.
+ * @param values The collection of values and the strings in between those values, beginning with a
+ * string prefix and ending with a string suffix.
+ * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+ * @param sanitizer An optional sanitizer function
+ * @returns itself, so that it may be chained.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnViewport(target) { } // TODO: implement runtime logic.
+function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
+    const lView = getLView();
+    const interpolatedValue = interpolationV(lView, values);
+    if (interpolatedValue !== NO_CHANGE) {
+        const tView = getTView();
+        const tNode = getSelectedTNode();
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        if (ngDevMode) {
+            const interpolationInBetween = [values[0]]; // prefix
+            for (let i = 2; i < values.length; i += 2) {
+                interpolationInBetween.push(values[i]);
+            }
+            storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - interpolationInBetween.length + 1, ...interpolationInBetween);
+        }
+    }
+    return ɵɵpropertyInterpolateV;
+}
+
+/** Store a value in the `data` at a given `index`. */
+function store(tView, lView, index, value) {
+    // We don't store any static data for local variables, so the first time
+    // we see the template, we should store as null to avoid a sparse array
+    if (index >= tView.data.length) {
+        tView.data[index] = null;
+        tView.blueprint[index] = null;
+    }
+    lView[index] = value;
+}
+/**
+ * Retrieves a local reference from the current contextViewData.
+ *
+ * If the reference to retrieve is in a parent view, this instruction is used in conjunction
+ * with a nextContext() call, which walks up the tree and updates the contextViewData instance.
+ *
+ * @param index The index of the local ref in contextViewData.
+ *
+ * @codeGenApi
+ */
+function ɵɵreference(index) {
+    const contextLView = getContextLView();
+    return load(contextLView, HEADER_OFFSET + index);
+}
+
+/**
+ *
+ * Update an interpolated style on an element with single bound value surrounded by text.
+ *
+ * Used when the value passed to a property has 1 interpolated value in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate1('key: ', v0, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+function ɵɵstyleMapInterpolate1(prefix, v0, suffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
+    ɵɵstyleMap(interpolatedValue);
+}
+/**
+ *
+ * Update an interpolated style on an element with 2 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 2 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate2('key: ', v0, '; key1: ', v1, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+function ɵɵstyleMapInterpolate2(prefix, v0, i0, v1, suffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
+    ɵɵstyleMap(interpolatedValue);
+}
+/**
+ *
+ * Update an interpolated style on an element with 3 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 3 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key2: {{v1}}; key2: {{v2}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate3(
+ *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+function ɵɵstyleMapInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
+    ɵɵstyleMap(interpolatedValue);
+}
+/**
+ *
+ * Update an interpolated style on an element with 4 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 4 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate4(
+ *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+function ɵɵstyleMapInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    ɵɵstyleMap(interpolatedValue);
+}
+/**
+ *
+ * Update an interpolated style on an element with 5 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 5 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate5(
+ *     'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+function ɵɵstyleMapInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    ɵɵstyleMap(interpolatedValue);
+}
+/**
+ *
+ * Update an interpolated style on an element with 6 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 6 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}};
+ *             key5: {{v5}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate6(
+ *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+ *    'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+function ɵɵstyleMapInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    ɵɵstyleMap(interpolatedValue);
+}
+/**
+ *
+ * Update an interpolated style on an element with 7 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 7 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
+ *             key6: {{v6}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate7(
+ *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+ *    '; key6: ', v6, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+function ɵɵstyleMapInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    ɵɵstyleMap(interpolatedValue);
+}
+/**
+ *
+ * Update an interpolated style on an element with 8 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 8 interpolated values in it:
+ *
+ * ```html
+ * <div style="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
+ *             key6: {{v6}}; key7: {{v7}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolate8(
+ *    'key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+ *    '; key6: ', v6, '; key7: ', v7, 'suffix');
+ * ```
+ *
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param i6 Static value used for concatenation only.
+ * @param v7 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @codeGenApi
+ */
+function ɵɵstyleMapInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    ɵɵstyleMap(interpolatedValue);
+}
+/**
+ * Update an interpolated style on an element with 9 or more bound values surrounded by text.
+ *
+ * Used when the number of interpolated values exceeds 8.
+ *
+ * ```html
+ * <div
+ *  class="key: {{v0}}; key1: {{v1}}; key2: {{v2}}; key3: {{v3}}; key4: {{v4}}; key5: {{v5}};
+ *         key6: {{v6}}; key7: {{v7}}; key8: {{v8}}; key9: {{v9}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstyleMapInterpolateV(
+ *    ['key: ', v0, '; key1: ', v1, '; key2: ', v2, '; key3: ', v3, '; key4: ', v4, '; key5: ', v5,
+ *     '; key6: ', v6, '; key7: ', v7, '; key8: ', v8, '; key9: ', v9, 'suffix']);
+ * ```
+ *.
+ * @param values The collection of values and the strings in-between those values, beginning with
+ * a string prefix and ending with a string suffix.
+ * (e.g. `['prefix', value0, '; key2: ', value1, '; key2: ', value2, ..., value99, 'suffix']`)
+ * @codeGenApi
+ */
+function ɵɵstyleMapInterpolateV(values) {
+    const lView = getLView();
+    const interpolatedValue = interpolationV(lView, values);
+    ɵɵstyleMap(interpolatedValue);
+}
+
+/**
+ *
+ * Update an interpolated style property on an element with single bound value surrounded by text.
+ *
+ * Used when the value passed to a property has 1 interpolated value in it:
+ *
+ * ```html
+ * <div style.color="prefix{{v0}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstylePropInterpolate1(0, 'prefix', v0, 'suffix');
+ * ```
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `styling`.
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵstylePropInterpolate1(prop, prefix, v0, suffix, valueSuffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation1(lView, prefix, v0, suffix);
+    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
+    return ɵɵstylePropInterpolate1;
+}
+/**
+ *
+ * Update an interpolated style property on an element with 2 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 2 interpolated values in it:
+ *
+ * ```html
+ * <div style.color="prefix{{v0}}-{{v1}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstylePropInterpolate2(0, 'prefix', v0, '-', v1, 'suffix');
+ * ```
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `styling`.
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵstylePropInterpolate2(prop, prefix, v0, i0, v1, suffix, valueSuffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation2(lView, prefix, v0, i0, v1, suffix);
+    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
+    return ɵɵstylePropInterpolate2;
+}
+/**
+ *
+ * Update an interpolated style property on an element with 3 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 3 interpolated values in it:
+ *
+ * ```html
+ * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstylePropInterpolate3(0, 'prefix', v0, '-', v1, '-', v2, 'suffix');
+ * ```
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `styling`.
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵstylePropInterpolate3(prop, prefix, v0, i0, v1, i1, v2, suffix, valueSuffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
+    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
+    return ɵɵstylePropInterpolate3;
+}
+/**
+ *
+ * Update an interpolated style property on an element with 4 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 4 interpolated values in it:
+ *
+ * ```html
+ * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstylePropInterpolate4(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+ * ```
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `styling`.
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵstylePropInterpolate4(prop, prefix, v0, i0, v1, i1, v2, i2, v3, suffix, valueSuffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
+    return ɵɵstylePropInterpolate4;
+}
+/**
+ *
+ * Update an interpolated style property on an element with 5 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 5 interpolated values in it:
+ *
+ * ```html
+ * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstylePropInterpolate5(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+ * ```
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `styling`.
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵstylePropInterpolate5(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix, valueSuffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
+    return ɵɵstylePropInterpolate5;
+}
+/**
+ *
+ * Update an interpolated style property on an element with 6 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 6 interpolated values in it:
+ *
+ * ```html
+ * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstylePropInterpolate6(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+ * ```
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `styling`.
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵstylePropInterpolate6(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix, valueSuffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
+    return ɵɵstylePropInterpolate6;
+}
+/**
+ *
+ * Update an interpolated style property on an element with 7 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 7 interpolated values in it:
+ *
+ * ```html
+ * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstylePropInterpolate7(
+ *    0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+ * ```
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `styling`.
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵstylePropInterpolate7(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix, valueSuffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
+    return ɵɵstylePropInterpolate7;
+}
+/**
+ *
+ * Update an interpolated style property on an element with 8 bound values surrounded by text.
+ *
+ * Used when the value passed to a property has 8 interpolated values in it:
+ *
+ * ```html
+ * <div style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix"></div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstylePropInterpolate8(0, 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6,
+ * '-', v7, 'suffix');
+ * ```
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `styling`.
+ * @param prefix Static value used for concatenation only.
+ * @param v0 Value checked for change.
+ * @param i0 Static value used for concatenation only.
+ * @param v1 Value checked for change.
+ * @param i1 Static value used for concatenation only.
+ * @param v2 Value checked for change.
+ * @param i2 Static value used for concatenation only.
+ * @param v3 Value checked for change.
+ * @param i3 Static value used for concatenation only.
+ * @param v4 Value checked for change.
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change.
+ * @param i5 Static value used for concatenation only.
+ * @param v6 Value checked for change.
+ * @param i6 Static value used for concatenation only.
+ * @param v7 Value checked for change.
+ * @param suffix Static value used for concatenation only.
+ * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵstylePropInterpolate8(prop, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix, valueSuffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
+    return ɵɵstylePropInterpolate8;
+}
+/**
+ * Update an interpolated style property on an element with 9 or more bound values surrounded by
+ * text.
+ *
+ * Used when the number of interpolated values exceeds 8.
+ *
+ * ```html
+ * <div
+ *  style.color="prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix">
+ * </div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵstylePropInterpolateV(
+ *  0, ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+ *  'suffix']);
+ * ```
+ *
+ * @param styleIndex Index of style to update. This index value refers to the
+ *        index of the style in the style bindings array that was passed into
+ *        `styling`..
+ * @param values The collection of values and the strings in-between those values, beginning with
+ * a string prefix and ending with a string suffix.
+ * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+ * @param valueSuffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵstylePropInterpolateV(prop, values, valueSuffix) {
+    const lView = getLView();
+    const interpolatedValue = interpolationV(lView, values);
+    checkStylingProperty(prop, interpolatedValue, valueSuffix, false);
+    return ɵɵstylePropInterpolateV;
+}
+
+function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
+    ngDevMode && assertFirstCreatePass(tView);
+    ngDevMode && ngDevMode.firstCreatePass++;
+    const tViewConsts = tView.consts;
+    // TODO(pk): refactor getOrCreateTNode to have the "create" only version
+    const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
+    resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
+    registerPostOrderHooks(tView, tNode);
+    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts, null /* ssrId */);
+    if (tView.queries !== null) {
+        tView.queries.template(tView, tNode);
+        embeddedTView.queries = tView.queries.embeddedTView(tNode);
+    }
+    return tNode;
+}
+/**
+ * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
+ *
+ * <ng-template #foo>
+ *    <div></div>
+ * </ng-template>
+ *
+ * @param index The index of the container in the data array
+ * @param templateFn Inline template
+ * @param decls The number of nodes, local refs, and pipes for this template
+ * @param vars The number of bindings for this template
+ * @param tagName The name of the container element, if applicable
+ * @param attrsIndex Index of template attributes in the `consts` array.
+ * @param localRefs Index of the local references in the `consts` array.
+ * @param localRefExtractor A function which extracts local-refs values from the template.
+ *        Defaults to the current element associated with the local-ref.
+ *
+ * @codeGenApi
+ */
+function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex, localRefExtractor) {
+    const lView = getLView();
+    const tView = getTView();
+    const adjustedIndex = index + HEADER_OFFSET;
+    const tNode = tView.firstCreatePass ? templateFirstCreatePass(adjustedIndex, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
+        tView.data[adjustedIndex];
+    setCurrentTNode(tNode, false);
+    const comment = _locateOrCreateContainerAnchor(tView, lView, tNode, index);
+    if (wasLastNodeCreated()) {
+        appendChild(tView, lView, comment, tNode);
+    }
+    attachPatchData(comment, lView);
+    addToViewTree(lView, lView[adjustedIndex] = createLContainer(comment, lView, comment, tNode));
+    if (isDirectiveHost(tNode)) {
+        createDirectivesInstances(tView, lView, tNode);
+    }
+    if (localRefsIndex != null) {
+        saveResolvedLocalsInData(lView, tNode, localRefExtractor);
+    }
+}
+let _locateOrCreateContainerAnchor = createContainerAnchorImpl;
+/**
+ * Regular creation mode for LContainers and their anchor (comment) nodes.
+ */
+function createContainerAnchorImpl(tView, lView, tNode, index) {
+    lastNodeWasCreated(true);
+    return lView[RENDERER].createComment(ngDevMode ? 'container' : '');
+}
+/**
+ * Enables hydration code path (to lookup existing elements in DOM)
+ * in addition to the regular creation mode for LContainers and their
+ * anchor (comment) nodes.
+ */
+function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    lastNodeWasCreated(isNodeCreationMode);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return createContainerAnchorImpl(tView, lView, tNode, index);
+    }
+    const ssrId = hydrationInfo.data[TEMPLATES]?.[index] ?? null;
+    // Apply `ssrId` value to the underlying TView if it was not previously set.
+    //
+    // There might be situations when the same component is present in a template
+    // multiple times and some instances are opted-out of using hydration via
+    // `ngSkipHydration` attribute. In this scenario, at the time a TView is created,
+    // the `ssrId` might be `null` (if the first component is opted-out of hydration).
+    // The code below makes sure that the `ssrId` is applied to the TView if it's still
+    // `null` and verifies we never try to override it with a different value.
+    if (ssrId !== null && tNode.tView !== null) {
+        if (tNode.tView.ssrId === null) {
+            tNode.tView.ssrId = ssrId;
+        }
+        else {
+            ngDevMode &&
+                assertEqual(tNode.tView.ssrId, ssrId, 'Unexpected value of the `ssrId` for this TView');
+        }
+    }
+    // Hydration mode, looking up existing elements in DOM.
+    const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
+    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
+    setSegmentHead(hydrationInfo, index, currentRNode);
+    const viewContainerSize = calcSerializedContainerSize(hydrationInfo, index);
+    const comment = siblingAfter(viewContainerSize, currentRNode);
+    if (ngDevMode) {
+        validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
+        markRNodeAsClaimedByHydration(comment);
+    }
+    return comment;
+}
+function enableLocateOrCreateContainerAnchorImpl() {
+    _locateOrCreateContainerAnchor = locateOrCreateContainerAnchorImpl;
+}
+
+/**
+ * Create static text node
+ *
+ * @param index Index of the node in the data array
+ * @param value Static string value to write.
+ *
+ * @codeGenApi
+ */
+function ɵɵtext(index, value = '') {
+    const lView = getLView();
+    const tView = getTView();
+    const adjustedIndex = index + HEADER_OFFSET;
+    ngDevMode &&
+        assertEqual(getBindingIndex(), tView.bindingStartIndex, 'text nodes should be created before any bindings');
+    ngDevMode && assertIndexInRange(lView, adjustedIndex);
+    const tNode = tView.firstCreatePass ?
+        getOrCreateTNode(tView, adjustedIndex, 1 /* TNodeType.Text */, value, null) :
+        tView.data[adjustedIndex];
+    const textNative = _locateOrCreateTextNode(tView, lView, tNode, value, index);
+    lView[adjustedIndex] = textNative;
+    if (wasLastNodeCreated()) {
+        appendChild(tView, lView, textNative, tNode);
+    }
+    // Text nodes are self closing.
+    setCurrentTNode(tNode, false);
+}
+let _locateOrCreateTextNode = (tView, lView, tNode, value, index) => {
+    lastNodeWasCreated(true);
+    return createTextNode(lView[RENDERER], value);
+};
+/**
+ * Enables hydration code path (to lookup existing elements in DOM)
+ * in addition to the regular creation mode of text nodes.
+ */
+function locateOrCreateTextNodeImpl(tView, lView, tNode, value, index) {
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    lastNodeWasCreated(isNodeCreationMode);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return createTextNode(lView[RENDERER], value);
+    }
+    // Hydration mode, looking up an existing element in DOM.
+    const textNative = locateNextRNode(hydrationInfo, tView, lView, tNode);
+    ngDevMode && validateMatchingNode(textNative, Node.TEXT_NODE, null, lView, tNode);
+    ngDevMode && markRNodeAsClaimedByHydration(textNative);
+    return textNative;
+}
+function enableLocateOrCreateTextNodeImpl() {
+    _locateOrCreateTextNode = locateOrCreateTextNodeImpl;
+}
+
+/**
+ *
+ * Update text content with a lone bound value
+ *
+ * Used when a text node has 1 interpolated value in it, an no additional text
+ * surrounds that interpolated value:
+ *
+ * ```html
+ * <div>{{v0}}</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate(v0);
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+function ɵɵtextInterpolate(v0) {
+    ɵɵtextInterpolate1('', v0, '');
+    return ɵɵtextInterpolate;
+}
+/**
+ *
+ * Update text content with single bound value surrounded by other text.
+ *
+ * Used when a text node has 1 interpolated value in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate1('prefix', v0, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+function ɵɵtextInterpolate1(prefix, v0, suffix) {
+    const lView = getLView();
+    const interpolated = interpolation1(lView, prefix, v0, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, getSelectedIndex(), interpolated);
+    }
+    return ɵɵtextInterpolate1;
+}
+/**
+ *
+ * Update text content with 2 bound values surrounded by other text.
+ *
+ * Used when a text node has 2 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate2('prefix', v0, '-', v1, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+function ɵɵtextInterpolate2(prefix, v0, i0, v1, suffix) {
+    const lView = getLView();
+    const interpolated = interpolation2(lView, prefix, v0, i0, v1, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, getSelectedIndex(), interpolated);
+    }
+    return ɵɵtextInterpolate2;
+}
+/**
+ *
+ * Update text content with 3 bound values surrounded by other text.
+ *
+ * Used when a text node has 3 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate3(
+ * 'prefix', v0, '-', v1, '-', v2, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+function ɵɵtextInterpolate3(prefix, v0, i0, v1, i1, v2, suffix) {
+    const lView = getLView();
+    const interpolated = interpolation3(lView, prefix, v0, i0, v1, i1, v2, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, getSelectedIndex(), interpolated);
+    }
+    return ɵɵtextInterpolate3;
+}
+/**
+ *
+ * Update text content with 4 bound values surrounded by other text.
+ *
+ * Used when a text node has 4 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate4(
+ * 'prefix', v0, '-', v1, '-', v2, '-', v3, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see ɵɵtextInterpolateV
+ * @codeGenApi
+ */
+function ɵɵtextInterpolate4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+    const lView = getLView();
+    const interpolated = interpolation4(lView, prefix, v0, i0, v1, i1, v2, i2, v3, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, getSelectedIndex(), interpolated);
+    }
+    return ɵɵtextInterpolate4;
+}
+/**
+ *
+ * Update text content with 5 bound values surrounded by other text.
+ *
+ * Used when a text node has 5 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate5(
+ * 'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+function ɵɵtextInterpolate5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+    const lView = getLView();
+    const interpolated = interpolation5(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, getSelectedIndex(), interpolated);
+    }
+    return ɵɵtextInterpolate5;
+}
+/**
+ *
+ * Update text content with 6 bound values surrounded by other text.
+ *
+ * Used when a text node has 6 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate6(
+ *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, 'suffix');
+ * ```
+ *
+ * @param i4 Static value used for concatenation only.
+ * @param v5 Value checked for change. @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+function ɵɵtextInterpolate6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+    const lView = getLView();
+    const interpolated = interpolation6(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, getSelectedIndex(), interpolated);
+    }
+    return ɵɵtextInterpolate6;
+}
+/**
+ *
+ * Update text content with 7 bound values surrounded by other text.
+ *
+ * Used when a text node has 7 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate7(
+ *    'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+function ɵɵtextInterpolate7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+    const lView = getLView();
+    const interpolated = interpolation7(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, getSelectedIndex(), interpolated);
+    }
+    return ɵɵtextInterpolate7;
+}
+/**
+ *
+ * Update text content with 8 bound values surrounded by other text.
+ *
+ * Used when a text node has 8 interpolated values in it:
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolate8(
+ *  'prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, 'suffix');
+ * ```
+ * @returns itself, so that it may be chained.
+ * @see textInterpolateV
+ * @codeGenApi
+ */
+function ɵɵtextInterpolate8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+    const lView = getLView();
+    const interpolated = interpolation8(lView, prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, getSelectedIndex(), interpolated);
+    }
+    return ɵɵtextInterpolate8;
+}
+/**
+ * Update text content with 9 or more bound values other surrounded by text.
+ *
+ * Used when the number of interpolated values exceeds 8.
+ *
+ * ```html
+ * <div>prefix{{v0}}-{{v1}}-{{v2}}-{{v3}}-{{v4}}-{{v5}}-{{v6}}-{{v7}}-{{v8}}-{{v9}}suffix</div>
+ * ```
+ *
+ * Its compiled representation is:
+ *
+ * ```ts
+ * ɵɵtextInterpolateV(
+ *  ['prefix', v0, '-', v1, '-', v2, '-', v3, '-', v4, '-', v5, '-', v6, '-', v7, '-', v9,
+ *  'suffix']);
+ * ```
+ *.
+ * @param values The collection of values and the strings in between those values, beginning with
+ * a string prefix and ending with a string suffix.
+ * (e.g. `['prefix', value0, '-', value1, '-', value2, ..., value99, 'suffix']`)
+ *
+ * @returns itself, so that it may be chained.
+ * @codeGenApi
+ */
+function ɵɵtextInterpolateV(values) {
+    const lView = getLView();
+    const interpolated = interpolationV(lView, values);
+    if (interpolated !== NO_CHANGE) {
+        textBindingInternal(lView, getSelectedIndex(), interpolated);
+    }
+    return ɵɵtextInterpolateV;
+}
 
 /*
  * This file re-exports all symbols contained in this directory.
@@ -23780,57 +23879,6 @@ class QueryList {
         this.changes.complete();
         this.changes.unsubscribe();
     }
-}
-
-function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
-    const embeddedTView = templateTNode.tView;
-    ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
-    ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
-    // Embedded views follow the change detection strategy of the view they're declared in.
-    const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
-    const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
-    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.hydrationInfo ?? null);
-    const declarationLContainer = declarationLView[templateTNode.index];
-    ngDevMode && assertLContainer(declarationLContainer);
-    embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
-    const declarationViewLQueries = declarationLView[QUERIES];
-    if (declarationViewLQueries !== null) {
-        embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
-    }
-    // execute creation mode of a view
-    renderView(embeddedTView, embeddedLView, context);
-    return embeddedLView;
-}
-function getLViewFromLContainer(lContainer, index) {
-    const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
-    // avoid reading past the array boundaries
-    if (adjustedIndex < lContainer.length) {
-        const lView = lContainer[adjustedIndex];
-        ngDevMode && assertLView(lView);
-        return lView;
-    }
-    return undefined;
-}
-function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
-    const tView = lView[TVIEW];
-    // insert to the view tree so the new view can be change-detected
-    insertView(tView, lView, lContainer, index);
-    // insert to the view to the DOM tree
-    if (addToDOM) {
-        const beforeNode = getBeforeNodeForView(index, lContainer);
-        const renderer = lView[RENDERER];
-        const parentRNode = nativeParentNode(renderer, lContainer[NATIVE]);
-        if (parentRNode !== null) {
-            addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
-        }
-    }
-}
-function removeLViewFromLContainer(lContainer, index) {
-    const lView = detachView(lContainer, index);
-    if (lView !== undefined) {
-        destroyLView(lView[TVIEW], lView);
-    }
-    return lView;
 }
 
 /**
@@ -32027,5 +32075,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertPlatform, booleanAttribute, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, numberAttribute, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ENABLED_SSR_FEATURES as ɵENABLED_SSR_FEATURES, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, InitialRenderPendingTasks as ɵInitialRenderPendingTasks, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefer, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertPlatform, booleanAttribute, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, numberAttribute, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, ENABLED_SSR_FEATURES as ɵENABLED_SSR_FEATURES, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, InitialRenderPendingTasks as ɵInitialRenderPendingTasks, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, getDebugNode as ɵgetDebugNode, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, setClassMetadata as ɵsetClassMetadata, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵconditional, ɵɵcontentQuery, ɵɵdefer, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map

@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-6a60a29
+ * @license Angular v17.0.0-next.0+sha-93675dc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12784,6 +12784,20 @@ export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportA
 }, OutputMap extends {
     [key: string]: string;
 }, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
+
+
+/**
+ * The conditional instruction represents the basic building block on the runtime side to support
+ * built-in "if" and "switch". On the high level this instruction is responsible for adding and
+ * removing views selected by a conditional expression.
+ *
+ * @param containerIndex index of a container in a host view (indexed from HEADER_OFFSET) where
+ *     conditional views should be inserted.
+ * @param matchingTemplateIndex index of a template TNode representing a conditional view to be
+ *     inserted; -1 represents a special case when there is no view to insert.
+ * @codeGenApi
+ */
+export declare function ɵɵconditional<T>(containerIndex: number, matchingTemplateIndex: number, value?: T): void;
 
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
