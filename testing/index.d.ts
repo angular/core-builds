@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.1+sha-4b46819
+ * @license Angular v16.2.1+sha-a43c077
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -295,7 +295,7 @@ export declare interface TestBed {
     /**
      * Runs the given function in the `EnvironmentInjector` context of `TestBed`.
      *
-     * @see EnvironmentInjector#runInContext
+     * @see {@link EnvironmentInjector#runInContext}
      */
     runInInjectionContext<T>(fn: () => T): T;
     execute(tokens: any[], fn: Function, context?: any): any;

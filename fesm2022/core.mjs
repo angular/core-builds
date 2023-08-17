@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.1+sha-4b46819
+ * @license Angular v16.2.1+sha-a43c077
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10291,7 +10291,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.1+sha-4b46819');
+const VERSION = new Version('16.2.1+sha-a43c077');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -28799,8 +28799,8 @@ function internalProvideZoneChangeDetection(ngZoneFactory) {
  * ```
  *
  * @publicApi
- * @see bootstrapApplication
- * @see NgZoneOptions
+ * @see {@link bootstrapApplication}
+ * @see {@link NgZoneOptions}
  */
 function provideZoneChangeDetection(options) {
     const zoneProviders = internalProvideZoneChangeDetection(() => new NgZone(getNgZoneOptions(options)));

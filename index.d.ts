@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.1+sha-4b46819
+ * @license Angular v16.2.1+sha-a43c077
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6253,7 +6253,7 @@ export declare class NgZone {
  *
  * @publicApi
  *
- * @see provideZoneChangeDetection
+ * @see {@link provideZoneChangeDetection}
  */
 export declare interface NgZoneOptions {
     /**
@@ -6832,8 +6832,8 @@ export declare type ProviderToken<T> = Type<T> | AbstractType<T> | InjectionToke
  * ```
  *
  * @publicApi
- * @see bootstrapApplication
- * @see NgZoneOptions
+ * @see {@link bootstrapApplication}
+ * @see {@link NgZoneOptions}
  */
 export declare function provideZoneChangeDetection(options?: NgZoneOptions): EnvironmentProviders;
 
