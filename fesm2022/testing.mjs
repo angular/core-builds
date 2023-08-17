@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.0+sha-5fb5f08
+ * @license Angular v17.0.0-next.0+sha-e650393
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11307,7 +11307,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.0+sha-5fb5f08');
+const VERSION = new Version('17.0.0-next.0+sha-e650393');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -27216,7 +27216,7 @@ class TestBedImpl {
     /**
      * Runs the given function in the `EnvironmentInjector` context of `TestBed`.
      *
-     * @see EnvironmentInjector#runInContext
+     * @see {@link EnvironmentInjector#runInContext}
      */
     static runInInjectionContext(fn) {
         return TestBedImpl.INSTANCE.runInInjectionContext(fn);
