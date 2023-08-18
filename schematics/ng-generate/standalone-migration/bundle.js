@@ -22421,7 +22421,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.0+sha-8798abb");
+var VERSION2 = new Version("17.0.0-next.0+sha-5bd9fbd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -23958,7 +23958,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-8798abb"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24016,7 +24016,7 @@ function compileDependency(dep) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/partial/directive.mjs
-var MINIMUM_PARTIAL_LINKER_VERSION2 = "14.0.0";
+var MINIMUM_PARTIAL_LINKER_VERSION2 = "16.1.0";
 function compileDeclareDirectiveFromMetadata(meta) {
   const definitionMap = createDirectiveDefinitionMap(meta);
   const expression = importExpr(Identifiers.declareDirective).callFn([definitionMap.toLiteralMap()]);
@@ -24026,8 +24026,10 @@ function compileDeclareDirectiveFromMetadata(meta) {
 function createDirectiveDefinitionMap(meta) {
   var _a2;
   const definitionMap = new DefinitionMap();
-  definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-8798abb"));
+  const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
+  const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
+  definitionMap.set("minVersion", literal(minVersion));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24215,7 +24217,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-8798abb"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24238,7 +24240,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-8798abb"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24276,7 +24278,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-8798abb"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -24300,7 +24302,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-8798abb"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -24335,7 +24337,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-8798abb"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -24352,7 +24354,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.0+sha-8798abb");
+var VERSION3 = new Version("17.0.0-next.0+sha-5bd9fbd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -24462,7 +24464,7 @@ function compareVersions(v1, v2) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/typescript_support.mjs
 var MIN_TS_VERSION = "4.9.3";
-var MAX_TS_VERSION = "5.2.0";
+var MAX_TS_VERSION = "5.3.0";
 var tsVersion = import_typescript3.default.version;
 function checkVersion(version, minVersion, maxVersion) {
   if (compareVersions(version, minVersion) < 0 || compareVersions(version, maxVersion) >= 0) {
@@ -24551,6 +24553,8 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["INJECTABLE_DUPLICATE_PROV"] = 9001] = "INJECTABLE_DUPLICATE_PROV";
   ErrorCode2[ErrorCode2["SUGGEST_STRICT_TEMPLATES"] = 10001] = "SUGGEST_STRICT_TEMPLATES";
   ErrorCode2[ErrorCode2["SUGGEST_SUBOPTIMAL_TYPE_INFERENCE"] = 10002] = "SUGGEST_SUBOPTIMAL_TYPE_INFERENCE";
+  ErrorCode2[ErrorCode2["LOCAL_COMPILATION_IMPORTED_TEMPLATE_STRING"] = 11001] = "LOCAL_COMPILATION_IMPORTED_TEMPLATE_STRING";
+  ErrorCode2[ErrorCode2["LOCAL_COMPILATION_IMPORTED_STYLES_STRING"] = 11002] = "LOCAL_COMPILATION_IMPORTED_STYLES_STRING";
 })(ErrorCode || (ErrorCode = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/diagnostics/src/docs.mjs
@@ -31418,6 +31422,30 @@ function extractQueriesFromDecorator(queryData, reflector, evaluator, isCore) {
   });
   return { content, view };
 }
+function parseDirectiveStyles(directive, evaluator, compilationMode) {
+  const expression = directive.get("styles");
+  if (!expression) {
+    return null;
+  }
+  const value = evaluator.evaluate(expression);
+  if (compilationMode === CompilationMode.LOCAL && Array.isArray(value)) {
+    for (const entry of value) {
+      if (entry instanceof DynamicValue && entry.isFromUnknownIdentifier()) {
+        const relatedInformation = traceDynamicValue(expression, entry);
+        const chain = {
+          messageText: `Unknown identifier used as styles string: ${entry.node.getText()} (did you import this string from another file? This is not allowed in local compilation mode. Please either inline it or move it to a separate file and include it using'styleUrls')`,
+          category: import_typescript48.default.DiagnosticCategory.Error,
+          code: 0
+        };
+        throw new FatalDiagnosticError(ErrorCode.LOCAL_COMPILATION_IMPORTED_STYLES_STRING, expression, chain, relatedInformation);
+      }
+    }
+  }
+  if (!isStringArrayOrDie(value, "styles", expression)) {
+    throw createValueHasWrongTypeError(expression, value, `Failed to resolve @Directive.styles to a string array`);
+  }
+  return value;
+}
 function parseFieldStringArrayValue(directive, field, evaluator) {
   if (!directive.has(field)) {
     return null;
@@ -32615,7 +32643,7 @@ var import_typescript52 = __toESM(require("typescript"), 1);
 function getTemplateDeclarationNodeForError(declaration) {
   return declaration.isInline ? declaration.expression : declaration.templateUrlExpression;
 }
-function extractTemplate(node, template2, evaluator, depTracker, resourceLoader, options) {
+function extractTemplate(node, template2, evaluator, depTracker, resourceLoader, options, compilationMode) {
   if (template2.isInline) {
     let sourceStr;
     let sourceParseRange = null;
@@ -32635,6 +32663,15 @@ function extractTemplate(node, template2, evaluator, depTracker, resourceLoader,
       sourceMapUrl = template2.resolvedTemplateUrl;
     } else {
       const resolvedTemplate = evaluator.evaluate(template2.expression);
+      if (compilationMode === CompilationMode.LOCAL && resolvedTemplate instanceof DynamicValue && resolvedTemplate.isFromUnknownIdentifier()) {
+        const relatedInformation = traceDynamicValue(template2.expression, resolvedTemplate);
+        const chain = {
+          messageText: `Unknown identifier used as template string: ${template2.expression.getText()} (did you import this string from another file? This is not allowed in local compilation mode. Please either inline it or move it to a separate file and include it using 'templateUrl')`,
+          category: import_typescript52.default.DiagnosticCategory.Error,
+          code: 0
+        };
+        throw new FatalDiagnosticError(ErrorCode.LOCAL_COMPILATION_IMPORTED_TEMPLATE_STRING, template2.expression, chain, relatedInformation);
+      }
       if (typeof resolvedTemplate !== "string") {
         throw createValueHasWrongTypeError(template2.expression, resolvedTemplate, "template must be a string");
       }
@@ -32760,7 +32797,7 @@ function parseTemplateDeclaration(node, decorator, component, containingFile, ev
     throw new FatalDiagnosticError(ErrorCode.COMPONENT_MISSING_TEMPLATE, decorator.node, "component is missing a template");
   }
 }
-function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanalyzeTemplateCache, node, decorator, component, containingFile, defaultPreserveWhitespaces, options) {
+function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanalyzeTemplateCache, node, decorator, component, containingFile, defaultPreserveWhitespaces, options, compilationMode) {
   if (component.has("templateUrl")) {
     const templateUrlExpr = component.get("templateUrl");
     const templateUrl = evaluator.evaluate(templateUrlExpr);
@@ -32773,7 +32810,7 @@ function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanaly
       if (templatePromise !== void 0) {
         return templatePromise.then(() => {
           const templateDecl = parseTemplateDeclaration(node, decorator, component, containingFile, evaluator, depTracker, resourceLoader, defaultPreserveWhitespaces);
-          const template2 = extractTemplate(node, templateDecl, evaluator, depTracker, resourceLoader, options);
+          const template2 = extractTemplate(node, templateDecl, evaluator, depTracker, resourceLoader, options, compilationMode);
           preanalyzeTemplateCache.set(node, template2);
           return template2;
         });
@@ -32788,7 +32825,7 @@ function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanaly
     }
   } else {
     const templateDecl = parseTemplateDeclaration(node, decorator, component, containingFile, evaluator, depTracker, resourceLoader, defaultPreserveWhitespaces);
-    const template2 = extractTemplate(node, templateDecl, evaluator, depTracker, resourceLoader, options);
+    const template2 = extractTemplate(node, templateDecl, evaluator, depTracker, resourceLoader, options, compilationMode);
     preanalyzeTemplateCache.set(node, template2);
     return Promise.resolve(template2);
   }
@@ -33114,7 +33151,7 @@ var ComponentDecoratorHandler = class {
         return void 0;
       }
     };
-    const templateAndTemplateStyleResources = preloadAndParseTemplate(this.evaluator, this.resourceLoader, this.depTracker, this.preanalyzeTemplateCache, node, decorator, component, containingFile, this.defaultPreserveWhitespaces, this.extractTemplateOptions).then((template2) => {
+    const templateAndTemplateStyleResources = preloadAndParseTemplate(this.evaluator, this.resourceLoader, this.depTracker, this.preanalyzeTemplateCache, node, decorator, component, containingFile, this.defaultPreserveWhitespaces, this.extractTemplateOptions, this.compilationMode).then((template2) => {
       if (template2 === null) {
         return void 0;
       }
@@ -33123,7 +33160,7 @@ var ComponentDecoratorHandler = class {
     const componentStyleUrls = extractComponentStyleUrls(this.evaluator, component);
     let inlineStyles;
     if (component.has("styles")) {
-      const litStyles = parseFieldStringArrayValue(component, "styles", this.evaluator);
+      const litStyles = parseDirectiveStyles(component, this.evaluator, this.compilationMode);
       if (litStyles === null) {
         this.preanalyzeStylesCache.set(node, null);
       } else {
@@ -33231,7 +33268,7 @@ var ComponentDecoratorHandler = class {
         i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
         usePoisonedData: this.usePoisonedData,
         enabledBlockTypes: this.enabledBlockTypes
-      });
+      }, this.compilationMode);
     }
     const templateResource = template2.declaration.isInline ? { path: null, expression: component.get("template") } : {
       path: absoluteFrom(template2.declaration.resolvedTemplateUrl),
@@ -33283,7 +33320,7 @@ var ComponentDecoratorHandler = class {
         throw new Error("Inline resource processing requires asynchronous preanalyze.");
       }
       if (component.has("styles")) {
-        const litStyles = parseFieldStringArrayValue(component, "styles", this.evaluator);
+        const litStyles = parseDirectiveStyles(component, this.evaluator, this.compilationMode);
         if (litStyles !== null) {
           inlineStyles = [...litStyles];
           styles.push(...litStyles);
@@ -33616,7 +33653,7 @@ var ComponentDecoratorHandler = class {
     const containingFile = node.getSourceFile().fileName;
     const templateDecl = analysis.template.declaration;
     if (!templateDecl.isInline) {
-      analysis.template = extractTemplate(node, templateDecl, this.evaluator, this.depTracker, this.resourceLoader, this.extractTemplateOptions);
+      analysis.template = extractTemplate(node, templateDecl, this.evaluator, this.depTracker, this.resourceLoader, this.extractTemplateOptions, this.compilationMode);
     }
     let styles = [];
     if (analysis.styleUrls !== null) {
