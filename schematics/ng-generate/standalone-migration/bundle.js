@@ -2733,6 +2733,9 @@ var Identifiers = _Identifiers;
   _Identifiers.deferPrefetchOnViewport = { name: "\u0275\u0275deferPrefetchOnViewport", moduleName: CORE };
 })();
 (() => {
+  _Identifiers.conditional = { name: "\u0275\u0275conditional", moduleName: CORE };
+})();
+(() => {
   _Identifiers.text = { name: "\u0275\u0275text", moduleName: CORE };
 })();
 (() => {
@@ -5008,6 +5011,7 @@ var REFERENCE_PREFIX = "_r";
 var IMPLICIT_REFERENCE = "$implicit";
 var NON_BINDABLE_ATTR = "ngNonBindable";
 var RESTORED_VIEW_CONTEXT_NAME = "restoredCtx";
+var DIRECT_CONTEXT_REFERENCE = "#context";
 var MAX_CHAIN_LENGTH = 500;
 var CHAINABLE_INSTRUCTIONS = /* @__PURE__ */ new Set([
   Identifiers.element,
@@ -19983,6 +19987,7 @@ var TemplateDefinitionBuilder = class {
     this._updateCodeFns = [];
     this._currentIndex = 0;
     this._tempVariables = [];
+    this._controlFlowTempVariable = null;
     this._nestedTemplateFns = [];
     this.i18n = null;
     this._pureFunctionSlots = 0;
@@ -19999,6 +20004,8 @@ var TemplateDefinitionBuilder = class {
     this.visitDeferredBlockError = invalid;
     this.visitDeferredBlockLoading = invalid;
     this.visitDeferredBlockPlaceholder = invalid;
+    this.visitIfBlockBranch = invalid;
+    this.visitSwitchBlockCase = invalid;
     this._bindingScope = parentBindingScope.nestedScope(level);
     this.fileBasedI18nSuffix = relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_") + "_";
     this._valueConverter = new ValueConverter(constantPool, () => this.allocateDataSlot(), (numSlots) => this.allocatePureFunctionSlots(numSlots), (name, localName, slot, value) => {
@@ -20069,13 +20076,18 @@ var TemplateDefinitionBuilder = class {
   registerContextVariables(variable2) {
     const scopedName = this._bindingScope.freshReferenceName();
     const retrievalLevel = this.level;
+    const isDirect = variable2.value === DIRECT_CONTEXT_REFERENCE;
     const lhs = variable(variable2.name + scopedName);
-    this._bindingScope.set(retrievalLevel, variable2.name, lhs, 1, (scope, relativeLevel) => {
+    this._bindingScope.set(retrievalLevel, variable2.name, (scope) => {
+      return isDirect && scope.bindingLevel === retrievalLevel && !scope.isListenerScope() ? variable(CONTEXT_NAME) : lhs;
+    }, 1, (scope, relativeLevel) => {
       let rhs;
       if (scope.bindingLevel === retrievalLevel) {
         if (scope.isListenerScope() && scope.hasRestoreViewVariable()) {
           rhs = variable(RESTORED_VIEW_CONTEXT_NAME);
           scope.notifyRestoredViewContextUse();
+        } else if (isDirect) {
+          return [];
         } else {
           rhs = variable(CONTEXT_NAME);
         }
@@ -20083,7 +20095,9 @@ var TemplateDefinitionBuilder = class {
         const sharedCtxVar = scope.getSharedContextName(retrievalLevel);
         rhs = sharedCtxVar ? sharedCtxVar : generateNextContextExpr(relativeLevel);
       }
-      return [lhs.set(rhs.prop(variable2.value || IMPLICIT_REFERENCE)).toConstDecl()];
+      return [
+        lhs.set(isDirect ? rhs : rhs.prop(variable2.value || IMPLICIT_REFERENCE)).toConstDecl()
+      ];
     });
   }
   i18nAppendBindings(expressions) {
@@ -20524,6 +20538,76 @@ var TemplateDefinitionBuilder = class {
     }
     return null;
   }
+  visitIfBlock(block) {
+    const branchData = block.branches.map(({ expression, expressionAlias, children, sourceSpan }) => {
+      let processedExpression = null;
+      if (expression !== null) {
+        processedExpression = expression.visit(this._valueConverter);
+        this.allocateBindingSlots(processedExpression);
+      }
+      const variables = expressionAlias ? [new Variable(expressionAlias, DIRECT_CONTEXT_REFERENCE, sourceSpan, sourceSpan)] : void 0;
+      return {
+        index: this.createEmbeddedTemplateFn(null, children, "_Conditional", sourceSpan, variables),
+        expression: processedExpression,
+        alias: expressionAlias
+      };
+    });
+    const containerIndex = branchData[0].index;
+    const paramsCallback = () => {
+      let contextVariable = null;
+      const generateBranch = (branchIndex) => {
+        if (branchIndex > branchData.length - 1) {
+          return literal(-1);
+        }
+        const { index, expression, alias } = branchData[branchIndex];
+        if (expression === null) {
+          return literal(index);
+        }
+        let comparisonTarget;
+        if (alias) {
+          contextVariable = this.allocateControlFlowTempVariable();
+          comparisonTarget = contextVariable.set(this.convertPropertyBinding(expression));
+        } else {
+          comparisonTarget = this.convertPropertyBinding(expression);
+        }
+        return comparisonTarget.conditional(literal(index), generateBranch(branchIndex + 1));
+      };
+      const params = [literal(containerIndex), generateBranch(0)];
+      if (contextVariable !== null) {
+        params.push(contextVariable);
+      }
+      return params;
+    };
+    this.updateInstructionWithAdvance(containerIndex, block.branches[0].sourceSpan, Identifiers.conditional, paramsCallback);
+  }
+  visitSwitchBlock(block) {
+    const blockExpression = block.expression.visit(this._valueConverter);
+    this.allocateBindingSlots(blockExpression);
+    const caseData = block.cases.map((currentCase) => {
+      const index = this.createEmbeddedTemplateFn(null, currentCase.children, "_Case", currentCase.sourceSpan);
+      let expression = null;
+      if (currentCase.expression !== null) {
+        expression = currentCase.expression.visit(this._valueConverter);
+        this.allocateBindingSlots(expression);
+      }
+      return { index, expression };
+    });
+    const containerIndex = caseData[0].index;
+    this.updateInstructionWithAdvance(containerIndex, block.sourceSpan, Identifiers.conditional, () => {
+      const generateCases = (caseIndex) => {
+        if (caseIndex > caseData.length - 1) {
+          return literal(-1);
+        }
+        const { index, expression } = caseData[caseIndex];
+        if (expression === null) {
+          return literal(index);
+        }
+        const comparisonTarget = caseIndex === 0 ? this.allocateControlFlowTempVariable().set(this.convertPropertyBinding(blockExpression)) : this.allocateControlFlowTempVariable();
+        return comparisonTarget.identical(this.convertPropertyBinding(expression)).conditional(literal(index), generateCases(caseIndex + 1));
+      };
+      return [literal(containerIndex), generateCases(0)];
+    });
+  }
   visitDeferredBlock(deferred) {
     const { loading, placeholder, error: error2, triggers, prefetchTriggers } = deferred;
     const primaryTemplateIndex = this.createEmbeddedTemplateFn(null, deferred.children, "_Defer", deferred.sourceSpan);
@@ -20595,17 +20679,9 @@ var TemplateDefinitionBuilder = class {
   allocateDataSlot() {
     return this._dataIndex++;
   }
-  visitSwitchBlock(block) {
-  }
-  visitSwitchBlockCase(block) {
-  }
   visitForLoopBlock(block) {
   }
   visitForLoopBlockEmpty(block) {
-  }
-  visitIfBlock(block) {
-  }
-  visitIfBlockBranch(block) {
   }
   getConstCount() {
     return this._dataIndex;
@@ -20704,6 +20780,14 @@ var TemplateDefinitionBuilder = class {
     const { args, stmts } = convertUpdateArguments(this, this.getImplicitReceiverExpr(), value, this.bindingContext());
     this._tempVariables.push(...stmts);
     return args;
+  }
+  allocateControlFlowTempVariable() {
+    if (this._controlFlowTempVariable === null) {
+      const name = `${this.contextName}_contFlowTmp`;
+      this._tempVariables.push(new DeclareVarStmt(name));
+      this._controlFlowTempVariable = variable(name);
+    }
+    return this._controlFlowTempVariable;
   }
   getAttributeExpressions(elementName, renderAttributes, inputs, outputs, styles, templateAttrs = [], boundI18nAttrs = []) {
     const alreadySeen = /* @__PURE__ */ new Set();
@@ -20952,7 +21036,7 @@ var BindingScope = class {
         if (value.declareLocalCallback && !value.declare) {
           value.declare = true;
         }
-        return value.lhs;
+        return typeof value.lhs === "function" ? value.lhs(this) : value.lhs;
       }
       current = current.parent;
     }
@@ -21025,7 +21109,8 @@ var BindingScope = class {
     const componentValue = this.map.get(SHARED_CONTEXT_KEY + 0);
     componentValue.declare = true;
     this.maybeRestoreView();
-    return componentValue.lhs.prop(name);
+    const lhs = typeof componentValue.lhs === "function" ? componentValue.lhs(this) : componentValue.lhs;
+    return name === DIRECT_CONTEXT_REFERENCE ? lhs : lhs.prop(name);
   }
   maybeRestoreView() {
     if (this.isListenerScope()) {
@@ -22421,7 +22506,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.0+sha-5bd9fbd");
+var VERSION2 = new Version("17.0.0-next.0+sha-9152de1");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -23958,7 +24043,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-9152de1"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24029,7 +24114,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-9152de1"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24217,7 +24302,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-9152de1"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24240,7 +24325,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-9152de1"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24278,7 +24363,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-9152de1"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -24302,7 +24387,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-9152de1"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -24337,7 +24422,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-5bd9fbd"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-9152de1"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -24354,7 +24439,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.0+sha-5bd9fbd");
+var VERSION3 = new Version("17.0.0-next.0+sha-9152de1");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
