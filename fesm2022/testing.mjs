@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.1+sha-39ace86
+ * @license Angular v16.2.1+sha-6dc2b22
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10939,7 +10939,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.1+sha-39ace86');
+const VERSION = new Version('16.2.1+sha-6dc2b22');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -27110,11 +27110,15 @@ function withModule(moduleDef, fn) {
  * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
  */
 // Reset the test providers and the fake async zone before each test.
-beforeEach(getCleanupHook(false));
+// We keep a guard because somehow this file can make it into a bundle and be executed
+// beforeEach is only defined when executing the tests
+globalThis.beforeEach?.(getCleanupHook(false));
 // We provide both a `beforeEach` and `afterEach`, because the updated behavior for
 // tearing down the module is supposed to run after the test so that we can associate
 // teardown errors with the correct test.
-afterEach(getCleanupHook(true));
+// We keep a guard because somehow this file can make it into a bundle and be executed
+// afterEach is only defined when executing the tests
+globalThis.afterEach?.(getCleanupHook(true));
 function getCleanupHook(expectedTeardownValue) {
     return () => {
         const testBed = TestBedImpl.INSTANCE;
