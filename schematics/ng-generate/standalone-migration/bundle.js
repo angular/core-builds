@@ -4255,10 +4255,11 @@ var SwitchBlockCase = class {
   }
 };
 var ForLoopBlock = class {
-  constructor(itemName, expression, trackBy, children, empty, sourceSpan, startSourceSpan, endSourceSpan) {
+  constructor(itemName, expression, trackBy, contextVariables, children, empty, sourceSpan, startSourceSpan, endSourceSpan) {
     this.itemName = itemName;
     this.expression = expression;
     this.trackBy = trackBy;
+    this.contextVariables = contextVariables;
     this.children = children;
     this.empty = empty;
     this.sourceSpan = sourceSpan;
@@ -18178,6 +18179,8 @@ var FOR_LOOP_EXPRESSION_PATTERN = /^\s*([0-9A-Za-z_$]*)\s+of\s+(.*)/;
 var FOR_LOOP_TRACK_PATTERN = /^track\s+(.*)/;
 var CONDITIONAL_ALIAS_PATTERN = /^as\s+(.*)/;
 var ELSE_IF_PATTERN = /^if\s/;
+var FOR_LOOP_LET_PATTERN = /^let\s+(.*)/;
+var ALLOWED_FOR_LOOP_LET_VARIABLES = /* @__PURE__ */ new Set(["$index", "$first", "$last", "$even", "$odd", "$count"]);
 function createIfBlock(ast, visitor, bindingParser) {
   const errors = validateIfBlock(ast);
   const branches = [];
@@ -18190,8 +18193,7 @@ function createIfBlock(ast, visitor, bindingParser) {
       branches.push(new IfBlockBranch(null, children, null, block.sourceSpan, block.startSourceSpan));
       continue;
     }
-    const expressionStart = block.name === "if" ? 0 : 2;
-    const params = parseConditionalBlockParameters(block, errors, bindingParser, expressionStart);
+    const params = parseConditionalBlockParameters(block, errors, bindingParser);
     if (params !== null) {
       branches.push(new IfBlockBranch(params.expression, children, params.expressionAlias, block.sourceSpan, block.startSourceSpan));
     }
@@ -18224,7 +18226,7 @@ function createForLoop(ast, visitor, bindingParser) {
     if (params.trackBy === null) {
       errors.push(new ParseError(ast.sourceSpan, 'For loop must have a "track" expression'));
     } else {
-      node = new ForLoopBlock(params.itemName, params.expression, params.trackBy, visitAll2(visitor, primaryBlock.children), empty, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+      node = new ForLoopBlock(params.itemName, params.expression, params.trackBy, params.context, visitAll2(visitor, primaryBlock.children), empty, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
     }
   }
   return { node, errors };
@@ -18271,24 +18273,45 @@ function parseForLoopParameters(block, errors, bindingParser) {
   const result = {
     itemName,
     trackBy: null,
-    expression: bindingParser.parseBinding(
-      rawExpression,
-      false,
-      expressionParam.sourceSpan,
-      Math.max(0, expressionParam.expression.lastIndexOf(rawExpression))
-    )
+    expression: parseBlockParameterToBinding(expressionParam, bindingParser, rawExpression),
+    context: null
   };
   for (const param of secondaryParams) {
-    const trackMatch = param.expression.match(FOR_LOOP_TRACK_PATTERN);
-    if (trackMatch === null) {
-      errors.push(new ParseError(param.sourceSpan, `Unrecognized loop paramater "${param.expression}"`));
-    } else if (result.trackBy !== null) {
-      errors.push(new ParseError(param.sourceSpan, 'For loop can only have one "track" expression'));
-    } else {
-      result.trackBy = trackMatch[1].trim();
+    const letMatch = param.expression.match(FOR_LOOP_LET_PATTERN);
+    if (letMatch !== null) {
+      result.context = result.context || {};
+      parseLetParameter(param.sourceSpan, letMatch[1], result.context, errors);
+      continue;
     }
+    const trackMatch = param.expression.match(FOR_LOOP_TRACK_PATTERN);
+    if (trackMatch !== null) {
+      if (result.trackBy !== null) {
+        errors.push(new ParseError(param.sourceSpan, 'For loop can only have one "track" expression'));
+      } else {
+        result.trackBy = parseBlockParameterToBinding(param, bindingParser, trackMatch[1]);
+      }
+      continue;
+    }
+    errors.push(new ParseError(param.sourceSpan, `Unrecognized loop paramater "${param.expression}"`));
   }
   return result;
+}
+function parseLetParameter(sourceSpan, expression, context, errors) {
+  const parts = expression.split(",");
+  for (const part of parts) {
+    const expressionParts = part.split("=");
+    const name = expressionParts.length === 2 ? expressionParts[0].trim() : "";
+    const variableName = expressionParts.length === 2 ? expressionParts[1].trim() : "";
+    if (name.length === 0 || variableName.length === 0) {
+      errors.push(new ParseError(sourceSpan, `Invalid for loop "let" parameter. Parameter should match the pattern "<name> = <variable name>"`));
+    } else if (!ALLOWED_FOR_LOOP_LET_VARIABLES.has(variableName)) {
+      errors.push(new ParseError(sourceSpan, `Unknown "let" parameter variable "${variableName}". The allowed variables are: ${Array.from(ALLOWED_FOR_LOOP_LET_VARIABLES).join(", ")}`));
+    } else if (context.hasOwnProperty(variableName)) {
+      errors.push(new ParseError(sourceSpan, `Duplicate "let" parameter variable "${variableName}"`));
+    } else {
+      context[variableName] = name;
+    }
+  }
 }
 function validateIfBlock(ast) {
   const errors = [];
@@ -18343,21 +18366,33 @@ function validateSwitchBlock(ast) {
   }
   return errors;
 }
-function parseBlockParameterToBinding(ast, bindingParser, start = 0) {
-  return bindingParser.parseBinding(ast.expression.slice(start), false, ast.sourceSpan, ast.sourceSpan.start.offset + start);
+function parseBlockParameterToBinding(ast, bindingParser, part = 0) {
+  let start;
+  let end;
+  if (typeof part === "number") {
+    start = part;
+    end = ast.expression.length;
+  } else {
+    start = Math.max(0, ast.expression.lastIndexOf(part));
+    end = start + part.length;
+  }
+  return bindingParser.parseBinding(ast.expression.slice(start, end), false, ast.sourceSpan, ast.sourceSpan.start.offset + start);
 }
-function parseConditionalBlockParameters(block, errors, bindingParser, primaryExpressionStart) {
+function parseConditionalBlockParameters(block, errors, bindingParser) {
   if (block.parameters.length === 0) {
     errors.push(new ParseError(block.sourceSpan, "Conditional block does not have an expression"));
     return null;
   }
-  const expression = parseBlockParameterToBinding(block.parameters[0], bindingParser, primaryExpressionStart);
+  const isPrimaryIfBlock = block.name === "if";
+  const expression = parseBlockParameterToBinding(block.parameters[0], bindingParser, isPrimaryIfBlock ? 0 : 2);
   let expressionAlias = null;
   for (let i = 1; i < block.parameters.length; i++) {
     const param = block.parameters[i];
     const aliasMatch = param.expression.match(CONDITIONAL_ALIAS_PATTERN);
     if (aliasMatch === null) {
       errors.push(new ParseError(param.sourceSpan, `Unrecognized conditional paramater "${param.expression}"`));
+    } else if (!isPrimaryIfBlock) {
+      errors.push(new ParseError(param.sourceSpan, '"as" expression is only allowed on the primary "if" block'));
     } else if (expressionAlias !== null) {
       errors.push(new ParseError(param.sourceSpan, 'Conditional can only have one "as" expression'));
     } else {
@@ -22506,7 +22541,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.0+sha-362e069");
+var VERSION2 = new Version("17.0.0-next.0+sha-36663e6");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24043,7 +24078,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-362e069"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-36663e6"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24114,7 +24149,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-362e069"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-36663e6"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24302,7 +24337,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-362e069"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-36663e6"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24325,7 +24360,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-362e069"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-36663e6"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24363,7 +24398,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-362e069"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-36663e6"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -24387,7 +24422,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-362e069"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-36663e6"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -24422,7 +24457,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.0+sha-362e069"));
+  definitionMap.set("version", literal("17.0.0-next.0+sha-36663e6"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -24439,7 +24474,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.0+sha-362e069");
+var VERSION3 = new Version("17.0.0-next.0+sha-36663e6");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
