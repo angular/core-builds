@@ -748,6 +748,7 @@ function parseSelectorToR3Selector(selector) {
 var output_ast_exports = {};
 __export(output_ast_exports, {
   ArrayType: () => ArrayType,
+  ArrowFunctionExpr: () => ArrowFunctionExpr,
   BOOL_TYPE: () => BOOL_TYPE,
   BinaryOperator: () => BinaryOperator,
   BinaryOperatorExpr: () => BinaryOperatorExpr,
@@ -809,6 +810,7 @@ __export(output_ast_exports, {
   WritePropExpr: () => WritePropExpr,
   WriteVarExpr: () => WriteVarExpr,
   areAllEquivalent: () => areAllEquivalent,
+  arrowFn: () => arrowFn,
   expressionType: () => expressionType,
   fn: () => fn,
   ifStmt: () => ifStmt,
@@ -1816,6 +1818,34 @@ var FunctionExpr = class extends Expression {
     return new FunctionExpr(this.params.map((p2) => p2.clone()), this.statements, this.type, this.sourceSpan, this.name);
   }
 };
+var ArrowFunctionExpr = class extends Expression {
+  constructor(params, body, type, sourceSpan) {
+    super(type, sourceSpan);
+    this.params = params;
+    this.body = body;
+  }
+  isEquivalent(e) {
+    if (!(e instanceof ArrowFunctionExpr) || !areAllEquivalent(this.params, e.params)) {
+      return false;
+    }
+    if (this.body instanceof Expression && e.body instanceof Expression) {
+      return this.body.isEquivalent(e.body);
+    }
+    if (Array.isArray(this.body) && Array.isArray(e.body)) {
+      return areAllEquivalent(this.body, e.body);
+    }
+    return false;
+  }
+  isConstant() {
+    return false;
+  }
+  visitExpression(visitor, context) {
+    return visitor.visitArrowFunctionExpr(this, context);
+  }
+  clone() {
+    return new ArrowFunctionExpr(this.params.map((p2) => p2.clone()), Array.isArray(this.body) ? this.body : this.body.clone(), this.type, this.sourceSpan);
+  }
+};
 var UnaryOperatorExpr = class extends Expression {
   constructor(operator, expr, type, sourceSpan, parens = true) {
     super(type || NUMBER_TYPE, sourceSpan);
@@ -2184,6 +2214,14 @@ var RecursiveAstVisitor = class {
     this.visitAllStatements(ast.statements, context);
     return this.visitExpression(ast, context);
   }
+  visitArrowFunctionExpr(ast, context) {
+    if (Array.isArray(ast.body)) {
+      this.visitAllStatements(ast.body, context);
+    } else {
+      this.visitExpression(ast.body, context);
+    }
+    return this.visitExpression(ast, context);
+  }
   visitUnaryOperatorExpr(ast, context) {
     ast.expr.visitExpression(this, context);
     return this.visitExpression(ast, context);
@@ -2289,6 +2327,9 @@ function not(expr, sourceSpan) {
 }
 function fn(params, body, type, sourceSpan, name) {
   return new FunctionExpr(params, body, type, sourceSpan, name);
+}
+function arrowFn(params, body, type, sourceSpan) {
+  return new ArrowFunctionExpr(params, body, type, sourceSpan);
 }
 function ifStmt(condition, thenClause, elseClause, sourceSpan, leadingComments) {
   return new IfStmt(condition, thenClause, elseClause, sourceSpan, leadingComments);
@@ -5613,6 +5654,28 @@ var AbstractJsEmitterVisitor = class extends AbstractEmitterVisitor {
     this.visitAllStatements(ast.statements, ctx);
     ctx.decIndent();
     ctx.print(ast, `}`);
+    return null;
+  }
+  visitArrowFunctionExpr(ast, ctx) {
+    ctx.print(ast, "(");
+    this._visitParams(ast.params, ctx);
+    ctx.print(ast, ") =>");
+    if (Array.isArray(ast.body)) {
+      ctx.println(ast, `{`);
+      ctx.incIndent();
+      this.visitAllStatements(ast.body, ctx);
+      ctx.decIndent();
+      ctx.print(ast, `}`);
+    } else {
+      const isObjectLiteral = ast.body instanceof LiteralMapExpr;
+      if (isObjectLiteral) {
+        ctx.print(ast, "(");
+      }
+      ast.body.visitExpression(this, ctx);
+      if (isObjectLiteral) {
+        ctx.print(ast, ")");
+      }
+    }
     return null;
   }
   visitDeclareFunctionStmt(stmt, ctx) {
@@ -22541,7 +22604,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.1+sha-fd4e8b1");
+var VERSION2 = new Version("17.0.0-next.1+sha-fa72384");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24078,7 +24141,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-fd4e8b1"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-fa72384"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24149,7 +24212,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-fd4e8b1"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-fa72384"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24337,7 +24400,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-fd4e8b1"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-fa72384"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24360,7 +24423,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-fd4e8b1"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-fa72384"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24398,7 +24461,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-fd4e8b1"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-fa72384"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -24422,7 +24485,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-fd4e8b1"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-fa72384"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -24457,7 +24520,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-fd4e8b1"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-fa72384"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -24474,7 +24537,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.1+sha-fd4e8b1");
+var VERSION3 = new Version("17.0.0-next.1+sha-fa72384");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -27065,6 +27128,9 @@ var ExpressionTranslatorVisitor = class {
     var _a2;
     return this.factory.createFunctionExpression((_a2 = ast.name) != null ? _a2 : null, ast.params.map((param) => param.name), this.factory.createBlock(this.visitStatements(ast.statements, context)));
   }
+  visitArrowFunctionExpr(ast, context) {
+    return this.factory.createArrowFunctionExpression(ast.params.map((param) => param.name), Array.isArray(ast.body) ? this.factory.createBlock(this.visitStatements(ast.body, context)) : ast.body.visitExpression(this, context));
+  }
   visitBinaryOperatorExpr(ast, context) {
     if (!BINARY_OPERATORS2.has(ast.operator)) {
       throw new Error(`Unknown binary operator: ${BinaryOperator[ast.operator]}`);
@@ -27256,6 +27322,9 @@ var TypeTranslatorVisitor = class {
     throw new Error("Method not implemented.");
   }
   visitFunctionExpr(ast, context) {
+    throw new Error("Method not implemented.");
+  }
+  visitArrowFunctionExpr(ast, context) {
     throw new Error("Method not implemented.");
   }
   visitUnaryOperatorExpr(ast, context) {
@@ -27450,6 +27519,12 @@ var TypeScriptAstFactory = class {
       throw new Error(`Invalid syntax, expected a block, but got ${import_typescript25.default.SyntaxKind[body.kind]}.`);
     }
     return import_typescript25.default.factory.createFunctionExpression(void 0, void 0, functionName != null ? functionName : void 0, void 0, parameters.map((param) => import_typescript25.default.factory.createParameterDeclaration(void 0, void 0, param)), void 0, body);
+  }
+  createArrowFunctionExpression(parameters, body) {
+    if (import_typescript25.default.isStatement(body) && !import_typescript25.default.isBlock(body)) {
+      throw new Error(`Invalid syntax, expected a block, but got ${import_typescript25.default.SyntaxKind[body.kind]}.`);
+    }
+    return import_typescript25.default.factory.createArrowFunction(void 0, void 0, parameters.map((param) => import_typescript25.default.factory.createParameterDeclaration(void 0, void 0, param)), void 0, void 0, body);
   }
   createIfStatement(condition, thenStatement, elseStatement) {
     return import_typescript25.default.factory.createIfStatement(condition, thenStatement, elseStatement != null ? elseStatement : void 0);
