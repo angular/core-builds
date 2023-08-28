@@ -8256,9 +8256,9 @@ var RestoreViewExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
+  transformInternalExpressions(transform2, flags) {
     if (typeof this.view !== "number") {
-      this.view = transformExpressionsInExpression(this.view, transform, flags);
+      this.view = transformExpressionsInExpression(this.view, transform2, flags);
     }
   }
   clone() {
@@ -8280,8 +8280,8 @@ var ResetViewExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
-    this.expr = transformExpressionsInExpression(this.expr, transform, flags);
+  transformInternalExpressions(transform2, flags) {
+    this.expr = transformExpressionsInExpression(this.expr, transform2, flags);
   }
   clone() {
     return new ResetViewExpr(this.expr.clone());
@@ -8337,14 +8337,14 @@ var _PureFunctionExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
+  transformInternalExpressions(transform2, flags) {
     if (this.body !== null) {
-      this.body = transformExpressionsInExpression(this.body, transform, flags | VisitorContextFlag.InChildOperation);
+      this.body = transformExpressionsInExpression(this.body, transform2, flags | VisitorContextFlag.InChildOperation);
     } else if (this.fn !== null) {
-      this.fn = transformExpressionsInExpression(this.fn, transform, flags);
+      this.fn = transformExpressionsInExpression(this.fn, transform2, flags);
     }
     for (let i = 0; i < this.args.length; i++) {
-      this.args[i] = transformExpressionsInExpression(this.args[i], transform, flags);
+      this.args[i] = transformExpressionsInExpression(this.args[i], transform2, flags);
     }
   }
   clone() {
@@ -8403,9 +8403,9 @@ var _PipeBindingExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
+  transformInternalExpressions(transform2, flags) {
     for (let idx = 0; idx < this.args.length; idx++) {
-      this.args[idx] = transformExpressionsInExpression(this.args[idx], transform, flags);
+      this.args[idx] = transformExpressionsInExpression(this.args[idx], transform2, flags);
     }
   }
   clone() {
@@ -8442,8 +8442,8 @@ var _PipeBindingVariadicExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
-    this.args = transformExpressionsInExpression(this.args, transform, flags);
+  transformInternalExpressions(transform2, flags) {
+    this.args = transformExpressionsInExpression(this.args, transform2, flags);
   }
   clone() {
     const r = new _PipeBindingVariadicExpr(this.target, this.name, this.args.clone(), this.numArgs);
@@ -8475,8 +8475,8 @@ var SafePropertyReadExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
-    this.receiver = transformExpressionsInExpression(this.receiver, transform, flags);
+  transformInternalExpressions(transform2, flags) {
+    this.receiver = transformExpressionsInExpression(this.receiver, transform2, flags);
   }
   clone() {
     return new SafePropertyReadExpr(this.receiver.clone(), this.name);
@@ -8499,9 +8499,9 @@ var SafeKeyedReadExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
-    this.receiver = transformExpressionsInExpression(this.receiver, transform, flags);
-    this.index = transformExpressionsInExpression(this.index, transform, flags);
+  transformInternalExpressions(transform2, flags) {
+    this.receiver = transformExpressionsInExpression(this.receiver, transform2, flags);
+    this.index = transformExpressionsInExpression(this.index, transform2, flags);
   }
   clone() {
     return new SafeKeyedReadExpr(this.receiver.clone(), this.index.clone());
@@ -8526,10 +8526,10 @@ var SafeInvokeFunctionExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
-    this.receiver = transformExpressionsInExpression(this.receiver, transform, flags);
+  transformInternalExpressions(transform2, flags) {
+    this.receiver = transformExpressionsInExpression(this.receiver, transform2, flags);
     for (let i = 0; i < this.args.length; i++) {
-      this.args[i] = transformExpressionsInExpression(this.args[i], transform, flags);
+      this.args[i] = transformExpressionsInExpression(this.args[i], transform2, flags);
     }
   }
   clone() {
@@ -8553,9 +8553,9 @@ var SafeTernaryExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
-    this.guard = transformExpressionsInExpression(this.guard, transform, flags);
-    this.expr = transformExpressionsInExpression(this.expr, transform, flags);
+  transformInternalExpressions(transform2, flags) {
+    this.guard = transformExpressionsInExpression(this.guard, transform2, flags);
+    this.expr = transformExpressionsInExpression(this.expr, transform2, flags);
   }
   clone() {
     return new SafeTernaryExpr(this.guard.clone(), this.expr.clone());
@@ -8597,8 +8597,8 @@ var AssignTemporaryExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
-    this.expr = transformExpressionsInExpression(this.expr, transform, flags);
+  transformInternalExpressions(transform2, flags) {
+    this.expr = transformExpressionsInExpression(this.expr, transform2, flags);
   }
   clone() {
     const a = new AssignTemporaryExpr(this.expr.clone(), this.xref);
@@ -8621,7 +8621,7 @@ var ReadTemporaryExpr = class extends ExpressionBase {
   isConstant() {
     return false;
   }
-  transformInternalExpressions(transform, flags) {
+  transformInternalExpressions(transform2, flags) {
   }
   clone() {
     const r = new ReadTemporaryExpr(this.xref);
@@ -8660,12 +8660,12 @@ var VisitorContextFlag;
   VisitorContextFlag2[VisitorContextFlag2["None"] = 0] = "None";
   VisitorContextFlag2[VisitorContextFlag2["InChildOperation"] = 1] = "InChildOperation";
 })(VisitorContextFlag || (VisitorContextFlag = {}));
-function transformExpressionsInInterpolation(interpolation, transform, flags) {
+function transformExpressionsInInterpolation(interpolation, transform2, flags) {
   for (let i = 0; i < interpolation.expressions.length; i++) {
-    interpolation.expressions[i] = transformExpressionsInExpression(interpolation.expressions[i], transform, flags);
+    interpolation.expressions[i] = transformExpressionsInExpression(interpolation.expressions[i], transform2, flags);
   }
 }
-function transformExpressionsInOp(op, transform, flags) {
+function transformExpressionsInOp(op, transform2, flags) {
   switch (op.kind) {
     case OpKind.StyleProp:
     case OpKind.StyleMap:
@@ -8674,46 +8674,46 @@ function transformExpressionsInOp(op, transform, flags) {
     case OpKind.Binding:
     case OpKind.HostProperty:
       if (op.expression instanceof Interpolation2) {
-        transformExpressionsInInterpolation(op.expression, transform, flags);
+        transformExpressionsInInterpolation(op.expression, transform2, flags);
       } else {
-        op.expression = transformExpressionsInExpression(op.expression, transform, flags);
+        op.expression = transformExpressionsInExpression(op.expression, transform2, flags);
       }
       break;
     case OpKind.Property:
     case OpKind.Attribute:
       if (op.expression instanceof Interpolation2) {
-        transformExpressionsInInterpolation(op.expression, transform, flags);
+        transformExpressionsInInterpolation(op.expression, transform2, flags);
       } else {
-        op.expression = transformExpressionsInExpression(op.expression, transform, flags);
+        op.expression = transformExpressionsInExpression(op.expression, transform2, flags);
       }
-      op.sanitizer = op.sanitizer && transformExpressionsInExpression(op.sanitizer, transform, flags);
+      op.sanitizer = op.sanitizer && transformExpressionsInExpression(op.sanitizer, transform2, flags);
       break;
     case OpKind.InterpolateText:
-      transformExpressionsInInterpolation(op.interpolation, transform, flags);
+      transformExpressionsInInterpolation(op.interpolation, transform2, flags);
       break;
     case OpKind.Statement:
-      transformExpressionsInStatement(op.statement, transform, flags);
+      transformExpressionsInStatement(op.statement, transform2, flags);
       break;
     case OpKind.Variable:
-      op.initializer = transformExpressionsInExpression(op.initializer, transform, flags);
+      op.initializer = transformExpressionsInExpression(op.initializer, transform2, flags);
       break;
     case OpKind.Listener:
       for (const innerOp of op.handlerOps) {
-        transformExpressionsInOp(innerOp, transform, flags | VisitorContextFlag.InChildOperation);
+        transformExpressionsInOp(innerOp, transform2, flags | VisitorContextFlag.InChildOperation);
       }
       break;
     case OpKind.ExtractedAttribute:
-      op.expression = op.expression && transformExpressionsInExpression(op.expression, transform, flags);
+      op.expression = op.expression && transformExpressionsInExpression(op.expression, transform2, flags);
       break;
     case OpKind.ExtractedMessage:
-      op.expression = transformExpressionsInExpression(op.expression, transform, flags);
+      op.expression = transformExpressionsInExpression(op.expression, transform2, flags);
       for (const statement of op.statements) {
-        transformExpressionsInStatement(statement, transform, flags);
+        transformExpressionsInStatement(statement, transform2, flags);
       }
       break;
     case OpKind.I18nStart:
       for (const placeholder in op.tagNameParams) {
-        op.tagNameParams[placeholder] = transformExpressionsInExpression(op.tagNameParams[placeholder], transform, flags);
+        op.tagNameParams[placeholder] = transformExpressionsInExpression(op.tagNameParams[placeholder], transform2, flags);
       }
       break;
     case OpKind.Element:
@@ -8736,73 +8736,73 @@ function transformExpressionsInOp(op, transform, flags) {
       throw new Error(`AssertionError: transformExpressionsInOp doesn't handle ${OpKind[op.kind]}`);
   }
 }
-function transformExpressionsInExpression(expr, transform, flags) {
+function transformExpressionsInExpression(expr, transform2, flags) {
   if (expr instanceof ExpressionBase) {
-    expr.transformInternalExpressions(transform, flags);
+    expr.transformInternalExpressions(transform2, flags);
   } else if (expr instanceof BinaryOperatorExpr) {
-    expr.lhs = transformExpressionsInExpression(expr.lhs, transform, flags);
-    expr.rhs = transformExpressionsInExpression(expr.rhs, transform, flags);
+    expr.lhs = transformExpressionsInExpression(expr.lhs, transform2, flags);
+    expr.rhs = transformExpressionsInExpression(expr.rhs, transform2, flags);
   } else if (expr instanceof ReadPropExpr) {
-    expr.receiver = transformExpressionsInExpression(expr.receiver, transform, flags);
+    expr.receiver = transformExpressionsInExpression(expr.receiver, transform2, flags);
   } else if (expr instanceof ReadKeyExpr) {
-    expr.receiver = transformExpressionsInExpression(expr.receiver, transform, flags);
-    expr.index = transformExpressionsInExpression(expr.index, transform, flags);
+    expr.receiver = transformExpressionsInExpression(expr.receiver, transform2, flags);
+    expr.index = transformExpressionsInExpression(expr.index, transform2, flags);
   } else if (expr instanceof WritePropExpr) {
-    expr.receiver = transformExpressionsInExpression(expr.receiver, transform, flags);
-    expr.value = transformExpressionsInExpression(expr.value, transform, flags);
+    expr.receiver = transformExpressionsInExpression(expr.receiver, transform2, flags);
+    expr.value = transformExpressionsInExpression(expr.value, transform2, flags);
   } else if (expr instanceof WriteKeyExpr) {
-    expr.receiver = transformExpressionsInExpression(expr.receiver, transform, flags);
-    expr.index = transformExpressionsInExpression(expr.index, transform, flags);
-    expr.value = transformExpressionsInExpression(expr.value, transform, flags);
+    expr.receiver = transformExpressionsInExpression(expr.receiver, transform2, flags);
+    expr.index = transformExpressionsInExpression(expr.index, transform2, flags);
+    expr.value = transformExpressionsInExpression(expr.value, transform2, flags);
   } else if (expr instanceof InvokeFunctionExpr) {
-    expr.fn = transformExpressionsInExpression(expr.fn, transform, flags);
+    expr.fn = transformExpressionsInExpression(expr.fn, transform2, flags);
     for (let i = 0; i < expr.args.length; i++) {
-      expr.args[i] = transformExpressionsInExpression(expr.args[i], transform, flags);
+      expr.args[i] = transformExpressionsInExpression(expr.args[i], transform2, flags);
     }
   } else if (expr instanceof LiteralArrayExpr) {
     for (let i = 0; i < expr.entries.length; i++) {
-      expr.entries[i] = transformExpressionsInExpression(expr.entries[i], transform, flags);
+      expr.entries[i] = transformExpressionsInExpression(expr.entries[i], transform2, flags);
     }
   } else if (expr instanceof LiteralMapExpr) {
     for (let i = 0; i < expr.entries.length; i++) {
-      expr.entries[i].value = transformExpressionsInExpression(expr.entries[i].value, transform, flags);
+      expr.entries[i].value = transformExpressionsInExpression(expr.entries[i].value, transform2, flags);
     }
   } else if (expr instanceof ConditionalExpr) {
-    expr.condition = transformExpressionsInExpression(expr.condition, transform, flags);
-    expr.trueCase = transformExpressionsInExpression(expr.trueCase, transform, flags);
+    expr.condition = transformExpressionsInExpression(expr.condition, transform2, flags);
+    expr.trueCase = transformExpressionsInExpression(expr.trueCase, transform2, flags);
     if (expr.falseCase !== null) {
-      expr.falseCase = transformExpressionsInExpression(expr.falseCase, transform, flags);
+      expr.falseCase = transformExpressionsInExpression(expr.falseCase, transform2, flags);
     }
   } else if (expr instanceof TypeofExpr) {
-    expr.expr = transformExpressionsInExpression(expr.expr, transform, flags);
+    expr.expr = transformExpressionsInExpression(expr.expr, transform2, flags);
   } else if (expr instanceof WriteVarExpr) {
-    expr.value = transformExpressionsInExpression(expr.value, transform, flags);
+    expr.value = transformExpressionsInExpression(expr.value, transform2, flags);
   } else if (expr instanceof LocalizedString) {
     for (let i = 0; i < expr.expressions.length; i++) {
-      expr.expressions[i] = transformExpressionsInExpression(expr.expressions[i], transform, flags);
+      expr.expressions[i] = transformExpressionsInExpression(expr.expressions[i], transform2, flags);
     }
   } else if (expr instanceof ReadVarExpr || expr instanceof ExternalExpr || expr instanceof LiteralExpr) {
   } else {
     throw new Error(`Unhandled expression kind: ${expr.constructor.name}`);
   }
-  return transform(expr, flags);
+  return transform2(expr, flags);
 }
-function transformExpressionsInStatement(stmt, transform, flags) {
+function transformExpressionsInStatement(stmt, transform2, flags) {
   if (stmt instanceof ExpressionStatement) {
-    stmt.expr = transformExpressionsInExpression(stmt.expr, transform, flags);
+    stmt.expr = transformExpressionsInExpression(stmt.expr, transform2, flags);
   } else if (stmt instanceof ReturnStatement) {
-    stmt.value = transformExpressionsInExpression(stmt.value, transform, flags);
+    stmt.value = transformExpressionsInExpression(stmt.value, transform2, flags);
   } else if (stmt instanceof DeclareVarStmt) {
     if (stmt.value !== void 0) {
-      stmt.value = transformExpressionsInExpression(stmt.value, transform, flags);
+      stmt.value = transformExpressionsInExpression(stmt.value, transform2, flags);
     }
   } else if (stmt instanceof IfStmt) {
-    stmt.condition = transformExpressionsInExpression(stmt.condition, transform, flags);
+    stmt.condition = transformExpressionsInExpression(stmt.condition, transform2, flags);
     for (const caseStatement of stmt.trueCase) {
-      transformExpressionsInStatement(caseStatement, transform, flags);
+      transformExpressionsInStatement(caseStatement, transform2, flags);
     }
     for (const caseStatement of stmt.falseCase) {
-      transformExpressionsInStatement(caseStatement, transform, flags);
+      transformExpressionsInStatement(caseStatement, transform2, flags);
     }
   } else {
     throw new Error(`Unhandled statement kind: ${stmt.constructor.name}`);
@@ -8832,6 +8832,12 @@ var _OpList = class {
     this.tail.prev = this.head;
   }
   push(op) {
+    if (Array.isArray(op)) {
+      for (const o of op) {
+        this.push(o);
+      }
+      return;
+    }
     _OpList.assertIsNotEnd(op);
     _OpList.assertIsUnowned(op);
     op.debugListId = this.debugListId;
@@ -8942,6 +8948,12 @@ var _OpList = class {
     op.next = null;
   }
   static insertBefore(op, target) {
+    if (Array.isArray(op)) {
+      for (const o of op) {
+        this.insertBefore(o, target);
+      }
+      return;
+    }
     _OpList.assertIsOwned(target);
     if (target.prev === null) {
       throw new Error(`AssertionError: illegal operation on list start`);
@@ -9057,29 +9069,17 @@ function createTextOp(xref, initialValue, sourceSpan) {
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createListenerOp(target, name, tag) {
+function createListenerOp(target, name, tag, animationPhase, hostListener) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Listener,
     target,
     tag,
+    hostListener,
     name,
     handlerOps: new OpList(),
     handlerFnName: null,
     consumesDollarEvent: false,
-    isAnimationListener: false,
-    animationPhase: null
-  }, NEW_OP), TRAIT_USES_SLOT_INDEX);
-}
-function createListenerOpForAnimation(target, name, animationPhase, tag) {
-  return __spreadValues(__spreadValues({
-    kind: OpKind.Listener,
-    target,
-    tag,
-    name,
-    handlerOps: new OpList(),
-    handlerFnName: null,
-    consumesDollarEvent: false,
-    isAnimationListener: true,
+    isAnimationListener: animationPhase !== null,
     animationPhase
   }, NEW_OP), TRAIT_USES_SLOT_INDEX);
 }
@@ -9136,16 +9136,70 @@ function createI18nEndOp(xref) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/host.mjs
-function createHostPropertyOp(name, expression, sourceSpan) {
+function createHostPropertyOp(name, expression, isAnimationTrigger, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.HostProperty,
     name,
     expression,
+    isAnimationTrigger,
     sourceSpan
   }, TRAIT_CONSUMES_VARS), NEW_OP);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/compilation.mjs
+var CompilationJobKind;
+(function(CompilationJobKind2) {
+  CompilationJobKind2[CompilationJobKind2["Tmpl"] = 0] = "Tmpl";
+  CompilationJobKind2[CompilationJobKind2["Host"] = 1] = "Host";
+  CompilationJobKind2[CompilationJobKind2["Both"] = 2] = "Both";
+})(CompilationJobKind || (CompilationJobKind = {}));
+var CompilationJob = class {
+  constructor(componentName, pool, compatibility) {
+    this.componentName = componentName;
+    this.pool = pool;
+    this.compatibility = compatibility;
+    this.kind = CompilationJobKind.Both;
+    this.nextXrefId = 0;
+  }
+  allocateXrefId() {
+    return this.nextXrefId++;
+  }
+};
+var ComponentCompilationJob = class extends CompilationJob {
+  constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds) {
+    super(componentName, pool, compatibility);
+    this.relativeContextFilePath = relativeContextFilePath;
+    this.i18nUseExternalIds = i18nUseExternalIds;
+    this.kind = CompilationJobKind.Tmpl;
+    this.fnSuffix = "Template";
+    this.views = /* @__PURE__ */ new Map();
+    this.consts = [];
+    this.constsInitializers = [];
+    this.root = new ViewCompilationUnit(this, this.allocateXrefId(), null);
+    this.views.set(this.root.xref, this.root);
+  }
+  allocateView(parent) {
+    const view = new ViewCompilationUnit(this, this.allocateXrefId(), parent);
+    this.views.set(view.xref, view);
+    return view;
+  }
+  get units() {
+    return this.views.values();
+  }
+  addConst(newConst, initializers) {
+    for (let idx2 = 0; idx2 < this.consts.length; idx2++) {
+      if (this.consts[idx2].isEquivalent(newConst)) {
+        return idx2;
+      }
+    }
+    const idx = this.consts.length;
+    this.consts.push(newConst);
+    if (initializers) {
+      this.constsInitializers.push(...initializers);
+    }
+    return idx;
+  }
+};
 var CompilationUnit = class {
   constructor(xref) {
     this.xref = xref;
@@ -9168,67 +9222,6 @@ var CompilationUnit = class {
     }
   }
 };
-var HostBindingCompilationJob = class extends CompilationUnit {
-  constructor(componentName, pool, compatibility) {
-    super(0);
-    this.componentName = componentName;
-    this.pool = pool;
-    this.compatibility = compatibility;
-    this.fnSuffix = "HostBindings";
-    this.units = [this];
-    this.nextXrefId = 1;
-  }
-  get job() {
-    return this;
-  }
-  get root() {
-    return this;
-  }
-  allocateXrefId() {
-    return this.nextXrefId++;
-  }
-};
-var ComponentCompilationJob = class {
-  get units() {
-    return this.views.values();
-  }
-  constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds) {
-    this.componentName = componentName;
-    this.pool = pool;
-    this.compatibility = compatibility;
-    this.relativeContextFilePath = relativeContextFilePath;
-    this.i18nUseExternalIds = i18nUseExternalIds;
-    this.fnSuffix = "Template";
-    this.nextXrefId = 0;
-    this.views = /* @__PURE__ */ new Map();
-    this.consts = [];
-    this.constsInitializers = [];
-    const root = new ViewCompilationUnit(this, this.allocateXrefId(), null);
-    this.views.set(root.xref, root);
-    this.root = root;
-  }
-  allocateView(parent) {
-    const view = new ViewCompilationUnit(this, this.allocateXrefId(), parent);
-    this.views.set(view.xref, view);
-    return view;
-  }
-  allocateXrefId() {
-    return this.nextXrefId++;
-  }
-  addConst(newConst, initializers) {
-    for (let idx2 = 0; idx2 < this.consts.length; idx2++) {
-      if (this.consts[idx2].isEquivalent(newConst)) {
-        return idx2;
-      }
-    }
-    const idx = this.consts.length;
-    this.consts.push(newConst);
-    if (initializers) {
-      this.constsInitializers.push(...initializers);
-    }
-    return idx;
-  }
-};
 var ViewCompilationUnit = class extends CompilationUnit {
   constructor(job, xref, parent) {
     super(xref);
@@ -9237,8 +9230,23 @@ var ViewCompilationUnit = class extends CompilationUnit {
     this.contextVariables = /* @__PURE__ */ new Map();
     this.decls = null;
   }
-  get compatibility() {
-    return this.job.compatibility;
+};
+var HostBindingCompilationJob = class extends CompilationJob {
+  constructor(componentName, pool, compatibility) {
+    super(componentName, pool, compatibility);
+    this.kind = CompilationJobKind.Host;
+    this.fnSuffix = "HostBindings";
+    this.root = new HostBindingCompilationUnit(this);
+  }
+  get units() {
+    return [this.root];
+  }
+};
+var HostBindingCompilationUnit = class extends CompilationUnit {
+  constructor(job) {
+    super(0);
+    this.job = job;
+    this.attributes = null;
   }
 };
 
@@ -9265,8 +9273,8 @@ function phaseVarCounting(job) {
     unit.vars = varCount;
   }
   if (job instanceof ComponentCompilationJob) {
-    for (const view of job.views.values()) {
-      for (const op of view.create) {
+    for (const unit of job.units) {
+      for (const op of unit.create) {
         if (op.kind !== OpKind.Template) {
           continue;
         }
@@ -9316,9 +9324,9 @@ function varsUsedByIrExpression(expr) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/align_pipe_variadic_var_offset.mjs
-function phaseAlignPipeVariadicVarOffset(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.update) {
+function phaseAlignPipeVariadicVarOffset(job) {
+  for (const unit of job.units) {
+    for (const op of unit.update) {
       visitExpressionsInOp(op, (expr) => {
         if (!(expr instanceof PipeBindingVariadicExpr)) {
           return expr;
@@ -9337,9 +9345,9 @@ function phaseAlignPipeVariadicVarOffset(cpl) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/any_cast.mjs
-function phaseFindAnyCasts(cpl) {
-  for (const [_, view] of cpl.views) {
-    for (const op of view.ops()) {
+function phaseFindAnyCasts(job) {
+  for (const unit of job.units) {
+    for (const op of unit.ops()) {
       transformExpressionsInOp(op, removeAnys, VisitorContextFlag.None);
     }
   }
@@ -9355,9 +9363,9 @@ function removeAnys(e) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/util/elements.mjs
-function getElementsByXrefId(view) {
+function getElementsByXrefId(unit) {
   const elements = /* @__PURE__ */ new Map();
-  for (const op of view.create) {
+  for (const op of unit.create) {
     if (!isElementOrContainerOp(op)) {
       continue;
     }
@@ -9367,13 +9375,13 @@ function getElementsByXrefId(view) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/attribute_extraction.mjs
-function phaseAttributeExtraction(cpl) {
-  for (const [_, view] of cpl.views) {
-    const elements = getElementsByXrefId(view);
-    for (const op of view.ops()) {
+function phaseAttributeExtraction(job) {
+  for (const unit of job.units) {
+    const elements = getElementsByXrefId(unit);
+    for (const op of unit.ops()) {
       switch (op.kind) {
         case OpKind.Attribute:
-          extractAttributeOp(view, op, elements);
+          extractAttributeOp(unit, op, elements);
           break;
         case OpKind.Property:
           if (!op.isAnimationTrigger) {
@@ -9382,13 +9390,18 @@ function phaseAttributeExtraction(cpl) {
           break;
         case OpKind.StyleProp:
         case OpKind.ClassProp:
-          if (view.compatibility === CompatibilityMode.TemplateDefinitionBuilder && op.expression instanceof EmptyExpr2) {
+          if (unit.job.compatibility === CompatibilityMode.TemplateDefinitionBuilder && op.expression instanceof EmptyExpr2) {
             OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.Property, op.name, null), lookupElement(elements, op.target));
           }
           break;
         case OpKind.Listener:
           if (!op.isAnimationListener) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.Property, op.name, null), lookupElement(elements, op.target));
+            const extractedAttributeOp = createExtractedAttributeOp(op.target, BindingKind.Property, op.name, null);
+            if (job.kind === CompilationJobKind.Host) {
+              unit.create.push(extractedAttributeOp);
+            } else {
+              OpList.insertBefore(extractedAttributeOp, lookupElement(elements, op.target));
+            }
           }
           break;
       }
@@ -9402,20 +9415,28 @@ function lookupElement(elements, xref) {
   }
   return el;
 }
-function extractAttributeOp(view, op, elements) {
+function extractAttributeOp(unit, op, elements) {
   if (op.expression instanceof Interpolation2) {
     return;
   }
-  const ownerOp = lookupElement(elements, op.target);
   let extractable = op.expression.isConstant();
-  if (view.compatibility === CompatibilityMode.TemplateDefinitionBuilder) {
+  if (unit.job.compatibility === CompatibilityMode.TemplateDefinitionBuilder) {
     extractable = isStringLiteral(op.expression);
     if (op.name === "style" || op.name === "class") {
       extractable && (extractable = op.isTextAttribute);
     }
+    if (unit.job.kind === CompilationJobKind.Host) {
+      extractable && (extractable = op.isTextAttribute);
+    }
   }
   if (extractable) {
-    OpList.insertBefore(createExtractedAttributeOp(op.target, op.isTemplate ? BindingKind.Template : BindingKind.Attribute, op.name, op.expression), ownerOp);
+    const extractedAttributeOp = createExtractedAttributeOp(op.target, op.isTemplate ? BindingKind.Template : BindingKind.Attribute, op.name, op.expression);
+    if (unit.job.kind === CompilationJobKind.Host) {
+      unit.create.push(extractedAttributeOp);
+    } else {
+      const ownerOp = lookupElement(elements, op.target);
+      OpList.insertBefore(extractedAttributeOp, ownerOp);
+    }
     OpList.remove(op);
   }
 }
@@ -9455,8 +9476,8 @@ function phaseBindingSpecialization(job) {
           break;
         case BindingKind.Property:
         case BindingKind.Animation:
-          if (job instanceof HostBindingCompilationJob) {
-            OpList.replace(op, createHostPropertyOp(op.name, op.expression, op.sourceSpan));
+          if (job.kind === CompilationJobKind.Host) {
+            OpList.replace(op, createHostPropertyOp(op.name, op.expression, op.bindingKind === BindingKind.Animation, op.sourceSpan));
           } else {
             OpList.replace(op, createPropertyOp(op.target, op.name, op.expression, op.bindingKind === BindingKind.Animation, op.securityContext, op.isTemplate, op.sourceSpan));
           }
@@ -9477,6 +9498,7 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.element,
   Identifiers.property,
   Identifiers.hostProperty,
+  Identifiers.syntheticHostProperty,
   Identifiers.styleProp,
   Identifiers.attribute,
   Identifiers.stylePropInterpolate1,
@@ -9493,7 +9515,8 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.elementContainerStart,
   Identifiers.elementContainerEnd,
   Identifiers.elementContainer,
-  Identifiers.listener
+  Identifiers.listener,
+  Identifiers.syntheticHostListener
 ]);
 function phaseChaining(job) {
   for (const unit of job.units) {
@@ -9567,19 +9590,21 @@ function mergeNsAndName(prefix, localName) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/const_collection.mjs
 function phaseConstCollection(job) {
-  const messageConstIndices = {};
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.ExtractedMessage) {
-        messageConstIndices[op.owner] = job.addConst(op.expression, op.statements);
-        OpList.remove(op);
+  if (job instanceof ComponentCompilationJob) {
+    const messageConstIndices = {};
+    for (const unit of job.units) {
+      for (const op of unit.create) {
+        if (op.kind === OpKind.ExtractedMessage) {
+          messageConstIndices[op.owner] = job.addConst(op.expression, op.statements);
+          OpList.remove(op);
+        }
       }
     }
-  }
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart && messageConstIndices[op.xref] !== void 0) {
-        op.messageIndex = messageConstIndices[op.xref];
+    for (const unit of job.units) {
+      for (const op of unit.create) {
+        if (op.kind === OpKind.I18nStart && messageConstIndices[op.xref] !== void 0) {
+          op.messageIndex = messageConstIndices[op.xref];
+        }
       }
     }
   }
@@ -9594,16 +9619,28 @@ function phaseConstCollection(job) {
       }
     }
   }
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.Element || op.kind === OpKind.ElementStart || op.kind === OpKind.Template) {
-        const attributes = elementAttributes.get(op.xref);
-        if (attributes !== void 0) {
-          const attrArray = serializeAttributes(attributes);
-          if (attrArray.entries.length > 0) {
-            op.attributes = job.addConst(attrArray);
+  if (job instanceof ComponentCompilationJob) {
+    for (const unit of job.units) {
+      for (const op of unit.create) {
+        if (op.kind === OpKind.Element || op.kind === OpKind.ElementStart || op.kind === OpKind.Template) {
+          const attributes = elementAttributes.get(op.xref);
+          if (attributes !== void 0) {
+            const attrArray = serializeAttributes(attributes);
+            if (attrArray.entries.length > 0) {
+              op.attributes = job.addConst(attrArray);
+            }
           }
         }
+      }
+    }
+  } else if (job instanceof HostBindingCompilationJob) {
+    for (const [xref, attributes] of elementAttributes.entries()) {
+      if (xref !== job.root.xref) {
+        throw new Error(`An attribute would be const collected into the host binding's template function, but is not associated with the root xref.`);
+      }
+      const attrArray = serializeAttributes(attributes);
+      if (attrArray.entries.length > 0) {
+        job.root.attributes = attrArray;
       }
     }
   }
@@ -9701,9 +9738,9 @@ var REPLACEMENTS = /* @__PURE__ */ new Map([
   [OpKind.ContainerEnd, [OpKind.ContainerStart, OpKind.Container]],
   [OpKind.I18nEnd, [OpKind.I18nStart, OpKind.I18n]]
 ]);
-function phaseEmptyElements(cpl) {
-  for (const [_, view] of cpl.views) {
-    for (const op of view.create) {
+function phaseEmptyElements(job) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
       const opReplacements = REPLACEMENTS.get(op.kind);
       if (opReplacements === void 0) {
         continue;
@@ -9854,10 +9891,10 @@ function ternaryTransform(e) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_advance.mjs
-function phaseGenerateAdvance(cpl) {
-  for (const [_, view] of cpl.views) {
+function phaseGenerateAdvance(job) {
+  for (const unit of job.units) {
     const slotMap = /* @__PURE__ */ new Map();
-    for (const op of view.create) {
+    for (const op of unit.create) {
       if (!hasConsumesSlotTrait(op)) {
         continue;
       } else if (op.slot === null) {
@@ -9866,7 +9903,7 @@ function phaseGenerateAdvance(cpl) {
       slotMap.set(op.xref, op.slot);
     }
     let slotContext = 0;
-    for (const op of view.update) {
+    for (const op of unit.update) {
       if (!hasDependsOnSlotContextTrait(op)) {
         continue;
       } else if (!slotMap.has(op.target)) {
@@ -9912,8 +9949,8 @@ function phaseGenerateI18nBlocks(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_variables.mjs
-function phaseGenerateVariables(cpl) {
-  recursivelyProcessView(cpl.root, null);
+function phaseGenerateVariables(job) {
+  recursivelyProcessView(job.root, null);
 }
 function recursivelyProcessView(view, parentScope) {
   const scope = getScopeForView(view, parentScope);
@@ -9994,8 +10031,10 @@ function generateVariablesInScopeForView(view, scope) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/host_style_property_parsing.mjs
 var STYLE_DOT = "style.";
 var CLASS_DOT = "class.";
+var STYLE_BANG = "style!";
+var CLASS_BANG = "class!";
 function phaseHostStylePropertyParsing(job) {
-  for (const op of job.update) {
+  for (const op of job.root.update) {
     if (op.kind !== OpKind.Binding) {
       continue;
     }
@@ -10008,11 +10047,15 @@ function phaseHostStylePropertyParsing(job) {
       const { property: property2, suffix } = parseProperty(op.name);
       op.name = property2;
       op.unit = suffix;
-    } else if (op.name.startsWith("style!")) {
+    } else if (op.name.startsWith(STYLE_BANG)) {
+      op.bindingKind = BindingKind.StyleProperty;
       op.name = "style";
     } else if (op.name.startsWith(CLASS_DOT)) {
       op.bindingKind = BindingKind.ClassName;
       op.name = parseProperty(op.name.substring(CLASS_DOT.length)).property;
+    } else if (op.name.startsWith(CLASS_BANG)) {
+      op.bindingKind = BindingKind.ClassName;
+      op.name = parseProperty(op.name.substring(CLASS_BANG.length)).property;
     }
   }
 }
@@ -16023,9 +16066,9 @@ function phaseI18nTextExtraction(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/local_refs.mjs
-function phaseLocalRefs(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.create) {
+function phaseLocalRefs(job) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.ElementStart:
         case OpKind.Element:
@@ -16036,7 +16079,7 @@ function phaseLocalRefs(cpl) {
           op.numSlotsUsed += op.localRefs.length;
           if (op.localRefs.length > 0) {
             const localRefs = serializeLocalRefs(op.localRefs);
-            op.localRefs = cpl.addConst(localRefs);
+            op.localRefs = job.addConst(localRefs);
           } else {
             op.localRefs = null;
           }
@@ -16055,9 +16098,9 @@ function serializeLocalRefs(refs) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/namespace.mjs
 function phaseNamespace(job) {
-  for (const [_, view] of job.views) {
+  for (const unit of job.units) {
     let activeNamespace = Namespace.HTML;
-    for (const op of view.create) {
+    for (const op of unit.create) {
       if (op.kind !== OpKind.Element && op.kind !== OpKind.ElementStart) {
         continue;
       }
@@ -16185,23 +16228,29 @@ function addNamesToView(unit, baseName, state, compatibility) {
   for (const op of unit.ops()) {
     switch (op.kind) {
       case OpKind.Property:
+      case OpKind.HostProperty:
         if (op.isAnimationTrigger) {
           op.name = "@" + op.name;
         }
         break;
       case OpKind.Listener:
-        if (op.handlerFnName === null) {
-          if (op.slot === null) {
-            throw new Error(`Expected a slot to be assigned`);
-          }
-          const safeTagName = op.tag.replace("-", "_");
-          if (op.isAnimationListener) {
-            op.handlerFnName = sanitizeIdentifier(`${unit.fnName}_${safeTagName}_animation_${op.name}_${op.animationPhase}_${op.slot}_listener`);
-            op.name = `@${op.name}.${op.animationPhase}`;
-          } else {
-            op.handlerFnName = sanitizeIdentifier(`${unit.fnName}_${safeTagName}_${op.name}_${op.slot}_listener`);
-          }
+        if (op.handlerFnName !== null) {
+          break;
         }
+        if (!op.hostListener && op.slot === null) {
+          throw new Error(`Expected a slot to be assigned`);
+        }
+        let animation = "";
+        if (op.isAnimationListener) {
+          op.name = `@${op.name}.${op.animationPhase}`;
+          animation = "animation";
+        }
+        if (op.hostListener) {
+          op.handlerFnName = `${baseName}_${animation}${op.name}_HostBindingHandler`;
+        } else {
+          op.handlerFnName = `${unit.fnName}_${op.tag.replace("-", "_")}_${animation}${op.name}_${op.slot}_listener`;
+        }
+        op.handlerFnName = sanitizeIdentifier(op.handlerFnName);
         break;
       case OpKind.Variable:
         varNames.set(op.xref, getVariableName(op.variable, state));
@@ -16269,14 +16318,14 @@ function stripImportant(name) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/next_context_merging.mjs
-function phaseMergeNextContext(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.create) {
+function phaseMergeNextContext(job) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
       if (op.kind === OpKind.Listener) {
         mergeNextContextsInOps(op.handlerOps);
       }
     }
-    mergeNextContextsInOps(view.update);
+    mergeNextContextsInOps(unit.update);
   }
 }
 function mergeNextContextsInOps(ops) {
@@ -16315,10 +16364,10 @@ function mergeNextContextsInOps(ops) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/ng_container.mjs
 var CONTAINER_TAG = "ng-container";
-function phaseNgContainer(cpl) {
-  for (const [_, view] of cpl.views) {
+function phaseNgContainer(job) {
+  for (const unit of job.units) {
     const updatedElementXrefs = /* @__PURE__ */ new Set();
-    for (const op of view.create) {
+    for (const op of unit.create) {
       if (op.kind === OpKind.ElementStart && op.tag === CONTAINER_TAG) {
         op.kind = OpKind.ContainerStart;
         updatedElementXrefs.add(op.xref);
@@ -16373,8 +16422,8 @@ function phaseNonbindable(job) {
       elements.set(op.xref, op);
     }
   }
-  for (const [_, view] of job.views) {
-    for (const op of view.create) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
       if ((op.kind === OpKind.ElementStart || op.kind === OpKind.ContainerStart) && op.nonBindable) {
         OpList.insertAfter(createDisableBindingsOp(op.xref), op);
       }
@@ -16403,8 +16452,8 @@ function phaseNullishCoalescing(job) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/parse_extracted_styles.mjs
 function phaseParseExtractedStyles(cpl) {
-  for (const [_, view] of cpl.views) {
-    for (const op of view.create) {
+  for (const unit of cpl.units) {
+    for (const op of unit.create) {
       if (op.kind === OpKind.ExtractedAttribute && op.bindingKind === BindingKind.Attribute && isStringLiteral(op.expression)) {
         if (op.name === "style") {
           const parsedStyles = parse(op.expression.value);
@@ -16425,13 +16474,13 @@ function phaseParseExtractedStyles(cpl) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_creation.mjs
-function phasePipeCreation(cpl) {
-  for (const view of cpl.views.values()) {
-    processPipeBindingsInView(view);
+function phasePipeCreation(job) {
+  for (const unit of job.units) {
+    processPipeBindingsInView(unit);
   }
 }
-function processPipeBindingsInView(view) {
-  for (const updateOp of view.update) {
+function processPipeBindingsInView(unit) {
+  for (const updateOp of unit.update) {
     visitExpressionsInOp(updateOp, (expr, flags) => {
       if (!isIrExpression(expr)) {
         return;
@@ -16445,12 +16494,12 @@ function processPipeBindingsInView(view) {
       if (!hasDependsOnSlotContextTrait(updateOp)) {
         throw new Error(`AssertionError: pipe binding associated with non-slot operation ${OpKind[updateOp.kind]}`);
       }
-      addPipeToCreationBlock(view, updateOp.target, expr);
+      addPipeToCreationBlock(unit, updateOp.target, expr);
     });
   }
 }
-function addPipeToCreationBlock(view, afterTargetXref, binding) {
-  for (let op = view.create.head.next; op.kind !== OpKind.ListEnd; op = op.next) {
+function addPipeToCreationBlock(unit, afterTargetXref, binding) {
+  for (let op = unit.create.head.next; op.kind !== OpKind.ListEnd; op = op.next) {
     if (!hasConsumesSlotTrait(op)) {
       continue;
     }
@@ -16468,9 +16517,9 @@ function addPipeToCreationBlock(view, afterTargetXref, binding) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_variadic.mjs
-function phasePipeVariadic(cpl) {
-  for (const view of cpl.views.values()) {
-    for (const op of view.update) {
+function phasePipeVariadic(job) {
+  for (const unit of job.units) {
+    for (const op of unit.update) {
       transformExpressionsInOp(op, (expr) => {
         if (!(expr instanceof PipeBindingExpr)) {
           return expr;
@@ -16484,24 +16533,27 @@ function phasePipeVariadic(cpl) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/property_ordering.mjs
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/ordering.mjs
 function kindTest(kind) {
   return (op) => op.kind === kind;
 }
-var ORDERING = [
+var CREATE_ORDERING = [
+  { test: (op) => op.kind === OpKind.Listener && op.hostListener && op.isAnimationListener },
+  { test: (op) => op.kind === OpKind.Listener && !(op.hostListener && op.isAnimationListener) }
+];
+var UPDATE_ORDERING = [
+  { test: (op) => op.kind === OpKind.HostProperty && op.expression instanceof Interpolation2 },
+  { test: (op) => op.kind === OpKind.HostProperty && !(op.expression instanceof Interpolation2) },
   { test: kindTest(OpKind.StyleMap), transform: keepLast },
   { test: kindTest(OpKind.ClassMap), transform: keepLast },
   { test: kindTest(OpKind.StyleProp) },
   { test: kindTest(OpKind.ClassProp) },
-  {
-    test: (op) => (op.kind === OpKind.Property || op.kind === OpKind.HostProperty) && op.expression instanceof Interpolation2
-  },
-  {
-    test: (op) => (op.kind === OpKind.Property || op.kind === OpKind.HostProperty) && !(op.expression instanceof Interpolation2)
-  },
+  { test: (op) => op.kind === OpKind.Property && op.expression instanceof Interpolation2 },
+  { test: (op) => op.kind === OpKind.Property && !(op.expression instanceof Interpolation2) },
   { test: kindTest(OpKind.Attribute) }
 ];
 var handledOpKinds = /* @__PURE__ */ new Set([
+  OpKind.Listener,
   OpKind.StyleMap,
   OpKind.ClassMap,
   OpKind.StyleProp,
@@ -16510,34 +16562,41 @@ var handledOpKinds = /* @__PURE__ */ new Set([
   OpKind.HostProperty,
   OpKind.Attribute
 ]);
-function phasePropertyOrdering(cpl) {
-  for (const unit of cpl.units) {
+function phaseOrdering(job) {
+  for (const unit of job.units) {
     let opsToOrder = [];
+    for (const op of unit.create) {
+      if (handledOpKinds.has(op.kind)) {
+        opsToOrder.push(op);
+        OpList.remove(op);
+      } else {
+        OpList.insertBefore(reorder(opsToOrder, CREATE_ORDERING), op);
+        opsToOrder = [];
+      }
+    }
+    unit.create.push(reorder(opsToOrder, CREATE_ORDERING));
+    opsToOrder = [];
     for (const op of unit.update) {
       if (handledOpKinds.has(op.kind)) {
         opsToOrder.push(op);
         OpList.remove(op);
       } else {
-        for (const orderedOp of reorder(opsToOrder)) {
-          OpList.insertBefore(orderedOp, op);
-        }
+        OpList.insertBefore(reorder(opsToOrder, UPDATE_ORDERING), op);
         opsToOrder = [];
       }
     }
-    for (const orderedOp of reorder(opsToOrder)) {
-      unit.update.push(orderedOp);
-    }
+    unit.update.push(reorder(opsToOrder, UPDATE_ORDERING));
   }
 }
-function reorder(ops) {
-  const groups = Array.from(ORDERING, () => new Array());
+function reorder(ops, ordering) {
+  const groups = Array.from(ordering, () => new Array());
   for (const op of ops) {
-    const groupIndex = ORDERING.findIndex((o) => o.test(op));
+    const groupIndex = ordering.findIndex((o) => o.test(op));
     groups[groupIndex].push(op);
   }
   return groups.flatMap((group, i) => {
-    const transform = ORDERING[i].transform;
-    return transform ? transform(group) : group;
+    const transform2 = ordering[i].transform;
+    return transform2 ? transform2(group) : group;
   });
 }
 function keepLast(ops) {
@@ -16685,6 +16744,12 @@ function enableBindings() {
 }
 function listener(name, handlerFn) {
   return call(Identifiers.listener, [
+    literal(name),
+    handlerFn
+  ], null);
+}
+function syntheticHostListener(name, handlerFn) {
+  return call(Identifiers.syntheticHostListener, [
     literal(name),
     handlerFn
   ], null);
@@ -16850,6 +16915,9 @@ function classMapInterpolate(strings, expressions) {
 }
 function hostProperty(name, expression) {
   return call(Identifiers.hostProperty, [literal(name), expression], null);
+}
+function syntheticHostProperty(name, expression) {
+  return call(Identifiers.syntheticHostProperty, [literal(name), expression], null);
 }
 function pureFunction(varOffset, fn2, args) {
   return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [
@@ -17093,7 +17161,8 @@ function reifyCreateOperations(unit, ops) {
         break;
       case OpKind.Listener:
         const listenerFn = reifyListenerHandler(unit, op.handlerFnName, op.handlerOps, op.consumesDollarEvent);
-        OpList.replace(op, listener(op.name, listenerFn));
+        const reified = op.hostListener && op.isAnimationListener ? syntheticHostListener(op.name, listenerFn) : listener(op.name, listenerFn);
+        OpList.replace(op, reified);
         break;
       case OpKind.Variable:
         if (op.variable.name === null) {
@@ -17173,7 +17242,11 @@ function reifyUpdateOperations(_unit, ops) {
         if (op.expression instanceof Interpolation2) {
           throw new Error("not yet handled");
         } else {
-          OpList.replace(op, hostProperty(op.name, op.expression));
+          if (op.isAnimationTrigger) {
+            OpList.replace(op, syntheticHostProperty(op.name, op.expression));
+          } else {
+            OpList.replace(op, hostProperty(op.name, op.expression));
+          }
         }
         break;
       case OpKind.Variable:
@@ -17317,13 +17390,13 @@ function processLexicalScope(view, ops) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_dollar_event.mjs
-function phaseResolveDollarEvent(cpl) {
-  for (const [_, view] of cpl.views) {
-    resolveDollarEvent(view, view.create);
-    resolveDollarEvent(view, view.update);
+function phaseResolveDollarEvent(job) {
+  for (const unit of job.units) {
+    resolveDollarEvent(unit, unit.create);
+    resolveDollarEvent(unit, unit.update);
   }
 }
-function resolveDollarEvent(view, ops) {
+function resolveDollarEvent(unit, ops) {
   for (const op of ops) {
     if (op.kind === OpKind.Listener) {
       transformExpressionsInOp(op, (expr) => {
@@ -17446,11 +17519,11 @@ var sanitizers = /* @__PURE__ */ new Map([
   [SecurityContext.URL, SanitizerFn.Url],
   [SecurityContext.RESOURCE_URL, SanitizerFn.ResourceUrl]
 ]);
-function phaseResolveSanitizers(cpl) {
-  for (const [_, view] of cpl.views) {
-    const elements = getElementsByXrefId(view);
+function phaseResolveSanitizers(job) {
+  for (const unit of job.units) {
+    const elements = getElementsByXrefId(unit);
     let sanitizerFn;
-    for (const op of view.update) {
+    for (const op of unit.update) {
       switch (op.kind) {
         case OpKind.Property:
         case OpKind.Attribute:
@@ -17475,8 +17548,8 @@ function isIframeElement(op) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/save_restore_view.mjs
-function phaseSaveRestoreView(cpl) {
-  for (const view of cpl.views.values()) {
+function phaseSaveRestoreView(job) {
+  for (const view of job.views.values()) {
     view.create.prepend([
       createVariableOp(view.job.allocateXrefId(), {
         kind: SemanticVariableKind.SavedView,
@@ -17488,7 +17561,7 @@ function phaseSaveRestoreView(cpl) {
       if (op.kind !== OpKind.Listener) {
         continue;
       }
-      let needsRestoreView = view !== cpl.root;
+      let needsRestoreView = view !== job.root;
       if (!needsRestoreView) {
         for (const handlerOp of op.handlerOps) {
           visitExpressionsInOp(handlerOp, (expr) => {
@@ -17504,13 +17577,13 @@ function phaseSaveRestoreView(cpl) {
     }
   }
 }
-function addSaveRestoreViewOperationToListener(view, op) {
+function addSaveRestoreViewOperationToListener(unit, op) {
   op.handlerOps.prepend([
-    createVariableOp(view.job.allocateXrefId(), {
+    createVariableOp(unit.job.allocateXrefId(), {
       kind: SemanticVariableKind.Context,
       name: null,
-      view: view.xref
-    }, new RestoreViewExpr(view.xref))
+      view: unit.xref
+    }, new RestoreViewExpr(unit.xref))
   ]);
   for (const handlerOp of op.handlerOps) {
     if (handlerOp.kind === OpKind.Statement && handlerOp.statement instanceof ReturnStatement) {
@@ -17520,11 +17593,11 @@ function addSaveRestoreViewOperationToListener(view, op) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/slot_allocation.mjs
-function phaseSlotAllocation(cpl) {
+function phaseSlotAllocation(job) {
   const slotMap = /* @__PURE__ */ new Map();
-  for (const [_, view] of cpl.views) {
+  for (const unit of job.units) {
     let slotCount = 0;
-    for (const op of view.create) {
+    for (const op of unit.create) {
       if (!hasConsumesSlotTrait(op)) {
         continue;
       }
@@ -17532,12 +17605,12 @@ function phaseSlotAllocation(cpl) {
       slotMap.set(op.xref, op.slot);
       slotCount += op.numSlotsUsed;
     }
-    view.decls = slotCount;
+    unit.decls = slotCount;
   }
-  for (const [_, view] of cpl.views) {
-    for (const op of view.ops()) {
+  for (const unit of job.units) {
+    for (const op of unit.ops()) {
       if (op.kind === OpKind.Template) {
-        const childView = cpl.views.get(op.xref);
+        const childView = job.views.get(op.xref);
         op.decls = childView.decls;
       }
       if (hasUsesSlotIndexTrait(op) && op.slot === null) {
@@ -17848,65 +17921,55 @@ function allowConservativeInlining(decl, target) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/emit.mjs
-function transformTemplate(job) {
-  phaseGenerateI18nBlocks(job);
-  phaseI18nTextExtraction(job);
-  phaseNamespace(job);
-  phaseStyleBindingSpecialization(job);
-  phaseBindingSpecialization(job);
-  phaseAttributeExtraction(job);
-  phaseParseExtractedStyles(job);
-  phaseRemoveEmptyBindings(job);
-  phaseNoListenersOnTemplates(job);
-  phasePipeCreation(job);
-  phasePipeVariadic(job);
-  phasePureLiteralStructures(job);
-  phaseGenerateVariables(job);
-  phaseSaveRestoreView(job);
-  phaseFindAnyCasts(job);
-  phaseResolveDollarEvent(job);
-  phaseResolveNames(job);
-  phaseResolveContexts(job);
-  phaseResolveSanitizers(job);
-  phaseLocalRefs(job);
-  phaseNullishCoalescing(job);
-  phaseExpandSafeReads(job);
-  phaseTemporaryVariables(job);
-  phaseSlotAllocation(job);
-  phaseResolveI18nPlaceholders(job);
-  phaseI18nMessageExtraction(job);
-  phaseConstCollection(job);
-  phaseVarCounting(job);
-  phaseGenerateAdvance(job);
-  phaseVariableOptimization(job);
-  phaseNaming(job);
-  phaseMergeNextContext(job);
-  phaseNgContainer(job);
-  phaseEmptyElements(job);
-  phaseNonbindable(job);
-  phasePureFunctionExtraction(job);
-  phaseAlignPipeVariadicVarOffset(job);
-  phasePropertyOrdering(job);
-  phaseReify(job);
-  phaseChaining(job);
-}
-function transformHostBinding(job) {
-  phaseHostStylePropertyParsing(job);
-  phaseStyleBindingSpecialization(job);
-  phaseBindingSpecialization(job);
-  phasePureLiteralStructures(job);
-  phaseNullishCoalescing(job);
-  phaseExpandSafeReads(job);
-  phaseTemporaryVariables(job);
-  phaseVarCounting(job);
-  phaseVariableOptimization(job);
-  phaseResolveNames(job);
-  phaseResolveContexts(job);
-  phaseNaming(job);
-  phasePureFunctionExtraction(job);
-  phasePropertyOrdering(job);
-  phaseReify(job);
-  phaseChaining(job);
+var phases = [
+  { kind: CompilationJobKind.Tmpl, fn: phaseGenerateI18nBlocks },
+  { kind: CompilationJobKind.Tmpl, fn: phaseI18nTextExtraction },
+  { kind: CompilationJobKind.Host, fn: phaseHostStylePropertyParsing },
+  { kind: CompilationJobKind.Tmpl, fn: phaseNamespace },
+  { kind: CompilationJobKind.Both, fn: phaseStyleBindingSpecialization },
+  { kind: CompilationJobKind.Both, fn: phaseBindingSpecialization },
+  { kind: CompilationJobKind.Both, fn: phaseAttributeExtraction },
+  { kind: CompilationJobKind.Both, fn: phaseParseExtractedStyles },
+  { kind: CompilationJobKind.Tmpl, fn: phaseRemoveEmptyBindings },
+  { kind: CompilationJobKind.Tmpl, fn: phaseNoListenersOnTemplates },
+  { kind: CompilationJobKind.Tmpl, fn: phasePipeCreation },
+  { kind: CompilationJobKind.Tmpl, fn: phasePipeVariadic },
+  { kind: CompilationJobKind.Both, fn: phasePureLiteralStructures },
+  { kind: CompilationJobKind.Tmpl, fn: phaseGenerateVariables },
+  { kind: CompilationJobKind.Tmpl, fn: phaseSaveRestoreView },
+  { kind: CompilationJobKind.Tmpl, fn: phaseFindAnyCasts },
+  { kind: CompilationJobKind.Both, fn: phaseResolveDollarEvent },
+  { kind: CompilationJobKind.Both, fn: phaseResolveNames },
+  { kind: CompilationJobKind.Both, fn: phaseResolveContexts },
+  { kind: CompilationJobKind.Tmpl, fn: phaseResolveSanitizers },
+  { kind: CompilationJobKind.Tmpl, fn: phaseLocalRefs },
+  { kind: CompilationJobKind.Both, fn: phaseNullishCoalescing },
+  { kind: CompilationJobKind.Both, fn: phaseExpandSafeReads },
+  { kind: CompilationJobKind.Both, fn: phaseTemporaryVariables },
+  { kind: CompilationJobKind.Tmpl, fn: phaseSlotAllocation },
+  { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nPlaceholders },
+  { kind: CompilationJobKind.Tmpl, fn: phaseI18nMessageExtraction },
+  { kind: CompilationJobKind.Both, fn: phaseConstCollection },
+  { kind: CompilationJobKind.Both, fn: phaseVarCounting },
+  { kind: CompilationJobKind.Tmpl, fn: phaseGenerateAdvance },
+  { kind: CompilationJobKind.Both, fn: phaseVariableOptimization },
+  { kind: CompilationJobKind.Both, fn: phaseNaming },
+  { kind: CompilationJobKind.Tmpl, fn: phaseMergeNextContext },
+  { kind: CompilationJobKind.Tmpl, fn: phaseNgContainer },
+  { kind: CompilationJobKind.Tmpl, fn: phaseEmptyElements },
+  { kind: CompilationJobKind.Tmpl, fn: phaseNonbindable },
+  { kind: CompilationJobKind.Both, fn: phasePureFunctionExtraction },
+  { kind: CompilationJobKind.Tmpl, fn: phaseAlignPipeVariadicVarOffset },
+  { kind: CompilationJobKind.Both, fn: phaseOrdering },
+  { kind: CompilationJobKind.Both, fn: phaseReify },
+  { kind: CompilationJobKind.Both, fn: phaseChaining }
+];
+function transform(job, kind) {
+  for (const phase of phases) {
+    if (phase.kind === kind || phase.kind === CompilationJobKind.Both) {
+      phase.fn(job);
+    }
+  }
 }
 function emitTemplateFn(tpl, pool) {
   const rootFn = emitView(tpl.root);
@@ -17914,12 +17977,12 @@ function emitTemplateFn(tpl, pool) {
   return rootFn;
 }
 function emitChildViews(parent, pool) {
-  for (const view of parent.job.views.values()) {
-    if (view.parent !== parent.xref) {
+  for (const unit of parent.job.units) {
+    if (unit.parent !== parent.xref) {
       continue;
     }
-    emitChildViews(view, pool);
-    const viewFn = emitView(view);
+    emitChildViews(unit, pool);
+    const viewFn = emitView(unit);
     pool.statements.push(viewFn.toDeclStmt(viewFn.name));
   }
 }
@@ -17966,18 +18029,18 @@ function maybeGenerateRfBlock(flag, statements) {
   ];
 }
 function emitHostBindingFunction(job) {
-  if (job.fnName === null) {
+  if (job.root.fnName === null) {
     throw new Error(`AssertionError: host binding function is unnamed`);
   }
   const createStatements = [];
-  for (const op of job.create) {
+  for (const op of job.root.create) {
     if (op.kind !== OpKind.Statement) {
       throw new Error(`AssertionError: expected all create ops to have been compiled, but got ${OpKind[op.kind]}`);
     }
     createStatements.push(op.statement);
   }
   const updateStatements = [];
-  for (const op of job.update) {
+  for (const op of job.root.update) {
     if (op.kind !== OpKind.Statement) {
       throw new Error(`AssertionError: expected all update ops to have been compiled, but got ${OpKind[op.kind]}`);
     }
@@ -17999,7 +18062,7 @@ function emitHostBindingFunction(job) {
     ],
     void 0,
     void 0,
-    job.fnName
+    job.root.fnName
   );
 }
 
@@ -18011,12 +18074,15 @@ function ingestComponent(componentName, template2, constantPool, relativeContext
   return cpl;
 }
 function ingestHostBinding(input, bindingParser, constantPool) {
-  var _a2, _b2;
+  var _a2, _b2, _c2;
   const job = new HostBindingCompilationJob(input.componentName, constantPool, compatibilityMode);
   for (const property2 of (_a2 = input.properties) != null ? _a2 : []) {
     ingestHostProperty(job, property2, false);
   }
-  for (const event of (_b2 = input.events) != null ? _b2 : []) {
+  for (const [name, expr] of (_b2 = Object.entries(input.attributes)) != null ? _b2 : []) {
+    ingestHostAttribute(job, name, expr);
+  }
+  for (const event of (_c2 = input.events) != null ? _c2 : []) {
     ingestHostEvent(job, event);
   }
   return job;
@@ -18034,9 +18100,29 @@ function ingestHostProperty(job, property2, isTextAttribute) {
     property2.name = property2.name.substring("attr.".length);
     bindingKind = BindingKind.Attribute;
   }
-  job.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, SecurityContext.NONE, isTextAttribute, false, property2.sourceSpan));
+  if (property2.isAnimation) {
+    bindingKind = BindingKind.Animation;
+  }
+  job.root.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, SecurityContext.NONE, isTextAttribute, false, property2.sourceSpan));
+}
+function ingestHostAttribute(job, name, value) {
+  const attrBinding = createBindingOp(
+    job.root.xref,
+    BindingKind.Attribute,
+    name,
+    value,
+    null,
+    SecurityContext.NONE,
+    true,
+    false,
+    null
+  );
+  job.root.update.push(attrBinding);
 }
 function ingestHostEvent(job, event) {
+  const eventBinding = createListenerOp(job.root.xref, event.name, null, event.targetOrPhase, true);
+  eventBinding.handlerOps.push(createStatementOp(new ReturnStatement(convertAst(event.handler.ast, job))));
+  job.root.create.push(eventBinding);
 }
 function ingestNodes(view, template2) {
   for (const node of template2) {
@@ -18182,10 +18268,8 @@ function ingestBindings(view, op, element2) {
       if (output.phase === null) {
         throw Error("Animation listener should have a phase");
       }
-      listenerOp = createListenerOpForAnimation(op.xref, output.name, output.phase, op.tag);
-    } else {
-      listenerOp = createListenerOp(op.xref, output.name, op.tag);
     }
+    listenerOp = createListenerOp(op.xref, output.name, op.tag, output.phase, false);
     let inputExprs;
     let handler = output.handler;
     if (handler instanceof ASTWithSource) {
@@ -21838,7 +21922,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     definitionMap.set("template", templateFunctionExpression);
   } else {
     const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds);
-    transformTemplate(tpl);
+    transform(tpl, CompilationJobKind.Tmpl);
     const templateFn = emitTemplateFn(tpl, constantPool);
     definitionMap.set("decls", literal(tpl.root.decls));
     definitionMap.set("vars", literal(tpl.root.vars));
@@ -22027,12 +22111,20 @@ function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindin
   const bindings = bindingParser.createBoundHostProperties(hostBindingsMetadata.properties, typeSourceSpan);
   const eventBindings = bindingParser.createDirectiveHostEventAsts(hostBindingsMetadata.listeners, typeSourceSpan);
   if (USE_TEMPLATE_PIPELINE) {
+    if (hostBindingsMetadata.specialAttributes.styleAttr) {
+      hostBindingsMetadata.attributes.style = literal(hostBindingsMetadata.specialAttributes.styleAttr);
+    }
+    if (hostBindingsMetadata.specialAttributes.classAttr) {
+      hostBindingsMetadata.attributes.class = literal(hostBindingsMetadata.specialAttributes.classAttr);
+    }
     const hostJob = ingestHostBinding({
       componentName: name,
       properties: bindings,
-      events: eventBindings
+      events: eventBindings,
+      attributes: hostBindingsMetadata.attributes
     }, bindingParser, constantPool);
-    transformHostBinding(hostJob);
+    transform(hostJob, CompilationJobKind.Host);
+    definitionMap.set("hostAttrs", hostJob.root.attributes);
     const varCount = hostJob.root.vars;
     if (varCount !== null && varCount > 0) {
       definitionMap.set("hostVars", literal(varCount));
@@ -22842,7 +22934,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.1+sha-cdcfa09");
+var VERSION2 = new Version("17.0.0-next.1+sha-c2d8592");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24379,7 +24471,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-cdcfa09"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-c2d8592"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24450,7 +24542,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-cdcfa09"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-c2d8592"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24638,7 +24730,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-cdcfa09"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-c2d8592"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24661,7 +24753,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-cdcfa09"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-c2d8592"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24699,7 +24791,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-cdcfa09"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-c2d8592"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -24723,7 +24815,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-cdcfa09"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-c2d8592"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -24758,7 +24850,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-cdcfa09"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-c2d8592"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -24775,7 +24867,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.1+sha-cdcfa09");
+var VERSION3 = new Version("17.0.0-next.1+sha-c2d8592");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -27969,10 +28061,10 @@ var DtsTransformer = class {
   transformClassDeclaration(clazz, transforms, imports) {
     let elements = clazz.members;
     let elementsChanged = false;
-    for (const transform of transforms) {
-      if (transform.transformClassElement !== void 0) {
+    for (const transform2 of transforms) {
+      if (transform2.transformClassElement !== void 0) {
         for (let i = 0; i < elements.length; i++) {
-          const res = transform.transformClassElement(elements[i], imports);
+          const res = transform2.transformClassElement(elements[i], imports);
           if (res !== elements[i]) {
             if (!elementsChanged) {
               elements = [...elements];
@@ -27984,10 +28076,10 @@ var DtsTransformer = class {
       }
     }
     let newClazz = clazz;
-    for (const transform of transforms) {
-      if (transform.transformClass !== void 0) {
+    for (const transform2 of transforms) {
+      if (transform2.transformClass !== void 0) {
         const inputMembers = clazz === newClazz ? elements : newClazz.members;
-        newClazz = transform.transformClass(newClazz, inputMembers, this.reflector, this.refEmitter, imports);
+        newClazz = transform2.transformClass(newClazz, inputMembers, this.reflector, this.refEmitter, imports);
       }
     }
     if (elementsChanged && clazz === newClazz) {
@@ -28004,9 +28096,9 @@ var DtsTransformer = class {
   }
   transformFunctionDeclaration(declaration, transforms, imports) {
     let newDecl = declaration;
-    for (const transform of transforms) {
-      if (transform.transformFunctionDeclaration !== void 0) {
-        newDecl = transform.transformFunctionDeclaration(newDecl, imports);
+    for (const transform2 of transforms) {
+      if (transform2.transformFunctionDeclaration !== void 0) {
+        newDecl = transform2.transformFunctionDeclaration(newDecl, imports);
       }
     }
     return newDecl;
@@ -28811,10 +28903,10 @@ var ClassPropertyMapping = class {
     }
     return obj;
   }
-  toJointMappedObject(transform) {
+  toJointMappedObject(transform2) {
     const obj = {};
     for (const [classPropertyName, inputOrOutput] of this.forwardMap) {
-      obj[classPropertyName] = transform(inputOrOutput);
+      obj[classPropertyName] = transform2(inputOrOutput);
     }
     return obj;
   }
@@ -28917,7 +29009,7 @@ function extractDirectiveTypeCheckMeta(node, inputs, reflector) {
   const restrictedInputFields = /* @__PURE__ */ new Set();
   const stringLiteralInputFields = /* @__PURE__ */ new Set();
   const undeclaredInputFields = /* @__PURE__ */ new Set();
-  for (const { classPropertyName, transform } of inputs) {
+  for (const { classPropertyName, transform: transform2 } of inputs) {
     const field = members.find((member) => member.name === classPropertyName);
     if (field === void 0 || field.node === null) {
       undeclaredInputFields.add(classPropertyName);
@@ -28929,7 +29021,7 @@ function extractDirectiveTypeCheckMeta(node, inputs, reflector) {
     if (field.nameNode !== null && import_typescript32.default.isStringLiteral(field.nameNode)) {
       stringLiteralInputFields.add(classPropertyName);
     }
-    if (transform !== null) {
+    if (transform2 !== null) {
       coercedInputFields.add(classPropertyName);
     }
   }
@@ -31969,7 +32061,7 @@ function parseInputsArray2(clazz, decoratorMetadata, evaluator, reflector, refEm
       const name = value.get("name");
       const alias = value.get("alias");
       const required = value.get("required");
-      let transform = null;
+      let transform2 = null;
       if (typeof name !== "string") {
         throw createValueHasWrongTypeError(inputsField, name, `Value at position ${i} of @Directive.inputs array must have a "name" property`);
       }
@@ -31978,13 +32070,13 @@ function parseInputsArray2(clazz, decoratorMetadata, evaluator, reflector, refEm
         if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference2)) {
           throw createValueHasWrongTypeError(inputsField, transformValue, `Transform of value at position ${i} of @Directive.inputs array must be a function`);
         }
-        transform = parseInputTransformFunction(clazz, name, transformValue, reflector, refEmitter);
+        transform2 = parseInputTransformFunction(clazz, name, transformValue, reflector, refEmitter);
       }
       inputs[name] = {
         classPropertyName: name,
         bindingPropertyName: typeof alias === "string" ? alias : name,
         required: required === true,
-        transform
+        transform: transform2
       };
     } else {
       throw createValueHasWrongTypeError(inputsField, value, `@Directive.inputs array can only contain strings or object literals`);
@@ -31997,7 +32089,7 @@ function parseInputFields(clazz, inputMembers, evaluator, reflector, refEmitter)
   parseDecoratedFields(inputMembers, evaluator, (classPropertyName, options, decorator) => {
     let bindingPropertyName;
     let required = false;
-    let transform = null;
+    let transform2 = null;
     if (options === null) {
       bindingPropertyName = classPropertyName;
     } else if (typeof options === "string") {
@@ -32011,12 +32103,12 @@ function parseInputFields(clazz, inputMembers, evaluator, reflector, refEmitter)
         if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference2)) {
           throw createValueHasWrongTypeError(decorator.node, transformValue, `Input transform must be a function`);
         }
-        transform = parseInputTransformFunction(clazz, classPropertyName, transformValue, reflector, refEmitter);
+        transform2 = parseInputTransformFunction(clazz, classPropertyName, transformValue, reflector, refEmitter);
       }
     } else {
       throw createValueHasWrongTypeError(decorator.node, options, `@${decorator.name} decorator argument must resolve to a string or an object literal`);
     }
-    inputs[classPropertyName] = { bindingPropertyName, classPropertyName, required, transform };
+    inputs[classPropertyName] = { bindingPropertyName, classPropertyName, required, transform: transform2 };
   });
   return inputs;
 }
@@ -37156,7 +37248,7 @@ function constructTypeCtorParameter(node, meta, rawType) {
   let initType = null;
   const plainKeys = [];
   const coercedKeys = [];
-  for (const { classPropertyName, transform } of meta.fields.inputs) {
+  for (const { classPropertyName, transform: transform2 } of meta.fields.inputs) {
     if (!meta.coercedInputFields.has(classPropertyName)) {
       plainKeys.push(import_typescript77.default.factory.createLiteralTypeNode(import_typescript77.default.factory.createStringLiteral(classPropertyName)));
     } else {
@@ -37164,7 +37256,7 @@ function constructTypeCtorParameter(node, meta, rawType) {
         void 0,
         classPropertyName,
         void 0,
-        transform == null ? tsCreateTypeQueryForCoercedInput(rawType.typeName, classPropertyName) : transform.type
+        transform2 == null ? tsCreateTypeQueryForCoercedInput(rawType.typeName, classPropertyName) : transform2.type
       ));
     }
   }
