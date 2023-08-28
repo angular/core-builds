@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.1+sha-88fcd27
+ * @license Angular v17.0.0-next.1+sha-cdcfa09
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12946,7 +12946,6 @@ export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportA
     [key: string]: string;
 }, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
 
-
 /**
  * The conditional instruction represents the basic building block on the runtime side to support
  * built-in "if" and "switch". On the high level this instruction is responsible for adding and
@@ -14634,6 +14633,50 @@ export declare function ɵɵreference<T>(index: number): T;
  * @codeGenApi
  */
 export declare function ɵɵregisterNgModuleType(ngModuleType: ɵNgModuleType, id: string): void;
+
+/**
+ * The repeater instruction does update-time diffing of a provided collection (against the
+ * collection seen previously) and maps changes in the collection to views structure (by adding,
+ * removing or moving views as needed).
+ * @param metadataSlotIdx - index in data where we can find an instance of RepeaterMetadata with
+ *     additional information (ex. differ) needed to process collection diffing and view
+ *     manipulation
+ * @param collection - the collection instance to be checked for changes
+ * @codeGenApi
+ */
+export declare function ɵɵrepeater(metadataSlotIdx: number, collection: Iterable<unknown> | undefined | null): void;
+
+/**
+ * The repeaterCreate instruction runs in the creation part of the template pass and initializes
+ * internal data structures required by the update pass of the built-in repeater logic. Repeater
+ * metadata are allocated in the data part of LView with the following layout:
+ * - LView[HEADER_OFFSET + index] - metadata
+ * - LView[HEADER_OFFSET + index + 1] - reference to a template function rendering an item
+ * - LView[HEADER_OFFSET + index + 2] - optional reference to a template function rendering an empty
+ * block
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵrepeaterCreate(index: number, templateFn: ComponentTemplate<unknown>, decls: number, vars: number, trackByFn: TrackByFunction<unknown>, emptyTemplateFn?: ComponentTemplate<unknown>, emptyDecls?: number, emptyVars?: number): void;
+
+/**
+ * A built-in trackBy function used for situations where users specified collection item reference
+ * as a tracking expression. Having this function body in the runtime avoids unnecessary code
+ * generation.
+ *
+ * @param index
+ * @returns
+ */
+export declare function ɵɵrepeaterTrackByIdentity<T>(_: number, value: T): T;
+
+/**
+ * A built-in trackBy function used for situations where users specified collection index as a
+ * tracking expression. Having this function body in the runtime avoids unnecessary code generation.
+ *
+ * @param index
+ * @returns
+ */
+export declare function ɵɵrepeaterTrackByIndex(index: number): number;
 
 /**
  * Clears the view set in `ɵɵrestoreView` from memory. Returns the passed in
