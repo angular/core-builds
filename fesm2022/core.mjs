@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.1+sha-c62e680
+ * @license Angular v17.0.0-next.1+sha-49415e8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7924,7 +7924,7 @@ const COMMENT_DISALLOWED = /^>|^->|<!--|-->|--!>|<!-$/g;
 /**
  * Delimiter in the disallowed strings which needs to be wrapped with zero with character.
  */
-const COMMENT_DELIMITER = /(<|>)/;
+const COMMENT_DELIMITER = /(<|>)/g;
 const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
 /**
  * Escape the content of comment strings so that it can be safely inserted into a comment node.
@@ -10854,7 +10854,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.1+sha-c62e680');
+const VERSION = new Version('17.0.0-next.1+sha-49415e8');
 
 // This default value is when checking the hierarchy for a token.
 //
