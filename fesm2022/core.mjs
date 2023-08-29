@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.1+sha-4dabcad
+ * @license Angular v17.0.0-next.1+sha-685d01e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10854,7 +10854,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.1+sha-4dabcad');
+const VERSION = new Version('17.0.0-next.1+sha-685d01e');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19394,6 +19394,7 @@ function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, local
     if (localRefsIndex != null) {
         saveResolvedLocalsInData(lView, tNode, localRefExtractor);
     }
+    return ɵɵtemplate;
 }
 let _locateOrCreateContainerAnchor = createContainerAnchorImpl;
 /**
