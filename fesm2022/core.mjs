@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.1+sha-3a19d6b
+ * @license Angular v17.0.0-next.1+sha-ba32d6f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10854,7 +10854,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.1+sha-3a19d6b');
+const VERSION = new Version('17.0.0-next.1+sha-ba32d6f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19725,7 +19725,20 @@ function ɵɵdeferWhen(rawValue) {
  * Prefetches the deferred content when a value becomes truthy.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchWhen(value) { } // TODO: implement runtime logic.
+function ɵɵdeferPrefetchWhen(rawValue) {
+    const lView = getLView();
+    const bindingIndex = nextBindingIndex();
+    if (bindingUpdated(lView, bindingIndex, rawValue)) {
+        const value = Boolean(rawValue); // handle truthy or falsy values
+        const tView = lView[TVIEW];
+        const tNode = getSelectedTNode();
+        const tDetails = getTDeferBlockDetails(tView, tNode);
+        if (value === true && tDetails.loadingState === 0 /* DeferDependenciesLoadingState.NOT_STARTED */) {
+            // If loading has not been started yet, trigger it now.
+            triggerResourceLoading(tDetails, getPrimaryBlockTNode(tView, tDetails), lView[INJECTOR$1]);
+        }
+    }
+}
 /**
  * Sets up handlers that represent `on idle` deferred trigger.
  * @codeGenApi
@@ -19984,6 +19997,11 @@ function renderDeferStateAfterResourceLoading(tDetails, tNode, lContainer) {
         }
     });
 }
+/** Retrieves a TNode that represents main content of a defer block. */
+function getPrimaryBlockTNode(tView, tDetails) {
+    const adjustedIndex = tDetails.primaryTmplIndex + HEADER_OFFSET;
+    return getTNode(tView, adjustedIndex);
+}
 /**
  * Attempts to trigger loading of defer block dependencies.
  * If the block is already in a loading, completed or an error state -
@@ -19999,9 +20017,7 @@ function triggerDeferBlock(lView, tNode) {
     renderDeferBlockState(2 /* DeferBlockInstanceState.LOADING */, tNode, lContainer, tDetails.loadingTmplIndex);
     switch (tDetails.loadingState) {
         case 0 /* DeferDependenciesLoadingState.NOT_STARTED */:
-            const adjustedIndex = tDetails.primaryTmplIndex + HEADER_OFFSET;
-            const primaryBlockTNode = getTNode(lView[TVIEW], adjustedIndex);
-            triggerResourceLoading(tDetails, primaryBlockTNode, lView[INJECTOR$1]);
+            triggerResourceLoading(tDetails, getPrimaryBlockTNode(lView[TVIEW], tDetails), lView[INJECTOR$1]);
             // The `loadingState` might have changed to "loading".
             if (tDetails.loadingState ===
                 1 /* DeferDependenciesLoadingState.IN_PROGRESS */) {

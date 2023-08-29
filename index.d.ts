@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.1+sha-3a19d6b
+ * @license Angular v17.0.0-next.1+sha-ba32d6f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13091,7 +13091,7 @@ export declare function ɵɵdeferPrefetchOnViewport(target?: unknown): void;
  * Prefetches the deferred content when a value becomes truthy.
  * @codeGenApi
  */
-export declare function ɵɵdeferPrefetchWhen(value: unknown): void;
+export declare function ɵɵdeferPrefetchWhen(rawValue: unknown): void;
 
 /**
  * Loads defer block dependencies when a trigger value becomes truthy.
