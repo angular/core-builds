@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.1+sha-c5daa6c
+ * @license Angular v17.0.0-next.1+sha-4dabcad
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15554,7 +15554,7 @@ export declare function ɵɵsyntheticHostProperty<T>(propName: string, value: T 
  *
  * @codeGenApi
  */
-export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, attrsIndex?: number | null, localRefsIndex?: number | null, localRefExtractor?: LocalRefExtractor): typeof ɵɵtemplate;
+export declare function ɵɵtemplate(index: number, templateFn: ComponentTemplate<any> | null, decls: number, vars: number, tagName?: string | null, attrsIndex?: number | null, localRefsIndex?: number | null, localRefExtractor?: LocalRefExtractor): void;
 
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
