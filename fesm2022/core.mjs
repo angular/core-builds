@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.1+sha-ab0f9ee
+ * @license Angular v17.0.0-next.1+sha-006577f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10854,7 +10854,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.1+sha-ab0f9ee');
+const VERSION = new Version('17.0.0-next.1+sha-006577f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13589,28 +13589,7 @@ function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
         // ViewContainerRef). When we find a LContainer we need to descend into it to collect root nodes
         // from the views in this container.
         if (isLContainer(lNode)) {
-            for (let i = CONTAINER_HEADER_OFFSET; i < lNode.length; i++) {
-                const lViewInAContainer = lNode[i];
-                const lViewFirstChildTNode = lViewInAContainer[TVIEW].firstChild;
-                if (lViewFirstChildTNode !== null) {
-                    collectNativeNodes(lViewInAContainer[TVIEW], lViewInAContainer, lViewFirstChildTNode, result);
-                }
-            }
-            // When an LContainer is created, the anchor (comment) node is:
-            // - (1) either reused in case of an ElementContainer (<ng-container>)
-            // - (2) or a new comment node is created
-            // In the first case, the anchor comment node would be added to the final
-            // list by the code above (`result.push(unwrapRNode(lNode))`), but the second
-            // case requires extra handling: the anchor node needs to be added to the
-            // final list manually. See additional information in the `createAnchorNode`
-            // function in the `view_container_ref.ts`.
-            //
-            // In the first case, the same reference would be stored in the `NATIVE`
-            // and `HOST` slots in an LContainer. Otherwise, this is the second case and
-            // we should add an element to the final list.
-            if (lNode[NATIVE] !== lNode[HOST]) {
-                result.push(lNode[NATIVE]);
-            }
+            collectNativeNodesInLContainer(lNode, result);
         }
         const tNodeType = tNode.type;
         if (tNodeType & 8 /* TNodeType.ElementContainer */) {
@@ -13637,6 +13616,34 @@ function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
         tNode = isProjection ? tNode.projectionNext : tNode.next;
     }
     return result;
+}
+/**
+ * Collects all root nodes in all views in a given LContainer.
+ */
+function collectNativeNodesInLContainer(lContainer, result) {
+    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        const lViewInAContainer = lContainer[i];
+        const lViewFirstChildTNode = lViewInAContainer[TVIEW].firstChild;
+        if (lViewFirstChildTNode !== null) {
+            collectNativeNodes(lViewInAContainer[TVIEW], lViewInAContainer, lViewFirstChildTNode, result);
+        }
+    }
+    // When an LContainer is created, the anchor (comment) node is:
+    // - (1) either reused in case of an ElementContainer (<ng-container>)
+    // - (2) or a new comment node is created
+    // In the first case, the anchor comment node would be added to the final
+    // list by the code in the `collectNativeNodes` function
+    // (see the `result.push(unwrapRNode(lNode))` line), but the second
+    // case requires extra handling: the anchor node needs to be added to the
+    // final list manually. See additional information in the `createAnchorNode`
+    // function in the `view_container_ref.ts`.
+    //
+    // In the first case, the same reference would be stored in the `NATIVE`
+    // and `HOST` slots in an LContainer. Otherwise, this is the second case and
+    // we should add an element to the final list.
+    if (lContainer[NATIVE] !== lContainer[HOST]) {
+        result.push(lContainer[NATIVE]);
+    }
 }
 
 function detectChangesInternal(tView, lView, context, notifyErrorHandler = true) {
@@ -31677,6 +31684,14 @@ function calcNumRootNodes(tView, lView, tNode) {
     return rootNodes.length;
 }
 /**
+ * Computes the number of root nodes in all views in a given LContainer.
+ */
+function calcNumRootNodesInLContainer(lContainer) {
+    const rootNodes = [];
+    collectNativeNodesInLContainer(lContainer, rootNodes);
+    return rootNodes.length;
+}
+/**
  * Annotates root level component's LView for hydration,
  * see `annotateHostElementForHydration` for additional information.
  */
@@ -31696,7 +31711,7 @@ function annotateComponentLViewForHydration(lView, context) {
  * container.
  */
 function annotateLContainerForHydration(lContainer, context) {
-    const componentLView = lContainer[HOST];
+    const componentLView = unwrapLView(lContainer[HOST]);
     // Serialize the root component itself.
     const componentLViewNghIndex = annotateComponentLViewForHydration(componentLView, context);
     const hostElement = unwrapRNode(componentLView[HOST]);
@@ -31768,33 +31783,53 @@ function serializeLContainer(lContainer, context) {
     let lastViewAsString = '';
     for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
         let childLView = lContainer[i];
-        // If this is a root view, get an LView for the underlying component,
-        // because it contains information about the view to serialize.
-        if (isRootView(childLView)) {
-            childLView = childLView[HEADER_OFFSET];
-        }
-        const childTView = childLView[TVIEW];
         let template;
-        let numRootNodes = 0;
-        if (childTView.type === 1 /* TViewType.Component */) {
-            template = childTView.ssrId;
-            // This is a component view, thus it has only 1 root node: the component
-            // host node itself (other nodes would be inside that host node).
-            numRootNodes = 1;
+        let numRootNodes;
+        let serializedView;
+        if (isRootView(childLView)) {
+            // If this is a root view, get an LView for the underlying component,
+            // because it contains information about the view to serialize.
+            childLView = childLView[HEADER_OFFSET];
+            // If we have an LContainer at this position, this indicates that the
+            // host element was used as a ViewContainerRef anchor (e.g. a `ViewContainerRef`
+            // was injected within the component class). This case requires special handling.
+            if (isLContainer(childLView)) {
+                // Calculate the number of root nodes in all views in a given container
+                // and increment by one to account for an anchor node itself, i.e. in this
+                // scenario we'll have a layout that would look like this:
+                // `<app-root /><#VIEW1><#VIEW2>...<!--container-->`
+                // The `+1` is to capture the `<app-root />` element.
+                numRootNodes = calcNumRootNodesInLContainer(childLView) + 1;
+                annotateLContainerForHydration(childLView, context);
+                const componentLView = unwrapLView(childLView[HOST]);
+                serializedView = {
+                    [TEMPLATE_ID]: componentLView[TVIEW].ssrId,
+                    [NUM_ROOT_NODES]: numRootNodes,
+                };
+            }
         }
-        else {
-            template = getSsrId(childTView);
-            numRootNodes = calcNumRootNodes(childTView, childLView, childTView.firstChild);
+        if (!serializedView) {
+            const childTView = childLView[TVIEW];
+            if (childTView.type === 1 /* TViewType.Component */) {
+                template = childTView.ssrId;
+                // This is a component view, thus it has only 1 root node: the component
+                // host node itself (other nodes would be inside that host node).
+                numRootNodes = 1;
+            }
+            else {
+                template = getSsrId(childTView);
+                numRootNodes = calcNumRootNodes(childTView, childLView, childTView.firstChild);
+            }
+            serializedView = {
+                [TEMPLATE_ID]: template,
+                [NUM_ROOT_NODES]: numRootNodes,
+                ...serializeLView(lContainer[i], context),
+            };
         }
-        const view = {
-            [TEMPLATE_ID]: template,
-            [NUM_ROOT_NODES]: numRootNodes,
-            ...serializeLView(lContainer[i], context),
-        };
         // Check if the previous view has the same shape (for example, it was
         // produced by the *ngFor), in which case bump the counter on the previous
         // view instead of including the same information again.
-        const currentViewAsString = JSON.stringify(view);
+        const currentViewAsString = JSON.stringify(serializedView);
         if (views.length > 0 && currentViewAsString === lastViewAsString) {
             const previousView = views[views.length - 1];
             previousView[MULTIPLIER] ??= 1;
@@ -31803,7 +31838,7 @@ function serializeLContainer(lContainer, context) {
         else {
             // Record this view as most recently added.
             lastViewAsString = currentViewAsString;
-            views.push(view);
+            views.push(serializedView);
         }
     }
     return views;
