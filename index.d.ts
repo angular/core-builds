@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.1+sha-a610eb1
+ * @license Angular v17.0.0-next.1+sha-0b6aae8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1466,6 +1466,11 @@ declare interface ComponentDefinition<T> extends Omit<DirectiveDefinition<T>, 'f
     schemas?: SchemaMetadata[] | null;
 }
 
+/** Component dependencies info as calculated during runtime by the deps tracker. */
+declare interface ComponentDependencies {
+    dependencies: DependencyTypeList;
+}
+
 /**
  * Base class for a factory that can create a component dynamically.
  * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
@@ -2487,6 +2492,94 @@ declare type DependencyResolverFn = () => Array<Promise<DependencyType>>;
 declare type DependencyType = ɵDirectiveType<any> | ɵComponentType<any> | PipeType<any> | Type<any>;
 
 declare type DependencyTypeList = Array<DependencyType>;
+
+/**
+ * An implementation of DepsTrackerApi which will be used for JIT and local compilation.
+ */
+declare class DepsTracker implements DepsTrackerApi {
+    private ownerNgModule;
+    private ngModulesWithSomeUnresolvedDecls;
+    private ngModulesScopeCache;
+    private standaloneComponentsScopeCache;
+    /**
+     * Attempts to resolve ng module's forward ref declarations as much as possible and add them to
+     * the `ownerNgModule` map. This method normally should be called after the initial parsing when
+     * all the forward refs are resolved (e.g., when trying to render a component)
+     */
+    private resolveNgModulesDecls;
+    /** @override */
+    getComponentDependencies(type: ɵComponentType<any>, rawImports?: RawScopeInfoFromDecorator[]): ComponentDependencies;
+    /**
+     * @override
+     * This implementation does not make use of param scopeInfo since it assumes the scope info is
+     * already added to the type itself through methods like {@link ɵɵsetNgModuleScope}
+     */
+    registerNgModule(type: Type<any>, scopeInfo: NgModuleScopeInfoFromDecorator): void;
+    /** @override */
+    clearScopeCacheFor(type: Type<any>): void;
+    /** @override */
+    getNgModuleScope(type: ɵNgModuleType<any>): NgModuleScope;
+    /** Compute NgModule scope afresh. */
+    private computeNgModuleScope;
+    /** @override */
+    getStandaloneComponentScope(type: ɵComponentType<any>, rawImports?: RawScopeInfoFromDecorator[]): StandaloneComponentScope;
+    private computeStandaloneComponentScope;
+}
+
+/**
+ * Public API for runtime deps tracker (RDT).
+ *
+ * All downstream tools should only use these methods.
+ */
+declare interface DepsTrackerApi {
+    /**
+     * Computes the component dependencies, i.e., a set of components/directive/pipes that could be
+     * present in the component's template (This set might contain directives/components/pipes not
+     * necessarily used in the component's template depending on the implementation).
+     *
+     * Standalone components should specify `rawImports` as this information is not available from
+     * their type. The consumer (e.g., {@link getStandaloneDefFunctions}) is expected to pass this
+     * parameter.
+     *
+     * The implementation is expected to use some caching mechanism in order to optimize the resources
+     * needed to do this computation.
+     */
+    getComponentDependencies(cmp: ɵComponentType<any>, rawImports?: (Type<any> | (() => Type<any>))[]): ComponentDependencies;
+    /**
+     * Registers an NgModule into the tracker with the given scope info.
+     *
+     * This method should be called for every NgModule whether it is compiled in local mode or not.
+     * This is needed in order to compute component's dependencies as some dependencies might be in
+     * different compilation units with different compilation mode.
+     */
+    registerNgModule(type: Type<any>, scopeInfo: NgModuleScopeInfoFromDecorator): void;
+    /**
+     * Clears the scope cache for NgModule or standalone component. This will force re-calculation of
+     * the scope, which could be an expensive operation as it involves aggregating transitive closure.
+     *
+     * The main application of this method is for test beds where we want to clear the cache to
+     * enforce scope update after overriding.
+     */
+    clearScopeCacheFor(type: Type<any>): void;
+    /**
+     * Returns the scope of NgModule. Mainly to be used by JIT and test bed.
+     *
+     * The scope value here is memoized. To enforce a new calculation bust the cache by using
+     * `clearScopeCacheFor` method.
+     */
+    getNgModuleScope(type: ɵNgModuleType<any>): NgModuleScope;
+    /**
+     * Returns the scope of standalone component. Mainly to be used by JIT. This method should be
+     * called lazily after the initial parsing so that all the forward refs can be resolved.
+     *
+     * @param rawImports the imports statement as appears on the component decorate which consists of
+     *     Type as well as forward refs.
+     *
+     * The scope value here is memoized. To enforce a new calculation bust the cache by using
+     * `clearScopeCacheFor` method.
+     */
+    getStandaloneComponentScope(type: ɵComponentType<any>, rawImports: (Type<any> | (() => Type<any>))[]): StandaloneComponentScope;
+}
 
 declare const DESCENDANT_VIEWS_TO_REFRESH = 5;
 
@@ -6093,6 +6186,12 @@ export declare abstract class NgModuleRef<T> {
     abstract onDestroy(callback: () => void): void;
 }
 
+/** Represents scope data for NgModule as calculated during runtime by the deps tracker. */
+declare interface NgModuleScope {
+    compilation: ScopeData;
+    exported: ScopeData;
+}
+
 /**
  * NgModule scope info as provided by AoT compiler
  *
@@ -7815,90 +7914,6 @@ declare interface RText extends RNode {
  */
 export declare function runInInjectionContext<ReturnT>(injector: Injector, fn: () => ReturnT): ReturnT;
 
-
-/**
- * The list of error codes used in runtime code of the `core` package.
- * Reserved error code range: 100-999.
- *
- * Note: the minus sign denotes the fact that a particular code has a detailed guide on
- * angular.io. This extra annotation is needed to avoid introducing a separate set to store
- * error codes which have guides, which might leak into runtime code.
- *
- * Full list of available error guides can be found at https://angular.io/errors.
- *
- * Error code ranges per package:
- *  - core (this package): 100-999
- *  - forms: 1000-1999
- *  - common: 2000-2999
- *  - animations: 3000-3999
- *  - router: 4000-4999
- *  - platform-browser: 5000-5500
- */
-declare const enum RuntimeErrorCode {
-    EXPRESSION_CHANGED_AFTER_CHECKED = -100,
-    RECURSIVE_APPLICATION_REF_TICK = 101,
-    RECURSIVE_APPLICATION_RENDER = 102,
-    CYCLIC_DI_DEPENDENCY = -200,
-    PROVIDER_NOT_FOUND = -201,
-    INVALID_FACTORY_DEPENDENCY = 202,
-    MISSING_INJECTION_CONTEXT = -203,
-    INVALID_INJECTION_TOKEN = 204,
-    INJECTOR_ALREADY_DESTROYED = 205,
-    PROVIDER_IN_WRONG_CONTEXT = 207,
-    MISSING_INJECTION_TOKEN = 208,
-    INVALID_MULTI_PROVIDER = -209,
-    MISSING_DOCUMENT = 210,
-    MULTIPLE_COMPONENTS_MATCH = -300,
-    EXPORT_NOT_FOUND = -301,
-    PIPE_NOT_FOUND = -302,
-    UNKNOWN_BINDING = 303,
-    UNKNOWN_ELEMENT = 304,
-    TEMPLATE_STRUCTURE_ERROR = 305,
-    INVALID_EVENT_BINDING = 306,
-    HOST_DIRECTIVE_UNRESOLVABLE = 307,
-    HOST_DIRECTIVE_NOT_STANDALONE = 308,
-    DUPLICATE_DIRECTITVE = 309,
-    HOST_DIRECTIVE_COMPONENT = 310,
-    HOST_DIRECTIVE_UNDEFINED_BINDING = 311,
-    HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
-    MULTIPLE_MATCHING_PIPES = 313,
-    MULTIPLE_PLATFORMS = 400,
-    PLATFORM_NOT_FOUND = 401,
-    MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
-    BOOTSTRAP_COMPONENTS_NOT_FOUND = -403,
-    PLATFORM_ALREADY_DESTROYED = 404,
-    ASYNC_INITIALIZERS_STILL_RUNNING = 405,
-    APPLICATION_REF_ALREADY_DESTROYED = 406,
-    RENDERER_NOT_FOUND = 407,
-    HYDRATION_NODE_MISMATCH = -500,
-    HYDRATION_MISSING_SIBLINGS = -501,
-    HYDRATION_MISSING_NODE = -502,
-    UNSUPPORTED_PROJECTION_DOM_NODES = -503,
-    INVALID_SKIP_HYDRATION_HOST = -504,
-    MISSING_HYDRATION_ANNOTATIONS = -505,
-    HYDRATION_STABLE_TIMEDOUT = -506,
-    MISSING_SSR_CONTENT_INTEGRITY_MARKER = -507,
-    SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
-    REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
-    INVALID_I18N_STRUCTURE = 700,
-    MISSING_LOCALE_DATA = 701,
-    IMPORT_PROVIDERS_FROM_STANDALONE = 800,
-    INVALID_DIFFER_INPUT = 900,
-    NO_SUPPORTING_DIFFER_FACTORY = 901,
-    VIEW_ALREADY_ATTACHED = 902,
-    INVALID_INHERITANCE = 903,
-    UNSAFE_VALUE_IN_RESOURCE_URL = 904,
-    UNSAFE_VALUE_IN_SCRIPT = 905,
-    MISSING_GENERATED_DEF = 906,
-    TYPE_IS_NOT_STANDALONE = 907,
-    MISSING_ZONEJS = 908,
-    UNEXPECTED_ZONE_STATE = 909,
-    UNSAFE_IFRAME_ATTRS = -910,
-    VIEW_ALREADY_DESTROYED = 911,
-    COMPONENT_ID_COLLISION = -912,
-    RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000
-}
-
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
@@ -7929,6 +7944,24 @@ declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => 
  */
 export declare interface SchemaMetadata {
     name: string;
+}
+
+/**
+ * Represents the set of dependencies of a type in a certain context.
+ */
+declare interface ScopeData {
+    pipes: Set<PipeType<any>>;
+    directives: Set<ɵDirectiveType<any> | ɵComponentType<any> | Type<any>>;
+    /**
+     * If true it indicates that calculating this scope somehow was not successful. The consumers
+     * should interpret this as empty dependencies. The application of this flag is when calculating
+     * scope recursively, the presence of this flag in a scope dependency implies that the scope is
+     * also poisoned and thus we can return immediately without having to continue the recursion. The
+     * reason for this error is displayed as an error message in the console as per JIT behavior
+     * today. In addition to that, in local compilation the other build/compilations run in parallel
+     * with local compilation may or may not reveal some details about the error as well.
+     */
+    isPoisoned?: boolean;
 }
 
 
@@ -8200,6 +8233,13 @@ export declare interface SkipSelfDecorator {
      */
     (): any;
     new (): SkipSelf;
+}
+
+/**
+ * Represents scope data for standalone component as calculated during runtime by the deps tracker.
+ */
+declare interface StandaloneComponentScope {
+    compilation: ScopeData;
 }
 
 
@@ -10973,6 +11013,9 @@ export declare interface ɵDeferBlockDependencyInterceptor {
     setInterceptor(interceptorFn: (current: DependencyResolverFn) => DependencyResolverFn): void;
 }
 
+/** The deps tracker to be used in the current Angular app in dev mode. */
+export declare const ɵdepsTracker: DepsTracker;
+
 /**
  * Synchronously perform change detection on a component (and possibly its sub-components).
  *
@@ -11178,7 +11221,15 @@ export declare function ɵflushModuleScopingQueueAsMuchAsPossible(): void;
  * Called to format a runtime error.
  * See additional info on the `message` argument type in the `RuntimeError` class description.
  */
-export declare function ɵformatRuntimeError<T extends number = RuntimeErrorCode>(code: T, message: null | false | string): string;
+export declare function ɵformatRuntimeError<T extends number = ɵRuntimeErrorCode>(code: T, message: null | false | string): string;
+
+export declare function ɵgenerateStandaloneInDeclarationsError(type: Type<any>, location: string): string;
+
+/**
+ * If a given component has unresolved async metadata - this function returns a reference to
+ * a Promise that represents dependency loading. Otherwise - this function returns `null`.
+ */
+export declare function ɵgetAsyncClassMetadata(type: Type<unknown>): Promise<Array<Type<unknown>>> | null;
 
 /**
  * Retrieves directive instances associated with a given DOM node. Does not include
@@ -11368,6 +11419,8 @@ export declare interface ɵInternalEnvironmentProviders extends EnvironmentProvi
 export declare const ɵIS_HYDRATION_DOM_REUSE_ENABLED: InjectionToken<boolean>;
 
 export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
+
+export declare function ɵisComponentDefPendingResolution(type: Type<any>): boolean;
 
 export declare function ɵisEnvironmentProviders(value: Provider | EnvironmentProviders | ɵInternalEnvironmentProviders): value is ɵInternalEnvironmentProviders;
 
@@ -11872,6 +11925,8 @@ export declare function ɵresolveComponentResources(resourceResolver: (url: stri
     text(): Promise<string>;
 }>)): Promise<void>;
 
+export declare function ɵrestoreComponentResolutionQueue(queue: Map<Type<any>, Component>): void;
+
 /**
  * Class that represents a runtime error.
  * Formats and outputs the error message in a consistent way.
@@ -11888,9 +11943,93 @@ export declare function ɵresolveComponentResources(resourceResolver: (url: stri
  * `message` argument becomes `false`, thus we account for it in the typings and the runtime
  * logic.
  */
-export declare class ɵRuntimeError<T extends number = RuntimeErrorCode> extends Error {
+export declare class ɵRuntimeError<T extends number = ɵRuntimeErrorCode> extends Error {
     code: T;
     constructor(code: T, message: null | false | string);
+}
+
+
+/**
+ * The list of error codes used in runtime code of the `core` package.
+ * Reserved error code range: 100-999.
+ *
+ * Note: the minus sign denotes the fact that a particular code has a detailed guide on
+ * angular.io. This extra annotation is needed to avoid introducing a separate set to store
+ * error codes which have guides, which might leak into runtime code.
+ *
+ * Full list of available error guides can be found at https://angular.io/errors.
+ *
+ * Error code ranges per package:
+ *  - core (this package): 100-999
+ *  - forms: 1000-1999
+ *  - common: 2000-2999
+ *  - animations: 3000-3999
+ *  - router: 4000-4999
+ *  - platform-browser: 5000-5500
+ */
+export declare const enum ɵRuntimeErrorCode {
+    EXPRESSION_CHANGED_AFTER_CHECKED = -100,
+    RECURSIVE_APPLICATION_REF_TICK = 101,
+    RECURSIVE_APPLICATION_RENDER = 102,
+    CYCLIC_DI_DEPENDENCY = -200,
+    PROVIDER_NOT_FOUND = -201,
+    INVALID_FACTORY_DEPENDENCY = 202,
+    MISSING_INJECTION_CONTEXT = -203,
+    INVALID_INJECTION_TOKEN = 204,
+    INJECTOR_ALREADY_DESTROYED = 205,
+    PROVIDER_IN_WRONG_CONTEXT = 207,
+    MISSING_INJECTION_TOKEN = 208,
+    INVALID_MULTI_PROVIDER = -209,
+    MISSING_DOCUMENT = 210,
+    MULTIPLE_COMPONENTS_MATCH = -300,
+    EXPORT_NOT_FOUND = -301,
+    PIPE_NOT_FOUND = -302,
+    UNKNOWN_BINDING = 303,
+    UNKNOWN_ELEMENT = 304,
+    TEMPLATE_STRUCTURE_ERROR = 305,
+    INVALID_EVENT_BINDING = 306,
+    HOST_DIRECTIVE_UNRESOLVABLE = 307,
+    HOST_DIRECTIVE_NOT_STANDALONE = 308,
+    DUPLICATE_DIRECTITVE = 309,
+    HOST_DIRECTIVE_COMPONENT = 310,
+    HOST_DIRECTIVE_UNDEFINED_BINDING = 311,
+    HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
+    MULTIPLE_MATCHING_PIPES = 313,
+    MULTIPLE_PLATFORMS = 400,
+    PLATFORM_NOT_FOUND = 401,
+    MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
+    BOOTSTRAP_COMPONENTS_NOT_FOUND = -403,
+    PLATFORM_ALREADY_DESTROYED = 404,
+    ASYNC_INITIALIZERS_STILL_RUNNING = 405,
+    APPLICATION_REF_ALREADY_DESTROYED = 406,
+    RENDERER_NOT_FOUND = 407,
+    HYDRATION_NODE_MISMATCH = -500,
+    HYDRATION_MISSING_SIBLINGS = -501,
+    HYDRATION_MISSING_NODE = -502,
+    UNSUPPORTED_PROJECTION_DOM_NODES = -503,
+    INVALID_SKIP_HYDRATION_HOST = -504,
+    MISSING_HYDRATION_ANNOTATIONS = -505,
+    HYDRATION_STABLE_TIMEDOUT = -506,
+    MISSING_SSR_CONTENT_INTEGRITY_MARKER = -507,
+    SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
+    REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
+    INVALID_I18N_STRUCTURE = 700,
+    MISSING_LOCALE_DATA = 701,
+    IMPORT_PROVIDERS_FROM_STANDALONE = 800,
+    INVALID_DIFFER_INPUT = 900,
+    NO_SUPPORTING_DIFFER_FACTORY = 901,
+    VIEW_ALREADY_ATTACHED = 902,
+    INVALID_INHERITANCE = 903,
+    UNSAFE_VALUE_IN_RESOURCE_URL = 904,
+    UNSAFE_VALUE_IN_SCRIPT = 905,
+    MISSING_GENERATED_DEF = 906,
+    TYPE_IS_NOT_STANDALONE = 907,
+    MISSING_ZONEJS = 908,
+    UNEXPECTED_ZONE_STATE = 909,
+    UNSAFE_IFRAME_ATTRS = -910,
+    VIEW_ALREADY_DESTROYED = 911,
+    COMPONENT_ID_COLLISION = -912,
+    RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000
 }
 
 /**
@@ -12054,6 +12193,15 @@ export declare function ɵunregisterLocaleData(): void;
 export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
 
 export declare function ɵunwrapSafeValue<T>(value: T): T;
+
+/**
+ * Indicates whether to use the runtime dependency tracker for scope calculation in JIT compilation.
+ * The value "false" means the old code path based on patching scope info into the types will be
+ * used.
+ *
+ * @deprecated For migration purposes only, to be removed soon.
+ */
+export declare const ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT = false;
 
 export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef, ChangeDetectorRefInterface {
     /**
