@@ -1,12 +1,13 @@
 /**
- * @license Angular v16.2.2+sha-20d6260
+ * @license Angular v16.2.2+sha-0c7c852
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, provideZoneChangeDetection, Compiler, COMPILER_OPTIONS, Injector as Injector$1, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, EnvironmentInjector as EnvironmentInjector$1, NgZone, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode, RendererFactory2 as RendererFactory2$1, InjectionToken as InjectionToken$1, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetInjectableDef, resolveForwardRef as resolveForwardRef$1, ɵNG_COMP_DEF, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID as LOCALE_ID$1, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, provideZoneChangeDetection, Compiler, COMPILER_OPTIONS, Injector as Injector$1, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags as InjectFlags$1, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode as ɵsetUnknownElementStrictMode$1, ɵsetUnknownPropertyStrictMode as ɵsetUnknownPropertyStrictMode$1, ɵgetUnknownElementStrictMode as ɵgetUnknownElementStrictMode$1, ɵgetUnknownPropertyStrictMode as ɵgetUnknownPropertyStrictMode$1, EnvironmentInjector as EnvironmentInjector$1, NgZone as NgZone$1, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, Observable, merge as merge$1 } from 'rxjs';
+import { share } from 'rxjs/operators';
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -10939,7 +10940,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.2+sha-20d6260');
+const VERSION = new Version('16.2.2+sha-0c7c852');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10994,6 +10995,562 @@ function injectDestroyRef() {
     return new NodeInjectorDestroyRef(getLView());
 }
 
+/// <reference types="rxjs" />
+class EventEmitter_ extends Subject {
+    constructor(isAsync = false) {
+        super();
+        this.__isAsync = isAsync;
+    }
+    emit(value) {
+        super.next(value);
+    }
+    subscribe(observerOrNext, error, complete) {
+        let nextFn = observerOrNext;
+        let errorFn = error || (() => null);
+        let completeFn = complete;
+        if (observerOrNext && typeof observerOrNext === 'object') {
+            const observer = observerOrNext;
+            nextFn = observer.next?.bind(observer);
+            errorFn = observer.error?.bind(observer);
+            completeFn = observer.complete?.bind(observer);
+        }
+        if (this.__isAsync) {
+            errorFn = _wrapInTimeout(errorFn);
+            if (nextFn) {
+                nextFn = _wrapInTimeout(nextFn);
+            }
+            if (completeFn) {
+                completeFn = _wrapInTimeout(completeFn);
+            }
+        }
+        const sink = super.subscribe({ next: nextFn, error: errorFn, complete: completeFn });
+        if (observerOrNext instanceof Subscription) {
+            observerOrNext.add(sink);
+        }
+        return sink;
+    }
+}
+function _wrapInTimeout(fn) {
+    return (value) => {
+        setTimeout(fn, undefined, value);
+    };
+}
+/**
+ * @publicApi
+ */
+const EventEmitter = EventEmitter_;
+
+function noop(...args) {
+    // Do nothing.
+}
+
+function getNativeRequestAnimationFrame() {
+    // Note: the `getNativeRequestAnimationFrame` is used in the `NgZone` class, but we cannot use the
+    // `inject` function. The `NgZone` instance may be created manually, and thus the injection
+    // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
+    // available because otherwise, we'll fall back to `setTimeout`.
+    const isBrowser = typeof _global['requestAnimationFrame'] === 'function';
+    // Note: `requestAnimationFrame` is unavailable when the code runs in the Node.js environment. We
+    // use `setTimeout` because no changes are required other than checking if the current platform is
+    // the browser. `setTimeout` is a well-established API that is available in both environments.
+    // `requestAnimationFrame` is used in the browser to coalesce event tasks since event tasks are
+    // usually executed within the same rendering frame (but this is more implementation details of
+    // browsers).
+    let nativeRequestAnimationFrame = _global[isBrowser ? 'requestAnimationFrame' : 'setTimeout'];
+    let nativeCancelAnimationFrame = _global[isBrowser ? 'cancelAnimationFrame' : 'clearTimeout'];
+    if (typeof Zone !== 'undefined' && nativeRequestAnimationFrame && nativeCancelAnimationFrame) {
+        // Note: zone.js sets original implementations on patched APIs behind the
+        // `__zone_symbol__OriginalDelegate` key (see `attachOriginToPatched`). Given the following
+        // example: `window.requestAnimationFrame.__zone_symbol__OriginalDelegate`; this would return an
+        // unpatched implementation of the `requestAnimationFrame`, which isn't intercepted by the
+        // Angular zone. We use the unpatched implementation to avoid another change detection when
+        // coalescing tasks.
+        const unpatchedRequestAnimationFrame = nativeRequestAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+        if (unpatchedRequestAnimationFrame) {
+            nativeRequestAnimationFrame = unpatchedRequestAnimationFrame;
+        }
+        const unpatchedCancelAnimationFrame = nativeCancelAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+        if (unpatchedCancelAnimationFrame) {
+            nativeCancelAnimationFrame = unpatchedCancelAnimationFrame;
+        }
+    }
+    return { nativeRequestAnimationFrame, nativeCancelAnimationFrame };
+}
+
+class AsyncStackTaggingZoneSpec {
+    constructor(namePrefix, consoleAsyncStackTaggingImpl = console) {
+        this.name = 'asyncStackTagging for ' + namePrefix;
+        this.createTask = consoleAsyncStackTaggingImpl?.createTask ?? (() => null);
+    }
+    onScheduleTask(delegate, _current, target, task) {
+        task.consoleTask = this.createTask(`Zone - ${task.source || task.type}`);
+        return delegate.scheduleTask(target, task);
+    }
+    onInvokeTask(delegate, _currentZone, targetZone, task, applyThis, applyArgs) {
+        let ret;
+        if (task.consoleTask) {
+            ret = task.consoleTask.run(() => delegate.invokeTask(targetZone, task, applyThis, applyArgs));
+        }
+        else {
+            ret = delegate.invokeTask(targetZone, task, applyThis, applyArgs);
+        }
+        return ret;
+    }
+}
+
+/**
+ * An injectable service for executing work inside or outside of the Angular zone.
+ *
+ * The most common use of this service is to optimize performance when starting a work consisting of
+ * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
+ * Angular. Such tasks can be kicked off via {@link #runOutsideAngular} and if needed, these tasks
+ * can reenter the Angular zone via {@link #run}.
+ *
+ * <!-- TODO: add/fix links to:
+ *   - docs explaining zones and the use of zones in Angular and change-detection
+ *   - link to runOutsideAngular/run (throughout this file!)
+ *   -->
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```
+ * import {Component, NgZone} from '@angular/core';
+ * import {NgIf} from '@angular/common';
+ *
+ * @Component({
+ *   selector: 'ng-zone-demo',
+ *   template: `
+ *     <h2>Demo: NgZone</h2>
+ *
+ *     <p>Progress: {{progress}}%</p>
+ *     <p *ngIf="progress >= 100">Done processing {{label}} of Angular zone!</p>
+ *
+ *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
+ *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
+ *   `,
+ * })
+ * export class NgZoneDemo {
+ *   progress: number = 0;
+ *   label: string;
+ *
+ *   constructor(private _ngZone: NgZone) {}
+ *
+ *   // Loop inside the Angular zone
+ *   // so the UI DOES refresh after each setTimeout cycle
+ *   processWithinAngularZone() {
+ *     this.label = 'inside';
+ *     this.progress = 0;
+ *     this._increaseProgress(() => console.log('Inside Done!'));
+ *   }
+ *
+ *   // Loop outside of the Angular zone
+ *   // so the UI DOES NOT refresh after each setTimeout cycle
+ *   processOutsideOfAngularZone() {
+ *     this.label = 'outside';
+ *     this.progress = 0;
+ *     this._ngZone.runOutsideAngular(() => {
+ *       this._increaseProgress(() => {
+ *         // reenter the Angular zone and display done
+ *         this._ngZone.run(() => { console.log('Outside Done!'); });
+ *       });
+ *     });
+ *   }
+ *
+ *   _increaseProgress(doneCallback: () => void) {
+ *     this.progress += 1;
+ *     console.log(`Current progress: ${this.progress}%`);
+ *
+ *     if (this.progress < 100) {
+ *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
+ *     } else {
+ *       doneCallback();
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @publicApi
+ */
+class NgZone {
+    constructor({ enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false }) {
+        this.hasPendingMacrotasks = false;
+        this.hasPendingMicrotasks = false;
+        /**
+         * Whether there are no outstanding microtasks or macrotasks.
+         */
+        this.isStable = true;
+        /**
+         * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+         */
+        this.onUnstable = new EventEmitter(false);
+        /**
+         * Notifies when there is no more microtasks enqueued in the current VM Turn.
+         * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+         * For this reason this event can fire multiple times per VM Turn.
+         */
+        this.onMicrotaskEmpty = new EventEmitter(false);
+        /**
+         * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+         * implies we are about to relinquish VM turn.
+         * This event gets called just once.
+         */
+        this.onStable = new EventEmitter(false);
+        /**
+         * Notifies that an error has been delivered.
+         */
+        this.onError = new EventEmitter(false);
+        if (typeof Zone == 'undefined') {
+            throw new RuntimeError(908 /* RuntimeErrorCode.MISSING_ZONEJS */, ngDevMode && `In this configuration Angular requires Zone.js`);
+        }
+        Zone.assertZonePatched();
+        const self = this;
+        self._nesting = 0;
+        self._outer = self._inner = Zone.current;
+        // AsyncStackTaggingZoneSpec provides `linked stack traces` to show
+        // where the async operation is scheduled. For more details, refer
+        // to this article, https://developer.chrome.com/blog/devtools-better-angular-debugging/
+        // And we only import this AsyncStackTaggingZoneSpec in development mode,
+        // in the production mode, the AsyncStackTaggingZoneSpec will be tree shaken away.
+        if (ngDevMode) {
+            self._inner = self._inner.fork(new AsyncStackTaggingZoneSpec('Angular'));
+        }
+        if (Zone['TaskTrackingZoneSpec']) {
+            self._inner = self._inner.fork(new Zone['TaskTrackingZoneSpec']);
+        }
+        if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
+            self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
+        }
+        // if shouldCoalesceRunChangeDetection is true, all tasks including event tasks will be
+        // coalesced, so shouldCoalesceEventChangeDetection option is not necessary and can be skipped.
+        self.shouldCoalesceEventChangeDetection =
+            !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
+        self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
+        self.lastRequestAnimationFrameId = -1;
+        self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
+        forkInnerZoneWithAngularBehavior(self);
+    }
+    /**
+      This method checks whether the method call happens within an Angular Zone instance.
+    */
+    static isInAngularZone() {
+        // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
+        return typeof Zone !== 'undefined' && Zone.current.get('isAngularZone') === true;
+    }
+    /**
+      Assures that the method is called within the Angular Zone, otherwise throws an error.
+    */
+    static assertInAngularZone() {
+        if (!NgZone.isInAngularZone()) {
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
+        }
+    }
+    /**
+      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+    */
+    static assertNotInAngularZone() {
+        if (NgZone.isInAngularZone()) {
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
+        }
+    }
+    /**
+     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    run(fn, applyThis, applyArgs) {
+        return this._inner.run(fn, applyThis, applyArgs);
+    }
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    runTask(fn, applyThis, applyArgs, name) {
+        const zone = this._inner;
+        const task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop, noop);
+        try {
+            return zone.runTask(task, applyThis, applyArgs);
+        }
+        finally {
+            zone.cancelTask(task);
+        }
+    }
+    /**
+     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
+     * rethrown.
+     */
+    runGuarded(fn, applyThis, applyArgs) {
+        return this._inner.runGuarded(fn, applyThis, applyArgs);
+    }
+    /**
+     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
+     * the function.
+     *
+     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
+     * work that
+     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * outside of the Angular zone.
+     *
+     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
+     */
+    runOutsideAngular(fn) {
+        return this._outer.run(fn);
+    }
+}
+const EMPTY_PAYLOAD = {};
+function checkStable(zone) {
+    // TODO: @JiaLiPassion, should check zone.isCheckStableRunning to prevent
+    // re-entry. The case is:
+    //
+    // @Component({...})
+    // export class AppComponent {
+    // constructor(private ngZone: NgZone) {
+    //   this.ngZone.onStable.subscribe(() => {
+    //     this.ngZone.run(() => console.log('stable'););
+    //   });
+    // }
+    //
+    // The onStable subscriber run another function inside ngZone
+    // which causes `checkStable()` re-entry.
+    // But this fix causes some issues in g3, so this fix will be
+    // launched in another PR.
+    if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
+        try {
+            zone._nesting++;
+            zone.onMicrotaskEmpty.emit(null);
+        }
+        finally {
+            zone._nesting--;
+            if (!zone.hasPendingMicrotasks) {
+                try {
+                    zone.runOutsideAngular(() => zone.onStable.emit(null));
+                }
+                finally {
+                    zone.isStable = true;
+                }
+            }
+        }
+    }
+}
+function delayChangeDetectionForEvents(zone) {
+    /**
+     * We also need to check _nesting here
+     * Consider the following case with shouldCoalesceRunChangeDetection = true
+     *
+     * ngZone.run(() => {});
+     * ngZone.run(() => {});
+     *
+     * We want the two `ngZone.run()` only trigger one change detection
+     * when shouldCoalesceRunChangeDetection is true.
+     * And because in this case, change detection run in async way(requestAnimationFrame),
+     * so we also need to check the _nesting here to prevent multiple
+     * change detections.
+     */
+    if (zone.isCheckStableRunning || zone.lastRequestAnimationFrameId !== -1) {
+        return;
+    }
+    zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, () => {
+        // This is a work around for https://github.com/angular/angular/issues/36839.
+        // The core issue is that when event coalescing is enabled it is possible for microtasks
+        // to get flushed too early (As is the case with `Promise.then`) between the
+        // coalescing eventTasks.
+        //
+        // To workaround this we schedule a "fake" eventTask before we process the
+        // coalescing eventTasks. The benefit of this is that the "fake" container eventTask
+        //  will prevent the microtasks queue from getting drained in between the coalescing
+        // eventTask execution.
+        if (!zone.fakeTopEventTask) {
+            zone.fakeTopEventTask = Zone.root.scheduleEventTask('fakeTopEventTask', () => {
+                zone.lastRequestAnimationFrameId = -1;
+                updateMicroTaskStatus(zone);
+                zone.isCheckStableRunning = true;
+                checkStable(zone);
+                zone.isCheckStableRunning = false;
+            }, undefined, () => { }, () => { });
+        }
+        zone.fakeTopEventTask.invoke();
+    });
+    updateMicroTaskStatus(zone);
+}
+function forkInnerZoneWithAngularBehavior(zone) {
+    const delayChangeDetectionForEventsDelegate = () => {
+        delayChangeDetectionForEvents(zone);
+    };
+    zone._inner = zone._inner.fork({
+        name: 'angular',
+        properties: { 'isAngularZone': true },
+        onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
+            try {
+                onEnter(zone);
+                return delegate.invokeTask(target, task, applyThis, applyArgs);
+            }
+            finally {
+                if ((zone.shouldCoalesceEventChangeDetection && task.type === 'eventTask') ||
+                    zone.shouldCoalesceRunChangeDetection) {
+                    delayChangeDetectionForEventsDelegate();
+                }
+                onLeave(zone);
+            }
+        },
+        onInvoke: (delegate, current, target, callback, applyThis, applyArgs, source) => {
+            try {
+                onEnter(zone);
+                return delegate.invoke(target, callback, applyThis, applyArgs, source);
+            }
+            finally {
+                if (zone.shouldCoalesceRunChangeDetection) {
+                    delayChangeDetectionForEventsDelegate();
+                }
+                onLeave(zone);
+            }
+        },
+        onHasTask: (delegate, current, target, hasTaskState) => {
+            delegate.hasTask(target, hasTaskState);
+            if (current === target) {
+                // We are only interested in hasTask events which originate from our zone
+                // (A child hasTask event is not interesting to us)
+                if (hasTaskState.change == 'microTask') {
+                    zone._hasPendingMicrotasks = hasTaskState.microTask;
+                    updateMicroTaskStatus(zone);
+                    checkStable(zone);
+                }
+                else if (hasTaskState.change == 'macroTask') {
+                    zone.hasPendingMacrotasks = hasTaskState.macroTask;
+                }
+            }
+        },
+        onHandleError: (delegate, current, target, error) => {
+            delegate.handleError(target, error);
+            zone.runOutsideAngular(() => zone.onError.emit(error));
+            return false;
+        }
+    });
+}
+function updateMicroTaskStatus(zone) {
+    if (zone._hasPendingMicrotasks ||
+        ((zone.shouldCoalesceEventChangeDetection || zone.shouldCoalesceRunChangeDetection) &&
+            zone.lastRequestAnimationFrameId !== -1)) {
+        zone.hasPendingMicrotasks = true;
+    }
+    else {
+        zone.hasPendingMicrotasks = false;
+    }
+}
+function onEnter(zone) {
+    zone._nesting++;
+    if (zone.isStable) {
+        zone.isStable = false;
+        zone.onUnstable.emit(null);
+    }
+}
+function onLeave(zone) {
+    zone._nesting--;
+    checkStable(zone);
+}
+/**
+ * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
+ * to framework to perform rendering.
+ */
+class NoopNgZone {
+    constructor() {
+        this.hasPendingMicrotasks = false;
+        this.hasPendingMacrotasks = false;
+        this.isStable = true;
+        this.onUnstable = new EventEmitter();
+        this.onMicrotaskEmpty = new EventEmitter();
+        this.onStable = new EventEmitter();
+        this.onError = new EventEmitter();
+    }
+    run(fn, applyThis, applyArgs) {
+        return fn.apply(applyThis, applyArgs);
+    }
+    runGuarded(fn, applyThis, applyArgs) {
+        return fn.apply(applyThis, applyArgs);
+    }
+    runOutsideAngular(fn) {
+        return fn();
+    }
+    runTask(fn, applyThis, applyArgs, name) {
+        return fn.apply(applyThis, applyArgs);
+    }
+}
+/**
+ * Token used to drive ApplicationRef.isStable
+ *
+ * TODO: This should be moved entirely to NgZone (as a breaking change) so it can be tree-shakeable
+ * for `NoopNgZone` which is always just an `Observable` of `true`. Additionally, we should consider
+ * whether the property on `NgZone` should be `Observable` or `Signal`.
+ */
+const ZONE_IS_STABLE_OBSERVABLE = new InjectionToken(ngDevMode ? 'isStable Observable' : '', {
+    providedIn: 'root',
+    // TODO(atscott): Replace this with a suitable default like `new
+    // BehaviorSubject(true).asObservable`. Again, long term this won't exist on ApplicationRef at
+    // all but until we can remove it, we need a default value zoneless.
+    factory: isStableFactory,
+});
+function isStableFactory() {
+    const zone = inject$1(NgZone);
+    let _stable = true;
+    const isCurrentlyStable = new Observable((observer) => {
+        _stable = zone.isStable && !zone.hasPendingMacrotasks && !zone.hasPendingMicrotasks;
+        zone.runOutsideAngular(() => {
+            observer.next(_stable);
+            observer.complete();
+        });
+    });
+    const isStable = new Observable((observer) => {
+        // Create the subscription to onStable outside the Angular Zone so that
+        // the callback is run outside the Angular Zone.
+        let stableSub;
+        zone.runOutsideAngular(() => {
+            stableSub = zone.onStable.subscribe(() => {
+                NgZone.assertNotInAngularZone();
+                // Check whether there are no pending macro/micro tasks in the next tick
+                // to allow for NgZone to update the state.
+                queueMicrotask(() => {
+                    if (!_stable && !zone.hasPendingMacrotasks && !zone.hasPendingMicrotasks) {
+                        _stable = true;
+                        observer.next(true);
+                    }
+                });
+            });
+        });
+        const unstableSub = zone.onUnstable.subscribe(() => {
+            NgZone.assertInAngularZone();
+            if (_stable) {
+                _stable = false;
+                zone.runOutsideAngular(() => {
+                    observer.next(false);
+                });
+            }
+        });
+        return () => {
+            stableSub.unsubscribe();
+            unstableSub.unsubscribe();
+        };
+    });
+    return merge$1(isCurrentlyStable, isStable.pipe(share()));
+}
+
+// Public API for Zone
+
 /**
  * Register a callback to be invoked each time the application
  * finishes rendering.
@@ -11044,7 +11601,8 @@ function afterRender(callback, options) {
     let destroy;
     const unregisterFn = injector.get(DestroyRef).onDestroy(() => destroy?.());
     const manager = injector.get(AfterRenderEventManager);
-    const instance = new AfterRenderCallback(callback);
+    const ngZone = injector.get(NgZone);
+    const instance = new AfterRenderCallback(() => ngZone.runOutsideAngular(callback));
     destroy = () => {
         manager.unregister(instance);
         unregisterFn();
@@ -11103,9 +11661,10 @@ function afterNextRender(callback, options) {
     let destroy;
     const unregisterFn = injector.get(DestroyRef).onDestroy(() => destroy?.());
     const manager = injector.get(AfterRenderEventManager);
+    const ngZone = injector.get(NgZone);
     const instance = new AfterRenderCallback(() => {
         destroy?.();
-        callback();
+        ngZone.runOutsideAngular(callback);
     });
     destroy = () => {
         manager.unregister(instance);
@@ -23558,51 +24117,6 @@ function isPure(lView, index) {
     return lView[TVIEW].data[index].pure;
 }
 
-/// <reference types="rxjs" />
-class EventEmitter_ extends Subject {
-    constructor(isAsync = false) {
-        super();
-        this.__isAsync = isAsync;
-    }
-    emit(value) {
-        super.next(value);
-    }
-    subscribe(observerOrNext, error, complete) {
-        let nextFn = observerOrNext;
-        let errorFn = error || (() => null);
-        let completeFn = complete;
-        if (observerOrNext && typeof observerOrNext === 'object') {
-            const observer = observerOrNext;
-            nextFn = observer.next?.bind(observer);
-            errorFn = observer.error?.bind(observer);
-            completeFn = observer.complete?.bind(observer);
-        }
-        if (this.__isAsync) {
-            errorFn = _wrapInTimeout(errorFn);
-            if (nextFn) {
-                nextFn = _wrapInTimeout(nextFn);
-            }
-            if (completeFn) {
-                completeFn = _wrapInTimeout(completeFn);
-            }
-        }
-        const sink = super.subscribe({ next: nextFn, error: errorFn, complete: completeFn });
-        if (observerOrNext instanceof Subscription) {
-            observerOrNext.add(sink);
-        }
-        return sink;
-    }
-}
-function _wrapInTimeout(fn) {
-    return (value) => {
-        setTimeout(fn, undefined, value);
-    };
-}
-/**
- * @publicApi
- */
-const EventEmitter = EventEmitter_;
-
 function symbolIterator() {
     // @ts-expect-error accessing a private member
     return this._results[Symbol.iterator]();
@@ -26906,7 +27420,7 @@ class TestBedImpl {
         }
         const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
         const autoDetect = this.inject(ComponentFixtureAutoDetect, false);
-        const ngZone = noNgZone ? null : this.inject(NgZone, null);
+        const ngZone = noNgZone ? null : this.inject(NgZone$1, null);
         const componentFactory = new ɵRender3ComponentFactory(componentDef);
         const initComponent = () => {
             const componentRef = componentFactory.create(Injector$1.NULL, [], `#${rootElId}`, this.testModuleRef);
