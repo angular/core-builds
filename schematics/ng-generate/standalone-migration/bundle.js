@@ -7869,26 +7869,27 @@ var OpKind;
   OpKind2[OpKind2["Container"] = 8] = "Container";
   OpKind2[OpKind2["ContainerEnd"] = 9] = "ContainerEnd";
   OpKind2[OpKind2["DisableBindings"] = 10] = "DisableBindings";
-  OpKind2[OpKind2["EnableBindings"] = 11] = "EnableBindings";
-  OpKind2[OpKind2["Text"] = 12] = "Text";
-  OpKind2[OpKind2["Listener"] = 13] = "Listener";
-  OpKind2[OpKind2["InterpolateText"] = 14] = "InterpolateText";
-  OpKind2[OpKind2["Binding"] = 15] = "Binding";
-  OpKind2[OpKind2["Property"] = 16] = "Property";
-  OpKind2[OpKind2["StyleProp"] = 17] = "StyleProp";
-  OpKind2[OpKind2["ClassProp"] = 18] = "ClassProp";
-  OpKind2[OpKind2["StyleMap"] = 19] = "StyleMap";
-  OpKind2[OpKind2["ClassMap"] = 20] = "ClassMap";
-  OpKind2[OpKind2["Advance"] = 21] = "Advance";
-  OpKind2[OpKind2["Pipe"] = 22] = "Pipe";
-  OpKind2[OpKind2["Attribute"] = 23] = "Attribute";
-  OpKind2[OpKind2["ExtractedAttribute"] = 24] = "ExtractedAttribute";
-  OpKind2[OpKind2["ExtractedMessage"] = 25] = "ExtractedMessage";
-  OpKind2[OpKind2["HostProperty"] = 26] = "HostProperty";
-  OpKind2[OpKind2["Namespace"] = 27] = "Namespace";
-  OpKind2[OpKind2["I18nStart"] = 28] = "I18nStart";
-  OpKind2[OpKind2["I18n"] = 29] = "I18n";
-  OpKind2[OpKind2["I18nEnd"] = 30] = "I18nEnd";
+  OpKind2[OpKind2["Conditional"] = 11] = "Conditional";
+  OpKind2[OpKind2["EnableBindings"] = 12] = "EnableBindings";
+  OpKind2[OpKind2["Text"] = 13] = "Text";
+  OpKind2[OpKind2["Listener"] = 14] = "Listener";
+  OpKind2[OpKind2["InterpolateText"] = 15] = "InterpolateText";
+  OpKind2[OpKind2["Binding"] = 16] = "Binding";
+  OpKind2[OpKind2["Property"] = 17] = "Property";
+  OpKind2[OpKind2["StyleProp"] = 18] = "StyleProp";
+  OpKind2[OpKind2["ClassProp"] = 19] = "ClassProp";
+  OpKind2[OpKind2["StyleMap"] = 20] = "StyleMap";
+  OpKind2[OpKind2["ClassMap"] = 21] = "ClassMap";
+  OpKind2[OpKind2["Advance"] = 22] = "Advance";
+  OpKind2[OpKind2["Pipe"] = 23] = "Pipe";
+  OpKind2[OpKind2["Attribute"] = 24] = "Attribute";
+  OpKind2[OpKind2["ExtractedAttribute"] = 25] = "ExtractedAttribute";
+  OpKind2[OpKind2["ExtractedMessage"] = 26] = "ExtractedMessage";
+  OpKind2[OpKind2["HostProperty"] = 27] = "HostProperty";
+  OpKind2[OpKind2["Namespace"] = 28] = "Namespace";
+  OpKind2[OpKind2["I18nStart"] = 29] = "I18nStart";
+  OpKind2[OpKind2["I18n"] = 30] = "I18n";
+  OpKind2[OpKind2["I18nEnd"] = 31] = "I18nEnd";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -7912,6 +7913,7 @@ var ExpressionKind;
   ExpressionKind2[ExpressionKind2["AssignTemporaryExpr"] = 17] = "AssignTemporaryExpr";
   ExpressionKind2[ExpressionKind2["ReadTemporaryExpr"] = 18] = "ReadTemporaryExpr";
   ExpressionKind2[ExpressionKind2["SanitizerExpr"] = 19] = "SanitizerExpr";
+  ExpressionKind2[ExpressionKind2["SlotLiteralExpr"] = 20] = "SlotLiteralExpr";
 })(ExpressionKind || (ExpressionKind = {}));
 var SemanticVariableKind;
 (function(SemanticVariableKind2) {
@@ -8103,6 +8105,16 @@ function createAdvanceOp(delta, sourceSpan) {
     sourceSpan
   }, NEW_OP);
 }
+function createConditionalOp(target, test, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.Conditional,
+    target,
+    test,
+    conditions: [],
+    processed: null,
+    sourceSpan
+  }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
+}
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/expression.mjs
 var _a;
@@ -8114,6 +8126,7 @@ var _f;
 var _g;
 var _h;
 var _j;
+var _k;
 function isIrExpression(expr) {
   return expr instanceof ExpressionBase;
 }
@@ -8649,6 +8662,32 @@ var SanitizerExpr = class extends ExpressionBase {
   transformInternalExpressions() {
   }
 };
+var _SlotLiteralExpr = class extends ExpressionBase {
+  constructor(target) {
+    super();
+    this.target = target;
+    this.kind = ExpressionKind.SlotLiteralExpr;
+    this[_k] = true;
+    this.slot = null;
+  }
+  visitExpression(visitor, context) {
+  }
+  isEquivalent(e) {
+    return e instanceof _SlotLiteralExpr && e.target === this.target && e.slot === this.slot;
+  }
+  isConstant() {
+    return true;
+  }
+  clone() {
+    return new _SlotLiteralExpr(this.target);
+  }
+  transformInternalExpressions() {
+  }
+};
+var SlotLiteralExpr = _SlotLiteralExpr;
+(() => {
+  _k = UsesSlotIndex;
+})();
 function visitExpressionsInOp(op, visitor) {
   transformExpressionsInOp(op, (expr, flags) => {
     visitor(expr, flags);
@@ -8696,6 +8735,17 @@ function transformExpressionsInOp(op, transform2, flags) {
       break;
     case OpKind.Variable:
       op.initializer = transformExpressionsInExpression(op.initializer, transform2, flags);
+      break;
+    case OpKind.Conditional:
+      for (const condition of op.conditions) {
+        if (condition[1] === null) {
+          continue;
+        }
+        condition[1] = transformExpressionsInExpression(condition[1], transform2, flags);
+      }
+      if (op.processed !== null) {
+        op.processed = transformExpressionsInExpression(op.processed, transform2, flags);
+      }
       break;
     case OpKind.Listener:
       for (const innerOp of op.handlerOps) {
@@ -9551,6 +9601,33 @@ function chainOperationsInList(opList) {
         instruction,
         expression: op.statement.expr
       };
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/conditionals.mjs
+function phaseConditionals(job) {
+  for (const unit of job.units) {
+    for (const op of unit.ops()) {
+      if (op.kind !== OpKind.Conditional) {
+        continue;
+      }
+      let test;
+      const defaultCase = op.conditions.findIndex(([xref, cond]) => cond === null);
+      if (defaultCase >= 0) {
+        const [xref, cond] = op.conditions.splice(defaultCase, 1)[0];
+        test = new SlotLiteralExpr(xref);
+      } else {
+        test = literal(-1);
+      }
+      let tmp = new AssignTemporaryExpr(op.test, job.allocateXrefId());
+      for (let i = op.conditions.length - 1; i >= 0; i--) {
+        const useTmp = i === 0 ? tmp : new ReadTemporaryExpr(tmp.xref);
+        const [xref, check] = op.conditions[i];
+        const comparison = new BinaryOperatorExpr(BinaryOperator.Identical, useTmp, check);
+        test = new ConditionalExpr(comparison, new SlotLiteralExpr(xref), test);
+      }
+      op.processed = test;
     }
   }
 }
@@ -16727,14 +16804,11 @@ function elementContainerEnd() {
   return call(Identifiers.elementContainerEnd, [], null);
 }
 function template(slot, templateFnRef, decls, vars, tag, constIndex, sourceSpan) {
-  return call(Identifiers.templateCreate, [
-    literal(slot),
-    templateFnRef,
-    literal(decls),
-    literal(vars),
-    literal(tag),
-    literal(constIndex)
-  ], sourceSpan);
+  const args = [literal(slot), templateFnRef, literal(decls), literal(vars)];
+  if (tag != null && constIndex != null) {
+    args.push(literal(tag), literal(constIndex));
+  }
+  return call(Identifiers.templateCreate, args, sourceSpan);
 }
 function disableBindings() {
   return call(Identifiers.disableBindings, [], null);
@@ -16944,6 +17018,9 @@ function collateInterpolationArgs(strings, expressions) {
 function call(instruction, args, sourceSpan) {
   const expr = importExpr(instruction).callFn(args, sourceSpan);
   return createStatementOp(new ExpressionStatement(expr, sourceSpan));
+}
+function conditional(slot, condition) {
+  return call(Identifiers.conditional, [literal(slot), condition], null);
 }
 var TEXT_INTERPOLATE_CONFIG = {
   constant: [
@@ -17255,6 +17332,15 @@ function reifyUpdateOperations(_unit, ops) {
         }
         OpList.replace(op, createStatementOp(new DeclareVarStmt(op.variable.name, op.initializer, void 0, StmtModifier.Final)));
         break;
+      case OpKind.Conditional:
+        if (op.processed === null) {
+          throw new Error(`Conditional test was not set.`);
+        }
+        if (op.slot === null) {
+          throw new Error(`Conditional slot was not set.`);
+        }
+        OpList.replace(op, conditional(op.slot, op.processed));
+        break;
       case OpKind.Statement:
         break;
       default:
@@ -17310,6 +17396,8 @@ function reifyIrExpression(expr) {
       return pipeBindV(expr.slot, expr.varOffset, expr.args);
     case ExpressionKind.SanitizerExpr:
       return importExpr(sanitizerIdentifierMap.get(expr.fn));
+    case ExpressionKind.SlotLiteralExpr:
+      return literal(expr.slot);
     default:
       throw new Error(`AssertionError: Unsupported reification of ir.Expression kind: ${ExpressionKind[expr.kind]}`);
   }
@@ -17931,6 +18019,7 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: phaseAttributeExtraction },
   { kind: CompilationJobKind.Both, fn: phaseParseExtractedStyles },
   { kind: CompilationJobKind.Tmpl, fn: phaseRemoveEmptyBindings },
+  { kind: CompilationJobKind.Tmpl, fn: phaseConditionals },
   { kind: CompilationJobKind.Tmpl, fn: phaseNoListenersOnTemplates },
   { kind: CompilationJobKind.Tmpl, fn: phasePipeCreation },
   { kind: CompilationJobKind.Tmpl, fn: phasePipeVariadic },
@@ -18124,55 +18213,57 @@ function ingestHostEvent(job, event) {
   eventBinding.handlerOps.push(createStatementOp(new ReturnStatement(convertAst(event.handler.ast, job))));
   job.root.create.push(eventBinding);
 }
-function ingestNodes(view, template2) {
+function ingestNodes(unit, template2) {
   for (const node of template2) {
     if (node instanceof Element) {
-      ingestElement(view, node);
+      ingestElement(unit, node);
     } else if (node instanceof Template) {
-      ingestTemplate(view, node);
+      ingestTemplate(unit, node);
     } else if (node instanceof Text) {
-      ingestText(view, node);
+      ingestText(unit, node);
     } else if (node instanceof BoundText) {
-      ingestBoundText(view, node);
+      ingestBoundText(unit, node);
+    } else if (node instanceof SwitchBlock) {
+      ingestSwitchBlock(unit, node);
     } else {
       throw new Error(`Unsupported template node: ${node.constructor.name}`);
     }
   }
 }
-function ingestElement(view, element2) {
+function ingestElement(unit, element2) {
   const staticAttributes = {};
   for (const attr of element2.attributes) {
     staticAttributes[attr.name] = attr.value;
   }
-  const id = view.job.allocateXrefId();
+  const id = unit.job.allocateXrefId();
   const [namespaceKey, elementName] = splitNsName(element2.name);
   const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element2.i18n, element2.startSourceSpan);
-  view.create.push(startOp);
-  ingestBindings(view, startOp, element2);
+  unit.create.push(startOp);
+  ingestBindings(unit, startOp, element2);
   ingestReferences(startOp, element2);
-  ingestNodes(view, element2.children);
-  view.create.push(createElementEndOp(id, element2.endSourceSpan));
+  ingestNodes(unit, element2.children);
+  unit.create.push(createElementEndOp(id, element2.endSourceSpan));
 }
-function ingestTemplate(view, tmpl) {
-  const childView = view.job.allocateView(view.xref);
+function ingestTemplate(unit, tmpl) {
+  const childView = unit.job.allocateView(unit.xref);
   let tagNameWithoutNamespace = tmpl.tagName;
   let namespacePrefix = "";
   if (tmpl.tagName) {
     [namespacePrefix, tagNameWithoutNamespace] = splitNsName(tmpl.tagName);
   }
   const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace != null ? tagNameWithoutNamespace : "ng-template", namespaceForKey(namespacePrefix), tmpl.i18n, tmpl.startSourceSpan);
-  view.create.push(tplOp);
-  ingestBindings(view, tplOp, tmpl);
+  unit.create.push(tplOp);
+  ingestBindings(unit, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
   ingestNodes(childView, tmpl.children);
   for (const { name, value } of tmpl.variables) {
     childView.contextVariables.set(name, value);
   }
 }
-function ingestText(view, text2) {
-  view.create.push(createTextOp(view.job.allocateXrefId(), text2.value, text2.sourceSpan));
+function ingestText(unit, text2) {
+  unit.create.push(createTextOp(unit.job.allocateXrefId(), text2.value, text2.sourceSpan));
 }
-function ingestBoundText(view, text2) {
+function ingestBoundText(unit, text2) {
   let value = text2.value;
   if (value instanceof ASTWithSource) {
     value = value.ast;
@@ -18180,28 +18271,44 @@ function ingestBoundText(view, text2) {
   if (!(value instanceof Interpolation)) {
     throw new Error(`AssertionError: expected Interpolation for BoundText node, got ${value.constructor.name}`);
   }
-  const textXref = view.job.allocateXrefId();
-  view.create.push(createTextOp(textXref, "", text2.sourceSpan));
-  view.update.push(createInterpolateTextOp(textXref, new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, view.job))), text2.sourceSpan));
+  const textXref = unit.job.allocateXrefId();
+  unit.create.push(createTextOp(textXref, "", text2.sourceSpan));
+  unit.update.push(createInterpolateTextOp(textXref, new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, unit.job))), text2.sourceSpan));
 }
-function convertAst(ast, cpl) {
+function ingestSwitchBlock(unit, switchBlock) {
+  let firstXref = null;
+  let conditions = [];
+  for (const switchCase of switchBlock.cases) {
+    const cView = unit.job.allocateView(unit.xref);
+    if (!firstXref)
+      firstXref = cView.xref;
+    unit.create.push(createTemplateOp(cView.xref, "Case", Namespace.HTML, void 0, null));
+    const caseExpr = switchCase.expression ? convertAst(switchCase.expression, unit.job) : null;
+    conditions.push([cView.xref, caseExpr]);
+    ingestNodes(cView, switchCase.children);
+  }
+  const conditional2 = createConditionalOp(firstXref, convertAst(switchBlock.expression, unit.job), null);
+  conditional2.conditions = conditions;
+  unit.update.push(conditional2);
+}
+function convertAst(ast, job) {
   if (ast instanceof ASTWithSource) {
-    return convertAst(ast.ast, cpl);
+    return convertAst(ast.ast, job);
   } else if (ast instanceof PropertyRead) {
     if (ast.receiver instanceof ImplicitReceiver && !(ast.receiver instanceof ThisReceiver)) {
       return new LexicalReadExpr(ast.name);
     } else {
-      return new ReadPropExpr(convertAst(ast.receiver, cpl), ast.name);
+      return new ReadPropExpr(convertAst(ast.receiver, job), ast.name);
     }
   } else if (ast instanceof PropertyWrite) {
-    return new WritePropExpr(convertAst(ast.receiver, cpl), ast.name, convertAst(ast.value, cpl));
+    return new WritePropExpr(convertAst(ast.receiver, job), ast.name, convertAst(ast.value, job));
   } else if (ast instanceof KeyedWrite) {
-    return new WriteKeyExpr(convertAst(ast.receiver, cpl), convertAst(ast.key, cpl), convertAst(ast.value, cpl));
+    return new WriteKeyExpr(convertAst(ast.receiver, job), convertAst(ast.key, job), convertAst(ast.value, job));
   } else if (ast instanceof Call) {
     if (ast.receiver instanceof ImplicitReceiver) {
       throw new Error(`Unexpected ImplicitReceiver`);
     } else {
-      return new InvokeFunctionExpr(convertAst(ast.receiver, cpl), ast.args.map((arg) => convertAst(arg, cpl)));
+      return new InvokeFunctionExpr(convertAst(ast.receiver, job), ast.args.map((arg) => convertAst(arg, job)));
     }
   } else if (ast instanceof LiteralPrimitive) {
     return literal(ast.value);
@@ -18210,57 +18317,57 @@ function convertAst(ast, cpl) {
     if (operator === void 0) {
       throw new Error(`AssertionError: unknown binary operator ${ast.operation}`);
     }
-    return new BinaryOperatorExpr(operator, convertAst(ast.left, cpl), convertAst(ast.right, cpl));
+    return new BinaryOperatorExpr(operator, convertAst(ast.left, job), convertAst(ast.right, job));
   } else if (ast instanceof ThisReceiver) {
-    return new ContextExpr(cpl.root.xref);
+    return new ContextExpr(job.root.xref);
   } else if (ast instanceof KeyedRead) {
-    return new ReadKeyExpr(convertAst(ast.receiver, cpl), convertAst(ast.key, cpl));
+    return new ReadKeyExpr(convertAst(ast.receiver, job), convertAst(ast.key, job));
   } else if (ast instanceof Chain) {
     throw new Error(`AssertionError: Chain in unknown context`);
   } else if (ast instanceof LiteralMap) {
     const entries = ast.keys.map((key, idx) => {
       const value = ast.values[idx];
-      return new LiteralMapEntry(key.key, convertAst(value, cpl), key.quoted);
+      return new LiteralMapEntry(key.key, convertAst(value, job), key.quoted);
     });
     return new LiteralMapExpr(entries);
   } else if (ast instanceof LiteralArray) {
-    return new LiteralArrayExpr(ast.expressions.map((expr) => convertAst(expr, cpl)));
+    return new LiteralArrayExpr(ast.expressions.map((expr) => convertAst(expr, job)));
   } else if (ast instanceof Conditional) {
-    return new ConditionalExpr(convertAst(ast.condition, cpl), convertAst(ast.trueExp, cpl), convertAst(ast.falseExp, cpl));
+    return new ConditionalExpr(convertAst(ast.condition, job), convertAst(ast.trueExp, job), convertAst(ast.falseExp, job));
   } else if (ast instanceof NonNullAssert) {
-    return convertAst(ast.expression, cpl);
+    return convertAst(ast.expression, job);
   } else if (ast instanceof BindingPipe) {
-    return new PipeBindingExpr(cpl.allocateXrefId(), ast.name, [
-      convertAst(ast.exp, cpl),
-      ...ast.args.map((arg) => convertAst(arg, cpl))
+    return new PipeBindingExpr(job.allocateXrefId(), ast.name, [
+      convertAst(ast.exp, job),
+      ...ast.args.map((arg) => convertAst(arg, job))
     ]);
   } else if (ast instanceof SafeKeyedRead) {
-    return new SafeKeyedReadExpr(convertAst(ast.receiver, cpl), convertAst(ast.key, cpl));
+    return new SafeKeyedReadExpr(convertAst(ast.receiver, job), convertAst(ast.key, job));
   } else if (ast instanceof SafePropertyRead) {
-    return new SafePropertyReadExpr(convertAst(ast.receiver, cpl), ast.name);
+    return new SafePropertyReadExpr(convertAst(ast.receiver, job), ast.name);
   } else if (ast instanceof SafeCall) {
-    return new SafeInvokeFunctionExpr(convertAst(ast.receiver, cpl), ast.args.map((a) => convertAst(a, cpl)));
+    return new SafeInvokeFunctionExpr(convertAst(ast.receiver, job), ast.args.map((a) => convertAst(a, job)));
   } else if (ast instanceof EmptyExpr) {
     return new EmptyExpr2();
   } else {
     throw new Error(`Unhandled expression type: ${ast.constructor.name}`);
   }
 }
-function ingestBindings(view, op, element2) {
+function ingestBindings(unit, op, element2) {
   if (element2 instanceof Template) {
     for (const attr of element2.templateAttrs) {
       if (attr instanceof TextAttribute) {
-        ingestBinding(view, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, true);
+        ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, true);
       } else {
-        ingestBinding(view, op.xref, attr.name, attr.value, attr.type, attr.unit, attr.securityContext, attr.sourceSpan, false, true);
+        ingestBinding(unit, op.xref, attr.name, attr.value, attr.type, attr.unit, attr.securityContext, attr.sourceSpan, false, true);
       }
     }
   }
   for (const attr of element2.attributes) {
-    ingestBinding(view, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, false);
+    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, false);
   }
   for (const input of element2.inputs) {
-    ingestBinding(view, op.xref, input.name, input.value, input.type, input.unit, input.securityContext, input.sourceSpan, false, false);
+    ingestBinding(unit, op.xref, input.name, input.value, input.type, input.unit, input.securityContext, input.sourceSpan, false, false);
   }
   for (const output of element2.outputs) {
     let listenerOp;
@@ -18283,14 +18390,14 @@ function ingestBindings(view, op, element2) {
     if (inputExprs.length === 0) {
       throw new Error("Expected listener to have non-empty expression list.");
     }
-    const expressions = inputExprs.map((expr) => convertAst(expr, view.job));
+    const expressions = inputExprs.map((expr) => convertAst(expr, unit.job));
     const returnExpr = expressions.pop();
     for (const expr of expressions) {
       const stmtOp = createStatementOp(new ExpressionStatement(expr));
       listenerOp.handlerOps.push(stmtOp);
     }
     listenerOp.handlerOps.push(createStatementOp(new ReturnStatement(returnExpr)));
-    view.create.push(listenerOp);
+    unit.create.push(listenerOp);
   }
 }
 var BINDING_KINDS = /* @__PURE__ */ new Map([
@@ -22934,7 +23041,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.1+sha-f7364ec");
+var VERSION2 = new Version("17.0.0-next.1+sha-ab0f9ee");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24471,7 +24578,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-f7364ec"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-ab0f9ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24542,7 +24649,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-f7364ec"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-ab0f9ee"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24730,7 +24837,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-f7364ec"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-ab0f9ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24753,7 +24860,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-f7364ec"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-ab0f9ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24791,7 +24898,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-f7364ec"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-ab0f9ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -24815,7 +24922,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-f7364ec"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-ab0f9ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -24850,7 +24957,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.1+sha-f7364ec"));
+  definitionMap.set("version", literal("17.0.0-next.1+sha-ab0f9ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -24867,7 +24974,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.1+sha-f7364ec");
+var VERSION3 = new Version("17.0.0-next.1+sha-ab0f9ee");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
