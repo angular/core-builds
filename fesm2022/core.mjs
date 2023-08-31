@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.2+sha-a1bad49
+ * @license Angular v17.0.0-next.2+sha-0839885
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10859,7 +10859,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.2+sha-a1bad49');
+const VERSION = new Version('17.0.0-next.2+sha-0839885');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11520,13 +11520,16 @@ function afterRender(callback, options) {
     let destroy;
     const unregisterFn = injector.get(DestroyRef).onDestroy(() => destroy?.());
     const manager = injector.get(AfterRenderEventManager);
+    // Lazily initialize the handler implementation, if necessary. This is so that it can be
+    // tree-shaken if `afterRender` and `afterNextRender` aren't used.
+    const handler = manager.handler ??= new AfterRenderCallbackHandlerImpl();
     const ngZone = injector.get(NgZone);
     const instance = new AfterRenderCallback(() => ngZone.runOutsideAngular(callback));
     destroy = () => {
-        manager.unregister(instance);
+        handler.unregister(instance);
         unregisterFn();
     };
-    manager.register(instance);
+    handler.register(instance);
     return { destroy };
 }
 /**
@@ -11580,21 +11583,23 @@ function afterNextRender(callback, options) {
     let destroy;
     const unregisterFn = injector.get(DestroyRef).onDestroy(() => destroy?.());
     const manager = injector.get(AfterRenderEventManager);
+    // Lazily initialize the handler implementation, if necessary. This is so that it can be
+    // tree-shaken if `afterRender` and `afterNextRender` aren't used.
+    const handler = manager.handler ??= new AfterRenderCallbackHandlerImpl();
     const ngZone = injector.get(NgZone);
     const instance = new AfterRenderCallback(() => {
         destroy?.();
         ngZone.runOutsideAngular(callback);
     });
     destroy = () => {
-        manager.unregister(instance);
+        handler.unregister(instance);
         unregisterFn();
     };
-    manager.register(instance);
+    handler.register(instance);
     return { destroy };
 }
 /**
  * A wrapper around a function to be used as an after render callback.
- * @private
  */
 class AfterRenderCallback {
     constructor(callback) {
@@ -11605,62 +11610,84 @@ class AfterRenderCallback {
     }
 }
 /**
- * Implements `afterRender` and `afterNextRender` callback manager logic.
+ * Core functionality for `afterRender` and `afterNextRender`. Kept separate from
+ * `AfterRenderEventManager` for tree-shaking.
  */
-class AfterRenderEventManager {
+class AfterRenderCallbackHandlerImpl {
     constructor() {
+        this.executingCallbacks = false;
         this.callbacks = new Set();
         this.deferredCallbacks = new Set();
-        this.renderDepth = 0;
-        this.runningCallbacks = false;
     }
-    /**
-     * Mark the beginning of a render operation (i.e. CD cycle).
-     * Throws if called from an `afterRender` callback.
-     */
-    begin() {
-        if (this.runningCallbacks) {
+    validateBegin() {
+        if (this.executingCallbacks) {
             throw new RuntimeError(102 /* RuntimeErrorCode.RECURSIVE_APPLICATION_RENDER */, ngDevMode &&
                 'A new render operation began before the previous operation ended. ' +
                     'Did you trigger change detection from afterRender or afterNextRender?');
-        }
-        this.renderDepth++;
-    }
-    /**
-     * Mark the end of a render operation. Registered callbacks
-     * are invoked if there are no more pending operations.
-     */
-    end() {
-        this.renderDepth--;
-        if (this.renderDepth === 0) {
-            try {
-                this.runningCallbacks = true;
-                for (const callback of this.callbacks) {
-                    callback.invoke();
-                }
-            }
-            finally {
-                this.runningCallbacks = false;
-                for (const callback of this.deferredCallbacks) {
-                    this.callbacks.add(callback);
-                }
-                this.deferredCallbacks.clear();
-            }
         }
     }
     register(callback) {
         // If we're currently running callbacks, new callbacks should be deferred
         // until the next render operation.
-        const target = this.runningCallbacks ? this.deferredCallbacks : this.callbacks;
+        const target = this.executingCallbacks ? this.deferredCallbacks : this.callbacks;
         target.add(callback);
     }
     unregister(callback) {
         this.callbacks.delete(callback);
         this.deferredCallbacks.delete(callback);
     }
-    ngOnDestroy() {
+    execute() {
+        try {
+            this.executingCallbacks = true;
+            for (const callback of this.callbacks) {
+                callback.invoke();
+            }
+        }
+        finally {
+            this.executingCallbacks = false;
+            for (const callback of this.deferredCallbacks) {
+                this.callbacks.add(callback);
+            }
+            this.deferredCallbacks.clear();
+        }
+    }
+    destroy() {
         this.callbacks.clear();
         this.deferredCallbacks.clear();
+    }
+}
+/**
+ * Implements core timing for `afterRender` and `afterNextRender` events.
+ * Delegates to an optional `AfterRenderCallbackHandler` for implementation.
+ */
+class AfterRenderEventManager {
+    constructor() {
+        this.renderDepth = 0;
+        /* @internal */
+        this.handler = null;
+    }
+    /**
+     * Mark the beginning of a render operation (i.e. CD cycle).
+     * Throws if called while executing callbacks.
+     */
+    begin() {
+        this.handler?.validateBegin();
+        this.renderDepth++;
+    }
+    /**
+     * Mark the end of a render operation. Callbacks will be
+     * executed if there are no more pending operations.
+     */
+    end() {
+        ngDevMode && assertGreaterThan(this.renderDepth, 0, 'renderDepth must be greater than 0');
+        this.renderDepth--;
+        if (this.renderDepth === 0) {
+            this.handler?.execute();
+        }
+    }
+    ngOnDestroy() {
+        this.handler?.destroy();
+        this.handler = null;
     }
     /** @nocollapse */
     static { this.ɵprov = ɵɵdefineInjectable({
