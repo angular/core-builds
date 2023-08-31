@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.2+sha-3c28506
+ * @license Angular v17.0.0-next.2+sha-05e4dbb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9526,17 +9526,17 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
  * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/trusted-types/index.d.ts
  * but restricted to the API surface used within Angular.
  */
-declare interface TrustedHTML {
+declare type TrustedHTML = string & {
     __brand__: 'TrustedHTML';
-}
+};
 
-declare interface TrustedScript {
+declare type TrustedScript = string & {
     __brand__: 'TrustedScript';
-}
+};
 
-declare interface TrustedScriptURL {
+declare type TrustedScriptURL = string & {
     __brand__: 'TrustedScriptURL';
-}
+};
 
 /**
  * Value stored in the `TData` which is needed to re-concatenate the styling.
@@ -9585,9 +9585,9 @@ declare type TStylingKeyPrimitive = string | null | false;
  *
  * NOTE: `0` has special significance and represents `null` as in no additional pointer.
  */
-declare interface TStylingRange {
+declare type TStylingRange = number & {
     __brand__: 'TStylingRange';
-}
+};
 
 /**
  * Store the static values for the styling binding.

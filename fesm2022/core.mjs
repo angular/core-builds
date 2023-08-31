@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.2+sha-3c28506
+ * @license Angular v17.0.0-next.2+sha-05e4dbb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10859,7 +10859,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.2+sha-3c28506');
+const VERSION = new Version('17.0.0-next.2+sha-05e4dbb');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -15680,14 +15680,12 @@ function getTStylingRangePrev(tStylingRange) {
 }
 function getTStylingRangePrevDuplicate(tStylingRange) {
     ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange & 2 /* StylingRange.PREV_DUPLICATE */) ==
-        2 /* StylingRange.PREV_DUPLICATE */;
+    return (tStylingRange & 2 /* StylingRange.PREV_DUPLICATE */) == 2 /* StylingRange.PREV_DUPLICATE */;
 }
 function setTStylingRangePrev(tStylingRange, previous) {
     ngDevMode && assertNumber(tStylingRange, 'expected number');
     ngDevMode && assertNumberInRange(previous, 0, 32767 /* StylingRange.UNSIGNED_MASK */);
-    return ((tStylingRange & ~4294836224 /* StylingRange.PREV_MASK */) |
-        (previous << 17 /* StylingRange.PREV_SHIFT */));
+    return ((tStylingRange & ~4294836224 /* StylingRange.PREV_MASK */) | (previous << 17 /* StylingRange.PREV_SHIFT */));
 }
 function setTStylingRangePrevDuplicate(tStylingRange) {
     ngDevMode && assertNumber(tStylingRange, 'expected number');
@@ -15705,8 +15703,7 @@ function setTStylingRangeNext(tStylingRange, next) {
 }
 function getTStylingRangeNextDuplicate(tStylingRange) {
     ngDevMode && assertNumber(tStylingRange, 'expected number');
-    return (tStylingRange & 1 /* StylingRange.NEXT_DUPLICATE */) ===
-        1 /* StylingRange.NEXT_DUPLICATE */;
+    return ((tStylingRange) & 1 /* StylingRange.NEXT_DUPLICATE */) === 1 /* StylingRange.NEXT_DUPLICATE */;
 }
 function setTStylingRangeNextDuplicate(tStylingRange) {
     ngDevMode && assertNumber(tStylingRange, 'expected number');
