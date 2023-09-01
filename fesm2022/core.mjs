@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.2+sha-6e94e6d
+ * @license Angular v17.0.0-next.2+sha-b37ba05
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10819,7 +10819,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.2+sha-6e94e6d');
+const VERSION = new Version('17.0.0-next.2+sha-b37ba05');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -32498,17 +32498,18 @@ function ɵɵngDeclarePipe(decl) {
  * const applicationRef = await bootstrapApplication(RootComponent);
  *
  * // Locate a DOM node that would be used as a host.
- * const host = document.getElementById('hello-component-host');
+ * const hostElement = document.getElementById('hello-component-host');
  *
  * // Get an `EnvironmentInjector` instance from the `ApplicationRef`.
  * const environmentInjector = applicationRef.injector;
  *
  * // We can now create a `ComponentRef` instance.
- * const componentRef = createComponent(HelloComponent, {host, environmentInjector});
+ * const componentRef = createComponent(HelloComponent, {hostElement, environmentInjector});
  *
  * // Last step is to register the newly created ref using the `ApplicationRef` instance
  * // to include the component view into change detection cycles.
  * applicationRef.attachView(componentRef.hostView);
+ * componentRef.changeDetectorRef.detectChanges();
  * ```
  *
  * @param component Component class reference.
