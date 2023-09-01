@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.2+sha-bb47f81
+ * @license Angular v17.0.0-next.2+sha-b9ba6e6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10859,7 +10859,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.2+sha-bb47f81');
+const VERSION = new Version('17.0.0-next.2+sha-b9ba6e6');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13912,15 +13912,15 @@ function detectChangesInView(lView, mode) {
         return;
     }
     const tView = lView[TVIEW];
-    if ((lView[FLAGS] & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */) &&
+    const flags = lView[FLAGS];
+    if ((flags & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */) &&
         mode === 0 /* ChangeDetectionMode.Global */) ||
-        lView[FLAGS] & 1024 /* LViewFlags.RefreshView */ ||
+        flags & 1024 /* LViewFlags.RefreshView */ ||
         mode === 2 /* ChangeDetectionMode.BugToForceRefreshAndIgnoreViewFlags */) {
         refreshView(tView, lView, tView.template, lView[CONTEXT]);
     }
     else if (lView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
         detectChangesInEmbeddedViews(lView, 1 /* ChangeDetectionMode.Targeted */);
-        const tView = lView[TVIEW];
         const components = tView.components;
         if (components !== null) {
             detectChangesInChildComponents(lView, components, 1 /* ChangeDetectionMode.Targeted */);
