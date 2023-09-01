@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.2+sha-b37ba05
+ * @license Angular v17.0.0-next.2+sha-40bb45f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10819,7 +10819,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.2+sha-b37ba05');
+const VERSION = new Version('17.0.0-next.2+sha-40bb45f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13722,7 +13722,7 @@ function refreshView(tView, lView, templateFn, context) {
         // insertion points. This is needed to avoid the situation where the template is defined in this
         // `LView` but its declaration appears after the insertion component.
         markTransplantedViewsForRefresh(lView);
-        detectChangesInEmbeddedViews(lView, 2 /* ChangeDetectionMode.BugToForceRefreshAndIgnoreViewFlags */);
+        detectChangesInEmbeddedViews(lView, 0 /* ChangeDetectionMode.Global */);
         // Content query results must be refreshed before content hooks are called.
         if (tView.contentQueries !== null) {
             refreshContentQueries(tView, lView);
@@ -13861,8 +13861,7 @@ function detectChangesInView(lView, mode) {
     const flags = lView[FLAGS];
     if ((flags & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */) &&
         mode === 0 /* ChangeDetectionMode.Global */) ||
-        flags & 1024 /* LViewFlags.RefreshView */ ||
-        mode === 2 /* ChangeDetectionMode.BugToForceRefreshAndIgnoreViewFlags */) {
+        flags & 1024 /* LViewFlags.RefreshView */) {
         refreshView(tView, lView, tView.template, lView[CONTEXT]);
     }
     else if (lView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
