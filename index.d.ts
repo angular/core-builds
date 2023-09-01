@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.3+sha-7842d06
+ * @license Angular v16.2.3+sha-f56b655
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7225,116 +7225,94 @@ declare const REACTIVE_HOST_BINDING_CONSUMER = 24;
 
 declare const REACTIVE_TEMPLATE_CONSUMER = 23;
 
-declare class ReactiveLViewConsumer extends ReactiveNode {
-    protected consumerAllowSignalWrites: boolean;
-    private _lView;
-    set lView(lView: LView);
-    protected onConsumerDependencyMayHaveChanged(): void;
-    protected onProducerUpdateValueVersion(): void;
-    get hasReadASignal(): boolean;
-    runInContext(fn: HostBindingsFunction<unknown> | ComponentTemplate<unknown>, rf: ɵRenderFlags, ctx: unknown): void;
-    destroy(): void;
+declare interface ReactiveLViewConsumer extends ReactiveNode {
+    lView: LView | null;
 }
 
 /**
- * A node in the reactive graph.
+ * A producer and/or consumer which participates in the reactive graph.
  *
- * Nodes can be producers of reactive values, consumers of other reactive values, or both.
+ * Producer `ReactiveNode`s which are accessed when a consumer `ReactiveNode` is the
+ * `activeConsumer` are tracked as dependencies of that consumer.
  *
- * Producers are nodes that produce values, and can be depended upon by consumer nodes.
+ * Certain consumers are also tracked as "live" consumers and create edges in the other direction,
+ * from producer to consumer. These edges are used to propagate change notifications when a
+ * producer's value is updated.
  *
- * Producers expose a monotonic `valueVersion` counter, and are responsible for incrementing this
- * version when their value semantically changes. Some producers may produce their values lazily and
- * thus at times need to be polled for potential updates to their value (and by extension their
- * `valueVersion`). This is accomplished via the `onProducerUpdateValueVersion` method for
- * implemented by producers, which should perform whatever calculations are necessary to ensure
- * `valueVersion` is up to date.
- *
- * Consumers are nodes that depend on the values of producers and are notified when those values
- * might have changed.
- *
- * Consumers do not wrap the reads they consume themselves, but rather can be set as the active
- * reader via `setActiveConsumer`. Reads of producers that happen while a consumer is active will
- * result in those producers being added as dependencies of that consumer node.
- *
- * The set of dependencies of a consumer is dynamic. Implementers expose a monotonically increasing
- * `trackingVersion` counter, which increments whenever the consumer is about to re-run any reactive
- * reads it needs and establish a new set of dependencies as a result.
- *
- * Producers store the last `trackingVersion` they've seen from `Consumer`s which have read them.
- * This allows a producer to identify whether its record of the dependency is current or stale, by
- * comparing the consumer's `trackingVersion` to the version at which the dependency was
- * last observed.
+ * A `ReactiveNode` may be both a producer and consumer.
  */
-declare abstract class ReactiveNode {
-    private readonly id;
+declare interface ReactiveNode {
     /**
-     * A cached weak reference to this node, which will be used in `ReactiveEdge`s.
-     */
-    private readonly ref;
-    /**
-     * Edges to producers on which this node depends (in its consumer capacity).
-     */
-    private readonly producers;
-    /**
-     * Edges to consumers on which this node depends (in its producer capacity).
-     */
-    private readonly consumers;
-    /**
-     * Monotonically increasing counter representing a version of this `Consumer`'s
-     * dependencies.
-     */
-    protected trackingVersion: number;
-    /**
-     * Monotonically increasing counter which increases when the value of this `Producer`
-     * semantically changes.
-     */
-    protected valueVersion: number;
-    /**
-     * Whether signal writes should be allowed while this `ReactiveNode` is the current consumer.
-     */
-    protected abstract readonly consumerAllowSignalWrites: boolean;
-    /**
-     * Called for consumers whenever one of their dependencies notifies that it might have a new
-     * value.
-     */
-    protected abstract onConsumerDependencyMayHaveChanged(): void;
-    /**
-     * Called for producers when a dependent consumer is checking if the producer's value has actually
-     * changed.
-     */
-    protected abstract onProducerUpdateValueVersion(): void;
-    /**
-     * Polls dependencies of a consumer to determine if they have actually changed.
+     * Version of the value that this node produces.
      *
-     * If this returns `false`, then even though the consumer may have previously been notified of a
-     * change, the values of its dependencies have not actually changed and the consumer should not
-     * rerun any reactions.
+     * This is incremented whenever a new value is produced by this node which is not equal to the
+     * previous value (by whatever definition of equality is in use).
      */
-    protected consumerPollProducersForChange(): boolean;
+    version: Version_2;
     /**
-     * Notify all consumers of this producer that its value may have changed.
+     * Whether this node (in its consumer capacity) is dirty.
+     *
+     * Only live consumers become dirty, when receiving a change notification from a dependency
+     * producer.
      */
-    protected producerMayHaveChanged(): void;
+    dirty: boolean;
     /**
-     * Mark that this producer node has been accessed in the current reactive context.
+     * Producers which are dependencies of this consumer.
+     *
+     * Uses the same indices as the `producerLastReadVersion` and `producerIndexOfThis` arrays.
      */
-    protected producerAccessed(): void;
+    producerNode: ReactiveNode[] | undefined;
     /**
-     * Whether this consumer currently has any producers registered.
+     * `Version` of the value last read by a given producer.
+     *
+     * Uses the same indices as the `producerNode` and `producerIndexOfThis` arrays.
      */
-    protected get hasProducers(): boolean;
+    producerLastReadVersion: Version_2[] | undefined;
     /**
-     * Whether this `ReactiveNode` in its producer capacity is currently allowed to initiate updates,
-     * based on the current consumer context.
+     * Index of `this` (consumer) in each producer's `liveConsumers` array.
+     *
+     * This value is only meaningful if this node is live (`liveConsumers.length > 0`). Otherwise
+     * these indices are stale.
+     *
+     * Uses the same indices as the `producerNode` and `producerLastReadVersion` arrays.
      */
-    protected get producerUpdatesAllowed(): boolean;
+    producerIndexOfThis: number[] | undefined;
     /**
-     * Checks if a `Producer` has a current value which is different than the value
-     * last seen at a specific version by a `Consumer` which recorded a dependency on
-     * this `Producer`.
+     * Index into the producer arrays that the next dependency of this node as a consumer will use.
+     *
+     * This index is zeroed before this node as a consumer begins executing. When a producer is read,
+     * it gets inserted into the producers arrays at this index. There may be an existing dependency
+     * in this location which may or may not match the incoming producer, depending on whether the
+     * same producers were read in the same order as the last computation.
      */
-    private producerPollStatus;
+    nextProducerIndex: number;
+    /**
+     * Array of consumers of this producer that are "live" (they require push notifications).
+     *
+     * `liveConsumerNode.length` is effectively our reference count for this node.
+     */
+    liveConsumerNode: ReactiveNode[] | undefined;
+    /**
+     * Index of `this` (producer) in each consumer's `producerNode` array.
+     *
+     * Uses the same indices as the `liveConsumerNode` array.
+     */
+    liveConsumerIndexOfThis: number[] | undefined;
+    /**
+     * Whether writes to signals are allowed when this consumer is the `activeConsumer`.
+     *
+     * This is used to enforce guardrails such as preventing writes to writable signals in the
+     * computation function of computed signals, which is supposed to be pure.
+     */
+    consumerAllowSignalWrites: boolean;
+    readonly consumerIsAlwaysLive: boolean;
+    /**
+     * Tracks whether producers need to recompute their value independently of the reactive graph (for
+     * example, if no initial value has been computed).
+     */
+    producerMustRecompute(node: unknown): boolean;
+    producerRecomputeValue(node: unknown): void;
+    consumerMarkedDirty(node: unknown): void;
 }
 
 /**
@@ -9395,17 +9373,17 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
  * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/trusted-types/index.d.ts
  * but restricted to the API surface used within Angular.
  */
-declare interface TrustedHTML {
+declare type TrustedHTML = string & {
     __brand__: 'TrustedHTML';
-}
+};
 
-declare interface TrustedScript {
+declare type TrustedScript = string & {
     __brand__: 'TrustedScript';
-}
+};
 
-declare interface TrustedScriptURL {
+declare type TrustedScriptURL = string & {
     __brand__: 'TrustedScriptURL';
-}
+};
 
 /**
  * Value stored in the `TData` which is needed to re-concatenate the styling.
@@ -9454,9 +9432,9 @@ declare type TStylingKeyPrimitive = string | null | false;
  *
  * NOTE: `0` has special significance and represents `null` as in no additional pointer.
  */
-declare interface TStylingRange {
+declare type TStylingRange = number & {
     __brand__: 'TStylingRange';
-}
+};
 
 /**
  * Store the static values for the styling binding.
@@ -9939,6 +9917,10 @@ export declare class Version {
     constructor(full: string);
 }
 
+declare type Version_2 = number & {
+    __brand: 'Version';
+};
+
 declare const VIEW_REFS = 8;
 
 /**
@@ -10348,14 +10330,6 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
  */
 declare interface ViewRefTracker {
     detachView(viewRef: ViewRef): void;
-}
-
-declare interface WeakRef<T extends object> {
-    deref(): T | undefined;
-}
-
-declare interface WeakRefCtor {
-    new <T extends object>(value: T): WeakRef<T>;
 }
 
 /**
@@ -11818,7 +11792,8 @@ export declare interface ɵSafeValue {
  */
 export declare function ɵsetAllowDuplicateNgModuleIdsForTest(allowDuplicates: boolean): void;
 
-export declare function ɵsetAlternateWeakRefImpl(impl: WeakRefCtor): void;
+
+export declare function ɵsetAlternateWeakRefImpl(impl: unknown): void;
 
 /**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields
