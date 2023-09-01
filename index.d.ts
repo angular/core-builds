@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.2+sha-4555290
+ * @license Angular v17.0.0-next.2+sha-5a32326
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1932,17 +1932,18 @@ declare const CONTEXT = 8;
  * const applicationRef = await bootstrapApplication(RootComponent);
  *
  * // Locate a DOM node that would be used as a host.
- * const host = document.getElementById('hello-component-host');
+ * const hostElement = document.getElementById('hello-component-host');
  *
  * // Get an `EnvironmentInjector` instance from the `ApplicationRef`.
  * const environmentInjector = applicationRef.injector;
  *
  * // We can now create a `ComponentRef` instance.
- * const componentRef = createComponent(HelloComponent, {host, environmentInjector});
+ * const componentRef = createComponent(HelloComponent, {hostElement, environmentInjector});
  *
  * // Last step is to register the newly created ref using the `ApplicationRef` instance
  * // to include the component view into change detection cycles.
  * applicationRef.attachView(componentRef.hostView);
+ * componentRef.changeDetectorRef.detectChanges();
  * ```
  *
  * @param component Component class reference.
@@ -10233,6 +10234,40 @@ export declare interface ViewChildrenDecorator {
  *
  * A view container instance can contain other view containers,
  * creating a [view hierarchy](guide/glossary#view-hierarchy).
+ *
+ * @usageNotes
+ *
+ * The example below demonstrates how the `createComponent` function can be used
+ * to create an instance of a ComponentRef dynamically and attach it to an ApplicationRef,
+ * so that it gets included into change detection cycles.
+ *
+ * Note: the example uses standalone components, but the function can also be used for
+ * non-standalone components (declared in an NgModule) as well.
+ *
+ * ```typescript
+ * @Component({
+ *   standalone: true,
+ *   selector: 'dynamic',
+ *   template: `<span>This is a content of a dynamic component.</span>`,
+ * })
+ * class DynamicComponent {
+ *   vcr = inject(ViewContainerRef);
+ * }
+ *
+ * @Component({
+ *   standalone: true,
+ *   selector: 'app',
+ *   template: `<main>Hi! This is the main content.</main>`,
+ * })
+ * class AppComponent {
+ *   vcr = inject(ViewContainerRef);
+ *
+ *   ngAfterViewInit() {
+ *     const compRef = this.vcr.createComponent(DynamicComponent);
+ *     compRef.changeDetectorRef.detectChanges();
+ *   }
+ * }
+ * ```
  *
  * @see {@link ComponentRef}
  * @see {@link EmbeddedViewRef}
