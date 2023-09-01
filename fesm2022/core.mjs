@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.2+sha-40bb45f
+ * @license Angular v17.0.0-next.2+sha-1aff106
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4040,6 +4040,21 @@ function toTNodeTypeAsString(tNodeType) {
     (tNodeType & 32 /* TNodeType.Icu */) && (text += '|IcuContainer');
     (tNodeType & 64 /* TNodeType.Placeholder */) && (text += '|Placeholder');
     return text.length > 0 ? text.substring(1) : text;
+}
+/**
+ * Helper function to detect if a given value matches a `TNode` shape.
+ *
+ * The logic uses the `insertBeforeIndex` and its possible values as
+ * a way to differentiate a TNode shape from other types of objects
+ * within the `TView.data`. This is not a perfect check, but it can
+ * be a reasonable differentiator, since we control the shapes of objects
+ * within `TView.data`.
+ */
+function isTNodeShape(value) {
+    return value != null && typeof value === 'object' &&
+        (value.insertBeforeIndex === null ||
+            typeof value.insertBeforeIndex === 'number' ||
+            Array.isArray(value.insertBeforeIndex));
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
@@ -10819,7 +10834,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.2+sha-40bb45f');
+const VERSION = new Version('17.0.0-next.2+sha-1aff106');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -18589,7 +18604,7 @@ function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, 
     // Embedded views follow the change detection strategy of the view they're declared in.
     const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
     const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
-    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.hydrationInfo ?? null);
+    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.dehydratedView ?? null);
     const declarationLContainer = declarationLView[templateTNode.index];
     ngDevMode && assertLContainer(declarationLContainer);
     embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
@@ -18610,6 +18625,16 @@ function getLViewFromLContainer(lContainer, index) {
         return lView;
     }
     return undefined;
+}
+/**
+ * Returns whether an elements that belong to a view should be
+ * inserted into the DOM. For client-only cases, DOM elements are
+ * always inserted. For hydration cases, we check whether serialized
+ * info is available for a view and the view is not in a "skip hydration"
+ * block (in which case view contents was re-created, thus needing insertion).
+ */
+function shouldAddViewToDom(tNode, dehydratedView) {
+    return !dehydratedView || hasInSkipHydrationBlockFlag(tNode);
 }
 function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
     const tView = lView[TVIEW];
@@ -19624,8 +19649,598 @@ function getExistingTNode(tView, index) {
     return tNode;
 }
 
+/**
+ * Removes all dehydrated views from a given LContainer:
+ * both in internal data structure, as well as removing
+ * corresponding DOM nodes that belong to that dehydrated view.
+ */
+function removeDehydratedViews(lContainer) {
+    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
+    const parentLView = lContainer[PARENT];
+    const renderer = parentLView[RENDERER];
+    for (const view of views) {
+        removeDehydratedView(view, renderer);
+        ngDevMode && ngDevMode.dehydratedViewsRemoved++;
+    }
+    // Reset the value to an empty array to indicate that no
+    // further processing of dehydrated views is needed for
+    // this view container (i.e. do not trigger the lookup process
+    // once again in case a `ViewContainerRef` is created later).
+    lContainer[DEHYDRATED_VIEWS] = EMPTY_ARRAY;
+}
+/**
+ * Helper function to remove all nodes from a dehydrated view.
+ */
+function removeDehydratedView(dehydratedView, renderer) {
+    let nodesRemoved = 0;
+    let currentRNode = dehydratedView.firstChild;
+    if (currentRNode) {
+        const numNodes = dehydratedView.data[NUM_ROOT_NODES];
+        while (nodesRemoved < numNodes) {
+            ngDevMode && validateSiblingNodeExists(currentRNode);
+            const nextSibling = currentRNode.nextSibling;
+            nativeRemoveNode(renderer, currentRNode, false);
+            currentRNode = nextSibling;
+            nodesRemoved++;
+        }
+    }
+}
+/**
+ * Walks over all views within this LContainer invokes dehydrated views
+ * cleanup function for each one.
+ */
+function cleanupLContainer(lContainer) {
+    removeDehydratedViews(lContainer);
+    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        cleanupLView(lContainer[i]);
+    }
+}
+/**
+ * Walks over `LContainer`s and components registered within
+ * this LView and invokes dehydrated views cleanup function for each one.
+ */
+function cleanupLView(lView) {
+    const tView = lView[TVIEW];
+    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
+        if (isLContainer(lView[i])) {
+            const lContainer = lView[i];
+            cleanupLContainer(lContainer);
+        }
+        else if (isLView(lView[i])) {
+            // This is a component, enter the `cleanupLView` recursively.
+            cleanupLView(lView[i]);
+        }
+    }
+}
+/**
+ * Walks over all views registered within the ApplicationRef and removes
+ * all dehydrated views from all `LContainer`s along the way.
+ */
+function cleanupDehydratedViews(appRef) {
+    const viewRefs = appRef._views;
+    for (const viewRef of viewRefs) {
+        const lNode = getLNodeForHydration(viewRef);
+        // An `lView` might be `null` if a `ViewRef` represents
+        // an embedded view (not a component view).
+        if (lNode !== null && lNode[HOST] !== null) {
+            if (isLView(lNode)) {
+                cleanupLView(lNode);
+            }
+            else {
+                // Cleanup in the root component view
+                const componentLView = lNode[HOST];
+                cleanupLView(componentLView);
+                // Cleanup in all views within this view container
+                cleanupLContainer(lNode);
+            }
+            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
+        }
+    }
+}
+
+/**
+ * Given a current DOM node and a serialized information about the views
+ * in a container, walks over the DOM structure, collecting the list of
+ * dehydrated views.
+ */
+function locateDehydratedViewsInContainer(currentRNode, serializedViews) {
+    const dehydratedViews = [];
+    for (const serializedView of serializedViews) {
+        // Repeats a view multiple times as needed, based on the serialized information
+        // (for example, for *ngFor-produced views).
+        for (let i = 0; i < (serializedView[MULTIPLIER] ?? 1); i++) {
+            const view = {
+                data: serializedView,
+                firstChild: null,
+            };
+            if (serializedView[NUM_ROOT_NODES] > 0) {
+                // Keep reference to the first node in this view,
+                // so it can be accessed while invoking template instructions.
+                view.firstChild = currentRNode;
+                // Move over to the next node after this view, which can
+                // either be a first node of the next view or an anchor comment
+                // node after the last view in a container.
+                currentRNode = siblingAfter(serializedView[NUM_ROOT_NODES], currentRNode);
+            }
+            dehydratedViews.push(view);
+        }
+    }
+    return [currentRNode, dehydratedViews];
+}
+/**
+ * Reference to a function that searches for a matching dehydrated views
+ * stored on a given lContainer.
+ * Returns `null` by default, when hydration is not enabled.
+ */
+let _findMatchingDehydratedViewImpl = (lContainer, template) => null;
+/**
+ * Retrieves the next dehydrated view from the LContainer and verifies that
+ * it matches a given template id (from the TView that was used to create this
+ * instance of a view). If the id doesn't match, that means that we are in an
+ * unexpected state and can not complete the reconciliation process. Thus,
+ * all dehydrated views from this LContainer are removed (including corresponding
+ * DOM nodes) and the rendering is performed as if there were no dehydrated views
+ * in this container.
+ */
+function findMatchingDehydratedViewImpl(lContainer, template) {
+    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
+    if (!template || views.length === 0) {
+        return null;
+    }
+    const view = views[0];
+    // Verify whether the first dehydrated view in the container matches
+    // the template id passed to this function (that originated from a TView
+    // that was used to create an instance of an embedded or component views.
+    if (view.data[TEMPLATE_ID] === template) {
+        // If the template id matches - extract the first view and return it.
+        return views.shift();
+    }
+    else {
+        // Otherwise, we are at the state when reconciliation can not be completed,
+        // thus we remove all dehydrated views within this container (remove them
+        // from internal data structures as well as delete associated elements from
+        // the DOM tree).
+        removeDehydratedViews(lContainer);
+        return null;
+    }
+}
+function enableFindMatchingDehydratedViewImpl() {
+    _findMatchingDehydratedViewImpl = findMatchingDehydratedViewImpl;
+}
+function findMatchingDehydratedView(lContainer, template) {
+    return _findMatchingDehydratedViewImpl(lContainer, template);
+}
+
+/**
+ * Represents a container where one or more views can be attached to a component.
+ *
+ * Can contain *host views* (created by instantiating a
+ * component with the `createComponent()` method), and *embedded views*
+ * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
+ *
+ * A view container instance can contain other view containers,
+ * creating a [view hierarchy](guide/glossary#view-hierarchy).
+ *
+ * @usageNotes
+ *
+ * The example below demonstrates how the `createComponent` function can be used
+ * to create an instance of a ComponentRef dynamically and attach it to an ApplicationRef,
+ * so that it gets included into change detection cycles.
+ *
+ * Note: the example uses standalone components, but the function can also be used for
+ * non-standalone components (declared in an NgModule) as well.
+ *
+ * ```typescript
+ * @Component({
+ *   standalone: true,
+ *   selector: 'dynamic',
+ *   template: `<span>This is a content of a dynamic component.</span>`,
+ * })
+ * class DynamicComponent {
+ *   vcr = inject(ViewContainerRef);
+ * }
+ *
+ * @Component({
+ *   standalone: true,
+ *   selector: 'app',
+ *   template: `<main>Hi! This is the main content.</main>`,
+ * })
+ * class AppComponent {
+ *   vcr = inject(ViewContainerRef);
+ *
+ *   ngAfterViewInit() {
+ *     const compRef = this.vcr.createComponent(DynamicComponent);
+ *     compRef.changeDetectorRef.detectChanges();
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link ComponentRef}
+ * @see {@link EmbeddedViewRef}
+ *
+ * @publicApi
+ */
+class ViewContainerRef {
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ELEMENT_ID__ = injectViewContainerRef; }
+}
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @returns The ViewContainerRef instance to use
+ */
+function injectViewContainerRef() {
+    const previousTNode = getCurrentTNode();
+    return createContainerRef(previousTNode, getLView());
+}
+const VE_ViewContainerRef = ViewContainerRef;
+// TODO(alxhub): cleaning up this indirection triggers a subtle bug in Closure in g3. Once the fix
+// for that lands, this can be cleaned up.
+const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
+    constructor(_lContainer, _hostTNode, _hostLView) {
+        super();
+        this._lContainer = _lContainer;
+        this._hostTNode = _hostTNode;
+        this._hostLView = _hostLView;
+    }
+    get element() {
+        return createElementRef(this._hostTNode, this._hostLView);
+    }
+    get injector() {
+        return new NodeInjector(this._hostTNode, this._hostLView);
+    }
+    /** @deprecated No replacement */
+    get parentInjector() {
+        const parentLocation = getParentInjectorLocation(this._hostTNode, this._hostLView);
+        if (hasParentInjector(parentLocation)) {
+            const parentView = getParentInjectorView(parentLocation, this._hostLView);
+            const injectorIndex = getParentInjectorIndex(parentLocation);
+            ngDevMode && assertNodeInjector(parentView, injectorIndex);
+            const parentTNode = parentView[TVIEW].data[injectorIndex + 8 /* NodeInjectorOffset.TNODE */];
+            return new NodeInjector(parentTNode, parentView);
+        }
+        else {
+            return new NodeInjector(null, this._hostLView);
+        }
+    }
+    clear() {
+        while (this.length > 0) {
+            this.remove(this.length - 1);
+        }
+    }
+    get(index) {
+        const viewRefs = getViewRefs(this._lContainer);
+        return viewRefs !== null && viewRefs[index] || null;
+    }
+    get length() {
+        return this._lContainer.length - CONTAINER_HEADER_OFFSET;
+    }
+    createEmbeddedView(templateRef, context, indexOrOptions) {
+        let index;
+        let injector;
+        if (typeof indexOrOptions === 'number') {
+            index = indexOrOptions;
+        }
+        else if (indexOrOptions != null) {
+            index = indexOrOptions.index;
+            injector = indexOrOptions.injector;
+        }
+        const dehydratedView = findMatchingDehydratedView(this._lContainer, templateRef.ssrId);
+        const viewRef = templateRef.createEmbeddedViewImpl(context || {}, injector, dehydratedView);
+        this.insertImpl(viewRef, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
+        return viewRef;
+    }
+    createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, environmentInjector) {
+        const isComponentFactory = componentFactoryOrType && !isType(componentFactoryOrType);
+        let index;
+        // This function supports 2 signatures and we need to handle options correctly for both:
+        //   1. When first argument is a Component type. This signature also requires extra
+        //      options to be provided as object (more ergonomic option).
+        //   2. First argument is a Component factory. In this case extra options are represented as
+        //      positional arguments. This signature is less ergonomic and will be deprecated.
+        if (isComponentFactory) {
+            if (ngDevMode) {
+                assertEqual(typeof indexOrOptions !== 'object', true, 'It looks like Component factory was provided as the first argument ' +
+                    'and an options object as the second argument. This combination of arguments ' +
+                    'is incompatible. You can either change the first argument to provide Component ' +
+                    'type or change the second argument to be a number (representing an index at ' +
+                    'which to insert the new component\'s host view into this container)');
+            }
+            index = indexOrOptions;
+        }
+        else {
+            if (ngDevMode) {
+                assertDefined(getComponentDef(componentFactoryOrType), `Provided Component class doesn't contain Component definition. ` +
+                    `Please check whether provided class has @Component decorator.`);
+                assertEqual(typeof indexOrOptions !== 'number', true, 'It looks like Component type was provided as the first argument ' +
+                    'and a number (representing an index at which to insert the new component\'s ' +
+                    'host view into this container as the second argument. This combination of arguments ' +
+                    'is incompatible. Please use an object as the second argument instead.');
+            }
+            const options = (indexOrOptions || {});
+            if (ngDevMode && options.environmentInjector && options.ngModuleRef) {
+                throwError(`Cannot pass both environmentInjector and ngModuleRef options to createComponent().`);
+            }
+            index = options.index;
+            injector = options.injector;
+            projectableNodes = options.projectableNodes;
+            environmentInjector = options.environmentInjector || options.ngModuleRef;
+        }
+        const componentFactory = isComponentFactory ?
+            componentFactoryOrType :
+            new ComponentFactory(getComponentDef(componentFactoryOrType));
+        const contextInjector = injector || this.parentInjector;
+        // If an `NgModuleRef` is not provided explicitly, try retrieving it from the DI tree.
+        if (!environmentInjector && componentFactory.ngModule == null) {
+            // For the `ComponentFactory` case, entering this logic is very unlikely, since we expect that
+            // an instance of a `ComponentFactory`, resolved via `ComponentFactoryResolver` would have an
+            // `ngModule` field. This is possible in some test scenarios and potentially in some JIT-based
+            // use-cases. For the `ComponentFactory` case we preserve backwards-compatibility and try
+            // using a provided injector first, then fall back to the parent injector of this
+            // `ViewContainerRef` instance.
+            //
+            // For the factory-less case, it's critical to establish a connection with the module
+            // injector tree (by retrieving an instance of an `NgModuleRef` and accessing its injector),
+            // so that a component can use DI tokens provided in MgModules. For this reason, we can not
+            // rely on the provided injector, since it might be detached from the DI tree (for example, if
+            // it was created via `Injector.create` without specifying a parent injector, or if an
+            // injector is retrieved from an `NgModuleRef` created via `createNgModule` using an
+            // NgModule outside of a module tree). Instead, we always use `ViewContainerRef`'s parent
+            // injector, which is normally connected to the DI tree, which includes module injector
+            // subtree.
+            const _injector = isComponentFactory ? contextInjector : this.parentInjector;
+            // DO NOT REFACTOR. The code here used to have a `injector.get(NgModuleRef, null) ||
+            // undefined` expression which seems to cause internal google apps to fail. This is documented
+            // in the following internal bug issue: go/b/142967802
+            const result = _injector.get(EnvironmentInjector, null);
+            if (result) {
+                environmentInjector = result;
+            }
+        }
+        const componentDef = getComponentDef(componentFactory.componentType ?? {});
+        const dehydratedView = findMatchingDehydratedView(this._lContainer, componentDef?.id ?? null);
+        const rNode = dehydratedView?.firstChild ?? null;
+        const componentRef = componentFactory.create(contextInjector, projectableNodes, rNode, environmentInjector);
+        this.insertImpl(componentRef.hostView, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
+        return componentRef;
+    }
+    insert(viewRef, index) {
+        return this.insertImpl(viewRef, index, true);
+    }
+    insertImpl(viewRef, index, addToDOM) {
+        const lView = viewRef._lView;
+        if (ngDevMode && viewRef.destroyed) {
+            throw new Error('Cannot insert a destroyed View in a ViewContainer!');
+        }
+        if (viewAttachedToContainer(lView)) {
+            // If view is already attached, detach it first so we clean up references appropriately.
+            const prevIdx = this.indexOf(viewRef);
+            // A view might be attached either to this or a different container. The `prevIdx` for
+            // those cases will be:
+            // equal to -1 for views attached to this ViewContainerRef
+            // >= 0 for views attached to a different ViewContainerRef
+            if (prevIdx !== -1) {
+                this.detach(prevIdx);
+            }
+            else {
+                const prevLContainer = lView[PARENT];
+                ngDevMode &&
+                    assertEqual(isLContainer(prevLContainer), true, 'An attached view should have its PARENT point to a container.');
+                // We need to re-create a R3ViewContainerRef instance since those are not stored on
+                // LView (nor anywhere else).
+                const prevVCRef = new R3ViewContainerRef(prevLContainer, prevLContainer[T_HOST], prevLContainer[PARENT]);
+                prevVCRef.detach(prevVCRef.indexOf(viewRef));
+            }
+        }
+        // Logical operation of adding `LView` to `LContainer`
+        const adjustedIdx = this._adjustIndex(index);
+        const lContainer = this._lContainer;
+        addLViewToLContainer(lContainer, lView, adjustedIdx, addToDOM);
+        viewRef.attachToViewContainerRef();
+        addToArray(getOrCreateViewRefs(lContainer), adjustedIdx, viewRef);
+        return viewRef;
+    }
+    move(viewRef, newIndex) {
+        if (ngDevMode && viewRef.destroyed) {
+            throw new Error('Cannot move a destroyed View in a ViewContainer!');
+        }
+        return this.insert(viewRef, newIndex);
+    }
+    indexOf(viewRef) {
+        const viewRefsArr = getViewRefs(this._lContainer);
+        return viewRefsArr !== null ? viewRefsArr.indexOf(viewRef) : -1;
+    }
+    remove(index) {
+        const adjustedIdx = this._adjustIndex(index, -1);
+        const detachedView = detachView(this._lContainer, adjustedIdx);
+        if (detachedView) {
+            // Before destroying the view, remove it from the container's array of `ViewRef`s.
+            // This ensures the view container length is updated before calling
+            // `destroyLView`, which could recursively call view container methods that
+            // rely on an accurate container length.
+            // (e.g. a method on this view container being called by a child directive's OnDestroy
+            // lifecycle hook)
+            removeFromArray(getOrCreateViewRefs(this._lContainer), adjustedIdx);
+            destroyLView(detachedView[TVIEW], detachedView);
+        }
+    }
+    detach(index) {
+        const adjustedIdx = this._adjustIndex(index, -1);
+        const view = detachView(this._lContainer, adjustedIdx);
+        const wasDetached = view && removeFromArray(getOrCreateViewRefs(this._lContainer), adjustedIdx) != null;
+        return wasDetached ? new ViewRef$1(view) : null;
+    }
+    _adjustIndex(index, shift = 0) {
+        if (index == null) {
+            return this.length + shift;
+        }
+        if (ngDevMode) {
+            assertGreaterThan(index, -1, `ViewRef index must be positive, got ${index}`);
+            // +1 because it's legal to insert at the end.
+            assertLessThan(index, this.length + 1 + shift, 'index');
+        }
+        return index;
+    }
+};
+function getViewRefs(lContainer) {
+    return lContainer[VIEW_REFS];
+}
+function getOrCreateViewRefs(lContainer) {
+    return (lContainer[VIEW_REFS] || (lContainer[VIEW_REFS] = []));
+}
+/**
+ * Creates a ViewContainerRef and stores it on the injector.
+ *
+ * @param hostTNode The node that is requesting a ViewContainerRef
+ * @param hostLView The view to which the node belongs
+ * @returns The ViewContainerRef instance to use
+ */
+function createContainerRef(hostTNode, hostLView) {
+    ngDevMode && assertTNodeType(hostTNode, 12 /* TNodeType.AnyContainer */ | 3 /* TNodeType.AnyRNode */);
+    let lContainer;
+    const slotValue = hostLView[hostTNode.index];
+    if (isLContainer(slotValue)) {
+        // If the host is a container, we don't need to create a new LContainer
+        lContainer = slotValue;
+    }
+    else {
+        // An LContainer anchor can not be `null`, but we set it here temporarily
+        // and update to the actual value later in this function (see
+        // `_locateOrCreateAnchorNode`).
+        lContainer = createLContainer(slotValue, hostLView, null, hostTNode);
+        hostLView[hostTNode.index] = lContainer;
+        addToViewTree(hostLView, lContainer);
+    }
+    _locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue);
+    return new R3ViewContainerRef(lContainer, hostTNode, hostLView);
+}
+/**
+ * Creates and inserts a comment node that acts as an anchor for a view container.
+ *
+ * If the host is a regular element, we have to insert a comment node manually which will
+ * be used as an anchor when inserting elements. In this specific case we use low-level DOM
+ * manipulation to insert it.
+ */
+function insertAnchorNode(hostLView, hostTNode) {
+    const renderer = hostLView[RENDERER];
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    const commentNode = renderer.createComment(ngDevMode ? 'container' : '');
+    const hostNative = getNativeByTNode(hostTNode, hostLView);
+    const parentOfHostNative = nativeParentNode(renderer, hostNative);
+    nativeInsertBefore(renderer, parentOfHostNative, commentNode, nativeNextSibling(renderer, hostNative), false);
+    return commentNode;
+}
+let _locateOrCreateAnchorNode = createAnchorNode;
+let _populateDehydratedViewsInContainer = (lContainer, lView, tNode) => false; // noop by default
+/**
+ * Looks up dehydrated views that belong to a given LContainer and populates
+ * this information into the `LContainer[DEHYDRATED_VIEWS]` slot. When running
+ * in client-only mode, this function is a noop.
+ *
+ * @param lContainer LContainer that should be populated.
+ * @returns a boolean flag that indicates whether a populating operation
+ *   was successful. The operation might be unsuccessful in case is has completed
+ *   previously, we are rendering in client-only mode or this content is located
+ *   in a skip hydration section.
+ */
+function populateDehydratedViewsInContainer(lContainer) {
+    return _populateDehydratedViewsInContainer(lContainer, getLView(), getCurrentTNode());
+}
+/**
+ * Regular creation mode: an anchor is created and
+ * assigned to the `lContainer[NATIVE]` slot.
+ */
+function createAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
+    // We already have a native element (anchor) set, return.
+    if (lContainer[NATIVE])
+        return;
+    let commentNode;
+    // If the host is an element container, the native host element is guaranteed to be a
+    // comment and we can reuse that comment as anchor element for the new LContainer.
+    // The comment node in question is already part of the DOM structure so we don't need to append
+    // it again.
+    if (hostTNode.type & 8 /* TNodeType.ElementContainer */) {
+        commentNode = unwrapRNode(slotValue);
+    }
+    else {
+        commentNode = insertAnchorNode(hostLView, hostTNode);
+    }
+    lContainer[NATIVE] = commentNode;
+}
+/**
+ * Hydration logic that looks up all dehydrated views in this container
+ * and puts them into `lContainer[DEHYDRATED_VIEWS]` slot.
+ *
+ * @returns a boolean flag that indicates whether a populating operation
+ *   was successful. The operation might be unsuccessful in case is has completed
+ *   previously, we are rendering in client-only mode or this content is located
+ *   in a skip hydration section.
+ */
+function populateDehydratedViewsInContainerImpl(lContainer, hostLView, hostTNode) {
+    // We already have a native element (anchor) set and the process
+    // of finding dehydrated views happened (so the `lContainer[DEHYDRATED_VIEWS]`
+    // is not null), exit early.
+    if (lContainer[NATIVE] && lContainer[DEHYDRATED_VIEWS]) {
+        return true;
+    }
+    const hydrationInfo = hostLView[HYDRATION];
+    const noOffsetIndex = hostTNode.index - HEADER_OFFSET;
+    // TODO(akushnir): this should really be a single condition, refactor the code
+    // to use `hasInSkipHydrationBlockFlag` logic inside `isInSkipHydrationBlock`.
+    const skipHydration = isInSkipHydrationBlock(hostTNode) || hasInSkipHydrationBlockFlag(hostTNode);
+    const isNodeCreationMode = !hydrationInfo || skipHydration || isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return false;
+    }
+    // Hydration mode, looking up an anchor node and dehydrated views in DOM.
+    const currentRNode = getSegmentHead(hydrationInfo, noOffsetIndex);
+    const serializedViews = hydrationInfo.data[CONTAINERS]?.[noOffsetIndex];
+    ngDevMode &&
+        assertDefined(serializedViews, 'Unexpected state: no hydration info available for a given TNode, ' +
+            'which represents a view container.');
+    const [commentNode, dehydratedViews] = locateDehydratedViewsInContainer(currentRNode, serializedViews);
+    if (ngDevMode) {
+        validateMatchingNode(commentNode, Node.COMMENT_NODE, null, hostLView, hostTNode, true);
+        // Do not throw in case this node is already claimed (thus `false` as a second
+        // argument). If this container is created based on an `<ng-template>`, the comment
+        // node would be already claimed from the `template` instruction. If an element acts
+        // as an anchor (e.g. <div #vcRef>), a separate comment node would be created/located,
+        // so we need to claim it here.
+        markRNodeAsClaimedByHydration(commentNode, false);
+    }
+    lContainer[NATIVE] = commentNode;
+    lContainer[DEHYDRATED_VIEWS] = dehydratedViews;
+    return true;
+}
+function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
+    if (!_populateDehydratedViewsInContainer(lContainer, hostLView, hostTNode)) {
+        // Populating dehydrated views operation returned `false`, which indicates
+        // that the logic was running in client-only mode, this an anchor comment
+        // node should be created for this container.
+        createAnchorNode(lContainer, hostLView, hostTNode, slotValue);
+    }
+}
+function enableLocateOrCreateContainerRefImpl() {
+    _locateOrCreateAnchorNode = locateOrCreateAnchorNode;
+    _populateDehydratedViewsInContainer = populateDehydratedViewsInContainerImpl;
+}
+
 const DEFER_BLOCK_STATE = 0;
 
+/**
+ * Returns whether defer blocks should be triggered.
+ *
+ * Currently, defer blocks are not triggered on the server,
+ * only placeholder content is rendered (if provided).
+ */
+function shouldTriggerDeferBlock(injector) {
+    return isPlatformBrowser(injector);
+}
 /**
  * Shims for the `requestIdleCallback` and `cancelIdleCallback` functions for environments
  * where those functions are not available (e.g. Node.js).
@@ -19672,6 +20287,10 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
         };
         setTDeferBlockDetails(tView, adjustedIndex, deferBlockConfig);
     }
+    // Lookup dehydrated views that belong to this LContainer.
+    // In client-only mode, this operation is noop.
+    const lContainer = lView[adjustedIndex];
+    populateDehydratedViewsInContainer(lContainer);
     // Init instance-specific defer details and store it.
     const lDetails = [];
     lDetails[DEFER_BLOCK_STATE] = 0 /* DeferBlockInstanceState.INITIAL */;
@@ -19872,8 +20491,9 @@ function renderDeferBlockState(newState, tNode, lContainer, stateTmplIndex) {
         // represents a `{#defer}` block, so always refer to the first one.
         const viewIndex = 0;
         removeLViewFromLContainer(lContainer, viewIndex);
-        const embeddedLView = createAndRenderEmbeddedLView(hostLView, tNode, null);
-        addLViewToLContainer(lContainer, embeddedLView, viewIndex);
+        const dehydratedView = findMatchingDehydratedView(lContainer, tNode.tView.ssrId);
+        const embeddedLView = createAndRenderEmbeddedLView(hostLView, tNode, null, { dehydratedView });
+        addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(tNode, dehydratedView));
     }
 }
 /**
@@ -19885,6 +20505,8 @@ function renderDeferBlockState(newState, tNode, lContainer, stateTmplIndex) {
  */
 function triggerResourceLoading(tDetails, primaryBlockTNode, injector) {
     const tView = primaryBlockTNode.tView;
+    if (!shouldTriggerDeferBlock(injector))
+        return;
     if (tDetails.loadingState !== 0 /* DeferDependenciesLoadingState.NOT_STARTED */) {
         // If the loading status is different from initial one, it means that
         // the loading of dependencies is in progress and there is nothing to do
@@ -19992,7 +20614,10 @@ function getPrimaryBlockTNode(tView, tDetails) {
 function triggerDeferBlock(lView, tNode) {
     const tView = lView[TVIEW];
     const lContainer = lView[tNode.index];
+    const injector = lView[INJECTOR$1];
     ngDevMode && assertLContainer(lContainer);
+    if (!shouldTriggerDeferBlock(injector))
+        return;
     const tDetails = getTDeferBlockDetails(tView, tNode);
     // Condition is triggered, try to render loading state and start downloading.
     // Note: if a block is in a loading, completed or an error state, this call would be a noop.
@@ -26079,8 +26704,8 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
     /**
      * @internal
      */
-    createEmbeddedViewImpl(context, injector, hydrationInfo) {
-        const embeddedLView = createAndRenderEmbeddedLView(this._declarationLView, this._declarationTContainer, context, { injector, hydrationInfo });
+    createEmbeddedViewImpl(context, injector, dehydratedView) {
+        const embeddedLView = createAndRenderEmbeddedLView(this._declarationLView, this._declarationTContainer, context, { injector, dehydratedView });
         return new ViewRef$1(embeddedLView);
     }
 };
@@ -26105,566 +26730,6 @@ function createTemplateRef(hostTNode, hostLView) {
         return new R3TemplateRef(hostLView, hostTNode, createElementRef(hostTNode, hostLView));
     }
     return null;
-}
-
-/**
- * Removes all dehydrated views from a given LContainer:
- * both in internal data structure, as well as removing
- * corresponding DOM nodes that belong to that dehydrated view.
- */
-function removeDehydratedViews(lContainer) {
-    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
-    const parentLView = lContainer[PARENT];
-    const renderer = parentLView[RENDERER];
-    for (const view of views) {
-        removeDehydratedView(view, renderer);
-        ngDevMode && ngDevMode.dehydratedViewsRemoved++;
-    }
-    // Reset the value to an empty array to indicate that no
-    // further processing of dehydrated views is needed for
-    // this view container (i.e. do not trigger the lookup process
-    // once again in case a `ViewContainerRef` is created later).
-    lContainer[DEHYDRATED_VIEWS] = EMPTY_ARRAY;
-}
-/**
- * Helper function to remove all nodes from a dehydrated view.
- */
-function removeDehydratedView(dehydratedView, renderer) {
-    let nodesRemoved = 0;
-    let currentRNode = dehydratedView.firstChild;
-    if (currentRNode) {
-        const numNodes = dehydratedView.data[NUM_ROOT_NODES];
-        while (nodesRemoved < numNodes) {
-            ngDevMode && validateSiblingNodeExists(currentRNode);
-            const nextSibling = currentRNode.nextSibling;
-            nativeRemoveNode(renderer, currentRNode, false);
-            currentRNode = nextSibling;
-            nodesRemoved++;
-        }
-    }
-}
-/**
- * Walks over all views within this LContainer invokes dehydrated views
- * cleanup function for each one.
- */
-function cleanupLContainer(lContainer) {
-    removeDehydratedViews(lContainer);
-    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-        cleanupLView(lContainer[i]);
-    }
-}
-/**
- * Walks over `LContainer`s and components registered within
- * this LView and invokes dehydrated views cleanup function for each one.
- */
-function cleanupLView(lView) {
-    const tView = lView[TVIEW];
-    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
-        if (isLContainer(lView[i])) {
-            const lContainer = lView[i];
-            cleanupLContainer(lContainer);
-        }
-        else if (Array.isArray(lView[i])) {
-            // This is a component, enter the `cleanupLView` recursively.
-            cleanupLView(lView[i]);
-        }
-    }
-}
-/**
- * Walks over all views registered within the ApplicationRef and removes
- * all dehydrated views from all `LContainer`s along the way.
- */
-function cleanupDehydratedViews(appRef) {
-    const viewRefs = appRef._views;
-    for (const viewRef of viewRefs) {
-        const lNode = getLNodeForHydration(viewRef);
-        // An `lView` might be `null` if a `ViewRef` represents
-        // an embedded view (not a component view).
-        if (lNode !== null && lNode[HOST] !== null) {
-            if (isLView(lNode)) {
-                cleanupLView(lNode);
-            }
-            else {
-                // Cleanup in the root component view
-                const componentLView = lNode[HOST];
-                cleanupLView(componentLView);
-                // Cleanup in all views within this view container
-                cleanupLContainer(lNode);
-            }
-            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
-        }
-    }
-}
-
-/**
- * Given a current DOM node and a serialized information about the views
- * in a container, walks over the DOM structure, collecting the list of
- * dehydrated views.
- */
-function locateDehydratedViewsInContainer(currentRNode, serializedViews) {
-    const dehydratedViews = [];
-    for (const serializedView of serializedViews) {
-        // Repeats a view multiple times as needed, based on the serialized information
-        // (for example, for *ngFor-produced views).
-        for (let i = 0; i < (serializedView[MULTIPLIER] ?? 1); i++) {
-            const view = {
-                data: serializedView,
-                firstChild: null,
-            };
-            if (serializedView[NUM_ROOT_NODES] > 0) {
-                // Keep reference to the first node in this view,
-                // so it can be accessed while invoking template instructions.
-                view.firstChild = currentRNode;
-                // Move over to the next node after this view, which can
-                // either be a first node of the next view or an anchor comment
-                // node after the last view in a container.
-                currentRNode = siblingAfter(serializedView[NUM_ROOT_NODES], currentRNode);
-            }
-            dehydratedViews.push(view);
-        }
-    }
-    return [currentRNode, dehydratedViews];
-}
-/**
- * Reference to a function that searches for a matching dehydrated views
- * stored on a given lContainer.
- * Returns `null` by default, when hydration is not enabled.
- */
-let _findMatchingDehydratedViewImpl = (lContainer, template) => null;
-/**
- * Retrieves the next dehydrated view from the LContainer and verifies that
- * it matches a given template id (from the TView that was used to create this
- * instance of a view). If the id doesn't match, that means that we are in an
- * unexpected state and can not complete the reconciliation process. Thus,
- * all dehydrated views from this LContainer are removed (including corresponding
- * DOM nodes) and the rendering is performed as if there were no dehydrated views
- * in this container.
- */
-function findMatchingDehydratedViewImpl(lContainer, template) {
-    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
-    if (!template || views.length === 0) {
-        return null;
-    }
-    const view = views[0];
-    // Verify whether the first dehydrated view in the container matches
-    // the template id passed to this function (that originated from a TView
-    // that was used to create an instance of an embedded or component views.
-    if (view.data[TEMPLATE_ID] === template) {
-        // If the template id matches - extract the first view and return it.
-        return views.shift();
-    }
-    else {
-        // Otherwise, we are at the state when reconciliation can not be completed,
-        // thus we remove all dehydrated views within this container (remove them
-        // from internal data structures as well as delete associated elements from
-        // the DOM tree).
-        removeDehydratedViews(lContainer);
-        return null;
-    }
-}
-function enableFindMatchingDehydratedViewImpl() {
-    _findMatchingDehydratedViewImpl = findMatchingDehydratedViewImpl;
-}
-function findMatchingDehydratedView(lContainer, template) {
-    return _findMatchingDehydratedViewImpl(lContainer, template);
-}
-
-/**
- * Represents a container where one or more views can be attached to a component.
- *
- * Can contain *host views* (created by instantiating a
- * component with the `createComponent()` method), and *embedded views*
- * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
- *
- * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-hierarchy).
- *
- * @usageNotes
- *
- * The example below demonstrates how the `createComponent` function can be used
- * to create an instance of a ComponentRef dynamically and attach it to an ApplicationRef,
- * so that it gets included into change detection cycles.
- *
- * Note: the example uses standalone components, but the function can also be used for
- * non-standalone components (declared in an NgModule) as well.
- *
- * ```typescript
- * @Component({
- *   standalone: true,
- *   selector: 'dynamic',
- *   template: `<span>This is a content of a dynamic component.</span>`,
- * })
- * class DynamicComponent {
- *   vcr = inject(ViewContainerRef);
- * }
- *
- * @Component({
- *   standalone: true,
- *   selector: 'app',
- *   template: `<main>Hi! This is the main content.</main>`,
- * })
- * class AppComponent {
- *   vcr = inject(ViewContainerRef);
- *
- *   ngAfterViewInit() {
- *     const compRef = this.vcr.createComponent(DynamicComponent);
- *     compRef.changeDetectorRef.detectChanges();
- *   }
- * }
- * ```
- *
- * @see {@link ComponentRef}
- * @see {@link EmbeddedViewRef}
- *
- * @publicApi
- */
-class ViewContainerRef {
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static { this.__NG_ELEMENT_ID__ = injectViewContainerRef; }
-}
-/**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
- *
- * @returns The ViewContainerRef instance to use
- */
-function injectViewContainerRef() {
-    const previousTNode = getCurrentTNode();
-    return createContainerRef(previousTNode, getLView());
-}
-const VE_ViewContainerRef = ViewContainerRef;
-// TODO(alxhub): cleaning up this indirection triggers a subtle bug in Closure in g3. Once the fix
-// for that lands, this can be cleaned up.
-const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
-    constructor(_lContainer, _hostTNode, _hostLView) {
-        super();
-        this._lContainer = _lContainer;
-        this._hostTNode = _hostTNode;
-        this._hostLView = _hostLView;
-    }
-    get element() {
-        return createElementRef(this._hostTNode, this._hostLView);
-    }
-    get injector() {
-        return new NodeInjector(this._hostTNode, this._hostLView);
-    }
-    /** @deprecated No replacement */
-    get parentInjector() {
-        const parentLocation = getParentInjectorLocation(this._hostTNode, this._hostLView);
-        if (hasParentInjector(parentLocation)) {
-            const parentView = getParentInjectorView(parentLocation, this._hostLView);
-            const injectorIndex = getParentInjectorIndex(parentLocation);
-            ngDevMode && assertNodeInjector(parentView, injectorIndex);
-            const parentTNode = parentView[TVIEW].data[injectorIndex + 8 /* NodeInjectorOffset.TNODE */];
-            return new NodeInjector(parentTNode, parentView);
-        }
-        else {
-            return new NodeInjector(null, this._hostLView);
-        }
-    }
-    clear() {
-        while (this.length > 0) {
-            this.remove(this.length - 1);
-        }
-    }
-    get(index) {
-        const viewRefs = getViewRefs(this._lContainer);
-        return viewRefs !== null && viewRefs[index] || null;
-    }
-    get length() {
-        return this._lContainer.length - CONTAINER_HEADER_OFFSET;
-    }
-    createEmbeddedView(templateRef, context, indexOrOptions) {
-        let index;
-        let injector;
-        if (typeof indexOrOptions === 'number') {
-            index = indexOrOptions;
-        }
-        else if (indexOrOptions != null) {
-            index = indexOrOptions.index;
-            injector = indexOrOptions.injector;
-        }
-        const hydrationInfo = findMatchingDehydratedView(this._lContainer, templateRef.ssrId);
-        const viewRef = templateRef.createEmbeddedViewImpl(context || {}, injector, hydrationInfo);
-        // If there is a matching dehydrated view, but the host TNode is located in the skip
-        // hydration block, this means that the content was detached (as a part of the skip
-        // hydration logic) and it needs to be appended into the DOM.
-        const skipDomInsertion = !!hydrationInfo && !hasInSkipHydrationBlockFlag(this._hostTNode);
-        this.insertImpl(viewRef, index, skipDomInsertion);
-        return viewRef;
-    }
-    createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, environmentInjector) {
-        const isComponentFactory = componentFactoryOrType && !isType(componentFactoryOrType);
-        let index;
-        // This function supports 2 signatures and we need to handle options correctly for both:
-        //   1. When first argument is a Component type. This signature also requires extra
-        //      options to be provided as object (more ergonomic option).
-        //   2. First argument is a Component factory. In this case extra options are represented as
-        //      positional arguments. This signature is less ergonomic and will be deprecated.
-        if (isComponentFactory) {
-            if (ngDevMode) {
-                assertEqual(typeof indexOrOptions !== 'object', true, 'It looks like Component factory was provided as the first argument ' +
-                    'and an options object as the second argument. This combination of arguments ' +
-                    'is incompatible. You can either change the first argument to provide Component ' +
-                    'type or change the second argument to be a number (representing an index at ' +
-                    'which to insert the new component\'s host view into this container)');
-            }
-            index = indexOrOptions;
-        }
-        else {
-            if (ngDevMode) {
-                assertDefined(getComponentDef(componentFactoryOrType), `Provided Component class doesn't contain Component definition. ` +
-                    `Please check whether provided class has @Component decorator.`);
-                assertEqual(typeof indexOrOptions !== 'number', true, 'It looks like Component type was provided as the first argument ' +
-                    'and a number (representing an index at which to insert the new component\'s ' +
-                    'host view into this container as the second argument. This combination of arguments ' +
-                    'is incompatible. Please use an object as the second argument instead.');
-            }
-            const options = (indexOrOptions || {});
-            if (ngDevMode && options.environmentInjector && options.ngModuleRef) {
-                throwError(`Cannot pass both environmentInjector and ngModuleRef options to createComponent().`);
-            }
-            index = options.index;
-            injector = options.injector;
-            projectableNodes = options.projectableNodes;
-            environmentInjector = options.environmentInjector || options.ngModuleRef;
-        }
-        const componentFactory = isComponentFactory ?
-            componentFactoryOrType :
-            new ComponentFactory(getComponentDef(componentFactoryOrType));
-        const contextInjector = injector || this.parentInjector;
-        // If an `NgModuleRef` is not provided explicitly, try retrieving it from the DI tree.
-        if (!environmentInjector && componentFactory.ngModule == null) {
-            // For the `ComponentFactory` case, entering this logic is very unlikely, since we expect that
-            // an instance of a `ComponentFactory`, resolved via `ComponentFactoryResolver` would have an
-            // `ngModule` field. This is possible in some test scenarios and potentially in some JIT-based
-            // use-cases. For the `ComponentFactory` case we preserve backwards-compatibility and try
-            // using a provided injector first, then fall back to the parent injector of this
-            // `ViewContainerRef` instance.
-            //
-            // For the factory-less case, it's critical to establish a connection with the module
-            // injector tree (by retrieving an instance of an `NgModuleRef` and accessing its injector),
-            // so that a component can use DI tokens provided in MgModules. For this reason, we can not
-            // rely on the provided injector, since it might be detached from the DI tree (for example, if
-            // it was created via `Injector.create` without specifying a parent injector, or if an
-            // injector is retrieved from an `NgModuleRef` created via `createNgModule` using an
-            // NgModule outside of a module tree). Instead, we always use `ViewContainerRef`'s parent
-            // injector, which is normally connected to the DI tree, which includes module injector
-            // subtree.
-            const _injector = isComponentFactory ? contextInjector : this.parentInjector;
-            // DO NOT REFACTOR. The code here used to have a `injector.get(NgModuleRef, null) ||
-            // undefined` expression which seems to cause internal google apps to fail. This is documented
-            // in the following internal bug issue: go/b/142967802
-            const result = _injector.get(EnvironmentInjector, null);
-            if (result) {
-                environmentInjector = result;
-            }
-        }
-        const componentDef = getComponentDef(componentFactory.componentType ?? {});
-        const dehydratedView = findMatchingDehydratedView(this._lContainer, componentDef?.id ?? null);
-        const rNode = dehydratedView?.firstChild ?? null;
-        const componentRef = componentFactory.create(contextInjector, projectableNodes, rNode, environmentInjector);
-        // If there is a matching dehydrated view, but the host TNode is located in the skip
-        // hydration block, this means that the content was detached (as a part of the skip
-        // hydration logic) and it needs to be appended into the DOM.
-        const skipDomInsertion = !!dehydratedView && !hasInSkipHydrationBlockFlag(this._hostTNode);
-        this.insertImpl(componentRef.hostView, index, skipDomInsertion);
-        return componentRef;
-    }
-    insert(viewRef, index) {
-        return this.insertImpl(viewRef, index, false);
-    }
-    insertImpl(viewRef, index, skipDomInsertion) {
-        const lView = viewRef._lView;
-        const tView = lView[TVIEW];
-        if (ngDevMode && viewRef.destroyed) {
-            throw new Error('Cannot insert a destroyed View in a ViewContainer!');
-        }
-        if (viewAttachedToContainer(lView)) {
-            // If view is already attached, detach it first so we clean up references appropriately.
-            const prevIdx = this.indexOf(viewRef);
-            // A view might be attached either to this or a different container. The `prevIdx` for
-            // those cases will be:
-            // equal to -1 for views attached to this ViewContainerRef
-            // >= 0 for views attached to a different ViewContainerRef
-            if (prevIdx !== -1) {
-                this.detach(prevIdx);
-            }
-            else {
-                const prevLContainer = lView[PARENT];
-                ngDevMode &&
-                    assertEqual(isLContainer(prevLContainer), true, 'An attached view should have its PARENT point to a container.');
-                // We need to re-create a R3ViewContainerRef instance since those are not stored on
-                // LView (nor anywhere else).
-                const prevVCRef = new R3ViewContainerRef(prevLContainer, prevLContainer[T_HOST], prevLContainer[PARENT]);
-                prevVCRef.detach(prevVCRef.indexOf(viewRef));
-            }
-        }
-        // Logical operation of adding `LView` to `LContainer`
-        const adjustedIdx = this._adjustIndex(index);
-        const lContainer = this._lContainer;
-        addLViewToLContainer(lContainer, lView, adjustedIdx, !skipDomInsertion);
-        viewRef.attachToViewContainerRef();
-        addToArray(getOrCreateViewRefs(lContainer), adjustedIdx, viewRef);
-        return viewRef;
-    }
-    move(viewRef, newIndex) {
-        if (ngDevMode && viewRef.destroyed) {
-            throw new Error('Cannot move a destroyed View in a ViewContainer!');
-        }
-        return this.insert(viewRef, newIndex);
-    }
-    indexOf(viewRef) {
-        const viewRefsArr = getViewRefs(this._lContainer);
-        return viewRefsArr !== null ? viewRefsArr.indexOf(viewRef) : -1;
-    }
-    remove(index) {
-        const adjustedIdx = this._adjustIndex(index, -1);
-        const detachedView = detachView(this._lContainer, adjustedIdx);
-        if (detachedView) {
-            // Before destroying the view, remove it from the container's array of `ViewRef`s.
-            // This ensures the view container length is updated before calling
-            // `destroyLView`, which could recursively call view container methods that
-            // rely on an accurate container length.
-            // (e.g. a method on this view container being called by a child directive's OnDestroy
-            // lifecycle hook)
-            removeFromArray(getOrCreateViewRefs(this._lContainer), adjustedIdx);
-            destroyLView(detachedView[TVIEW], detachedView);
-        }
-    }
-    detach(index) {
-        const adjustedIdx = this._adjustIndex(index, -1);
-        const view = detachView(this._lContainer, adjustedIdx);
-        const wasDetached = view && removeFromArray(getOrCreateViewRefs(this._lContainer), adjustedIdx) != null;
-        return wasDetached ? new ViewRef$1(view) : null;
-    }
-    _adjustIndex(index, shift = 0) {
-        if (index == null) {
-            return this.length + shift;
-        }
-        if (ngDevMode) {
-            assertGreaterThan(index, -1, `ViewRef index must be positive, got ${index}`);
-            // +1 because it's legal to insert at the end.
-            assertLessThan(index, this.length + 1 + shift, 'index');
-        }
-        return index;
-    }
-};
-function getViewRefs(lContainer) {
-    return lContainer[VIEW_REFS];
-}
-function getOrCreateViewRefs(lContainer) {
-    return (lContainer[VIEW_REFS] || (lContainer[VIEW_REFS] = []));
-}
-/**
- * Creates a ViewContainerRef and stores it on the injector.
- *
- * @param hostTNode The node that is requesting a ViewContainerRef
- * @param hostLView The view to which the node belongs
- * @returns The ViewContainerRef instance to use
- */
-function createContainerRef(hostTNode, hostLView) {
-    ngDevMode && assertTNodeType(hostTNode, 12 /* TNodeType.AnyContainer */ | 3 /* TNodeType.AnyRNode */);
-    let lContainer;
-    const slotValue = hostLView[hostTNode.index];
-    if (isLContainer(slotValue)) {
-        // If the host is a container, we don't need to create a new LContainer
-        lContainer = slotValue;
-    }
-    else {
-        // An LContainer anchor can not be `null`, but we set it here temporarily
-        // and update to the actual value later in this function (see
-        // `_locateOrCreateAnchorNode`).
-        lContainer = createLContainer(slotValue, hostLView, null, hostTNode);
-        hostLView[hostTNode.index] = lContainer;
-        addToViewTree(hostLView, lContainer);
-    }
-    _locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue);
-    return new R3ViewContainerRef(lContainer, hostTNode, hostLView);
-}
-/**
- * Creates and inserts a comment node that acts as an anchor for a view container.
- *
- * If the host is a regular element, we have to insert a comment node manually which will
- * be used as an anchor when inserting elements. In this specific case we use low-level DOM
- * manipulation to insert it.
- */
-function insertAnchorNode(hostLView, hostTNode) {
-    const renderer = hostLView[RENDERER];
-    ngDevMode && ngDevMode.rendererCreateComment++;
-    const commentNode = renderer.createComment(ngDevMode ? 'container' : '');
-    const hostNative = getNativeByTNode(hostTNode, hostLView);
-    const parentOfHostNative = nativeParentNode(renderer, hostNative);
-    nativeInsertBefore(renderer, parentOfHostNative, commentNode, nativeNextSibling(renderer, hostNative), false);
-    return commentNode;
-}
-let _locateOrCreateAnchorNode = createAnchorNode;
-/**
- * Regular creation mode: an anchor is created and
- * assigned to the `lContainer[NATIVE]` slot.
- */
-function createAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
-    // We already have a native element (anchor) set, return.
-    if (lContainer[NATIVE])
-        return;
-    let commentNode;
-    // If the host is an element container, the native host element is guaranteed to be a
-    // comment and we can reuse that comment as anchor element for the new LContainer.
-    // The comment node in question is already part of the DOM structure so we don't need to append
-    // it again.
-    if (hostTNode.type & 8 /* TNodeType.ElementContainer */) {
-        commentNode = unwrapRNode(slotValue);
-    }
-    else {
-        commentNode = insertAnchorNode(hostLView, hostTNode);
-    }
-    lContainer[NATIVE] = commentNode;
-}
-/**
- * Hydration logic that looks up:
- *  - an anchor node in the DOM and stores the node in `lContainer[NATIVE]`
- *  - all dehydrated views in this container and puts them into `lContainer[DEHYDRATED_VIEWS]`
- */
-function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
-    // We already have a native element (anchor) set and the process
-    // of finding dehydrated views happened (so the `lContainer[DEHYDRATED_VIEWS]`
-    // is not null), exit early.
-    if (lContainer[NATIVE] && lContainer[DEHYDRATED_VIEWS])
-        return;
-    const hydrationInfo = hostLView[HYDRATION];
-    const noOffsetIndex = hostTNode.index - HEADER_OFFSET;
-    // TODO(akushnir): this should really be a single condition, refactor the code
-    // to use `hasInSkipHydrationBlockFlag` logic inside `isInSkipHydrationBlock`.
-    const skipHydration = isInSkipHydrationBlock(hostTNode) || hasInSkipHydrationBlockFlag(hostTNode);
-    const isNodeCreationMode = !hydrationInfo || skipHydration || isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
-    // Regular creation mode.
-    if (isNodeCreationMode) {
-        return createAnchorNode(lContainer, hostLView, hostTNode, slotValue);
-    }
-    // Hydration mode, looking up an anchor node and dehydrated views in DOM.
-    const currentRNode = getSegmentHead(hydrationInfo, noOffsetIndex);
-    const serializedViews = hydrationInfo.data[CONTAINERS]?.[noOffsetIndex];
-    ngDevMode &&
-        assertDefined(serializedViews, 'Unexpected state: no hydration info available for a given TNode, ' +
-            'which represents a view container.');
-    const [commentNode, dehydratedViews] = locateDehydratedViewsInContainer(currentRNode, serializedViews);
-    if (ngDevMode) {
-        validateMatchingNode(commentNode, Node.COMMENT_NODE, null, hostLView, hostTNode, true);
-        // Do not throw in case this node is already claimed (thus `false` as a second
-        // argument). If this container is created based on an `<ng-template>`, the comment
-        // node would be already claimed from the `template` instruction. If an element acts
-        // as an anchor (e.g. <div #vcRef>), a separate comment node would be created/located,
-        // so we need to claim it here.
-        markRNodeAsClaimedByHydration(commentNode, false);
-    }
-    lContainer[NATIVE] = commentNode;
-    lContainer[DEHYDRATED_VIEWS] = dehydratedViews;
-}
-function enableLocateOrCreateContainerRefImpl() {
-    _locateOrCreateAnchorNode = locateOrCreateAnchorNode;
 }
 
 class LQuery_ {
@@ -31894,11 +31959,13 @@ function serializeLView(lView, context) {
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
         const tNode = tView.data[i];
         const noOffsetIndex = i - HEADER_OFFSET;
-        // Local refs (e.g. <div #localRef>) take up an extra slot in LViews
-        // to store the same element. In this case, there is no information in
-        // a corresponding slot in TNode data structure. If that's the case, just
-        // skip this slot and move to the next one.
-        if (!tNode) {
+        // Skip processing of a given slot in the following cases:
+        // - Local refs (e.g. <div #localRef>) take up an extra slot in LViews
+        //   to store the same element. In this case, there is no information in
+        //   a corresponding slot in TNode data structure.
+        // - When a slot contains something other than a TNode. For example, there
+        //   might be some metadata information about a defer block or a control flow block.
+        if (!isTNodeShape(tNode)) {
             continue;
         }
         // Check if a native node that represents a given TNode is disconnected from the DOM tree.
