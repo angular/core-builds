@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.3+sha-f0ff388
+ * @license Angular v16.2.3+sha-6d3c497
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10256,7 +10256,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.3+sha-f0ff388');
+const VERSION = new Version('16.2.3+sha-6d3c497');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10960,6 +10960,9 @@ function forkInnerZoneWithAngularBehavior(zone) {
         name: 'angular',
         properties: { 'isAngularZone': true },
         onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
+            if (shouldBeIgnoredByZone(applyArgs)) {
+                return delegate.invokeTask(target, task, applyThis, applyArgs);
+            }
             try {
                 onEnter(zone);
                 return delegate.invokeTask(target, task, applyThis, applyArgs);
@@ -11110,6 +11113,18 @@ function isStableFactory() {
         };
     });
     return merge$1(isCurrentlyStable, isStable.pipe(share()));
+}
+function shouldBeIgnoredByZone(applyArgs) {
+    if (!Array.isArray(applyArgs)) {
+        return false;
+    }
+    // We should only ever get 1 arg passed through to invokeTask.
+    // Short circuit here incase that behavior changes.
+    if (applyArgs.length !== 1) {
+        return false;
+    }
+    // Prevent triggering change detection when the __ignore_ng_zone__ flag is detected.
+    return applyArgs[0].data?.['__ignore_ng_zone__'] === true;
 }
 
 // Public API for Zone
