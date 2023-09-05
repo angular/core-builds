@@ -1803,7 +1803,7 @@ var FunctionExpr = class extends Expression {
     this.name = name;
   }
   isEquivalent(e) {
-    return e instanceof FunctionExpr && areAllEquivalent(this.params, e.params) && areAllEquivalent(this.statements, e.statements);
+    return (e instanceof FunctionExpr || e instanceof DeclareFunctionStmt) && areAllEquivalent(this.params, e.params) && areAllEquivalent(this.statements, e.statements);
   }
   isConstant() {
     return false;
@@ -1844,6 +1844,9 @@ var ArrowFunctionExpr = class extends Expression {
   }
   clone() {
     return new ArrowFunctionExpr(this.params.map((p2) => p2.clone()), Array.isArray(this.body) ? this.body : this.body.clone(), this.type, this.sourceSpan);
+  }
+  toDeclStmt(name, modifiers) {
+    return new DeclareVarStmt(name, this, INFERRED_TYPE, modifiers, this.sourceSpan);
   }
 };
 var UnaryOperatorExpr = class extends Expression {
@@ -2478,6 +2481,21 @@ var ConstantPool = class {
       }))));
     }
   }
+  getSharedFunctionReference(fn2, prefix) {
+    var _a2;
+    const isArrow = fn2 instanceof ArrowFunctionExpr;
+    for (const current of this.statements) {
+      if (isArrow && current instanceof DeclareVarStmt && ((_a2 = current.value) == null ? void 0 : _a2.isEquivalent(fn2))) {
+        return variable(current.name);
+      }
+      if (!isArrow && current instanceof DeclareFunctionStmt && fn2.isEquivalent(current)) {
+        return variable(current.name);
+      }
+    }
+    const name = this.uniqueName(prefix);
+    this.statements.push(fn2.toDeclStmt(name, StmtModifier.Final));
+    return variable(name);
+  }
   _getLiteralFactory(key, values, resultMap) {
     let literalFactory = this.literalFactories.get(key);
     const literalFactoryArguments = values.filter((e) => !e.isConstant());
@@ -2787,6 +2805,9 @@ var Identifiers = _Identifiers;
 })();
 (() => {
   _Identifiers.repeaterTrackByIdentity = { name: "\u0275\u0275repeaterTrackByIdentity", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.componentInstance = { name: "\u0275\u0275componentInstance", moduleName: CORE };
 })();
 (() => {
   _Identifiers.text = { name: "\u0275\u0275text", moduleName: CORE };
@@ -6786,6 +6807,25 @@ function convertPropertyBinding(localResolver, implicitReceiver, expressionWitho
     localResolver.notifyImplicitReceiverUse();
   }
   return new ConvertPropertyBindingResult(stmts, outputExpr);
+}
+function convertPureComponentScopeFunction(ast, localResolver, implicitReceiver, bindingId) {
+  const converted = convertPropertyBindingBuiltins({
+    createLiteralArrayConverter: () => (args) => literalArr(args),
+    createLiteralMapConverter: (keys) => (values) => literalMap(keys.map((key, index) => {
+      return {
+        key: key.key,
+        value: values[index],
+        quoted: key.quoted
+      };
+    })),
+    createPipeConverter: () => {
+      throw new Error("Illegal State: Pipes are not allowed in this context");
+    }
+  }, ast);
+  const visitor = new _AstToIrVisitor(localResolver, implicitReceiver, bindingId, false);
+  const statements = [];
+  flattenStatements(converted.visit(visitor, _Mode.Statement), statements);
+  return statements;
 }
 function convertUpdateArguments(localResolver, contextVariableExpression, expressionWithArgumentsToExtract, bindingId) {
   const visitor = new _AstToIrVisitor(localResolver, contextVariableExpression, bindingId, true);
@@ -20508,9 +20548,10 @@ function createComponentDefConsts() {
   };
 }
 var TemplateData = class {
-  constructor(name, index, visitor) {
+  constructor(name, index, scope, visitor) {
     this.name = name;
     this.index = index;
+    this.scope = scope;
     this.visitor = visitor;
   }
   getConstCount() {
@@ -21002,7 +21043,7 @@ var TemplateDefinitionBuilder = class {
         this._ngContentReservedSlots.push(...visitor._ngContentReservedSlots);
       }
     });
-    return new TemplateData(name, index, visitor);
+    return new TemplateData(name, index, visitor._bindingScope, visitor);
   }
   createEmbeddedTemplateFn(tagName, children, contextNameSuffix, sourceSpan, variables = [], attrsExprs, references, i18n2) {
     const data = this.prepareEmbeddedTemplateFn(children, contextNameSuffix, variables, i18n2);
@@ -21239,55 +21280,95 @@ var TemplateDefinitionBuilder = class {
   }
   visitForLoopBlock(block) {
     const blockIndex = this.allocateDataSlot();
-    const templateVariables = this.createForLoopVariables(block);
-    const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", templateVariables);
+    const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [
+      new Variable(block.itemName, "$implicit", block.sourceSpan, block.sourceSpan),
+      new Variable(getLoopLocalName(block, "$index"), "$index", block.sourceSpan, block.sourceSpan),
+      new Variable(getLoopLocalName(block, "$count"), "$count", block.sourceSpan, block.sourceSpan)
+    ]);
     const emptyData = block.empty === null ? null : this.prepareEmbeddedTemplateFn(block.empty.children, "_ForEmpty");
-    const trackByFn = this.createTrackByFunction(block);
+    const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
     const value = block.expression.visit(this._valueConverter);
     this.allocateBindingSlots(value);
+    this.registerComputedLoopVariables(block, primaryData.scope);
     this.creationInstruction(block.sourceSpan, Identifiers.repeaterCreate, () => {
       const params = [
         literal(blockIndex),
         variable(primaryData.name),
         literal(primaryData.getConstCount()),
         literal(primaryData.getVarCount()),
-        trackByFn
+        trackByExpression
       ];
       if (emptyData !== null) {
-        params.push(variable(emptyData.name), literal(emptyData.getConstCount()), literal(emptyData.getVarCount()));
+        params.push(literal(trackByUsesComponentInstance), variable(emptyData.name), literal(emptyData.getConstCount()), literal(emptyData.getVarCount()));
+      } else if (trackByUsesComponentInstance) {
+        params.push(literal(trackByUsesComponentInstance));
       }
       return params;
     });
     this.updateInstruction(block.sourceSpan, Identifiers.repeater, () => [literal(blockIndex), this.convertPropertyBinding(value)]);
   }
-  createForLoopVariables(block) {
+  registerComputedLoopVariables(block, bindingScope) {
     const indexLocalName = getLoopLocalName(block, "$index");
     const countLocalName = getLoopLocalName(block, "$count");
-    this._bindingScope.set(this.level, getLoopLocalName(block, "$odd"), (scope) => scope.get(indexLocalName).modulo(literal(2)).notIdentical(literal(0)));
-    this._bindingScope.set(this.level, getLoopLocalName(block, "$even"), (scope) => scope.get(indexLocalName).modulo(literal(2)).identical(literal(0)));
-    this._bindingScope.set(this.level, getLoopLocalName(block, "$first"), (scope) => scope.get(indexLocalName).identical(literal(0)));
-    this._bindingScope.set(this.level, getLoopLocalName(block, "$last"), (scope) => scope.get(indexLocalName).identical(scope.get(countLocalName).minus(literal(1))));
-    return [
-      new Variable(block.itemName, "$implicit", block.sourceSpan, block.sourceSpan),
-      new Variable(indexLocalName, "$index", block.sourceSpan, block.sourceSpan),
-      new Variable(countLocalName, "$count", block.sourceSpan, block.sourceSpan)
-    ];
+    const level = bindingScope.bindingLevel;
+    bindingScope.set(level, getLoopLocalName(block, "$odd"), (scope) => scope.get(indexLocalName).modulo(literal(2)).notIdentical(literal(0)));
+    bindingScope.set(level, getLoopLocalName(block, "$even"), (scope) => scope.get(indexLocalName).modulo(literal(2)).identical(literal(0)));
+    bindingScope.set(level, getLoopLocalName(block, "$first"), (scope) => scope.get(indexLocalName).identical(literal(0)));
+    bindingScope.set(level, getLoopLocalName(block, "$last"), (scope) => scope.get(indexLocalName).identical(scope.get(countLocalName).minus(literal(1))));
   }
-  createTrackByFunction(block) {
+  optimizeTrackByFunction(block) {
     const ast = block.trackBy.ast;
     if (ast instanceof PropertyRead && ast.receiver instanceof ImplicitReceiver && ast.name === getLoopLocalName(block, "$index")) {
-      return importExpr(Identifiers.repeaterTrackByIndex);
+      return { expression: importExpr(Identifiers.repeaterTrackByIndex), usesComponentInstance: false };
     }
     if (ast instanceof PropertyRead && ast.receiver instanceof ImplicitReceiver && ast.name === block.itemName) {
-      return importExpr(Identifiers.repeaterTrackByIdentity);
+      return { expression: importExpr(Identifiers.repeaterTrackByIdentity), usesComponentInstance: false };
     }
-    if (ast instanceof PropertyRead && ast.receiver instanceof PropertyRead && ast.receiver.receiver instanceof ImplicitReceiver && ast.receiver.name === block.itemName) {
-      const params = [getLoopLocalName(block, "$index"), block.itemName];
-      const scope = this._bindingScope.nestedScope(this.level + 1, new Set(params));
-      const binding = convertPropertyBinding(scope, variable(CONTEXT_NAME), block.trackBy, "trackBy");
-      return arrowFn(params.map((param) => new FnParam(param)), binding.currValExpr);
+    if (ast instanceof Call && ast.receiver instanceof PropertyRead && ast.receiver.receiver instanceof ImplicitReceiver && ast.args.length === 2) {
+      const firstIsIndex = ast.args[0] instanceof PropertyRead && ast.args[0].receiver instanceof ImplicitReceiver && ast.args[0].name === getLoopLocalName(block, "$index");
+      const secondIsItem = ast.args[1] instanceof PropertyRead && ast.args[1].receiver instanceof ImplicitReceiver && ast.args[1].name === block.itemName;
+      if (firstIsIndex && secondIsItem) {
+        const receiver = this.level === 0 ? variable(CONTEXT_NAME) : new ExternalExpr(Identifiers.componentInstance).callFn([]);
+        return { expression: receiver.prop(ast.receiver.name), usesComponentInstance: false };
+      }
     }
-    throw new Error("Unsupported track expression");
+    return null;
+  }
+  createTrackByFunction(block) {
+    const optimizedFn = this.optimizeTrackByFunction(block);
+    if (optimizedFn !== null) {
+      return optimizedFn;
+    }
+    const bannedGlobals = /* @__PURE__ */ new Set([
+      getLoopLocalName(block, "$count"),
+      getLoopLocalName(block, "$first"),
+      getLoopLocalName(block, "$last"),
+      getLoopLocalName(block, "$even"),
+      getLoopLocalName(block, "$odd")
+    ]);
+    const scope = new TrackByBindingScope(this._bindingScope, {
+      [getLoopLocalName(block, "$index")]: "$index",
+      [block.itemName]: "$item"
+    }, bannedGlobals);
+    const params = [new FnParam("$index"), new FnParam("$item")];
+    const stmts = convertPureComponentScopeFunction(block.trackBy.ast, scope, variable(CONTEXT_NAME), "track");
+    const usesComponentInstance = scope.getComponentAccessCount() > 0;
+    let fn2;
+    if (!usesComponentInstance && stmts.length === 1 && stmts[0] instanceof ExpressionStatement) {
+      fn2 = arrowFn(params, stmts[0].expr);
+    } else {
+      if (stmts.length > 0) {
+        const lastStatement = stmts[stmts.length - 1];
+        if (lastStatement instanceof ExpressionStatement) {
+          stmts[stmts.length - 1] = new ReturnStatement(lastStatement.expr);
+        }
+      }
+      fn2 = fn(params, stmts);
+    }
+    return {
+      expression: this.constantPool.getSharedFunctionReference(fn2, "_forTrack"),
+      usesComponentInstance
+    };
   }
   getConstCount() {
     return this._dataIndex;
@@ -21648,6 +21729,9 @@ var BindingScope = class {
     }
     return this.bindingLevel === 0 ? null : this.getComponentProperty(name);
   }
+  hasLocal(name) {
+    return this.map.has(name);
+  }
   set(retrievalLevel, name, lhs, priority = 0, declareLocalCallback, localRef) {
     if (this.map.has(name)) {
       if (localRef) {
@@ -21762,6 +21846,37 @@ var BindingScope = class {
   }
   notifyRestoredViewContextUse() {
     this.usesRestoredViewContext = true;
+  }
+};
+var TrackByBindingScope = class extends BindingScope {
+  constructor(parentScope, globalAliases, bannedGlobals) {
+    super(parentScope.bindingLevel + 1, parentScope);
+    this.globalAliases = globalAliases;
+    this.bannedGlobals = bannedGlobals;
+    this.componentAccessCount = 0;
+  }
+  get(name) {
+    let current = this.parent;
+    while (current) {
+      if (current.hasLocal(name)) {
+        this.forbiddenAccessError(name);
+      }
+      current = current.parent;
+    }
+    if (this.bannedGlobals.has(name)) {
+      this.forbiddenAccessError(name);
+    }
+    if (this.globalAliases[name]) {
+      return variable(this.globalAliases[name]);
+    }
+    this.componentAccessCount++;
+    return variable("this").prop(name);
+  }
+  getComponentAccessCount() {
+    return this.componentAccessCount;
+  }
+  forbiddenAccessError(propertyName) {
+    throw new Error(`Accessing ${propertyName} inside of a track expression is not allowed. Tracking expressions can only access the item, $index and properties on the containing component.`);
   }
 };
 function createCssSelector(elementName, attributes) {
@@ -23128,7 +23243,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.2+sha-75ab0bd");
+var VERSION2 = new Version("17.0.0-next.2+sha-7fa17d0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24665,7 +24780,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-7fa17d0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24736,7 +24851,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-7fa17d0"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24924,7 +25039,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-7fa17d0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24947,7 +25062,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-7fa17d0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24985,7 +25100,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-7fa17d0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25009,7 +25124,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-7fa17d0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25044,7 +25159,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-7fa17d0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25061,7 +25176,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.2+sha-75ab0bd");
+var VERSION3 = new Version("17.0.0-next.2+sha-7fa17d0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;

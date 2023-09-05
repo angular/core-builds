@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.2+sha-75ab0bd
+ * @license Angular v17.0.0-next.2+sha-7fa17d0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13096,6 +13096,15 @@ export declare type ɵɵComponentDeclaration<T, Selector extends String, ExportA
 }, QueryFields extends string[], NgContentSelectors extends string[], IsStandalone extends boolean = false, HostDirectives = never, IsSignal extends boolean = false> = unknown;
 
 /**
+ * Instruction that returns the component instance in which the current instruction is executing.
+ * This is a constant-time version of `nextContent` for the case where we know that we need the
+ * component instance specifically, rather than the context of a particular template.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵcomponentInstance(): unknown;
+
+/**
  * The conditional instruction represents the basic building block on the runtime side to support
  * built-in "if" and "switch". On the high level this instruction is responsible for adding and
  * removing views selected by a conditional expression.
@@ -14804,9 +14813,20 @@ export declare function ɵɵrepeater(metadataSlotIdx: number, collection: Iterab
  * - LView[HEADER_OFFSET + index + 2] - optional reference to a template function rendering an empty
  * block
  *
+ * @param index Index at which to store the metadata of the repeater.
+ * @param templateFn Reference to the template of the main repeater block.
+ * @param decls The number of nodes, local refs, and pipes for the main block.
+ * @param vars The number of bindings for the main block.
+ * @param trackByFn Reference to the tracking function.
+ * @param trackByUsesComponentInstance Whether the tracking function has any references to the
+ *  component instance. If it doesn't, we can avoid rebinding it.
+ * @param emptyTemplateFn Reference to the template function of the empty block.
+ * @param emptyDecls The number of nodes, local refs, and pipes for the empty block.
+ * @param emptyVars The number of bindings for the empty block.
+ *
  * @codeGenApi
  */
-export declare function ɵɵrepeaterCreate(index: number, templateFn: ComponentTemplate<unknown>, decls: number, vars: number, trackByFn: TrackByFunction<unknown>, emptyTemplateFn?: ComponentTemplate<unknown>, emptyDecls?: number, emptyVars?: number): void;
+export declare function ɵɵrepeaterCreate(index: number, templateFn: ComponentTemplate<unknown>, decls: number, vars: number, trackByFn: TrackByFunction<unknown>, trackByUsesComponentInstance?: boolean, emptyTemplateFn?: ComponentTemplate<unknown>, emptyDecls?: number, emptyVars?: number): void;
 
 /**
  * A built-in trackBy function used for situations where users specified collection item reference
