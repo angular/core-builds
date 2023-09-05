@@ -19433,7 +19433,10 @@ function validateSwitchBlock(ast) {
   const [primaryBlock, ...secondaryBlocks] = ast.blocks;
   const errors = [];
   let hasDefault = false;
-  if (primaryBlock.children.length > 0) {
+  const hasPrimary = primaryBlock.children.length > 0 && primaryBlock.children.some((child) => {
+    return !(child instanceof Text4) || child.value.trim().length > 0;
+  });
+  if (hasPrimary) {
     errors.push(new ParseError(primaryBlock.sourceSpan, 'Switch block can only contain "case" and "default" blocks'));
   }
   if (primaryBlock.parameters.length !== 1) {
@@ -23125,7 +23128,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.2+sha-80de250");
+var VERSION2 = new Version("17.0.0-next.2+sha-75ab0bd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24662,7 +24665,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-80de250"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24733,7 +24736,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-80de250"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24921,7 +24924,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-80de250"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24944,7 +24947,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-80de250"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24982,7 +24985,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-80de250"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25006,7 +25009,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-80de250"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25041,7 +25044,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.2+sha-80de250"));
+  definitionMap.set("version", literal("17.0.0-next.2+sha-75ab0bd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25058,7 +25061,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.2+sha-80de250");
+var VERSION3 = new Version("17.0.0-next.2+sha-75ab0bd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -33451,7 +33454,8 @@ function parseExtractedTemplate(template2, sourceStr, sourceParseRange, escapedS
     enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat,
     i18nNormalizeLineEndingsInICUs,
     leadingTriviaChars: [],
-    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData
+    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData,
+    enabledBlockTypes: options.enabledBlockTypes
   });
   return __spreadProps(__spreadValues({}, parsedTemplate), {
     diagNodes,
@@ -38323,18 +38327,18 @@ var TcbTemplateBodyOp = class extends TcbOp {
     return null;
   }
 };
-var TcbTextInterpolationOp = class extends TcbOp {
-  constructor(tcb, scope, binding) {
+var TcbExpressionOp = class extends TcbOp {
+  constructor(tcb, scope, expression) {
     super();
     this.tcb = tcb;
     this.scope = scope;
-    this.binding = binding;
+    this.expression = expression;
   }
   get optional() {
     return false;
   }
   execute() {
-    const expr = tcbExpression(this.binding.value, this.tcb, this.scope);
+    const expr = tcbExpression(this.expression, this.tcb, this.scope);
     this.scope.addStatement(import_typescript83.default.factory.createExpressionStatement(expr));
     return null;
   }
@@ -38911,9 +38915,7 @@ var Scope2 = class {
       this.elementOpMap.set(node, opIndex);
       this.appendDirectivesAndInputsOfNode(node);
       this.appendOutputsOfNode(node);
-      for (const child of node.children) {
-        this.appendNode(child);
-      }
+      this.appendChildren(node);
       this.checkAndAppendReferencesOfNode(node);
     } else if (node instanceof Template) {
       this.appendDirectivesAndInputsOfNode(node);
@@ -38926,10 +38928,33 @@ var Scope2 = class {
         this.appendDeepSchemaChecks(node.children);
       }
       this.checkAndAppendReferencesOfNode(node);
+    } else if (node instanceof DeferredBlock) {
+      node.triggers.when !== void 0 && this.opQueue.push(new TcbExpressionOp(this.tcb, this, node.triggers.when.value));
+      node.prefetchTriggers.when !== void 0 && this.opQueue.push(new TcbExpressionOp(this.tcb, this, node.prefetchTriggers.when.value));
+      this.appendChildren(node);
+      node.placeholder !== null && this.appendChildren(node.placeholder);
+      node.loading !== null && this.appendChildren(node.loading);
+      node.error !== null && this.appendChildren(node.error);
+    } else if (node instanceof IfBlock) {
+      for (const branch of node.branches) {
+        this.appendChildren(branch);
+      }
+    } else if (node instanceof SwitchBlock) {
+      for (const currentCase of node.cases) {
+        this.appendChildren(currentCase);
+      }
+    } else if (node instanceof ForLoopBlock) {
+      this.appendChildren(node);
+      node.empty && this.appendChildren(node.empty);
     } else if (node instanceof BoundText) {
-      this.opQueue.push(new TcbTextInterpolationOp(this.tcb, this, node));
+      this.opQueue.push(new TcbExpressionOp(this.tcb, this, node.value));
     } else if (node instanceof Icu) {
       this.appendIcuExpressions(node);
+    }
+  }
+  appendChildren(node) {
+    for (const child of node.children) {
+      this.appendNode(child);
     }
   }
   checkAndAppendReferencesOfNode(node) {
@@ -39032,11 +39057,11 @@ var Scope2 = class {
   }
   appendIcuExpressions(node) {
     for (const variable2 of Object.values(node.vars)) {
-      this.opQueue.push(new TcbTextInterpolationOp(this.tcb, this, variable2));
+      this.opQueue.push(new TcbExpressionOp(this.tcb, this, variable2.value));
     }
     for (const placeholder of Object.values(node.placeholders)) {
       if (placeholder instanceof BoundText) {
-        this.opQueue.push(new TcbTextInterpolationOp(this.tcb, this, placeholder));
+        this.opQueue.push(new TcbExpressionOp(this.tcb, this, placeholder.value));
       }
     }
   }
