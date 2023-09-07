@@ -832,98 +832,6 @@ __export(output_ast_exports, {
   variable: () => variable
 });
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/big_integer.mjs
-var BigInteger = class {
-  static zero() {
-    return new BigInteger([0]);
-  }
-  static one() {
-    return new BigInteger([1]);
-  }
-  constructor(digits) {
-    this.digits = digits;
-  }
-  clone() {
-    return new BigInteger(this.digits.slice());
-  }
-  add(other) {
-    const result = this.clone();
-    result.addToSelf(other);
-    return result;
-  }
-  addToSelf(other) {
-    const maxNrOfDigits = Math.max(this.digits.length, other.digits.length);
-    let carry = 0;
-    for (let i = 0; i < maxNrOfDigits; i++) {
-      let digitSum = carry;
-      if (i < this.digits.length) {
-        digitSum += this.digits[i];
-      }
-      if (i < other.digits.length) {
-        digitSum += other.digits[i];
-      }
-      if (digitSum >= 10) {
-        this.digits[i] = digitSum - 10;
-        carry = 1;
-      } else {
-        this.digits[i] = digitSum;
-        carry = 0;
-      }
-    }
-    if (carry > 0) {
-      this.digits[maxNrOfDigits] = 1;
-    }
-  }
-  toString() {
-    let res = "";
-    for (let i = this.digits.length - 1; i >= 0; i--) {
-      res += this.digits[i];
-    }
-    return res;
-  }
-};
-var BigIntForMultiplication = class {
-  constructor(value) {
-    this.powerOfTwos = [value];
-  }
-  getValue() {
-    return this.powerOfTwos[0];
-  }
-  multiplyBy(num) {
-    const product = BigInteger.zero();
-    this.multiplyByAndAddTo(num, product);
-    return product;
-  }
-  multiplyByAndAddTo(num, result) {
-    for (let exponent = 0; num !== 0; num = num >>> 1, exponent++) {
-      if (num & 1) {
-        const value = this.getMultipliedByPowerOfTwo(exponent);
-        result.addToSelf(value);
-      }
-    }
-  }
-  getMultipliedByPowerOfTwo(exponent) {
-    for (let i = this.powerOfTwos.length; i <= exponent; i++) {
-      const previousPower = this.powerOfTwos[i - 1];
-      this.powerOfTwos[i] = previousPower.add(previousPower);
-    }
-    return this.powerOfTwos[exponent];
-  }
-};
-var BigIntExponentiation = class {
-  constructor(base) {
-    this.base = base;
-    this.exponents = [new BigIntForMultiplication(BigInteger.one())];
-  }
-  toThePowerOf(exponent) {
-    for (let i = this.exponents.length; i <= exponent; i++) {
-      const value = this.exponents[i - 1].multiplyBy(this.base);
-      this.exponents[i] = new BigIntForMultiplication(value);
-    }
-    return this.exponents[exponent];
-  }
-};
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/digest.mjs
 var textEncoder;
 function digest(message) {
@@ -1031,17 +939,15 @@ function fingerprint(str) {
     hi = hi ^ 319790063;
     lo = lo ^ -1801410264;
   }
-  return [hi, lo];
+  return BigInt.asUintN(32, BigInt(hi)) << BigInt(32) | BigInt.asUintN(32, BigInt(lo));
 }
 function computeMsgId(msg, meaning = "") {
   let msgFingerprint = fingerprint(msg);
   if (meaning) {
-    const meaningFingerprint = fingerprint(meaning);
-    msgFingerprint = add64(rol64(msgFingerprint, 1), meaningFingerprint);
+    msgFingerprint = BigInt.asUintN(64, msgFingerprint << BigInt(1)) | msgFingerprint >> BigInt(63) & BigInt(1);
+    msgFingerprint += fingerprint(meaning);
   }
-  const hi = msgFingerprint[0];
-  const lo = msgFingerprint[1];
-  return wordsToDecimalString(hi & 2147483647, lo);
+  return BigInt.asUintN(63, msgFingerprint).toString();
 }
 function hash32(view, length, c) {
   let a = 2654435769, b = 2654435769;
@@ -1138,23 +1044,8 @@ function add32to64(a, b) {
   const high = (a >>> 16) + (b >>> 16) + (low >>> 16);
   return [high >>> 16, high << 16 | low & 65535];
 }
-function add64(a, b) {
-  const ah = a[0], al = a[1];
-  const bh = b[0], bl = b[1];
-  const result = add32to64(al, bl);
-  const carry = result[0];
-  const l = result[1];
-  const h = add32(add32(ah, bh), carry);
-  return [h, l];
-}
 function rol32(a, count) {
   return a << count | a >>> 32 - count;
-}
-function rol64(num, count) {
-  const hi = num[0], lo = num[1];
-  const h = hi << count | lo >>> 32 - count;
-  const l = lo << count | hi >>> 32 - count;
-  return [h, l];
 }
 function bytesToWords32(bytes, endian) {
   const size = bytes.length + 3 >>> 2;
@@ -1179,12 +1070,6 @@ function wordAt(bytes, index, endian) {
     }
   }
   return word;
-}
-var base256 = new BigIntExponentiation(256);
-function wordsToDecimalString(hi, lo) {
-  const decimal = base256.toThePowerOf(0).multiplyBy(lo);
-  base256.toThePowerOf(4).multiplyByAndAddTo(hi, decimal);
-  return decimal.toString();
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/output/output_ast.mjs
@@ -23243,7 +23128,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.3+sha-d14560f");
+var VERSION2 = new Version("17.0.0-next.3+sha-0f10d75");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24780,7 +24665,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-d14560f"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-0f10d75"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24851,7 +24736,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-d14560f"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-0f10d75"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25039,7 +24924,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-d14560f"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-0f10d75"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25062,7 +24947,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-d14560f"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-0f10d75"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25100,7 +24985,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-d14560f"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-0f10d75"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25124,7 +25009,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-d14560f"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-0f10d75"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25159,7 +25044,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-d14560f"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-0f10d75"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25176,7 +25061,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.3+sha-d14560f");
+var VERSION3 = new Version("17.0.0-next.3+sha-0f10d75");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
