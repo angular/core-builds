@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.3+sha-e866d85
+ * @license Angular v17.0.0-next.3+sha-5277cb4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10834,7 +10834,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.3+sha-e866d85');
+const VERSION = new Version('17.0.0-next.3+sha-5277cb4');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10854,6 +10854,66 @@ const VERSION = new Version('17.0.0-next.3+sha-e866d85');
 // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
 // - mod2.injector.get(token, default)
 const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
+
+const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
+function wrappedError(message, originalError) {
+    const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
+    const error = Error(msg);
+    error[ERROR_ORIGINAL_ERROR] = originalError;
+    return error;
+}
+function getOriginalError(error) {
+    return error[ERROR_ORIGINAL_ERROR];
+}
+
+/**
+ * Provides a hook for centralized exception handling.
+ *
+ * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+ * intercept error handling, write a custom exception handler that replaces this default as
+ * appropriate for your app.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```
+ * class MyErrorHandler implements ErrorHandler {
+ *   handleError(error) {
+ *     // do something with the exception
+ *   }
+ * }
+ *
+ * @NgModule({
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ * class MyModule {}
+ * ```
+ *
+ * @publicApi
+ */
+class ErrorHandler {
+    constructor() {
+        /**
+         * @internal
+         */
+        this._console = console;
+    }
+    handleError(error) {
+        const originalError = this._findOriginalError(error);
+        this._console.error('ERROR', error);
+        if (originalError) {
+            this._console.error('ORIGINAL ERROR', originalError);
+        }
+    }
+    /** @internal */
+    _findOriginalError(error) {
+        let e = error && getOriginalError(error);
+        while (e && getOriginalError(e)) {
+            e = getOriginalError(e);
+        }
+        return e || null;
+    }
+}
 
 /**
  * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
@@ -11509,17 +11569,18 @@ function afterRender(callback, options) {
     }
     let destroy;
     const unregisterFn = injector.get(DestroyRef).onDestroy(() => destroy?.());
-    const manager = injector.get(AfterRenderEventManager);
+    const afterRenderEventManager = injector.get(AfterRenderEventManager);
     // Lazily initialize the handler implementation, if necessary. This is so that it can be
     // tree-shaken if `afterRender` and `afterNextRender` aren't used.
-    const handler = manager.handler ??= new AfterRenderCallbackHandlerImpl();
+    const callbackHandler = afterRenderEventManager.handler ??= new AfterRenderCallbackHandlerImpl();
     const ngZone = injector.get(NgZone);
-    const instance = new AfterRenderCallback(() => ngZone.runOutsideAngular(callback));
+    const errorHandler = injector.get(ErrorHandler, null, { optional: true });
+    const instance = new AfterRenderCallback(ngZone, errorHandler, callback);
     destroy = () => {
-        handler.unregister(instance);
+        callbackHandler.unregister(instance);
         unregisterFn();
     };
-    handler.register(instance);
+    callbackHandler.register(instance);
     return { destroy };
 }
 /**
@@ -11572,31 +11633,39 @@ function afterNextRender(callback, options) {
     }
     let destroy;
     const unregisterFn = injector.get(DestroyRef).onDestroy(() => destroy?.());
-    const manager = injector.get(AfterRenderEventManager);
+    const afterRenderEventManager = injector.get(AfterRenderEventManager);
     // Lazily initialize the handler implementation, if necessary. This is so that it can be
     // tree-shaken if `afterRender` and `afterNextRender` aren't used.
-    const handler = manager.handler ??= new AfterRenderCallbackHandlerImpl();
+    const callbackHandler = afterRenderEventManager.handler ??= new AfterRenderCallbackHandlerImpl();
     const ngZone = injector.get(NgZone);
-    const instance = new AfterRenderCallback(() => {
+    const errorHandler = injector.get(ErrorHandler, null, { optional: true });
+    const instance = new AfterRenderCallback(ngZone, errorHandler, () => {
         destroy?.();
-        ngZone.runOutsideAngular(callback);
+        callback();
     });
     destroy = () => {
-        handler.unregister(instance);
+        callbackHandler.unregister(instance);
         unregisterFn();
     };
-    handler.register(instance);
+    callbackHandler.register(instance);
     return { destroy };
 }
 /**
  * A wrapper around a function to be used as an after render callback.
  */
 class AfterRenderCallback {
-    constructor(callback) {
-        this.callback = callback;
+    constructor(zone, errorHandler, callbackFn) {
+        this.zone = zone;
+        this.errorHandler = errorHandler;
+        this.callbackFn = callbackFn;
     }
     invoke() {
-        this.callback();
+        try {
+            this.zone.runOutsideAngular(this.callbackFn);
+        }
+        catch (err) {
+            this.errorHandler?.handleError(err);
+        }
     }
 }
 /**
@@ -11627,19 +11696,15 @@ class AfterRenderCallbackHandlerImpl {
         this.deferredCallbacks.delete(callback);
     }
     execute() {
-        try {
-            this.executingCallbacks = true;
-            for (const callback of this.callbacks) {
-                callback.invoke();
-            }
+        this.executingCallbacks = true;
+        for (const callback of this.callbacks) {
+            callback.invoke();
         }
-        finally {
-            this.executingCallbacks = false;
-            for (const callback of this.deferredCallbacks) {
-                this.callbacks.add(callback);
-            }
-            this.deferredCallbacks.clear();
+        this.executingCallbacks = false;
+        for (const callback of this.deferredCallbacks) {
+            this.callbacks.add(callback);
         }
+        this.deferredCallbacks.clear();
     }
     destroy() {
         this.callbacks.clear();
@@ -11710,66 +11775,6 @@ function markViewDirty(lView) {
         lView = parent;
     }
     return null;
-}
-
-const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
-function wrappedError(message, originalError) {
-    const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
-    const error = Error(msg);
-    error[ERROR_ORIGINAL_ERROR] = originalError;
-    return error;
-}
-function getOriginalError(error) {
-    return error[ERROR_ORIGINAL_ERROR];
-}
-
-/**
- * Provides a hook for centralized exception handling.
- *
- * The default implementation of `ErrorHandler` prints error messages to the `console`. To
- * intercept error handling, write a custom exception handler that replaces this default as
- * appropriate for your app.
- *
- * @usageNotes
- * ### Example
- *
- * ```
- * class MyErrorHandler implements ErrorHandler {
- *   handleError(error) {
- *     // do something with the exception
- *   }
- * }
- *
- * @NgModule({
- *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
- * })
- * class MyModule {}
- * ```
- *
- * @publicApi
- */
-class ErrorHandler {
-    constructor() {
-        /**
-         * @internal
-         */
-        this._console = console;
-    }
-    handleError(error) {
-        const originalError = this._findOriginalError(error);
-        this._console.error('ERROR', error);
-        if (originalError) {
-            this._console.error('ORIGINAL ERROR', originalError);
-        }
-    }
-    /** @internal */
-    _findOriginalError(error) {
-        let e = error && getOriginalError(error);
-        while (e && getOriginalError(e)) {
-            e = getOriginalError(e);
-        }
-        return e || null;
-    }
 }
 
 /**
