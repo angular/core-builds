@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.4+sha-975cb05
+ * @license Angular v16.2.4+sha-c700418
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -163,16 +163,6 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
  * @developerPreview
  */
 export declare function afterRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
-
-/**
- * A wrapper around a function to be used as an after render callback.
- * @private
- */
-declare class AfterRenderCallback {
-    private callback;
-    constructor(callback: VoidFunction);
-    invoke(): void;
-}
 
 /**
  * Options passed to `afterRender` and `afterNextRender`.
@@ -10405,25 +10395,21 @@ export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string
 export declare function ɵ_sanitizeUrl(url: string): string;
 
 /**
- * Implements `afterRender` and `afterNextRender` callback manager logic.
+ * Implements core timing for `afterRender` and `afterNextRender` events.
+ * Delegates to an optional `AfterRenderCallbackHandler` for implementation.
  */
 export declare class ɵAfterRenderEventManager {
-    private callbacks;
-    private deferredCallbacks;
     private renderDepth;
-    private runningCallbacks;
     /**
      * Mark the beginning of a render operation (i.e. CD cycle).
-     * Throws if called from an `afterRender` callback.
+     * Throws if called while executing callbacks.
      */
     begin(): void;
     /**
-     * Mark the end of a render operation. Registered callbacks
-     * are invoked if there are no more pending operations.
+     * Mark the end of a render operation. Callbacks will be
+     * executed if there are no more pending operations.
      */
     end(): void;
-    register(callback: AfterRenderCallback): void;
-    unregister(callback: AfterRenderCallback): void;
     ngOnDestroy(): void;
     /** @nocollapse */
     static ɵprov: unknown;
