@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.3+sha-f993975
+ * @license Angular v17.0.0-next.3+sha-59387ee
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1113,15 +1113,19 @@ export declare interface Component extends Directive {
      */
     template?: string;
     /**
-     * One or more relative paths or absolute URLs for files containing CSS stylesheets to use
+     * One relative paths or an absolute URL for files containing CSS stylesheet to use
      * in this component.
+     */
+    styleUrl?: string;
+    /**
+     * Relative paths or absolute URLs for files containing CSS stylesheets to use in this component.
      */
     styleUrls?: string[];
     /**
      * One or more inline CSS stylesheets to use
      * in this component.
      */
-    styles?: string[];
+    styles?: string | string[];
     /**
      * One or more animation `trigger()` calls, containing
      * [`state()`](api/animations/state) and `transition()` definitions.

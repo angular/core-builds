@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.3+sha-f993975
+ * @license Angular v17.0.0-next.3+sha-59387ee
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5864,19 +5864,32 @@ function resolveComponentResources(resourceResolver) {
                 component.template = template;
             }));
         }
-        const styleUrls = component.styleUrls;
-        const styles = component.styles || (component.styles = []);
-        const styleOffset = component.styles.length;
-        styleUrls && styleUrls.forEach((styleUrl, index) => {
-            styles.push(''); // pre-allocate array.
-            promises.push(cachedResourceResolve(styleUrl).then((style) => {
-                styles[styleOffset + index] = style;
-                styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
-                if (styleUrls.length == 0) {
-                    component.styleUrls = undefined;
-                }
+        const styles = typeof component.styles === 'string' ? [component.styles] : (component.styles || []);
+        component.styles = styles;
+        if (component.styleUrl && component.styleUrls?.length) {
+            throw new Error('@Component cannot define both `styleUrl` and `styleUrls`. ' +
+                'Use `styleUrl` if the component has one stylesheet, or `styleUrls` if it has multiple');
+        }
+        else if (component.styleUrls?.length) {
+            const styleOffset = component.styles.length;
+            const styleUrls = component.styleUrls;
+            component.styleUrls.forEach((styleUrl, index) => {
+                styles.push(''); // pre-allocate array.
+                promises.push(cachedResourceResolve(styleUrl).then((style) => {
+                    styles[styleOffset + index] = style;
+                    styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
+                    if (styleUrls.length == 0) {
+                        component.styleUrls = undefined;
+                    }
+                }));
+            });
+        }
+        else if (component.styleUrl) {
+            promises.push(cachedResourceResolve(component.styleUrl).then((style) => {
+                styles.push(style);
+                component.styleUrl = undefined;
             }));
-        });
+        }
         const fullyResolved = Promise.all(promises).then(() => componentDefResolved(type));
         componentResolved.push(fullyResolved);
     });
@@ -5897,7 +5910,7 @@ function isComponentDefPendingResolution(type) {
 }
 function componentNeedsResolution(component) {
     return !!((component.templateUrl && !component.hasOwnProperty('template')) ||
-        component.styleUrls && component.styleUrls.length);
+        (component.styleUrls && component.styleUrls.length) || component.styleUrl);
 }
 function clearResolutionOfComponentResourcesQueue() {
     const old = componentResourceResolutionQueue;
@@ -10836,7 +10849,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.3+sha-f993975');
+const VERSION = new Version('17.0.0-next.3+sha-59387ee');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -28008,6 +28021,9 @@ function compileComponent(type, metadata) {
                     if (metadata.styleUrls && metadata.styleUrls.length) {
                         error.push(` - styleUrls: ${JSON.stringify(metadata.styleUrls)}`);
                     }
+                    if (metadata.styleUrl) {
+                        error.push(` - styleUrl: ${metadata.styleUrl}`);
+                    }
                     error.push(`Did you run and wait for 'resolveComponentResources()'?`);
                     throw new Error(error.join('\n'));
                 }
@@ -28040,7 +28056,8 @@ function compileComponent(type, metadata) {
                     typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl),
                     template: metadata.template || '',
                     preserveWhitespaces,
-                    styles: metadata.styles || EMPTY_ARRAY,
+                    styles: typeof metadata.styles === 'string' ? [metadata.styles] :
+                        (metadata.styles || EMPTY_ARRAY),
                     animations: metadata.animations,
                     // JIT components are always compiled against an empty set of `declarations`. Instead, the
                     // `directiveDefs` and `pipeDefs` are updated at a later point:

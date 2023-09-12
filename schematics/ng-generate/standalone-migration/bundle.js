@@ -23131,7 +23131,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.3+sha-f993975");
+var VERSION2 = new Version("17.0.0-next.3+sha-59387ee");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24668,7 +24668,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-f993975"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-59387ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24739,7 +24739,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-f993975"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-59387ee"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -24927,7 +24927,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-f993975"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-59387ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -24950,7 +24950,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-f993975"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-59387ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -24988,7 +24988,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-f993975"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-59387ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25012,7 +25012,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-f993975"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-59387ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25047,7 +25047,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.3+sha-f993975"));
+  definitionMap.set("version", literal("17.0.0-next.3+sha-59387ee"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25064,7 +25064,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.3+sha-f993975");
+var VERSION3 = new Version("17.0.0-next.3+sha-59387ee");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -25221,6 +25221,7 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["HOST_DIRECTIVE_CONFLICTING_ALIAS"] = 2018] = "HOST_DIRECTIVE_CONFLICTING_ALIAS";
   ErrorCode2[ErrorCode2["HOST_DIRECTIVE_MISSING_REQUIRED_BINDING"] = 2019] = "HOST_DIRECTIVE_MISSING_REQUIRED_BINDING";
   ErrorCode2[ErrorCode2["CONFLICTING_INPUT_TRANSFORM"] = 2020] = "CONFLICTING_INPUT_TRANSFORM";
+  ErrorCode2[ErrorCode2["COMPONENT_INVALID_STYLE_URLS"] = 2021] = "COMPONENT_INVALID_STYLE_URLS";
   ErrorCode2[ErrorCode2["SYMBOL_NOT_EXPORTED"] = 3001] = "SYMBOL_NOT_EXPORTED";
   ErrorCode2[ErrorCode2["IMPORT_CYCLE_DETECTED"] = 3003] = "IMPORT_CYCLE_DETECTED";
   ErrorCode2[ErrorCode2["IMPORT_GENERATION_FAILURE"] = 3004] = "IMPORT_GENERATION_FAILURE";
@@ -32147,13 +32148,14 @@ function parseDirectiveStyles(directive, evaluator, compilationMode) {
   if (!expression) {
     return null;
   }
-  const value = evaluator.evaluate(expression);
+  const evaluated = evaluator.evaluate(expression);
+  const value = typeof evaluated === "string" ? [evaluated] : evaluated;
   if (compilationMode === CompilationMode.LOCAL && Array.isArray(value)) {
     for (const entry of value) {
       if (entry instanceof DynamicValue && entry.isFromUnknownIdentifier()) {
         const relatedInformation = traceDynamicValue(expression, entry);
         const chain = {
-          messageText: `Unknown identifier used as styles string: ${entry.node.getText()} (did you import this string from another file? This is not allowed in local compilation mode. Please either inline it or move it to a separate file and include it using'styleUrls')`,
+          messageText: `Unknown identifier used as styles string: ${entry.node.getText()} (did you import this string from another file? This is not allowed in local compilation mode. Please either inline it or move it to a separate file and include it using 'styleUrl')`,
           category: import_typescript48.default.DiagnosticCategory.Error,
           code: 0
         };
@@ -32162,7 +32164,7 @@ function parseDirectiveStyles(directive, evaluator, compilationMode) {
     }
   }
   if (!isStringArrayOrDie(value, "styles", expression)) {
-    throw createValueHasWrongTypeError(expression, value, `Failed to resolve @Directive.styles to a string array`);
+    throw createValueHasWrongTypeError(expression, value, `Failed to resolve @Component.styles to a string or an array of strings`);
   }
   return value;
 }
@@ -33580,7 +33582,7 @@ function transformDecoratorResources(dec, component, styles, template2) {
   if (dec.name !== "Component") {
     return dec;
   }
-  if (!component.has("templateUrl") && !component.has("styleUrls") && !component.has("styles")) {
+  if (!component.has("templateUrl") && !component.has("styleUrls") && !component.has("styleUrl") && !component.has("styles")) {
     return dec;
   }
   const metadata = new Map(component);
@@ -33588,9 +33590,10 @@ function transformDecoratorResources(dec, component, styles, template2) {
     metadata.delete("templateUrl");
     metadata.set("template", import_typescript52.default.factory.createStringLiteral(template2.content));
   }
-  if (metadata.has("styleUrls") || metadata.has("styles")) {
+  if (metadata.has("styleUrls") || metadata.has("styleUrl") || metadata.has("styles")) {
     metadata.delete("styles");
     metadata.delete("styleUrls");
+    metadata.delete("styleUrl");
     if (styles.length > 0) {
       const styleNodes = styles.reduce((result, style) => {
         if (style.trim().length > 0) {
@@ -33610,10 +33613,26 @@ function transformDecoratorResources(dec, component, styles, template2) {
   return __spreadProps(__spreadValues({}, dec), { args: [import_typescript52.default.factory.createObjectLiteralExpression(newMetadataFields)] });
 }
 function extractComponentStyleUrls(evaluator, component) {
-  if (!component.has("styleUrls")) {
-    return [];
+  const styleUrlsExpr = component.get("styleUrls");
+  const styleUrlExpr = component.get("styleUrl");
+  if (styleUrlsExpr !== void 0 && styleUrlExpr !== void 0) {
+    throw new FatalDiagnosticError(ErrorCode.COMPONENT_INVALID_STYLE_URLS, styleUrlExpr, "@Component cannot define both `styleUrl` and `styleUrls`. Use `styleUrl` if the component has one stylesheet, or `styleUrls` if it has multiple");
   }
-  return extractStyleUrlsFromExpression(evaluator, component.get("styleUrls"));
+  if (styleUrlsExpr !== void 0) {
+    return extractStyleUrlsFromExpression(evaluator, component.get("styleUrls"));
+  }
+  if (styleUrlExpr !== void 0) {
+    const styleUrl = evaluator.evaluate(styleUrlExpr);
+    if (typeof styleUrl !== "string") {
+      throw createValueHasWrongTypeError(styleUrlExpr, styleUrl, "styleUrl must be a string");
+    }
+    return [{
+      url: styleUrl,
+      source: 2,
+      nodeForError: styleUrlExpr
+    }];
+  }
+  return [];
 }
 function extractStyleUrlsFromExpression(evaluator, styleUrlsExpr) {
   const styleUrls = [];
@@ -33653,23 +33672,40 @@ function extractStyleResources(resourceLoader, component, containingFile) {
   function stringLiteralElements(array) {
     return array.elements.filter((e) => import_typescript52.default.isStringLiteralLike(e));
   }
+  const styleUrlExpr = component.get("styleUrl");
   const styleUrlsExpr = component.get("styleUrls");
   if (styleUrlsExpr !== void 0 && import_typescript52.default.isArrayLiteralExpression(styleUrlsExpr)) {
     for (const expression of stringLiteralElements(styleUrlsExpr)) {
-      try {
-        const resourceUrl = resourceLoader.resolve(expression.text, containingFile);
-        styles.add({ path: absoluteFrom(resourceUrl), expression });
-      } catch (e) {
+      const resource = stringLiteralUrlToResource(resourceLoader, expression, containingFile);
+      if (resource !== null) {
+        styles.add(resource);
       }
+    }
+  } else if (styleUrlExpr !== void 0 && import_typescript52.default.isStringLiteralLike(styleUrlExpr)) {
+    const resource = stringLiteralUrlToResource(resourceLoader, styleUrlExpr, containingFile);
+    if (resource !== null) {
+      styles.add(resource);
     }
   }
   const stylesExpr = component.get("styles");
-  if (stylesExpr !== void 0 && import_typescript52.default.isArrayLiteralExpression(stylesExpr)) {
-    for (const expression of stringLiteralElements(stylesExpr)) {
-      styles.add({ path: null, expression });
+  if (stylesExpr !== void 0) {
+    if (import_typescript52.default.isArrayLiteralExpression(stylesExpr)) {
+      for (const expression of stringLiteralElements(stylesExpr)) {
+        styles.add({ path: null, expression });
+      }
+    } else if (import_typescript52.default.isStringLiteralLike(stylesExpr)) {
+      styles.add({ path: null, expression: stylesExpr });
     }
   }
   return styles;
+}
+function stringLiteralUrlToResource(resourceLoader, expression, containingFile) {
+  try {
+    const resourceUrl = resourceLoader.resolve(expression.text, containingFile);
+    return { path: absoluteFrom(resourceUrl), expression };
+  } catch (e) {
+    return null;
+  }
 }
 function _extractTemplateStyleUrls(template2) {
   if (template2.styleUrls === null) {

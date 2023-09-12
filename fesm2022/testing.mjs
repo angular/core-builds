@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.3+sha-f993975
+ * @license Angular v17.0.0-next.3+sha-59387ee
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -777,7 +777,7 @@ class TestBedCompiler {
         const def = type[ɵNG_COMP_DEF];
         const hasStyleUrls = () => {
             const metadata = this.resolvers.component.resolve(type);
-            return !!metadata.styleUrls && metadata.styleUrls.length > 0;
+            return !!metadata.styleUrl || !!metadata.styleUrls?.length;
         };
         const overrideStyleUrls = !!def && !ɵisComponentDefPendingResolution(type) && hasStyleUrls();
         // In Ivy, compiling a component does not require knowing the module providing the
@@ -787,7 +787,7 @@ class TestBedCompiler {
         // resolution). In order to avoid this, we preemptively set styleUrls to an empty array,
         // preserve current styles available on Component def and restore styles back once compilation
         // is complete.
-        const override = overrideStyleUrls ? { template, styles: [], styleUrls: [] } : { template };
+        const override = overrideStyleUrls ? { template, styles: [], styleUrls: [], styleUrl: undefined } : { template };
         this.overrideComponent(type, { set: override });
         if (overrideStyleUrls && def.styles && def.styles.length > 0) {
             this.existingComponentStyles.set(type, def.styles);
