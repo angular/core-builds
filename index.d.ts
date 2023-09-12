@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.3+sha-e86d6db
+ * @license Angular v17.0.0-next.3+sha-38c9f08
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3238,19 +3238,6 @@ export declare type EffectCleanupFn = () => void;
 declare type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
 
 /**
- * Tracks all effects registered within a given application and runs them via `flush`.
- */
-declare class EffectManager {
-    private all;
-    private queue;
-    create(effectFn: (onCleanup: (cleanupFn: EffectCleanupFn) => void) => void, destroyRef: DestroyRef | null, allowSignalWrites: boolean): EffectRef;
-    flush(): void;
-    get isQueueEmpty(): boolean;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
-
-/**
  * A global reactive effect, which can be manually destroyed.
  *
  * @developerPreview
@@ -5773,7 +5760,7 @@ declare interface LViewEnvironment {
     /** An optional custom sanitizer. */
     sanitizer: Sanitizer | null;
     /** Container for reactivity system `effect`s. */
-    effectManager: EffectManager | null;
+    inlineEffectRunner: ɵFlushableEffectRunner | null;
     /** Container for after render hooks */
     afterRenderEventManager: ɵAfterRenderEventManager | null;
 }
@@ -7905,6 +7892,11 @@ export declare abstract class Sanitizer {
  * Function used to sanitize the value before writing it into the renderer.
  */
 declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string | TrustedHTML | TrustedScript | TrustedScriptURL;
+
+declare interface SchedulableEffect {
+    run(): void;
+    creationZone: unknown;
+}
 
 
 /**
@@ -11187,6 +11179,20 @@ export declare interface ɵDirectiveType<T> extends Type<T> {
 }
 
 /**
+ * A scheduler which manages the execution of effects.
+ */
+export declare abstract class ɵEffectScheduler {
+    /**
+     * Schedule the given effect to be executed at a later time.
+     *
+     * It is an error to attempt to execute any effects synchronously during a scheduling operation.
+     */
+    abstract scheduleEffect(e: SchedulableEffect): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
+
+/**
  * Internal token to collect all SSR-related features enabled for this application.
  *
  * Note: the token is in `core` to let other packages register features (the `core`
@@ -11211,6 +11217,16 @@ export declare const enum ɵExtraLocaleDataIndex {
  * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n-overview)
  */
 export declare function ɵfindLocaleData(locale: string): any;
+
+/**
+ * Interface to an `EffectScheduler` capable of running scheduled effects synchronously.
+ */
+export declare interface ɵFlushableEffectRunner {
+    /**
+     * Run any scheduled effects.
+     */
+    flush(): void;
+}
 
 /**
  * Loops over queued module definitions, if a given module definition has all of its
@@ -12435,6 +12451,26 @@ export declare function ɵwithDomHydration(): EnvironmentProviders;
  * URL for the XSS security documentation.
  */
 export declare const ɵXSS_SECURITY_URL = "https://g.co/ng/security#xss";
+
+/**
+ * An `EffectScheduler` which is capable of queueing scheduled effects per-zone, and flushing them
+ * as an explicit operation.
+ */
+export declare class ɵZoneAwareQueueingScheduler implements ɵEffectScheduler, ɵFlushableEffectRunner {
+    private queuedEffectCount;
+    private queues;
+    scheduleEffect(handle: SchedulableEffect): void;
+    /**
+     * Run all scheduled effects.
+     *
+     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
+     * ordering guarantee between effects scheduled in different zones.
+     */
+    flush(): void;
+    private flushQueue;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
 
 /**
  * Advances to an element for later binding instructions.

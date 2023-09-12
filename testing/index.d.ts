@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.3+sha-e86d6db
+ * @license Angular v17.0.0-next.3+sha-38c9f08
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -21,6 +21,7 @@ import { PlatformRef } from '@angular/core';
 import { ProviderToken } from '@angular/core';
 import { SchemaMetadata } from '@angular/core';
 import { Type } from '@angular/core';
+import { ɵFlushableEffectRunner } from '@angular/core';
 
 /**
  * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
@@ -47,6 +48,7 @@ export declare function async(fn: Function): (done: any) => any;
 export declare class ComponentFixture<T> {
     componentRef: ComponentRef<T>;
     ngZone: NgZone | null;
+    private effectRunner;
     private _autoDetect;
     /**
      * The DebugElement associated with the root element of this component.
@@ -77,7 +79,7 @@ export declare class ComponentFixture<T> {
     private _onStableSubscription;
     private _onMicrotaskEmptySubscription;
     private _onErrorSubscription;
-    constructor(componentRef: ComponentRef<T>, ngZone: NgZone | null, _autoDetect: boolean);
+    constructor(componentRef: ComponentRef<T>, ngZone: NgZone | null, effectRunner: ɵFlushableEffectRunner | null, _autoDetect: boolean);
     private _tick;
     /**
      * Trigger a change detection cycle for the component.
@@ -324,6 +326,12 @@ export declare interface TestBed {
     }): TestBed;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): TestBed;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
+    /**
+     * Execute any pending effects.
+     *
+     * @developerPreview
+     */
+    flushEffects(): void;
 }
 
 /**

@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.0.0-next.3+sha-e86d6db
+ * @license Angular v17.0.0-next.3+sha-38c9f08
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadata, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, EnvironmentInjector, NgZone, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadata, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, EnvironmentInjector, NgZone, ɵZoneAwareQueueingScheduler, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -56,9 +56,10 @@ function async(fn) {
  * @publicApi
  */
 class ComponentFixture {
-    constructor(componentRef, ngZone, _autoDetect) {
+    constructor(componentRef, ngZone, effectRunner, _autoDetect) {
         this.componentRef = componentRef;
         this.ngZone = ngZone;
+        this.effectRunner = effectRunner;
         this._autoDetect = _autoDetect;
         this._isStable = true;
         this._isDestroyed = false;
@@ -131,6 +132,7 @@ class ComponentFixture {
      * Trigger a change detection cycle for the component.
      */
     detectChanges(checkNoChanges = true) {
+        this.effectRunner?.flush();
         if (this.ngZone != null) {
             // Run the change detection inside the NgZone so that any async tasks as part of the change
             // detection are captured by the zone and can be waited for in isStable.
@@ -1614,6 +1616,9 @@ class TestBedImpl {
     static get ngModule() {
         return TestBedImpl.INSTANCE.ngModule;
     }
+    static flushEffects() {
+        return TestBedImpl.INSTANCE.flushEffects();
+    }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -1795,7 +1800,7 @@ class TestBedImpl {
         const componentFactory = new ɵRender3ComponentFactory(componentDef);
         const initComponent = () => {
             const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this.testModuleRef);
-            return new ComponentFixture(componentRef, ngZone, autoDetect);
+            return new ComponentFixture(componentRef, ngZone, this.inject(ɵZoneAwareQueueingScheduler, null), autoDetect);
         };
         const fixture = ngZone ? ngZone.run(initComponent) : initComponent();
         this._activeFixtures.push(fixture);
@@ -1919,6 +1924,14 @@ class TestBedImpl {
         finally {
             testRenderer.removeAllRootElements?.();
         }
+    }
+    /**
+     * Execute any pending effects.
+     *
+     * @developerPreview
+     */
+    flushEffects() {
+        this.inject(ɵZoneAwareQueueingScheduler).flush();
     }
 }
 /**
