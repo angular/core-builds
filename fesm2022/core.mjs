@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.3+sha-92113d7
+ * @license Angular v17.0.0-next.3+sha-635318f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6371,8 +6371,7 @@ class R3Injector extends EnvironmentInjector {
         if (record != null && typeof record.value === 'string') {
             this.scopes.add(record.value);
         }
-        this.injectorDefTypes =
-            new Set(this.get(INJECTOR_DEF_TYPES.multi, EMPTY_ARRAY, InjectFlags.Self));
+        this.injectorDefTypes = new Set(this.get(INJECTOR_DEF_TYPES, EMPTY_ARRAY, InjectFlags.Self));
     }
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
@@ -6506,7 +6505,7 @@ class R3Injector extends EnvironmentInjector {
             prevInjectContext = setInjectorProfilerContext({ injector: this, token: null });
         }
         try {
-            const initializers = this.get(ENVIRONMENT_INITIALIZER.multi, EMPTY_ARRAY, InjectFlags.Self);
+            const initializers = this.get(ENVIRONMENT_INITIALIZER, EMPTY_ARRAY, InjectFlags.Self);
             if (ngDevMode && !Array.isArray(initializers)) {
                 throw new RuntimeError(-209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `ENVIRONMENT_INITIALIZER` token value ' +
                     `(expected an array, but got ${typeof initializers}). ` +
@@ -10837,7 +10836,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.3+sha-92113d7');
+const VERSION = new Version('17.0.0-next.3+sha-635318f');
 
 // This default value is when checking the hierarchy for a token.
 //

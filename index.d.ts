@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.3+sha-92113d7
+ * @license Angular v17.0.0-next.3+sha-635318f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3383,7 +3383,7 @@ declare const ENVIRONMENT = 10;
  *
  * @publicApi
  */
-export declare const ENVIRONMENT_INITIALIZER: InjectionToken<() => void>;
+export declare const ENVIRONMENT_INITIALIZER: InjectionToken<readonly (() => void)[]>;
 
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
