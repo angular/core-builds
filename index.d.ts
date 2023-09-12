@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.3+sha-caaabd8
+ * @license Angular v17.0.0-next.3+sha-52cc7f8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10885,6 +10885,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     readonly data: {
         [kind: string]: any;
+        animation?: any[];
     };
     /** Whether or not this component's ChangeDetectionStrategy is OnPush */
     readonly onPush: boolean;
