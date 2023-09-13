@@ -1,10 +1,11 @@
 /**
- * @license Angular v17.0.0-next.4+sha-5a0d6aa
+ * @license Angular v17.0.0-next.4+sha-aedfc75
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadata, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, EnvironmentInjector, NgZone, ɵZoneAwareQueueingScheduler, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadata, ɵgenerateStandaloneInDeclarationsError, ɵDeferBlockBehavior, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, EnvironmentInjector, NgZone, ɵZoneAwareQueueingScheduler, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -51,11 +52,88 @@ function async(fn) {
 }
 
 /**
+ * Represents an individual `{#defer}` block for testing purposes.
+ *
+ * @publicApi
+ * @developerPreview
+ */
+class DeferBlockFixture {
+    /** @nodoc */
+    constructor(block, componentFixture) {
+        this.block = block;
+        this.componentFixture = componentFixture;
+    }
+    /**
+     * Renders the specified state of the defer fixture.
+     * @param state the defer state to render
+     */
+    async render(state) {
+        if (!hasStateTemplate(state, this.block)) {
+            const stateAsString = getDeferBlockStateNameFromEnum(state);
+            throw new Error(`Tried to render this defer block in the \`${stateAsString}\` state, ` +
+                `but there was no \`{:${stateAsString.toLowerCase()}}\` section defined in a template.`);
+        }
+        if (state === ɵDeferBlockState.Complete) {
+            await ɵtriggerResourceLoading(this.block.tDetails, this.block.lView);
+        }
+        ɵrenderDeferBlockState(state, this.block.tNode, this.block.lContainer);
+        this.componentFixture.detectChanges();
+        return this.componentFixture.whenStable();
+    }
+    /**
+     * Retrieves all nested child defer block fixtures
+     * in a given defer block.
+     */
+    getDeferBlocks() {
+        const deferBlocks = [];
+        // An LContainer that represents a defer block has at most 1 view, which is
+        // located right after an LContainer header. Get a hold of that view and inspect
+        // it for nested defer blocks.
+        const deferBlockFixtures = [];
+        if (this.block.lContainer.length >= ɵCONTAINER_HEADER_OFFSET) {
+            const lView = this.block.lContainer[ɵCONTAINER_HEADER_OFFSET];
+            ɵgetDeferBlocks(lView, deferBlocks);
+            for (const block of deferBlocks) {
+                deferBlockFixtures.push(new DeferBlockFixture(block, this.componentFixture));
+            }
+        }
+        return Promise.resolve(deferBlockFixtures);
+    }
+}
+function hasStateTemplate(state, block) {
+    switch (state) {
+        case ɵDeferBlockState.Placeholder:
+            return block.tDetails.placeholderTmplIndex !== null;
+        case ɵDeferBlockState.Loading:
+            return block.tDetails.loadingTmplIndex !== null;
+        case ɵDeferBlockState.Error:
+            return block.tDetails.errorTmplIndex !== null;
+        case ɵDeferBlockState.Complete:
+            return true;
+        default:
+            return false;
+    }
+}
+function getDeferBlockStateNameFromEnum(state) {
+    switch (state) {
+        case ɵDeferBlockState.Placeholder:
+            return 'Placeholder';
+        case ɵDeferBlockState.Loading:
+            return 'Loading';
+        case ɵDeferBlockState.Error:
+            return 'Error';
+        default:
+            return 'Main';
+    }
+}
+
+/**
  * Fixture for debugging and testing a component.
  *
  * @publicApi
  */
 class ComponentFixture {
+    /** @nodoc */
     constructor(componentRef, ngZone, effectRunner, _autoDetect) {
         this.componentRef = componentRef;
         this.ngZone = ngZone;
@@ -189,6 +267,19 @@ class ComponentFixture {
             });
             return this._promise;
         }
+    }
+    /**
+     * Retrieves all defer block fixtures in the component fixture
+     */
+    getDeferBlocks() {
+        const deferBlocks = [];
+        const lView = this.componentRef.hostView['_lView'];
+        ɵgetDeferBlocks(lView, deferBlocks);
+        const deferBlockFixtures = [];
+        for (const block of deferBlocks) {
+            deferBlockFixtures.push(new DeferBlockFixture(block, this));
+        }
+        return Promise.resolve(deferBlockFixtures);
     }
     _getRenderer() {
         if (this._renderer === undefined) {
@@ -674,6 +765,7 @@ class TestBedCompiler {
         this.providerOverridesByToken = new Map();
         this.scopesWithOverriddenProviders = new Set();
         this.testModuleRef = null;
+        this.deferBlockBehavior = ɵDeferBlockBehavior.Manual;
         class DynamicTestModule {
         }
         this.testModuleType = DynamicTestModule;
@@ -701,6 +793,7 @@ class TestBedCompiler {
         if (moduleDef.schemas !== undefined) {
             this.schemas.push(...moduleDef.schemas);
         }
+        this.deferBlockBehavior = moduleDef.deferBlockBehavior ?? ɵDeferBlockBehavior.Manual;
     }
     overrideModule(ngModule, override) {
         if (ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
@@ -1289,6 +1382,7 @@ class TestBedCompiler {
         const providers = [
             provideZoneChangeDetection(),
             { provide: Compiler, useFactory: () => new R3TestCompiler(this) },
+            { provide: ɵDEFER_BLOCK_CONFIG, useValue: { behavior: this.deferBlockBehavior } },
             ...this.providers,
             ...this.providerOverrides,
         ];
@@ -1498,6 +1592,11 @@ function getTestBed() {
  */
 class TestBedImpl {
     constructor() {
+        /**
+         * Defer block behavior option that specifies whether defer blocks will be triggered manually
+         * or set to play through.
+         */
+        this._instanceDeferBlockBehavior = ɵDeferBlockBehavior.Manual;
         // Properties
         this.platform = null;
         this.ngModule = null;
@@ -1689,6 +1788,7 @@ class TestBedImpl {
                 this._instanceTeardownOptions = undefined;
                 this._instanceErrorOnUnknownElementsOption = undefined;
                 this._instanceErrorOnUnknownPropertiesOption = undefined;
+                this._instanceDeferBlockBehavior = ɵDeferBlockBehavior.Manual;
             }
         }
         return this;
@@ -1714,6 +1814,7 @@ class TestBedImpl {
         this._instanceTeardownOptions = moduleDef.teardown;
         this._instanceErrorOnUnknownElementsOption = moduleDef.errorOnUnknownElements;
         this._instanceErrorOnUnknownPropertiesOption = moduleDef.errorOnUnknownProperties;
+        this._instanceDeferBlockBehavior = moduleDef.deferBlockBehavior ?? ɵDeferBlockBehavior.Manual;
         // Store the current value of the strict mode option,
         // so we can restore it later
         this._previousErrorOnUnknownElementsOption = ɵgetUnknownElementStrictMode();
@@ -1899,6 +2000,9 @@ class TestBedImpl {
             TestBedImpl._environmentTeardownOptions?.destroyAfterEach ??
             TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
     }
+    getDeferBlockBehavior() {
+        return this._instanceDeferBlockBehavior;
+    }
     tearDownTestingModule() {
         // If the module ref has already been destroyed, we won't be able to get a test renderer.
         if (this._testModuleRef === null) {
@@ -2059,5 +2163,5 @@ const __core_private_testing_placeholder__ = '';
  * Generated bundle index. Do not edit.
  */
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, MetadataOverrider as ɵMetadataOverrider };
 //# sourceMappingURL=testing.mjs.map

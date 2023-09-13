@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-5a0d6aa
+ * @license Angular v17.0.0-next.4+sha-aedfc75
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,6 +9,8 @@ import { ChangeDetectorRef } from '@angular/core';
 import { Component } from '@angular/core';
 import { ComponentRef } from '@angular/core';
 import { DebugElement } from '@angular/core';
+import { ɵDeferBlockBehavior as DeferBlockBehavior } from '@angular/core';
+import { ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Directive } from '@angular/core';
 import { ElementRef } from '@angular/core';
 import { InjectFlags } from '@angular/core';
@@ -21,6 +23,7 @@ import { PlatformRef } from '@angular/core';
 import { ProviderToken } from '@angular/core';
 import { SchemaMetadata } from '@angular/core';
 import { Type } from '@angular/core';
+import { ɵDeferBlockDetails } from '@angular/core';
 import { ɵFlushableEffectRunner } from '@angular/core';
 
 /**
@@ -79,6 +82,7 @@ export declare class ComponentFixture<T> {
     private _onStableSubscription;
     private _onMicrotaskEmptySubscription;
     private _onErrorSubscription;
+    /** @nodoc */
     constructor(componentRef: ComponentRef<T>, ngZone: NgZone | null, effectRunner: ɵFlushableEffectRunner | null, _autoDetect: boolean);
     private _tick;
     /**
@@ -107,6 +111,10 @@ export declare class ComponentFixture<T> {
      * asynchronous change detection.
      */
     whenStable(): Promise<any>;
+    /**
+     * Retrieves all defer block fixtures in the component fixture
+     */
+    getDeferBlocks(): Promise<DeferBlockFixture[]>;
     private _getRenderer;
     /**
      * Get a promise that resolves when the ui state is stable following animations.
@@ -127,6 +135,33 @@ export declare const ComponentFixtureAutoDetect: InjectionToken<boolean>;
  * @publicApi
  */
 export declare const ComponentFixtureNoNgZone: InjectionToken<boolean>;
+
+export { DeferBlockBehavior }
+
+/**
+ * Represents an individual `{#defer}` block for testing purposes.
+ *
+ * @publicApi
+ * @developerPreview
+ */
+export declare class DeferBlockFixture {
+    private block;
+    private componentFixture;
+    /** @nodoc */
+    constructor(block: ɵDeferBlockDetails, componentFixture: ComponentFixture<unknown>);
+    /**
+     * Renders the specified state of the defer fixture.
+     * @param state the defer state to render
+     */
+    render(state: DeferBlockState): Promise<void>;
+    /**
+     * Retrieves all nested child defer block fixtures
+     * in a given defer block.
+     */
+    getDeferBlocks(): Promise<DeferBlockFixture[]>;
+}
+
+export { DeferBlockState }
 
 /**
  * Discard all remaining periodic tasks.
@@ -411,6 +446,11 @@ export declare interface TestModuleMetadata {
      * @see [NG8002](/errors/NG8002) for the description of the error and how to fix it
      */
     errorOnUnknownProperties?: boolean;
+    /**
+     * Whether defer blocks should behave with manual triggering or play through normally.
+     * Defaults to `manual`.
+     */
+    deferBlockBehavior?: DeferBlockBehavior;
 }
 
 /**

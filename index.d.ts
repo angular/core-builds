@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-5a0d6aa
+ * @license Angular v17.0.0-next.4+sha-aedfc75
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2404,7 +2404,7 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
 /**
  * Describes the state of defer block dependency loading.
  */
-declare const enum DeferDependenciesLoadingState {
+declare enum DeferDependenciesLoadingState {
     /** Initial state, dependency loading is not yet triggered */
     NOT_STARTED = 0,
     /** Dependency loading was scheduled (e.g. `on idle`), but has not started yet */
@@ -10949,6 +10949,14 @@ export declare class ɵConsole {
     static ɵprov: i0.ɵɵInjectableDeclaration<ɵConsole>;
 }
 
+/**
+ * Size of LContainer's header. Represents the index after which all views in the
+ * container will be inserted. We need to keep a record of current views so we know
+ * which views are already in the DOM (and don't need to be re-added) and so we can
+ * remove views from the DOM when they are no longer required.
+ */
+export declare const ɵCONTAINER_HEADER_OFFSET = 11;
+
 export declare function ɵconvertToBitFlags(flags: InjectOptions | InjectFlags | undefined): InjectFlags | undefined;
 
 /**
@@ -10986,12 +10994,41 @@ export declare const ɵdefaultIterableDiffers: IterableDiffers;
 export declare const ɵdefaultKeyValueDiffers: KeyValueDiffers;
 
 /**
+ * Internal token used for configuring defer block behavior.
+ */
+export declare const ɵDEFER_BLOCK_CONFIG: InjectionToken<ɵDeferBlockConfig>;
+
+/**
  * **INTERNAL**, avoid referencing it in application code.
  *
  * Injector token that allows to provide `DeferBlockDependencyInterceptor` class
  * implementation.
  */
 export declare const ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR: InjectionToken<ɵDeferBlockDependencyInterceptor>;
+
+/**
+ * Options for configuring defer blocks behavior.
+ * @publicApi
+ * @developerPreview
+ */
+export declare enum ɵDeferBlockBehavior {
+    /**
+     * Manual triggering mode for defer blocks. Provides control over when defer blocks render
+     * and which state they render. This is the default behavior in test environments.
+     */
+    Manual = 0,
+    /**
+     * Playthrough mode for defer blocks. This mode behaves like defer blocks would in a browser.
+     */
+    Playthrough = 1
+}
+
+/**
+ * Internal structure used for configuration of defer block behavior.
+ * */
+export declare interface ɵDeferBlockConfig {
+    behavior: ɵDeferBlockBehavior;
+}
 
 /**
  * **INTERNAL**, avoid referencing it in application code.
@@ -11010,6 +11047,33 @@ export declare interface ɵDeferBlockDependencyInterceptor {
      * Allows to configure an interceptor function.
      */
     setInterceptor(interceptorFn: (current: DependencyResolverFn) => DependencyResolverFn): void;
+}
+
+/**
+ * Defer block instance for testing.
+ */
+export declare interface ɵDeferBlockDetails {
+    lContainer: LContainer;
+    lView: LView;
+    tNode: TNode;
+    tDetails: TDeferBlockDetails;
+}
+
+/**
+ * Describes the current state of this {#defer} block instance.
+ *
+ * @publicApi
+ * @developerPreview
+ */
+export declare enum ɵDeferBlockState {
+    /** The {:placeholder} block content is rendered */
+    Placeholder = 0,
+    /** The {:loading} block content is rendered */
+    Loading = 1,
+    /** The main content block content is rendered */
+    Complete = 2,
+    /** The {:error} block content is rendered */
+    Error = 3
 }
 
 /** The deps tracker to be used in the current Angular app in dev mode. */
@@ -11253,6 +11317,14 @@ export declare function ɵgenerateStandaloneInDeclarationsError(type: Type<any>,
  * a Promise that represents dependency loading. Otherwise - this function returns `null`.
  */
 export declare function ɵgetAsyncClassMetadata(type: Type<unknown>): Promise<Array<Type<unknown>>> | null;
+
+/**
+ * Retrieves all defer blocks in a given LView.
+ *
+ * @param lView lView with defer blocks
+ * @param deferBlocks defer block aggregator array
+ */
+export declare function ɵgetDeferBlocks(lView: LView, deferBlocks: ɵDeferBlockDetails[]): void;
 
 /**
  * Retrieves directive instances associated with a given DOM node. Does not include
@@ -11896,6 +11968,16 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
 }
 
 /**
+ * Transitions a defer block to the new state. Updates the  necessary
+ * data structures and renders corresponding block.
+ *
+ * @param newState New state that should be applied to the defer block.
+ * @param tNode TNode that represents a defer block.
+ * @param lContainer Represents an instance of a defer block.
+ */
+export declare function ɵrenderDeferBlockState(newState: ɵDeferBlockState, tNode: TNode, lContainer: LContainer): void;
+
+/**
  * Flags passed into template functions to determine which blocks (i.e. creation, update)
  * should be executed.
  *
@@ -12208,6 +12290,14 @@ export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
  * (either a NgModule or a standalone component / directive / pipe).
  */
 export declare function ɵtransitiveScopesFor<T>(type: Type<T>): ɵNgModuleTransitiveScopes;
+
+/**
+ * Trigger loading of defer block dependencies if the process hasn't started yet.
+ *
+ * @param tDetails Static information about this defer block.
+ * @param lView LView of a host view.
+ */
+export declare function ɵtriggerResourceLoading(tDetails: TDeferBlockDetails, lView: LView): void;
 
 /**
  * Helper function to remove all the locale data from `LOCALE_DATA`.
