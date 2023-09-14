@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.5+sha-65d6915
+ * @license Angular v16.2.5+sha-7b40d74
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -374,7 +374,9 @@ function consumerAfterComputation(node, prevConsumer) {
         }
     }
     // Truncate the producer tracking arrays.
-    for (let i = node.nextProducerIndex; i < node.producerNode.length; i++) {
+    // Perf note: this is essentially truncating the length to `node.nextProducerIndex`, but
+    // benchmarking has shown that individual pop operations are faster.
+    while (node.producerNode.length > node.nextProducerIndex) {
         node.producerNode.pop();
         node.producerLastReadVersion.pop();
         node.producerIndexOfThis.pop();
@@ -448,6 +450,9 @@ function producerAddLiveConsumer(node, consumer, indexOfThis) {
 function producerRemoveLiveConsumerAtIndex(node, idx) {
     assertProducerNode(node);
     assertConsumerNode(node);
+    if (typeof ngDevMode !== 'undefined' && ngDevMode && idx >= node.liveConsumerNode.length) {
+        throw new Error(`Assertion error: active consumer index ${idx} is out of bounds of ${node.liveConsumerNode.length} consumers)`);
+    }
     if (node.liveConsumerNode.length === 1) {
         // When removing the last live consumer, we will no longer be live. We need to remove
         // ourselves from our producers' tracking (which may cause consumer-producers to lose
