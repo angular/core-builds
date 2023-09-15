@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.5+sha-b0b004e
+ * @license Angular v16.2.5+sha-3b46066
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3556,7 +3556,7 @@ function getFactoryDef(type, throwNotFound) {
  *
  * This can be used to auto-unwrap signals in various cases, or to auto-wrap non-signal values.
  */
-const SIGNAL = Symbol('SIGNAL');
+const SIGNAL = /* @__PURE__ */ Symbol('SIGNAL');
 /**
  * Checks if the given `value` is a reactive `Signal`.
  *
@@ -3877,19 +3877,19 @@ function computed(computation, options) {
  * A dedicated symbol used before a computed value has been calculated for the first time.
  * Explicitly typed as `any` so we can use it as signal's value.
  */
-const UNSET = Symbol('UNSET');
+const UNSET = /* @__PURE__ */ Symbol('UNSET');
 /**
  * A dedicated symbol used in place of a computed signal value to indicate that a given computation
  * is in progress. Used to detect cycles in computation chains.
  * Explicitly typed as `any` so we can use it as signal's value.
  */
-const COMPUTING = Symbol('COMPUTING');
+const COMPUTING = /* @__PURE__ */ Symbol('COMPUTING');
 /**
  * A dedicated symbol used in place of a computed signal value to indicate that a given computation
  * failed. The thrown error is cached until the computation gets dirty again.
  * Explicitly typed as `any` so we can use it as signal's value.
  */
-const ERRORED = Symbol('ERRORED');
+const ERRORED = /* @__PURE__ */ Symbol('ERRORED');
 const COMPUTED_NODE = {
     ...REACTIVE_NODE,
     value: UNSET,
@@ -10910,7 +10910,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.5+sha-b0b004e');
+const VERSION = new Version('16.2.5+sha-3b46066');
 
 // This default value is when checking the hierarchy for a token.
 //
