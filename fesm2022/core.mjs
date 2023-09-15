@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-cb7acdf
+ * @license Angular v17.0.0-next.4+sha-a62e62c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2759,7 +2759,27 @@ function watch(fn, schedule, allowSignalWrites) {
     const registerOnCleanup = (cleanupFn) => {
         node.cleanupFn = cleanupFn;
     };
+    function isWatchNodeDestroyed(node) {
+        return node.fn === null && node.schedule === null;
+    }
+    function destroyWatchNode(node) {
+        if (!isWatchNodeDestroyed(node)) {
+            consumerDestroy(node); // disconnect watcher from the reactive graph
+            node.cleanupFn();
+            // nullify references to the integration functions to mark node as destroyed
+            node.fn = null;
+            node.schedule = null;
+            node.cleanupFn = NOOP_CLEANUP_FN;
+        }
+    }
     const run = () => {
+        if (node.fn === null) {
+            // trying to run a destroyed watch is noop
+            return;
+        }
+        if (isInNotificationPhase()) {
+            throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
+        }
         node.dirty = false;
         if (node.hasRun && !consumerPollProducersForChange(node)) {
             return;
@@ -2779,6 +2799,7 @@ function watch(fn, schedule, allowSignalWrites) {
         notify: () => consumerMarkDirty(node),
         run,
         cleanup: () => node.cleanupFn(),
+        destroy: () => destroyWatchNode(node),
     };
     return node.ref;
 }
@@ -2788,7 +2809,9 @@ const WATCH_NODE = {
     consumerIsAlwaysLive: true,
     consumerAllowSignalWrites: false,
     consumerMarkedDirty: (node) => {
-        node.schedule(node.ref);
+        if (node.schedule !== null) {
+            node.schedule(node.ref);
+        }
     },
     hasRun: false,
     cleanupFn: NOOP_CLEANUP_FN,
@@ -10854,7 +10877,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.4+sha-cb7acdf');
+const VERSION = new Version('17.0.0-next.4+sha-a62e62c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -32839,19 +32862,11 @@ class EffectHandle {
         this.effectFn = effectFn;
         this.creationZone = creationZone;
         this.errorHandler = errorHandler;
-        this.alive = true;
         this.watcher =
             watch((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
         this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
     }
     runEffect(onCleanup) {
-        if (!this.alive) {
-            // Running a destroyed effect is a no-op.
-            return;
-        }
-        if (ngDevMode && isInNotificationPhase()) {
-            throw new Error(`Schedulers cannot synchronously execute effects while scheduling.`);
-        }
         try {
             this.effectFn(onCleanup);
         }
@@ -32863,17 +32878,13 @@ class EffectHandle {
         this.watcher.run();
     }
     schedule() {
-        if (!this.alive) {
-            return;
-        }
         this.scheduler.scheduleEffect(this);
     }
     notify() {
         this.watcher.notify();
     }
     destroy() {
-        this.alive = false;
-        this.watcher.cleanup();
+        this.watcher.destroy();
         this.unregisterOnDestroy?.();
         // Note: if the effect is currently scheduled, it's not un-scheduled, and so the scheduler will
         // retain a reference to it. Attempting to execute it will be a no-op.
