@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-5a20a44
+ * @license Angular v17.0.0-next.4+sha-c6b9a3e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7330,7 +7330,7 @@ class DepsTracker {
         }
         else {
             if (!this.ownerNgModule.has(type)) {
-                return { dependencies: [] };
+                throw new RuntimeError(1001 /* RuntimeErrorCode.RUNTIME_DEPS_ORPHAN_COMPONENT */, `Orphan component found! Trying to render the component ${type.name} without first loading the NgModule that declares it. Make sure that you import the component's NgModule in the NgModule or the standalone component in which you are trying to render this component. Also make sure the way the app is bundled and served always includes the component's NgModule before the component.`);
             }
             const scope = this.getNgModuleScope(this.ownerNgModule.get(type));
             if (scope.compilation.isPoisoned) {
@@ -10854,7 +10854,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.4+sha-5a20a44');
+const VERSION = new Version('17.0.0-next.4+sha-c6b9a3e');
 
 // This default value is when checking the hierarchy for a token.
 //

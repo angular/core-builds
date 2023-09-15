@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-5a20a44
+ * @license Angular v17.0.0-next.4+sha-c6b9a3e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12134,7 +12134,8 @@ export declare const enum ɵRuntimeErrorCode {
     UNSAFE_IFRAME_ATTRS = -910,
     VIEW_ALREADY_DESTROYED = 911,
     COMPONENT_ID_COLLISION = -912,
-    RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000
+    RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,
+    RUNTIME_DEPS_ORPHAN_COMPONENT = 1001
 }
 
 /**
