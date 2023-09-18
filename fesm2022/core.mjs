@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-8486fa1
+ * @license Angular v17.0.0-next.4+sha-fb3e6d6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2601,47 +2601,52 @@ const COMPUTING = /* @__PURE__ */ Symbol('COMPUTING');
  * Explicitly typed as `any` so we can use it as signal's value.
  */
 const ERRORED = /* @__PURE__ */ Symbol('ERRORED');
-const COMPUTED_NODE = {
-    ...REACTIVE_NODE,
-    value: UNSET,
-    dirty: true,
-    error: null,
-    equal: defaultEquals,
-    producerMustRecompute(node) {
-        // Force a recomputation if there's no current value, or if the current value is in the process
-        // of being calculated (which should throw an error).
-        return node.value === UNSET || node.value === COMPUTING;
-    },
-    producerRecomputeValue(node) {
-        if (node.value === COMPUTING) {
-            // Our computation somehow led to a cyclic read of itself.
-            throw new Error('Detected cycle in computations.');
-        }
-        const oldValue = node.value;
-        node.value = COMPUTING;
-        const prevConsumer = consumerBeforeComputation(node);
-        let newValue;
-        try {
-            newValue = node.computation();
-        }
-        catch (err) {
-            newValue = ERRORED;
-            node.error = err;
-        }
-        finally {
-            consumerAfterComputation(node, prevConsumer);
-        }
-        if (oldValue !== UNSET && oldValue !== ERRORED && newValue !== ERRORED &&
-            node.equal(oldValue, newValue)) {
-            // No change to `valueVersion` - old and new values are
-            // semantically equivalent.
-            node.value = oldValue;
-            return;
-        }
-        node.value = newValue;
-        node.version++;
-    },
-};
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const COMPUTED_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...REACTIVE_NODE,
+        value: UNSET,
+        dirty: true,
+        error: null,
+        equal: defaultEquals,
+        producerMustRecompute(node) {
+            // Force a recomputation if there's no current value, or if the current value is in the
+            // process of being calculated (which should throw an error).
+            return node.value === UNSET || node.value === COMPUTING;
+        },
+        producerRecomputeValue(node) {
+            if (node.value === COMPUTING) {
+                // Our computation somehow led to a cyclic read of itself.
+                throw new Error('Detected cycle in computations.');
+            }
+            const oldValue = node.value;
+            node.value = COMPUTING;
+            const prevConsumer = consumerBeforeComputation(node);
+            let newValue;
+            try {
+                newValue = node.computation();
+            }
+            catch (err) {
+                newValue = ERRORED;
+                node.error = err;
+            }
+            finally {
+                consumerAfterComputation(node, prevConsumer);
+            }
+            if (oldValue !== UNSET && oldValue !== ERRORED && newValue !== ERRORED &&
+                node.equal(oldValue, newValue)) {
+                // No change to `valueVersion` - old and new values are
+                // semantically equivalent.
+                node.value = oldValue;
+                return;
+            }
+            node.value = newValue;
+            node.version++;
+        },
+    };
+})();
 
 function defaultThrowError() {
     throw new Error();
@@ -2686,11 +2691,16 @@ function setPostSignalSetFn(fn) {
     postSignalSetFn = fn;
     return prev;
 }
-const SIGNAL_NODE = {
-    ...REACTIVE_NODE,
-    equal: defaultEquals,
-    readonlyFn: undefined,
-};
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const SIGNAL_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...REACTIVE_NODE,
+        equal: defaultEquals,
+        readonlyFn: undefined,
+    };
+})();
 function signalValueChanged(node) {
     node.version++;
     producerNotifyConsumers(node);
@@ -2804,18 +2814,23 @@ function watch(fn, schedule, allowSignalWrites) {
     return node.ref;
 }
 const NOOP_CLEANUP_FN = () => { };
-const WATCH_NODE = {
-    ...REACTIVE_NODE,
-    consumerIsAlwaysLive: true,
-    consumerAllowSignalWrites: false,
-    consumerMarkedDirty: (node) => {
-        if (node.schedule !== null) {
-            node.schedule(node.ref);
-        }
-    },
-    hasRun: false,
-    cleanupFn: NOOP_CLEANUP_FN,
-};
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const WATCH_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...REACTIVE_NODE,
+        consumerIsAlwaysLive: true,
+        consumerAllowSignalWrites: false,
+        consumerMarkedDirty: (node) => {
+            if (node.schedule !== null) {
+                node.schedule(node.ref);
+            }
+        },
+        hasRun: false,
+        cleanupFn: NOOP_CLEANUP_FN,
+    };
+})();
 
 function setAlternateWeakRefImpl(impl) {
     // TODO: remove this function
@@ -10877,7 +10892,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.4+sha-8486fa1');
+const VERSION = new Version('17.0.0-next.4+sha-fb3e6d6');
 
 // This default value is when checking the hierarchy for a token.
 //
