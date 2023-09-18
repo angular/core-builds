@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-fb3e6d6
+ * @license Angular v17.0.0-next.4+sha-3d06a81
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6287,6 +6287,12 @@ declare interface NgModuleScopeInfoFromDecorator {
      * module.
      */
     exports?: Type<any>[] | (() => Type<any>[]) | RawScopeInfoFromDecorator[];
+    /**
+     * The set of components that are bootstrapped when this module is bootstrapped. This field is
+     * only available in local compilation mode. In full compilation mode bootstrap info is passed
+     * directly to the module def runtime after statically analyzed and resolved.
+     */
+    bootstrap?: Type<any>[] | (() => Type<any>[]) | RawScopeInfoFromDecorator[];
 }
 
 /**
@@ -7424,7 +7430,7 @@ declare class R3Injector extends EnvironmentInjector {
  *  - NgModule's annotation imports/exports/declarations fields
  *  - standalone component annotation imports field
  */
-declare type RawScopeInfoFromDecorator = Type<any> | ModuleWithProviders<any> | (() => Type<any>) | (() => ModuleWithProviders<any>);
+declare type RawScopeInfoFromDecorator = Type<any> | ModuleWithProviders<any> | (() => Type<any>) | (() => ModuleWithProviders<any>) | any[];
 
 declare interface RComment extends RNode {
     textContent: string | null;
@@ -11751,7 +11757,11 @@ export declare const ɵNG_PROV_DEF: string;
 export declare interface ɵNgModuleDef<T> {
     /** Token representing the module. Used by DI. */
     type: T;
-    /** List of components to bootstrap. */
+    /**
+     * List of components to bootstrap.
+     *
+     * @see {NgModuleScopeInfoFromDecorator} This field is only used in global compilation mode. In local compilation mode the bootstrap info is computed and added in runtime.
+     */
     bootstrap: Type<any>[] | (() => Type<any>[]);
     /** List of components, directives, and pipes declared by this module. */
     declarations: Type<any>[] | (() => Type<any>[]);

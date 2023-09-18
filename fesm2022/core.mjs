@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-fb3e6d6
+ * @license Angular v17.0.0-next.4+sha-3d06a81
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7502,7 +7502,7 @@ class DepsTracker {
                 pipes: new Set(),
             },
         };
-        for (const rawImport of rawImports ?? []) {
+        for (const rawImport of flatten(rawImports ?? [])) {
             const imported = resolveForwardRef(rawImport);
             try {
                 verifyStandaloneImport(imported, type);
@@ -10892,7 +10892,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.4+sha-fb3e6d6');
+const VERSION = new Version('17.0.0-next.4+sha-3d06a81');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -25782,6 +25782,10 @@ function ɵɵsetNgModuleScope(type, scope) {
         ngModuleDef.declarations = convertToTypeArray(scope.declarations || EMPTY_ARRAY);
         ngModuleDef.imports = convertToTypeArray(scope.imports || EMPTY_ARRAY);
         ngModuleDef.exports = convertToTypeArray(scope.exports || EMPTY_ARRAY);
+        if (scope.bootstrap) {
+            // This only happens in local compilation mode.
+            ngModuleDef.bootstrap = convertToTypeArray(scope.bootstrap);
+        }
         depsTracker.registerNgModule(type, scope);
     });
 }
@@ -25789,11 +25793,12 @@ function convertToTypeArray(values) {
     if (typeof values === 'function') {
         return values;
     }
-    if (values.some(isForwardRef)) {
-        return () => values.map(resolveForwardRef).map(maybeUnwrapModuleWithProviders);
+    const flattenValues = flatten(values);
+    if (flattenValues.some(isForwardRef)) {
+        return () => flattenValues.map(resolveForwardRef).map(maybeUnwrapModuleWithProviders);
     }
     else {
-        return values.map(maybeUnwrapModuleWithProviders);
+        return flattenValues.map(maybeUnwrapModuleWithProviders);
     }
 }
 function maybeUnwrapModuleWithProviders(value) {
