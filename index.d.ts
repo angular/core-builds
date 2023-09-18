@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-e2416a2
+ * @license Angular v17.0.0-next.4+sha-545db6d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -81,6 +81,13 @@ export declare interface AfterContentInit {
  * Register a callback to be invoked the next time the application
  * finishes rendering.
  *
+ * <div class="alert is-critical">
+ *
+ * You should always explicitly specify a non-default [phase](api/core/AfterRenderPhase), or you
+ * risk significant performance degradation.
+ *
+ * </div>
+ *
  * Note that the callback will run
  * - in the order it was registered
  * - on browser platforms only
@@ -112,7 +119,7 @@ export declare interface AfterContentInit {
  *   constructor() {
  *     afterNextRender(() => {
  *       this.chart = new MyChart(this.chartRef.nativeElement);
- *     });
+ *     }, {phase: AfterRenderPhase.Write});
  *   }
  * }
  * ```
@@ -124,6 +131,13 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
 /**
  * Register a callback to be invoked each time the application
  * finishes rendering.
+ *
+ * <div class="alert is-critical">
+ *
+ * You should always explicitly specify a non-default [phase](api/core/AfterRenderPhase), or you
+ * risk significant performance degradation.
+ *
+ * </div>
  *
  * Note that the callback will run
  * - in the order it was registered
@@ -155,7 +169,7 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
  *   constructor() {
  *     afterRender(() => {
  *       console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
- *     });
+ *     }, {phase: AfterRenderPhase.Read});
  *   }
  * }
  * ```
@@ -176,6 +190,77 @@ export declare interface AfterRenderOptions {
      * If this is not provided, the current injection context will be used instead (via `inject`).
      */
     injector?: Injector;
+    /**
+     * The phase the callback should be invoked in.
+     *
+     * <div class="alert is-critical">
+     *
+     * Defaults to `AfterRenderPhase.MixedReadWrite`. You should choose a more specific
+     * phase instead. See `AfterRenderPhase` for more information.
+     *
+     * </div>
+     */
+    phase?: AfterRenderPhase;
+}
+
+/**
+ * The phase to run an `afterRender` or `afterNextRender` callback in.
+ *
+ * Callbacks in the same phase run in the order they are registered. Phases run in the
+ * following order after each render:
+ *
+ *   1. `AfterRenderPhase.EarlyRead`
+ *   2. `AfterRenderPhase.Write`
+ *   3. `AfterRenderPhase.MixedReadWrite`
+ *   4. `AfterRenderPhase.Read`
+ *
+ * Angular is unable to verify or enforce that phases are used correctly, and instead
+ * relies on each developer to follow the guidelines documented for each value and
+ * carefully choose the appropriate one, refactoring their code if necessary. By doing
+ * so, Angular is better able to minimize the performance degradation associated with
+ * manual DOM access, ensuring the best experience for the end users of your application
+ * or library.
+ *
+ * @developerPreview
+ */
+export declare enum AfterRenderPhase {
+    /**
+     * Use `AfterRenderPhase.EarlyRead` for callbacks that only need to **read** from the
+     * DOM before a subsequent `AfterRenderPhase.Write` callback, for example to perform
+     * custom layout that the browser doesn't natively support. **Never** use this phase
+     * for callbacks that can write to the DOM or when `AfterRenderPhase.Read` is adequate.
+     *
+     * <div class="alert is-important">
+     *
+     * Using this value can degrade performance.
+     * Instead, prefer using built-in browser functionality when possible.
+     *
+     * </div>
+     */
+    EarlyRead = 0,
+    /**
+     * Use `AfterRenderPhase.Write` for callbacks that only **write** to the DOM. **Never**
+     * use this phase for callbacks that can read from the DOM.
+     */
+    Write = 1,
+    /**
+     * Use `AfterRenderPhase.MixedReadWrite` for callbacks that read from or write to the
+     * DOM, that haven't been refactored to use a different phase. **Never** use this phase
+     * for callbacks that can use a different phase instead.
+     *
+     * <div class="alert is-critical">
+     *
+     * Using this value can **significantly** degrade performance.
+     * Instead, prefer refactoring into multiple callbacks using a more specific phase.
+     *
+     * </div>
+     */
+    MixedReadWrite = 2,
+    /**
+     * Use `AfterRenderPhase.Read` for callbacks that only **read** from the DOM. **Never**
+     * use this phase for callbacks that can write to the DOM.
+     */
+    Read = 3
 }
 
 /**
