@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "17.0.0-next.4+sha-75380bf",
+  "version": "17.0.0-next.4+sha-9bd1551",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -38,7 +38,7 @@
   },
   "peerDependencies": {
     "rxjs": "^6.5.3 || ^7.4.0",
-    "zone.js": "~0.13.0"
+    "zone.js": "~0.14.0"
   },
   "repository": {
     "type": "git",
