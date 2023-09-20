@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-0ee0f78
+ * @license Angular v17.0.0-next.4+sha-b44533b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8302,7 +8302,15 @@ export declare interface SkipSelfDecorator {
  * Represents scope data for standalone component as calculated during runtime by the deps tracker.
  */
 declare interface StandaloneComponentScope {
-    compilation: ScopeData;
+    compilation: StandaloneCompScopeData;
+}
+
+/**
+ * Represents scope data for standalone components as calculated during runtime by the deps
+ * tracker.
+ */
+declare interface StandaloneCompScopeData extends ScopeData {
+    ngModules: Set<ɵNgModuleType<any>>;
 }
 
 

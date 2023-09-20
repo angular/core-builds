@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-0ee0f78
+ * @license Angular v17.0.0-next.4+sha-b44533b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7363,6 +7363,7 @@ class DepsTracker {
                 dependencies: [
                     ...scope.compilation.directives,
                     ...scope.compilation.pipes,
+                    ...scope.compilation.ngModules,
                 ]
             };
         }
@@ -7506,6 +7507,7 @@ class DepsTracker {
                 // Standalone components are always able to self-reference.
                 directives: new Set([type]),
                 pipes: new Set(),
+                ngModules: new Set(),
             },
         };
         for (const rawImport of flatten(rawImports ?? [])) {
@@ -7519,6 +7521,7 @@ class DepsTracker {
                 return ans;
             }
             if (isNgModule(imported)) {
+                ans.compilation.ngModules.add(imported);
                 const importedScope = this.getNgModuleScope(imported);
                 // Short-circuit if an imported NgModule has corrupted exported scope.
                 if (importedScope.exported.isPoisoned) {
@@ -10898,7 +10901,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.4+sha-0ee0f78');
+const VERSION = new Version('17.0.0-next.4+sha-b44533b');
 
 // This default value is when checking the hierarchy for a token.
 //
