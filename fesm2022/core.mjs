@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.4+sha-b44533b
+ * @license Angular v17.0.0-next.4+sha-e353229
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10901,7 +10901,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.4+sha-b44533b');
+const VERSION = new Version('17.0.0-next.4+sha-e353229');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -27533,7 +27533,13 @@ function ɵɵtemplateRefExtractor(tNode, lView) {
 
 function ɵɵgetComponentDepsFactory(type, rawImports) {
     return () => {
-        return depsTracker.getComponentDependencies(type, rawImports).dependencies;
+        try {
+            return depsTracker.getComponentDependencies(type, rawImports).dependencies;
+        }
+        catch (e) {
+            console.error(`Computing dependencies in local compilation mode for the component "${type.name}" failed with the exception:`, e);
+            throw e;
+        }
     };
 }
 
