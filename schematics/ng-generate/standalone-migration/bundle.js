@@ -23256,7 +23256,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.4+sha-2c09d51");
+var VERSION2 = new Version("17.0.0-next.4+sha-34495b3");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24869,7 +24869,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.4+sha-2c09d51"));
+  definitionMap.set("version", literal("17.0.0-next.4+sha-34495b3"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24940,7 +24940,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.4+sha-2c09d51"));
+  definitionMap.set("version", literal("17.0.0-next.4+sha-34495b3"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25128,7 +25128,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.4+sha-2c09d51"));
+  definitionMap.set("version", literal("17.0.0-next.4+sha-34495b3"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25151,7 +25151,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.4+sha-2c09d51"));
+  definitionMap.set("version", literal("17.0.0-next.4+sha-34495b3"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25189,7 +25189,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.4+sha-2c09d51"));
+  definitionMap.set("version", literal("17.0.0-next.4+sha-34495b3"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25213,7 +25213,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.4+sha-2c09d51"));
+  definitionMap.set("version", literal("17.0.0-next.4+sha-34495b3"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25248,7 +25248,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.4+sha-2c09d51"));
+  definitionMap.set("version", literal("17.0.0-next.4+sha-34495b3"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25265,7 +25265,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.4+sha-2c09d51");
+var VERSION3 = new Version("17.0.0-next.4+sha-34495b3");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35682,33 +35682,32 @@ var DocsExtractor = class {
     this.metadataReader = metadataReader;
   }
   extractAll(sourceFile) {
+    var _a2;
     const entries = [];
-    for (const statement of sourceFile.statements) {
-      if (!this.isExported(statement))
-        continue;
-      if (isNamedClassDeclaration(statement)) {
-        entries.push(extractClass(statement, this.metadataReader, this.typeChecker));
+    const reflector = new TypeScriptReflectionHost(this.typeChecker);
+    const exportedDeclarationMap = reflector.getExportsOfModule(sourceFile);
+    const exportedDeclarations = Array.from((_a2 = exportedDeclarationMap == null ? void 0 : exportedDeclarationMap.entries()) != null ? _a2 : []).map(([exportName, declaration]) => [exportName, declaration.node]).sort(([a, declarationA], [b, declarationB]) => declarationA.pos - declarationB.pos);
+    for (const [exportName, node] of exportedDeclarations) {
+      let entry = void 0;
+      if (isNamedClassDeclaration(node)) {
+        entry = extractClass(node, this.metadataReader, this.typeChecker);
       }
-      if (import_typescript61.default.isFunctionDeclaration(statement)) {
-        const functionExtractor = new FunctionExtractor(statement, this.typeChecker);
-        entries.push(functionExtractor.extract());
+      if (import_typescript61.default.isFunctionDeclaration(node)) {
+        const functionExtractor = new FunctionExtractor(node, this.typeChecker);
+        entry = functionExtractor.extract();
       }
-      if (import_typescript61.default.isVariableStatement(statement)) {
-        statement.declarationList.forEachChild((declaration) => {
-          if (import_typescript61.default.isVariableDeclaration(declaration) && !isSyntheticAngularConstant(declaration)) {
-            entries.push(extractConstant(declaration, this.typeChecker));
-          }
-        });
+      if (import_typescript61.default.isVariableDeclaration(node) && !isSyntheticAngularConstant(node)) {
+        entry = extractConstant(node, this.typeChecker);
       }
-      if (import_typescript61.default.isEnumDeclaration(statement)) {
-        entries.push(extractEnum(statement, this.typeChecker));
+      if (import_typescript61.default.isEnumDeclaration(node)) {
+        entry = extractEnum(node, this.typeChecker);
+      }
+      if (entry) {
+        entry.name = exportName;
+        entries.push(entry);
       }
     }
     return entries;
-  }
-  isExported(node) {
-    var _a2;
-    return import_typescript61.default.canHaveModifiers(node) && ((_a2 = import_typescript61.default.getModifiers(node)) != null ? _a2 : []).some((mod) => mod.kind === import_typescript61.default.SyntaxKind.ExportKeyword);
   }
 };
 
@@ -42302,17 +42301,17 @@ var NgCompiler = class {
     compilation.traitCompiler.index(context);
     return generateAnalysis(context);
   }
-  getApiDocumentation() {
+  getApiDocumentation(entryPoint) {
     const compilation = this.ensureAnalyzed();
     const checker = this.inputProgram.getTypeChecker();
     const docsExtractor = new DocsExtractor(checker, compilation.metaReader);
-    let entries = [];
-    for (const sourceFile of this.inputProgram.getSourceFiles()) {
-      if (sourceFile.isDeclarationFile)
-        continue;
-      entries.push(...docsExtractor.extractAll(sourceFile));
+    const entryPointSourceFile = this.inputProgram.getSourceFiles().find((sourceFile) => {
+      return sourceFile.fileName.includes(entryPoint);
+    });
+    if (!entryPointSourceFile) {
+      throw new Error(`Entry point "${entryPoint}" not found in program sources.`);
     }
-    return entries;
+    return docsExtractor.extractAll(entryPointSourceFile);
   }
   xi18n(ctx) {
     const compilation = this.ensureAnalyzed();
@@ -43112,8 +43111,8 @@ var NgtscProgram = class {
   getIndexedComponents() {
     return this.compiler.getIndexedComponents();
   }
-  getApiDocumentation() {
-    return this.compiler.getApiDocumentation();
+  getApiDocumentation(entryPoint) {
+    return this.compiler.getApiDocumentation(entryPoint);
   }
   getEmittedSourceFiles() {
     throw new Error("Method not implemented.");
