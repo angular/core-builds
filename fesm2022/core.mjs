@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-077534e
+ * @license Angular v17.0.0-next.5+sha-013aec8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7315,7 +7315,7 @@ function isPlatformBrowser(injector) {
  *
  * @deprecated For migration purposes only, to be removed soon.
  */
-const USE_RUNTIME_DEPS_TRACKER_FOR_JIT = true;
+const USE_RUNTIME_DEPS_TRACKER_FOR_JIT = false;
 /**
  * An implementation of DepsTrackerApi which will be used for JIT and local compilation.
  */
@@ -7397,8 +7397,12 @@ class DepsTracker {
     }
     /** @override */
     clearScopeCacheFor(type) {
-        this.ngModulesScopeCache.delete(type);
-        this.standaloneComponentsScopeCache.delete(type);
+        if (isNgModule(type)) {
+            this.ngModulesScopeCache.delete(type);
+        }
+        else if (isComponent(type)) {
+            this.standaloneComponentsScopeCache.delete(type);
+        }
     }
     /** @override */
     getNgModuleScope(type) {
@@ -10897,7 +10901,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.5+sha-077534e');
+const VERSION = new Version('17.0.0-next.5+sha-013aec8');
 
 // This default value is when checking the hierarchy for a token.
 //
