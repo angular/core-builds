@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-0598613
+ * @license Angular v17.0.0-next.5+sha-3cbb2a8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13451,10 +13451,11 @@ export declare function ɵɵdeferOnImmediate(): void;
 
 /**
  * Creates runtime data structures for the `on interaction` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-export declare function ɵɵdeferOnInteraction(target?: unknown): void;
+export declare function ɵɵdeferOnInteraction(triggerIndex: number, walkUpTimes?: number): void;
 
 /**
  * Creates runtime data structures for the `on timer` deferred trigger.
@@ -13490,10 +13491,11 @@ export declare function ɵɵdeferPrefetchOnImmediate(): void;
 
 /**
  * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-export declare function ɵɵdeferPrefetchOnInteraction(target?: unknown): void;
+export declare function ɵɵdeferPrefetchOnInteraction(triggerIndex: number, walkUpTimes?: number): void;
 
 /**
  * Creates runtime data structures for the `prefetch on timer` deferred trigger.

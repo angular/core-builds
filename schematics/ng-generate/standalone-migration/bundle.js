@@ -20586,7 +20586,7 @@ var TemplateData = class {
   }
 };
 var TemplateDefinitionBuilder = class {
-  constructor(constantPool, parentBindingScope, level = 0, contextName, i18nContext, templateIndex, templateName, _namespace, relativeContextFilePath, i18nUseExternalIds, deferBlocks, _constants = createComponentDefConsts()) {
+  constructor(constantPool, parentBindingScope, level = 0, contextName, i18nContext, templateIndex, templateName, _namespace, relativeContextFilePath, i18nUseExternalIds, deferBlocks, elementLocations, _constants = createComponentDefConsts()) {
     this.constantPool = constantPool;
     this.level = level;
     this.contextName = contextName;
@@ -20596,6 +20596,7 @@ var TemplateDefinitionBuilder = class {
     this._namespace = _namespace;
     this.i18nUseExternalIds = i18nUseExternalIds;
     this.deferBlocks = deferBlocks;
+    this.elementLocations = elementLocations;
     this._constants = _constants;
     this._dataIndex = 0;
     this._bindingContext = 0;
@@ -20887,6 +20888,7 @@ var TemplateDefinitionBuilder = class {
     var _a2, _b2;
     const elementIndex = this.allocateDataSlot();
     const stylingBuilder = new StylingBuilder(null);
+    this.elementLocations.set(element2, { index: elementIndex, level: this.level });
     let isNonBindableMode = false;
     const isI18nRootElement = isI18nRootNode(element2.i18n) && !isSingleI18nIcu(element2.i18n);
     const outputAttrs = [];
@@ -21059,7 +21061,7 @@ var TemplateDefinitionBuilder = class {
     }
     const contextName = `${this.contextName}${contextNameSuffix}_${index}`;
     const name = `${contextName}_Template`;
-    const visitor = new TemplateDefinitionBuilder(this.constantPool, this._bindingScope, this.level + 1, contextName, this.i18n, index, name, this._namespace, this.fileBasedI18nSuffix, this.i18nUseExternalIds, this.deferBlocks, this._constants);
+    const visitor = new TemplateDefinitionBuilder(this.constantPool, this._bindingScope, this.level + 1, contextName, this.i18n, index, name, this._namespace, this.fileBasedI18nSuffix, this.i18nUseExternalIds, this.deferBlocks, this.elementLocations, this._constants);
     this._nestedTemplateFns.push(() => {
       const templateFunctionExpr = visitor.buildTemplateFunction(children, variables, this._ngContentReservedSlots.length + this._ngContentSelectorsOffset, i18n2);
       this.constantPool.statements.push(templateFunctionExpr.toDeclStmt(name));
@@ -21232,6 +21234,10 @@ var TemplateDefinitionBuilder = class {
   }
   visitDeferredBlock(deferred) {
     const { loading, placeholder, error: error2, triggers, prefetchTriggers } = deferred;
+    const metadata = this.deferBlocks.get(deferred);
+    if (!metadata) {
+      throw new Error("Could not resolve `defer` block metadata. Block may need to be analyzed.");
+    }
     const primaryTemplateIndex = this.createEmbeddedTemplateFn(null, deferred.children, "_Defer", deferred.sourceSpan);
     const loadingIndex = loading ? this.createEmbeddedTemplateFn(null, loading.children, "_DeferLoading", loading.sourceSpan) : null;
     const loadingConsts = loading ? trimTrailingNulls([literal(loading.minimumTime), literal(loading.afterTime)]) : null;
@@ -21243,24 +21249,23 @@ var TemplateDefinitionBuilder = class {
     this.creationInstruction(deferred.sourceSpan, Identifiers.defer, trimTrailingNulls([
       literal(deferredIndex),
       literal(primaryTemplateIndex),
-      this.createDeferredDepsFunction(depsFnName, deferred),
+      this.createDeferredDepsFunction(depsFnName, metadata),
       literal(loadingIndex),
       literal(placeholderIndex),
       literal(errorIndex),
       (loadingConsts == null ? void 0 : loadingConsts.length) ? this.addToConsts(literalArr(loadingConsts)) : TYPED_NULL_EXPR,
       placeholderConsts ? this.addToConsts(placeholderConsts) : TYPED_NULL_EXPR
     ]));
-    this.createDeferTriggerInstructions(deferredIndex, triggers, false);
-    this.createDeferTriggerInstructions(deferredIndex, prefetchTriggers, true);
+    this.createDeferTriggerInstructions(deferredIndex, triggers, metadata, false);
+    this.createDeferTriggerInstructions(deferredIndex, prefetchTriggers, metadata, true);
     this.allocateDataSlot();
   }
-  createDeferredDepsFunction(name, deferred) {
-    const deferredDeps = this.deferBlocks.get(deferred);
-    if (!deferredDeps || deferredDeps.length === 0) {
+  createDeferredDepsFunction(name, metadata) {
+    if (metadata.deps.length === 0) {
       return TYPED_NULL_EXPR;
     }
     const dependencyExp = [];
-    for (const deferredDep of deferredDeps) {
+    for (const deferredDep of metadata.deps) {
       if (deferredDep.isDeferrable) {
         const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(deferredDep.symbolName));
         const importExpr2 = new DynamicImportExpr(deferredDep.importPath).prop("then").callFn([innerFn]);
@@ -21273,7 +21278,7 @@ var TemplateDefinitionBuilder = class {
     this.constantPool.statements.push(depsFnExpr.toDeclStmt(name, StmtModifier.Final));
     return variable(name);
   }
-  createDeferTriggerInstructions(deferredIndex, triggers, prefetch) {
+  createDeferTriggerInstructions(deferredIndex, triggers, metadata, prefetch) {
     const { when, idle, immediate, timer, hover, interaction, viewport } = triggers;
     if (when) {
       const value = when.value.visit(this._valueConverter);
@@ -21293,7 +21298,22 @@ var TemplateDefinitionBuilder = class {
       this.creationInstruction(hover.sourceSpan, prefetch ? Identifiers.deferPrefetchOnHover : Identifiers.deferOnHover);
     }
     if (interaction) {
-      this.creationInstruction(interaction.sourceSpan, prefetch ? Identifiers.deferPrefetchOnInteraction : Identifiers.deferOnInteraction, [literal(interaction.reference)]);
+      const instructionRef = prefetch ? Identifiers.deferPrefetchOnInteraction : Identifiers.deferOnInteraction;
+      const triggerEl = metadata.triggerElements.get(interaction);
+      if (triggerEl) {
+        this.creationInstruction(interaction.sourceSpan, instructionRef, () => {
+          const location = this.elementLocations.get(triggerEl);
+          if (!location) {
+            throw new Error(`Could not determine location of reference passed into 'interaction' trigger. Template may not have been fully analyzed.`);
+          }
+          const depth = Math.max(this.level - location.level, -1);
+          const params = [literal(location.index)];
+          if (depth !== 0) {
+            params.push(literal(depth));
+          }
+          return params;
+        });
+      }
     }
     if (viewport) {
       this.creationInstruction(viewport.sourceSpan, prefetch ? Identifiers.deferPrefetchOnViewport : Identifiers.deferOnViewport, [literal(viewport.reference)]);
@@ -22222,7 +22242,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
   const changeDetection = meta.changeDetection;
   if (!USE_TEMPLATE_PIPELINE) {
     const template2 = meta.template;
-    const templateBuilder = new TemplateDefinitionBuilder(constantPool, BindingScope.createRootScope(), 0, templateTypeName, null, null, templateName, Identifiers.namespaceHTML, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.deferBlocks);
+    const templateBuilder = new TemplateDefinitionBuilder(constantPool, BindingScope.createRootScope(), 0, templateTypeName, null, null, templateName, Identifiers.namespaceHTML, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.deferBlocks, /* @__PURE__ */ new Map());
     const templateFunctionExpression = templateBuilder.buildTemplateFunction(template2.nodes, []);
     const ngContentSelectors = templateBuilder.getNgContentSelectors();
     if (ngContentSelectors) {
@@ -22722,6 +22742,591 @@ function createHostDirectivesMappingArray(mapping) {
   return elements.length > 0 ? literalArr(elements) : null;
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/t2_binder.mjs
+var R3TargetBinder = class {
+  constructor(directiveMatcher) {
+    this.directiveMatcher = directiveMatcher;
+  }
+  bind(target) {
+    if (!target.template) {
+      throw new Error("Binding without a template not yet supported");
+    }
+    const scope = Scope.apply(target.template);
+    const scopedNodeEntities = extractScopedNodeEntities(scope);
+    const { directives, eagerDirectives, bindings, references } = DirectiveBinder.apply(target.template, this.directiveMatcher);
+    const { expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks } = TemplateBinder.applyWithScope(target.template, scope);
+    return new R3BoundTarget(target, directives, eagerDirectives, bindings, references, expressions, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks);
+  }
+};
+var Scope = class {
+  constructor(parentScope, rootNode) {
+    this.parentScope = parentScope;
+    this.rootNode = rootNode;
+    this.namedEntities = /* @__PURE__ */ new Map();
+    this.childScopes = /* @__PURE__ */ new Map();
+    this.isDeferred = parentScope !== null && parentScope.isDeferred ? true : rootNode instanceof DeferredBlock;
+  }
+  static newRootScope() {
+    return new Scope(null, null);
+  }
+  static apply(template2) {
+    const scope = Scope.newRootScope();
+    scope.ingest(template2);
+    return scope;
+  }
+  ingest(nodeOrNodes) {
+    if (nodeOrNodes instanceof Template) {
+      nodeOrNodes.variables.forEach((node) => this.visitVariable(node));
+      nodeOrNodes.children.forEach((node) => node.visit(this));
+    } else if (nodeOrNodes instanceof IfBlockBranch) {
+      if (nodeOrNodes.expressionAlias !== null) {
+        this.visitVariable(nodeOrNodes.expressionAlias);
+      }
+      nodeOrNodes.children.forEach((node) => node.visit(this));
+    } else if (nodeOrNodes instanceof ForLoopBlock) {
+      this.visitVariable(nodeOrNodes.item);
+      Object.values(nodeOrNodes.contextVariables).forEach((v) => this.visitVariable(v));
+      nodeOrNodes.children.forEach((node) => node.visit(this));
+    } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlock || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading) {
+      nodeOrNodes.children.forEach((node) => node.visit(this));
+    } else {
+      nodeOrNodes.forEach((node) => node.visit(this));
+    }
+  }
+  visitElement(element2) {
+    element2.references.forEach((node) => this.visitReference(node));
+    element2.children.forEach((node) => node.visit(this));
+  }
+  visitTemplate(template2) {
+    template2.references.forEach((node) => this.visitReference(node));
+    this.ingestScopedNode(template2);
+  }
+  visitVariable(variable2) {
+    this.maybeDeclare(variable2);
+  }
+  visitReference(reference2) {
+    this.maybeDeclare(reference2);
+  }
+  visitDeferredBlock(deferred) {
+    var _a2, _b2, _c2;
+    this.ingestScopedNode(deferred);
+    (_a2 = deferred.placeholder) == null ? void 0 : _a2.visit(this);
+    (_b2 = deferred.loading) == null ? void 0 : _b2.visit(this);
+    (_c2 = deferred.error) == null ? void 0 : _c2.visit(this);
+  }
+  visitDeferredBlockPlaceholder(block) {
+    this.ingestScopedNode(block);
+  }
+  visitDeferredBlockError(block) {
+    this.ingestScopedNode(block);
+  }
+  visitDeferredBlockLoading(block) {
+    this.ingestScopedNode(block);
+  }
+  visitSwitchBlock(block) {
+    block.cases.forEach((node) => node.visit(this));
+  }
+  visitSwitchBlockCase(block) {
+    this.ingestScopedNode(block);
+  }
+  visitForLoopBlock(block) {
+    var _a2;
+    this.ingestScopedNode(block);
+    (_a2 = block.empty) == null ? void 0 : _a2.visit(this);
+  }
+  visitForLoopBlockEmpty(block) {
+    this.ingestScopedNode(block);
+  }
+  visitIfBlock(block) {
+    block.branches.forEach((node) => node.visit(this));
+  }
+  visitIfBlockBranch(block) {
+    this.ingestScopedNode(block);
+  }
+  visitContent(content) {
+  }
+  visitBoundAttribute(attr) {
+  }
+  visitBoundEvent(event) {
+  }
+  visitBoundText(text2) {
+  }
+  visitText(text2) {
+  }
+  visitTextAttribute(attr) {
+  }
+  visitIcu(icu) {
+  }
+  visitDeferredTrigger(trigger) {
+  }
+  maybeDeclare(thing) {
+    if (!this.namedEntities.has(thing.name)) {
+      this.namedEntities.set(thing.name, thing);
+    }
+  }
+  lookup(name) {
+    if (this.namedEntities.has(name)) {
+      return this.namedEntities.get(name);
+    } else if (this.parentScope !== null) {
+      return this.parentScope.lookup(name);
+    } else {
+      return null;
+    }
+  }
+  getChildScope(node) {
+    const res = this.childScopes.get(node);
+    if (res === void 0) {
+      throw new Error(`Assertion error: child scope for ${node} not found`);
+    }
+    return res;
+  }
+  ingestScopedNode(node) {
+    const scope = new Scope(this, node);
+    scope.ingest(node);
+    this.childScopes.set(node, scope);
+  }
+};
+var DirectiveBinder = class {
+  constructor(matcher, directives, eagerDirectives, bindings, references) {
+    this.matcher = matcher;
+    this.directives = directives;
+    this.eagerDirectives = eagerDirectives;
+    this.bindings = bindings;
+    this.references = references;
+    this.isInDeferBlock = false;
+  }
+  static apply(template2, selectorMatcher) {
+    const directives = /* @__PURE__ */ new Map();
+    const bindings = /* @__PURE__ */ new Map();
+    const references = /* @__PURE__ */ new Map();
+    const eagerDirectives = [];
+    const matcher = new DirectiveBinder(selectorMatcher, directives, eagerDirectives, bindings, references);
+    matcher.ingest(template2);
+    return { directives, eagerDirectives, bindings, references };
+  }
+  ingest(template2) {
+    template2.forEach((node) => node.visit(this));
+  }
+  visitElement(element2) {
+    this.visitElementOrTemplate(element2.name, element2);
+  }
+  visitTemplate(template2) {
+    this.visitElementOrTemplate("ng-template", template2);
+  }
+  visitElementOrTemplate(elementName, node) {
+    const cssSelector = createCssSelector(elementName, getAttrsForDirectiveMatching(node));
+    const directives = [];
+    this.matcher.match(cssSelector, (_selector, results) => directives.push(...results));
+    if (directives.length > 0) {
+      this.directives.set(node, directives);
+      if (!this.isInDeferBlock) {
+        this.eagerDirectives.push(...directives);
+      }
+    }
+    node.references.forEach((ref) => {
+      let dirTarget = null;
+      if (ref.value.trim() === "") {
+        dirTarget = directives.find((dir) => dir.isComponent) || null;
+      } else {
+        dirTarget = directives.find((dir) => dir.exportAs !== null && dir.exportAs.some((value) => value === ref.value)) || null;
+        if (dirTarget === null) {
+          return;
+        }
+      }
+      if (dirTarget !== null) {
+        this.references.set(ref, { directive: dirTarget, node });
+      } else {
+        this.references.set(ref, node);
+      }
+    });
+    const setAttributeBinding = (attribute2, ioType) => {
+      const dir = directives.find((dir2) => dir2[ioType].hasBindingPropertyName(attribute2.name));
+      const binding = dir !== void 0 ? dir : node;
+      this.bindings.set(attribute2, binding);
+    };
+    node.inputs.forEach((input) => setAttributeBinding(input, "inputs"));
+    node.attributes.forEach((attr) => setAttributeBinding(attr, "inputs"));
+    if (node instanceof Template) {
+      node.templateAttrs.forEach((attr) => setAttributeBinding(attr, "inputs"));
+    }
+    node.outputs.forEach((output) => setAttributeBinding(output, "outputs"));
+    node.children.forEach((child) => child.visit(this));
+  }
+  visitDeferredBlock(deferred) {
+    var _a2, _b2, _c2;
+    const wasInDeferBlock = this.isInDeferBlock;
+    this.isInDeferBlock = true;
+    deferred.children.forEach((child) => child.visit(this));
+    this.isInDeferBlock = wasInDeferBlock;
+    (_a2 = deferred.placeholder) == null ? void 0 : _a2.visit(this);
+    (_b2 = deferred.loading) == null ? void 0 : _b2.visit(this);
+    (_c2 = deferred.error) == null ? void 0 : _c2.visit(this);
+  }
+  visitDeferredBlockPlaceholder(block) {
+    block.children.forEach((child) => child.visit(this));
+  }
+  visitDeferredBlockError(block) {
+    block.children.forEach((child) => child.visit(this));
+  }
+  visitDeferredBlockLoading(block) {
+    block.children.forEach((child) => child.visit(this));
+  }
+  visitSwitchBlock(block) {
+    block.cases.forEach((node) => node.visit(this));
+  }
+  visitSwitchBlockCase(block) {
+    block.children.forEach((node) => node.visit(this));
+  }
+  visitForLoopBlock(block) {
+    var _a2;
+    block.item.visit(this);
+    Object.values(block.contextVariables).forEach((v) => v.visit(this));
+    block.children.forEach((node) => node.visit(this));
+    (_a2 = block.empty) == null ? void 0 : _a2.visit(this);
+  }
+  visitForLoopBlockEmpty(block) {
+    block.children.forEach((node) => node.visit(this));
+  }
+  visitIfBlock(block) {
+    block.branches.forEach((node) => node.visit(this));
+  }
+  visitIfBlockBranch(block) {
+    var _a2;
+    (_a2 = block.expressionAlias) == null ? void 0 : _a2.visit(this);
+    block.children.forEach((node) => node.visit(this));
+  }
+  visitContent(content) {
+  }
+  visitVariable(variable2) {
+  }
+  visitReference(reference2) {
+  }
+  visitTextAttribute(attribute2) {
+  }
+  visitBoundAttribute(attribute2) {
+  }
+  visitBoundEvent(attribute2) {
+  }
+  visitBoundAttributeOrEvent(node) {
+  }
+  visitText(text2) {
+  }
+  visitBoundText(text2) {
+  }
+  visitIcu(icu) {
+  }
+  visitDeferredTrigger(trigger) {
+  }
+};
+var TemplateBinder = class extends RecursiveAstVisitor2 {
+  constructor(bindings, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, rootNode, level) {
+    super();
+    this.bindings = bindings;
+    this.symbols = symbols;
+    this.usedPipes = usedPipes;
+    this.eagerPipes = eagerPipes;
+    this.deferBlocks = deferBlocks;
+    this.nestingLevel = nestingLevel;
+    this.scope = scope;
+    this.rootNode = rootNode;
+    this.level = level;
+    this.visitNode = (node) => node.visit(this);
+  }
+  visit(node, context) {
+    if (node instanceof AST) {
+      node.visit(this, context);
+    } else {
+      node.visit(this);
+    }
+  }
+  static applyWithScope(nodes, scope) {
+    const expressions = /* @__PURE__ */ new Map();
+    const symbols = /* @__PURE__ */ new Map();
+    const nestingLevel = /* @__PURE__ */ new Map();
+    const usedPipes = /* @__PURE__ */ new Set();
+    const eagerPipes = /* @__PURE__ */ new Set();
+    const template2 = nodes instanceof Template ? nodes : null;
+    const deferBlocks = /* @__PURE__ */ new Set();
+    const binder = new TemplateBinder(expressions, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, template2, 0);
+    binder.ingest(nodes);
+    return { expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks };
+  }
+  ingest(nodeOrNodes) {
+    if (nodeOrNodes instanceof Template) {
+      nodeOrNodes.variables.forEach(this.visitNode);
+      nodeOrNodes.children.forEach(this.visitNode);
+      this.nestingLevel.set(nodeOrNodes, this.level);
+    } else if (nodeOrNodes instanceof IfBlockBranch) {
+      if (nodeOrNodes.expressionAlias !== null) {
+        this.visitNode(nodeOrNodes.expressionAlias);
+      }
+      nodeOrNodes.children.forEach(this.visitNode);
+      this.nestingLevel.set(nodeOrNodes, this.level);
+    } else if (nodeOrNodes instanceof ForLoopBlock) {
+      this.visitNode(nodeOrNodes.item);
+      Object.values(nodeOrNodes.contextVariables).forEach((v) => this.visitNode(v));
+      nodeOrNodes.trackBy.visit(this);
+      nodeOrNodes.children.forEach(this.visitNode);
+      this.nestingLevel.set(nodeOrNodes, this.level);
+    } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlock || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading) {
+      nodeOrNodes.children.forEach((node) => node.visit(this));
+      this.nestingLevel.set(nodeOrNodes, this.level);
+    } else {
+      nodeOrNodes.forEach(this.visitNode);
+    }
+  }
+  visitElement(element2) {
+    element2.inputs.forEach(this.visitNode);
+    element2.outputs.forEach(this.visitNode);
+    element2.children.forEach(this.visitNode);
+    element2.references.forEach(this.visitNode);
+  }
+  visitTemplate(template2) {
+    template2.inputs.forEach(this.visitNode);
+    template2.outputs.forEach(this.visitNode);
+    template2.templateAttrs.forEach(this.visitNode);
+    template2.references.forEach(this.visitNode);
+    this.ingestScopedNode(template2);
+  }
+  visitVariable(variable2) {
+    if (this.rootNode !== null) {
+      this.symbols.set(variable2, this.rootNode);
+    }
+  }
+  visitReference(reference2) {
+    if (this.rootNode !== null) {
+      this.symbols.set(reference2, this.rootNode);
+    }
+  }
+  visitText(text2) {
+  }
+  visitContent(content) {
+  }
+  visitTextAttribute(attribute2) {
+  }
+  visitIcu(icu) {
+    Object.keys(icu.vars).forEach((key) => icu.vars[key].visit(this));
+    Object.keys(icu.placeholders).forEach((key) => icu.placeholders[key].visit(this));
+  }
+  visitBoundAttribute(attribute2) {
+    attribute2.value.visit(this);
+  }
+  visitBoundEvent(event) {
+    event.handler.visit(this);
+  }
+  visitDeferredBlock(deferred) {
+    this.deferBlocks.add(deferred);
+    this.ingestScopedNode(deferred);
+    deferred.placeholder && this.visitNode(deferred.placeholder);
+    deferred.loading && this.visitNode(deferred.loading);
+    deferred.error && this.visitNode(deferred.error);
+  }
+  visitDeferredTrigger(trigger) {
+    if (trigger instanceof BoundDeferredTrigger) {
+      trigger.value.visit(this);
+    }
+  }
+  visitDeferredBlockPlaceholder(block) {
+    this.ingestScopedNode(block);
+  }
+  visitDeferredBlockError(block) {
+    this.ingestScopedNode(block);
+  }
+  visitDeferredBlockLoading(block) {
+    this.ingestScopedNode(block);
+  }
+  visitSwitchBlock(block) {
+    block.expression.visit(this);
+    block.cases.forEach(this.visitNode);
+  }
+  visitSwitchBlockCase(block) {
+    var _a2;
+    (_a2 = block.expression) == null ? void 0 : _a2.visit(this);
+    this.ingestScopedNode(block);
+  }
+  visitForLoopBlock(block) {
+    var _a2;
+    block.expression.visit(this);
+    this.ingestScopedNode(block);
+    (_a2 = block.empty) == null ? void 0 : _a2.visit(this);
+  }
+  visitForLoopBlockEmpty(block) {
+    this.ingestScopedNode(block);
+  }
+  visitIfBlock(block) {
+    block.branches.forEach((node) => node.visit(this));
+  }
+  visitIfBlockBranch(block) {
+    var _a2;
+    (_a2 = block.expression) == null ? void 0 : _a2.visit(this);
+    this.ingestScopedNode(block);
+  }
+  visitBoundText(text2) {
+    text2.value.visit(this);
+  }
+  visitPipe(ast, context) {
+    this.usedPipes.add(ast.name);
+    if (!this.scope.isDeferred) {
+      this.eagerPipes.add(ast.name);
+    }
+    return super.visitPipe(ast, context);
+  }
+  visitPropertyRead(ast, context) {
+    this.maybeMap(ast, ast.name);
+    return super.visitPropertyRead(ast, context);
+  }
+  visitSafePropertyRead(ast, context) {
+    this.maybeMap(ast, ast.name);
+    return super.visitSafePropertyRead(ast, context);
+  }
+  visitPropertyWrite(ast, context) {
+    this.maybeMap(ast, ast.name);
+    return super.visitPropertyWrite(ast, context);
+  }
+  ingestScopedNode(node) {
+    const childScope = this.scope.getChildScope(node);
+    const binder = new TemplateBinder(this.bindings, this.symbols, this.usedPipes, this.eagerPipes, this.deferBlocks, this.nestingLevel, childScope, node, this.level + 1);
+    binder.ingest(node);
+  }
+  maybeMap(ast, name) {
+    if (!(ast.receiver instanceof ImplicitReceiver)) {
+      return;
+    }
+    let target = this.scope.lookup(name);
+    if (target !== null) {
+      this.bindings.set(ast, target);
+    }
+  }
+};
+var R3BoundTarget = class {
+  constructor(target, directives, eagerDirectives, bindings, references, exprTargets, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferredBlocks) {
+    this.target = target;
+    this.directives = directives;
+    this.eagerDirectives = eagerDirectives;
+    this.bindings = bindings;
+    this.references = references;
+    this.exprTargets = exprTargets;
+    this.symbols = symbols;
+    this.nestingLevel = nestingLevel;
+    this.scopedNodeEntities = scopedNodeEntities;
+    this.usedPipes = usedPipes;
+    this.eagerPipes = eagerPipes;
+    this.deferredBlocks = deferredBlocks;
+  }
+  getEntitiesInScope(node) {
+    var _a2;
+    return (_a2 = this.scopedNodeEntities.get(node)) != null ? _a2 : /* @__PURE__ */ new Set();
+  }
+  getDirectivesOfNode(node) {
+    return this.directives.get(node) || null;
+  }
+  getReferenceTarget(ref) {
+    return this.references.get(ref) || null;
+  }
+  getConsumerOfBinding(binding) {
+    return this.bindings.get(binding) || null;
+  }
+  getExpressionTarget(expr) {
+    return this.exprTargets.get(expr) || null;
+  }
+  getDefinitionNodeOfSymbol(symbol) {
+    return this.symbols.get(symbol) || null;
+  }
+  getNestingLevel(node) {
+    return this.nestingLevel.get(node) || 0;
+  }
+  getUsedDirectives() {
+    const set = /* @__PURE__ */ new Set();
+    this.directives.forEach((dirs) => dirs.forEach((dir) => set.add(dir)));
+    return Array.from(set.values());
+  }
+  getEagerlyUsedDirectives() {
+    const set = new Set(this.eagerDirectives);
+    return Array.from(set.values());
+  }
+  getUsedPipes() {
+    return Array.from(this.usedPipes);
+  }
+  getEagerlyUsedPipes() {
+    return Array.from(this.eagerPipes);
+  }
+  getDeferBlocks() {
+    return Array.from(this.deferredBlocks);
+  }
+  getDeferredTriggerTarget(block, trigger) {
+    if (!(trigger instanceof InteractionDeferredTrigger) && !(trigger instanceof ViewportDeferredTrigger) && !(trigger instanceof HoverDeferredTrigger)) {
+      return null;
+    }
+    const name = trigger.reference;
+    if (name === null) {
+      return null;
+    }
+    const outsideRef = this.findEntityInScope(block, name);
+    if (outsideRef instanceof Reference && this.getDefinitionNodeOfSymbol(outsideRef) !== block) {
+      const target = this.getReferenceTarget(outsideRef);
+      if (target !== null) {
+        return this.referenceTargetToElement(target);
+      }
+    }
+    if (block.placeholder !== null) {
+      const refInPlaceholder = this.findEntityInScope(block.placeholder, name);
+      const targetInPlaceholder = refInPlaceholder instanceof Reference ? this.getReferenceTarget(refInPlaceholder) : null;
+      if (targetInPlaceholder !== null) {
+        return this.referenceTargetToElement(targetInPlaceholder);
+      }
+    }
+    return null;
+  }
+  findEntityInScope(rootNode, name) {
+    const entities = this.getEntitiesInScope(rootNode);
+    for (const entitity of entities) {
+      if (entitity.name === name) {
+        return entitity;
+      }
+    }
+    return null;
+  }
+  referenceTargetToElement(target) {
+    if (target instanceof Element) {
+      return target;
+    }
+    if (target instanceof Template) {
+      return null;
+    }
+    return this.referenceTargetToElement(target.node);
+  }
+};
+function extractScopedNodeEntities(rootScope) {
+  const entityMap = /* @__PURE__ */ new Map();
+  function extractScopeEntities(scope) {
+    if (entityMap.has(scope.rootNode)) {
+      return entityMap.get(scope.rootNode);
+    }
+    const currentEntities = scope.namedEntities;
+    let entities;
+    if (scope.parentScope !== null) {
+      entities = new Map([...extractScopeEntities(scope.parentScope), ...currentEntities]);
+    } else {
+      entities = new Map(currentEntities);
+    }
+    entityMap.set(scope.rootNode, entities);
+    return entities;
+  }
+  const scopesToProcess = [rootScope];
+  while (scopesToProcess.length > 0) {
+    const scope = scopesToProcess.pop();
+    for (const childScope of scope.childScopes.values()) {
+      scopesToProcess.push(childScope);
+    }
+    extractScopeEntities(scope);
+  }
+  const templateEntities = /* @__PURE__ */ new Map();
+  for (const [template2, entities] of entityMap) {
+    templateEntities.set(template2, new Set(entities.values()));
+  }
+  return templateEntities;
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/resource_loader.mjs
 var ResourceLoader = class {
 };
@@ -22842,13 +23447,13 @@ var CompilerFacadeImpl = class {
     return this.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, constantPool.statements);
   }
   compileComponent(angularCoreEnv, sourceMapUrl, facade) {
-    const { template: template2, interpolation } = parseJitTemplate(facade.template, facade.name, sourceMapUrl, facade.preserveWhitespaces, facade.interpolation);
+    const { template: template2, interpolation, deferBlocks } = parseJitTemplate(facade.template, facade.name, sourceMapUrl, facade.preserveWhitespaces, facade.interpolation);
     const meta = __spreadProps(__spreadValues(__spreadValues({}, facade), convertDirectiveFacadeToMetadata(facade)), {
       selector: facade.selector || this.elementSchemaRegistry.getDefaultComponentElementName(),
       template: template2,
       declarations: facade.declarations.map(convertDeclarationFacadeToMetadata),
       declarationListEmitMode: 0,
-      deferBlocks: /* @__PURE__ */ new Map(),
+      deferBlocks,
       deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
       styles: [...facade.styles, ...template2.styles],
       encapsulation: facade.encapsulation,
@@ -23029,7 +23634,7 @@ function convertOpaqueValuesToExpressions(obj) {
 }
 function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMapUrl) {
   var _a2, _b2, _c2, _d2;
-  const { template: template2, interpolation } = parseJitTemplate(decl.template, decl.type.name, sourceMapUrl, (_a2 = decl.preserveWhitespaces) != null ? _a2 : false, decl.interpolation);
+  const { template: template2, interpolation, deferBlocks } = parseJitTemplate(decl.template, decl.type.name, sourceMapUrl, (_a2 = decl.preserveWhitespaces) != null ? _a2 : false, decl.interpolation);
   const declarations = [];
   if (decl.dependencies) {
     for (const innerDep of decl.dependencies) {
@@ -23054,7 +23659,7 @@ function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMap
     declarations,
     viewProviders: decl.viewProviders !== void 0 ? new WrappedNodeExpr(decl.viewProviders) : null,
     animations: decl.animations !== void 0 ? new WrappedNodeExpr(decl.animations) : null,
-    deferBlocks: /* @__PURE__ */ new Map(),
+    deferBlocks,
     deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
     changeDetection: (_c2 = decl.changeDetection) != null ? _c2 : ChangeDetectionStrategy.Default,
     encapsulation: (_d2 = decl.encapsulation) != null ? _d2 : ViewEncapsulation.Emulated,
@@ -23107,7 +23712,13 @@ function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces
     const errors = parsed.errors.map((err) => err.toString()).join(", ");
     throw new Error(`Errors during JIT compilation of template for ${typeName}: ${errors}`);
   }
-  return { template: parsed, interpolation: interpolationConfig };
+  const binder = new R3TargetBinder(new SelectorMatcher());
+  const boundTarget = binder.bind({ template: parsed.nodes });
+  return {
+    template: parsed,
+    interpolation: interpolationConfig,
+    deferBlocks: createR3DeferredMetadata(boundTarget)
+  };
 }
 function convertToProviderExpression(obj, property2) {
   if (obj.hasOwnProperty(property2)) {
@@ -23145,6 +23756,23 @@ function convertR3DeclareDependencyMetadata(facade) {
 function createR3DependencyMetadata(token, isAttributeDep, host, optional, self, skipSelf) {
   const attributeNameType = isAttributeDep ? literal("unknown") : null;
   return { token, attributeNameType, host, optional, self, skipSelf };
+}
+function createR3DeferredMetadata(boundTarget) {
+  const deferredBlocks = boundTarget.getDeferBlocks();
+  const meta = /* @__PURE__ */ new Map();
+  for (const block of deferredBlocks) {
+    const triggerElements = /* @__PURE__ */ new Map();
+    resolveDeferTriggers(block, block.triggers, boundTarget, triggerElements);
+    resolveDeferTriggers(block, block.prefetchTriggers, boundTarget, triggerElements);
+    meta.set(block, { deps: [], triggerElements });
+  }
+  return meta;
+}
+function resolveDeferTriggers(block, triggers, boundTarget, triggerElements) {
+  Object.keys(triggers).forEach((key) => {
+    const trigger = triggers[key];
+    triggerElements.set(trigger, boundTarget.getDeferredTriggerTarget(block, trigger));
+  });
 }
 function extractHostBindings(propMetadata, sourceSpan, host) {
   const bindings = parseHostBindings(host || {});
@@ -23256,7 +23884,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.5+sha-0598613");
+var VERSION2 = new Version("17.0.0-next.5+sha-3cbb2a8");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24237,591 +24865,6 @@ var FactoryTarget2;
   FactoryTarget3[FactoryTarget3["NgModule"] = 4] = "NgModule";
 })(FactoryTarget2 || (FactoryTarget2 = {}));
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/t2_binder.mjs
-var R3TargetBinder = class {
-  constructor(directiveMatcher) {
-    this.directiveMatcher = directiveMatcher;
-  }
-  bind(target) {
-    if (!target.template) {
-      throw new Error("Binding without a template not yet supported");
-    }
-    const scope = Scope.apply(target.template);
-    const scopedNodeEntities = extractScopedNodeEntities(scope);
-    const { directives, eagerDirectives, bindings, references } = DirectiveBinder.apply(target.template, this.directiveMatcher);
-    const { expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks } = TemplateBinder.applyWithScope(target.template, scope);
-    return new R3BoundTarget(target, directives, eagerDirectives, bindings, references, expressions, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks);
-  }
-};
-var Scope = class {
-  constructor(parentScope, rootNode) {
-    this.parentScope = parentScope;
-    this.rootNode = rootNode;
-    this.namedEntities = /* @__PURE__ */ new Map();
-    this.childScopes = /* @__PURE__ */ new Map();
-    this.isDeferred = parentScope !== null && parentScope.isDeferred ? true : rootNode instanceof DeferredBlock;
-  }
-  static newRootScope() {
-    return new Scope(null, null);
-  }
-  static apply(template2) {
-    const scope = Scope.newRootScope();
-    scope.ingest(template2);
-    return scope;
-  }
-  ingest(nodeOrNodes) {
-    if (nodeOrNodes instanceof Template) {
-      nodeOrNodes.variables.forEach((node) => this.visitVariable(node));
-      nodeOrNodes.children.forEach((node) => node.visit(this));
-    } else if (nodeOrNodes instanceof IfBlockBranch) {
-      if (nodeOrNodes.expressionAlias !== null) {
-        this.visitVariable(nodeOrNodes.expressionAlias);
-      }
-      nodeOrNodes.children.forEach((node) => node.visit(this));
-    } else if (nodeOrNodes instanceof ForLoopBlock) {
-      this.visitVariable(nodeOrNodes.item);
-      Object.values(nodeOrNodes.contextVariables).forEach((v) => this.visitVariable(v));
-      nodeOrNodes.children.forEach((node) => node.visit(this));
-    } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlock || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading) {
-      nodeOrNodes.children.forEach((node) => node.visit(this));
-    } else {
-      nodeOrNodes.forEach((node) => node.visit(this));
-    }
-  }
-  visitElement(element2) {
-    element2.references.forEach((node) => this.visitReference(node));
-    element2.children.forEach((node) => node.visit(this));
-  }
-  visitTemplate(template2) {
-    template2.references.forEach((node) => this.visitReference(node));
-    this.ingestScopedNode(template2);
-  }
-  visitVariable(variable2) {
-    this.maybeDeclare(variable2);
-  }
-  visitReference(reference2) {
-    this.maybeDeclare(reference2);
-  }
-  visitDeferredBlock(deferred) {
-    var _a2, _b2, _c2;
-    this.ingestScopedNode(deferred);
-    (_a2 = deferred.placeholder) == null ? void 0 : _a2.visit(this);
-    (_b2 = deferred.loading) == null ? void 0 : _b2.visit(this);
-    (_c2 = deferred.error) == null ? void 0 : _c2.visit(this);
-  }
-  visitDeferredBlockPlaceholder(block) {
-    this.ingestScopedNode(block);
-  }
-  visitDeferredBlockError(block) {
-    this.ingestScopedNode(block);
-  }
-  visitDeferredBlockLoading(block) {
-    this.ingestScopedNode(block);
-  }
-  visitSwitchBlock(block) {
-    block.cases.forEach((node) => node.visit(this));
-  }
-  visitSwitchBlockCase(block) {
-    this.ingestScopedNode(block);
-  }
-  visitForLoopBlock(block) {
-    var _a2;
-    this.ingestScopedNode(block);
-    (_a2 = block.empty) == null ? void 0 : _a2.visit(this);
-  }
-  visitForLoopBlockEmpty(block) {
-    this.ingestScopedNode(block);
-  }
-  visitIfBlock(block) {
-    block.branches.forEach((node) => node.visit(this));
-  }
-  visitIfBlockBranch(block) {
-    this.ingestScopedNode(block);
-  }
-  visitContent(content) {
-  }
-  visitBoundAttribute(attr) {
-  }
-  visitBoundEvent(event) {
-  }
-  visitBoundText(text2) {
-  }
-  visitText(text2) {
-  }
-  visitTextAttribute(attr) {
-  }
-  visitIcu(icu) {
-  }
-  visitDeferredTrigger(trigger) {
-  }
-  maybeDeclare(thing) {
-    if (!this.namedEntities.has(thing.name)) {
-      this.namedEntities.set(thing.name, thing);
-    }
-  }
-  lookup(name) {
-    if (this.namedEntities.has(name)) {
-      return this.namedEntities.get(name);
-    } else if (this.parentScope !== null) {
-      return this.parentScope.lookup(name);
-    } else {
-      return null;
-    }
-  }
-  getChildScope(node) {
-    const res = this.childScopes.get(node);
-    if (res === void 0) {
-      throw new Error(`Assertion error: child scope for ${node} not found`);
-    }
-    return res;
-  }
-  ingestScopedNode(node) {
-    const scope = new Scope(this, node);
-    scope.ingest(node);
-    this.childScopes.set(node, scope);
-  }
-};
-var DirectiveBinder = class {
-  constructor(matcher, directives, eagerDirectives, bindings, references) {
-    this.matcher = matcher;
-    this.directives = directives;
-    this.eagerDirectives = eagerDirectives;
-    this.bindings = bindings;
-    this.references = references;
-    this.isInDeferBlock = false;
-  }
-  static apply(template2, selectorMatcher) {
-    const directives = /* @__PURE__ */ new Map();
-    const bindings = /* @__PURE__ */ new Map();
-    const references = /* @__PURE__ */ new Map();
-    const eagerDirectives = [];
-    const matcher = new DirectiveBinder(selectorMatcher, directives, eagerDirectives, bindings, references);
-    matcher.ingest(template2);
-    return { directives, eagerDirectives, bindings, references };
-  }
-  ingest(template2) {
-    template2.forEach((node) => node.visit(this));
-  }
-  visitElement(element2) {
-    this.visitElementOrTemplate(element2.name, element2);
-  }
-  visitTemplate(template2) {
-    this.visitElementOrTemplate("ng-template", template2);
-  }
-  visitElementOrTemplate(elementName, node) {
-    const cssSelector = createCssSelector(elementName, getAttrsForDirectiveMatching(node));
-    const directives = [];
-    this.matcher.match(cssSelector, (_selector, results) => directives.push(...results));
-    if (directives.length > 0) {
-      this.directives.set(node, directives);
-      if (!this.isInDeferBlock) {
-        this.eagerDirectives.push(...directives);
-      }
-    }
-    node.references.forEach((ref) => {
-      let dirTarget = null;
-      if (ref.value.trim() === "") {
-        dirTarget = directives.find((dir) => dir.isComponent) || null;
-      } else {
-        dirTarget = directives.find((dir) => dir.exportAs !== null && dir.exportAs.some((value) => value === ref.value)) || null;
-        if (dirTarget === null) {
-          return;
-        }
-      }
-      if (dirTarget !== null) {
-        this.references.set(ref, { directive: dirTarget, node });
-      } else {
-        this.references.set(ref, node);
-      }
-    });
-    const setAttributeBinding = (attribute2, ioType) => {
-      const dir = directives.find((dir2) => dir2[ioType].hasBindingPropertyName(attribute2.name));
-      const binding = dir !== void 0 ? dir : node;
-      this.bindings.set(attribute2, binding);
-    };
-    node.inputs.forEach((input) => setAttributeBinding(input, "inputs"));
-    node.attributes.forEach((attr) => setAttributeBinding(attr, "inputs"));
-    if (node instanceof Template) {
-      node.templateAttrs.forEach((attr) => setAttributeBinding(attr, "inputs"));
-    }
-    node.outputs.forEach((output) => setAttributeBinding(output, "outputs"));
-    node.children.forEach((child) => child.visit(this));
-  }
-  visitDeferredBlock(deferred) {
-    var _a2, _b2, _c2;
-    const wasInDeferBlock = this.isInDeferBlock;
-    this.isInDeferBlock = true;
-    deferred.children.forEach((child) => child.visit(this));
-    this.isInDeferBlock = wasInDeferBlock;
-    (_a2 = deferred.placeholder) == null ? void 0 : _a2.visit(this);
-    (_b2 = deferred.loading) == null ? void 0 : _b2.visit(this);
-    (_c2 = deferred.error) == null ? void 0 : _c2.visit(this);
-  }
-  visitDeferredBlockPlaceholder(block) {
-    block.children.forEach((child) => child.visit(this));
-  }
-  visitDeferredBlockError(block) {
-    block.children.forEach((child) => child.visit(this));
-  }
-  visitDeferredBlockLoading(block) {
-    block.children.forEach((child) => child.visit(this));
-  }
-  visitSwitchBlock(block) {
-    block.cases.forEach((node) => node.visit(this));
-  }
-  visitSwitchBlockCase(block) {
-    block.children.forEach((node) => node.visit(this));
-  }
-  visitForLoopBlock(block) {
-    var _a2;
-    block.item.visit(this);
-    Object.values(block.contextVariables).forEach((v) => v.visit(this));
-    block.children.forEach((node) => node.visit(this));
-    (_a2 = block.empty) == null ? void 0 : _a2.visit(this);
-  }
-  visitForLoopBlockEmpty(block) {
-    block.children.forEach((node) => node.visit(this));
-  }
-  visitIfBlock(block) {
-    block.branches.forEach((node) => node.visit(this));
-  }
-  visitIfBlockBranch(block) {
-    var _a2;
-    (_a2 = block.expressionAlias) == null ? void 0 : _a2.visit(this);
-    block.children.forEach((node) => node.visit(this));
-  }
-  visitContent(content) {
-  }
-  visitVariable(variable2) {
-  }
-  visitReference(reference2) {
-  }
-  visitTextAttribute(attribute2) {
-  }
-  visitBoundAttribute(attribute2) {
-  }
-  visitBoundEvent(attribute2) {
-  }
-  visitBoundAttributeOrEvent(node) {
-  }
-  visitText(text2) {
-  }
-  visitBoundText(text2) {
-  }
-  visitIcu(icu) {
-  }
-  visitDeferredTrigger(trigger) {
-  }
-};
-var TemplateBinder = class extends RecursiveAstVisitor2 {
-  constructor(bindings, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, rootNode, level) {
-    super();
-    this.bindings = bindings;
-    this.symbols = symbols;
-    this.usedPipes = usedPipes;
-    this.eagerPipes = eagerPipes;
-    this.deferBlocks = deferBlocks;
-    this.nestingLevel = nestingLevel;
-    this.scope = scope;
-    this.rootNode = rootNode;
-    this.level = level;
-    this.visitNode = (node) => node.visit(this);
-  }
-  visit(node, context) {
-    if (node instanceof AST) {
-      node.visit(this, context);
-    } else {
-      node.visit(this);
-    }
-  }
-  static applyWithScope(nodes, scope) {
-    const expressions = /* @__PURE__ */ new Map();
-    const symbols = /* @__PURE__ */ new Map();
-    const nestingLevel = /* @__PURE__ */ new Map();
-    const usedPipes = /* @__PURE__ */ new Set();
-    const eagerPipes = /* @__PURE__ */ new Set();
-    const template2 = nodes instanceof Template ? nodes : null;
-    const deferBlocks = /* @__PURE__ */ new Set();
-    const binder = new TemplateBinder(expressions, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, template2, 0);
-    binder.ingest(nodes);
-    return { expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks };
-  }
-  ingest(nodeOrNodes) {
-    if (nodeOrNodes instanceof Template) {
-      nodeOrNodes.variables.forEach(this.visitNode);
-      nodeOrNodes.children.forEach(this.visitNode);
-      this.nestingLevel.set(nodeOrNodes, this.level);
-    } else if (nodeOrNodes instanceof IfBlockBranch) {
-      if (nodeOrNodes.expressionAlias !== null) {
-        this.visitNode(nodeOrNodes.expressionAlias);
-      }
-      nodeOrNodes.children.forEach(this.visitNode);
-      this.nestingLevel.set(nodeOrNodes, this.level);
-    } else if (nodeOrNodes instanceof ForLoopBlock) {
-      this.visitNode(nodeOrNodes.item);
-      Object.values(nodeOrNodes.contextVariables).forEach((v) => this.visitNode(v));
-      nodeOrNodes.trackBy.visit(this);
-      nodeOrNodes.children.forEach(this.visitNode);
-      this.nestingLevel.set(nodeOrNodes, this.level);
-    } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlock || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading) {
-      nodeOrNodes.children.forEach((node) => node.visit(this));
-      this.nestingLevel.set(nodeOrNodes, this.level);
-    } else {
-      nodeOrNodes.forEach(this.visitNode);
-    }
-  }
-  visitElement(element2) {
-    element2.inputs.forEach(this.visitNode);
-    element2.outputs.forEach(this.visitNode);
-    element2.children.forEach(this.visitNode);
-    element2.references.forEach(this.visitNode);
-  }
-  visitTemplate(template2) {
-    template2.inputs.forEach(this.visitNode);
-    template2.outputs.forEach(this.visitNode);
-    template2.templateAttrs.forEach(this.visitNode);
-    template2.references.forEach(this.visitNode);
-    this.ingestScopedNode(template2);
-  }
-  visitVariable(variable2) {
-    if (this.rootNode !== null) {
-      this.symbols.set(variable2, this.rootNode);
-    }
-  }
-  visitReference(reference2) {
-    if (this.rootNode !== null) {
-      this.symbols.set(reference2, this.rootNode);
-    }
-  }
-  visitText(text2) {
-  }
-  visitContent(content) {
-  }
-  visitTextAttribute(attribute2) {
-  }
-  visitIcu(icu) {
-    Object.keys(icu.vars).forEach((key) => icu.vars[key].visit(this));
-    Object.keys(icu.placeholders).forEach((key) => icu.placeholders[key].visit(this));
-  }
-  visitBoundAttribute(attribute2) {
-    attribute2.value.visit(this);
-  }
-  visitBoundEvent(event) {
-    event.handler.visit(this);
-  }
-  visitDeferredBlock(deferred) {
-    this.deferBlocks.add(deferred);
-    this.ingestScopedNode(deferred);
-    deferred.placeholder && this.visitNode(deferred.placeholder);
-    deferred.loading && this.visitNode(deferred.loading);
-    deferred.error && this.visitNode(deferred.error);
-  }
-  visitDeferredTrigger(trigger) {
-    if (trigger instanceof BoundDeferredTrigger) {
-      trigger.value.visit(this);
-    }
-  }
-  visitDeferredBlockPlaceholder(block) {
-    this.ingestScopedNode(block);
-  }
-  visitDeferredBlockError(block) {
-    this.ingestScopedNode(block);
-  }
-  visitDeferredBlockLoading(block) {
-    this.ingestScopedNode(block);
-  }
-  visitSwitchBlock(block) {
-    block.expression.visit(this);
-    block.cases.forEach(this.visitNode);
-  }
-  visitSwitchBlockCase(block) {
-    var _a2;
-    (_a2 = block.expression) == null ? void 0 : _a2.visit(this);
-    this.ingestScopedNode(block);
-  }
-  visitForLoopBlock(block) {
-    var _a2;
-    block.expression.visit(this);
-    this.ingestScopedNode(block);
-    (_a2 = block.empty) == null ? void 0 : _a2.visit(this);
-  }
-  visitForLoopBlockEmpty(block) {
-    this.ingestScopedNode(block);
-  }
-  visitIfBlock(block) {
-    block.branches.forEach((node) => node.visit(this));
-  }
-  visitIfBlockBranch(block) {
-    var _a2;
-    (_a2 = block.expression) == null ? void 0 : _a2.visit(this);
-    this.ingestScopedNode(block);
-  }
-  visitBoundText(text2) {
-    text2.value.visit(this);
-  }
-  visitPipe(ast, context) {
-    this.usedPipes.add(ast.name);
-    if (!this.scope.isDeferred) {
-      this.eagerPipes.add(ast.name);
-    }
-    return super.visitPipe(ast, context);
-  }
-  visitPropertyRead(ast, context) {
-    this.maybeMap(ast, ast.name);
-    return super.visitPropertyRead(ast, context);
-  }
-  visitSafePropertyRead(ast, context) {
-    this.maybeMap(ast, ast.name);
-    return super.visitSafePropertyRead(ast, context);
-  }
-  visitPropertyWrite(ast, context) {
-    this.maybeMap(ast, ast.name);
-    return super.visitPropertyWrite(ast, context);
-  }
-  ingestScopedNode(node) {
-    const childScope = this.scope.getChildScope(node);
-    const binder = new TemplateBinder(this.bindings, this.symbols, this.usedPipes, this.eagerPipes, this.deferBlocks, this.nestingLevel, childScope, node, this.level + 1);
-    binder.ingest(node);
-  }
-  maybeMap(ast, name) {
-    if (!(ast.receiver instanceof ImplicitReceiver)) {
-      return;
-    }
-    let target = this.scope.lookup(name);
-    if (target !== null) {
-      this.bindings.set(ast, target);
-    }
-  }
-};
-var R3BoundTarget = class {
-  constructor(target, directives, eagerDirectives, bindings, references, exprTargets, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferredBlocks) {
-    this.target = target;
-    this.directives = directives;
-    this.eagerDirectives = eagerDirectives;
-    this.bindings = bindings;
-    this.references = references;
-    this.exprTargets = exprTargets;
-    this.symbols = symbols;
-    this.nestingLevel = nestingLevel;
-    this.scopedNodeEntities = scopedNodeEntities;
-    this.usedPipes = usedPipes;
-    this.eagerPipes = eagerPipes;
-    this.deferredBlocks = deferredBlocks;
-  }
-  getEntitiesInScope(node) {
-    var _a2;
-    return (_a2 = this.scopedNodeEntities.get(node)) != null ? _a2 : /* @__PURE__ */ new Set();
-  }
-  getDirectivesOfNode(node) {
-    return this.directives.get(node) || null;
-  }
-  getReferenceTarget(ref) {
-    return this.references.get(ref) || null;
-  }
-  getConsumerOfBinding(binding) {
-    return this.bindings.get(binding) || null;
-  }
-  getExpressionTarget(expr) {
-    return this.exprTargets.get(expr) || null;
-  }
-  getDefinitionNodeOfSymbol(symbol) {
-    return this.symbols.get(symbol) || null;
-  }
-  getNestingLevel(node) {
-    return this.nestingLevel.get(node) || 0;
-  }
-  getUsedDirectives() {
-    const set = /* @__PURE__ */ new Set();
-    this.directives.forEach((dirs) => dirs.forEach((dir) => set.add(dir)));
-    return Array.from(set.values());
-  }
-  getEagerlyUsedDirectives() {
-    const set = new Set(this.eagerDirectives);
-    return Array.from(set.values());
-  }
-  getUsedPipes() {
-    return Array.from(this.usedPipes);
-  }
-  getEagerlyUsedPipes() {
-    return Array.from(this.eagerPipes);
-  }
-  getDeferBlocks() {
-    return Array.from(this.deferredBlocks);
-  }
-  getDeferredTriggerTarget(block, trigger) {
-    if (!(trigger instanceof InteractionDeferredTrigger) && !(trigger instanceof ViewportDeferredTrigger) && !(trigger instanceof HoverDeferredTrigger)) {
-      return null;
-    }
-    const name = trigger.reference;
-    if (name === null) {
-      return null;
-    }
-    const outsideRef = this.findEntityInScope(block, name);
-    if (outsideRef instanceof Reference && this.getDefinitionNodeOfSymbol(outsideRef) !== block) {
-      const target = this.getReferenceTarget(outsideRef);
-      if (target !== null) {
-        return this.referenceTargetToElement(target);
-      }
-    }
-    if (block.placeholder !== null) {
-      const refInPlaceholder = this.findEntityInScope(block.placeholder, name);
-      const targetInPlaceholder = refInPlaceholder instanceof Reference ? this.getReferenceTarget(refInPlaceholder) : null;
-      if (targetInPlaceholder !== null) {
-        return this.referenceTargetToElement(targetInPlaceholder);
-      }
-    }
-    return null;
-  }
-  findEntityInScope(rootNode, name) {
-    const entities = this.getEntitiesInScope(rootNode);
-    for (const entitity of entities) {
-      if (entitity.name === name) {
-        return entitity;
-      }
-    }
-    return null;
-  }
-  referenceTargetToElement(target) {
-    if (target instanceof Element) {
-      return target;
-    }
-    if (target instanceof Template) {
-      return null;
-    }
-    return this.referenceTargetToElement(target.node);
-  }
-};
-function extractScopedNodeEntities(rootScope) {
-  const entityMap = /* @__PURE__ */ new Map();
-  function extractScopeEntities(scope) {
-    if (entityMap.has(scope.rootNode)) {
-      return entityMap.get(scope.rootNode);
-    }
-    const currentEntities = scope.namedEntities;
-    let entities;
-    if (scope.parentScope !== null) {
-      entities = new Map([...extractScopeEntities(scope.parentScope), ...currentEntities]);
-    } else {
-      entities = new Map(currentEntities);
-    }
-    entityMap.set(scope.rootNode, entities);
-    return entities;
-  }
-  const scopesToProcess = [rootScope];
-  while (scopesToProcess.length > 0) {
-    const scope = scopesToProcess.pop();
-    for (const childScope of scope.childScopes.values()) {
-      scopesToProcess.push(childScope);
-    }
-    extractScopeEntities(scope);
-  }
-  const templateEntities = /* @__PURE__ */ new Map();
-  for (const [template2, entities] of entityMap) {
-    templateEntities.set(template2, new Set(entities.values()));
-  }
-  return templateEntities;
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_class_metadata_compiler.mjs
 function compileClassMetadata(metadata) {
   var _a2, _b2;
@@ -24869,7 +24912,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-0598613"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-3cbb2a8"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24940,7 +24983,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-0598613"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-3cbb2a8"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25128,7 +25171,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-0598613"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-3cbb2a8"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25151,7 +25194,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-0598613"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-3cbb2a8"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25189,7 +25232,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-0598613"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-3cbb2a8"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25213,7 +25256,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-0598613"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-3cbb2a8"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25248,7 +25291,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-0598613"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-3cbb2a8"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25265,7 +25308,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.5+sha-0598613");
+var VERSION3 = new Version("17.0.0-next.5+sha-3cbb2a8");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -34535,7 +34578,7 @@ var ComponentDecoratorHandler = class {
         symbol.usedPipes = Array.from(declarations.values()).filter(isUsedPipe).map(getSemanticReference);
       }
       const eagerDeclarations = Array.from(declarations.values()).filter((decl) => decl.kind === R3TemplateDependencyKind.NgModule || eagerlyUsed.has(decl.ref.node));
-      this.resolveDeferBlocks(deferBlocks, declarations, data, analysis, eagerlyUsed);
+      this.resolveDeferBlocks(deferBlocks, declarations, data, analysis, eagerlyUsed, bound);
       const cyclesFromDirectives = /* @__PURE__ */ new Map();
       const cyclesFromPipes = /* @__PURE__ */ new Map();
       if (!metadata.isStandalone) {
@@ -34584,6 +34627,16 @@ var ComponentDecoratorHandler = class {
           }
           throw new FatalDiagnosticError(ErrorCode.IMPORT_CYCLE_DETECTED, node, "One or more import cycles would need to be created to compile this component, which is not supported by the current compiler configuration.", relatedMessages);
         }
+      }
+    } else {
+      const directivelessBinder = new R3TargetBinder(new SelectorMatcher());
+      const bound = directivelessBinder.bind({ template: metadata.template.nodes });
+      const deferredBlocks = bound.getDeferBlocks();
+      const triggerElements = /* @__PURE__ */ new Map();
+      for (const block of deferredBlocks) {
+        this.resolveDeferTriggers(block, block.triggers, bound, triggerElements);
+        this.resolveDeferTriggers(block, block.prefetchTriggers, bound, triggerElements);
+        data.deferBlocks.set(block, { deps: [], triggerElements });
       }
     }
     if (analysis.resolvedImports !== null && analysis.rawImports !== null) {
@@ -34648,8 +34701,8 @@ var ComponentDecoratorHandler = class {
       return [];
     }
     const deferrableTypes = /* @__PURE__ */ new Map();
-    for (const [_, deferBlockDeps] of resolution.deferBlocks) {
-      for (const deferBlockDep of deferBlockDeps) {
+    for (const [_, metadata] of resolution.deferBlocks) {
+      for (const deferBlockDep of metadata.deps) {
         const dep = deferBlockDep;
         const classDecl = dep.classDeclaration;
         const importDecl = (_a2 = resolution.deferrableDeclToImportDecl.get(classDecl)) != null ? _a2 : null;
@@ -34720,12 +34773,13 @@ var ComponentDecoratorHandler = class {
     }
     this.cycleAnalyzer.recordSyntheticImport(origin, imported);
   }
-  resolveDeferBlocks(deferBlocks, deferrableDecls, resolutionData, analysisData, eagerlyUsedDecls) {
+  resolveDeferBlocks(deferBlocks, deferrableDecls, resolutionData, analysisData, eagerlyUsedDecls, componentBoundTarget) {
     const allDeferredDecls = /* @__PURE__ */ new Set();
     for (const [deferBlock, bound] of deferBlocks) {
       const usedDirectives = new Set(bound.getEagerlyUsedDirectives().map((d) => d.ref.node));
       const usedPipes = new Set(bound.getEagerlyUsedPipes());
       const deps = [];
+      const triggerElements = /* @__PURE__ */ new Map();
       for (const decl of Array.from(deferrableDecls.values())) {
         if (decl.kind === R3TemplateDependencyKind.NgModule) {
           continue;
@@ -34745,7 +34799,9 @@ var ComponentDecoratorHandler = class {
         });
         allDeferredDecls.add(decl.ref.node);
       }
-      resolutionData.deferBlocks.set(deferBlock, deps);
+      this.resolveDeferTriggers(deferBlock, deferBlock.triggers, componentBoundTarget, triggerElements);
+      this.resolveDeferTriggers(deferBlock, deferBlock.prefetchTriggers, componentBoundTarget, triggerElements);
+      resolutionData.deferBlocks.set(deferBlock, { deps, triggerElements });
     }
     if (analysisData.meta.isStandalone && analysisData.rawImports !== null && import_typescript53.default.isArrayLiteralExpression(analysisData.rawImports)) {
       for (const node of analysisData.rawImports.elements) {
@@ -34784,6 +34840,12 @@ var ComponentDecoratorHandler = class {
         this.deferredSymbolTracker.markAsDeferrableCandidate(node, imp.node);
       }
     }
+  }
+  resolveDeferTriggers(block, triggers, componentBoundTarget, triggerElements) {
+    Object.keys(triggers).forEach((key) => {
+      const trigger = triggers[key];
+      triggerElements.set(trigger, componentBoundTarget.getDeferredTriggerTarget(block, trigger));
+    });
   }
 };
 function validateStandaloneImports(importRefs, importExpr2, metaReader, scopeReader) {

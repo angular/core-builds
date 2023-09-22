@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-0598613
+ * @license Angular v17.0.0-next.5+sha-3cbb2a8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -331,6 +331,11 @@ function throwError(msg, actual, expected, comparison) {
 function assertDomNode(node) {
     if (!(node instanceof Node)) {
         throwError(`The provided value must be an instance of a DOM Node but got ${stringify(node)}`);
+    }
+}
+function assertElement(node) {
+    if (!(node instanceof Element)) {
+        throwError(`The provided value must be an element but got ${stringify(node)}`);
     }
 }
 function assertIndexInRange(arr, index) {
@@ -3126,6 +3131,20 @@ function clearViewRefreshFlag(lView) {
     }
 }
 /**
+ * Walks up the LView hierarchy.
+ * @param nestingLevel Number of times to walk up in hierarchy.
+ * @param currentView View from which to start the lookup.
+ */
+function walkUpViews(nestingLevel, currentView) {
+    while (nestingLevel > 0) {
+        ngDevMode &&
+            assertDefined(currentView[DECLARATION_VIEW], 'Declaration view should be defined if nesting level is greater than 0.');
+        currentView = currentView[DECLARATION_VIEW];
+        nestingLevel--;
+    }
+    return currentView;
+}
+/**
  * Updates the `DESCENDANT_VIEWS_TO_REFRESH` counter on the parents of the `LView` as well as the
  * parents above that whose
  *  1. counter goes from 0 to 1, indicating that there is a new child that has a view to refresh
@@ -3625,15 +3644,6 @@ function nextContextImpl(level) {
     const contextLView = instructionState.lFrame.contextLView =
         walkUpViews(level, instructionState.lFrame.contextLView);
     return contextLView[CONTEXT];
-}
-function walkUpViews(nestingLevel, currentView) {
-    while (nestingLevel > 0) {
-        ngDevMode &&
-            assertDefined(currentView[DECLARATION_VIEW], 'Declaration view should be defined if nesting level is greater than 0.');
-        currentView = currentView[DECLARATION_VIEW];
-        nestingLevel--;
-    }
-    return currentView;
 }
 /**
  * Gets the currently selected element index.
@@ -10897,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.5+sha-0598613');
+const VERSION = new Version('17.0.0-next.5+sha-3cbb2a8');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20432,6 +20442,72 @@ var DeferBlockBehavior;
     DeferBlockBehavior[DeferBlockBehavior["Playthrough"] = 1] = "Playthrough";
 })(DeferBlockBehavior || (DeferBlockBehavior = {}));
 
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** Configuration object used to register passive and capturing events. */
+const eventListenerOptions = {
+    passive: true,
+    capture: true
+};
+/** Keeps track of the currently-registered `on interaction` triggers. */
+const interactionTriggers = new WeakMap();
+/** Names of the events considered as interaction events. */
+const interactionEventNames = ['click', 'keydown'];
+/** Object keeping track of registered callbacks for a deferred block trigger. */
+class DeferEventEntry {
+    constructor() {
+        this.callbacks = new Set();
+        this.listener = () => {
+            for (const callback of this.callbacks) {
+                callback();
+            }
+        };
+    }
+}
+/**
+ * Registers an interaction trigger.
+ * @param trigger Element that is the trigger.
+ * @param callback Callback to be invoked when the trigger is interacted with.
+ */
+function onInteraction(trigger, callback) {
+    let entry = interactionTriggers.get(trigger);
+    // If this is the first entry for this element, add the listeners.
+    if (!entry) {
+        // Note that using managing events centrally like this lends itself well to using global
+        // event delegation. It currently does delegation at the element level, rather than the
+        // document level, because:
+        // 1. Global delegation is the most effective when there are a lot of events being registered
+        // at the same time. Deferred blocks are unlikely to be used in such a way.
+        // 2. Matching events to their target isn't free. For each `click` and `keydown` event we
+        // would have look through all the triggers and check if the target either is the element
+        // itself or it's contained within the element. Given that `click` and `keydown` are some
+        // of the most common events, this may end up introducing a lot of runtime overhead.
+        // 3. We're still registering only two events per element, no matter how many deferred blocks
+        // are referencing it.
+        entry = new DeferEventEntry();
+        interactionTriggers.set(trigger, entry);
+        for (const name of interactionEventNames) {
+            trigger.addEventListener(name, entry.listener, eventListenerOptions);
+        }
+    }
+    entry.callbacks.add(callback);
+    return () => {
+        const { callbacks, listener } = entry;
+        callbacks.delete(callback);
+        if (callbacks.size === 0) {
+            interactionTriggers.delete(trigger);
+            for (const name of interactionEventNames) {
+                trigger.removeEventListener(name, listener, eventListenerOptions);
+            }
+        }
+    };
+}
+
 /**
  * Returns whether defer blocks should be triggered.
  *
@@ -20439,7 +20515,7 @@ var DeferBlockBehavior;
  * only placeholder content is rendered (if provided).
  */
 function shouldTriggerDeferBlock(injector) {
-    const config = injector.get(DEFER_BLOCK_CONFIG, { optional: true });
+    const config = injector.get(DEFER_BLOCK_CONFIG, null, { optional: true });
     if (config?.behavior === DeferBlockBehavior.Manual) {
         return false;
     }
@@ -20617,16 +20693,31 @@ function ɵɵdeferOnHover() { } // TODO: implement runtime logic.
 function ɵɵdeferPrefetchOnHover() { } // TODO: implement runtime logic.
 /**
  * Creates runtime data structures for the `on interaction` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-function ɵɵdeferOnInteraction(target) { } // TODO: implement runtime logic.
+function ɵɵdeferOnInteraction(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    renderPlaceholder(lView, tNode);
+    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerDeferBlock(lView, tNode));
+}
 /**
  * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnInteraction(target) { } // TODO: implement runtime logic.
+function ɵɵdeferPrefetchOnInteraction(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerPrefetching(tDetails, lView));
+    }
+}
 /**
  * Creates runtime data structures for the `on viewport` deferred trigger.
  * @param target Optional element on which to listen for hover events.
@@ -20640,6 +20731,99 @@ function ɵɵdeferOnViewport(target) { } // TODO: implement runtime logic.
  */
 function ɵɵdeferPrefetchOnViewport(target) { } // TODO: implement runtime logic.
 /********** Helper functions **********/
+/**
+ * Helper function to get the LView in which a deferred block's trigger is rendered.
+ * @param deferredHostLView LView in which the deferred block is defined.
+ * @param deferredTNode TNode defining the deferred block.
+ * @param walkUpTimes Number of times to go up in the view hierarchy to find the trigger's view.
+ *   A negative value means that the trigger is inside the block's placeholder, while an undefined
+ *   value means that the trigger is in the same LView as the deferred block.
+ */
+function getTriggerLView(deferredHostLView, deferredTNode, walkUpTimes) {
+    // The trigger is in the same view, we don't need to traverse.
+    if (walkUpTimes == null) {
+        return deferredHostLView;
+    }
+    // A positive value or zero means that the trigger is in a parent view.
+    if (walkUpTimes >= 0) {
+        return walkUpViews(walkUpTimes, deferredHostLView);
+    }
+    // If the value is negative, it means that the trigger is inside the placeholder.
+    const deferredContainer = deferredHostLView[deferredTNode.index];
+    ngDevMode && assertLContainer(deferredContainer);
+    const triggerLView = deferredContainer[CONTAINER_HEADER_OFFSET] ?? null;
+    // We need to null check, because the placeholder might not have been rendered yet.
+    if (ngDevMode && triggerLView !== null) {
+        const lDetails = getLDeferBlockDetails(deferredHostLView, deferredTNode);
+        const renderedState = lDetails[DEFER_BLOCK_STATE];
+        assertEqual(renderedState, DeferBlockState.Placeholder, 'Expected a placeholder to be rendered in this defer block.');
+        assertLView(triggerLView);
+    }
+    return triggerLView;
+}
+/**
+ * Gets the element that a deferred block's trigger is pointing to.
+ * @param triggerLView LView in which the trigger is defined.
+ * @param triggerIndex Index at which the trigger element should've been rendered.
+ */
+function getTriggerElement(triggerLView, triggerIndex) {
+    const element = getNativeByIndex(HEADER_OFFSET + triggerIndex, triggerLView);
+    ngDevMode && assertElement(element);
+    return element;
+}
+/**
+ * Registers a DOM-node based trigger.
+ * @param initialLView LView in which the defer block is rendered.
+ * @param tNode TNode representing the defer block.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to go up/down in the view hierarchy to find the trigger.
+ * @param registerFn Function that will register the DOM events.
+ * @param callback Callback to be invoked when the trigger receives the event that should render
+ *     the deferred block.
+ */
+function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback) {
+    const injector = initialLView[INJECTOR$1];
+    // Assumption: the `afterRender` reference should be destroyed
+    // automatically so we don't need to keep track of it.
+    const afterRenderRef = afterRender(() => {
+        const lDetails = getLDeferBlockDetails(initialLView, tNode);
+        const renderedState = lDetails[DEFER_BLOCK_STATE];
+        // If the block was loaded before the trigger was resolved, we don't need to do anything.
+        if (renderedState !== DeferBlockInternalState.Initial &&
+            renderedState !== DeferBlockState.Placeholder) {
+            afterRenderRef.destroy();
+            return;
+        }
+        const triggerLView = getTriggerLView(initialLView, tNode, walkUpTimes);
+        // Keep polling until we resolve the trigger's LView.
+        // `afterRender` should stop automatically if the view is destroyed.
+        if (!triggerLView) {
+            return;
+        }
+        // It's possible that the trigger's view was destroyed before we resolved the trigger element.
+        if (triggerLView[FLAGS] & 256 /* LViewFlags.Destroyed */) {
+            afterRenderRef.destroy();
+            return;
+        }
+        // TODO: add integration with `DeferBlockCleanupManager`.
+        const element = getTriggerElement(triggerLView, triggerIndex);
+        const cleanup = registerFn(element, () => {
+            callback();
+            removeLViewOnDestroy(triggerLView, cleanup);
+            if (initialLView !== triggerLView) {
+                removeLViewOnDestroy(initialLView, cleanup);
+            }
+            cleanup();
+        }, injector);
+        afterRenderRef.destroy();
+        storeLViewOnDestroy(triggerLView, cleanup);
+        // Since the trigger and deferred block might be in different
+        // views, we have to register the callback in both locations.
+        if (initialLView !== triggerLView) {
+            storeLViewOnDestroy(initialLView, cleanup);
+        }
+    }, { injector });
+}
 /**
  * Helper function to schedule a callback to be invoked when a browser becomes idle.
  *
