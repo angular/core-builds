@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-0a4f18a
+ * @license Angular v17.0.0-next.5+sha-917203d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10901,7 +10901,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.5+sha-0a4f18a');
+const VERSION = new Version('17.0.0-next.5+sha-917203d');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20379,14 +20379,12 @@ var DeferDependenciesLoadingState;
 (function (DeferDependenciesLoadingState) {
     /** Initial state, dependency loading is not yet triggered */
     DeferDependenciesLoadingState[DeferDependenciesLoadingState["NOT_STARTED"] = 0] = "NOT_STARTED";
-    /** Dependency loading was scheduled (e.g. `on idle`), but has not started yet */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["SCHEDULED"] = 1] = "SCHEDULED";
     /** Dependency loading is in progress */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["IN_PROGRESS"] = 2] = "IN_PROGRESS";
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["IN_PROGRESS"] = 1] = "IN_PROGRESS";
     /** Dependency loading has completed successfully */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["COMPLETE"] = 3] = "COMPLETE";
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["COMPLETE"] = 2] = "COMPLETE";
     /** Dependency loading has failed */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["FAILED"] = 4] = "FAILED";
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["FAILED"] = 3] = "FAILED";
 })(DeferDependenciesLoadingState || (DeferDependenciesLoadingState = {}));
 /**
  * Describes the current state of this {#defer} block instance.
@@ -20574,13 +20572,20 @@ function ɵɵdeferPrefetchOnIdle() {
     const tView = lView[TVIEW];
     const tDetails = getTDeferBlockDetails(tView, tNode);
     if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        // Set loading to the scheduled state, so that we don't register it again.
-        tDetails.loadingState = DeferDependenciesLoadingState.SCHEDULED;
-        // In case of prefetching, we intentionally avoid cancelling prefetching if
-        // an underlying LView get destroyed (thus passing `null` as a second argument),
-        // because there might be other LViews (that represent embedded views) that
-        // depend on resource loading.
-        onIdle(() => triggerPrefetching(tDetails, lView), null /* LView */);
+        // Prevent scheduling more than one `requestIdleCallback` call
+        // for each defer block. For this reason we use only a trigger
+        // identifier in a key, so all instances would use the same key.
+        const key = String(0 /* DeferBlockTriggers.OnIdle */);
+        const injector = lView[INJECTOR$1];
+        const manager = injector.get(DeferBlockCleanupManager);
+        if (!manager.has(tDetails, key)) {
+            // In case of prefetching, we intentionally avoid cancelling resource loading if
+            // an underlying LView get destroyed (thus passing `null` as a second argument),
+            // because there might be other LViews (that represent embedded views) that
+            // depend on resource loading.
+            const cleanupFn = onIdle(() => triggerPrefetching(tDetails, lView), null /* LView */);
+            registerTDetailsCleanup(injector, tDetails, key, cleanupFn);
+        }
     }
 }
 /**
@@ -20668,6 +20673,7 @@ function onIdle(callback, lView) {
         // is invoked.
         storeLViewOnDestroy(lView, removeIdleCallback);
     }
+    return removeIdleCallback;
 }
 /**
  * Calculates a data slot index for defer block info (either static or
@@ -20778,8 +20784,7 @@ function triggerPrefetching(tDetails, lView) {
 function triggerResourceLoading(tDetails, lView) {
     const injector = lView[INJECTOR$1];
     const tView = lView[TVIEW];
-    if (tDetails.loadingState !== DeferDependenciesLoadingState.NOT_STARTED &&
-        tDetails.loadingState !== DeferDependenciesLoadingState.SCHEDULED) {
+    if (tDetails.loadingState !== DeferDependenciesLoadingState.NOT_STARTED) {
         // If the loading status is different from initial one, it means that
         // the loading of dependencies is in progress and there is nothing to do
         // in this function. All details can be obtained from the `tDetails` object.
@@ -20802,6 +20807,9 @@ function triggerResourceLoading(tDetails, lView) {
         });
         return;
     }
+    // Defer block may have multiple prefetch triggers. Once the loading
+    // starts, invoke all clean functions, since they are no longer needed.
+    invokeTDetailsCleanup(injector, tDetails);
     // Start downloading of defer block dependencies.
     tDetails.loadingPromise = Promise.allSettled(dependenciesFn()).then(results => {
         let failed = false;
@@ -20900,7 +20908,6 @@ function triggerDeferBlock(lView, tNode) {
     renderDeferBlockState(DeferBlockState.Loading, tNode, lContainer);
     switch (tDetails.loadingState) {
         case DeferDependenciesLoadingState.NOT_STARTED:
-        case DeferDependenciesLoadingState.SCHEDULED:
             triggerResourceLoading(tDetails, lView);
             // The `loadingState` might have changed to "loading".
             if (tDetails.loadingState ===
@@ -20987,6 +20994,67 @@ function getDeferBlocks(lView, deferBlocks) {
             getDeferBlocks(lView[i], deferBlocks);
         }
     }
+}
+/**
+ * Registers a cleanup function associated with a prefetching trigger
+ * of a given defer block.
+ */
+function registerTDetailsCleanup(injector, tDetails, key, cleanupFn) {
+    injector.get(DeferBlockCleanupManager).add(tDetails, key, cleanupFn);
+}
+/**
+ * Invokes all registered prefetch cleanup triggers
+ * and removes all cleanup functions afterwards.
+ */
+function invokeTDetailsCleanup(injector, tDetails) {
+    injector.get(DeferBlockCleanupManager).cleanup(tDetails);
+}
+/**
+ * Internal service to keep track of cleanup functions associated
+ * with defer blocks. This class is used to manage cleanup functions
+ * created for prefetching triggers.
+ */
+class DeferBlockCleanupManager {
+    constructor() {
+        this.blocks = new Map();
+    }
+    add(tDetails, key, callback) {
+        if (!this.blocks.has(tDetails)) {
+            this.blocks.set(tDetails, new Map());
+        }
+        const block = this.blocks.get(tDetails);
+        if (!block.has(key)) {
+            block.set(key, []);
+        }
+        const callbacks = block.get(key);
+        callbacks.push(callback);
+    }
+    has(tDetails, key) {
+        return !!this.blocks.get(tDetails)?.has(key);
+    }
+    cleanup(tDetails) {
+        const block = this.blocks.get(tDetails);
+        if (block) {
+            for (const callbacks of Object.values(block)) {
+                for (const callback of callbacks) {
+                    callback();
+                }
+            }
+            this.blocks.delete(tDetails);
+        }
+    }
+    ngOnDestroy() {
+        for (const [block] of this.blocks) {
+            this.cleanup(block);
+        }
+        this.blocks.clear();
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: DeferBlockCleanupManager,
+        providedIn: 'root',
+        factory: () => new DeferBlockCleanupManager(),
+    }); }
 }
 
 function elementStartFirstCreatePass(index, tView, lView, name, attrsIndex, localRefsIndex) {

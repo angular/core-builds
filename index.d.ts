@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-0a4f18a
+ * @license Angular v17.0.0-next.5+sha-917203d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2492,14 +2492,12 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
 declare enum DeferDependenciesLoadingState {
     /** Initial state, dependency loading is not yet triggered */
     NOT_STARTED = 0,
-    /** Dependency loading was scheduled (e.g. `on idle`), but has not started yet */
-    SCHEDULED = 1,
     /** Dependency loading is in progress */
-    IN_PROGRESS = 2,
+    IN_PROGRESS = 1,
     /** Dependency loading has completed successfully */
-    COMPLETE = 3,
+    COMPLETE = 2,
     /** Dependency loading has failed */
-    FAILED = 4
+    FAILED = 3
 }
 
 /** Configuration object for a `{:loading}` block as it is stored in the component constants. */
