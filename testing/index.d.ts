@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-013aec8
+ * @license Angular v17.0.0-next.5+sha-4599642
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -112,7 +112,9 @@ export declare class ComponentFixture<T> {
      */
     whenStable(): Promise<any>;
     /**
-     * Retrieves all defer block fixtures in the component fixture
+     * Retrieves all defer block fixtures in the component fixture.
+     *
+     * @developerPreview
      */
     getDeferBlocks(): Promise<DeferBlockFixture[]>;
     private _getRenderer;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-013aec8
+ * @license Angular v17.0.0-next.5+sha-4599642
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12417,7 +12417,7 @@ export declare function ɵunwrapSafeValue<T>(value: T): T;
  *
  * @deprecated For migration purposes only, to be removed soon.
  */
-export declare const ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT = false;
+export declare const ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT = true;
 
 export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef, ChangeDetectorRefInterface {
     /**
