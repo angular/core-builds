@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-917203d
+ * @license Angular v17.0.0-next.5+sha-86e9146
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -78,17 +78,19 @@ function toSignal(source, options) {
         // If an initial value was passed, use it. Otherwise, use `undefined` as the initial value.
         state = signal({ kind: 1 /* StateKind.Value */, value: options?.initialValue });
     }
-    const sub = source.subscribe({
-        next: value => state.set({ kind: 1 /* StateKind.Value */, value }),
-        error: error => state.set({ kind: 2 /* StateKind.Error */, error }),
-        // Completion of the Observable is meaningless to the signal. Signals don't have a concept of
-        // "complete".
+    untracked(() => {
+        const sub = source.subscribe({
+            next: value => state.set({ kind: 1 /* StateKind.Value */, value }),
+            error: error => state.set({ kind: 2 /* StateKind.Error */, error }),
+            // Completion of the Observable is meaningless to the signal. Signals don't have a concept of
+            // "complete".
+        });
+        if (ngDevMode && options?.requireSync && state().kind === 0 /* StateKind.NoValue */) {
+            throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
+        }
+        // Unsubscribe when the current context is destroyed, if requested.
+        cleanupRef?.onDestroy(sub.unsubscribe.bind(sub));
     });
-    if (ngDevMode && options?.requireSync && untracked(state).kind === 0 /* StateKind.NoValue */) {
-        throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
-    }
-    // Unsubscribe when the current context is destroyed, if requested.
-    cleanupRef?.onDestroy(sub.unsubscribe.bind(sub));
     // The actual returned signal is a `computed` of the `State` signal, which maps the various states
     // to either values or errors.
     return computed(() => {
