@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-4599642
+ * @license Angular v17.0.0-next.5+sha-e5d327d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12643,6 +12643,35 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
  * configure or change anything in NgUniversal to enable the feature.
  */
 export declare function ɵwithDomHydration(): EnvironmentProviders;
+
+/**
+ * Returns a writable type version of type.
+ *
+ * USAGE:
+ * Given:
+ * ```
+ * interface Person {readonly name: string}
+ * ```
+ *
+ * We would like to get a read/write version of `Person`.
+ * ```
+ * const WritablePerson = Writable<Person>;
+ * ```
+ *
+ * The result is that you can do:
+ *
+ * ```
+ * const readonlyPerson: Person = {name: 'Marry'};
+ * readonlyPerson.name = 'John'; // TypeError
+ * (readonlyPerson as WritablePerson).name = 'John'; // OK
+ *
+ * // Error: Correctly detects that `Person` did not have `age` property.
+ * (readonlyPerson as WritablePerson).age = 30;
+ * ```
+ */
+export declare type ɵWritable<T> = {
+    -readonly [K in keyof T]: T[K];
+};
 
 /**
  * URL for the XSS security documentation.

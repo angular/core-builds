@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-4599642
+ * @license Angular v17.0.0-next.5+sha-e5d327d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10897,7 +10897,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.5+sha-4599642');
+const VERSION = new Version('17.0.0-next.5+sha-e5d327d');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -17771,7 +17771,6 @@ class DefaultIterableDiffer {
             this.length = index;
         }
         this._truncate(record);
-        // @ts-expect-error overwriting a readonly member
         this.collection = collection;
         return this.isDirty;
     }
@@ -27020,16 +27019,13 @@ class QueryList {
      *    are compared as is (without any pre-processing).
      */
     reset(resultsTree, identityAccessor) {
-        // Cast to `QueryListInternal` so that we can mutate fields which are readonly for the usage of
-        // QueryList (but not for QueryList itself.)
-        const self = this;
-        self.dirty = false;
+        this.dirty = false;
         const newResultFlat = flatten(resultsTree);
-        if (this._changesDetected = !arrayEquals(self._results, newResultFlat, identityAccessor)) {
-            self._results = newResultFlat;
-            self.length = newResultFlat.length;
-            self.last = newResultFlat[this.length - 1];
-            self.first = newResultFlat[0];
+        if (this._changesDetected = !arrayEquals(this._results, newResultFlat, identityAccessor)) {
+            this._results = newResultFlat;
+            this.length = newResultFlat.length;
+            this.last = newResultFlat[this.length - 1];
+            this.first = newResultFlat[0];
         }
     }
     /**
