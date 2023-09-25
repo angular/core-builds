@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-16f5fc4
+ * @license Angular v17.0.0-next.5+sha-baaaa6d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13440,13 +13440,13 @@ export declare function ɵɵdefer(index: number, primaryTmplIndex: number, depen
 export declare function ɵɵdeferOnHover(triggerIndex: number, walkUpTimes?: number): void;
 
 /**
- * Sets up handlers that represent `on idle` deferred trigger.
+ * Sets up logic to handle the `on idle` deferred trigger.
  * @codeGenApi
  */
 export declare function ɵɵdeferOnIdle(): void;
 
 /**
- * Creates runtime data structures for the `on immediate` deferred trigger.
+ * Sets up logic to handle the `on immediate` deferred trigger.
  * @codeGenApi
  */
 export declare function ɵɵdeferOnImmediate(): void;
@@ -13483,13 +13483,13 @@ export declare function ɵɵdeferOnViewport(triggerIndex: number, walkUpTimes?: 
 export declare function ɵɵdeferPrefetchOnHover(triggerIndex: number, walkUpTimes?: number): void;
 
 /**
- * Creates runtime data structures for the `prefetch on idle` deferred trigger.
+ * Sets up logic to handle the `prefetch on idle` deferred trigger.
  * @codeGenApi
  */
 export declare function ɵɵdeferPrefetchOnIdle(): void;
 
 /**
- * Creates runtime data structures for the `prefetch on immediate` deferred trigger.
+ * Sets up logic to handle the `prefetch on immediate` deferred trigger.
  * @codeGenApi
  */
 export declare function ɵɵdeferPrefetchOnImmediate(): void;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-16f5fc4
+ * @license Angular v17.0.0-next.5+sha-baaaa6d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.5+sha-16f5fc4');
+const VERSION = new Version('17.0.0-next.5+sha-baaaa6d');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20707,7 +20707,7 @@ function ɵɵdeferPrefetchWhen(rawValue) {
     }
 }
 /**
- * Sets up handlers that represent `on idle` deferred trigger.
+ * Sets up logic to handle the `on idle` deferred trigger.
  * @codeGenApi
  */
 function ɵɵdeferOnIdle() {
@@ -20720,7 +20720,7 @@ function ɵɵdeferOnIdle() {
     onIdle(() => triggerDeferBlock(lView, tNode), lView);
 }
 /**
- * Creates runtime data structures for the `prefetch on idle` deferred trigger.
+ * Sets up logic to handle the `prefetch on idle` deferred trigger.
  * @codeGenApi
  */
 function ɵɵdeferPrefetchOnIdle() {
@@ -20746,15 +20746,35 @@ function ɵɵdeferPrefetchOnIdle() {
     }
 }
 /**
- * Creates runtime data structures for the `on immediate` deferred trigger.
+ * Sets up logic to handle the `on immediate` deferred trigger.
  * @codeGenApi
  */
-function ɵɵdeferOnImmediate() { } // TODO: implement runtime logic.
+function ɵɵdeferOnImmediate() {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    // Render placeholder block only if loading template is not present
+    // to avoid content flickering, since it would be immediately replaced
+    // by the loading block.
+    if (tDetails.loadingTmplIndex === null) {
+        renderPlaceholder(lView, tNode);
+    }
+    triggerDeferBlock(lView, tNode);
+}
 /**
- * Creates runtime data structures for the `prefetch on immediate` deferred trigger.
+ * Sets up logic to handle the `prefetch on immediate` deferred trigger.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnImmediate() { } // TODO: implement runtime logic.
+function ɵɵdeferPrefetchOnImmediate() {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        triggerResourceLoading(tDetails, lView);
+    }
+}
 /**
  * Creates runtime data structures for the `on timer` deferred trigger.
  * @param delay Amount of time to wait before loading the content.
