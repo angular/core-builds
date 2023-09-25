@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-baaaa6d
+ * @license Angular v17.0.0-next.5+sha-d6bfebe
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.5+sha-baaaa6d');
+const VERSION = new Version('17.0.0-next.5+sha-d6bfebe');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29420,10 +29420,10 @@ class ApplicationInitStatus {
     static { this.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac, providedIn: 'root' }); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
-    }], function () { return []; }, null); })();
+    }], () => [], null); })();
 
 class Console {
     log(message) {
@@ -29438,7 +29438,7 @@ class Console {
     static { this.ɵfac = function Console_Factory(t) { return new (t || Console)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac, providedIn: 'platform' }); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Console, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Console, [{
         type: Injectable,
         args: [{ providedIn: 'platform' }]
     }], null, null); })();
@@ -29649,7 +29649,7 @@ class InitialRenderPendingTasks {
     static { this.ɵfac = function InitialRenderPendingTasks_Factory(t) { return new (t || InitialRenderPendingTasks)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: InitialRenderPendingTasks, factory: InitialRenderPendingTasks.ɵfac, providedIn: 'root' }); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(InitialRenderPendingTasks, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(InitialRenderPendingTasks, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
     }], null, null); })();
@@ -29737,7 +29737,7 @@ class Compiler {
     static { this.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: 'root' }); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Compiler, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Compiler, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
     }], null, null); })();
@@ -30701,12 +30701,12 @@ class Testability {
     static { this.ɵfac = function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone), ɵɵinject(TestabilityRegistry), ɵɵinject(TESTABILITY_GETTER)); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac }); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Testability, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Testability, [{
         type: Injectable
-    }], function () { return [{ type: NgZone }, { type: TestabilityRegistry }, { type: undefined, decorators: [{
+    }], () => [{ type: NgZone }, { type: TestabilityRegistry }, { type: undefined, decorators: [{
                 type: Inject,
                 args: [TESTABILITY_GETTER]
-            }] }]; }, null); })();
+            }] }], null); })();
 /**
  * A global registry of {@link Testability} instances for specific elements.
  * @publicApi
@@ -30768,7 +30768,7 @@ class TestabilityRegistry {
     static { this.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac, providedIn: 'platform' }); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(TestabilityRegistry, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(TestabilityRegistry, [{
         type: Injectable,
         args: [{ providedIn: 'platform' }]
     }], null, null); })();
@@ -31211,10 +31211,10 @@ class PlatformRef {
     static { this.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: 'platform' }); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PlatformRef, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PlatformRef, [{
         type: Injectable,
         args: [{ providedIn: 'platform' }]
-    }], function () { return [{ type: Injector }]; }, null); })();
+    }], () => [{ type: Injector }], null); })();
 // Transforms a set of `BootstrapOptions` (supported by the NgModule-based bootstrap APIs) ->
 // `NgZoneOptions` that are recognized by the NgZone constructor. Passing no options will result in
 // a set of default options returned.
@@ -31594,7 +31594,7 @@ class ApplicationRef {
     static { this.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' }); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
     }], null, null); })();
@@ -31653,7 +31653,7 @@ class NgZoneChangeDetectionScheduler {
     static { this.ɵfac = function NgZoneChangeDetectionScheduler_Factory(t) { return new (t || NgZoneChangeDetectionScheduler)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: NgZoneChangeDetectionScheduler, factory: NgZoneChangeDetectionScheduler.ɵfac, providedIn: 'root' }); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(NgZoneChangeDetectionScheduler, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(NgZoneChangeDetectionScheduler, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
     }], null, null); })();
@@ -32429,9 +32429,9 @@ class ApplicationModule {
     static { this.ɵmod = /*@__PURE__*/ ɵɵdefineNgModule({ type: ApplicationModule }); }
     static { this.ɵinj = /*@__PURE__*/ ɵɵdefineInjector({}); }
 }
-(function () { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationModule, [{
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationModule, [{
         type: NgModule
-    }], function () { return [{ type: ApplicationRef }]; }, null); })();
+    }], () => [{ type: ApplicationRef }], null); })();
 
 /**
  * A collection that tracks all serialized views (`ngh` DOM annotations)
