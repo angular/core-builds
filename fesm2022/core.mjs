@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-3cbb2a8
+ * @license Angular v17.0.0-next.5+sha-16f5fc4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.5+sha-3cbb2a8');
+const VERSION = new Version('17.0.0-next.5+sha-16f5fc4');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20454,6 +20454,8 @@ const eventListenerOptions = {
     passive: true,
     capture: true
 };
+/** Keeps track of the currently-registered `on hover` triggers. */
+const hoverTriggers = new WeakMap();
 /** Keeps track of the currently-registered `on interaction` triggers. */
 const interactionTriggers = new WeakMap();
 /** Names of the events considered as interaction events. */
@@ -20506,6 +20508,90 @@ function onInteraction(trigger, callback) {
             }
         }
     };
+}
+/**
+ * Registers a hover trigger.
+ * @param trigger Element that is the trigger.
+ * @param callback Callback to be invoked when the trigger is hovered over.
+ */
+function onHover(trigger, callback) {
+    let entry = hoverTriggers.get(trigger);
+    // If this is the first entry for this element, add the listener.
+    if (!entry) {
+        entry = new DeferEventEntry();
+        trigger.addEventListener('mouseenter', entry.listener, eventListenerOptions);
+        hoverTriggers.set(trigger, entry);
+    }
+    entry.callbacks.add(callback);
+    return () => {
+        const { callbacks, listener } = entry;
+        callbacks.delete(callback);
+        if (callbacks.size === 0) {
+            trigger.removeEventListener('mouseenter', listener, eventListenerOptions);
+            hoverTriggers.delete(trigger);
+        }
+    };
+}
+/**
+ * Registers a viewport trigger.
+ * @param trigger Element that is the trigger.
+ * @param callback Callback to be invoked when the trigger comes into the viewport.
+ * @param injector Injector that can be used by the trigger to resolve DI tokens.
+ */
+function onViewport(trigger, callback, injector) {
+    return injector.get(DeferIntersectionManager).register(trigger, callback);
+}
+/** Keeps track of the registered `viewport` triggers. */
+class DeferIntersectionManager {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: DeferIntersectionManager,
+        providedIn: 'root',
+        factory: () => new DeferIntersectionManager(inject(NgZone)),
+    }); }
+    constructor(ngZone) {
+        this.ngZone = ngZone;
+        /** `IntersectionObserver` used to observe `viewport` triggers. */
+        this.intersectionObserver = null;
+        /** Number of elements currently observed with `viewport` triggers. */
+        this.observedViewportElements = 0;
+        /** Currently-registered `viewport` triggers. */
+        this.viewportTriggers = new WeakMap();
+        this.intersectionCallback = entries => {
+            for (const current of entries) {
+                // Only invoke the callbacks if the specific element is intersecting.
+                if (current.isIntersecting && this.viewportTriggers.has(current.target)) {
+                    this.ngZone.run(this.viewportTriggers.get(current.target).listener);
+                }
+            }
+        };
+    }
+    register(trigger, callback) {
+        let entry = this.viewportTriggers.get(trigger);
+        if (!this.intersectionObserver) {
+            this.intersectionObserver =
+                this.ngZone.runOutsideAngular(() => new IntersectionObserver(this.intersectionCallback));
+        }
+        if (!entry) {
+            entry = new DeferEventEntry();
+            this.ngZone.runOutsideAngular(() => this.intersectionObserver.observe(trigger));
+            this.viewportTriggers.set(trigger, entry);
+            this.observedViewportElements++;
+        }
+        entry.callbacks.add(callback);
+        return () => {
+            entry.callbacks.delete(callback);
+            if (entry.callbacks.size === 0) {
+                this.intersectionObserver?.unobserve(trigger);
+                this.viewportTriggers.delete(trigger);
+                this.observedViewportElements--;
+            }
+            if (this.observedViewportElements === 0) {
+                this.intersectionObserver?.disconnect();
+                this.intersectionObserver = null;
+            }
+        };
+    }
 }
 
 /**
@@ -20683,14 +20769,31 @@ function ɵɵdeferOnTimer(delay) { } // TODO: implement runtime logic.
 function ɵɵdeferPrefetchOnTimer(delay) { } // TODO: implement runtime logic.
 /**
  * Creates runtime data structures for the `on hover` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-function ɵɵdeferOnHover() { } // TODO: implement runtime logic.
+function ɵɵdeferOnHover(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    renderPlaceholder(lView, tNode);
+    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerDeferBlock(lView, tNode));
+}
 /**
  * Creates runtime data structures for the `prefetch on hover` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnHover() { } // TODO: implement runtime logic.
+function ɵɵdeferPrefetchOnHover(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerPrefetching(tDetails, lView));
+    }
+}
 /**
  * Creates runtime data structures for the `on interaction` deferred trigger.
  * @param triggerIndex Index at which to find the trigger element.
@@ -20720,16 +20823,31 @@ function ɵɵdeferPrefetchOnInteraction(triggerIndex, walkUpTimes) {
 }
 /**
  * Creates runtime data structures for the `on viewport` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-function ɵɵdeferOnViewport(target) { } // TODO: implement runtime logic.
+function ɵɵdeferOnViewport(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    renderPlaceholder(lView, tNode);
+    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerDeferBlock(lView, tNode));
+}
 /**
  * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-function ɵɵdeferPrefetchOnViewport(target) { } // TODO: implement runtime logic.
+function ɵɵdeferPrefetchOnViewport(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerPrefetching(tDetails, lView));
+    }
+}
 /********** Helper functions **********/
 /**
  * Helper function to get the LView in which a deferred block's trigger is rendered.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-3cbb2a8
+ * @license Angular v17.0.0-next.5+sha-16f5fc4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13433,9 +13433,11 @@ export declare function ɵɵdefer(index: number, primaryTmplIndex: number, depen
 
 /**
  * Creates runtime data structures for the `on hover` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-export declare function ɵɵdeferOnHover(): void;
+export declare function ɵɵdeferOnHover(triggerIndex: number, walkUpTimes?: number): void;
 
 /**
  * Sets up handlers that represent `on idle` deferred trigger.
@@ -13466,16 +13468,19 @@ export declare function ɵɵdeferOnTimer(delay: number): void;
 
 /**
  * Creates runtime data structures for the `on viewport` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-export declare function ɵɵdeferOnViewport(target?: unknown): void;
+export declare function ɵɵdeferOnViewport(triggerIndex: number, walkUpTimes?: number): void;
 
 /**
  * Creates runtime data structures for the `prefetch on hover` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-export declare function ɵɵdeferPrefetchOnHover(): void;
+export declare function ɵɵdeferPrefetchOnHover(triggerIndex: number, walkUpTimes?: number): void;
 
 /**
  * Creates runtime data structures for the `prefetch on idle` deferred trigger.
@@ -13506,10 +13511,11 @@ export declare function ɵɵdeferPrefetchOnTimer(delay: number): void;
 
 /**
  * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
- * @param target Optional element on which to listen for hover events.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
  * @codeGenApi
  */
-export declare function ɵɵdeferPrefetchOnViewport(target?: unknown): void;
+export declare function ɵɵdeferPrefetchOnViewport(triggerIndex: number, walkUpTimes?: number): void;
 
 /**
  * Prefetches the deferred content when a value becomes truthy.
