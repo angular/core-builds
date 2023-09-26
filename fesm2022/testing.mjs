@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-b771539
+ * @license Angular v17.0.0-next.5+sha-8be2c48
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -52,7 +52,7 @@ function async(fn) {
 }
 
 /**
- * Represents an individual `{#defer}` block for testing purposes.
+ * Represents an individual defer block for testing purposes.
  *
  * @publicApi
  * @developerPreview
@@ -71,7 +71,7 @@ class DeferBlockFixture {
         if (!hasStateTemplate(state, this.block)) {
             const stateAsString = getDeferBlockStateNameFromEnum(state);
             throw new Error(`Tried to render this defer block in the \`${stateAsString}\` state, ` +
-                `but there was no \`{:${stateAsString.toLowerCase()}}\` section defined in a template.`);
+                `but there was no @${stateAsString.toLowerCase()} block defined in a template.`);
         }
         if (state === ɵDeferBlockState.Complete) {
             await ɵtriggerResourceLoading(this.block.tDetails, this.block.lView);

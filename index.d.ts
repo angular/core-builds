@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-b771539
+ * @license Angular v17.0.0-next.5+sha-8be2c48
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2500,10 +2500,10 @@ declare enum DeferDependenciesLoadingState {
     FAILED = 3
 }
 
-/** Configuration object for a `{:loading}` block as it is stored in the component constants. */
+/** Configuration object for a loading block as it is stored in the component constants. */
 declare type DeferredLoadingBlockConfig = [minimumTime: number | null, afterTime: number | null];
 
-/** Configuration object for a `{:placeholder}` block as it is stored in the component constants. */
+/** Configuration object for a placeholder block as it is stored in the component constants. */
 declare type DeferredPlaceholderBlockConfig = [afterTime: number | null];
 
 /**
@@ -8475,7 +8475,7 @@ declare interface TContainerNode extends TNode {
 declare type TData = (TNode | ɵPipeDef<any> | ɵDirectiveDef<any> | ɵComponentDef<any> | number | TStylingRange | TStylingKey | ProviderToken<any> | TI18n | I18nUpdateOpCodes | TIcu | null | string | TDeferBlockDetails)[];
 
 /**
- * Describes the data shared across all instances of a {#defer} block.
+ * Describes the data shared across all instances of a defer block.
  */
 declare interface TDeferBlockDetails {
     /**
@@ -8484,32 +8484,27 @@ declare interface TDeferBlockDetails {
      */
     primaryTmplIndex: number;
     /**
-     * Index in an LView and TData arrays where a template for the `{:loading}`
-     * block can be found.
+     * Index in an LView and TData arrays where a template for the loading block can be found.
      */
     loadingTmplIndex: number | null;
     /**
-     * Extra configuration parameters (such as `after` and `minimum`)
-     * for the `{:loading}` block.
+     * Extra configuration parameters (such as `after` and `minimum`) for the loading block.
      */
     loadingBlockConfig: DeferredLoadingBlockConfig | null;
     /**
-     * Index in an LView and TData arrays where a template for the `{:placeholder}`
-     * block can be found.
+     * Index in an LView and TData arrays where a template for the placeholder block can be found.
      */
     placeholderTmplIndex: number | null;
     /**
-     * Extra configuration parameters (such as `after` and `minimum`)
-     * for the `{:placeholder}` block.
+     * Extra configuration parameters (such as `after` and `minimum`) for the placeholder block.
      */
     placeholderBlockConfig: DeferredPlaceholderBlockConfig | null;
     /**
-     * Index in an LView and TData arrays where a template for the `{:error}`
-     * block can be found.
+     * Index in an LView and TData arrays where a template for the error block can be found.
      */
     errorTmplIndex: number | null;
     /**
-     * Compiler-generated function that loads all dependencies for a `{#defer}` block.
+     * Compiler-generated function that loads all dependencies for a defer block.
      */
     dependencyResolverFn: DependencyResolverFn | null;
     /**
@@ -11157,19 +11152,19 @@ export declare interface ɵDeferBlockDetails {
 }
 
 /**
- * Describes the current state of this {#defer} block instance.
+ * Describes the current state of this defer block instance.
  *
  * @publicApi
  * @developerPreview
  */
 export declare enum ɵDeferBlockState {
-    /** The {:placeholder} block content is rendered */
+    /** The placeholder block content is rendered */
     Placeholder = 0,
-    /** The {:loading} block content is rendered */
+    /** The loading block content is rendered */
     Loading = 1,
     /** The main content block content is rendered */
     Complete = 2,
-    /** The {:error} block content is rendered */
+    /** The error block content is rendered */
     Error = 3
 }
 
@@ -12314,7 +12309,7 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
 
 /**
  * Handles the process of applying metadata info to a component class in case
- * component template had `{#defer}` blocks (thus some dependencies became deferrable).
+ * component template had defer blocks (thus some dependencies became deferrable).
  *
  * @param type Component class where metadata should be added
  * @param dependencyLoaderFn Function that loads dependencies
@@ -13414,18 +13409,18 @@ export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: P
 export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
 /**
- * Creates runtime data structures for `{#defer}` blocks.
+ * Creates runtime data structures for defer blocks.
  *
  * @param index Index of the `defer` instruction.
  * @param primaryTmplIndex Index of the template with the primary block content.
  * @param dependencyResolverFn Function that contains dependencies for this defer block.
- * @param loadingTmplIndex Index of the template with the `{:loading}` block content.
- * @param placeholderTmplIndex Index of the template with the `{:placeholder}` block content.
- * @param errorTmplIndex Index of the template with the `{:error}` block content.
- * @param loadingConfigIndex Index in the constants array of the configuration of the `{:loading}`.
+ * @param loadingTmplIndex Index of the template with the loading block content.
+ * @param placeholderTmplIndex Index of the template with the placeholder block content.
+ * @param errorTmplIndex Index of the template with the error block content.
+ * @param loadingConfigIndex Index in the constants array of the configuration of the loading.
  *     block.
  * @param placeholderConfigIndexIndex in the constants array of the configuration of the
- *     `{:placeholder}` block.
+ *     placeholder block.
  *
  * @codeGenApi
  */

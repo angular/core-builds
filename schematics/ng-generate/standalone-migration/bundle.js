@@ -5372,6 +5372,7 @@ var $LBRACE = 123;
 var $BAR = 124;
 var $RBRACE = 125;
 var $NBSP = 160;
+var $AT = 64;
 var $BT = 96;
 function isWhitespace(code) {
   return code >= $TAB && code <= $SPACE || code == $NBSP;
@@ -11541,17 +11542,6 @@ var Comment2 = class {
     return visitor.visitComment(this, context);
   }
 };
-var BlockGroup = class {
-  constructor(blocks, sourceSpan, startSourceSpan, endSourceSpan = null) {
-    this.blocks = blocks;
-    this.sourceSpan = sourceSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
-  }
-  visit(visitor, context) {
-    return visitor.visitBlockGroup(this, context);
-  }
-};
 var Block = class {
   constructor(name, parameters, children, sourceSpan, startSourceSpan, endSourceSpan = null) {
     this.name = name;
@@ -12240,11 +12230,6 @@ var _I18nVisitor = class {
   }
   visitExpansionCase(_icuCase, _context) {
     throw new Error("Unreachable code");
-  }
-  visitBlockGroup(group, context) {
-    const children = visitAll2(this, group.blocks, context);
-    const node = new Container(children, group.sourceSpan);
-    return context.visitNodeFn(group, node);
   }
   visitBlock(block, context) {
     const children = visitAll2(this, block.children, context);
@@ -14548,12 +14533,10 @@ var _Tokenizer = class {
           } else {
             this._consumeTagOpen(start);
           }
-        } else if (this._tokenizeBlocks && this._attemptStr("{#")) {
-          this._consumeBlockGroupOpen(start);
-        } else if (this._tokenizeBlocks && this._attemptStr("{/")) {
-          this._consumeBlockGroupClose(start);
-        } else if (this._tokenizeBlocks && this._attemptStr("{:")) {
-          this._consumeBlock(start);
+        } else if (this._tokenizeBlocks && this._attemptCharCode($AT)) {
+          this._consumeBlockStart(start);
+        } else if (this._tokenizeBlocks && !this._inInterpolation && !this._isInExpansionCase() && !this._isInExpansionForm() && this._attemptCharCode($RBRACE)) {
+          this._consumeBlockEnd(start);
         } else if (!(this._tokenizeIcu && this._tokenizeExpansionForm())) {
           this._consumeWithInterpolation(5, 8, () => this._isTextEnd(), () => this._isTagStart());
         }
@@ -14561,44 +14544,49 @@ var _Tokenizer = class {
         this.handleError(e);
       }
     }
-    this._beginToken(24);
+    this._beginToken(28);
     this._endToken([]);
   }
-  _consumeBlockGroupOpen(start) {
-    this._beginToken(25, start);
+  _getBlockName() {
+    let spacesInNameAllowed = false;
     const nameCursor = this._cursor.clone();
-    this._attemptCharCodeUntilFn((code) => !isBlockNameChar(code));
-    this._endToken([this._cursor.getChars(nameCursor)]);
-    this._consumeBlockParameters();
-    this._beginToken(26);
-    this._requireCharCode($RBRACE);
+    this._attemptCharCodeUntilFn((code) => {
+      if (isWhitespace(code)) {
+        return !spacesInNameAllowed;
+      }
+      if (isBlockNameChar(code)) {
+        spacesInNameAllowed = true;
+        return false;
+      }
+      return true;
+    });
+    return this._cursor.getChars(nameCursor).trim();
+  }
+  _consumeBlockStart(start) {
+    this._beginToken(24, start);
+    this._endToken([this._getBlockName()]);
+    if (this._cursor.peek() === $LPAREN) {
+      this._cursor.advance();
+      this._consumeBlockParameters();
+      this._attemptCharCodeUntilFn(isNotWhitespace);
+      this._requireCharCode($RPAREN);
+      this._attemptCharCodeUntilFn(isNotWhitespace);
+    }
+    this._beginToken(25);
+    this._requireCharCode($LBRACE);
     this._endToken([]);
   }
-  _consumeBlockGroupClose(start) {
-    this._beginToken(27, start);
-    const nameCursor = this._cursor.clone();
-    this._attemptCharCodeUntilFn((code) => !isBlockNameChar(code));
-    const name = this._cursor.getChars(nameCursor);
-    this._requireCharCode($RBRACE);
-    this._endToken([name]);
-  }
-  _consumeBlock(start) {
-    this._beginToken(29, start);
-    const nameCursor = this._cursor.clone();
-    this._attemptCharCodeUntilFn((code) => !isBlockNameChar(code));
-    this._endToken([this._cursor.getChars(nameCursor)]);
-    this._consumeBlockParameters();
-    this._beginToken(30);
-    this._requireCharCode($RBRACE);
+  _consumeBlockEnd(start) {
+    this._beginToken(26, start);
     this._endToken([]);
   }
   _consumeBlockParameters() {
     this._attemptCharCodeUntilFn(isBlockParameterChar);
-    while (this._cursor.peek() !== $RBRACE && this._cursor.peek() !== $EOF) {
-      this._beginToken(28);
+    while (this._cursor.peek() !== $RPAREN && this._cursor.peek() !== $EOF) {
+      this._beginToken(27);
       const start = this._cursor.clone();
       let inQuote = null;
-      let openBraces = 0;
+      let openParens = 0;
       while (this._cursor.peek() !== $SEMICOLON && this._cursor.peek() !== $EOF || inQuote !== null) {
         const char = this._cursor.peek();
         if (char === $BACKSLASH) {
@@ -14607,13 +14595,13 @@ var _Tokenizer = class {
           inQuote = null;
         } else if (inQuote === null && isQuote(char)) {
           inQuote = char;
-        } else if (char === $LBRACE && inQuote === null) {
-          openBraces++;
-        } else if (char === $RBRACE && inQuote === null) {
-          if (openBraces === 0) {
+        } else if (char === $LPAREN && inQuote === null) {
+          openParens++;
+        } else if (char === $RPAREN && inQuote === null) {
+          if (openParens === 0) {
             break;
-          } else if (openBraces > 0) {
-            openBraces--;
+          } else if (openParens > 0) {
+            openParens--;
           }
         }
         this._cursor.advance();
@@ -15072,7 +15060,7 @@ var _Tokenizer = class {
     return this._processCarriageReturns(end.getChars(start));
   }
   _isTextEnd() {
-    if (this._isTagStart() || this._isBlockStart() || this._cursor.peek() === $EOF) {
+    if (this._isTagStart() || this._cursor.peek() === $EOF) {
       return true;
     }
     if (this._tokenizeIcu && !this._inInterpolation) {
@@ -15082,6 +15070,9 @@ var _Tokenizer = class {
       if (this._cursor.peek() === $RBRACE && this._isInExpansionCase()) {
         return true;
       }
+    }
+    if (this._tokenizeBlocks && !this._inInterpolation && !this._isInExpansion() && (this._isBlockStart() || this._cursor.peek() === $RBRACE)) {
+      return true;
     }
     return false;
   }
@@ -15097,13 +15088,8 @@ var _Tokenizer = class {
     return false;
   }
   _isBlockStart() {
-    if (this._tokenizeBlocks && this._cursor.peek() === $LBRACE) {
+    if (this._tokenizeBlocks && this._cursor.peek() === $AT) {
       const tmp = this._cursor.clone();
-      tmp.advance();
-      const next = tmp.peek();
-      if (next !== $BANG && next !== $SLASH && next !== $COLON) {
-        return false;
-      }
       tmp.advance();
       if (isBlockNameChar(tmp.peek())) {
         return true;
@@ -15115,6 +15101,9 @@ var _Tokenizer = class {
     const start = this._cursor.clone();
     this._attemptUntilChar(char);
     return this._cursor.getChars(start);
+  }
+  _isInExpansion() {
+    return this._isInExpansionCase() || this._isInExpansionForm();
   }
   _isInExpansionCase() {
     return this._expansionCaseStack.length > 0 && this._expansionCaseStack[this._expansionCaseStack.length - 1] === 21;
@@ -15417,7 +15406,7 @@ var _TreeBuilder = class {
     this._advance();
   }
   build() {
-    while (this._peek.type !== 24) {
+    while (this._peek.type !== 28) {
       if (this._peek.type === 0 || this._peek.type === 4) {
         this._consumeStartTag(this._advance());
       } else if (this._peek.type === 3) {
@@ -15433,17 +15422,19 @@ var _TreeBuilder = class {
         this._consumeText(this._advance());
       } else if (this._peek.type === 19) {
         this._consumeExpansion(this._advance());
-      } else if (this._peek.type === 25) {
+      } else if (this._peek.type === 24) {
         this._closeVoidElement();
-        this._consumeBlockGroupOpen(this._advance());
-      } else if (this._peek.type === 29) {
+        this._consumeBlockOpen(this._advance());
+      } else if (this._peek.type === 26) {
         this._closeVoidElement();
-        this._consumeBlock(this._advance(), 30);
-      } else if (this._peek.type === 27) {
-        this._closeVoidElement();
-        this._consumeBlockGroupClose(this._advance());
+        this._consumeBlockClose(this._advance());
       } else {
         this._advance();
+      }
+    }
+    for (const leftoverContainer of this._containerStack) {
+      if (leftoverContainer instanceof Block) {
+        this.errors.push(TreeError.create(leftoverContainer.name, leftoverContainer.sourceSpan, `Unclosed block "${leftoverContainer.name}"`));
       }
     }
   }
@@ -15501,7 +15492,7 @@ var _TreeBuilder = class {
     if (!exp)
       return null;
     const end = this._advance();
-    exp.push({ type: 24, parts: [], sourceSpan: end.sourceSpan });
+    exp.push({ type: 28, parts: [], sourceSpan: end.sourceSpan });
     const expansionCaseParser = new _TreeBuilder(exp, this.getTagDefinition);
     expansionCaseParser.build();
     if (expansionCaseParser.errors.length > 0) {
@@ -15537,7 +15528,7 @@ var _TreeBuilder = class {
           return null;
         }
       }
-      if (this._peek.type === 24) {
+      if (this._peek.type === 28) {
         this.errors.push(TreeError.create(null, start.sourceSpan, `Invalid ICU message. Missing '}'.`));
         return null;
       }
@@ -15550,10 +15541,6 @@ var _TreeBuilder = class {
     let text2 = token.parts[0];
     if (text2.length > 0 && text2[0] === "\n") {
       const parent = this._getContainer();
-      if (parent instanceof BlockGroup) {
-        this.errors.push(TreeError.create(null, startSpan, "Text cannot be placed directly inside of a block group."));
-        return;
-      }
       if (parent != null && parent.children.length === 0 && this.getTagDefinition(parent.name).ignoreFirstLf) {
         text2 = text2.substring(1);
         tokens[0] = { type: token.type, sourceSpan: token.sourceSpan, parts: [text2] };
@@ -15629,19 +15616,17 @@ var _TreeBuilder = class {
       this.errors.push(TreeError.create(fullName, endTagToken.sourceSpan, errMsg));
     }
   }
-  _popContainer(fullName, expectedType, endSourceSpan) {
-    var _a2;
+  _popContainer(expectedName, expectedType, endSourceSpan) {
     let unexpectedCloseTagDetected = false;
     for (let stackIndex = this._containerStack.length - 1; stackIndex >= 0; stackIndex--) {
       const node = this._containerStack[stackIndex];
-      const name = node instanceof BlockGroup ? (_a2 = node.blocks[0]) == null ? void 0 : _a2.name : node.name;
-      if (name === fullName && node instanceof expectedType) {
+      if ((node.name === expectedName || expectedName === null) && node instanceof expectedType) {
         node.endSourceSpan = endSourceSpan;
         node.sourceSpan.end = endSourceSpan !== null ? endSourceSpan.end : node.sourceSpan.end;
         this._containerStack.splice(stackIndex, this._containerStack.length - stackIndex);
         return !unexpectedCloseTagDetected;
       }
-      if (node instanceof BlockGroup || node instanceof Element2 && !this.getTagDefinition(node.name).closedByParent) {
+      if (node instanceof Block || node instanceof Element2 && !this.getTagDefinition(node.name).closedByParent) {
         unexpectedCloseTagDetected = true;
       }
     }
@@ -15681,53 +15666,27 @@ var _TreeBuilder = class {
     const valueSpan = valueStartSpan && valueEnd && new ParseSourceSpan(valueStartSpan.start, valueEnd, valueStartSpan.fullStart);
     return new Attribute(fullName, value, new ParseSourceSpan(attrName.sourceSpan.start, attrEnd, attrName.sourceSpan.fullStart), attrName.sourceSpan, valueSpan, valueTokens.length > 0 ? valueTokens : void 0, void 0);
   }
-  _consumeBlockGroupOpen(token) {
-    const end = this._peek.sourceSpan.fullStart;
-    const span = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
-    const startSpan = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
-    const blockGroup = new BlockGroup([], span, startSpan, null);
-    this._pushContainer(blockGroup, false);
-    const implicitBlock = this._consumeBlock(token, 26);
-    startSpan.end = implicitBlock.startSourceSpan.end;
-  }
-  _consumeBlock(token, closeToken) {
-    this._conditionallyClosePreviousBlock();
+  _consumeBlockOpen(token) {
     const parameters = [];
-    while (this._peek.type === 28) {
+    while (this._peek.type === 27) {
       const paramToken = this._advance();
       parameters.push(new BlockParameter(paramToken.parts[0], paramToken.sourceSpan));
     }
-    if (this._peek.type === closeToken) {
+    if (this._peek.type === 25) {
       this._advance();
     }
     const end = this._peek.sourceSpan.fullStart;
     const span = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
     const startSpan = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
     const block = new Block(token.parts[0], parameters, [], span, startSpan);
-    const parent = this._getContainer();
-    if (!(parent instanceof BlockGroup)) {
-      this.errors.push(TreeError.create(block.name, block.sourceSpan, "Blocks can only be placed inside of block groups."));
-    } else {
-      parent.blocks.push(block);
-      this._containerStack.push(block);
-    }
+    this._pushContainer(block, false);
     return block;
   }
-  _consumeBlockGroupClose(token) {
-    const name = token.parts[0];
+  _consumeBlockClose(token) {
     const previousContainer = this._getContainer();
-    this._conditionallyClosePreviousBlock();
-    if (!this._popContainer(name, BlockGroup, token.sourceSpan)) {
-      const context = previousContainer instanceof Element2 ? `There is an unclosed "${previousContainer.name}" HTML tag named that may have to be closed first.` : `The block may have been closed earlier.`;
-      this.errors.push(TreeError.create(name, token.sourceSpan, `Unexpected closing block "${name}". ${context}`));
-    }
-  }
-  _conditionallyClosePreviousBlock() {
-    const container = this._getContainer();
-    if (container instanceof Block) {
-      const lastChild = container.children.length ? container.children[container.children.length - 1] : null;
-      const endSpan = lastChild === null ? null : new ParseSourceSpan(lastChild.sourceSpan.end, lastChild.sourceSpan.end);
-      this._popContainer(container.name, Block, endSpan);
+    if (!this._popContainer(null, Block, token.sourceSpan)) {
+      const context = previousContainer instanceof Element2 ? `There is an unclosed "${previousContainer.name}" HTML tag that may have to be closed first.` : `The block may have been closed earlier.`;
+      this.errors.push(TreeError.create(null, token.sourceSpan, `Unexpected closing block. ${context}`));
     }
   }
   _getContainer() {
@@ -15745,8 +15704,6 @@ var _TreeBuilder = class {
     const parent = this._getContainer();
     if (parent === null) {
       this.rootNodes.push(node);
-    } else if (parent instanceof BlockGroup) {
-      this.errors.push(TreeError.create(null, node.sourceSpan, "Block groups can only contain blocks."));
     } else {
       parent.children.push(node);
     }
@@ -15895,10 +15852,6 @@ var I18nMetaVisitor = class {
   }
   visitExpansionCase(expansionCase) {
     return expansionCase;
-  }
-  visitBlockGroup(group, context) {
-    visitAll2(this, group.blocks, context);
-    return group;
   }
   visitBlock(block, context) {
     visitAll2(this, block.children, context);
@@ -18898,11 +18851,8 @@ var WhitespaceVisitor = class {
   visitExpansionCase(expansionCase, context) {
     return expansionCase;
   }
-  visitBlockGroup(group, context) {
-    return new BlockGroup(visitAllWithSiblings(this, group.blocks), group.sourceSpan, group.startSourceSpan, group.endSourceSpan);
-  }
   visitBlock(block, context) {
-    return new Block(block.name, block.parameters, visitAllWithSiblings(this, block.children), block.sourceSpan, block.startSourceSpan);
+    return new Block(block.name, block.parameters, visitAllWithSiblings(this, block.children), block.sourceSpan, block.startSourceSpan, block.endSourceSpan);
   }
   visitBlockParameter(parameter, context) {
     return parameter;
@@ -19329,24 +19279,34 @@ function normalizeNgContentSelect(selectAttr) {
 var FOR_LOOP_EXPRESSION_PATTERN = /^\s*([0-9A-Za-z_$]*)\s+of\s+(.*)/;
 var FOR_LOOP_TRACK_PATTERN = /^track\s+(.*)/;
 var CONDITIONAL_ALIAS_PATTERN = /^as\s+(.*)/;
-var ELSE_IF_PATTERN = /^if\s/;
+var ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
 var FOR_LOOP_LET_PATTERN = /^let\s+(.*)/;
 var ALLOWED_FOR_LOOP_LET_VARIABLES = /* @__PURE__ */ new Set(["$index", "$first", "$last", "$even", "$odd", "$count"]);
-function createIfBlock(ast, visitor, bindingParser) {
-  const errors = validateIfBlock(ast);
+function isConnectedForLoopBlock(name) {
+  return name === "empty";
+}
+function isConnectedIfLoopBlock(name) {
+  return name === "else" || ELSE_IF_PATTERN.test(name);
+}
+function createIfBlock(ast, connectedBlocks, visitor, bindingParser) {
+  const errors = validateIfConnectedBlocks(connectedBlocks);
   const branches = [];
   if (errors.length > 0) {
     return { node: null, errors };
   }
-  for (const block of ast.blocks) {
-    const children = visitAll2(visitor, block.children);
-    if (block.name === "else" && block.parameters.length === 0) {
+  const mainBlockParams = parseConditionalBlockParameters(ast, errors, bindingParser);
+  if (mainBlockParams !== null) {
+    branches.push(new IfBlockBranch(mainBlockParams.expression, visitAll2(visitor, ast.children, ast.children), mainBlockParams.expressionAlias, ast.sourceSpan, ast.startSourceSpan));
+  }
+  for (const block of connectedBlocks) {
+    const children = visitAll2(visitor, block.children, block.children);
+    if (ELSE_IF_PATTERN.test(block.name)) {
+      const params = parseConditionalBlockParameters(block, errors, bindingParser);
+      if (params !== null) {
+        branches.push(new IfBlockBranch(params.expression, children, params.expressionAlias, block.sourceSpan, block.startSourceSpan));
+      }
+    } else if (block.name === "else") {
       branches.push(new IfBlockBranch(null, children, null, block.sourceSpan, block.startSourceSpan));
-      continue;
-    }
-    const params = parseConditionalBlockParameters(block, errors, bindingParser);
-    if (params !== null) {
-      branches.push(new IfBlockBranch(params.expression, children, params.expressionAlias, block.sourceSpan, block.startSourceSpan));
     }
   }
   return {
@@ -19354,46 +19314,47 @@ function createIfBlock(ast, visitor, bindingParser) {
     errors
   };
 }
-function createForLoop(ast, visitor, bindingParser) {
-  const [primaryBlock, ...secondaryBlocks] = ast.blocks;
+function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
   const errors = [];
-  const params = parseForLoopParameters(primaryBlock, errors, bindingParser);
+  const params = parseForLoopParameters(ast, errors, bindingParser);
   let node = null;
   let empty = null;
-  for (const block of secondaryBlocks) {
+  for (const block of connectedBlocks) {
     if (block.name === "empty") {
       if (empty !== null) {
-        errors.push(new ParseError(block.sourceSpan, 'For loop can only have one "empty" block'));
+        errors.push(new ParseError(block.sourceSpan, "@for loop can only have one @empty block"));
       } else if (block.parameters.length > 0) {
-        errors.push(new ParseError(block.sourceSpan, "Empty block cannot have parameters"));
+        errors.push(new ParseError(block.sourceSpan, "@empty block cannot have parameters"));
       } else {
-        empty = new ForLoopBlockEmpty(visitAll2(visitor, block.children), block.sourceSpan, block.startSourceSpan);
+        empty = new ForLoopBlockEmpty(visitAll2(visitor, block.children, block.children), block.sourceSpan, block.startSourceSpan);
       }
     } else {
-      errors.push(new ParseError(block.sourceSpan, `Unrecognized loop block "${block.name}"`));
+      errors.push(new ParseError(block.sourceSpan, `Unrecognized @for loop block "${block.name}"`));
     }
   }
   if (params !== null) {
     if (params.trackBy === null) {
-      errors.push(new ParseError(ast.sourceSpan, 'For loop must have a "track" expression'));
+      errors.push(new ParseError(ast.sourceSpan, '@for loop must have a "track" expression'));
     } else {
-      node = new ForLoopBlock(params.itemName, params.expression, params.trackBy, params.context, visitAll2(visitor, primaryBlock.children), empty, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+      node = new ForLoopBlock(params.itemName, params.expression, params.trackBy, params.context, visitAll2(visitor, ast.children, ast.children), empty, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
     }
   }
   return { node, errors };
 }
 function createSwitchBlock(ast, visitor, bindingParser) {
-  const [primaryBlock, ...secondaryBlocks] = ast.blocks;
   const errors = validateSwitchBlock(ast);
   if (errors.length > 0) {
     return { node: null, errors };
   }
-  const primaryExpression = parseBlockParameterToBinding(primaryBlock.parameters[0], bindingParser);
+  const primaryExpression = parseBlockParameterToBinding(ast.parameters[0], bindingParser);
   const cases = [];
   let defaultCase = null;
-  for (const block of secondaryBlocks) {
-    const expression = block.name === "case" ? parseBlockParameterToBinding(block.parameters[0], bindingParser) : null;
-    const ast2 = new SwitchBlockCase(expression, visitAll2(visitor, block.children), block.sourceSpan, block.startSourceSpan);
+  for (const node of ast.children) {
+    if (!(node instanceof Block)) {
+      continue;
+    }
+    const expression = node.name === "case" ? parseBlockParameterToBinding(node.parameters[0], bindingParser) : null;
+    const ast2 = new SwitchBlockCase(expression, visitAll2(visitor, node.children, node.children), node.sourceSpan, node.startSourceSpan);
     if (expression === null) {
       defaultCase = ast2;
     } else {
@@ -19411,13 +19372,13 @@ function createSwitchBlock(ast, visitor, bindingParser) {
 function parseForLoopParameters(block, errors, bindingParser) {
   var _a2;
   if (block.parameters.length === 0) {
-    errors.push(new ParseError(block.sourceSpan, "For loop does not have an expression"));
+    errors.push(new ParseError(block.sourceSpan, "@for loop does not have an expression"));
     return null;
   }
   const [expressionParam, ...secondaryParams] = block.parameters;
   const match = (_a2 = stripOptionalParentheses(expressionParam, errors)) == null ? void 0 : _a2.match(FOR_LOOP_EXPRESSION_PATTERN);
   if (!match || match[2].trim().length === 0) {
-    errors.push(new ParseError(expressionParam.sourceSpan, 'Cannot parse expression. For loop expression must match the pattern "<identifier> of <expression>"'));
+    errors.push(new ParseError(expressionParam.sourceSpan, 'Cannot parse expression. @for loop expression must match the pattern "<identifier> of <expression>"'));
     return null;
   }
   const [, itemName, rawExpression] = match;
@@ -19436,13 +19397,13 @@ function parseForLoopParameters(block, errors, bindingParser) {
     const trackMatch = param.expression.match(FOR_LOOP_TRACK_PATTERN);
     if (trackMatch !== null) {
       if (result.trackBy !== null) {
-        errors.push(new ParseError(param.sourceSpan, 'For loop can only have one "track" expression'));
+        errors.push(new ParseError(param.sourceSpan, '@for loop can only have one "track" expression'));
       } else {
         result.trackBy = parseBlockParameterToBinding(param, bindingParser, trackMatch[1]);
       }
       continue;
     }
-    errors.push(new ParseError(param.sourceSpan, `Unrecognized loop paramater "${param.expression}"`));
+    errors.push(new ParseError(param.sourceSpan, `Unrecognized @for loop paramater "${param.expression}"`));
   }
   for (const variableName of ALLOWED_FOR_LOOP_LET_VARIABLES) {
     if (!result.context.hasOwnProperty(variableName)) {
@@ -19458,7 +19419,7 @@ function parseLetParameter(sourceSpan, expression, span, context, errors) {
     const name = expressionParts.length === 2 ? expressionParts[0].trim() : "";
     const variableName = expressionParts.length === 2 ? expressionParts[1].trim() : "";
     if (name.length === 0 || variableName.length === 0) {
-      errors.push(new ParseError(sourceSpan, `Invalid for loop "let" parameter. Parameter should match the pattern "<name> = <variable name>"`));
+      errors.push(new ParseError(sourceSpan, `Invalid @for loop "let" parameter. Parameter should match the pattern "<name> = <variable name>"`));
     } else if (!ALLOWED_FOR_LOOP_LET_VARIABLES.has(variableName)) {
       errors.push(new ParseError(sourceSpan, `Unknown "let" parameter variable "${variableName}". The allowed variables are: ${Array.from(ALLOWED_FOR_LOOP_LET_VARIABLES).join(", ")}`));
     } else if (context.hasOwnProperty(variableName)) {
@@ -19468,71 +19429,63 @@ function parseLetParameter(sourceSpan, expression, span, context, errors) {
     }
   }
 }
-function validateIfBlock(ast) {
+function validateIfConnectedBlocks(connectedBlocks) {
   const errors = [];
   let hasElse = false;
-  for (let i = 0; i < ast.blocks.length; i++) {
-    const block = ast.blocks[i];
-    if ((block.name !== "if" || i > 0) && block.name !== "else") {
-      errors.push(new ParseError(block.sourceSpan, `Unrecognized conditional block "${block.name}"`));
-      continue;
-    }
-    if (block.name === "if") {
-      continue;
-    }
-    if (block.parameters.length === 0) {
+  for (let i = 0; i < connectedBlocks.length; i++) {
+    const block = connectedBlocks[i];
+    if (block.name === "else") {
       if (hasElse) {
-        errors.push(new ParseError(block.sourceSpan, 'Conditional can only have one "else" block'));
-      } else if (ast.blocks.length > 1 && i < ast.blocks.length - 1) {
-        errors.push(new ParseError(block.sourceSpan, "Else block must be last inside the conditional"));
+        errors.push(new ParseError(block.sourceSpan, "Conditional can only have one @else block"));
+      } else if (connectedBlocks.length > 1 && i < connectedBlocks.length - 1) {
+        errors.push(new ParseError(block.sourceSpan, "@else block must be last inside the conditional"));
+      } else if (block.parameters.length > 0) {
+        errors.push(new ParseError(block.sourceSpan, "@else block cannot have parameters"));
       }
       hasElse = true;
-    } else if (block.parameters.length > 0 && !ELSE_IF_PATTERN.test(block.parameters[0].expression)) {
-      errors.push(new ParseError(block.sourceSpan, "Else block cannot have parameters"));
+    } else if (!ELSE_IF_PATTERN.test(block.name)) {
+      errors.push(new ParseError(block.sourceSpan, `Unrecognized conditional block @${block.name}`));
     }
   }
   return errors;
 }
 function validateSwitchBlock(ast) {
-  const [primaryBlock, ...secondaryBlocks] = ast.blocks;
   const errors = [];
   let hasDefault = false;
-  const hasPrimary = primaryBlock.children.length > 0 && primaryBlock.children.some((child) => {
-    return !(child instanceof Text4) || child.value.trim().length > 0;
-  });
-  if (hasPrimary) {
-    errors.push(new ParseError(primaryBlock.sourceSpan, 'Switch block can only contain "case" and "default" blocks'));
+  if (ast.parameters.length !== 1) {
+    errors.push(new ParseError(ast.sourceSpan, "@switch block must have exactly one parameter"));
+    return errors;
   }
-  if (primaryBlock.parameters.length !== 1) {
-    errors.push(new ParseError(primaryBlock.sourceSpan, "Switch block must have exactly one parameter"));
-  }
-  for (const block of secondaryBlocks) {
-    if (block.name === "case") {
-      if (block.parameters.length !== 1) {
-        errors.push(new ParseError(block.sourceSpan, "Case block must have exactly one parameter"));
-      }
-    } else if (block.name === "default") {
+  for (const node of ast.children) {
+    if (node instanceof Text4 && node.value.trim().length === 0) {
+      continue;
+    }
+    if (!(node instanceof Block) || node.name !== "case" && node.name !== "default") {
+      errors.push(new ParseError(node.sourceSpan, "@switch block can only contain @case and @default blocks"));
+      continue;
+    }
+    if (node.name === "default") {
       if (hasDefault) {
-        errors.push(new ParseError(block.sourceSpan, 'Switch block can only have one "default" block'));
-      } else if (block.parameters.length > 0) {
-        errors.push(new ParseError(block.sourceSpan, "Default block cannot have parameters"));
+        errors.push(new ParseError(node.sourceSpan, "@switch block can only have one @default block"));
+      } else if (node.parameters.length > 0) {
+        errors.push(new ParseError(node.sourceSpan, "@default block cannot have parameters"));
       }
       hasDefault = true;
-    } else {
-      errors.push(new ParseError(block.sourceSpan, 'Switch block can only contain "case" and "default" blocks'));
+    } else if (node.name === "case" && node.parameters.length !== 1) {
+      errors.push(new ParseError(node.sourceSpan, "@case block must have exactly one parameter"));
     }
   }
   return errors;
 }
-function parseBlockParameterToBinding(ast, bindingParser, part = 0) {
+function parseBlockParameterToBinding(ast, bindingParser, part) {
   let start;
   let end;
-  if (typeof part === "number") {
-    start = part;
-    end = ast.expression.length;
-  } else {
+  if (typeof part === "string") {
     start = Math.max(0, ast.expression.lastIndexOf(part));
     end = start + part.length;
+  } else {
+    start = 0;
+    end = ast.expression.length;
   }
   return bindingParser.parseBinding(ast.expression.slice(start, end), false, ast.sourceSpan, ast.sourceSpan.start.offset + start);
 }
@@ -19541,16 +19494,15 @@ function parseConditionalBlockParameters(block, errors, bindingParser) {
     errors.push(new ParseError(block.sourceSpan, "Conditional block does not have an expression"));
     return null;
   }
-  const isPrimaryIfBlock = block.name === "if";
-  const expression = parseBlockParameterToBinding(block.parameters[0], bindingParser, isPrimaryIfBlock ? 0 : 2);
+  const expression = parseBlockParameterToBinding(block.parameters[0], bindingParser);
   let expressionAlias = null;
   for (let i = 1; i < block.parameters.length; i++) {
     const param = block.parameters[i];
     const aliasMatch = param.expression.match(CONDITIONAL_ALIAS_PATTERN);
     if (aliasMatch === null) {
       errors.push(new ParseError(param.sourceSpan, `Unrecognized conditional paramater "${param.expression}"`));
-    } else if (!isPrimaryIfBlock) {
-      errors.push(new ParseError(param.sourceSpan, '"as" expression is only allowed on the primary "if" block'));
+    } else if (block.name !== "if") {
+      errors.push(new ParseError(param.sourceSpan, '"as" expression is only allowed on the primary @if block'));
     } else if (expressionAlias !== null) {
       errors.push(new ParseError(param.sourceSpan, 'Conditional can only have one "as" expression'));
     } else {
@@ -19846,52 +19798,47 @@ var MINIMUM_PARAMETER_PATTERN = /^minimum\s/;
 var AFTER_PARAMETER_PATTERN = /^after\s/;
 var WHEN_PARAMETER_PATTERN = /^when\s/;
 var ON_PARAMETER_PATTERN = /^on\s/;
-var SecondaryDeferredBlockType;
-(function(SecondaryDeferredBlockType2) {
-  SecondaryDeferredBlockType2["PLACEHOLDER"] = "placeholder";
-  SecondaryDeferredBlockType2["LOADING"] = "loading";
-  SecondaryDeferredBlockType2["ERROR"] = "error";
-})(SecondaryDeferredBlockType || (SecondaryDeferredBlockType = {}));
-function createDeferredBlock(ast, visitor, bindingParser) {
-  const errors = [];
-  const [primaryBlock, ...secondaryBlocks] = ast.blocks;
-  const { triggers, prefetchTriggers } = parsePrimaryTriggers(primaryBlock.parameters, bindingParser, errors);
-  const { placeholder, loading, error: error2 } = parseSecondaryBlocks(secondaryBlocks, errors, visitor);
-  return {
-    node: new DeferredBlock(visitAll2(visitor, primaryBlock.children), triggers, prefetchTriggers, placeholder, loading, error2, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan),
-    errors
-  };
+function isConnectedDeferLoopBlock(name) {
+  return name === "placeholder" || name === "loading" || name === "error";
 }
-function parseSecondaryBlocks(blocks, errors, visitor) {
+function createDeferredBlock(ast, connectedBlocks, visitor, bindingParser) {
+  const errors = [];
+  const { triggers, prefetchTriggers } = parsePrimaryTriggers(ast.parameters, bindingParser, errors);
+  const { placeholder, loading, error: error2 } = parseConnectedBlocks(connectedBlocks, errors, visitor);
+  const node = new DeferredBlock(visitAll2(visitor, ast.children, ast.children), triggers, prefetchTriggers, placeholder, loading, error2, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+  return { node, errors };
+}
+function parseConnectedBlocks(connectedBlocks, errors, visitor) {
   let placeholder = null;
   let loading = null;
   let error2 = null;
-  for (const block of blocks) {
+  for (const block of connectedBlocks) {
     try {
+      if (!isConnectedDeferLoopBlock(block.name)) {
+        errors.push(new ParseError(block.startSourceSpan, `Unrecognized block "@${block.name}"`));
+        break;
+      }
       switch (block.name) {
-        case SecondaryDeferredBlockType.PLACEHOLDER:
+        case "placeholder":
           if (placeholder !== null) {
-            errors.push(new ParseError(block.startSourceSpan, `"defer" block can only have one "${SecondaryDeferredBlockType.PLACEHOLDER}" block`));
+            errors.push(new ParseError(block.startSourceSpan, `@defer block can only have one @placeholder block`));
           } else {
             placeholder = parsePlaceholderBlock(block, visitor);
           }
           break;
-        case SecondaryDeferredBlockType.LOADING:
+        case "loading":
           if (loading !== null) {
-            errors.push(new ParseError(block.startSourceSpan, `"defer" block can only have one "${SecondaryDeferredBlockType.LOADING}" block`));
+            errors.push(new ParseError(block.startSourceSpan, `@defer block can only have one @loading block`));
           } else {
             loading = parseLoadingBlock(block, visitor);
           }
           break;
-        case SecondaryDeferredBlockType.ERROR:
+        case "error":
           if (error2 !== null) {
-            errors.push(new ParseError(block.startSourceSpan, `"defer" block can only have one "${SecondaryDeferredBlockType.ERROR}" block`));
+            errors.push(new ParseError(block.startSourceSpan, `@defer block can only have one @error block`));
           } else {
             error2 = parseErrorBlock(block, visitor);
           }
-          break;
-        default:
-          errors.push(new ParseError(block.startSourceSpan, `Unrecognized block "${block.name}"`));
           break;
       }
     } catch (e) {
@@ -19905,7 +19852,7 @@ function parsePlaceholderBlock(ast, visitor) {
   for (const param of ast.parameters) {
     if (MINIMUM_PARAMETER_PATTERN.test(param.expression)) {
       if (minimumTime != null) {
-        throw new Error(`Placeholder block can only have one "minimum" parameter`);
+        throw new Error(`@placeholder block can only have one "minimum" parameter`);
       }
       const parsedTime = parseDeferredTime(param.expression.slice(getTriggerParametersStart(param.expression)));
       if (parsedTime === null) {
@@ -19913,10 +19860,10 @@ function parsePlaceholderBlock(ast, visitor) {
       }
       minimumTime = parsedTime;
     } else {
-      throw new Error(`Unrecognized parameter in "${SecondaryDeferredBlockType.PLACEHOLDER}" block: "${param.expression}"`);
+      throw new Error(`Unrecognized parameter in @placeholder block: "${param.expression}"`);
     }
   }
-  return new DeferredBlockPlaceholder(visitAll2(visitor, ast.children), minimumTime, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+  return new DeferredBlockPlaceholder(visitAll2(visitor, ast.children, ast.children), minimumTime, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
 }
 function parseLoadingBlock(ast, visitor) {
   let afterTime = null;
@@ -19924,7 +19871,7 @@ function parseLoadingBlock(ast, visitor) {
   for (const param of ast.parameters) {
     if (AFTER_PARAMETER_PATTERN.test(param.expression)) {
       if (afterTime != null) {
-        throw new Error(`Loading block can only have one "after" parameter`);
+        throw new Error(`@loading block can only have one "after" parameter`);
       }
       const parsedTime = parseDeferredTime(param.expression.slice(getTriggerParametersStart(param.expression)));
       if (parsedTime === null) {
@@ -19933,7 +19880,7 @@ function parseLoadingBlock(ast, visitor) {
       afterTime = parsedTime;
     } else if (MINIMUM_PARAMETER_PATTERN.test(param.expression)) {
       if (minimumTime != null) {
-        throw new Error(`Loading block can only have one "minimum" parameter`);
+        throw new Error(`@loading block can only have one "minimum" parameter`);
       }
       const parsedTime = parseDeferredTime(param.expression.slice(getTriggerParametersStart(param.expression)));
       if (parsedTime === null) {
@@ -19941,16 +19888,16 @@ function parseLoadingBlock(ast, visitor) {
       }
       minimumTime = parsedTime;
     } else {
-      throw new Error(`Unrecognized parameter in "${SecondaryDeferredBlockType.LOADING}" block: "${param.expression}"`);
+      throw new Error(`Unrecognized parameter in @loading block: "${param.expression}"`);
     }
   }
-  return new DeferredBlockLoading(visitAll2(visitor, ast.children), afterTime, minimumTime, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+  return new DeferredBlockLoading(visitAll2(visitor, ast.children, ast.children), afterTime, minimumTime, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
 }
 function parseErrorBlock(ast, visitor) {
   if (ast.parameters.length > 0) {
-    throw new Error(`"${SecondaryDeferredBlockType.ERROR}" block cannot have parameters`);
+    throw new Error(`@error block cannot have parameters`);
   }
-  return new DeferredBlockError(visitAll2(visitor, ast.children), ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+  return new DeferredBlockError(visitAll2(visitor, ast.children, ast.children), ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
 }
 function parsePrimaryTriggers(params, bindingParser, errors) {
   const triggers = {};
@@ -19988,7 +19935,7 @@ var BINDING_DELIMS = {
 var TEMPLATE_ATTR_PREFIX2 = "*";
 function htmlAstToRender3Ast(htmlNodes, bindingParser, options) {
   const transformer = new HtmlAstToIvyAst(bindingParser, options);
-  const ivyNodes = visitAll2(transformer, htmlNodes);
+  const ivyNodes = visitAll2(transformer, htmlNodes, htmlNodes);
   const allErrors = bindingParser.errors.concat(transformer.errors);
   const result = {
     nodes: ivyNodes,
@@ -20012,6 +19959,7 @@ var HtmlAstToIvyAst = class {
     this.ngContentSelectors = [];
     this.commentNodes = [];
     this.inI18nBlock = false;
+    this.processedNodes = /* @__PURE__ */ new Set();
   }
   visitElement(element2) {
     const isI18nRootElement = isI18nRootNode(element2.i18n);
@@ -20074,7 +20022,7 @@ var HtmlAstToIvyAst = class {
     if (preparsedElement.nonBindable) {
       children = visitAll2(NON_BINDABLE_VISITOR, element2.children).flat(Infinity);
     } else {
-      children = visitAll2(this, element2.children);
+      children = visitAll2(this, element2.children, element2.children);
     }
     let parsedElement;
     if (preparsedElement.type === PreparsedElementType.NG_CONTENT) {
@@ -20115,7 +20063,7 @@ var HtmlAstToIvyAst = class {
     return new TextAttribute(attribute2.name, attribute2.value, attribute2.sourceSpan, attribute2.keySpan, attribute2.valueSpan, attribute2.i18n);
   }
   visitText(text2) {
-    return this._visitTextWithInterpolation(text2.value, text2.sourceSpan, text2.tokens, text2.i18n);
+    return this.processedNodes.has(text2) ? null : this._visitTextWithInterpolation(text2.value, text2.sourceSpan, text2.tokens, text2.i18n);
   }
   visitExpansion(expansion) {
     if (!expansion.i18n) {
@@ -20148,43 +20096,73 @@ var HtmlAstToIvyAst = class {
     }
     return null;
   }
-  visitBlockGroup(group, context) {
-    const primaryBlock = group.blocks[0];
-    if (!primaryBlock) {
-      this.reportError("Block group must have at least one block.", group.sourceSpan);
+  visitBlockParameter() {
+    return null;
+  }
+  visitBlock(block, context) {
+    const index = Array.isArray(context) ? context.indexOf(block) : -1;
+    if (index === -1) {
+      throw new Error("Visitor invoked incorrectly. Expecting visitBlock to be invoked siblings array as its context");
+    }
+    if (this.processedNodes.has(block)) {
       return null;
     }
-    if (!this.options.enabledBlockTypes.has(primaryBlock.name)) {
-      this.reportError(`Unrecognized block "${primaryBlock.name}".`, primaryBlock.sourceSpan);
+    if (!this.options.enabledBlockTypes.has(block.name)) {
+      let errorMessage;
+      if (isConnectedDeferLoopBlock(block.name)) {
+        errorMessage = `@${block.name} block can only be used after an @defer block.`;
+        this.processedNodes.add(block);
+      } else if (isConnectedForLoopBlock(block.name)) {
+        errorMessage = `@${block.name} block can only be used after an @for block.`;
+        this.processedNodes.add(block);
+      } else if (isConnectedIfLoopBlock(block.name)) {
+        errorMessage = `@${block.name} block can only be used after an @if or @else if block.`;
+        this.processedNodes.add(block);
+      } else {
+        errorMessage = `Unrecognized block @${block.name}.`;
+      }
+      this.reportError(errorMessage, block.sourceSpan);
       return null;
     }
     let result = null;
-    switch (primaryBlock.name) {
+    switch (block.name) {
       case "defer":
-        result = createDeferredBlock(group, this, this.bindingParser);
+        result = createDeferredBlock(block, this.findConnectedBlocks(index, context, isConnectedDeferLoopBlock), this, this.bindingParser);
         break;
       case "switch":
-        result = createSwitchBlock(group, this, this.bindingParser);
+        result = createSwitchBlock(block, this, this.bindingParser);
         break;
       case "for":
-        result = createForLoop(group, this, this.bindingParser);
+        result = createForLoop(block, this.findConnectedBlocks(index, context, isConnectedForLoopBlock), this, this.bindingParser);
         break;
       case "if":
-        result = createIfBlock(group, this, this.bindingParser);
+        result = createIfBlock(block, this.findConnectedBlocks(index, context, isConnectedIfLoopBlock), this, this.bindingParser);
         break;
       default:
         result = {
           node: null,
-          errors: [new ParseError(primaryBlock.sourceSpan, `Unrecognized block "${primaryBlock.name}".`)]
+          errors: [new ParseError(block.sourceSpan, `Unrecognized block @${block.name}.`)]
         };
         break;
     }
     this.errors.push(...result.errors);
     return result.node;
   }
-  visitBlock(block, context) {
-  }
-  visitBlockParameter(parameter, context) {
+  findConnectedBlocks(primaryBlockIndex, siblings, predicate) {
+    const relatedBlocks = [];
+    for (let i = primaryBlockIndex + 1; i < siblings.length; i++) {
+      const node = siblings[i];
+      if (node instanceof Text4 && node.value.trim().length === 0) {
+        this.processedNodes.add(node);
+        continue;
+      }
+      if (!(node instanceof Block) || !predicate(node.name)) {
+        break;
+      }
+      relatedBlocks.push(node);
+      this.processedNodes.add(node);
+    }
+    return relatedBlocks;
   }
   extractAttributes(elementName, properties, i18nPropsMeta) {
     const bound = [];
@@ -20340,18 +20318,15 @@ var NonBindableVisitor = class {
   visitExpansionCase(expansionCase) {
     return null;
   }
-  visitBlockGroup(group, context) {
-    const nodes = visitAll2(this, group.blocks);
-    if (group.endSourceSpan !== null) {
-      nodes.push(new Text(group.endSourceSpan.toString(), group.endSourceSpan));
-    }
-    return nodes;
-  }
   visitBlock(block, context) {
-    return [
+    const nodes = [
       new Text(block.startSourceSpan.toString(), block.startSourceSpan),
       ...visitAll2(this, block.children)
     ];
+    if (block.endSourceSpan !== null) {
+      nodes.push(new Text(block.endSourceSpan.toString(), block.endSourceSpan));
+    }
+    return nodes;
   }
   visitBlockParameter(parameter, context) {
     return null;
@@ -23887,7 +23862,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.5+sha-b771539");
+var VERSION2 = new Version("17.0.0-next.5+sha-8be2c48");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24058,9 +24033,6 @@ var _Visitor3 = class {
   }
   visitAttribute(attribute2, context) {
     throw new Error("unreachable code");
-  }
-  visitBlockGroup(group, context) {
-    visitAll2(this, group.blocks, context);
   }
   visitBlock(block, context) {
     visitAll2(this, block.children, context);
@@ -24412,8 +24384,6 @@ var XliffParser = class {
   }
   visitExpansionCase(expansionCase, context) {
   }
-  visitBlockGroup(group, context) {
-  }
   visitBlock(block, context) {
   }
   visitBlockParameter(parameter, context) {
@@ -24466,8 +24436,6 @@ var XmlToI18n = class {
   visitComment(comment, context) {
   }
   visitAttribute(attribute2, context) {
-  }
-  visitBlockGroup(group, context) {
   }
   visitBlock(block, context) {
   }
@@ -24695,8 +24663,6 @@ var Xliff2Parser = class {
   }
   visitExpansionCase(expansionCase, context) {
   }
-  visitBlockGroup(group, context) {
-  }
   visitBlock(block, context) {
   }
   visitBlockParameter(parameter, context) {
@@ -24764,8 +24730,6 @@ var XmlToI18n2 = class {
   visitComment(comment, context) {
   }
   visitAttribute(attribute2, context) {
-  }
-  visitBlockGroup(group, context) {
   }
   visitBlock(block, context) {
   }
@@ -24915,7 +24879,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-b771539"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-8be2c48"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24986,7 +24950,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-b771539"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-8be2c48"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25174,7 +25138,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-b771539"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-8be2c48"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25197,7 +25161,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-b771539"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-8be2c48"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25235,7 +25199,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-b771539"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-8be2c48"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25259,7 +25223,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-b771539"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-8be2c48"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25294,7 +25258,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.5+sha-b771539"));
+  definitionMap.set("version", literal("17.0.0-next.5+sha-8be2c48"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25311,7 +25275,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.5+sha-b771539");
+var VERSION3 = new Version("17.0.0-next.5+sha-8be2c48");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;

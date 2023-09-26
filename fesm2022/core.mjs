@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-b771539
+ * @license Angular v17.0.0-next.5+sha-8be2c48
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.5+sha-b771539');
+const VERSION = new Version('17.0.0-next.5+sha-8be2c48');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20392,24 +20392,24 @@ var DeferDependenciesLoadingState;
     DeferDependenciesLoadingState[DeferDependenciesLoadingState["FAILED"] = 3] = "FAILED";
 })(DeferDependenciesLoadingState || (DeferDependenciesLoadingState = {}));
 /**
- * Describes the current state of this {#defer} block instance.
+ * Describes the current state of this defer block instance.
  *
  * @publicApi
  * @developerPreview
  */
 var DeferBlockState;
 (function (DeferBlockState) {
-    /** The {:placeholder} block content is rendered */
+    /** The placeholder block content is rendered */
     DeferBlockState[DeferBlockState["Placeholder"] = 0] = "Placeholder";
-    /** The {:loading} block content is rendered */
+    /** The loading block content is rendered */
     DeferBlockState[DeferBlockState["Loading"] = 1] = "Loading";
     /** The main content block content is rendered */
     DeferBlockState[DeferBlockState["Complete"] = 2] = "Complete";
-    /** The {:error} block content is rendered */
+    /** The error block content is rendered */
     DeferBlockState[DeferBlockState["Error"] = 3] = "Error";
 })(DeferBlockState || (DeferBlockState = {}));
 /**
- * Describes the initial state of this {#defer} block instance.
+ * Describes the initial state of this defer block instance.
  *
  * Note: this state is internal only and *must* be represented
  * with a number lower than any value in the `DeferBlockState` enum.
@@ -20614,18 +20614,18 @@ function shouldTriggerDeferBlock(injector) {
 const _requestIdleCallback = typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : setTimeout;
 const _cancelIdleCallback = typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
 /**
- * Creates runtime data structures for `{#defer}` blocks.
+ * Creates runtime data structures for defer blocks.
  *
  * @param index Index of the `defer` instruction.
  * @param primaryTmplIndex Index of the template with the primary block content.
  * @param dependencyResolverFn Function that contains dependencies for this defer block.
- * @param loadingTmplIndex Index of the template with the `{:loading}` block content.
- * @param placeholderTmplIndex Index of the template with the `{:placeholder}` block content.
- * @param errorTmplIndex Index of the template with the `{:error}` block content.
- * @param loadingConfigIndex Index in the constants array of the configuration of the `{:loading}`.
+ * @param loadingTmplIndex Index of the template with the loading block content.
+ * @param placeholderTmplIndex Index of the template with the placeholder block content.
+ * @param errorTmplIndex Index of the template with the error block content.
+ * @param loadingConfigIndex Index in the constants array of the configuration of the loading.
  *     block.
  * @param placeholderConfigIndexIndex in the constants array of the configuration of the
- *     `{:placeholder}` block.
+ *     placeholder block.
  *
  * @codeGenApi
  */
@@ -21073,7 +21073,7 @@ function renderDeferBlockState(newState, tNode, lContainer) {
         const adjustedIndex = stateTmplIndex + HEADER_OFFSET;
         const tNode = getTNode(hostTView, adjustedIndex);
         // There is only 1 view that can be present in an LContainer that
-        // represents a `{#defer}` block, so always refer to the first one.
+        // represents a defer block, so always refer to the first one.
         const viewIndex = 0;
         removeLViewFromLContainer(lContainer, viewIndex);
         const dehydratedView = findMatchingDehydratedView(lContainer, tNode.tView.ssrId);
@@ -21116,7 +21116,7 @@ function triggerResourceLoading(tDetails, lView) {
         deferDependencyInterceptor.intercept(tDetails.dependencyResolverFn) :
         tDetails.dependencyResolverFn;
     // The `dependenciesFn` might be `null` when all dependencies within
-    // a given `{#defer}` block were eagerly references elsewhere in a file,
+    // a given defer block were eagerly references elsewhere in a file,
     // thus no dynamic `import()`s were produced.
     if (!dependenciesFn) {
         tDetails.loadingPromise = Promise.resolve().then(() => {
@@ -21173,7 +21173,7 @@ function triggerResourceLoading(tDetails, lView) {
         }
     });
 }
-/** Utility function to render `{:placeholder}` content (if present) */
+/** Utility function to render placeholder content (if present) */
 function renderPlaceholder(lView, tNode) {
     const tView = lView[TVIEW];
     const lContainer = lView[tNode.index];
@@ -26593,7 +26593,7 @@ function getAsyncClassMetadata(type) {
 }
 /**
  * Handles the process of applying metadata info to a component class in case
- * component template had `{#defer}` blocks (thus some dependencies became deferrable).
+ * component template had defer blocks (thus some dependencies became deferrable).
  *
  * @param type Component class where metadata should be added
  * @param dependencyLoaderFn Function that loads dependencies
