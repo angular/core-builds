@@ -15225,7 +15225,7 @@ function phaseI18nMessageExtraction(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.I18nStart && op.i18n instanceof Message) {
-        const params = op.tagNameParams;
+        const params = Object.fromEntries(Object.entries(op.tagNameParams).sort());
         const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
         const closureVar = i18nGenerateClosureVar(job.pool, op.i18n.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
         const statements = getTranslationDeclStmts(op.i18n, mainVar, closureVar, params, void 0);
@@ -21292,6 +21292,7 @@ function getBindingFunctionParams(deferredParams, name, eagerParams) {
 }
 var NG_I18N_CLOSURE_MODE2 = "ngI18nClosureMode";
 function getTranslationDeclStmts2(message, variable2, closureVar, params = {}, transformFn) {
+  params = Object.fromEntries(Object.entries(params).sort());
   const statements = [
     declareI18nVariable(variable2),
     ifStmt(createClosureModeGuard2(), createGoogleGetMsgStatements(variable2, message, closureVar, params), createLocalizeStatements(variable2, message, formatI18nPlaceholderNamesInMap(params, false)))
@@ -23047,7 +23048,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.5+sha-a39010f");
+var VERSION2 = new Version("17.0.0-next.5+sha-c52995d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
