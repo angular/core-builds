@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-acfea3c
+ * @license Angular v17.0.0-next.5+sha-7a731c9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.5+sha-acfea3c');
+const VERSION = new Version('17.0.0-next.5+sha-7a731c9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -18728,67 +18728,6 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
  * Change detection enables data binding in Angular.
  */
 
-function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
-    const embeddedTView = templateTNode.tView;
-    ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
-    ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
-    // Embedded views follow the change detection strategy of the view they're declared in.
-    const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
-    const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
-    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.dehydratedView ?? null);
-    const declarationLContainer = declarationLView[templateTNode.index];
-    ngDevMode && assertLContainer(declarationLContainer);
-    embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
-    const declarationViewLQueries = declarationLView[QUERIES];
-    if (declarationViewLQueries !== null) {
-        embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
-    }
-    // execute creation mode of a view
-    renderView(embeddedTView, embeddedLView, context);
-    return embeddedLView;
-}
-function getLViewFromLContainer(lContainer, index) {
-    const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
-    // avoid reading past the array boundaries
-    if (adjustedIndex < lContainer.length) {
-        const lView = lContainer[adjustedIndex];
-        ngDevMode && assertLView(lView);
-        return lView;
-    }
-    return undefined;
-}
-/**
- * Returns whether an elements that belong to a view should be
- * inserted into the DOM. For client-only cases, DOM elements are
- * always inserted. For hydration cases, we check whether serialized
- * info is available for a view and the view is not in a "skip hydration"
- * block (in which case view contents was re-created, thus needing insertion).
- */
-function shouldAddViewToDom(tNode, dehydratedView) {
-    return !dehydratedView || hasInSkipHydrationBlockFlag(tNode);
-}
-function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
-    const tView = lView[TVIEW];
-    // insert to the view tree so the new view can be change-detected
-    insertView(tView, lView, lContainer, index);
-    // insert to the view to the DOM tree
-    if (addToDOM) {
-        const beforeNode = getBeforeNodeForView(index, lContainer);
-        const renderer = lView[RENDERER];
-        const parentRNode = nativeParentNode(renderer, lContainer[NATIVE]);
-        if (parentRNode !== null) {
-            addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
-        }
-    }
-}
-function removeLViewFromLContainer(lContainer, index) {
-    const lView = detachView(lContainer, index);
-    if (lView !== undefined) {
-        destroyLView(lView[TVIEW], lView);
-    }
-    return lView;
-}
-
 const AT_THIS_LOCATION = '<-- AT THIS LOCATION';
 /**
  * Retrieves a user friendly string for a given TNodeType for use in
@@ -19150,6 +19089,95 @@ function shorten(input, maxLength = 50) {
 }
 
 /**
+ * Removes all dehydrated views from a given LContainer:
+ * both in internal data structure, as well as removing
+ * corresponding DOM nodes that belong to that dehydrated view.
+ */
+function removeDehydratedViews(lContainer) {
+    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
+    const parentLView = lContainer[PARENT];
+    const renderer = parentLView[RENDERER];
+    for (const view of views) {
+        removeDehydratedView(view, renderer);
+        ngDevMode && ngDevMode.dehydratedViewsRemoved++;
+    }
+    // Reset the value to an empty array to indicate that no
+    // further processing of dehydrated views is needed for
+    // this view container (i.e. do not trigger the lookup process
+    // once again in case a `ViewContainerRef` is created later).
+    lContainer[DEHYDRATED_VIEWS] = EMPTY_ARRAY;
+}
+/**
+ * Helper function to remove all nodes from a dehydrated view.
+ */
+function removeDehydratedView(dehydratedView, renderer) {
+    let nodesRemoved = 0;
+    let currentRNode = dehydratedView.firstChild;
+    if (currentRNode) {
+        const numNodes = dehydratedView.data[NUM_ROOT_NODES];
+        while (nodesRemoved < numNodes) {
+            ngDevMode && validateSiblingNodeExists(currentRNode);
+            const nextSibling = currentRNode.nextSibling;
+            nativeRemoveNode(renderer, currentRNode, false);
+            currentRNode = nextSibling;
+            nodesRemoved++;
+        }
+    }
+}
+/**
+ * Walks over all views within this LContainer invokes dehydrated views
+ * cleanup function for each one.
+ */
+function cleanupLContainer(lContainer) {
+    removeDehydratedViews(lContainer);
+    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        cleanupLView(lContainer[i]);
+    }
+}
+/**
+ * Walks over `LContainer`s and components registered within
+ * this LView and invokes dehydrated views cleanup function for each one.
+ */
+function cleanupLView(lView) {
+    const tView = lView[TVIEW];
+    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
+        if (isLContainer(lView[i])) {
+            const lContainer = lView[i];
+            cleanupLContainer(lContainer);
+        }
+        else if (isLView(lView[i])) {
+            // This is a component, enter the `cleanupLView` recursively.
+            cleanupLView(lView[i]);
+        }
+    }
+}
+/**
+ * Walks over all views registered within the ApplicationRef and removes
+ * all dehydrated views from all `LContainer`s along the way.
+ */
+function cleanupDehydratedViews(appRef) {
+    const viewRefs = appRef._views;
+    for (const viewRef of viewRefs) {
+        const lNode = getLNodeForHydration(viewRef);
+        // An `lView` might be `null` if a `ViewRef` represents
+        // an embedded view (not a component view).
+        if (lNode !== null && lNode[HOST] !== null) {
+            if (isLView(lNode)) {
+                cleanupLView(lNode);
+            }
+            else {
+                // Cleanup in the root component view
+                const componentLView = lNode[HOST];
+                cleanupLView(componentLView);
+                // Cleanup in all views within this view container
+                cleanupLContainer(lNode);
+            }
+            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
+        }
+    }
+}
+
+/**
  * Regexp that extracts a reference node information from the compressed node location.
  * The reference node is represented as either:
  *  - a number which points to an LView slot
@@ -19471,420 +19499,6 @@ function calcPathForNode(tNode, lView) {
     return path;
 }
 
-function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
-    ngDevMode && assertFirstCreatePass(tView);
-    ngDevMode && ngDevMode.firstCreatePass++;
-    const tViewConsts = tView.consts;
-    // TODO(pk): refactor getOrCreateTNode to have the "create" only version
-    const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
-    resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    registerPostOrderHooks(tView, tNode);
-    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts, null /* ssrId */);
-    if (tView.queries !== null) {
-        tView.queries.template(tView, tNode);
-        embeddedTView.queries = tView.queries.embeddedTView(tNode);
-    }
-    return tNode;
-}
-/**
- * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
- *
- * <ng-template #foo>
- *    <div></div>
- * </ng-template>
- *
- * @param index The index of the container in the data array
- * @param templateFn Inline template
- * @param decls The number of nodes, local refs, and pipes for this template
- * @param vars The number of bindings for this template
- * @param tagName The name of the container element, if applicable
- * @param attrsIndex Index of template attributes in the `consts` array.
- * @param localRefs Index of the local references in the `consts` array.
- * @param localRefExtractor A function which extracts local-refs values from the template.
- *        Defaults to the current element associated with the local-ref.
- *
- * @codeGenApi
- */
-function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex, localRefExtractor) {
-    const lView = getLView();
-    const tView = getTView();
-    const adjustedIndex = index + HEADER_OFFSET;
-    const tNode = tView.firstCreatePass ? templateFirstCreatePass(adjustedIndex, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
-        tView.data[adjustedIndex];
-    setCurrentTNode(tNode, false);
-    const comment = _locateOrCreateContainerAnchor(tView, lView, tNode, index);
-    if (wasLastNodeCreated()) {
-        appendChild(tView, lView, comment, tNode);
-    }
-    attachPatchData(comment, lView);
-    addToViewTree(lView, lView[adjustedIndex] = createLContainer(comment, lView, comment, tNode));
-    if (isDirectiveHost(tNode)) {
-        createDirectivesInstances(tView, lView, tNode);
-    }
-    if (localRefsIndex != null) {
-        saveResolvedLocalsInData(lView, tNode, localRefExtractor);
-    }
-    return ɵɵtemplate;
-}
-let _locateOrCreateContainerAnchor = createContainerAnchorImpl;
-/**
- * Regular creation mode for LContainers and their anchor (comment) nodes.
- */
-function createContainerAnchorImpl(tView, lView, tNode, index) {
-    lastNodeWasCreated(true);
-    return lView[RENDERER].createComment(ngDevMode ? 'container' : '');
-}
-/**
- * Enables hydration code path (to lookup existing elements in DOM)
- * in addition to the regular creation mode for LContainers and their
- * anchor (comment) nodes.
- */
-function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
-    const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
-    lastNodeWasCreated(isNodeCreationMode);
-    // Regular creation mode.
-    if (isNodeCreationMode) {
-        return createContainerAnchorImpl(tView, lView, tNode, index);
-    }
-    const ssrId = hydrationInfo.data[TEMPLATES]?.[index] ?? null;
-    // Apply `ssrId` value to the underlying TView if it was not previously set.
-    //
-    // There might be situations when the same component is present in a template
-    // multiple times and some instances are opted-out of using hydration via
-    // `ngSkipHydration` attribute. In this scenario, at the time a TView is created,
-    // the `ssrId` might be `null` (if the first component is opted-out of hydration).
-    // The code below makes sure that the `ssrId` is applied to the TView if it's still
-    // `null` and verifies we never try to override it with a different value.
-    if (ssrId !== null && tNode.tView !== null) {
-        if (tNode.tView.ssrId === null) {
-            tNode.tView.ssrId = ssrId;
-        }
-        else {
-            ngDevMode &&
-                assertEqual(tNode.tView.ssrId, ssrId, 'Unexpected value of the `ssrId` for this TView');
-        }
-    }
-    // Hydration mode, looking up existing elements in DOM.
-    const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
-    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
-    setSegmentHead(hydrationInfo, index, currentRNode);
-    const viewContainerSize = calcSerializedContainerSize(hydrationInfo, index);
-    const comment = siblingAfter(viewContainerSize, currentRNode);
-    if (ngDevMode) {
-        validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
-        markRNodeAsClaimedByHydration(comment);
-    }
-    return comment;
-}
-function enableLocateOrCreateContainerAnchorImpl() {
-    _locateOrCreateContainerAnchor = locateOrCreateContainerAnchorImpl;
-}
-
-/**
- * The conditional instruction represents the basic building block on the runtime side to support
- * built-in "if" and "switch". On the high level this instruction is responsible for adding and
- * removing views selected by a conditional expression.
- *
- * @param containerIndex index of a container in a host view (indexed from HEADER_OFFSET) where
- *     conditional views should be inserted.
- * @param matchingTemplateIndex index of a template TNode representing a conditional view to be
- *     inserted; -1 represents a special case when there is no view to insert.
- * @codeGenApi
- */
-function ɵɵconditional(containerIndex, matchingTemplateIndex, value) {
-    const hostLView = getLView();
-    const bindingIndex = nextBindingIndex();
-    const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
-    const viewInContainerIdx = 0;
-    if (bindingUpdated(hostLView, bindingIndex, matchingTemplateIndex)) {
-        // The index of the view to show changed - remove the previously displayed one
-        // (it is a noop if there are no active views in a container).
-        removeLViewFromLContainer(lContainer, viewInContainerIdx);
-        // Index -1 is a special case where none of the conditions evaluates to
-        // a truthy value and as the consequence we've got no view to show.
-        if (matchingTemplateIndex !== -1) {
-            const templateTNode = getExistingTNode(hostLView[TVIEW], matchingTemplateIndex);
-            const embeddedLView = createAndRenderEmbeddedLView(hostLView, templateTNode, value);
-            addLViewToLContainer(lContainer, embeddedLView, viewInContainerIdx);
-        }
-    }
-    else {
-        // We might keep displaying the same template but the actual value of the expression could have
-        // changed - re-bind in context.
-        const lView = getLViewFromLContainer(lContainer, viewInContainerIdx);
-        if (lView !== undefined) {
-            lView[CONTEXT] = value;
-        }
-    }
-}
-class RepeaterContext {
-    constructor(lContainer, $implicit, $index) {
-        this.lContainer = lContainer;
-        this.$implicit = $implicit;
-        this.$index = $index;
-    }
-    get $count() {
-        return this.lContainer.length - CONTAINER_HEADER_OFFSET;
-    }
-}
-/**
- * A built-in trackBy function used for situations where users specified collection index as a
- * tracking expression. Having this function body in the runtime avoids unnecessary code generation.
- *
- * @param index
- * @returns
- */
-function ɵɵrepeaterTrackByIndex(index) {
-    return index;
-}
-/**
- * A built-in trackBy function used for situations where users specified collection item reference
- * as a tracking expression. Having this function body in the runtime avoids unnecessary code
- * generation.
- *
- * @param index
- * @returns
- */
-function ɵɵrepeaterTrackByIdentity(_, value) {
-    return value;
-}
-class RepeaterMetadata {
-    constructor(hasEmptyBlock, differ) {
-        this.hasEmptyBlock = hasEmptyBlock;
-        this.differ = differ;
-    }
-}
-/**
- * The repeaterCreate instruction runs in the creation part of the template pass and initializes
- * internal data structures required by the update pass of the built-in repeater logic. Repeater
- * metadata are allocated in the data part of LView with the following layout:
- * - LView[HEADER_OFFSET + index] - metadata
- * - LView[HEADER_OFFSET + index + 1] - reference to a template function rendering an item
- * - LView[HEADER_OFFSET + index + 2] - optional reference to a template function rendering an empty
- * block
- *
- * @param index Index at which to store the metadata of the repeater.
- * @param templateFn Reference to the template of the main repeater block.
- * @param decls The number of nodes, local refs, and pipes for the main block.
- * @param vars The number of bindings for the main block.
- * @param trackByFn Reference to the tracking function.
- * @param trackByUsesComponentInstance Whether the tracking function has any references to the
- *  component instance. If it doesn't, we can avoid rebinding it.
- * @param emptyTemplateFn Reference to the template function of the empty block.
- * @param emptyDecls The number of nodes, local refs, and pipes for the empty block.
- * @param emptyVars The number of bindings for the empty block.
- *
- * @codeGenApi
- */
-function ɵɵrepeaterCreate(index, templateFn, decls, vars, trackByFn, trackByUsesComponentInstance, emptyTemplateFn, emptyDecls, emptyVars) {
-    const hasEmptyBlock = emptyTemplateFn !== undefined;
-    const hostLView = getLView();
-    const boundTrackBy = trackByUsesComponentInstance ?
-        // We only want to bind when necessary, because it produces a
-        // new function. For pure functions it's not necessary.
-        trackByFn.bind(hostLView[DECLARATION_COMPONENT_VIEW][CONTEXT]) :
-        trackByFn;
-    const metadata = new RepeaterMetadata(hasEmptyBlock, new DefaultIterableDiffer(boundTrackBy));
-    hostLView[HEADER_OFFSET + index] = metadata;
-    ɵɵtemplate(index + 1, templateFn, decls, vars);
-    if (hasEmptyBlock) {
-        ngDevMode &&
-            assertDefined(emptyDecls, 'Missing number of declarations for the empty repeater block.');
-        ngDevMode &&
-            assertDefined(emptyVars, 'Missing number of bindings for the empty repeater block.');
-        ɵɵtemplate(index + 2, emptyTemplateFn, emptyDecls, emptyVars);
-    }
-}
-/**
- * The repeater instruction does update-time diffing of a provided collection (against the
- * collection seen previously) and maps changes in the collection to views structure (by adding,
- * removing or moving views as needed).
- * @param metadataSlotIdx - index in data where we can find an instance of RepeaterMetadata with
- *     additional information (ex. differ) needed to process collection diffing and view
- *     manipulation
- * @param collection - the collection instance to be checked for changes
- * @codeGenApi
- */
-function ɵɵrepeater(metadataSlotIdx, collection) {
-    const hostLView = getLView();
-    const hostTView = hostLView[TVIEW];
-    const metadata = hostLView[HEADER_OFFSET + metadataSlotIdx];
-    const differ = metadata.differ;
-    const changes = differ.diff(collection);
-    // handle repeater changes
-    if (changes !== null) {
-        const containerIndex = metadataSlotIdx + 1;
-        const itemTemplateTNode = getExistingTNode(hostTView, containerIndex);
-        const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
-        let needsIndexUpdate = false;
-        changes.forEachOperation((item, adjustedPreviousIndex, currentIndex) => {
-            if (item.previousIndex === null) {
-                // add
-                const newViewIdx = adjustToLastLContainerIndex(lContainer, currentIndex);
-                const embeddedLView = createAndRenderEmbeddedLView(hostLView, itemTemplateTNode, new RepeaterContext(lContainer, item.item, newViewIdx));
-                addLViewToLContainer(lContainer, embeddedLView, newViewIdx);
-                needsIndexUpdate = true;
-            }
-            else if (currentIndex === null) {
-                // remove
-                adjustedPreviousIndex = adjustToLastLContainerIndex(lContainer, adjustedPreviousIndex);
-                removeLViewFromLContainer(lContainer, adjustedPreviousIndex);
-                needsIndexUpdate = true;
-            }
-            else if (adjustedPreviousIndex !== null) {
-                // move
-                const existingLView = detachExistingView(lContainer, adjustedPreviousIndex);
-                addLViewToLContainer(lContainer, existingLView, currentIndex);
-                needsIndexUpdate = true;
-            }
-        });
-        // A trackBy function might return the same value even if the underlying item changed - re-bind
-        // it in the context.
-        changes.forEachIdentityChange((record) => {
-            const viewIdx = adjustToLastLContainerIndex(lContainer, record.currentIndex);
-            const lView = getExistingLViewFromLContainer(lContainer, viewIdx);
-            lView[CONTEXT].$implicit = record.item;
-        });
-        // moves in the container might caused context's index to get out of order, re-adjust
-        if (needsIndexUpdate) {
-            for (let i = 0; i < lContainer.length - CONTAINER_HEADER_OFFSET; i++) {
-                const lView = getExistingLViewFromLContainer(lContainer, i);
-                lView[CONTEXT].$index = i;
-            }
-        }
-    }
-    // handle empty blocks
-    const bindingIndex = nextBindingIndex();
-    if (metadata.hasEmptyBlock) {
-        const hasItemsInCollection = differ.length > 0;
-        if (bindingUpdated(hostLView, bindingIndex, hasItemsInCollection)) {
-            const emptyTemplateIndex = metadataSlotIdx + 2;
-            const lContainer = getLContainer(hostLView, HEADER_OFFSET + emptyTemplateIndex);
-            if (hasItemsInCollection) {
-                removeLViewFromLContainer(lContainer, 0);
-            }
-            else {
-                const emptyTemplateTNode = getExistingTNode(hostTView, emptyTemplateIndex);
-                const embeddedLView = createAndRenderEmbeddedLView(hostLView, emptyTemplateTNode, undefined);
-                addLViewToLContainer(lContainer, embeddedLView, 0);
-            }
-        }
-    }
-}
-function getLContainer(lView, index) {
-    const lContainer = lView[index];
-    ngDevMode && assertLContainer(lContainer);
-    return lContainer;
-}
-function adjustToLastLContainerIndex(lContainer, index) {
-    return index !== null ? index : lContainer.length - CONTAINER_HEADER_OFFSET;
-}
-function detachExistingView(lContainer, index) {
-    const existingLView = detachView(lContainer, index);
-    ngDevMode && assertLView(existingLView);
-    return existingLView;
-}
-function getExistingLViewFromLContainer(lContainer, index) {
-    const existingLView = getLViewFromLContainer(lContainer, index);
-    ngDevMode && assertLView(existingLView);
-    return existingLView;
-}
-function getExistingTNode(tView, index) {
-    const tNode = getTNode(tView, index + HEADER_OFFSET);
-    ngDevMode && assertTNode(tNode);
-    return tNode;
-}
-
-/**
- * Removes all dehydrated views from a given LContainer:
- * both in internal data structure, as well as removing
- * corresponding DOM nodes that belong to that dehydrated view.
- */
-function removeDehydratedViews(lContainer) {
-    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
-    const parentLView = lContainer[PARENT];
-    const renderer = parentLView[RENDERER];
-    for (const view of views) {
-        removeDehydratedView(view, renderer);
-        ngDevMode && ngDevMode.dehydratedViewsRemoved++;
-    }
-    // Reset the value to an empty array to indicate that no
-    // further processing of dehydrated views is needed for
-    // this view container (i.e. do not trigger the lookup process
-    // once again in case a `ViewContainerRef` is created later).
-    lContainer[DEHYDRATED_VIEWS] = EMPTY_ARRAY;
-}
-/**
- * Helper function to remove all nodes from a dehydrated view.
- */
-function removeDehydratedView(dehydratedView, renderer) {
-    let nodesRemoved = 0;
-    let currentRNode = dehydratedView.firstChild;
-    if (currentRNode) {
-        const numNodes = dehydratedView.data[NUM_ROOT_NODES];
-        while (nodesRemoved < numNodes) {
-            ngDevMode && validateSiblingNodeExists(currentRNode);
-            const nextSibling = currentRNode.nextSibling;
-            nativeRemoveNode(renderer, currentRNode, false);
-            currentRNode = nextSibling;
-            nodesRemoved++;
-        }
-    }
-}
-/**
- * Walks over all views within this LContainer invokes dehydrated views
- * cleanup function for each one.
- */
-function cleanupLContainer(lContainer) {
-    removeDehydratedViews(lContainer);
-    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-        cleanupLView(lContainer[i]);
-    }
-}
-/**
- * Walks over `LContainer`s and components registered within
- * this LView and invokes dehydrated views cleanup function for each one.
- */
-function cleanupLView(lView) {
-    const tView = lView[TVIEW];
-    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
-        if (isLContainer(lView[i])) {
-            const lContainer = lView[i];
-            cleanupLContainer(lContainer);
-        }
-        else if (isLView(lView[i])) {
-            // This is a component, enter the `cleanupLView` recursively.
-            cleanupLView(lView[i]);
-        }
-    }
-}
-/**
- * Walks over all views registered within the ApplicationRef and removes
- * all dehydrated views from all `LContainer`s along the way.
- */
-function cleanupDehydratedViews(appRef) {
-    const viewRefs = appRef._views;
-    for (const viewRef of viewRefs) {
-        const lNode = getLNodeForHydration(viewRef);
-        // An `lView` might be `null` if a `ViewRef` represents
-        // an embedded view (not a component view).
-        if (lNode !== null && lNode[HOST] !== null) {
-            if (isLView(lNode)) {
-                cleanupLView(lNode);
-            }
-            else {
-                // Cleanup in the root component view
-                const componentLView = lNode[HOST];
-                cleanupLView(componentLView);
-                // Cleanup in all views within this view container
-                cleanupLContainer(lNode);
-            }
-            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
-        }
-    }
-}
-
 /**
  * Given a current DOM node and a serialized information about the views
  * in a container, walks over the DOM structure, collecting the list of
@@ -19956,6 +19570,67 @@ function enableFindMatchingDehydratedViewImpl() {
 }
 function findMatchingDehydratedView(lContainer, template) {
     return _findMatchingDehydratedViewImpl(lContainer, template);
+}
+
+function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
+    const embeddedTView = templateTNode.tView;
+    ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
+    ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
+    // Embedded views follow the change detection strategy of the view they're declared in.
+    const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
+    const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
+    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.dehydratedView ?? null);
+    const declarationLContainer = declarationLView[templateTNode.index];
+    ngDevMode && assertLContainer(declarationLContainer);
+    embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
+    const declarationViewLQueries = declarationLView[QUERIES];
+    if (declarationViewLQueries !== null) {
+        embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
+    }
+    // execute creation mode of a view
+    renderView(embeddedTView, embeddedLView, context);
+    return embeddedLView;
+}
+function getLViewFromLContainer(lContainer, index) {
+    const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
+    // avoid reading past the array boundaries
+    if (adjustedIndex < lContainer.length) {
+        const lView = lContainer[adjustedIndex];
+        ngDevMode && assertLView(lView);
+        return lView;
+    }
+    return undefined;
+}
+/**
+ * Returns whether an elements that belong to a view should be
+ * inserted into the DOM. For client-only cases, DOM elements are
+ * always inserted. For hydration cases, we check whether serialized
+ * info is available for a view and the view is not in a "skip hydration"
+ * block (in which case view contents was re-created, thus needing insertion).
+ */
+function shouldAddViewToDom(tNode, dehydratedView) {
+    return !dehydratedView || hasInSkipHydrationBlockFlag(tNode);
+}
+function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
+    const tView = lView[TVIEW];
+    // insert to the view tree so the new view can be change-detected
+    insertView(tView, lView, lContainer, index);
+    // insert to the view to the DOM tree
+    if (addToDOM) {
+        const beforeNode = getBeforeNodeForView(index, lContainer);
+        const renderer = lView[RENDERER];
+        const parentRNode = nativeParentNode(renderer, lContainer[NATIVE]);
+        if (parentRNode !== null) {
+            addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
+        }
+    }
+}
+function removeLViewFromLContainer(lContainer, index) {
+    const lView = detachView(lContainer, index);
+    if (lView !== undefined) {
+        destroyLView(lView[TVIEW], lView);
+    }
+    return lView;
 }
 
 /**
@@ -20282,20 +19957,22 @@ function insertAnchorNode(hostLView, hostTNode) {
     return commentNode;
 }
 let _locateOrCreateAnchorNode = createAnchorNode;
-let _populateDehydratedViewsInContainer = (lContainer, lView, tNode) => false; // noop by default
+let _populateDehydratedViewsInLContainer = (lContainer, tNode, hostLView) => false; // noop by default
 /**
  * Looks up dehydrated views that belong to a given LContainer and populates
  * this information into the `LContainer[DEHYDRATED_VIEWS]` slot. When running
  * in client-only mode, this function is a noop.
  *
  * @param lContainer LContainer that should be populated.
+ * @param tNode Corresponding TNode.
+ * @param hostLView LView that hosts LContainer.
  * @returns a boolean flag that indicates whether a populating operation
  *   was successful. The operation might be unsuccessful in case is has completed
  *   previously, we are rendering in client-only mode or this content is located
  *   in a skip hydration section.
  */
-function populateDehydratedViewsInContainer(lContainer) {
-    return _populateDehydratedViewsInContainer(lContainer, getLView(), getCurrentTNode());
+function populateDehydratedViewsInLContainer(lContainer, tNode, hostLView) {
+    return _populateDehydratedViewsInLContainer(lContainer, tNode, hostLView);
 }
 /**
  * Regular creation mode: an anchor is created and
@@ -20327,7 +20004,7 @@ function createAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
  *   previously, we are rendering in client-only mode or this content is located
  *   in a skip hydration section.
  */
-function populateDehydratedViewsInContainerImpl(lContainer, hostLView, hostTNode) {
+function populateDehydratedViewsInLContainerImpl(lContainer, tNode, hostLView) {
     // We already have a native element (anchor) set and the process
     // of finding dehydrated views happened (so the `lContainer[DEHYDRATED_VIEWS]`
     // is not null), exit early.
@@ -20335,10 +20012,10 @@ function populateDehydratedViewsInContainerImpl(lContainer, hostLView, hostTNode
         return true;
     }
     const hydrationInfo = hostLView[HYDRATION];
-    const noOffsetIndex = hostTNode.index - HEADER_OFFSET;
+    const noOffsetIndex = tNode.index - HEADER_OFFSET;
     // TODO(akushnir): this should really be a single condition, refactor the code
     // to use `hasInSkipHydrationBlockFlag` logic inside `isInSkipHydrationBlock`.
-    const skipHydration = isInSkipHydrationBlock(hostTNode) || hasInSkipHydrationBlockFlag(hostTNode);
+    const skipHydration = isInSkipHydrationBlock(tNode) || hasInSkipHydrationBlockFlag(tNode);
     const isNodeCreationMode = !hydrationInfo || skipHydration || isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -20352,7 +20029,7 @@ function populateDehydratedViewsInContainerImpl(lContainer, hostLView, hostTNode
             'which represents a view container.');
     const [commentNode, dehydratedViews] = locateDehydratedViewsInContainer(currentRNode, serializedViews);
     if (ngDevMode) {
-        validateMatchingNode(commentNode, Node.COMMENT_NODE, null, hostLView, hostTNode, true);
+        validateMatchingNode(commentNode, Node.COMMENT_NODE, null, hostLView, tNode, true);
         // Do not throw in case this node is already claimed (thus `false` as a second
         // argument). If this container is created based on an `<ng-template>`, the comment
         // node would be already claimed from the `template` instruction. If an element acts
@@ -20365,7 +20042,7 @@ function populateDehydratedViewsInContainerImpl(lContainer, hostLView, hostTNode
     return true;
 }
 function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
-    if (!_populateDehydratedViewsInContainer(lContainer, hostLView, hostTNode)) {
+    if (!_populateDehydratedViewsInLContainer(lContainer, hostTNode, hostLView)) {
         // Populating dehydrated views operation returned `false`, which indicates
         // that the logic was running in client-only mode, this an anchor comment
         // node should be created for this container.
@@ -20374,7 +20051,339 @@ function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
 }
 function enableLocateOrCreateContainerRefImpl() {
     _locateOrCreateAnchorNode = locateOrCreateAnchorNode;
-    _populateDehydratedViewsInContainer = populateDehydratedViewsInContainerImpl;
+    _populateDehydratedViewsInLContainer = populateDehydratedViewsInLContainerImpl;
+}
+
+function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
+    ngDevMode && assertFirstCreatePass(tView);
+    ngDevMode && ngDevMode.firstCreatePass++;
+    const tViewConsts = tView.consts;
+    // TODO(pk): refactor getOrCreateTNode to have the "create" only version
+    const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
+    resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
+    registerPostOrderHooks(tView, tNode);
+    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts, null /* ssrId */);
+    if (tView.queries !== null) {
+        tView.queries.template(tView, tNode);
+        embeddedTView.queries = tView.queries.embeddedTView(tNode);
+    }
+    return tNode;
+}
+/**
+ * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
+ *
+ * <ng-template #foo>
+ *    <div></div>
+ * </ng-template>
+ *
+ * @param index The index of the container in the data array
+ * @param templateFn Inline template
+ * @param decls The number of nodes, local refs, and pipes for this template
+ * @param vars The number of bindings for this template
+ * @param tagName The name of the container element, if applicable
+ * @param attrsIndex Index of template attributes in the `consts` array.
+ * @param localRefs Index of the local references in the `consts` array.
+ * @param localRefExtractor A function which extracts local-refs values from the template.
+ *        Defaults to the current element associated with the local-ref.
+ *
+ * @codeGenApi
+ */
+function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex, localRefExtractor) {
+    const lView = getLView();
+    const tView = getTView();
+    const adjustedIndex = index + HEADER_OFFSET;
+    const tNode = tView.firstCreatePass ? templateFirstCreatePass(adjustedIndex, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
+        tView.data[adjustedIndex];
+    setCurrentTNode(tNode, false);
+    const comment = _locateOrCreateContainerAnchor(tView, lView, tNode, index);
+    if (wasLastNodeCreated()) {
+        appendChild(tView, lView, comment, tNode);
+    }
+    attachPatchData(comment, lView);
+    const lContainer = createLContainer(comment, lView, comment, tNode);
+    lView[adjustedIndex] = lContainer;
+    addToViewTree(lView, lContainer);
+    // If hydration is enabled, looks up dehydrated views in the DOM
+    // using hydration annotation info and stores those views on LContainer.
+    // In client-only mode, this function is a noop.
+    populateDehydratedViewsInLContainer(lContainer, tNode, lView);
+    if (isDirectiveHost(tNode)) {
+        createDirectivesInstances(tView, lView, tNode);
+    }
+    if (localRefsIndex != null) {
+        saveResolvedLocalsInData(lView, tNode, localRefExtractor);
+    }
+    return ɵɵtemplate;
+}
+let _locateOrCreateContainerAnchor = createContainerAnchorImpl;
+/**
+ * Regular creation mode for LContainers and their anchor (comment) nodes.
+ */
+function createContainerAnchorImpl(tView, lView, tNode, index) {
+    lastNodeWasCreated(true);
+    return lView[RENDERER].createComment(ngDevMode ? 'container' : '');
+}
+/**
+ * Enables hydration code path (to lookup existing elements in DOM)
+ * in addition to the regular creation mode for LContainers and their
+ * anchor (comment) nodes.
+ */
+function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    lastNodeWasCreated(isNodeCreationMode);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return createContainerAnchorImpl(tView, lView, tNode, index);
+    }
+    const ssrId = hydrationInfo.data[TEMPLATES]?.[index] ?? null;
+    // Apply `ssrId` value to the underlying TView if it was not previously set.
+    //
+    // There might be situations when the same component is present in a template
+    // multiple times and some instances are opted-out of using hydration via
+    // `ngSkipHydration` attribute. In this scenario, at the time a TView is created,
+    // the `ssrId` might be `null` (if the first component is opted-out of hydration).
+    // The code below makes sure that the `ssrId` is applied to the TView if it's still
+    // `null` and verifies we never try to override it with a different value.
+    if (ssrId !== null && tNode.tView !== null) {
+        if (tNode.tView.ssrId === null) {
+            tNode.tView.ssrId = ssrId;
+        }
+        else {
+            ngDevMode &&
+                assertEqual(tNode.tView.ssrId, ssrId, 'Unexpected value of the `ssrId` for this TView');
+        }
+    }
+    // Hydration mode, looking up existing elements in DOM.
+    const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
+    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
+    setSegmentHead(hydrationInfo, index, currentRNode);
+    const viewContainerSize = calcSerializedContainerSize(hydrationInfo, index);
+    const comment = siblingAfter(viewContainerSize, currentRNode);
+    if (ngDevMode) {
+        validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
+        markRNodeAsClaimedByHydration(comment);
+    }
+    return comment;
+}
+function enableLocateOrCreateContainerAnchorImpl() {
+    _locateOrCreateContainerAnchor = locateOrCreateContainerAnchorImpl;
+}
+
+/**
+ * The conditional instruction represents the basic building block on the runtime side to support
+ * built-in "if" and "switch". On the high level this instruction is responsible for adding and
+ * removing views selected by a conditional expression.
+ *
+ * @param containerIndex index of a container in a host view (indexed from HEADER_OFFSET) where
+ *     conditional views should be inserted.
+ * @param matchingTemplateIndex index of a template TNode representing a conditional view to be
+ *     inserted; -1 represents a special case when there is no view to insert.
+ * @codeGenApi
+ */
+function ɵɵconditional(containerIndex, matchingTemplateIndex, value) {
+    const hostLView = getLView();
+    const bindingIndex = nextBindingIndex();
+    const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
+    const viewInContainerIdx = 0;
+    if (bindingUpdated(hostLView, bindingIndex, matchingTemplateIndex)) {
+        // The index of the view to show changed - remove the previously displayed one
+        // (it is a noop if there are no active views in a container).
+        removeLViewFromLContainer(lContainer, viewInContainerIdx);
+        // Index -1 is a special case where none of the conditions evaluates to
+        // a truthy value and as the consequence we've got no view to show.
+        if (matchingTemplateIndex !== -1) {
+            const templateTNode = getExistingTNode(hostLView[TVIEW], matchingTemplateIndex);
+            const dehydratedView = findMatchingDehydratedView(lContainer, templateTNode.tView.ssrId);
+            const embeddedLView = createAndRenderEmbeddedLView(hostLView, templateTNode, value, { dehydratedView });
+            addLViewToLContainer(lContainer, embeddedLView, viewInContainerIdx, shouldAddViewToDom(templateTNode, dehydratedView));
+        }
+    }
+    else {
+        // We might keep displaying the same template but the actual value of the expression could have
+        // changed - re-bind in context.
+        const lView = getLViewFromLContainer(lContainer, viewInContainerIdx);
+        if (lView !== undefined) {
+            lView[CONTEXT] = value;
+        }
+    }
+}
+class RepeaterContext {
+    constructor(lContainer, $implicit, $index) {
+        this.lContainer = lContainer;
+        this.$implicit = $implicit;
+        this.$index = $index;
+    }
+    get $count() {
+        return this.lContainer.length - CONTAINER_HEADER_OFFSET;
+    }
+}
+/**
+ * A built-in trackBy function used for situations where users specified collection index as a
+ * tracking expression. Having this function body in the runtime avoids unnecessary code generation.
+ *
+ * @param index
+ * @returns
+ */
+function ɵɵrepeaterTrackByIndex(index) {
+    return index;
+}
+/**
+ * A built-in trackBy function used for situations where users specified collection item reference
+ * as a tracking expression. Having this function body in the runtime avoids unnecessary code
+ * generation.
+ *
+ * @param index
+ * @returns
+ */
+function ɵɵrepeaterTrackByIdentity(_, value) {
+    return value;
+}
+class RepeaterMetadata {
+    constructor(hasEmptyBlock, differ) {
+        this.hasEmptyBlock = hasEmptyBlock;
+        this.differ = differ;
+    }
+}
+/**
+ * The repeaterCreate instruction runs in the creation part of the template pass and initializes
+ * internal data structures required by the update pass of the built-in repeater logic. Repeater
+ * metadata are allocated in the data part of LView with the following layout:
+ * - LView[HEADER_OFFSET + index] - metadata
+ * - LView[HEADER_OFFSET + index + 1] - reference to a template function rendering an item
+ * - LView[HEADER_OFFSET + index + 2] - optional reference to a template function rendering an empty
+ * block
+ *
+ * @param index Index at which to store the metadata of the repeater.
+ * @param templateFn Reference to the template of the main repeater block.
+ * @param decls The number of nodes, local refs, and pipes for the main block.
+ * @param vars The number of bindings for the main block.
+ * @param trackByFn Reference to the tracking function.
+ * @param trackByUsesComponentInstance Whether the tracking function has any references to the
+ *  component instance. If it doesn't, we can avoid rebinding it.
+ * @param emptyTemplateFn Reference to the template function of the empty block.
+ * @param emptyDecls The number of nodes, local refs, and pipes for the empty block.
+ * @param emptyVars The number of bindings for the empty block.
+ *
+ * @codeGenApi
+ */
+function ɵɵrepeaterCreate(index, templateFn, decls, vars, trackByFn, trackByUsesComponentInstance, emptyTemplateFn, emptyDecls, emptyVars) {
+    const hasEmptyBlock = emptyTemplateFn !== undefined;
+    const hostLView = getLView();
+    const boundTrackBy = trackByUsesComponentInstance ?
+        // We only want to bind when necessary, because it produces a
+        // new function. For pure functions it's not necessary.
+        trackByFn.bind(hostLView[DECLARATION_COMPONENT_VIEW][CONTEXT]) :
+        trackByFn;
+    const metadata = new RepeaterMetadata(hasEmptyBlock, new DefaultIterableDiffer(boundTrackBy));
+    hostLView[HEADER_OFFSET + index] = metadata;
+    ɵɵtemplate(index + 1, templateFn, decls, vars);
+    if (hasEmptyBlock) {
+        ngDevMode &&
+            assertDefined(emptyDecls, 'Missing number of declarations for the empty repeater block.');
+        ngDevMode &&
+            assertDefined(emptyVars, 'Missing number of bindings for the empty repeater block.');
+        ɵɵtemplate(index + 2, emptyTemplateFn, emptyDecls, emptyVars);
+    }
+}
+/**
+ * The repeater instruction does update-time diffing of a provided collection (against the
+ * collection seen previously) and maps changes in the collection to views structure (by adding,
+ * removing or moving views as needed).
+ * @param metadataSlotIdx - index in data where we can find an instance of RepeaterMetadata with
+ *     additional information (ex. differ) needed to process collection diffing and view
+ *     manipulation
+ * @param collection - the collection instance to be checked for changes
+ * @codeGenApi
+ */
+function ɵɵrepeater(metadataSlotIdx, collection) {
+    const hostLView = getLView();
+    const hostTView = hostLView[TVIEW];
+    const metadata = hostLView[HEADER_OFFSET + metadataSlotIdx];
+    const differ = metadata.differ;
+    const changes = differ.diff(collection);
+    // handle repeater changes
+    if (changes !== null) {
+        const containerIndex = metadataSlotIdx + 1;
+        const itemTemplateTNode = getExistingTNode(hostTView, containerIndex);
+        const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
+        let needsIndexUpdate = false;
+        changes.forEachOperation((item, adjustedPreviousIndex, currentIndex) => {
+            if (item.previousIndex === null) {
+                // add
+                const newViewIdx = adjustToLastLContainerIndex(lContainer, currentIndex);
+                const embeddedLView = createAndRenderEmbeddedLView(hostLView, itemTemplateTNode, new RepeaterContext(lContainer, item.item, newViewIdx));
+                addLViewToLContainer(lContainer, embeddedLView, newViewIdx);
+                needsIndexUpdate = true;
+            }
+            else if (currentIndex === null) {
+                // remove
+                adjustedPreviousIndex = adjustToLastLContainerIndex(lContainer, adjustedPreviousIndex);
+                removeLViewFromLContainer(lContainer, adjustedPreviousIndex);
+                needsIndexUpdate = true;
+            }
+            else if (adjustedPreviousIndex !== null) {
+                // move
+                const existingLView = detachExistingView(lContainer, adjustedPreviousIndex);
+                addLViewToLContainer(lContainer, existingLView, currentIndex);
+                needsIndexUpdate = true;
+            }
+        });
+        // A trackBy function might return the same value even if the underlying item changed - re-bind
+        // it in the context.
+        changes.forEachIdentityChange((record) => {
+            const viewIdx = adjustToLastLContainerIndex(lContainer, record.currentIndex);
+            const lView = getExistingLViewFromLContainer(lContainer, viewIdx);
+            lView[CONTEXT].$implicit = record.item;
+        });
+        // moves in the container might caused context's index to get out of order, re-adjust
+        if (needsIndexUpdate) {
+            for (let i = 0; i < lContainer.length - CONTAINER_HEADER_OFFSET; i++) {
+                const lView = getExistingLViewFromLContainer(lContainer, i);
+                lView[CONTEXT].$index = i;
+            }
+        }
+    }
+    // handle empty blocks
+    const bindingIndex = nextBindingIndex();
+    if (metadata.hasEmptyBlock) {
+        const hasItemsInCollection = differ.length > 0;
+        if (bindingUpdated(hostLView, bindingIndex, hasItemsInCollection)) {
+            const emptyTemplateIndex = metadataSlotIdx + 2;
+            const lContainer = getLContainer(hostLView, HEADER_OFFSET + emptyTemplateIndex);
+            if (hasItemsInCollection) {
+                removeLViewFromLContainer(lContainer, 0);
+            }
+            else {
+                const emptyTemplateTNode = getExistingTNode(hostTView, emptyTemplateIndex);
+                const embeddedLView = createAndRenderEmbeddedLView(hostLView, emptyTemplateTNode, undefined);
+                addLViewToLContainer(lContainer, embeddedLView, 0);
+            }
+        }
+    }
+}
+function getLContainer(lView, index) {
+    const lContainer = lView[index];
+    ngDevMode && assertLContainer(lContainer);
+    return lContainer;
+}
+function adjustToLastLContainerIndex(lContainer, index) {
+    return index !== null ? index : lContainer.length - CONTAINER_HEADER_OFFSET;
+}
+function detachExistingView(lContainer, index) {
+    const existingLView = detachView(lContainer, index);
+    ngDevMode && assertLView(existingLView);
+    return existingLView;
+}
+function getExistingLViewFromLContainer(lContainer, index) {
+    const existingLView = getLViewFromLContainer(lContainer, index);
+    ngDevMode && assertLView(existingLView);
+    return existingLView;
+}
+function getExistingTNode(tView, index) {
+    const tNode = getTNode(tView, index + HEADER_OFFSET);
+    ngDevMode && assertTNode(tNode);
+    return tNode;
 }
 
 /**
@@ -20647,10 +20656,12 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
         };
         setTDeferBlockDetails(tView, adjustedIndex, deferBlockConfig);
     }
-    // Lookup dehydrated views that belong to this LContainer.
-    // In client-only mode, this operation is noop.
+    const tNode = getCurrentTNode();
     const lContainer = lView[adjustedIndex];
-    populateDehydratedViewsInContainer(lContainer);
+    // If hydration is enabled, looks up dehydrated views in the DOM
+    // using hydration annotation info and stores those views on LContainer.
+    // In client-only mode, this function is a noop.
+    populateDehydratedViewsInLContainer(lContainer, tNode, lView);
     // Init instance-specific defer details and store it.
     const lDetails = [];
     lDetails[DEFER_BLOCK_STATE] = DeferBlockInternalState.Initial;
