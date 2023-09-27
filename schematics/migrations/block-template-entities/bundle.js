@@ -18767,23 +18767,24 @@ function parseWhenTrigger({ expression, sourceSpan }, bindingParser, triggers, e
     trackTrigger("when", triggers, errors, new BoundDeferredTrigger(parsed, sourceSpan));
   }
 }
-function parseOnTrigger({ expression, sourceSpan }, triggers, errors) {
+function parseOnTrigger({ expression, sourceSpan }, triggers, errors, placeholder) {
   const onIndex = expression.indexOf("on");
   if (onIndex === -1) {
     errors.push(new ParseError(sourceSpan, `Could not find "on" keyword in expression`));
   } else {
     const start = getTriggerParametersStart(expression, onIndex + 1);
-    const parser = new OnTriggerParser(expression, start, sourceSpan, triggers, errors);
+    const parser = new OnTriggerParser(expression, start, sourceSpan, triggers, errors, placeholder);
     parser.parse();
   }
 }
 var OnTriggerParser = class {
-  constructor(expression, start, span, triggers, errors) {
+  constructor(expression, start, span, triggers, errors, placeholder) {
     this.expression = expression;
     this.start = start;
     this.span = span;
     this.triggers = triggers;
     this.errors = errors;
+    this.placeholder = placeholder;
     this.index = 0;
     this.tokens = new Lexer().tokenize(expression.slice(start));
   }
@@ -18837,16 +18838,16 @@ var OnTriggerParser = class {
           this.trackTrigger("timer", createTimerTrigger(parameters, sourceSpan));
           break;
         case OnTriggerType.INTERACTION:
-          this.trackTrigger("interaction", createInteractionTrigger(parameters, sourceSpan));
+          this.trackTrigger("interaction", createInteractionTrigger(parameters, sourceSpan, this.placeholder));
           break;
         case OnTriggerType.IMMEDIATE:
           this.trackTrigger("immediate", createImmediateTrigger(parameters, sourceSpan));
           break;
         case OnTriggerType.HOVER:
-          this.trackTrigger("hover", createHoverTrigger(parameters, sourceSpan));
+          this.trackTrigger("hover", createHoverTrigger(parameters, sourceSpan, this.placeholder));
           break;
         case OnTriggerType.VIEWPORT:
-          this.trackTrigger("viewport", createViewportTrigger(parameters, sourceSpan));
+          this.trackTrigger("viewport", createViewportTrigger(parameters, sourceSpan, this.placeholder));
           break;
         default:
           throw new Error(`Unrecognized trigger type "${identifier}"`);
@@ -18933,30 +18934,39 @@ function createTimerTrigger(parameters, sourceSpan) {
   }
   return new TimerDeferredTrigger(delay, sourceSpan);
 }
-function createInteractionTrigger(parameters, sourceSpan) {
-  if (parameters.length !== 1) {
-    throw new Error(`"${OnTriggerType.INTERACTION}" trigger must have exactly one parameter`);
-  }
-  return new InteractionDeferredTrigger(parameters[0], sourceSpan);
-}
 function createImmediateTrigger(parameters, sourceSpan) {
   if (parameters.length > 0) {
     throw new Error(`"${OnTriggerType.IMMEDIATE}" trigger cannot have parameters`);
   }
   return new ImmediateDeferredTrigger(sourceSpan);
 }
-function createHoverTrigger(parameters, sourceSpan) {
-  if (parameters.length !== 1) {
-    throw new Error(`"${OnTriggerType.HOVER}" trigger must have exactly one parameter`);
-  }
-  return new HoverDeferredTrigger(parameters[0], sourceSpan);
-}
-function createViewportTrigger(parameters, sourceSpan) {
+function createHoverTrigger(parameters, sourceSpan, placeholder) {
   var _a2;
-  if (parameters.length > 1) {
-    throw new Error(`"${OnTriggerType.VIEWPORT}" trigger can only have zero or one parameters`);
-  }
+  validateReferenceBasedTrigger(OnTriggerType.HOVER, parameters, placeholder);
+  return new HoverDeferredTrigger((_a2 = parameters[0]) != null ? _a2 : null, sourceSpan);
+}
+function createInteractionTrigger(parameters, sourceSpan, placeholder) {
+  var _a2;
+  validateReferenceBasedTrigger(OnTriggerType.INTERACTION, parameters, placeholder);
+  return new InteractionDeferredTrigger((_a2 = parameters[0]) != null ? _a2 : null, sourceSpan);
+}
+function createViewportTrigger(parameters, sourceSpan, placeholder) {
+  var _a2;
+  validateReferenceBasedTrigger(OnTriggerType.VIEWPORT, parameters, placeholder);
   return new ViewportDeferredTrigger((_a2 = parameters[0]) != null ? _a2 : null, sourceSpan);
+}
+function validateReferenceBasedTrigger(type, parameters, placeholder) {
+  if (parameters.length > 1) {
+    throw new Error(`"${type}" trigger can only have zero or one parameters`);
+  }
+  if (parameters.length === 0) {
+    if (placeholder === null) {
+      throw new Error(`"${type}" trigger with no parameters can only be placed on an @defer that has a @placeholder block`);
+    }
+    if (placeholder.children.length !== 1 || !(placeholder.children[0] instanceof Element)) {
+      throw new Error(`"${type}" trigger with no parameters can only be placed on an @defer that has a @placeholder block with exactly one root element node`);
+    }
+  }
 }
 function getTriggerParametersStart(value, startPosition = 0) {
   let hasFoundSeparator = false;
@@ -18990,8 +19000,8 @@ function isConnectedDeferLoopBlock(name) {
 }
 function createDeferredBlock(ast, connectedBlocks, visitor, bindingParser) {
   const errors = [];
-  const { triggers, prefetchTriggers } = parsePrimaryTriggers(ast.parameters, bindingParser, errors);
   const { placeholder, loading, error: error2 } = parseConnectedBlocks(connectedBlocks, errors, visitor);
+  const { triggers, prefetchTriggers } = parsePrimaryTriggers(ast.parameters, bindingParser, errors, placeholder);
   const node = new DeferredBlock(visitAll2(visitor, ast.children, ast.children), triggers, prefetchTriggers, placeholder, loading, error2, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
   return { node, errors };
 }
@@ -19086,18 +19096,18 @@ function parseErrorBlock(ast, visitor) {
   }
   return new DeferredBlockError(visitAll2(visitor, ast.children, ast.children), ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
 }
-function parsePrimaryTriggers(params, bindingParser, errors) {
+function parsePrimaryTriggers(params, bindingParser, errors, placeholder) {
   const triggers = {};
   const prefetchTriggers = {};
   for (const param of params) {
     if (WHEN_PARAMETER_PATTERN.test(param.expression)) {
       parseWhenTrigger(param, bindingParser, triggers, errors);
     } else if (ON_PARAMETER_PATTERN.test(param.expression)) {
-      parseOnTrigger(param, triggers, errors);
+      parseOnTrigger(param, triggers, errors, placeholder);
     } else if (PREFETCH_WHEN_PATTERN.test(param.expression)) {
       parseWhenTrigger(param, bindingParser, prefetchTriggers, errors);
     } else if (PREFETCH_ON_PATTERN.test(param.expression)) {
-      parseOnTrigger(param, prefetchTriggers, errors);
+      parseOnTrigger(param, prefetchTriggers, errors, placeholder);
     } else {
       errors.push(new ParseError(param.sourceSpan, "Unrecognized trigger"));
     }
@@ -22422,7 +22432,8 @@ var R3BoundTarget = class {
     }
     const name = trigger.reference;
     if (name === null) {
-      return null;
+      const children = block.placeholder ? block.placeholder.children : null;
+      return children !== null && children.length === 1 && children[0] instanceof Element ? children[0] : null;
     }
     const outsideRef = this.findEntityInScope(block, name);
     if (outsideRef instanceof Reference && this.getDefinitionNodeOfSymbol(outsideRef) !== block) {
@@ -23048,7 +23059,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.5+sha-8413b64");
+var VERSION2 = new Version("17.0.0-next.5+sha-e2e3d69");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
