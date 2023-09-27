@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.5+sha-7a731c9
+ * @license Angular v17.0.0-next.5+sha-8413b64
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12626,6 +12626,12 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
     detachFromAppRef(): void;
     attachToAppRef(appRef: ViewRefTracker): void;
 }
+
+/**
+ * Returns a Promise that resolves when the application becomes stable after this method is called
+ * the first time.
+ */
+export declare function ɵwhenStable(applicationRef: ApplicationRef): Promise<void>;
 
 /**
  * Returns a set of providers required to setup hydration support
