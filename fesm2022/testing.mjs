@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.6+sha-c3d901e
+ * @license Angular v16.2.6+sha-aedd8de
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10925,7 +10925,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.6+sha-c3d901e');
+const VERSION = new Version('16.2.6+sha-aedd8de');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -24551,8 +24551,8 @@ let _findMatchingDehydratedViewImpl = (lContainer, template) => null;
  * in this container.
  */
 function findMatchingDehydratedViewImpl(lContainer, template) {
-    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
-    if (!template || views.length === 0) {
+    const views = lContainer[DEHYDRATED_VIEWS];
+    if (!template || views === null || views.length === 0) {
         return null;
     }
     const view = views[0];
