@@ -6998,6 +6998,7 @@ var ExpressionKind;
   ExpressionKind2[ExpressionKind2["ReadTemporaryExpr"] = 18] = "ReadTemporaryExpr";
   ExpressionKind2[ExpressionKind2["SanitizerExpr"] = 19] = "SanitizerExpr";
   ExpressionKind2[ExpressionKind2["SlotLiteralExpr"] = 20] = "SlotLiteralExpr";
+  ExpressionKind2[ExpressionKind2["ConditionalCase"] = 21] = "ConditionalCase";
 })(ExpressionKind || (ExpressionKind = {}));
 var SemanticVariableKind;
 (function(SemanticVariableKind2) {
@@ -7190,15 +7191,16 @@ function createAdvanceOp(delta, sourceSpan) {
     sourceSpan
   }, NEW_OP);
 }
-function createConditionalOp(target, test, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
+function createConditionalOp(target, test, conditions, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.Conditional,
     target,
     test,
-    conditions: [],
+    conditions,
     processed: null,
-    sourceSpan
-  }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
+    sourceSpan,
+    contextValue: null
+  }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS);
 }
 function createI18nExpressionOp(target, expression, i18nPlaceholder, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
@@ -7789,6 +7791,34 @@ var SlotLiteralExpr = _SlotLiteralExpr;
 (() => {
   _k = UsesSlotIndex;
 })();
+var ConditionalCaseExpr = class extends ExpressionBase {
+  constructor(expr, target, alias = null) {
+    super();
+    this.expr = expr;
+    this.target = target;
+    this.alias = alias;
+    this.kind = ExpressionKind.ConditionalCase;
+  }
+  visitExpression(visitor, context) {
+    if (this.expr !== null) {
+      this.expr.visitExpression(visitor, context);
+    }
+  }
+  isEquivalent(e) {
+    return e instanceof ConditionalCaseExpr && e.expr === this.expr;
+  }
+  isConstant() {
+    return true;
+  }
+  clone() {
+    return new ConditionalCaseExpr(this.expr, this.target);
+  }
+  transformInternalExpressions(transform2, flags) {
+    if (this.expr !== null) {
+      this.expr = transformExpressionsInExpression(this.expr, transform2, flags);
+    }
+  }
+};
 function visitExpressionsInOp(op, visitor) {
   transformExpressionsInOp(op, (expr, flags) => {
     visitor(expr, flags);
@@ -7842,13 +7872,16 @@ function transformExpressionsInOp(op, transform2, flags) {
       break;
     case OpKind.Conditional:
       for (const condition of op.conditions) {
-        if (condition[1] === null) {
+        if (condition.expr === null) {
           continue;
         }
-        condition[1] = transformExpressionsInExpression(condition[1], transform2, flags);
+        condition.expr = transformExpressionsInExpression(condition.expr, transform2, flags);
       }
       if (op.processed !== null) {
         op.processed = transformExpressionsInExpression(op.processed, transform2, flags);
+      }
+      if (op.contextValue !== null) {
+        op.contextValue = transformExpressionsInExpression(op.contextValue, transform2, flags);
       }
       break;
     case OpKind.Listener:
@@ -8323,6 +8356,9 @@ function createHostPropertyOp(name, expression, isAnimationTrigger, sourceSpan) 
   }, TRAIT_CONSUMES_VARS), NEW_OP);
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/variable.mjs
+var CTX_REF = "CTX_REF_MARKER";
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/compilation.mjs
 var CompilationJobKind;
 (function(CompilationJobKind2) {
@@ -8485,6 +8521,7 @@ function varsUsedByOp(op) {
     case OpKind.InterpolateText:
       return op.interpolation.expressions.length;
     case OpKind.I18nExpression:
+    case OpKind.Conditional:
       return 1;
     default:
       throw new Error(`Unhandled op: ${OpKind[op.kind]}`);
@@ -8767,19 +8804,28 @@ function phaseConditionals(job) {
         continue;
       }
       let test;
-      const defaultCase = op.conditions.findIndex(([xref, cond]) => cond === null);
+      const defaultCase = op.conditions.findIndex((cond) => cond.expr === null);
       if (defaultCase >= 0) {
-        const [xref, cond] = op.conditions.splice(defaultCase, 1)[0];
+        const xref = op.conditions.splice(defaultCase, 1)[0].target;
         test = new SlotLiteralExpr(xref);
       } else {
         test = literal(-1);
       }
-      let tmp = new AssignTemporaryExpr(op.test, job.allocateXrefId());
+      let tmp = op.test == null ? null : new AssignTemporaryExpr(op.test, job.allocateXrefId());
       for (let i = op.conditions.length - 1; i >= 0; i--) {
-        const useTmp = i === 0 ? tmp : new ReadTemporaryExpr(tmp.xref);
-        const [xref, check] = op.conditions[i];
-        const comparison = new BinaryOperatorExpr(BinaryOperator.Identical, useTmp, check);
-        test = new ConditionalExpr(comparison, new SlotLiteralExpr(xref), test);
+        let conditionalCase = op.conditions[i];
+        if (conditionalCase.expr === null) {
+          continue;
+        }
+        if (tmp !== null) {
+          const useTmp = i === 0 ? tmp : new ReadTemporaryExpr(tmp.xref);
+          conditionalCase.expr = new BinaryOperatorExpr(BinaryOperator.Identical, useTmp, conditionalCase.expr);
+        } else if (conditionalCase.alias !== null) {
+          const caseExpressionTemporaryXref = job.allocateXrefId();
+          conditionalCase.expr = new AssignTemporaryExpr(conditionalCase.expr, caseExpressionTemporaryXref);
+          op.contextValue = new ReadTemporaryExpr(caseExpressionTemporaryXref);
+        }
+        test = new ConditionalExpr(conditionalCase.expr, new SlotLiteralExpr(conditionalCase.target), test);
       }
       op.processed = test;
     }
@@ -9302,7 +9348,9 @@ function generateVariablesInScopeForView(view, scope) {
     newOps.push(createVariableOp(view.job.allocateXrefId(), scope.viewContextVariable, new NextContextExpr()));
   }
   for (const [name, value] of view.job.views.get(scope.view).contextVariables) {
-    newOps.push(createVariableOp(view.job.allocateXrefId(), scope.contextVariables.get(name), new ReadPropExpr(new ContextExpr(scope.view), value)));
+    const context = new ContextExpr(scope.view);
+    const variable2 = value === CTX_REF ? context : new ReadPropExpr(context, value);
+    newOps.push(createVariableOp(view.job.allocateXrefId(), scope.contextVariables.get(name), variable2));
   }
   for (const ref of scope.references) {
     newOps.push(createVariableOp(view.job.allocateXrefId(), ref.variable, new ReferenceExpr(ref.targetId, ref.offset)));
@@ -16271,8 +16319,12 @@ function call(instruction, args, sourceSpan) {
   const expr = importExpr(instruction).callFn(args, sourceSpan);
   return createStatementOp(new ExpressionStatement(expr, sourceSpan));
 }
-function conditional(slot, condition) {
-  return call(Identifiers.conditional, [literal(slot), condition], null);
+function conditional(slot, condition, contextValue, sourceSpan) {
+  const args = [literal(slot), condition];
+  if (contextValue !== null) {
+    args.push(contextValue);
+  }
+  return call(Identifiers.conditional, args, sourceSpan);
 }
 var TEXT_INTERPOLATE_CONFIG = {
   constant: [
@@ -16606,7 +16658,7 @@ function reifyUpdateOperations(_unit, ops) {
         if (op.slot === null) {
           throw new Error(`Conditional slot was not set.`);
         }
-        OpList.replace(op, conditional(op.slot, op.processed));
+        OpList.replace(op, conditional(op.slot, op.processed, op.contextValue, op.sourceSpan));
         break;
       case OpKind.Statement:
         break;
@@ -17308,6 +17360,9 @@ function tryInlineVariableInitializer(id, initializer, target, declFences) {
 function allowConservativeInlining(decl, target) {
   switch (decl.variable.kind) {
     case SemanticVariableKind.Identifier:
+      if (decl.initializer instanceof ReadVarExpr && decl.initializer.name === "ctx") {
+        return true;
+      }
       return false;
     case SemanticVariableKind.Context:
       return target.kind === OpKind.Variable;
@@ -17536,6 +17591,8 @@ function ingestNodes(unit, template2) {
       ingestText(unit, node);
     } else if (node instanceof BoundText) {
       ingestBoundText(unit, node);
+    } else if (node instanceof IfBlock) {
+      ingestIfBlock(unit, node);
     } else if (node instanceof SwitchBlock) {
       ingestSwitchBlock(unit, node);
     } else {
@@ -17617,20 +17674,41 @@ function ingestBoundText(unit, text2) {
   const baseSourceSpan = unit.job.compatibility ? null : text2.sourceSpan;
   unit.update.push(createInterpolateTextOp(textXref, new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, unit.job, baseSourceSpan))), i18nPlaceholders, text2.sourceSpan));
 }
+function ingestIfBlock(unit, ifBlock) {
+  let firstXref = null;
+  let conditions = [];
+  for (const ifCase of ifBlock.branches) {
+    const cView = unit.job.allocateView(unit.xref);
+    if (ifCase.expressionAlias !== null) {
+      cView.contextVariables.set(ifCase.expressionAlias.name, CTX_REF);
+    }
+    if (firstXref === null) {
+      firstXref = cView.xref;
+    }
+    unit.create.push(createTemplateOp(cView.xref, "Conditional", Namespace.HTML, true, ifCase.sourceSpan));
+    const caseExpr = ifCase.expression ? convertAst(ifCase.expression, unit.job, null) : null;
+    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, cView.xref, ifCase.expressionAlias);
+    conditions.push(conditionalCaseExpr);
+    ingestNodes(cView, ifCase.children);
+  }
+  const conditional2 = createConditionalOp(firstXref, null, conditions, ifBlock.sourceSpan);
+  unit.update.push(conditional2);
+}
 function ingestSwitchBlock(unit, switchBlock) {
   let firstXref = null;
   let conditions = [];
   for (const switchCase of switchBlock.cases) {
     const cView = unit.job.allocateView(unit.xref);
-    if (!firstXref)
+    if (firstXref === null) {
       firstXref = cView.xref;
-    unit.create.push(createTemplateOp(cView.xref, "Case", Namespace.HTML, true, null));
+    }
+    unit.create.push(createTemplateOp(cView.xref, "Case", Namespace.HTML, true, switchCase.sourceSpan));
     const caseExpr = switchCase.expression ? convertAst(switchCase.expression, unit.job, switchBlock.startSourceSpan) : null;
-    conditions.push([cView.xref, caseExpr]);
+    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, cView.xref);
+    conditions.push(conditionalCaseExpr);
     ingestNodes(cView, switchCase.children);
   }
-  const conditional2 = createConditionalOp(firstXref, convertAst(switchBlock.expression, unit.job, switchBlock.startSourceSpan), null);
-  conditional2.conditions = conditions;
+  const conditional2 = createConditionalOp(firstXref, convertAst(switchBlock.expression, unit.job, null), conditions, switchBlock.sourceSpan);
   unit.update.push(conditional2);
 }
 function convertAst(ast, job, baseSourceSpan) {
@@ -23196,7 +23274,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-8d09e9e");
+var VERSION2 = new Version("17.0.0-next.6+sha-408d3b4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
