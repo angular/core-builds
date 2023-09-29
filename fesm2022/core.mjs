@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-6b6a44c
+ * @license Angular v17.0.0-next.6+sha-a54713c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.6+sha-6b6a44c');
+const VERSION = new Version('17.0.0-next.6+sha-a54713c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -30368,6 +30368,37 @@ function getInjectorProviders(injector) {
     }
     throwError('getInjectorProviders only supports NodeInjector and EnvironmentInjector');
 }
+/**
+ *
+ * Given an injector, this function will return
+ * an object containing the type and source of the injector.
+ *
+ * |              | type        | source                                                      |
+ * |--------------|-------------|-------------------------------------------------------------|
+ * | NodeInjector | element     | DOM element that created this injector                      |
+ * | R3Injector   | environment | `injector.source`                                           |
+ * | NullInjector | null        | null                                                        |
+ *
+ * @param injector the Injector to get metadata for
+ * @returns an object containing the type and source of the given injector. If the injector metadata
+ *     cannot be determined, returns null.
+ */
+function getInjectorMetadata(injector) {
+    if (injector instanceof NodeInjector) {
+        const lView = getNodeInjectorLView(injector);
+        const tNode = getNodeInjectorTNode(injector);
+        assertTNodeForLView(tNode, lView);
+        assertDefined(lView[tNode.index][HOST], 'Could not find node in element view.');
+        return { type: 'element', source: lView[tNode.index][HOST] };
+    }
+    if (injector instanceof R3Injector) {
+        return { type: 'environment', source: injector.source ?? null };
+    }
+    if (injector instanceof NullInjector) {
+        return { type: 'null', source: null };
+    }
+    return null;
+}
 function getInjectorResolutionPath(injector) {
     const resolutionPath = [injector];
     getInjectorResolutionPathHelper(injector, resolutionPath);
@@ -30526,6 +30557,7 @@ function publishDefaultGlobalUtils$1() {
         publishGlobalUtil('ɵgetDependenciesFromInjectable', getDependenciesFromInjectable);
         publishGlobalUtil('ɵgetInjectorProviders', getInjectorProviders);
         publishGlobalUtil('ɵgetInjectorResolutionPath', getInjectorResolutionPath);
+        publishGlobalUtil('ɵgetInjectorMetadata', getInjectorMetadata);
         /**
          * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
          * The contract of the function might be changed in any release and/or the function can be
