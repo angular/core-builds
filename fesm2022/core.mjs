@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-408d3b4
+ * @license Angular v17.0.0-next.6+sha-6b6a44c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.6+sha-408d3b4');
+const VERSION = new Version('17.0.0-next.6+sha-6b6a44c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20312,8 +20312,9 @@ function ɵɵrepeater(metadataSlotIdx, collection) {
             if (item.previousIndex === null) {
                 // add
                 const newViewIdx = adjustToLastLContainerIndex(lContainer, currentIndex);
-                const embeddedLView = createAndRenderEmbeddedLView(hostLView, itemTemplateTNode, new RepeaterContext(lContainer, item.item, newViewIdx));
-                addLViewToLContainer(lContainer, embeddedLView, newViewIdx);
+                const dehydratedView = findMatchingDehydratedView(lContainer, itemTemplateTNode.tView.ssrId);
+                const embeddedLView = createAndRenderEmbeddedLView(hostLView, itemTemplateTNode, new RepeaterContext(lContainer, item.item, newViewIdx), { dehydratedView });
+                addLViewToLContainer(lContainer, embeddedLView, newViewIdx, shouldAddViewToDom(itemTemplateTNode, dehydratedView));
                 needsIndexUpdate = true;
             }
             else if (currentIndex === null) {
@@ -20356,8 +20357,9 @@ function ɵɵrepeater(metadataSlotIdx, collection) {
             }
             else {
                 const emptyTemplateTNode = getExistingTNode(hostTView, emptyTemplateIndex);
-                const embeddedLView = createAndRenderEmbeddedLView(hostLView, emptyTemplateTNode, undefined);
-                addLViewToLContainer(lContainer, embeddedLView, 0);
+                const dehydratedView = findMatchingDehydratedView(lContainer, emptyTemplateTNode.tView.ssrId);
+                const embeddedLView = createAndRenderEmbeddedLView(hostLView, emptyTemplateTNode, undefined, { dehydratedView });
+                addLViewToLContainer(lContainer, embeddedLView, 0, shouldAddViewToDom(emptyTemplateTNode, dehydratedView));
             }
         }
     }
