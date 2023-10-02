@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-c4d77fd
+ * @license Angular v17.0.0-next.6+sha-e368d81
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.6+sha-c4d77fd');
+const VERSION = new Version('17.0.0-next.6+sha-e368d81');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -21402,6 +21402,7 @@ class OnIdleScheduler {
         // Set of callbacks collected while invoking current set of callbacks.
         // Those callbacks are scheduled for the next idle period.
         this.deferred = new Set();
+        this.ngZone = inject(NgZone);
         this.requestIdleCallback = _requestIdleCallback().bind(globalThis);
         this.cancelIdleCallback = _cancelIdleCallback().bind(globalThis);
     }
@@ -21437,7 +21438,9 @@ class OnIdleScheduler {
                 this.scheduleIdleCallback();
             }
         };
-        this.idleId = this.requestIdleCallback(callback);
+        // Ensure that the callback runs in the NgZone since
+        // the `requestIdleCallback` is not currently patched by Zone.js.
+        this.idleId = this.requestIdleCallback(() => this.ngZone.run(callback));
     }
     ngOnDestroy() {
         if (this.idleId !== null) {
