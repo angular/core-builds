@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-31edf79
+ * @license Angular v17.0.0-next.6+sha-5419af6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.6+sha-31edf79');
+const VERSION = new Version('17.0.0-next.6+sha-5419af6');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20486,8 +20486,9 @@ class DeferEventEntry {
  * Registers an interaction trigger.
  * @param trigger Element that is the trigger.
  * @param callback Callback to be invoked when the trigger is interacted with.
+ * @param injector Injector that can be used by the trigger to resolve DI tokens.
  */
-function onInteraction(trigger, callback) {
+function onInteraction(trigger, callback, injector) {
     let entry = interactionTriggers.get(trigger);
     // If this is the first entry for this element, add the listeners.
     if (!entry) {
@@ -20504,9 +20505,13 @@ function onInteraction(trigger, callback) {
         // are referencing it.
         entry = new DeferEventEntry();
         interactionTriggers.set(trigger, entry);
-        for (const name of interactionEventNames) {
-            trigger.addEventListener(name, entry.listener, eventListenerOptions);
-        }
+        // Ensure that the handler runs in the NgZone since it gets
+        // registered in `afterRender` which runs outside.
+        injector.get(NgZone).run(() => {
+            for (const name of interactionEventNames) {
+                trigger.addEventListener(name, entry.listener, eventListenerOptions);
+            }
+        });
     }
     entry.callbacks.add(callback);
     return () => {
@@ -20524,14 +20529,19 @@ function onInteraction(trigger, callback) {
  * Registers a hover trigger.
  * @param trigger Element that is the trigger.
  * @param callback Callback to be invoked when the trigger is hovered over.
+ * @param injector Injector that can be used by the trigger to resolve DI tokens.
  */
-function onHover(trigger, callback) {
+function onHover(trigger, callback, injector) {
     let entry = hoverTriggers.get(trigger);
     // If this is the first entry for this element, add the listener.
     if (!entry) {
         entry = new DeferEventEntry();
-        trigger.addEventListener('mouseenter', entry.listener, eventListenerOptions);
         hoverTriggers.set(trigger, entry);
+        // Ensure that the handler runs in the NgZone since it gets
+        // registered in `afterRender` which runs outside.
+        injector.get(NgZone).run(() => {
+            trigger.addEventListener('mouseenter', entry.listener, eventListenerOptions);
+        });
     }
     entry.callbacks.add(callback);
     return () => {
