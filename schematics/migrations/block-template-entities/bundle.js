@@ -13799,6 +13799,7 @@ var _ControlFlowError = class {
 };
 var _Tokenizer = class {
   constructor(_file, _getTagDefinition, options) {
+    var _a2;
     this._getTagDefinition = _getTagDefinition;
     this._currentTokenStart = null;
     this._currentTokenType = null;
@@ -13814,7 +13815,7 @@ var _Tokenizer = class {
     this._cursor = options.escapedString ? new EscapedCharacterCursor(_file, range) : new PlainCharacterCursor(_file, range);
     this._preserveLineEndings = options.preserveLineEndings || false;
     this._i18nNormalizeLineEndingsInICUs = options.i18nNormalizeLineEndingsInICUs || false;
-    this._tokenizeBlocks = options.tokenizeBlocks || false;
+    this._tokenizeBlocks = (_a2 = options.tokenizeBlocks) != null ? _a2 : true;
     try {
       this._cursor.init();
     } catch (e) {
@@ -19526,23 +19527,6 @@ var HtmlAstToIvyAst = class {
     if (this.processedNodes.has(block)) {
       return null;
     }
-    if (!this.options.enabledBlockTypes.has(block.name)) {
-      let errorMessage;
-      if (isConnectedDeferLoopBlock(block.name)) {
-        errorMessage = `@${block.name} block can only be used after an @defer block.`;
-        this.processedNodes.add(block);
-      } else if (isConnectedForLoopBlock(block.name)) {
-        errorMessage = `@${block.name} block can only be used after an @for block.`;
-        this.processedNodes.add(block);
-      } else if (isConnectedIfLoopBlock(block.name)) {
-        errorMessage = `@${block.name} block can only be used after an @if or @else if block.`;
-        this.processedNodes.add(block);
-      } else {
-        errorMessage = `Unrecognized block @${block.name}.`;
-      }
-      this.reportError(errorMessage, block.sourceSpan);
-      return null;
-    }
     let result = null;
     switch (block.name) {
       case "defer":
@@ -19558,10 +19542,20 @@ var HtmlAstToIvyAst = class {
         result = createIfBlock(block, this.findConnectedBlocks(index, context, isConnectedIfLoopBlock), this, this.bindingParser);
         break;
       default:
-        result = {
-          node: null,
-          errors: [new ParseError(block.sourceSpan, `Unrecognized block @${block.name}.`)]
-        };
+        let errorMessage;
+        if (isConnectedDeferLoopBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @defer block.`;
+          this.processedNodes.add(block);
+        } else if (isConnectedForLoopBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @for block.`;
+          this.processedNodes.add(block);
+        } else if (isConnectedIfLoopBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @if or @else if block.`;
+          this.processedNodes.add(block);
+        } else {
+          errorMessage = `Unrecognized block @${block.name}.`;
+        }
+        result = { node: null, errors: [new ParseError(block.sourceSpan, errorMessage)] };
         break;
     }
     this.errors.push(...result.errors);
@@ -19771,6 +19765,9 @@ function textContents(node) {
     return node.children[0].value;
   }
 }
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/block_syntax_switch.mjs
+var BLOCK_SYNTAX_ENABLED_DEFAULT = true;
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/i18n/context.mjs
 var TagType;
@@ -21394,6 +21391,7 @@ function getTextInterpolationExpression(interpolation) {
   }
 }
 function parseTemplate(template2, templateUrl, options = {}) {
+  var _a2;
   const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat } = options;
   const bindingParser = makeBindingParser(interpolationConfig);
   const htmlParser = new HtmlParser();
@@ -21401,7 +21399,7 @@ function parseTemplate(template2, templateUrl, options = {}) {
     leadingTriviaChars: LEADING_TRIVIA_CHARS
   }, options), {
     tokenizeExpansionForms: true,
-    tokenizeBlocks: options.enabledBlockTypes != null && options.enabledBlockTypes.size > 0
+    tokenizeBlocks: (_a2 = options.enableBlockSyntax) != null ? _a2 : BLOCK_SYNTAX_ENABLED_DEFAULT
   }));
   if (!options.alwaysAttemptHtmlToR3AstConversion && parseResult.errors && parseResult.errors.length > 0) {
     const parsedTemplate2 = {
@@ -21443,10 +21441,7 @@ function parseTemplate(template2, templateUrl, options = {}) {
       rootNodes = visitAll2(new I18nMetaVisitor(interpolationConfig, false), rootNodes);
     }
   }
-  const { nodes, errors, styleUrls, styles, ngContentSelectors, commentNodes } = htmlAstToRender3Ast(rootNodes, bindingParser, {
-    collectCommentNodes: !!options.collectCommentNodes,
-    enabledBlockTypes: options.enabledBlockTypes || /* @__PURE__ */ new Set()
-  });
+  const { nodes, errors, styleUrls, styles, ngContentSelectors, commentNodes } = htmlAstToRender3Ast(rootNodes, bindingParser, { collectCommentNodes: !!options.collectCommentNodes });
   errors.push(...parseResult.errors, ...i18nMetaResult.errors);
   const parsedTemplate = {
     interpolationConfig,
@@ -22728,7 +22723,6 @@ var ResourceLoader = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/jit_compiler_facade.mjs
-var enabledBlockTypes;
 var CompilerFacadeImpl = class {
   constructor(jitEvaluator = new JitEvaluator()) {
     this.jitEvaluator = jitEvaluator;
@@ -23104,7 +23098,7 @@ function convertPipeDeclarationToMetadata(pipe2) {
 }
 function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces, interpolation) {
   const interpolationConfig = interpolation ? InterpolationConfig.fromArray(interpolation) : DEFAULT_INTERPOLATION_CONFIG;
-  const parsed = parseTemplate(template2, sourceMapUrl, { preserveWhitespaces, interpolationConfig, enabledBlockTypes });
+  const parsed = parseTemplate(template2, sourceMapUrl, { preserveWhitespaces, interpolationConfig });
   if (parsed.errors !== null) {
     const errors = parsed.errors.map((err) => err.toString()).join(", ");
     throw new Error(`Errors during JIT compilation of template for ${typeName}: ${errors}`);
@@ -23281,7 +23275,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-1beef49");
+var VERSION2 = new Version("17.0.0-next.6+sha-43e6fb0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23461,6 +23455,13 @@ function runBlockTemplateEntitiesMigration(tree, tsconfigPath, basePath) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {});
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * @license
  * Copyright Google LLC All Rights Reserved.

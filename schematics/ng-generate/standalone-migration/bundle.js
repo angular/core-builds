@@ -14623,6 +14623,7 @@ var _ControlFlowError = class {
 };
 var _Tokenizer = class {
   constructor(_file, _getTagDefinition, options) {
+    var _a2;
     this._getTagDefinition = _getTagDefinition;
     this._currentTokenStart = null;
     this._currentTokenType = null;
@@ -14638,7 +14639,7 @@ var _Tokenizer = class {
     this._cursor = options.escapedString ? new EscapedCharacterCursor(_file, range) : new PlainCharacterCursor(_file, range);
     this._preserveLineEndings = options.preserveLineEndings || false;
     this._i18nNormalizeLineEndingsInICUs = options.i18nNormalizeLineEndingsInICUs || false;
-    this._tokenizeBlocks = options.tokenizeBlocks || false;
+    this._tokenizeBlocks = (_a2 = options.tokenizeBlocks) != null ? _a2 : true;
     try {
       this._cursor.init();
     } catch (e) {
@@ -20350,23 +20351,6 @@ var HtmlAstToIvyAst = class {
     if (this.processedNodes.has(block)) {
       return null;
     }
-    if (!this.options.enabledBlockTypes.has(block.name)) {
-      let errorMessage;
-      if (isConnectedDeferLoopBlock(block.name)) {
-        errorMessage = `@${block.name} block can only be used after an @defer block.`;
-        this.processedNodes.add(block);
-      } else if (isConnectedForLoopBlock(block.name)) {
-        errorMessage = `@${block.name} block can only be used after an @for block.`;
-        this.processedNodes.add(block);
-      } else if (isConnectedIfLoopBlock(block.name)) {
-        errorMessage = `@${block.name} block can only be used after an @if or @else if block.`;
-        this.processedNodes.add(block);
-      } else {
-        errorMessage = `Unrecognized block @${block.name}.`;
-      }
-      this.reportError(errorMessage, block.sourceSpan);
-      return null;
-    }
     let result = null;
     switch (block.name) {
       case "defer":
@@ -20382,10 +20366,20 @@ var HtmlAstToIvyAst = class {
         result = createIfBlock(block, this.findConnectedBlocks(index, context, isConnectedIfLoopBlock), this, this.bindingParser);
         break;
       default:
-        result = {
-          node: null,
-          errors: [new ParseError(block.sourceSpan, `Unrecognized block @${block.name}.`)]
-        };
+        let errorMessage;
+        if (isConnectedDeferLoopBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @defer block.`;
+          this.processedNodes.add(block);
+        } else if (isConnectedForLoopBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @for block.`;
+          this.processedNodes.add(block);
+        } else if (isConnectedIfLoopBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @if or @else if block.`;
+          this.processedNodes.add(block);
+        } else {
+          errorMessage = `Unrecognized block @${block.name}.`;
+        }
+        result = { node: null, errors: [new ParseError(block.sourceSpan, errorMessage)] };
         break;
     }
     this.errors.push(...result.errors);
@@ -20595,6 +20589,9 @@ function textContents(node) {
     return node.children[0].value;
   }
 }
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/block_syntax_switch.mjs
+var BLOCK_SYNTAX_ENABLED_DEFAULT = true;
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/i18n/context.mjs
 var TagType;
@@ -22218,6 +22215,7 @@ function getTextInterpolationExpression(interpolation) {
   }
 }
 function parseTemplate(template2, templateUrl, options = {}) {
+  var _a2;
   const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat } = options;
   const bindingParser = makeBindingParser(interpolationConfig);
   const htmlParser = new HtmlParser();
@@ -22225,7 +22223,7 @@ function parseTemplate(template2, templateUrl, options = {}) {
     leadingTriviaChars: LEADING_TRIVIA_CHARS
   }, options), {
     tokenizeExpansionForms: true,
-    tokenizeBlocks: options.enabledBlockTypes != null && options.enabledBlockTypes.size > 0
+    tokenizeBlocks: (_a2 = options.enableBlockSyntax) != null ? _a2 : BLOCK_SYNTAX_ENABLED_DEFAULT
   }));
   if (!options.alwaysAttemptHtmlToR3AstConversion && parseResult.errors && parseResult.errors.length > 0) {
     const parsedTemplate2 = {
@@ -22267,10 +22265,7 @@ function parseTemplate(template2, templateUrl, options = {}) {
       rootNodes = visitAll2(new I18nMetaVisitor(interpolationConfig, false), rootNodes);
     }
   }
-  const { nodes, errors, styleUrls, styles, ngContentSelectors, commentNodes } = htmlAstToRender3Ast(rootNodes, bindingParser, {
-    collectCommentNodes: !!options.collectCommentNodes,
-    enabledBlockTypes: options.enabledBlockTypes || /* @__PURE__ */ new Set()
-  });
+  const { nodes, errors, styleUrls, styles, ngContentSelectors, commentNodes } = htmlAstToRender3Ast(rootNodes, bindingParser, { collectCommentNodes: !!options.collectCommentNodes });
   errors.push(...parseResult.errors, ...i18nMetaResult.errors);
   const parsedTemplate = {
     interpolationConfig,
@@ -23552,7 +23547,6 @@ var ResourceLoader = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/jit_compiler_facade.mjs
-var enabledBlockTypes;
 var CompilerFacadeImpl = class {
   constructor(jitEvaluator = new JitEvaluator()) {
     this.jitEvaluator = jitEvaluator;
@@ -23928,7 +23922,7 @@ function convertPipeDeclarationToMetadata(pipe2) {
 }
 function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces, interpolation) {
   const interpolationConfig = interpolation ? InterpolationConfig.fromArray(interpolation) : DEFAULT_INTERPOLATION_CONFIG;
-  const parsed = parseTemplate(template2, sourceMapUrl, { preserveWhitespaces, interpolationConfig, enabledBlockTypes });
+  const parsed = parseTemplate(template2, sourceMapUrl, { preserveWhitespaces, interpolationConfig });
   if (parsed.errors !== null) {
     const errors = parsed.errors.map((err) => err.toString()).join(", ");
     throw new Error(`Errors during JIT compilation of template for ${typeName}: ${errors}`);
@@ -24105,7 +24099,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-1beef49");
+var VERSION2 = new Version("17.0.0-next.6+sha-43e6fb0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25122,7 +25116,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-1beef49"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-43e6fb0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25193,7 +25187,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-1beef49"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-43e6fb0"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25425,7 +25419,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-1beef49"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-43e6fb0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25448,7 +25442,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-1beef49"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-43e6fb0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25486,7 +25480,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-1beef49"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-43e6fb0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25510,7 +25504,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-1beef49"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-43e6fb0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25545,7 +25539,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-1beef49"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-43e6fb0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25562,7 +25556,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.6+sha-1beef49");
+var VERSION3 = new Version("17.0.0-next.6+sha-43e6fb0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -33967,8 +33961,7 @@ function parseExtractedTemplate(template2, sourceStr, sourceParseRange, escapedS
     escapedString,
     enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat,
     i18nNormalizeLineEndingsInICUs,
-    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData,
-    enabledBlockTypes: options.enabledBlockTypes
+    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData
   });
   const { nodes: diagNodes } = parseTemplate(sourceStr, sourceMapUrl != null ? sourceMapUrl : "", {
     preserveWhitespaces: true,
@@ -33979,8 +33972,7 @@ function parseExtractedTemplate(template2, sourceStr, sourceParseRange, escapedS
     enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat,
     i18nNormalizeLineEndingsInICUs,
     leadingTriviaChars: [],
-    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData,
-    enabledBlockTypes: options.enabledBlockTypes
+    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData
   });
   return __spreadProps(__spreadValues({}, parsedTemplate), {
     diagNodes,
@@ -34352,7 +34344,7 @@ var EMPTY_ARRAY2 = [];
 var isUsedDirective = (decl) => decl.kind === R3TemplateDependencyKind.Directive;
 var isUsedPipe = (decl) => decl.kind === R3TemplateDependencyKind.Pipe;
 var ComponentDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, enabledBlockTypes2, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode, deferredSymbolTracker) {
+  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode, deferredSymbolTracker) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -34371,7 +34363,6 @@ var ComponentDecoratorHandler = class {
     this.enableI18nLegacyMessageIdFormat = enableI18nLegacyMessageIdFormat;
     this.usePoisonedData = usePoisonedData;
     this.i18nNormalizeLineEndingsInICUs = i18nNormalizeLineEndingsInICUs;
-    this.enabledBlockTypes = enabledBlockTypes2;
     this.moduleResolver = moduleResolver;
     this.cycleAnalyzer = cycleAnalyzer;
     this.cycleHandlingStrategy = cycleHandlingStrategy;
@@ -34395,8 +34386,7 @@ var ComponentDecoratorHandler = class {
     this.extractTemplateOptions = {
       enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
       i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
-      usePoisonedData: this.usePoisonedData,
-      enabledBlockTypes: this.enabledBlockTypes
+      usePoisonedData: this.usePoisonedData
     };
   }
   detect(node, decorators) {
@@ -34549,8 +34539,7 @@ var ComponentDecoratorHandler = class {
       template2 = extractTemplate(node, templateDecl, this.evaluator, this.depTracker, this.resourceLoader, {
         enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
         i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
-        usePoisonedData: this.usePoisonedData,
-        enabledBlockTypes: this.enabledBlockTypes
+        usePoisonedData: this.usePoisonedData
       }, this.compilationMode);
     }
     const templateResource = template2.declaration.isInline ? { path: null, expression: component.get("template") } : {
@@ -42459,7 +42448,7 @@ var NgCompiler = class {
     }
   }
   constructor(adapter, options, inputProgram, programDriver, incrementalStrategy, incrementalCompilation, enableTemplateTypeChecker, usePoisonedData, livePerfRecorder) {
-    var _a2, _b2;
+    var _a2;
     this.adapter = adapter;
     this.options = options;
     this.inputProgram = inputProgram;
@@ -42473,7 +42462,6 @@ var NgCompiler = class {
     this.nonTemplateDiagnostics = null;
     this.delegatingPerfRecorder = new DelegatingPerfRecorder(this.perfRecorder);
     this.enableTemplateTypeChecker = enableTemplateTypeChecker || ((_a2 = options["_enableTemplateTypeChecker"]) != null ? _a2 : false);
-    this.enabledBlockTypes = new Set((_b2 = options["_enabledBlockTypes"]) != null ? _b2 : []);
     this.constructionDiagnostics.push(...this.adapter.constructionDiagnostics, ...verifyCompatibleTypeCheckOptions(this.options));
     this.currentProgram = inputProgram;
     this.closureCompilerEnabled = !!this.options.annotateForClosureCompiler;
@@ -42954,7 +42942,7 @@ var NgCompiler = class {
       throw new Error('JIT mode support ("supportJitMode" option) cannot be disabled in partial compilation mode.');
     }
     const handlers = [
-      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.enabledBlockTypes, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, supportTestBed, compilationMode, deferredSymbolsTracker),
+      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, supportTestBed, compilationMode, deferredSymbolsTracker),
       new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, supportTestBed, compilationMode),
       new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder, supportTestBed, compilationMode),
       new InjectableDecoratorHandler(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, compilationMode),
