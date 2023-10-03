@@ -4260,7 +4260,12 @@ var DefinitionMap = class {
   }
   set(key, value) {
     if (value) {
-      this.values.push({ key, value, quoted: false });
+      const existing = this.values.find((value2) => value2.key === key);
+      if (existing) {
+        existing.value = value;
+      } else {
+        this.values.push({ key, value, quoted: false });
+      }
     }
   }
   toLiteralMap() {
@@ -23276,7 +23281,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-e9c3790");
+var VERSION2 = new Version("17.0.0-next.6+sha-1beef49");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
