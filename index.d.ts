@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-5419af6
+ * @license Angular v17.0.0-next.6+sha-32cfbb4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14310,12 +14310,12 @@ export declare function ɵɵpipe(index: number, pipeName: string): any;
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
- * @param slotOffset the offset in the reserved slot space
+ * @param offset the binding offset
  * @param v1 1st argument to {@link PipeTransform#transform}.
  *
  * @codeGenApi
  */
-export declare function ɵɵpipeBind1(index: number, slotOffset: number, v1: any): any;
+export declare function ɵɵpipeBind1(index: number, offset: number, v1: any): any;
 
 /**
  * Invokes a pipe with 2 arguments.

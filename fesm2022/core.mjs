@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-5419af6
+ * @license Angular v17.0.0-next.6+sha-32cfbb4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.6+sha-5419af6');
+const VERSION = new Version('17.0.0-next.6+sha-32cfbb4');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -27207,17 +27207,17 @@ function getPipeNotFoundErrorMessage(name) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
- * @param slotOffset the offset in the reserved slot space
+ * @param offset the binding offset
  * @param v1 1st argument to {@link PipeTransform#transform}.
  *
  * @codeGenApi
  */
-function ɵɵpipeBind1(index, slotOffset, v1) {
+function ɵɵpipeBind1(index, offset, v1) {
     const adjustedIndex = index + HEADER_OFFSET;
     const lView = getLView();
     const pipeInstance = load(lView, adjustedIndex);
     return isPure(lView, adjustedIndex) ?
-        pureFunction1Internal(lView, getBindingRoot(), slotOffset, pipeInstance.transform, v1, pipeInstance) :
+        pureFunction1Internal(lView, getBindingRoot(), offset, pipeInstance.transform, v1, pipeInstance) :
         pipeInstance.transform(v1);
 }
 /**

@@ -8472,6 +8472,8 @@ function phaseVarCounting(job) {
       if (hasConsumesVarsTrait(op)) {
         varCount += varsUsedByOp(op);
       }
+    }
+    for (const op of unit.ops()) {
       visitExpressionsInOp(op, (expr) => {
         if (!isIrExpression(expr)) {
           return;
@@ -15988,15 +15990,15 @@ var PureFunctionConstant = class extends GenericKeyFn {
   toSharedConstantDeclaration(declName, keyExpr) {
     const fnParams = [];
     for (let idx = 0; idx < this.numArgs; idx++) {
-      fnParams.push(new FnParam("_p" + idx));
+      fnParams.push(new FnParam("a" + idx));
     }
     const returnExpr = transformExpressionsInExpression(keyExpr, (expr) => {
       if (!(expr instanceof PureFunctionParameterExpr)) {
         return expr;
       }
-      return variable("_p" + expr.index);
+      return variable("a" + expr.index);
     }, VisitorContextFlag.None);
-    return new DeclareFunctionStmt(declName, fnParams, [new ReturnStatement(returnExpr)]);
+    return new DeclareVarStmt(declName, new ArrowFunctionExpr(fnParams, returnExpr), void 0, StmtModifier.Final);
   }
 };
 
@@ -23274,7 +23276,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-5419af6");
+var VERSION2 = new Version("17.0.0-next.6+sha-32cfbb4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
