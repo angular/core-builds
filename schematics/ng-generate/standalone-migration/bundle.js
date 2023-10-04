@@ -10320,10 +10320,14 @@ var STYLE_DOT = "style.";
 var CLASS_DOT = "class.";
 var STYLE_BANG = "style!";
 var CLASS_BANG = "class!";
+var BANG_IMPORTANT = "!important";
 function phaseHostStylePropertyParsing(job) {
   for (const op of job.root.update) {
     if (op.kind !== OpKind.Binding) {
       continue;
+    }
+    if (op.name.endsWith(BANG_IMPORTANT)) {
+      op.name = op.name.substring(0, op.name.length - BANG_IMPORTANT.length);
     }
     if (op.name.startsWith(STYLE_DOT)) {
       op.bindingKind = BindingKind.StyleProperty;
@@ -16624,31 +16628,6 @@ function phaseNgContainer(job) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/no_listeners_on_templates.mjs
-function phaseNoListenersOnTemplates(job) {
-  for (const unit of job.units) {
-    let inTemplate = false;
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.Template:
-          inTemplate = true;
-          break;
-        case OpKind.ElementStart:
-        case OpKind.Element:
-        case OpKind.ContainerStart:
-        case OpKind.Container:
-          inTemplate = false;
-          break;
-        case OpKind.Listener:
-          if (inTemplate) {
-            OpList.remove(op);
-          }
-          break;
-      }
-    }
-  }
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/nonbindable.mjs
 function lookupElement3(elements, xref) {
   const el = elements.get(xref);
@@ -18059,39 +18038,52 @@ function phaseStyleBindingSpecialization(cpl) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/temporary_variables.mjs
 function phaseTemporaryVariables(cpl) {
   for (const unit of cpl.units) {
-    let opCount = 0;
-    let generatedStatements = [];
-    for (const op of unit.ops()) {
-      const finalReads = /* @__PURE__ */ new Map();
-      visitExpressionsInOp(op, (expr) => {
-        if (expr instanceof ReadTemporaryExpr) {
-          finalReads.set(expr.xref, expr);
-        }
-      });
-      let count = 0;
-      const assigned = /* @__PURE__ */ new Set();
-      const released = /* @__PURE__ */ new Set();
-      const defs = /* @__PURE__ */ new Map();
-      visitExpressionsInOp(op, (expr) => {
-        if (expr instanceof AssignTemporaryExpr) {
-          if (!assigned.has(expr.xref)) {
-            assigned.add(expr.xref);
-            defs.set(expr.xref, `tmp_${opCount}_${count++}`);
-          }
-          assignName(defs, expr);
-        } else if (expr instanceof ReadTemporaryExpr) {
-          if (finalReads.get(expr.xref) === expr) {
-            released.add(expr.xref);
-            count--;
-          }
-          assignName(defs, expr);
-        }
-      });
-      generatedStatements.push(...Array.from(new Set(defs.values())).map((name) => createStatementOp(new DeclareVarStmt(name))));
-      opCount++;
-    }
-    unit.update.prepend(generatedStatements);
+    unit.create.prepend(generateTemporaries(unit.create));
+    unit.update.prepend(generateTemporaries(unit.update));
   }
+}
+function generateTemporaries(ops) {
+  let opCount = 0;
+  let generatedStatements = [];
+  for (const op of ops) {
+    const finalReads = /* @__PURE__ */ new Map();
+    visitExpressionsInOp(op, (expr, flag) => {
+      if (flag & VisitorContextFlag.InChildOperation) {
+        return;
+      }
+      if (expr instanceof ReadTemporaryExpr) {
+        finalReads.set(expr.xref, expr);
+      }
+    });
+    let count = 0;
+    const assigned = /* @__PURE__ */ new Set();
+    const released = /* @__PURE__ */ new Set();
+    const defs = /* @__PURE__ */ new Map();
+    visitExpressionsInOp(op, (expr, flag) => {
+      if (flag & VisitorContextFlag.InChildOperation) {
+        return;
+      }
+      if (expr instanceof AssignTemporaryExpr) {
+        if (!assigned.has(expr.xref)) {
+          assigned.add(expr.xref);
+          defs.set(expr.xref, `tmp_${opCount}_${count++}`);
+        }
+        assignName(defs, expr);
+      } else if (expr instanceof ReadTemporaryExpr) {
+        if (finalReads.get(expr.xref) === expr) {
+          released.add(expr.xref);
+          count--;
+        }
+        assignName(defs, expr);
+      }
+    });
+    generatedStatements.push(...Array.from(new Set(defs.values())).map((name) => createStatementOp(new DeclareVarStmt(name))));
+    opCount++;
+    if (op.kind === OpKind.Listener) {
+      op.handlerOps.prepend(generateTemporaries(op.handlerOps));
+    }
+  }
+  return generatedStatements;
 }
 function assignName(names, expr) {
   const name = names.get(expr.xref);
@@ -18325,7 +18317,6 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: phaseParseExtractedStyles },
   { kind: CompilationJobKind.Tmpl, fn: phaseRemoveEmptyBindings },
   { kind: CompilationJobKind.Tmpl, fn: phaseConditionals },
-  { kind: CompilationJobKind.Tmpl, fn: phaseNoListenersOnTemplates },
   { kind: CompilationJobKind.Tmpl, fn: phasePipeCreation },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nTextExtraction },
   { kind: CompilationJobKind.Tmpl, fn: phaseApplyI18nExpressions },
@@ -18596,7 +18587,7 @@ function ingestTemplate(unit, tmpl) {
 function ingestContent(unit, content) {
   const op = createProjectionOp(unit.job.allocateXrefId(), content.selector);
   for (const attr of content.attributes) {
-    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, false);
+    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue);
   }
   unit.create.push(op);
 }
@@ -18759,20 +18750,28 @@ function convertAst(ast, job, baseSourceSpan) {
   }
 }
 function ingestBindings(unit, op, element2) {
+  var _a2;
+  let flags = BindingFlags.None;
+  const isPlainTemplate = element2 instanceof Template && splitNsName((_a2 = element2.tagName) != null ? _a2 : "")[1] === "ng-template";
   if (element2 instanceof Template) {
+    flags |= BindingFlags.OnNgTemplateElement;
+    if (isPlainTemplate) {
+      flags |= BindingFlags.BindingTargetsTemplate;
+    }
+    const templateAttrFlags = flags | BindingFlags.BindingTargetsTemplate | BindingFlags.IsStructuralTemplateAttribute;
     for (const attr of element2.templateAttrs) {
       if (attr instanceof TextAttribute) {
-        ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, true);
+        ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, templateAttrFlags | BindingFlags.TextValue);
       } else {
-        ingestBinding(unit, op.xref, attr.name, attr.value, attr.type, attr.unit, attr.securityContext, attr.sourceSpan, false, true);
+        ingestBinding(unit, op.xref, attr.name, attr.value, attr.type, attr.unit, attr.securityContext, attr.sourceSpan, templateAttrFlags);
       }
     }
   }
   for (const attr of element2.attributes) {
-    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, false);
+    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, flags | BindingFlags.TextValue);
   }
   for (const input of element2.inputs) {
-    ingestBinding(unit, op.xref, input.name, input.value, input.type, input.unit, input.securityContext, input.sourceSpan, false, false);
+    ingestBinding(unit, op.xref, input.name, input.value, input.type, input.unit, input.securityContext, input.sourceSpan, flags);
   }
   for (const output of element2.outputs) {
     let listenerOp;
@@ -18780,6 +18779,10 @@ function ingestBindings(unit, op, element2) {
       if (output.phase === null) {
         throw Error("Animation listener should have a phase");
       }
+    }
+    if (element2 instanceof Template && !isPlainTemplate) {
+      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null));
+      continue;
     }
     listenerOp = createListenerOp(op.xref, output.name, op.tag, output.phase, false, output.sourceSpan);
     let handlerExprs;
@@ -18812,9 +18815,21 @@ var BINDING_KINDS = /* @__PURE__ */ new Map([
   [3, BindingKind.StyleProperty],
   [4, BindingKind.Animation]
 ]);
-function ingestBinding(view, xref, name, value, type, unit, securityContext, sourceSpan, isTextAttribute, isTemplateBinding) {
+var BindingFlags;
+(function(BindingFlags2) {
+  BindingFlags2[BindingFlags2["None"] = 0] = "None";
+  BindingFlags2[BindingFlags2["TextValue"] = 1] = "TextValue";
+  BindingFlags2[BindingFlags2["BindingTargetsTemplate"] = 2] = "BindingTargetsTemplate";
+  BindingFlags2[BindingFlags2["IsStructuralTemplateAttribute"] = 4] = "IsStructuralTemplateAttribute";
+  BindingFlags2[BindingFlags2["OnNgTemplateElement"] = 8] = "OnNgTemplateElement";
+})(BindingFlags || (BindingFlags = {}));
+function ingestBinding(view, xref, name, value, type, unit, securityContext, sourceSpan, flags) {
   if (value instanceof ASTWithSource) {
     value = value.ast;
+  }
+  if (flags & BindingFlags.OnNgTemplateElement && !(flags & BindingFlags.BindingTargetsTemplate) && type === 0) {
+    view.create.push(createExtractedAttributeOp(xref, BindingKind.Property, name, null));
+    return;
   }
   let expression;
   if (value instanceof Interpolation) {
@@ -18825,7 +18840,7 @@ function ingestBinding(view, xref, name, value, type, unit, securityContext, sou
     expression = value;
   }
   const kind = BINDING_KINDS.get(type);
-  view.update.push(createBindingOp(xref, kind, name, expression, unit, securityContext, isTextAttribute, isTemplateBinding, sourceSpan));
+  view.update.push(createBindingOp(xref, kind, name, expression, unit, securityContext, !!(flags & BindingFlags.TextValue), !!(flags & BindingFlags.IsStructuralTemplateAttribute), sourceSpan));
 }
 function ingestReferences(op, element2) {
   assertIsArray(op.localRefs);
@@ -24255,7 +24270,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-7068389");
+var VERSION2 = new Version("17.0.0-next.6+sha-422a3db");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25272,7 +25287,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-7068389"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-422a3db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25343,7 +25358,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-7068389"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-422a3db"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25575,7 +25590,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-7068389"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-422a3db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25598,7 +25613,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-7068389"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-422a3db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25636,7 +25651,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-7068389"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-422a3db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25660,7 +25675,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-7068389"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-422a3db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25695,7 +25710,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-7068389"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-422a3db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25712,7 +25727,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.6+sha-7068389");
+var VERSION3 = new Version("17.0.0-next.6+sha-422a3db");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
