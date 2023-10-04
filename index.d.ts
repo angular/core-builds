@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-8e7feef
+ * @license Angular v17.0.0-next.6+sha-d77c4b2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5898,13 +5898,13 @@ declare const enum LViewFlags {
     /** Indicates that the view was created with `signals: true`. */
     SignalView = 4096,
     /**
-     * Index of the current init phase on last 21 bits
-     */
-    IndexWithinInitPhaseIncrementer = 8192,
-    /**
      * This is the count of the bits the 1 was shifted above (base 10)
      */
     IndexWithinInitPhaseShift = 13,
+    /**
+     * Index of the current init phase on last 21 bits
+     */
+    IndexWithinInitPhaseIncrementer = 8192,
     IndexWithinInitPhaseReset = 8191
 }
 
