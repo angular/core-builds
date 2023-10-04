@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-1d871c0
+ * @license Angular v17.0.0-next.6+sha-7068389
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.6+sha-1d871c0');
+const VERSION = new Version('17.0.0-next.6+sha-7068389');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20348,17 +20348,31 @@ function triggerResourceLoading(tDetails, lView) {
             // Update directive and pipe registries to add newly downloaded dependencies.
             const primaryBlockTView = primaryBlockTNode.tView;
             if (directiveDefs.length > 0) {
-                primaryBlockTView.directiveRegistry = primaryBlockTView.directiveRegistry ?
-                    [...primaryBlockTView.directiveRegistry, ...directiveDefs] :
-                    directiveDefs;
+                primaryBlockTView.directiveRegistry =
+                    addDepsToRegistry(primaryBlockTView.directiveRegistry, directiveDefs);
             }
             if (pipeDefs.length > 0) {
-                primaryBlockTView.pipeRegistry = primaryBlockTView.pipeRegistry ?
-                    [...primaryBlockTView.pipeRegistry, ...pipeDefs] :
-                    pipeDefs;
+                primaryBlockTView.pipeRegistry =
+                    addDepsToRegistry(primaryBlockTView.pipeRegistry, pipeDefs);
             }
         }
     });
+}
+/**
+ * Adds downloaded dependencies into a directive or a pipe registry,
+ * making sure that a dependency doesn't yet exist in the registry.
+ */
+function addDepsToRegistry(currentDeps, newDeps) {
+    if (!currentDeps || currentDeps.length === 0) {
+        return newDeps;
+    }
+    const currentDepSet = new Set(currentDeps);
+    for (const dep of newDeps) {
+        currentDepSet.add(dep);
+    }
+    // If `currentDeps` is the same length, there were no new deps and can
+    // return the original array.
+    return (currentDeps.length === currentDepSet.size) ? currentDeps : Array.from(currentDepSet);
 }
 /** Utility function to render placeholder content (if present) */
 function renderPlaceholder(lView, tNode) {
