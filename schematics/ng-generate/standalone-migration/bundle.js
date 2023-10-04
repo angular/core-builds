@@ -24270,7 +24270,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-dde3fda");
+var VERSION2 = new Version("17.0.0-next.6+sha-a7fa253");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25287,7 +25287,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-dde3fda"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-a7fa253"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25358,7 +25358,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-dde3fda"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-a7fa253"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25590,7 +25590,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-dde3fda"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-a7fa253"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25613,7 +25613,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-dde3fda"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-a7fa253"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25651,7 +25651,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-dde3fda"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-a7fa253"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25675,7 +25675,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-dde3fda"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-a7fa253"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25710,7 +25710,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-dde3fda"));
+  definitionMap.set("version", literal("17.0.0-next.6+sha-a7fa253"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25727,7 +25727,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.6+sha-dde3fda");
+var VERSION3 = new Version("17.0.0-next.6+sha-a7fa253");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35976,15 +35976,14 @@ var import_typescript61 = __toESM(require("typescript"), 1);
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/class_extractor.mjs
 var import_typescript60 = __toESM(require("typescript"), 1);
 var ClassExtractor = class {
-  constructor(declaration, reference2, typeChecker) {
+  constructor(declaration, typeChecker) {
     this.declaration = declaration;
-    this.reference = reference2;
     this.typeChecker = typeChecker;
   }
   extract() {
     return {
       name: this.declaration.name.text,
-      entryType: EntryType.UndecoratedClass,
+      entryType: import_typescript60.default.isInterfaceDeclaration(this.declaration) ? EntryType.Interface : EntryType.UndecoratedClass,
       members: this.extractAllClassMembers(this.declaration),
       description: extractJsDocDescription(this.declaration),
       jsdocTags: extractJsDocTags(this.declaration),
@@ -36004,9 +36003,9 @@ var ClassExtractor = class {
     return members;
   }
   extractClassMember(memberDeclaration) {
-    if (import_typescript60.default.isMethodDeclaration(memberDeclaration)) {
+    if (this.isMethod(memberDeclaration)) {
       return this.extractMethod(memberDeclaration);
-    } else if (import_typescript60.default.isPropertyDeclaration(memberDeclaration)) {
+    } else if (this.isProperty(memberDeclaration)) {
       return this.extractClassProperty(memberDeclaration);
     } else if (import_typescript60.default.isAccessor(memberDeclaration)) {
       return this.extractGetterSetter(memberDeclaration);
@@ -36069,12 +36068,19 @@ var ClassExtractor = class {
     return !member.name || !this.isDocumentableMember(member) || !!((_a2 = member.modifiers) == null ? void 0 : _a2.some((mod) => mod.kind === import_typescript60.default.SyntaxKind.PrivateKeyword));
   }
   isDocumentableMember(member) {
-    return import_typescript60.default.isMethodDeclaration(member) || import_typescript60.default.isPropertyDeclaration(member) || import_typescript60.default.isAccessor(member);
+    return this.isMethod(member) || this.isProperty(member) || import_typescript60.default.isAccessor(member);
+  }
+  isProperty(member) {
+    return import_typescript60.default.isPropertyDeclaration(member) || import_typescript60.default.isPropertySignature(member);
+  }
+  isMethod(member) {
+    return import_typescript60.default.isMethodDeclaration(member) || import_typescript60.default.isMethodSignature(member);
   }
 };
 var DirectiveExtractor = class extends ClassExtractor {
   constructor(declaration, reference2, metadata, checker) {
-    super(declaration, reference2, checker);
+    super(declaration, checker);
+    this.reference = reference2;
     this.metadata = metadata;
   }
   extract() {
@@ -36113,7 +36119,8 @@ var DirectiveExtractor = class extends ClassExtractor {
 };
 var PipeExtractor = class extends ClassExtractor {
   constructor(declaration, reference2, metadata, typeChecker) {
-    super(declaration, reference2, typeChecker);
+    super(declaration, typeChecker);
+    this.reference = reference2;
     this.metadata = metadata;
   }
   extract() {
@@ -36126,7 +36133,8 @@ var PipeExtractor = class extends ClassExtractor {
 };
 var NgModuleExtractor = class extends ClassExtractor {
   constructor(declaration, reference2, metadata, typeChecker) {
-    super(declaration, reference2, typeChecker);
+    super(declaration, typeChecker);
+    this.reference = reference2;
     this.metadata = metadata;
   }
   extract() {
@@ -36148,8 +36156,12 @@ function extractClass(classDeclaration, metadataReader, typeChecker) {
   } else if (ngModuleMetadata) {
     extractor = new NgModuleExtractor(classDeclaration, ref, ngModuleMetadata, typeChecker);
   } else {
-    extractor = new ClassExtractor(classDeclaration, ref, typeChecker);
+    extractor = new ClassExtractor(classDeclaration, typeChecker);
   }
+  return extractor.extract();
+}
+function extractInterface(declaration, typeChecker) {
+  const extractor = new ClassExtractor(declaration, typeChecker);
   return extractor.extract();
 }
 
@@ -36187,6 +36199,9 @@ var DocsExtractor = class {
       let entry = void 0;
       if (isNamedClassDeclaration(node)) {
         entry = extractClass(node, this.metadataReader, this.typeChecker);
+      }
+      if (import_typescript61.default.isInterfaceDeclaration(node)) {
+        entry = extractInterface(node, this.typeChecker);
       }
       if (import_typescript61.default.isFunctionDeclaration(node)) {
         const functionExtractor = new FunctionExtractor(node, this.typeChecker);
