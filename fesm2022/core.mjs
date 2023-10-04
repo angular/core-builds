@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-d77c4b2
+ * @license Angular v17.0.0-next.6+sha-7426948
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10907,7 +10907,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.6+sha-d77c4b2');
+const VERSION = new Version('17.0.0-next.6+sha-7426948');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14040,7 +14040,17 @@ class ViewRef$1 {
     get context() {
         return this._lView[CONTEXT];
     }
+    /**
+     * @deprecated Replacing the full context object is not supported. Modify the context
+     *   directly, or consider using a `Proxy` if you need to replace the full object.
+     * // TODO(devversion): Remove this.
+     */
     set context(value) {
+        if (ngDevMode) {
+            // Note: We have a warning message here because the `@deprecated` JSDoc will not be picked
+            // up for assignments on the setter. We want to let users know about the deprecated usage.
+            console.warn('Angular: Replacing the `context` object of an `EmbeddedViewRef` is deprecated.');
+        }
         this._lView[CONTEXT] = value;
     }
     get destroyed() {

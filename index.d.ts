@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-d77c4b2
+ * @license Angular v17.0.0-next.6+sha-7426948
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12446,6 +12446,11 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
      */
     _cdRefInjectingView?: LView<unknown> | undefined);
     get context(): T;
+    /**
+     * @deprecated Replacing the full context object is not supported. Modify the context
+     *   directly, or consider using a `Proxy` if you need to replace the full object.
+     * // TODO(devversion): Remove this.
+     */
     set context(value: T);
     get destroyed(): boolean;
     destroy(): void;
