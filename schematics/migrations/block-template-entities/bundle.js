@@ -3024,7 +3024,14 @@ var AbstractEmitterVisitor = class {
     return null;
   }
   visitInvokeFunctionExpr(expr, ctx) {
+    const shouldParenthesize = expr.fn instanceof ArrowFunctionExpr;
+    if (shouldParenthesize) {
+      ctx.print(expr.fn, "(");
+    }
     expr.fn.visitExpression(this, ctx);
+    if (shouldParenthesize) {
+      ctx.print(expr.fn, ")");
+    }
     ctx.print(expr, `(`);
     this.visitAllExpressions(expr.args, ctx, ",");
     ctx.print(expr, `)`);
@@ -3320,7 +3327,7 @@ function wrapReference(value) {
 }
 function refsToArray(refs, shouldForwardDeclare) {
   const values = literalArr(refs.map((ref) => ref.value));
-  return shouldForwardDeclare ? fn([], [new ReturnStatement(values)]) : values;
+  return shouldForwardDeclare ? arrowFn([], values) : values;
 }
 function createMayBeForwardRefExpression(expression, forwardRef) {
   return { expression, forwardRef };
@@ -3335,7 +3342,7 @@ function convertFromMaybeForwardRefExpression({ expression, forwardRef }) {
   }
 }
 function generateForwardRef(expr) {
-  return importExpr(Identifiers.forwardRef).callFn([fn([], [new ReturnStatement(expr)])]);
+  return importExpr(Identifiers.forwardRef).callFn([arrowFn([], expr)]);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_factory.mjs
@@ -3394,7 +3401,7 @@ function compileFactoryFunction(meta) {
   }
   let factoryFn = fn([new FnParam("t", DYNAMIC_TYPE)], body, INFERRED_TYPE, void 0, `${meta.name}_Factory`);
   if (baseFactoryVar !== null) {
-    factoryFn = fn([], [
+    factoryFn = arrowFn([], [
       new DeclareVarStmt(baseFactoryVar.name),
       new ReturnStatement(factoryFn)
     ]).callFn([], void 0, true);
@@ -4366,10 +4373,7 @@ function compileInjectable(meta, resolveForwardRefs) {
         delegateType: R3FactoryDelegateType.Function
       }));
     } else {
-      result = {
-        statements: [],
-        expression: fn([], [new ReturnStatement(meta.useFactory.callFn([]))])
-      };
+      result = { statements: [], expression: arrowFn([], meta.useFactory.callFn([])) };
     }
   } else if (meta.useValue !== void 0) {
     result = compileFactoryFunction(__spreadProps(__spreadValues({}, factoryMeta), {
@@ -4413,7 +4417,7 @@ function delegateToFactory(type, useType, unwrapForwardRefs) {
   return createFactoryFunction(unwrappedType);
 }
 function createFactoryFunction(type) {
-  return fn([new FnParam("t", DYNAMIC_TYPE)], [new ReturnStatement(type.prop("\u0275fac").callFn([variable("t")]))]);
+  return arrowFn([new FnParam("t", DYNAMIC_TYPE)], type.prop("\u0275fac").callFn([variable("t")]));
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/assertions.mjs
@@ -21789,7 +21793,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     if (constExpressions.length > 0) {
       let constsExpr = literalArr(constExpressions);
       if (prepareStatements.length > 0) {
-        constsExpr = fn([], [...prepareStatements, new ReturnStatement(constsExpr)]);
+        constsExpr = arrowFn([], [...prepareStatements, new ReturnStatement(constsExpr)]);
       }
       definitionMap.set("consts", constsExpr);
     }
@@ -21805,7 +21809,10 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     definitionMap.set("vars", literal(tpl.root.vars));
     if (tpl.consts.length > 0) {
       if (tpl.constsInitializers.length > 0) {
-        definitionMap.set("consts", fn([], [...tpl.constsInitializers, new ReturnStatement(literalArr(tpl.consts))]));
+        definitionMap.set("consts", arrowFn([], [
+          ...tpl.constsInitializers,
+          new ReturnStatement(literalArr(tpl.consts))
+        ]));
       } else {
         definitionMap.set("consts", literalArr(tpl.consts));
       }
@@ -21870,10 +21877,10 @@ function compileDeclarationList(list, mode) {
     case 0:
       return list;
     case 1:
-      return fn([], [new ReturnStatement(list)]);
+      return arrowFn([], list);
     case 2:
       const resolvedList = list.prop("map").callFn([importExpr(Identifiers.resolveForwardRef)]);
-      return fn([], [new ReturnStatement(resolvedList)]);
+      return arrowFn([], resolvedList);
     case 3:
       throw new Error(`Unsupported with an array of pre-resolved dependencies`);
   }
@@ -23424,7 +23431,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-0eae992");
+var VERSION2 = new Version("17.0.0-next.6+sha-e5bca43");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
