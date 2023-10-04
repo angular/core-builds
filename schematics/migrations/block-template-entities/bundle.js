@@ -85,7 +85,7 @@ function getProjectTsConfigPaths(tree) {
           continue;
         }
         for (const [, options] of allTargetOptions(target)) {
-          const tsConfig = options.tsConfig;
+          const tsConfig = options["tsConfig"];
           if (typeof tsConfig !== "string" || !tree.exists(tsConfig)) {
             continue;
           }
@@ -23431,7 +23431,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-650ab4f");
+var VERSION2 = new Version("17.0.0-next.6+sha-8e7feef");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
