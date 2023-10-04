@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-43e6fb0
+ * @license Angular v17.0.0-next.6+sha-07602eb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13425,7 +13425,7 @@ export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any
  * @param errorTmplIndex Index of the template with the error block content.
  * @param loadingConfigIndex Index in the constants array of the configuration of the loading.
  *     block.
- * @param placeholderConfigIndexIndex in the constants array of the configuration of the
+ * @param placeholderConfigIndex Index in the constants array of the configuration of the
  *     placeholder block.
  *
  * @codeGenApi

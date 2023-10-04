@@ -6969,16 +6969,19 @@ var OpKind;
   OpKind2[OpKind2["Pipe"] = 23] = "Pipe";
   OpKind2[OpKind2["Attribute"] = 24] = "Attribute";
   OpKind2[OpKind2["ExtractedAttribute"] = 25] = "ExtractedAttribute";
-  OpKind2[OpKind2["ExtractedMessage"] = 26] = "ExtractedMessage";
-  OpKind2[OpKind2["HostProperty"] = 27] = "HostProperty";
-  OpKind2[OpKind2["Namespace"] = 28] = "Namespace";
-  OpKind2[OpKind2["ProjectionDef"] = 29] = "ProjectionDef";
-  OpKind2[OpKind2["Projection"] = 30] = "Projection";
-  OpKind2[OpKind2["I18nStart"] = 31] = "I18nStart";
-  OpKind2[OpKind2["I18n"] = 32] = "I18n";
-  OpKind2[OpKind2["I18nEnd"] = 33] = "I18nEnd";
-  OpKind2[OpKind2["I18nExpression"] = 34] = "I18nExpression";
-  OpKind2[OpKind2["I18nApply"] = 35] = "I18nApply";
+  OpKind2[OpKind2["Defer"] = 26] = "Defer";
+  OpKind2[OpKind2["DeferSecondaryBlock"] = 27] = "DeferSecondaryBlock";
+  OpKind2[OpKind2["DeferOn"] = 28] = "DeferOn";
+  OpKind2[OpKind2["ExtractedMessage"] = 29] = "ExtractedMessage";
+  OpKind2[OpKind2["HostProperty"] = 30] = "HostProperty";
+  OpKind2[OpKind2["Namespace"] = 31] = "Namespace";
+  OpKind2[OpKind2["ProjectionDef"] = 32] = "ProjectionDef";
+  OpKind2[OpKind2["Projection"] = 33] = "Projection";
+  OpKind2[OpKind2["I18nStart"] = 34] = "I18nStart";
+  OpKind2[OpKind2["I18n"] = 35] = "I18n";
+  OpKind2[OpKind2["I18nEnd"] = 36] = "I18nEnd";
+  OpKind2[OpKind2["I18nExpression"] = 37] = "I18nExpression";
+  OpKind2[OpKind2["I18nApply"] = 38] = "I18nApply";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -7025,6 +7028,12 @@ var SanitizerFn;
   SanitizerFn2[SanitizerFn2["ResourceUrl"] = 4] = "ResourceUrl";
   SanitizerFn2[SanitizerFn2["IframeAttribute"] = 5] = "IframeAttribute";
 })(SanitizerFn || (SanitizerFn = {}));
+var DeferSecondaryKind;
+(function(DeferSecondaryKind2) {
+  DeferSecondaryKind2[DeferSecondaryKind2["Loading"] = 0] = "Loading";
+  DeferSecondaryKind2[DeferSecondaryKind2["Placeholder"] = 1] = "Placeholder";
+  DeferSecondaryKind2[DeferSecondaryKind2["Error"] = 2] = "Error";
+})(DeferSecondaryKind || (DeferSecondaryKind = {}));
 var BindingKind;
 (function(BindingKind2) {
   BindingKind2[BindingKind2["Attribute"] = 0] = "Attribute";
@@ -7042,6 +7051,7 @@ var DependsOnSlotContext = Symbol("DependsOnSlotContext");
 var UsesSlotIndex = Symbol("UsesSlotIndex");
 var ConsumesVarsTrait = Symbol("ConsumesVars");
 var UsesVarOffset = Symbol("UsesVarOffset");
+var HasConst = Symbol("HasConst");
 var TRAIT_CONSUMES_SLOT = {
   [ConsumesSlot]: true,
   slot: null,
@@ -7049,7 +7059,7 @@ var TRAIT_CONSUMES_SLOT = {
 };
 var TRAIT_USES_SLOT_INDEX = {
   [UsesSlotIndex]: true,
-  slot: null
+  targetSlot: null
 };
 var TRAIT_DEPENDS_ON_SLOT_CONTEXT = {
   [DependsOnSlotContext]: true
@@ -7060,6 +7070,10 @@ var TRAIT_CONSUMES_VARS = {
 var TRAIT_USES_VAR_OFFSET = {
   [UsesVarOffset]: true,
   varOffset: null
+};
+var TRAIT_HAS_CONST = {
+  [HasConst]: true,
+  constIndex: null
 };
 function hasConsumesSlotTrait(op) {
   return op[ConsumesSlot] === true;
@@ -7075,6 +7089,9 @@ function hasUsesVarOffsetTrait(expr) {
 }
 function hasUsesSlotIndexTrait(value) {
   return value[UsesSlotIndex] === true;
+}
+function hasConstTrait(value) {
+  return value[HasConst] === true;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/shared.mjs
@@ -7270,7 +7287,7 @@ var _ReferenceExpr = class extends ExpressionBase {
     this.offset = offset;
     this.kind = ExpressionKind.Reference;
     this[_a] = true;
-    this.slot = null;
+    this.targetSlot = null;
   }
   visitExpression() {
   }
@@ -7284,7 +7301,7 @@ var _ReferenceExpr = class extends ExpressionBase {
   }
   clone() {
     const expr = new _ReferenceExpr(this.target, this.offset);
-    expr.slot = this.slot;
+    expr.targetSlot = this.targetSlot;
     return expr;
   }
 };
@@ -7510,7 +7527,7 @@ var _PipeBindingExpr = class extends ExpressionBase {
     this[_d] = true;
     this[_e] = true;
     this[_f] = true;
-    this.slot = null;
+    this.targetSlot = null;
     this.varOffset = null;
   }
   visitExpression(visitor, context) {
@@ -7531,7 +7548,7 @@ var _PipeBindingExpr = class extends ExpressionBase {
   }
   clone() {
     const r = new _PipeBindingExpr(this.target, this.name, this.args.map((a) => a.clone()));
-    r.slot = this.slot;
+    r.targetSlot = this.targetSlot;
     r.varOffset = this.varOffset;
     return r;
   }
@@ -7551,7 +7568,7 @@ var _PipeBindingVariadicExpr = class extends ExpressionBase {
     this[_g] = true;
     this[_h] = true;
     this[_j] = true;
-    this.slot = null;
+    this.targetSlot = null;
     this.varOffset = null;
   }
   visitExpression(visitor, context) {
@@ -7568,7 +7585,7 @@ var _PipeBindingVariadicExpr = class extends ExpressionBase {
   }
   clone() {
     const r = new _PipeBindingVariadicExpr(this.target, this.name, this.args.clone(), this.numArgs);
-    r.slot = this.slot;
+    r.targetSlot = this.targetSlot;
     r.varOffset = this.varOffset;
     return r;
   }
@@ -7776,18 +7793,20 @@ var _SlotLiteralExpr = class extends ExpressionBase {
     this.target = target;
     this.kind = ExpressionKind.SlotLiteralExpr;
     this[_k] = true;
-    this.slot = null;
+    this.targetSlot = null;
   }
   visitExpression(visitor, context) {
   }
   isEquivalent(e) {
-    return e instanceof _SlotLiteralExpr && e.target === this.target && e.slot === this.slot;
+    return e instanceof _SlotLiteralExpr && e.target === this.target && e.targetSlot === this.targetSlot;
   }
   isConstant() {
     return true;
   }
   clone() {
-    return new _SlotLiteralExpr(this.target);
+    const copy = new _SlotLiteralExpr(this.target);
+    copy.targetSlot = this.targetSlot;
+    return copy;
   }
   transformInternalExpressions() {
   }
@@ -7909,6 +7928,9 @@ function transformExpressionsInOp(op, transform2, flags) {
         op.params.set(placeholder, transformExpressionsInExpression(expression, transform2, flags));
       }
       break;
+    case OpKind.Defer:
+    case OpKind.DeferSecondaryBlock:
+    case OpKind.DeferOn:
     case OpKind.Projection:
     case OpKind.ProjectionDef:
     case OpKind.Element:
@@ -8223,13 +8245,13 @@ function createElementStartOp(tag, xref, namespace, i18nPlaceholder, sourceSpan)
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createTemplateOp(xref, tag, namespace, controlFlow, sourceSpan) {
+function createTemplateOp(xref, tag, namespace, generatedInBlock, i18n2, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Template,
     xref,
     attributes: null,
     tag,
-    controlFlow,
+    block: generatedInBlock,
     decls: null,
     vars: null,
     localRefs: [],
@@ -8306,7 +8328,7 @@ function createProjectionDefOp(def) {
   }, NEW_OP);
 }
 function createProjectionOp(xref, selector) {
-  return __spreadValues(__spreadValues(__spreadValues({
+  return __spreadValues(__spreadValues({
     kind: OpKind.Projection,
     xref,
     selector,
@@ -8315,7 +8337,7 @@ function createProjectionOp(xref, selector) {
     localRefs: [],
     nonBindable: false,
     sourceSpan: null
-  }, NEW_OP), TRAIT_CONSUMES_SLOT), TRAIT_USES_SLOT_INDEX);
+  }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
 function createExtractedAttributeOp(target, bindingKind, name, expression) {
   return __spreadValues({
@@ -8325,6 +8347,34 @@ function createExtractedAttributeOp(target, bindingKind, name, expression) {
     name,
     expression
   }, NEW_OP);
+}
+function createDeferOp(xref, main, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.Defer,
+    xref,
+    target: main,
+    loading: null,
+    placeholder: null,
+    error: null,
+    sourceSpan
+  }, NEW_OP), TRAIT_CONSUMES_SLOT), TRAIT_USES_SLOT_INDEX);
+}
+function createDeferSecondaryOp(deferOp, secondaryView, secondaryBlockKind) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.DeferSecondaryBlock,
+    deferOp,
+    target: secondaryView,
+    secondaryBlockKind,
+    constValue: null,
+    makeExpression: literalOrArrayLiteral
+  }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_HAS_CONST);
+}
+function createDeferOnOp(xref, sourceSpan) {
+  return __spreadValues(__spreadValues({
+    kind: OpKind.DeferOn,
+    xref,
+    sourceSpan
+  }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
 function createExtractedMessageOp(owner, expression, statements) {
   return __spreadValues({
@@ -8348,6 +8398,12 @@ function createI18nEndOp(xref) {
     kind: OpKind.I18nEnd,
     xref
   }, NEW_OP);
+}
+function literalOrArrayLiteral(value) {
+  if (Array.isArray(value)) {
+    return literalArr(value.map(literalOrArrayLiteral));
+  }
+  return literal(value, INFERRED_TYPE);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/host.mjs
@@ -8892,15 +8948,16 @@ var BINARY_OPERATORS = /* @__PURE__ */ new Map([
   ["||", BinaryOperator.Or],
   ["+", BinaryOperator.Plus]
 ]);
-var NAMESPACES = /* @__PURE__ */ new Map([["svg", Namespace.SVG], ["math", Namespace.Math]]);
 function namespaceForKey(namespacePrefixKey) {
   var _a2;
+  const NAMESPACES = /* @__PURE__ */ new Map([["svg", Namespace.SVG], ["math", Namespace.Math]]);
   if (namespacePrefixKey === null) {
     return Namespace.HTML;
   }
   return (_a2 = NAMESPACES.get(namespacePrefixKey)) != null ? _a2 : Namespace.HTML;
 }
 function keyForNamespace(namespace) {
+  const NAMESPACES = /* @__PURE__ */ new Map([["svg", Namespace.SVG], ["math", Namespace.Math]]);
   for (const [k, n] of NAMESPACES.entries()) {
     if (n === namespace) {
       return k;
@@ -8914,9 +8971,9 @@ function prefixWithNamespace(strippedTag, namespace) {
   }
   return `:${keyForNamespace(namespace)}:${strippedTag}`;
 }
-function literalOrArrayLiteral(value) {
+function literalOrArrayLiteral2(value) {
   if (Array.isArray(value)) {
-    return literalArr(value.map(literalOrArrayLiteral));
+    return literalArr(value.map(literalOrArrayLiteral2));
   }
   return literal(value, INFERRED_TYPE);
 }
@@ -9035,7 +9092,7 @@ function serializeAttributes({ attributes, bindings, classes, i18n: i18n2, proje
   const attrArray = [...attributes];
   if (projectAs !== null) {
     const parsedR3Selector = parseSelectorToR3Selector(projectAs)[0];
-    attrArray.push(literal(5), literalOrArrayLiteral(parsedR3Selector));
+    attrArray.push(literal(5), literalOrArrayLiteral2(parsedR3Selector));
   }
   if (classes.length > 0) {
     attrArray.push(literal(1), ...classes);
@@ -9279,9 +9336,9 @@ function phaseGenerateProjectionDef(job) {
     let defExpr = null;
     if (selectors.length > 1 || selectors[0] !== "*") {
       const def = selectors.map((s) => s === "*" ? s : parseSelectorToR3Selector(s));
-      defExpr = job.pool.getConstLiteral(literalOrArrayLiteral(def), share);
+      defExpr = job.pool.getConstLiteral(literalOrArrayLiteral2(def), share);
     }
-    job.contentSelectors = job.pool.getConstLiteral(literalOrArrayLiteral(selectors), share);
+    job.contentSelectors = job.pool.getConstLiteral(literalOrArrayLiteral2(selectors), share);
     job.root.create.prepend([createProjectionDefOp(defExpr)]);
   }
 }
@@ -9366,6 +9423,27 @@ function generateVariablesInScopeForView(view, scope) {
     newOps.push(...generateVariablesInScopeForView(view, scope.parent));
   }
   return newOps;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/has_const_trait_collection.mjs
+function phaseConstTraitCollection(job) {
+  const collectGlobalConsts = (e) => {
+    if (e instanceof ExpressionBase && hasConstTrait(e)) {
+      const ea = e;
+      if (ea.constValue !== null) {
+        ea.constIndex = job.addConst(ea.constValue);
+      }
+    }
+    return e;
+  };
+  for (const unit of job.units) {
+    for (const op of unit.ops()) {
+      if (hasConstTrait(op) && op.constValue !== null) {
+        op.constIndex = job.addConst(op.makeExpression(op.constValue));
+      }
+      transformExpressionsInOp(op, collectGlobalConsts, VisitorContextFlag.None);
+    }
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/host_style_property_parsing.mjs
@@ -15571,7 +15649,7 @@ function addNamesToView(unit, baseName, state, compatibility) {
         if (op.handlerFnName !== null) {
           break;
         }
-        if (!op.hostListener && op.slot === null) {
+        if (!op.hostListener && op.targetSlot === null) {
           throw new Error(`Expected a slot to be assigned`);
         }
         let animation = "";
@@ -15582,7 +15660,7 @@ function addNamesToView(unit, baseName, state, compatibility) {
         if (op.hostListener) {
           op.handlerFnName = `${baseName}_${animation}${op.name}_HostBindingHandler`;
         } else {
-          op.handlerFnName = `${unit.fnName}_${op.tag.replace("-", "_")}_${animation}${op.name}_${op.slot}_listener`;
+          op.handlerFnName = `${unit.fnName}_${op.tag.replace("-", "_")}_${animation}${op.name}_${op.targetSlot}_listener`;
         }
         op.handlerFnName = sanitizeIdentifier(op.handlerFnName);
         break;
@@ -16165,6 +16243,25 @@ function text(slot, initialValue, sourceSpan) {
   }
   return call(Identifiers.text, args, sourceSpan);
 }
+function defer(selfSlot, primarySlot, dependencyResolverFn, loadingSlot, placeholderSlot, errorSlot, loadingConfigIndex, placeholderConfigIndex, sourceSpan) {
+  const args = [
+    literal(selfSlot),
+    literal(primarySlot),
+    literal(dependencyResolverFn),
+    literal(loadingSlot),
+    literal(placeholderSlot),
+    literal(errorSlot),
+    literal(loadingConfigIndex),
+    literal(placeholderConfigIndex)
+  ];
+  while (args[args.length - 1].value === null) {
+    args.pop();
+  }
+  return call(Identifiers.defer, args, sourceSpan);
+}
+function deferOn(sourceSpan) {
+  return call(Identifiers.deferOnIdle, [], sourceSpan);
+}
 function projectionDef(def) {
   return call(Identifiers.projectionDef, def ? [def] : [], null);
 }
@@ -16499,6 +16596,7 @@ function phaseReify(cpl) {
   }
 }
 function reifyCreateOperations(unit, ops) {
+  var _a2, _b2, _c2, _d2;
   for (const op of ops) {
     transformExpressionsInOp(op, reifyIrExpression, VisitorContextFlag.None);
     switch (op.kind) {
@@ -16537,7 +16635,7 @@ function reifyCreateOperations(unit, ops) {
           throw new Error(`AssertionError: must be compiling a component`);
         }
         const childView = unit.job.views.get(op.xref);
-        OpList.replace(op, template(op.slot, variable(childView.fnName), childView.decls, childView.vars, op.controlFlow ? null : op.tag, op.attributes, op.sourceSpan));
+        OpList.replace(op, template(op.slot, variable(childView.fnName), childView.decls, childView.vars, op.block ? null : op.tag, op.attributes, op.sourceSpan));
         break;
       case OpKind.DisableBindings:
         OpList.replace(op, disableBindings());
@@ -16571,6 +16669,15 @@ function reifyCreateOperations(unit, ops) {
             OpList.replace(op, namespaceMath());
             break;
         }
+        break;
+      case OpKind.Defer:
+        OpList.replace(op, defer(op.slot, op.targetSlot, null, op.loading && op.loading.targetSlot, op.placeholder && op.placeholder.targetSlot, op.error && op.error.targetSlot, (_b2 = (_a2 = op.loading) == null ? void 0 : _a2.constIndex) != null ? _b2 : null, (_d2 = (_c2 = op.placeholder) == null ? void 0 : _c2.constIndex) != null ? _d2 : null, op.sourceSpan));
+        break;
+      case OpKind.DeferSecondaryBlock:
+        OpList.remove(op);
+        break;
+      case OpKind.DeferOn:
+        OpList.replace(op, deferOn(op.sourceSpan));
         break;
       case OpKind.ProjectionDef:
         OpList.replace(op, projectionDef(op.def));
@@ -16630,7 +16737,7 @@ function reifyUpdateOperations(_unit, ops) {
         OpList.replace(op, i18nExp(op.expression, op.sourceSpan));
         break;
       case OpKind.I18nApply:
-        OpList.replace(op, i18nApply(op.slot, op.sourceSpan));
+        OpList.replace(op, i18nApply(op.targetSlot, op.sourceSpan));
         break;
       case OpKind.InterpolateText:
         OpList.replace(op, textInterpolate(op.interpolation.strings, op.interpolation.expressions, op.sourceSpan));
@@ -16663,10 +16770,10 @@ function reifyUpdateOperations(_unit, ops) {
         if (op.processed === null) {
           throw new Error(`Conditional test was not set.`);
         }
-        if (op.slot === null) {
+        if (op.targetSlot === null) {
           throw new Error(`Conditional slot was not set.`);
         }
-        OpList.replace(op, conditional(op.slot, op.processed, op.contextValue, op.sourceSpan));
+        OpList.replace(op, conditional(op.targetSlot, op.processed, op.contextValue, op.sourceSpan));
         break;
       case OpKind.Statement:
         break;
@@ -16683,7 +16790,7 @@ function reifyIrExpression(expr) {
     case ExpressionKind.NextContext:
       return nextContext(expr.steps);
     case ExpressionKind.Reference:
-      return reference(expr.slot + 1 + expr.offset);
+      return reference(expr.targetSlot + 1 + expr.offset);
     case ExpressionKind.LexicalRead:
       throw new Error(`AssertionError: unresolved LexicalRead of ${expr.name}`);
     case ExpressionKind.RestoreView:
@@ -16718,13 +16825,13 @@ function reifyIrExpression(expr) {
     case ExpressionKind.PureFunctionParameterExpr:
       throw new Error(`AssertionError: expected PureFunctionParameterExpr to have been extracted`);
     case ExpressionKind.PipeBinding:
-      return pipeBind(expr.slot, expr.varOffset, expr.args);
+      return pipeBind(expr.targetSlot, expr.varOffset, expr.args);
     case ExpressionKind.PipeBindingVariadic:
-      return pipeBindV(expr.slot, expr.varOffset, expr.args);
+      return pipeBindV(expr.targetSlot, expr.varOffset, expr.args);
     case ExpressionKind.SanitizerExpr:
       return importExpr(sanitizerIdentifierMap.get(expr.fn));
     case ExpressionKind.SlotLiteralExpr:
-      return literal(expr.slot);
+      return literal(expr.targetSlot);
     default:
       throw new Error(`AssertionError: Unsupported reification of ir.Expression kind: ${ExpressionKind[expr.kind]}`);
   }
@@ -17069,23 +17176,23 @@ function phaseSlotAllocation(job) {
         const childView = job.views.get(op.xref);
         op.decls = childView.decls;
       }
-      if (hasUsesSlotIndexTrait(op) && op.slot === null) {
+      if (hasUsesSlotIndexTrait(op) && op.targetSlot === null) {
         if (!slotMap.has(op.target)) {
           throw new Error(`AssertionError: no slot allocated for ${OpKind[op.kind]} target ${op.target}`);
         }
-        op.slot = slotMap.get(op.target);
+        op.targetSlot = slotMap.get(op.target);
       }
       visitExpressionsInOp(op, (expr) => {
         if (!isIrExpression(expr)) {
           return;
         }
-        if (!hasUsesSlotIndexTrait(expr) || expr.slot !== null) {
+        if (!hasUsesSlotIndexTrait(expr) || expr.targetSlot !== null) {
           return;
         }
         if (!slotMap.has(expr.target)) {
           throw new Error(`AssertionError: no slot allocated for ${expr.constructor.name} target ${expr.target}`);
         }
-        expr.slot = slotMap.get(expr.target);
+        expr.targetSlot = slotMap.get(expr.target);
       });
     }
   }
@@ -17412,6 +17519,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nMessageExtraction },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nConstCollection },
+  { kind: CompilationJobKind.Tmpl, fn: phaseConstTraitCollection },
   { kind: CompilationJobKind.Both, fn: phaseConstCollection },
   { kind: CompilationJobKind.Both, fn: phaseVarCounting },
   { kind: CompilationJobKind.Tmpl, fn: phaseGenerateAdvance },
@@ -17603,6 +17711,8 @@ function ingestNodes(unit, template2) {
       ingestIfBlock(unit, node);
     } else if (node instanceof SwitchBlock) {
       ingestSwitchBlock(unit, node);
+    } else if (node instanceof DeferredBlock) {
+      ingestDeferBlock(unit, node);
     } else {
       throw new Error(`Unsupported template node: ${node.constructor.name}`);
     }
@@ -17641,7 +17751,7 @@ function ingestTemplate(unit, tmpl) {
   if (tmpl.tagName) {
     [namespacePrefix, tagNameWithoutNamespace] = splitNsName(tmpl.tagName);
   }
-  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace != null ? tagNameWithoutNamespace : "ng-template", namespaceForKey(namespacePrefix), false, tmpl.startSourceSpan);
+  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace != null ? tagNameWithoutNamespace : "ng-template", namespaceForKey(namespacePrefix), false, void 0, tmpl.startSourceSpan);
   unit.create.push(tplOp);
   ingestBindings(unit, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
@@ -17693,7 +17803,7 @@ function ingestIfBlock(unit, ifBlock) {
     if (firstXref === null) {
       firstXref = cView.xref;
     }
-    unit.create.push(createTemplateOp(cView.xref, "Conditional", Namespace.HTML, true, ifCase.sourceSpan));
+    unit.create.push(createTemplateOp(cView.xref, "Conditional", Namespace.HTML, true, void 0, ifCase.sourceSpan));
     const caseExpr = ifCase.expression ? convertAst(ifCase.expression, unit.job, null) : null;
     const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, cView.xref, ifCase.expressionAlias);
     conditions.push(conditionalCaseExpr);
@@ -17710,7 +17820,7 @@ function ingestSwitchBlock(unit, switchBlock) {
     if (firstXref === null) {
       firstXref = cView.xref;
     }
-    unit.create.push(createTemplateOp(cView.xref, "Case", Namespace.HTML, true, switchCase.sourceSpan));
+    unit.create.push(createTemplateOp(cView.xref, "Case", Namespace.HTML, true, void 0, switchCase.sourceSpan));
     const caseExpr = switchCase.expression ? convertAst(switchCase.expression, unit.job, switchBlock.startSourceSpan) : null;
     const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, cView.xref);
     conditions.push(conditionalCaseExpr);
@@ -17718,6 +17828,45 @@ function ingestSwitchBlock(unit, switchBlock) {
   }
   const conditional2 = createConditionalOp(firstXref, convertAst(switchBlock.expression, unit.job, null), conditions, switchBlock.sourceSpan);
   unit.update.push(conditional2);
+}
+function ingestDeferView(unit, suffix, children, sourceSpan) {
+  if (children === void 0) {
+    return null;
+  }
+  const secondaryView = unit.job.allocateView(unit.xref);
+  ingestNodes(secondaryView, children);
+  const templateOp = createTemplateOp(secondaryView.xref, `Defer${suffix}`, Namespace.HTML, true, void 0, sourceSpan);
+  unit.create.push(templateOp);
+  return templateOp;
+}
+function ingestDeferBlock(unit, deferBlock) {
+  var _a2, _b2, _c2, _d2, _e2, _f2;
+  const main = ingestDeferView(unit, "", deferBlock.children, deferBlock.sourceSpan);
+  const loading = ingestDeferView(unit, "Loading", (_a2 = deferBlock.loading) == null ? void 0 : _a2.children, (_b2 = deferBlock.loading) == null ? void 0 : _b2.sourceSpan);
+  const placeholder = ingestDeferView(unit, "Placeholder", (_c2 = deferBlock.placeholder) == null ? void 0 : _c2.children, (_d2 = deferBlock.placeholder) == null ? void 0 : _d2.sourceSpan);
+  const error2 = ingestDeferView(unit, "Error", (_e2 = deferBlock.error) == null ? void 0 : _e2.children, (_f2 = deferBlock.error) == null ? void 0 : _f2.sourceSpan);
+  const deferOp = createDeferOp(unit.job.allocateXrefId(), main.xref, deferBlock.sourceSpan);
+  unit.create.push(deferOp);
+  if (loading && deferBlock.loading) {
+    deferOp.loading = createDeferSecondaryOp(deferOp.xref, loading.xref, DeferSecondaryKind.Loading);
+    if (deferBlock.loading.afterTime !== null || deferBlock.loading.minimumTime !== null) {
+      deferOp.loading.constValue = [deferBlock.loading.minimumTime, deferBlock.loading.afterTime];
+    }
+    unit.create.push(deferOp.loading);
+  }
+  if (placeholder && deferBlock.placeholder) {
+    deferOp.placeholder = createDeferSecondaryOp(deferOp.xref, placeholder.xref, DeferSecondaryKind.Placeholder);
+    if (deferBlock.placeholder.minimumTime !== null) {
+      deferOp.placeholder.constValue = [deferBlock.placeholder.minimumTime];
+    }
+    unit.create.push(deferOp.placeholder);
+  }
+  if (error2 && deferBlock.error) {
+    deferOp.error = createDeferSecondaryOp(deferOp.xref, error2.xref, DeferSecondaryKind.Error);
+    unit.create.push(deferOp.error);
+  }
+  const deferOnOp = createDeferOnOp(unit.job.allocateXrefId(), null);
+  unit.create.push(deferOnOp);
 }
 function convertAst(ast, job, baseSourceSpan) {
   if (ast instanceof ASTWithSource) {
@@ -23275,7 +23424,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-43e6fb0");
+var VERSION2 = new Version("17.0.0-next.6+sha-07602eb");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
