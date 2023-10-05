@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-40c5357
+ * @license Angular v17.0.0-next.7+sha-caa8eb2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2515,7 +2515,7 @@ declare enum DeferDependenciesLoadingState {
 declare type DeferredLoadingBlockConfig = [minimumTime: number | null, afterTime: number | null];
 
 /** Configuration object for a placeholder block as it is stored in the component constants. */
-declare type DeferredPlaceholderBlockConfig = [afterTime: number | null];
+declare type DeferredPlaceholderBlockConfig = [minimumTime: number | null];
 
 /**
  * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
