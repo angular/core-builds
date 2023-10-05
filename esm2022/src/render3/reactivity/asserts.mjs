@@ -1,0 +1,26 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { RuntimeError } from '../../errors';
+import { getActiveConsumer } from '../../signals';
+/**
+ * Asserts that the current stack frame is not within a reactive context. Useful
+ * to disallow certain code from running inside a reactive context (see {@link toSignal}).
+ *
+ * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @publicApi
+ */
+export function assertNotInReactiveContext(debugFn, extraContext) {
+    // Taking a `Function` instead of a string name here prevents the unminified name of the function
+    // from being retained in the bundle regardless of minification.
+    if (getActiveConsumer() !== null) {
+        throw new RuntimeError(602 /* RuntimeErrorCode.ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT */, ngDevMode &&
+            `${debugFn.name}() cannot be called from within a reactive context.${extraContext ? ` ${extraContext}` : ''}`);
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXNzZXJ0cy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uLy4uL3BhY2thZ2VzL2NvcmUvc3JjL3JlbmRlcjMvcmVhY3Rpdml0eS9hc3NlcnRzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVILE9BQU8sRUFBQyxZQUFZLEVBQW1CLE1BQU0sY0FBYyxDQUFDO0FBQzVELE9BQU8sRUFBQyxpQkFBaUIsRUFBQyxNQUFNLGVBQWUsQ0FBQztBQUVoRDs7Ozs7OztHQU9HO0FBQ0gsTUFBTSxVQUFVLDBCQUEwQixDQUFDLE9BQWlCLEVBQUUsWUFBcUI7SUFDakYsaUdBQWlHO0lBQ2pHLGdFQUFnRTtJQUNoRSxJQUFJLGlCQUFpQixFQUFFLEtBQUssSUFBSSxFQUFFO1FBQ2hDLE1BQU0sSUFBSSxZQUFZLG1FQUVsQixTQUFTO1lBQ0wsR0FBRyxPQUFPLENBQUMsSUFBSSxzREFDWCxZQUFZLENBQUMsQ0FBQyxDQUFDLElBQUksWUFBWSxFQUFFLENBQUMsQ0FBQyxDQUFDLEVBQUUsRUFBRSxDQUFDLENBQUM7S0FDdkQ7QUFDSCxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBMTEMgQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbmltcG9ydCB7UnVudGltZUVycm9yLCBSdW50aW1lRXJyb3JDb2RlfSBmcm9tICcuLi8uLi9lcnJvcnMnO1xuaW1wb3J0IHtnZXRBY3RpdmVDb25zdW1lcn0gZnJvbSAnLi4vLi4vc2lnbmFscyc7XG5cbi8qKlxuICogQXNzZXJ0cyB0aGF0IHRoZSBjdXJyZW50IHN0YWNrIGZyYW1lIGlzIG5vdCB3aXRoaW4gYSByZWFjdGl2ZSBjb250ZXh0LiBVc2VmdWxcbiAqIHRvIGRpc2FsbG93IGNlcnRhaW4gY29kZSBmcm9tIHJ1bm5pbmcgaW5zaWRlIGEgcmVhY3RpdmUgY29udGV4dCAoc2VlIHtAbGluayB0b1NpZ25hbH0pLlxuICpcbiAqIEBwYXJhbSBkZWJ1Z0ZuIGEgcmVmZXJlbmNlIHRvIHRoZSBmdW5jdGlvbiBtYWtpbmcgdGhlIGFzc2VydGlvbiAodXNlZCBmb3IgdGhlIGVycm9yIG1lc3NhZ2UpLlxuICpcbiAqIEBwdWJsaWNBcGlcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGFzc2VydE5vdEluUmVhY3RpdmVDb250ZXh0KGRlYnVnRm46IEZ1bmN0aW9uLCBleHRyYUNvbnRleHQ/OiBzdHJpbmcpOiB2b2lkIHtcbiAgLy8gVGFraW5nIGEgYEZ1bmN0aW9uYCBpbnN0ZWFkIG9mIGEgc3RyaW5nIG5hbWUgaGVyZSBwcmV2ZW50cyB0aGUgdW5taW5pZmllZCBuYW1lIG9mIHRoZSBmdW5jdGlvblxuICAvLyBmcm9tIGJlaW5nIHJldGFpbmVkIGluIHRoZSBidW5kbGUgcmVnYXJkbGVzcyBvZiBtaW5pZmljYXRpb24uXG4gIGlmIChnZXRBY3RpdmVDb25zdW1lcigpICE9PSBudWxsKSB7XG4gICAgdGhyb3cgbmV3IFJ1bnRpbWVFcnJvcihcbiAgICAgICAgUnVudGltZUVycm9yQ29kZS5BU1NFUlRJT05fTk9UX0lOU0lERV9SRUFDVElWRV9DT05URVhULFxuICAgICAgICBuZ0Rldk1vZGUgJiZcbiAgICAgICAgICAgIGAke2RlYnVnRm4ubmFtZX0oKSBjYW5ub3QgYmUgY2FsbGVkIGZyb20gd2l0aGluIGEgcmVhY3RpdmUgY29udGV4dC4ke1xuICAgICAgICAgICAgICAgIGV4dHJhQ29udGV4dCA/IGAgJHtleHRyYUNvbnRleHR9YCA6ICcnfWApO1xuICB9XG59XG4iXX0=

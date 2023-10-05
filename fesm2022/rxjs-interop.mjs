@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.0.0-next.7+sha-2da3551
+ * @license Angular v17.0.0-next.7+sha-ced66d4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { assertInInjectionContext, inject, DestroyRef, Injector, effect, untracked, signal, ɵRuntimeError, computed } from '@angular/core';
+import { assertInInjectionContext, inject, DestroyRef, Injector, effect, untracked, assertNotInReactiveContext, signal, ɵRuntimeError, computed } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -64,6 +64,9 @@ function toObservable(source, options) {
 }
 
 function toSignal(source, options) {
+    ngDevMode &&
+        assertNotInReactiveContext(toSignal, 'Invoking `toSignal` causes new subscriptions every time. ' +
+            'Consider moving `toSignal` outside of the reactive context and read the signal value where needed.');
     const requiresCleanup = !options?.manualCleanup;
     requiresCleanup && !options?.injector && assertInInjectionContext(toSignal);
     const cleanupRef = requiresCleanup ? options?.injector?.get(DestroyRef) ?? inject(DestroyRef) : null;
@@ -78,19 +81,23 @@ function toSignal(source, options) {
         // If an initial value was passed, use it. Otherwise, use `undefined` as the initial value.
         state = signal({ kind: 1 /* StateKind.Value */, value: options?.initialValue });
     }
-    untracked(() => {
-        const sub = source.subscribe({
-            next: value => state.set({ kind: 1 /* StateKind.Value */, value }),
-            error: error => state.set({ kind: 2 /* StateKind.Error */, error }),
-            // Completion of the Observable is meaningless to the signal. Signals don't have a concept of
-            // "complete".
-        });
-        if (ngDevMode && options?.requireSync && state().kind === 0 /* StateKind.NoValue */) {
-            throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
-        }
-        // Unsubscribe when the current context is destroyed, if requested.
-        cleanupRef?.onDestroy(sub.unsubscribe.bind(sub));
+    // Note: This code cannot run inside a reactive context (see assertion above). If we'd support
+    // this, we would subscribe to the observable outside of the current reactive context, avoiding
+    // that side-effect signal reads/writes are attribute to the current consumer. The current
+    // consumer only needs to be notified when the `state` signal changes through the observable
+    // subscription. Additional context (related to async pipe):
+    // https://github.com/angular/angular/pull/50522.
+    const sub = source.subscribe({
+        next: value => state.set({ kind: 1 /* StateKind.Value */, value }),
+        error: error => state.set({ kind: 2 /* StateKind.Error */, error }),
+        // Completion of the Observable is meaningless to the signal. Signals don't have a concept of
+        // "complete".
     });
+    if (ngDevMode && options?.requireSync && state().kind === 0 /* StateKind.NoValue */) {
+        throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
+    }
+    // Unsubscribe when the current context is destroyed, if requested.
+    cleanupRef?.onDestroy(sub.unsubscribe.bind(sub));
     // The actual returned signal is a `computed` of the `State` signal, which maps the various states
     // to either values or errors.
     return computed(() => {

@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-2da3551
+ * @license Angular v17.0.0-next.7+sha-ced66d4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -751,6 +751,17 @@ export declare function asNativeElements(debugEls: DebugElement[]): any;
  * @publicApi
  */
 export declare function assertInInjectionContext(debugFn: Function): void;
+
+
+/**
+ * Asserts that the current stack frame is not within a reactive context. Useful
+ * to disallow certain code from running inside a reactive context (see {@link toSignal}).
+ *
+ * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @publicApi
+ */
+export declare function assertNotInReactiveContext(debugFn: Function, extraContext?: string): void;
 
 /**
  * Checks that there is currently a platform that contains the given token as a provider.
@@ -12214,6 +12225,7 @@ export declare const enum ɵRuntimeErrorCode {
     MISSING_SSR_CONTENT_INTEGRITY_MARKER = -507,
     SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
     REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
+    ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT = 602,
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
