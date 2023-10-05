@@ -4273,6 +4273,15 @@ var IfBlockBranch = class {
     return visitor.visitIfBlockBranch(this);
   }
 };
+var UnknownBlock = class {
+  constructor(name, sourceSpan) {
+    this.name = name;
+    this.sourceSpan = sourceSpan;
+  }
+  visit(visitor) {
+    return visitor.visitUnknownBlock(this);
+  }
+};
 var Template = class {
   constructor(tagName, attributes, inputs, outputs, templateAttrs, children, references, variables, sourceSpan, startSourceSpan, endSourceSpan, i18n2) {
     this.tagName = tagName;
@@ -4410,6 +4419,8 @@ var RecursiveVisitor = class {
   visitIcu(icu) {
   }
   visitDeferredTrigger(trigger) {
+  }
+  visitUnknownBlock(block) {
   }
 };
 function visitAll(visitor, nodes) {
@@ -14767,7 +14778,7 @@ var _Tokenizer = class {
         this.handleError(e);
       }
     }
-    this._beginToken(28);
+    this._beginToken(29);
     this._endToken([]);
   }
   _getBlockName() {
@@ -14787,17 +14798,24 @@ var _Tokenizer = class {
   }
   _consumeBlockStart(start) {
     this._beginToken(24, start);
-    this._endToken([this._getBlockName()]);
+    const startToken = this._endToken([this._getBlockName()]);
     if (this._cursor.peek() === $LPAREN) {
       this._cursor.advance();
       this._consumeBlockParameters();
       this._attemptCharCodeUntilFn(isNotWhitespace);
-      this._requireCharCode($RPAREN);
-      this._attemptCharCodeUntilFn(isNotWhitespace);
+      if (this._attemptCharCode($RPAREN)) {
+        this._attemptCharCodeUntilFn(isNotWhitespace);
+      } else {
+        startToken.type = 28;
+        return;
+      }
     }
-    this._beginToken(25);
-    this._requireCharCode($LBRACE);
-    this._endToken([]);
+    if (this._attemptCharCode($LBRACE)) {
+      this._beginToken(25);
+      this._endToken([]);
+    } else {
+      startToken.type = 28;
+    }
   }
   _consumeBlockEnd(start) {
     this._beginToken(26, start);
@@ -15629,7 +15647,7 @@ var _TreeBuilder = class {
     this._advance();
   }
   build() {
-    while (this._peek.type !== 28) {
+    while (this._peek.type !== 29) {
       if (this._peek.type === 0 || this._peek.type === 4) {
         this._consumeStartTag(this._advance());
       } else if (this._peek.type === 3) {
@@ -15651,6 +15669,9 @@ var _TreeBuilder = class {
       } else if (this._peek.type === 26) {
         this._closeVoidElement();
         this._consumeBlockClose(this._advance());
+      } else if (this._peek.type === 28) {
+        this._closeVoidElement();
+        this._consumeIncompleteBlock(this._advance());
       } else {
         this._advance();
       }
@@ -15715,7 +15736,7 @@ var _TreeBuilder = class {
     if (!exp)
       return null;
     const end = this._advance();
-    exp.push({ type: 28, parts: [], sourceSpan: end.sourceSpan });
+    exp.push({ type: 29, parts: [], sourceSpan: end.sourceSpan });
     const expansionCaseParser = new _TreeBuilder(exp, this.getTagDefinition);
     expansionCaseParser.build();
     if (expansionCaseParser.errors.length > 0) {
@@ -15751,7 +15772,7 @@ var _TreeBuilder = class {
           return null;
         }
       }
-      if (this._peek.type === 28) {
+      if (this._peek.type === 29) {
         this.errors.push(TreeError.create(null, start.sourceSpan, `Invalid ICU message. Missing '}'.`));
         return null;
       }
@@ -15903,14 +15924,25 @@ var _TreeBuilder = class {
     const startSpan = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
     const block = new Block(token.parts[0], parameters, [], span, startSpan);
     this._pushContainer(block, false);
-    return block;
   }
   _consumeBlockClose(token) {
-    const previousContainer = this._getContainer();
     if (!this._popContainer(null, Block, token.sourceSpan)) {
-      const context = previousContainer instanceof Element2 ? `There is an unclosed "${previousContainer.name}" HTML tag that may have to be closed first.` : `The block may have been closed earlier.`;
-      this.errors.push(TreeError.create(null, token.sourceSpan, `Unexpected closing block. ${context}`));
+      this.errors.push(TreeError.create(null, token.sourceSpan, `Unexpected closing block. The block may have been closed earlier. If you meant to write the } character, you should use the "&#125;" HTML entity instead.`));
     }
+  }
+  _consumeIncompleteBlock(token) {
+    const parameters = [];
+    while (this._peek.type === 27) {
+      const paramToken = this._advance();
+      parameters.push(new BlockParameter(paramToken.parts[0], paramToken.sourceSpan));
+    }
+    const end = this._peek.sourceSpan.fullStart;
+    const span = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
+    const startSpan = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
+    const block = new Block(token.parts[0], parameters, [], span, startSpan);
+    this._pushContainer(block, false);
+    this._popContainer(null, Block, null);
+    this.errors.push(TreeError.create(token.parts[0], span, `Incomplete block "${token.parts[0]}". If you meant to write the @ character, you should use the "&#64;" HTML entity instead.`));
   }
   _getContainer() {
     return this._containerStack.length > 0 ? this._containerStack[this._containerStack.length - 1] : null;
@@ -20547,7 +20579,10 @@ var HtmlAstToIvyAst = class {
         } else {
           errorMessage = `Unrecognized block @${block.name}.`;
         }
-        result = { node: null, errors: [new ParseError(block.sourceSpan, errorMessage)] };
+        result = {
+          node: new UnknownBlock(block.name, block.sourceSpan),
+          errors: [new ParseError(block.sourceSpan, errorMessage)]
+        };
         break;
     }
     this.errors.push(...result.errors);
@@ -21008,6 +21043,7 @@ var TemplateDefinitionBuilder = class {
     this.visitIfBlockBranch = invalid;
     this.visitSwitchBlockCase = invalid;
     this.visitForLoopBlockEmpty = invalid;
+    this.visitUnknownBlock = invalid;
     this._bindingScope = parentBindingScope.nestedScope(level);
     this.fileBasedI18nSuffix = relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_") + "_";
     this._valueConverter = new ValueConverter(constantPool, () => this.allocateDataSlot(), (numSlots) => this.allocatePureFunctionSlots(numSlots), (name, localName, slot, value) => {
@@ -23244,6 +23280,8 @@ var Scope = class {
   }
   visitDeferredTrigger(trigger) {
   }
+  visitUnknownBlock(block) {
+  }
   maybeDeclare(thing) {
     if (!this.namedEntities.has(thing.name)) {
       this.namedEntities.set(thing.name, thing);
@@ -23402,6 +23440,8 @@ var DirectiveBinder = class {
   }
   visitDeferredTrigger(trigger) {
   }
+  visitUnknownBlock(block) {
+  }
 };
 var TemplateBinder = class extends RecursiveAstVisitor2 {
   constructor(bindings, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, rootNode, level) {
@@ -23488,6 +23528,8 @@ var TemplateBinder = class extends RecursiveAstVisitor2 {
   visitContent(content) {
   }
   visitTextAttribute(attribute2) {
+  }
+  visitUnknownBlock(block) {
   }
   visitIcu(icu) {
     Object.keys(icu.vars).forEach((key) => icu.vars[key].visit(this));
@@ -24270,7 +24312,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-ced66d4");
+var VERSION2 = new Version("17.0.0-next.7+sha-40c5357");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25287,7 +25329,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-ced66d4"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-40c5357"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25358,7 +25400,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-ced66d4"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-40c5357"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25590,7 +25632,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-ced66d4"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-40c5357"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25613,7 +25655,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-ced66d4"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-40c5357"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25651,7 +25693,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-ced66d4"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-40c5357"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25675,7 +25717,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-ced66d4"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-40c5357"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25710,7 +25752,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-ced66d4"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-40c5357"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25727,7 +25769,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.7+sha-ced66d4");
+var VERSION3 = new Version("17.0.0-next.7+sha-40c5357");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -42195,6 +42237,8 @@ var TemplateVisitor2 = class extends RecursiveAstVisitor2 {
   visitReference(reference2) {
   }
   visitTextAttribute(attribute2) {
+  }
+  visitUnknownBlock(block) {
   }
   visitBoundAttribute(attribute2) {
     this.visitAst(attribute2.value);
