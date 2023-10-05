@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.6+sha-ee0d04b
+ * @license Angular v17.0.0-next.7+sha-0d3373b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5898,13 +5898,13 @@ declare const enum LViewFlags {
     /** Indicates that the view was created with `signals: true`. */
     SignalView = 4096,
     /**
-     * Index of the current init phase on last 21 bits
-     */
-    IndexWithinInitPhaseIncrementer = 8192,
-    /**
      * This is the count of the bits the 1 was shifted above (base 10)
      */
     IndexWithinInitPhaseShift = 13,
+    /**
+     * Index of the current init phase on last 21 bits
+     */
+    IndexWithinInitPhaseIncrementer = 8192,
     IndexWithinInitPhaseReset = 8191
 }
 
@@ -12446,6 +12446,11 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
      */
     _cdRefInjectingView?: LView<unknown> | undefined);
     get context(): T;
+    /**
+     * @deprecated Replacing the full context object is not supported. Modify the context
+     *   directly, or consider using a `Proxy` if you need to replace the full object.
+     * // TODO(devversion): Remove this.
+     */
     set context(value: T);
     get destroyed(): boolean;
     destroy(): void;
@@ -13425,7 +13430,7 @@ export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any
  * @param errorTmplIndex Index of the template with the error block content.
  * @param loadingConfigIndex Index in the constants array of the configuration of the loading.
  *     block.
- * @param placeholderConfigIndexIndex in the constants array of the configuration of the
+ * @param placeholderConfigIndex Index in the constants array of the configuration of the
  *     placeholder block.
  *
  * @codeGenApi
@@ -14310,12 +14315,12 @@ export declare function ɵɵpipe(index: number, pipeName: string): any;
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
- * @param slotOffset the offset in the reserved slot space
+ * @param offset the binding offset
  * @param v1 1st argument to {@link PipeTransform#transform}.
  *
  * @codeGenApi
  */
-export declare function ɵɵpipeBind1(index: number, slotOffset: number, v1: any): any;
+export declare function ɵɵpipeBind1(index: number, offset: number, v1: any): any;
 
 /**
  * Invokes a pipe with 2 arguments.

@@ -3519,7 +3519,14 @@ var AbstractEmitterVisitor = class {
     return null;
   }
   visitInvokeFunctionExpr(expr, ctx) {
+    const shouldParenthesize = expr.fn instanceof ArrowFunctionExpr;
+    if (shouldParenthesize) {
+      ctx.print(expr.fn, "(");
+    }
     expr.fn.visitExpression(this, ctx);
+    if (shouldParenthesize) {
+      ctx.print(expr.fn, ")");
+    }
     ctx.print(expr, `(`);
     this.visitAllExpressions(expr.args, ctx, ",");
     ctx.print(expr, `)`);
@@ -3818,7 +3825,7 @@ function wrapReference(value) {
 }
 function refsToArray(refs, shouldForwardDeclare) {
   const values = literalArr(refs.map((ref) => ref.value));
-  return shouldForwardDeclare ? fn([], [new ReturnStatement(values)]) : values;
+  return shouldForwardDeclare ? arrowFn([], values) : values;
 }
 function createMayBeForwardRefExpression(expression, forwardRef) {
   return { expression, forwardRef };
@@ -3833,7 +3840,7 @@ function convertFromMaybeForwardRefExpression({ expression, forwardRef }) {
   }
 }
 function generateForwardRef(expr) {
-  return importExpr(Identifiers.forwardRef).callFn([fn([], [new ReturnStatement(expr)])]);
+  return importExpr(Identifiers.forwardRef).callFn([arrowFn([], expr)]);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_factory.mjs
@@ -3892,7 +3899,7 @@ function compileFactoryFunction(meta) {
   }
   let factoryFn = fn([new FnParam("t", DYNAMIC_TYPE)], body, INFERRED_TYPE, void 0, `${meta.name}_Factory`);
   if (baseFactoryVar !== null) {
-    factoryFn = fn([], [
+    factoryFn = arrowFn([], [
       new DeclareVarStmt(baseFactoryVar.name),
       new ReturnStatement(factoryFn)
     ]).callFn([], void 0, true);
@@ -5125,7 +5132,12 @@ var DefinitionMap = class {
   }
   set(key, value) {
     if (value) {
-      this.values.push({ key, value, quoted: false });
+      const existing = this.values.find((value2) => value2.key === key);
+      if (existing) {
+        existing.value = value;
+      } else {
+        this.values.push({ key, value, quoted: false });
+      }
     }
   }
   toLiteralMap() {
@@ -5226,10 +5238,7 @@ function compileInjectable(meta, resolveForwardRefs) {
         delegateType: R3FactoryDelegateType.Function
       }));
     } else {
-      result = {
-        statements: [],
-        expression: fn([], [new ReturnStatement(meta.useFactory.callFn([]))])
-      };
+      result = { statements: [], expression: arrowFn([], meta.useFactory.callFn([])) };
     }
   } else if (meta.useValue !== void 0) {
     result = compileFactoryFunction(__spreadProps(__spreadValues({}, factoryMeta), {
@@ -5273,7 +5282,7 @@ function delegateToFactory(type, useType, unwrapForwardRefs) {
   return createFactoryFunction(unwrappedType);
 }
 function createFactoryFunction(type) {
-  return fn([new FnParam("t", DYNAMIC_TYPE)], [new ReturnStatement(type.prop("\u0275fac").callFn([variable("t")]))]);
+  return arrowFn([new FnParam("t", DYNAMIC_TYPE)], type.prop("\u0275fac").callFn([variable("t")]));
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/assertions.mjs
@@ -7829,14 +7838,19 @@ var OpKind;
   OpKind2[OpKind2["Pipe"] = 23] = "Pipe";
   OpKind2[OpKind2["Attribute"] = 24] = "Attribute";
   OpKind2[OpKind2["ExtractedAttribute"] = 25] = "ExtractedAttribute";
-  OpKind2[OpKind2["ExtractedMessage"] = 26] = "ExtractedMessage";
-  OpKind2[OpKind2["HostProperty"] = 27] = "HostProperty";
-  OpKind2[OpKind2["Namespace"] = 28] = "Namespace";
-  OpKind2[OpKind2["ProjectionDef"] = 29] = "ProjectionDef";
-  OpKind2[OpKind2["Projection"] = 30] = "Projection";
-  OpKind2[OpKind2["I18nStart"] = 31] = "I18nStart";
-  OpKind2[OpKind2["I18n"] = 32] = "I18n";
-  OpKind2[OpKind2["I18nEnd"] = 33] = "I18nEnd";
+  OpKind2[OpKind2["Defer"] = 26] = "Defer";
+  OpKind2[OpKind2["DeferSecondaryBlock"] = 27] = "DeferSecondaryBlock";
+  OpKind2[OpKind2["DeferOn"] = 28] = "DeferOn";
+  OpKind2[OpKind2["ExtractedMessage"] = 29] = "ExtractedMessage";
+  OpKind2[OpKind2["HostProperty"] = 30] = "HostProperty";
+  OpKind2[OpKind2["Namespace"] = 31] = "Namespace";
+  OpKind2[OpKind2["ProjectionDef"] = 32] = "ProjectionDef";
+  OpKind2[OpKind2["Projection"] = 33] = "Projection";
+  OpKind2[OpKind2["I18nStart"] = 34] = "I18nStart";
+  OpKind2[OpKind2["I18n"] = 35] = "I18n";
+  OpKind2[OpKind2["I18nEnd"] = 36] = "I18nEnd";
+  OpKind2[OpKind2["I18nExpression"] = 37] = "I18nExpression";
+  OpKind2[OpKind2["I18nApply"] = 38] = "I18nApply";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -7861,6 +7875,7 @@ var ExpressionKind;
   ExpressionKind2[ExpressionKind2["ReadTemporaryExpr"] = 18] = "ReadTemporaryExpr";
   ExpressionKind2[ExpressionKind2["SanitizerExpr"] = 19] = "SanitizerExpr";
   ExpressionKind2[ExpressionKind2["SlotLiteralExpr"] = 20] = "SlotLiteralExpr";
+  ExpressionKind2[ExpressionKind2["ConditionalCase"] = 21] = "ConditionalCase";
 })(ExpressionKind || (ExpressionKind = {}));
 var SemanticVariableKind;
 (function(SemanticVariableKind2) {
@@ -7882,6 +7897,12 @@ var SanitizerFn;
   SanitizerFn2[SanitizerFn2["ResourceUrl"] = 4] = "ResourceUrl";
   SanitizerFn2[SanitizerFn2["IframeAttribute"] = 5] = "IframeAttribute";
 })(SanitizerFn || (SanitizerFn = {}));
+var DeferSecondaryKind;
+(function(DeferSecondaryKind2) {
+  DeferSecondaryKind2[DeferSecondaryKind2["Loading"] = 0] = "Loading";
+  DeferSecondaryKind2[DeferSecondaryKind2["Placeholder"] = 1] = "Placeholder";
+  DeferSecondaryKind2[DeferSecondaryKind2["Error"] = 2] = "Error";
+})(DeferSecondaryKind || (DeferSecondaryKind = {}));
 var BindingKind;
 (function(BindingKind2) {
   BindingKind2[BindingKind2["Attribute"] = 0] = "Attribute";
@@ -7899,6 +7920,7 @@ var DependsOnSlotContext = Symbol("DependsOnSlotContext");
 var UsesSlotIndex = Symbol("UsesSlotIndex");
 var ConsumesVarsTrait = Symbol("ConsumesVars");
 var UsesVarOffset = Symbol("UsesVarOffset");
+var HasConst = Symbol("HasConst");
 var TRAIT_CONSUMES_SLOT = {
   [ConsumesSlot]: true,
   slot: null,
@@ -7906,7 +7928,7 @@ var TRAIT_CONSUMES_SLOT = {
 };
 var TRAIT_USES_SLOT_INDEX = {
   [UsesSlotIndex]: true,
-  slot: null
+  targetSlot: null
 };
 var TRAIT_DEPENDS_ON_SLOT_CONTEXT = {
   [DependsOnSlotContext]: true
@@ -7917,6 +7939,10 @@ var TRAIT_CONSUMES_VARS = {
 var TRAIT_USES_VAR_OFFSET = {
   [UsesVarOffset]: true,
   varOffset: null
+};
+var TRAIT_HAS_CONST = {
+  [HasConst]: true,
+  constIndex: null
 };
 function hasConsumesSlotTrait(op) {
   return op[ConsumesSlot] === true;
@@ -7932,6 +7958,9 @@ function hasUsesVarOffsetTrait(expr) {
 }
 function hasUsesSlotIndexTrait(value) {
   return value[UsesSlotIndex] === true;
+}
+function hasConstTrait(value) {
+  return value[HasConst] === true;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/shared.mjs
@@ -7956,11 +7985,12 @@ var NEW_OP = {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/update.mjs
-function createInterpolateTextOp(xref, interpolation, sourceSpan) {
+function createInterpolateTextOp(xref, interpolation, i18nPlaceholders, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.InterpolateText,
     target: xref,
     interpolation,
+    i18nPlaceholders,
     sourceSpan
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
@@ -8052,15 +8082,32 @@ function createAdvanceOp(delta, sourceSpan) {
     sourceSpan
   }, NEW_OP);
 }
-function createConditionalOp(target, test, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
+function createConditionalOp(target, test, conditions, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.Conditional,
     target,
     test,
-    conditions: [],
+    conditions,
     processed: null,
+    sourceSpan,
+    contextValue: null
+  }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS);
+}
+function createI18nExpressionOp(target, expression, i18nPlaceholder, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.I18nExpression,
+    target,
+    expression,
+    i18nPlaceholder,
     sourceSpan
-  }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
+  }, NEW_OP), TRAIT_CONSUMES_VARS), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
+}
+function createI18nApplyOp(target, sourceSpan) {
+  return __spreadValues(__spreadValues({
+    kind: OpKind.I18nApply,
+    target,
+    sourceSpan
+  }, NEW_OP), TRAIT_USES_SLOT_INDEX);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/expression.mjs
@@ -8109,7 +8156,7 @@ var _ReferenceExpr = class extends ExpressionBase {
     this.offset = offset;
     this.kind = ExpressionKind.Reference;
     this[_a] = true;
-    this.slot = null;
+    this.targetSlot = null;
   }
   visitExpression() {
   }
@@ -8123,7 +8170,7 @@ var _ReferenceExpr = class extends ExpressionBase {
   }
   clone() {
     const expr = new _ReferenceExpr(this.target, this.offset);
-    expr.slot = this.slot;
+    expr.targetSlot = this.targetSlot;
     return expr;
   }
 };
@@ -8349,7 +8396,7 @@ var _PipeBindingExpr = class extends ExpressionBase {
     this[_d] = true;
     this[_e] = true;
     this[_f] = true;
-    this.slot = null;
+    this.targetSlot = null;
     this.varOffset = null;
   }
   visitExpression(visitor, context) {
@@ -8370,7 +8417,7 @@ var _PipeBindingExpr = class extends ExpressionBase {
   }
   clone() {
     const r = new _PipeBindingExpr(this.target, this.name, this.args.map((a) => a.clone()));
-    r.slot = this.slot;
+    r.targetSlot = this.targetSlot;
     r.varOffset = this.varOffset;
     return r;
   }
@@ -8390,7 +8437,7 @@ var _PipeBindingVariadicExpr = class extends ExpressionBase {
     this[_g] = true;
     this[_h] = true;
     this[_j] = true;
-    this.slot = null;
+    this.targetSlot = null;
     this.varOffset = null;
   }
   visitExpression(visitor, context) {
@@ -8407,7 +8454,7 @@ var _PipeBindingVariadicExpr = class extends ExpressionBase {
   }
   clone() {
     const r = new _PipeBindingVariadicExpr(this.target, this.name, this.args.clone(), this.numArgs);
-    r.slot = this.slot;
+    r.targetSlot = this.targetSlot;
     r.varOffset = this.varOffset;
     return r;
   }
@@ -8615,18 +8662,20 @@ var _SlotLiteralExpr = class extends ExpressionBase {
     this.target = target;
     this.kind = ExpressionKind.SlotLiteralExpr;
     this[_k] = true;
-    this.slot = null;
+    this.targetSlot = null;
   }
   visitExpression(visitor, context) {
   }
   isEquivalent(e) {
-    return e instanceof _SlotLiteralExpr && e.target === this.target && e.slot === this.slot;
+    return e instanceof _SlotLiteralExpr && e.target === this.target && e.targetSlot === this.targetSlot;
   }
   isConstant() {
     return true;
   }
   clone() {
-    return new _SlotLiteralExpr(this.target);
+    const copy = new _SlotLiteralExpr(this.target);
+    copy.targetSlot = this.targetSlot;
+    return copy;
   }
   transformInternalExpressions() {
   }
@@ -8635,6 +8684,34 @@ var SlotLiteralExpr = _SlotLiteralExpr;
 (() => {
   _k = UsesSlotIndex;
 })();
+var ConditionalCaseExpr = class extends ExpressionBase {
+  constructor(expr, target, alias = null) {
+    super();
+    this.expr = expr;
+    this.target = target;
+    this.alias = alias;
+    this.kind = ExpressionKind.ConditionalCase;
+  }
+  visitExpression(visitor, context) {
+    if (this.expr !== null) {
+      this.expr.visitExpression(visitor, context);
+    }
+  }
+  isEquivalent(e) {
+    return e instanceof ConditionalCaseExpr && e.expr === this.expr;
+  }
+  isConstant() {
+    return true;
+  }
+  clone() {
+    return new ConditionalCaseExpr(this.expr, this.target);
+  }
+  transformInternalExpressions(transform2, flags) {
+    if (this.expr !== null) {
+      this.expr = transformExpressionsInExpression(this.expr, transform2, flags);
+    }
+  }
+};
 function visitExpressionsInOp(op, visitor) {
   transformExpressionsInOp(op, (expr, flags) => {
     visitor(expr, flags);
@@ -8674,6 +8751,9 @@ function transformExpressionsInOp(op, transform2, flags) {
       }
       op.sanitizer = op.sanitizer && transformExpressionsInExpression(op.sanitizer, transform2, flags);
       break;
+    case OpKind.I18nExpression:
+      op.expression = transformExpressionsInExpression(op.expression, transform2, flags);
+      break;
     case OpKind.InterpolateText:
       transformExpressionsInInterpolation(op.interpolation, transform2, flags);
       break;
@@ -8685,13 +8765,16 @@ function transformExpressionsInOp(op, transform2, flags) {
       break;
     case OpKind.Conditional:
       for (const condition of op.conditions) {
-        if (condition[1] === null) {
+        if (condition.expr === null) {
           continue;
         }
-        condition[1] = transformExpressionsInExpression(condition[1], transform2, flags);
+        condition.expr = transformExpressionsInExpression(condition.expr, transform2, flags);
       }
       if (op.processed !== null) {
         op.processed = transformExpressionsInExpression(op.processed, transform2, flags);
+      }
+      if (op.contextValue !== null) {
+        op.contextValue = transformExpressionsInExpression(op.contextValue, transform2, flags);
       }
       break;
     case OpKind.Listener:
@@ -8708,17 +8791,20 @@ function transformExpressionsInOp(op, transform2, flags) {
         transformExpressionsInStatement(statement, transform2, flags);
       }
       break;
+    case OpKind.I18n:
     case OpKind.I18nStart:
-      for (const placeholder in op.tagNameParams) {
-        op.tagNameParams[placeholder] = transformExpressionsInExpression(op.tagNameParams[placeholder], transform2, flags);
+      for (const [placeholder, expression] of op.params) {
+        op.params.set(placeholder, transformExpressionsInExpression(expression, transform2, flags));
       }
       break;
+    case OpKind.Defer:
+    case OpKind.DeferSecondaryBlock:
+    case OpKind.DeferOn:
     case OpKind.Projection:
     case OpKind.ProjectionDef:
     case OpKind.Element:
     case OpKind.ElementStart:
     case OpKind.ElementEnd:
-    case OpKind.I18n:
     case OpKind.I18nEnd:
     case OpKind.Container:
     case OpKind.ContainerStart:
@@ -8730,6 +8816,7 @@ function transformExpressionsInOp(op, transform2, flags) {
     case OpKind.Pipe:
     case OpKind.Advance:
     case OpKind.Namespace:
+    case OpKind.I18nApply:
       break;
     default:
       throw new Error(`AssertionError: transformExpressionsInOp doesn't handle ${OpKind[op.kind]}`);
@@ -8930,7 +9017,7 @@ var _OpList = class {
     const last = prev;
     if (oldPrev !== null) {
       oldPrev.next = first;
-      first.prev = oldOp.prev;
+      first.prev = oldPrev;
     }
     if (oldNext !== null) {
       oldNext.prev = last;
@@ -9014,7 +9101,7 @@ var elementContainerOpKinds = /* @__PURE__ */ new Set([
 function isElementOrContainerOp(op) {
   return elementContainerOpKinds.has(op.kind);
 }
-function createElementStartOp(tag, xref, namespace, i18n2, sourceSpan) {
+function createElementStartOp(tag, xref, namespace, i18nPlaceholder, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.ElementStart,
     xref,
@@ -9023,23 +9110,22 @@ function createElementStartOp(tag, xref, namespace, i18n2, sourceSpan) {
     localRefs: [],
     nonBindable: false,
     namespace,
-    i18n: i18n2,
+    i18nPlaceholder,
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createTemplateOp(xref, tag, namespace, controlFlow, i18n2, sourceSpan) {
+function createTemplateOp(xref, tag, namespace, generatedInBlock, i18n2, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Template,
     xref,
     attributes: null,
     tag,
-    controlFlow,
+    block: generatedInBlock,
     decls: null,
     vars: null,
     localRefs: [],
     nonBindable: false,
     namespace,
-    i18n: i18n2,
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
@@ -9111,7 +9197,7 @@ function createProjectionDefOp(def) {
   }, NEW_OP);
 }
 function createProjectionOp(xref, selector) {
-  return __spreadValues(__spreadValues(__spreadValues({
+  return __spreadValues(__spreadValues({
     kind: OpKind.Projection,
     xref,
     selector,
@@ -9119,9 +9205,8 @@ function createProjectionOp(xref, selector) {
     attributes: null,
     localRefs: [],
     nonBindable: false,
-    i18n: void 0,
     sourceSpan: null
-  }, NEW_OP), TRAIT_CONSUMES_SLOT), TRAIT_USES_SLOT_INDEX);
+  }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
 function createExtractedAttributeOp(target, bindingKind, name, expression) {
   return __spreadValues({
@@ -9132,6 +9217,34 @@ function createExtractedAttributeOp(target, bindingKind, name, expression) {
     expression
   }, NEW_OP);
 }
+function createDeferOp(xref, main, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.Defer,
+    xref,
+    target: main,
+    loading: null,
+    placeholder: null,
+    error: null,
+    sourceSpan
+  }, NEW_OP), TRAIT_CONSUMES_SLOT), TRAIT_USES_SLOT_INDEX);
+}
+function createDeferSecondaryOp(deferOp, secondaryView, secondaryBlockKind) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.DeferSecondaryBlock,
+    deferOp,
+    target: secondaryView,
+    secondaryBlockKind,
+    constValue: null,
+    makeExpression: literalOrArrayLiteral
+  }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_HAS_CONST);
+}
+function createDeferOnOp(xref, sourceSpan) {
+  return __spreadValues(__spreadValues({
+    kind: OpKind.DeferOn,
+    xref,
+    sourceSpan
+  }, NEW_OP), TRAIT_CONSUMES_SLOT);
+}
 function createExtractedMessageOp(owner, expression, statements) {
   return __spreadValues({
     kind: OpKind.ExtractedMessage,
@@ -9140,12 +9253,12 @@ function createExtractedMessageOp(owner, expression, statements) {
     statements
   }, NEW_OP);
 }
-function createI18nStartOp(xref, i18n2) {
+function createI18nStartOp(xref, message) {
   return __spreadValues(__spreadValues({
     kind: OpKind.I18nStart,
     xref,
-    i18n: i18n2,
-    tagNameParams: {},
+    message,
+    params: /* @__PURE__ */ new Map(),
     messageIndex: null
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
@@ -9154,6 +9267,12 @@ function createI18nEndOp(xref) {
     kind: OpKind.I18nEnd,
     xref
   }, NEW_OP);
+}
+function literalOrArrayLiteral(value) {
+  if (Array.isArray(value)) {
+    return literalArr(value.map(literalOrArrayLiteral));
+  }
+  return literal(value, INFERRED_TYPE);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/host.mjs
@@ -9166,6 +9285,9 @@ function createHostPropertyOp(name, expression, isAnimationTrigger, sourceSpan) 
     sourceSpan
   }, TRAIT_CONSUMES_VARS), NEW_OP);
 }
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/variable.mjs
+var CTX_REF = "CTX_REF_MARKER";
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/compilation.mjs
 var CompilationJobKind;
@@ -9280,6 +9402,8 @@ function phaseVarCounting(job) {
       if (hasConsumesVarsTrait(op)) {
         varCount += varsUsedByOp(op);
       }
+    }
+    for (const op of unit.ops()) {
       visitExpressionsInOp(op, (expr) => {
         if (!isIrExpression(expr)) {
           return;
@@ -9328,6 +9452,9 @@ function varsUsedByOp(op) {
       return slots;
     case OpKind.InterpolateText:
       return op.interpolation.expressions.length;
+    case OpKind.I18nExpression:
+    case OpKind.Conditional:
+      return 1;
     default:
       throw new Error(`Unhandled op: ${OpKind[op.kind]}`);
   }
@@ -9383,6 +9510,27 @@ function removeAnys(e) {
     return e.args[0];
   }
   return e;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/apply_i18n_expressions.mjs
+function phaseApplyI18nExpressions(job) {
+  for (const unit of job.units) {
+    for (const op of unit.update) {
+      if (op.kind === OpKind.I18nExpression && needsApplication(op)) {
+        OpList.insertAfter(createI18nApplyOp(op.target, null), op);
+      }
+    }
+  }
+}
+function needsApplication(op) {
+  var _a2;
+  if (((_a2 = op.next) == null ? void 0 : _a2.kind) !== OpKind.I18nExpression) {
+    return true;
+  }
+  if (op.next.target !== op.target) {
+    return true;
+  }
+  return false;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/util/elements.mjs
@@ -9516,14 +9664,20 @@ function phaseBindingSpecialization(job) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/chaining.mjs
 var CHAINABLE = /* @__PURE__ */ new Set([
-  Identifiers.elementStart,
-  Identifiers.elementEnd,
-  Identifiers.element,
-  Identifiers.property,
-  Identifiers.hostProperty,
-  Identifiers.syntheticHostProperty,
-  Identifiers.styleProp,
   Identifiers.attribute,
+  Identifiers.classProp,
+  Identifiers.element,
+  Identifiers.elementContainer,
+  Identifiers.elementContainerEnd,
+  Identifiers.elementContainerStart,
+  Identifiers.elementEnd,
+  Identifiers.elementStart,
+  Identifiers.hostProperty,
+  Identifiers.i18nExp,
+  Identifiers.listener,
+  Identifiers.listener,
+  Identifiers.property,
+  Identifiers.styleProp,
   Identifiers.stylePropInterpolate1,
   Identifiers.stylePropInterpolate2,
   Identifiers.stylePropInterpolate3,
@@ -9533,13 +9687,8 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.stylePropInterpolate7,
   Identifiers.stylePropInterpolate8,
   Identifiers.stylePropInterpolateV,
-  Identifiers.classProp,
-  Identifiers.listener,
-  Identifiers.elementContainerStart,
-  Identifiers.elementContainerEnd,
-  Identifiers.elementContainer,
-  Identifiers.listener,
   Identifiers.syntheticHostListener,
+  Identifiers.syntheticHostProperty,
   Identifiers.templateCreate
 ]);
 function phaseChaining(job) {
@@ -9587,19 +9736,28 @@ function phaseConditionals(job) {
         continue;
       }
       let test;
-      const defaultCase = op.conditions.findIndex(([xref, cond]) => cond === null);
+      const defaultCase = op.conditions.findIndex((cond) => cond.expr === null);
       if (defaultCase >= 0) {
-        const [xref, cond] = op.conditions.splice(defaultCase, 1)[0];
+        const xref = op.conditions.splice(defaultCase, 1)[0].target;
         test = new SlotLiteralExpr(xref);
       } else {
         test = literal(-1);
       }
-      let tmp = new AssignTemporaryExpr(op.test, job.allocateXrefId());
+      let tmp = op.test == null ? null : new AssignTemporaryExpr(op.test, job.allocateXrefId());
       for (let i = op.conditions.length - 1; i >= 0; i--) {
-        const useTmp = i === 0 ? tmp : new ReadTemporaryExpr(tmp.xref);
-        const [xref, check] = op.conditions[i];
-        const comparison = new BinaryOperatorExpr(BinaryOperator.Identical, useTmp, check);
-        test = new ConditionalExpr(comparison, new SlotLiteralExpr(xref), test);
+        let conditionalCase = op.conditions[i];
+        if (conditionalCase.expr === null) {
+          continue;
+        }
+        if (tmp !== null) {
+          const useTmp = i === 0 ? tmp : new ReadTemporaryExpr(tmp.xref);
+          conditionalCase.expr = new BinaryOperatorExpr(BinaryOperator.Identical, useTmp, conditionalCase.expr);
+        } else if (conditionalCase.alias !== null) {
+          const caseExpressionTemporaryXref = job.allocateXrefId();
+          conditionalCase.expr = new AssignTemporaryExpr(conditionalCase.expr, caseExpressionTemporaryXref);
+          op.contextValue = new ReadTemporaryExpr(caseExpressionTemporaryXref);
+        }
+        test = new ConditionalExpr(conditionalCase.expr, new SlotLiteralExpr(conditionalCase.target), test);
       }
       op.processed = test;
     }
@@ -9659,15 +9817,16 @@ var BINARY_OPERATORS = /* @__PURE__ */ new Map([
   ["||", BinaryOperator.Or],
   ["+", BinaryOperator.Plus]
 ]);
-var NAMESPACES = /* @__PURE__ */ new Map([["svg", Namespace.SVG], ["math", Namespace.Math]]);
 function namespaceForKey(namespacePrefixKey) {
   var _a2;
+  const NAMESPACES = /* @__PURE__ */ new Map([["svg", Namespace.SVG], ["math", Namespace.Math]]);
   if (namespacePrefixKey === null) {
     return Namespace.HTML;
   }
   return (_a2 = NAMESPACES.get(namespacePrefixKey)) != null ? _a2 : Namespace.HTML;
 }
 function keyForNamespace(namespace) {
+  const NAMESPACES = /* @__PURE__ */ new Map([["svg", Namespace.SVG], ["math", Namespace.Math]]);
   for (const [k, n] of NAMESPACES.entries()) {
     if (n === namespace) {
       return k;
@@ -9681,9 +9840,9 @@ function prefixWithNamespace(strippedTag, namespace) {
   }
   return `:${keyForNamespace(namespace)}:${strippedTag}`;
 }
-function literalOrArrayLiteral(value) {
+function literalOrArrayLiteral2(value) {
   if (Array.isArray(value)) {
-    return literalArr(value.map(literalOrArrayLiteral));
+    return literalArr(value.map(literalOrArrayLiteral2));
   }
   return literal(value, INFERRED_TYPE);
 }
@@ -9802,7 +9961,7 @@ function serializeAttributes({ attributes, bindings, classes, i18n: i18n2, proje
   const attrArray = [...attributes];
   if (projectAs !== null) {
     const parsedR3Selector = parseSelectorToR3Selector(projectAs)[0];
-    attrArray.push(literal(5), literalOrArrayLiteral(parsedR3Selector));
+    attrArray.push(literal(5), literalOrArrayLiteral2(parsedR3Selector));
   }
   if (classes.length > 0) {
     attrArray.push(literal(1), ...classes);
@@ -9828,6 +9987,7 @@ var REPLACEMENTS = /* @__PURE__ */ new Map([
   [OpKind.ContainerEnd, [OpKind.ContainerStart, OpKind.Container]],
   [OpKind.I18nEnd, [OpKind.I18nStart, OpKind.I18n]]
 ]);
+var IGNORED_OP_KINDS = /* @__PURE__ */ new Set([OpKind.Pipe]);
 function phaseEmptyElements(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
@@ -9836,8 +9996,12 @@ function phaseEmptyElements(job) {
         continue;
       }
       const [startKind, mergedKind] = opReplacements;
-      if (op.prev !== null && op.prev.kind === startKind) {
-        op.prev.kind = mergedKind;
+      let prevOp = op.prev;
+      while (prevOp !== null && IGNORED_OP_KINDS.has(prevOp.kind)) {
+        prevOp = prevOp.prev;
+      }
+      if (prevOp !== null && prevOp.kind === startKind) {
+        prevOp.kind = mergedKind;
         OpList.remove(op);
       }
     }
@@ -9984,12 +10148,24 @@ function ternaryTransform(e) {
 function phaseGenerateAdvance(job) {
   for (const unit of job.units) {
     const slotMap = /* @__PURE__ */ new Map();
+    let lastSlotOp = null;
     for (const op of unit.create) {
+      if (op.kind === OpKind.I18nEnd) {
+        if (lastSlotOp === null) {
+          throw Error("Expected to have encountered an op prior to i18nEnd that consumes a slot");
+        }
+        let lastSlot = lastSlotOp.slot;
+        if (lastSlotOp.kind === OpKind.I18nStart && job.compatibility) {
+          lastSlot++;
+        }
+        slotMap.set(op.xref, lastSlot);
+      }
       if (!hasConsumesSlotTrait(op)) {
         continue;
       } else if (op.slot === null) {
         throw new Error(`AssertionError: expected slots to have been allocated before generating advance() calls`);
       }
+      lastSlotOp = op;
       slotMap.set(op.xref, op.slot);
     }
     let slotContext = 0;
@@ -10012,29 +10188,27 @@ function phaseGenerateAdvance(job) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_i18n_blocks.mjs
-function phaseGenerateI18nBlocks(job) {
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_projection_def.mjs
+function phaseGenerateProjectionDef(job) {
+  const share = job.compatibility === CompatibilityMode.TemplateDefinitionBuilder;
+  const selectors = [];
+  let projectionSlotIndex = 0;
   for (const unit of job.units) {
-    const elements = getElementsByXrefId(unit);
     for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.ElementEnd:
-          const start = elements.get(op.xref);
-          if (start.i18n instanceof Message) {
-            const id = job.allocateXrefId();
-            OpList.insertAfter(createI18nStartOp(id, start.i18n), start);
-            OpList.insertBefore(createI18nEndOp(id), op);
-          }
-          break;
-        case OpKind.Template:
-          if (op.i18n !== void 0) {
-            const id = job.allocateXrefId();
-            OpList.insertBefore(createI18nStartOp(id, op.i18n), op);
-            OpList.insertAfter(createI18nEndOp(id), op);
-          }
-          break;
+      if (op.kind === OpKind.Projection) {
+        selectors.push(op.selector);
+        op.projectionSlotIndex = projectionSlotIndex++;
       }
     }
+  }
+  if (selectors.length > 0) {
+    let defExpr = null;
+    if (selectors.length > 1 || selectors[0] !== "*") {
+      const def = selectors.map((s) => s === "*" ? s : parseSelectorToR3Selector(s));
+      defExpr = job.pool.getConstLiteral(literalOrArrayLiteral2(def), share);
+    }
+    job.contentSelectors = job.pool.getConstLiteral(literalOrArrayLiteral2(selectors), share);
+    job.root.create.prepend([createProjectionDefOp(defExpr)]);
   }
 }
 
@@ -10107,7 +10281,9 @@ function generateVariablesInScopeForView(view, scope) {
     newOps.push(createVariableOp(view.job.allocateXrefId(), scope.viewContextVariable, new NextContextExpr()));
   }
   for (const [name, value] of view.job.views.get(scope.view).contextVariables) {
-    newOps.push(createVariableOp(view.job.allocateXrefId(), scope.contextVariables.get(name), new ReadPropExpr(new ContextExpr(scope.view), value)));
+    const context = new ContextExpr(scope.view);
+    const variable2 = value === CTX_REF ? context : new ReadPropExpr(context, value);
+    newOps.push(createVariableOp(view.job.allocateXrefId(), scope.contextVariables.get(name), variable2));
   }
   for (const ref of scope.references) {
     newOps.push(createVariableOp(view.job.allocateXrefId(), ref.variable, new ReferenceExpr(ref.targetId, ref.offset)));
@@ -10118,15 +10294,40 @@ function generateVariablesInScopeForView(view, scope) {
   return newOps;
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/has_const_trait_collection.mjs
+function phaseConstTraitCollection(job) {
+  const collectGlobalConsts = (e) => {
+    if (e instanceof ExpressionBase && hasConstTrait(e)) {
+      const ea = e;
+      if (ea.constValue !== null) {
+        ea.constIndex = job.addConst(ea.constValue);
+      }
+    }
+    return e;
+  };
+  for (const unit of job.units) {
+    for (const op of unit.ops()) {
+      if (hasConstTrait(op) && op.constValue !== null) {
+        op.constIndex = job.addConst(op.makeExpression(op.constValue));
+      }
+      transformExpressionsInOp(op, collectGlobalConsts, VisitorContextFlag.None);
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/host_style_property_parsing.mjs
 var STYLE_DOT = "style.";
 var CLASS_DOT = "class.";
 var STYLE_BANG = "style!";
 var CLASS_BANG = "class!";
+var BANG_IMPORTANT = "!important";
 function phaseHostStylePropertyParsing(job) {
   for (const op of job.root.update) {
     if (op.kind !== OpKind.Binding) {
       continue;
+    }
+    if (op.name.endsWith(BANG_IMPORTANT)) {
+      op.name = op.name.substring(0, op.name.length - BANG_IMPORTANT.length);
     }
     if (op.name.startsWith(STYLE_DOT)) {
       op.bindingKind = BindingKind.StyleProperty;
@@ -10170,6 +10371,26 @@ function parseProperty(name) {
     property2 = name.substring(0, unitIndex);
   }
   return { property: property2, suffix };
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_const_collection.mjs
+function phaseI18nConstCollection(job) {
+  const messageConstIndices = {};
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.ExtractedMessage) {
+        messageConstIndices[op.owner] = job.addConst(op.expression, op.statements);
+        OpList.remove(op);
+      }
+    }
+  }
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if ((op.kind === OpKind.I18nStart || op.kind === OpKind.I18n) && messageConstIndices[op.xref] !== void 0) {
+        op.messageIndex = messageConstIndices[op.xref];
+      }
+    }
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/output/map_util.mjs
@@ -14488,6 +14709,7 @@ var _ControlFlowError = class {
 };
 var _Tokenizer = class {
   constructor(_file, _getTagDefinition, options) {
+    var _a2;
     this._getTagDefinition = _getTagDefinition;
     this._currentTokenStart = null;
     this._currentTokenType = null;
@@ -14503,7 +14725,7 @@ var _Tokenizer = class {
     this._cursor = options.escapedString ? new EscapedCharacterCursor(_file, range) : new PlainCharacterCursor(_file, range);
     this._preserveLineEndings = options.preserveLineEndings || false;
     this._i18nNormalizeLineEndingsInICUs = options.i18nNormalizeLineEndingsInICUs || false;
-    this._tokenizeBlocks = options.tokenizeBlocks || false;
+    this._tokenizeBlocks = (_a2 = options.tokenizeBlocks) != null ? _a2 : true;
     try {
       this._cursor.init();
     } catch (e) {
@@ -16048,20 +16270,21 @@ function phaseI18nMessageExtraction(job) {
   const fileBasedI18nSuffix = job.relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_").toUpperCase() + "_";
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart && op.i18n instanceof Message) {
-        const params = Object.fromEntries(Object.entries(op.tagNameParams).sort());
+      if (op.kind === OpKind.I18nStart || op.kind === OpKind.I18n) {
+        const params = new Map([...op.params.entries()].sort());
         const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
-        const closureVar = i18nGenerateClosureVar(job.pool, op.i18n.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
-        const statements = getTranslationDeclStmts(op.i18n, mainVar, closureVar, params, void 0);
+        const closureVar = i18nGenerateClosureVar(job.pool, op.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
+        const statements = getTranslationDeclStmts(op.message, mainVar, closureVar, params, void 0);
         unit.create.push(createExtractedMessageOp(op.xref, mainVar, statements));
       }
     }
   }
 }
-function getTranslationDeclStmts(message, variable2, closureVar, params = {}, transformFn) {
+function getTranslationDeclStmts(message, variable2, closureVar, params, transformFn) {
+  const paramsObject = Object.fromEntries(params);
   const statements = [
     declareI18nVariable(variable2),
-    ifStmt(createClosureModeGuard(), createGoogleGetMsgStatements(variable2, message, closureVar, params), createLocalizeStatements(variable2, message, formatI18nPlaceholderNamesInMap(params, false)))
+    ifStmt(createClosureModeGuard(), createGoogleGetMsgStatements(variable2, message, closureVar, paramsObject), createLocalizeStatements(variable2, message, formatI18nPlaceholderNamesInMap(paramsObject, false)))
   ];
   if (transformFn) {
     statements.push(new ExpressionStatement(variable2.set(transformFn(variable2))));
@@ -16087,20 +16310,42 @@ function i18nGenerateClosureVar(pool, messageId, fileBasedI18nSuffix, useExterna
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_text_extraction.mjs
 function phaseI18nTextExtraction(job) {
+  var _a2;
   for (const unit of job.units) {
-    let inI18nBlock = false;
+    let currentI18nId = null;
+    const textNodes = /* @__PURE__ */ new Map();
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
-          inI18nBlock = true;
+          currentI18nId = op.xref;
           break;
         case OpKind.I18nEnd:
-          inI18nBlock = false;
+          currentI18nId = null;
           break;
         case OpKind.Text:
-          if (inI18nBlock) {
+          if (currentI18nId !== null) {
+            textNodes.set(op.xref, currentI18nId);
             OpList.remove(op);
           }
+          break;
+      }
+    }
+    for (const op of unit.update) {
+      switch (op.kind) {
+        case OpKind.InterpolateText:
+          if (!textNodes.has(op.target)) {
+            continue;
+          }
+          const i18nBlockId = textNodes.get(op.target);
+          const ops = [];
+          for (let i = 0; i < op.interpolation.expressions.length; i++) {
+            const expr = op.interpolation.expressions[i];
+            const placeholder = op.i18nPlaceholders[i];
+            ops.push(createI18nExpressionOp(i18nBlockId, expr, placeholder, (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
+          }
+          if (ops.length > 0) {
+          }
+          OpList.replaceWithMany(op, ops);
           break;
       }
     }
@@ -16236,7 +16481,7 @@ function addNamesToView(unit, baseName, state, compatibility) {
         if (op.handlerFnName !== null) {
           break;
         }
-        if (!op.hostListener && op.slot === null) {
+        if (!op.hostListener && op.targetSlot === null) {
           throw new Error(`Expected a slot to be assigned`);
         }
         let animation = "";
@@ -16247,7 +16492,7 @@ function addNamesToView(unit, baseName, state, compatibility) {
         if (op.hostListener) {
           op.handlerFnName = `${baseName}_${animation}${op.name}_HostBindingHandler`;
         } else {
-          op.handlerFnName = `${unit.fnName}_${op.tag.replace("-", "_")}_${animation}${op.name}_${op.slot}_listener`;
+          op.handlerFnName = `${unit.fnName}_${op.tag.replace("-", "_")}_${animation}${op.name}_${op.targetSlot}_listener`;
         }
         op.handlerFnName = sanitizeIdentifier(op.handlerFnName);
         break;
@@ -16368,37 +16613,16 @@ function phaseNgContainer(job) {
   for (const unit of job.units) {
     const updatedElementXrefs = /* @__PURE__ */ new Set();
     for (const op of unit.create) {
+      if (op.kind === OpKind.Element && op.tag === CONTAINER_TAG) {
+        op.kind = OpKind.Container;
+        updatedElementXrefs.add(op.xref);
+      }
       if (op.kind === OpKind.ElementStart && op.tag === CONTAINER_TAG) {
         op.kind = OpKind.ContainerStart;
         updatedElementXrefs.add(op.xref);
       }
       if (op.kind === OpKind.ElementEnd && updatedElementXrefs.has(op.xref)) {
         op.kind = OpKind.ContainerEnd;
-      }
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/no_listeners_on_templates.mjs
-function phaseNoListenersOnTemplates(job) {
-  for (const unit of job.units) {
-    let inTemplate = false;
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.Template:
-          inTemplate = true;
-          break;
-        case OpKind.ElementStart:
-        case OpKind.Element:
-        case OpKind.ContainerStart:
-        case OpKind.Container:
-          inTemplate = false;
-          break;
-        case OpKind.Listener:
-          if (inTemplate) {
-            OpList.remove(op);
-          }
-          break;
       }
     }
   }
@@ -16445,89 +16669,6 @@ function phaseNullishCoalescing(job) {
         const assignment = new AssignTemporaryExpr(expr.lhs.clone(), job.allocateXrefId());
         const read = new ReadTemporaryExpr(assignment.xref);
         return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.And, new BinaryOperatorExpr(BinaryOperator.NotIdentical, assignment, NULL_EXPR), new BinaryOperatorExpr(BinaryOperator.NotIdentical, read, new LiteralExpr(void 0))), read.clone(), expr.rhs);
-      }, VisitorContextFlag.None);
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/parse_extracted_styles.mjs
-function phaseParseExtractedStyles(cpl) {
-  for (const unit of cpl.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.ExtractedAttribute && op.bindingKind === BindingKind.Attribute && isStringLiteral(op.expression)) {
-        if (op.name === "style") {
-          const parsedStyles = parse(op.expression.value);
-          for (let i = 0; i < parsedStyles.length - 1; i += 2) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, parsedStyles[i], literal(parsedStyles[i + 1])), op);
-          }
-          OpList.remove(op);
-        } else if (op.name === "class") {
-          const parsedClasses = op.expression.value.trim().split(/\s+/g);
-          for (const parsedClass of parsedClasses) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.ClassName, parsedClass, null), op);
-          }
-          OpList.remove(op);
-        }
-      }
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_creation.mjs
-function phasePipeCreation(job) {
-  for (const unit of job.units) {
-    processPipeBindingsInView(unit);
-  }
-}
-function processPipeBindingsInView(unit) {
-  for (const updateOp of unit.update) {
-    visitExpressionsInOp(updateOp, (expr, flags) => {
-      if (!isIrExpression(expr)) {
-        return;
-      }
-      if (expr.kind !== ExpressionKind.PipeBinding) {
-        return;
-      }
-      if (flags & VisitorContextFlag.InChildOperation) {
-        throw new Error(`AssertionError: pipe bindings should not appear in child expressions`);
-      }
-      if (!hasDependsOnSlotContextTrait(updateOp)) {
-        throw new Error(`AssertionError: pipe binding associated with non-slot operation ${OpKind[updateOp.kind]}`);
-      }
-      addPipeToCreationBlock(unit, updateOp.target, expr);
-    });
-  }
-}
-function addPipeToCreationBlock(unit, afterTargetXref, binding) {
-  for (let op = unit.create.head.next; op.kind !== OpKind.ListEnd; op = op.next) {
-    if (!hasConsumesSlotTrait(op)) {
-      continue;
-    }
-    if (op.xref !== afterTargetXref) {
-      continue;
-    }
-    while (op.next.kind === OpKind.Pipe) {
-      op = op.next;
-    }
-    const pipe2 = createPipeOp(binding.target, binding.name);
-    OpList.insertBefore(pipe2, op.next);
-    return;
-  }
-  throw new Error(`AssertionError: unable to find insertion point for pipe ${binding.name}`);
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_variadic.mjs
-function phasePipeVariadic(job) {
-  for (const unit of job.units) {
-    for (const op of unit.update) {
-      transformExpressionsInOp(op, (expr) => {
-        if (!(expr instanceof PipeBindingExpr)) {
-          return expr;
-        }
-        if (expr.args.length <= 4) {
-          return expr;
-        }
-        return new PipeBindingVariadicExpr(expr.target, expr.name, literalArr(expr.args), expr.args.length);
       }, VisitorContextFlag.None);
     }
   }
@@ -16603,6 +16744,113 @@ function keepLast(ops) {
   return ops.slice(ops.length - 1);
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/parse_extracted_styles.mjs
+function phaseParseExtractedStyles(cpl) {
+  for (const unit of cpl.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.ExtractedAttribute && op.bindingKind === BindingKind.Attribute && isStringLiteral(op.expression)) {
+        if (op.name === "style") {
+          const parsedStyles = parse(op.expression.value);
+          for (let i = 0; i < parsedStyles.length - 1; i += 2) {
+            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, parsedStyles[i], literal(parsedStyles[i + 1])), op);
+          }
+          OpList.remove(op);
+        } else if (op.name === "class") {
+          const parsedClasses = op.expression.value.trim().split(/\s+/g);
+          for (const parsedClass of parsedClasses) {
+            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.ClassName, parsedClass, null), op);
+          }
+          OpList.remove(op);
+        }
+      }
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/phase_remove_content_selectors.mjs
+function phaseRemoveContentSelectors(job) {
+  for (const unit of job.units) {
+    const elements = getElementsByXrefId(unit);
+    for (const op of unit.update) {
+      switch (op.kind) {
+        case OpKind.Binding:
+          const target = lookupElement4(elements, op.target);
+          if (op.name.toLowerCase() === "select" && target.kind === OpKind.Projection) {
+            OpList.remove(op);
+          }
+          continue;
+      }
+    }
+  }
+}
+function lookupElement4(elements, xref) {
+  const el = elements.get(xref);
+  if (el === void 0) {
+    throw new Error("All attributes should have an element-like target.");
+  }
+  return el;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_creation.mjs
+function phasePipeCreation(job) {
+  for (const unit of job.units) {
+    processPipeBindingsInView(unit);
+  }
+}
+function processPipeBindingsInView(unit) {
+  for (const updateOp of unit.update) {
+    visitExpressionsInOp(updateOp, (expr, flags) => {
+      if (!isIrExpression(expr)) {
+        return;
+      }
+      if (expr.kind !== ExpressionKind.PipeBinding) {
+        return;
+      }
+      if (flags & VisitorContextFlag.InChildOperation) {
+        throw new Error(`AssertionError: pipe bindings should not appear in child expressions`);
+      }
+      if (!hasDependsOnSlotContextTrait(updateOp)) {
+        throw new Error(`AssertionError: pipe binding associated with non-slot operation ${OpKind[updateOp.kind]}`);
+      }
+      addPipeToCreationBlock(unit, updateOp.target, expr);
+    });
+  }
+}
+function addPipeToCreationBlock(unit, afterTargetXref, binding) {
+  for (let op = unit.create.head.next; op.kind !== OpKind.ListEnd; op = op.next) {
+    if (!hasConsumesSlotTrait(op)) {
+      continue;
+    }
+    if (op.xref !== afterTargetXref) {
+      continue;
+    }
+    while (op.next.kind === OpKind.Pipe) {
+      op = op.next;
+    }
+    const pipe2 = createPipeOp(binding.target, binding.name);
+    OpList.insertBefore(pipe2, op.next);
+    return;
+  }
+  throw new Error(`AssertionError: unable to find insertion point for pipe ${binding.name}`);
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_variadic.mjs
+function phasePipeVariadic(job) {
+  for (const unit of job.units) {
+    for (const op of unit.update) {
+      transformExpressionsInOp(op, (expr) => {
+        if (!(expr instanceof PipeBindingExpr)) {
+          return expr;
+        }
+        if (expr.args.length <= 4) {
+          return expr;
+        }
+        return new PipeBindingVariadicExpr(expr.target, expr.name, literalArr(expr.args), expr.args.length);
+      }, VisitorContextFlag.None);
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pure_function_extraction.mjs
 function phasePureFunctionExtraction(job) {
   for (const view of job.units) {
@@ -16633,15 +16881,15 @@ var PureFunctionConstant = class extends GenericKeyFn {
   toSharedConstantDeclaration(declName, keyExpr) {
     const fnParams = [];
     for (let idx = 0; idx < this.numArgs; idx++) {
-      fnParams.push(new FnParam("_p" + idx));
+      fnParams.push(new FnParam("a" + idx));
     }
     const returnExpr = transformExpressionsInExpression(keyExpr, (expr) => {
       if (!(expr instanceof PureFunctionParameterExpr)) {
         return expr;
       }
-      return variable("_p" + expr.index);
+      return variable("a" + expr.index);
     }, VisitorContextFlag.None);
-    return new DeclareFunctionStmt(declName, fnParams, [new ReturnStatement(returnExpr)]);
+    return new DeclareVarStmt(declName, new ArrowFunctionExpr(fnParams, returnExpr), void 0, StmtModifier.Final);
   }
 };
 
@@ -16802,6 +17050,25 @@ function text(slot, initialValue, sourceSpan) {
   }
   return call(Identifiers.text, args, sourceSpan);
 }
+function defer(selfSlot, primarySlot, dependencyResolverFn, loadingSlot, placeholderSlot, errorSlot, loadingConfigIndex, placeholderConfigIndex, sourceSpan) {
+  const args = [
+    literal(selfSlot),
+    literal(primarySlot),
+    literal(dependencyResolverFn),
+    literal(loadingSlot),
+    literal(placeholderSlot),
+    literal(errorSlot),
+    literal(loadingConfigIndex),
+    literal(placeholderConfigIndex)
+  ];
+  while (args[args.length - 1].value === null) {
+    args.pop();
+  }
+  return call(Identifiers.defer, args, sourceSpan);
+}
+function deferOn(sourceSpan) {
+  return call(Identifiers.deferOnIdle, [], sourceSpan);
+}
 function projectionDef(def) {
   return call(Identifiers.projectionDef, def ? [def] : [], null);
 }
@@ -16818,8 +17085,8 @@ function projection(slot, projectionSlotIndex, attributes) {
 function i18nStart(slot, constIndex) {
   return call(Identifiers.i18nStart, [literal(slot), literal(constIndex)], null);
 }
-function i18n(slot) {
-  return call(Identifiers.i18n, [literal(slot)], null);
+function i18n(slot, constIndex) {
+  return call(Identifiers.i18n, [literal(slot), literal(constIndex)], null);
 }
 function i18nEnd() {
   return call(Identifiers.i18nEnd, [], null);
@@ -16894,6 +17161,12 @@ function textInterpolate(strings, expressions, sourceSpan) {
   }
   return callVariadicInstruction(TEXT_INTERPOLATE_CONFIG, [], interpolationArgs, [], sourceSpan);
 }
+function i18nExp(expr, sourceSpan) {
+  return call(Identifiers.i18nExp, [expr], sourceSpan);
+}
+function i18nApply(slot, sourceSpan) {
+  return call(Identifiers.i18nApply, [literal(slot)], sourceSpan);
+}
 function propertyInterpolate(name, strings, expressions, sanitizer, sourceSpan) {
   const interpolationArgs = collateInterpolationArgs(strings, expressions);
   const extraArgs = [];
@@ -16958,8 +17231,12 @@ function call(instruction, args, sourceSpan) {
   const expr = importExpr(instruction).callFn(args, sourceSpan);
   return createStatementOp(new ExpressionStatement(expr, sourceSpan));
 }
-function conditional(slot, condition) {
-  return call(Identifiers.conditional, [literal(slot), condition], null);
+function conditional(slot, condition, contextValue, sourceSpan) {
+  const args = [literal(slot), condition];
+  if (contextValue !== null) {
+    args.push(contextValue);
+  }
+  return call(Identifiers.conditional, args, sourceSpan);
 }
 var TEXT_INTERPOLATE_CONFIG = {
   constant: [
@@ -17126,6 +17403,7 @@ function phaseReify(cpl) {
   }
 }
 function reifyCreateOperations(unit, ops) {
+  var _a2, _b2, _c2, _d2;
   for (const op of ops) {
     transformExpressionsInOp(op, reifyIrExpression, VisitorContextFlag.None);
     switch (op.kind) {
@@ -17157,14 +17435,14 @@ function reifyCreateOperations(unit, ops) {
         OpList.replace(op, i18nEnd());
         break;
       case OpKind.I18n:
-        OpList.replace(op, i18n(op.slot));
+        OpList.replace(op, i18n(op.slot, op.messageIndex));
         break;
       case OpKind.Template:
         if (!(unit instanceof ViewCompilationUnit)) {
           throw new Error(`AssertionError: must be compiling a component`);
         }
         const childView = unit.job.views.get(op.xref);
-        OpList.replace(op, template(op.slot, variable(childView.fnName), childView.decls, childView.vars, op.controlFlow ? null : op.tag, op.attributes, op.sourceSpan));
+        OpList.replace(op, template(op.slot, variable(childView.fnName), childView.decls, childView.vars, op.block ? null : op.tag, op.attributes, op.sourceSpan));
         break;
       case OpKind.DisableBindings:
         OpList.replace(op, disableBindings());
@@ -17198,6 +17476,15 @@ function reifyCreateOperations(unit, ops) {
             OpList.replace(op, namespaceMath());
             break;
         }
+        break;
+      case OpKind.Defer:
+        OpList.replace(op, defer(op.slot, op.targetSlot, null, op.loading && op.loading.targetSlot, op.placeholder && op.placeholder.targetSlot, op.error && op.error.targetSlot, (_b2 = (_a2 = op.loading) == null ? void 0 : _a2.constIndex) != null ? _b2 : null, (_d2 = (_c2 = op.placeholder) == null ? void 0 : _c2.constIndex) != null ? _d2 : null, op.sourceSpan));
+        break;
+      case OpKind.DeferSecondaryBlock:
+        OpList.remove(op);
+        break;
+      case OpKind.DeferOn:
+        OpList.replace(op, deferOn(op.sourceSpan));
         break;
       case OpKind.ProjectionDef:
         OpList.replace(op, projectionDef(op.def));
@@ -17253,6 +17540,12 @@ function reifyUpdateOperations(_unit, ops) {
           OpList.replace(op, classMap(op.expression, op.sourceSpan));
         }
         break;
+      case OpKind.I18nExpression:
+        OpList.replace(op, i18nExp(op.expression, op.sourceSpan));
+        break;
+      case OpKind.I18nApply:
+        OpList.replace(op, i18nApply(op.targetSlot, op.sourceSpan));
+        break;
       case OpKind.InterpolateText:
         OpList.replace(op, textInterpolate(op.interpolation.strings, op.interpolation.expressions, op.sourceSpan));
         break;
@@ -17284,10 +17577,10 @@ function reifyUpdateOperations(_unit, ops) {
         if (op.processed === null) {
           throw new Error(`Conditional test was not set.`);
         }
-        if (op.slot === null) {
+        if (op.targetSlot === null) {
           throw new Error(`Conditional slot was not set.`);
         }
-        OpList.replace(op, conditional(op.slot, op.processed));
+        OpList.replace(op, conditional(op.targetSlot, op.processed, op.contextValue, op.sourceSpan));
         break;
       case OpKind.Statement:
         break;
@@ -17304,7 +17597,7 @@ function reifyIrExpression(expr) {
     case ExpressionKind.NextContext:
       return nextContext(expr.steps);
     case ExpressionKind.Reference:
-      return reference(expr.slot + 1 + expr.offset);
+      return reference(expr.targetSlot + 1 + expr.offset);
     case ExpressionKind.LexicalRead:
       throw new Error(`AssertionError: unresolved LexicalRead of ${expr.name}`);
     case ExpressionKind.RestoreView:
@@ -17339,13 +17632,13 @@ function reifyIrExpression(expr) {
     case ExpressionKind.PureFunctionParameterExpr:
       throw new Error(`AssertionError: expected PureFunctionParameterExpr to have been extracted`);
     case ExpressionKind.PipeBinding:
-      return pipeBind(expr.slot, expr.varOffset, expr.args);
+      return pipeBind(expr.targetSlot, expr.varOffset, expr.args);
     case ExpressionKind.PipeBindingVariadic:
-      return pipeBindV(expr.slot, expr.varOffset, expr.args);
+      return pipeBindV(expr.targetSlot, expr.varOffset, expr.args);
     case ExpressionKind.SanitizerExpr:
       return importExpr(sanitizerIdentifierMap.get(expr.fn));
     case ExpressionKind.SlotLiteralExpr:
-      return literal(expr.slot);
+      return literal(expr.targetSlot);
     default:
       throw new Error(`AssertionError: Unsupported reification of ir.Expression kind: ${ExpressionKind[expr.kind]}`);
   }
@@ -17450,38 +17743,79 @@ function resolveDollarEvent(unit, ops) {
 var ESCAPE = "\uFFFD";
 function phaseResolveI18nPlaceholders(job) {
   for (const unit of job.units) {
-    let i18nOp = null;
-    let startTags = [];
-    let closeTags = [];
+    const i18nOps = /* @__PURE__ */ new Map();
+    let startTagSlots = /* @__PURE__ */ new Map();
+    let closeTagSlots = /* @__PURE__ */ new Map();
+    let currentI18nOp = null;
     for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart && op.i18n instanceof Message) {
-        i18nOp = op;
-      } else if (op.kind === OpKind.I18nEnd) {
-        i18nOp = null;
-      } else if ((op.kind === OpKind.Element || op.kind === OpKind.ElementStart) && op.i18n instanceof TagPlaceholder) {
-        if (i18nOp === null) {
-          throw Error("i18n tag placeholder should only occur inside an i18n block");
-        }
-        startTags.push({
-          i18nOp,
-          placeholder: op.i18n.startName,
-          value: literal(`${ESCAPE}#${op.slot}${ESCAPE}`)
-        });
-        closeTags.push({
-          i18nOp,
-          placeholder: op.i18n.closeName,
-          value: literal(`${ESCAPE}/#${op.slot}${ESCAPE}`)
-        });
+      switch (op.kind) {
+        case OpKind.I18nStart:
+        case OpKind.I18n:
+          i18nOps.set(op.xref, op);
+          currentI18nOp = op.kind === OpKind.I18nStart ? op : null;
+          startTagSlots = /* @__PURE__ */ new Map();
+          closeTagSlots = /* @__PURE__ */ new Map();
+          break;
+        case OpKind.I18nEnd:
+          if (currentI18nOp === null) {
+            throw Error("Missing corresponding i18n start op for i18n end op");
+          }
+          for (const [placeholder, slots] of startTagSlots) {
+            currentI18nOp.params.set(placeholder, serializeSlots(slots, true));
+          }
+          for (const [placeholder, slots] of closeTagSlots) {
+            currentI18nOp.params.set(placeholder, serializeSlots(slots, false));
+          }
+          currentI18nOp = null;
+          break;
+        case OpKind.Element:
+        case OpKind.ElementStart:
+          if (op.i18nPlaceholder != void 0) {
+            if (currentI18nOp === null) {
+              throw Error("i18n tag placeholder should only occur inside an i18n block");
+            }
+            if (!op.slot) {
+              throw Error("Slots should be allocated before i18n placeholder resolution");
+            }
+            const { startName, closeName } = op.i18nPlaceholder;
+            addTagSlot(startTagSlots, startName, op.slot);
+            addTagSlot(closeTagSlots, closeName, op.slot);
+          }
+          break;
       }
     }
-    for (const { i18nOp: i18nOp2, placeholder, value } of startTags) {
-      i18nOp2.tagNameParams[placeholder] = value;
+    const i18nBlockPlaceholderIndices = /* @__PURE__ */ new Map();
+    for (const op of unit.update) {
+      if (op.kind === OpKind.I18nExpression) {
+        const i18nOp = i18nOps.get(op.target);
+        let index = i18nBlockPlaceholderIndices.get(op.target) || 0;
+        if (!i18nOp) {
+          throw Error("Cannot find corresponding i18nStart for i18nExpr");
+        }
+        i18nOp.params.set(op.i18nPlaceholder.name, literal(`${ESCAPE}${index++}${ESCAPE}`));
+        i18nBlockPlaceholderIndices.set(op.target, index);
+      }
     }
-    for (let i = closeTags.length - 1; i >= 0; i--) {
-      const { i18nOp: i18nOp2, placeholder, value } = closeTags[i];
-      i18nOp2.tagNameParams[placeholder] = value;
+    for (const op of i18nOps.values()) {
+      for (const placeholder in op.message.placeholders) {
+        if (!op.params.has(placeholder)) {
+          throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
+        }
+      }
     }
   }
+}
+function addTagSlot(tagSlots, placeholder, slot) {
+  const slots = tagSlots.get(placeholder) || [];
+  slots.push(slot);
+  tagSlots.set(placeholder, slots);
+}
+function serializeSlots(slots, start) {
+  const slotStrings = slots.map((slot) => `${ESCAPE}${start ? "" : "/"}#${slot}${ESCAPE}`);
+  if (slotStrings.length === 1) {
+    return literal(slotStrings[0]);
+  }
+  return literal(`[${slotStrings.join("|")}]`);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_names.mjs
@@ -17649,23 +17983,23 @@ function phaseSlotAllocation(job) {
         const childView = job.views.get(op.xref);
         op.decls = childView.decls;
       }
-      if (hasUsesSlotIndexTrait(op) && op.slot === null) {
+      if (hasUsesSlotIndexTrait(op) && op.targetSlot === null) {
         if (!slotMap.has(op.target)) {
           throw new Error(`AssertionError: no slot allocated for ${OpKind[op.kind]} target ${op.target}`);
         }
-        op.slot = slotMap.get(op.target);
+        op.targetSlot = slotMap.get(op.target);
       }
       visitExpressionsInOp(op, (expr) => {
         if (!isIrExpression(expr)) {
           return;
         }
-        if (!hasUsesSlotIndexTrait(expr) || expr.slot !== null) {
+        if (!hasUsesSlotIndexTrait(expr) || expr.targetSlot !== null) {
           return;
         }
         if (!slotMap.has(expr.target)) {
           throw new Error(`AssertionError: no slot allocated for ${expr.constructor.name} target ${expr.target}`);
         }
-        expr.slot = slotMap.get(expr.target);
+        expr.targetSlot = slotMap.get(expr.target);
       });
     }
   }
@@ -17704,39 +18038,52 @@ function phaseStyleBindingSpecialization(cpl) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/temporary_variables.mjs
 function phaseTemporaryVariables(cpl) {
   for (const unit of cpl.units) {
-    let opCount = 0;
-    let generatedStatements = [];
-    for (const op of unit.ops()) {
-      const finalReads = /* @__PURE__ */ new Map();
-      visitExpressionsInOp(op, (expr) => {
-        if (expr instanceof ReadTemporaryExpr) {
-          finalReads.set(expr.xref, expr);
-        }
-      });
-      let count = 0;
-      const assigned = /* @__PURE__ */ new Set();
-      const released = /* @__PURE__ */ new Set();
-      const defs = /* @__PURE__ */ new Map();
-      visitExpressionsInOp(op, (expr) => {
-        if (expr instanceof AssignTemporaryExpr) {
-          if (!assigned.has(expr.xref)) {
-            assigned.add(expr.xref);
-            defs.set(expr.xref, `tmp_${opCount}_${count++}`);
-          }
-          assignName(defs, expr);
-        } else if (expr instanceof ReadTemporaryExpr) {
-          if (finalReads.get(expr.xref) === expr) {
-            released.add(expr.xref);
-            count--;
-          }
-          assignName(defs, expr);
-        }
-      });
-      generatedStatements.push(...Array.from(new Set(defs.values())).map((name) => createStatementOp(new DeclareVarStmt(name))));
-      opCount++;
-    }
-    unit.update.prepend(generatedStatements);
+    unit.create.prepend(generateTemporaries(unit.create));
+    unit.update.prepend(generateTemporaries(unit.update));
   }
+}
+function generateTemporaries(ops) {
+  let opCount = 0;
+  let generatedStatements = [];
+  for (const op of ops) {
+    const finalReads = /* @__PURE__ */ new Map();
+    visitExpressionsInOp(op, (expr, flag) => {
+      if (flag & VisitorContextFlag.InChildOperation) {
+        return;
+      }
+      if (expr instanceof ReadTemporaryExpr) {
+        finalReads.set(expr.xref, expr);
+      }
+    });
+    let count = 0;
+    const assigned = /* @__PURE__ */ new Set();
+    const released = /* @__PURE__ */ new Set();
+    const defs = /* @__PURE__ */ new Map();
+    visitExpressionsInOp(op, (expr, flag) => {
+      if (flag & VisitorContextFlag.InChildOperation) {
+        return;
+      }
+      if (expr instanceof AssignTemporaryExpr) {
+        if (!assigned.has(expr.xref)) {
+          assigned.add(expr.xref);
+          defs.set(expr.xref, `tmp_${opCount}_${count++}`);
+        }
+        assignName(defs, expr);
+      } else if (expr instanceof ReadTemporaryExpr) {
+        if (finalReads.get(expr.xref) === expr) {
+          released.add(expr.xref);
+          count--;
+        }
+        assignName(defs, expr);
+      }
+    });
+    generatedStatements.push(...Array.from(new Set(defs.values())).map((name) => createStatementOp(new DeclareVarStmt(name))));
+    opCount++;
+    if (op.kind === OpKind.Listener) {
+      op.handlerOps.prepend(generateTemporaries(op.handlerOps));
+    }
+  }
+  return generatedStatements;
 }
 function assignName(names, expr) {
   const name = names.get(expr.xref);
@@ -17948,6 +18295,9 @@ function tryInlineVariableInitializer(id, initializer, target, declFences) {
 function allowConservativeInlining(decl, target) {
   switch (decl.variable.kind) {
     case SemanticVariableKind.Identifier:
+      if (decl.initializer instanceof ReadVarExpr && decl.initializer.name === "ctx") {
+        return true;
+      }
       return false;
     case SemanticVariableKind.Context:
       return target.kind === OpKind.Variable;
@@ -17956,79 +18306,9 @@ function allowConservativeInlining(decl, target) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_projection_def.mjs
-function phaseGenerateProjectionDef(job) {
-  const share = job.compatibility === CompatibilityMode.TemplateDefinitionBuilder;
-  const selectors = [];
-  let projectionSlotIndex = 0;
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.Projection) {
-        selectors.push(op.selector);
-        op.projectionSlotIndex = projectionSlotIndex++;
-      }
-    }
-  }
-  if (selectors.length > 0) {
-    let defExpr = null;
-    if (selectors.length > 1 || selectors[0] !== "*") {
-      const def = selectors.map((s) => s === "*" ? s : parseSelectorToR3Selector(s));
-      defExpr = job.pool.getConstLiteral(literalOrArrayLiteral(def), share);
-    }
-    job.contentSelectors = job.pool.getConstLiteral(literalOrArrayLiteral(selectors), share);
-    job.root.create.prepend([createProjectionDefOp(defExpr)]);
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_const_collection.mjs
-function phaseI18nConstCollection(job) {
-  const messageConstIndices = {};
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.ExtractedMessage) {
-        messageConstIndices[op.owner] = job.addConst(op.expression, op.statements);
-        OpList.remove(op);
-      }
-    }
-  }
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart && messageConstIndices[op.xref] !== void 0) {
-        op.messageIndex = messageConstIndices[op.xref];
-      }
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/phase_remove_content_selectors.mjs
-function phaseRemoveContentSelectors(job) {
-  for (const unit of job.units) {
-    const elements = getElementsByXrefId(unit);
-    for (const op of unit.update) {
-      switch (op.kind) {
-        case OpKind.Binding:
-          const target = lookupElement4(elements, op.target);
-          if (op.name.toLowerCase() === "select" && target.kind === OpKind.Projection) {
-            OpList.remove(op);
-          }
-          continue;
-      }
-    }
-  }
-}
-function lookupElement4(elements, xref) {
-  const el = elements.get(xref);
-  if (el === void 0) {
-    throw new Error("All attributes should have an element-like target.");
-  }
-  return el;
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/emit.mjs
 var phases = [
   { kind: CompilationJobKind.Tmpl, fn: phaseRemoveContentSelectors },
-  { kind: CompilationJobKind.Tmpl, fn: phaseGenerateI18nBlocks },
-  { kind: CompilationJobKind.Tmpl, fn: phaseI18nTextExtraction },
   { kind: CompilationJobKind.Host, fn: phaseHostStylePropertyParsing },
   { kind: CompilationJobKind.Tmpl, fn: phaseNamespace },
   { kind: CompilationJobKind.Both, fn: phaseStyleBindingSpecialization },
@@ -18037,8 +18317,9 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: phaseParseExtractedStyles },
   { kind: CompilationJobKind.Tmpl, fn: phaseRemoveEmptyBindings },
   { kind: CompilationJobKind.Tmpl, fn: phaseConditionals },
-  { kind: CompilationJobKind.Tmpl, fn: phaseNoListenersOnTemplates },
   { kind: CompilationJobKind.Tmpl, fn: phasePipeCreation },
+  { kind: CompilationJobKind.Tmpl, fn: phaseI18nTextExtraction },
+  { kind: CompilationJobKind.Tmpl, fn: phaseApplyI18nExpressions },
   { kind: CompilationJobKind.Tmpl, fn: phasePipeVariadic },
   { kind: CompilationJobKind.Both, fn: phasePureLiteralStructures },
   { kind: CompilationJobKind.Tmpl, fn: phaseGenerateProjectionDef },
@@ -18057,6 +18338,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nMessageExtraction },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nConstCollection },
+  { kind: CompilationJobKind.Tmpl, fn: phaseConstTraitCollection },
   { kind: CompilationJobKind.Both, fn: phaseConstCollection },
   { kind: CompilationJobKind.Both, fn: phaseVarCounting },
   { kind: CompilationJobKind.Tmpl, fn: phaseGenerateAdvance },
@@ -18244,35 +18526,51 @@ function ingestNodes(unit, template2) {
       ingestText(unit, node);
     } else if (node instanceof BoundText) {
       ingestBoundText(unit, node);
+    } else if (node instanceof IfBlock) {
+      ingestIfBlock(unit, node);
     } else if (node instanceof SwitchBlock) {
       ingestSwitchBlock(unit, node);
+    } else if (node instanceof DeferredBlock) {
+      ingestDeferBlock(unit, node);
     } else {
       throw new Error(`Unsupported template node: ${node.constructor.name}`);
     }
   }
 }
 function ingestElement(unit, element2) {
+  if (element2.i18n !== void 0 && !(element2.i18n instanceof Message || element2.i18n instanceof TagPlaceholder)) {
+    throw Error(`Unhandled i18n metadata type for element: ${element2.i18n.constructor.name}`);
+  }
   const staticAttributes = {};
   for (const attr of element2.attributes) {
     staticAttributes[attr.name] = attr.value;
   }
   const id = unit.job.allocateXrefId();
   const [namespaceKey, elementName] = splitNsName(element2.name);
-  const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element2.i18n, element2.startSourceSpan);
+  const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element2.i18n instanceof TagPlaceholder ? element2.i18n : void 0, element2.startSourceSpan);
   unit.create.push(startOp);
   ingestBindings(unit, startOp, element2);
   ingestReferences(startOp, element2);
   ingestNodes(unit, element2.children);
-  unit.create.push(createElementEndOp(id, element2.endSourceSpan));
+  const endOp = createElementEndOp(id, element2.endSourceSpan);
+  unit.create.push(endOp);
+  if (element2.i18n instanceof Message) {
+    const i18nBlockId = unit.job.allocateXrefId();
+    OpList.insertAfter(createI18nStartOp(i18nBlockId, element2.i18n), startOp);
+    OpList.insertBefore(createI18nEndOp(i18nBlockId), endOp);
+  }
 }
 function ingestTemplate(unit, tmpl) {
+  if (tmpl.i18n !== void 0 && !(tmpl.i18n instanceof Message)) {
+    throw Error(`Unhandled i18n metadata type for template: ${tmpl.i18n.constructor.name}`);
+  }
   const childView = unit.job.allocateView(unit.xref);
   let tagNameWithoutNamespace = tmpl.tagName;
   let namespacePrefix = "";
   if (tmpl.tagName) {
     [namespacePrefix, tagNameWithoutNamespace] = splitNsName(tmpl.tagName);
   }
-  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace != null ? tagNameWithoutNamespace : "ng-template", namespaceForKey(namespacePrefix), false, tmpl.i18n, tmpl.startSourceSpan);
+  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace != null ? tagNameWithoutNamespace : "ng-template", namespaceForKey(namespacePrefix), false, void 0, tmpl.startSourceSpan);
   unit.create.push(tplOp);
   ingestBindings(unit, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
@@ -18280,11 +18578,16 @@ function ingestTemplate(unit, tmpl) {
   for (const { name, value } of tmpl.variables) {
     childView.contextVariables.set(name, value);
   }
+  if (tmpl.i18n instanceof Message) {
+    const id = unit.job.allocateXrefId();
+    OpList.insertAfter(createI18nStartOp(id, tmpl.i18n), childView.create.head);
+    OpList.insertBefore(createI18nEndOp(id), childView.create.tail);
+  }
 }
 function ingestContent(unit, content) {
   const op = createProjectionOp(unit.job.allocateXrefId(), content.selector);
   for (const attr of content.attributes) {
-    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, false);
+    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue);
   }
   unit.create.push(op);
 }
@@ -18299,26 +18602,90 @@ function ingestBoundText(unit, text2) {
   if (!(value instanceof Interpolation)) {
     throw new Error(`AssertionError: expected Interpolation for BoundText node, got ${value.constructor.name}`);
   }
+  if (text2.i18n !== void 0 && !(text2.i18n instanceof Container)) {
+    throw Error(`Unhandled i18n metadata type for text interpolation: ${text2.i18n.constructor.name}`);
+  }
+  const i18nPlaceholders = text2.i18n instanceof Container ? text2.i18n.children.filter((node) => node instanceof Placeholder) : [];
   const textXref = unit.job.allocateXrefId();
   unit.create.push(createTextOp(textXref, "", text2.sourceSpan));
   const baseSourceSpan = unit.job.compatibility ? null : text2.sourceSpan;
-  unit.update.push(createInterpolateTextOp(textXref, new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, unit.job, baseSourceSpan))), text2.sourceSpan));
+  unit.update.push(createInterpolateTextOp(textXref, new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, unit.job, baseSourceSpan))), i18nPlaceholders, text2.sourceSpan));
+}
+function ingestIfBlock(unit, ifBlock) {
+  let firstXref = null;
+  let conditions = [];
+  for (const ifCase of ifBlock.branches) {
+    const cView = unit.job.allocateView(unit.xref);
+    if (ifCase.expressionAlias !== null) {
+      cView.contextVariables.set(ifCase.expressionAlias.name, CTX_REF);
+    }
+    if (firstXref === null) {
+      firstXref = cView.xref;
+    }
+    unit.create.push(createTemplateOp(cView.xref, "Conditional", Namespace.HTML, true, void 0, ifCase.sourceSpan));
+    const caseExpr = ifCase.expression ? convertAst(ifCase.expression, unit.job, null) : null;
+    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, cView.xref, ifCase.expressionAlias);
+    conditions.push(conditionalCaseExpr);
+    ingestNodes(cView, ifCase.children);
+  }
+  const conditional2 = createConditionalOp(firstXref, null, conditions, ifBlock.sourceSpan);
+  unit.update.push(conditional2);
 }
 function ingestSwitchBlock(unit, switchBlock) {
   let firstXref = null;
   let conditions = [];
   for (const switchCase of switchBlock.cases) {
     const cView = unit.job.allocateView(unit.xref);
-    if (!firstXref)
+    if (firstXref === null) {
       firstXref = cView.xref;
-    unit.create.push(createTemplateOp(cView.xref, "Case", Namespace.HTML, true, void 0, null));
+    }
+    unit.create.push(createTemplateOp(cView.xref, "Case", Namespace.HTML, true, void 0, switchCase.sourceSpan));
     const caseExpr = switchCase.expression ? convertAst(switchCase.expression, unit.job, switchBlock.startSourceSpan) : null;
-    conditions.push([cView.xref, caseExpr]);
+    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, cView.xref);
+    conditions.push(conditionalCaseExpr);
     ingestNodes(cView, switchCase.children);
   }
-  const conditional2 = createConditionalOp(firstXref, convertAst(switchBlock.expression, unit.job, switchBlock.startSourceSpan), null);
-  conditional2.conditions = conditions;
+  const conditional2 = createConditionalOp(firstXref, convertAst(switchBlock.expression, unit.job, null), conditions, switchBlock.sourceSpan);
   unit.update.push(conditional2);
+}
+function ingestDeferView(unit, suffix, children, sourceSpan) {
+  if (children === void 0) {
+    return null;
+  }
+  const secondaryView = unit.job.allocateView(unit.xref);
+  ingestNodes(secondaryView, children);
+  const templateOp = createTemplateOp(secondaryView.xref, `Defer${suffix}`, Namespace.HTML, true, void 0, sourceSpan);
+  unit.create.push(templateOp);
+  return templateOp;
+}
+function ingestDeferBlock(unit, deferBlock) {
+  var _a2, _b2, _c2, _d2, _e2, _f2;
+  const main = ingestDeferView(unit, "", deferBlock.children, deferBlock.sourceSpan);
+  const loading = ingestDeferView(unit, "Loading", (_a2 = deferBlock.loading) == null ? void 0 : _a2.children, (_b2 = deferBlock.loading) == null ? void 0 : _b2.sourceSpan);
+  const placeholder = ingestDeferView(unit, "Placeholder", (_c2 = deferBlock.placeholder) == null ? void 0 : _c2.children, (_d2 = deferBlock.placeholder) == null ? void 0 : _d2.sourceSpan);
+  const error2 = ingestDeferView(unit, "Error", (_e2 = deferBlock.error) == null ? void 0 : _e2.children, (_f2 = deferBlock.error) == null ? void 0 : _f2.sourceSpan);
+  const deferOp = createDeferOp(unit.job.allocateXrefId(), main.xref, deferBlock.sourceSpan);
+  unit.create.push(deferOp);
+  if (loading && deferBlock.loading) {
+    deferOp.loading = createDeferSecondaryOp(deferOp.xref, loading.xref, DeferSecondaryKind.Loading);
+    if (deferBlock.loading.afterTime !== null || deferBlock.loading.minimumTime !== null) {
+      deferOp.loading.constValue = [deferBlock.loading.minimumTime, deferBlock.loading.afterTime];
+    }
+    unit.create.push(deferOp.loading);
+  }
+  if (placeholder && deferBlock.placeholder) {
+    deferOp.placeholder = createDeferSecondaryOp(deferOp.xref, placeholder.xref, DeferSecondaryKind.Placeholder);
+    if (deferBlock.placeholder.minimumTime !== null) {
+      deferOp.placeholder.constValue = [deferBlock.placeholder.minimumTime];
+    }
+    unit.create.push(deferOp.placeholder);
+  }
+  if (error2 && deferBlock.error) {
+    deferOp.error = createDeferSecondaryOp(deferOp.xref, error2.xref, DeferSecondaryKind.Error);
+    unit.create.push(deferOp.error);
+  }
+  const deferOnOp = createDeferOnOp(unit.job.allocateXrefId(), null);
+  unit.create.push(deferOnOp);
 }
 function convertAst(ast, job, baseSourceSpan) {
   if (ast instanceof ASTWithSource) {
@@ -18383,20 +18750,28 @@ function convertAst(ast, job, baseSourceSpan) {
   }
 }
 function ingestBindings(unit, op, element2) {
+  var _a2;
+  let flags = BindingFlags.None;
+  const isPlainTemplate = element2 instanceof Template && splitNsName((_a2 = element2.tagName) != null ? _a2 : "")[1] === "ng-template";
   if (element2 instanceof Template) {
+    flags |= BindingFlags.OnNgTemplateElement;
+    if (isPlainTemplate) {
+      flags |= BindingFlags.BindingTargetsTemplate;
+    }
+    const templateAttrFlags = flags | BindingFlags.BindingTargetsTemplate | BindingFlags.IsStructuralTemplateAttribute;
     for (const attr of element2.templateAttrs) {
       if (attr instanceof TextAttribute) {
-        ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, true);
+        ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, templateAttrFlags | BindingFlags.TextValue);
       } else {
-        ingestBinding(unit, op.xref, attr.name, attr.value, attr.type, attr.unit, attr.securityContext, attr.sourceSpan, false, true);
+        ingestBinding(unit, op.xref, attr.name, attr.value, attr.type, attr.unit, attr.securityContext, attr.sourceSpan, templateAttrFlags);
       }
     }
   }
   for (const attr of element2.attributes) {
-    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, true, false);
+    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, flags | BindingFlags.TextValue);
   }
   for (const input of element2.inputs) {
-    ingestBinding(unit, op.xref, input.name, input.value, input.type, input.unit, input.securityContext, input.sourceSpan, false, false);
+    ingestBinding(unit, op.xref, input.name, input.value, input.type, input.unit, input.securityContext, input.sourceSpan, flags);
   }
   for (const output of element2.outputs) {
     let listenerOp;
@@ -18404,6 +18779,10 @@ function ingestBindings(unit, op, element2) {
       if (output.phase === null) {
         throw Error("Animation listener should have a phase");
       }
+    }
+    if (element2 instanceof Template && !isPlainTemplate) {
+      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null));
+      continue;
     }
     listenerOp = createListenerOp(op.xref, output.name, op.tag, output.phase, false, output.sourceSpan);
     let handlerExprs;
@@ -18436,9 +18815,21 @@ var BINDING_KINDS = /* @__PURE__ */ new Map([
   [3, BindingKind.StyleProperty],
   [4, BindingKind.Animation]
 ]);
-function ingestBinding(view, xref, name, value, type, unit, securityContext, sourceSpan, isTextAttribute, isTemplateBinding) {
+var BindingFlags;
+(function(BindingFlags2) {
+  BindingFlags2[BindingFlags2["None"] = 0] = "None";
+  BindingFlags2[BindingFlags2["TextValue"] = 1] = "TextValue";
+  BindingFlags2[BindingFlags2["BindingTargetsTemplate"] = 2] = "BindingTargetsTemplate";
+  BindingFlags2[BindingFlags2["IsStructuralTemplateAttribute"] = 4] = "IsStructuralTemplateAttribute";
+  BindingFlags2[BindingFlags2["OnNgTemplateElement"] = 8] = "OnNgTemplateElement";
+})(BindingFlags || (BindingFlags = {}));
+function ingestBinding(view, xref, name, value, type, unit, securityContext, sourceSpan, flags) {
   if (value instanceof ASTWithSource) {
     value = value.ast;
+  }
+  if (flags & BindingFlags.OnNgTemplateElement && !(flags & BindingFlags.BindingTargetsTemplate) && type === 0) {
+    view.create.push(createExtractedAttributeOp(xref, BindingKind.Property, name, null));
+    return;
   }
   let expression;
   if (value instanceof Interpolation) {
@@ -18449,7 +18840,7 @@ function ingestBinding(view, xref, name, value, type, unit, securityContext, sou
     expression = value;
   }
   const kind = BINDING_KINDS.get(type);
-  view.update.push(createBindingOp(xref, kind, name, expression, unit, securityContext, isTextAttribute, isTemplateBinding, sourceSpan));
+  view.update.push(createBindingOp(xref, kind, name, expression, unit, securityContext, !!(flags & BindingFlags.TextValue), !!(flags & BindingFlags.IsStructuralTemplateAttribute), sourceSpan));
 }
 function ingestReferences(op, element2) {
   assertIsArray(op.localRefs);
@@ -20128,23 +20519,6 @@ var HtmlAstToIvyAst = class {
     if (this.processedNodes.has(block)) {
       return null;
     }
-    if (!this.options.enabledBlockTypes.has(block.name)) {
-      let errorMessage;
-      if (isConnectedDeferLoopBlock(block.name)) {
-        errorMessage = `@${block.name} block can only be used after an @defer block.`;
-        this.processedNodes.add(block);
-      } else if (isConnectedForLoopBlock(block.name)) {
-        errorMessage = `@${block.name} block can only be used after an @for block.`;
-        this.processedNodes.add(block);
-      } else if (isConnectedIfLoopBlock(block.name)) {
-        errorMessage = `@${block.name} block can only be used after an @if or @else if block.`;
-        this.processedNodes.add(block);
-      } else {
-        errorMessage = `Unrecognized block @${block.name}.`;
-      }
-      this.reportError(errorMessage, block.sourceSpan);
-      return null;
-    }
     let result = null;
     switch (block.name) {
       case "defer":
@@ -20160,10 +20534,20 @@ var HtmlAstToIvyAst = class {
         result = createIfBlock(block, this.findConnectedBlocks(index, context, isConnectedIfLoopBlock), this, this.bindingParser);
         break;
       default:
-        result = {
-          node: null,
-          errors: [new ParseError(block.sourceSpan, `Unrecognized block @${block.name}.`)]
-        };
+        let errorMessage;
+        if (isConnectedDeferLoopBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @defer block.`;
+          this.processedNodes.add(block);
+        } else if (isConnectedForLoopBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @for block.`;
+          this.processedNodes.add(block);
+        } else if (isConnectedIfLoopBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @if or @else if block.`;
+          this.processedNodes.add(block);
+        } else {
+          errorMessage = `Unrecognized block @${block.name}.`;
+        }
+        result = { node: null, errors: [new ParseError(block.sourceSpan, errorMessage)] };
         break;
     }
     this.errors.push(...result.errors);
@@ -20373,6 +20757,9 @@ function textContents(node) {
     return node.children[0].value;
   }
 }
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/block_syntax_switch.mjs
+var BLOCK_SYNTAX_ENABLED_DEFAULT = true;
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/i18n/context.mjs
 var TagType;
@@ -21996,6 +22383,7 @@ function getTextInterpolationExpression(interpolation) {
   }
 }
 function parseTemplate(template2, templateUrl, options = {}) {
+  var _a2;
   const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat } = options;
   const bindingParser = makeBindingParser(interpolationConfig);
   const htmlParser = new HtmlParser();
@@ -22003,7 +22391,7 @@ function parseTemplate(template2, templateUrl, options = {}) {
     leadingTriviaChars: LEADING_TRIVIA_CHARS
   }, options), {
     tokenizeExpansionForms: true,
-    tokenizeBlocks: options.enabledBlockTypes != null && options.enabledBlockTypes.size > 0
+    tokenizeBlocks: (_a2 = options.enableBlockSyntax) != null ? _a2 : BLOCK_SYNTAX_ENABLED_DEFAULT
   }));
   if (!options.alwaysAttemptHtmlToR3AstConversion && parseResult.errors && parseResult.errors.length > 0) {
     const parsedTemplate2 = {
@@ -22045,10 +22433,7 @@ function parseTemplate(template2, templateUrl, options = {}) {
       rootNodes = visitAll2(new I18nMetaVisitor(interpolationConfig, false), rootNodes);
     }
   }
-  const { nodes, errors, styleUrls, styles, ngContentSelectors, commentNodes } = htmlAstToRender3Ast(rootNodes, bindingParser, {
-    collectCommentNodes: !!options.collectCommentNodes,
-    enabledBlockTypes: options.enabledBlockTypes || /* @__PURE__ */ new Set()
-  });
+  const { nodes, errors, styleUrls, styles, ngContentSelectors, commentNodes } = htmlAstToRender3Ast(rootNodes, bindingParser, { collectCommentNodes: !!options.collectCommentNodes });
   errors.push(...parseResult.errors, ...i18nMetaResult.errors);
   const parsedTemplate = {
     interpolationConfig,
@@ -22247,7 +22632,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     if (constExpressions.length > 0) {
       let constsExpr = literalArr(constExpressions);
       if (prepareStatements.length > 0) {
-        constsExpr = fn([], [...prepareStatements, new ReturnStatement(constsExpr)]);
+        constsExpr = arrowFn([], [...prepareStatements, new ReturnStatement(constsExpr)]);
       }
       definitionMap.set("consts", constsExpr);
     }
@@ -22263,7 +22648,10 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     definitionMap.set("vars", literal(tpl.root.vars));
     if (tpl.consts.length > 0) {
       if (tpl.constsInitializers.length > 0) {
-        definitionMap.set("consts", fn([], [...tpl.constsInitializers, new ReturnStatement(literalArr(tpl.consts))]));
+        definitionMap.set("consts", arrowFn([], [
+          ...tpl.constsInitializers,
+          new ReturnStatement(literalArr(tpl.consts))
+        ]));
       } else {
         definitionMap.set("consts", literalArr(tpl.consts));
       }
@@ -22328,10 +22716,10 @@ function compileDeclarationList(list, mode) {
     case 0:
       return list;
     case 1:
-      return fn([], [new ReturnStatement(list)]);
+      return arrowFn([], list);
     case 2:
       const resolvedList = list.prop("map").callFn([importExpr(Identifiers.resolveForwardRef)]);
-      return fn([], [new ReturnStatement(resolvedList)]);
+      return arrowFn([], resolvedList);
     case 3:
       throw new Error(`Unsupported with an array of pre-resolved dependencies`);
   }
@@ -23330,7 +23718,6 @@ var ResourceLoader = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/jit_compiler_facade.mjs
-var enabledBlockTypes;
 var CompilerFacadeImpl = class {
   constructor(jitEvaluator = new JitEvaluator()) {
     this.jitEvaluator = jitEvaluator;
@@ -23706,7 +24093,7 @@ function convertPipeDeclarationToMetadata(pipe2) {
 }
 function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces, interpolation) {
   const interpolationConfig = interpolation ? InterpolationConfig.fromArray(interpolation) : DEFAULT_INTERPOLATION_CONFIG;
-  const parsed = parseTemplate(template2, sourceMapUrl, { preserveWhitespaces, interpolationConfig, enabledBlockTypes });
+  const parsed = parseTemplate(template2, sourceMapUrl, { preserveWhitespaces, interpolationConfig });
   if (parsed.errors !== null) {
     const errors = parsed.errors.map((err) => err.toString()).join(", ");
     throw new Error(`Errors during JIT compilation of template for ${typeName}: ${errors}`);
@@ -23883,7 +24270,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.6+sha-ee0d04b");
+var VERSION2 = new Version("17.0.0-next.7+sha-0d3373b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -24900,7 +25287,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-ee0d04b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-0d3373b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -24971,7 +25358,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-ee0d04b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-0d3373b"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25073,9 +25460,14 @@ function compileDeclareComponentFromMetadata(meta, template2, additionalTemplate
 }
 function createComponentDefinitionMap(meta, template2, templateInfo) {
   const definitionMap = createDirectiveDefinitionMap(meta);
+  const blockVisitor = new BlockPresenceVisitor();
+  visitAll(blockVisitor, template2.nodes);
   definitionMap.set("template", getTemplateExpression(template2, templateInfo));
   if (templateInfo.isInline) {
     definitionMap.set("isInline", literal(true));
+  }
+  if (blockVisitor.hasBlocks) {
+    definitionMap.set("minVersion", literal("17.0.0"));
   }
   definitionMap.set("styles", toOptionalLiteralArray(meta.styles, literal));
   definitionMap.set("dependencies", compileUsedDependenciesMetadata(meta));
@@ -25156,13 +25548,49 @@ function compileUsedDependenciesMetadata(meta) {
     }
   });
 }
+var BlockPresenceVisitor = class extends RecursiveVisitor {
+  constructor() {
+    super(...arguments);
+    this.hasBlocks = false;
+  }
+  visitDeferredBlock() {
+    this.hasBlocks = true;
+  }
+  visitDeferredBlockPlaceholder() {
+    this.hasBlocks = true;
+  }
+  visitDeferredBlockLoading() {
+    this.hasBlocks = true;
+  }
+  visitDeferredBlockError() {
+    this.hasBlocks = true;
+  }
+  visitIfBlock() {
+    this.hasBlocks = true;
+  }
+  visitIfBlockBranch() {
+    this.hasBlocks = true;
+  }
+  visitForLoopBlock() {
+    this.hasBlocks = true;
+  }
+  visitForLoopBlockEmpty() {
+    this.hasBlocks = true;
+  }
+  visitSwitchBlock() {
+    this.hasBlocks = true;
+  }
+  visitSwitchBlockCase() {
+    this.hasBlocks = true;
+  }
+};
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/partial/factory.mjs
 var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-ee0d04b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-0d3373b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25185,7 +25613,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-ee0d04b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-0d3373b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25223,7 +25651,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-ee0d04b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-0d3373b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25247,7 +25675,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-ee0d04b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-0d3373b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25282,7 +25710,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.6+sha-ee0d04b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-0d3373b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25299,7 +25727,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.6+sha-ee0d04b");
+var VERSION3 = new Version("17.0.0-next.7+sha-0d3373b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -33704,8 +34132,7 @@ function parseExtractedTemplate(template2, sourceStr, sourceParseRange, escapedS
     escapedString,
     enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat,
     i18nNormalizeLineEndingsInICUs,
-    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData,
-    enabledBlockTypes: options.enabledBlockTypes
+    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData
   });
   const { nodes: diagNodes } = parseTemplate(sourceStr, sourceMapUrl != null ? sourceMapUrl : "", {
     preserveWhitespaces: true,
@@ -33716,8 +34143,7 @@ function parseExtractedTemplate(template2, sourceStr, sourceParseRange, escapedS
     enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat,
     i18nNormalizeLineEndingsInICUs,
     leadingTriviaChars: [],
-    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData,
-    enabledBlockTypes: options.enabledBlockTypes
+    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData
   });
   return __spreadProps(__spreadValues({}, parsedTemplate), {
     diagNodes,
@@ -34089,7 +34515,7 @@ var EMPTY_ARRAY2 = [];
 var isUsedDirective = (decl) => decl.kind === R3TemplateDependencyKind.Directive;
 var isUsedPipe = (decl) => decl.kind === R3TemplateDependencyKind.Pipe;
 var ComponentDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, enabledBlockTypes2, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode, deferredSymbolTracker) {
+  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode, deferredSymbolTracker) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -34108,7 +34534,6 @@ var ComponentDecoratorHandler = class {
     this.enableI18nLegacyMessageIdFormat = enableI18nLegacyMessageIdFormat;
     this.usePoisonedData = usePoisonedData;
     this.i18nNormalizeLineEndingsInICUs = i18nNormalizeLineEndingsInICUs;
-    this.enabledBlockTypes = enabledBlockTypes2;
     this.moduleResolver = moduleResolver;
     this.cycleAnalyzer = cycleAnalyzer;
     this.cycleHandlingStrategy = cycleHandlingStrategy;
@@ -34132,8 +34557,7 @@ var ComponentDecoratorHandler = class {
     this.extractTemplateOptions = {
       enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
       i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
-      usePoisonedData: this.usePoisonedData,
-      enabledBlockTypes: this.enabledBlockTypes
+      usePoisonedData: this.usePoisonedData
     };
   }
   detect(node, decorators) {
@@ -34286,8 +34710,7 @@ var ComponentDecoratorHandler = class {
       template2 = extractTemplate(node, templateDecl, this.evaluator, this.depTracker, this.resourceLoader, {
         enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
         i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
-        usePoisonedData: this.usePoisonedData,
-        enabledBlockTypes: this.enabledBlockTypes
+        usePoisonedData: this.usePoisonedData
       }, this.compilationMode);
     }
     const templateResource = template2.declaration.isInline ? { path: null, expression: component.get("template") } : {
@@ -34814,7 +35237,8 @@ var ComponentDecoratorHandler = class {
       resolutionData.deferBlocks.set(deferBlock, { deps, triggerElements });
     }
     if (analysisData.meta.isStandalone && analysisData.rawImports !== null && import_typescript53.default.isArrayLiteralExpression(analysisData.rawImports)) {
-      for (const node of analysisData.rawImports.elements) {
+      for (const element2 of analysisData.rawImports.elements) {
+        const node = tryUnwrapForwardRef(element2, this.reflector) || element2;
         if (!import_typescript53.default.isIdentifier(node)) {
           continue;
         }
@@ -35552,15 +35976,14 @@ var import_typescript61 = __toESM(require("typescript"), 1);
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/class_extractor.mjs
 var import_typescript60 = __toESM(require("typescript"), 1);
 var ClassExtractor = class {
-  constructor(declaration, reference2, typeChecker) {
+  constructor(declaration, typeChecker) {
     this.declaration = declaration;
-    this.reference = reference2;
     this.typeChecker = typeChecker;
   }
   extract() {
     return {
       name: this.declaration.name.text,
-      entryType: EntryType.UndecoratedClass,
+      entryType: import_typescript60.default.isInterfaceDeclaration(this.declaration) ? EntryType.Interface : EntryType.UndecoratedClass,
       members: this.extractAllClassMembers(this.declaration),
       description: extractJsDocDescription(this.declaration),
       jsdocTags: extractJsDocTags(this.declaration),
@@ -35580,9 +36003,9 @@ var ClassExtractor = class {
     return members;
   }
   extractClassMember(memberDeclaration) {
-    if (import_typescript60.default.isMethodDeclaration(memberDeclaration)) {
+    if (this.isMethod(memberDeclaration)) {
       return this.extractMethod(memberDeclaration);
-    } else if (import_typescript60.default.isPropertyDeclaration(memberDeclaration)) {
+    } else if (this.isProperty(memberDeclaration)) {
       return this.extractClassProperty(memberDeclaration);
     } else if (import_typescript60.default.isAccessor(memberDeclaration)) {
       return this.extractGetterSetter(memberDeclaration);
@@ -35645,12 +36068,19 @@ var ClassExtractor = class {
     return !member.name || !this.isDocumentableMember(member) || !!((_a2 = member.modifiers) == null ? void 0 : _a2.some((mod) => mod.kind === import_typescript60.default.SyntaxKind.PrivateKeyword));
   }
   isDocumentableMember(member) {
-    return import_typescript60.default.isMethodDeclaration(member) || import_typescript60.default.isPropertyDeclaration(member) || import_typescript60.default.isAccessor(member);
+    return this.isMethod(member) || this.isProperty(member) || import_typescript60.default.isAccessor(member);
+  }
+  isProperty(member) {
+    return import_typescript60.default.isPropertyDeclaration(member) || import_typescript60.default.isPropertySignature(member);
+  }
+  isMethod(member) {
+    return import_typescript60.default.isMethodDeclaration(member) || import_typescript60.default.isMethodSignature(member);
   }
 };
 var DirectiveExtractor = class extends ClassExtractor {
   constructor(declaration, reference2, metadata, checker) {
-    super(declaration, reference2, checker);
+    super(declaration, checker);
+    this.reference = reference2;
     this.metadata = metadata;
   }
   extract() {
@@ -35689,7 +36119,8 @@ var DirectiveExtractor = class extends ClassExtractor {
 };
 var PipeExtractor = class extends ClassExtractor {
   constructor(declaration, reference2, metadata, typeChecker) {
-    super(declaration, reference2, typeChecker);
+    super(declaration, typeChecker);
+    this.reference = reference2;
     this.metadata = metadata;
   }
   extract() {
@@ -35702,7 +36133,8 @@ var PipeExtractor = class extends ClassExtractor {
 };
 var NgModuleExtractor = class extends ClassExtractor {
   constructor(declaration, reference2, metadata, typeChecker) {
-    super(declaration, reference2, typeChecker);
+    super(declaration, typeChecker);
+    this.reference = reference2;
     this.metadata = metadata;
   }
   extract() {
@@ -35724,8 +36156,12 @@ function extractClass(classDeclaration, metadataReader, typeChecker) {
   } else if (ngModuleMetadata) {
     extractor = new NgModuleExtractor(classDeclaration, ref, ngModuleMetadata, typeChecker);
   } else {
-    extractor = new ClassExtractor(classDeclaration, ref, typeChecker);
+    extractor = new ClassExtractor(classDeclaration, typeChecker);
   }
+  return extractor.extract();
+}
+function extractInterface(declaration, typeChecker) {
+  const extractor = new ClassExtractor(declaration, typeChecker);
   return extractor.extract();
 }
 
@@ -35763,6 +36199,9 @@ var DocsExtractor = class {
       let entry = void 0;
       if (isNamedClassDeclaration(node)) {
         entry = extractClass(node, this.metadataReader, this.typeChecker);
+      }
+      if (import_typescript61.default.isInterfaceDeclaration(node)) {
+        entry = extractInterface(node, this.typeChecker);
       }
       if (import_typescript61.default.isFunctionDeclaration(node)) {
         const functionExtractor = new FunctionExtractor(node, this.typeChecker);
@@ -38854,7 +39293,7 @@ var TcbGenericContextBehavior;
 })(TcbGenericContextBehavior || (TcbGenericContextBehavior = {}));
 function generateTypeCheckBlock(env, ref, name, meta, domSchemaChecker, oobRecorder, genericContextBehavior) {
   const tcb = new Context2(env, domSchemaChecker, oobRecorder, meta.id, meta.boundTarget, meta.pipes, meta.schemas, meta.isStandalone);
-  const scope = Scope2.forNodes(tcb, null, tcb.boundTarget.target.template, null);
+  const scope = Scope2.forNodes(tcb, null, null, tcb.boundTarget.target.template, null);
   const ctxRawType = env.referenceType(ref);
   if (!import_typescript87.default.isTypeReferenceNode(ctxRawType)) {
     throw new Error(`Expected TypeReferenceNode when referencing the ctx param for ${ref.debugName}`);
@@ -39016,7 +39455,7 @@ var TcbTemplateBodyOp = class extends TcbOp {
     if (directiveGuards.length > 0) {
       guard = directiveGuards.reduce((expr, dirGuard) => import_typescript87.default.factory.createBinaryExpression(expr, import_typescript87.default.SyntaxKind.AmpersandAmpersandToken, dirGuard), directiveGuards.pop());
     }
-    const tmplScope = Scope2.forNodes(this.tcb, this.scope, this.template, guard);
+    const tmplScope = Scope2.forNodes(this.tcb, this.scope, this.template, this.template.children, guard);
     const statements = tmplScope.render();
     if (statements.length === 0) {
       return null;
@@ -39521,8 +39960,20 @@ var TcbIfOp = class extends TcbOp {
     if (!branch) {
       return void 0;
     }
-    const branchScope = Scope2.forNodes(this.tcb, this.scope, branch, null);
-    return branch.expression === null ? import_typescript87.default.factory.createBlock(branchScope.render()) : import_typescript87.default.factory.createIfStatement(tcbExpression(branch.expression, this.tcb, branchScope), import_typescript87.default.factory.createBlock(branchScope.render()), this.generateBranch(index + 1));
+    if (branch.expression === null) {
+      const branchScope2 = Scope2.forNodes(this.tcb, this.scope, null, branch.children, null);
+      return import_typescript87.default.factory.createBlock(branchScope2.render());
+    }
+    let branchParentScope;
+    if (branch.expressionAlias === null) {
+      branchParentScope = this.scope;
+    } else {
+      branchParentScope = Scope2.forNodes(this.tcb, this.scope, branch, [], null);
+      branchParentScope.render().forEach((stmt) => this.scope.addStatement(stmt));
+    }
+    const branchScope = Scope2.forNodes(this.tcb, branchParentScope, null, branch.children, null);
+    const expression = branch.expressionAlias === null ? tcbExpression(branch.expression, this.tcb, branchScope) : branchScope.resolve(branch.expressionAlias);
+    return import_typescript87.default.factory.createIfStatement(expression, import_typescript87.default.factory.createBlock(branchScope.render()), this.generateBranch(index + 1));
   }
 };
 var TcbSwitchOp = class extends TcbOp {
@@ -39539,7 +39990,7 @@ var TcbSwitchOp = class extends TcbOp {
     const clauses = [];
     for (const current of this.block.cases) {
       const breakStatement = import_typescript87.default.factory.createBreakStatement();
-      const clauseScope = Scope2.forNodes(this.tcb, this.scope, current.children, null);
+      const clauseScope = Scope2.forNodes(this.tcb, this.scope, null, current.children, null);
       if (current.expression === null) {
         clauses.push(import_typescript87.default.factory.createDefaultClause([...clauseScope.render(), breakStatement]));
       } else {
@@ -39561,9 +40012,9 @@ var TcbForOfOp = class extends TcbOp {
     return false;
   }
   execute() {
-    const loopScope = Scope2.forNodes(this.tcb, this.scope, this.block, null);
+    const loopScope = Scope2.forNodes(this.tcb, this.scope, this.block, this.block.children, null);
     const initializer = import_typescript87.default.factory.createVariableDeclarationList([import_typescript87.default.factory.createVariableDeclaration(this.block.item.name)], import_typescript87.default.NodeFlags.Const);
-    const expression = tcbExpression(this.block.expression, this.tcb, loopScope);
+    const expression = import_typescript87.default.factory.createNonNullExpression(tcbExpression(this.block.expression, this.tcb, loopScope));
     const trackTranslator = new TcbForLoopTrackTranslator(this.tcb, loopScope, this.block);
     const trackExpression = trackTranslator.translate(this.block.trackBy);
     const statements = [
@@ -39610,39 +40061,33 @@ var Scope2 = class {
     this.varMap = /* @__PURE__ */ new Map();
     this.statements = [];
   }
-  static forNodes(tcb, parent, blockOrNodes, guard) {
-    const scope = new Scope2(tcb, parent, guard);
-    if (parent === null && tcb.env.config.enableTemplateTypeChecker) {
+  static forNodes(tcb, parentScope, scopedNode, children, guard) {
+    const scope = new Scope2(tcb, parentScope, guard);
+    if (parentScope === null && tcb.env.config.enableTemplateTypeChecker) {
       scope.opQueue.push(new TcbComponentContextCompletionOp(scope));
     }
-    let children;
-    if (blockOrNodes instanceof Template) {
+    if (scopedNode instanceof Template) {
       const varMap = /* @__PURE__ */ new Map();
-      for (const v of blockOrNodes.variables) {
+      for (const v of scopedNode.variables) {
         if (!varMap.has(v.name)) {
           varMap.set(v.name, v);
         } else {
           const firstDecl = varMap.get(v.name);
           tcb.oobRecorder.duplicateTemplateVar(tcb.id, v, firstDecl);
         }
-        this.registerVariable(scope, v, new TcbTemplateVariableOp(tcb, scope, blockOrNodes, v));
+        this.registerVariable(scope, v, new TcbTemplateVariableOp(tcb, scope, scopedNode, v));
       }
-      children = blockOrNodes.children;
-    } else if (blockOrNodes instanceof IfBlockBranch) {
-      const { expression, expressionAlias } = blockOrNodes;
+    } else if (scopedNode instanceof IfBlockBranch) {
+      const { expression, expressionAlias } = scopedNode;
       if (expression !== null && expressionAlias !== null) {
         this.registerVariable(scope, expressionAlias, new TcbBlockVariableOp(tcb, scope, tcbExpression(expression, tcb, scope), expressionAlias));
       }
-      children = blockOrNodes.children;
-    } else if (blockOrNodes instanceof ForLoopBlock) {
-      this.registerVariable(scope, blockOrNodes.item, new TcbBlockVariableOp(tcb, scope, import_typescript87.default.factory.createIdentifier(blockOrNodes.item.name), blockOrNodes.item));
-      for (const variable2 of Object.values(blockOrNodes.contextVariables)) {
+    } else if (scopedNode instanceof ForLoopBlock) {
+      this.registerVariable(scope, scopedNode.item, new TcbBlockVariableOp(tcb, scope, import_typescript87.default.factory.createIdentifier(scopedNode.item.name), scopedNode.item));
+      for (const variable2 of Object.values(scopedNode.contextVariables)) {
         const type = import_typescript87.default.factory.createKeywordTypeNode(import_typescript87.default.SyntaxKind.NumberKeyword);
         this.registerVariable(scope, variable2, new TcbBlockImplicitVariableOp(tcb, scope, type, variable2));
       }
-      children = blockOrNodes.children;
-    } else {
-      children = blockOrNodes;
     }
     for (const node of children) {
       scope.appendNode(node);
@@ -42196,7 +42641,7 @@ var NgCompiler = class {
     }
   }
   constructor(adapter, options, inputProgram, programDriver, incrementalStrategy, incrementalCompilation, enableTemplateTypeChecker, usePoisonedData, livePerfRecorder) {
-    var _a2, _b2;
+    var _a2;
     this.adapter = adapter;
     this.options = options;
     this.inputProgram = inputProgram;
@@ -42210,7 +42655,6 @@ var NgCompiler = class {
     this.nonTemplateDiagnostics = null;
     this.delegatingPerfRecorder = new DelegatingPerfRecorder(this.perfRecorder);
     this.enableTemplateTypeChecker = enableTemplateTypeChecker || ((_a2 = options["_enableTemplateTypeChecker"]) != null ? _a2 : false);
-    this.enabledBlockTypes = new Set((_b2 = options["_enabledBlockTypes"]) != null ? _b2 : []);
     this.constructionDiagnostics.push(...this.adapter.constructionDiagnostics, ...verifyCompatibleTypeCheckOptions(this.options));
     this.currentProgram = inputProgram;
     this.closureCompilerEnabled = !!this.options.annotateForClosureCompiler;
@@ -42691,7 +43135,7 @@ var NgCompiler = class {
       throw new Error('JIT mode support ("supportJitMode" option) cannot be disabled in partial compilation mode.');
     }
     const handlers = [
-      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.enabledBlockTypes, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, supportTestBed, compilationMode, deferredSymbolsTracker),
+      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, supportTestBed, compilationMode, deferredSymbolsTracker),
       new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, supportTestBed, compilationMode),
       new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder, supportTestBed, compilationMode),
       new InjectableDecoratorHandler(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, compilationMode),
@@ -43547,7 +43991,7 @@ function getProjectTsConfigPaths(tree) {
           continue;
         }
         for (const [, options] of allTargetOptions(target)) {
-          const tsConfig = options.tsConfig;
+          const tsConfig = options["tsConfig"];
           if (typeof tsConfig !== "string" || !tree.exists(tsConfig)) {
             continue;
           }
