@@ -3673,12 +3673,13 @@ var DeferredBlockError = class {
   }
 };
 var DeferredBlock = class {
-  constructor(children, triggers, prefetchTriggers, placeholder, loading, error2, sourceSpan, startSourceSpan, endSourceSpan) {
+  constructor(children, triggers, prefetchTriggers, placeholder, loading, error2, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan) {
     this.children = children;
     this.placeholder = placeholder;
     this.loading = loading;
     this.error = error2;
     this.sourceSpan = sourceSpan;
+    this.mainBlockSpan = mainBlockSpan;
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
     this.triggers = triggers;
@@ -3693,14 +3694,11 @@ var DeferredBlock = class {
     this.visitTriggers(this.definedTriggers, this.triggers, visitor);
     this.visitTriggers(this.definedPrefetchTriggers, this.prefetchTriggers, visitor);
     visitAll(visitor, this.children);
-    this.placeholder && visitor.visitDeferredBlockPlaceholder(this.placeholder);
-    this.loading && visitor.visitDeferredBlockLoading(this.loading);
-    this.error && visitor.visitDeferredBlockError(this.error);
+    const remainingBlocks = [this.placeholder, this.loading, this.error].filter((x) => x !== null);
+    visitAll(visitor, remainingBlocks);
   }
   visitTriggers(keys, triggers, visitor) {
-    for (const key of keys) {
-      visitor.visitDeferredTrigger(triggers[key]);
-    }
+    visitAll(visitor, keys.map((k) => triggers[k]));
   }
 };
 var SwitchBlock = class {
@@ -3727,7 +3725,7 @@ var SwitchBlockCase = class {
   }
 };
 var ForLoopBlock = class {
-  constructor(item, expression, trackBy, contextVariables, children, empty, sourceSpan, startSourceSpan, endSourceSpan) {
+  constructor(item, expression, trackBy, contextVariables, children, empty, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan) {
     this.item = item;
     this.expression = expression;
     this.trackBy = trackBy;
@@ -3735,6 +3733,7 @@ var ForLoopBlock = class {
     this.children = children;
     this.empty = empty;
     this.sourceSpan = sourceSpan;
+    this.mainBlockSpan = mainBlockSpan;
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
   }
@@ -3743,10 +3742,11 @@ var ForLoopBlock = class {
   }
 };
 var ForLoopBlockEmpty = class {
-  constructor(children, sourceSpan, startSourceSpan) {
+  constructor(children, sourceSpan, startSourceSpan, endSourceSpan) {
     this.children = children;
     this.sourceSpan = sourceSpan;
     this.startSourceSpan = startSourceSpan;
+    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitForLoopBlockEmpty(this);
@@ -3764,12 +3764,13 @@ var IfBlock = class {
   }
 };
 var IfBlockBranch = class {
-  constructor(expression, children, expressionAlias, sourceSpan, startSourceSpan) {
+  constructor(expression, children, expressionAlias, sourceSpan, startSourceSpan, endSourceSpan) {
     this.expression = expression;
     this.children = children;
     this.expressionAlias = expressionAlias;
     this.sourceSpan = sourceSpan;
     this.startSourceSpan = startSourceSpan;
+    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitIfBlockBranch(this);
@@ -18904,25 +18905,33 @@ function createIfBlock(ast, connectedBlocks, visitor, bindingParser) {
   }
   const mainBlockParams = parseConditionalBlockParameters(ast, errors, bindingParser);
   if (mainBlockParams !== null) {
-    branches.push(new IfBlockBranch(mainBlockParams.expression, visitAll2(visitor, ast.children, ast.children), mainBlockParams.expressionAlias, ast.sourceSpan, ast.startSourceSpan));
+    branches.push(new IfBlockBranch(mainBlockParams.expression, visitAll2(visitor, ast.children, ast.children), mainBlockParams.expressionAlias, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan));
   }
   for (const block of connectedBlocks) {
     const children = visitAll2(visitor, block.children, block.children);
     if (ELSE_IF_PATTERN.test(block.name)) {
       const params = parseConditionalBlockParameters(block, errors, bindingParser);
       if (params !== null) {
-        branches.push(new IfBlockBranch(params.expression, children, params.expressionAlias, block.sourceSpan, block.startSourceSpan));
+        branches.push(new IfBlockBranch(params.expression, children, params.expressionAlias, block.sourceSpan, block.startSourceSpan, block.endSourceSpan));
       }
     } else if (block.name === "else") {
-      branches.push(new IfBlockBranch(null, children, null, block.sourceSpan, block.startSourceSpan));
+      branches.push(new IfBlockBranch(null, children, null, block.sourceSpan, block.startSourceSpan, block.endSourceSpan));
     }
   }
+  const ifBlockStartSourceSpan = branches.length > 0 ? branches[0].startSourceSpan : ast.startSourceSpan;
+  const ifBlockEndSourceSpan = branches.length > 0 ? branches[branches.length - 1].endSourceSpan : ast.endSourceSpan;
+  let wholeSourceSpan = ast.sourceSpan;
+  const lastBranch = branches[branches.length - 1];
+  if (lastBranch !== void 0) {
+    wholeSourceSpan = new ParseSourceSpan(ifBlockStartSourceSpan.start, lastBranch.sourceSpan.end);
+  }
   return {
-    node: new IfBlock(branches, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan),
+    node: new IfBlock(branches, wholeSourceSpan, ast.startSourceSpan, ifBlockEndSourceSpan),
     errors
   };
 }
 function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
+  var _a2, _b2;
   const errors = [];
   const params = parseForLoopParameters(ast, errors, bindingParser);
   let node = null;
@@ -18934,7 +18943,7 @@ function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
       } else if (block.parameters.length > 0) {
         errors.push(new ParseError(block.sourceSpan, "@empty block cannot have parameters"));
       } else {
-        empty = new ForLoopBlockEmpty(visitAll2(visitor, block.children, block.children), block.sourceSpan, block.startSourceSpan);
+        empty = new ForLoopBlockEmpty(visitAll2(visitor, block.children, block.children), block.sourceSpan, block.startSourceSpan, block.endSourceSpan);
       }
     } else {
       errors.push(new ParseError(block.sourceSpan, `Unrecognized @for loop block "${block.name}"`));
@@ -18944,7 +18953,9 @@ function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
     if (params.trackBy === null) {
       errors.push(new ParseError(ast.sourceSpan, '@for loop must have a "track" expression'));
     } else {
-      node = new ForLoopBlock(params.itemName, params.expression, params.trackBy, params.context, visitAll2(visitor, ast.children, ast.children), empty, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+      const endSpan = (_a2 = empty == null ? void 0 : empty.endSourceSpan) != null ? _a2 : ast.endSourceSpan;
+      const sourceSpan = new ParseSourceSpan(ast.sourceSpan.start, (_b2 = endSpan == null ? void 0 : endSpan.end) != null ? _b2 : ast.sourceSpan.end);
+      node = new ForLoopBlock(params.itemName, params.expression, params.trackBy, params.context, visitAll2(visitor, ast.children, ast.children), empty, sourceSpan, ast.sourceSpan, ast.startSourceSpan, endSpan);
     }
   }
   return { node, errors };
@@ -19015,7 +19026,8 @@ function parseForLoopParameters(block, errors, bindingParser) {
   }
   for (const variableName of ALLOWED_FOR_LOOP_LET_VARIABLES) {
     if (!result.context.hasOwnProperty(variableName)) {
-      result.context[variableName] = new Variable(variableName, variableName, block.startSourceSpan, block.startSourceSpan);
+      const emptySpanAfterForBlockStart = new ParseSourceSpan(block.startSourceSpan.end, block.startSourceSpan.end);
+      result.context[variableName] = new Variable(variableName, variableName, emptySpanAfterForBlockStart, emptySpanAfterForBlockStart);
     }
   }
   return result;
@@ -19423,7 +19435,15 @@ function createDeferredBlock(ast, connectedBlocks, visitor, bindingParser) {
   const errors = [];
   const { placeholder, loading, error: error2 } = parseConnectedBlocks(connectedBlocks, errors, visitor);
   const { triggers, prefetchTriggers } = parsePrimaryTriggers(ast.parameters, bindingParser, errors, placeholder);
-  const node = new DeferredBlock(visitAll2(visitor, ast.children, ast.children), triggers, prefetchTriggers, placeholder, loading, error2, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+  let lastEndSourceSpan = ast.endSourceSpan;
+  let endOfLastSourceSpan = ast.sourceSpan.end;
+  if (connectedBlocks.length > 0) {
+    const lastConnectedBlock = connectedBlocks[connectedBlocks.length - 1];
+    lastEndSourceSpan = lastConnectedBlock.endSourceSpan;
+    endOfLastSourceSpan = lastConnectedBlock.sourceSpan.end;
+  }
+  const mainDeferredSourceSpan = new ParseSourceSpan(ast.sourceSpan.start, endOfLastSourceSpan);
+  const node = new DeferredBlock(visitAll2(visitor, ast.children, ast.children), triggers, prefetchTriggers, placeholder, loading, error2, mainDeferredSourceSpan, ast.sourceSpan, ast.startSourceSpan, lastEndSourceSpan);
   return { node, errors };
 }
 function parseConnectedBlocks(connectedBlocks, errors, visitor) {
@@ -23486,7 +23506,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-5464bea");
+var VERSION2 = new Version("17.0.0-next.7+sha-5b88d13");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

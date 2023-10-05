@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-5464bea
+ * @license Angular v17.0.0-next.7+sha-5b88d13
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1747,8 +1747,6 @@ declare type ComponentTemplate<T> = {
 
 /**
  * Create a computed `Signal` which derives a reactive value from an expression.
- *
- * @developerPreview
  */
 export declare function computed<T>(computation: () => T, options?: CreateComputedOptions<T>): Signal<T>;
 
@@ -2070,8 +2068,6 @@ export declare function createComponent<C>(component: Type<C>, options: {
 
 /**
  * Options passed to the `computed` creation function.
- *
- * @developerPreview
  */
 export declare interface CreateComputedOptions<T> {
     /**
@@ -2167,8 +2163,6 @@ export declare function createPlatformFactory(parentPlatformFactory: ((extraProv
 
 /**
  * Options passed to the `signal` creation function.
- *
- * @developerPreview
  */
 export declare interface CreateSignalOptions<T> {
     /**
@@ -5120,8 +5114,6 @@ export declare function isDevMode(): boolean;
 
 /**
  * Checks if the given `value` is a reactive `Signal`.
- *
- * @developerPreview
  */
 export declare function isSignal(value: unknown): value is Signal<unknown>;
 
@@ -8214,8 +8206,6 @@ declare const SIGNAL: unique symbol;
  * call it.
  *
  * Ordinary values can be turned into `Signal`s with the `signal` function.
- *
- * @developerPreview
  */
 export declare type Signal<T> = (() => T) & {
     [SIGNAL]: unknown;
@@ -8223,8 +8213,6 @@ export declare type Signal<T> = (() => T) & {
 
 /**
  * Create a `Signal` that can be set or updated directly.
- *
- * @developerPreview
  */
 export declare function signal<T>(initialValue: T, options?: CreateSignalOptions<T>): WritableSignal<T>;
 
@@ -10078,15 +10066,11 @@ export declare interface TypeProvider extends Type<any> {
 /**
  * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
  * can, optionally, return a value.
- *
- * @developerPreview
  */
 export declare function untracked<T>(nonReactiveReadsFn: () => T): T;
 
 /**
  * A comparison function which can determine if two values are equal.
- *
- * @developerPreview
  */
 export declare type ValueEqualityFn<T> = (a: T, b: T) => boolean;
 
@@ -10610,8 +10594,6 @@ declare interface ViewRefTracker {
 
 /**
  * A `Signal` with a value that can be mutated via a setter interface.
- *
- * @developerPreview
  */
 export declare interface WritableSignal<T> extends Signal<T> {
     /**
@@ -10623,11 +10605,6 @@ export declare interface WritableSignal<T> extends Signal<T> {
      * notify any dependents.
      */
     update(updateFn: (value: T) => T): void;
-    /**
-     * Update the current value by mutating it in-place, and
-     * notify any dependents.
-     */
-    mutate(mutatorFn: (value: T) => void): void;
     /**
      * Returns a readonly version of this signal. Readonly signals can be accessed to read their value
      * but can't be changed using set, update or mutate methods. The readonly signals do _not_ have

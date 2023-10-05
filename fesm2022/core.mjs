@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-5464bea
+ * @license Angular v17.0.0-next.7+sha-5b88d13
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2272,8 +2272,6 @@ function getFactoryDef(type, throwNotFound) {
 const SIGNAL = /* @__PURE__ */ Symbol('SIGNAL');
 /**
  * Checks if the given `value` is a reactive `Signal`.
- *
- * @developerPreview
  */
 function isSignal(value) {
     return typeof value === 'function' && value[SIGNAL] !== undefined;
@@ -2284,16 +2282,9 @@ function isSignal(value) {
  *
  * This allows signals to hold non-primitive values (arrays, objects, other collections) and still
  * propagate change notification upon explicit mutation without identity change.
- *
- * @developerPreview
  */
 function defaultEquals(a, b) {
-    // `Object.is` compares two values using identity semantics which is desired behavior for
-    // primitive values. If `Object.is` determines two values to be equal we need to make sure that
-    // those don't represent objects (we want to make sure that 2 objects are always considered
-    // "unequal"). The null check is needed for the special case of JavaScript reporting null values
-    // as objects (`typeof null === 'object'`).
-    return (a === null || typeof a !== 'object') && Object.is(a, b);
+    return Object.is(a, b);
 }
 
 // Required as the signals library is in a separate package, so we need to explicitly ensure the
@@ -2572,8 +2563,6 @@ function assertProducerNode(node) {
 
 /**
  * Create a computed `Signal` which derives a reactive value from an expression.
- *
- * @developerPreview
  */
 function computed(computation, options) {
     const node = Object.create(COMPUTED_NODE);
@@ -2676,8 +2665,6 @@ function setThrowInvalidWriteToSignalError(fn) {
 let postSignalSetFn = null;
 /**
  * Create a `Signal` that can be set or updated directly.
- *
- * @developerPreview
  */
 function signal(initialValue, options) {
     const node = Object.create(SIGNAL_NODE);
@@ -2689,7 +2676,6 @@ function signal(initialValue, options) {
     }
     signalFn.set = signalSetFn;
     signalFn.update = signalUpdateFn;
-    signalFn.mutate = signalMutateFn;
     signalFn.asReadonly = signalAsReadonlyFn;
     signalFn[SIGNAL] = node;
     return signalFn;
@@ -2725,19 +2711,7 @@ function signalSetFn(newValue) {
     }
 }
 function signalUpdateFn(updater) {
-    if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError();
-    }
     signalSetFn.call(this, updater(this[SIGNAL].value));
-}
-function signalMutateFn(mutator) {
-    const node = this[SIGNAL];
-    if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError();
-    }
-    // Mutate bypasses equality checks as it's by definition changing the value.
-    mutator(node.value);
-    signalValueChanged(node);
 }
 function signalAsReadonlyFn() {
     const node = this[SIGNAL];
@@ -2752,8 +2726,6 @@ function signalAsReadonlyFn() {
 /**
  * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
  * can, optionally, return a value.
- *
- * @developerPreview
  */
 function untracked(nonReactiveReadsFn) {
     const prevConsumer = setActiveConsumer(null);
@@ -10910,7 +10882,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-5464bea');
+const VERSION = new Version('17.0.0-next.7+sha-5b88d13');
 
 // This default value is when checking the hierarchy for a token.
 //
