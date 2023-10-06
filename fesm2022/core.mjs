@@ -1,9 +1,10 @@
 /**
- * @license Angular v17.0.0-next.7+sha-2e16b0e
+ * @license Angular v17.0.0-next.7+sha-00128e3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
+import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, createWatch as createWatch$1, getActiveConsumer as getActiveConsumer$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, Observable, merge as merge$1, BehaviorSubject, of } from 'rxjs';
 import { share, switchMap, distinctUntilChanged, first } from 'rxjs/operators';
 
@@ -2280,576 +2281,6 @@ function getFactoryDef(type, throwNotFound) {
 }
 
 /**
- * Symbol used to tell `Signal`s apart from other functions.
- *
- * This can be used to auto-unwrap signals in various cases, or to auto-wrap non-signal values.
- */
-const SIGNAL = /* @__PURE__ */ Symbol('SIGNAL');
-/**
- * Checks if the given `value` is a reactive `Signal`.
- */
-function isSignal(value) {
-    return typeof value === 'function' && value[SIGNAL] !== undefined;
-}
-/**
- * The default equality function used for `signal` and `computed`, which treats objects and arrays
- * as never equal, and all other primitive values using identity semantics.
- *
- * This allows signals to hold non-primitive values (arrays, objects, other collections) and still
- * propagate change notification upon explicit mutation without identity change.
- */
-function defaultEquals(a, b) {
-    // `Object.is` compares two values using identity semantics which is desired behavior for
-    // primitive values. If `Object.is` determines two values to be equal we need to make sure that
-    // those don't represent objects (we want to make sure that 2 objects are always considered
-    // "unequal"). The null check is needed for the special case of JavaScript reporting null values
-    // as objects (`typeof null === 'object'`).
-    return (a === null || typeof a !== 'object') && Object.is(a, b);
-}
-
-// Required as the signals library is in a separate package, so we need to explicitly ensure the
-/**
- * The currently active consumer `ReactiveNode`, if running code in a reactive context.
- *
- * Change this via `setActiveConsumer`.
- */
-let activeConsumer = null;
-let inNotificationPhase = false;
-function setActiveConsumer(consumer) {
-    const prev = activeConsumer;
-    activeConsumer = consumer;
-    return prev;
-}
-function getActiveConsumer() {
-    return activeConsumer;
-}
-function isInNotificationPhase() {
-    return inNotificationPhase;
-}
-const REACTIVE_NODE = {
-    version: 0,
-    dirty: false,
-    producerNode: undefined,
-    producerLastReadVersion: undefined,
-    producerIndexOfThis: undefined,
-    nextProducerIndex: 0,
-    liveConsumerNode: undefined,
-    liveConsumerIndexOfThis: undefined,
-    consumerAllowSignalWrites: false,
-    consumerIsAlwaysLive: false,
-    producerMustRecompute: () => false,
-    producerRecomputeValue: () => { },
-    consumerMarkedDirty: () => { },
-};
-/**
- * Called by implementations when a producer's signal is read.
- */
-function producerAccessed(node) {
-    if (inNotificationPhase) {
-        throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode ?
-            `Assertion error: signal read during notification phase` :
-            '');
-    }
-    if (activeConsumer === null) {
-        // Accessed outside of a reactive context, so nothing to record.
-        return;
-    }
-    // This producer is the `idx`th dependency of `activeConsumer`.
-    const idx = activeConsumer.nextProducerIndex++;
-    assertConsumerNode(activeConsumer);
-    if (idx < activeConsumer.producerNode.length && activeConsumer.producerNode[idx] !== node) {
-        // There's been a change in producers since the last execution of `activeConsumer`.
-        // `activeConsumer.producerNode[idx]` holds a stale dependency which will be be removed and
-        // replaced with `this`.
-        //
-        // If `activeConsumer` isn't live, then this is a no-op, since we can replace the producer in
-        // `activeConsumer.producerNode` directly. However, if `activeConsumer` is live, then we need
-        // to remove it from the stale producer's `liveConsumer`s.
-        if (consumerIsLive(activeConsumer)) {
-            const staleProducer = activeConsumer.producerNode[idx];
-            producerRemoveLiveConsumerAtIndex(staleProducer, activeConsumer.producerIndexOfThis[idx]);
-            // At this point, the only record of `staleProducer` is the reference at
-            // `activeConsumer.producerNode[idx]` which will be overwritten below.
-        }
-    }
-    if (activeConsumer.producerNode[idx] !== node) {
-        // We're a new dependency of the consumer (at `idx`).
-        activeConsumer.producerNode[idx] = node;
-        // If the active consumer is live, then add it as a live consumer. If not, then use 0 as a
-        // placeholder value.
-        activeConsumer.producerIndexOfThis[idx] =
-            consumerIsLive(activeConsumer) ? producerAddLiveConsumer(node, activeConsumer, idx) : 0;
-    }
-    activeConsumer.producerLastReadVersion[idx] = node.version;
-}
-/**
- * Ensure this producer's `version` is up-to-date.
- */
-function producerUpdateValueVersion(node) {
-    if (consumerIsLive(node) && !node.dirty) {
-        // A live consumer will be marked dirty by producers, so a clean state means that its version
-        // is guaranteed to be up-to-date.
-        return;
-    }
-    if (!node.producerMustRecompute(node) && !consumerPollProducersForChange(node)) {
-        // None of our producers report a change since the last time they were read, so no
-        // recomputation of our value is necessary, and we can consider ourselves clean.
-        node.dirty = false;
-        return;
-    }
-    node.producerRecomputeValue(node);
-    // After recomputing the value, we're no longer dirty.
-    node.dirty = false;
-}
-/**
- * Propagate a dirty notification to live consumers of this producer.
- */
-function producerNotifyConsumers(node) {
-    if (node.liveConsumerNode === undefined) {
-        return;
-    }
-    // Prevent signal reads when we're updating the graph
-    const prev = inNotificationPhase;
-    inNotificationPhase = true;
-    try {
-        for (const consumer of node.liveConsumerNode) {
-            if (!consumer.dirty) {
-                consumerMarkDirty(consumer);
-            }
-        }
-    }
-    finally {
-        inNotificationPhase = prev;
-    }
-}
-/**
- * Whether this `ReactiveNode` in its producer capacity is currently allowed to initiate updates,
- * based on the current consumer context.
- */
-function producerUpdatesAllowed() {
-    return activeConsumer?.consumerAllowSignalWrites !== false;
-}
-function consumerMarkDirty(node) {
-    node.dirty = true;
-    producerNotifyConsumers(node);
-    node.consumerMarkedDirty?.(node);
-}
-/**
- * Prepare this consumer to run a computation in its reactive context.
- *
- * Must be called by subclasses which represent reactive computations, before those computations
- * begin.
- */
-function consumerBeforeComputation(node) {
-    node && (node.nextProducerIndex = 0);
-    return setActiveConsumer(node);
-}
-/**
- * Finalize this consumer's state after a reactive computation has run.
- *
- * Must be called by subclasses which represent reactive computations, after those computations
- * have finished.
- */
-function consumerAfterComputation(node, prevConsumer) {
-    setActiveConsumer(prevConsumer);
-    if (!node || node.producerNode === undefined || node.producerIndexOfThis === undefined ||
-        node.producerLastReadVersion === undefined) {
-        return;
-    }
-    if (consumerIsLive(node)) {
-        // For live consumers, we need to remove the producer -> consumer edge for any stale producers
-        // which weren't dependencies after the recomputation.
-        for (let i = node.nextProducerIndex; i < node.producerNode.length; i++) {
-            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
-        }
-    }
-    // Truncate the producer tracking arrays.
-    // Perf note: this is essentially truncating the length to `node.nextProducerIndex`, but
-    // benchmarking has shown that individual pop operations are faster.
-    while (node.producerNode.length > node.nextProducerIndex) {
-        node.producerNode.pop();
-        node.producerLastReadVersion.pop();
-        node.producerIndexOfThis.pop();
-    }
-}
-/**
- * Determine whether this consumer has any dependencies which have changed since the last time
- * they were read.
- */
-function consumerPollProducersForChange(node) {
-    assertConsumerNode(node);
-    // Poll producers for change.
-    for (let i = 0; i < node.producerNode.length; i++) {
-        const producer = node.producerNode[i];
-        const seenVersion = node.producerLastReadVersion[i];
-        // First check the versions. A mismatch means that the producer's value is known to have
-        // changed since the last time we read it.
-        if (seenVersion !== producer.version) {
-            return true;
-        }
-        // The producer's version is the same as the last time we read it, but it might itself be
-        // stale. Force the producer to recompute its version (calculating a new value if necessary).
-        producerUpdateValueVersion(producer);
-        // Now when we do this check, `producer.version` is guaranteed to be up to date, so if the
-        // versions still match then it has not changed since the last time we read it.
-        if (seenVersion !== producer.version) {
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * Disconnect this consumer from the graph.
- */
-function consumerDestroy(node) {
-    assertConsumerNode(node);
-    if (consumerIsLive(node)) {
-        // Drop all connections from the graph to this node.
-        for (let i = 0; i < node.producerNode.length; i++) {
-            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
-        }
-    }
-    // Truncate all the arrays to drop all connection from this node to the graph.
-    node.producerNode.length = node.producerLastReadVersion.length = node.producerIndexOfThis.length =
-        0;
-    if (node.liveConsumerNode) {
-        node.liveConsumerNode.length = node.liveConsumerIndexOfThis.length = 0;
-    }
-}
-/**
- * Add `consumer` as a live consumer of this node.
- *
- * Note that this operation is potentially transitive. If this node becomes live, then it becomes
- * a live consumer of all of its current producers.
- */
-function producerAddLiveConsumer(node, consumer, indexOfThis) {
-    assertProducerNode(node);
-    assertConsumerNode(node);
-    if (node.liveConsumerNode.length === 0) {
-        // When going from 0 to 1 live consumers, we become a live consumer to our producers.
-        for (let i = 0; i < node.producerNode.length; i++) {
-            node.producerIndexOfThis[i] = producerAddLiveConsumer(node.producerNode[i], node, i);
-        }
-    }
-    node.liveConsumerIndexOfThis.push(indexOfThis);
-    return node.liveConsumerNode.push(consumer) - 1;
-}
-/**
- * Remove the live consumer at `idx`.
- */
-function producerRemoveLiveConsumerAtIndex(node, idx) {
-    assertProducerNode(node);
-    assertConsumerNode(node);
-    if (typeof ngDevMode !== 'undefined' && ngDevMode && idx >= node.liveConsumerNode.length) {
-        throw new Error(`Assertion error: active consumer index ${idx} is out of bounds of ${node.liveConsumerNode.length} consumers)`);
-    }
-    if (node.liveConsumerNode.length === 1) {
-        // When removing the last live consumer, we will no longer be live. We need to remove
-        // ourselves from our producers' tracking (which may cause consumer-producers to lose
-        // liveness as well).
-        for (let i = 0; i < node.producerNode.length; i++) {
-            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
-        }
-    }
-    // Move the last value of `liveConsumers` into `idx`. Note that if there's only a single
-    // live consumer, this is a no-op.
-    const lastIdx = node.liveConsumerNode.length - 1;
-    node.liveConsumerNode[idx] = node.liveConsumerNode[lastIdx];
-    node.liveConsumerIndexOfThis[idx] = node.liveConsumerIndexOfThis[lastIdx];
-    // Truncate the array.
-    node.liveConsumerNode.length--;
-    node.liveConsumerIndexOfThis.length--;
-    // If the index is still valid, then we need to fix the index pointer from the producer to this
-    // consumer, and update it from `lastIdx` to `idx` (accounting for the move above).
-    if (idx < node.liveConsumerNode.length) {
-        const idxProducer = node.liveConsumerIndexOfThis[idx];
-        const consumer = node.liveConsumerNode[idx];
-        assertConsumerNode(consumer);
-        consumer.producerIndexOfThis[idxProducer] = idx;
-    }
-}
-function consumerIsLive(node) {
-    return node.consumerIsAlwaysLive || (node?.liveConsumerNode?.length ?? 0) > 0;
-}
-function assertConsumerNode(node) {
-    node.producerNode ??= [];
-    node.producerIndexOfThis ??= [];
-    node.producerLastReadVersion ??= [];
-}
-function assertProducerNode(node) {
-    node.liveConsumerNode ??= [];
-    node.liveConsumerIndexOfThis ??= [];
-}
-
-/**
- * Create a computed `Signal` which derives a reactive value from an expression.
- */
-function computed(computation, options) {
-    const node = Object.create(COMPUTED_NODE);
-    node.computation = computation;
-    options?.equal && (node.equal = options.equal);
-    const computed = () => {
-        // Check if the value needs updating before returning it.
-        producerUpdateValueVersion(node);
-        // Record that someone looked at this signal.
-        producerAccessed(node);
-        if (node.value === ERRORED) {
-            throw node.error;
-        }
-        return node.value;
-    };
-    computed[SIGNAL] = node;
-    return computed;
-}
-/**
- * A dedicated symbol used before a computed value has been calculated for the first time.
- * Explicitly typed as `any` so we can use it as signal's value.
- */
-const UNSET = /* @__PURE__ */ Symbol('UNSET');
-/**
- * A dedicated symbol used in place of a computed signal value to indicate that a given computation
- * is in progress. Used to detect cycles in computation chains.
- * Explicitly typed as `any` so we can use it as signal's value.
- */
-const COMPUTING = /* @__PURE__ */ Symbol('COMPUTING');
-/**
- * A dedicated symbol used in place of a computed signal value to indicate that a given computation
- * failed. The thrown error is cached until the computation gets dirty again.
- * Explicitly typed as `any` so we can use it as signal's value.
- */
-const ERRORED = /* @__PURE__ */ Symbol('ERRORED');
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const COMPUTED_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE,
-        value: UNSET,
-        dirty: true,
-        error: null,
-        equal: defaultEquals,
-        producerMustRecompute(node) {
-            // Force a recomputation if there's no current value, or if the current value is in the
-            // process of being calculated (which should throw an error).
-            return node.value === UNSET || node.value === COMPUTING;
-        },
-        producerRecomputeValue(node) {
-            if (node.value === COMPUTING) {
-                // Our computation somehow led to a cyclic read of itself.
-                throw new Error('Detected cycle in computations.');
-            }
-            const oldValue = node.value;
-            node.value = COMPUTING;
-            const prevConsumer = consumerBeforeComputation(node);
-            let newValue;
-            try {
-                newValue = node.computation();
-            }
-            catch (err) {
-                newValue = ERRORED;
-                node.error = err;
-            }
-            finally {
-                consumerAfterComputation(node, prevConsumer);
-            }
-            if (oldValue !== UNSET && oldValue !== ERRORED && newValue !== ERRORED &&
-                node.equal(oldValue, newValue)) {
-                // No change to `valueVersion` - old and new values are
-                // semantically equivalent.
-                node.value = oldValue;
-                return;
-            }
-            node.value = newValue;
-            node.version++;
-        },
-    };
-})();
-
-function defaultThrowError() {
-    throw new Error();
-}
-let throwInvalidWriteToSignalErrorFn = defaultThrowError;
-function throwInvalidWriteToSignalError() {
-    throwInvalidWriteToSignalErrorFn();
-}
-function setThrowInvalidWriteToSignalError(fn) {
-    throwInvalidWriteToSignalErrorFn = fn;
-}
-
-/**
- * If set, called after `WritableSignal`s are updated.
- *
- * This hook can be used to achieve various effects, such as running effects synchronously as part
- * of setting a signal.
- */
-let postSignalSetFn = null;
-/**
- * Create a `Signal` that can be set or updated directly.
- */
-function signal(initialValue, options) {
-    const node = Object.create(SIGNAL_NODE);
-    node.value = initialValue;
-    options?.equal && (node.equal = options.equal);
-    function signalFn() {
-        producerAccessed(node);
-        return node.value;
-    }
-    signalFn.set = signalSetFn;
-    signalFn.update = signalUpdateFn;
-    signalFn.mutate = signalMutateFn;
-    signalFn.asReadonly = signalAsReadonlyFn;
-    signalFn[SIGNAL] = node;
-    return signalFn;
-}
-function setPostSignalSetFn(fn) {
-    const prev = postSignalSetFn;
-    postSignalSetFn = fn;
-    return prev;
-}
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const SIGNAL_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE,
-        equal: defaultEquals,
-        readonlyFn: undefined,
-    };
-})();
-function signalValueChanged(node) {
-    node.version++;
-    producerNotifyConsumers(node);
-    postSignalSetFn?.();
-}
-function signalSetFn(newValue) {
-    const node = this[SIGNAL];
-    if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError();
-    }
-    if (!node.equal(node.value, newValue)) {
-        node.value = newValue;
-        signalValueChanged(node);
-    }
-}
-function signalUpdateFn(updater) {
-    if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError();
-    }
-    signalSetFn.call(this, updater(this[SIGNAL].value));
-}
-function signalMutateFn(mutator) {
-    const node = this[SIGNAL];
-    if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError();
-    }
-    // Mutate bypasses equality checks as it's by definition changing the value.
-    mutator(node.value);
-    signalValueChanged(node);
-}
-function signalAsReadonlyFn() {
-    const node = this[SIGNAL];
-    if (node.readonlyFn === undefined) {
-        const readonlyFn = () => this();
-        readonlyFn[SIGNAL] = node;
-        node.readonlyFn = readonlyFn;
-    }
-    return node.readonlyFn;
-}
-
-/**
- * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
- * can, optionally, return a value.
- */
-function untracked(nonReactiveReadsFn) {
-    const prevConsumer = setActiveConsumer(null);
-    // We are not trying to catch any particular errors here, just making sure that the consumers
-    // stack is restored in case of errors.
-    try {
-        return nonReactiveReadsFn();
-    }
-    finally {
-        setActiveConsumer(prevConsumer);
-    }
-}
-
-function watch(fn, schedule, allowSignalWrites) {
-    const node = Object.create(WATCH_NODE);
-    if (allowSignalWrites) {
-        node.consumerAllowSignalWrites = true;
-    }
-    node.fn = fn;
-    node.schedule = schedule;
-    const registerOnCleanup = (cleanupFn) => {
-        node.cleanupFn = cleanupFn;
-    };
-    function isWatchNodeDestroyed(node) {
-        return node.fn === null && node.schedule === null;
-    }
-    function destroyWatchNode(node) {
-        if (!isWatchNodeDestroyed(node)) {
-            consumerDestroy(node); // disconnect watcher from the reactive graph
-            node.cleanupFn();
-            // nullify references to the integration functions to mark node as destroyed
-            node.fn = null;
-            node.schedule = null;
-            node.cleanupFn = NOOP_CLEANUP_FN;
-        }
-    }
-    const run = () => {
-        if (node.fn === null) {
-            // trying to run a destroyed watch is noop
-            return;
-        }
-        if (isInNotificationPhase()) {
-            throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
-        }
-        node.dirty = false;
-        if (node.hasRun && !consumerPollProducersForChange(node)) {
-            return;
-        }
-        node.hasRun = true;
-        const prevConsumer = consumerBeforeComputation(node);
-        try {
-            node.cleanupFn();
-            node.cleanupFn = NOOP_CLEANUP_FN;
-            node.fn(registerOnCleanup);
-        }
-        finally {
-            consumerAfterComputation(node, prevConsumer);
-        }
-    };
-    node.ref = {
-        notify: () => consumerMarkDirty(node),
-        run,
-        cleanup: () => node.cleanupFn(),
-        destroy: () => destroyWatchNode(node),
-    };
-    return node.ref;
-}
-const NOOP_CLEANUP_FN = () => { };
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const WATCH_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE,
-        consumerIsAlwaysLive: true,
-        consumerAllowSignalWrites: false,
-        consumerMarkedDirty: (node) => {
-            if (node.schedule !== null) {
-                node.schedule(node.ref);
-            }
-        },
-        hasRun: false,
-        cleanupFn: NOOP_CLEANUP_FN,
-    };
-})();
-
-function setAlternateWeakRefImpl(impl) {
-    // TODO: remove this function
-}
-
-/**
  * Represents a basic change from a previous to a new value for a single
  * property on a directive instance. Passed as a value in a
  * {@link SimpleChanges} object to the `ngOnChanges` hook.
@@ -3929,12 +3360,12 @@ function callHooks(currentView, arr, initPhase, currentNodeIndex) {
  */
 function callHookInternal(directive, hook) {
     profiler(4 /* ProfilerEvent.LifecycleHookStart */, directive, hook);
-    const prevConsumer = setActiveConsumer(null);
+    const prevConsumer = setActiveConsumer$1(null);
     try {
         hook.call(directive);
     }
     finally {
-        setActiveConsumer(prevConsumer);
+        setActiveConsumer$1(prevConsumer);
         profiler(5 /* ProfilerEvent.LifecycleHookEnd */, directive, hook);
     }
 }
@@ -8767,8 +8198,8 @@ function detachView(lContainer, removeIndex) {
 function destroyLView(tView, lView) {
     if (!(lView[FLAGS] & 256 /* LViewFlags.Destroyed */)) {
         const renderer = lView[RENDERER];
-        lView[REACTIVE_TEMPLATE_CONSUMER] && consumerDestroy(lView[REACTIVE_TEMPLATE_CONSUMER]);
-        lView[REACTIVE_HOST_BINDING_CONSUMER] && consumerDestroy(lView[REACTIVE_HOST_BINDING_CONSUMER]);
+        lView[REACTIVE_TEMPLATE_CONSUMER] && consumerDestroy$1(lView[REACTIVE_TEMPLATE_CONSUMER]);
+        lView[REACTIVE_HOST_BINDING_CONSUMER] && consumerDestroy$1(lView[REACTIVE_HOST_BINDING_CONSUMER]);
         if (renderer.destroyNode) {
             applyView(tView, lView, renderer, 3 /* WalkTNodeTreeAction.Destroy */, null, null);
         }
@@ -10930,7 +10361,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-2e16b0e');
+const VERSION = new Version('17.0.0-next.7+sha-00128e3');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -12136,7 +11567,7 @@ function commitLViewConsumerIfHasProducers(lView, slot) {
     currentConsumer = createLViewConsumer();
 }
 const REACTIVE_LVIEW_CONSUMER_NODE = {
-    ...REACTIVE_NODE,
+    ...REACTIVE_NODE$1,
     consumerIsAlwaysLive: true,
     consumerMarkedDirty: (node) => {
         (typeof ngDevMode === 'undefined' || ngDevMode) &&
@@ -12268,13 +11699,13 @@ function processHostBindingOpCodes(tView, lView) {
                 const hostBindingFn = hostBindingOpCodes[++i];
                 setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
                 consumer.dirty = false;
-                const prevConsumer = consumerBeforeComputation(consumer);
+                const prevConsumer = consumerBeforeComputation$1(consumer);
                 try {
                     const context = lView[directiveIdx];
                     hostBindingFn(2 /* RenderFlags.Update */, context);
                 }
                 finally {
-                    consumerAfterComputation(consumer, prevConsumer);
+                    consumerAfterComputation$1(consumer, prevConsumer);
                 }
             }
         }
@@ -12416,7 +11847,7 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         const preHookType = isUpdatePhase ? 2 /* ProfilerEvent.TemplateUpdateStart */ : 0 /* ProfilerEvent.TemplateCreateStart */;
         profiler(preHookType, context);
         const effectiveConsumer = isUpdatePhase ? consumer : null;
-        const prevConsumer = consumerBeforeComputation(effectiveConsumer);
+        const prevConsumer = consumerBeforeComputation$1(effectiveConsumer);
         try {
             if (effectiveConsumer !== null) {
                 effectiveConsumer.dirty = false;
@@ -12424,7 +11855,7 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
             templateFn(rf, context);
         }
         finally {
-            consumerAfterComputation(effectiveConsumer, prevConsumer);
+            consumerAfterComputation$1(effectiveConsumer, prevConsumer);
         }
     }
     finally {
@@ -12441,7 +11872,7 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
 //////////////////////////
 function executeContentQueries(tView, tNode, lView) {
     if (isContentQueryHost(tNode)) {
-        const prevConsumer = setActiveConsumer(null);
+        const prevConsumer = setActiveConsumer$1(null);
         try {
             const start = tNode.directiveStart;
             const end = tNode.directiveEnd;
@@ -12453,7 +11884,7 @@ function executeContentQueries(tView, tNode, lView) {
             }
         }
         finally {
-            setActiveConsumer(prevConsumer);
+            setActiveConsumer$1(prevConsumer);
         }
     }
 }
@@ -13297,7 +12728,7 @@ function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode, initial
     }
 }
 function writeToDirectiveInput(def, instance, publicName, privateName, value) {
-    const prevConsumer = setActiveConsumer(null);
+    const prevConsumer = setActiveConsumer$1(null);
     try {
         const inputTransforms = def.inputTransforms;
         if (inputTransforms !== null && inputTransforms.hasOwnProperty(privateName)) {
@@ -13311,7 +12742,7 @@ function writeToDirectiveInput(def, instance, publicName, privateName, value) {
         }
     }
     finally {
-        setActiveConsumer(prevConsumer);
+        setActiveConsumer$1(prevConsumer);
     }
 }
 /**
@@ -13447,12 +12878,12 @@ function addToViewTree(lView, lViewOrLContainer) {
 function executeViewQueryFn(flags, viewQueryFn, component) {
     ngDevMode && assertDefined(viewQueryFn, 'View queries function to execute must be defined.');
     setCurrentQueryIndex(0);
-    const prevConsumer = setActiveConsumer(null);
+    const prevConsumer = setActiveConsumer$1(null);
     try {
         viewQueryFn(flags, component);
     }
     finally {
-        setActiveConsumer(prevConsumer);
+        setActiveConsumer$1(prevConsumer);
     }
 }
 ///////////////////////////////
@@ -30584,7 +30015,7 @@ function publishDefaultGlobalUtils() {
  * Sets the error for an invalid write to a signal to be an Angular `RuntimeError`.
  */
 function publishSignalConfiguration() {
-    setThrowInvalidWriteToSignalError(() => {
+    setThrowInvalidWriteToSignalError$1(() => {
         throw new RuntimeError(600 /* RuntimeErrorCode.SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT */, ngDevMode &&
             'Writing to signals is not allowed in a `computed` or an `effect` by default. ' +
                 'Use `allowSignalWrites` in the `CreateEffectOptions` to enable this inside effects.');
@@ -33321,6 +32752,537 @@ class ApplicationModule {
     }], () => [{ type: ApplicationRef }], null); })();
 
 /**
+ * The default equality function used for `signal` and `computed`, which uses referential equality.
+ */
+function defaultEquals(a, b) {
+    return Object.is(a, b);
+}
+
+/**
+ * The currently active consumer `ReactiveNode`, if running code in a reactive context.
+ *
+ * Change this via `setActiveConsumer`.
+ */
+let activeConsumer = null;
+let inNotificationPhase = false;
+/**
+ * Symbol used to tell `Signal`s apart from other functions.
+ *
+ * This can be used to auto-unwrap signals in various cases, or to auto-wrap non-signal values.
+ */
+const SIGNAL = /* @__PURE__ */ Symbol('SIGNAL');
+function setActiveConsumer(consumer) {
+    const prev = activeConsumer;
+    activeConsumer = consumer;
+    return prev;
+}
+function getActiveConsumer() {
+    return activeConsumer;
+}
+function isInNotificationPhase() {
+    return inNotificationPhase;
+}
+function isReactive(value) {
+    return value[SIGNAL] !== undefined;
+}
+const REACTIVE_NODE = {
+    version: 0,
+    dirty: false,
+    producerNode: undefined,
+    producerLastReadVersion: undefined,
+    producerIndexOfThis: undefined,
+    nextProducerIndex: 0,
+    liveConsumerNode: undefined,
+    liveConsumerIndexOfThis: undefined,
+    consumerAllowSignalWrites: false,
+    consumerIsAlwaysLive: false,
+    producerMustRecompute: () => false,
+    producerRecomputeValue: () => { },
+    consumerMarkedDirty: () => { },
+    consumerOnSignalRead: () => { },
+};
+/**
+ * Called by implementations when a producer's signal is read.
+ */
+function producerAccessed(node) {
+    if (inNotificationPhase) {
+        throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode ?
+            `Assertion error: signal read during notification phase` :
+            '');
+    }
+    if (activeConsumer === null) {
+        // Accessed outside of a reactive context, so nothing to record.
+        return;
+    }
+    activeConsumer.consumerOnSignalRead(node);
+    // This producer is the `idx`th dependency of `activeConsumer`.
+    const idx = activeConsumer.nextProducerIndex++;
+    assertConsumerNode(activeConsumer);
+    if (idx < activeConsumer.producerNode.length && activeConsumer.producerNode[idx] !== node) {
+        // There's been a change in producers since the last execution of `activeConsumer`.
+        // `activeConsumer.producerNode[idx]` holds a stale dependency which will be be removed and
+        // replaced with `this`.
+        //
+        // If `activeConsumer` isn't live, then this is a no-op, since we can replace the producer in
+        // `activeConsumer.producerNode` directly. However, if `activeConsumer` is live, then we need
+        // to remove it from the stale producer's `liveConsumer`s.
+        if (consumerIsLive(activeConsumer)) {
+            const staleProducer = activeConsumer.producerNode[idx];
+            producerRemoveLiveConsumerAtIndex(staleProducer, activeConsumer.producerIndexOfThis[idx]);
+            // At this point, the only record of `staleProducer` is the reference at
+            // `activeConsumer.producerNode[idx]` which will be overwritten below.
+        }
+    }
+    if (activeConsumer.producerNode[idx] !== node) {
+        // We're a new dependency of the consumer (at `idx`).
+        activeConsumer.producerNode[idx] = node;
+        // If the active consumer is live, then add it as a live consumer. If not, then use 0 as a
+        // placeholder value.
+        activeConsumer.producerIndexOfThis[idx] =
+            consumerIsLive(activeConsumer) ? producerAddLiveConsumer(node, activeConsumer, idx) : 0;
+    }
+    activeConsumer.producerLastReadVersion[idx] = node.version;
+}
+/**
+ * Ensure this producer's `version` is up-to-date.
+ */
+function producerUpdateValueVersion(node) {
+    if (consumerIsLive(node) && !node.dirty) {
+        // A live consumer will be marked dirty by producers, so a clean state means that its version
+        // is guaranteed to be up-to-date.
+        return;
+    }
+    if (!node.producerMustRecompute(node) && !consumerPollProducersForChange(node)) {
+        // None of our producers report a change since the last time they were read, so no
+        // recomputation of our value is necessary, and we can consider ourselves clean.
+        node.dirty = false;
+        return;
+    }
+    node.producerRecomputeValue(node);
+    // After recomputing the value, we're no longer dirty.
+    node.dirty = false;
+}
+/**
+ * Propagate a dirty notification to live consumers of this producer.
+ */
+function producerNotifyConsumers(node) {
+    if (node.liveConsumerNode === undefined) {
+        return;
+    }
+    // Prevent signal reads when we're updating the graph
+    const prev = inNotificationPhase;
+    inNotificationPhase = true;
+    try {
+        for (const consumer of node.liveConsumerNode) {
+            if (!consumer.dirty) {
+                consumerMarkDirty(consumer);
+            }
+        }
+    }
+    finally {
+        inNotificationPhase = prev;
+    }
+}
+/**
+ * Whether this `ReactiveNode` in its producer capacity is currently allowed to initiate updates,
+ * based on the current consumer context.
+ */
+function producerUpdatesAllowed() {
+    return activeConsumer?.consumerAllowSignalWrites !== false;
+}
+function consumerMarkDirty(node) {
+    node.dirty = true;
+    producerNotifyConsumers(node);
+    node.consumerMarkedDirty?.(node);
+}
+/**
+ * Prepare this consumer to run a computation in its reactive context.
+ *
+ * Must be called by subclasses which represent reactive computations, before those computations
+ * begin.
+ */
+function consumerBeforeComputation(node) {
+    node && (node.nextProducerIndex = 0);
+    return setActiveConsumer(node);
+}
+/**
+ * Finalize this consumer's state after a reactive computation has run.
+ *
+ * Must be called by subclasses which represent reactive computations, after those computations
+ * have finished.
+ */
+function consumerAfterComputation(node, prevConsumer) {
+    setActiveConsumer(prevConsumer);
+    if (!node || node.producerNode === undefined || node.producerIndexOfThis === undefined ||
+        node.producerLastReadVersion === undefined) {
+        return;
+    }
+    if (consumerIsLive(node)) {
+        // For live consumers, we need to remove the producer -> consumer edge for any stale producers
+        // which weren't dependencies after the recomputation.
+        for (let i = node.nextProducerIndex; i < node.producerNode.length; i++) {
+            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
+        }
+    }
+    // Truncate the producer tracking arrays.
+    // Perf note: this is essentially truncating the length to `node.nextProducerIndex`, but
+    // benchmarking has shown that individual pop operations are faster.
+    while (node.producerNode.length > node.nextProducerIndex) {
+        node.producerNode.pop();
+        node.producerLastReadVersion.pop();
+        node.producerIndexOfThis.pop();
+    }
+}
+/**
+ * Determine whether this consumer has any dependencies which have changed since the last time
+ * they were read.
+ */
+function consumerPollProducersForChange(node) {
+    assertConsumerNode(node);
+    // Poll producers for change.
+    for (let i = 0; i < node.producerNode.length; i++) {
+        const producer = node.producerNode[i];
+        const seenVersion = node.producerLastReadVersion[i];
+        // First check the versions. A mismatch means that the producer's value is known to have
+        // changed since the last time we read it.
+        if (seenVersion !== producer.version) {
+            return true;
+        }
+        // The producer's version is the same as the last time we read it, but it might itself be
+        // stale. Force the producer to recompute its version (calculating a new value if necessary).
+        producerUpdateValueVersion(producer);
+        // Now when we do this check, `producer.version` is guaranteed to be up to date, so if the
+        // versions still match then it has not changed since the last time we read it.
+        if (seenVersion !== producer.version) {
+            return true;
+        }
+    }
+    return false;
+}
+/**
+ * Disconnect this consumer from the graph.
+ */
+function consumerDestroy(node) {
+    assertConsumerNode(node);
+    if (consumerIsLive(node)) {
+        // Drop all connections from the graph to this node.
+        for (let i = 0; i < node.producerNode.length; i++) {
+            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
+        }
+    }
+    // Truncate all the arrays to drop all connection from this node to the graph.
+    node.producerNode.length = node.producerLastReadVersion.length = node.producerIndexOfThis.length =
+        0;
+    if (node.liveConsumerNode) {
+        node.liveConsumerNode.length = node.liveConsumerIndexOfThis.length = 0;
+    }
+}
+/**
+ * Add `consumer` as a live consumer of this node.
+ *
+ * Note that this operation is potentially transitive. If this node becomes live, then it becomes
+ * a live consumer of all of its current producers.
+ */
+function producerAddLiveConsumer(node, consumer, indexOfThis) {
+    assertProducerNode(node);
+    assertConsumerNode(node);
+    if (node.liveConsumerNode.length === 0) {
+        // When going from 0 to 1 live consumers, we become a live consumer to our producers.
+        for (let i = 0; i < node.producerNode.length; i++) {
+            node.producerIndexOfThis[i] = producerAddLiveConsumer(node.producerNode[i], node, i);
+        }
+    }
+    node.liveConsumerIndexOfThis.push(indexOfThis);
+    return node.liveConsumerNode.push(consumer) - 1;
+}
+/**
+ * Remove the live consumer at `idx`.
+ */
+function producerRemoveLiveConsumerAtIndex(node, idx) {
+    assertProducerNode(node);
+    assertConsumerNode(node);
+    if (typeof ngDevMode !== 'undefined' && ngDevMode && idx >= node.liveConsumerNode.length) {
+        throw new Error(`Assertion error: active consumer index ${idx} is out of bounds of ${node.liveConsumerNode.length} consumers)`);
+    }
+    if (node.liveConsumerNode.length === 1) {
+        // When removing the last live consumer, we will no longer be live. We need to remove
+        // ourselves from our producers' tracking (which may cause consumer-producers to lose
+        // liveness as well).
+        for (let i = 0; i < node.producerNode.length; i++) {
+            producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
+        }
+    }
+    // Move the last value of `liveConsumers` into `idx`. Note that if there's only a single
+    // live consumer, this is a no-op.
+    const lastIdx = node.liveConsumerNode.length - 1;
+    node.liveConsumerNode[idx] = node.liveConsumerNode[lastIdx];
+    node.liveConsumerIndexOfThis[idx] = node.liveConsumerIndexOfThis[lastIdx];
+    // Truncate the array.
+    node.liveConsumerNode.length--;
+    node.liveConsumerIndexOfThis.length--;
+    // If the index is still valid, then we need to fix the index pointer from the producer to this
+    // consumer, and update it from `lastIdx` to `idx` (accounting for the move above).
+    if (idx < node.liveConsumerNode.length) {
+        const idxProducer = node.liveConsumerIndexOfThis[idx];
+        const consumer = node.liveConsumerNode[idx];
+        assertConsumerNode(consumer);
+        consumer.producerIndexOfThis[idxProducer] = idx;
+    }
+}
+function consumerIsLive(node) {
+    return node.consumerIsAlwaysLive || (node?.liveConsumerNode?.length ?? 0) > 0;
+}
+function assertConsumerNode(node) {
+    node.producerNode ??= [];
+    node.producerIndexOfThis ??= [];
+    node.producerLastReadVersion ??= [];
+}
+function assertProducerNode(node) {
+    node.liveConsumerNode ??= [];
+    node.liveConsumerIndexOfThis ??= [];
+}
+
+/**
+ * Create a computed signal which derives a reactive value from an expression.
+ */
+function createComputed(computation) {
+    const node = Object.create(COMPUTED_NODE);
+    node.computation = computation;
+    const computed = () => {
+        // Check if the value needs updating before returning it.
+        producerUpdateValueVersion(node);
+        // Record that someone looked at this signal.
+        producerAccessed(node);
+        if (node.value === ERRORED) {
+            throw node.error;
+        }
+        return node.value;
+    };
+    computed[SIGNAL] = node;
+    return computed;
+}
+/**
+ * A dedicated symbol used before a computed value has been calculated for the first time.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+const UNSET = /* @__PURE__ */ Symbol('UNSET');
+/**
+ * A dedicated symbol used in place of a computed signal value to indicate that a given computation
+ * is in progress. Used to detect cycles in computation chains.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+const COMPUTING = /* @__PURE__ */ Symbol('COMPUTING');
+/**
+ * A dedicated symbol used in place of a computed signal value to indicate that a given computation
+ * failed. The thrown error is cached until the computation gets dirty again.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+const ERRORED = /* @__PURE__ */ Symbol('ERRORED');
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const COMPUTED_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...REACTIVE_NODE,
+        value: UNSET,
+        dirty: true,
+        error: null,
+        equal: defaultEquals,
+        producerMustRecompute(node) {
+            // Force a recomputation if there's no current value, or if the current value is in the
+            // process of being calculated (which should throw an error).
+            return node.value === UNSET || node.value === COMPUTING;
+        },
+        producerRecomputeValue(node) {
+            if (node.value === COMPUTING) {
+                // Our computation somehow led to a cyclic read of itself.
+                throw new Error('Detected cycle in computations.');
+            }
+            const oldValue = node.value;
+            node.value = COMPUTING;
+            const prevConsumer = consumerBeforeComputation(node);
+            let newValue;
+            try {
+                newValue = node.computation();
+            }
+            catch (err) {
+                newValue = ERRORED;
+                node.error = err;
+            }
+            finally {
+                consumerAfterComputation(node, prevConsumer);
+            }
+            if (oldValue !== UNSET && oldValue !== ERRORED && newValue !== ERRORED &&
+                node.equal(oldValue, newValue)) {
+                // No change to `valueVersion` - old and new values are
+                // semantically equivalent.
+                node.value = oldValue;
+                return;
+            }
+            node.value = newValue;
+            node.version++;
+        },
+    };
+})();
+
+function defaultThrowError() {
+    throw new Error();
+}
+let throwInvalidWriteToSignalErrorFn = defaultThrowError;
+function throwInvalidWriteToSignalError() {
+    throwInvalidWriteToSignalErrorFn();
+}
+function setThrowInvalidWriteToSignalError(fn) {
+    throwInvalidWriteToSignalErrorFn = fn;
+}
+
+/**
+ * If set, called after `WritableSignal`s are updated.
+ *
+ * This hook can be used to achieve various effects, such as running effects synchronously as part
+ * of setting a signal.
+ */
+let postSignalSetFn = null;
+/**
+ * Create a `Signal` that can be set or updated directly.
+ */
+function createSignal(initialValue) {
+    const node = Object.create(SIGNAL_NODE);
+    node.value = initialValue;
+    const getter = (() => {
+        producerAccessed(node);
+        return node.value;
+    });
+    getter[SIGNAL] = node;
+    return getter;
+}
+function setPostSignalSetFn(fn) {
+    const prev = postSignalSetFn;
+    postSignalSetFn = fn;
+    return prev;
+}
+function signalGetFn() {
+    producerAccessed(this);
+    return this.value;
+}
+function signalSetFn(node, newValue) {
+    if (!producerUpdatesAllowed()) {
+        throwInvalidWriteToSignalError();
+    }
+    if (!node.equal(node.value, newValue)) {
+        node.value = newValue;
+        signalValueChanged(node);
+    }
+}
+function signalUpdateFn(node, updater) {
+    if (!producerUpdatesAllowed()) {
+        throwInvalidWriteToSignalError();
+    }
+    signalSetFn(node, updater(node.value));
+}
+function signalMutateFn(node, mutator) {
+    if (!producerUpdatesAllowed()) {
+        throwInvalidWriteToSignalError();
+    }
+    // Mutate bypasses equality checks as it's by definition changing the value.
+    mutator(node.value);
+    signalValueChanged(node);
+}
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const SIGNAL_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...REACTIVE_NODE,
+        equal: defaultEquals,
+        value: undefined,
+    };
+})();
+function signalValueChanged(node) {
+    node.version++;
+    producerNotifyConsumers(node);
+    postSignalSetFn?.();
+}
+
+function createWatch(fn, schedule, allowSignalWrites) {
+    const node = Object.create(WATCH_NODE);
+    if (allowSignalWrites) {
+        node.consumerAllowSignalWrites = true;
+    }
+    node.fn = fn;
+    node.schedule = schedule;
+    const registerOnCleanup = (cleanupFn) => {
+        node.cleanupFn = cleanupFn;
+    };
+    function isWatchNodeDestroyed(node) {
+        return node.fn === null && node.schedule === null;
+    }
+    function destroyWatchNode(node) {
+        if (!isWatchNodeDestroyed(node)) {
+            consumerDestroy(node); // disconnect watcher from the reactive graph
+            node.cleanupFn();
+            // nullify references to the integration functions to mark node as destroyed
+            node.fn = null;
+            node.schedule = null;
+            node.cleanupFn = NOOP_CLEANUP_FN;
+        }
+    }
+    const run = () => {
+        if (node.fn === null) {
+            // trying to run a destroyed watch is noop
+            return;
+        }
+        if (isInNotificationPhase()) {
+            throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
+        }
+        node.dirty = false;
+        if (node.hasRun && !consumerPollProducersForChange(node)) {
+            return;
+        }
+        node.hasRun = true;
+        const prevConsumer = consumerBeforeComputation(node);
+        try {
+            node.cleanupFn();
+            node.cleanupFn = NOOP_CLEANUP_FN;
+            node.fn(registerOnCleanup);
+        }
+        finally {
+            consumerAfterComputation(node, prevConsumer);
+        }
+    };
+    node.ref = {
+        notify: () => consumerMarkDirty(node),
+        run,
+        cleanup: () => node.cleanupFn(),
+        destroy: () => destroyWatchNode(node),
+        [SIGNAL]: node,
+    };
+    return node.ref;
+}
+const NOOP_CLEANUP_FN = () => { };
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const WATCH_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...REACTIVE_NODE,
+        consumerIsAlwaysLive: true,
+        consumerAllowSignalWrites: false,
+        consumerMarkedDirty: (node) => {
+            if (node.schedule !== null) {
+                node.schedule(node.ref);
+            }
+        },
+        hasRun: false,
+        cleanupFn: NOOP_CLEANUP_FN,
+    };
+})();
+
+function setAlternateWeakRefImpl(impl) {
+    // TODO: remove this function
+}
+
+/**
  * A collection that tracks all serialized views (`ngh` DOM annotations)
  * to avoid duplication. An attempt to add a duplicate view results in the
  * collection returning the index of the previously collected serialized view.
@@ -34141,6 +34103,64 @@ function ɵɵngDeclarePipe(decl) {
 // clang-format on
 
 /**
+ * Checks if the given `value` is a reactive `Signal`.
+ */
+function isSignal(value) {
+    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
+}
+
+/**
+ * Create a computed `Signal` which derives a reactive value from an expression.
+ */
+function computed(computation, options) {
+    const getter = createComputed$1(computation);
+    if (options?.equal) {
+        getter[SIGNAL$1].equal = options.equal;
+    }
+    return getter;
+}
+
+/**
+ * Create a `Signal` that can be set or updated directly.
+ */
+function signal(initialValue, options) {
+    const signalFn = createSignal$1(initialValue);
+    const node = signalFn[SIGNAL$1];
+    if (options?.equal) {
+        node.equal = options.equal;
+    }
+    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
+    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
+    signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
+    return signalFn;
+}
+function signalAsReadonlyFn() {
+    const node = this[SIGNAL$1];
+    if (node.readonlyFn === undefined) {
+        const readonlyFn = () => this();
+        readonlyFn[SIGNAL$1] = node;
+        node.readonlyFn = readonlyFn;
+    }
+    return node.readonlyFn;
+}
+
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ */
+function untracked(nonReactiveReadsFn) {
+    const prevConsumer = setActiveConsumer$1(null);
+    // We are not trying to catch any particular errors here, just making sure that the consumers
+    // stack is restored in case of errors.
+    try {
+        return nonReactiveReadsFn();
+    }
+    finally {
+        setActiveConsumer$1(prevConsumer);
+    }
+}
+
+/**
  * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
  * injector.
  */
@@ -34253,8 +34273,7 @@ class EffectHandle {
         this.effectFn = effectFn;
         this.creationZone = creationZone;
         this.errorHandler = errorHandler;
-        this.watcher =
-            watch((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
+        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
         this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
     }
     runEffect(onCleanup) {
@@ -34283,8 +34302,6 @@ class EffectHandle {
 }
 /**
  * Create a global `Effect` for the given reactive function.
- *
- * @developerPreview
  */
 function effect(effectFn, options) {
     !options?.injector && assertInInjectionContext(effect);
@@ -34308,7 +34325,7 @@ function effect(effectFn, options) {
 function assertNotInReactiveContext(debugFn, extraContext) {
     // Taking a `Function` instead of a string name here prevents the unminified name of the function
     // from being retained in the bundle regardless of minification.
-    if (getActiveConsumer() !== null) {
+    if (getActiveConsumer$1() !== null) {
         throw new RuntimeError(602 /* RuntimeErrorCode.ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT */, ngDevMode &&
             `${debugFn.name}() cannot be called from within a reactive context.${extraContext ? ` ${extraContext}` : ''}`);
     }

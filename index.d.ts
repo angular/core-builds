@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-2e16b0e
+ * @license Angular v17.0.0-next.7+sha-00128e3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,6 +7,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { Observable } from 'rxjs';
+import { ReactiveNode } from '@angular/core/primitives/signals';
+import { SIGNAL } from '@angular/core/primitives/signals';
 import { Subject } from 'rxjs';
 import { Subscribable } from 'rxjs';
 import { Subscription } from 'rxjs';
@@ -2078,8 +2080,6 @@ export declare interface CreateComputedOptions<T> {
 
 /**
  * Options passed to the `effect` function.
- *
- * @developerPreview
  */
 export declare interface CreateEffectOptions {
     /**
@@ -3310,8 +3310,6 @@ export declare interface DoCheck {
 
 /**
  * Create a global `Effect` for the given reactive function.
- *
- * @developerPreview
  */
 export declare function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, options?: CreateEffectOptions): EffectRef;
 
@@ -3319,8 +3317,6 @@ export declare function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) =>
  * An effect can, optionally, register a cleanup function. If registered, the cleanup is executed
  * before the next effect run. The cleanup function makes it possible to "cancel" any work that the
  * previous effect run might have started.
- *
- * @developerPreview
  */
 export declare type EffectCleanupFn = () => void;
 
@@ -3331,8 +3327,6 @@ declare type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
 
 /**
  * A global reactive effect, which can be manually destroyed.
- *
- * @developerPreview
  */
 export declare interface EffectRef {
     /**
@@ -7456,92 +7450,6 @@ declare interface ReactiveLViewConsumer extends ReactiveNode {
 }
 
 /**
- * A producer and/or consumer which participates in the reactive graph.
- *
- * Producer `ReactiveNode`s which are accessed when a consumer `ReactiveNode` is the
- * `activeConsumer` are tracked as dependencies of that consumer.
- *
- * Certain consumers are also tracked as "live" consumers and create edges in the other direction,
- * from producer to consumer. These edges are used to propagate change notifications when a
- * producer's value is updated.
- *
- * A `ReactiveNode` may be both a producer and consumer.
- */
-declare interface ReactiveNode {
-    /**
-     * Version of the value that this node produces.
-     *
-     * This is incremented whenever a new value is produced by this node which is not equal to the
-     * previous value (by whatever definition of equality is in use).
-     */
-    version: Version_2;
-    /**
-     * Whether this node (in its consumer capacity) is dirty.
-     *
-     * Only live consumers become dirty, when receiving a change notification from a dependency
-     * producer.
-     */
-    dirty: boolean;
-    /**
-     * Producers which are dependencies of this consumer.
-     *
-     * Uses the same indices as the `producerLastReadVersion` and `producerIndexOfThis` arrays.
-     */
-    producerNode: ReactiveNode[] | undefined;
-    /**
-     * `Version` of the value last read by a given producer.
-     *
-     * Uses the same indices as the `producerNode` and `producerIndexOfThis` arrays.
-     */
-    producerLastReadVersion: Version_2[] | undefined;
-    /**
-     * Index of `this` (consumer) in each producer's `liveConsumers` array.
-     *
-     * This value is only meaningful if this node is live (`liveConsumers.length > 0`). Otherwise
-     * these indices are stale.
-     *
-     * Uses the same indices as the `producerNode` and `producerLastReadVersion` arrays.
-     */
-    producerIndexOfThis: number[] | undefined;
-    /**
-     * Index into the producer arrays that the next dependency of this node as a consumer will use.
-     *
-     * This index is zeroed before this node as a consumer begins executing. When a producer is read,
-     * it gets inserted into the producers arrays at this index. There may be an existing dependency
-     * in this location which may or may not match the incoming producer, depending on whether the
-     * same producers were read in the same order as the last computation.
-     */
-    nextProducerIndex: number;
-    /**
-     * Array of consumers of this producer that are "live" (they require push notifications).
-     *
-     * `liveConsumerNode.length` is effectively our reference count for this node.
-     */
-    liveConsumerNode: ReactiveNode[] | undefined;
-    /**
-     * Index of `this` (producer) in each consumer's `producerNode` array.
-     *
-     * Uses the same indices as the `liveConsumerNode` array.
-     */
-    liveConsumerIndexOfThis: number[] | undefined;
-    /**
-     * Whether writes to signals are allowed when this consumer is the `activeConsumer`.
-     *
-     * This is used to enforce guardrails such as preventing writes to writable signals in the
-     * computation function of computed signals, which is supposed to be pure.
-     */
-    consumerAllowSignalWrites: boolean;
-    readonly consumerIsAlwaysLive: boolean;
-    /**
-     * Tracks whether producers need to recompute their value independently of the reactive graph (for
-     * example, if no initial value has been computed).
-     */
-    producerMustRecompute(node: unknown): boolean;
-    producerRecomputeValue(node: unknown): void;
-    consumerMarkedDirty(node: unknown): void;
-}
-
-/**
  * Creates an object that allows to retrieve component metadata.
  *
  * @usageNotes
@@ -8191,13 +8099,6 @@ declare interface SerializedView {
  * @publicApi
  */
 export declare function setTestabilityGetter(getter: GetTestability): void;
-
-/**
- * Symbol used to tell `Signal`s apart from other functions.
- *
- * This can be used to auto-unwrap signals in various cases, or to auto-wrap non-signal values.
- */
-declare const SIGNAL: unique symbol;
 
 /**
  * A reactive value which notifies consumers of any changes.
@@ -10134,10 +10035,6 @@ export declare class Version {
     constructor(full: string);
 }
 
-declare type Version_2 = number & {
-    __brand: 'Version';
-};
-
 declare const VIEW_REFS = 8;
 
 /**
@@ -10601,15 +10498,10 @@ export declare interface WritableSignal<T> extends Signal<T> {
      */
     set(value: T): void;
     /**
-     * Update the value of the signal based on its current value, and
+     * Update the value of the signal based on itfs current value, and
      * notify any dependents.
      */
     update(updateFn: (value: T) => T): void;
-    /**
-     * Update the current value by mutating it in-place, and
-     * notify any dependents.
-     */
-    mutate(mutatorFn: (value: T) => void): void;
     /**
      * Returns a readonly version of this signal. Readonly signals can be accessed to read their value
      * but can't be changed using set, update or mutate methods. The readonly signals do _not_ have
