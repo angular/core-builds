@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-17078a3
+ * @license Angular v17.0.0-next.7+sha-b6b9eae
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2284,7 +2284,12 @@ function isSignal(value) {
  * propagate change notification upon explicit mutation without identity change.
  */
 function defaultEquals(a, b) {
-    return Object.is(a, b);
+    // `Object.is` compares two values using identity semantics which is desired behavior for
+    // primitive values. If `Object.is` determines two values to be equal we need to make sure that
+    // those don't represent objects (we want to make sure that 2 objects are always considered
+    // "unequal"). The null check is needed for the special case of JavaScript reporting null values
+    // as objects (`typeof null === 'object'`).
+    return (a === null || typeof a !== 'object') && Object.is(a, b);
 }
 
 // Required as the signals library is in a separate package, so we need to explicitly ensure the
@@ -2676,6 +2681,7 @@ function signal(initialValue, options) {
     }
     signalFn.set = signalSetFn;
     signalFn.update = signalUpdateFn;
+    signalFn.mutate = signalMutateFn;
     signalFn.asReadonly = signalAsReadonlyFn;
     signalFn[SIGNAL] = node;
     return signalFn;
@@ -2711,7 +2717,19 @@ function signalSetFn(newValue) {
     }
 }
 function signalUpdateFn(updater) {
+    if (!producerUpdatesAllowed()) {
+        throwInvalidWriteToSignalError();
+    }
     signalSetFn.call(this, updater(this[SIGNAL].value));
+}
+function signalMutateFn(mutator) {
+    const node = this[SIGNAL];
+    if (!producerUpdatesAllowed()) {
+        throwInvalidWriteToSignalError();
+    }
+    // Mutate bypasses equality checks as it's by definition changing the value.
+    mutator(node.value);
+    signalValueChanged(node);
 }
 function signalAsReadonlyFn() {
     const node = this[SIGNAL];
@@ -10882,7 +10900,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-17078a3');
+const VERSION = new Version('17.0.0-next.7+sha-b6b9eae');
 
 // This default value is when checking the hierarchy for a token.
 //
