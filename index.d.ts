@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-b6b9eae
+ * @license Angular v17.0.0-next.7+sha-048f400
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11518,6 +11518,38 @@ export declare function ɵgetUnknownPropertyStrictMode(): boolean;
 export declare const ɵglobal: any;
 
 /**
+ * Injection token that configures the image optimized image functionality.
+ * See {@link ImageConfig} for additional information about parameters that
+ * can be used.
+ *
+ * @see {@link NgOptimizedImage}
+ * @see {@link ImageConfig}
+ * @publicApi
+ */
+export declare const ɵIMAGE_CONFIG: InjectionToken<ɵImageConfig>;
+
+export declare const ɵIMAGE_CONFIG_DEFAULTS: ɵImageConfig;
+
+/**
+ * A configuration object for the image-related options. Contains:
+ * - breakpoints: An array of integer breakpoints used to generate
+ *      srcsets for responsive images.
+ * - disableImageSizeWarning: A boolean value. Setting this to true will
+ *      disable console warnings about oversized images.
+ * - disableImageLazyLoadWarning: A boolean value. Setting this to true will
+ *      disable console warnings about LCP images configured with `loading="lazy"`.
+ * Learn more about the responsive image configuration in [the NgOptimizedImage
+ * guide](guide/image-directive).
+ * Learn more about image warning options in [the related error page](errors/NG0913).
+ * @publicApi
+ */
+export declare type ɵImageConfig = {
+    breakpoints?: number[];
+    disableImageSizeWarning?: boolean;
+    disableImageLazyLoadWarning?: boolean;
+};
+
+/**
  * *Internal* service that keeps track of pending tasks happening in the system
  * during the initial rendering. No tasks are tracked after an initial
  * rendering.
@@ -12224,6 +12256,7 @@ export declare const enum ɵRuntimeErrorCode {
     UNSAFE_IFRAME_ATTRS = -910,
     VIEW_ALREADY_DESTROYED = 911,
     COMPONENT_ID_COLLISION = -912,
+    IMAGE_PERFORMANCE_WARNING = -913,
     RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,
     RUNTIME_DEPS_ORPHAN_COMPONENT = 1001
 }
@@ -12389,6 +12422,15 @@ export declare function ɵtransitiveScopesFor<T>(type: Type<T>): ɵNgModuleTrans
  * @param lView LView of a host view.
  */
 export declare function ɵtriggerResourceLoading(tDetails: TDeferBlockDetails, lView: LView): void;
+
+/**
+ * Ellipses the string in the middle when longer than the max length
+ *
+ * @param string
+ * @param maxLength of the output string
+ * @returns elispsed string with ... in the middle
+ */
+export declare function ɵtruncateMiddle(str: string, maxLength?: number): string;
 
 /**
  * Helper function to remove all the locale data from `LOCALE_DATA`.
