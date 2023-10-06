@@ -22725,6 +22725,8 @@ var TemplateBinder = class extends RecursiveAstVisitor {
   }
   visitUnknownBlock(block) {
   }
+  visitDeferredTrigger() {
+  }
   visitIcu(icu) {
     Object.keys(icu.vars).forEach((key) => icu.vars[key].visit(this));
     Object.keys(icu.placeholders).forEach((key) => icu.placeholders[key].visit(this));
@@ -22736,16 +22738,14 @@ var TemplateBinder = class extends RecursiveAstVisitor {
     event.handler.visit(this);
   }
   visitDeferredBlock(deferred) {
+    var _a2, _b2;
     this.deferBlocks.add(deferred);
     this.ingestScopedNode(deferred);
+    (_a2 = deferred.triggers.when) == null ? void 0 : _a2.value.visit(this);
+    (_b2 = deferred.prefetchTriggers.when) == null ? void 0 : _b2.value.visit(this);
     deferred.placeholder && this.visitNode(deferred.placeholder);
     deferred.loading && this.visitNode(deferred.loading);
     deferred.error && this.visitNode(deferred.error);
-  }
-  visitDeferredTrigger(trigger) {
-    if (trigger instanceof BoundDeferredTrigger) {
-      trigger.value.visit(this);
-    }
   }
   visitDeferredBlockPlaceholder(block) {
     this.ingestScopedNode(block);
@@ -23506,7 +23506,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-486cc61");
+var VERSION2 = new Version("17.0.0-next.7+sha-17078a3");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
