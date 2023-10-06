@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-f06d97e
+ * @license Angular v17.0.0-next.7+sha-486cc61
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10882,7 +10882,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-f06d97e');
+const VERSION = new Version('17.0.0-next.7+sha-486cc61');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19582,6 +19582,8 @@ const hoverTriggers = new WeakMap();
 const interactionTriggers = new WeakMap();
 /** Names of the events considered as interaction events. */
 const interactionEventNames = ['click', 'keydown'];
+/** Names of the events considered as hover events. */
+const hoverEventNames = ['mouseenter', 'focusin'];
 /** Object keeping track of registered callbacks for a deferred block trigger. */
 class DeferEventEntry {
     constructor() {
@@ -19651,7 +19653,9 @@ function onHover(trigger, callback, injector) {
         // Ensure that the handler runs in the NgZone since it gets
         // registered in `afterRender` which runs outside.
         injector.get(NgZone).run(() => {
-            trigger.addEventListener('mouseenter', entry.listener, eventListenerOptions);
+            for (const name of hoverEventNames) {
+                trigger.addEventListener(name, entry.listener, eventListenerOptions);
+            }
         });
     }
     entry.callbacks.add(callback);
@@ -19659,7 +19663,9 @@ function onHover(trigger, callback, injector) {
         const { callbacks, listener } = entry;
         callbacks.delete(callback);
         if (callbacks.size === 0) {
-            trigger.removeEventListener('mouseenter', listener, eventListenerOptions);
+            for (const name of hoverEventNames) {
+                trigger.removeEventListener(name, listener, eventListenerOptions);
+            }
             hoverTriggers.delete(trigger);
         }
     };
