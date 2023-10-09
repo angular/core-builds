@@ -20118,9 +20118,6 @@ function textContents(node) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/block_syntax_switch.mjs
-var BLOCK_SYNTAX_ENABLED_DEFAULT = true;
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/i18n/context.mjs
 var TagType;
 (function(TagType2) {
@@ -21752,7 +21749,7 @@ function parseTemplate(template2, templateUrl, options = {}) {
     leadingTriviaChars: LEADING_TRIVIA_CHARS
   }, options), {
     tokenizeExpansionForms: true,
-    tokenizeBlocks: (_a2 = options.enableBlockSyntax) != null ? _a2 : BLOCK_SYNTAX_ENABLED_DEFAULT
+    tokenizeBlocks: (_a2 = options.enableBlockSyntax) != null ? _a2 : true
   }));
   if (!options.alwaysAttemptHtmlToR3AstConversion && parseResult.errors && parseResult.errors.length > 0) {
     const parsedTemplate2 = {
@@ -23637,7 +23634,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-4beeaf5");
+var VERSION2 = new Version("17.0.0-next.7+sha-29b876b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23817,13 +23814,6 @@ function runBlockTemplateEntitiesMigration(tree, tsconfigPath, basePath) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {});
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 /**
  * @license
  * Copyright Google LLC All Rights Reserved.
