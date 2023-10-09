@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-7bfe207
+ * @license Angular v17.0.0-next.7+sha-7368b8a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2250,6 +2250,20 @@ function assertProjectionSlots(lView, errMessage) {
 }
 function assertParentView(lView, errMessage) {
     assertDefined(lView, errMessage || 'Component views should always have a parent view (component\'s host view)');
+}
+function assertNoDuplicateDirectives(directives) {
+    // The array needs at least two elements in order to have duplicates.
+    if (directives.length < 2) {
+        return;
+    }
+    const seenDirectives = new Set();
+    for (const current of directives) {
+        if (seenDirectives.has(current)) {
+            throw new RuntimeError(309 /* RuntimeErrorCode.DUPLICATE_DIRECTITVE */, `Directive ${current.type.name} matches multiple times on the same element. ` +
+                `Directives can only match an element once.`);
+        }
+        seenDirectives.add(current);
+    }
 }
 /**
  * This is a basic sanity check that the `injectorIndex` seems to point to what looks like a
@@ -10361,7 +10375,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-7bfe207');
+const VERSION = new Version('17.0.0-next.7+sha-7368b8a');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -12582,6 +12596,7 @@ function findDirectiveDefMatches(tView, tNode) {
             }
         }
     }
+    ngDevMode && matches !== null && assertNoDuplicateDirectives(matches);
     return matches === null ? null : [matches, hostDirectiveDefs];
 }
 /**
@@ -13908,6 +13923,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 hostDirectiveDefs = new Map();
                 rootComponentDef.findHostDirectiveDefs(rootComponentDef, rootDirectives, hostDirectiveDefs);
                 rootDirectives.push(rootComponentDef);
+                ngDevMode && assertNoDuplicateDirectives(rootDirectives);
             }
             else {
                 rootDirectives = [rootComponentDef];
@@ -14406,7 +14422,7 @@ function findHostDirectiveDefs(currentDef, matchedDefs, hostDirectiveDefs) {
         for (const hostDirectiveConfig of currentDef.hostDirectives) {
             const hostDirectiveDef = getDirectiveDef(hostDirectiveConfig.directive);
             if (typeof ngDevMode === 'undefined' || ngDevMode) {
-                validateHostDirective(hostDirectiveConfig, hostDirectiveDef, matchedDefs);
+                validateHostDirective(hostDirectiveConfig, hostDirectiveDef);
             }
             // We need to patch the `declaredInputs` so that
             // `ngOnChanges` can map the properties correctly.
@@ -14472,9 +14488,8 @@ function patchDeclaredInputs(declaredInputs, exposedInputs) {
  * Verifies that the host directive has been configured correctly.
  * @param hostDirectiveConfig Host directive configuration object.
  * @param directiveDef Directive definition of the host directive.
- * @param matchedDefs Directives that have been matched so far.
  */
-function validateHostDirective(hostDirectiveConfig, directiveDef, matchedDefs) {
+function validateHostDirective(hostDirectiveConfig, directiveDef) {
     const type = hostDirectiveConfig.directive;
     if (directiveDef === null) {
         if (getComponentDef(type) !== null) {
@@ -14485,10 +14500,6 @@ function validateHostDirective(hostDirectiveConfig, directiveDef, matchedDefs) {
     }
     if (!directiveDef.standalone) {
         throw new RuntimeError(308 /* RuntimeErrorCode.HOST_DIRECTIVE_NOT_STANDALONE */, `Host directive ${directiveDef.type.name} must be standalone.`);
-    }
-    if (matchedDefs.indexOf(directiveDef) > -1) {
-        throw new RuntimeError(309 /* RuntimeErrorCode.DUPLICATE_DIRECTITVE */, `Directive ${directiveDef.type.name} matches multiple times on the same element. ` +
-            `Directives can only match an element once.`);
     }
     validateMappings('input', directiveDef, hostDirectiveConfig.inputs);
     validateMappings('output', directiveDef, hostDirectiveConfig.outputs);

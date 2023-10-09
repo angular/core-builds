@@ -8104,10 +8104,11 @@ function createConditionalOp(target, test, conditions, sourceSpan) {
     contextValue: null
   }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS);
 }
-function createI18nExpressionOp(target, expression, i18nPlaceholder, sourceSpan) {
+function createI18nExpressionOp(owner, expression, i18nPlaceholder, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.I18nExpression,
-    target,
+    owner,
+    target: owner,
     expression,
     i18nPlaceholder,
     sourceSpan
@@ -9125,7 +9126,7 @@ function createElementStartOp(tag, xref, namespace, i18nPlaceholder, sourceSpan)
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createTemplateOp(xref, tag, namespace, generatedInBlock, i18n2, sourceSpan) {
+function createTemplateOp(xref, tag, namespace, generatedInBlock, i18nPlaceholder, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Template,
     xref,
@@ -9137,6 +9138,7 @@ function createTemplateOp(xref, tag, namespace, generatedInBlock, i18n2, sourceS
     localRefs: [],
     nonBindable: false,
     namespace,
+    i18nPlaceholder,
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
@@ -9264,13 +9266,15 @@ function createExtractedMessageOp(owner, expression, statements) {
     statements
   }, NEW_OP);
 }
-function createI18nStartOp(xref, message) {
+function createI18nStartOp(xref, message, root) {
   return __spreadValues(__spreadValues({
     kind: OpKind.I18nStart,
     xref,
+    root: root != null ? root : xref,
     message,
     params: /* @__PURE__ */ new Map(),
-    messageIndex: null
+    messageIndex: null,
+    subTemplateIndex: null
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
 function createI18nEndOp(xref) {
@@ -9528,7 +9532,7 @@ function phaseApplyI18nExpressions(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression && needsApplication(op)) {
-        OpList.insertAfter(createI18nApplyOp(op.target, null), op);
+        OpList.insertAfter(createI18nApplyOp(op.owner, null), op);
       }
     }
   }
@@ -9538,10 +9542,31 @@ function needsApplication(op) {
   if (((_a2 = op.next) == null ? void 0 : _a2.kind) !== OpKind.I18nExpression) {
     return true;
   }
-  if (op.next.target !== op.target) {
+  if (op.next.owner !== op.owner) {
     return true;
   }
   return false;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/assign_i18n_slot_dependencies.mjs
+function phaseAssignI18nSlotDependencies(job) {
+  const i18nLastSlotConsumers = /* @__PURE__ */ new Map();
+  let lastSlotConsumer = null;
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.I18nEnd) {
+        i18nLastSlotConsumers.set(op.xref, lastSlotConsumer);
+      }
+      if (hasConsumesSlotTrait(op)) {
+        lastSlotConsumer = op.xref;
+      }
+    }
+    for (const op of unit.update) {
+      if (op.kind === OpKind.I18nExpression) {
+        op.target = i18nLastSlotConsumers.get(op.owner);
+      }
+    }
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/util/elements.mjs
@@ -10159,24 +10184,12 @@ function ternaryTransform(e) {
 function phaseGenerateAdvance(job) {
   for (const unit of job.units) {
     const slotMap = /* @__PURE__ */ new Map();
-    let lastSlotOp = null;
     for (const op of unit.create) {
-      if (op.kind === OpKind.I18nEnd) {
-        if (lastSlotOp === null) {
-          throw Error("Expected to have encountered an op prior to i18nEnd that consumes a slot");
-        }
-        let lastSlot = lastSlotOp.slot;
-        if (lastSlotOp.kind === OpKind.I18nStart && job.compatibility) {
-          lastSlot++;
-        }
-        slotMap.set(op.xref, lastSlot);
-      }
       if (!hasConsumesSlotTrait(op)) {
         continue;
       } else if (op.slot === null) {
         throw new Error(`AssertionError: expected slots to have been allocated before generating advance() calls`);
       }
-      lastSlotOp = op;
       slotMap.set(op.xref, op.slot);
     }
     let slotContext = 0;
@@ -10397,8 +10410,8 @@ function phaseI18nConstCollection(job) {
   }
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if ((op.kind === OpKind.I18nStart || op.kind === OpKind.I18n) && messageConstIndices[op.xref] !== void 0) {
-        op.messageIndex = messageConstIndices[op.xref];
+      if (op.kind === OpKind.I18nStart || op.kind === OpKind.I18n) {
+        op.messageIndex = messageConstIndices[op.root];
       }
     }
   }
@@ -16303,11 +16316,13 @@ function phaseI18nMessageExtraction(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.I18nStart || op.kind === OpKind.I18n) {
-        const params = new Map([...op.params.entries()].sort());
-        const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
-        const closureVar = i18nGenerateClosureVar(job.pool, op.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
-        const statements = getTranslationDeclStmts(op.message, mainVar, closureVar, params, void 0);
-        unit.create.push(createExtractedMessageOp(op.xref, mainVar, statements));
+        if (op.xref === op.root) {
+          const params = new Map([...op.params.entries()].sort());
+          const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
+          const closureVar = i18nGenerateClosureVar(job.pool, op.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
+          const statements = getTranslationDeclStmts(op.message, mainVar, closureVar, params, void 0);
+          unit.create.push(createExtractedMessageOp(op.xref, mainVar, statements));
+        }
       }
     }
   }
@@ -16883,6 +16898,72 @@ function phasePipeVariadic(job) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/propagate_i18n_blocks.mjs
+function phasePropagateI18nBlocks(job) {
+  propagateI18nBlocksToTemplates(job.root, 0);
+}
+function propagateI18nBlocksToTemplates(unit, subTemplateIndex) {
+  let i18nBlock = null;
+  for (const op of unit.create) {
+    switch (op.kind) {
+      case OpKind.I18nStart:
+        op.subTemplateIndex = subTemplateIndex === 0 ? null : subTemplateIndex;
+        i18nBlock = op;
+        break;
+      case OpKind.I18nEnd:
+        i18nBlock = null;
+        break;
+      case OpKind.Template:
+        const templateView = unit.job.views.get(op.xref);
+        if (op.i18nPlaceholder !== void 0) {
+          if (i18nBlock === null) {
+            throw Error("Expected template with i18n placeholder to be in an i18n block.");
+          }
+          subTemplateIndex++;
+          wrapTemplateWithI18n(templateView, i18nBlock);
+        }
+        propagateI18nBlocksToTemplates(templateView, subTemplateIndex);
+    }
+  }
+}
+function wrapTemplateWithI18n(unit, parentI18n) {
+  var _a2;
+  if (((_a2 = unit.create.head.next) == null ? void 0 : _a2.kind) !== OpKind.I18nStart) {
+    const id = unit.job.allocateXrefId();
+    OpList.insertAfter(createI18nStartOp(id, parentI18n.message, parentI18n.root), unit.create.head);
+    OpList.insertBefore(createI18nEndOp(id), unit.create.tail);
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/propagate_i18n_placeholders.mjs
+function phasePropagateI18nPlaceholders(job) {
+  const i18nOps = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.I18nStart) {
+        i18nOps.set(op.xref, op);
+      }
+    }
+  }
+  for (const op of i18nOps.values()) {
+    if (op.xref !== op.root) {
+      const rootOp = i18nOps.get(op.root);
+      for (const [placeholder, value] of op.params) {
+        rootOp.params.set(placeholder, value);
+      }
+    }
+  }
+  for (const op of i18nOps.values()) {
+    if (op.xref === op.root) {
+      for (const placeholder in op.message.placeholders) {
+        if (!op.params.has(placeholder)) {
+          throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
+        }
+      }
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pure_function_extraction.mjs
 function phasePureFunctionExtraction(job) {
   for (const view of job.units) {
@@ -17114,11 +17195,19 @@ function projection(slot, projectionSlotIndex, attributes) {
   }
   return call(Identifiers.projection, args, null);
 }
-function i18nStart(slot, constIndex) {
-  return call(Identifiers.i18nStart, [literal(slot), literal(constIndex)], null);
+function i18nStart(slot, constIndex, subTemplateIndex) {
+  const args = [literal(slot), literal(constIndex)];
+  if (subTemplateIndex !== null) {
+    args.push(literal(subTemplateIndex));
+  }
+  return call(Identifiers.i18nStart, args, null);
 }
-function i18n(slot, constIndex) {
-  return call(Identifiers.i18n, [literal(slot), literal(constIndex)], null);
+function i18n(slot, constIndex, subTemplateIndex) {
+  const args = [literal(slot), literal(constIndex)];
+  if (subTemplateIndex) {
+    args.push(literal(subTemplateIndex));
+  }
+  return call(Identifiers.i18n, args, null);
 }
 function i18nEnd() {
   return call(Identifiers.i18nEnd, [], null);
@@ -17461,13 +17550,13 @@ function reifyCreateOperations(unit, ops) {
         OpList.replace(op, elementContainerEnd());
         break;
       case OpKind.I18nStart:
-        OpList.replace(op, i18nStart(op.slot, op.messageIndex));
+        OpList.replace(op, i18nStart(op.slot, op.messageIndex, op.subTemplateIndex));
         break;
       case OpKind.I18nEnd:
         OpList.replace(op, i18nEnd());
         break;
       case OpKind.I18n:
-        OpList.replace(op, i18n(op.slot, op.messageIndex));
+        OpList.replace(op, i18n(op.slot, op.messageIndex, op.subTemplateIndex));
         break;
       case OpKind.Template:
         if (!(unit instanceof ViewCompilationUnit)) {
@@ -17773,11 +17862,58 @@ function resolveDollarEvent(unit, ops) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_placeholders.mjs
 var ESCAPE = "\uFFFD";
+var ELEMENT_MARKER = "#";
+var TEMPLATE_MARKER = "*";
+var TAG_CLOSE_MARKER = "/";
+var CONTEXT_MARKER = ":";
+var LIST_START_MARKER = "[";
+var LIST_END_MARKER = "]";
+var LIST_DELIMITER = "|";
+var I18nParamValueFlags;
+(function(I18nParamValueFlags2) {
+  I18nParamValueFlags2[I18nParamValueFlags2["None"] = 0] = "None";
+  I18nParamValueFlags2[I18nParamValueFlags2["ElementTag"] = 1] = "ElementTag";
+  I18nParamValueFlags2[I18nParamValueFlags2["TemplateTag"] = 2] = "TemplateTag";
+  I18nParamValueFlags2[I18nParamValueFlags2["CloseTag"] = 4] = "CloseTag";
+})(I18nParamValueFlags || (I18nParamValueFlags = {}));
+var I18nPlaceholderParams = class {
+  constructor() {
+    this.values = /* @__PURE__ */ new Map();
+  }
+  addValue(placeholder, value, subTemplateIndex, flags) {
+    var _a2;
+    const placeholderValues = (_a2 = this.values.get(placeholder)) != null ? _a2 : [];
+    placeholderValues.push({ value, subTemplateIndex, flags });
+    this.values.set(placeholder, placeholderValues);
+  }
+  saveToOp(op) {
+    for (const [placeholder, placeholderValues] of this.values) {
+      op.params.set(placeholder, literal(this.serializeValues(placeholderValues)));
+    }
+  }
+  serializeValues(values) {
+    const serializedValues = values.map((value) => this.serializeValue(value));
+    return serializedValues.length === 1 ? serializedValues[0] : `${LIST_START_MARKER}${serializedValues.join(LIST_DELIMITER)}${LIST_END_MARKER}`;
+  }
+  serializeValue(value) {
+    let tagMarker = "";
+    let closeMarker = "";
+    if (value.flags & I18nParamValueFlags.ElementTag) {
+      tagMarker = ELEMENT_MARKER;
+    } else if (value.flags & I18nParamValueFlags.TemplateTag) {
+      tagMarker = TEMPLATE_MARKER;
+    }
+    if (tagMarker !== "") {
+      closeMarker = value.flags & I18nParamValueFlags.CloseTag ? TAG_CLOSE_MARKER : "";
+    }
+    const context = value.subTemplateIndex === null ? "" : `${CONTEXT_MARKER}${value.subTemplateIndex}`;
+    return `${ESCAPE}${closeMarker}${tagMarker}${value.value}${context}${ESCAPE}`;
+  }
+};
 function phaseResolveI18nPlaceholders(job) {
   for (const unit of job.units) {
     const i18nOps = /* @__PURE__ */ new Map();
-    let startTagSlots = /* @__PURE__ */ new Map();
-    let closeTagSlots = /* @__PURE__ */ new Map();
+    const params = /* @__PURE__ */ new Map();
     let currentI18nOp = null;
     for (const op of unit.create) {
       switch (op.kind) {
@@ -17785,33 +17921,22 @@ function phaseResolveI18nPlaceholders(job) {
         case OpKind.I18n:
           i18nOps.set(op.xref, op);
           currentI18nOp = op.kind === OpKind.I18nStart ? op : null;
-          startTagSlots = /* @__PURE__ */ new Map();
-          closeTagSlots = /* @__PURE__ */ new Map();
           break;
         case OpKind.I18nEnd:
-          if (currentI18nOp === null) {
-            throw Error("Missing corresponding i18n start op for i18n end op");
-          }
-          for (const [placeholder, slots] of startTagSlots) {
-            currentI18nOp.params.set(placeholder, serializeSlots(slots, true));
-          }
-          for (const [placeholder, slots] of closeTagSlots) {
-            currentI18nOp.params.set(placeholder, serializeSlots(slots, false));
-          }
           currentI18nOp = null;
           break;
         case OpKind.Element:
         case OpKind.ElementStart:
-          if (op.i18nPlaceholder != void 0) {
+        case OpKind.Template:
+          if (op.i18nPlaceholder !== void 0) {
             if (currentI18nOp === null) {
               throw Error("i18n tag placeholder should only occur inside an i18n block");
             }
-            if (!op.slot) {
-              throw Error("Slots should be allocated before i18n placeholder resolution");
-            }
             const { startName, closeName } = op.i18nPlaceholder;
-            addTagSlot(startTagSlots, startName, op.slot);
-            addTagSlot(closeTagSlots, closeName, op.slot);
+            const subTemplateIndex = getSubTemplateIndexForTag(job, currentI18nOp, op);
+            const flags = op.kind === OpKind.Template ? I18nParamValueFlags.TemplateTag : I18nParamValueFlags.ElementTag;
+            addParam(params, currentI18nOp, startName, op.slot, subTemplateIndex, flags);
+            addParam(params, currentI18nOp, closeName, op.slot, subTemplateIndex, flags | I18nParamValueFlags.CloseTag);
           }
           break;
       }
@@ -17819,35 +17944,35 @@ function phaseResolveI18nPlaceholders(job) {
     const i18nBlockPlaceholderIndices = /* @__PURE__ */ new Map();
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
-        const i18nOp = i18nOps.get(op.target);
-        let index = i18nBlockPlaceholderIndices.get(op.target) || 0;
+        const i18nOp = i18nOps.get(op.owner);
+        let index = i18nBlockPlaceholderIndices.get(op.owner) || 0;
         if (!i18nOp) {
           throw Error("Cannot find corresponding i18nStart for i18nExpr");
         }
-        i18nOp.params.set(op.i18nPlaceholder.name, literal(`${ESCAPE}${index++}${ESCAPE}`));
-        i18nBlockPlaceholderIndices.set(op.target, index);
+        addParam(params, i18nOp, op.i18nPlaceholder.name, index++, i18nOp.subTemplateIndex);
+        i18nBlockPlaceholderIndices.set(op.owner, index);
       }
     }
-    for (const op of i18nOps.values()) {
-      for (const placeholder in op.message.placeholders) {
-        if (!op.params.has(placeholder)) {
-          throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
-        }
-      }
+    for (const [xref, i18nOpParams] of params) {
+      i18nOpParams.saveToOp(i18nOps.get(xref));
     }
   }
 }
-function addTagSlot(tagSlots, placeholder, slot) {
-  const slots = tagSlots.get(placeholder) || [];
-  slots.push(slot);
-  tagSlots.set(placeholder, slots);
+function addParam(params, i18nOp, placeholder, value, subTemplateIndex, flags = I18nParamValueFlags.None) {
+  var _a2;
+  const i18nOpParams = (_a2 = params.get(i18nOp.xref)) != null ? _a2 : new I18nPlaceholderParams();
+  i18nOpParams.addValue(placeholder, value, subTemplateIndex, flags);
+  params.set(i18nOp.xref, i18nOpParams);
 }
-function serializeSlots(slots, start) {
-  const slotStrings = slots.map((slot) => `${ESCAPE}${start ? "" : "/"}#${slot}${ESCAPE}`);
-  if (slotStrings.length === 1) {
-    return literal(slotStrings[0]);
+function getSubTemplateIndexForTag(job, i18nOp, op) {
+  if (op.kind === OpKind.Template) {
+    for (const childOp of job.views.get(op.xref).create) {
+      if (childOp.kind === OpKind.I18nStart) {
+        return childOp.subTemplateIndex;
+      }
+    }
   }
-  return literal(`[${slotStrings.join("|")}]`);
+  return i18nOp.subTemplateIndex;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_names.mjs
@@ -18345,6 +18470,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: phaseNamespace },
   { kind: CompilationJobKind.Both, fn: phaseStyleBindingSpecialization },
   { kind: CompilationJobKind.Both, fn: phaseBindingSpecialization },
+  { kind: CompilationJobKind.Tmpl, fn: phasePropagateI18nBlocks },
   { kind: CompilationJobKind.Both, fn: phaseAttributeExtraction },
   { kind: CompilationJobKind.Both, fn: phaseParseExtractedStyles },
   { kind: CompilationJobKind.Tmpl, fn: phaseRemoveEmptyBindings },
@@ -18368,10 +18494,12 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: phaseTemporaryVariables },
   { kind: CompilationJobKind.Tmpl, fn: phaseSlotAllocation },
   { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nPlaceholders },
+  { kind: CompilationJobKind.Tmpl, fn: phasePropagateI18nPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nMessageExtraction },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nConstCollection },
   { kind: CompilationJobKind.Tmpl, fn: phaseConstTraitCollection },
   { kind: CompilationJobKind.Both, fn: phaseConstCollection },
+  { kind: CompilationJobKind.Tmpl, fn: phaseAssignI18nSlotDependencies },
   { kind: CompilationJobKind.Both, fn: phaseVarCounting },
   { kind: CompilationJobKind.Tmpl, fn: phaseGenerateAdvance },
   { kind: CompilationJobKind.Both, fn: phaseVariableOptimization },
@@ -18593,7 +18721,7 @@ function ingestElement(unit, element2) {
   }
 }
 function ingestTemplate(unit, tmpl) {
-  if (tmpl.i18n !== void 0 && !(tmpl.i18n instanceof Message)) {
+  if (tmpl.i18n !== void 0 && !(tmpl.i18n instanceof Message || tmpl.i18n instanceof TagPlaceholder)) {
     throw Error(`Unhandled i18n metadata type for template: ${tmpl.i18n.constructor.name}`);
   }
   const childView = unit.job.allocateView(unit.xref);
@@ -18602,7 +18730,8 @@ function ingestTemplate(unit, tmpl) {
   if (tmpl.tagName) {
     [namespacePrefix, tagNameWithoutNamespace] = splitNsName(tmpl.tagName);
   }
-  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace != null ? tagNameWithoutNamespace : "ng-template", namespaceForKey(namespacePrefix), false, void 0, tmpl.startSourceSpan);
+  const i18nPlaceholder = tmpl.i18n instanceof TagPlaceholder ? tmpl.i18n : void 0;
+  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace != null ? tagNameWithoutNamespace : "ng-template", namespaceForKey(namespacePrefix), false, i18nPlaceholder, tmpl.startSourceSpan);
   unit.create.push(tplOp);
   ingestBindings(unit, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
@@ -18627,6 +18756,7 @@ function ingestText(unit, text2) {
   unit.create.push(createTextOp(unit.job.allocateXrefId(), text2.value, text2.sourceSpan));
 }
 function ingestBoundText(unit, text2) {
+  var _a2;
   let value = text2.value;
   if (value instanceof ASTWithSource) {
     value = value.ast;
@@ -18635,7 +18765,7 @@ function ingestBoundText(unit, text2) {
     throw new Error(`AssertionError: expected Interpolation for BoundText node, got ${value.constructor.name}`);
   }
   if (text2.i18n !== void 0 && !(text2.i18n instanceof Container)) {
-    throw Error(`Unhandled i18n metadata type for text interpolation: ${text2.i18n.constructor.name}`);
+    throw Error(`Unhandled i18n metadata type for text interpolation: ${(_a2 = text2.i18n) == null ? void 0 : _a2.constructor.name}`);
   }
   const i18nPlaceholders = text2.i18n instanceof Container ? text2.i18n.children.filter((node) => node instanceof Placeholder) : [];
   const textXref = unit.job.allocateXrefId();
@@ -24331,7 +24461,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-7bfe207");
+var VERSION2 = new Version("17.0.0-next.7+sha-7368b8a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25348,7 +25478,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-7bfe207"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-7368b8a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25419,7 +25549,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-7bfe207"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-7368b8a"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25651,7 +25781,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-7bfe207"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-7368b8a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25674,7 +25804,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-7bfe207"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-7368b8a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25712,7 +25842,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-7bfe207"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-7368b8a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25736,7 +25866,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-7bfe207"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-7368b8a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25771,7 +25901,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-7bfe207"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-7368b8a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25788,7 +25918,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.7+sha-7bfe207");
+var VERSION3 = new Version("17.0.0-next.7+sha-7368b8a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
