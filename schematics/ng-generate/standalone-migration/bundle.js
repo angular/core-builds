@@ -4212,11 +4212,12 @@ var SwitchBlock = class {
   }
 };
 var SwitchBlockCase = class {
-  constructor(expression, children, sourceSpan, startSourceSpan) {
+  constructor(expression, children, sourceSpan, startSourceSpan, endSourceSpan) {
     this.expression = expression;
     this.children = children;
     this.sourceSpan = sourceSpan;
     this.startSourceSpan = startSourceSpan;
+    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitSwitchBlockCase(this);
@@ -4384,11 +4385,9 @@ var RecursiveVisitor = class {
     visitAll(this, block.children);
   }
   visitForLoopBlock(block) {
-    var _a2;
-    block.item.visit(this);
-    visitAll(this, Object.values(block.contextVariables));
-    visitAll(this, block.children);
-    (_a2 = block.empty) == null ? void 0 : _a2.visit(this);
+    const blockItems = [block.item, ...Object.values(block.contextVariables), ...block.children];
+    block.empty && blockItems.push(block.empty);
+    visitAll(this, blockItems);
   }
   visitForLoopBlockEmpty(block) {
     visitAll(this, block.children);
@@ -4397,9 +4396,9 @@ var RecursiveVisitor = class {
     visitAll(this, block.branches);
   }
   visitIfBlockBranch(block) {
-    var _a2;
-    visitAll(this, block.children);
-    (_a2 = block.expressionAlias) == null ? void 0 : _a2.visit(this);
+    const blockItems = block.children;
+    block.expressionAlias && blockItems.push(block.expressionAlias);
+    visitAll(this, blockItems);
   }
   visitContent(content) {
   }
@@ -19799,7 +19798,7 @@ function createSwitchBlock(ast, visitor, bindingParser) {
       continue;
     }
     const expression = node.name === "case" ? parseBlockParameterToBinding(node.parameters[0], bindingParser) : null;
-    const ast2 = new SwitchBlockCase(expression, visitAll2(visitor, node.children, node.children), node.sourceSpan, node.startSourceSpan);
+    const ast2 = new SwitchBlockCase(expression, visitAll2(visitor, node.children, node.children), node.sourceSpan, node.startSourceSpan, node.endSourceSpan);
     if (expression === null) {
       defaultCase = ast2;
     } else {
@@ -24332,7 +24331,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-28a5925");
+var VERSION2 = new Version("17.0.0-next.7+sha-023a181");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25349,7 +25348,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-28a5925"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25420,7 +25419,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-28a5925"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25652,7 +25651,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-28a5925"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25675,7 +25674,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-28a5925"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25713,7 +25712,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-28a5925"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25737,7 +25736,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-28a5925"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25772,7 +25771,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-28a5925"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25789,7 +25788,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.7+sha-28a5925");
+var VERSION3 = new Version("17.0.0-next.7+sha-023a181");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -26153,9 +26152,10 @@ var PerfPhase;
   PerfPhase2[PerfPhase2["LsDiagnostics"] = 21] = "LsDiagnostics";
   PerfPhase2[PerfPhase2["LsComponentLocations"] = 22] = "LsComponentLocations";
   PerfPhase2[PerfPhase2["LsSignatureHelp"] = 23] = "LsSignatureHelp";
-  PerfPhase2[PerfPhase2["LAST"] = 24] = "LAST";
-  PerfPhase2[PerfPhase2["LsCodeFixes"] = 25] = "LsCodeFixes";
-  PerfPhase2[PerfPhase2["LsCodeFixesAll"] = 26] = "LsCodeFixesAll";
+  PerfPhase2[PerfPhase2["OutliningSpans"] = 24] = "OutliningSpans";
+  PerfPhase2[PerfPhase2["LAST"] = 25] = "LAST";
+  PerfPhase2[PerfPhase2["LsCodeFixes"] = 26] = "LsCodeFixes";
+  PerfPhase2[PerfPhase2["LsCodeFixesAll"] = 27] = "LsCodeFixesAll";
 })(PerfPhase || (PerfPhase = {}));
 var PerfEvent;
 (function(PerfEvent2) {

@@ -3714,11 +3714,12 @@ var SwitchBlock = class {
   }
 };
 var SwitchBlockCase = class {
-  constructor(expression, children, sourceSpan, startSourceSpan) {
+  constructor(expression, children, sourceSpan, startSourceSpan, endSourceSpan) {
     this.expression = expression;
     this.children = children;
     this.sourceSpan = sourceSpan;
     this.startSourceSpan = startSourceSpan;
+    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitSwitchBlockCase(this);
@@ -18973,7 +18974,7 @@ function createSwitchBlock(ast, visitor, bindingParser) {
       continue;
     }
     const expression = node.name === "case" ? parseBlockParameterToBinding(node.parameters[0], bindingParser) : null;
-    const ast2 = new SwitchBlockCase(expression, visitAll2(visitor, node.children, node.children), node.sourceSpan, node.startSourceSpan);
+    const ast2 = new SwitchBlockCase(expression, visitAll2(visitor, node.children, node.children), node.sourceSpan, node.startSourceSpan, node.endSourceSpan);
     if (expression === null) {
       defaultCase = ast2;
     } else {
@@ -23506,7 +23507,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-28a5925");
+var VERSION2 = new Version("17.0.0-next.7+sha-023a181");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
