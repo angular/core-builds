@@ -24458,7 +24458,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-29b876b");
+var VERSION2 = new Version("17.0.0-next.7+sha-11bb19c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25475,7 +25475,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-29b876b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-11bb19c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25546,7 +25546,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-29b876b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-11bb19c"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25778,7 +25778,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-29b876b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-11bb19c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25801,7 +25801,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-29b876b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-11bb19c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25839,7 +25839,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-29b876b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-11bb19c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25863,7 +25863,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-29b876b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-11bb19c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25898,7 +25898,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-29b876b"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-11bb19c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25915,7 +25915,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.7+sha-29b876b");
+var VERSION3 = new Version("17.0.0-next.7+sha-11bb19c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -29741,14 +29741,7 @@ function getConstructorDependencies(clazz, reflector, isCore, compilationMode) {
     if (compilationMode === CompilationMode.LOCAL && param.typeValueReference.kind === 2 && param.typeValueReference.reason.kind !== 0) {
       const typeNode = param.typeValueReference.reason.typeNode;
       if (import_typescript31.default.isTypeReferenceNode(typeNode)) {
-        if (import_typescript31.default.isIdentifier(typeNode.typeName)) {
-          token = new WrappedNodeExpr(typeNode.typeName);
-        } else if (import_typescript31.default.isQualifiedName(typeNode.typeName)) {
-          const receiver = new WrappedNodeExpr(typeNode.typeName.left);
-          token = new ReadPropExpr(receiver, typeNode.typeName.right.getText());
-        } else {
-          throw new Error("Impossible state!");
-        }
+        token = toQualifiedExpression(typeNode.typeName);
       }
     } else {
       token = valueReferenceToExpression(param.typeValueReference);
@@ -29803,6 +29796,12 @@ function getConstructorDependencies(clazz, reflector, isCore, compilationMode) {
   } else {
     return { deps: null, errors };
   }
+}
+function toQualifiedExpression(entity) {
+  if (import_typescript31.default.isIdentifier(entity)) {
+    return new WrappedNodeExpr(entity);
+  }
+  return new ReadPropExpr(toQualifiedExpression(entity.left), entity.right.text);
 }
 function unwrapConstructorDependencies(deps) {
   if (deps === null) {
