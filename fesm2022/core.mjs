@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-11bb19c
+ * @license Angular v17.0.0-next.7+sha-0ec66b8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2048,10 +2048,12 @@ function getComponentId(componentDef) {
 const HOST = 0;
 const TVIEW = 1;
 const FLAGS = 2;
+// Shared with LContainer
 const PARENT = 3;
 const NEXT = 4;
-const DESCENDANT_VIEWS_TO_REFRESH = 5;
-const T_HOST = 6;
+const T_HOST = 5;
+// End shared with LContainer
+const HYDRATION = 6;
 const CLEANUP = 7;
 const CONTEXT = 8;
 const INJECTOR$1 = 9;
@@ -2068,7 +2070,6 @@ const QUERIES = 18;
 const ID = 19;
 const EMBEDDED_VIEW_INJECTOR = 20;
 const ON_DESTROY_HOOKS = 21;
-const HYDRATION = 22;
 const REACTIVE_TEMPLATE_CONSUMER = 23;
 const REACTIVE_HOST_BINDING_CONSUMER = 24;
 /**
@@ -2103,10 +2104,11 @@ const TYPE = 1;
  * that the `MOVED_VIEWS` are transplanted and on-push.
  */
 const HAS_TRANSPLANTED_VIEWS = 2;
-// PARENT, NEXT, DESCENDANT_VIEWS_TO_REFRESH are indices 3, 4, and 5
+// PARENT and NEXT are indices 3 and 4
 // As we already have these constants in LView, we don't need to re-create them.
-// T_HOST is index 6
+// T_HOST is index 5
 // We already have this constants in LView, we don't need to re-create it.
+const HAS_CHILD_VIEWS_TO_REFRESH = 6;
 const NATIVE = 7;
 const VIEW_REFS = 8;
 const MOVED_VIEWS = 9;
@@ -2564,23 +2566,16 @@ function resetPreOrderHookFlags(lView) {
     lView[PREORDER_HOOK_FLAGS] = 0;
 }
 /**
- * Adds the `RefreshView` flag from the lView and updates DESCENDANT_VIEWS_TO_REFRESH counters of
+ * Adds the `RefreshView` flag from the lView and updates HAS_CHILD_VIEWS_TO_REFRESH flag of
  * parents.
  */
 function markViewForRefresh(lView) {
-    if ((lView[FLAGS] & 1024 /* LViewFlags.RefreshView */) === 0) {
-        lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
-        updateViewsToRefresh(lView, 1);
-    }
-}
-/**
- * Removes the `RefreshView` flag from the lView and updates DESCENDANT_VIEWS_TO_REFRESH counters of
- * parents.
- */
-function clearViewRefreshFlag(lView) {
     if (lView[FLAGS] & 1024 /* LViewFlags.RefreshView */) {
-        lView[FLAGS] &= ~1024 /* LViewFlags.RefreshView */;
-        updateViewsToRefresh(lView, -1);
+        return;
+    }
+    lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
+    if (viewAttachedToChangeDetector(lView)) {
+        markAncestorsForTraversal(lView);
     }
 }
 /**
@@ -2603,20 +2598,43 @@ function walkUpViews(nestingLevel, currentView) {
  *  1. counter goes from 0 to 1, indicating that there is a new child that has a view to refresh
  *  or
  *  2. counter goes from 1 to 0, indicating there are no more descendant views to refresh
+ * When attaching/re-attaching an `LView` to the change detection tree, we need to ensure that the
+ * views above it are traversed during change detection if this one is marked for refresh or has
+ * some child or descendant that needs to be refreshed.
  */
-function updateViewsToRefresh(lView, amount) {
+function updateAncestorTraversalFlagsOnAttach(lView) {
+    if (lView[FLAGS] & (1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */)) {
+        markAncestorsForTraversal(lView);
+    }
+}
+/**
+ * Ensures views above the given `lView` are traversed during change detection even when they are
+ * not dirty.
+ *
+ * This is done by setting the `HAS_CHILD_VIEWS_TO_REFRESH` flag up to the root, stopping when the
+ * flag is already `true` or the `lView` is detached.
+ */
+function markAncestorsForTraversal(lView) {
     let parent = lView[PARENT];
     if (parent === null) {
         return;
     }
-    parent[DESCENDANT_VIEWS_TO_REFRESH] += amount;
-    let viewOrContainer = parent;
-    parent = parent[PARENT];
-    while (parent !== null &&
-        ((amount === 1 && viewOrContainer[DESCENDANT_VIEWS_TO_REFRESH] === 1) ||
-            (amount === -1 && viewOrContainer[DESCENDANT_VIEWS_TO_REFRESH] === 0))) {
-        parent[DESCENDANT_VIEWS_TO_REFRESH] += amount;
-        viewOrContainer = parent;
+    while (parent !== null) {
+        // We stop adding markers to the ancestors once we reach one that already has the marker. This
+        // is to avoid needlessly traversing all the way to the root when the marker already exists.
+        if ((isLContainer(parent) && parent[HAS_CHILD_VIEWS_TO_REFRESH] ||
+            (isLView(parent) && parent[FLAGS] & 8192 /* LViewFlags.HasChildViewsToRefresh */))) {
+            break;
+        }
+        if (isLContainer(parent)) {
+            parent[HAS_CHILD_VIEWS_TO_REFRESH] = true;
+        }
+        else {
+            parent[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
+            if (!viewAttachedToChangeDetector(parent)) {
+                break;
+            }
+        }
         parent = parent[PARENT];
     }
 }
@@ -3316,7 +3334,7 @@ function incrementInitPhaseFlags(lView, initPhase) {
         assertNotEqual(initPhase, 3 /* InitPhaseState.InitPhaseCompleted */, 'Init hooks phase should not be incremented after all init hooks have been run.');
     let flags = lView[FLAGS];
     if ((flags & 3 /* LViewFlags.InitPhaseStateMask */) === initPhase) {
-        flags &= 8191 /* LViewFlags.IndexWithinInitPhaseReset */;
+        flags &= 16383 /* LViewFlags.IndexWithinInitPhaseReset */;
         flags += 1 /* LViewFlags.InitPhaseStateIncrementer */;
         lView[FLAGS] = flags;
     }
@@ -3397,12 +3415,12 @@ function callHook(currentView, initPhase, arr, i) {
     const directiveIndex = isInitHook ? -arr[i] : arr[i];
     const directive = currentView[directiveIndex];
     if (isInitHook) {
-        const indexWithintInitPhase = currentView[FLAGS] >> 13 /* LViewFlags.IndexWithinInitPhaseShift */;
+        const indexWithintInitPhase = currentView[FLAGS] >> 14 /* LViewFlags.IndexWithinInitPhaseShift */;
         // The init phase state must be always checked here as it may have been recursively updated.
         if (indexWithintInitPhase <
             (currentView[PREORDER_HOOK_FLAGS] >> 16 /* PreOrderHookFlags.NumberOfInitHooksCalledShift */) &&
             (currentView[FLAGS] & 3 /* LViewFlags.InitPhaseStateMask */) === initPhase) {
-            currentView[FLAGS] += 8192 /* LViewFlags.IndexWithinInitPhaseIncrementer */;
+            currentView[FLAGS] += 16384 /* LViewFlags.IndexWithinInitPhaseIncrementer */;
             callHookInternal(directive, hook);
         }
     }
@@ -8122,6 +8140,7 @@ function insertView(tView, lView, lContainer, index) {
     if (lQueries !== null) {
         lQueries.insertView(tView);
     }
+    updateAncestorTraversalFlagsOnAttach(lView);
     // Sets the attached flag
     lView[FLAGS] |= 128 /* LViewFlags.Attached */;
 }
@@ -8160,9 +8179,6 @@ function detachMovedView(declarationContainer, lView) {
     const declarationViewIndex = movedViews.indexOf(lView);
     const insertionLContainer = lView[PARENT];
     ngDevMode && assertLContainer(insertionLContainer);
-    // If the view was marked for refresh but then detached before it was checked (where the flag
-    // would be cleared and the counter decremented), we need to update the status here.
-    clearViewRefreshFlag(lView);
     movedViews.splice(declarationViewIndex, 1);
 }
 /**
@@ -10375,7 +10391,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-11bb19c');
+const VERSION = new Version('17.0.0-next.7+sha-0ec66b8');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -12833,8 +12849,8 @@ function createLContainer(hostNative, currentView, native, tNode) {
         false,
         currentView,
         null,
-        0,
         tNode,
+        false,
         native,
         null,
         null,
@@ -13388,7 +13404,15 @@ function refreshView(tView, lView, templateFn, context) {
         if (!isInCheckNoChangesPass) {
             lView[FLAGS] &= ~(64 /* LViewFlags.Dirty */ | 8 /* LViewFlags.FirstLViewPass */);
         }
-        clearViewRefreshFlag(lView);
+        lView[FLAGS] &= ~1024 /* LViewFlags.RefreshView */;
+    }
+    catch (e) {
+        // If refreshing a view causes an error, we need to remark the ancestors as needing traversal
+        // because the error might have caused a situation where views below the current location are
+        // dirty but will be unreachable because the "has dirty children" flag in the ancestors has been
+        // cleared during change detection and we failed to run to completion.
+        markAncestorsForTraversal(lView);
+        throw e;
     }
     finally {
         leaveView();
@@ -13400,9 +13424,10 @@ function refreshView(tView, lView, templateFn, context) {
  */
 function detectChangesInEmbeddedViews(lView, mode) {
     for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
+        lContainer[HAS_CHILD_VIEWS_TO_REFRESH] = false;
         for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             const embeddedLView = lContainer[i];
-            detectChangesInView(embeddedLView, mode);
+            detectChangesInViewIfAttached(embeddedLView, mode);
         }
     }
 }
@@ -13434,33 +13459,41 @@ function markTransplantedViewsForRefresh(lView) {
 function detectChangesInComponent(hostLView, componentHostIdx, mode) {
     ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
     const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
-    detectChangesInView(componentView, mode);
+    detectChangesInViewIfAttached(componentView, mode);
 }
 /**
  * Visits a view as part of change detection traversal.
  *
- * - If the view is detached, no additional traversal happens.
+ * If the view is detached, no additional traversal happens.
+ */
+function detectChangesInViewIfAttached(lView, mode) {
+    if (!viewAttachedToChangeDetector(lView)) {
+        return;
+    }
+    detectChangesInView(lView, mode);
+}
+/**
+ * Visits a view as part of change detection traversal.
  *
  * The view is refreshed if:
  * - If the view is CheckAlways or Dirty and ChangeDetectionMode is `Global`
  * - If the view has the `RefreshTransplantedView` flag
  *
  * The view is not refreshed, but descendants are traversed in `ChangeDetectionMode.Targeted` if the
- * view has a non-zero TRANSPLANTED_VIEWS_TO_REFRESH counter.
- *
+ * view HasChildViewsToRefresh flag is set.
  */
 function detectChangesInView(lView, mode) {
-    if (!viewAttachedToChangeDetector(lView)) {
-        return;
-    }
     const tView = lView[TVIEW];
     const flags = lView[FLAGS];
+    // Flag cleared before change detection runs so that the view can be re-marked for traversal if
+    // necessary.
+    lView[FLAGS] &= ~8192 /* LViewFlags.HasChildViewsToRefresh */;
     if ((flags & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */) &&
         mode === 0 /* ChangeDetectionMode.Global */) ||
         flags & 1024 /* LViewFlags.RefreshView */) {
         refreshView(tView, lView, tView.template, lView[CONTEXT]);
     }
-    else if (lView[DESCENDANT_VIEWS_TO_REFRESH] > 0) {
+    else if (flags & 8192 /* LViewFlags.HasChildViewsToRefresh */) {
         detectChangesInEmbeddedViews(lView, 1 /* ChangeDetectionMode.Targeted */);
         const components = tView.components;
         if (components !== null) {
@@ -13695,6 +13728,7 @@ class ViewRef$1 {
      * ```
      */
     reattach() {
+        updateAncestorTraversalFlagsOnAttach(this._lView);
         this._lView[FLAGS] |= 128 /* LViewFlags.Attached */;
     }
     /**

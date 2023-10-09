@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-11bb19c
+ * @license Angular v17.0.0-next.7+sha-0ec66b8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2666,8 +2666,6 @@ declare interface DepsTrackerApi {
     getStandaloneComponentScope(type: ɵComponentType<any>, rawImports: (Type<any> | (() => Type<any>))[]): StandaloneComponentScope;
 }
 
-declare const DESCENDANT_VIEWS_TO_REFRESH = 5;
-
 /**
  * Array of destroy hooks that should be executed for a view and their directive indices.
  *
@@ -3883,6 +3881,8 @@ declare type GlobalTargetName = 'document' | 'window' | 'body';
 
 declare type GlobalTargetResolver = (element: any) => EventTarget;
 
+declare const HAS_CHILD_VIEWS_TO_REFRESH = 6;
+
 /**
  * Flag to signify that this `LContainer` may have transplanted views which need to be change
  * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
@@ -4233,7 +4233,7 @@ export declare interface HostListenerDecorator {
     new (eventName: string, args?: string[]): any;
 }
 
-declare const HYDRATION = 22;
+declare const HYDRATION = 6;
 
 declare namespace i0 {
     export {
@@ -5446,12 +5446,10 @@ declare interface LContainer extends Array<any> {
      */
     [NEXT]: LView | LContainer | null;
     /**
-     * The number of direct transplanted views which need a refresh or have descendants themselves
-     * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
-     * change detection we should still descend to find those children to refresh, even if the parents
-     * are not `Dirty`/`CheckAlways`.
+     * Indicates that this LContainer has a view underneath it that needs to be refreshed during
+     * change detection.
      */
-    [DESCENDANT_VIEWS_TO_REFRESH]: number;
+    [HAS_CHILD_VIEWS_TO_REFRESH]: boolean;
     /**
      * A collection of views created based on the underlying `<ng-template>` element but inserted into
      * a different `LContainer`. We need to track views created from a given declaration point since
@@ -5798,13 +5796,6 @@ declare interface LView<T = unknown> extends Array<any> {
      * More flags for this view. See PreOrderHookFlags for more info.
      */
     [PREORDER_HOOK_FLAGS]: PreOrderHookFlags;
-    /**
-     * The number of direct transplanted views which need a refresh or have descendants themselves
-     * that need a refresh but have not marked their ancestors as Dirty. This tells us that during
-     * change detection we should still descend to find those children to refresh, even if the parents
-     * are not `Dirty`/`CheckAlways`.
-     */
-    [DESCENDANT_VIEWS_TO_REFRESH]: number;
     /** Unique ID of the view. Used for `__ngContext__` lookups in the `LView` registry. */
     [ID]: number;
     /**
@@ -5886,8 +5877,8 @@ declare const enum LViewFlags {
     /**
      * Whether this moved LView was needs to be refreshed. Similar to the Dirty flag, but used for
      * transplanted and signal views where the parent/ancestor views are not marked dirty as well.
-     * i.e. "Refresh just this view". Used in conjunction with the DESCENDANT_VIEWS_TO_REFRESH
-     * counter.
+     * i.e. "Refresh just this view". Used in conjunction with the HAS_CHILD_VIEWS_TO_REFRESH
+     * flag.
      */
     RefreshView = 1024,
     /** Indicates that the view **or any of its ancestors** have an embedded view injector. */
@@ -5895,14 +5886,20 @@ declare const enum LViewFlags {
     /** Indicates that the view was created with `signals: true`. */
     SignalView = 4096,
     /**
+     * Indicates that this LView has a view underneath it that needs to be refreshed during change
+     * detection. This flag indicates that even if this view is not dirty itself, we still need to
+     * traverse its children during change detection.
+     */
+    HasChildViewsToRefresh = 8192,
+    /**
      * This is the count of the bits the 1 was shifted above (base 10)
      */
-    IndexWithinInitPhaseShift = 13,
+    IndexWithinInitPhaseShift = 14,
     /**
      * Index of the current init phase on last 21 bits
      */
-    IndexWithinInitPhaseIncrementer = 8192,
-    IndexWithinInitPhaseReset = 8191
+    IndexWithinInitPhaseIncrementer = 16384,
+    IndexWithinInitPhaseReset = 16383
 }
 
 /**
@@ -8291,7 +8288,7 @@ export declare interface StaticClassSansProvider {
  */
 export declare type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider | any[];
 
-declare const T_HOST = 6;
+declare const T_HOST = 5;
 
 /**
  * A combination of:
