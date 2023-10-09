@@ -76,40 +76,40 @@ var import_typescript = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/file_system/src/invalid_file_system.mjs
 var InvalidFileSystem = class {
-  exists(path3) {
+  exists(path4) {
     throw makeError();
   }
-  readFile(path3) {
+  readFile(path4) {
     throw makeError();
   }
-  readFileBuffer(path3) {
+  readFileBuffer(path4) {
     throw makeError();
   }
-  writeFile(path3, data, exclusive) {
+  writeFile(path4, data, exclusive) {
     throw makeError();
   }
-  removeFile(path3) {
+  removeFile(path4) {
     throw makeError();
   }
-  symlink(target, path3) {
+  symlink(target, path4) {
     throw makeError();
   }
-  readdir(path3) {
+  readdir(path4) {
     throw makeError();
   }
-  lstat(path3) {
+  lstat(path4) {
     throw makeError();
   }
-  stat(path3) {
+  stat(path4) {
     throw makeError();
   }
   pwd() {
     throw makeError();
   }
-  chdir(path3) {
+  chdir(path4) {
     throw makeError();
   }
-  extname(path3) {
+  extname(path4) {
     throw makeError();
   }
   copyFile(from, to) {
@@ -118,10 +118,10 @@ var InvalidFileSystem = class {
   moveFile(from, to) {
     throw makeError();
   }
-  ensureDir(path3) {
+  ensureDir(path4) {
     throw makeError();
   }
-  removeDeep(path3) {
+  removeDeep(path4) {
     throw makeError();
   }
   isCaseSensitive() {
@@ -136,10 +136,10 @@ var InvalidFileSystem = class {
   join(basePath, ...paths) {
     throw makeError();
   }
-  isRoot(path3) {
+  isRoot(path4) {
     throw makeError();
   }
-  isRooted(path3) {
+  isRooted(path4) {
     throw makeError();
   }
   relative(from, to) {
@@ -154,7 +154,7 @@ var InvalidFileSystem = class {
   getDefaultLibLocation() {
     throw makeError();
   }
-  normalize(path3) {
+  normalize(path4) {
     throw makeError();
   }
 };
@@ -164,8 +164,8 @@ function makeError() {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/file_system/src/util.mjs
 var TS_DTS_JS_EXTENSION = /(?:\.d)?\.ts$|\.js$/;
-function stripExtension(path3) {
-  return path3.replace(TS_DTS_JS_EXTENSION, "");
+function stripExtension(path4) {
+  return path4.replace(TS_DTS_JS_EXTENSION, "");
 }
 function getSourceFileOrError(program, fileName) {
   const sf = program.getSourceFile(fileName);
@@ -183,11 +183,11 @@ function getFileSystem() {
 function setFileSystem(fileSystem) {
   fs = fileSystem;
 }
-function absoluteFrom(path3) {
-  if (!fs.isRooted(path3)) {
-    throw new Error(`Internal Error: absoluteFrom(${path3}): path is not absolute`);
+function absoluteFrom(path4) {
+  if (!fs.isRooted(path4)) {
+    throw new Error(`Internal Error: absoluteFrom(${path4}): path is not absolute`);
   }
-  return fs.resolve(path3);
+  return fs.resolve(path4);
 }
 var ABSOLUTE_PATH = Symbol("AbsolutePath");
 function absoluteFromSourceFile(sf) {
@@ -206,8 +206,8 @@ function join(basePath, ...paths) {
 function resolve(basePath, ...paths) {
   return fs.resolve(basePath, ...paths);
 }
-function isRooted(path3) {
-  return fs.isRooted(path3);
+function isRooted(path4) {
+  return fs.isRooted(path4);
 }
 function relative(from, to) {
   return fs.relative(from, to);
@@ -261,8 +261,8 @@ var LogicalFileSystem = class {
     return logicalPath.startsWith("/") ? logicalPath : "/" + logicalPath;
   }
 };
-function isWithinBasePath(base, path3) {
-  return isLocalRelativePath(relative(base, path3));
+function isWithinBasePath(base, path4) {
+  return isLocalRelativePath(relative(base, path4));
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/file_system/src/node_js_file_system.mjs
@@ -287,11 +287,11 @@ var NodeJSPathManipulation = class {
   join(basePath, ...paths) {
     return this.normalize(p.join(basePath, ...paths));
   }
-  isRoot(path3) {
-    return this.dirname(path3) === this.normalize(path3);
+  isRoot(path4) {
+    return this.dirname(path4) === this.normalize(path4);
   }
-  isRooted(path3) {
-    return p.isAbsolute(path3);
+  isRooted(path4) {
+    return p.isAbsolute(path4);
   }
   relative(from, to) {
     return this.normalize(p.relative(from, to));
@@ -299,11 +299,11 @@ var NodeJSPathManipulation = class {
   basename(filePath, extension) {
     return p.basename(filePath, extension);
   }
-  extname(path3) {
-    return p.extname(path3);
+  extname(path4) {
+    return p.extname(path4);
   }
-  normalize(path3) {
-    return path3.replace(/\\/g, "/");
+  normalize(path4) {
+    return path4.replace(/\\/g, "/");
   }
 };
 var isCommonJS = typeof __filename !== "undefined";
@@ -320,26 +320,26 @@ var NodeJSReadonlyFileSystem = class extends NodeJSPathManipulation {
     }
     return this._caseSensitive;
   }
-  exists(path3) {
-    return import_fs.default.existsSync(path3);
+  exists(path4) {
+    return import_fs.default.existsSync(path4);
   }
-  readFile(path3) {
-    return import_fs.default.readFileSync(path3, "utf8");
+  readFile(path4) {
+    return import_fs.default.readFileSync(path4, "utf8");
   }
-  readFileBuffer(path3) {
-    return import_fs.default.readFileSync(path3);
+  readFileBuffer(path4) {
+    return import_fs.default.readFileSync(path4);
   }
-  readdir(path3) {
-    return import_fs.default.readdirSync(path3);
+  readdir(path4) {
+    return import_fs.default.readdirSync(path4);
   }
-  lstat(path3) {
-    return import_fs.default.lstatSync(path3);
+  lstat(path4) {
+    return import_fs.default.lstatSync(path4);
   }
-  stat(path3) {
-    return import_fs.default.statSync(path3);
+  stat(path4) {
+    return import_fs.default.statSync(path4);
   }
-  realpath(path3) {
-    return this.resolve(import_fs.default.realpathSync(path3));
+  realpath(path4) {
+    return this.resolve(import_fs.default.realpathSync(path4));
   }
   getDefaultLibLocation() {
     const requireFn = isCommonJS ? require : import_module.default.createRequire(currentFileUrl);
@@ -347,14 +347,14 @@ var NodeJSReadonlyFileSystem = class extends NodeJSPathManipulation {
   }
 };
 var NodeJSFileSystem = class extends NodeJSReadonlyFileSystem {
-  writeFile(path3, data, exclusive = false) {
-    import_fs.default.writeFileSync(path3, data, exclusive ? { flag: "wx" } : void 0);
+  writeFile(path4, data, exclusive = false) {
+    import_fs.default.writeFileSync(path4, data, exclusive ? { flag: "wx" } : void 0);
   }
-  removeFile(path3) {
-    import_fs.default.unlinkSync(path3);
+  removeFile(path4) {
+    import_fs.default.unlinkSync(path4);
   }
-  symlink(target, path3) {
-    import_fs.default.symlinkSync(target, path3);
+  symlink(target, path4) {
+    import_fs.default.symlinkSync(target, path4);
   }
   copyFile(from, to) {
     import_fs.default.copyFileSync(from, to);
@@ -362,11 +362,11 @@ var NodeJSFileSystem = class extends NodeJSReadonlyFileSystem {
   moveFile(from, to) {
     import_fs.default.renameSync(from, to);
   }
-  ensureDir(path3) {
-    import_fs.default.mkdirSync(path3, { recursive: true });
+  ensureDir(path4) {
+    import_fs.default.mkdirSync(path4, { recursive: true });
   }
-  removeDeep(path3) {
-    import_fs.default.rmdirSync(path3, { recursive: true });
+  removeDeep(path4) {
+    import_fs.default.rmdirSync(path4, { recursive: true });
   }
 };
 function toggleCase(str) {
@@ -2677,6 +2677,9 @@ var Identifiers = _Identifiers;
   _Identifiers.deferPrefetchOnViewport = { name: "\u0275\u0275deferPrefetchOnViewport", moduleName: CORE };
 })();
 (() => {
+  _Identifiers.deferEnableTimerScheduling = { name: "\u0275\u0275deferEnableTimerScheduling", moduleName: CORE };
+})();
+(() => {
   _Identifiers.conditional = { name: "\u0275\u0275conditional", moduleName: CORE };
 })();
 (() => {
@@ -3002,6 +3005,9 @@ var Identifiers = _Identifiers;
 })();
 (() => {
   _Identifiers.setClassMetadataAsync = { name: "\u0275setClassMetadataAsync", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.setClassDebugInfo = { name: "\u0275setClassDebugInfo", moduleName: CORE };
 })();
 (() => {
   _Identifiers.queryRefresh = { name: "\u0275\u0275queryRefresh", moduleName: CORE };
@@ -21813,7 +21819,8 @@ var TemplateDefinitionBuilder = class {
       literal(placeholderIndex),
       literal(errorIndex),
       (loadingConsts == null ? void 0 : loadingConsts.length) ? this.addToConsts(literalArr(loadingConsts)) : TYPED_NULL_EXPR,
-      placeholderConsts ? this.addToConsts(placeholderConsts) : TYPED_NULL_EXPR
+      placeholderConsts ? this.addToConsts(placeholderConsts) : TYPED_NULL_EXPR,
+      (loadingConsts == null ? void 0 : loadingConsts.length) || placeholderConsts ? importExpr(Identifiers.deferEnableTimerScheduling) : TYPED_NULL_EXPR
     ]));
     this.createDeferTriggerInstructions(deferredIndex, triggers, metadata, false);
     this.createDeferTriggerInstructions(deferredIndex, prefetchTriggers, metadata, true);
@@ -24458,7 +24465,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-0ec66b8");
+var VERSION2 = new Version("17.0.0-next.7+sha-c2f270c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25470,12 +25477,29 @@ function compileComponentClassMetadata(metadata, deferrableTypes) {
   return iife.callFn([]);
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_class_debug_info_compiler.mjs
+function compileClassDebugInfo(debugInfo) {
+  const debugInfoObject = {
+    className: debugInfo.className
+  };
+  if (debugInfo.filePath) {
+    debugInfoObject.filePath = debugInfo.filePath;
+    debugInfoObject.lineNumber = debugInfo.lineNumber;
+  }
+  const fnCall = importExpr(Identifiers.setClassDebugInfo).callFn([
+    debugInfo.type,
+    mapLiteral(debugInfoObject)
+  ]);
+  const iife = arrowFn([], [devOnlyGuardedExpression(fnCall).toStmt()]);
+  return iife.callFn([]);
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/partial/class_metadata.mjs
 var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-0ec66b8"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-c2f270c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25546,7 +25570,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-0ec66b8"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-c2f270c"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25778,7 +25802,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-0ec66b8"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-c2f270c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25801,7 +25825,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-0ec66b8"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-c2f270c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25839,7 +25863,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-0ec66b8"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-c2f270c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25863,7 +25887,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-0ec66b8"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-c2f270c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25898,7 +25922,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-0ec66b8"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-c2f270c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25915,7 +25939,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.7+sha-0ec66b8");
+var VERSION3 = new Version("17.0.0-next.7+sha-c2f270c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -28002,8 +28026,8 @@ function relativePathBetween(from, to) {
   const relativePath = stripExtension(relative(dirname(resolve(from)), resolve(to)));
   return relativePath !== "" ? toRelativeImport(relativePath) : null;
 }
-function normalizeSeparators2(path3) {
-  return path3.replace(/\\/g, "/");
+function normalizeSeparators2(path4) {
+  return path4.replace(/\\/g, "/");
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/core.mjs
@@ -29673,10 +29697,13 @@ function createSourceSpan(node) {
   const parseSf = new ParseSourceFile(sf.getFullText(), sf.fileName);
   return new ParseSourceSpan(new ParseLocation(parseSf, startOffset, startLine + 1, startCol + 1), new ParseLocation(parseSf, endOffset, endLine + 1, endCol + 1));
 }
-function compileResults(fac, def, metadataStmt, propName, additionalFields, deferrableImports) {
+function compileResults(fac, def, metadataStmt, propName, additionalFields, deferrableImports, debugInfo = null) {
   const statements = def.statements;
   if (metadataStmt !== null) {
     statements.push(metadataStmt);
+  }
+  if (debugInfo !== null) {
+    statements.push(debugInfo);
   }
   const results = [
     fac,
@@ -30473,12 +30500,12 @@ var ResourceRegistry = class {
     }
   }
   registerTemplate(templateResource, component) {
-    const { path: path3 } = templateResource;
-    if (path3 !== null) {
-      if (!this.externalTemplateToComponentsMap.has(path3)) {
-        this.externalTemplateToComponentsMap.set(path3, /* @__PURE__ */ new Set());
+    const { path: path4 } = templateResource;
+    if (path4 !== null) {
+      if (!this.externalTemplateToComponentsMap.has(path4)) {
+        this.externalTemplateToComponentsMap.set(path4, /* @__PURE__ */ new Set());
       }
-      this.externalTemplateToComponentsMap.get(path3).add(component);
+      this.externalTemplateToComponentsMap.get(path4).add(component);
     }
     this.componentToTemplateMap.set(component, templateResource);
   }
@@ -30489,15 +30516,15 @@ var ResourceRegistry = class {
     return this.componentToTemplateMap.get(component);
   }
   registerStyle(styleResource, component) {
-    const { path: path3 } = styleResource;
+    const { path: path4 } = styleResource;
     if (!this.componentToStylesMap.has(component)) {
       this.componentToStylesMap.set(component, /* @__PURE__ */ new Set());
     }
-    if (path3 !== null) {
-      if (!this.externalStyleToComponentsMap.has(path3)) {
-        this.externalStyleToComponentsMap.set(path3, /* @__PURE__ */ new Set());
+    if (path4 !== null) {
+      if (!this.externalStyleToComponentsMap.has(path4)) {
+        this.externalStyleToComponentsMap.set(path4, /* @__PURE__ */ new Set());
       }
-      this.externalStyleToComponentsMap.get(path3).add(component);
+      this.externalStyleToComponentsMap.get(path4).add(component);
     }
     this.componentToStylesMap.get(component).add(styleResource);
   }
@@ -31382,11 +31409,11 @@ var StaticInterpreter = class {
     }
   }
   visitBindingElement(node, context) {
-    const path3 = [];
+    const path4 = [];
     let closestDeclaration = node;
     while (import_typescript37.default.isBindingElement(closestDeclaration) || import_typescript37.default.isArrayBindingPattern(closestDeclaration) || import_typescript37.default.isObjectBindingPattern(closestDeclaration)) {
       if (import_typescript37.default.isBindingElement(closestDeclaration)) {
-        path3.unshift(closestDeclaration);
+        path4.unshift(closestDeclaration);
       }
       closestDeclaration = closestDeclaration.parent;
     }
@@ -31394,7 +31421,7 @@ var StaticInterpreter = class {
       return DynamicValue.fromUnknown(node);
     }
     let value = this.visit(closestDeclaration.initializer, context);
-    for (const element2 of path3) {
+    for (const element2 of path4) {
       let key;
       if (import_typescript37.default.isArrayBindingPattern(element2.parent)) {
         key = element2.parent.elements.indexOf(element2);
@@ -31910,6 +31937,31 @@ function removeIdentifierReferences(node, names) {
   return result.transformed[0];
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/common/src/debug_info.mjs
+var path2 = __toESM(require("path"), 1);
+function extractClassDebugInfo(clazz, reflection, rootDirs) {
+  if (!reflection.isClass(clazz)) {
+    return null;
+  }
+  const srcFile = clazz.getSourceFile();
+  const srcFileMaybeRelativePath = computeRelativePathIfPossible(srcFile.fileName, rootDirs);
+  return {
+    type: new WrappedNodeExpr(clazz.name),
+    className: literal(clazz.name.getText()),
+    filePath: srcFileMaybeRelativePath ? literal(srcFileMaybeRelativePath) : null,
+    lineNumber: literal(srcFile.getLineAndCharacterOfPosition(clazz.name.pos).line + 1)
+  };
+}
+function computeRelativePathIfPossible(filePath, rootDirs) {
+  for (const rootDir of rootDirs) {
+    const rel = path2.relative(rootDir, filePath);
+    if (!rel.startsWith("..")) {
+      return rel;
+    }
+  }
+  return null;
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/common/src/references_registry.mjs
 var NoopReferencesRegistry = class {
   add(source, ...references) {
@@ -32011,11 +32063,11 @@ var SemanticDepGraph = class {
     }
     return previousSymbol;
   }
-  getSymbolByName(path3, identifier) {
-    if (!this.files.has(path3)) {
+  getSymbolByName(path4, identifier) {
+    if (!this.files.has(path4)) {
       return null;
     }
-    const file = this.files.get(path3);
+    const file = this.files.get(path4);
     if (!file.has(identifier)) {
       return null;
     }
@@ -34214,9 +34266,9 @@ function isSyntheticReference(ref) {
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/component/src/diagnostics.mjs
 function makeCyclicImportInfo(ref, type, cycle) {
   const name = ref.debugName || "(unknown)";
-  const path3 = cycle.getPath().map((sf) => sf.fileName).join(" -> ");
+  const path4 = cycle.getPath().map((sf) => sf.fileName).join(" -> ");
   const message = `The ${type} '${name}' is used in the template but importing it would create a cycle: `;
-  return makeRelatedInformation(ref.node, message + path3);
+  return makeRelatedInformation(ref.node, message + path4);
 }
 function checkCustomElementSelectorForErrors(selector) {
   if (selector.includes(".") || selector.includes("[") && selector.includes("]")) {
@@ -34985,6 +35037,7 @@ var ComponentDecoratorHandler = class {
         }),
         typeCheckMeta: extractDirectiveTypeCheckMeta(node, inputs, this.reflector),
         classMetadata: this.includeClassMetadata ? extractClassMetadata(node, this.reflector, this.isCore, this.annotateForClosureCompiler, (dec) => transformDecoratorResources(dec, component, styles, template2)) : null,
+        classDebugInfo: extractClassDebugInfo(node, this.reflector, this.rootDirs),
         template: template2,
         providersRequiringFactory,
         viewProvidersRequiringFactory,
@@ -35344,8 +35397,9 @@ var ComponentDecoratorHandler = class {
     const def = compileComponentFromMetadata(meta, pool, makeBindingParser());
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileComponentClassMetadata(analysis.classMetadata, deferrableTypes).toStmt() : null;
+    const debugInfo = analysis.classDebugInfo !== null ? compileClassDebugInfo(analysis.classDebugInfo).toStmt() : null;
     const deferrableImports = this.deferredSymbolTracker.getDeferrableImportDecls();
-    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields, deferrableImports);
+    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields, deferrableImports, debugInfo);
   }
   compilePartial(node, analysis, resolution) {
     if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
@@ -35378,7 +35432,8 @@ var ComponentDecoratorHandler = class {
     const def = compileComponentFromMetadata(meta, pool, makeBindingParser());
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
     const classMetadata = analysis.classMetadata !== null ? compileClassMetadata(analysis.classMetadata).toStmt() : null;
-    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields, null);
+    const debugInfo = analysis.classDebugInfo !== null ? compileClassDebugInfo(analysis.classDebugInfo).toStmt() : null;
+    return compileResults(fac, def, classMetadata, "\u0275cmp", inputTransformFields, null, debugInfo);
   }
   _checkForCyclicImport(importedFile, expr, origin) {
     const imported = resolveImportedFile(this.moduleResolver, importedFile, expr, origin);
@@ -42044,16 +42099,16 @@ var TemplateTypeCheckerImpl = class {
       this.perf.memory(PerfCheckpoint.TtcUpdateProgram);
     });
   }
-  getFileData(path3) {
-    if (!this.state.has(path3)) {
-      this.state.set(path3, {
+  getFileData(path4) {
+    if (!this.state.has(path4)) {
+      this.state.set(path4, {
         hasInlines: false,
         sourceManager: new TemplateSourceManager(),
         isComplete: false,
         shimData: /* @__PURE__ */ new Map()
       });
     }
-    return this.state.get(path3);
+    return this.state.get(path4);
   }
   getSymbolOfNode(node, component) {
     const builder = this.getOrCreateSymbolBuilder(component);
@@ -44246,8 +44301,8 @@ var ChangeTracker = class {
     }
   }
 };
-function normalizePath(path3) {
-  return path3.replace(/\\/g, "/");
+function normalizePath(path4) {
+  return path4.replace(/\\/g, "/");
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/project_tsconfig_paths.mjs
@@ -44296,28 +44351,28 @@ function* allTargetOptions(target) {
 }
 function createHost(tree) {
   return {
-    readFile(path3) {
+    readFile(path4) {
       return __async(this, null, function* () {
-        const data = tree.read(path3);
+        const data = tree.read(path4);
         if (!data) {
           throw new Error("File not found.");
         }
         return import_core16.virtualFs.fileBufferToString(data);
       });
     },
-    writeFile(path3, data) {
+    writeFile(path4, data) {
       return __async(this, null, function* () {
-        return tree.overwrite(path3, data);
+        return tree.overwrite(path4, data);
       });
     },
-    isDirectory(path3) {
+    isDirectory(path4) {
       return __async(this, null, function* () {
-        return !tree.exists(path3) && tree.getDir(path3).subfiles.length > 0;
+        return !tree.exists(path4) && tree.getDir(path4).subfiles.length > 0;
       });
     },
-    isFile(path3) {
+    isFile(path4) {
       return __async(this, null, function* () {
-        return tree.exists(path3);
+        return tree.exists(path4);
       });
     }
   };
@@ -44335,7 +44390,7 @@ var import_path5 = require("path");
 var import_typescript108 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/parse_tsconfig.mjs
-var path2 = __toESM(require("path"), 1);
+var path3 = __toESM(require("path"), 1);
 var import_typescript107 = __toESM(require("typescript"), 1);
 function parseTsconfigFile(tsconfigPath, basePath) {
   const { config } = import_typescript107.default.readConfigFile(tsconfigPath, import_typescript107.default.sys.readFile);
@@ -44345,7 +44400,7 @@ function parseTsconfigFile(tsconfigPath, basePath) {
     readDirectory: import_typescript107.default.sys.readDirectory,
     readFile: import_typescript107.default.sys.readFile
   };
-  if (!path2.isAbsolute(basePath)) {
+  if (!path3.isAbsolute(basePath)) {
     throw Error("Unexpected relative base path has been specified.");
   }
   return import_typescript107.default.parseJsonConfigFileContent(config, parseConfigHost, basePath, {});
@@ -44554,12 +44609,12 @@ var ReferenceResolver = class {
     this._tempOnlyFile = null;
     return results;
   }
-  _readFile(path3) {
+  _readFile(path4) {
     var _a2;
-    if (this._tempOnlyFile !== null && path3 !== this._tempOnlyFile || ((_a2 = this._excludedFiles) == null ? void 0 : _a2.test(path3))) {
+    if (this._tempOnlyFile !== null && path4 !== this._tempOnlyFile || ((_a2 = this._excludedFiles) == null ? void 0 : _a2.test(path4))) {
       return "";
     }
-    return this._host.readFile(path3);
+    return this._host.readFile(path4);
   }
   _getLanguageService() {
     if (!this._languageService) {
@@ -44574,14 +44629,14 @@ var ReferenceResolver = class {
         getCompilationSettings: () => this._program.getTsProgram().getCompilerOptions(),
         getScriptFileNames: () => rootFileNames,
         getScriptVersion: () => "0",
-        getScriptSnapshot: (path3) => {
-          const content = this._readFile(path3);
+        getScriptSnapshot: (path4) => {
+          const content = this._readFile(path4);
           return content ? import_typescript112.default.ScriptSnapshot.fromString(content) : void 0;
         },
         getCurrentDirectory: () => this._basePath,
         getDefaultLibFileName: (options) => import_typescript112.default.getDefaultLibFilePath(options),
-        readFile: (path3) => this._readFile(path3),
-        fileExists: (path3) => this._host.fileExists(path3)
+        readFile: (path4) => this._readFile(path4),
+        fileExists: (path4) => this._host.fileExists(path4)
       }, import_typescript112.default.createDocumentRegistry(), import_typescript112.default.LanguageServiceMode.PartialSemantic);
     }
     return this._languageService;
@@ -44618,11 +44673,11 @@ function findLiteralProperty(literal3, name) {
   return literal3.properties.find((prop) => prop.name && import_typescript112.default.isIdentifier(prop.name) && prop.name.text === name);
 }
 function getRelativeImportPath(fromFile, toFile) {
-  let path3 = (0, import_path6.relative)((0, import_path6.dirname)(fromFile), toFile).replace(/\.ts$/, "");
-  if (!path3.startsWith(".")) {
-    path3 = "./" + path3;
+  let path4 = (0, import_path6.relative)((0, import_path6.dirname)(fromFile), toFile).replace(/\.ts$/, "");
+  if (!path4.startsWith(".")) {
+    path4 = "./" + path4;
   }
-  return normalizePath(path3);
+  return normalizePath(path4);
 }
 function knownInternalAliasRemapper(imports) {
   return imports.map((current) => current.moduleSpecifier === "@angular/common" && current.symbolName === "NgForOf" ? __spreadProps(__spreadValues({}, current), { symbolName: "NgFor" }) : current);

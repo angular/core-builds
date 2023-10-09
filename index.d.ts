@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-0ec66b8
+ * @license Angular v17.0.0-next.7+sha-c2f270c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1026,6 +1026,12 @@ declare interface ChangeDetectorRefInterface extends ChangeDetectorRef {
 declare const CHILD_HEAD = 12;
 
 declare const CHILD_TAIL = 13;
+
+declare interface ClassDebugInfo {
+    className: string;
+    filePath?: string;
+    lineNumber?: number;
+}
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
@@ -11198,6 +11204,11 @@ export declare interface ɵDirectiveDef<T> {
      */
     readonly features: DirectiveDefFeature[] | null;
     /**
+     * Info related to debugging/troubleshooting for this component. This info is only available in
+     * dev mode.
+     */
+    debugInfo: ClassDebugInfo | null;
+    /**
      * Function that will add the host directives to the list of matches during directive matching.
      * Patched onto the definition by the `HostDirectivesFeature`.
      * @param currentDef Definition that has been matched.
@@ -12209,6 +12220,13 @@ export declare function ɵsetAllowDuplicateNgModuleIdsForTest(allowDuplicates: b
 
 
 export declare function ɵsetAlternateWeakRefImpl(impl: unknown): void;
+
+/**
+ * Sets the debug info for an Angular class.
+ *
+ * This runtime is guarded by ngDevMode flag.
+ */
+export declare function ɵsetClassDebugInfo(type: Type<any>, debugInfo: ClassDebugInfo): void;
 
 /**
  * Adds decorator, constructor, and property metadata to a given type via static metadata fields
@@ -13357,10 +13375,18 @@ export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any
  *     block.
  * @param placeholderConfigIndex Index in the constants array of the configuration of the
  *     placeholder block.
+ * @param enableTimerScheduling Function that enables timer-related scheduling if `after`
+ *     or `minimum` parameters are setup on the `@loading` or `@placeholder` blocks.
  *
  * @codeGenApi
  */
-export declare function ɵɵdefer(index: number, primaryTmplIndex: number, dependencyResolverFn?: DependencyResolverFn | null, loadingTmplIndex?: number | null, placeholderTmplIndex?: number | null, errorTmplIndex?: number | null, loadingConfigIndex?: number | null, placeholderConfigIndex?: number | null): void;
+export declare function ɵɵdefer(index: number, primaryTmplIndex: number, dependencyResolverFn?: DependencyResolverFn | null, loadingTmplIndex?: number | null, placeholderTmplIndex?: number | null, errorTmplIndex?: number | null, loadingConfigIndex?: number | null, placeholderConfigIndex?: number | null, enableTimerScheduling?: typeof ɵɵdeferEnableTimerScheduling): void;
+
+/**
+ * Enables timer-related scheduling if `after` or `minimum` parameters are setup
+ * on the `@loading` or `@placeholder` blocks.
+ */
+export declare function ɵɵdeferEnableTimerScheduling(tView: TView, tDetails: TDeferBlockDetails, placeholderConfigIndex?: number | null, loadingConfigIndex?: number | null): void;
 
 /**
  * Creates runtime data structures for the `on hover` deferred trigger.

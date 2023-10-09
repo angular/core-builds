@@ -2182,6 +2182,9 @@ var Identifiers = _Identifiers;
   _Identifiers.deferPrefetchOnViewport = { name: "\u0275\u0275deferPrefetchOnViewport", moduleName: CORE };
 })();
 (() => {
+  _Identifiers.deferEnableTimerScheduling = { name: "\u0275\u0275deferEnableTimerScheduling", moduleName: CORE };
+})();
+(() => {
   _Identifiers.conditional = { name: "\u0275\u0275conditional", moduleName: CORE };
 })();
 (() => {
@@ -2507,6 +2510,9 @@ var Identifiers = _Identifiers;
 })();
 (() => {
   _Identifiers.setClassMetadataAsync = { name: "\u0275setClassMetadataAsync", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.setClassDebugInfo = { name: "\u0275setClassDebugInfo", moduleName: CORE };
 })();
 (() => {
   _Identifiers.queryRefresh = { name: "\u0275\u0275queryRefresh", moduleName: CORE };
@@ -20989,7 +20995,8 @@ var TemplateDefinitionBuilder = class {
       literal(placeholderIndex),
       literal(errorIndex),
       (loadingConsts == null ? void 0 : loadingConsts.length) ? this.addToConsts(literalArr(loadingConsts)) : TYPED_NULL_EXPR,
-      placeholderConsts ? this.addToConsts(placeholderConsts) : TYPED_NULL_EXPR
+      placeholderConsts ? this.addToConsts(placeholderConsts) : TYPED_NULL_EXPR,
+      (loadingConsts == null ? void 0 : loadingConsts.length) || placeholderConsts ? importExpr(Identifiers.deferEnableTimerScheduling) : TYPED_NULL_EXPR
     ]));
     this.createDeferTriggerInstructions(deferredIndex, triggers, metadata, false);
     this.createDeferTriggerInstructions(deferredIndex, prefetchTriggers, metadata, true);
@@ -23634,7 +23641,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-0ec66b8");
+var VERSION2 = new Version("17.0.0-next.7+sha-c2f270c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
