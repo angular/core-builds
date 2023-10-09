@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-023a181
+ * @license Angular v17.0.0-next.7+sha-422e858
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10361,7 +10361,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-023a181');
+const VERSION = new Version('17.0.0-next.7+sha-422e858');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19825,6 +19825,7 @@ function applyDeferBlockStateToDom(newState, lDetails, lContainer, hostLView, tN
         const dehydratedView = findMatchingDehydratedView(lContainer, tNode.tView.ssrId);
         const embeddedLView = createAndRenderEmbeddedLView(hostLView, tNode, null, { dehydratedView });
         addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(tNode, dehydratedView));
+        markViewDirty(embeddedLView);
     }
 }
 /**

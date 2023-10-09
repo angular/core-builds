@@ -24331,7 +24331,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-023a181");
+var VERSION2 = new Version("17.0.0-next.7+sha-422e858");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25348,7 +25348,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-422e858"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25419,7 +25419,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-422e858"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25651,7 +25651,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-422e858"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25674,7 +25674,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-422e858"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25712,7 +25712,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-422e858"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25736,7 +25736,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-422e858"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25771,7 +25771,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-023a181"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-422e858"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25788,7 +25788,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.7+sha-023a181");
+var VERSION3 = new Version("17.0.0-next.7+sha-422e858");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -40049,18 +40049,29 @@ var TcbSwitchOp = class extends TcbOp {
     return false;
   }
   execute() {
-    const clauses = [];
-    for (const current of this.block.cases) {
-      const breakStatement = import_typescript87.default.factory.createBreakStatement();
-      const clauseScope = Scope2.forNodes(this.tcb, this.scope, null, current.children, null);
-      if (current.expression === null) {
-        clauses.push(import_typescript87.default.factory.createDefaultClause([...clauseScope.render(), breakStatement]));
-      } else {
-        clauses.push(import_typescript87.default.factory.createCaseClause(tcbExpression(current.expression, this.tcb, clauseScope), [...clauseScope.render(), breakStatement]));
-      }
+    const expression = tcbExpression(this.block.expression, this.tcb, this.scope);
+    markIgnoreDiagnostics(expression);
+    const root = this.generateCase(0, expression, null);
+    if (root !== void 0) {
+      this.scope.addStatement(root);
     }
-    this.scope.addStatement(import_typescript87.default.factory.createSwitchStatement(tcbExpression(this.block.expression, this.tcb, this.scope), import_typescript87.default.factory.createCaseBlock(clauses)));
     return null;
+  }
+  generateCase(index, switchValue, defaultCase) {
+    if (index >= this.block.cases.length) {
+      if (defaultCase !== null) {
+        const defaultScope = Scope2.forNodes(this.tcb, this.scope, null, defaultCase.children, null);
+        return import_typescript87.default.factory.createBlock(defaultScope.render());
+      }
+      return void 0;
+    }
+    const current = this.block.cases[index];
+    if (current.expression === null) {
+      return this.generateCase(index + 1, switchValue, current);
+    }
+    const caseScope = Scope2.forNodes(this.tcb, this.scope, null, current.children, null);
+    const caseValue = tcbExpression(current.expression, this.tcb, caseScope);
+    return import_typescript87.default.factory.createIfStatement(import_typescript87.default.factory.createBinaryExpression(switchValue, import_typescript87.default.SyntaxKind.EqualsEqualsEqualsToken, caseValue), import_typescript87.default.factory.createBlock(caseScope.render()), this.generateCase(index + 1, switchValue, defaultCase));
   }
 };
 var TcbForOfOp = class extends TcbOp {
@@ -40267,7 +40278,7 @@ var Scope2 = class {
     } else if (node instanceof IfBlock) {
       this.opQueue.push(new TcbIfOp(this.tcb, this, node));
     } else if (node instanceof SwitchBlock) {
-      this.opQueue.push(new TcbSwitchOp(this.tcb, this, node));
+      this.opQueue.push(new TcbExpressionOp(this.tcb, this, node.expression), new TcbSwitchOp(this.tcb, this, node));
     } else if (node instanceof ForLoopBlock) {
       this.opQueue.push(new TcbForOfOp(this.tcb, this, node));
       node.empty && this.appendChildren(node.empty);
