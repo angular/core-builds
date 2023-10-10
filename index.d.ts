@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-965ce5a
+ * @license Angular v17.0.0-next.7+sha-11588a1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12179,7 +12179,7 @@ export declare const enum ɵRuntimeErrorCode {
     MISSING_SSR_CONTENT_INTEGRITY_MARKER = -507,
     SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
     REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
-    ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT = 602,
+    ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT = -602,
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,

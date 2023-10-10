@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.0.0-next.7+sha-965ce5a
+ * @license Angular v17.0.0-next.7+sha-11588a1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, createWatch as createWatch$1, getActiveConsumer as getActiveConsumer$1 } from '@angular/core/primitives/signals';
+import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, Observable, merge as merge$1, BehaviorSubject, of } from 'rxjs';
 import { share, switchMap, distinctUntilChanged, first } from 'rxjs/operators';
 
@@ -10418,7 +10418,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-965ce5a');
+const VERSION = new Version('17.0.0-next.7+sha-11588a1');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10438,6 +10438,64 @@ const VERSION = new Version('17.0.0-next.7+sha-965ce5a');
 // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
 // - mod2.injector.get(token, default)
 const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
+
+/**
+ * Checks if the given `value` is a reactive `Signal`.
+ */
+function isSignal(value) {
+    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
+}
+
+/**
+ * Create a computed `Signal` which derives a reactive value from an expression.
+ */
+function computed(computation, options) {
+    const getter = createComputed$1(computation);
+    if (options?.equal) {
+        getter[SIGNAL$1].equal = options.equal;
+    }
+    return getter;
+}
+
+/**
+ * Create a `Signal` that can be set or updated directly.
+ */
+function signal(initialValue, options) {
+    const signalFn = createSignal$1(initialValue);
+    const node = signalFn[SIGNAL$1];
+    if (options?.equal) {
+        node.equal = options.equal;
+    }
+    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
+    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
+    signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
+    return signalFn;
+}
+function signalAsReadonlyFn() {
+    const node = this[SIGNAL$1];
+    if (node.readonlyFn === undefined) {
+        const readonlyFn = () => this();
+        readonlyFn[SIGNAL$1] = node;
+        node.readonlyFn = readonlyFn;
+    }
+    return node.readonlyFn;
+}
+
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ */
+function untracked(nonReactiveReadsFn) {
+    const prevConsumer = setActiveConsumer$1(null);
+    // We are not trying to catch any particular errors here, just making sure that the consumers
+    // stack is restored in case of errors.
+    try {
+        return nonReactiveReadsFn();
+    }
+    finally {
+        setActiveConsumer$1(prevConsumer);
+    }
+}
 
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 function wrappedError(message, originalError) {
@@ -10532,6 +10590,183 @@ class NodeInjectorDestroyRef extends DestroyRef {
 function injectDestroyRef() {
     return new NodeInjectorDestroyRef(getLView());
 }
+
+/**
+ * Asserts that the current stack frame is not within a reactive context. Useful
+ * to disallow certain code from running inside a reactive context (see {@link toSignal}).
+ *
+ * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @publicApi
+ */
+function assertNotInReactiveContext(debugFn, extraContext) {
+    // Taking a `Function` instead of a string name here prevents the un-minified name of the function
+    // from being retained in the bundle regardless of minification.
+    if (getActiveConsumer$1() !== null) {
+        throw new RuntimeError(-602 /* RuntimeErrorCode.ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT */, ngDevMode &&
+            `${debugFn.name}() cannot be called from within a reactive context.${extraContext ? ` ${extraContext}` : ''}`);
+    }
+}
+
+/**
+ * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
+ * injector.
+ */
+const APP_EFFECT_SCHEDULER = new InjectionToken('', {
+    providedIn: 'root',
+    factory: () => inject(EffectScheduler),
+});
+/**
+ * A scheduler which manages the execution of effects.
+ */
+class EffectScheduler {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: EffectScheduler,
+        providedIn: 'root',
+        factory: () => new ZoneAwareMicrotaskScheduler(),
+    }); }
+}
+/**
+ * An `EffectScheduler` which is capable of queueing scheduled effects per-zone, and flushing them
+ * as an explicit operation.
+ */
+class ZoneAwareQueueingScheduler {
+    constructor() {
+        this.queuedEffectCount = 0;
+        this.queues = new Map();
+    }
+    scheduleEffect(handle) {
+        const zone = handle.creationZone;
+        if (!this.queues.has(zone)) {
+            this.queues.set(zone, new Set());
+        }
+        const queue = this.queues.get(zone);
+        if (queue.has(handle)) {
+            return;
+        }
+        this.queuedEffectCount++;
+        queue.add(handle);
+    }
+    /**
+     * Run all scheduled effects.
+     *
+     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
+     * ordering guarantee between effects scheduled in different zones.
+     */
+    flush() {
+        while (this.queuedEffectCount > 0) {
+            for (const [zone, queue] of this.queues) {
+                // `zone` here must be defined.
+                if (zone === null) {
+                    this.flushQueue(queue);
+                }
+                else {
+                    zone.run(() => this.flushQueue(queue));
+                }
+            }
+        }
+    }
+    flushQueue(queue) {
+        for (const handle of queue) {
+            queue.delete(handle);
+            this.queuedEffectCount--;
+            // TODO: what happens if this throws an error?
+            handle.run();
+        }
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: ZoneAwareQueueingScheduler,
+        providedIn: 'root',
+        factory: () => new ZoneAwareQueueingScheduler(),
+    }); }
+}
+/**
+ * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
+ * when.
+ */
+class ZoneAwareMicrotaskScheduler {
+    constructor() {
+        this.hasQueuedFlush = false;
+        this.delegate = new ZoneAwareQueueingScheduler();
+        this.flushTask = () => {
+            // Leave `hasQueuedFlush` as `true` so we don't queue another microtask if more effects are
+            // scheduled during flushing. The flush of the `ZoneAwareQueueingScheduler` delegate is
+            // guaranteed to empty the queue.
+            this.delegate.flush();
+            this.hasQueuedFlush = false;
+            // This is a variable initialization, not a method.
+            // tslint:disable-next-line:semicolon
+        };
+    }
+    scheduleEffect(handle) {
+        this.delegate.scheduleEffect(handle);
+        if (!this.hasQueuedFlush) {
+            queueMicrotask(this.flushTask);
+            this.hasQueuedFlush = true;
+        }
+    }
+}
+/**
+ * Core reactive node for an Angular effect.
+ *
+ * `EffectHandle` combines the reactive graph's `Watch` base node for effects with the framework's
+ * scheduling abstraction (`EffectScheduler`) as well as automatic cleanup via `DestroyRef` if
+ * available/requested.
+ */
+class EffectHandle {
+    constructor(scheduler, effectFn, creationZone, destroyRef, errorHandler, allowSignalWrites) {
+        this.scheduler = scheduler;
+        this.effectFn = effectFn;
+        this.creationZone = creationZone;
+        this.errorHandler = errorHandler;
+        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
+        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
+    }
+    runEffect(onCleanup) {
+        try {
+            this.effectFn(onCleanup);
+        }
+        catch (err) {
+            this.errorHandler?.handleError(err);
+        }
+    }
+    run() {
+        this.watcher.run();
+    }
+    schedule() {
+        this.scheduler.scheduleEffect(this);
+    }
+    notify() {
+        this.watcher.notify();
+    }
+    destroy() {
+        this.watcher.destroy();
+        this.unregisterOnDestroy?.();
+        // Note: if the effect is currently scheduled, it's not un-scheduled, and so the scheduler will
+        // retain a reference to it. Attempting to execute it will be a no-op.
+    }
+}
+/**
+ * Create a global `Effect` for the given reactive function.
+ */
+function effect(effectFn, options) {
+    ngDevMode &&
+        assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
+            'effect inside the component constructor.');
+    !options?.injector && assertInInjectionContext(effect);
+    const injector = options?.injector ?? inject(Injector);
+    const errorHandler = injector.get(ErrorHandler, null, { optional: true });
+    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
+    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, errorHandler, options?.allowSignalWrites ?? false);
+    // Effects start dirty.
+    handle.notify();
+    return handle;
+}
+
+// clang-format off
+// clang-format on
 
 /// <reference types="rxjs" />
 class EventEmitter_ extends Subject {
@@ -11213,6 +11448,9 @@ var AfterRenderPhase;
  * @developerPreview
  */
 function afterRender(callback, options) {
+    ngDevMode &&
+        assertNotInReactiveContext(afterRender, 'Call `afterRender` outside of a reactive context. For example, schedule the render ' +
+            'callback inside the component constructor`.');
     !options && assertInInjectionContext(afterRender);
     const injector = options?.injector ?? inject(Injector);
     if (!isPlatformBrowser(injector)) {
@@ -28923,7 +29161,7 @@ function logLazyLCPWarning(src) {
 }
 function logOversizedImageWarning(src) {
     console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} has intrinsic file dimensions much larger than its ` +
-        `rendered size. This can ` +
+        `rendered size. This can negatively impact application loading performance. ` +
         `For more information about addressing or disabling this warning, see ` +
         `https://angular.io/errors/NG2965`));
 }
@@ -34333,238 +34571,6 @@ function ɵɵngDeclareNgModule(decl) {
 function ɵɵngDeclarePipe(decl) {
     const compiler = getCompilerFacade({ usage: 1 /* JitCompilerUsage.PartialDeclaration */, kind: 'pipe', type: decl.type });
     return compiler.compilePipeDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵpipe.js`, decl);
-}
-
-// clang-format off
-// clang-format on
-
-/**
- * Checks if the given `value` is a reactive `Signal`.
- */
-function isSignal(value) {
-    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
-}
-
-/**
- * Create a computed `Signal` which derives a reactive value from an expression.
- */
-function computed(computation, options) {
-    const getter = createComputed$1(computation);
-    if (options?.equal) {
-        getter[SIGNAL$1].equal = options.equal;
-    }
-    return getter;
-}
-
-/**
- * Create a `Signal` that can be set or updated directly.
- */
-function signal(initialValue, options) {
-    const signalFn = createSignal$1(initialValue);
-    const node = signalFn[SIGNAL$1];
-    if (options?.equal) {
-        node.equal = options.equal;
-    }
-    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
-    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
-    signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
-    return signalFn;
-}
-function signalAsReadonlyFn() {
-    const node = this[SIGNAL$1];
-    if (node.readonlyFn === undefined) {
-        const readonlyFn = () => this();
-        readonlyFn[SIGNAL$1] = node;
-        node.readonlyFn = readonlyFn;
-    }
-    return node.readonlyFn;
-}
-
-/**
- * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
- * can, optionally, return a value.
- */
-function untracked(nonReactiveReadsFn) {
-    const prevConsumer = setActiveConsumer$1(null);
-    // We are not trying to catch any particular errors here, just making sure that the consumers
-    // stack is restored in case of errors.
-    try {
-        return nonReactiveReadsFn();
-    }
-    finally {
-        setActiveConsumer$1(prevConsumer);
-    }
-}
-
-/**
- * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
- * injector.
- */
-const APP_EFFECT_SCHEDULER = new InjectionToken('', {
-    providedIn: 'root',
-    factory: () => inject(EffectScheduler),
-});
-/**
- * A scheduler which manages the execution of effects.
- */
-class EffectScheduler {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: EffectScheduler,
-        providedIn: 'root',
-        factory: () => new ZoneAwareMicrotaskScheduler(),
-    }); }
-}
-/**
- * An `EffectScheduler` which is capable of queueing scheduled effects per-zone, and flushing them
- * as an explicit operation.
- */
-class ZoneAwareQueueingScheduler {
-    constructor() {
-        this.queuedEffectCount = 0;
-        this.queues = new Map();
-    }
-    scheduleEffect(handle) {
-        const zone = handle.creationZone;
-        if (!this.queues.has(zone)) {
-            this.queues.set(zone, new Set());
-        }
-        const queue = this.queues.get(zone);
-        if (queue.has(handle)) {
-            return;
-        }
-        this.queuedEffectCount++;
-        queue.add(handle);
-    }
-    /**
-     * Run all scheduled effects.
-     *
-     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
-     * ordering guarantee between effects scheduled in different zones.
-     */
-    flush() {
-        while (this.queuedEffectCount > 0) {
-            for (const [zone, queue] of this.queues) {
-                // `zone` here must be defined.
-                if (zone === null) {
-                    this.flushQueue(queue);
-                }
-                else {
-                    zone.run(() => this.flushQueue(queue));
-                }
-            }
-        }
-    }
-    flushQueue(queue) {
-        for (const handle of queue) {
-            queue.delete(handle);
-            this.queuedEffectCount--;
-            // TODO: what happens if this throws an error?
-            handle.run();
-        }
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: ZoneAwareQueueingScheduler,
-        providedIn: 'root',
-        factory: () => new ZoneAwareQueueingScheduler(),
-    }); }
-}
-/**
- * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
- * when.
- */
-class ZoneAwareMicrotaskScheduler {
-    constructor() {
-        this.hasQueuedFlush = false;
-        this.delegate = new ZoneAwareQueueingScheduler();
-        this.flushTask = () => {
-            // Leave `hasQueuedFlush` as `true` so we don't queue another microtask if more effects are
-            // scheduled during flushing. The flush of the `ZoneAwareQueueingScheduler` delegate is
-            // guaranteed to empty the queue.
-            this.delegate.flush();
-            this.hasQueuedFlush = false;
-            // This is a variable initialization, not a method.
-            // tslint:disable-next-line:semicolon
-        };
-    }
-    scheduleEffect(handle) {
-        this.delegate.scheduleEffect(handle);
-        if (!this.hasQueuedFlush) {
-            queueMicrotask(this.flushTask);
-            this.hasQueuedFlush = true;
-        }
-    }
-}
-/**
- * Core reactive node for an Angular effect.
- *
- * `EffectHandle` combines the reactive graph's `Watch` base node for effects with the framework's
- * scheduling abstraction (`EffectScheduler`) as well as automatic cleanup via `DestroyRef` if
- * available/requested.
- */
-class EffectHandle {
-    constructor(scheduler, effectFn, creationZone, destroyRef, errorHandler, allowSignalWrites) {
-        this.scheduler = scheduler;
-        this.effectFn = effectFn;
-        this.creationZone = creationZone;
-        this.errorHandler = errorHandler;
-        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
-        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
-    }
-    runEffect(onCleanup) {
-        try {
-            this.effectFn(onCleanup);
-        }
-        catch (err) {
-            this.errorHandler?.handleError(err);
-        }
-    }
-    run() {
-        this.watcher.run();
-    }
-    schedule() {
-        this.scheduler.scheduleEffect(this);
-    }
-    notify() {
-        this.watcher.notify();
-    }
-    destroy() {
-        this.watcher.destroy();
-        this.unregisterOnDestroy?.();
-        // Note: if the effect is currently scheduled, it's not un-scheduled, and so the scheduler will
-        // retain a reference to it. Attempting to execute it will be a no-op.
-    }
-}
-/**
- * Create a global `Effect` for the given reactive function.
- */
-function effect(effectFn, options) {
-    !options?.injector && assertInInjectionContext(effect);
-    const injector = options?.injector ?? inject(Injector);
-    const errorHandler = injector.get(ErrorHandler, null, { optional: true });
-    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, errorHandler, options?.allowSignalWrites ?? false);
-    // Effects start dirty.
-    handle.notify();
-    return handle;
-}
-
-/**
- * Asserts that the current stack frame is not within a reactive context. Useful
- * to disallow certain code from running inside a reactive context (see {@link toSignal}).
- *
- * @param debugFn a reference to the function making the assertion (used for the error message).
- *
- * @publicApi
- */
-function assertNotInReactiveContext(debugFn, extraContext) {
-    // Taking a `Function` instead of a string name here prevents the unminified name of the function
-    // from being retained in the bundle regardless of minification.
-    if (getActiveConsumer$1() !== null) {
-        throw new RuntimeError(602 /* RuntimeErrorCode.ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT */, ngDevMode &&
-            `${debugFn.name}() cannot be called from within a reactive context.${extraContext ? ` ${extraContext}` : ''}`);
-    }
 }
 
 // clang-format off
