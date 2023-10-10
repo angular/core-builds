@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-da056a1
+ * @license Angular v17.0.0-next.7+sha-ddd7212
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1079,6 +1079,7 @@ declare interface ClassDebugInfo {
     className: string;
     filePath?: string;
     lineNumber?: number;
+    forbidOrphanRendering?: boolean;
 }
 
 /**
@@ -2655,6 +2656,8 @@ declare class DepsTracker implements DepsTrackerApi {
     /** @override */
     getStandaloneComponentScope(type: ɵComponentType<any>, rawImports?: RawScopeInfoFromDecorator[]): StandaloneComponentScope;
     private computeStandaloneComponentScope;
+    /** @override */
+    isOrphanComponent(cmp: Type<any>): boolean;
 }
 
 /**
@@ -2710,6 +2713,11 @@ declare interface DepsTrackerApi {
      * `clearScopeCacheFor` method.
      */
     getStandaloneComponentScope(type: ɵComponentType<any>, rawImports: (Type<any> | (() => Type<any>))[]): StandaloneComponentScope;
+    /**
+     * Checks if the NgModule declaring the component is not loaded into the browser yet. Always
+     * returns false for standalone components.
+     */
+    isOrphanComponent(cmp: ɵComponentType<any>): boolean;
 }
 
 /**

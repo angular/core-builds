@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-da056a1
+ * @license Angular v17.0.0-next.7+sha-ddd7212
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6892,7 +6892,9 @@ class DepsTracker {
         }
         else {
             if (!this.ownerNgModule.has(type)) {
-                throw new RuntimeError(1001 /* RuntimeErrorCode.RUNTIME_DEPS_ORPHAN_COMPONENT */, `Orphan component found! Trying to render the component ${debugStringifyTypeForError(type)} without first loading the NgModule that declares it. It is recommended to make this component standalone in order to avoid such confusing cases. If this is not possible now, please import the component's NgModule in the NgModule or the standalone component in which you are trying to render this component. Also make sure the way the app is bundled and served always includes the component's NgModule before the component.`);
+                // This component is orphan! No need to handle the error since the component rendering
+                // pipeline (e.g., view_container_ref) will check for this error based on configs.
+                return { dependencies: [] };
             }
             const scope = this.getNgModuleScope(this.ownerNgModule.get(type));
             if (scope.compilation.isPoisoned) {
@@ -7064,6 +7066,15 @@ class DepsTracker {
             }
         }
         return ans;
+    }
+    /** @override */
+    isOrphanComponent(cmp) {
+        const def = getComponentDef(cmp);
+        if (!def || def.standalone) {
+            return false;
+        }
+        this.resolveNgModulesDecls();
+        return !this.ownerNgModule.has(cmp);
     }
 }
 function addSet(sourceSet, targetSet) {
@@ -10418,7 +10429,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-da056a1');
+const VERSION = new Version('17.0.0-next.7+sha-ddd7212');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14160,6 +14171,13 @@ class ComponentFactory extends ComponentFactory$1 {
         this.isBoundToModule = !!ngModule;
     }
     create(injector, projectableNodes, rootSelectorOrNode, environmentInjector) {
+        // Check if the component is orphan
+        if (ngDevMode && (typeof ngJitMode === 'undefined' || ngJitMode) &&
+            this.componentDef.debugInfo?.forbidOrphanRendering) {
+            if (depsTracker.isOrphanComponent(this.componentType)) {
+                throw new RuntimeError(1001 /* RuntimeErrorCode.RUNTIME_DEPS_ORPHAN_COMPONENT */, `Orphan component found! Trying to render the component ${debugStringifyTypeForError(this.componentType)} without first loading the NgModule that declares it. It is recommended to make this component standalone in order to avoid this error. If this is not possible now, import the component's NgModule in the appropriate NgModule, or the standalone component in which you are trying to render this component. If this is a lazy import, load the NgModule lazily as well and use its module injector.`);
+            }
+        }
         environmentInjector = environmentInjector || this.ngModule;
         let realEnvironmentInjector = environmentInjector instanceof EnvironmentInjector ?
             environmentInjector :
