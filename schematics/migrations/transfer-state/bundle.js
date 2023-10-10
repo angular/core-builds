@@ -60,12 +60,12 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/compiler-options/index.mjs
-var compiler_options_exports = {};
-__export(compiler_options_exports, {
-  default: () => compiler_options_default
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/transfer-state/index.mjs
+var transfer_state_exports = {};
+__export(transfer_state_exports, {
+  default: () => transfer_state_default
 });
-module.exports = __toCommonJS(compiler_options_exports);
+module.exports = __toCommonJS(transfer_state_exports);
 var import_schematics = require("@angular-devkit/schematics");
 var import_path3 = require("path");
 
@@ -203,7 +203,7 @@ function canMigrateFile(basePath, sourceFile, program) {
   return !(0, import_path.relative)(basePath, sourceFile.fileName).startsWith("..");
 }
 
-// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/compiler-options/util.mjs
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/transfer-state/utils.mjs
 var import_typescript7 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/change_tracker.mjs
@@ -454,10 +454,6 @@ function normalizePath(path2) {
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/imports.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
-function getImportSpecifier(sourceFile, moduleName, specifierName) {
-  var _a;
-  return (_a = getImportSpecifiers(sourceFile, moduleName, [specifierName])[0]) != null ? _a : null;
-}
 function getImportSpecifiers(sourceFile, moduleName, specifierNames) {
   var _a;
   const matches = [];
@@ -476,6 +472,11 @@ function getImportSpecifiers(sourceFile, moduleName, specifierNames) {
     }
   }
   return matches;
+}
+function removeSymbolFromNamedImports(node, symbol) {
+  return import_typescript5.default.factory.updateNamedImports(node, [
+    ...node.elements.filter((current) => current !== symbol)
+  ]);
 }
 function findImportSpecifier(nodes, specifierName) {
   return nodes.find((element) => {
@@ -497,60 +498,69 @@ function closestNode(node, predicate) {
   return null;
 }
 
-// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/compiler-options/util.mjs
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/transfer-state/utils.mjs
+var symbolsToUpdate = /* @__PURE__ */ new Set(["makeStateKey", "StateKey", "TransferState"]);
+var platformBrowserModule = "@angular/platform-browser";
 var coreModule = "@angular/core";
-var compilerOptionsType = "CompilerOptions";
-var deletedIdentifiers = /* @__PURE__ */ new Set(["useJit", "missingTranslation"]);
 function migrateFile(sourceFile, rewriteFn) {
-  var _a;
-  const compilerOptionsImport = getImportSpecifier(sourceFile, coreModule, compilerOptionsType);
-  if (compilerOptionsImport === null) {
+  const exposedImports = getImportSpecifiers(sourceFile, platformBrowserModule, [...symbolsToUpdate]);
+  if (exposedImports.length === 0) {
     return;
   }
-  const changeTracker = new ChangeTracker(import_typescript7.default.createPrinter());
-  removeIdentifiers(sourceFile, changeTracker);
+  migrateImports(sourceFile, rewriteFn);
+}
+function migrateImports(sourceFile, rewriteFn) {
+  var _a, _b, _c;
+  let changeTracker = new ChangeTracker(import_typescript7.default.createPrinter());
+  const updatedImports = /* @__PURE__ */ new Map();
+  const addedImports = new Array();
+  const importSpecifiers = getImportSpecifiers(sourceFile, platformBrowserModule, [...symbolsToUpdate]);
+  for (const importSpecifier of importSpecifiers) {
+    const namedImports = closestNode(importSpecifier, import_typescript7.default.isNamedImports);
+    const importToUpdate = (_a = updatedImports.get(namedImports)) != null ? _a : namedImports;
+    const rewrittenNamedImports = removeSymbolFromNamedImports(importToUpdate, importSpecifier);
+    updatedImports.set(namedImports, rewrittenNamedImports);
+    addedImports.push(importSpecifier.name.getText());
+  }
+  for (const [originalNode, rewrittenNode] of updatedImports.entries()) {
+    if (rewrittenNode.elements.length > 0) {
+      changeTracker.replaceNode(originalNode, rewrittenNode);
+    } else {
+      const importDeclaration = originalNode.parent.parent;
+      changeTracker.removeNode(importDeclaration);
+    }
+  }
   for (const changesInFile of changeTracker.recordChanges().values()) {
     for (const change of changesInFile) {
-      rewriteFn(change.start, (_a = change.removeLength) != null ? _a : 0, change.text);
+      rewriteFn(change.start, (_b = change.removeLength) != null ? _b : 0, change.text);
+    }
+  }
+  changeTracker.clearChanges();
+  for (const i of addedImports) {
+    changeTracker.addImport(sourceFile, i, coreModule, null, true);
+  }
+  for (const changesInFile of changeTracker.recordChanges().values()) {
+    for (const change of changesInFile) {
+      rewriteFn(change.start, (_c = change.removeLength) != null ? _c : 0, change.text);
     }
   }
 }
-function removeIdentifiers(sourceFile, changeTracker) {
-  const missingTranslationStrategyImport = getImportSpecifier(sourceFile, coreModule, "MissingTranslationStrategy");
-  const namedImports = missingTranslationStrategyImport ? closestNode(missingTranslationStrategyImport, import_typescript7.default.isNamedImports) : null;
-  const visitNode = (node) => {
-    var _a;
-    if (import_typescript7.default.isVariableDeclaration(node) && ((_a = node.type) == null ? void 0 : _a.getText()) !== compilerOptionsType) {
-      return;
-    }
-    if (import_typescript7.default.isIdentifier(node) && deletedIdentifiers.has(node.text)) {
-      changeTracker.removeNode(node.parent);
-      if (node.text === "missingTranslation") {
-        if (namedImports && missingTranslationStrategyImport) {
-          changeTracker.removeNode(missingTranslationStrategyImport);
-        }
-      }
-    }
-    import_typescript7.default.forEachChild(node, visitNode);
-  };
-  import_typescript7.default.forEachChild(sourceFile, visitNode);
-}
 
-// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/compiler-options/index.mjs
-function compiler_options_default() {
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/transfer-state/index.mjs
+function transfer_state_default() {
   return (tree) => __async(this, null, function* () {
     const { buildPaths, testPaths } = yield getProjectTsConfigPaths(tree);
     const basePath = process.cwd();
     const allPaths = [...buildPaths, ...testPaths];
     if (!allPaths.length) {
-      throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the guard and resolve interfaces migration.");
+      throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the transfer state migration.");
     }
     for (const tsconfigPath of allPaths) {
-      runGuardAndResolveInterfacesMigration(tree, tsconfigPath, basePath);
+      runMigration(tree, tsconfigPath, basePath);
     }
   });
 }
-function runGuardAndResolveInterfacesMigration(tree, tsconfigPath, basePath) {
+function runMigration(tree, tsconfigPath, basePath) {
   const program = createMigrationProgram(tree, tsconfigPath, basePath);
   const sourceFiles = program.getSourceFiles().filter((sourceFile) => canMigrateFile(basePath, sourceFile, program));
   for (const sourceFile of sourceFiles) {

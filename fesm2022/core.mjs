@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-1934524
+ * @license Angular v17.0.0-next.7+sha-965ce5a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10418,7 +10418,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-1934524');
+const VERSION = new Version('17.0.0-next.7+sha-965ce5a');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29178,7 +29178,35 @@ function handleInjectEvent(context, data) {
         instantiatedTokenToDependencies.set(context.token, []);
     }
     const { token, value, flags } = data;
-    instantiatedTokenToDependencies.get(context.token).push({ token, value, flags });
+    assertDefined(context.token, 'Injector profiler context token is undefined.');
+    const dependencies = instantiatedTokenToDependencies.get(context.token);
+    assertDefined(dependencies, 'Could not resolve dependencies for token.');
+    if (context.injector instanceof NodeInjector) {
+        dependencies.push({ token, value, flags, injectedIn: getNodeInjectorContext(context.injector) });
+    }
+    else {
+        dependencies.push({ token, value, flags });
+    }
+}
+/**
+ *
+ * Returns the LView and TNode associated with a NodeInjector. Returns undefined if the injector
+ * is not a NodeInjector.
+ *
+ * @param injector
+ * @returns {lView: LView, tNode: TNode}|undefined
+ */
+function getNodeInjectorContext(injector) {
+    if (!(injector instanceof NodeInjector)) {
+        throwError('getNodeInjectorContext must be called with a NodeInjector');
+    }
+    const lView = getNodeInjectorLView(injector);
+    const tNode = getNodeInjectorTNode(injector);
+    if (tNode === null) {
+        return;
+    }
+    assertTNodeForLView(tNode, lView);
+    return { lView, tNode };
 }
 /**
  *
@@ -29307,14 +29335,10 @@ function getDependenciesFromInjectable(injector, token) {
     if (instance === null) {
         throw new Error(`Unable to determine instance of ${token} in given injector`);
     }
-    let diResolver = injector;
-    if (injector instanceof NodeInjector) {
-        diResolver = getNodeInjectorLView(injector);
-    }
-    const { resolverToTokenToDependencies } = getFrameworkDIDebugData();
-    let dependencies = resolverToTokenToDependencies.get(diResolver)?.get?.(token) ?? [];
+    const unformattedDependencies = getDependenciesForTokenInInjector(token, injector);
     const resolutionPath = getInjectorResolutionPath(injector);
-    dependencies = dependencies.map(dep => {
+    const dependencies = unformattedDependencies.map(dep => {
+        // convert injection flags to booleans
         const flags = dep.flags;
         dep.flags = {
             optional: (8 /* InternalInjectFlags.Optional */ & flags) === 8 /* InternalInjectFlags.Optional */,
@@ -29322,6 +29346,7 @@ function getDependenciesFromInjectable(injector, token) {
             self: (2 /* InternalInjectFlags.Self */ & flags) === 2 /* InternalInjectFlags.Self */,
             skipSelf: (4 /* InternalInjectFlags.SkipSelf */ & flags) === 4 /* InternalInjectFlags.SkipSelf */,
         };
+        // find the injector that provided the dependency
         for (let i = 0; i < resolutionPath.length; i++) {
             const injectorToCheck = resolutionPath[i];
             // if skipSelf is true we skip the first injector
@@ -29354,9 +29379,41 @@ function getDependenciesFromInjectable(injector, token) {
                 break;
             }
         }
-        return dep;
+        // injectedIn contains private fields, so we omit it from the response
+        const formattedDependency = {
+            value: dep.value,
+        };
+        if (dep.token)
+            formattedDependency.token = dep.token;
+        if (dep.flags)
+            formattedDependency.flags = dep.flags;
+        if (dep.providedIn)
+            formattedDependency.providedIn = dep.providedIn;
+        return formattedDependency;
     });
     return { instance, dependencies };
+}
+function getDependenciesForTokenInInjector(token, injector) {
+    const { resolverToTokenToDependencies } = getFrameworkDIDebugData();
+    if (!(injector instanceof NodeInjector)) {
+        return resolverToTokenToDependencies.get(injector)?.get?.(token) ?? [];
+    }
+    const lView = getNodeInjectorLView(injector);
+    const tokenDependencyMap = resolverToTokenToDependencies.get(lView);
+    const dependencies = tokenDependencyMap?.get(token) ?? [];
+    // In the NodeInjector case, all injections for every node are stored in the same lView.
+    // We use the injectedIn field of the dependency to filter out the dependencies that
+    // do not come from the same node as the instance we're looking at.
+    return dependencies.filter(dependency => {
+        const dependencyNode = dependency.injectedIn?.tNode;
+        if (dependencyNode === undefined) {
+            return false;
+        }
+        const instanceNode = getNodeInjectorTNode(injector);
+        assertTNode(dependencyNode);
+        assertTNode(instanceNode);
+        return dependencyNode === instanceNode;
+    });
 }
 /**
  * Gets the class associated with an injector that contains a provider `imports` array in it's
@@ -29620,8 +29677,7 @@ function getInjectorMetadata(injector) {
         const lView = getNodeInjectorLView(injector);
         const tNode = getNodeInjectorTNode(injector);
         assertTNodeForLView(tNode, lView);
-        assertDefined(lView[tNode.index][HOST], 'Could not find node in element view.');
-        return { type: 'element', source: lView[tNode.index][HOST] };
+        return { type: 'element', source: getNativeByTNode(tNode, lView) };
     }
     if (injector instanceof R3Injector) {
         return { type: 'environment', source: injector.source ?? null };

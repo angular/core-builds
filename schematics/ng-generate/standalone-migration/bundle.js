@@ -24462,7 +24462,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-1934524");
+var VERSION2 = new Version("17.0.0-next.7+sha-965ce5a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25496,7 +25496,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-1934524"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-965ce5a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25567,7 +25567,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-1934524"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-965ce5a"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25799,7 +25799,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-1934524"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-965ce5a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25822,7 +25822,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-1934524"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-965ce5a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25860,7 +25860,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-1934524"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-965ce5a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25884,7 +25884,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-1934524"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-965ce5a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25919,7 +25919,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-1934524"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-965ce5a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25936,7 +25936,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.7+sha-1934524");
+var VERSION3 = new Version("17.0.0-next.7+sha-965ce5a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -44133,7 +44133,7 @@ var ImportManager2 = class {
     this.getUpdateRecorder = getUpdateRecorder;
     this.printer = printer;
   }
-  addImportToSourceFile(sourceFile, symbolName, moduleName, alias = null, typeImport = false) {
+  addImportToSourceFile(sourceFile, symbolName, moduleName, alias = null, typeImport = false, keepSymbolName = false) {
     const sourceDir = (0, import_path4.dirname)(sourceFile.fileName);
     let importStartIndex = 0;
     let existingImport = null;
@@ -44174,7 +44174,7 @@ var ImportManager2 = class {
       }
     }
     if (existingImport) {
-      const { propertyName, name } = this._getImportParts(sourceFile, symbolName, alias);
+      const { propertyName, name } = this._getImportParts(sourceFile, symbolName, alias, keepSymbolName);
       this.updatedImports.set(existingImport, (this.updatedImports.get(existingImport) || []).concat({ propertyName, importName: name }));
       this.importCache.push({ sourceFile, moduleName, symbolName, alias, identifier: name });
       return name;
@@ -44188,7 +44188,7 @@ var ImportManager2 = class {
       });
     }
     if (symbolName) {
-      const { propertyName, name } = this._getImportParts(sourceFile, symbolName, alias);
+      const { propertyName, name } = this._getImportParts(sourceFile, symbolName, alias, keepSymbolName);
       const importMap = this.newImports.get(sourceFile).namedImports;
       identifier = name;
       if (!importMap.has(moduleName)) {
@@ -44269,14 +44269,14 @@ var ImportManager2 = class {
 ` : `
 ${text2}`;
   }
-  _getImportParts(sourceFile, symbolName, alias) {
+  _getImportParts(sourceFile, symbolName, alias, keepSymbolName) {
     const symbolIdentifier = import_typescript105.default.factory.createIdentifier(symbolName);
     const aliasIdentifier = alias ? import_typescript105.default.factory.createIdentifier(alias) : null;
     const generatedUniqueIdentifier = this._getUniqueIdentifier(sourceFile, alias || symbolName);
     const needsGeneratedUniqueName = generatedUniqueIdentifier.text !== (alias || symbolName);
     let propertyName;
     let name;
-    if (needsGeneratedUniqueName) {
+    if (needsGeneratedUniqueName && !keepSymbolName) {
       propertyName = symbolIdentifier;
       name = generatedUniqueIdentifier;
     } else if (aliasIdentifier) {
@@ -44329,16 +44329,19 @@ var ChangeTracker = class {
   removeNode(node) {
     this._trackChange(node.getSourceFile(), { start: node.getStart(), removeLength: node.getWidth(), text: "" });
   }
-  addImport(sourceFile, symbolName, moduleName, alias = null) {
+  addImport(sourceFile, symbolName, moduleName, alias = null, keepSymbolName = false) {
     if (this._importRemapper) {
       moduleName = this._importRemapper(moduleName, sourceFile.fileName);
     }
     moduleName = normalizePath(moduleName);
-    return this._importManager.addImportToSourceFile(sourceFile, symbolName, moduleName, alias);
+    return this._importManager.addImportToSourceFile(sourceFile, symbolName, moduleName, alias, false, keepSymbolName);
   }
   recordChanges() {
     this._importManager.recordChanges();
     return this._changes;
+  }
+  clearChanges() {
+    this._changes.clear();
   }
   _trackChange(file, change) {
     const changes = this._changes.get(file);
