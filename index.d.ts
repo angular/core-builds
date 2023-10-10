@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-229331e
+ * @license Angular v17.0.0-next.7+sha-503e67d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1160,16 +1160,8 @@ export declare abstract class CompilerFactory {
  * @publicApi
  */
 export declare type CompilerOptions = {
-    /**
-     * @deprecated not used at all in Ivy, providing this config option has no effect.
-     */
-    useJit?: boolean;
     defaultEncapsulation?: ViewEncapsulation;
     providers?: StaticProvider[];
-    /**
-     * @deprecated not used at all in Ivy, providing this config option has no effect.
-     */
-    missingTranslation?: MissingTranslationStrategy;
     preserveWhitespaces?: boolean;
 };
 
