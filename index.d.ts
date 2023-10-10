@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-5a4ccdf
+ * @license Angular v17.0.0-next.7+sha-9bf6495
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -400,7 +400,7 @@ export declare const APP_ID: InjectionToken<string>;
  *
  * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
  * and a function returning a promise.
- *
+ * ### Example with NgModule-based application
  * ```
  *  function initializeApp(): Promise<any> {
  *    return new Promise((resolve, reject) => {
@@ -422,11 +422,38 @@ export declare const APP_ID: InjectionToken<string>;
  *  export class AppModule {}
  * ```
  *
+ * ### Example with standalone application
+ * ```
+ * export function initializeApp(http: HttpClient) {
+ *   return (): Promise<any> =>
+ *     firstValueFrom(
+ *       http
+ *         .get("https://someUrl.com/api/user")
+ *         .pipe(tap(user => { ... }))
+ *     );
+ * }
+ *
+ * bootstrapApplication(App, {
+ *   providers: [
+ *     provideHttpClient(),
+ *     {
+ *       provide: APP_INITIALIZER,
+ *       useFactory: initializeApp,
+ *       multi: true,
+ *       deps: [HttpClient],
+ *     },
+ *   ],
+ * });
+
+ * ```
+ *
+ *
  * It's also possible to configure a multi-provider using `APP_INITIALIZER` token and a function
  * returning an observable, see an example below. Note: the `HttpClient` in this example is used for
  * demo purposes to illustrate how the factory function can work with other providers available
  * through DI.
  *
+ * ### Example with NgModule-based application
  * ```
  *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
  *   return () => httpClient.get("https://someUrl.com/api/user")
@@ -448,6 +475,27 @@ export declare const APP_ID: InjectionToken<string>;
  *  })
  *  export class AppModule {}
  * ```
+ *
+ * ### Example with standalone application
+ *
+ *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
+ *   return () => httpClient.get("https://someUrl.com/api/user")
+ *     .pipe(
+ *        tap(user => { ... })
+ *     );
+ *  }
+ *
+ * bootstrapApplication(App, {
+ *   providers: [
+ *     provideHttpClient(),
+ *     {
+ *       provide: APP_INITIALIZER,
+ *       useFactory: initializeApp,
+ *       multi: true,
+ *       deps: [HttpClient],
+ *     },
+ *   ],
+ * });
  *
  * @publicApi
  */
@@ -2917,7 +2965,7 @@ export declare interface Directive {
      * If a binding changes, Angular updates the directive's host element.
      *
      * When the key is a property of the host element, the property value is
-     * the propagated to the specified DOM property.
+     * propagated to the specified DOM property.
      *
      * When the key is a static attribute in the DOM, the attribute value
      * is propagated to the specified property in the host element.

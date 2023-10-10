@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-5a4ccdf
+ * @license Angular v17.0.0-next.7+sha-9bf6495
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -63,6 +63,30 @@ function toObservable(source, options) {
     return subject.asObservable();
 }
 
+/**
+ * Get the current value of an `Observable` as a reactive `Signal`.
+ *
+ * `toSignal` returns a `Signal` which provides synchronous reactive access to values produced
+ * by the given `Observable`, by subscribing to that `Observable`. The returned `Signal` will always
+ * have the most recent value emitted by the subscription, and will throw an error if the
+ * `Observable` errors.
+ *
+ * With `requireSync` set to `true`, `toSignal` will assert that the `Observable` produces a value
+ * immediately upon subscription. No `initialValue` is needed in this case, and the returned signal
+ * does not include an `undefined` type.
+ *
+ * By default, the subscription will be automatically cleaned up when the current [injection
+ * context](/guide/dependency-injection-context) is destroyed. For example, when `toObservable` is
+ * called during the construction of a component, the subscription will be cleaned up when the
+ * component is destroyed. If an injection context is not available, an explicit `Injector` can be
+ * passed instead.
+ *
+ * If the subscription should persist until the `Observable` itself completes, the `manualCleanup`
+ * option can be specified instead, which disables the automatic subscription teardown. No injection
+ * context is needed in this configuration as well.
+ *
+ * @developerPreview
+ */
 function toSignal(source, options) {
     ngDevMode &&
         assertNotInReactiveContext(toSignal, 'Invoking `toSignal` causes new subscriptions every time. ' +

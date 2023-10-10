@@ -19023,10 +19023,10 @@ function normalizeNgContentSelect(selectAttr) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_control_flow.mjs
 var FOR_LOOP_EXPRESSION_PATTERN = /^\s*([0-9A-Za-z_$]*)\s+of\s+(.*)/;
-var FOR_LOOP_TRACK_PATTERN = /^track\s+(.*)/;
+var FOR_LOOP_TRACK_PATTERN = /^track\s+([\S\s]*)/;
 var CONDITIONAL_ALIAS_PATTERN = /^as\s+(.*)/;
 var ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
-var FOR_LOOP_LET_PATTERN = /^let\s+(.*)/;
+var FOR_LOOP_LET_PATTERN = /^let\s+([\S\s]*)/;
 var ALLOWED_FOR_LOOP_LET_VARIABLES = /* @__PURE__ */ new Set(["$index", "$first", "$last", "$even", "$odd", "$count"]);
 function isConnectedForLoopBlock(name) {
   return name === "empty";
@@ -23637,7 +23637,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-5a4ccdf");
+var VERSION2 = new Version("17.0.0-next.7+sha-9bf6495");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
