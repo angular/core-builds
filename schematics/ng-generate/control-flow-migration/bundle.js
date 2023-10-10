@@ -63,12 +63,12 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/block-template-entities/index.mjs
-var block_template_entities_exports = {};
-__export(block_template_entities_exports, {
-  default: () => block_template_entities_default
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/index.mjs
+var control_flow_migration_exports = {};
+__export(control_flow_migration_exports, {
+  default: () => control_flow_migration_default
 });
-module.exports = __toCommonJS(block_template_entities_exports);
+module.exports = __toCommonJS(control_flow_migration_exports);
 var import_schematics = require("@angular-devkit/schematics");
 var import_path3 = require("path");
 
@@ -23682,12 +23682,77 @@ var FactoryTarget2;
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/compiler.mjs
 publishFacade(_global);
 
-// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/block-template-entities/util.mjs
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
 var import_path2 = require("path");
 var import_typescript3 = __toESM(require("typescript"), 1);
-var REPLACEMENTS2 = {
-  "@": "&#64;",
-  "}": "&#125;"
+var ngif = "*ngIf";
+var ngfor = "*ngFor";
+var ngswitch = "[ngSwitch]";
+var attributesToMigrate = [
+  ngif,
+  ngfor,
+  ngswitch
+];
+var casesToMigrate = [
+  "*ngSwitchCase",
+  "*ngSwitchDefault"
+];
+var ElementToMigrate = class {
+  constructor(el, attr) {
+    __publicField(this, "el");
+    __publicField(this, "attr");
+    __publicField(this, "nestCount", 0);
+    this.el = el;
+    this.attr = attr;
+  }
+  getCondition(targetStr) {
+    const targetLocation = this.attr.value.indexOf(targetStr);
+    return this.attr.value.slice(0, targetLocation);
+  }
+  getTemplateName(targetStr, secondStr) {
+    const targetLocation = this.attr.value.indexOf(targetStr);
+    if (secondStr) {
+      const secondTargetLocation = this.attr.value.indexOf(secondStr);
+      return this.attr.value.slice(targetLocation + targetStr.length, secondTargetLocation).trim();
+    }
+    return this.attr.value.slice(targetLocation + targetStr.length).trim();
+  }
+  start(offset) {
+    var _a2;
+    return ((_a2 = this.el.sourceSpan) == null ? void 0 : _a2.start.offset) - this.nestCount - offset;
+  }
+  end(offset) {
+    var _a2;
+    return ((_a2 = this.el.sourceSpan) == null ? void 0 : _a2.end.offset) - this.nestCount - offset;
+  }
+  length() {
+    return this.el.sourceSpan.end.offset - this.el.sourceSpan.start.offset;
+  }
+  openLength() {
+    return this.el.children[0].sourceSpan.start.offset - this.el.sourceSpan.start.offset;
+  }
+  closeLength() {
+    return this.el.sourceSpan.end.offset - this.el.children[0].sourceSpan.end.offset;
+  }
+  preOffset(newOffset) {
+    return newOffset - this.openLength() + 1;
+  }
+  postOffset(newOffset) {
+    return newOffset - this.closeLength();
+  }
+};
+var Template2 = class {
+  constructor(el) {
+    __publicField(this, "el");
+    __publicField(this, "count", 0);
+    __publicField(this, "contents", "");
+    __publicField(this, "children", "");
+    this.el = el;
+  }
+  generateContents(tmpl) {
+    this.contents = tmpl.slice(this.el.sourceSpan.start.offset, this.el.sourceSpan.end.offset + 1);
+    this.children = tmpl.slice(this.el.children[0].sourceSpan.start.offset, this.el.children[this.el.children.length - 1].sourceSpan.end.offset);
+  }
 };
 var AnalyzedFile = class {
   constructor() {
@@ -23737,62 +23802,258 @@ function analyze(sourceFile, analyzedFiles) {
     }
   }
 }
+function getNestedCount(etm, aggregator) {
+  if (aggregator.length === 0) {
+    return 0;
+  }
+  if (etm.el.sourceSpan.start.offset < aggregator[aggregator.length - 1] && etm.el.sourceSpan.end.offset !== aggregator[aggregator.length - 1]) {
+    aggregator.push(etm.el.sourceSpan.end.offset);
+    return aggregator.length - 1;
+  } else {
+    aggregator.pop();
+    return getNestedCount(etm, aggregator);
+  }
+}
 function migrateTemplate(template2) {
+  var _a2, _b2, _c2;
+  let parsed;
   try {
-    const parsed = new HtmlParser().parse(template2, "", {
+    parsed = new HtmlParser().parse(template2, "", {
       tokenizeExpansionForms: true,
       tokenizeBlocks: false
     });
     if (parsed.errors && parsed.errors.length > 0) {
       return null;
     }
-    let result = template2;
-    const visitor = new TextRangeCollector();
-    visitAll2(visitor, parsed.rootNodes);
-    const sortedRanges = visitor.textRanges.sort(([aStart], [bStart]) => bStart - aStart);
-    for (const [start, end] of sortedRanges) {
-      const text2 = result.slice(start, end);
-      let replaced = "";
-      for (const char of text2) {
-        replaced += REPLACEMENTS2[char] || char;
-      }
-      result = result.slice(0, start) + replaced + result.slice(end);
-    }
-    return result;
   } catch (e) {
     return null;
   }
+  let result = template2;
+  const visitor = new ElementCollector();
+  visitAll2(visitor, parsed.rootNodes);
+  for (let [key, tmpl] of visitor.templates) {
+    const regex = new RegExp(`\\W${key.slice(1)}\\W`, "gm");
+    const matches = template2.match(regex);
+    tmpl.count = (_a2 = matches == null ? void 0 : matches.length) != null ? _a2 : 0;
+    tmpl.generateContents(template2);
+  }
+  let prevElEnd = (_c2 = (_b2 = visitor.elements[0]) == null ? void 0 : _b2.el.sourceSpan.end.offset) != null ? _c2 : result.length - 1;
+  let nestedQueue = [prevElEnd];
+  for (let i = 1; i < visitor.elements.length; i++) {
+    let currEl = visitor.elements[i];
+    currEl.nestCount = getNestedCount(currEl, nestedQueue);
+  }
+  let offset = 0;
+  for (const el of visitor.elements) {
+    if (el.attr.name === ngif) {
+      let ifResult = migrateNgIf(el, visitor.templates, result, offset);
+      result = ifResult.tmpl;
+      offset = ifResult.offset;
+    } else if (el.attr.name === ngfor) {
+      let forResult = migrateNgFor(el, result, offset);
+      result = forResult.tmpl;
+      offset = forResult.offset;
+    } else if (el.attr.name === ngswitch) {
+      let switchResult = migrateNgSwitch(el, result, offset);
+      result = switchResult.tmpl;
+      offset = switchResult.offset;
+    }
+  }
+  for (const [_, t] of visitor.templates) {
+    if (t.count === 2) {
+      result = result.replace(t.contents, "");
+    }
+  }
+  return result;
 }
-var TextRangeCollector = class extends RecursiveVisitor {
+function migrateNgFor(etm, tmpl, offset) {
+  const aliasRegexp = /=\s+(count|index|first|last|even|odd)/gm;
+  const aliases = [];
+  const parts = etm.attr.value.split(";");
+  const condition = parts[0].replace("let ", "");
+  const loopVar = condition.split(" of ")[0];
+  let trackBy = loopVar;
+  for (let i = 1; i < parts.length; i++) {
+    const part = parts[i].trim();
+    if (part.startsWith("trackBy:")) {
+      const trackByFn = part.replace("trackBy:", "").trim();
+      trackBy = `${trackByFn}($index, ${loopVar})`;
+    }
+    if (part.match(aliasRegexp)) {
+      const aliasParts = part.split("=");
+      aliases.push(` ${aliasParts[0].trim()} = $${aliasParts[1].trim()}`);
+    }
+  }
+  const aliasStr = aliases.length > 0 ? `;${aliases.join(";")}` : "";
+  const startBlock = `@for (${condition}; track ${trackBy}${aliasStr}) {`;
+  const mainBlock = getMainBlock(etm, tmpl, offset);
+  const forBlock = startBlock + mainBlock + "}";
+  const updatedTmpl = tmpl.slice(0, etm.start(offset)) + forBlock + tmpl.slice(etm.end(offset));
+  offset = offset + etm.length() - forBlock.length;
+  return { tmpl: updatedTmpl, offset };
+}
+function migrateNgIf(etm, ngTemplates, tmpl, offset) {
+  const matchThen = etm.attr.value.match(/;\s+then/gm);
+  const matchElse = etm.attr.value.match(/;\s+else/gm);
+  if (matchThen && matchThen.length > 0) {
+    return buildIfThenElseBlock(etm, ngTemplates, tmpl, matchThen[0], matchElse[0], offset);
+  } else if (matchElse && matchElse.length > 0) {
+    return buildIfElseBlock(etm, ngTemplates, tmpl, matchElse[0], offset);
+  }
+  return buildIfBlock(etm, tmpl, offset);
+}
+function buildIfBlock(etm, tmpl, offset) {
+  const condition = etm.attr.value;
+  const startBlock = `@if (${condition}) {`;
+  const ifBlock = startBlock + getMainBlock(etm, tmpl, offset) + `}`;
+  const updatedTmpl = tmpl.slice(0, etm.start(offset)) + ifBlock + tmpl.slice(etm.end(offset));
+  offset = offset + etm.length() - ifBlock.length;
+  return { tmpl: updatedTmpl, offset };
+}
+function buildIfElseBlock(etm, ngTemplates, tmpl, elseString, offset) {
+  const condition = etm.getCondition(elseString);
+  const elseTmpl = ngTemplates.get(`#${etm.getTemplateName(elseString)}`);
+  const startBlock = `@if (${condition}) {`;
+  const mainBlock = getMainBlock(etm, tmpl, offset);
+  const elseBlock = `} @else {`;
+  const postBlock = elseBlock + elseTmpl.children + "}";
+  const ifElseBlock = startBlock + mainBlock + postBlock;
+  let tmplStart = tmpl.slice(0, etm.start(offset));
+  let tmplEnd = tmpl.slice(etm.end(offset));
+  const updatedTmpl = tmplStart + ifElseBlock + tmplEnd;
+  offset = offset + etm.preOffset(startBlock.length) + etm.postOffset(mainBlock.length + postBlock.length);
+  return { tmpl: updatedTmpl, offset };
+}
+function buildIfThenElseBlock(etm, ngTemplates, tmpl, thenString, elseString, offset) {
+  const condition = etm.getCondition(thenString);
+  const startBlock = `@if (${condition}) {`;
+  const elseBlock = `} @else {`;
+  const thenTmpl = ngTemplates.get(`#${etm.getTemplateName(thenString, elseString)}`);
+  const elseTmpl = ngTemplates.get(`#${etm.getTemplateName(elseString)}`);
+  const postBlock = thenTmpl.children + elseBlock + elseTmpl.children + "}";
+  const ifThenElseBlock = startBlock + postBlock;
+  let tmplStart = tmpl.slice(0, etm.start(offset));
+  let tmplEnd = tmpl.slice(etm.end(offset));
+  const updatedTmpl = tmplStart + ifThenElseBlock + tmplEnd;
+  offset = offset + etm.preOffset(startBlock.length) + etm.postOffset(postBlock.length);
+  return { tmpl: updatedTmpl, offset };
+}
+function getMainBlock(etm, tmpl, offset) {
+  if (etm.el.name === "ng-container" && etm.el.attrs.length === 1 && etm.attr.name === ngfor) {
+    const childStart = etm.el.children[0].sourceSpan.start.offset - etm.nestCount - offset;
+    const childEnd = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - etm.nestCount - offset;
+    return tmpl.slice(childStart, childEnd);
+  }
+  const attrStart = etm.attr.keySpan.start.offset - 1 - etm.nestCount - offset;
+  const valEnd = etm.attr.valueSpan.end.offset + 1 - etm.nestCount - offset;
+  const start = tmpl.slice(etm.start(offset), attrStart);
+  const end = tmpl.slice(valEnd, etm.end(offset));
+  return start + end;
+}
+function migrateNgSwitch(etm, tmpl, offset) {
+  const condition = etm.attr.value;
+  const startBlock = `@switch (${condition}) { `;
+  const { openTag, closeTag, children } = getSwitchBlockElements(etm, tmpl, offset);
+  const cases = getSwitchCases(children, tmpl, etm.nestCount, offset);
+  const switchBlock = openTag + startBlock + cases.join(" ") + `}` + closeTag;
+  const updatedTmpl = tmpl.slice(0, etm.start(offset)) + switchBlock + tmpl.slice(etm.end(offset));
+  const difference = etm.length() - switchBlock.length;
+  offset = offset + difference;
+  return { tmpl: updatedTmpl, offset };
+}
+function getSwitchBlockElements(etm, tmpl, offset) {
+  const attrStart = etm.attr.keySpan.start.offset - 1 - etm.nestCount - offset;
+  const valEnd = etm.attr.valueSpan.end.offset + 1 - etm.nestCount - offset;
+  const childStart = etm.el.children[0].sourceSpan.start.offset - etm.nestCount - offset;
+  const childEnd = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - etm.nestCount - offset;
+  let openTag = tmpl.slice(etm.start(offset), attrStart) + tmpl.slice(valEnd, childStart);
+  if (tmpl.slice(childStart, childStart + 1) === "\n") {
+    openTag += "\n";
+  }
+  let closeTag = tmpl.slice(childEnd, etm.end(offset));
+  if (tmpl.slice(childEnd - 1, childEnd) === "\n") {
+    closeTag = "\n" + closeTag;
+  }
+  return {
+    openTag,
+    closeTag,
+    children: etm.el.children
+  };
+}
+function getSwitchCases(children, tmpl, nestCount, offset) {
+  const collector = new CaseCollector();
+  visitAll2(collector, children);
+  return collector.elements.map((etm) => getSwitchCaseBlock(etm, tmpl, nestCount, offset));
+}
+function getSwitchCaseBlock(etm, tmpl, nestCount, offset) {
+  var _a2, _b2;
+  const elStart = ((_a2 = etm.el.sourceSpan) == null ? void 0 : _a2.start.offset) - nestCount - offset;
+  const elEnd = ((_b2 = etm.el.sourceSpan) == null ? void 0 : _b2.end.offset) - nestCount - offset;
+  const attrStart = etm.attr.keySpan.start.offset - 1 - nestCount - offset;
+  const attrEnd = etm.attr.keySpan.end.offset - nestCount - offset;
+  if (etm.attr.name === "*ngSwitchDefault") {
+    return `@default { ${tmpl.slice(elStart, attrStart) + tmpl.slice(attrEnd, elEnd)} }`;
+  }
+  const valEnd = etm.attr.valueSpan.end.offset + 1 - nestCount - offset;
+  return `@case (${etm.attr.value}) { ${tmpl.slice(elStart, attrStart) + tmpl.slice(valEnd, elEnd)} }`;
+}
+var ElementCollector = class extends RecursiveVisitor {
   constructor() {
     super(...arguments);
-    __publicField(this, "textRanges", []);
+    __publicField(this, "elements", []);
+    __publicField(this, "templates", /* @__PURE__ */ new Map());
   }
-  visitText(text2) {
-    for (const token of text2.tokens) {
-      if (token.type === 5) {
-        this.textRanges.push([token.sourceSpan.start.offset, token.sourceSpan.end.offset]);
+  visitElement(el) {
+    if (el.attrs.length > 0) {
+      for (const attr of el.attrs) {
+        if (attributesToMigrate.includes(attr.name)) {
+          this.elements.push(new ElementToMigrate(el, attr));
+        }
       }
     }
-    super.visitText(text2, null);
+    if (el.name === "ng-template") {
+      for (const attr of el.attrs) {
+        if (attr.name.startsWith("#")) {
+          this.elements.push(new ElementToMigrate(el, attr));
+          this.templates.set(attr.name, new Template2(el));
+        }
+      }
+    }
+    super.visitElement(el, null);
+  }
+};
+var CaseCollector = class extends RecursiveVisitor {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "elements", []);
+  }
+  visitElement(el) {
+    if (el.attrs.length > 0) {
+      for (const attr of el.attrs) {
+        if (casesToMigrate.includes(attr.name)) {
+          this.elements.push(new ElementToMigrate(el, attr));
+        }
+      }
+    }
+    super.visitElement(el, null);
   }
 };
 
-// bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/block-template-entities/index.mjs
-function block_template_entities_default() {
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/index.mjs
+function control_flow_migration_default() {
   return (tree) => __async(this, null, function* () {
     const { buildPaths, testPaths } = yield getProjectTsConfigPaths(tree);
     const basePath = process.cwd();
     const allPaths = [...buildPaths, ...testPaths];
     if (!allPaths.length) {
-      throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the block syntax template entities migration.");
+      throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the control flow migration.");
     }
     for (const tsconfigPath of allPaths) {
-      runBlockTemplateEntitiesMigration(tree, tsconfigPath, basePath);
+      runControlFlowMigration(tree, tsconfigPath, basePath);
     }
   });
 }
-function runBlockTemplateEntitiesMigration(tree, tsconfigPath, basePath) {
+function runControlFlowMigration(tree, tsconfigPath, basePath) {
   const program = createMigrationProgram(tree, tsconfigPath, basePath);
   const sourceFiles = program.getSourceFiles().filter((sourceFile) => canMigrateFile(basePath, sourceFile, program));
   const analysis = /* @__PURE__ */ new Map();

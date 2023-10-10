@@ -4206,9 +4206,10 @@ var DeferredBlock = class {
   }
 };
 var SwitchBlock = class {
-  constructor(expression, cases, sourceSpan, startSourceSpan, endSourceSpan) {
+  constructor(expression, cases, unknownBlocks, sourceSpan, startSourceSpan, endSourceSpan) {
     this.expression = expression;
     this.cases = cases;
+    this.unknownBlocks = unknownBlocks;
     this.sourceSpan = sourceSpan;
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
@@ -19861,21 +19862,19 @@ function isConnectedIfLoopBlock(name) {
 function createIfBlock(ast, connectedBlocks, visitor, bindingParser) {
   const errors = validateIfConnectedBlocks(connectedBlocks);
   const branches = [];
-  if (errors.length > 0) {
-    return { node: null, errors };
-  }
   const mainBlockParams = parseConditionalBlockParameters(ast, errors, bindingParser);
   if (mainBlockParams !== null) {
     branches.push(new IfBlockBranch(mainBlockParams.expression, visitAll2(visitor, ast.children, ast.children), mainBlockParams.expressionAlias, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan));
   }
   for (const block of connectedBlocks) {
-    const children = visitAll2(visitor, block.children, block.children);
     if (ELSE_IF_PATTERN.test(block.name)) {
       const params = parseConditionalBlockParameters(block, errors, bindingParser);
       if (params !== null) {
+        const children = visitAll2(visitor, block.children, block.children);
         branches.push(new IfBlockBranch(params.expression, children, params.expressionAlias, block.sourceSpan, block.startSourceSpan, block.endSourceSpan));
       }
     } else if (block.name === "else") {
+      const children = visitAll2(visitor, block.children, block.children);
       branches.push(new IfBlockBranch(null, children, null, block.sourceSpan, block.startSourceSpan, block.endSourceSpan));
     }
   }
@@ -19923,14 +19922,16 @@ function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
 }
 function createSwitchBlock(ast, visitor, bindingParser) {
   const errors = validateSwitchBlock(ast);
-  if (errors.length > 0) {
-    return { node: null, errors };
-  }
-  const primaryExpression = parseBlockParameterToBinding(ast.parameters[0], bindingParser);
+  const primaryExpression = ast.parameters.length > 0 ? parseBlockParameterToBinding(ast.parameters[0], bindingParser) : bindingParser.parseBinding("", false, ast.sourceSpan, 0);
   const cases = [];
+  const unknownBlocks = [];
   let defaultCase = null;
   for (const node of ast.children) {
     if (!(node instanceof Block)) {
+      continue;
+    }
+    if ((node.name !== "case" || node.parameters.length === 0) && node.name !== "default") {
+      unknownBlocks.push(new UnknownBlock(node.name, node.sourceSpan));
       continue;
     }
     const expression = node.name === "case" ? parseBlockParameterToBinding(node.parameters[0], bindingParser) : null;
@@ -19945,7 +19946,7 @@ function createSwitchBlock(ast, visitor, bindingParser) {
     cases.push(defaultCase);
   }
   return {
-    node: new SwitchBlock(primaryExpression, cases, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan),
+    node: new SwitchBlock(primaryExpression, cases, unknownBlocks, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan),
     errors
   };
 }
@@ -24461,7 +24462,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-9bf6495");
+var VERSION2 = new Version("17.0.0-next.7+sha-21b085d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25495,7 +25496,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-9bf6495"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-21b085d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25566,7 +25567,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-9bf6495"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-21b085d"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25798,7 +25799,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-9bf6495"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-21b085d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25821,7 +25822,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-9bf6495"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-21b085d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25859,7 +25860,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-9bf6495"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-21b085d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25883,7 +25884,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-9bf6495"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-21b085d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25918,7 +25919,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-9bf6495"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-21b085d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25935,7 +25936,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.7+sha-9bf6495");
+var VERSION3 = new Version("17.0.0-next.7+sha-21b085d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
