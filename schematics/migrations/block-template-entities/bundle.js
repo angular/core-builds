@@ -20912,13 +20912,10 @@ var TemplateDefinitionBuilder = class {
   visitIfBlock(block) {
     this.allocateBindingSlots(null);
     const branchData = block.branches.map(({ expression, expressionAlias, children, sourceSpan }) => {
-      const processedExpression = expression === null ? null : expression.visit(this._valueConverter);
       const variables = expressionAlias !== null ? [new Variable(expressionAlias.name, DIRECT_CONTEXT_REFERENCE, expressionAlias.sourceSpan, expressionAlias.keySpan)] : void 0;
-      return {
-        index: this.createEmbeddedTemplateFn(null, children, "_Conditional", sourceSpan, variables),
-        expression: processedExpression,
-        alias: expressionAlias
-      };
+      const index = this.createEmbeddedTemplateFn(null, children, "_Conditional", sourceSpan, variables);
+      const processedExpression = expression === null ? null : expression.visit(this._valueConverter);
+      return { index, expression: processedExpression, alias: expressionAlias };
     });
     const containerIndex = branchData[0].index;
     const paramsCallback = () => {
@@ -20949,15 +20946,14 @@ var TemplateDefinitionBuilder = class {
     this.updateInstructionWithAdvance(containerIndex, block.branches[0].sourceSpan, Identifiers.conditional, paramsCallback);
   }
   visitSwitchBlock(block) {
-    const blockExpression = block.expression.visit(this._valueConverter);
-    this.allocateBindingSlots(null);
     const caseData = block.cases.map((currentCase) => {
-      return {
-        index: this.createEmbeddedTemplateFn(null, currentCase.children, "_Case", currentCase.sourceSpan),
-        expression: currentCase.expression === null ? null : currentCase.expression.visit(this._valueConverter)
-      };
+      const index = this.createEmbeddedTemplateFn(null, currentCase.children, "_Case", currentCase.sourceSpan);
+      const expression = currentCase.expression === null ? null : currentCase.expression.visit(this._valueConverter);
+      return { index, expression };
     });
     const containerIndex = caseData[0].index;
+    const blockExpression = block.expression.visit(this._valueConverter);
+    this.allocateBindingSlots(null);
     this.updateInstructionWithAdvance(containerIndex, block.sourceSpan, Identifiers.conditional, () => {
       const generateCases = (caseIndex) => {
         if (caseIndex > caseData.length - 1) {
@@ -20998,9 +20994,9 @@ var TemplateDefinitionBuilder = class {
       placeholderConsts ? this.addToConsts(placeholderConsts) : TYPED_NULL_EXPR,
       (loadingConsts == null ? void 0 : loadingConsts.length) || placeholderConsts ? importExpr(Identifiers.deferEnableTimerScheduling) : TYPED_NULL_EXPR
     ]));
+    this.allocateDataSlot();
     this.createDeferTriggerInstructions(deferredIndex, triggers, metadata, false);
     this.createDeferTriggerInstructions(deferredIndex, prefetchTriggers, metadata, true);
-    this.allocateDataSlot();
   }
   createDeferredDepsFunction(name, metadata) {
     if (metadata.deps.length === 0) {
@@ -21072,8 +21068,6 @@ var TemplateDefinitionBuilder = class {
     const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [block.item, block.contextVariables.$index, block.contextVariables.$count]);
     const emptyData = block.empty === null ? null : this.prepareEmbeddedTemplateFn(block.empty.children, "_ForEmpty");
     const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
-    const value = block.expression.visit(this._valueConverter);
-    this.allocateBindingSlots(value);
     this.registerComputedLoopVariables(block, primaryData.scope);
     this.creationInstruction(block.sourceSpan, Identifiers.repeaterCreate, () => {
       const params = [
@@ -21090,6 +21084,8 @@ var TemplateDefinitionBuilder = class {
       }
       return params;
     });
+    const value = block.expression.visit(this._valueConverter);
+    this.allocateBindingSlots(value);
     this.updateInstruction(block.sourceSpan, Identifiers.repeater, () => [literal(blockIndex), this.convertPropertyBinding(value)]);
   }
   registerComputedLoopVariables(block, bindingScope) {
@@ -23641,7 +23637,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-503e67d");
+var VERSION2 = new Version("17.0.0-next.7+sha-d5dad3e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

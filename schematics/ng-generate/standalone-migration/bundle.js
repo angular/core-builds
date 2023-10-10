@@ -21736,13 +21736,10 @@ var TemplateDefinitionBuilder = class {
   visitIfBlock(block) {
     this.allocateBindingSlots(null);
     const branchData = block.branches.map(({ expression, expressionAlias, children, sourceSpan }) => {
-      const processedExpression = expression === null ? null : expression.visit(this._valueConverter);
       const variables = expressionAlias !== null ? [new Variable(expressionAlias.name, DIRECT_CONTEXT_REFERENCE, expressionAlias.sourceSpan, expressionAlias.keySpan)] : void 0;
-      return {
-        index: this.createEmbeddedTemplateFn(null, children, "_Conditional", sourceSpan, variables),
-        expression: processedExpression,
-        alias: expressionAlias
-      };
+      const index = this.createEmbeddedTemplateFn(null, children, "_Conditional", sourceSpan, variables);
+      const processedExpression = expression === null ? null : expression.visit(this._valueConverter);
+      return { index, expression: processedExpression, alias: expressionAlias };
     });
     const containerIndex = branchData[0].index;
     const paramsCallback = () => {
@@ -21773,15 +21770,14 @@ var TemplateDefinitionBuilder = class {
     this.updateInstructionWithAdvance(containerIndex, block.branches[0].sourceSpan, Identifiers.conditional, paramsCallback);
   }
   visitSwitchBlock(block) {
-    const blockExpression = block.expression.visit(this._valueConverter);
-    this.allocateBindingSlots(null);
     const caseData = block.cases.map((currentCase) => {
-      return {
-        index: this.createEmbeddedTemplateFn(null, currentCase.children, "_Case", currentCase.sourceSpan),
-        expression: currentCase.expression === null ? null : currentCase.expression.visit(this._valueConverter)
-      };
+      const index = this.createEmbeddedTemplateFn(null, currentCase.children, "_Case", currentCase.sourceSpan);
+      const expression = currentCase.expression === null ? null : currentCase.expression.visit(this._valueConverter);
+      return { index, expression };
     });
     const containerIndex = caseData[0].index;
+    const blockExpression = block.expression.visit(this._valueConverter);
+    this.allocateBindingSlots(null);
     this.updateInstructionWithAdvance(containerIndex, block.sourceSpan, Identifiers.conditional, () => {
       const generateCases = (caseIndex) => {
         if (caseIndex > caseData.length - 1) {
@@ -21822,9 +21818,9 @@ var TemplateDefinitionBuilder = class {
       placeholderConsts ? this.addToConsts(placeholderConsts) : TYPED_NULL_EXPR,
       (loadingConsts == null ? void 0 : loadingConsts.length) || placeholderConsts ? importExpr(Identifiers.deferEnableTimerScheduling) : TYPED_NULL_EXPR
     ]));
+    this.allocateDataSlot();
     this.createDeferTriggerInstructions(deferredIndex, triggers, metadata, false);
     this.createDeferTriggerInstructions(deferredIndex, prefetchTriggers, metadata, true);
-    this.allocateDataSlot();
   }
   createDeferredDepsFunction(name, metadata) {
     if (metadata.deps.length === 0) {
@@ -21896,8 +21892,6 @@ var TemplateDefinitionBuilder = class {
     const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [block.item, block.contextVariables.$index, block.contextVariables.$count]);
     const emptyData = block.empty === null ? null : this.prepareEmbeddedTemplateFn(block.empty.children, "_ForEmpty");
     const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
-    const value = block.expression.visit(this._valueConverter);
-    this.allocateBindingSlots(value);
     this.registerComputedLoopVariables(block, primaryData.scope);
     this.creationInstruction(block.sourceSpan, Identifiers.repeaterCreate, () => {
       const params = [
@@ -21914,6 +21908,8 @@ var TemplateDefinitionBuilder = class {
       }
       return params;
     });
+    const value = block.expression.visit(this._valueConverter);
+    this.allocateBindingSlots(value);
     this.updateInstruction(block.sourceSpan, Identifiers.repeater, () => [literal(blockIndex), this.convertPropertyBinding(value)]);
   }
   registerComputedLoopVariables(block, bindingScope) {
@@ -24465,7 +24461,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-503e67d");
+var VERSION2 = new Version("17.0.0-next.7+sha-d5dad3e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25499,7 +25495,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-503e67d"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-d5dad3e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25570,7 +25566,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-503e67d"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-d5dad3e"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25802,7 +25798,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-503e67d"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-d5dad3e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25825,7 +25821,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-503e67d"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-d5dad3e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25863,7 +25859,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-503e67d"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-d5dad3e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25887,7 +25883,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-503e67d"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-d5dad3e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25922,7 +25918,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.7+sha-503e67d"));
+  definitionMap.set("version", literal("17.0.0-next.7+sha-d5dad3e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25939,7 +25935,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.7+sha-503e67d");
+var VERSION3 = new Version("17.0.0-next.7+sha-d5dad3e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -40257,6 +40253,7 @@ var TcbIfOp = class extends TcbOp {
     this.tcb = tcb;
     this.scope = scope;
     this.block = block;
+    this.expressionScopes = /* @__PURE__ */ new Map();
   }
   get optional() {
     return false;
@@ -40272,19 +40269,38 @@ var TcbIfOp = class extends TcbOp {
       return void 0;
     }
     if (branch.expression === null) {
-      const branchScope2 = Scope2.forNodes(this.tcb, this.scope, null, branch.children, null);
-      return import_typescript88.default.factory.createBlock(branchScope2.render());
+      const branchScope = Scope2.forNodes(this.tcb, this.scope, null, branch.children, this.generateBranchGuard(index));
+      return import_typescript88.default.factory.createBlock(branchScope.render());
     }
-    let branchParentScope;
-    if (branch.expressionAlias === null) {
-      branchParentScope = this.scope;
-    } else {
-      branchParentScope = Scope2.forNodes(this.tcb, this.scope, branch, [], null);
-      branchParentScope.render().forEach((stmt) => this.scope.addStatement(stmt));
+    const expressionScope = Scope2.forNodes(this.tcb, this.scope, branch, [], null);
+    expressionScope.render().forEach((stmt) => this.scope.addStatement(stmt));
+    this.expressionScopes.set(branch, expressionScope);
+    const expression = branch.expressionAlias === null ? tcbExpression(branch.expression, this.tcb, expressionScope) : expressionScope.resolve(branch.expressionAlias);
+    const bodyScope = Scope2.forNodes(this.tcb, expressionScope, null, branch.children, this.generateBranchGuard(index));
+    return import_typescript88.default.factory.createIfStatement(expression, import_typescript88.default.factory.createBlock(bodyScope.render()), this.generateBranch(index + 1));
+  }
+  generateBranchGuard(index) {
+    let guard = null;
+    for (let i = 0; i <= index; i++) {
+      const branch = this.block.branches[i];
+      if (branch.expression === null) {
+        continue;
+      }
+      if (!this.expressionScopes.has(branch)) {
+        throw new Error(`Could not determine expression scope of branch at index ${i}`);
+      }
+      const expressionScope = this.expressionScopes.get(branch);
+      let expression;
+      if (branch.expressionAlias === null) {
+        expression = tcbExpression(branch.expression, this.tcb, expressionScope);
+        markIgnoreDiagnostics(expression);
+      } else {
+        expression = expressionScope.resolve(branch.expressionAlias);
+      }
+      const comparisonExpression = i === index ? expression : import_typescript88.default.factory.createPrefixUnaryExpression(import_typescript88.default.SyntaxKind.ExclamationToken, import_typescript88.default.factory.createParenthesizedExpression(expression));
+      guard = guard === null ? comparisonExpression : import_typescript88.default.factory.createBinaryExpression(guard, import_typescript88.default.SyntaxKind.AmpersandAmpersandToken, comparisonExpression);
     }
-    const branchScope = Scope2.forNodes(this.tcb, branchParentScope, null, branch.children, null);
-    const expression = branch.expressionAlias === null ? tcbExpression(branch.expression, this.tcb, branchScope) : branchScope.resolve(branch.expressionAlias);
-    return import_typescript88.default.factory.createIfStatement(expression, import_typescript88.default.factory.createBlock(branchScope.render()), this.generateBranch(index + 1));
+    return guard;
   }
 };
 var TcbSwitchOp = class extends TcbOp {
@@ -40309,7 +40325,7 @@ var TcbSwitchOp = class extends TcbOp {
   generateCase(index, switchValue, defaultCase) {
     if (index >= this.block.cases.length) {
       if (defaultCase !== null) {
-        const defaultScope = Scope2.forNodes(this.tcb, this.scope, null, defaultCase.children, null);
+        const defaultScope = Scope2.forNodes(this.tcb, this.scope, null, defaultCase.children, this.generateGuard(defaultCase, switchValue));
         return import_typescript88.default.factory.createBlock(defaultScope.render());
       }
       return void 0;
@@ -40318,9 +40334,31 @@ var TcbSwitchOp = class extends TcbOp {
     if (current.expression === null) {
       return this.generateCase(index + 1, switchValue, current);
     }
-    const caseScope = Scope2.forNodes(this.tcb, this.scope, null, current.children, null);
+    const caseScope = Scope2.forNodes(this.tcb, this.scope, null, current.children, this.generateGuard(current, switchValue));
     const caseValue = tcbExpression(current.expression, this.tcb, caseScope);
     return import_typescript88.default.factory.createIfStatement(import_typescript88.default.factory.createBinaryExpression(switchValue, import_typescript88.default.SyntaxKind.EqualsEqualsEqualsToken, caseValue), import_typescript88.default.factory.createBlock(caseScope.render()), this.generateCase(index + 1, switchValue, defaultCase));
+  }
+  generateGuard(node, switchValue) {
+    if (node.expression !== null) {
+      const expression = tcbExpression(node.expression, this.tcb, this.scope);
+      markIgnoreDiagnostics(expression);
+      return import_typescript88.default.factory.createBinaryExpression(switchValue, import_typescript88.default.SyntaxKind.EqualsEqualsEqualsToken, expression);
+    }
+    let guard = null;
+    for (const current of this.block.cases) {
+      if (current.expression === null) {
+        continue;
+      }
+      const expression = tcbExpression(current.expression, this.tcb, this.scope);
+      markIgnoreDiagnostics(expression);
+      const comparison = import_typescript88.default.factory.createBinaryExpression(switchValue, import_typescript88.default.SyntaxKind.ExclamationEqualsEqualsToken, expression);
+      if (guard === null) {
+        guard = comparison;
+      } else {
+        guard = import_typescript88.default.factory.createBinaryExpression(guard, import_typescript88.default.SyntaxKind.AmpersandAmpersandToken, comparison);
+      }
+    }
+    return guard;
   }
 };
 var TcbForOfOp = class extends TcbOp {

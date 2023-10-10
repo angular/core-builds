@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-503e67d
+ * @license Angular v17.0.0-next.7+sha-d5dad3e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10418,7 +10418,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-503e67d');
+const VERSION = new Version('17.0.0-next.7+sha-d5dad3e');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19269,6 +19269,10 @@ class DeferIntersectionManager {
         }
         entry.callbacks.add(callback);
         return () => {
+            // It's possible that a different cleanup callback fully removed this element already.
+            if (!this.viewportTriggers.has(trigger)) {
+                return;
+            }
             entry.callbacks.delete(callback);
             if (entry.callbacks.size === 0) {
                 this.intersectionObserver?.unobserve(trigger);
