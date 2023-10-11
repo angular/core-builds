@@ -6742,7 +6742,7 @@ var ShadowCss = class {
     while ((res = sep.exec(selector)) !== null) {
       const separator = res[1];
       const part2 = selector.slice(startIndex, res.index).trim();
-      if (part2.match(_placeholderRe) && ((_a2 = selector[res.index + 1]) == null ? void 0 : _a2.match(/[a-fA-F\d]/))) {
+      if (part2.match(/__esc-ph-(\d+)__/) && ((_a2 = selector[res.index + 1]) == null ? void 0 : _a2.match(/[a-fA-F\d]/))) {
         continue;
       }
       shouldScope = shouldScope || part2.indexOf(_polyfillHostNoCombinator) > -1;
@@ -6764,7 +6764,12 @@ var SafeSelector = class {
     this.placeholders = [];
     this.index = 0;
     selector = this._escapeRegexMatches(selector, /(\[[^\]]*\])/g);
-    selector = this._escapeRegexMatches(selector, /(\\.)/g);
+    selector = selector.replace(/(\\.)/g, (_, keep) => {
+      const replaceBy = `__esc-ph-${this.index}__`;
+      this.placeholders.push(keep);
+      this.index++;
+      return replaceBy;
+    });
     this._content = selector.replace(/(:nth-[-\w]+)(\([^)]+\))/g, (_, pseudo, exp) => {
       const replaceBy = `__ph-${this.index}__`;
       this.placeholders.push(exp);
@@ -6773,7 +6778,7 @@ var SafeSelector = class {
     });
   }
   restore(content) {
-    return content.replace(_placeholderRe, (_ph, index) => this.placeholders[+index]);
+    return content.replace(/__(?:ph|esc-ph)-(\d+)__/g, (_ph, index) => this.placeholders[+index]);
   }
   content() {
     return this._content;
@@ -6814,7 +6819,6 @@ var _commentRe = /\/\*[\s\S]*?\*\//g;
 var _commentWithHashRe = /\/\*\s*#\s*source(Mapping)?URL=/g;
 var COMMENT_PLACEHOLDER = "%COMMENT%";
 var _commentWithHashPlaceHolderRe = new RegExp(COMMENT_PLACEHOLDER, "g");
-var _placeholderRe = /__ph-(\d+)__/g;
 var BLOCK_PLACEHOLDER = "%BLOCK%";
 var _ruleRe = new RegExp(`(\\s*(?:${COMMENT_PLACEHOLDER}\\s*)*)([^;\\{\\}]+?)(\\s*)((?:{%BLOCK%}?\\s*;?)|(?:\\s*;))`, "g");
 var CONTENT_PAIRS = /* @__PURE__ */ new Map([["{", "}"]]);
@@ -23641,7 +23645,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.8+sha-926db6d");
+var VERSION2 = new Version("17.0.0-next.8+sha-073ebfe");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
