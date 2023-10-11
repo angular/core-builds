@@ -21067,8 +21067,12 @@ var TemplateDefinitionBuilder = class {
   visitForLoopBlock(block) {
     const blockIndex = this.allocateDataSlot();
     const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [block.item, block.contextVariables.$index, block.contextVariables.$count]);
-    const emptyData = block.empty === null ? null : this.prepareEmbeddedTemplateFn(block.empty.children, "_ForEmpty");
     const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
+    let emptyData = null;
+    if (block.empty !== null) {
+      emptyData = this.prepareEmbeddedTemplateFn(block.empty.children, "_ForEmpty");
+      this.allocateBindingSlots(null);
+    }
     this.registerComputedLoopVariables(block, primaryData.scope);
     this.creationInstruction(block.sourceSpan, Identifiers.repeaterCreate, () => {
       const params = [
@@ -21086,7 +21090,6 @@ var TemplateDefinitionBuilder = class {
       return params;
     });
     const value = block.expression.visit(this._valueConverter);
-    this.allocateBindingSlots(value);
     this.updateInstruction(block.sourceSpan, Identifiers.repeater, () => [literal(blockIndex), this.convertPropertyBinding(value)]);
   }
   registerComputedLoopVariables(block, bindingScope) {
@@ -23638,7 +23641,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.7+sha-77284d9");
+var VERSION2 = new Version("17.0.0-next.7+sha-e906942");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23685,6 +23688,8 @@ publishFacade(_global);
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
 var import_path2 = require("path");
 var import_typescript3 = __toESM(require("typescript"), 1);
+
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/types.mjs
 var ngif = "*ngIf";
 var ngfor = "*ngFor";
 var ngswitch = "[ngSwitch]";
@@ -23773,6 +23778,49 @@ var AnalyzedFile = class {
     }
   }
 };
+var ElementCollector = class extends RecursiveVisitor {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "elements", []);
+    __publicField(this, "templates", /* @__PURE__ */ new Map());
+  }
+  visitElement(el) {
+    if (el.attrs.length > 0) {
+      for (const attr of el.attrs) {
+        if (attributesToMigrate.includes(attr.name)) {
+          this.elements.push(new ElementToMigrate(el, attr));
+        }
+      }
+    }
+    if (el.name === "ng-template") {
+      for (const attr of el.attrs) {
+        if (attr.name.startsWith("#")) {
+          this.elements.push(new ElementToMigrate(el, attr));
+          this.templates.set(attr.name, new Template2(el));
+        }
+      }
+    }
+    super.visitElement(el, null);
+  }
+};
+var CaseCollector = class extends RecursiveVisitor {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "elements", []);
+  }
+  visitElement(el) {
+    if (el.attrs.length > 0) {
+      for (const attr of el.attrs) {
+        if (casesToMigrate.includes(attr.name)) {
+          this.elements.push(new ElementToMigrate(el, attr));
+        }
+      }
+    }
+    super.visitElement(el, null);
+  }
+};
+
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
 function analyze(sourceFile, analyzedFiles) {
   var _a2;
   for (const node of sourceFile.statements) {
@@ -23997,57 +24045,17 @@ function getSwitchCaseBlock(etm, tmpl, nestCount, offset) {
   const valEnd = etm.attr.valueSpan.end.offset + 1 - nestCount - offset;
   return `@case (${etm.attr.value}) { ${tmpl.slice(elStart, attrStart) + tmpl.slice(valEnd, elEnd)} }`;
 }
-var ElementCollector = class extends RecursiveVisitor {
-  constructor() {
-    super(...arguments);
-    __publicField(this, "elements", []);
-    __publicField(this, "templates", /* @__PURE__ */ new Map());
-  }
-  visitElement(el) {
-    if (el.attrs.length > 0) {
-      for (const attr of el.attrs) {
-        if (attributesToMigrate.includes(attr.name)) {
-          this.elements.push(new ElementToMigrate(el, attr));
-        }
-      }
-    }
-    if (el.name === "ng-template") {
-      for (const attr of el.attrs) {
-        if (attr.name.startsWith("#")) {
-          this.elements.push(new ElementToMigrate(el, attr));
-          this.templates.set(attr.name, new Template2(el));
-        }
-      }
-    }
-    super.visitElement(el, null);
-  }
-};
-var CaseCollector = class extends RecursiveVisitor {
-  constructor() {
-    super(...arguments);
-    __publicField(this, "elements", []);
-  }
-  visitElement(el) {
-    if (el.attrs.length > 0) {
-      for (const attr of el.attrs) {
-        if (casesToMigrate.includes(attr.name)) {
-          this.elements.push(new ElementToMigrate(el, attr));
-        }
-      }
-    }
-    super.visitElement(el, null);
-  }
-};
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/index.mjs
 function control_flow_migration_default() {
-  return (tree) => __async(this, null, function* () {
+  return (tree, context) => __async(this, null, function* () {
     const { buildPaths, testPaths } = yield getProjectTsConfigPaths(tree);
     const basePath = process.cwd();
     const allPaths = [...buildPaths, ...testPaths];
     if (!allPaths.length) {
       throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the control flow migration.");
     }
+    context.logger.warn("IMPORTANT! This migration is in developer preview. Use with caution.");
     for (const tsconfigPath of allPaths) {
       runControlFlowMigration(tree, tsconfigPath, basePath);
     }

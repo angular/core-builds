@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.7+sha-77284d9
+ * @license Angular v17.0.0-next.7+sha-e906942
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10429,7 +10429,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.7+sha-77284d9');
+const VERSION = new Version('17.0.0-next.7+sha-e906942');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19203,6 +19203,12 @@ class LiveCollectionLContainerImpl extends LiveCollection {
         this.hostLView = hostLView;
         this.templateTNode = templateTNode;
         this.trackByFn = trackByFn;
+        /**
+         Property indicating if indexes in the repeater context need to be updated following the live
+         collection changes. Index updates are necessary if and only if views are inserted / removed in
+         the middle of LContainer. Adds and removals at the end don't require index updates.
+       */
+        this.needsIndexUpdate = false;
     }
     get length() {
         return this.lContainer.length - CONTAINER_HEADER_OFFSET;
@@ -19215,9 +19221,11 @@ class LiveCollectionLContainerImpl extends LiveCollection {
     }
     attach(index, lView) {
         const dehydratedView = lView[HYDRATION];
+        this.needsIndexUpdate ||= index !== this.length;
         addLViewToLContainer(this.lContainer, lView, index, shouldAddViewToDom(this.templateTNode, dehydratedView));
     }
     detach(index) {
+        this.needsIndexUpdate ||= index !== this.length - 1;
         return detachExistingView(this.lContainer, index);
     }
     create(index, value) {
@@ -19230,6 +19238,13 @@ class LiveCollectionLContainerImpl extends LiveCollection {
     }
     updateValue(index, value) {
         this.at(index)[CONTEXT].$implicit = value;
+    }
+    updateIndexes() {
+        if (this.needsIndexUpdate) {
+            for (let i = 0; i < this.length; i++) {
+                this.at(i)[CONTEXT].$index = i;
+            }
+        }
     }
 }
 /**
@@ -19249,19 +19264,13 @@ function ɵɵrepeater(metadataSlotIdx, collection) {
     const containerIndex = metadataSlotIdx + 1;
     const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
     const itemTemplateTNode = getExistingTNode(hostTView, containerIndex);
-    reconcile(new LiveCollectionLContainerImpl(lContainer, hostLView, itemTemplateTNode, metadata.trackByFn), collection, metadata.trackByFn);
-    // moves in the container might caused context's index to get out of order, re-adjust
-    // PERF: we could try to book-keep moves and do this index re-adjust as need, at the cost of the
-    // additional code complexity
-    for (let i = 0; i < lContainer.length - CONTAINER_HEADER_OFFSET; i++) {
-        const lView = getExistingLViewFromLContainer(lContainer, i);
-        lView[CONTEXT].$index = i;
-    }
+    const liveCollection = new LiveCollectionLContainerImpl(lContainer, hostLView, itemTemplateTNode, metadata.trackByFn);
+    reconcile(liveCollection, collection, metadata.trackByFn);
+    // moves in the container might caused context's index to get out of order, re-adjust if needed
+    liveCollection.updateIndexes();
     // handle empty blocks
-    // PERF: maybe I could skip allocation of memory for the empty block? Isn't it the "fix" on the
-    // compiler side that we've been discussing? Talk to K & D!
-    const bindingIndex = nextBindingIndex();
     if (metadata.hasEmptyBlock) {
+        const bindingIndex = nextBindingIndex();
         const isCollectionEmpty = lContainer.length - CONTAINER_HEADER_OFFSET === 0;
         if (bindingUpdated(hostLView, bindingIndex, isCollectionEmpty)) {
             const emptyTemplateIndex = metadataSlotIdx + 2;
