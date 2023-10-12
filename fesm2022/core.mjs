@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.8+sha-2bf088e
+ * @license Angular v17.0.0-next.8+sha-65b4604
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10429,7 +10429,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.8+sha-2bf088e');
+const VERSION = new Version('17.0.0-next.8+sha-65b4604');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19308,6 +19308,75 @@ function getExistingTNode(tView, index) {
     return tNode;
 }
 
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Registers a cleanup function associated with a prefetching trigger
+ * of a given defer block.
+ */
+function registerTDetailsCleanup(injector, tDetails, key, cleanupFn) {
+    injector.get(DeferBlockCleanupManager).add(tDetails, key, cleanupFn);
+}
+/**
+ * Invokes all registered prefetch cleanup triggers
+ * and removes all cleanup functions afterwards.
+ */
+function invokeTDetailsCleanup(injector, tDetails) {
+    injector.get(DeferBlockCleanupManager).cleanup(tDetails);
+}
+/**
+ * Internal service to keep track of cleanup functions associated
+ * with defer blocks. This class is used to manage cleanup functions
+ * created for prefetching triggers.
+ */
+class DeferBlockCleanupManager {
+    constructor() {
+        this.blocks = new Map();
+    }
+    add(tDetails, key, callback) {
+        if (!this.blocks.has(tDetails)) {
+            this.blocks.set(tDetails, new Map());
+        }
+        const block = this.blocks.get(tDetails);
+        if (!block.has(key)) {
+            block.set(key, []);
+        }
+        const callbacks = block.get(key);
+        callbacks.push(callback);
+    }
+    has(tDetails, key) {
+        return !!this.blocks.get(tDetails)?.has(key);
+    }
+    cleanup(tDetails) {
+        const block = this.blocks.get(tDetails);
+        if (block) {
+            for (const callbacks of Object.values(block)) {
+                for (const callback of callbacks) {
+                    callback();
+                }
+            }
+            this.blocks.delete(tDetails);
+        }
+    }
+    ngOnDestroy() {
+        for (const [block] of this.blocks) {
+            this.cleanup(block);
+        }
+        this.blocks.clear();
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: DeferBlockCleanupManager,
+        providedIn: 'root',
+        factory: () => new DeferBlockCleanupManager(),
+    }); }
+}
+
 /**
  * Describes the state of defer block dependency loading.
  */
@@ -19379,6 +19448,128 @@ var DeferBlockBehavior;
      */
     DeferBlockBehavior[DeferBlockBehavior["Playthrough"] = 1] = "Playthrough";
 })(DeferBlockBehavior || (DeferBlockBehavior = {}));
+
+/**
+ * Wraps a given callback into a logic that registers a cleanup function
+ * in the LView cleanup slot, to be invoked when an LView is destroyed.
+ */
+function wrapWithLViewCleanup(callback, lView, cleanup) {
+    const wrappedCallback = () => {
+        callback();
+        removeLViewOnDestroy(lView, cleanup);
+    };
+    storeLViewOnDestroy(lView, cleanup);
+    return wrappedCallback;
+}
+/**
+ * Calculates a data slot index for defer block info (either static or
+ * instance-specific), given an index of a defer instruction.
+ */
+function getDeferBlockDataIndex(deferBlockIndex) {
+    // Instance state is located at the *next* position
+    // after the defer block slot in an LView or TView.data.
+    return deferBlockIndex + 1;
+}
+/** Retrieves a defer block state from an LView, given a TNode that represents a block. */
+function getLDeferBlockDetails(lView, tNode) {
+    const tView = lView[TVIEW];
+    const slotIndex = getDeferBlockDataIndex(tNode.index);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    return lView[slotIndex];
+}
+/** Stores a defer block instance state in LView. */
+function setLDeferBlockDetails(lView, deferBlockIndex, lDetails) {
+    const tView = lView[TVIEW];
+    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    lView[slotIndex] = lDetails;
+}
+/** Retrieves static info about a defer block, given a TView and a TNode that represents a block. */
+function getTDeferBlockDetails(tView, tNode) {
+    const slotIndex = getDeferBlockDataIndex(tNode.index);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    return tView.data[slotIndex];
+}
+/** Stores a defer block static info in `TView.data`. */
+function setTDeferBlockDetails(tView, deferBlockIndex, deferBlockConfig) {
+    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    tView.data[slotIndex] = deferBlockConfig;
+}
+function getTemplateIndexForState(newState, hostLView, tNode) {
+    const tView = hostLView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    switch (newState) {
+        case DeferBlockState.Complete:
+            return tDetails.primaryTmplIndex;
+        case DeferBlockState.Loading:
+            return tDetails.loadingTmplIndex;
+        case DeferBlockState.Error:
+            return tDetails.errorTmplIndex;
+        case DeferBlockState.Placeholder:
+            return tDetails.placeholderTmplIndex;
+        default:
+            ngDevMode && throwError(`Unexpected defer block state: ${newState}`);
+            return null;
+    }
+}
+/**
+ * Returns a minimum amount of time that a given state should be rendered for,
+ * taking into account `minimum` parameter value. If the `minimum` value is
+ * not specified - returns `null`.
+ */
+function getMinimumDurationForState(tDetails, currentState) {
+    if (currentState === DeferBlockState.Placeholder) {
+        return tDetails.placeholderBlockConfig?.[MINIMUM_SLOT] ?? null;
+    }
+    else if (currentState === DeferBlockState.Loading) {
+        return tDetails.loadingBlockConfig?.[MINIMUM_SLOT] ?? null;
+    }
+    return null;
+}
+/** Retrieves the value of the `after` parameter on the @loading block. */
+function getLoadingBlockAfter(tDetails) {
+    return tDetails.loadingBlockConfig?.[LOADING_AFTER_SLOT] ?? null;
+}
+/**
+ * Adds downloaded dependencies into a directive or a pipe registry,
+ * making sure that a dependency doesn't yet exist in the registry.
+ */
+function addDepsToRegistry(currentDeps, newDeps) {
+    if (!currentDeps || currentDeps.length === 0) {
+        return newDeps;
+    }
+    const currentDepSet = new Set(currentDeps);
+    for (const dep of newDeps) {
+        currentDepSet.add(dep);
+    }
+    // If `currentDeps` is the same length, there were no new deps and can
+    // return the original array.
+    return (currentDeps.length === currentDepSet.size) ? currentDeps : Array.from(currentDepSet);
+}
+/** Retrieves a TNode that represents main content of a defer block. */
+function getPrimaryBlockTNode(tView, tDetails) {
+    const adjustedIndex = tDetails.primaryTmplIndex + HEADER_OFFSET;
+    return getTNode(tView, adjustedIndex);
+}
+/**
+ * Asserts whether all dependencies for a defer block are loaded.
+ * Always run this function (in dev mode) before rendering a defer
+ * block in completed state.
+ */
+function assertDeferredDependenciesLoaded(tDetails) {
+    assertEqual(tDetails.loadingState, DeferDependenciesLoadingState.COMPLETE, 'Expecting all deferred dependencies to be loaded.');
+}
+/**
+ * Determines if a given value matches the expected structure of a defer block
+ *
+ * We can safely rely on the primaryTmplIndex because every defer block requires
+ * that a primary template exists. All the other template options are optional.
+ */
+function isTDeferBlockDetails(value) {
+    return (typeof value === 'object') &&
+        (typeof value.primaryTmplIndex === 'number');
+}
 
 /*!
  * @license
@@ -19551,7 +19742,390 @@ class DeferIntersectionManager {
         };
     }
 }
+/**
+ * Helper function to get the LView in which a deferred block's trigger is rendered.
+ * @param deferredHostLView LView in which the deferred block is defined.
+ * @param deferredTNode TNode defining the deferred block.
+ * @param walkUpTimes Number of times to go up in the view hierarchy to find the trigger's view.
+ *   A negative value means that the trigger is inside the block's placeholder, while an undefined
+ *   value means that the trigger is in the same LView as the deferred block.
+ */
+function getTriggerLView(deferredHostLView, deferredTNode, walkUpTimes) {
+    // The trigger is in the same view, we don't need to traverse.
+    if (walkUpTimes == null) {
+        return deferredHostLView;
+    }
+    // A positive value or zero means that the trigger is in a parent view.
+    if (walkUpTimes >= 0) {
+        return walkUpViews(walkUpTimes, deferredHostLView);
+    }
+    // If the value is negative, it means that the trigger is inside the placeholder.
+    const deferredContainer = deferredHostLView[deferredTNode.index];
+    ngDevMode && assertLContainer(deferredContainer);
+    const triggerLView = deferredContainer[CONTAINER_HEADER_OFFSET] ?? null;
+    // We need to null check, because the placeholder might not have been rendered yet.
+    if (ngDevMode && triggerLView !== null) {
+        const lDetails = getLDeferBlockDetails(deferredHostLView, deferredTNode);
+        const renderedState = lDetails[DEFER_BLOCK_STATE];
+        assertEqual(renderedState, DeferBlockState.Placeholder, 'Expected a placeholder to be rendered in this defer block.');
+        assertLView(triggerLView);
+    }
+    return triggerLView;
+}
+/**
+ * Gets the element that a deferred block's trigger is pointing to.
+ * @param triggerLView LView in which the trigger is defined.
+ * @param triggerIndex Index at which the trigger element should've been rendered.
+ */
+function getTriggerElement(triggerLView, triggerIndex) {
+    const element = getNativeByIndex(HEADER_OFFSET + triggerIndex, triggerLView);
+    ngDevMode && assertElement(element);
+    return element;
+}
+/**
+ * Registers a DOM-node based trigger.
+ * @param initialLView LView in which the defer block is rendered.
+ * @param tNode TNode representing the defer block.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to go up/down in the view hierarchy to find the trigger.
+ * @param registerFn Function that will register the DOM events.
+ * @param callback Callback to be invoked when the trigger receives the event that should render
+ *     the deferred block.
+ */
+function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback) {
+    const injector = initialLView[INJECTOR$1];
+    // Assumption: the `afterRender` reference should be destroyed
+    // automatically so we don't need to keep track of it.
+    const afterRenderRef = afterRender(() => {
+        const lDetails = getLDeferBlockDetails(initialLView, tNode);
+        const renderedState = lDetails[DEFER_BLOCK_STATE];
+        // If the block was loaded before the trigger was resolved, we don't need to do anything.
+        if (renderedState !== DeferBlockInternalState.Initial &&
+            renderedState !== DeferBlockState.Placeholder) {
+            afterRenderRef.destroy();
+            return;
+        }
+        const triggerLView = getTriggerLView(initialLView, tNode, walkUpTimes);
+        // Keep polling until we resolve the trigger's LView.
+        // `afterRender` should stop automatically if the view is destroyed.
+        if (!triggerLView) {
+            return;
+        }
+        // It's possible that the trigger's view was destroyed before we resolved the trigger element.
+        if (triggerLView[FLAGS] & 256 /* LViewFlags.Destroyed */) {
+            afterRenderRef.destroy();
+            return;
+        }
+        // TODO: add integration with `DeferBlockCleanupManager`.
+        const element = getTriggerElement(triggerLView, triggerIndex);
+        const cleanup = registerFn(element, () => {
+            callback();
+            removeLViewOnDestroy(triggerLView, cleanup);
+            if (initialLView !== triggerLView) {
+                removeLViewOnDestroy(initialLView, cleanup);
+            }
+            cleanup();
+        }, injector);
+        afterRenderRef.destroy();
+        storeLViewOnDestroy(triggerLView, cleanup);
+        // Since the trigger and deferred block might be in different
+        // views, we have to register the callback in both locations.
+        if (initialLView !== triggerLView) {
+            storeLViewOnDestroy(initialLView, cleanup);
+        }
+    }, { injector });
+}
 
+/**
+ * Helper function to schedule a callback to be invoked when a browser becomes idle.
+ *
+ * @param callback A function to be invoked when a browser becomes idle.
+ * @param lView LView that hosts an instance of a defer block.
+ * @param withLViewCleanup A flag that indicates whether a scheduled callback
+ *           should be cancelled in case an LView is destroyed before a callback
+ *           was invoked.
+ */
+function onIdle(callback, lView, withLViewCleanup) {
+    const injector = lView[INJECTOR$1];
+    const scheduler = injector.get(IdleScheduler);
+    const cleanupFn = () => scheduler.remove(callback);
+    const wrappedCallback = withLViewCleanup ? wrapWithLViewCleanup(callback, lView, cleanupFn) : callback;
+    scheduler.add(wrappedCallback);
+    return cleanupFn;
+}
+/**
+ * Use shims for the `requestIdleCallback` and `cancelIdleCallback` functions for
+ * environments where those functions are not available (e.g. Node.js and Safari).
+ *
+ * Note: we wrap the `requestIdleCallback` call into a function, so that it can be
+ * overridden/mocked in test environment and picked up by the runtime code.
+ */
+const _requestIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : setTimeout;
+const _cancelIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
+/**
+ * Helper service to schedule `requestIdleCallback`s for batches of defer blocks,
+ * to avoid calling `requestIdleCallback` for each defer block (e.g. if
+ * defer blocks are defined inside a for loop).
+ */
+class IdleScheduler {
+    constructor() {
+        // Indicates whether current callbacks are being invoked.
+        this.executingCallbacks = false;
+        // Currently scheduled idle callback id.
+        this.idleId = null;
+        // Set of callbacks to be invoked next.
+        this.current = new Set();
+        // Set of callbacks collected while invoking current set of callbacks.
+        // Those callbacks are scheduled for the next idle period.
+        this.deferred = new Set();
+        this.ngZone = inject(NgZone);
+        this.requestIdleCallback = _requestIdleCallback().bind(globalThis);
+        this.cancelIdleCallback = _cancelIdleCallback().bind(globalThis);
+    }
+    add(callback) {
+        const target = this.executingCallbacks ? this.deferred : this.current;
+        target.add(callback);
+        if (this.idleId === null) {
+            this.scheduleIdleCallback();
+        }
+    }
+    remove(callback) {
+        this.current.delete(callback);
+        this.deferred.delete(callback);
+    }
+    scheduleIdleCallback() {
+        const callback = () => {
+            this.cancelIdleCallback(this.idleId);
+            this.idleId = null;
+            this.executingCallbacks = true;
+            for (const callback of this.current) {
+                callback();
+            }
+            this.current.clear();
+            this.executingCallbacks = false;
+            // If there are any callbacks added during an invocation
+            // of the current ones - make them "current" and schedule
+            // a new idle callback.
+            if (this.deferred.size > 0) {
+                for (const callback of this.deferred) {
+                    this.current.add(callback);
+                }
+                this.deferred.clear();
+                this.scheduleIdleCallback();
+            }
+        };
+        // Ensure that the callback runs in the NgZone since
+        // the `requestIdleCallback` is not currently patched by Zone.js.
+        this.idleId = this.requestIdleCallback(() => this.ngZone.run(callback));
+    }
+    ngOnDestroy() {
+        if (this.idleId !== null) {
+            this.cancelIdleCallback(this.idleId);
+            this.idleId = null;
+        }
+        this.current.clear();
+        this.deferred.clear();
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: IdleScheduler,
+        providedIn: 'root',
+        factory: () => new IdleScheduler(),
+    }); }
+}
+
+/**
+ * Returns a function that captures a provided delay.
+ * Invoking the returned function schedules a trigger.
+ */
+function onTimer(delay) {
+    return (callback, lView, withLViewCleanup) => scheduleTimerTrigger(delay, callback, lView, withLViewCleanup);
+}
+/**
+ * Schedules a callback to be invoked after a given timeout.
+ *
+ * @param delay A number of ms to wait until firing a callback.
+ * @param callback A function to be invoked after a timeout.
+ * @param lView LView that hosts an instance of a defer block.
+ * @param withLViewCleanup A flag that indicates whether a scheduled callback
+ *           should be cancelled in case an LView is destroyed before a callback
+ *           was invoked.
+ */
+function scheduleTimerTrigger(delay, callback, lView, withLViewCleanup) {
+    const injector = lView[INJECTOR$1];
+    const scheduler = injector.get(TimerScheduler);
+    const cleanupFn = () => scheduler.remove(callback);
+    const wrappedCallback = withLViewCleanup ? wrapWithLViewCleanup(callback, lView, cleanupFn) : callback;
+    scheduler.add(delay, wrappedCallback);
+    return cleanupFn;
+}
+/**
+ * Helper service to schedule `setTimeout`s for batches of defer blocks,
+ * to avoid calling `setTimeout` for each defer block (e.g. if defer blocks
+ * are created inside a for loop).
+ */
+class TimerScheduler {
+    constructor() {
+        // Indicates whether current callbacks are being invoked.
+        this.executingCallbacks = false;
+        // Currently scheduled `setTimeout` id.
+        this.timeoutId = null;
+        // When currently scheduled timer would fire.
+        this.invokeTimerAt = null;
+        // List of callbacks to be invoked.
+        // For each callback we also store a timestamp on when the callback
+        // should be invoked. We store timestamps and callback functions
+        // in a flat array to avoid creating new objects for each entry.
+        // [timestamp1, callback1, timestamp2, callback2, ...]
+        this.current = [];
+        // List of callbacks collected while invoking current set of callbacks.
+        // Those callbacks are added to the "current" queue at the end of
+        // the current callback invocation. The shape of this list is the same
+        // as the shape of the `current` list.
+        this.deferred = [];
+    }
+    add(delay, callback) {
+        const target = this.executingCallbacks ? this.deferred : this.current;
+        this.addToQueue(target, Date.now() + delay, callback);
+        this.scheduleTimer();
+    }
+    remove(callback) {
+        const callbackIndex = this.removeFromQueue(this.current, callback);
+        if (callbackIndex === -1) {
+            // Try cleaning up deferred queue only in case
+            // we didn't find a callback in the "current" queue.
+            this.removeFromQueue(this.deferred, callback);
+        }
+    }
+    addToQueue(target, invokeAt, callback) {
+        let insertAtIndex = target.length;
+        for (let i = 0; i < target.length; i += 2) {
+            const invokeQueuedCallbackAt = target[i];
+            if (invokeQueuedCallbackAt > invokeAt) {
+                // We've reached a first timer that is scheduled
+                // for a later time than what we are trying to insert.
+                // This is the location at which we need to insert,
+                // no need to iterate further.
+                insertAtIndex = i;
+                break;
+            }
+        }
+        arrayInsert2(target, insertAtIndex, invokeAt, callback);
+    }
+    removeFromQueue(target, callback) {
+        let index = -1;
+        for (let i = 0; i < target.length; i += 2) {
+            const queuedCallback = target[i + 1];
+            if (queuedCallback === callback) {
+                index = i;
+                break;
+            }
+        }
+        if (index > -1) {
+            // Remove 2 elements: a timestamp slot and
+            // the following slot with a callback function.
+            arraySplice(target, index, 2);
+        }
+        return index;
+    }
+    scheduleTimer() {
+        const callback = () => {
+            clearTimeout(this.timeoutId);
+            this.timeoutId = null;
+            this.executingCallbacks = true;
+            // Invoke callbacks that were scheduled to run
+            // before the current time.
+            let now = Date.now();
+            let lastCallbackIndex = null;
+            for (let i = 0; i < this.current.length; i += 2) {
+                const invokeAt = this.current[i];
+                const callback = this.current[i + 1];
+                if (invokeAt <= now) {
+                    callback();
+                    // Point at the invoked callback function, which is located
+                    // after the timestamp.
+                    lastCallbackIndex = i + 1;
+                }
+                else {
+                    // We've reached a timer that should not be invoked yet.
+                    break;
+                }
+            }
+            if (lastCallbackIndex !== null) {
+                // If last callback index is `null` - no callbacks were invoked,
+                // so no cleanup is needed. Otherwise, remove invoked callbacks
+                // from the queue.
+                arraySplice(this.current, 0, lastCallbackIndex + 1);
+            }
+            this.executingCallbacks = false;
+            // If there are any callbacks added during an invocation
+            // of the current ones - move them over to the "current"
+            // queue.
+            if (this.deferred.length > 0) {
+                for (let i = 0; i < this.deferred.length; i += 2) {
+                    const invokeAt = this.deferred[i];
+                    const callback = this.deferred[i + 1];
+                    this.addToQueue(this.current, invokeAt, callback);
+                }
+                this.deferred.length = 0;
+            }
+            this.scheduleTimer();
+        };
+        // Avoid running timer callbacks more than once per
+        // average frame duration. This is needed for better
+        // batching and to avoid kicking off excessive change
+        // detection cycles.
+        const FRAME_DURATION_MS = 16; // 1000ms / 60fps
+        if (this.current.length > 0) {
+            const now = Date.now();
+            // First element in the queue points at the timestamp
+            // of the first (earliest) event.
+            const invokeAt = this.current[0];
+            if (!this.timeoutId ||
+                // Reschedule a timer in case a queue contains an item with
+                // an earlier timestamp and the delta is more than an average
+                // frame duration.
+                (this.invokeTimerAt && (this.invokeTimerAt - invokeAt > FRAME_DURATION_MS))) {
+                if (this.timeoutId !== null) {
+                    // There was a timeout already, but an earlier event was added
+                    // into the queue. In this case we drop an old timer and setup
+                    // a new one with an updated (smaller) timeout.
+                    clearTimeout(this.timeoutId);
+                    this.timeoutId = null;
+                }
+                const timeout = Math.max(invokeAt - now, FRAME_DURATION_MS);
+                this.invokeTimerAt = invokeAt;
+                this.timeoutId = setTimeout(callback, timeout);
+            }
+        }
+    }
+    ngOnDestroy() {
+        if (this.timeoutId !== null) {
+            clearTimeout(this.timeoutId);
+            this.timeoutId = null;
+        }
+        this.current.length = 0;
+        this.deferred.length = 0;
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: TimerScheduler,
+        providedIn: 'root',
+        factory: () => new TimerScheduler(),
+    }); }
+}
+
+/**
+ * **INTERNAL**, avoid referencing it in application code.
+ *
+ * Injector token that allows to provide `DeferBlockDependencyInterceptor` class
+ * implementation.
+ */
+const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = new InjectionToken(ngDevMode ? 'DEFER_BLOCK_DEPENDENCY_INTERCEPTOR' : '');
+/**
+ * **INTERNAL**, token used for configuring defer block behavior.
+ */
+const DEFER_BLOCK_CONFIG = new InjectionToken(ngDevMode ? 'DEFER_BLOCK_CONFIG' : '');
 /**
  * Returns whether defer blocks should be triggered.
  *
@@ -19870,223 +20444,6 @@ function scheduleDelayedPrefetching(scheduleFn, trigger) {
     }
 }
 /**
- * Helper function to get the LView in which a deferred block's trigger is rendered.
- * @param deferredHostLView LView in which the deferred block is defined.
- * @param deferredTNode TNode defining the deferred block.
- * @param walkUpTimes Number of times to go up in the view hierarchy to find the trigger's view.
- *   A negative value means that the trigger is inside the block's placeholder, while an undefined
- *   value means that the trigger is in the same LView as the deferred block.
- */
-function getTriggerLView(deferredHostLView, deferredTNode, walkUpTimes) {
-    // The trigger is in the same view, we don't need to traverse.
-    if (walkUpTimes == null) {
-        return deferredHostLView;
-    }
-    // A positive value or zero means that the trigger is in a parent view.
-    if (walkUpTimes >= 0) {
-        return walkUpViews(walkUpTimes, deferredHostLView);
-    }
-    // If the value is negative, it means that the trigger is inside the placeholder.
-    const deferredContainer = deferredHostLView[deferredTNode.index];
-    ngDevMode && assertLContainer(deferredContainer);
-    const triggerLView = deferredContainer[CONTAINER_HEADER_OFFSET] ?? null;
-    // We need to null check, because the placeholder might not have been rendered yet.
-    if (ngDevMode && triggerLView !== null) {
-        const lDetails = getLDeferBlockDetails(deferredHostLView, deferredTNode);
-        const renderedState = lDetails[DEFER_BLOCK_STATE];
-        assertEqual(renderedState, DeferBlockState.Placeholder, 'Expected a placeholder to be rendered in this defer block.');
-        assertLView(triggerLView);
-    }
-    return triggerLView;
-}
-/**
- * Gets the element that a deferred block's trigger is pointing to.
- * @param triggerLView LView in which the trigger is defined.
- * @param triggerIndex Index at which the trigger element should've been rendered.
- */
-function getTriggerElement(triggerLView, triggerIndex) {
-    const element = getNativeByIndex(HEADER_OFFSET + triggerIndex, triggerLView);
-    ngDevMode && assertElement(element);
-    return element;
-}
-/**
- * Registers a DOM-node based trigger.
- * @param initialLView LView in which the defer block is rendered.
- * @param tNode TNode representing the defer block.
- * @param triggerIndex Index at which to find the trigger element.
- * @param walkUpTimes Number of times to go up/down in the view hierarchy to find the trigger.
- * @param registerFn Function that will register the DOM events.
- * @param callback Callback to be invoked when the trigger receives the event that should render
- *     the deferred block.
- */
-function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback) {
-    const injector = initialLView[INJECTOR$1];
-    // Assumption: the `afterRender` reference should be destroyed
-    // automatically so we don't need to keep track of it.
-    const afterRenderRef = afterRender(() => {
-        const lDetails = getLDeferBlockDetails(initialLView, tNode);
-        const renderedState = lDetails[DEFER_BLOCK_STATE];
-        // If the block was loaded before the trigger was resolved, we don't need to do anything.
-        if (renderedState !== DeferBlockInternalState.Initial &&
-            renderedState !== DeferBlockState.Placeholder) {
-            afterRenderRef.destroy();
-            return;
-        }
-        const triggerLView = getTriggerLView(initialLView, tNode, walkUpTimes);
-        // Keep polling until we resolve the trigger's LView.
-        // `afterRender` should stop automatically if the view is destroyed.
-        if (!triggerLView) {
-            return;
-        }
-        // It's possible that the trigger's view was destroyed before we resolved the trigger element.
-        if (triggerLView[FLAGS] & 256 /* LViewFlags.Destroyed */) {
-            afterRenderRef.destroy();
-            return;
-        }
-        // TODO: add integration with `DeferBlockCleanupManager`.
-        const element = getTriggerElement(triggerLView, triggerIndex);
-        const cleanup = registerFn(element, () => {
-            callback();
-            removeLViewOnDestroy(triggerLView, cleanup);
-            if (initialLView !== triggerLView) {
-                removeLViewOnDestroy(initialLView, cleanup);
-            }
-            cleanup();
-        }, injector);
-        afterRenderRef.destroy();
-        storeLViewOnDestroy(triggerLView, cleanup);
-        // Since the trigger and deferred block might be in different
-        // views, we have to register the callback in both locations.
-        if (initialLView !== triggerLView) {
-            storeLViewOnDestroy(initialLView, cleanup);
-        }
-    }, { injector });
-}
-/**
- * Helper function to schedule a callback to be invoked when a browser becomes idle.
- *
- * @param callback A function to be invoked when a browser becomes idle.
- * @param lView LView that hosts an instance of a defer block.
- * @param withLViewCleanup A flag that indicates whether a scheduled callback
- *           should be cancelled in case an LView is destroyed before a callback
- *           was invoked.
- */
-function onIdle(callback, lView, withLViewCleanup) {
-    const injector = lView[INJECTOR$1];
-    const scheduler = injector.get(OnIdleScheduler);
-    const cleanupFn = () => scheduler.remove(callback);
-    const wrappedCallback = withLViewCleanup ? wrapWithLViewCleanup(callback, lView, cleanupFn) : callback;
-    scheduler.add(wrappedCallback);
-    return cleanupFn;
-}
-/**
- * Returns a function that captures a provided delay.
- * Invoking the returned function schedules a trigger.
- */
-function onTimer(delay) {
-    return (callback, lView, withLViewCleanup) => scheduleTimerTrigger(delay, callback, lView, withLViewCleanup);
-}
-/**
- * Schedules a callback to be invoked after a given timeout.
- *
- * @param delay A number of ms to wait until firing a callback.
- * @param callback A function to be invoked after a timeout.
- * @param lView LView that hosts an instance of a defer block.
- * @param withLViewCleanup A flag that indicates whether a scheduled callback
- *           should be cancelled in case an LView is destroyed before a callback
- *           was invoked.
- */
-function scheduleTimerTrigger(delay, callback, lView, withLViewCleanup) {
-    const injector = lView[INJECTOR$1];
-    const scheduler = injector.get(TimerScheduler);
-    const cleanupFn = () => scheduler.remove(callback);
-    const wrappedCallback = withLViewCleanup ? wrapWithLViewCleanup(callback, lView, cleanupFn) : callback;
-    scheduler.add(delay, wrappedCallback);
-    return cleanupFn;
-}
-/**
- * Wraps a given callback into a logic that registers a cleanup function
- * in the LView cleanup slot, to be invoked when an LView is destroyed.
- */
-function wrapWithLViewCleanup(callback, lView, cleanup) {
-    const wrappedCallback = () => {
-        callback();
-        removeLViewOnDestroy(lView, cleanup);
-    };
-    storeLViewOnDestroy(lView, cleanup);
-    return wrappedCallback;
-}
-/**
- * Calculates a data slot index for defer block info (either static or
- * instance-specific), given an index of a defer instruction.
- */
-function getDeferBlockDataIndex(deferBlockIndex) {
-    // Instance state is located at the *next* position
-    // after the defer block slot in an LView or TView.data.
-    return deferBlockIndex + 1;
-}
-/** Retrieves a defer block state from an LView, given a TNode that represents a block. */
-function getLDeferBlockDetails(lView, tNode) {
-    const tView = lView[TVIEW];
-    const slotIndex = getDeferBlockDataIndex(tNode.index);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    return lView[slotIndex];
-}
-/** Stores a defer block instance state in LView. */
-function setLDeferBlockDetails(lView, deferBlockIndex, lDetails) {
-    const tView = lView[TVIEW];
-    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    lView[slotIndex] = lDetails;
-}
-/** Retrieves static info about a defer block, given a TView and a TNode that represents a block. */
-function getTDeferBlockDetails(tView, tNode) {
-    const slotIndex = getDeferBlockDataIndex(tNode.index);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    return tView.data[slotIndex];
-}
-/** Stores a defer block static info in `TView.data`. */
-function setTDeferBlockDetails(tView, deferBlockIndex, deferBlockConfig) {
-    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    tView.data[slotIndex] = deferBlockConfig;
-}
-function getTemplateIndexForState(newState, hostLView, tNode) {
-    const tView = hostLView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    switch (newState) {
-        case DeferBlockState.Complete:
-            return tDetails.primaryTmplIndex;
-        case DeferBlockState.Loading:
-            return tDetails.loadingTmplIndex;
-        case DeferBlockState.Error:
-            return tDetails.errorTmplIndex;
-        case DeferBlockState.Placeholder:
-            return tDetails.placeholderTmplIndex;
-        default:
-            ngDevMode && throwError(`Unexpected defer block state: ${newState}`);
-            return null;
-    }
-}
-/**
- * Returns a minimum amount of time that a given state should be rendered for,
- * taking into account `minimum` parameter value. If the `minimum` value is
- * not specified - returns `null`.
- */
-function getMinimumDurationForState(tDetails, currentState) {
-    if (currentState === DeferBlockState.Placeholder) {
-        return tDetails.placeholderBlockConfig?.[MINIMUM_SLOT] ?? null;
-    }
-    else if (currentState === DeferBlockState.Loading) {
-        return tDetails.loadingBlockConfig?.[MINIMUM_SLOT] ?? null;
-    }
-    return null;
-}
-/** Retrieves the value of the `after` parameter on the @loading block. */
-function getLoadingBlockAfter(tDetails) {
-    return tDetails.loadingBlockConfig?.[LOADING_AFTER_SLOT] ?? null;
-}
-/**
  * Transitions a defer block to the new state. Updates the  necessary
  * data structures and renders corresponding block.
  *
@@ -20300,22 +20657,6 @@ function triggerResourceLoading(tDetails, lView) {
         }
     });
 }
-/**
- * Adds downloaded dependencies into a directive or a pipe registry,
- * making sure that a dependency doesn't yet exist in the registry.
- */
-function addDepsToRegistry(currentDeps, newDeps) {
-    if (!currentDeps || currentDeps.length === 0) {
-        return newDeps;
-    }
-    const currentDepSet = new Set(currentDeps);
-    for (const dep of newDeps) {
-        currentDepSet.add(dep);
-    }
-    // If `currentDeps` is the same length, there were no new deps and can
-    // return the original array.
-    return (currentDeps.length === currentDepSet.size) ? currentDeps : Array.from(currentDepSet);
-}
 /** Utility function to render placeholder content (if present) */
 function renderPlaceholder(lView, tNode) {
     const lContainer = lView[tNode.index];
@@ -20342,11 +20683,6 @@ function renderDeferStateAfterResourceLoading(tDetails, tNode, lContainer) {
             renderDeferBlockState(DeferBlockState.Error, tNode, lContainer);
         }
     });
-}
-/** Retrieves a TNode that represents main content of a defer block. */
-function getPrimaryBlockTNode(tView, tDetails) {
-    const adjustedIndex = tDetails.primaryTmplIndex + HEADER_OFFSET;
-    return getTNode(tView, adjustedIndex);
 }
 /**
  * Attempts to trigger loading of defer block dependencies.
@@ -20387,366 +20723,6 @@ function triggerDeferBlock(lView, tNode) {
                 throwError('Unknown defer block state');
             }
     }
-}
-/**
- * Asserts whether all dependencies for a defer block are loaded.
- * Always run this function (in dev mode) before rendering a defer
- * block in completed state.
- */
-function assertDeferredDependenciesLoaded(tDetails) {
-    assertEqual(tDetails.loadingState, DeferDependenciesLoadingState.COMPLETE, 'Expecting all deferred dependencies to be loaded.');
-}
-/**
- * **INTERNAL**, avoid referencing it in application code.
- *
- * Injector token that allows to provide `DeferBlockDependencyInterceptor` class
- * implementation.
- */
-const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = new InjectionToken(ngDevMode ? 'DEFER_BLOCK_DEPENDENCY_INTERCEPTOR' : '');
-/**
- * Determines if a given value matches the expected structure of a defer block
- *
- * We can safely rely on the primaryTmplIndex because every defer block requires
- * that a primary template exists. All the other template options are optional.
- */
-function isTDeferBlockDetails(value) {
-    return (typeof value === 'object') &&
-        (typeof value.primaryTmplIndex === 'number');
-}
-/**
- * Internal token used for configuring defer block behavior.
- */
-const DEFER_BLOCK_CONFIG = new InjectionToken(ngDevMode ? 'DEFER_BLOCK_CONFIG' : '');
-/**
- * Retrieves all defer blocks in a given LView.
- *
- * @param lView lView with defer blocks
- * @param deferBlocks defer block aggregator array
- */
-function getDeferBlocks(lView, deferBlocks) {
-    const tView = lView[TVIEW];
-    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
-        if (isLContainer(lView[i])) {
-            const lContainer = lView[i];
-            // An LContainer may represent an instance of a defer block, in which case
-            // we store it as a result. Otherwise, keep iterating over LContainer views and
-            // look for defer blocks.
-            const isLast = i === tView.bindingStartIndex - 1;
-            if (!isLast) {
-                const tNode = tView.data[i];
-                const tDetails = getTDeferBlockDetails(tView, tNode);
-                if (isTDeferBlockDetails(tDetails)) {
-                    deferBlocks.push({ lContainer, lView, tNode, tDetails });
-                    // This LContainer represents a defer block, so we exit
-                    // this iteration and don't inspect views in this LContainer.
-                    continue;
-                }
-            }
-            for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-                getDeferBlocks(lContainer[i], deferBlocks);
-            }
-        }
-        else if (isLView(lView[i])) {
-            // This is a component, enter the `getDeferBlocks` recursively.
-            getDeferBlocks(lView[i], deferBlocks);
-        }
-    }
-}
-/**
- * Registers a cleanup function associated with a prefetching trigger
- * of a given defer block.
- */
-function registerTDetailsCleanup(injector, tDetails, key, cleanupFn) {
-    injector.get(DeferBlockCleanupManager).add(tDetails, key, cleanupFn);
-}
-/**
- * Invokes all registered prefetch cleanup triggers
- * and removes all cleanup functions afterwards.
- */
-function invokeTDetailsCleanup(injector, tDetails) {
-    injector.get(DeferBlockCleanupManager).cleanup(tDetails);
-}
-/**
- * Internal service to keep track of cleanup functions associated
- * with defer blocks. This class is used to manage cleanup functions
- * created for prefetching triggers.
- */
-class DeferBlockCleanupManager {
-    constructor() {
-        this.blocks = new Map();
-    }
-    add(tDetails, key, callback) {
-        if (!this.blocks.has(tDetails)) {
-            this.blocks.set(tDetails, new Map());
-        }
-        const block = this.blocks.get(tDetails);
-        if (!block.has(key)) {
-            block.set(key, []);
-        }
-        const callbacks = block.get(key);
-        callbacks.push(callback);
-    }
-    has(tDetails, key) {
-        return !!this.blocks.get(tDetails)?.has(key);
-    }
-    cleanup(tDetails) {
-        const block = this.blocks.get(tDetails);
-        if (block) {
-            for (const callbacks of Object.values(block)) {
-                for (const callback of callbacks) {
-                    callback();
-                }
-            }
-            this.blocks.delete(tDetails);
-        }
-    }
-    ngOnDestroy() {
-        for (const [block] of this.blocks) {
-            this.cleanup(block);
-        }
-        this.blocks.clear();
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: DeferBlockCleanupManager,
-        providedIn: 'root',
-        factory: () => new DeferBlockCleanupManager(),
-    }); }
-}
-/**
- * Use shims for the `requestIdleCallback` and `cancelIdleCallback` functions for
- * environments where those functions are not available (e.g. Node.js and Safari).
- *
- * Note: we wrap the `requestIdleCallback` call into a function, so that it can be
- * overridden/mocked in test environment and picked up by the runtime code.
- */
-const _requestIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : setTimeout;
-const _cancelIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
-/**
- * Helper service to schedule `requestIdleCallback`s for batches of defer blocks,
- * to avoid calling `requestIdleCallback` for each defer block (e.g. if
- * defer blocks are defined inside a for loop).
- */
-class OnIdleScheduler {
-    constructor() {
-        // Indicates whether current callbacks are being invoked.
-        this.executingCallbacks = false;
-        // Currently scheduled idle callback id.
-        this.idleId = null;
-        // Set of callbacks to be invoked next.
-        this.current = new Set();
-        // Set of callbacks collected while invoking current set of callbacks.
-        // Those callbacks are scheduled for the next idle period.
-        this.deferred = new Set();
-        this.ngZone = inject(NgZone);
-        this.requestIdleCallback = _requestIdleCallback().bind(globalThis);
-        this.cancelIdleCallback = _cancelIdleCallback().bind(globalThis);
-    }
-    add(callback) {
-        const target = this.executingCallbacks ? this.deferred : this.current;
-        target.add(callback);
-        if (this.idleId === null) {
-            this.scheduleIdleCallback();
-        }
-    }
-    remove(callback) {
-        this.current.delete(callback);
-        this.deferred.delete(callback);
-    }
-    scheduleIdleCallback() {
-        const callback = () => {
-            this.cancelIdleCallback(this.idleId);
-            this.idleId = null;
-            this.executingCallbacks = true;
-            for (const callback of this.current) {
-                callback();
-            }
-            this.current.clear();
-            this.executingCallbacks = false;
-            // If there are any callbacks added during an invocation
-            // of the current ones - make them "current" and schedule
-            // a new idle callback.
-            if (this.deferred.size > 0) {
-                for (const callback of this.deferred) {
-                    this.current.add(callback);
-                }
-                this.deferred.clear();
-                this.scheduleIdleCallback();
-            }
-        };
-        // Ensure that the callback runs in the NgZone since
-        // the `requestIdleCallback` is not currently patched by Zone.js.
-        this.idleId = this.requestIdleCallback(() => this.ngZone.run(callback));
-    }
-    ngOnDestroy() {
-        if (this.idleId !== null) {
-            this.cancelIdleCallback(this.idleId);
-            this.idleId = null;
-        }
-        this.current.clear();
-        this.deferred.clear();
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: OnIdleScheduler,
-        providedIn: 'root',
-        factory: () => new OnIdleScheduler(),
-    }); }
-}
-/**
- * Helper service to schedule `setTimeout`s for batches of defer blocks,
- * to avoid calling `setTimeout` for each defer block (e.g. if defer blocks
- * are created inside a for loop).
- */
-class TimerScheduler {
-    constructor() {
-        // Indicates whether current callbacks are being invoked.
-        this.executingCallbacks = false;
-        // Currently scheduled `setTimeout` id.
-        this.timeoutId = null;
-        // When currently scheduled timer would fire.
-        this.invokeTimerAt = null;
-        // List of callbacks to be invoked.
-        // For each callback we also store a timestamp on when the callback
-        // should be invoked. We store timestamps and callback functions
-        // in a flat array to avoid creating new objects for each entry.
-        // [timestamp1, callback1, timestamp2, callback2, ...]
-        this.current = [];
-        // List of callbacks collected while invoking current set of callbacks.
-        // Those callbacks are added to the "current" queue at the end of
-        // the current callback invocation. The shape of this list is the same
-        // as the shape of the `current` list.
-        this.deferred = [];
-    }
-    add(delay, callback) {
-        const target = this.executingCallbacks ? this.deferred : this.current;
-        this.addToQueue(target, Date.now() + delay, callback);
-        this.scheduleTimer();
-    }
-    remove(callback) {
-        const callbackIndex = this.removeFromQueue(this.current, callback);
-        if (callbackIndex === -1) {
-            // Try cleaning up deferred queue only in case
-            // we didn't find a callback in the "current" queue.
-            this.removeFromQueue(this.deferred, callback);
-        }
-    }
-    addToQueue(target, invokeAt, callback) {
-        let insertAtIndex = target.length;
-        for (let i = 0; i < target.length; i += 2) {
-            const invokeQueuedCallbackAt = target[i];
-            if (invokeQueuedCallbackAt > invokeAt) {
-                // We've reached a first timer that is scheduled
-                // for a later time than what we are trying to insert.
-                // This is the location at which we need to insert,
-                // no need to iterate further.
-                insertAtIndex = i;
-                break;
-            }
-        }
-        arrayInsert2(target, insertAtIndex, invokeAt, callback);
-    }
-    removeFromQueue(target, callback) {
-        let index = -1;
-        for (let i = 0; i < target.length; i += 2) {
-            const queuedCallback = target[i + 1];
-            if (queuedCallback === callback) {
-                index = i;
-                break;
-            }
-        }
-        if (index > -1) {
-            // Remove 2 elements: a timestamp slot and
-            // the following slot with a callback function.
-            arraySplice(target, index, 2);
-        }
-        return index;
-    }
-    scheduleTimer() {
-        const callback = () => {
-            clearTimeout(this.timeoutId);
-            this.timeoutId = null;
-            this.executingCallbacks = true;
-            // Invoke callbacks that were scheduled to run
-            // before the current time.
-            let now = Date.now();
-            let lastCallbackIndex = null;
-            for (let i = 0; i < this.current.length; i += 2) {
-                const invokeAt = this.current[i];
-                const callback = this.current[i + 1];
-                if (invokeAt <= now) {
-                    callback();
-                    // Point at the invoked callback function, which is located
-                    // after the timestamp.
-                    lastCallbackIndex = i + 1;
-                }
-                else {
-                    // We've reached a timer that should not be invoked yet.
-                    break;
-                }
-            }
-            if (lastCallbackIndex !== null) {
-                // If last callback index is `null` - no callbacks were invoked,
-                // so no cleanup is needed. Otherwise, remove invoked callbacks
-                // from the queue.
-                arraySplice(this.current, 0, lastCallbackIndex + 1);
-            }
-            this.executingCallbacks = false;
-            // If there are any callbacks added during an invocation
-            // of the current ones - move them over to the "current"
-            // queue.
-            if (this.deferred.length > 0) {
-                for (let i = 0; i < this.deferred.length; i += 2) {
-                    const invokeAt = this.deferred[i];
-                    const callback = this.deferred[i + 1];
-                    this.addToQueue(this.current, invokeAt, callback);
-                }
-                this.deferred.length = 0;
-            }
-            this.scheduleTimer();
-        };
-        // Avoid running timer callbacks more than once per
-        // average frame duration. This is needed for better
-        // batching and to avoid kicking off excessive change
-        // detection cycles.
-        const FRAME_DURATION_MS = 16; // 1000ms / 60fps
-        if (this.current.length > 0) {
-            const now = Date.now();
-            // First element in the queue points at the timestamp
-            // of the first (earliest) event.
-            const invokeAt = this.current[0];
-            if (!this.timeoutId ||
-                // Reschedule a timer in case a queue contains an item with
-                // an earlier timestamp and the delta is more than an average
-                // frame duration.
-                (this.invokeTimerAt && (this.invokeTimerAt - invokeAt > FRAME_DURATION_MS))) {
-                if (this.timeoutId !== null) {
-                    // There was a timeout already, but an earlier event was added
-                    // into the queue. In this case we drop an old timer and setup
-                    // a new one with an updated (smaller) timeout.
-                    clearTimeout(this.timeoutId);
-                    this.timeoutId = null;
-                }
-                const timeout = Math.max(invokeAt - now, FRAME_DURATION_MS);
-                this.invokeTimerAt = invokeAt;
-                this.timeoutId = setTimeout(callback, timeout);
-            }
-        }
-    }
-    ngOnDestroy() {
-        if (this.timeoutId !== null) {
-            clearTimeout(this.timeoutId);
-            this.timeoutId = null;
-        }
-        this.current.length = 0;
-        this.deferred.length = 0;
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: TimerScheduler,
-        providedIn: 'root',
-        factory: () => new TimerScheduler(),
-    }); }
 }
 
 function elementStartFirstCreatePass(index, tView, lView, name, attrsIndex, localRefsIndex) {
@@ -33781,6 +33757,42 @@ const WATCH_NODE = /* @__PURE__ */ (() => {
 
 function setAlternateWeakRefImpl(impl) {
     // TODO: remove this function
+}
+
+/**
+ * Retrieves all defer blocks in a given LView.
+ *
+ * @param lView lView with defer blocks
+ * @param deferBlocks defer block aggregator array
+ */
+function getDeferBlocks(lView, deferBlocks) {
+    const tView = lView[TVIEW];
+    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
+        if (isLContainer(lView[i])) {
+            const lContainer = lView[i];
+            // An LContainer may represent an instance of a defer block, in which case
+            // we store it as a result. Otherwise, keep iterating over LContainer views and
+            // look for defer blocks.
+            const isLast = i === tView.bindingStartIndex - 1;
+            if (!isLast) {
+                const tNode = tView.data[i];
+                const tDetails = getTDeferBlockDetails(tView, tNode);
+                if (isTDeferBlockDetails(tDetails)) {
+                    deferBlocks.push({ lContainer, lView, tNode, tDetails });
+                    // This LContainer represents a defer block, so we exit
+                    // this iteration and don't inspect views in this LContainer.
+                    continue;
+                }
+            }
+            for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+                getDeferBlocks(lContainer[i], deferBlocks);
+            }
+        }
+        else if (isLView(lView[i])) {
+            // This is a component, enter the `getDeferBlocks` recursively.
+            getDeferBlocks(lView[i], deferBlocks);
+        }
+    }
 }
 
 /**
