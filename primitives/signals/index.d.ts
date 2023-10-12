@@ -1,9 +1,33 @@
 /**
- * @license Angular v17.1.0-next.0+sha-20e7e21
+ * @license Angular v17.1.0-next.0+sha-ca81661
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
+
+export declare const COMPUTED_NODE: {
+    value: any;
+    dirty: boolean;
+    error: null;
+    equal: typeof defaultEquals;
+    producerMustRecompute(node: ComputedNode<unknown>): boolean;
+    producerRecomputeValue(node: ComputedNode<unknown>): void;
+    version: number & {
+        __brand: "Version";
+    };
+    producerNode: ReactiveNode[] | undefined;
+    producerLastReadVersion: (number & {
+        __brand: "Version";
+    })[] | undefined;
+    producerIndexOfThis: number[] | undefined;
+    nextProducerIndex: number;
+    liveConsumerNode: ReactiveNode[] | undefined;
+    liveConsumerIndexOfThis: number[] | undefined;
+    consumerAllowSignalWrites: boolean;
+    consumerIsAlwaysLive: boolean;
+    consumerMarkedDirty(node: unknown): void;
+    consumerOnSignalRead(node: unknown): void;
+};
 
 declare type ComputedGetter<T> = (() => T) & {
     [SIGNAL]: ComputedNode<T>;
@@ -14,7 +38,7 @@ declare type ComputedGetter<T> = (() => T) & {
  *
  * `Computed`s are both producers and consumers of reactivity.
  */
-declare interface ComputedNode<T> extends ReactiveNode {
+export declare interface ComputedNode<T> extends ReactiveNode {
     /**
      * Current value of the computation, or one of the sentinel values above (`UNSET`, `COMPUTING`,
      * `ERROR`).
@@ -31,6 +55,13 @@ declare interface ComputedNode<T> extends ReactiveNode {
     computation: () => T;
     equal: ValueEqualityFn<T>;
 }
+
+/**
+ * A dedicated symbol used in place of a computed signal value to indicate that a given computation
+ * is in progress. Used to detect cycles in computation chains.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+export declare const COMPUTING: any;
 
 /**
  * Finalize this consumer's state after a reactive computation has run.
@@ -53,6 +84,8 @@ export declare function consumerBeforeComputation(node: ReactiveNode | null): Re
  */
 export declare function consumerDestroy(node: ReactiveNode): void;
 
+export declare function consumerMarkDirty(node: ReactiveNode): void;
+
 /**
  * Create a computed signal which derives a reactive value from an expression.
  */
@@ -69,6 +102,13 @@ export declare function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => v
  * The default equality function used for `signal` and `computed`, which uses referential equality.
  */
 export declare function defaultEquals<T>(a: T, b: T): boolean;
+
+/**
+ * A dedicated symbol used in place of a computed signal value to indicate that a given computation
+ * failed. The thrown error is cached until the computation gets dirty again.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+export declare const ERRORED: any;
 
 export declare function getActiveConsumer(): ReactiveNode | null;
 
@@ -228,6 +268,12 @@ export declare interface SignalNode<T> extends ReactiveNode {
 export declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;
 
 export declare function signalUpdateFn<T>(node: SignalNode<T>, updater: (value: T) => T): void;
+
+/**
+ * A dedicated symbol used before a computed value has been calculated for the first time.
+ * Explicitly typed as `any` so we can use it as signal's value.
+ */
+export declare const UNSET: any;
 
 
 /**

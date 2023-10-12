@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.1.0-next.0+sha-20e7e21
+ * @license Angular v17.1.0-next.0+sha-ca81661
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
+import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, getActiveConsumer as getActiveConsumer$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, createComputed as createComputed$1, SIGNAL as SIGNAL$1, consumerMarkDirty as consumerMarkDirty$1, producerUpdateValueVersion as producerUpdateValueVersion$1, producerAccessed as producerAccessed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, createWatch as createWatch$1, COMPUTED_NODE as COMPUTED_NODE$1, UNSET as UNSET$1, ERRORED as ERRORED$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, Observable, merge as merge$1, BehaviorSubject, of } from 'rxjs';
 import { share, switchMap, distinctUntilChanged, first } from 'rxjs/operators';
 
@@ -2891,6 +2891,12 @@ function setBindingIndex(value) {
 function nextBindingIndex() {
     return instructionState.lFrame.bindingIndex++;
 }
+function getVirtualInstructionIndex() {
+    return instructionState.lFrame.currentVirtualInstruction;
+}
+function incrementVirtualInstructionIndex() {
+    return ++instructionState.lFrame.currentVirtualInstruction;
+}
 function incrementBindingIndex(count) {
     const lFrame = instructionState.lFrame;
     const index = lFrame.bindingIndex;
@@ -3086,6 +3092,7 @@ function createLFrame(parent) {
         currentDirectiveIndex: -1,
         bindingRootIndex: -1,
         bindingIndex: -1,
+        currentVirtualInstruction: 0,
         currentQueryIndex: 0,
         parent: parent,
         child: null,
@@ -3133,6 +3140,7 @@ function leaveView() {
     oldLFrame.contextLView = null;
     oldLFrame.elementDepthCount = 0;
     oldLFrame.currentDirectiveIndex = -1;
+    oldLFrame.currentVirtualInstruction = 0;
     oldLFrame.currentNamespace = null;
     oldLFrame.bindingRootIndex = -1;
     oldLFrame.bindingIndex = -1;
@@ -10429,7 +10437,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-20e7e21');
+const VERSION = new Version('17.1.0-next.0+sha-ca81661');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10449,64 +10457,6 @@ const VERSION = new Version('17.1.0-next.0+sha-20e7e21');
 // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
 // - mod2.injector.get(token, default)
 const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
-
-/**
- * Checks if the given `value` is a reactive `Signal`.
- */
-function isSignal(value) {
-    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
-}
-
-/**
- * Create a computed `Signal` which derives a reactive value from an expression.
- */
-function computed(computation, options) {
-    const getter = createComputed$1(computation);
-    if (options?.equal) {
-        getter[SIGNAL$1].equal = options.equal;
-    }
-    return getter;
-}
-
-/**
- * Create a `Signal` that can be set or updated directly.
- */
-function signal(initialValue, options) {
-    const signalFn = createSignal$1(initialValue);
-    const node = signalFn[SIGNAL$1];
-    if (options?.equal) {
-        node.equal = options.equal;
-    }
-    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
-    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
-    signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
-    return signalFn;
-}
-function signalAsReadonlyFn() {
-    const node = this[SIGNAL$1];
-    if (node.readonlyFn === undefined) {
-        const readonlyFn = () => this();
-        readonlyFn[SIGNAL$1] = node;
-        node.readonlyFn = readonlyFn;
-    }
-    return node.readonlyFn;
-}
-
-/**
- * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
- * can, optionally, return a value.
- */
-function untracked(nonReactiveReadsFn) {
-    const prevConsumer = setActiveConsumer$1(null);
-    // We are not trying to catch any particular errors here, just making sure that the consumers
-    // stack is restored in case of errors.
-    try {
-        return nonReactiveReadsFn();
-    }
-    finally {
-        setActiveConsumer$1(prevConsumer);
-    }
-}
 
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 function wrappedError(message, originalError) {
@@ -10618,166 +10568,6 @@ function assertNotInReactiveContext(debugFn, extraContext) {
             `${debugFn.name}() cannot be called from within a reactive context.${extraContext ? ` ${extraContext}` : ''}`);
     }
 }
-
-/**
- * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
- * injector.
- */
-const APP_EFFECT_SCHEDULER = new InjectionToken('', {
-    providedIn: 'root',
-    factory: () => inject(EffectScheduler),
-});
-/**
- * A scheduler which manages the execution of effects.
- */
-class EffectScheduler {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: EffectScheduler,
-        providedIn: 'root',
-        factory: () => new ZoneAwareMicrotaskScheduler(),
-    }); }
-}
-/**
- * An `EffectScheduler` which is capable of queueing scheduled effects per-zone, and flushing them
- * as an explicit operation.
- */
-class ZoneAwareQueueingScheduler {
-    constructor() {
-        this.queuedEffectCount = 0;
-        this.queues = new Map();
-    }
-    scheduleEffect(handle) {
-        const zone = handle.creationZone;
-        if (!this.queues.has(zone)) {
-            this.queues.set(zone, new Set());
-        }
-        const queue = this.queues.get(zone);
-        if (queue.has(handle)) {
-            return;
-        }
-        this.queuedEffectCount++;
-        queue.add(handle);
-    }
-    /**
-     * Run all scheduled effects.
-     *
-     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
-     * ordering guarantee between effects scheduled in different zones.
-     */
-    flush() {
-        while (this.queuedEffectCount > 0) {
-            for (const [zone, queue] of this.queues) {
-                // `zone` here must be defined.
-                if (zone === null) {
-                    this.flushQueue(queue);
-                }
-                else {
-                    zone.run(() => this.flushQueue(queue));
-                }
-            }
-        }
-    }
-    flushQueue(queue) {
-        for (const handle of queue) {
-            queue.delete(handle);
-            this.queuedEffectCount--;
-            // TODO: what happens if this throws an error?
-            handle.run();
-        }
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: ZoneAwareQueueingScheduler,
-        providedIn: 'root',
-        factory: () => new ZoneAwareQueueingScheduler(),
-    }); }
-}
-/**
- * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
- * when.
- */
-class ZoneAwareMicrotaskScheduler {
-    constructor() {
-        this.hasQueuedFlush = false;
-        this.delegate = new ZoneAwareQueueingScheduler();
-        this.flushTask = () => {
-            // Leave `hasQueuedFlush` as `true` so we don't queue another microtask if more effects are
-            // scheduled during flushing. The flush of the `ZoneAwareQueueingScheduler` delegate is
-            // guaranteed to empty the queue.
-            this.delegate.flush();
-            this.hasQueuedFlush = false;
-            // This is a variable initialization, not a method.
-            // tslint:disable-next-line:semicolon
-        };
-    }
-    scheduleEffect(handle) {
-        this.delegate.scheduleEffect(handle);
-        if (!this.hasQueuedFlush) {
-            queueMicrotask(this.flushTask);
-            this.hasQueuedFlush = true;
-        }
-    }
-}
-/**
- * Core reactive node for an Angular effect.
- *
- * `EffectHandle` combines the reactive graph's `Watch` base node for effects with the framework's
- * scheduling abstraction (`EffectScheduler`) as well as automatic cleanup via `DestroyRef` if
- * available/requested.
- */
-class EffectHandle {
-    constructor(scheduler, effectFn, creationZone, destroyRef, errorHandler, allowSignalWrites) {
-        this.scheduler = scheduler;
-        this.effectFn = effectFn;
-        this.creationZone = creationZone;
-        this.errorHandler = errorHandler;
-        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
-        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
-    }
-    runEffect(onCleanup) {
-        try {
-            this.effectFn(onCleanup);
-        }
-        catch (err) {
-            this.errorHandler?.handleError(err);
-        }
-    }
-    run() {
-        this.watcher.run();
-    }
-    schedule() {
-        this.scheduler.scheduleEffect(this);
-    }
-    notify() {
-        this.watcher.notify();
-    }
-    destroy() {
-        this.watcher.destroy();
-        this.unregisterOnDestroy?.();
-        // Note: if the effect is currently scheduled, it's not un-scheduled, and so the scheduler will
-        // retain a reference to it. Attempting to execute it will be a no-op.
-    }
-}
-/**
- * Create a global `Effect` for the given reactive function.
- */
-function effect(effectFn, options) {
-    ngDevMode &&
-        assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
-            'effect inside the component constructor.');
-    !options?.injector && assertInInjectionContext(effect);
-    const injector = options?.injector ?? inject(Injector);
-    const errorHandler = injector.get(ErrorHandler, null, { optional: true });
-    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, errorHandler, options?.allowSignalWrites ?? false);
-    // Effects start dirty.
-    handle.notify();
-    return handle;
-}
-
-// clang-format off
-// clang-format on
 
 /// <reference types="rxjs" />
 class EventEmitter_ extends Subject {
@@ -11922,6 +11712,13 @@ function ɵɵadvance(delta) {
 }
 function selectIndexInternal(tView, lView, index, checkNoChangesMode) {
     ngDevMode && assertIndexInDeclRange(lView[TVIEW], index);
+    // Flush virtual instructions up to this point.
+    const { virtualUpdate } = tView;
+    if (virtualUpdate) {
+        for (let idx = getVirtualInstructionIndex(); idx < virtualUpdate.length && virtualUpdate[idx].slot < index; idx = incrementVirtualInstructionIndex()) {
+            virtualUpdate[idx].instruction();
+        }
+    }
     // Flush the initial hooks for elements in the view that have been added up to this point.
     // PERF WARNING: do NOT extract this to a separate function without running benchmarks
     if (!checkNoChangesMode) {
@@ -12159,6 +11956,12 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
                 effectiveConsumer.dirty = false;
             }
             templateFn(rf, context);
+            // Flush remaining virtual instructions.
+            if (isUpdatePhase && tView.virtualUpdate) {
+                for (let idx = getVirtualInstructionIndex(); idx < tView.virtualUpdate.length; idx++) {
+                    tView.virtualUpdate[idx].instruction();
+                }
+            }
         }
         finally {
             consumerAfterComputation$1(effectiveConsumer, prevConsumer);
@@ -12294,6 +12097,7 @@ function createTView(type, declTNode, templateFn, decls, vars, directives, pipes
         schemas: schemas,
         consts: consts,
         incompleteFirstPass: false,
+        virtualUpdate: null,
         ssrId,
     };
     if (ngDevMode) {
@@ -12563,13 +12367,14 @@ function mapPropName(name) {
         return 'tabIndex';
     return name;
 }
-function elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, nativeOnly) {
+function elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, nativeOnly, skipSignal) {
     ngDevMode && assertNotSame(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
     const element = getNativeByTNode(tNode, lView);
     let inputData = tNode.inputs;
     let dataValue;
+    // TODO(signals): use prop target here
     if (!nativeOnly && inputData != null && (dataValue = inputData[propName])) {
-        setInputsForProperty(tView, lView, dataValue, propName, value);
+        setInputsForProperty(tView, lView, dataValue, propName, value, skipSignal);
         if (isComponentHost(tNode))
             markDirtyIfOnPush(lView, tNode.index);
         if (ngDevMode) {
@@ -12979,7 +12784,7 @@ function addComponentLogic(lView, hostTNode, def) {
     const rendererFactory = lView[ENVIRONMENT].rendererFactory;
     let lViewFlags = 16 /* LViewFlags.CheckAlways */;
     if (def.signals) {
-        lViewFlags = 4096 /* LViewFlags.SignalView */;
+        lViewFlags = 4096 /* LViewFlags.SignalView */ | 1024 /* LViewFlags.RefreshView */;
     }
     else if (def.onPush) {
         lViewFlags = 64 /* LViewFlags.Dirty */;
@@ -13272,13 +13077,17 @@ function handleError(lView, error) {
  *        possibly minified, property names to write to.
  * @param value Value to set.
  */
-function setInputsForProperty(tView, lView, inputs, publicName, value) {
+function setInputsForProperty(tView, lView, inputs, publicName, value, skipSignal) {
     for (let i = 0; i < inputs.length;) {
         const index = inputs[i++];
         const privateName = inputs[i++];
         const instance = lView[index];
         ngDevMode && assertIndexInRange(lView, index);
         const def = tView.data[index];
+        // TODO(signals): not ideal. just for prototyping.
+        if (def.signals && skipSignal) {
+            continue;
+        }
         writeToDirectiveInput(def, instance, publicName, privateName, value);
     }
 }
@@ -13293,6 +13102,7 @@ function textBindingInternal(lView, index, value) {
     ngDevMode && assertDefined(element, 'native element should exist');
     updateTextNode(lView[RENDERER], element, value);
 }
+function flushVirtualInstructionsBefore() { }
 
 function renderComponent(hostLView, componentHostIdx) {
     ngDevMode && assertEqual(isCreationMode(hostLView), true, 'Should be run in creation mode');
@@ -14210,8 +14020,8 @@ class ComponentFactory extends ComponentFactory$1 {
         const hostRNode = rootSelectorOrNode ?
             locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation, rootViewInjector) :
             createElementNode(hostRenderer, elementName, getNamespace(elementName));
-        // Signal components use the granular "RefreshView"  for change detection
-        const signalFlags = (4096 /* LViewFlags.SignalView */ | 512 /* LViewFlags.IsRoot */);
+        // Signal components use the granular "RefreshView" for change detection
+        const signalFlags = (4096 /* LViewFlags.SignalView */ | 1024 /* LViewFlags.RefreshView */ | 512 /* LViewFlags.IsRoot */);
         // Non-signal components use the traditional "CheckAlways or OnPush/Dirty" change detection
         const nonSignalFlags = this.componentDef.onPush ? 64 /* LViewFlags.Dirty */ | 512 /* LViewFlags.IsRoot */ :
             16 /* LViewFlags.CheckAlways */ | 512 /* LViewFlags.IsRoot */;
@@ -14300,7 +14110,7 @@ class ComponentRef extends ComponentRef$1 {
                 return;
             }
             const lView = this._rootLView;
-            setInputsForProperty(lView[TVIEW], lView, dataValue, name, value);
+            setInputsForProperty(lView[TVIEW], lView, dataValue, name, value, /* TODO(signals) */ false);
             this.previousInputValues.set(name, value);
             const childComponentLView = getComponentLViewByIndex(this._tNode.index, lView);
             markViewDirty(childComponentLView);
@@ -14359,7 +14169,7 @@ function createRootComponentView(tNode, hostRNode, rootComponentDef, rootDirecti
     const viewRenderer = environment.rendererFactory.createRenderer(hostRNode, rootComponentDef);
     let lViewFlags = 16 /* LViewFlags.CheckAlways */;
     if (rootComponentDef.signals) {
-        lViewFlags = 4096 /* LViewFlags.SignalView */;
+        lViewFlags = 4096 /* LViewFlags.SignalView */ | 1024 /* LViewFlags.RefreshView */;
     }
     else if (rootComponentDef.onPush) {
         lViewFlags = 64 /* LViewFlags.Dirty */;
@@ -14385,7 +14195,7 @@ function applyRootComponentStyling(rootDirectives, tNode, rNode, hostRenderer) {
     }
 }
 /**
- * Creates a root component and sets it up with features and host bindings.Shared by
+ * Creates a root component and sets it up with features and host bindings. Shared by
  * renderComponent() and ViewContainerRef.createComponent().
  */
 function createRootComponent(componentView, rootComponentDef, rootDirectives, hostDirectiveDefs, rootLView, hostFeatures) {
@@ -16255,13 +16065,13 @@ function malformedStyleError(text, expecting, index) {
  *
  * @codeGenApi
  */
-function ɵɵproperty(propName, value, sanitizer) {
+function ɵɵproperty(propName, value, sanitizer, opts) {
     const lView = getLView();
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, value)) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, false, !!opts?.skipSignal);
         ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵproperty;
@@ -16274,7 +16084,7 @@ function setDirectiveInputsWhichShadowsStyling(tView, tNode, lView, value, isCla
     const inputs = tNode.inputs;
     const property = isClassBased ? 'class' : 'style';
     // We support both 'class' and `className` hence the fallback.
-    setInputsForProperty(tView, lView, inputs[property], property, value);
+    setInputsForProperty(tView, lView, inputs[property], property, value, false);
 }
 
 /**
@@ -21078,7 +20888,8 @@ function ɵɵhostProperty(propName, value, sanitizer) {
     if (bindingUpdated(lView, bindingIndex, value)) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, true);
+        elementPropertyInternal(tView, tNode, lView, propName, value, lView[RENDERER], sanitizer, true, 
+        /* TODO(signals) */ false);
         ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵhostProperty;
@@ -21112,7 +20923,7 @@ function ɵɵsyntheticHostProperty(propName, value, sanitizer) {
         const tNode = getSelectedTNode();
         const currentDef = getCurrentDirectiveDef(tView.data);
         const renderer = loadComponentRenderer(currentDef, tNode, lView);
-        elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, true);
+        elementPropertyInternal(tView, tNode, lView, propName, value, renderer, sanitizer, true, /* TODO(signals) */ false);
         ngDevMode && storePropertyBindingMetadata(tView.data, tNode, propName, bindingIndex);
     }
     return ɵɵsyntheticHostProperty;
@@ -21838,7 +21649,7 @@ function applyUpdateOpCodes(tView, lView, updateOpCodes, bindingsStartIndex, cha
                                     setElementAttribute(lView[RENDERER], lView[nodeIndex], null, tNodeOrTagName, propName, value, sanitizeFn);
                                 }
                                 else {
-                                    elementPropertyInternal(tView, tNodeOrTagName, lView, propName, value, lView[RENDERER], sanitizeFn, false);
+                                    elementPropertyInternal(tView, tNodeOrTagName, lView, propName, value, lView[RENDERER], sanitizeFn, false, /* TODO(signals) */ false);
                                 }
                                 break;
                             case 0 /* I18nUpdateOpCode.Text */:
@@ -21889,9 +21700,11 @@ function applyIcuUpdateCase(tView, tIcu, bindingsStartIndex, lView) {
         let mask = changeMask;
         if (activeCaseIndex < 0) {
             // Clear the flag.
-            // Negative number means that the ICU was freshly created and we need to force the update.
+            // Negative number means that the ICU was freshly created and we need to
+            // force the update.
             activeCaseIndex = lView[tIcu.currentCaseLViewIndex] = ~activeCaseIndex;
-            // -1 is same as all bits on, which simulates creation since it marks all bits dirty
+            // -1 is same as all bits on, which simulates creation since it marks all
+            // bits dirty
             mask = -1;
         }
         applyUpdateOpCodes(tView, lView, tIcu.update[activeCaseIndex], bindingsStartIndex, mask);
@@ -23514,6 +23327,143 @@ function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
 }
 
 /**
+ * Create a computed `Signal` which derives a reactive value from an expression.
+ */
+function computed(computation, options) {
+    const getter = createComputed$1(computation);
+    if (options?.equal) {
+        getter[SIGNAL$1].equal = options.equal;
+    }
+    return getter;
+}
+
+/**
+ * TODO
+ *
+ * @codeGenApi
+ */
+function ɵɵpropertyCreate(slot, propName, expr, sanitizer) {
+    const lView = getLView();
+    const expressionSlot = HEADER_OFFSET + slot;
+    const tView = getTView();
+    const tNode = getCurrentTNode();
+    assertDefined(tNode, `propertyCreate() must follow an actual element`);
+    const inputData = tNode.inputs?.[propName] ?? EMPTY_ARRAY;
+    let signalInputs = null;
+    // PERF: the fact that we need to iterate over all the inputs here isn't great.
+    // We might consider storing more info on TView
+    let zoneTargets = null;
+    for (let i = 0; i < inputData.length;) {
+        const directiveIndex = inputData[i++];
+        const privateName = inputData[i++];
+        const def = tView.data[directiveIndex];
+        if (!def.signals) {
+            // TODO(pk): refactor - code flow with all those firstCreatePass checks becomes hard to follow
+            if (tView.firstCreatePass) {
+                (zoneTargets ??= []).push(directiveIndex, privateName);
+            }
+        }
+        else {
+            ngDevMode && assertIndexInRange(lView, directiveIndex);
+            // PERF: megamorphic read on [privateName] access
+            const inputSignal = lView[directiveIndex][privateName][SIGNAL$1];
+            (signalInputs ??= []).push(inputSignal);
+        }
+    }
+    zoneTargets ??= EMPTY_ARRAY;
+    signalInputs ??= EMPTY_ARRAY;
+    // PERF(pk): I could avoid wrapping into computed for the case of a single binding to a signal
+    // based component
+    expr = computed(expr);
+    lView[expressionSlot] = expr;
+    for (const inputSignal of signalInputs) {
+        // TODO: Improve this by not allocating an object literal here. This exists just for testing.
+        inputSignal.bind(inputSignal, { computation: expr });
+        // TODO: figure out where to set `isInitialized`.
+        inputSignal.isInitialized = true;
+    }
+    if (tView.firstCreatePass) {
+        if (inputData.length === 0) {
+            // Untargeted input -> DOM binding.
+            (tView.virtualUpdate ??= []).push({
+                slot: expressionSlot,
+                instruction: () => propertyUpdateDom(tNode.index, propName, expressionSlot, sanitizer ?? null),
+            });
+        }
+        else if (zoneTargets.length) {
+            // Some binding targets were zone-based, so we need an update instruction to process them.
+            (tView.virtualUpdate ??= []).push({
+                slot: expressionSlot,
+                instruction: () => propertyUpdateInput(tNode.index, propName, expressionSlot, zoneTargets),
+            });
+        }
+        else {
+            // The only target(s) were signal-based, so no update path is needed.
+        }
+    }
+    return ɵɵpropertyCreate;
+}
+function propertyUpdateDom(nodeSlot, propName, expressionSlot, sanitizer) {
+    const lView = getLView();
+    const expr = lView[expressionSlot];
+    let value = expr();
+    const bindingIndex = nextBindingIndex();
+    if (!bindingUpdated(lView, bindingIndex, value)) {
+        return;
+    }
+    const tView = getTView();
+    const tNode = tView.data[nodeSlot];
+    const element = getNativeByTNode(tNode, lView);
+    propName = mapPropName(propName);
+    if (ngDevMode) {
+        validateAgainstEventProperties(propName);
+        if (!isPropertyValid(element, propName, tNode.value, tView.schemas)) {
+            handleUnknownPropertyError(propName, tNode.value, tNode.type, lView);
+        }
+        ngDevMode.rendererSetProperty++;
+    }
+    // It is assumed that the sanitizer is only added when the compiler determines that the
+    // property is risky, so sanitization can be done without further checks.
+    value = sanitizer != null ? sanitizer(value, tNode.value || '', propName) : value;
+    lView[RENDERER].setProperty(element, propName, value);
+}
+function propertyUpdateInput(nodeIndex, propName, expressionSlot, targets) {
+    const lView = getLView();
+    const expr = lView[expressionSlot];
+    const value = expr();
+    const tView = getTView();
+    const tNode = tView.data[nodeIndex];
+    ngDevMode && assertDefined(tNode.inputs, `Expected tNode to have inputs`);
+    const bindingIndex = nextBindingIndex();
+    if (!bindingUpdated(lView, bindingIndex, value)) {
+        return;
+    }
+    for (let i = 0; i < targets.length;) {
+        const index = targets[i++];
+        const privateName = targets[i++];
+        ngDevMode && assertIndexInRange(lView, index);
+        const instance = lView[index];
+        const def = tView.data[index];
+        writeToDirectiveInput(def, instance, propName, privateName, value);
+    }
+    const element = getNativeByTNode(tNode, lView);
+    if (isComponentHost(tNode)) {
+        markDirtyIfOnPush(lView, tNode.index);
+    }
+    if (ngDevMode) {
+        setNgReflectProperties(lView, element, tNode.type, targets, value);
+    }
+}
+function ɵɵstringifyInterpolation(staticStrings, ...expressionValues) {
+    // Build the updated content
+    let content = staticStrings[0];
+    for (let i = 1; i < staticStrings.length; i++) {
+        content += renderStringify(expressionValues[i - 1]) + staticStrings[i];
+    }
+    return content;
+}
+
+/**
  *
  * Update an interpolated property on an element with a lone bound value
  *
@@ -23580,7 +23530,8 @@ function ɵɵpropertyInterpolate1(propName, prefix, v0, suffix, sanitizer) {
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false, 
+        /* TODO(signals) */ false);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 1, prefix, suffix);
     }
@@ -23622,7 +23573,8 @@ function ɵɵpropertyInterpolate2(propName, prefix, v0, i0, v1, suffix, sanitize
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false, 
+        /* TODO(signals) */ false);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 2, prefix, i0, suffix);
     }
@@ -23667,7 +23619,8 @@ function ɵɵpropertyInterpolate3(propName, prefix, v0, i0, v1, i1, v2, suffix, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false, 
+        /* TODO(signals) */ false);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 3, prefix, i0, i1, suffix);
     }
@@ -23714,7 +23667,8 @@ function ɵɵpropertyInterpolate4(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false, 
+        /* TODO(signals) */ false);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 4, prefix, i0, i1, i2, suffix);
     }
@@ -23763,7 +23717,8 @@ function ɵɵpropertyInterpolate5(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false, 
+        /* TODO(signals) */ false);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 5, prefix, i0, i1, i2, i3, suffix);
     }
@@ -23814,7 +23769,8 @@ function ɵɵpropertyInterpolate6(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false, 
+        /* TODO(signals) */ false);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 6, prefix, i0, i1, i2, i3, i4, suffix);
     }
@@ -23867,7 +23823,8 @@ function ɵɵpropertyInterpolate7(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false, 
+        /* TODO(signals) */ false);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 7, prefix, i0, i1, i2, i3, i4, i5, suffix);
     }
@@ -23922,7 +23879,8 @@ function ɵɵpropertyInterpolate8(propName, prefix, v0, i0, v1, i1, v2, i2, v3, 
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false, 
+        /* TODO(signals) */ false);
         ngDevMode &&
             storePropertyBindingMetadata(tView.data, tNode, propName, getBindingIndex() - 8, prefix, i0, i1, i2, i3, i4, i5, i6, suffix);
     }
@@ -23964,7 +23922,8 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
     if (interpolatedValue !== NO_CHANGE) {
         const tView = getTView();
         const tNode = getSelectedTNode();
-        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false);
+        elementPropertyInternal(tView, tNode, lView, propName, interpolatedValue, lView[RENDERER], sanitizer, false, 
+        /* TODO(signals) */ false);
         if (ngDevMode) {
             const interpolationInBetween = [values[0]]; // prefix
             for (let i = 2; i < values.length; i += 2) {
@@ -23999,6 +23958,16 @@ function store(tView, lView, index, value) {
 function ɵɵreference(index) {
     const contextLView = getContextLView();
     return load(contextLView, HEADER_OFFSET + index);
+}
+/**
+ * Retrieves a local reference from the current `LView`.
+ *
+ * @param index The relative index of the local ref in `LView`.
+ *
+ * @codeGenApi
+ */
+function ɵɵshallowReference(index) {
+    return load(getLView(), HEADER_OFFSET + index);
 }
 
 /**
@@ -26003,6 +25972,12 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
     });
 }
 
+let pureFunctionsEnabled = true;
+function setPureFunctionsEnabled(value) {
+    const prev = pureFunctionsEnabled;
+    pureFunctionsEnabled = value;
+    return prev;
+}
 /**
  * Bindings for pure functions are stored after regular bindings.
  *
@@ -26032,6 +26007,8 @@ function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
  * @codeGenApi
  */
 function ɵɵpureFunction0(slotOffset, pureFn, thisArg) {
+    if (!pureFunctionsEnabled)
+        return thisArg ? pureFn.call(thisArg) : pureFn();
     const bindingIndex = getBindingRoot() + slotOffset;
     const lView = getLView();
     return lView[bindingIndex] === NO_CHANGE ?
@@ -26254,9 +26231,11 @@ function getPureFunctionReturnValue(lView, returnValueIndex) {
  */
 function pureFunction1Internal(lView, bindingRoot, slotOffset, pureFn, exp, thisArg) {
     const bindingIndex = bindingRoot + slotOffset;
-    return bindingUpdated(lView, bindingIndex, exp) ?
-        updateBinding(lView, bindingIndex + 1, thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
-        getPureFunctionReturnValue(lView, bindingIndex + 1);
+    if (pureFunctionsEnabled && !bindingUpdated(lView, bindingIndex, exp)) {
+        return getPureFunctionReturnValue(lView, bindingIndex + 1);
+    }
+    const value = thisArg ? pureFn.call(thisArg, exp) : pureFn(exp);
+    return pureFunctionsEnabled ? updateBinding(lView, bindingIndex + 1, value) : value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -26273,9 +26252,11 @@ function pureFunction1Internal(lView, bindingRoot, slotOffset, pureFn, exp, this
  */
 function pureFunction2Internal(lView, bindingRoot, slotOffset, pureFn, exp1, exp2, thisArg) {
     const bindingIndex = bindingRoot + slotOffset;
-    return bindingUpdated2(lView, bindingIndex, exp1, exp2) ?
-        updateBinding(lView, bindingIndex + 2, thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
-        getPureFunctionReturnValue(lView, bindingIndex + 2);
+    if (pureFunctionsEnabled && !bindingUpdated2(lView, bindingIndex, exp1, exp2)) {
+        return getPureFunctionReturnValue(lView, bindingIndex + 2);
+    }
+    const value = thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2);
+    return pureFunctionsEnabled ? updateBinding(lView, bindingIndex + 2, value) : value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -26293,9 +26274,11 @@ function pureFunction2Internal(lView, bindingRoot, slotOffset, pureFn, exp1, exp
  */
 function pureFunction3Internal(lView, bindingRoot, slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
     const bindingIndex = bindingRoot + slotOffset;
-    return bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) ?
-        updateBinding(lView, bindingIndex + 3, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
-        getPureFunctionReturnValue(lView, bindingIndex + 3);
+    if (pureFunctionsEnabled && !bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3)) {
+        return getPureFunctionReturnValue(lView, bindingIndex + 3);
+    }
+    const value = thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3);
+    return pureFunctionsEnabled ? updateBinding(lView, bindingIndex + 3, value) : value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
@@ -26315,9 +26298,11 @@ function pureFunction3Internal(lView, bindingRoot, slotOffset, pureFn, exp1, exp
  */
 function pureFunction4Internal(lView, bindingRoot, slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
     const bindingIndex = bindingRoot + slotOffset;
-    return bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) ?
-        updateBinding(lView, bindingIndex + 4, thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
-        getPureFunctionReturnValue(lView, bindingIndex + 4);
+    if (pureFunctionsEnabled && !bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4)) {
+        return getPureFunctionReturnValue(lView, bindingIndex + 4);
+    }
+    const value = thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4);
+    return pureFunctionsEnabled ? updateBinding(lView, bindingIndex + 4, value) : value;
 }
 /**
  * pureFunction instruction that can support any number of bindings.
@@ -26337,11 +26322,16 @@ function pureFunction4Internal(lView, bindingRoot, slotOffset, pureFn, exp1, exp
 function pureFunctionVInternal(lView, bindingRoot, slotOffset, pureFn, exps, thisArg) {
     let bindingIndex = bindingRoot + slotOffset;
     let different = false;
-    for (let i = 0; i < exps.length; i++) {
-        bindingUpdated(lView, bindingIndex++, exps[i]) && (different = true);
+    if (pureFunctionsEnabled) {
+        for (let i = 0; i < exps.length; i++) {
+            bindingUpdated(lView, bindingIndex++, exps[i]) && (different = true);
+        }
+        if (!different) {
+            return getPureFunctionReturnValue(lView, bindingIndex);
+        }
     }
-    return different ? updateBinding(lView, bindingIndex, pureFn.apply(thisArg, exps)) :
-        getPureFunctionReturnValue(lView, bindingIndex);
+    const value = pureFn.apply(thisArg, exps);
+    return pureFunctionsEnabled ? updateBinding(lView, bindingIndex, value) : value;
 }
 
 /**
@@ -26709,8 +26699,17 @@ class QueryList {
             this._changes.emit(this);
     }
     /** internal */
+    onDirty(cb) {
+        this._onDirty = cb;
+    }
+    /** internal */
     setDirty() {
-        this.dirty = true;
+        if (this.dirty === false) {
+            this.dirty = true;
+            if (this._onDirty) {
+                this._onDirty();
+            }
+        }
     }
     /** internal */
     destroy() {
@@ -27150,10 +27149,15 @@ function collectQueryResults(tView, lView, queryIndex, result) {
  */
 function ɵɵqueryRefresh(queryList) {
     const lView = getLView();
-    const tView = getTView();
     const queryIndex = getCurrentQueryIndex();
     setCurrentQueryIndex(queryIndex + 1);
+    return queryRefreshInternal(lView, queryIndex);
+}
+function queryRefreshInternal(lView, queryIndex) {
+    const tView = lView[TVIEW];
     const tQuery = getTQuery(tView, queryIndex);
+    const lQuery = lView[QUERIES].queries[queryIndex];
+    const queryList = lQuery.queryList;
     if (queryList.dirty &&
         (isCreationMode(lView) ===
             ((tQuery.metadata.flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */))) {
@@ -27181,6 +27185,9 @@ function ɵɵqueryRefresh(queryList) {
  * @codeGenApi
  */
 function ɵɵviewQuery(predicate, flags, read) {
+    createViewQueryInternal(getLView(), predicate, flags, read);
+}
+function createViewQueryInternal(lView, predicate, flags, read) {
     ngDevMode && assertNumber(flags, 'Expecting flags');
     const tView = getTView();
     if (tView.firstCreatePass) {
@@ -27189,7 +27196,7 @@ function ɵɵviewQuery(predicate, flags, read) {
             tView.staticViewQueries = true;
         }
     }
-    createLQuery(tView, getLView(), flags);
+    return createLQuery(tView, lView, flags);
 }
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view
@@ -27204,6 +27211,9 @@ function ɵɵviewQuery(predicate, flags, read) {
  * @codeGenApi
  */
 function ɵɵcontentQuery(directiveIndex, predicate, flags, read) {
+    createContentQueryInternal(getLView(), directiveIndex, predicate, flags, read);
+}
+function createContentQueryInternal(lView, directiveIndex, predicate, flags, read) {
     ngDevMode && assertNumber(flags, 'Expecting flags');
     const tView = getTView();
     if (tView.firstCreatePass) {
@@ -27214,7 +27224,7 @@ function ɵɵcontentQuery(directiveIndex, predicate, flags, read) {
             tView.staticContentQueries = true;
         }
     }
-    createLQuery(tView, getLView(), flags);
+    return createLQuery(tView, lView, flags);
 }
 /**
  * Loads a QueryList corresponding to the current view or content query.
@@ -27236,6 +27246,7 @@ function createLQuery(tView, lView, flags) {
     if (lView[QUERIES] === null)
         lView[QUERIES] = new LQueries_();
     lView[QUERIES].queries.push(new LQuery_(queryList));
+    return lView[QUERIES].queries.length - 1;
 }
 function createTQuery(tView, metadata, nodeIndex) {
     if (tView.queries === null)
@@ -27252,6 +27263,95 @@ function saveContentQueryAndDirectiveIndex(tView, directiveIndex) {
 function getTQuery(tView, index) {
     ngDevMode && assertDefined(tView.queries, 'TQueries must be defined to retrieve a TQuery');
     return tView.queries.getByIndex(index);
+}
+
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const QUERY_SIGNAL_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...REACTIVE_NODE$1,
+        // Base reactive node.overrides
+        producerMustRecompute: (node) => {
+            return !!node._queryList?.dirty;
+        },
+        producerRecomputeValue: (node) => {
+            // The current value is stale. Check whether we need to produce a new one.
+            // TODO: assert: I've got both the lView and queryIndex stored
+            if (queryRefreshInternal(node._lView, node._queryIndex)) {
+                node.version++;
+            }
+        },
+        // Query-specific implementations.
+        bindToQuery: (node, queryIndex) => {
+            // TODO: assert: should bind only once, make sure it is not re-assigned again
+            node._lView = getLView();
+            node._queryIndex = queryIndex;
+            node._queryList = loadQueryInternal(node._lView, queryIndex);
+            node._queryList.onDirty(() => {
+                console.error('Dirty');
+                // Mark this producer as dirty and notify live consumer about the potential change. Note
+                // that the onDirty callback will fire only on the initial dirty marking (that is,
+                // subsequent dirty notifications are not fired- until the QueryList becomes clean again).
+                consumerMarkDirty$1(node);
+            });
+        },
+        // TODO(signals): Unsubscribe - destroy?
+    };
+})();
+function querySignalFnFirst() {
+    const node = Object.create(QUERY_SIGNAL_NODE);
+    function signalFn() {
+        // Check if the value needs updating before returning it.
+        producerUpdateValueVersion$1(node);
+        // Mark this producer as accessed.
+        producerAccessed$1(node);
+        return node._queryList?.first;
+    }
+    signalFn[SIGNAL$1] = node;
+    return signalFn;
+}
+function querySignalFnAll() {
+    const node = Object.create(QUERY_SIGNAL_NODE);
+    function signalFn() {
+        // Check if the value needs updating before returning it.
+        producerUpdateValueVersion$1(node);
+        // Mark this producer as accessed.
+        producerAccessed$1(node);
+        return node._queryList?.toArray() ?? [];
+    }
+    signalFn[SIGNAL$1] = node;
+    return signalFn;
+}
+// THINK: code duplication for predicate, flags etc.? Or would it be extracted by the compiler?
+function ɵɵviewQueryCreate(target, predicate, flags, read) {
+    const lView = getLView();
+    const reactiveQueryNode = target[SIGNAL$1];
+    reactiveQueryNode.bindToQuery(reactiveQueryNode, createViewQueryInternal(lView, predicate, flags, read));
+}
+// Q: assuming that the return type must be similar to InputSignal, with the write ability? (this is
+// needed only from the generated code so maybe not?)
+function viewChild(selector, opts) {
+    return querySignalFnFirst();
+}
+function viewChildren(selector, opts) {
+    // Q: by returning a signal we are effectively "dropping" QueryList from the public API. Is there
+    // anything valuable there that we would be losing?
+    return querySignalFnAll();
+}
+function ɵɵcontentQueryCreate(target, dirIndex, predicate, flags, read) {
+    const lView = getLView();
+    const reactiveQueryNode = target[SIGNAL$1];
+    // Q: why do we need the directive index?
+    reactiveQueryNode.bindToQuery(reactiveQueryNode, createContentQueryInternal(lView, dirIndex, predicate, flags, read));
+}
+function contentChild(selector, opts) {
+    return querySignalFnFirst();
+}
+function contentChildren(selector, opts) {
+    // Q: by returning a signal we are effectively "dropping" QueryList from the public API. Is there
+    // anything valuable there that we would be loosing?
+    return querySignalFnAll();
 }
 
 /**
@@ -27361,6 +27461,8 @@ const angularCoreEnv = (() => ({
     'ɵɵprojectionDef': ɵɵprojectionDef,
     'ɵɵhostProperty': ɵɵhostProperty,
     'ɵɵproperty': ɵɵproperty,
+    'ɵɵpropertyCreate': ɵɵpropertyCreate,
+    'ɵɵstringifyInterpolation': ɵɵstringifyInterpolation,
     'ɵɵpropertyInterpolate': ɵɵpropertyInterpolate,
     'ɵɵpropertyInterpolate1': ɵɵpropertyInterpolate1,
     'ɵɵpropertyInterpolate2': ɵɵpropertyInterpolate2,
@@ -27372,11 +27474,14 @@ const angularCoreEnv = (() => ({
     'ɵɵpropertyInterpolate8': ɵɵpropertyInterpolate8,
     'ɵɵpropertyInterpolateV': ɵɵpropertyInterpolateV,
     'ɵɵpipe': ɵɵpipe,
+    'ɵɵviewQueryCreate': ɵɵviewQueryCreate,
+    'ɵɵcontentQueryCreate': ɵɵcontentQueryCreate,
     'ɵɵqueryRefresh': ɵɵqueryRefresh,
     'ɵɵviewQuery': ɵɵviewQuery,
     'ɵɵloadQuery': ɵɵloadQuery,
     'ɵɵcontentQuery': ɵɵcontentQuery,
     'ɵɵreference': ɵɵreference,
+    'ɵɵshallowReference': ɵɵshallowReference,
     'ɵɵclassMap': ɵɵclassMap,
     'ɵɵclassMapInterpolate1': ɵɵclassMapInterpolate1,
     'ɵɵclassMapInterpolate2': ɵɵclassMapInterpolate2,
@@ -34615,6 +34720,286 @@ function ɵɵngDeclarePipe(decl) {
 // clang-format off
 // clang-format on
 
+/**
+ * Checks if the given `value` is a reactive `Signal`.
+ */
+function isSignal(value) {
+    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
+}
+
+// TODO(signals)
+// This will be replaced, depending on how we implement `InputSignal`
+function ɵɵtoWritableSignal(_s) {
+    return null;
+}
+/**
+ * Create a `Signal` that can be set or updated directly.
+ */
+function signal(initialValue, options) {
+    const signalFn = createSignal$1(initialValue);
+    const node = signalFn[SIGNAL$1];
+    if (options?.equal) {
+        node.equal = options.equal;
+    }
+    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
+    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
+    signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
+    return signalFn;
+}
+function signalAsReadonlyFn() {
+    const node = this[SIGNAL$1];
+    if (node.readonlyFn === undefined) {
+        const readonlyFn = () => this();
+        readonlyFn[SIGNAL$1] = node;
+        node.readonlyFn = readonlyFn;
+    }
+    return node.readonlyFn;
+}
+
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ */
+function untracked(nonReactiveReadsFn) {
+    const prevConsumer = setActiveConsumer$1(null);
+    // We are not trying to catch any particular errors here, just making sure that the consumers
+    // stack is restored in case of errors.
+    try {
+        return nonReactiveReadsFn();
+    }
+    finally {
+        setActiveConsumer$1(prevConsumer);
+    }
+}
+
+/**
+ * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
+ * injector.
+ */
+const APP_EFFECT_SCHEDULER = new InjectionToken('', {
+    providedIn: 'root',
+    factory: () => inject(EffectScheduler),
+});
+/**
+ * A scheduler which manages the execution of effects.
+ */
+class EffectScheduler {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: EffectScheduler,
+        providedIn: 'root',
+        factory: () => new ZoneAwareMicrotaskScheduler(),
+    }); }
+}
+/**
+ * An `EffectScheduler` which is capable of queueing scheduled effects per-zone, and flushing them
+ * as an explicit operation.
+ */
+class ZoneAwareQueueingScheduler {
+    constructor() {
+        this.queuedEffectCount = 0;
+        this.queues = new Map();
+    }
+    scheduleEffect(handle) {
+        const zone = handle.creationZone;
+        if (!this.queues.has(zone)) {
+            this.queues.set(zone, new Set());
+        }
+        const queue = this.queues.get(zone);
+        if (queue.has(handle)) {
+            return;
+        }
+        this.queuedEffectCount++;
+        queue.add(handle);
+    }
+    /**
+     * Run all scheduled effects.
+     *
+     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
+     * ordering guarantee between effects scheduled in different zones.
+     */
+    flush() {
+        while (this.queuedEffectCount > 0) {
+            for (const [zone, queue] of this.queues) {
+                // `zone` here must be defined.
+                if (zone === null) {
+                    this.flushQueue(queue);
+                }
+                else {
+                    zone.run(() => this.flushQueue(queue));
+                }
+            }
+        }
+    }
+    flushQueue(queue) {
+        for (const handle of queue) {
+            queue.delete(handle);
+            this.queuedEffectCount--;
+            // TODO: what happens if this throws an error?
+            handle.run();
+        }
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: ZoneAwareQueueingScheduler,
+        providedIn: 'root',
+        factory: () => new ZoneAwareQueueingScheduler(),
+    }); }
+}
+/**
+ * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
+ * when.
+ */
+class ZoneAwareMicrotaskScheduler {
+    constructor() {
+        this.hasQueuedFlush = false;
+        this.delegate = new ZoneAwareQueueingScheduler();
+        this.flushTask = () => {
+            // Leave `hasQueuedFlush` as `true` so we don't queue another microtask if more effects are
+            // scheduled during flushing. The flush of the `ZoneAwareQueueingScheduler` delegate is
+            // guaranteed to empty the queue.
+            this.delegate.flush();
+            this.hasQueuedFlush = false;
+            // This is a variable initialization, not a method.
+            // tslint:disable-next-line:semicolon
+        };
+    }
+    scheduleEffect(handle) {
+        this.delegate.scheduleEffect(handle);
+        if (!this.hasQueuedFlush) {
+            queueMicrotask(this.flushTask);
+            this.hasQueuedFlush = true;
+        }
+    }
+}
+/**
+ * Core reactive node for an Angular effect.
+ *
+ * `EffectHandle` combines the reactive graph's `Watch` base node for effects with the framework's
+ * scheduling abstraction (`EffectScheduler`) as well as automatic cleanup via `DestroyRef` if
+ * available/requested.
+ */
+class EffectHandle {
+    constructor(scheduler, effectFn, creationZone, destroyRef, errorHandler, allowSignalWrites) {
+        this.scheduler = scheduler;
+        this.effectFn = effectFn;
+        this.creationZone = creationZone;
+        this.errorHandler = errorHandler;
+        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
+        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
+    }
+    runEffect(onCleanup) {
+        try {
+            this.effectFn(onCleanup);
+        }
+        catch (err) {
+            this.errorHandler?.handleError(err);
+        }
+    }
+    run() {
+        this.watcher.run();
+    }
+    schedule() {
+        this.scheduler.scheduleEffect(this);
+    }
+    notify() {
+        this.watcher.notify();
+    }
+    destroy() {
+        this.watcher.destroy();
+        this.unregisterOnDestroy?.();
+        // Note: if the effect is currently scheduled, it's not un-scheduled, and so the scheduler will
+        // retain a reference to it. Attempting to execute it will be a no-op.
+    }
+}
+/**
+ * Create a global `Effect` for the given reactive function.
+ */
+function effect(effectFn, options) {
+    ngDevMode &&
+        assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
+            'effect inside the component constructor.');
+    !options?.injector && assertInInjectionContext(effect);
+    const injector = options?.injector ?? inject(Injector);
+    const errorHandler = injector.get(ErrorHandler, null, { optional: true });
+    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
+    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, errorHandler, options?.allowSignalWrites ?? false);
+    // Effects start dirty.
+    handle.notify();
+    return handle;
+}
+
+const BRAND_WRITE_TYPE = /* @__PURE__ */ Symbol();
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const INPUT_SIGNAL_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...COMPUTED_NODE$1,
+        // Input-signal specific defaults.
+        isInitialized: false,
+        transform: value => value,
+        // Overrides from the computed node.
+        // TODO: Should we change `ComputedNode` somehow to not rely on context (seems rather brittle).
+        computation: function () {
+            if (!this.isInitialized) {
+                // TODO: Make this a proper RuntimeError
+                throw new Error(`InputSignal not yet initialized`);
+            }
+            if (this._boundComputation !== undefined) {
+                // TODO(signals): Do we need this?
+                // Disable pure function memoization when running computations of input signals.
+                // ---
+                // Bound computations are generated with instructions in place to memoize allocations like
+                // object literals, or for pipe transformations. Such operations do not need to be memoized
+                // in input computations as the `InputSignal` naturally memoizes the whole expression.
+                const prevPureFunctionsEnabled = setPureFunctionsEnabled(false);
+                try {
+                    return this.transform(this._boundComputation());
+                }
+                finally {
+                    setPureFunctionsEnabled(prevPureFunctionsEnabled);
+                }
+            }
+            // Alternatively, if there no bound computation, we use the bound value.
+            return this.transform(this._boundValue);
+        },
+        bind: function (node, value) {
+            // TODO(signals): perf]
+            node._boundComputation = value.computation;
+            node._boundValue = value.value;
+            // TODO: Do we need to switch between bound values/computation.
+            node.dirty = true;
+            node.value = UNSET$1;
+        },
+    };
+})();
+
+function input(opts) {
+    const node = Object.create(INPUT_SIGNAL_NODE);
+    opts?.transform && (node.transform = opts.transform);
+    opts?.initialValue && (node.value = node.transform(opts.initialValue));
+    function inputValueFn() {
+        // Check if the value needs updating before returning it.
+        producerUpdateValueVersion$1(node);
+        // Record that someone looked at this signal.
+        producerAccessed$1(node);
+        if (node.value === ERRORED$1) {
+            throw node.error;
+        }
+        return node.value;
+    }
+    inputValueFn[SIGNAL$1] = node;
+    return inputValueFn;
+}
+
+function output(opts) {
+    return new EventEmitter(opts?.isAsync);
+}
+
+// clang-format off
+// clang-format on
+
 // This file exists to allow the set of reactivity exports to be modified in g3, as these APIs are
 
 /**
@@ -34802,5 +35187,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, numberAttribute, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, ENABLED_SSR_FEATURES as ɵENABLED_SSR_FEATURES, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, InitialRenderPendingTasks as ɵInitialRenderPendingTasks, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZoneAwareQueueingScheduler as ɵZoneAwareQueueingScheduler, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadata as ɵgetAsyncClassMetadata, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, numberAttribute, output, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, ENABLED_SSR_FEATURES as ɵENABLED_SSR_FEATURES, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, InitialRenderPendingTasks as ɵInitialRenderPendingTasks, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZoneAwareQueueingScheduler as ɵZoneAwareQueueingScheduler, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChanges as ɵdetectChanges, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadata as ɵgetAsyncClassMetadata, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQueryCreate, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyCreate, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵshallowReference, ɵɵstringifyInterpolation, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQueryCreate };
 //# sourceMappingURL=core.mjs.map

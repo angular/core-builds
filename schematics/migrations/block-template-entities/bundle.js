@@ -872,23 +872,24 @@ var UnaryOperator;
 })(UnaryOperator || (UnaryOperator = {}));
 var BinaryOperator;
 (function(BinaryOperator2) {
-  BinaryOperator2[BinaryOperator2["Equals"] = 0] = "Equals";
-  BinaryOperator2[BinaryOperator2["NotEquals"] = 1] = "NotEquals";
-  BinaryOperator2[BinaryOperator2["Identical"] = 2] = "Identical";
-  BinaryOperator2[BinaryOperator2["NotIdentical"] = 3] = "NotIdentical";
-  BinaryOperator2[BinaryOperator2["Minus"] = 4] = "Minus";
-  BinaryOperator2[BinaryOperator2["Plus"] = 5] = "Plus";
-  BinaryOperator2[BinaryOperator2["Divide"] = 6] = "Divide";
-  BinaryOperator2[BinaryOperator2["Multiply"] = 7] = "Multiply";
-  BinaryOperator2[BinaryOperator2["Modulo"] = 8] = "Modulo";
-  BinaryOperator2[BinaryOperator2["And"] = 9] = "And";
-  BinaryOperator2[BinaryOperator2["Or"] = 10] = "Or";
-  BinaryOperator2[BinaryOperator2["BitwiseAnd"] = 11] = "BitwiseAnd";
-  BinaryOperator2[BinaryOperator2["Lower"] = 12] = "Lower";
-  BinaryOperator2[BinaryOperator2["LowerEquals"] = 13] = "LowerEquals";
-  BinaryOperator2[BinaryOperator2["Bigger"] = 14] = "Bigger";
-  BinaryOperator2[BinaryOperator2["BiggerEquals"] = 15] = "BiggerEquals";
-  BinaryOperator2[BinaryOperator2["NullishCoalesce"] = 16] = "NullishCoalesce";
+  BinaryOperator2[BinaryOperator2["Assign"] = 0] = "Assign";
+  BinaryOperator2[BinaryOperator2["Equals"] = 1] = "Equals";
+  BinaryOperator2[BinaryOperator2["NotEquals"] = 2] = "NotEquals";
+  BinaryOperator2[BinaryOperator2["Identical"] = 3] = "Identical";
+  BinaryOperator2[BinaryOperator2["NotIdentical"] = 4] = "NotIdentical";
+  BinaryOperator2[BinaryOperator2["Minus"] = 5] = "Minus";
+  BinaryOperator2[BinaryOperator2["Plus"] = 6] = "Plus";
+  BinaryOperator2[BinaryOperator2["Divide"] = 7] = "Divide";
+  BinaryOperator2[BinaryOperator2["Multiply"] = 8] = "Multiply";
+  BinaryOperator2[BinaryOperator2["Modulo"] = 9] = "Modulo";
+  BinaryOperator2[BinaryOperator2["And"] = 10] = "And";
+  BinaryOperator2[BinaryOperator2["Or"] = 11] = "Or";
+  BinaryOperator2[BinaryOperator2["BitwiseAnd"] = 12] = "BitwiseAnd";
+  BinaryOperator2[BinaryOperator2["Lower"] = 13] = "Lower";
+  BinaryOperator2[BinaryOperator2["LowerEquals"] = 14] = "LowerEquals";
+  BinaryOperator2[BinaryOperator2["Bigger"] = 15] = "Bigger";
+  BinaryOperator2[BinaryOperator2["BiggerEquals"] = 16] = "BiggerEquals";
+  BinaryOperator2[BinaryOperator2["NullishCoalesce"] = 17] = "NullishCoalesce";
 })(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
   if (base == null || other == null) {
@@ -2362,6 +2363,9 @@ var Identifiers = _Identifiers;
   _Identifiers.reference = { name: "\u0275\u0275reference", moduleName: CORE };
 })();
 (() => {
+  _Identifiers.shallowReference = { name: "\u0275\u0275shallowReference", moduleName: CORE };
+})();
+(() => {
   _Identifiers.inject = { name: "\u0275\u0275inject", moduleName: CORE };
 })();
 (() => {
@@ -2582,6 +2586,21 @@ var Identifiers = _Identifiers;
 })();
 (() => {
   _Identifiers.validateIframeAttribute = { name: "\u0275\u0275validateIframeAttribute", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.getInputSignalWriteType = { name: "\u0275\u0275GetInputSignalWriteType", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.propertyCreate = { name: "\u0275\u0275propertyCreate", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.stringifyInterpolation = { name: "\u0275\u0275stringifyInterpolation", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.viewQueryCreate = { name: "\u0275\u0275viewQueryCreate", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.contentQueryCreate = { name: "\u0275\u0275contentQueryCreate", moduleName: CORE };
 })();
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/util.mjs
@@ -3184,6 +3203,9 @@ var AbstractEmitterVisitor = class {
         break;
       case BinaryOperator.NullishCoalesce:
         opStr = "??";
+        break;
+      case BinaryOperator.Assign:
+        opStr = "=";
         break;
       default:
         throw new Error(`Unknown operator ${ast.operator}`);
@@ -6986,28 +7008,30 @@ var OpKind;
   OpKind2[OpKind2["Listener"] = 14] = "Listener";
   OpKind2[OpKind2["InterpolateText"] = 15] = "InterpolateText";
   OpKind2[OpKind2["Binding"] = 16] = "Binding";
-  OpKind2[OpKind2["Property"] = 17] = "Property";
-  OpKind2[OpKind2["StyleProp"] = 18] = "StyleProp";
-  OpKind2[OpKind2["ClassProp"] = 19] = "ClassProp";
-  OpKind2[OpKind2["StyleMap"] = 20] = "StyleMap";
-  OpKind2[OpKind2["ClassMap"] = 21] = "ClassMap";
-  OpKind2[OpKind2["Advance"] = 22] = "Advance";
-  OpKind2[OpKind2["Pipe"] = 23] = "Pipe";
-  OpKind2[OpKind2["Attribute"] = 24] = "Attribute";
-  OpKind2[OpKind2["ExtractedAttribute"] = 25] = "ExtractedAttribute";
-  OpKind2[OpKind2["Defer"] = 26] = "Defer";
-  OpKind2[OpKind2["DeferSecondaryBlock"] = 27] = "DeferSecondaryBlock";
-  OpKind2[OpKind2["DeferOn"] = 28] = "DeferOn";
-  OpKind2[OpKind2["ExtractedMessage"] = 29] = "ExtractedMessage";
-  OpKind2[OpKind2["HostProperty"] = 30] = "HostProperty";
-  OpKind2[OpKind2["Namespace"] = 31] = "Namespace";
-  OpKind2[OpKind2["ProjectionDef"] = 32] = "ProjectionDef";
-  OpKind2[OpKind2["Projection"] = 33] = "Projection";
-  OpKind2[OpKind2["I18nStart"] = 34] = "I18nStart";
-  OpKind2[OpKind2["I18n"] = 35] = "I18n";
-  OpKind2[OpKind2["I18nEnd"] = 36] = "I18nEnd";
-  OpKind2[OpKind2["I18nExpression"] = 37] = "I18nExpression";
-  OpKind2[OpKind2["I18nApply"] = 38] = "I18nApply";
+  OpKind2[OpKind2["BindingSignalPlaceholder"] = 17] = "BindingSignalPlaceholder";
+  OpKind2[OpKind2["Property"] = 18] = "Property";
+  OpKind2[OpKind2["StyleProp"] = 19] = "StyleProp";
+  OpKind2[OpKind2["ClassProp"] = 20] = "ClassProp";
+  OpKind2[OpKind2["StyleMap"] = 21] = "StyleMap";
+  OpKind2[OpKind2["ClassMap"] = 22] = "ClassMap";
+  OpKind2[OpKind2["Advance"] = 23] = "Advance";
+  OpKind2[OpKind2["Pipe"] = 24] = "Pipe";
+  OpKind2[OpKind2["Attribute"] = 25] = "Attribute";
+  OpKind2[OpKind2["ExtractedAttribute"] = 26] = "ExtractedAttribute";
+  OpKind2[OpKind2["Defer"] = 27] = "Defer";
+  OpKind2[OpKind2["DeferSecondaryBlock"] = 28] = "DeferSecondaryBlock";
+  OpKind2[OpKind2["DeferOn"] = 29] = "DeferOn";
+  OpKind2[OpKind2["ExtractedMessage"] = 30] = "ExtractedMessage";
+  OpKind2[OpKind2["HostProperty"] = 31] = "HostProperty";
+  OpKind2[OpKind2["Namespace"] = 32] = "Namespace";
+  OpKind2[OpKind2["ProjectionDef"] = 33] = "ProjectionDef";
+  OpKind2[OpKind2["Projection"] = 34] = "Projection";
+  OpKind2[OpKind2["I18nStart"] = 35] = "I18nStart";
+  OpKind2[OpKind2["I18n"] = 36] = "I18n";
+  OpKind2[OpKind2["I18nEnd"] = 37] = "I18nEnd";
+  OpKind2[OpKind2["I18nExpression"] = 38] = "I18nExpression";
+  OpKind2[OpKind2["I18nApply"] = 39] = "I18nApply";
+  OpKind2[OpKind2["PropertyCreate"] = 40] = "PropertyCreate";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -7016,23 +7040,25 @@ var ExpressionKind;
   ExpressionKind2[ExpressionKind2["ReadVariable"] = 2] = "ReadVariable";
   ExpressionKind2[ExpressionKind2["NextContext"] = 3] = "NextContext";
   ExpressionKind2[ExpressionKind2["Reference"] = 4] = "Reference";
-  ExpressionKind2[ExpressionKind2["GetCurrentView"] = 5] = "GetCurrentView";
-  ExpressionKind2[ExpressionKind2["RestoreView"] = 6] = "RestoreView";
-  ExpressionKind2[ExpressionKind2["ResetView"] = 7] = "ResetView";
-  ExpressionKind2[ExpressionKind2["PureFunctionExpr"] = 8] = "PureFunctionExpr";
-  ExpressionKind2[ExpressionKind2["PureFunctionParameterExpr"] = 9] = "PureFunctionParameterExpr";
-  ExpressionKind2[ExpressionKind2["PipeBinding"] = 10] = "PipeBinding";
-  ExpressionKind2[ExpressionKind2["PipeBindingVariadic"] = 11] = "PipeBindingVariadic";
-  ExpressionKind2[ExpressionKind2["SafePropertyRead"] = 12] = "SafePropertyRead";
-  ExpressionKind2[ExpressionKind2["SafeKeyedRead"] = 13] = "SafeKeyedRead";
-  ExpressionKind2[ExpressionKind2["SafeInvokeFunction"] = 14] = "SafeInvokeFunction";
-  ExpressionKind2[ExpressionKind2["SafeTernaryExpr"] = 15] = "SafeTernaryExpr";
-  ExpressionKind2[ExpressionKind2["EmptyExpr"] = 16] = "EmptyExpr";
-  ExpressionKind2[ExpressionKind2["AssignTemporaryExpr"] = 17] = "AssignTemporaryExpr";
-  ExpressionKind2[ExpressionKind2["ReadTemporaryExpr"] = 18] = "ReadTemporaryExpr";
-  ExpressionKind2[ExpressionKind2["SanitizerExpr"] = 19] = "SanitizerExpr";
-  ExpressionKind2[ExpressionKind2["SlotLiteralExpr"] = 20] = "SlotLiteralExpr";
-  ExpressionKind2[ExpressionKind2["ConditionalCase"] = 21] = "ConditionalCase";
+  ExpressionKind2[ExpressionKind2["ShallowReference"] = 5] = "ShallowReference";
+  ExpressionKind2[ExpressionKind2["GetCurrentView"] = 6] = "GetCurrentView";
+  ExpressionKind2[ExpressionKind2["RestoreView"] = 7] = "RestoreView";
+  ExpressionKind2[ExpressionKind2["ResetView"] = 8] = "ResetView";
+  ExpressionKind2[ExpressionKind2["PureFunctionExpr"] = 9] = "PureFunctionExpr";
+  ExpressionKind2[ExpressionKind2["PureFunctionParameterExpr"] = 10] = "PureFunctionParameterExpr";
+  ExpressionKind2[ExpressionKind2["PipeBinding"] = 11] = "PipeBinding";
+  ExpressionKind2[ExpressionKind2["PipeBindingVariadic"] = 12] = "PipeBindingVariadic";
+  ExpressionKind2[ExpressionKind2["SafePropertyRead"] = 13] = "SafePropertyRead";
+  ExpressionKind2[ExpressionKind2["SafeKeyedRead"] = 14] = "SafeKeyedRead";
+  ExpressionKind2[ExpressionKind2["SafeInvokeFunction"] = 15] = "SafeInvokeFunction";
+  ExpressionKind2[ExpressionKind2["SafeTernaryExpr"] = 16] = "SafeTernaryExpr";
+  ExpressionKind2[ExpressionKind2["EmptyExpr"] = 17] = "EmptyExpr";
+  ExpressionKind2[ExpressionKind2["AssignTemporaryExpr"] = 18] = "AssignTemporaryExpr";
+  ExpressionKind2[ExpressionKind2["ReadTemporaryExpr"] = 19] = "ReadTemporaryExpr";
+  ExpressionKind2[ExpressionKind2["SanitizerExpr"] = 20] = "SanitizerExpr";
+  ExpressionKind2[ExpressionKind2["SlotLiteralExpr"] = 21] = "SlotLiteralExpr";
+  ExpressionKind2[ExpressionKind2["ConditionalCase"] = 22] = "ConditionalCase";
+  ExpressionKind2[ExpressionKind2["InterpolationTemplateExpr"] = 23] = "InterpolationTemplateExpr";
 })(ExpressionKind || (ExpressionKind = {}));
 var SemanticVariableKind;
 (function(SemanticVariableKind2) {
@@ -7070,6 +7096,14 @@ var BindingKind;
   BindingKind2[BindingKind2["I18n"] = 5] = "I18n";
   BindingKind2[BindingKind2["Animation"] = 6] = "Animation";
 })(BindingKind || (BindingKind = {}));
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/interpolation.mjs
+var Interpolation2 = class {
+  constructor(strings, expressions) {
+    this.strings = strings;
+    this.expressions = expressions;
+  }
+};
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/traits.mjs
 var ConsumesSlot = Symbol("ConsumesSlot");
@@ -7120,154 +7154,6 @@ function hasConstTrait(value) {
   return value[HasConst] === true;
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/shared.mjs
-function createStatementOp(statement) {
-  return __spreadValues({
-    kind: OpKind.Statement,
-    statement
-  }, NEW_OP);
-}
-function createVariableOp(xref, variable2, initializer) {
-  return __spreadValues({
-    kind: OpKind.Variable,
-    xref,
-    variable: variable2,
-    initializer
-  }, NEW_OP);
-}
-var NEW_OP = {
-  debugListId: null,
-  prev: null,
-  next: null
-};
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/update.mjs
-function createInterpolateTextOp(xref, interpolation, i18nPlaceholders, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
-    kind: OpKind.InterpolateText,
-    target: xref,
-    interpolation,
-    i18nPlaceholders,
-    sourceSpan
-  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
-}
-var Interpolation2 = class {
-  constructor(strings, expressions) {
-    this.strings = strings;
-    this.expressions = expressions;
-  }
-};
-function createBindingOp(target, kind, name, expression, unit, securityContext, isTextAttribute, isTemplate, sourceSpan) {
-  return __spreadValues({
-    kind: OpKind.Binding,
-    bindingKind: kind,
-    target,
-    name,
-    expression,
-    unit,
-    securityContext,
-    isTextAttribute,
-    isTemplate,
-    sourceSpan
-  }, NEW_OP);
-}
-function createPropertyOp(target, name, expression, isAnimationTrigger, securityContext, isTemplate, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
-    kind: OpKind.Property,
-    target,
-    name,
-    expression,
-    isAnimationTrigger,
-    securityContext,
-    sanitizer: null,
-    isTemplate,
-    sourceSpan
-  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
-}
-function createStylePropOp(xref, name, expression, unit, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
-    kind: OpKind.StyleProp,
-    target: xref,
-    name,
-    expression,
-    unit,
-    sourceSpan
-  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
-}
-function createClassPropOp(xref, name, expression, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
-    kind: OpKind.ClassProp,
-    target: xref,
-    name,
-    expression,
-    sourceSpan
-  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
-}
-function createStyleMapOp(xref, expression, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
-    kind: OpKind.StyleMap,
-    target: xref,
-    expression,
-    sourceSpan
-  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
-}
-function createClassMapOp(xref, expression, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
-    kind: OpKind.ClassMap,
-    target: xref,
-    expression,
-    sourceSpan
-  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
-}
-function createAttributeOp(target, name, expression, securityContext, isTextAttribute, isTemplate, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
-    kind: OpKind.Attribute,
-    target,
-    name,
-    expression,
-    securityContext,
-    sanitizer: null,
-    isTextAttribute,
-    isTemplate,
-    sourceSpan
-  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
-}
-function createAdvanceOp(delta, sourceSpan) {
-  return __spreadValues({
-    kind: OpKind.Advance,
-    delta,
-    sourceSpan
-  }, NEW_OP);
-}
-function createConditionalOp(target, test, conditions, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues(__spreadValues({
-    kind: OpKind.Conditional,
-    target,
-    test,
-    conditions,
-    processed: null,
-    sourceSpan,
-    contextValue: null
-  }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS);
-}
-function createI18nExpressionOp(owner, expression, i18nPlaceholder, sourceSpan) {
-  return __spreadValues(__spreadValues(__spreadValues({
-    kind: OpKind.I18nExpression,
-    owner,
-    target: owner,
-    expression,
-    i18nPlaceholder,
-    sourceSpan
-  }, NEW_OP), TRAIT_CONSUMES_VARS), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
-}
-function createI18nApplyOp(target, sourceSpan) {
-  return __spreadValues(__spreadValues({
-    kind: OpKind.I18nApply,
-    target,
-    sourceSpan
-  }, NEW_OP), TRAIT_USES_SLOT_INDEX);
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/expression.mjs
 var _a;
 var _b;
@@ -7279,6 +7165,7 @@ var _g;
 var _h;
 var _j;
 var _k;
+var _l;
 function isIrExpression(expr) {
   return expr instanceof ExpressionBase;
 }
@@ -7335,6 +7222,35 @@ var _ReferenceExpr = class extends ExpressionBase {
 var ReferenceExpr = _ReferenceExpr;
 (() => {
   _a = UsesSlotIndex;
+})();
+var _ShallowReferenceExpr = class extends ExpressionBase {
+  constructor(target, offset) {
+    super();
+    this.target = target;
+    this.offset = offset;
+    this.kind = ExpressionKind.ShallowReference;
+    this[_b] = true;
+    this.targetSlot = null;
+  }
+  visitExpression() {
+  }
+  isEquivalent(e) {
+    return e instanceof _ShallowReferenceExpr && e.target === this.target;
+  }
+  isConstant() {
+    return false;
+  }
+  transformInternalExpressions() {
+  }
+  clone() {
+    const expr = new _ShallowReferenceExpr(this.target, this.offset);
+    expr.targetSlot = this.targetSlot;
+    return expr;
+  }
+};
+var ShallowReferenceExpr = _ShallowReferenceExpr;
+(() => {
+  _b = UsesSlotIndex;
 })();
 var ContextExpr = class extends ExpressionBase {
   constructor(view) {
@@ -7479,8 +7395,8 @@ var _PureFunctionExpr = class extends ExpressionBase {
   constructor(expression, args) {
     super();
     this.kind = ExpressionKind.PureFunctionExpr;
-    this[_b] = true;
     this[_c] = true;
+    this[_d] = true;
     this.varOffset = null;
     this.fn = null;
     this.body = expression;
@@ -7522,7 +7438,7 @@ var _PureFunctionExpr = class extends ExpressionBase {
 };
 var PureFunctionExpr = _PureFunctionExpr;
 (() => {
-  _b = ConsumesVarsTrait, _c = UsesVarOffset;
+  _c = ConsumesVarsTrait, _d = UsesVarOffset;
 })();
 var PureFunctionParameterExpr = class extends ExpressionBase {
   constructor(index) {
@@ -7551,9 +7467,9 @@ var _PipeBindingExpr = class extends ExpressionBase {
     this.name = name;
     this.args = args;
     this.kind = ExpressionKind.PipeBinding;
-    this[_d] = true;
     this[_e] = true;
     this[_f] = true;
+    this[_g] = true;
     this.targetSlot = null;
     this.varOffset = null;
   }
@@ -7582,7 +7498,7 @@ var _PipeBindingExpr = class extends ExpressionBase {
 };
 var PipeBindingExpr = _PipeBindingExpr;
 (() => {
-  _d = UsesSlotIndex, _e = ConsumesVarsTrait, _f = UsesVarOffset;
+  _e = UsesSlotIndex, _f = ConsumesVarsTrait, _g = UsesVarOffset;
 })();
 var _PipeBindingVariadicExpr = class extends ExpressionBase {
   constructor(target, name, args, numArgs) {
@@ -7592,9 +7508,9 @@ var _PipeBindingVariadicExpr = class extends ExpressionBase {
     this.args = args;
     this.numArgs = numArgs;
     this.kind = ExpressionKind.PipeBindingVariadic;
-    this[_g] = true;
     this[_h] = true;
     this[_j] = true;
+    this[_k] = true;
     this.targetSlot = null;
     this.varOffset = null;
   }
@@ -7619,7 +7535,7 @@ var _PipeBindingVariadicExpr = class extends ExpressionBase {
 };
 var PipeBindingVariadicExpr = _PipeBindingVariadicExpr;
 (() => {
-  _g = UsesSlotIndex, _h = ConsumesVarsTrait, _j = UsesVarOffset;
+  _h = UsesSlotIndex, _j = ConsumesVarsTrait, _k = UsesVarOffset;
 })();
 var SafePropertyReadExpr = class extends ExpressionBase {
   constructor(receiver, name) {
@@ -7726,6 +7642,38 @@ var SafeTernaryExpr = class extends ExpressionBase {
     return new SafeTernaryExpr(this.guard.clone(), this.expr.clone());
   }
 };
+var InterpolationTemplateExpr = class extends ExpressionBase {
+  constructor(staticParts, expressionParts) {
+    super();
+    this.staticParts = staticParts;
+    this.expressionParts = expressionParts;
+    this.kind = ExpressionKind.InterpolationTemplateExpr;
+  }
+  visitExpression() {
+    throw new Error("Not implemented.");
+  }
+  isEquivalent(e) {
+    if (!(e instanceof InterpolationTemplateExpr)) {
+      return false;
+    }
+    if (e.staticParts.length !== this.staticParts.length) {
+      return false;
+    }
+    if (e.expressionParts.length !== this.expressionParts.length) {
+      return false;
+    }
+    return e.staticParts.every((p, i) => p === this.staticParts[i]) && e.expressionParts.every((e2, i) => e2 === this.expressionParts[i]);
+  }
+  isConstant() {
+    return false;
+  }
+  transformInternalExpressions(transform2, flags) {
+    this.expressionParts = this.expressionParts.map((p) => transformExpressionsInExpression(p, transform2, flags));
+  }
+  clone() {
+    return new InterpolationTemplateExpr([...this.staticParts], this.expressionParts.map((p) => p.clone()));
+  }
+};
 var EmptyExpr2 = class extends ExpressionBase {
   constructor() {
     super(...arguments);
@@ -7819,7 +7767,7 @@ var _SlotLiteralExpr = class extends ExpressionBase {
     super();
     this.target = target;
     this.kind = ExpressionKind.SlotLiteralExpr;
-    this[_k] = true;
+    this[_l] = true;
     this.targetSlot = null;
   }
   visitExpression(visitor, context) {
@@ -7840,7 +7788,7 @@ var _SlotLiteralExpr = class extends ExpressionBase {
 };
 var SlotLiteralExpr = _SlotLiteralExpr;
 (() => {
-  _k = UsesSlotIndex;
+  _l = UsesSlotIndex;
 })();
 var ConditionalCaseExpr = class extends ExpressionBase {
   constructor(expr, target, alias = null) {
@@ -7901,6 +7849,7 @@ function transformExpressionsInOp(op, transform2, flags) {
       }
       break;
     case OpKind.Property:
+    case OpKind.PropertyCreate:
     case OpKind.Attribute:
       if (op.expression instanceof Interpolation2) {
         transformExpressionsInInterpolation(op.expression, transform2, flags);
@@ -8205,7 +8154,6 @@ var _OpList = class {
     _OpList.assertIsNotEnd(op);
     _OpList.assertIsUnowned(op);
     op.debugListId = target.debugListId;
-    op.prev = null;
     target.prev.next = op;
     op.prev = target.prev;
     op.next = target;
@@ -8246,6 +8194,28 @@ var OpList = _OpList;
 (() => {
   _OpList.nextListId = 0;
 })();
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/shared.mjs
+function createStatementOp(statement) {
+  return __spreadValues({
+    kind: OpKind.Statement,
+    statement
+  }, NEW_OP);
+}
+function createVariableOp(xref, variable2, initializer, isConstant) {
+  return __spreadValues({
+    kind: OpKind.Variable,
+    xref,
+    variable: variable2,
+    initializer,
+    isConstant
+  }, NEW_OP);
+}
+var NEW_OP = {
+  debugListId: null,
+  prev: null,
+  next: null
+};
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/create.mjs
 var elementContainerOpKinds = /* @__PURE__ */ new Set([
@@ -8429,6 +8399,26 @@ function createI18nEndOp(xref) {
     xref
   }, NEW_OP);
 }
+function createBindingSignalPlaceholderOp(bindingXref) {
+  return __spreadValues({
+    kind: OpKind.BindingSignalPlaceholder,
+    bindingXref
+  }, NEW_OP);
+}
+function createPropertyCreateOp(bindingXref, target, name, expression, isAnimationTrigger, securityContext, isTemplate, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.PropertyCreate,
+    xref: bindingXref,
+    target,
+    name,
+    expression,
+    isAnimationTrigger,
+    securityContext,
+    sanitizer: null,
+    isTemplate,
+    sourceSpan
+  }, TRAIT_CONSUMES_SLOT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
 function literalOrArrayLiteral(value) {
   if (Array.isArray(value)) {
     return literalArr(value.map(literalOrArrayLiteral));
@@ -8447,6 +8437,129 @@ function createHostPropertyOp(name, expression, isAnimationTrigger, sourceSpan) 
   }, TRAIT_CONSUMES_VARS), NEW_OP);
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/update.mjs
+function createInterpolateTextOp(xref, interpolation, i18nPlaceholders, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.InterpolateText,
+    target: xref,
+    interpolation,
+    i18nPlaceholders,
+    sourceSpan
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createBindingOp(bindingXref, target, kind, name, expression, unit, securityContext, isTextAttribute, isTemplate, sourceSpan) {
+  return __spreadValues({
+    kind: OpKind.Binding,
+    bindingXref,
+    bindingKind: kind,
+    target,
+    name,
+    expression,
+    unit,
+    securityContext,
+    isTextAttribute,
+    isTemplate,
+    sourceSpan
+  }, NEW_OP);
+}
+function createPropertyOp(bindingXref, target, name, expression, isAnimationTrigger, securityContext, isTemplate, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.Property,
+    bindingXref,
+    target,
+    name,
+    expression,
+    isAnimationTrigger,
+    securityContext,
+    sanitizer: null,
+    isTemplate,
+    sourceSpan
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createStylePropOp(xref, name, expression, unit, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.StyleProp,
+    target: xref,
+    name,
+    expression,
+    unit,
+    sourceSpan
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createClassPropOp(xref, name, expression, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.ClassProp,
+    target: xref,
+    name,
+    expression,
+    sourceSpan
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createStyleMapOp(xref, expression, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.StyleMap,
+    target: xref,
+    expression,
+    sourceSpan
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createClassMapOp(xref, expression, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.ClassMap,
+    target: xref,
+    expression,
+    sourceSpan
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createAttributeOp(target, name, expression, securityContext, isTextAttribute, isTemplate, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.Attribute,
+    target,
+    name,
+    expression,
+    securityContext,
+    sanitizer: null,
+    isTextAttribute,
+    isTemplate,
+    sourceSpan
+  }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
+}
+function createAdvanceOp(delta, sourceSpan) {
+  return __spreadValues({
+    kind: OpKind.Advance,
+    delta,
+    sourceSpan
+  }, NEW_OP);
+}
+function createConditionalOp(target, test, conditions, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.Conditional,
+    target,
+    test,
+    conditions,
+    processed: null,
+    sourceSpan,
+    contextValue: null
+  }, NEW_OP), TRAIT_USES_SLOT_INDEX), TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS);
+}
+function createI18nExpressionOp(owner, expression, i18nPlaceholder, sourceSpan) {
+  return __spreadValues(__spreadValues(__spreadValues({
+    kind: OpKind.I18nExpression,
+    owner,
+    target: owner,
+    expression,
+    i18nPlaceholder,
+    sourceSpan
+  }, NEW_OP), TRAIT_CONSUMES_VARS), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
+}
+function createI18nApplyOp(target, sourceSpan) {
+  return __spreadValues(__spreadValues({
+    kind: OpKind.I18nApply,
+    target,
+    sourceSpan
+  }, NEW_OP), TRAIT_USES_SLOT_INDEX);
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/variable.mjs
 var CTX_REF = "CTX_REF_MARKER";
 
@@ -8458,8 +8571,9 @@ var CompilationJobKind;
   CompilationJobKind2[CompilationJobKind2["Both"] = 2] = "Both";
 })(CompilationJobKind || (CompilationJobKind = {}));
 var CompilationJob = class {
-  constructor(componentName, pool, compatibility) {
+  constructor(componentName, isSignal, pool, compatibility) {
     this.componentName = componentName;
+    this.isSignal = isSignal;
     this.pool = pool;
     this.compatibility = compatibility;
     this.kind = CompilationJobKind.Both;
@@ -8470,8 +8584,8 @@ var CompilationJob = class {
   }
 };
 var ComponentCompilationJob = class extends CompilationJob {
-  constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds) {
-    super(componentName, pool, compatibility);
+  constructor(componentName, isSignal, pool, compatibility, relativeContextFilePath, i18nUseExternalIds) {
+    super(componentName, isSignal, pool, compatibility);
     this.relativeContextFilePath = relativeContextFilePath;
     this.i18nUseExternalIds = i18nUseExternalIds;
     this.kind = CompilationJobKind.Tmpl;
@@ -8537,8 +8651,8 @@ var ViewCompilationUnit = class extends CompilationUnit {
   }
 };
 var HostBindingCompilationJob = class extends CompilationJob {
-  constructor(componentName, pool, compatibility) {
-    super(componentName, pool, compatibility);
+  constructor(componentName, isSignal, pool, compatibility) {
+    super(componentName, isSignal, pool, compatibility);
     this.kind = CompilationJobKind.Host;
     this.fnSuffix = "HostBindings";
     this.root = new HostBindingCompilationUnit(this);
@@ -8595,6 +8709,7 @@ function varsUsedByOp(op) {
   let slots;
   switch (op.kind) {
     case OpKind.Property:
+    case OpKind.PropertyCreate:
     case OpKind.HostProperty:
     case OpKind.Attribute:
       slots = 1;
@@ -8737,6 +8852,7 @@ function phaseAttributeExtraction(job) {
           extractAttributeOp(unit, op, elements);
           break;
         case OpKind.Property:
+        case OpKind.PropertyCreate:
           if (!op.isAnimationTrigger) {
             OpList.insertBefore(createExtractedAttributeOp(op.target, op.isTemplate ? BindingKind.Template : BindingKind.Property, op.name, null), lookupElement(elements, op.target));
           }
@@ -8832,7 +8948,7 @@ function phaseBindingSpecialization(job) {
           if (job.kind === CompilationJobKind.Host) {
             OpList.replace(op, createHostPropertyOp(op.name, op.expression, op.bindingKind === BindingKind.Animation, op.sourceSpan));
           } else {
-            OpList.replace(op, createPropertyOp(op.target, op.name, op.expression, op.bindingKind === BindingKind.Animation, op.securityContext, op.isTemplate, op.sourceSpan));
+            OpList.replace(op, createPropertyOp(op.bindingXref, op.target, op.name, op.expression, op.bindingKind === BindingKind.Animation, op.securityContext, op.isTemplate, op.sourceSpan));
           }
           break;
         case BindingKind.I18n:
@@ -8859,6 +8975,7 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.listener,
   Identifiers.listener,
   Identifiers.property,
+  Identifiers.propertyCreate,
   Identifiers.styleProp,
   Identifiers.stylePropInterpolate1,
   Identifiers.stylePropInterpolate2,
@@ -9163,6 +9280,63 @@ function serializeAttributes({ attributes, bindings, classes, i18n: i18n2, proje
   return literalArr(attrArray);
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/creation_var_colocation.mjs
+function phaseCreationVarColocation(cpl) {
+  for (const unit of cpl.units) {
+    processUnit(unit);
+  }
+}
+function processUnit(unit) {
+  const shallowDeclarations = /* @__PURE__ */ new Map();
+  const seenVariableReads = /* @__PURE__ */ new Set();
+  let shallow = true;
+  for (const op of unit.create) {
+    if (shallow && op.kind === OpKind.Variable && op.variable.kind === SemanticVariableKind.Identifier && op.variable.target !== null) {
+      const target = op.variable.target;
+      if (!shallowDeclarations.has(target)) {
+        shallowDeclarations.set(target, []);
+      }
+      shallowDeclarations.get(target).push(op);
+      continue;
+    }
+    visitExpressionsInOp(op, (exp, flags) => {
+      if (flags & VisitorContextFlag.InChildOperation) {
+        return;
+      }
+      if (exp instanceof NextContextExpr) {
+        shallow = false;
+      } else if (exp instanceof ReadVariableExpr) {
+        seenVariableReads.add(exp.xref);
+      }
+    });
+    if (hasConsumesSlotTrait(op) && shallowDeclarations.has(op.xref)) {
+      for (const declOp of shallowDeclarations.get(op.xref)) {
+        declOp.initializer = transformExpressionsInExpression(declOp.initializer, (expr) => {
+          if (!(expr instanceof ReferenceExpr)) {
+            return expr;
+          }
+          const shallowExpr = new ShallowReferenceExpr(expr.target, expr.offset);
+          shallowExpr.targetSlot = expr.targetSlot;
+          return shallowExpr;
+        }, VisitorContextFlag.None);
+        if (!seenVariableReads.has(declOp.xref)) {
+          OpList.remove(declOp);
+          OpList.insertAfter(declOp, op);
+        } else {
+          const initializer = declOp.initializer;
+          declOp.initializer = literal(void 0);
+          declOp.isConstant = false;
+          const readVar = new ReadVariableExpr(declOp.xref);
+          readVar.name = declOp.variable.name;
+          const assignment = new BinaryOperatorExpr(BinaryOperator.Assign, readVar, initializer);
+          OpList.insertAfter(createStatementOp(assignment.toStmt()), op);
+        }
+      }
+      shallowDeclarations.delete(op.xref);
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/empty_elements.mjs
 var REPLACEMENTS = /* @__PURE__ */ new Map([
   [OpKind.ElementEnd, [OpKind.ElementStart, OpKind.Element]],
@@ -9398,8 +9572,8 @@ function recursivelyProcessView(view, parentScope) {
         break;
     }
   }
-  const preambleOps = generateVariablesInScopeForView(view, scope);
-  view.update.prepend(preambleOps);
+  view.create.prepend(generateVariablesInScopeForView(view, scope));
+  view.update.prepend(generateVariablesInScopeForView(view, scope));
 }
 function getScopeForView(view, parent) {
   const scope = {
@@ -9417,7 +9591,8 @@ function getScopeForView(view, parent) {
     scope.contextVariables.set(identifier, {
       kind: SemanticVariableKind.Identifier,
       name: null,
-      identifier
+      identifier,
+      target: null
     });
   }
   for (const op of view.create) {
@@ -9436,7 +9611,8 @@ function getScopeForView(view, parent) {
             variable: {
               kind: SemanticVariableKind.Identifier,
               name: null,
-              identifier: op.localRefs[offset].name
+              identifier: op.localRefs[offset].name,
+              target: op.xref
             }
           });
         }
@@ -9448,15 +9624,30 @@ function getScopeForView(view, parent) {
 function generateVariablesInScopeForView(view, scope) {
   const newOps = [];
   if (scope.view !== view.xref) {
-    newOps.push(createVariableOp(view.job.allocateXrefId(), scope.viewContextVariable, new NextContextExpr()));
+    newOps.push(createVariableOp(
+      view.job.allocateXrefId(),
+      scope.viewContextVariable,
+      new NextContextExpr(),
+      true
+    ));
   }
   for (const [name, value] of view.job.views.get(scope.view).contextVariables) {
     const context = new ContextExpr(scope.view);
     const variable2 = value === CTX_REF ? context : new ReadPropExpr(context, value);
-    newOps.push(createVariableOp(view.job.allocateXrefId(), scope.contextVariables.get(name), variable2));
+    newOps.push(createVariableOp(
+      view.job.allocateXrefId(),
+      scope.contextVariables.get(name),
+      variable2,
+      true
+    ));
   }
   for (const ref of scope.references) {
-    newOps.push(createVariableOp(view.job.allocateXrefId(), ref.variable, new ReferenceExpr(ref.targetId, ref.offset)));
+    newOps.push(createVariableOp(
+      view.job.allocateXrefId(),
+      ref.variable,
+      new ReferenceExpr(ref.targetId, ref.offset),
+      true
+    ));
   }
   if (scope.parent !== null) {
     newOps.push(...generateVariablesInScopeForView(view, scope.parent));
@@ -15706,6 +15897,7 @@ function addNamesToView(unit, baseName, state, compatibility) {
   for (const op of unit.ops()) {
     switch (op.kind) {
       case OpKind.Property:
+      case OpKind.PropertyCreate:
       case OpKind.HostProperty:
         if (op.isAnimationTrigger) {
           op.name = "@" + op.name;
@@ -16327,6 +16519,11 @@ function reference(slot) {
     literal(slot)
   ]);
 }
+function shallowReference(slot) {
+  return importExpr(Identifiers.shallowReference).callFn([
+    literal(slot)
+  ]);
+}
 function nextContext(steps) {
   return importExpr(Identifiers.nextContext).callFn(steps === 1 ? [] : [literal(steps)]);
 }
@@ -16429,6 +16626,17 @@ function styleMap(expression, sourceSpan) {
 function classMap(expression, sourceSpan) {
   return call(Identifiers.classMap, [expression], sourceSpan);
 }
+function propertyCreate(slot, name, expression, sanitizer, sourceSpan) {
+  const args = [
+    literal(slot),
+    literal(name),
+    fn([], [new ReturnStatement(expression)])
+  ];
+  if (sanitizer !== null) {
+    args.push(sanitizer);
+  }
+  return call(Identifiers.propertyCreate, args, sourceSpan);
+}
 var PIPE_BINDINGS = [
   Identifiers.pipeBind1,
   Identifiers.pipeBind2,
@@ -16518,6 +16726,9 @@ function pureFunction(varOffset, fn2, args) {
     literal(varOffset),
     fn2
   ], args, [], null);
+}
+function stringifyInterpolation(staticParts, expressions) {
+  return taggedTemplate(importExpr(Identifiers.stringifyInterpolation), new TemplateLiteral(staticParts.map((p) => new TemplateLiteralElement(p)), expressions));
 }
 function collateInterpolationArgs(strings, expressions) {
   if (strings.length < 1 || expressions.length !== strings.length - 1) {
@@ -16770,7 +16981,11 @@ function reifyCreateOperations(unit, ops) {
         if (op.variable.name === null) {
           throw new Error(`AssertionError: unnamed variable ${op.xref}`);
         }
-        OpList.replace(op, createStatementOp(new DeclareVarStmt(op.variable.name, op.initializer, void 0, StmtModifier.Final)));
+        let initializer = op.initializer;
+        if (initializer instanceof LiteralExpr && initializer.value === void 0) {
+          initializer = void 0;
+        }
+        OpList.replace(op, createStatementOp(new DeclareVarStmt(op.variable.name, initializer, void 0, op.isConstant ? StmtModifier.Final : void 0)));
         break;
       case OpKind.Namespace:
         switch (op.active) {
@@ -16802,6 +17017,12 @@ function reifyCreateOperations(unit, ops) {
           throw new Error("No slot was assigned for project instruction");
         }
         OpList.replace(op, projection(op.slot, op.projectionSlotIndex, op.attributes));
+        break;
+      case OpKind.PropertyCreate:
+        if (op.expression instanceof Interpolation2) {
+        } else {
+          OpList.replace(op, propertyCreate(op.slot, op.name, op.expression, op.sanitizer, op.sourceSpan));
+        }
         break;
       case OpKind.Statement:
         break;
@@ -16879,7 +17100,7 @@ function reifyUpdateOperations(_unit, ops) {
         if (op.variable.name === null) {
           throw new Error(`AssertionError: unnamed variable ${op.xref}`);
         }
-        OpList.replace(op, createStatementOp(new DeclareVarStmt(op.variable.name, op.initializer, void 0, StmtModifier.Final)));
+        OpList.replace(op, createStatementOp(new DeclareVarStmt(op.variable.name, op.initializer, void 0, op.isConstant ? StmtModifier.Final : void 0)));
         break;
       case OpKind.Conditional:
         if (op.processed === null) {
@@ -16906,6 +17127,8 @@ function reifyIrExpression(expr) {
       return nextContext(expr.steps);
     case ExpressionKind.Reference:
       return reference(expr.targetSlot + 1 + expr.offset);
+    case ExpressionKind.ShallowReference:
+      return shallowReference(expr.targetSlot + 1 + expr.offset);
     case ExpressionKind.LexicalRead:
       throw new Error(`AssertionError: unresolved LexicalRead of ${expr.name}`);
     case ExpressionKind.RestoreView:
@@ -16947,6 +17170,8 @@ function reifyIrExpression(expr) {
       return importExpr(sanitizerIdentifierMap.get(expr.fn));
     case ExpressionKind.SlotLiteralExpr:
       return literal(expr.targetSlot);
+    case ExpressionKind.InterpolationTemplateExpr:
+      return stringifyInterpolation(expr.staticParts, expr.expressionParts);
     default:
       throw new Error(`AssertionError: Unsupported reification of ir.Expression kind: ${ExpressionKind[expr.kind]}`);
   }
@@ -16970,13 +17195,14 @@ function reifyListenerHandler(unit, name, handlerOps, consumesDollarEvent) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/remove_empty_bindings.mjs
 function phaseRemoveEmptyBindings(job) {
   for (const unit of job.units) {
-    for (const op of unit.update) {
+    for (const op of unit.ops()) {
       switch (op.kind) {
         case OpKind.Attribute:
         case OpKind.Binding:
         case OpKind.ClassProp:
         case OpKind.ClassMap:
         case OpKind.Property:
+        case OpKind.PropertyCreate:
         case OpKind.StyleProp:
         case OpKind.StyleMap:
           if (op.expression instanceof EmptyExpr2) {
@@ -17003,8 +17229,12 @@ function processLexicalScope(view, ops) {
       case OpKind.Variable:
         switch (op.variable.kind) {
           case SemanticVariableKind.Context:
+            if (op.variable.view === view.xref) {
+              if (view === view.job.root) {
+                break;
+              }
+            }
             scope.set(op.variable.view, new ReadVariableExpr(op.xref));
-            break;
         }
         break;
       case OpKind.Listener:
@@ -17236,24 +17466,27 @@ var sanitizers = /* @__PURE__ */ new Map([
 function phaseResolveSanitizers(job) {
   for (const unit of job.units) {
     const elements = getElementsByXrefId(unit);
-    let sanitizerFn;
-    for (const op of unit.update) {
+    for (const op of unit.ops()) {
       switch (op.kind) {
         case OpKind.Property:
+        case OpKind.PropertyCreate:
         case OpKind.Attribute:
-          sanitizerFn = sanitizers.get(op.securityContext) || null;
-          op.sanitizer = sanitizerFn ? new SanitizerExpr(sanitizerFn) : null;
-          if (op.sanitizer === null) {
-            const ownerOp = elements.get(op.target);
-            if (ownerOp === void 0) {
-              throw Error("Property should have an element-like owner");
-            }
-            if (isIframeElement(ownerOp) && isIframeSecuritySensitiveAttr(op.name)) {
-              op.sanitizer = new SanitizerExpr(SanitizerFn.IframeAttribute);
-            }
-          }
+          resolveSanitizer(op, elements);
           break;
       }
+    }
+  }
+}
+function resolveSanitizer(op, elements) {
+  const sanitizerFn = sanitizers.get(op.securityContext) || null;
+  op.sanitizer = sanitizerFn ? new SanitizerExpr(sanitizerFn) : null;
+  if (op.sanitizer === null) {
+    const ownerOp = elements.get(op.target);
+    if (ownerOp === void 0) {
+      throw Error("Property should have an element-like owner");
+    }
+    if (isIframeElement(ownerOp) && isIframeSecuritySensitiveAttr(op.name)) {
+      op.sanitizer = new SanitizerExpr(SanitizerFn.IframeAttribute);
     }
   }
 }
@@ -17269,7 +17502,7 @@ function phaseSaveRestoreView(job) {
         kind: SemanticVariableKind.SavedView,
         name: null,
         view: view.xref
-      }, new GetCurrentViewExpr())
+      }, new GetCurrentViewExpr(), true)
     ]);
     for (const op of view.create) {
       if (op.kind !== OpKind.Listener) {
@@ -17297,12 +17530,45 @@ function addSaveRestoreViewOperationToListener(unit, op) {
       kind: SemanticVariableKind.Context,
       name: null,
       view: unit.xref
-    }, new RestoreViewExpr(unit.xref))
+    }, new RestoreViewExpr(unit.xref), true)
   ]);
   for (const handlerOp of op.handlerOps) {
     if (handlerOp.kind === OpKind.Statement && handlerOp.statement instanceof ReturnStatement) {
       handlerOp.statement.value = new ResetViewExpr(handlerOp.statement.value);
     }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/signal_bindings.mjs
+function phaseSignalBindings(cpl) {
+  for (const unit of cpl.units) {
+    processUnit2(unit);
+  }
+}
+function processUnit2(unit) {
+  const placeholders = /* @__PURE__ */ new Map();
+  for (const op of unit.create) {
+    if (op.kind === OpKind.BindingSignalPlaceholder) {
+      placeholders.set(op.bindingXref, op);
+    }
+  }
+  if (unit.job.isSignal) {
+    for (const op of unit.update) {
+      if (op.kind === OpKind.Property) {
+        const placeholderOp = placeholders.get(op.bindingXref);
+        if (placeholderOp === void 0) {
+          throw new Error("Expected binding placeholder operation to exist for property operation.");
+        }
+        const expression = op.expression instanceof Interpolation2 ? new InterpolationTemplateExpr(op.expression.strings, op.expression.expressions) : op.expression;
+        const createOp = createPropertyCreateOp(op.bindingXref, op.target, op.name, expression, op.isAnimationTrigger, op.securityContext, op.isTemplate, op.sourceSpan);
+        OpList.replace(placeholderOp, createOp);
+        placeholders.delete(op.bindingXref);
+        OpList.remove(op);
+      }
+    }
+  }
+  for (const op of placeholders.values()) {
+    OpList.remove(op);
   }
 }
 
@@ -17547,8 +17813,11 @@ function fencesForIrExpression(expr) {
 function collectOpInfo(op) {
   let fences = Fence.None;
   const variablesUsed = /* @__PURE__ */ new Set();
-  visitExpressionsInOp(op, (expr) => {
+  visitExpressionsInOp(op, (expr, flags) => {
     if (!isIrExpression(expr)) {
+      return;
+    }
+    if (flags & VisitorContextFlag.InChildOperation) {
       return;
     }
     switch (expr.kind) {
@@ -17657,10 +17926,11 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: phaseNamespace },
   { kind: CompilationJobKind.Both, fn: phaseStyleBindingSpecialization },
   { kind: CompilationJobKind.Both, fn: phaseBindingSpecialization },
-  { kind: CompilationJobKind.Tmpl, fn: phasePropagateI18nBlocks },
+  { kind: CompilationJobKind.Both, fn: phaseSignalBindings },
   { kind: CompilationJobKind.Both, fn: phaseAttributeExtraction },
   { kind: CompilationJobKind.Both, fn: phaseParseExtractedStyles },
   { kind: CompilationJobKind.Tmpl, fn: phaseRemoveEmptyBindings },
+  { kind: CompilationJobKind.Tmpl, fn: phasePropagateI18nBlocks },
   { kind: CompilationJobKind.Tmpl, fn: phaseConditionals },
   { kind: CompilationJobKind.Tmpl, fn: phasePipeCreation },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nTextExtraction },
@@ -17690,6 +17960,7 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: phaseVarCounting },
   { kind: CompilationJobKind.Tmpl, fn: phaseGenerateAdvance },
   { kind: CompilationJobKind.Both, fn: phaseVariableOptimization },
+  { kind: CompilationJobKind.Both, fn: phaseCreationVarColocation },
   { kind: CompilationJobKind.Both, fn: phaseNaming },
   { kind: CompilationJobKind.Tmpl, fn: phaseMergeNextContext },
   { kind: CompilationJobKind.Tmpl, fn: phaseNgContainer },
@@ -17805,14 +18076,14 @@ function emitHostBindingFunction(job) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/ingest.mjs
 var compatibilityMode = CompatibilityMode.TemplateDefinitionBuilder;
-function ingestComponent(componentName, template2, constantPool, relativeContextFilePath, i18nUseExternalIds) {
-  const cpl = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds);
+function ingestComponent(componentName, isSignal, template2, constantPool, relativeContextFilePath, i18nUseExternalIds) {
+  const cpl = new ComponentCompilationJob(componentName, isSignal, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds);
   ingestNodes(cpl.root, template2);
   return cpl;
 }
-function ingestHostBinding(input, bindingParser, constantPool) {
+function ingestHostBinding(input, constantPool) {
   var _a2, _b2, _c2;
-  const job = new HostBindingCompilationJob(input.componentName, constantPool, compatibilityMode);
+  const job = new HostBindingCompilationJob(input.componentName, input.isSignal, constantPool, compatibilityMode);
   for (const property2 of (_a2 = input.properties) != null ? _a2 : []) {
     ingestHostProperty(job, property2, false);
   }
@@ -17840,10 +18111,14 @@ function ingestHostProperty(job, property2, isTextAttribute) {
   if (property2.isAnimation) {
     bindingKind = BindingKind.Animation;
   }
-  job.root.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, SecurityContext.NONE, isTextAttribute, false, property2.sourceSpan));
+  const bindingXref = job.allocateXrefId();
+  job.root.create.push(createBindingSignalPlaceholderOp(bindingXref));
+  job.root.update.push(createBindingOp(bindingXref, job.root.xref, bindingKind, property2.name, expression, null, SecurityContext.NONE, isTextAttribute, false, property2.sourceSpan));
 }
 function ingestHostAttribute(job, name, value) {
+  const bindingXref = job.allocateXrefId();
   const attrBinding = createBindingOp(
+    bindingXref,
     job.root.xref,
     BindingKind.Attribute,
     name,
@@ -18172,12 +18447,12 @@ var BindingFlags;
   BindingFlags2[BindingFlags2["IsStructuralTemplateAttribute"] = 4] = "IsStructuralTemplateAttribute";
   BindingFlags2[BindingFlags2["OnNgTemplateElement"] = 8] = "OnNgTemplateElement";
 })(BindingFlags || (BindingFlags = {}));
-function ingestBinding(view, xref, name, value, type, unit, securityContext, sourceSpan, flags) {
+function ingestBinding(view, targetXref, name, value, type, unit, securityContext, sourceSpan, flags) {
   if (value instanceof ASTWithSource) {
     value = value.ast;
   }
   if (flags & BindingFlags.OnNgTemplateElement && !(flags & BindingFlags.BindingTargetsTemplate) && type === 0) {
-    view.create.push(createExtractedAttributeOp(xref, BindingKind.Property, name, null));
+    view.create.push(createExtractedAttributeOp(targetXref, BindingKind.Property, name, null));
     return;
   }
   let expression;
@@ -18189,7 +18464,9 @@ function ingestBinding(view, xref, name, value, type, unit, securityContext, sou
     expression = value;
   }
   const kind = BINDING_KINDS.get(type);
-  view.update.push(createBindingOp(xref, kind, name, expression, unit, securityContext, !!(flags & BindingFlags.TextValue), !!(flags & BindingFlags.IsStructuralTemplateAttribute), sourceSpan));
+  const bindingXref = view.job.allocateXrefId();
+  view.create.push(createBindingSignalPlaceholderOp(bindingXref));
+  view.update.push(createBindingOp(bindingXref, targetXref, kind, name, expression, unit, securityContext, !!(flags & BindingFlags.TextValue), !!(flags & BindingFlags.IsStructuralTemplateAttribute), sourceSpan));
 }
 function ingestReferences(op, element2) {
   assertIsArray(op.localRefs);
@@ -21907,12 +22184,12 @@ function baseDirectiveFields(meta, constantPool, bindingParser) {
     definitionMap.set("selectors", asLiteral(selectors));
   }
   if (meta.queries.length > 0) {
-    definitionMap.set("contentQueries", createContentQueriesFunction(meta.queries, constantPool, meta.name));
+    definitionMap.set("contentQueries", createContentQueriesFunction(meta.isSignal, meta.queries, constantPool, meta.name));
   }
   if (meta.viewQueries.length) {
-    definitionMap.set("viewQuery", createViewQueriesFunction(meta.viewQueries, constantPool, meta.name));
+    definitionMap.set("viewQuery", createViewQueriesFunction(meta.isSignal, meta.viewQueries, constantPool, meta.name));
   }
-  definitionMap.set("hostBindings", createHostBindingsFunction(meta.host, meta.typeSourceSpan, bindingParser, constantPool, meta.selector || "", meta.name, definitionMap));
+  definitionMap.set("hostBindings", createHostBindingsFunction(meta.host, meta.typeSourceSpan, bindingParser, constantPool, meta.selector || "", meta.name, meta.isSignal, definitionMap));
   definitionMap.set("inputs", conditionallyCreateDirectiveBindingLiteral(meta.inputs, true));
   definitionMap.set("outputs", conditionallyCreateDirectiveBindingLiteral(meta.outputs));
   if (meta.exportAs !== null) {
@@ -22007,7 +22284,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     }
     definitionMap.set("template", templateFunctionExpression);
   } else {
-    const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds);
+    const tpl = ingestComponent(meta.name, meta.isSignal, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds);
     transform(tpl, CompilationJobKind.Tmpl);
     const templateFn = emitTemplateFn(tpl, constantPool);
     if (tpl.contentSelectors !== null) {
@@ -22111,11 +22388,19 @@ function convertAttributesToExpressions(attributes) {
   }
   return values;
 }
-function createContentQueriesFunction(queries, constantPool, name) {
+function createContentQueriesFunction(isSignal, queries, constantPool, name) {
   const createStatements = [];
   const updateStatements = [];
   const tempAllocator = temporaryAllocator(updateStatements, TEMPORARY_NAME);
   for (const query of queries) {
+    if (isSignal) {
+      createStatements.push(importExpr(Identifiers.contentQueryCreate).callFn([
+        variable(CONTEXT_NAME).prop(query.propertyName),
+        variable("dirIndex"),
+        ...prepareQueryParams(query, constantPool)
+      ]).toStmt());
+      continue;
+    }
     createStatements.push(importExpr(Identifiers.contentQuery).callFn([variable("dirIndex"), ...prepareQueryParams(query, constantPool)]).toStmt());
     const temporary = tempAllocator();
     const getQueryList = importExpr(Identifiers.loadQuery).callFn([]);
@@ -22124,14 +22409,17 @@ function createContentQueriesFunction(queries, constantPool, name) {
     updateStatements.push(refresh.and(updateDirective).toStmt());
   }
   const contentQueriesFnName = name ? `${name}_ContentQueries` : null;
+  const body = [
+    renderFlagCheckIfStmt(1, createStatements)
+  ];
+  if (updateStatements.length > 0) {
+    body.push(renderFlagCheckIfStmt(2, updateStatements));
+  }
   return fn([
     new FnParam(RENDER_FLAGS, NUMBER_TYPE),
     new FnParam(CONTEXT_NAME, null),
     new FnParam("dirIndex", null)
-  ], [
-    renderFlagCheckIfStmt(1, createStatements),
-    renderFlagCheckIfStmt(2, updateStatements)
-  ], INFERRED_TYPE, null, contentQueriesFnName);
+  ], body, INFERRED_TYPE, null, contentQueriesFnName);
 }
 function stringAsType(str) {
   return expressionType(literal(str));
@@ -22184,11 +22472,18 @@ function createDirectiveType(meta) {
   }
   return expressionType(importExpr(Identifiers.DirectiveDeclaration, typeParams));
 }
-function createViewQueriesFunction(viewQueries, constantPool, name) {
+function createViewQueriesFunction(isSignal, viewQueries, constantPool, name) {
   const createStatements = [];
   const updateStatements = [];
   const tempAllocator = temporaryAllocator(updateStatements, TEMPORARY_NAME);
   viewQueries.forEach((query) => {
+    if (isSignal) {
+      createStatements.push(importExpr(Identifiers.viewQueryCreate).callFn([
+        variable(CONTEXT_NAME).prop(query.propertyName),
+        ...prepareQueryParams(query, constantPool)
+      ]).toStmt());
+      return;
+    }
     const queryDefinition = importExpr(Identifiers.viewQuery).callFn(prepareQueryParams(query, constantPool));
     createStatements.push(queryDefinition.toStmt());
     const temporary = tempAllocator();
@@ -22198,12 +22493,15 @@ function createViewQueriesFunction(viewQueries, constantPool, name) {
     updateStatements.push(refresh.and(updateDirective).toStmt());
   });
   const viewQueryFnName = name ? `${name}_Query` : null;
-  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, null)], [
-    renderFlagCheckIfStmt(1, createStatements),
-    renderFlagCheckIfStmt(2, updateStatements)
-  ], INFERRED_TYPE, null, viewQueryFnName);
+  const body = [
+    renderFlagCheckIfStmt(1, createStatements)
+  ];
+  if (updateStatements.length > 0) {
+    body.push(renderFlagCheckIfStmt(2, updateStatements));
+  }
+  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, null)], body, INFERRED_TYPE, null, viewQueryFnName);
 }
-function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindingParser, constantPool, selector, name, definitionMap) {
+function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindingParser, constantPool, selector, name, isSignal, definitionMap) {
   const bindings = bindingParser.createBoundHostProperties(hostBindingsMetadata.properties, typeSourceSpan);
   const eventBindings = bindingParser.createDirectiveHostEventAsts(hostBindingsMetadata.listeners, typeSourceSpan);
   if (USE_TEMPLATE_PIPELINE) {
@@ -22214,11 +22512,12 @@ function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindin
       hostBindingsMetadata.attributes["class"] = literal(hostBindingsMetadata.specialAttributes.classAttr);
     }
     const hostJob = ingestHostBinding({
+      isSignal,
       componentName: name,
       properties: bindings,
       events: eventBindings,
       attributes: hostBindingsMetadata.attributes
-    }, bindingParser, constantPool);
+    }, constantPool);
     transform(hostJob, CompilationJobKind.Host);
     definitionMap.set("hostAttrs", hostJob.root.attributes);
     const varCount = hostJob.root.vars;
@@ -23645,7 +23944,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-20e7e21");
+var VERSION2 = new Version("17.1.0-next.0+sha-ca81661");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

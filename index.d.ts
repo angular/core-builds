@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-20e7e21
+ * @license Angular v17.1.0-next.0+sha-ca81661
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -944,6 +944,8 @@ export declare interface BootstrapOptions {
     ngZoneRunCoalescing?: boolean;
 }
 
+declare const BRAND_WRITE_TYPE: unique symbol;
+
 
 /**
  * The strategy that the default change detector uses to detect changes.
@@ -1314,6 +1316,11 @@ export declare interface Component extends Directive {
      * guide](guide/standalone-components).
      */
     standalone?: boolean;
+    /**
+     * // TODO(signals): Remove internal and add public documentation.
+     * TODO- internal
+     */
+    signals?: boolean;
     /**
      * The imports property specifies the standalone component's template dependencies — those
      * directives, components, and pipes that can be used within its template. Standalone components
@@ -1866,6 +1873,12 @@ export declare type ContentChild = Query;
  */
 export declare const ContentChild: ContentChildDecorator;
 
+export declare function contentChild<T>(selector: ProviderToken<T> | string, opts?: {
+    descendants?: boolean;
+    read?: any;
+    static?: boolean;
+}): Signal<T | undefined>;
+
 /**
  * Type of the ContentChild decorator / constructor function.
  *
@@ -1960,6 +1973,12 @@ export declare type ContentChildren = Query;
  * @publicApi
  */
 export declare const ContentChildren: ContentChildrenDecorator;
+
+export declare function contentChildren<T>(selector: ProviderToken<T> | string, opts?: {
+    descendants?: boolean;
+    read?: any;
+    emitDistinctChangesOnly?: boolean;
+}): Signal<T[]>;
 
 /**
  * Type of the ContentChildren decorator / constructor function.
@@ -3006,6 +3025,12 @@ export declare interface Directive {
      * guide](guide/standalone-components).
      */
     standalone?: boolean;
+    /**
+     * // TODO(signals): Remove internal and add public documentation
+     *
+     * //TODO-internal
+     */
+    signals?: boolean;
     /**
      * Standalone directives that should be applied to the host whenever the directive is matched.
      * By default, none of the inputs or outputs of the host directives will be available on the host,
@@ -5070,6 +5095,36 @@ export declare interface Input {
  */
 export declare const Input: InputDecorator;
 
+export declare function input(): InputSignal<undefined, undefined>;
+
+export declare function input<T>(): InputSignal<T | undefined, T>;
+
+export declare function input<T>(initialValue: T & (string | number | boolean), opts?: PrimaryInputOptions<T, T> & {
+    transform?: undefined;
+}): InputSignal<T, T>;
+
+export declare function input<ReadT, WriteT = ReadT>(initialValue: WriteT & (string | number | boolean), opts: PrimaryInputOptions<ReadT, WriteT>): InputSignal<ReadT, WriteT>;
+
+export declare function input<T>(opts: InputOptions<T, T> & {
+    required: true;
+    transform?: undefined;
+}): InputSignal<T, T>;
+
+export declare function input<ReadT, WriteT = ReadT>(opts: InputOptions<ReadT, WriteT> & {
+    required: true;
+}): InputSignal<ReadT, WriteT>;
+
+export declare function input<T>(opts: InputOptions<T, T> & {
+    initialValue: T;
+    transform?: undefined;
+}): InputSignal<T, T>;
+
+export declare function input<ReadT, WriteT = ReadT>(opts: InputOptions<ReadT, WriteT> & {
+    initialValue: ReadT;
+}): InputSignal<ReadT, WriteT>;
+
+export declare function input<ReadT, WriteT = ReadT>(opts: InputOptions<ReadT, WriteT>): InputSignal<ReadT | undefined, WriteT>;
+
 /**
  * @publicApi
  */
@@ -5128,6 +5183,20 @@ export declare interface InputDecorator {
     (arg?: string | Input): any;
     new (arg?: string | Input): any;
 }
+
+declare interface InputOptions<ReadT, WriteT> extends PrimaryInputOptions<ReadT, WriteT> {
+    initialValue?: WriteT;
+    required?: boolean;
+}
+
+/**
+ * A `Signal` representing a component or directive input.
+ *
+ * This is equivalent to a `Signal`, except it also carries type information about the
+ */
+export declare type InputSignal<ReadT, WriteT> = Signal<ReadT> & {
+    [BRAND_WRITE_TYPE]: WriteT;
+};
 
 /** Function that can be used to transform incoming input values. */
 declare type InputTransformFunction = (value: any) => any;
@@ -6018,6 +6087,13 @@ export declare enum MissingTranslationStrategy {
 }
 
 /**
+ * A `Signal` representing a component or directive model input.
+ *
+ * Model inputs also have the `WritableSignal` interface for their WriteTer side.
+ */
+export declare type ModelSignal<ReadT, WriteT> = InputSignal<ReadT, WriteT> & Pick<WritableSignal<WriteT>, 'set' | 'update'>;
+
+/**
  * Combination of NgModuleFactory and ComponentFactories.
  *
  * @publicApi
@@ -6745,6 +6821,11 @@ export declare interface Output {
  */
 export declare const Output: OutputDecorator;
 
+export declare function output<T>(opts?: {
+    alias?: string;
+    isAsync?: boolean;
+}): EventEmitter<T>;
+
 /**
  * Type of the Output decorator / constructor function.
  *
@@ -7025,6 +7106,11 @@ declare const enum PreOrderHookFlags {
     NumberOfInitHooksCalledMask = 4294901760
 }
 
+declare interface PrimaryInputOptions<ReadT, WriteT> {
+    alias?: string;
+    transform?: (value: WriteT) => ReadT;
+}
+
 /**
  * Describes a function that is used to process provider lists (such as provider
  * overrides).
@@ -7204,7 +7290,8 @@ declare const enum QueryFlags {
  */
 export declare class QueryList<T> implements Iterable<T> {
     private _emitDistinctChangesOnly;
-    readonly dirty = true;
+    readonly dirty: boolean;
+    private _onDirty?;
     private _results;
     private _changesDetected;
     private _changes;
@@ -7278,6 +7365,8 @@ export declare class QueryList<T> implements Iterable<T> {
      * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
      */
     notifyOnChanges(): void;
+    /** internal */
+    onDirty(cb: () => void): void;
     /** internal */
     setDirty(): void;
     /** internal */
@@ -9921,6 +10010,7 @@ declare interface TView {
      *                        (see `getComponentId` function for details)
      */
     ssrId: string | null;
+    virtualUpdate: TVirtualInstruction[] | null;
 }
 
 /**
@@ -9948,6 +10038,11 @@ declare const enum TViewType {
      * can have zero or more `Embedded` `TView`s.
      */
     Embedded = 2
+}
+
+declare interface TVirtualInstruction {
+    slot: number;
+    instruction: () => void;
 }
 
 /**
@@ -10103,6 +10198,11 @@ export declare type ViewChild = Query;
  */
 export declare const ViewChild: ViewChildDecorator;
 
+export declare function viewChild<T>(selector: ProviderToken<T> | string, opts?: {
+    read?: any;
+    static?: boolean;
+}): Signal<T | undefined>;
+
 /**
  * Type of the ViewChild decorator / constructor function.
  *
@@ -10188,6 +10288,11 @@ export declare type ViewChildren = Query;
  * @publicApi
  */
 export declare const ViewChildren: ViewChildrenDecorator;
+
+export declare function viewChildren<T>(selector: ProviderToken<T> | string, opts?: {
+    read?: any;
+    emitDistinctChangesOnly?: boolean;
+}): Signal<T[]>;
 
 /**
  * Type of the ViewChildren decorator / constructor function.
@@ -13403,6 +13508,8 @@ export declare function ɵɵconditional<T>(containerIndex: number, matchingTempl
  */
 export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
+export declare function ɵɵcontentQueryCreate<T>(target: Signal<T | undefined>, dirIndex: number, predicate: ProviderToken<T> | string[], flags: QueryFlags, read?: any): void;
+
 /**
  * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
  * definition.
@@ -13869,6 +13976,8 @@ export declare function ɵɵgetCurrentView(): OpaqueViewState;
  * @codeGenApi
  */
 export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type<T>) => T;
+
+export declare type ɵɵGetInputSignalWriteType<T> = T extends InputSignal<any, infer X> ? X : never;
 
 /**
  * This feature adds the host directives behavior to a directive definition by patching a
@@ -14457,7 +14566,16 @@ export declare function ɵɵprojectionDef(projectionSlots?: ProjectionSlots): vo
  *
  * @codeGenApi
  */
-export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵproperty;
+export declare function ɵɵproperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null, opts?: {
+    skipSignal: boolean;
+}): typeof ɵɵproperty;
+
+/**
+ * TODO
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵpropertyCreate<T>(slot: number, propName: string, expr: () => T, sanitizer?: SanitizerFn | null): typeof ɵɵpropertyCreate;
 
 /**
  *
@@ -15297,6 +15415,15 @@ export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, direct
 export declare function ɵɵsetNgModuleScope(type: any, scope: NgModuleScopeInfoFromDecorator): unknown;
 
 /**
+ * Retrieves a local reference from the current `LView`.
+ *
+ * @param index The relative index of the local ref in `LView`.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵshallowReference<T>(index: number): T;
+
+/**
  * A feature that acts as a setup code for the {@link StandaloneService}.
  *
  * The most important responsibility of this feature is to expose the "getStandaloneInjector"
@@ -15307,6 +15434,8 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: NgModuleScopeInfo
  * @codeGenApi
  */
 export declare function ɵɵStandaloneFeature(definition: ɵComponentDef<unknown>): void;
+
+export declare function ɵɵstringifyInterpolation(staticStrings: TemplateStringsArray, ...expressionValues: any[]): string;
 
 /**
  * Update style bindings using an object literal on an element.
@@ -16307,5 +16436,7 @@ export declare function ɵɵvalidateIframeAttribute(attrValue: any, tagName: str
  * @codeGenApi
  */
 export declare function ɵɵviewQuery<T>(predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
+
+export declare function ɵɵviewQueryCreate<T>(target: Signal<T | undefined>, predicate: ProviderToken<T> | string[], flags: QueryFlags, read?: any): void;
 
 export { }
