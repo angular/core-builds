@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-f3eebaf
+ * @license Angular v17.1.0-next.0+sha-1c4a367
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10608,6 +10608,17 @@ export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBy
 export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType.Url): value is ɵSafeUrl;
 
 export declare function ɵallowSanitizationBypassAndThrow(value: any, type: ɵBypassType): boolean;
+
+/**
+ * This enum is meant to be used by `ɵtype` properties of the different renderers implemented
+ * by the framework
+ *
+ * We choose to not add `ɵtype` to `Renderer2` to no expose it to the public API.
+ */
+export declare const enum ɵAnimationRendererType {
+    Regular = 0,
+    Delegated = 1
+}
 
 /**
  * Annotates all components bootstrapped in a given ApplicationRef
