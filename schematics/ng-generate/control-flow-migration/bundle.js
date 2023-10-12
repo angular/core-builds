@@ -23645,7 +23645,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-37c8fd7");
+var VERSION2 = new Version("17.1.0-next.0+sha-20e7e21");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23735,13 +23735,16 @@ var ElementToMigrate = class {
     return ((_a2 = this.el.sourceSpan) == null ? void 0 : _a2.end.offset) - this.nestCount - offset;
   }
   length() {
-    return this.el.sourceSpan.end.offset - this.el.sourceSpan.start.offset;
+    var _a2, _b2;
+    return ((_a2 = this.el.sourceSpan) == null ? void 0 : _a2.end.offset) - ((_b2 = this.el.sourceSpan) == null ? void 0 : _b2.start.offset);
   }
   openLength() {
-    return this.el.children[0].sourceSpan.start.offset - this.el.sourceSpan.start.offset;
+    var _a2, _b2;
+    return ((_a2 = this.el.children[0]) == null ? void 0 : _a2.sourceSpan.start.offset) - ((_b2 = this.el.sourceSpan) == null ? void 0 : _b2.start.offset);
   }
   closeLength() {
-    return this.el.sourceSpan.end.offset - this.el.children[0].sourceSpan.end.offset;
+    var _a2, _b2;
+    return ((_a2 = this.el.sourceSpan) == null ? void 0 : _a2.end.offset) - ((_b2 = this.el.children[0]) == null ? void 0 : _b2.sourceSpan.end.offset);
   }
   preOffset(newOffset) {
     return newOffset - this.openLength() + 1;
@@ -23760,7 +23763,10 @@ var Template2 = class {
   }
   generateContents(tmpl) {
     this.contents = tmpl.slice(this.el.sourceSpan.start.offset, this.el.sourceSpan.end.offset + 1);
-    this.children = tmpl.slice(this.el.children[0].sourceSpan.start.offset, this.el.children[this.el.children.length - 1].sourceSpan.end.offset);
+    this.children = "";
+    if (this.el.children.length > 0) {
+      this.children = tmpl.slice(this.el.children[0].sourceSpan.start.offset, this.el.children[this.el.children.length - 1].sourceSpan.end.offset);
+    }
   }
 };
 var AnalyzedFile = class {
@@ -23869,16 +23875,21 @@ function getNestedCount(etm, aggregator) {
 function migrateTemplate(template2) {
   var _a2, _b2, _c2;
   let parsed;
+  let errors = [];
   try {
     parsed = new HtmlParser().parse(template2, "", {
       tokenizeExpansionForms: true,
       tokenizeBlocks: false
     });
     if (parsed.errors && parsed.errors.length > 0) {
-      return null;
+      for (let error2 of parsed.errors) {
+        errors.push({ type: "parse", error: error2 });
+      }
+      return { migrated: null, errors };
     }
-  } catch (e) {
-    return null;
+  } catch (error2) {
+    errors.push({ type: "parse", error: error2 });
+    return { migrated: null, errors };
   }
   let result = template2;
   const visitor = new ElementCollector();
@@ -23898,25 +23909,37 @@ function migrateTemplate(template2) {
   let offset = 0;
   for (const el of visitor.elements) {
     if (el.attr.name === ngif) {
-      let ifResult = migrateNgIf(el, visitor.templates, result, offset);
-      result = ifResult.tmpl;
-      offset = ifResult.offset;
+      try {
+        let ifResult = migrateNgIf(el, visitor.templates, result, offset);
+        result = ifResult.tmpl;
+        offset = ifResult.offset;
+      } catch (error2) {
+        errors.push({ type: ngfor, error: error2 });
+      }
     } else if (el.attr.name === ngfor) {
-      let forResult = migrateNgFor(el, result, offset);
-      result = forResult.tmpl;
-      offset = forResult.offset;
+      try {
+        let forResult = migrateNgFor(el, result, offset);
+        result = forResult.tmpl;
+        offset = forResult.offset;
+      } catch (error2) {
+        errors.push({ type: ngfor, error: error2 });
+      }
     } else if (el.attr.name === ngswitch) {
-      let switchResult = migrateNgSwitch(el, result, offset);
-      result = switchResult.tmpl;
-      offset = switchResult.offset;
+      try {
+        let switchResult = migrateNgSwitch(el, result, offset);
+        result = switchResult.tmpl;
+        offset = switchResult.offset;
+      } catch (error2) {
+        errors.push({ type: ngfor, error: error2 });
+      }
     }
   }
   for (const [_, t] of visitor.templates) {
-    if (t.count === 2) {
+    if (t.count < 2) {
       result = result.replace(t.contents, "");
     }
   }
-  return result;
+  return { migrated: result, errors };
 }
 function migrateNgFor(etm, tmpl, offset) {
   const aliasWithEqualRegexp = /=\s+(count|index|first|last|even|odd)/gm;
@@ -23979,6 +24002,7 @@ function buildIfElseBlock(etm, ngTemplates, tmpl, elseString, offset) {
   let tmplEnd = tmpl.slice(etm.end(offset));
   const updatedTmpl = tmplStart + ifElseBlock + tmplEnd;
   offset = offset + etm.preOffset(startBlock.length) + etm.postOffset(mainBlock.length + postBlock.length);
+  elseTmpl.count--;
   return { tmpl: updatedTmpl, offset };
 }
 function buildIfThenElseBlock(etm, ngTemplates, tmpl, thenString, elseString, offset) {
@@ -23993,6 +24017,8 @@ function buildIfThenElseBlock(etm, ngTemplates, tmpl, thenString, elseString, of
   let tmplEnd = tmpl.slice(etm.end(offset));
   const updatedTmpl = tmplStart + ifThenElseBlock + tmplEnd;
   offset = offset + etm.preOffset(startBlock.length) + etm.postOffset(postBlock.length);
+  thenTmpl.count--;
+  elseTmpl.count--;
   return { tmpl: updatedTmpl, offset };
 }
 function getMainBlock(etm, tmpl, offset) {
@@ -24065,8 +24091,17 @@ function control_flow_migration_default() {
       throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the control flow migration.");
     }
     context.logger.warn("IMPORTANT! This migration is in developer preview. Use with caution.");
+    let errors = [];
     for (const tsconfigPath of allPaths) {
-      runControlFlowMigration(tree, tsconfigPath, basePath);
+      const migrateErrors = runControlFlowMigration(tree, tsconfigPath, basePath);
+      errors = [...errors, ...migrateErrors];
+    }
+    if (errors.length > 0) {
+      context.logger.warn(`WARNING: ${errors.length} errors occured during your migration:
+`);
+      errors.forEach((err) => {
+        context.logger.warn(err);
+      });
     }
   });
 }
@@ -24074,6 +24109,7 @@ function runControlFlowMigration(tree, tsconfigPath, basePath) {
   const program = createMigrationProgram(tree, tsconfigPath, basePath);
   const sourceFiles = program.getSourceFiles().filter((sourceFile) => canMigrateFile(basePath, sourceFile, program));
   const analysis = /* @__PURE__ */ new Map();
+  const migrateErrors = /* @__PURE__ */ new Map();
   for (const sourceFile of sourceFiles) {
     analyze(sourceFile, analysis);
   }
@@ -24085,14 +24121,29 @@ function runControlFlowMigration(tree, tsconfigPath, basePath) {
     for (const [start, end] of ranges) {
       const template2 = content.slice(start, end);
       const length = (end != null ? end : content.length) - start;
-      const migrated = migrateTemplate(template2);
+      const { migrated, errors } = migrateTemplate(template2);
       if (migrated !== null) {
         update.remove(start, length);
         update.insertLeft(start, migrated);
       }
+      if (errors.length > 0) {
+        migrateErrors.set(path2, errors);
+      }
     }
     tree.commitUpdate(update);
   }
+  const errorList = [];
+  for (let [template2, errors] of migrateErrors) {
+    errorList.push(generateErrorMessage(template2, errors));
+  }
+  return errorList;
+}
+function generateErrorMessage(path2, errors) {
+  let errorMessage = `Template "${path2}" encountered ${errors.length} errors during migration:
+`;
+  errorMessage += errors.map((e) => ` - ${e.type}: ${e.error}
+`);
+  return errorMessage;
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {});
