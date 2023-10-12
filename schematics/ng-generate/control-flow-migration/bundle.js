@@ -23645,7 +23645,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-1c4a367");
+var VERSION2 = new Version("17.1.0-next.0+sha-37c8fd7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23919,7 +23919,8 @@ function migrateTemplate(template2) {
   return result;
 }
 function migrateNgFor(etm, tmpl, offset) {
-  const aliasRegexp = /=\s+(count|index|first|last|even|odd)/gm;
+  const aliasWithEqualRegexp = /=\s+(count|index|first|last|even|odd)/gm;
+  const aliasWithAsRegexp = /(count|index|first|last|even|odd)\s+as/gm;
   const aliases = [];
   const parts = etm.attr.value.split(";");
   const condition = parts[0].replace("let ", "");
@@ -23931,9 +23932,13 @@ function migrateNgFor(etm, tmpl, offset) {
       const trackByFn = part.replace("trackBy:", "").trim();
       trackBy = `${trackByFn}($index, ${loopVar})`;
     }
-    if (part.match(aliasRegexp)) {
+    if (part.match(aliasWithEqualRegexp)) {
       const aliasParts = part.split("=");
       aliases.push(` ${aliasParts[0].trim()} = $${aliasParts[1].trim()}`);
+    }
+    if (part.match(aliasWithAsRegexp)) {
+      const aliasParts = part.split(/\s+as\s+/);
+      aliases.push(` let ${aliasParts[1].trim()} = $${aliasParts[0].trim()}`);
     }
   }
   const aliasStr = aliases.length > 0 ? `;${aliases.join(";")}` : "";
