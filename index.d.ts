@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-c2b1a24
+ * @license Angular v17.1.0-next.0+sha-b1cb0b3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11022,7 +11022,7 @@ export declare const ɵdefaultIterableDiffers: IterableDiffers;
 export declare const ɵdefaultKeyValueDiffers: KeyValueDiffers;
 
 /**
- * Internal token used for configuring defer block behavior.
+ * **INTERNAL**, token used for configuring defer block behavior.
  */
 export declare const ɵDEFER_BLOCK_CONFIG: InjectionToken<ɵDeferBlockConfig>;
 
