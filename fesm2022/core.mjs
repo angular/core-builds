@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-20e7e21
+ * @license Angular v17.1.0-next.0+sha-f2513c5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10429,7 +10429,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-20e7e21');
+const VERSION = new Version('17.1.0-next.0+sha-f2513c5');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19587,10 +19587,16 @@ const eventListenerOptions = {
 const hoverTriggers = new WeakMap();
 /** Keeps track of the currently-registered `on interaction` triggers. */
 const interactionTriggers = new WeakMap();
+/** Currently-registered `viewport` triggers. */
+const viewportTriggers = new WeakMap();
 /** Names of the events considered as interaction events. */
 const interactionEventNames = ['click', 'keydown'];
 /** Names of the events considered as hover events. */
 const hoverEventNames = ['mouseenter', 'focusin'];
+/** `IntersectionObserver` used to observe `viewport` triggers. */
+let intersectionObserver = null;
+/** Number of elements currently observed with `viewport` triggers. */
+let observedViewportElements = 0;
 /** Object keeping track of registered callbacks for a deferred block trigger. */
 class DeferEventEntry {
     constructor() {
@@ -19612,7 +19618,7 @@ function onInteraction(trigger, callback, injector) {
     let entry = interactionTriggers.get(trigger);
     // If this is the first entry for this element, add the listeners.
     if (!entry) {
-        // Note that using managing events centrally like this lends itself well to using global
+        // Note that managing events centrally like this lends itself well to using global
         // event delegation. It currently does delegation at the element level, rather than the
         // document level, because:
         // 1. Global delegation is the most effective when there are a lot of events being registered
@@ -19684,63 +19690,41 @@ function onHover(trigger, callback, injector) {
  * @param injector Injector that can be used by the trigger to resolve DI tokens.
  */
 function onViewport(trigger, callback, injector) {
-    return injector.get(DeferIntersectionManager).register(trigger, callback);
-}
-/** Keeps track of the registered `viewport` triggers. */
-class DeferIntersectionManager {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: DeferIntersectionManager,
-        providedIn: 'root',
-        factory: () => new DeferIntersectionManager(inject(NgZone)),
-    }); }
-    constructor(ngZone) {
-        this.ngZone = ngZone;
-        /** `IntersectionObserver` used to observe `viewport` triggers. */
-        this.intersectionObserver = null;
-        /** Number of elements currently observed with `viewport` triggers. */
-        this.observedViewportElements = 0;
-        /** Currently-registered `viewport` triggers. */
-        this.viewportTriggers = new WeakMap();
-        this.intersectionCallback = entries => {
+    const ngZone = injector.get(NgZone);
+    let entry = viewportTriggers.get(trigger);
+    intersectionObserver = intersectionObserver || ngZone.runOutsideAngular(() => {
+        return new IntersectionObserver(entries => {
             for (const current of entries) {
                 // Only invoke the callbacks if the specific element is intersecting.
-                if (current.isIntersecting && this.viewportTriggers.has(current.target)) {
-                    this.ngZone.run(this.viewportTriggers.get(current.target).listener);
+                if (current.isIntersecting && viewportTriggers.has(current.target)) {
+                    ngZone.run(viewportTriggers.get(current.target).listener);
                 }
             }
-        };
+        });
+    });
+    if (!entry) {
+        entry = new DeferEventEntry();
+        ngZone.runOutsideAngular(() => intersectionObserver.observe(trigger));
+        viewportTriggers.set(trigger, entry);
+        observedViewportElements++;
     }
-    register(trigger, callback) {
-        let entry = this.viewportTriggers.get(trigger);
-        if (!this.intersectionObserver) {
-            this.intersectionObserver =
-                this.ngZone.runOutsideAngular(() => new IntersectionObserver(this.intersectionCallback));
+    entry.callbacks.add(callback);
+    return () => {
+        // It's possible that a different cleanup callback fully removed this element already.
+        if (!viewportTriggers.has(trigger)) {
+            return;
         }
-        if (!entry) {
-            entry = new DeferEventEntry();
-            this.ngZone.runOutsideAngular(() => this.intersectionObserver.observe(trigger));
-            this.viewportTriggers.set(trigger, entry);
-            this.observedViewportElements++;
+        entry.callbacks.delete(callback);
+        if (entry.callbacks.size === 0) {
+            intersectionObserver?.unobserve(trigger);
+            viewportTriggers.delete(trigger);
+            observedViewportElements--;
         }
-        entry.callbacks.add(callback);
-        return () => {
-            // It's possible that a different cleanup callback fully removed this element already.
-            if (!this.viewportTriggers.has(trigger)) {
-                return;
-            }
-            entry.callbacks.delete(callback);
-            if (entry.callbacks.size === 0) {
-                this.intersectionObserver?.unobserve(trigger);
-                this.viewportTriggers.delete(trigger);
-                this.observedViewportElements--;
-            }
-            if (this.observedViewportElements === 0) {
-                this.intersectionObserver?.disconnect();
-                this.intersectionObserver = null;
-            }
-        };
-    }
+        if (observedViewportElements === 0) {
+            intersectionObserver?.disconnect();
+            intersectionObserver = null;
+        }
+    };
 }
 /**
  * Helper function to get the LView in which a deferred block's trigger is rendered.
