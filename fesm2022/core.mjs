@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.8+sha-e90f5e5
+ * @license Angular v17.0.0-next.8+sha-6fd863d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10429,7 +10429,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.8+sha-e90f5e5');
+const VERSION = new Version('17.0.0-next.8+sha-6fd863d');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -30488,6 +30488,7 @@ function isBoundToModule(cf) {
 /**
  * A token for third-party components that can register themselves with NgProbe.
  *
+ * @deprecated
  * @publicApi
  */
 class NgProbeToken {
@@ -31713,6 +31714,7 @@ class DebugElement extends DebugNode {
     /**
      *  A map of attribute names to attribute values for an element.
      */
+    // TODO: replace null by undefined in the return type
     get attributes() {
         const attributes = {};
         const element = this.nativeElement;
@@ -31758,16 +31760,11 @@ class DebugElement extends DebugNode {
     }
     /**
      * The inline styles of the DOM element.
-     *
-     * Will be `null` if there is no `style` property on the underlying DOM element.
-     *
-     * @see [ElementCSSInlineStyle](https://developer.mozilla.org/en-US/docs/Web/API/ElementCSSInlineStyle/style)
      */
+    // TODO: replace null by undefined in the return type
     get styles() {
-        if (this.nativeElement && this.nativeElement.style) {
-            return this.nativeElement.style;
-        }
-        return {};
+        const element = this.nativeElement;
+        return (element?.style ?? {});
     }
     /**
      * A map containing the class names on the element as keys.
