@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.9+sha-630e906
+ * @license Angular v16.2.9+sha-d75eaa7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10276,7 +10276,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.9+sha-630e906');
+const VERSION = new Version('16.2.9+sha-d75eaa7');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11665,11 +11665,6 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
 }
 
 let currentConsumer = null;
-function setLViewForConsumer(node, lView) {
-    (typeof ngDevMode === 'undefined' || ngDevMode) &&
-        assertEqual(node.lView, null, 'Consumer already associated with a view.');
-    node.lView = lView;
-}
 /**
  * Create a new template consumer pointing at the specified LView.
  * Sometimes, a previously created consumer may be reused, in order to save on allocations. In that
