@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-f2513c5
+ * @license Angular v17.1.0-next.0+sha-87ef880
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2340,10 +2340,6 @@ export declare class DebugElement extends DebugNode {
     };
     /**
      * The inline styles of the DOM element.
-     *
-     * Will be `null` if there is no `style` property on the underlying DOM element.
-     *
-     * @see [ElementCSSInlineStyle](https://developer.mozilla.org/en-US/docs/Web/API/ElementCSSInlineStyle/style)
      */
     get styles(): {
         [key: string]: string | null;
@@ -6344,6 +6340,7 @@ declare interface NgModuleScopeInfoFromDecorator {
 /**
  * A token for third-party components that can register themselves with NgProbe.
  *
+ * @deprecated
  * @publicApi
  */
 export declare class NgProbeToken {
