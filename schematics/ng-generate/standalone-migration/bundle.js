@@ -9285,7 +9285,8 @@ function createI18nStartOp(xref, message, root) {
     message,
     params: /* @__PURE__ */ new Map(),
     messageIndex: null,
-    subTemplateIndex: null
+    subTemplateIndex: null,
+    needsPostprocessing: false
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
 function createI18nEndOp(xref) {
@@ -10287,7 +10288,6 @@ function getScopeForView(view, parent) {
   }
   for (const op of view.create) {
     switch (op.kind) {
-      case OpKind.Element:
       case OpKind.ElementStart:
       case OpKind.Template:
         if (!Array.isArray(op.localRefs)) {
@@ -10421,7 +10421,7 @@ function phaseI18nConstCollection(job) {
   }
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart || op.kind === OpKind.I18n) {
+      if (op.kind === OpKind.I18nStart) {
         op.messageIndex = messageConstIndices[op.root];
       }
     }
@@ -16326,12 +16326,13 @@ function phaseI18nMessageExtraction(job) {
   const fileBasedI18nSuffix = job.relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_").toUpperCase() + "_";
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart || op.kind === OpKind.I18n) {
+      if (op.kind === OpKind.I18nStart) {
         if (op.xref === op.root) {
           const params = new Map([...op.params.entries()].sort());
           const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
           const closureVar = i18nGenerateClosureVar(job.pool, op.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
-          const statements = getTranslationDeclStmts(op.message, mainVar, closureVar, params, void 0);
+          const transformFn = op.needsPostprocessing ? (expr) => importExpr(Identifiers.i18nPostprocess).callFn([expr]) : void 0;
+          const statements = getTranslationDeclStmts(op.message, mainVar, closureVar, params, transformFn);
           unit.create.push(createExtractedMessageOp(op.xref, mainVar, statements));
         }
       }
@@ -16416,7 +16417,6 @@ function phaseLocalRefs(job) {
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.ElementStart:
-        case OpKind.Element:
         case OpKind.Template:
           if (!Array.isArray(op.localRefs)) {
             throw new Error(`AssertionError: expected localRefs to be an array still`);
@@ -16446,7 +16446,7 @@ function phaseNamespace(job) {
   for (const unit of job.units) {
     let activeNamespace = Namespace.HTML;
     for (const op of unit.create) {
-      if (op.kind !== OpKind.Element && op.kind !== OpKind.ElementStart) {
+      if (op.kind !== OpKind.ElementStart) {
         continue;
       }
       if (op.namespace !== activeNamespace) {
@@ -16671,10 +16671,6 @@ function phaseNgContainer(job) {
   for (const unit of job.units) {
     const updatedElementXrefs = /* @__PURE__ */ new Set();
     for (const op of unit.create) {
-      if (op.kind === OpKind.Element && op.tag === CONTAINER_TAG) {
-        op.kind = OpKind.Container;
-        updatedElementXrefs.add(op.xref);
-      }
       if (op.kind === OpKind.ElementStart && op.tag === CONTAINER_TAG) {
         op.kind = OpKind.ContainerStart;
         updatedElementXrefs.add(op.xref);
@@ -16943,35 +16939,6 @@ function wrapTemplateWithI18n(unit, parentI18n) {
     const id = unit.job.allocateXrefId();
     OpList.insertAfter(createI18nStartOp(id, parentI18n.message, parentI18n.root), unit.create.head);
     OpList.insertBefore(createI18nEndOp(id), unit.create.tail);
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/propagate_i18n_placeholders.mjs
-function phasePropagateI18nPlaceholders(job) {
-  const i18nOps = /* @__PURE__ */ new Map();
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart) {
-        i18nOps.set(op.xref, op);
-      }
-    }
-  }
-  for (const op of i18nOps.values()) {
-    if (op.xref !== op.root) {
-      const rootOp = i18nOps.get(op.root);
-      for (const [placeholder, value] of op.params) {
-        rootOp.params.set(placeholder, value);
-      }
-    }
-  }
-  for (const op of i18nOps.values()) {
-    if (op.xref === op.root) {
-      for (const placeholder in op.message.placeholders) {
-        if (!op.params.has(placeholder)) {
-          throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
-        }
-      }
-    }
   }
 }
 
@@ -17885,7 +17852,8 @@ var I18nParamValueFlags;
   I18nParamValueFlags2[I18nParamValueFlags2["None"] = 0] = "None";
   I18nParamValueFlags2[I18nParamValueFlags2["ElementTag"] = 1] = "ElementTag";
   I18nParamValueFlags2[I18nParamValueFlags2["TemplateTag"] = 2] = "TemplateTag";
-  I18nParamValueFlags2[I18nParamValueFlags2["CloseTag"] = 4] = "CloseTag";
+  I18nParamValueFlags2[I18nParamValueFlags2["OpenTag"] = 4] = "OpenTag";
+  I18nParamValueFlags2[I18nParamValueFlags2["CloseTag"] = 8] = "CloseTag";
 })(I18nParamValueFlags || (I18nParamValueFlags = {}));
 var I18nPlaceholderParams = class {
   constructor() {
@@ -17899,7 +17867,21 @@ var I18nPlaceholderParams = class {
   }
   saveToOp(op) {
     for (const [placeholder, placeholderValues] of this.values) {
+      if (placeholderValues.length > 1) {
+        op.needsPostprocessing = true;
+      }
       op.params.set(placeholder, literal(this.serializeValues(placeholderValues)));
+    }
+  }
+  merge(other) {
+    for (const [placeholder, otherValues] of other.values) {
+      const currentValues = this.values.get(placeholder) || [];
+      const flags = otherValues[0].flags;
+      if (flags & I18nParamValueFlags.CloseTag && !(flags & I18nParamValueFlags.OpenTag)) {
+        this.values.set(placeholder, [...otherValues, ...currentValues]);
+      } else {
+        this.values.set(placeholder, [...currentValues, ...otherValues]);
+      }
     }
   }
   serializeValues(values) {
@@ -17918,36 +17900,77 @@ var I18nPlaceholderParams = class {
       closeMarker = value.flags & I18nParamValueFlags.CloseTag ? TAG_CLOSE_MARKER : "";
     }
     const context = value.subTemplateIndex === null ? "" : `${CONTEXT_MARKER}${value.subTemplateIndex}`;
+    if (value.flags & I18nParamValueFlags.OpenTag && value.flags & I18nParamValueFlags.CloseTag) {
+      return `${ESCAPE}${tagMarker}${value.value}${context}${ESCAPE}${ESCAPE}${closeMarker}${tagMarker}${value.value}${context}${ESCAPE}`;
+    }
     return `${ESCAPE}${closeMarker}${tagMarker}${value.value}${context}${ESCAPE}`;
   }
 };
 function phaseResolveI18nPlaceholders(job) {
+  const params = /* @__PURE__ */ new Map();
+  const i18nOps = /* @__PURE__ */ new Map();
+  resolvePlaceholders(job, params, i18nOps);
+  propagatePlaceholders(params, i18nOps);
+  for (const [xref, i18nOpParams] of params) {
+    i18nOpParams.saveToOp(i18nOps.get(xref));
+  }
+  for (const op of i18nOps.values()) {
+    if (op.xref === op.root) {
+      for (const placeholder in op.message.placeholders) {
+        if (!op.params.has(placeholder)) {
+          throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
+        }
+      }
+    }
+  }
+}
+function resolvePlaceholders(job, params, i18nOps) {
   for (const unit of job.units) {
-    const i18nOps = /* @__PURE__ */ new Map();
-    const params = /* @__PURE__ */ new Map();
+    const elements = /* @__PURE__ */ new Map();
     let currentI18nOp = null;
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
-        case OpKind.I18n:
           i18nOps.set(op.xref, op);
           currentI18nOp = op.kind === OpKind.I18nStart ? op : null;
           break;
         case OpKind.I18nEnd:
           currentI18nOp = null;
           break;
-        case OpKind.Element:
         case OpKind.ElementStart:
+          if (op.i18nPlaceholder !== void 0) {
+            if (currentI18nOp === null) {
+              throw Error("i18n tag placeholder should only occur inside an i18n block");
+            }
+            elements.set(op.xref, op);
+            const { startName, closeName } = op.i18nPlaceholder;
+            let flags = I18nParamValueFlags.ElementTag | I18nParamValueFlags.OpenTag;
+            if (closeName === "") {
+              flags |= I18nParamValueFlags.CloseTag;
+            }
+            addParam(params, currentI18nOp, startName, op.slot, currentI18nOp.subTemplateIndex, flags);
+          }
+          break;
+        case OpKind.ElementEnd:
+          const startOp = elements.get(op.xref);
+          if (startOp && startOp.i18nPlaceholder !== void 0) {
+            if (currentI18nOp === null) {
+              throw Error("i18n tag placeholder should only occur inside an i18n block");
+            }
+            const { closeName } = startOp.i18nPlaceholder;
+            if (closeName !== "") {
+              addParam(params, currentI18nOp, closeName, startOp.slot, currentI18nOp.subTemplateIndex, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
+            }
+          }
+          break;
         case OpKind.Template:
           if (op.i18nPlaceholder !== void 0) {
             if (currentI18nOp === null) {
               throw Error("i18n tag placeholder should only occur inside an i18n block");
             }
-            const { startName, closeName } = op.i18nPlaceholder;
-            const subTemplateIndex = getSubTemplateIndexForTag(job, currentI18nOp, op);
-            const flags = op.kind === OpKind.Template ? I18nParamValueFlags.TemplateTag : I18nParamValueFlags.ElementTag;
-            addParam(params, currentI18nOp, startName, op.slot, subTemplateIndex, flags);
-            addParam(params, currentI18nOp, closeName, op.slot, subTemplateIndex, flags | I18nParamValueFlags.CloseTag);
+            const subTemplateIndex = getSubTemplateIndexForTemplateTag(job, currentI18nOp, op);
+            addParam(params, currentI18nOp, op.i18nPlaceholder.startName, op.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag);
+            addParam(params, currentI18nOp, op.i18nPlaceholder.closeName, op.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
           }
           break;
       }
@@ -17964,26 +17987,29 @@ function phaseResolveI18nPlaceholders(job) {
         i18nBlockPlaceholderIndices.set(op.owner, index);
       }
     }
-    for (const [xref, i18nOpParams] of params) {
-      i18nOpParams.saveToOp(i18nOps.get(xref));
-    }
   }
 }
 function addParam(params, i18nOp, placeholder, value, subTemplateIndex, flags = I18nParamValueFlags.None) {
-  var _a2;
-  const i18nOpParams = (_a2 = params.get(i18nOp.xref)) != null ? _a2 : new I18nPlaceholderParams();
+  const i18nOpParams = params.get(i18nOp.xref) || new I18nPlaceholderParams();
   i18nOpParams.addValue(placeholder, value, subTemplateIndex, flags);
   params.set(i18nOp.xref, i18nOpParams);
 }
-function getSubTemplateIndexForTag(job, i18nOp, op) {
-  if (op.kind === OpKind.Template) {
-    for (const childOp of job.views.get(op.xref).create) {
-      if (childOp.kind === OpKind.I18nStart) {
-        return childOp.subTemplateIndex;
-      }
+function getSubTemplateIndexForTemplateTag(job, i18nOp, op) {
+  for (const childOp of job.views.get(op.xref).create) {
+    if (childOp.kind === OpKind.I18nStart) {
+      return childOp.subTemplateIndex;
     }
   }
   return i18nOp.subTemplateIndex;
+}
+function propagatePlaceholders(params, i18nOps) {
+  for (const [xref, opParams] of params) {
+    const op = i18nOps.get(xref);
+    if (op.xref !== op.root) {
+      const rootParams = params.get(op.root) || new I18nPlaceholderParams();
+      rootParams.merge(opParams);
+    }
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_names.mjs
@@ -18082,7 +18108,7 @@ function phaseResolveSanitizers(job) {
   }
 }
 function isIframeElement(op) {
-  return (op.kind === OpKind.Element || op.kind === OpKind.ElementStart) && op.tag.toLowerCase() === "iframe";
+  return op.kind === OpKind.ElementStart && op.tag.toLowerCase() === "iframe";
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/save_restore_view.mjs
@@ -18505,7 +18531,6 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: phaseTemporaryVariables },
   { kind: CompilationJobKind.Tmpl, fn: phaseSlotAllocation },
   { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nPlaceholders },
-  { kind: CompilationJobKind.Tmpl, fn: phasePropagateI18nPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nMessageExtraction },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nConstCollection },
   { kind: CompilationJobKind.Tmpl, fn: phaseConstTraitCollection },
@@ -24469,7 +24494,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.8+sha-e5720ed");
+var VERSION2 = new Version("17.0.0-next.8+sha-6fe4f44");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25506,7 +25531,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-next.8+sha-e5720ed"));
+  definitionMap.set("version", literal("17.0.0-next.8+sha-6fe4f44"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25577,7 +25602,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-next.8+sha-e5720ed"));
+  definitionMap.set("version", literal("17.0.0-next.8+sha-6fe4f44"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25809,7 +25834,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-next.8+sha-e5720ed"));
+  definitionMap.set("version", literal("17.0.0-next.8+sha-6fe4f44"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25832,7 +25857,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-next.8+sha-e5720ed"));
+  definitionMap.set("version", literal("17.0.0-next.8+sha-6fe4f44"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25870,7 +25895,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-next.8+sha-e5720ed"));
+  definitionMap.set("version", literal("17.0.0-next.8+sha-6fe4f44"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25894,7 +25919,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-next.8+sha-e5720ed"));
+  definitionMap.set("version", literal("17.0.0-next.8+sha-6fe4f44"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25929,7 +25954,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-next.8+sha-e5720ed"));
+  definitionMap.set("version", literal("17.0.0-next.8+sha-6fe4f44"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25946,7 +25971,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-next.8+sha-e5720ed");
+var VERSION3 = new Version("17.0.0-next.8+sha-6fe4f44");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
