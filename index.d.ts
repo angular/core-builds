@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-4e4ad5a
+ * @license Angular v17.1.0-next.0+sha-9d8af45
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5134,6 +5134,18 @@ declare type InputTransformFunction_2 = any;
  * See `TNode.insertBeforeIndex`
  */
 declare type InsertBeforeIndex = null | number | number[];
+
+/**
+ * Options passed to `internalAfterNextRender`.
+ */
+declare interface InternalAfterNextRenderOptions {
+    /**
+     * The `Injector` to use during creation.
+     *
+     * If this is not provided, the current injection context will be used instead (via `inject`).
+     */
+    injector?: Injector;
+}
 
 declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
     _bootstrapComponents: Type<any>[];
@@ -11552,6 +11564,23 @@ export declare interface ɵInjectorProfilerContext {
      */
     token: Type<unknown> | null;
 }
+
+/**
+ * Register a callback to run once before any userspace `afterRender` or
+ * `afterNextRender` callbacks.
+ *
+ * This function should almost always be used instead of `afterRender` or
+ * `afterNextRender` for implementing framework functionality. Consider:
+ *
+ *   1.) `AfterRenderPhase.EarlyRead` is intended to be used for implementing
+ *       custom layout. If the framework itself mutates the DOM after *any*
+ *       `AfterRenderPhase.EarlyRead` callbacks are run, the phase can no
+ *       longer reliably serve its purpose.
+ *
+ *   2.) Importing `afterRender` in the framework can reduce the ability for it
+ *       to be tree-shaken, and the framework shouldn't need much of the behavior.
+ */
+export declare function ɵinternalAfterNextRender(callback: VoidFunction, options?: InternalAfterNextRenderOptions): void;
 
 /**
  * Internal create application API that implements the core application creation logic and optional
