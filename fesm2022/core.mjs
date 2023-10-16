@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.8+sha-2d98726
+ * @license Angular v17.0.0-next.8+sha-c1dc86d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10429,7 +10429,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.8+sha-2d98726');
+const VERSION = new Version('17.0.0-next.8+sha-c1dc86d');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20100,7 +20100,7 @@ class TimerScheduler {
  * Injector token that allows to provide `DeferBlockDependencyInterceptor` class
  * implementation.
  */
-const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = new InjectionToken(ngDevMode ? 'DEFER_BLOCK_DEPENDENCY_INTERCEPTOR' : '');
+const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = new InjectionToken('DEFER_BLOCK_DEPENDENCY_INTERCEPTOR');
 /**
  * **INTERNAL**, token used for configuring defer block behavior.
  */
@@ -20575,11 +20575,14 @@ function triggerResourceLoading(tDetails, lView) {
     const primaryBlockTNode = getPrimaryBlockTNode(tView, tDetails);
     // Switch from NOT_STARTED -> IN_PROGRESS state.
     tDetails.loadingState = DeferDependenciesLoadingState.IN_PROGRESS;
-    // Check if dependency function interceptor is configured.
-    const deferDependencyInterceptor = injector.get(DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, null, { optional: true });
-    const dependenciesFn = deferDependencyInterceptor ?
-        deferDependencyInterceptor.intercept(tDetails.dependencyResolverFn) :
-        tDetails.dependencyResolverFn;
+    let dependenciesFn = tDetails.dependencyResolverFn;
+    if (ngDevMode) {
+        // Check if dependency function interceptor is configured.
+        const deferDependencyInterceptor = injector.get(DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, null, { optional: true });
+        if (deferDependencyInterceptor) {
+            dependenciesFn = deferDependencyInterceptor.intercept(dependenciesFn);
+        }
+    }
     // The `dependenciesFn` might be `null` when all dependencies within
     // a given defer block were eagerly references elsewhere in a file,
     // thus no dynamic `import()`s were produced.

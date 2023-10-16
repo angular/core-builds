@@ -23645,7 +23645,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.8+sha-2d98726");
+var VERSION2 = new Version("17.0.0-next.8+sha-c1dc86d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23696,6 +23696,7 @@ var REPLACEMENTS2 = {
   "@": "&#64;",
   "}": "&#125;"
 };
+var CONTROL_FLOW_CHARS_PATTERN = /@|}/;
 var AnalyzedFile = class {
   constructor() {
     __publicField(this, "ranges", []);
@@ -23745,30 +23746,36 @@ function analyze(sourceFile, analyzedFiles) {
   }
 }
 function migrateTemplate(template2) {
+  if (!CONTROL_FLOW_CHARS_PATTERN.test(template2)) {
+    return null;
+  }
+  let rootNodes = null;
   try {
     const parsed = new HtmlParser().parse(template2, "", {
       tokenizeExpansionForms: true,
       tokenizeBlocks: false
     });
-    if (parsed.errors && parsed.errors.length > 0) {
-      return null;
+    if (parsed.errors.length === 0) {
+      rootNodes = parsed.rootNodes;
     }
-    let result = template2;
-    const visitor = new TextRangeCollector();
-    visitAll2(visitor, parsed.rootNodes);
-    const sortedRanges = visitor.textRanges.sort(([aStart], [bStart]) => bStart - aStart);
-    for (const [start, end] of sortedRanges) {
-      const text2 = result.slice(start, end);
-      let replaced = "";
-      for (const char of text2) {
-        replaced += REPLACEMENTS2[char] || char;
-      }
-      result = result.slice(0, start) + replaced + result.slice(end);
-    }
-    return result;
   } catch (e) {
+  }
+  if (rootNodes === null) {
     return null;
   }
+  let result = template2;
+  const visitor = new TextRangeCollector();
+  visitAll2(visitor, rootNodes);
+  const sortedRanges = visitor.textRanges.sort(([aStart], [bStart]) => bStart - aStart);
+  for (const [start, end] of sortedRanges) {
+    const text2 = result.slice(start, end);
+    let replaced = "";
+    for (const char of text2) {
+      replaced += REPLACEMENTS2[char] || char;
+    }
+    result = result.slice(0, start) + replaced + result.slice(end);
+  }
+  return result;
 }
 var TextRangeCollector = class extends RecursiveVisitor {
   constructor() {
@@ -23809,6 +23816,9 @@ function runBlockTemplateEntitiesMigration(tree, tsconfigPath, basePath) {
   for (const [path2, file] of analysis) {
     const ranges = file.getSortedRanges();
     const relativePath = (0, import_path3.relative)(basePath, path2);
+    if (!tree.exists(relativePath)) {
+      continue;
+    }
     const content = tree.readText(relativePath);
     const update = tree.beginUpdate(relativePath);
     for (const [start, end] of ranges) {
