@@ -11399,7 +11399,7 @@ function getHtmlTagDefinition(tagName) {
   var _a2, _b2;
   if (!TAG_DEFINITIONS) {
     DEFAULT_TAG_DEFINITION = new HtmlTagDefinition({ canSelfClose: true });
-    TAG_DEFINITIONS = {
+    TAG_DEFINITIONS = Object.assign(/* @__PURE__ */ Object.create(null), {
       "base": new HtmlTagDefinition({ isVoid: true }),
       "meta": new HtmlTagDefinition({ isVoid: true }),
       "area": new HtmlTagDefinition({ isVoid: true }),
@@ -11474,9 +11474,9 @@ function getHtmlTagDefinition(tagName) {
         contentType: { default: TagContentType.ESCAPABLE_RAW_TEXT, svg: TagContentType.PARSABLE_DATA }
       }),
       "textarea": new HtmlTagDefinition({ contentType: TagContentType.ESCAPABLE_RAW_TEXT, ignoreFirstLf: true })
-    };
+    });
     new DomElementSchemaRegistry().allKnownElementNames().forEach((knownTagName) => {
-      if (!TAG_DEFINITIONS.hasOwnProperty(knownTagName) && getNsPrefix(knownTagName) === null) {
+      if (!TAG_DEFINITIONS[knownTagName] && getNsPrefix(knownTagName) === null) {
         TAG_DEFINITIONS[knownTagName] = new HtmlTagDefinition({ canSelfClose: false });
       }
     });
@@ -23645,7 +23645,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.8+sha-65c2f02");
+var VERSION2 = new Version("17.0.0-next.8+sha-81a287a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
