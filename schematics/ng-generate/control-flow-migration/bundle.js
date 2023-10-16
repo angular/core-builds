@@ -23645,7 +23645,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-next.8+sha-81a287a");
+var VERSION2 = new Version("17.0.0-next.8+sha-e5720ed");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23983,7 +23983,7 @@ function migrateNgIf(etm, ngTemplates, tmpl, offset) {
   return buildIfBlock(etm, tmpl, offset);
 }
 function buildIfBlock(etm, tmpl, offset) {
-  const condition = etm.attr.value;
+  const condition = etm.attr.value.replace(" as ", "; as ");
   const startBlock = `@if (${condition}) {`;
   const ifBlock = startBlock + getMainBlock(etm, tmpl, offset) + `}`;
   const updatedTmpl = tmpl.slice(0, etm.start(offset)) + ifBlock + tmpl.slice(etm.end(offset));
@@ -23991,7 +23991,7 @@ function buildIfBlock(etm, tmpl, offset) {
   return { tmpl: updatedTmpl, offset };
 }
 function buildIfElseBlock(etm, ngTemplates, tmpl, elseString, offset) {
-  const condition = etm.getCondition(elseString);
+  const condition = etm.getCondition(elseString).replace(" as ", "; as ");
   const elseTmpl = ngTemplates.get(`#${etm.getTemplateName(elseString)}`);
   const startBlock = `@if (${condition}) {`;
   const mainBlock = getMainBlock(etm, tmpl, offset);
@@ -24006,7 +24006,7 @@ function buildIfElseBlock(etm, ngTemplates, tmpl, elseString, offset) {
   return { tmpl: updatedTmpl, offset };
 }
 function buildIfThenElseBlock(etm, ngTemplates, tmpl, thenString, elseString, offset) {
-  const condition = etm.getCondition(thenString);
+  const condition = etm.getCondition(thenString).replace(" as ", "; as ");
   const startBlock = `@if (${condition}) {`;
   const elseBlock = `} @else {`;
   const thenTmpl = ngTemplates.get(`#${etm.getTemplateName(thenString, elseString)}`);
