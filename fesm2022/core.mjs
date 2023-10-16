@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-next.8+sha-a6be2e2
+ * @license Angular v17.0.0-next.8+sha-65c2f02
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2107,9 +2107,6 @@ const REACTIVE_HOST_BINDING_CONSUMER = 24;
  * there should be no need to refer to `HEADER_OFFSET` anywhere else.
  */
 const HEADER_OFFSET = 25;
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd$4 = 1;
 
 /**
  * Special location which allows easy identification of type. If we have an array which was
@@ -2147,9 +2144,6 @@ const DEHYDRATED_VIEWS = 10;
  * remove views from the DOM when they are no longer required.
  */
 const CONTAINER_HEADER_OFFSET = 11;
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd$3 = 1;
 
 /**
  * True if `value` is `LView`.
@@ -3576,9 +3570,6 @@ class NodeInjectorFactory {
 function isFactory(obj) {
     return obj instanceof NodeInjectorFactory;
 }
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd$2 = 1;
 
 /**
  * Converts `TNodeType` into human readable text.
@@ -3610,9 +3601,6 @@ function isTNodeShape(value) {
             typeof value.insertBeforeIndex === 'number' ||
             Array.isArray(value.insertBeforeIndex));
 }
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd$1 = 1;
 /**
  * Returns `true` if the `TNode` has a directive which has `@Input()` for `class` binding.
  *
@@ -10429,7 +10417,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-next.8+sha-a6be2e2');
+const VERSION = new Version('17.0.0-next.8+sha-65c2f02');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -21331,9 +21319,6 @@ var I18nCreateOpCode;
      */
     I18nCreateOpCode[I18nCreateOpCode["COMMENT"] = 2] = "COMMENT";
 })(I18nCreateOpCode || (I18nCreateOpCode = {}));
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-const unusedValueExportToPlacateAjd = 1;
 
 /**
  * The locale id that the application is currently using (for translations and ICU expressions).
