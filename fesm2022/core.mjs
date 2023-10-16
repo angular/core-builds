@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-262d4d5
+ * @license Angular v17.1.0-next.0+sha-4e4ad5a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9997,7 +9997,7 @@ const DISCONNECTED_NODES = 'd';
  * The name of the key used in the TransferState collection,
  * where hydration information is located.
  */
-const TRANSFER_STATE_TOKEN_ID = '__ɵnghData__';
+const TRANSFER_STATE_TOKEN_ID = '__nghData__';
 /**
  * Lookup key used to reference DOM hydration data (ngh) in `TransferState`.
  */
@@ -10429,7 +10429,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-262d4d5');
+const VERSION = new Version('17.1.0-next.0+sha-4e4ad5a');
 
 // This default value is when checking the hierarchy for a token.
 //
