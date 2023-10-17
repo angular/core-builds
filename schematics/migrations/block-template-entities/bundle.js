@@ -15741,7 +15741,8 @@ function addNamesToView(unit, baseName, state, compatibility) {
         if (op.slot === null) {
           throw new Error(`Expected slot to be assigned`);
         }
-        addNamesToView(childView, `${baseName}_${prefixWithNamespace(op.tag, op.namespace)}_${op.slot}`, state, compatibility);
+        const tagToken = op.tag === null ? "" : "_" + prefixWithNamespace(op.tag, op.namespace);
+        addNamesToView(childView, `${baseName}${tagToken}_${op.slot}`, state, compatibility);
         break;
       case OpKind.StyleProp:
         op.name = normalizeStylePropName(op.name);
@@ -16243,7 +16244,7 @@ function elementContainerEnd() {
 }
 function template(slot, templateFnRef, decls, vars, tag, constIndex, sourceSpan) {
   const args = [literal(slot), templateFnRef, literal(decls), literal(vars)];
-  if (tag !== null) {
+  if (tag !== null || constIndex !== null) {
     args.push(literal(tag));
     if (constIndex !== null) {
       args.push(literal(constIndex));
@@ -17284,7 +17285,8 @@ function phaseResolveSanitizers(job) {
   }
 }
 function isIframeElement(op) {
-  return op.kind === OpKind.ElementStart && op.tag.toLowerCase() === "iframe";
+  var _a2;
+  return op.kind === OpKind.ElementStart && ((_a2 = op.tag) == null ? void 0 : _a2.toLowerCase()) === "iframe";
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/save_restore_view.mjs
@@ -17943,7 +17945,7 @@ function ingestTemplate(unit, tmpl) {
     [namespacePrefix, tagNameWithoutNamespace] = splitNsName(tmpl.tagName);
   }
   const i18nPlaceholder = tmpl.i18n instanceof TagPlaceholder ? tmpl.i18n : void 0;
-  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace != null ? tagNameWithoutNamespace : "ng-template", namespaceForKey(namespacePrefix), false, i18nPlaceholder, tmpl.startSourceSpan);
+  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace, namespaceForKey(namespacePrefix), false, i18nPlaceholder, tmpl.startSourceSpan);
   unit.create.push(tplOp);
   ingestBindings(unit, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
@@ -17951,7 +17953,7 @@ function ingestTemplate(unit, tmpl) {
   for (const { name, value } of tmpl.variables) {
     childView.contextVariables.set(name, value);
   }
-  if (tmpl.i18n instanceof Message) {
+  if (isPlainTemplate(tmpl) && tmpl.i18n instanceof Message) {
     const id = unit.job.allocateXrefId();
     OpList.insertAfter(createI18nStartOp(id, tmpl.i18n), childView.create.head);
     OpList.insertBefore(createI18nEndOp(id), childView.create.tail);
@@ -18123,13 +18125,15 @@ function convertAst(ast, job, baseSourceSpan) {
     throw new Error(`Unhandled expression type: ${ast.constructor.name}`);
   }
 }
-function ingestBindings(unit, op, element2) {
+function isPlainTemplate(tmpl) {
   var _a2;
+  return splitNsName((_a2 = tmpl.tagName) != null ? _a2 : "")[1] === "ng-template";
+}
+function ingestBindings(unit, op, element2) {
   let flags = BindingFlags.None;
-  const isPlainTemplate = element2 instanceof Template && splitNsName((_a2 = element2.tagName) != null ? _a2 : "")[1] === "ng-template";
   if (element2 instanceof Template) {
     flags |= BindingFlags.OnNgTemplateElement;
-    if (isPlainTemplate) {
+    if (element2 instanceof Template && isPlainTemplate(element2)) {
       flags |= BindingFlags.BindingTargetsTemplate;
     }
     const templateAttrFlags = flags | BindingFlags.BindingTargetsTemplate | BindingFlags.IsStructuralTemplateAttribute;
@@ -18154,7 +18158,7 @@ function ingestBindings(unit, op, element2) {
         throw Error("Animation listener should have a phase");
       }
     }
-    if (element2 instanceof Template && !isPlainTemplate) {
+    if (element2 instanceof Template && !isPlainTemplate(element2)) {
       unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null));
       continue;
     }
@@ -23670,7 +23674,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-9f4927e");
+var VERSION2 = new Version("17.1.0-next.0+sha-9bc9464");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
