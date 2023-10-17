@@ -24498,7 +24498,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-7466004");
+var VERSION2 = new Version("17.1.0-next.0+sha-634c529");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25535,7 +25535,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7466004"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-634c529"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25606,7 +25606,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7466004"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-634c529"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25838,7 +25838,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7466004"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-634c529"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25861,7 +25861,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7466004"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-634c529"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -25899,7 +25899,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7466004"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-634c529"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -25923,7 +25923,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7466004"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-634c529"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -25958,7 +25958,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7466004"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-634c529"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -25975,7 +25975,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.0+sha-7466004");
+var VERSION3 = new Version("17.1.0-next.0+sha-634c529");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -36228,6 +36228,21 @@ function getEnumMemberValue(memberNode) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/function_extractor.mjs
 var import_typescript60 = __toESM(require("typescript"), 1);
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/generics_extractor.mjs
+function extractGenerics(declaration) {
+  var _a2, _b2;
+  return (_b2 = (_a2 = declaration.typeParameters) == null ? void 0 : _a2.map((typeParam) => {
+    var _a3, _b3;
+    return {
+      name: typeParam.name.getText(),
+      constraint: (_a3 = typeParam.constraint) == null ? void 0 : _a3.getText(),
+      default: (_b3 = typeParam.default) == null ? void 0 : _b3.getText()
+    };
+  })) != null ? _b2 : [];
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/function_extractor.mjs
 var FunctionExtractor = class {
   constructor(declaration, typeChecker) {
     this.declaration = declaration;
@@ -36241,6 +36256,7 @@ var FunctionExtractor = class {
       name: this.declaration.name.getText(),
       returnType,
       entryType: EntryType.Function,
+      generics: extractGenerics(this.declaration),
       description: extractJsDocDescription(this.declaration),
       jsdocTags: extractJsDocTags(this.declaration),
       rawComment: extractRawJsDoc(this.declaration)
@@ -36305,6 +36321,7 @@ var ClassExtractor = class {
       isAbstract: this.isAbstract(),
       entryType: import_typescript61.default.isInterfaceDeclaration(this.declaration) ? EntryType.Interface : EntryType.UndecoratedClass,
       members: this.extractAllClassMembers(this.declaration),
+      generics: extractGenerics(this.declaration),
       description: extractJsDocDescription(this.declaration),
       jsdocTags: extractJsDocTags(this.declaration),
       rawComment: extractRawJsDoc(this.declaration)
