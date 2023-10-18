@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-1640743
+ * @license Angular v17.1.0-next.0+sha-35b0691
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10417,7 +10417,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-1640743');
+const VERSION = new Version('17.1.0-next.0+sha-35b0691');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -18277,6 +18277,17 @@ class LiveCollection {
         this.attach(newIdx, this.detach(prevIndex));
     }
 }
+function valuesMatching(liveIdx, liveValue, newIdx, newValue, trackBy) {
+    if (liveIdx === newIdx && Object.is(liveValue, newValue)) {
+        // matching and no value identity to update
+        return 1;
+    }
+    else if (Object.is(trackBy(liveIdx, liveValue), trackBy(newIdx, newValue))) {
+        // matching but requires value identity update
+        return -1;
+    }
+    return 0;
+}
 /**
  * The live collection reconciliation algorithm that perform various in-place operations, so it
  * reflects the content of the new (incoming) collection.
@@ -18309,40 +18320,47 @@ function reconcile(liveCollection, newCollection, trackByFn) {
         let newEndIdx = newCollection.length - 1;
         while (liveStartIdx <= liveEndIdx && liveStartIdx <= newEndIdx) {
             // compare from the beginning
-            const liveStartKey = liveCollection.key(liveStartIdx);
+            const liveStartValue = liveCollection.at(liveStartIdx);
             const newStartValue = newCollection[liveStartIdx];
-            const newStartKey = trackByFn(liveStartIdx, newStartValue);
-            if (Object.is(liveStartKey, newStartKey)) {
-                liveCollection.updateValue(liveStartIdx, newStartValue);
+            const isStartMatching = valuesMatching(liveStartIdx, liveStartValue, liveStartIdx, newStartValue, trackByFn);
+            if (isStartMatching !== 0) {
+                if (isStartMatching < 0) {
+                    liveCollection.updateValue(liveStartIdx, newStartValue);
+                }
                 liveStartIdx++;
                 continue;
             }
             // compare from the end
             // TODO(perf): do _all_ the matching from the end
-            const liveEndKey = liveCollection.key(liveEndIdx);
-            const newEndItem = newCollection[newEndIdx];
-            const newEndKey = trackByFn(newEndIdx, newEndItem);
-            if (Object.is(liveEndKey, newEndKey)) {
-                liveCollection.updateValue(liveEndIdx, newEndItem);
+            const liveEndValue = liveCollection.at(liveEndIdx);
+            const newEndValue = newCollection[newEndIdx];
+            const isEndMatching = valuesMatching(liveEndIdx, liveEndValue, newEndIdx, newEndValue, trackByFn);
+            if (isEndMatching !== 0) {
+                if (isEndMatching < 0) {
+                    liveCollection.updateValue(liveEndIdx, newEndValue);
+                }
                 liveEndIdx--;
                 newEndIdx--;
                 continue;
             }
-            // Detect swap / moves:
-            if (Object.is(newStartKey, liveEndKey) && Object.is(newEndKey, liveStartKey)) {
-                // swap on both ends;
-                liveCollection.swap(liveStartIdx, liveEndIdx);
-                liveCollection.updateValue(liveStartIdx, newStartValue);
-                liveCollection.updateValue(liveEndIdx, newEndItem);
-                newEndIdx--;
-                liveStartIdx++;
-                liveEndIdx--;
-                continue;
-            }
-            else if (Object.is(newStartKey, liveEndKey)) {
-                // the new item is the same as the live item with the end pointer - this is a move forward
-                // to an earlier index;
-                liveCollection.move(liveEndIdx, liveStartIdx);
+            // Detect swap and moves:
+            const liveStartKey = trackByFn(liveStartIdx, liveStartValue);
+            const liveEndKey = trackByFn(liveEndIdx, liveEndValue);
+            const newStartKey = trackByFn(liveStartIdx, newStartValue);
+            if (Object.is(newStartKey, liveEndKey)) {
+                const newEndKey = trackByFn(newEndIdx, newEndValue);
+                // detect swap on both ends;
+                if (Object.is(newEndKey, liveStartKey)) {
+                    liveCollection.swap(liveStartIdx, liveEndIdx);
+                    liveCollection.updateValue(liveEndIdx, newEndValue);
+                    newEndIdx--;
+                    liveEndIdx--;
+                }
+                else {
+                    // the new item is the same as the live item with the end pointer - this is a move forward
+                    // to an earlier index;
+                    liveCollection.move(liveEndIdx, liveStartIdx);
+                }
                 liveCollection.updateValue(liveStartIdx, newStartValue);
                 liveStartIdx++;
                 continue;
@@ -18350,7 +18368,8 @@ function reconcile(liveCollection, newCollection, trackByFn) {
             // Fallback to the slow path: we need to learn more about the content of the live and new
             // collections.
             detachedItems ??= new MultiMap();
-            liveKeysInTheFuture ??= initLiveItemsInTheFuture(liveCollection, liveStartIdx, liveEndIdx);
+            liveKeysInTheFuture ??=
+                initLiveItemsInTheFuture(liveCollection, liveStartIdx, liveEndIdx, trackByFn);
             // Check if I'm inserting a previously detached item: if so, attach it here
             if (attachPreviouslyDetached(liveCollection, detachedItems, liveStartIdx, newStartKey)) {
                 liveCollection.updateValue(liveStartIdx, newStartValue);
@@ -18384,19 +18403,23 @@ function reconcile(liveCollection, newCollection, trackByFn) {
         const newCollectionIterator = newCollection[Symbol.iterator]();
         let newIterationResult = newCollectionIterator.next();
         while (!newIterationResult.done && liveStartIdx <= liveEndIdx) {
+            const liveValue = liveCollection.at(liveStartIdx);
             const newValue = newIterationResult.value;
-            const newKey = trackByFn(liveStartIdx, newValue);
-            const liveKey = liveCollection.key(liveStartIdx);
-            if (Object.is(liveKey, newKey)) {
-                // found a match - move on
-                liveCollection.updateValue(liveStartIdx, newValue);
+            const isStartMatching = valuesMatching(liveStartIdx, liveValue, liveStartIdx, newValue, trackByFn);
+            if (isStartMatching !== 0) {
+                // found a match - move on, but update value
+                if (isStartMatching < 0) {
+                    liveCollection.updateValue(liveStartIdx, newValue);
+                }
                 liveStartIdx++;
                 newIterationResult = newCollectionIterator.next();
             }
             else {
                 detachedItems ??= new MultiMap();
-                liveKeysInTheFuture ??= initLiveItemsInTheFuture(liveCollection, liveStartIdx, liveEndIdx);
+                liveKeysInTheFuture ??=
+                    initLiveItemsInTheFuture(liveCollection, liveStartIdx, liveEndIdx, trackByFn);
                 // Check if I'm inserting a previously detached item: if so, attach it here
+                const newKey = trackByFn(liveStartIdx, newValue);
                 if (attachPreviouslyDetached(liveCollection, detachedItems, liveStartIdx, newKey)) {
                     liveCollection.updateValue(liveStartIdx, newValue);
                     liveStartIdx++;
@@ -18411,6 +18434,7 @@ function reconcile(liveCollection, newCollection, trackByFn) {
                 }
                 else {
                     // it is a move forward - detach the current item without advancing in collections
+                    const liveKey = trackByFn(liveStartIdx, liveValue);
                     detachedItems.set(liveKey, liveCollection.detach(liveStartIdx));
                     liveEndIdx--;
                 }
@@ -18448,10 +18472,10 @@ function createOrAttach(liveCollection, detachedItems, trackByFn, index, value) 
         liveCollection.updateValue(index, value);
     }
 }
-function initLiveItemsInTheFuture(liveCollection, start, end) {
+function initLiveItemsInTheFuture(liveCollection, start, end, trackByFn) {
     const keys = new Set();
     for (let i = start; i <= end; i++) {
-        keys.add(liveCollection.key(i));
+        keys.add(trackByFn(i, liveCollection.at(i)));
     }
     return keys;
 }
@@ -19163,9 +19187,10 @@ function ɵɵrepeaterTrackByIdentity(_, value) {
     return value;
 }
 class RepeaterMetadata {
-    constructor(hasEmptyBlock, trackByFn) {
+    constructor(hasEmptyBlock, trackByFn, liveCollection) {
         this.hasEmptyBlock = hasEmptyBlock;
         this.trackByFn = trackByFn;
+        this.liveCollection = liveCollection;
     }
 }
 /**
@@ -19210,12 +19235,11 @@ function ɵɵrepeaterCreate(index, templateFn, decls, vars, trackByFn, trackByUs
     }
 }
 class LiveCollectionLContainerImpl extends LiveCollection {
-    constructor(lContainer, hostLView, templateTNode, trackByFn) {
+    constructor(lContainer, hostLView, templateTNode) {
         super();
         this.lContainer = lContainer;
         this.hostLView = hostLView;
         this.templateTNode = templateTNode;
-        this.trackByFn = trackByFn;
         /**
          Property indicating if indexes in the repeater context need to be updated following the live
          collection changes. Index updates are necessary if and only if views are inserted / removed in
@@ -19227,10 +19251,7 @@ class LiveCollectionLContainerImpl extends LiveCollection {
         return this.lContainer.length - CONTAINER_HEADER_OFFSET;
     }
     at(index) {
-        return getExistingLViewFromLContainer(this.lContainer, index);
-    }
-    key(index) {
-        return this.trackByFn(index, this.at(index)[CONTEXT].$implicit);
+        return this.getLView(index)[CONTEXT].$implicit;
     }
     attach(index, lView) {
         const dehydratedView = lView[HYDRATION];
@@ -19250,14 +19271,20 @@ class LiveCollectionLContainerImpl extends LiveCollection {
         destroyLView(lView[TVIEW], lView);
     }
     updateValue(index, value) {
-        this.at(index)[CONTEXT].$implicit = value;
+        this.getLView(index)[CONTEXT].$implicit = value;
+    }
+    reset() {
+        this.needsIndexUpdate = false;
     }
     updateIndexes() {
         if (this.needsIndexUpdate) {
             for (let i = 0; i < this.length; i++) {
-                this.at(i)[CONTEXT].$index = i;
+                this.getLView(i)[CONTEXT].$index = i;
             }
         }
+    }
+    getLView(index) {
+        return getExistingLViewFromLContainer(this.lContainer, index);
     }
 }
 /**
@@ -19274,17 +19301,24 @@ function ɵɵrepeater(metadataSlotIdx, collection) {
     const hostLView = getLView();
     const hostTView = hostLView[TVIEW];
     const metadata = hostLView[HEADER_OFFSET + metadataSlotIdx];
-    const containerIndex = metadataSlotIdx + 1;
-    const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
-    const itemTemplateTNode = getExistingTNode(hostTView, containerIndex);
-    const liveCollection = new LiveCollectionLContainerImpl(lContainer, hostLView, itemTemplateTNode, metadata.trackByFn);
+    if (metadata.liveCollection === undefined) {
+        const containerIndex = metadataSlotIdx + 1;
+        const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
+        const itemTemplateTNode = getExistingTNode(hostTView, containerIndex);
+        metadata.liveCollection =
+            new LiveCollectionLContainerImpl(lContainer, hostLView, itemTemplateTNode);
+    }
+    else {
+        metadata.liveCollection.reset();
+    }
+    const liveCollection = metadata.liveCollection;
     reconcile(liveCollection, collection, metadata.trackByFn);
     // moves in the container might caused context's index to get out of order, re-adjust if needed
     liveCollection.updateIndexes();
     // handle empty blocks
     if (metadata.hasEmptyBlock) {
         const bindingIndex = nextBindingIndex();
-        const isCollectionEmpty = lContainer.length - CONTAINER_HEADER_OFFSET === 0;
+        const isCollectionEmpty = liveCollection.length === 0;
         if (bindingUpdated(hostLView, bindingIndex, isCollectionEmpty)) {
             const emptyTemplateIndex = metadataSlotIdx + 2;
             const lContainerForEmpty = getLContainer(hostLView, HEADER_OFFSET + emptyTemplateIndex);
