@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.0+sha-866d0f4
+ * @license Angular v17.0.0-rc.0+sha-b4c1ffb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7407,11 +7407,12 @@ function matchingSchemas(schemas, tagName) {
  * (component host node) to disable hydration for the content within that boundary.
  */
 const SKIP_HYDRATION_ATTR_NAME = 'ngSkipHydration';
+/** Lowercase name of the `ngSkipHydration` attribute used for case-insensitive comparisons. */
+const SKIP_HYDRATION_ATTR_NAME_LOWER_CASE = 'ngskiphydration';
 /**
  * Helper function to check if a given TNode has the 'ngSkipHydration' attribute.
  */
 function hasSkipHydrationAttrOnTNode(tNode) {
-    const SKIP_HYDRATION_ATTR_NAME_LOWER_CASE = SKIP_HYDRATION_ATTR_NAME.toLowerCase();
     const attrs = tNode.mergedAttrs;
     if (attrs === null)
         return false;
@@ -10417,7 +10418,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-rc.0+sha-866d0f4');
+const VERSION = new Version('17.0.0-rc.0+sha-b4c1ffb');
 
 // This default value is when checking the hierarchy for a token.
 //
