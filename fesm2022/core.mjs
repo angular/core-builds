@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.0+sha-b4c1ffb
+ * @license Angular v17.0.0-rc.0+sha-a207421
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7446,15 +7446,14 @@ function hasInSkipHydrationBlockFlag(tNode) {
  * Helper function that determines if a given node is within a skip hydration block
  * by navigating up the TNode tree to see if any parent nodes have skip hydration
  * attribute.
- *
- * TODO(akushnir): this function should contain the logic of `hasInSkipHydrationBlockFlag`,
- * there is no need to traverse parent nodes when we have a TNode flag (which would also
- * make this lookup O(1)).
  */
 function isInSkipHydrationBlock(tNode) {
+    if (hasInSkipHydrationBlockFlag(tNode)) {
+        return true;
+    }
     let currentTNode = tNode.parent;
     while (currentTNode) {
-        if (hasSkipHydrationAttrOnTNode(currentTNode)) {
+        if (hasInSkipHydrationBlockFlag(tNode) || hasSkipHydrationAttrOnTNode(currentTNode)) {
             return true;
         }
         currentTNode = currentTNode.parent;
@@ -10418,7 +10417,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-rc.0+sha-b4c1ffb');
+const VERSION = new Version('17.0.0-rc.0+sha-a207421');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -18961,10 +18960,8 @@ function populateDehydratedViewsInLContainerImpl(lContainer, tNode, hostLView) {
     }
     const hydrationInfo = hostLView[HYDRATION];
     const noOffsetIndex = tNode.index - HEADER_OFFSET;
-    // TODO(akushnir): this should really be a single condition, refactor the code
-    // to use `hasInSkipHydrationBlockFlag` logic inside `isInSkipHydrationBlock`.
-    const skipHydration = isInSkipHydrationBlock(tNode) || hasInSkipHydrationBlockFlag(tNode);
-    const isNodeCreationMode = !hydrationInfo || skipHydration || isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock(tNode) ||
+        isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
     // Regular creation mode.
     if (isNodeCreationMode) {
         return false;
