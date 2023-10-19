@@ -24621,7 +24621,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-43115da");
+var VERSION2 = new Version("17.1.0-next.0+sha-dcf9086");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25658,7 +25658,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-43115da"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-dcf9086"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25729,7 +25729,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-43115da"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-dcf9086"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25961,7 +25961,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-43115da"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-dcf9086"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25984,7 +25984,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-43115da"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-dcf9086"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -26022,7 +26022,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-43115da"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-dcf9086"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -26046,7 +26046,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-43115da"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-dcf9086"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -26081,7 +26081,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-43115da"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-dcf9086"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -26098,7 +26098,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.0+sha-43115da");
+var VERSION3 = new Version("17.1.0-next.0+sha-dcf9086");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -42854,10 +42854,10 @@ var factory = {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/extended/checks/missing_control_flow_directive/index.mjs
 var KNOWN_CONTROL_FLOW_DIRECTIVES = /* @__PURE__ */ new Map([
-  ["ngIf", "NgIf"],
-  ["ngFor", "NgFor"],
-  ["ngSwitchCase", "NgSwitchCase"],
-  ["ngSwitchDefault", "NgSwitchDefault"]
+  ["ngIf", { directive: "NgIf", builtIn: "@if" }],
+  ["ngFor", { directive: "NgFor", builtIn: "@for" }],
+  ["ngSwitchCase", { directive: "NgSwitchCase", builtIn: "@switch with @case" }],
+  ["ngSwitchDefault", { directive: "NgSwitchDefault", builtIn: "@switch with @default" }]
 ]);
 var MissingControlFlowDirectiveCheck = class extends TemplateCheckWithVisitor {
   constructor() {
@@ -42882,8 +42882,8 @@ var MissingControlFlowDirectiveCheck = class extends TemplateCheckWithVisitor {
       return [];
     }
     const sourceSpan = controlFlowAttr.keySpan || controlFlowAttr.sourceSpan;
-    const correspondingImport = KNOWN_CONTROL_FLOW_DIRECTIVES.get(controlFlowAttr.name);
-    const errorMessage = `The \`*${controlFlowAttr.name}\` directive was used in the template, but neither the \`${correspondingImport}\` directive nor the \`CommonModule\` was imported. Please make sure that either the \`${correspondingImport}\` directive or the \`CommonModule\` is included in the \`@Component.imports\` array of this component.`;
+    const directiveAndBuiltIn = KNOWN_CONTROL_FLOW_DIRECTIVES.get(controlFlowAttr.name);
+    const errorMessage = `The \`*${controlFlowAttr.name}\` directive was used in the template, but neither the \`${directiveAndBuiltIn == null ? void 0 : directiveAndBuiltIn.directive}\` directive nor the \`CommonModule\` was imported. Use Angular's built-in control flow ${directiveAndBuiltIn == null ? void 0 : directiveAndBuiltIn.builtIn} or make sure that either the \`${directiveAndBuiltIn == null ? void 0 : directiveAndBuiltIn.directive}\` directive or the \`CommonModule\` is included in the \`@Component.imports\` array of this component.`;
     const diagnostic = ctx.makeTemplateDiagnostic(sourceSpan, errorMessage);
     return [diagnostic];
   }
