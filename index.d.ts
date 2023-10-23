@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.0+sha-4dce876
+ * @license Angular v17.0.0-rc.0+sha-569f57d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11313,14 +11313,6 @@ export declare abstract class ɵEffectScheduler {
     /** @nocollapse */
     static ɵprov: unknown;
 }
-
-/**
- * Internal token to collect all SSR-related features enabled for this application.
- *
- * Note: the token is in `core` to let other packages register features (the `core`
- * package is imported in other packages).
- */
-export declare const ɵENABLED_SSR_FEATURES: InjectionToken<Set<string>>;
 
 /**
  * Index of each type of locale data from the extra locale data array
