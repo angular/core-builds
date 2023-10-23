@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.0+sha-569f57d
+ * @license Angular v17.0.0-rc.0+sha-f206d10
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2637,9 +2637,6 @@ function updateAncestorTraversalFlagsOnAttach(lView) {
  */
 function markAncestorsForTraversal(lView) {
     let parent = lView[PARENT];
-    if (parent === null) {
-        return;
-    }
     while (parent !== null) {
         // We stop adding markers to the ancestors once we reach one that already has the marker. This
         // is to avoid needlessly traversing all the way to the root when the marker already exists.
@@ -10407,7 +10404,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-rc.0+sha-569f57d');
+const VERSION = new Version('17.0.0-rc.0+sha-f206d10');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11473,6 +11470,7 @@ function afterRender(callback, options) {
     if (!isPlatformBrowser(injector)) {
         return NOOP_AFTER_RENDER_REF;
     }
+    performance.mark('mark_use_counter', { detail: { feature: 'NgAfterRender' } });
     const afterRenderEventManager = injector.get(AfterRenderEventManager);
     // Lazily initialize the handler implementation, if necessary. This is so that it can be
     // tree-shaken if `afterRender` and `afterNextRender` aren't used.
@@ -11542,6 +11540,7 @@ function afterNextRender(callback, options) {
     if (!isPlatformBrowser(injector)) {
         return NOOP_AFTER_RENDER_REF;
     }
+    performance.mark('mark_use_counter', { detail: { feature: 'NgAfterNextRender' } });
     const afterRenderEventManager = injector.get(AfterRenderEventManager);
     // Lazily initialize the handler implementation, if necessary. This is so that it can be
     // tree-shaken if `afterRender` and `afterNextRender` aren't used.
@@ -19345,75 +19344,6 @@ function getExistingTNode(tView, index) {
     return tNode;
 }
 
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Registers a cleanup function associated with a prefetching trigger
- * of a given defer block.
- */
-function registerTDetailsCleanup(injector, tDetails, key, cleanupFn) {
-    injector.get(DeferBlockCleanupManager).add(tDetails, key, cleanupFn);
-}
-/**
- * Invokes all registered prefetch cleanup triggers
- * and removes all cleanup functions afterwards.
- */
-function invokeTDetailsCleanup(injector, tDetails) {
-    injector.get(DeferBlockCleanupManager).cleanup(tDetails);
-}
-/**
- * Internal service to keep track of cleanup functions associated
- * with defer blocks. This class is used to manage cleanup functions
- * created for prefetching triggers.
- */
-class DeferBlockCleanupManager {
-    constructor() {
-        this.blocks = new Map();
-    }
-    add(tDetails, key, callback) {
-        if (!this.blocks.has(tDetails)) {
-            this.blocks.set(tDetails, new Map());
-        }
-        const block = this.blocks.get(tDetails);
-        if (!block.has(key)) {
-            block.set(key, []);
-        }
-        const callbacks = block.get(key);
-        callbacks.push(callback);
-    }
-    has(tDetails, key) {
-        return !!this.blocks.get(tDetails)?.has(key);
-    }
-    cleanup(tDetails) {
-        const block = this.blocks.get(tDetails);
-        if (block) {
-            for (const callbacks of Object.values(block)) {
-                for (const callback of callbacks) {
-                    callback();
-                }
-            }
-            this.blocks.delete(tDetails);
-        }
-    }
-    ngOnDestroy() {
-        for (const [block] of this.blocks) {
-            this.cleanup(block);
-        }
-        this.blocks.clear();
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: DeferBlockCleanupManager,
-        providedIn: 'root',
-        factory: () => new DeferBlockCleanupManager(),
-    }); }
-}
-
 /**
  * Describes the state of defer block dependency loading.
  */
@@ -19468,6 +19398,8 @@ const NEXT_DEFER_BLOCK_STATE = 0;
 const DEFER_BLOCK_STATE = 1;
 const STATE_IS_FROZEN_UNTIL = 2;
 const LOADING_AFTER_CLEANUP_FN = 3;
+const TRIGGER_CLEANUP_FNS = 4;
+const PREFETCH_TRIGGER_CLEANUP_FNS = 5;
 /**
  * Options for configuring defer blocks behavior.
  * @publicApi
@@ -19486,18 +19418,45 @@ var DeferBlockBehavior;
     DeferBlockBehavior[DeferBlockBehavior["Playthrough"] = 1] = "Playthrough";
 })(DeferBlockBehavior || (DeferBlockBehavior = {}));
 
-/**
- * Wraps a given callback into a logic that registers a cleanup function
- * in the LView cleanup slot, to be invoked when an LView is destroyed.
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
-function wrapWithLViewCleanup(callback, lView, cleanup) {
-    const wrappedCallback = () => {
-        callback();
-        removeLViewOnDestroy(lView, cleanup);
-    };
-    storeLViewOnDestroy(lView, cleanup);
-    return wrappedCallback;
+/**
+ * Registers a cleanup function associated with a prefetching trigger
+ * or a regular trigger of a defer block.
+ */
+function storeTriggerCleanupFn(type, lDetails, cleanupFn) {
+    const key = type === 1 /* TriggerType.Prefetch */ ? PREFETCH_TRIGGER_CLEANUP_FNS : TRIGGER_CLEANUP_FNS;
+    if (lDetails[key] === null) {
+        lDetails[key] = [];
+    }
+    lDetails[key].push(cleanupFn);
 }
+/**
+ * Invokes registered cleanup functions either for prefetch or for regular triggers.
+ */
+function invokeTriggerCleanupFns(type, lDetails) {
+    const key = type === 1 /* TriggerType.Prefetch */ ? PREFETCH_TRIGGER_CLEANUP_FNS : TRIGGER_CLEANUP_FNS;
+    const cleanupFns = lDetails[key];
+    if (cleanupFns !== null) {
+        for (const cleanupFn of cleanupFns) {
+            cleanupFn();
+        }
+        lDetails[key] = null;
+    }
+}
+/**
+ * Invokes registered cleanup functions for both prefetch and regular triggers.
+ */
+function invokeAllTriggerCleanupFns(lDetails) {
+    invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
+    invokeTriggerCleanupFns(0 /* TriggerType.Regular */, lDetails);
+}
+
 /**
  * Calculates a data slot index for defer block info (either static or
  * instance-specific), given an index of a defer instruction.
@@ -19649,9 +19608,8 @@ class DeferEventEntry {
  * Registers an interaction trigger.
  * @param trigger Element that is the trigger.
  * @param callback Callback to be invoked when the trigger is interacted with.
- * @param injector Injector that can be used by the trigger to resolve DI tokens.
  */
-function onInteraction(trigger, callback, injector) {
+function onInteraction(trigger, callback) {
     let entry = interactionTriggers.get(trigger);
     // If this is the first entry for this element, add the listeners.
     if (!entry) {
@@ -19690,9 +19648,8 @@ function onInteraction(trigger, callback, injector) {
  * Registers a hover trigger.
  * @param trigger Element that is the trigger.
  * @param callback Callback to be invoked when the trigger is hovered over.
- * @param injector Injector that can be used by the trigger to resolve DI tokens.
  */
-function onHover(trigger, callback, injector) {
+function onHover(trigger, callback) {
     let entry = hoverTriggers.get(trigger);
     // If this is the first entry for this element, add the listener.
     if (!entry) {
@@ -19808,8 +19765,9 @@ function getTriggerElement(triggerLView, triggerIndex) {
  * @param registerFn Function that will register the DOM events.
  * @param callback Callback to be invoked when the trigger receives the event that should render
  *     the deferred block.
+ * @param type Trigger type to distinguish between regular and prefetch triggers.
  */
-function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback) {
+function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback, type) {
     const injector = initialLView[INJECTOR$1];
     function pollDomTrigger() {
         // If the initial view was destroyed, we don't need to do anything.
@@ -19833,22 +19791,22 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
         if (isDestroyed(triggerLView)) {
             return;
         }
-        // TODO: add integration with `DeferBlockCleanupManager`.
         const element = getTriggerElement(triggerLView, triggerIndex);
         const cleanup = registerFn(element, () => {
-            callback();
-            removeLViewOnDestroy(triggerLView, cleanup);
             if (initialLView !== triggerLView) {
-                removeLViewOnDestroy(initialLView, cleanup);
+                removeLViewOnDestroy(triggerLView, cleanup);
             }
-            cleanup();
+            callback();
         }, injector);
-        storeLViewOnDestroy(triggerLView, cleanup);
-        // Since the trigger and deferred block might be in different
-        // views, we have to register the callback in both locations.
+        // The trigger and deferred block might be in different LViews.
+        // For the main LView the cleanup would happen as a part of
+        // `storeTriggerCleanupFn` logic. For trigger LView we register
+        // a cleanup function there to remove event handlers in case an
+        // LView gets destroyed before a trigger is invoked.
         if (initialLView !== triggerLView) {
-            storeLViewOnDestroy(initialLView, cleanup);
+            storeLViewOnDestroy(triggerLView, cleanup);
         }
+        storeTriggerCleanupFn(type, lDetails, cleanup);
     }
     // Begin polling for the trigger.
     internalAfterNextRender(pollDomTrigger, { injector });
@@ -19859,16 +19817,12 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
  *
  * @param callback A function to be invoked when a browser becomes idle.
  * @param lView LView that hosts an instance of a defer block.
- * @param withLViewCleanup A flag that indicates whether a scheduled callback
- *           should be cancelled in case an LView is destroyed before a callback
- *           was invoked.
  */
-function onIdle(callback, lView, withLViewCleanup) {
+function onIdle(callback, lView) {
     const injector = lView[INJECTOR$1];
     const scheduler = injector.get(IdleScheduler);
     const cleanupFn = () => scheduler.remove(callback);
-    const wrappedCallback = withLViewCleanup ? wrapWithLViewCleanup(callback, lView, cleanupFn) : callback;
-    scheduler.add(wrappedCallback);
+    scheduler.add(callback);
     return cleanupFn;
 }
 /**
@@ -19897,8 +19851,8 @@ class IdleScheduler {
         // Those callbacks are scheduled for the next idle period.
         this.deferred = new Set();
         this.ngZone = inject(NgZone);
-        this.requestIdleCallback = _requestIdleCallback().bind(globalThis);
-        this.cancelIdleCallback = _cancelIdleCallback().bind(globalThis);
+        this.requestIdleCallbackFn = _requestIdleCallback().bind(globalThis);
+        this.cancelIdleCallbackFn = _cancelIdleCallback().bind(globalThis);
     }
     add(callback) {
         const target = this.executingCallbacks ? this.deferred : this.current;
@@ -19908,13 +19862,18 @@ class IdleScheduler {
         }
     }
     remove(callback) {
-        this.current.delete(callback);
-        this.deferred.delete(callback);
+        const { current, deferred } = this;
+        current.delete(callback);
+        deferred.delete(callback);
+        // If the last callback was removed and there is a pending
+        // idle callback - cancel it.
+        if (current.size === 0 && deferred.size === 0) {
+            this.cancelIdleCallback();
+        }
     }
     scheduleIdleCallback() {
         const callback = () => {
-            this.cancelIdleCallback(this.idleId);
-            this.idleId = null;
+            this.cancelIdleCallback();
             this.executingCallbacks = true;
             for (const callback of this.current) {
                 callback();
@@ -19934,13 +19893,16 @@ class IdleScheduler {
         };
         // Ensure that the callback runs in the NgZone since
         // the `requestIdleCallback` is not currently patched by Zone.js.
-        this.idleId = this.requestIdleCallback(() => this.ngZone.run(callback));
+        this.idleId = this.requestIdleCallbackFn(() => this.ngZone.run(callback));
     }
-    ngOnDestroy() {
+    cancelIdleCallback() {
         if (this.idleId !== null) {
-            this.cancelIdleCallback(this.idleId);
+            this.cancelIdleCallbackFn(this.idleId);
             this.idleId = null;
         }
+    }
+    ngOnDestroy() {
+        this.cancelIdleCallback();
         this.current.clear();
         this.deferred.clear();
     }
@@ -19957,7 +19919,7 @@ class IdleScheduler {
  * Invoking the returned function schedules a trigger.
  */
 function onTimer(delay) {
-    return (callback, lView, withLViewCleanup) => scheduleTimerTrigger(delay, callback, lView, withLViewCleanup);
+    return (callback, lView) => scheduleTimerTrigger(delay, callback, lView);
 }
 /**
  * Schedules a callback to be invoked after a given timeout.
@@ -19965,16 +19927,12 @@ function onTimer(delay) {
  * @param delay A number of ms to wait until firing a callback.
  * @param callback A function to be invoked after a timeout.
  * @param lView LView that hosts an instance of a defer block.
- * @param withLViewCleanup A flag that indicates whether a scheduled callback
- *           should be cancelled in case an LView is destroyed before a callback
- *           was invoked.
  */
-function scheduleTimerTrigger(delay, callback, lView, withLViewCleanup) {
+function scheduleTimerTrigger(delay, callback, lView) {
     const injector = lView[INJECTOR$1];
     const scheduler = injector.get(TimerScheduler);
     const cleanupFn = () => scheduler.remove(callback);
-    const wrappedCallback = withLViewCleanup ? wrapWithLViewCleanup(callback, lView, cleanupFn) : callback;
-    scheduler.add(delay, wrappedCallback);
+    scheduler.add(delay, callback);
     return cleanupFn;
 }
 /**
@@ -20008,11 +19966,16 @@ class TimerScheduler {
         this.scheduleTimer();
     }
     remove(callback) {
-        const callbackIndex = this.removeFromQueue(this.current, callback);
+        const { current, deferred } = this;
+        const callbackIndex = this.removeFromQueue(current, callback);
         if (callbackIndex === -1) {
             // Try cleaning up deferred queue only in case
             // we didn't find a callback in the "current" queue.
-            this.removeFromQueue(this.deferred, callback);
+            this.removeFromQueue(deferred, callback);
+        }
+        // If the last callback was removed and there is a pending timeout - cancel it.
+        if (current.length === 0 && deferred.length === 0) {
+            this.clearTimeout();
         }
     }
     addToQueue(target, invokeAt, callback) {
@@ -20048,20 +20011,32 @@ class TimerScheduler {
     }
     scheduleTimer() {
         const callback = () => {
-            clearTimeout(this.timeoutId);
-            this.timeoutId = null;
+            this.clearTimeout();
             this.executingCallbacks = true;
-            // Invoke callbacks that were scheduled to run
-            // before the current time.
-            let now = Date.now();
-            let lastCallbackIndex = null;
-            for (let i = 0; i < this.current.length; i += 2) {
-                const invokeAt = this.current[i];
-                const callback = this.current[i + 1];
+            // Clone the current state of the queue, since it might be altered
+            // as we invoke callbacks.
+            const current = [...this.current];
+            // Invoke callbacks that were scheduled to run before the current time.
+            const now = Date.now();
+            for (let i = 0; i < current.length; i += 2) {
+                const invokeAt = current[i];
+                const callback = current[i + 1];
                 if (invokeAt <= now) {
                     callback();
-                    // Point at the invoked callback function, which is located
-                    // after the timestamp.
+                }
+                else {
+                    // We've reached a timer that should not be invoked yet.
+                    break;
+                }
+            }
+            // The state of the queue might've changed after callbacks invocation,
+            // run the cleanup logic based on the *current* state of the queue.
+            let lastCallbackIndex = -1;
+            for (let i = 0; i < this.current.length; i += 2) {
+                const invokeAt = this.current[i];
+                if (invokeAt <= now) {
+                    // Add +1 to account for a callback function that
+                    // goes after the timestamp in events array.
                     lastCallbackIndex = i + 1;
                 }
                 else {
@@ -20069,10 +20044,7 @@ class TimerScheduler {
                     break;
                 }
             }
-            if (lastCallbackIndex !== null) {
-                // If last callback index is `null` - no callbacks were invoked,
-                // so no cleanup is needed. Otherwise, remove invoked callbacks
-                // from the queue.
+            if (lastCallbackIndex >= 0) {
                 arraySplice(this.current, 0, lastCallbackIndex + 1);
             }
             this.executingCallbacks = false;
@@ -20099,29 +20071,29 @@ class TimerScheduler {
             // First element in the queue points at the timestamp
             // of the first (earliest) event.
             const invokeAt = this.current[0];
-            if (!this.timeoutId ||
+            if (this.timeoutId === null ||
                 // Reschedule a timer in case a queue contains an item with
                 // an earlier timestamp and the delta is more than an average
                 // frame duration.
                 (this.invokeTimerAt && (this.invokeTimerAt - invokeAt > FRAME_DURATION_MS))) {
-                if (this.timeoutId !== null) {
-                    // There was a timeout already, but an earlier event was added
-                    // into the queue. In this case we drop an old timer and setup
-                    // a new one with an updated (smaller) timeout.
-                    clearTimeout(this.timeoutId);
-                    this.timeoutId = null;
-                }
+                // There was a timeout already, but an earlier event was added
+                // into the queue. In this case we drop an old timer and setup
+                // a new one with an updated (smaller) timeout.
+                this.clearTimeout();
                 const timeout = Math.max(invokeAt - now, FRAME_DURATION_MS);
                 this.invokeTimerAt = invokeAt;
                 this.timeoutId = setTimeout(callback, timeout);
             }
         }
     }
-    ngOnDestroy() {
+    clearTimeout() {
         if (this.timeoutId !== null) {
             clearTimeout(this.timeoutId);
             this.timeoutId = null;
         }
+    }
+    ngOnDestroy() {
+        this.clearTimeout();
         this.current.length = 0;
         this.deferred.length = 0;
     }
@@ -20234,9 +20206,15 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
         null,
         DeferBlockInternalState.Initial,
         null,
-        null // LOADING_AFTER_CLEANUP_FN
+        null,
+        null,
+        null // PREFETCH_TRIGGER_CLEANUP_FNS
     ];
     setLDeferBlockDetails(lView, adjustedIndex, lDetails);
+    const cleanupTriggersFn = () => invokeAllTriggerCleanupFns(lDetails);
+    // When defer block is triggered - unsubscribe from LView destroy cleanup.
+    storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, () => removeLViewOnDestroy(lView, cleanupTriggersFn));
+    storeLViewOnDestroy(lView, cleanupTriggersFn);
 }
 /**
  * Loads defer block dependencies when a trigger value becomes truthy.
@@ -20278,7 +20256,7 @@ function ɵɵdeferPrefetchWhen(rawValue) {
         const tDetails = getTDeferBlockDetails(tView, tNode);
         if (value === true && tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
             // If loading has not been started yet, trigger it now.
-            triggerPrefetching(tDetails, lView);
+            triggerPrefetching(tDetails, lView, tNode);
         }
     }
 }
@@ -20294,7 +20272,7 @@ function ɵɵdeferOnIdle() {
  * @codeGenApi
  */
 function ɵɵdeferPrefetchOnIdle() {
-    scheduleDelayedPrefetching(onIdle, 0 /* DeferBlockTriggers.OnIdle */);
+    scheduleDelayedPrefetching(onIdle);
 }
 /**
  * Sets up logic to handle the `on immediate` deferred trigger.
@@ -20323,7 +20301,7 @@ function ɵɵdeferPrefetchOnImmediate() {
     const tView = lView[TVIEW];
     const tDetails = getTDeferBlockDetails(tView, tNode);
     if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        triggerResourceLoading(tDetails, lView);
+        triggerResourceLoading(tDetails, lView, tNode);
     }
 }
 /**
@@ -20340,7 +20318,7 @@ function ɵɵdeferOnTimer(delay) {
  * @codeGenApi
  */
 function ɵɵdeferPrefetchOnTimer(delay) {
-    scheduleDelayedPrefetching(onTimer(delay), 1 /* DeferBlockTriggers.OnTimer */);
+    scheduleDelayedPrefetching(onTimer(delay));
 }
 /**
  * Creates runtime data structures for the `on hover` deferred trigger.
@@ -20352,7 +20330,7 @@ function ɵɵdeferOnHover(triggerIndex, walkUpTimes) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     renderPlaceholder(lView, tNode);
-    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerDeferBlock(lView, tNode));
+    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerDeferBlock(lView, tNode), 0 /* TriggerType.Regular */);
 }
 /**
  * Creates runtime data structures for the `prefetch on hover` deferred trigger.
@@ -20366,7 +20344,7 @@ function ɵɵdeferPrefetchOnHover(triggerIndex, walkUpTimes) {
     const tView = lView[TVIEW];
     const tDetails = getTDeferBlockDetails(tView, tNode);
     if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerPrefetching(tDetails, lView));
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
     }
 }
 /**
@@ -20379,7 +20357,7 @@ function ɵɵdeferOnInteraction(triggerIndex, walkUpTimes) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     renderPlaceholder(lView, tNode);
-    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerDeferBlock(lView, tNode));
+    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerDeferBlock(lView, tNode), 0 /* TriggerType.Regular */);
 }
 /**
  * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
@@ -20393,7 +20371,7 @@ function ɵɵdeferPrefetchOnInteraction(triggerIndex, walkUpTimes) {
     const tView = lView[TVIEW];
     const tDetails = getTDeferBlockDetails(tView, tNode);
     if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerPrefetching(tDetails, lView));
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
     }
 }
 /**
@@ -20406,7 +20384,7 @@ function ɵɵdeferOnViewport(triggerIndex, walkUpTimes) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     renderPlaceholder(lView, tNode);
-    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerDeferBlock(lView, tNode));
+    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerDeferBlock(lView, tNode), 0 /* TriggerType.Regular */);
 }
 /**
  * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
@@ -20420,7 +20398,7 @@ function ɵɵdeferPrefetchOnViewport(triggerIndex, walkUpTimes) {
     const tView = lView[TVIEW];
     const tDetails = getTDeferBlockDetails(tView, tNode);
     if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerPrefetching(tDetails, lView));
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
     }
 }
 /********** Helper functions **********/
@@ -20431,35 +20409,25 @@ function scheduleDelayedTrigger(scheduleFn) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     renderPlaceholder(lView, tNode);
-    scheduleFn(() => triggerDeferBlock(lView, tNode), lView, true /* withLViewCleanup */);
+    const cleanupFn = scheduleFn(() => triggerDeferBlock(lView, tNode), lView);
+    const lDetails = getLDeferBlockDetails(lView, tNode);
+    storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, cleanupFn);
 }
 /**
  * Schedules prefetching for `on idle` and `on timer` triggers.
  *
  * @param scheduleFn A function that does the scheduling.
- * @param trigger A trigger that initiated scheduling.
  */
-function scheduleDelayedPrefetching(scheduleFn, trigger) {
+function scheduleDelayedPrefetching(scheduleFn) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     const tView = lView[TVIEW];
     const tDetails = getTDeferBlockDetails(tView, tNode);
     if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        // Prevent scheduling more than one prefetch init call
-        // for each defer block. For this reason we use only a trigger
-        // identifier in a key, so all instances would use the same key.
-        const key = String(trigger);
-        const injector = lView[INJECTOR$1];
-        const manager = injector.get(DeferBlockCleanupManager);
-        if (!manager.has(tDetails, key)) {
-            // In case of prefetching, we intentionally avoid cancelling resource loading if
-            // an underlying LView get destroyed (thus passing `null` as a second argument),
-            // because there might be other LViews (that represent embedded views) that
-            // depend on resource loading.
-            const prefetch = () => triggerPrefetching(tDetails, lView);
-            const cleanupFn = scheduleFn(prefetch, lView, false /* withLViewCleanup */);
-            registerTDetailsCleanup(injector, tDetails, key, cleanupFn);
-        }
+        const lDetails = getLDeferBlockDetails(lView, tNode);
+        const prefetch = () => triggerPrefetching(tDetails, lView, tNode);
+        const cleanupFn = scheduleFn(prefetch, lView);
+        storeTriggerCleanupFn(1 /* TriggerType.Prefetch */, lDetails, cleanupFn);
     }
 }
 /**
@@ -20572,7 +20540,7 @@ function scheduleDeferBlockUpdate(timeout, lDetails, tNode, lContainer, hostLVie
             renderDeferBlockState(nextState, tNode, lContainer);
         }
     };
-    return scheduleTimerTrigger(timeout, callback, hostLView, true);
+    return scheduleTimerTrigger(timeout, callback, hostLView);
 }
 /**
  * Checks whether we can transition to the next state.
@@ -20592,9 +20560,9 @@ function isValidStateChange(currentState, newState) {
  * @param tDetails Static information about this defer block.
  * @param lView LView of a host view.
  */
-function triggerPrefetching(tDetails, lView) {
+function triggerPrefetching(tDetails, lView, tNode) {
     if (lView[INJECTOR$1] && shouldTriggerDeferBlock(lView[INJECTOR$1])) {
-        triggerResourceLoading(tDetails, lView);
+        triggerResourceLoading(tDetails, lView, tNode);
     }
 }
 /**
@@ -20603,7 +20571,7 @@ function triggerPrefetching(tDetails, lView) {
  * @param tDetails Static information about this defer block.
  * @param lView LView of a host view.
  */
-function triggerResourceLoading(tDetails, lView) {
+function triggerResourceLoading(tDetails, lView, tNode) {
     const injector = lView[INJECTOR$1];
     const tView = lView[TVIEW];
     if (tDetails.loadingState !== DeferDependenciesLoadingState.NOT_STARTED) {
@@ -20612,9 +20580,12 @@ function triggerResourceLoading(tDetails, lView) {
         // in this function. All details can be obtained from the `tDetails` object.
         return;
     }
+    const lDetails = getLDeferBlockDetails(lView, tNode);
     const primaryBlockTNode = getPrimaryBlockTNode(tView, tDetails);
     // Switch from NOT_STARTED -> IN_PROGRESS state.
     tDetails.loadingState = DeferDependenciesLoadingState.IN_PROGRESS;
+    // Prefetching is triggered, cleanup all registered prefetch triggers.
+    invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
     let dependenciesFn = tDetails.dependencyResolverFn;
     if (ngDevMode) {
         // Check if dependency function interceptor is configured.
@@ -20632,9 +20603,6 @@ function triggerResourceLoading(tDetails, lView) {
         });
         return;
     }
-    // Defer block may have multiple prefetch triggers. Once the loading
-    // starts, invoke all clean functions, since they are no longer needed.
-    invokeTDetailsCleanup(injector, tDetails);
     // Start downloading of defer block dependencies.
     tDetails.loadingPromise = Promise.allSettled(dependenciesFn()).then(results => {
         let failed = false;
@@ -20718,11 +20686,14 @@ function triggerDeferBlock(lView, tNode) {
     ngDevMode && assertLContainer(lContainer);
     if (!shouldTriggerDeferBlock(injector))
         return;
+    const lDetails = getLDeferBlockDetails(lView, tNode);
     const tDetails = getTDeferBlockDetails(tView, tNode);
+    // Defer block is triggered, cleanup all registered trigger functions.
+    invokeAllTriggerCleanupFns(lDetails);
     switch (tDetails.loadingState) {
         case DeferDependenciesLoadingState.NOT_STARTED:
             renderDeferBlockState(DeferBlockState.Loading, tNode, lContainer);
-            triggerResourceLoading(tDetails, lView);
+            triggerResourceLoading(tDetails, lView, tNode);
             // The `loadingState` might have changed to "loading".
             if (tDetails.loadingState ===
                 DeferDependenciesLoadingState.IN_PROGRESS) {

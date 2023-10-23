@@ -4283,9 +4283,10 @@ var IfBlockBranch = class {
   }
 };
 var UnknownBlock = class {
-  constructor(name, sourceSpan) {
+  constructor(name, sourceSpan, nameSpan) {
     this.name = name;
     this.sourceSpan = sourceSpan;
+    this.nameSpan = nameSpan;
   }
   visit(visitor) {
     return visitor.visitUnknownBlock(this);
@@ -11826,11 +11827,12 @@ var Comment2 = class {
   }
 };
 var Block = class {
-  constructor(name, parameters, children, sourceSpan, startSourceSpan, endSourceSpan = null) {
+  constructor(name, parameters, children, sourceSpan, nameSpan, startSourceSpan, endSourceSpan = null) {
     this.name = name;
     this.parameters = parameters;
     this.children = children;
     this.sourceSpan = sourceSpan;
+    this.nameSpan = nameSpan;
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
   }
@@ -15362,7 +15364,7 @@ var _Tokenizer = class {
         return true;
       }
     }
-    if (this._tokenizeBlocks && !this._inInterpolation && !this._isInExpansion() && (this._isBlockStart() || this._cursor.peek() === $RBRACE)) {
+    if (this._tokenizeBlocks && !this._inInterpolation && !this._isInExpansion() && (this._cursor.peek() === $AT || this._cursor.peek() === $RBRACE)) {
       return true;
     }
     return false;
@@ -15373,16 +15375,6 @@ var _Tokenizer = class {
       tmp.advance();
       const code = tmp.peek();
       if ($a <= code && code <= $z || $A <= code && code <= $Z || code === $SLASH || code === $BANG) {
-        return true;
-      }
-    }
-    return false;
-  }
-  _isBlockStart() {
-    if (this._tokenizeBlocks && this._cursor.peek() === $AT) {
-      const tmp = this._cursor.clone();
-      tmp.advance();
-      if (isBlockNameChar(tmp.peek())) {
         return true;
       }
     }
@@ -15972,7 +15964,7 @@ var _TreeBuilder = class {
     const end = this._peek.sourceSpan.fullStart;
     const span = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
     const startSpan = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
-    const block = new Block(token.parts[0], parameters, [], span, startSpan);
+    const block = new Block(token.parts[0], parameters, [], span, token.sourceSpan, startSpan);
     this._pushContainer(block, false);
   }
   _consumeBlockClose(token) {
@@ -15989,7 +15981,7 @@ var _TreeBuilder = class {
     const end = this._peek.sourceSpan.fullStart;
     const span = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
     const startSpan = new ParseSourceSpan(token.sourceSpan.start, end, token.sourceSpan.fullStart);
-    const block = new Block(token.parts[0], parameters, [], span, startSpan);
+    const block = new Block(token.parts[0], parameters, [], span, token.sourceSpan, startSpan);
     this._pushContainer(block, false);
     this._popContainer(null, Block, null);
     this.errors.push(TreeError.create(token.parts[0], span, `Incomplete block "${token.parts[0]}". If you meant to write the @ character, you should use the "&#64;" HTML entity instead.`));
@@ -19579,7 +19571,7 @@ var WhitespaceVisitor = class {
     return expansionCase;
   }
   visitBlock(block, context) {
-    return new Block(block.name, block.parameters, visitAllWithSiblings(this, block.children), block.sourceSpan, block.startSourceSpan, block.endSourceSpan);
+    return new Block(block.name, block.parameters, visitAllWithSiblings(this, block.children), block.sourceSpan, block.nameSpan, block.startSourceSpan, block.endSourceSpan);
   }
   visitBlockParameter(parameter, context) {
     return parameter;
@@ -20087,7 +20079,7 @@ function createSwitchBlock(ast, visitor, bindingParser) {
       continue;
     }
     if ((node.name !== "case" || node.parameters.length === 0) && node.name !== "default") {
-      unknownBlocks.push(new UnknownBlock(node.name, node.sourceSpan));
+      unknownBlocks.push(new UnknownBlock(node.name, node.sourceSpan, node.nameSpan));
       continue;
     }
     const expression = node.name === "case" ? parseBlockParameterToBinding(node.parameters[0], bindingParser) : null;
@@ -20892,7 +20884,7 @@ var HtmlAstToIvyAst = class {
           errorMessage = `Unrecognized block @${block.name}.`;
         }
         result = {
-          node: new UnknownBlock(block.name, block.sourceSpan),
+          node: new UnknownBlock(block.name, block.sourceSpan, block.nameSpan),
           errors: [new ParseError(block.sourceSpan, errorMessage)]
         };
         break;
@@ -24621,7 +24613,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-rc.0+sha-569f57d");
+var VERSION2 = new Version("17.0.0-rc.0+sha-f206d10");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -25658,7 +25650,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0-rc.0+sha-569f57d"));
+  definitionMap.set("version", literal("17.0.0-rc.0+sha-f206d10"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -25729,7 +25721,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0-rc.0+sha-569f57d"));
+  definitionMap.set("version", literal("17.0.0-rc.0+sha-f206d10"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -25961,7 +25953,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0-rc.0+sha-569f57d"));
+  definitionMap.set("version", literal("17.0.0-rc.0+sha-f206d10"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -25984,7 +25976,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0-rc.0+sha-569f57d"));
+  definitionMap.set("version", literal("17.0.0-rc.0+sha-f206d10"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -26022,7 +26014,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0-rc.0+sha-569f57d"));
+  definitionMap.set("version", literal("17.0.0-rc.0+sha-f206d10"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -26046,7 +26038,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0-rc.0+sha-569f57d"));
+  definitionMap.set("version", literal("17.0.0-rc.0+sha-f206d10"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -26081,7 +26073,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0-rc.0+sha-569f57d"));
+  definitionMap.set("version", literal("17.0.0-rc.0+sha-f206d10"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -26098,7 +26090,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0-rc.0+sha-569f57d");
+var VERSION3 = new Version("17.0.0-rc.0+sha-f206d10");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
