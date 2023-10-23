@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-1f66090
+ * @license Angular v17.1.0-next.0+sha-67b9720
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12405,7 +12405,7 @@ export declare function ɵtransitiveScopesFor<T>(type: Type<T>): ɵNgModuleTrans
  * @param tDetails Static information about this defer block.
  * @param lView LView of a host view.
  */
-export declare function ɵtriggerResourceLoading(tDetails: TDeferBlockDetails, lView: LView): void;
+export declare function ɵtriggerResourceLoading(tDetails: TDeferBlockDetails, lView: LView, tNode: TNode): void;
 
 /**
  * Ellipses the string in the middle when longer than the max length

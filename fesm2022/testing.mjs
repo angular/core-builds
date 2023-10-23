@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-1f66090
+ * @license Angular v17.1.0-next.0+sha-67b9720
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -74,7 +74,7 @@ class DeferBlockFixture {
                 `but there was no @${stateAsString.toLowerCase()} block defined in a template.`);
         }
         if (state === ɵDeferBlockState.Complete) {
-            await ɵtriggerResourceLoading(this.block.tDetails, this.block.lView);
+            await ɵtriggerResourceLoading(this.block.tDetails, this.block.lView, this.block.tNode);
         }
         ɵrenderDeferBlockState(state, this.block.tNode, this.block.lContainer);
         this.componentFixture.detectChanges();
