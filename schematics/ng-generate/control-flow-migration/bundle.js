@@ -24202,7 +24202,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-rc.0+sha-114a2f8");
+var VERSION2 = new Version("17.0.0-rc.0+sha-54fed68");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24468,8 +24468,8 @@ function migrateTemplate(template2) {
   let offset = 0;
   let nestLevel = -1;
   let postOffsets = [];
-  let migrateResult = { tmpl: result, offsets: { pre: 0, post: 0 } };
   for (const el of visitor.elements) {
+    let migrateResult = { tmpl: result, offsets: { pre: 0, post: 0 } };
     if (el.nestCount <= nestLevel) {
       const count = nestLevel - el.nestCount;
       for (let i = 0; i <= count; i++) {
@@ -24498,7 +24498,6 @@ function migrateTemplate(template2) {
     result = migrateResult.tmpl;
     offset += migrateResult.offsets.pre;
     postOffsets.push(migrateResult.offsets.post);
-    const nm = el.el.name;
     nestLevel = el.nestCount;
   }
   for (const [_, t] of visitor.templates) {
