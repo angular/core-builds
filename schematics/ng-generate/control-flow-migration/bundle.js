@@ -24202,7 +24202,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-d82d586");
+var VERSION2 = new Version("17.1.0-next.0+sha-c993e9a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24384,17 +24384,14 @@ var CaseCollector = class extends RecursiveVisitor {
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
 function analyze(sourceFile, analyzedFiles) {
-  var _a2;
-  for (const node of sourceFile.statements) {
-    if (!import_typescript3.default.isClassDeclaration(node)) {
-      continue;
-    }
+  forEachClass(sourceFile, (node) => {
+    var _a2;
     const decorator = (_a2 = import_typescript3.default.getDecorators(node)) == null ? void 0 : _a2.find((dec) => {
       return import_typescript3.default.isCallExpression(dec.expression) && import_typescript3.default.isIdentifier(dec.expression.expression) && dec.expression.expression.text === "Component";
     });
     const metadata = decorator && decorator.expression.arguments.length > 0 && import_typescript3.default.isObjectLiteralExpression(decorator.expression.arguments[0]) ? decorator.expression.arguments[0] : null;
     if (!metadata) {
-      continue;
+      return;
     }
     for (const prop of metadata.properties) {
       if (!import_typescript3.default.isPropertyAssignment(prop) || !import_typescript3.default.isStringLiteralLike(prop.initializer) || !import_typescript3.default.isIdentifier(prop.name) && !import_typescript3.default.isStringLiteralLike(prop.name)) {
@@ -24410,7 +24407,7 @@ function analyze(sourceFile, analyzedFiles) {
           break;
       }
     }
-  }
+  });
 }
 function getNestedCount(etm, aggregator) {
   if (aggregator.length === 0) {
@@ -24468,8 +24465,8 @@ function migrateTemplate(template2) {
   let offset = 0;
   let nestLevel = -1;
   let postOffsets = [];
-  let migrateResult = { tmpl: result, offsets: { pre: 0, post: 0 } };
   for (const el of visitor.elements) {
+    let migrateResult = { tmpl: result, offsets: { pre: 0, post: 0 } };
     if (el.nestCount <= nestLevel) {
       const count = nestLevel - el.nestCount;
       for (let i = 0; i <= count; i++) {
@@ -24498,7 +24495,6 @@ function migrateTemplate(template2) {
     result = migrateResult.tmpl;
     offset += migrateResult.offsets.pre;
     postOffsets.push(migrateResult.offsets.post);
-    const nm = el.el.name;
     nestLevel = el.nestCount;
   }
   for (const [_, t] of visitor.templates) {
@@ -24691,6 +24687,14 @@ function getSwitchCaseBlock(etm, tmpl, offset, hasLineBreaks) {
   }
   let valEnd = etm.attr.valueSpan.end.offset + 1 - offset + shift;
   return `${lbString}@case (${etm.attr.value}) {${lbString}${lbSpaces}${tmpl.slice(elStart, attrStart) + tmpl.slice(valEnd, elEnd)}${lbString}}`;
+}
+function forEachClass(sourceFile, callback) {
+  sourceFile.forEachChild(function walk(node) {
+    if (import_typescript3.default.isClassDeclaration(node)) {
+      callback(node);
+    }
+    node.forEachChild(walk);
+  });
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/index.mjs
