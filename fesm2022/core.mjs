@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-c993e9a
+ * @license Angular v17.1.0-next.0+sha-76152a5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10404,7 +10404,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-c993e9a');
+const VERSION = new Version('17.1.0-next.0+sha-76152a5');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13516,6 +13516,10 @@ function collectNativeNodesInLContainer(lContainer, result) {
     }
 }
 
+/**
+ * The maximum number of times the change detection traversal will rerun before throwing an error.
+ */
+const MAXIMUM_REFRESH_RERUNS = 100;
 function detectChangesInternal(tView, lView, context, notifyErrorHandler = true) {
     const environment = lView[ENVIRONMENT];
     const rendererFactory = environment.rendererFactory;
@@ -13530,6 +13534,23 @@ function detectChangesInternal(tView, lView, context, notifyErrorHandler = true)
     }
     try {
         refreshView(tView, lView, tView.template, context);
+        let retries = 0;
+        // If after running change detection, this view still needs to be refreshed or there are
+        // descendants views that need to be refreshed due to re-dirtying during the change detection
+        // run, detect changes on the view again. We run change detection in `Targeted` mode to only
+        // refresh views with the `RefreshView` flag.
+        while (lView[FLAGS] & (1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */)) {
+            if (retries === MAXIMUM_REFRESH_RERUNS) {
+                throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
+                    'Infinite change detection while trying to refresh views. ' +
+                        'There may be components which each cause the other to require a refresh, ' +
+                        'causing an infinite loop.');
+            }
+            retries++;
+            // Even if this view is detached, we still detect changes in targeted mode because this was
+            // the root of the change detection run.
+            detectChangesInView(lView, 1 /* ChangeDetectionMode.Targeted */);
+        }
     }
     catch (error) {
         if (notifyErrorHandler) {
@@ -13684,7 +13705,6 @@ function refreshView(tView, lView, templateFn, context) {
         if (!isInCheckNoChangesPass) {
             lView[FLAGS] &= ~(64 /* LViewFlags.Dirty */ | 8 /* LViewFlags.FirstLViewPass */);
         }
-        lView[FLAGS] &= ~1024 /* LViewFlags.RefreshView */;
     }
     catch (e) {
         // If refreshing a view causes an error, we need to remark the ancestors as needing traversal
@@ -13767,7 +13787,7 @@ function detectChangesInView(lView, mode) {
     const flags = lView[FLAGS];
     // Flag cleared before change detection runs so that the view can be re-marked for traversal if
     // necessary.
-    lView[FLAGS] &= ~8192 /* LViewFlags.HasChildViewsToRefresh */;
+    lView[FLAGS] &= ~(8192 /* LViewFlags.HasChildViewsToRefresh */ | 1024 /* LViewFlags.RefreshView */);
     if ((flags & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */) &&
         mode === 0 /* ChangeDetectionMode.Global */) ||
         flags & 1024 /* LViewFlags.RefreshView */) {

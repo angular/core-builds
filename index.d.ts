@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-c993e9a
+ * @license Angular v17.1.0-next.0+sha-76152a5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12178,6 +12178,7 @@ export declare const enum ɵRuntimeErrorCode {
     EXPRESSION_CHANGED_AFTER_CHECKED = -100,
     RECURSIVE_APPLICATION_REF_TICK = 101,
     RECURSIVE_APPLICATION_RENDER = 102,
+    INFINITE_CHANGE_DETECTION = 103,
     CYCLIC_DI_DEPENDENCY = -200,
     PROVIDER_NOT_FOUND = -201,
     INVALID_FACTORY_DEPENDENCY = 202,
