@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-47ab069
+ * @license Angular v17.1.0-next.0+sha-dcc4a80
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12072,8 +12072,12 @@ export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements I
  * @param newState New state that should be applied to the defer block.
  * @param tNode TNode that represents a defer block.
  * @param lContainer Represents an instance of a defer block.
+ * @param skipTimerScheduling Indicates that `@loading` and `@placeholder` block
+ *   should be rendered immediately, even if they have `after` or `minimum` config
+ *   options setup. This flag to needed for testing APIs to transition defer block
+ *   between states via `DeferFixture.render` method.
  */
-export declare function ɵrenderDeferBlockState(newState: ɵDeferBlockState, tNode: TNode, lContainer: LContainer): void;
+export declare function ɵrenderDeferBlockState(newState: ɵDeferBlockState, tNode: TNode, lContainer: LContainer, skipTimerScheduling?: boolean): void;
 
 /**
  * Flags passed into template functions to determine which blocks (i.e. creation, update)
@@ -12219,6 +12223,7 @@ export declare const enum ɵRuntimeErrorCode {
     ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT = -602,
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,
+    DEFER_LOADING_FAILED = 750,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
     INVALID_DIFFER_INPUT = 900,
     NO_SUPPORTING_DIFFER_FACTORY = 901,

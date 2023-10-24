@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-47ab069
+ * @license Angular v17.1.0-next.0+sha-dcc4a80
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10404,7 +10404,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-47ab069');
+const VERSION = new Version('17.1.0-next.0+sha-dcc4a80');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20437,8 +20437,12 @@ function scheduleDelayedPrefetching(scheduleFn) {
  * @param newState New state that should be applied to the defer block.
  * @param tNode TNode that represents a defer block.
  * @param lContainer Represents an instance of a defer block.
+ * @param skipTimerScheduling Indicates that `@loading` and `@placeholder` block
+ *   should be rendered immediately, even if they have `after` or `minimum` config
+ *   options setup. This flag to needed for testing APIs to transition defer block
+ *   between states via `DeferFixture.render` method.
  */
-function renderDeferBlockState(newState, tNode, lContainer) {
+function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling = false) {
     const hostLView = lContainer[PARENT];
     const hostTView = hostLView[TVIEW];
     // Check if this view is not destroyed. Since the loading process was async,
@@ -20453,14 +20457,20 @@ function renderDeferBlockState(newState, tNode, lContainer) {
     if (isValidStateChange(currentState, newState) &&
         isValidStateChange(lDetails[NEXT_DEFER_BLOCK_STATE] ?? -1, newState)) {
         const tDetails = getTDeferBlockDetails(hostTView, tNode);
-        const needsScheduling = getLoadingBlockAfter(tDetails) !== null ||
-            getMinimumDurationForState(tDetails, DeferBlockState.Loading) !== null ||
-            getMinimumDurationForState(tDetails, DeferBlockState.Placeholder);
+        const needsScheduling = !skipTimerScheduling &&
+            (getLoadingBlockAfter(tDetails) !== null ||
+                getMinimumDurationForState(tDetails, DeferBlockState.Loading) !== null ||
+                getMinimumDurationForState(tDetails, DeferBlockState.Placeholder));
         if (ngDevMode && needsScheduling) {
             assertDefined(applyDeferBlockStateWithSchedulingImpl, 'Expected scheduling function to be defined');
         }
         const applyStateFn = needsScheduling ? applyDeferBlockStateWithSchedulingImpl : applyDeferBlockState;
-        applyStateFn(newState, lDetails, lContainer, tNode, hostLView);
+        try {
+            applyStateFn(newState, lDetails, lContainer, tNode, hostLView);
+        }
+        catch (error) {
+            handleError(hostLView, error);
+        }
     }
 }
 /**
@@ -20631,6 +20641,14 @@ function triggerResourceLoading(tDetails, lView, tNode) {
         tDetails.loadingPromise = null;
         if (failed) {
             tDetails.loadingState = DeferDependenciesLoadingState.FAILED;
+            if (tDetails.errorTmplIndex === null) {
+                const templateLocation = getTemplateLocationDetails(lView);
+                const error = new RuntimeError(750 /* RuntimeErrorCode.DEFER_LOADING_FAILED */, ngDevMode &&
+                    'Loading dependencies for `@defer` block failed, ' +
+                        `but no \`@error\` block was configured${templateLocation}. ` +
+                        'Consider using the `@error` block to render an error state.');
+                handleError(lView, error);
+            }
         }
         else {
             tDetails.loadingState = DeferDependenciesLoadingState.COMPLETE;

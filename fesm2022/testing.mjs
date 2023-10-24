@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-47ab069
+ * @license Angular v17.1.0-next.0+sha-dcc4a80
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -76,7 +76,10 @@ class DeferBlockFixture {
         if (state === ɵDeferBlockState.Complete) {
             await ɵtriggerResourceLoading(this.block.tDetails, this.block.lView, this.block.tNode);
         }
-        ɵrenderDeferBlockState(state, this.block.tNode, this.block.lContainer);
+        // If the `render` method is used explicitly - skip timer-based scheduling for
+        // `@placeholder` and `@loading` blocks and render them immediately.
+        const skipTimerScheduling = true;
+        ɵrenderDeferBlockState(state, this.block.tNode, this.block.lContainer, skipTimerScheduling);
         this.componentFixture.detectChanges();
         return this.componentFixture.whenStable();
     }
