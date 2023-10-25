@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.0+sha-1dd8558
+ * @license Angular v17.0.0-rc.0+sha-4c878f9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10404,7 +10404,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-rc.0+sha-1dd8558');
+const VERSION = new Version('17.0.0-rc.0+sha-4c878f9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -28779,7 +28779,7 @@ const ITS_JUST_ANGULAR = true;
  * ```
  *
  * ### Example with standalone application
- *
+ * ```
  *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
  *   return () => httpClient.get("https://someUrl.com/api/user")
  *     .pipe(
@@ -28798,6 +28798,7 @@ const ITS_JUST_ANGULAR = true;
  *     },
  *   ],
  * });
+ * ```
  *
  * @publicApi
  */
@@ -31367,7 +31368,7 @@ function internalProvideZoneChangeDetection(ngZoneFactory) {
  * `BootstrapOptions` instead.
  *
  * @usageNotes
- * ```typescript=
+ * ```typescript
  * bootstrapApplication(MyApp, {providers: [
  *   provideZoneChangeDetection({eventCoalescing: true}),
  * ]});
@@ -34800,7 +34801,7 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     // This helper is to give a reasonable error message to people upgrading to v9 that have not yet
     // installed `@angular/localize` in their app.
     // tslint:disable-next-line: no-toplevel-property-access
-    _global.$localize = _global.$localize || function () {
+    _global.$localize ??= function () {
         throw new Error('It looks like your application or one of its dependencies is using i18n.\n' +
             'Angular 9 introduced a global `$localize()` function that needs to be loaded.\n' +
             'Please run `ng add @angular/localize` from the Angular CLI.\n' +
