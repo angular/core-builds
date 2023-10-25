@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-31c7bc1
+ * @license Angular v17.1.0-next.0+sha-fc9ba39
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10559,7 +10559,7 @@ export declare interface WritableSignal<T> extends Signal<T> {
      */
     set(value: T): void;
     /**
-     * Update the value of the signal based on itfs current value, and
+     * Update the value of the signal based on its current value, and
      * notify any dependents.
      */
     update(updateFn: (value: T) => T): void;
@@ -12199,7 +12199,7 @@ export declare const enum ɵRuntimeErrorCode {
     INVALID_EVENT_BINDING = 306,
     HOST_DIRECTIVE_UNRESOLVABLE = 307,
     HOST_DIRECTIVE_NOT_STANDALONE = 308,
-    DUPLICATE_DIRECTITVE = 309,
+    DUPLICATE_DIRECTIVE = 309,
     HOST_DIRECTIVE_COMPONENT = 310,
     HOST_DIRECTIVE_UNDEFINED_BINDING = 311,
     HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
