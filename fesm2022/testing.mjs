@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.10+sha-372dd0a
+ * @license Angular v16.2.10+sha-019a0f4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1687,6 +1687,93 @@ function initNgDevMode() {
     return false;
 }
 
+/**
+ * Creates a token that can be used in a DI Provider.
+ *
+ * Use an `InjectionToken` whenever the type you are injecting is not reified (does not have a
+ * runtime representation) such as when injecting an interface, callable type, array or
+ * parameterized type.
+ *
+ * `InjectionToken` is parameterized on `T` which is the type of object which will be returned by
+ * the `Injector`. This provides an additional level of type safety.
+ *
+ * <div class="alert is-helpful">
+ *
+ * **Important Note**: Ensure that you use the same instance of the `InjectionToken` in both the
+ * provider and the injection call. Creating a new instance of `InjectionToken` in different places,
+ * even with the same description, will be treated as different tokens by Angular's DI system,
+ * leading to a `NullInjectorError`.
+ *
+ * </div>
+ *
+ * <code-example format="typescript" language="typescript" path="injection-token/src/main.ts"
+ * region="InjectionToken"></code-example>
+ *
+ * When creating an `InjectionToken`, you can optionally specify a factory function which returns
+ * (possibly by creating) a default value of the parameterized type `T`. This sets up the
+ * `InjectionToken` using this factory as a provider as if it was defined explicitly in the
+ * application's root injector. If the factory function, which takes zero arguments, needs to inject
+ * dependencies, it can do so using the [`inject`](api/core/inject) function.
+ * As you can see in the Tree-shakable InjectionToken example below.
+ *
+ * Additionally, if a `factory` is specified you can also specify the `providedIn` option, which
+ * overrides the above behavior and marks the token as belonging to a particular `@NgModule` (note:
+ * this option is now deprecated). As mentioned above, `'root'` is the default value for
+ * `providedIn`.
+ *
+ * The `providedIn: NgModule` and `providedIn: 'any'` options are deprecated.
+ *
+ * @usageNotes
+ * ### Basic Examples
+ *
+ * ### Plain InjectionToken
+ *
+ * {@example core/di/ts/injector_spec.ts region='InjectionToken'}
+ *
+ * ### Tree-shakable InjectionToken
+ *
+ * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+ *
+ * @publicApi
+ */
+class InjectionToken {
+    /**
+     * @param _desc   Description for the token,
+     *                used only for debugging purposes,
+     *                it should but does not need to be unique
+     * @param options Options for the token's usage, as described above
+     */
+    constructor(_desc, options) {
+        this._desc = _desc;
+        /** @internal */
+        this.ngMetadataName = 'InjectionToken';
+        this.ɵprov = undefined;
+        if (typeof options == 'number') {
+            (typeof ngDevMode === 'undefined' || ngDevMode) &&
+                assertLessThan(options, 0, 'Only negative numbers are supported here');
+            // This is a special hack to assign __NG_ELEMENT_ID__ to this instance.
+            // See `InjectorMarkers`
+            this.__NG_ELEMENT_ID__ = options;
+        }
+        else if (options !== undefined) {
+            this.ɵprov = ɵɵdefineInjectable({
+                token: this,
+                providedIn: options.providedIn || 'root',
+                factory: options.factory,
+            });
+        }
+    }
+    /**
+     * @internal
+     */
+    get multi() {
+        return this;
+    }
+    toString() {
+        return `InjectionToken ${this._desc}`;
+    }
+}
+
 let _injectorProfilerContext;
 function getInjectorProfilerContext() {
     !ngDevMode && throwError('getInjectorProfilerContext should never be called in production mode');
@@ -1728,18 +1815,35 @@ function injectorProfiler(event) {
  * Emits an InjectorProfilerEventType.ProviderConfigured to the injector profiler. The data in the
  * emitted event includes the raw provider, as well as the token that provider is providing.
  *
- * @param provider A provider object
+ * @param eventProvider A provider object
  */
-function emitProviderConfiguredEvent(provider, isViewProvider = false) {
+function emitProviderConfiguredEvent(eventProvider, isViewProvider = false) {
     !ngDevMode && throwError('Injector profiler should never be called in production mode');
+    let token;
+    // if the provider is a TypeProvider (typeof provider is function) then the token is the
+    // provider itself
+    if (typeof eventProvider === 'function') {
+        token = eventProvider;
+    }
+    // if the provider is an injection token, then the token is the injection token.
+    else if (eventProvider instanceof InjectionToken) {
+        token = eventProvider;
+    }
+    // in all other cases we can access the token via the `provide` property of the provider
+    else {
+        token = resolveForwardRef(eventProvider.provide);
+    }
+    let provider = eventProvider;
+    // Injection tokens may define their own default provider which gets attached to the token itself
+    // as `ɵprov`. In this case, we want to emit the provider that is attached to the token, not the
+    // token itself.
+    if (eventProvider instanceof InjectionToken) {
+        provider = eventProvider.ɵprov || eventProvider;
+    }
     injectorProfiler({
         type: 2 /* InjectorProfilerEventType.ProviderConfigured */,
         context: getInjectorProfilerContext(),
-        providerRecord: {
-            token: typeof provider === 'function' ? provider : resolveForwardRef(provider.provide),
-            provider,
-            isViewProvider
-        }
+        providerRecord: { token, provider, isViewProvider }
     });
 }
 /**
@@ -6345,93 +6449,6 @@ function setAllowDuplicateNgModuleIdsForTest(allowDuplicates) {
 }
 
 /**
- * Creates a token that can be used in a DI Provider.
- *
- * Use an `InjectionToken` whenever the type you are injecting is not reified (does not have a
- * runtime representation) such as when injecting an interface, callable type, array or
- * parameterized type.
- *
- * `InjectionToken` is parameterized on `T` which is the type of object which will be returned by
- * the `Injector`. This provides an additional level of type safety.
- *
- * <div class="alert is-helpful">
- *
- * **Important Note**: Ensure that you use the same instance of the `InjectionToken` in both the
- * provider and the injection call. Creating a new instance of `InjectionToken` in different places,
- * even with the same description, will be treated as different tokens by Angular's DI system,
- * leading to a `NullInjectorError`.
- *
- * </div>
- *
- * <code-example format="typescript" language="typescript" path="injection-token/src/main.ts"
- * region="InjectionToken"></code-example>
- *
- * When creating an `InjectionToken`, you can optionally specify a factory function which returns
- * (possibly by creating) a default value of the parameterized type `T`. This sets up the
- * `InjectionToken` using this factory as a provider as if it was defined explicitly in the
- * application's root injector. If the factory function, which takes zero arguments, needs to inject
- * dependencies, it can do so using the [`inject`](api/core/inject) function.
- * As you can see in the Tree-shakable InjectionToken example below.
- *
- * Additionally, if a `factory` is specified you can also specify the `providedIn` option, which
- * overrides the above behavior and marks the token as belonging to a particular `@NgModule` (note:
- * this option is now deprecated). As mentioned above, `'root'` is the default value for
- * `providedIn`.
- *
- * The `providedIn: NgModule` and `providedIn: 'any'` options are deprecated.
- *
- * @usageNotes
- * ### Basic Examples
- *
- * ### Plain InjectionToken
- *
- * {@example core/di/ts/injector_spec.ts region='InjectionToken'}
- *
- * ### Tree-shakable InjectionToken
- *
- * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
- *
- * @publicApi
- */
-class InjectionToken {
-    /**
-     * @param _desc   Description for the token,
-     *                used only for debugging purposes,
-     *                it should but does not need to be unique
-     * @param options Options for the token's usage, as described above
-     */
-    constructor(_desc, options) {
-        this._desc = _desc;
-        /** @internal */
-        this.ngMetadataName = 'InjectionToken';
-        this.ɵprov = undefined;
-        if (typeof options == 'number') {
-            (typeof ngDevMode === 'undefined' || ngDevMode) &&
-                assertLessThan(options, 0, 'Only negative numbers are supported here');
-            // This is a special hack to assign __NG_ELEMENT_ID__ to this instance.
-            // See `InjectorMarkers`
-            this.__NG_ELEMENT_ID__ = options;
-        }
-        else if (options !== undefined) {
-            this.ɵprov = ɵɵdefineInjectable({
-                token: this,
-                providedIn: options.providedIn || 'root',
-                factory: options.factory,
-            });
-        }
-    }
-    /**
-     * @internal
-     */
-    get multi() {
-        return this;
-    }
-    toString() {
-        return `InjectionToken ${this._desc}`;
-    }
-}
-
-/**
  * Most of the use of `document` in Angular is from within the DI system so it is possible to simply
  * inject the `DOCUMENT` token and are done.
  *
@@ -7032,6 +7049,11 @@ class R3Injector extends EnvironmentInjector {
                     if (def && this.injectableDefInScope(def)) {
                         // Found an injectable def and it's scoped to this injector. Pretend as if it was here
                         // all along.
+                        if (ngDevMode) {
+                            runInInjectorProfilerContext(this, token, () => {
+                                emitProviderConfiguredEvent(token);
+                            });
+                        }
                         record = makeRecord(injectableDefOrInjectorDefFactory(token), NOT_YET);
                     }
                     else {
@@ -10925,7 +10947,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('16.2.10+sha-372dd0a');
+const VERSION = new Version('16.2.10+sha-019a0f4');
 
 // This default value is when checking the hierarchy for a token.
 //
