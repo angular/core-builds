@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.1+sha-57630c3
+ * @license Angular v17.0.0-rc.1+sha-8580542
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2386,7 +2386,7 @@ function assertNoDuplicateDirectives(directives) {
     const seenDirectives = new Set();
     for (const current of directives) {
         if (seenDirectives.has(current)) {
-            throw new RuntimeError(309 /* RuntimeErrorCode.DUPLICATE_DIRECTITVE */, `Directive ${current.type.name} matches multiple times on the same element. ` +
+            throw new RuntimeError(309 /* RuntimeErrorCode.DUPLICATE_DIRECTIVE */, `Directive ${current.type.name} matches multiple times on the same element. ` +
                 `Directives can only match an element once.`);
         }
         seenDirectives.add(current);
@@ -10426,7 +10426,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-rc.1+sha-57630c3');
+const VERSION = new Version('17.0.0-rc.1+sha-8580542');
 
 // This default value is when checking the hierarchy for a token.
 //
