@@ -1,5 +1,5 @@
 /**
- * @license Angular v16.2.10+sha-fd88d6a
+ * @license Angular v16.2.10+sha-372dd0a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -390,7 +390,7 @@ export declare const APP_ID: InjectionToken<string>;
  * ```
  *
  * ### Example with standalone application
- *
+ * ```
  *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
  *   return () => httpClient.get("https://someUrl.com/api/user")
  *     .pipe(
@@ -409,6 +409,7 @@ export declare const APP_ID: InjectionToken<string>;
  *     },
  *   ],
  * });
+ * ```
  *
  * @publicApi
  */
@@ -6869,7 +6870,7 @@ export declare type ProviderToken<T> = Type<T> | AbstractType<T> | InjectionToke
  * `BootstrapOptions` instead.
  *
  * @usageNotes
- * ```typescript=
+ * ```typescript
  * bootstrapApplication(MyApp, {providers: [
  *   provideZoneChangeDetection({eventCoalescing: true}),
  * ]});
