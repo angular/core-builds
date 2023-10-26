@@ -24202,7 +24202,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-rc.1+sha-576338a");
+var VERSION2 = new Version("17.0.0-rc.1+sha-6a01d62");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24410,7 +24410,7 @@ function getNestedCount(etm, aggregator) {
 }
 var lb = "\n";
 function migrateTemplate(template2) {
-  var _a2, _b2, _c2, _d2;
+  var _a2, _b2;
   let parsed;
   let errors = [];
   try {
@@ -24440,11 +24440,14 @@ function migrateTemplate(template2) {
     tmpl.count = (_a2 = matches == null ? void 0 : matches.length) != null ? _a2 : 0;
     tmpl.generateContents(template2);
   }
-  visitor.elements[0].hasLineBreaks = hasLineBreaks;
-  let prevElEnd = (_c2 = (_b2 = visitor.elements[0]) == null ? void 0 : _b2.el.sourceSpan.end.offset) != null ? _c2 : result.length - 1;
-  let nestedQueue = [prevElEnd];
-  for (let i = 1; i < visitor.elements.length; i++) {
+  let nestedQueue = [];
+  for (let i = 0; i < visitor.elements.length; i++) {
     let currEl = visitor.elements[i];
+    if (i === 0) {
+      nestedQueue.push(currEl.el.sourceSpan.end.offset);
+      currEl.hasLineBreaks = hasLineBreaks;
+      continue;
+    }
     currEl.hasLineBreaks = hasLineBreaks;
     currEl.nestCount = getNestedCount(currEl, nestedQueue);
     if (currEl.el.sourceSpan.end.offset !== nestedQueue[nestedQueue.length - 1]) {
@@ -24459,7 +24462,7 @@ function migrateTemplate(template2) {
     if (el.nestCount <= nestLevel) {
       const count = nestLevel - el.nestCount;
       for (let i = 0; i <= count; i++) {
-        offset += (_d2 = postOffsets.pop()) != null ? _d2 : 0;
+        offset += (_b2 = postOffsets.pop()) != null ? _b2 : 0;
       }
     }
     if (el.attr.name === ngif || el.attr.name === nakedngif || el.attr.name === boundngif) {
