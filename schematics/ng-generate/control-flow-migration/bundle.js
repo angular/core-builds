@@ -72,6 +72,17 @@ module.exports = __toCommonJS(control_flow_migration_exports);
 var import_schematics = require("@angular-devkit/schematics");
 var import_path3 = require("path");
 
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/change_tracker.mjs
+var import_typescript2 = __toESM(require("typescript"), 1);
+
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/import_manager.mjs
+var import_typescript = __toESM(require("typescript"), 1);
+
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/change_tracker.mjs
+function normalizePath(path2) {
+  return path2.replace(/\\/g, "/");
+}
+
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/project_tsconfig_paths.mjs
 var import_core = require("@angular-devkit/core");
 function getProjectTsConfigPaths(tree) {
@@ -154,29 +165,29 @@ function getWorkspace(tree) {
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/compiler_host.mjs
 var import_path = require("path");
-var import_typescript2 = __toESM(require("typescript"), 1);
+var import_typescript4 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/parse_tsconfig.mjs
 var path = __toESM(require("path"), 1);
-var import_typescript = __toESM(require("typescript"), 1);
+var import_typescript3 = __toESM(require("typescript"), 1);
 function parseTsconfigFile(tsconfigPath, basePath) {
-  const { config } = import_typescript.default.readConfigFile(tsconfigPath, import_typescript.default.sys.readFile);
+  const { config } = import_typescript3.default.readConfigFile(tsconfigPath, import_typescript3.default.sys.readFile);
   const parseConfigHost = {
-    useCaseSensitiveFileNames: import_typescript.default.sys.useCaseSensitiveFileNames,
-    fileExists: import_typescript.default.sys.fileExists,
-    readDirectory: import_typescript.default.sys.readDirectory,
-    readFile: import_typescript.default.sys.readFile
+    useCaseSensitiveFileNames: import_typescript3.default.sys.useCaseSensitiveFileNames,
+    fileExists: import_typescript3.default.sys.fileExists,
+    readDirectory: import_typescript3.default.sys.readDirectory,
+    readFile: import_typescript3.default.sys.readFile
   };
   if (!path.isAbsolute(basePath)) {
     throw Error("Unexpected relative base path has been specified.");
   }
-  return import_typescript.default.parseJsonConfigFileContent(config, parseConfigHost, basePath, {});
+  return import_typescript3.default.parseJsonConfigFileContent(config, parseConfigHost, basePath, {});
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/compiler_host.mjs
 function createMigrationProgram(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles) {
   const { rootNames, options, host } = createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles);
-  return import_typescript2.default.createProgram(rootNames, options, host);
+  return import_typescript4.default.createProgram(rootNames, options, host);
 }
 function createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additionalFiles, optionOverrides) {
   tsconfigPath = (0, import_path.resolve)(basePath, tsconfigPath);
@@ -186,7 +197,7 @@ function createProgramOptions(tree, tsconfigPath, basePath, fakeFileRead, additi
   return { rootNames: parsed.fileNames.concat(additionalFiles || []), options, host };
 }
 function createMigrationCompilerHost(tree, options, basePath, fakeRead) {
-  const host = import_typescript2.default.createCompilerHost(options, true);
+  const host = import_typescript4.default.createCompilerHost(options, true);
   const defaultReadFile = host.readFile;
   host.readFile = (fileName) => {
     var _a2;
@@ -24202,7 +24213,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-rc.1+sha-d7397fb");
+var VERSION2 = new Version("17.0.0-rc.1+sha-57b9798");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24248,7 +24259,7 @@ publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
 var import_path2 = require("path");
-var import_typescript3 = __toESM(require("typescript"), 1);
+var import_typescript5 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/types.mjs
 var ngif = "*ngIf";
@@ -24373,15 +24384,15 @@ var ElementCollector = class extends RecursiveVisitor {
 function analyze(sourceFile, analyzedFiles) {
   forEachClass(sourceFile, (node) => {
     var _a2;
-    const decorator = (_a2 = import_typescript3.default.getDecorators(node)) == null ? void 0 : _a2.find((dec) => {
-      return import_typescript3.default.isCallExpression(dec.expression) && import_typescript3.default.isIdentifier(dec.expression.expression) && dec.expression.expression.text === "Component";
+    const decorator = (_a2 = import_typescript5.default.getDecorators(node)) == null ? void 0 : _a2.find((dec) => {
+      return import_typescript5.default.isCallExpression(dec.expression) && import_typescript5.default.isIdentifier(dec.expression.expression) && dec.expression.expression.text === "Component";
     });
-    const metadata = decorator && decorator.expression.arguments.length > 0 && import_typescript3.default.isObjectLiteralExpression(decorator.expression.arguments[0]) ? decorator.expression.arguments[0] : null;
+    const metadata = decorator && decorator.expression.arguments.length > 0 && import_typescript5.default.isObjectLiteralExpression(decorator.expression.arguments[0]) ? decorator.expression.arguments[0] : null;
     if (!metadata) {
       return;
     }
     for (const prop of metadata.properties) {
-      if (!import_typescript3.default.isPropertyAssignment(prop) || !import_typescript3.default.isStringLiteralLike(prop.initializer) || !import_typescript3.default.isIdentifier(prop.name) && !import_typescript3.default.isStringLiteralLike(prop.name)) {
+      if (!import_typescript5.default.isPropertyAssignment(prop) || !import_typescript5.default.isStringLiteralLike(prop.initializer) || !import_typescript5.default.isIdentifier(prop.name) && !import_typescript5.default.isStringLiteralLike(prop.name)) {
         continue;
       }
       switch (prop.name.text) {
@@ -24677,7 +24688,7 @@ function migrateNgSwitchDefault(etm, tmpl, offset) {
 }
 function forEachClass(sourceFile, callback) {
   sourceFile.forEachChild(function walk(node) {
-    if (import_typescript3.default.isClassDeclaration(node)) {
+    if (import_typescript5.default.isClassDeclaration(node)) {
       callback(node);
     }
     node.forEachChild(walk);
@@ -24685,18 +24696,19 @@ function forEachClass(sourceFile, callback) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/index.mjs
-function control_flow_migration_default() {
+function control_flow_migration_default(options) {
   return (tree, context) => __async(this, null, function* () {
     const { buildPaths, testPaths } = yield getProjectTsConfigPaths(tree);
     const basePath = process.cwd();
-    const allPaths = [...buildPaths, ...testPaths];
+    const pathToMigrate = normalizePath((0, import_path3.join)(basePath, options.path));
+    const allPaths = options.path !== "./" ? [...buildPaths, ...testPaths] : [pathToMigrate];
     if (!allPaths.length) {
       throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the control flow migration.");
     }
     context.logger.warn("IMPORTANT! This migration is in developer preview. Use with caution.");
     let errors = [];
     for (const tsconfigPath of allPaths) {
-      const migrateErrors = runControlFlowMigration(tree, tsconfigPath, basePath);
+      const migrateErrors = runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, options);
       errors = [...errors, ...migrateErrors];
     }
     if (errors.length > 0) {
@@ -24708,9 +24720,15 @@ function control_flow_migration_default() {
     }
   });
 }
-function runControlFlowMigration(tree, tsconfigPath, basePath) {
+function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, schematicOptions) {
+  if (schematicOptions.path.startsWith("..")) {
+    throw new import_schematics.SchematicsException("Cannot run control flow migration outside of the current project.");
+  }
   const program = createMigrationProgram(tree, tsconfigPath, basePath);
-  const sourceFiles = program.getSourceFiles().filter((sourceFile) => canMigrateFile(basePath, sourceFile, program));
+  const sourceFiles = program.getSourceFiles().filter((sourceFile) => sourceFile.fileName.startsWith(pathToMigrate) && canMigrateFile(basePath, sourceFile, program));
+  if (sourceFiles.length === 0) {
+    throw new import_schematics.SchematicsException(`Could not find any files to migrate under the path ${pathToMigrate}. Cannot run the control flow migration.`);
+  }
   const analysis = /* @__PURE__ */ new Map();
   const migrateErrors = /* @__PURE__ */ new Map();
   for (const sourceFile of sourceFiles) {
