@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-7888819
+ * @license Angular v17.1.0-next.0+sha-bdd61c7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10426,7 +10426,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-7888819');
+const VERSION = new Version('17.1.0-next.0+sha-bdd61c7');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11877,42 +11877,36 @@ let currentConsumer = null;
  * case, the LView will be updated.
  */
 function getReactiveLViewConsumer(lView, slot) {
-    return lView[slot] ?? getOrCreateCurrentLViewConsumer();
-}
-/**
- * Assigns the `currentTemplateContext` to its LView's `REACTIVE_CONSUMER` slot if there are tracked
- * producers.
- *
- * The presence of producers means that a signal was read while the consumer was the active
- * consumer.
- *
- * If no producers are present, we do not assign the current template context. This also means we
- * can just reuse the template context for the next LView.
- */
-function commitLViewConsumerIfHasProducers(lView, slot) {
-    const consumer = getOrCreateCurrentLViewConsumer();
-    if (!consumer.producerNode?.length) {
-        return;
-    }
-    lView[slot] = currentConsumer;
-    consumer.lView = lView;
-    currentConsumer = createLViewConsumer();
+    return lView[slot] ?? getOrCreateCurrentLViewConsumer(lView, slot);
 }
 const REACTIVE_LVIEW_CONSUMER_NODE = {
     ...REACTIVE_NODE$1,
     consumerIsAlwaysLive: true,
     consumerMarkedDirty: (node) => {
-        (typeof ngDevMode === 'undefined' || ngDevMode) &&
-            assertDefined(node.lView, 'Updating a signal during template or host binding execution is not allowed.');
+        if (ngDevMode && node.isRunning) {
+            console.warn(`Angular detected a signal being set which makes the template for this component dirty` +
+                ` while it's being executed, which is not currently supported and will likely result` +
+                ` in ExpressionChangedAfterItHasBeenChecked errors or future updates not working` +
+                ` entirely.`);
+        }
         markViewDirty(node.lView);
     },
-    lView: null,
+    consumerOnSignalRead() {
+        if (currentConsumer !== this) {
+            return;
+        }
+        this.lView[this.slot] = currentConsumer;
+        currentConsumer = null;
+    },
+    isRunning: false,
 };
 function createLViewConsumer() {
     return Object.create(REACTIVE_LVIEW_CONSUMER_NODE);
 }
-function getOrCreateCurrentLViewConsumer() {
+function getOrCreateCurrentLViewConsumer(lView, slot) {
     currentConsumer ??= createLViewConsumer();
+    currentConsumer.lView = lView;
+    currentConsumer.slot = slot;
     return currentConsumer;
 }
 
@@ -12032,20 +12026,19 @@ function processHostBindingOpCodes(tView, lView) {
                 setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
                 consumer.dirty = false;
                 const prevConsumer = consumerBeforeComputation$1(consumer);
+                consumer.isRunning = true;
                 try {
                     const context = lView[directiveIdx];
                     hostBindingFn(2 /* RenderFlags.Update */, context);
                 }
                 finally {
                     consumerAfterComputation$1(consumer, prevConsumer);
+                    consumer.isRunning = false;
                 }
             }
         }
     }
     finally {
-        if (lView[REACTIVE_HOST_BINDING_CONSUMER] === null) {
-            commitLViewConsumerIfHasProducers(lView, REACTIVE_HOST_BINDING_CONSUMER);
-        }
         setSelectedIndex(-1);
     }
 }
@@ -12183,17 +12176,16 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         try {
             if (effectiveConsumer !== null) {
                 effectiveConsumer.dirty = false;
+                effectiveConsumer.isRunning = true;
             }
             templateFn(rf, context);
         }
         finally {
             consumerAfterComputation$1(effectiveConsumer, prevConsumer);
+            effectiveConsumer && (effectiveConsumer.isRunning = false);
         }
     }
     finally {
-        if (isUpdatePhase && lView[REACTIVE_TEMPLATE_CONSUMER] === null) {
-            commitLViewConsumerIfHasProducers(lView, REACTIVE_TEMPLATE_CONSUMER);
-        }
         setSelectedIndex(prevSelectedIndex);
         const postHookType = isUpdatePhase ? 3 /* ProfilerEvent.TemplateUpdateEnd */ : 1 /* ProfilerEvent.TemplateCreateEnd */;
         profiler(postHookType, context);
@@ -13639,18 +13631,25 @@ function refreshView(tView, lView, templateFn, context) {
         // execute pre-order hooks (OnInit, OnChanges, DoCheck)
         // PERF WARNING: do NOT extract this to a separate function without running benchmarks
         if (!isInCheckNoChangesPass) {
-            if (hooksInitPhaseCompleted) {
-                const preOrderCheckHooks = tView.preOrderCheckHooks;
-                if (preOrderCheckHooks !== null) {
-                    executeCheckHooks(lView, preOrderCheckHooks, null);
+            const consumer = lView[REACTIVE_TEMPLATE_CONSUMER];
+            try {
+                consumer && (consumer.isRunning = true);
+                if (hooksInitPhaseCompleted) {
+                    const preOrderCheckHooks = tView.preOrderCheckHooks;
+                    if (preOrderCheckHooks !== null) {
+                        executeCheckHooks(lView, preOrderCheckHooks, null);
+                    }
+                }
+                else {
+                    const preOrderHooks = tView.preOrderHooks;
+                    if (preOrderHooks !== null) {
+                        executeInitAndCheckHooks(lView, preOrderHooks, 0 /* InitPhaseState.OnInitHooksToBeRun */, null);
+                    }
+                    incrementInitPhaseFlags(lView, 0 /* InitPhaseState.OnInitHooksToBeRun */);
                 }
             }
-            else {
-                const preOrderHooks = tView.preOrderHooks;
-                if (preOrderHooks !== null) {
-                    executeInitAndCheckHooks(lView, preOrderHooks, 0 /* InitPhaseState.OnInitHooksToBeRun */, null);
-                }
-                incrementInitPhaseFlags(lView, 0 /* InitPhaseState.OnInitHooksToBeRun */);
+            finally {
+                consumer && (consumer.isRunning = false);
             }
         }
         // First mark transplanted views that are declared in this lView as needing a refresh at their

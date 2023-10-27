@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-7888819
+ * @license Angular v17.1.0-next.0+sha-bdd61c7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7507,7 +7507,9 @@ declare const REACTIVE_HOST_BINDING_CONSUMER = 24;
 declare const REACTIVE_TEMPLATE_CONSUMER = 23;
 
 declare interface ReactiveLViewConsumer extends ReactiveNode {
-    lView: LView | null;
+    lView: LView;
+    slot: typeof REACTIVE_TEMPLATE_CONSUMER | typeof REACTIVE_HOST_BINDING_CONSUMER;
+    isRunning: boolean;
 }
 
 /**
