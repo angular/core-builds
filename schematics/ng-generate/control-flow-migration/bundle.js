@@ -24202,7 +24202,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-bdd61c7");
+var VERSION2 = new Version("17.1.0-next.0+sha-e06b73f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
