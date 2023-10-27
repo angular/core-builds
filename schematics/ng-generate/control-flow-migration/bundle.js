@@ -7099,6 +7099,14 @@ var I18nParamResolutionTime;
   I18nParamResolutionTime2[I18nParamResolutionTime2["Creation"] = 0] = "Creation";
   I18nParamResolutionTime2[I18nParamResolutionTime2["Postproccessing"] = 1] = "Postproccessing";
 })(I18nParamResolutionTime || (I18nParamResolutionTime = {}));
+var I18nParamValueFlags;
+(function(I18nParamValueFlags2) {
+  I18nParamValueFlags2[I18nParamValueFlags2["None"] = 0] = "None";
+  I18nParamValueFlags2[I18nParamValueFlags2["ElementTag"] = 1] = "ElementTag";
+  I18nParamValueFlags2[I18nParamValueFlags2["TemplateTag"] = 2] = "TemplateTag";
+  I18nParamValueFlags2[I18nParamValueFlags2["OpenTag"] = 4] = "OpenTag";
+  I18nParamValueFlags2[I18nParamValueFlags2["CloseTag"] = 8] = "CloseTag";
+})(I18nParamValueFlags || (I18nParamValueFlags = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/traits.mjs
 var ConsumesSlot = Symbol("ConsumesSlot");
@@ -8037,12 +8045,6 @@ function transformExpressionsInOp(op, transform2, flags) {
     case OpKind.ExtractedAttribute:
       op.expression = op.expression && transformExpressionsInExpression(op.expression, transform2, flags);
       break;
-    case OpKind.ExtractedMessage:
-      op.expression = transformExpressionsInExpression(op.expression, transform2, flags);
-      for (const statement of op.statements) {
-        transformExpressionsInStatement(statement, transform2, flags);
-      }
-      break;
     case OpKind.RepeaterCreate:
       op.track = transformExpressionsInExpression(op.track, transform2, flags);
       if (op.trackByFn !== null) {
@@ -8052,34 +8054,31 @@ function transformExpressionsInOp(op, transform2, flags) {
     case OpKind.Repeater:
       op.collection = transformExpressionsInExpression(op.collection, transform2, flags);
       break;
-    case OpKind.I18n:
-    case OpKind.I18nStart:
-      for (const [placeholder, expression] of op.params) {
-        op.params.set(placeholder, transformExpressionsInExpression(expression, transform2, flags));
-      }
-      break;
-    case OpKind.Defer:
-    case OpKind.DeferSecondaryBlock:
-    case OpKind.DeferOn:
-    case OpKind.Projection:
-    case OpKind.ProjectionDef:
-    case OpKind.Element:
-    case OpKind.ElementStart:
-    case OpKind.ElementEnd:
-    case OpKind.I18nEnd:
-    case OpKind.Container:
-    case OpKind.ContainerStart:
-    case OpKind.ContainerEnd:
-    case OpKind.Template:
-    case OpKind.DisableBindings:
-    case OpKind.EnableBindings:
-    case OpKind.Text:
-    case OpKind.Pipe:
     case OpKind.Advance:
-    case OpKind.Namespace:
+    case OpKind.Container:
+    case OpKind.ContainerEnd:
+    case OpKind.ContainerStart:
+    case OpKind.Defer:
+    case OpKind.DeferOn:
+    case OpKind.DeferSecondaryBlock:
+    case OpKind.DisableBindings:
+    case OpKind.Element:
+    case OpKind.ElementEnd:
+    case OpKind.ElementStart:
+    case OpKind.EnableBindings:
+    case OpKind.ExtractedMessage:
+    case OpKind.I18n:
     case OpKind.I18nApply:
+    case OpKind.I18nEnd:
+    case OpKind.I18nStart:
     case OpKind.Icu:
     case OpKind.IcuUpdate:
+    case OpKind.Namespace:
+    case OpKind.Pipe:
+    case OpKind.Projection:
+    case OpKind.ProjectionDef:
+    case OpKind.Template:
+    case OpKind.Text:
       break;
     default:
       throw new Error(`AssertionError: transformExpressionsInOp doesn't handle ${OpKind[op.kind]}`);
@@ -8529,12 +8528,17 @@ function createDeferOnOp(xref, sourceSpan) {
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
-function createExtractedMessageOp(owner, expression, statements) {
+function createExtractedMessageOp(owner, message, isRoot) {
   return __spreadValues({
     kind: OpKind.ExtractedMessage,
     owner,
-    expression,
-    statements
+    message,
+    isRoot,
+    params: /* @__PURE__ */ new Map(),
+    postprocessingParams: /* @__PURE__ */ new Map(),
+    needsPostprocessing: false,
+    formattedParams: null,
+    formattedPostprocessingParams: null
   }, NEW_OP);
 }
 function createI18nStartOp(xref, message, root) {
@@ -8543,11 +8547,8 @@ function createI18nStartOp(xref, message, root) {
     xref,
     root: root != null ? root : xref,
     message,
-    params: /* @__PURE__ */ new Map(),
-    postprocessingParams: /* @__PURE__ */ new Map(),
     messageIndex: null,
-    subTemplateIndex: null,
-    needsPostprocessing: false
+    subTemplateIndex: null
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
 function createI18nEndOp(xref) {
@@ -8751,18 +8752,6 @@ function phaseAssignI18nSlotDependencies(job) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/collapse_singleton_interpolations.mjs
-function phaseCollapseSingletonInterpolations(job) {
-  for (const unit of job.units) {
-    for (const op of unit.update) {
-      const eligibleOpKind = op.kind === OpKind.Attribute;
-      if (eligibleOpKind && op.expression instanceof Interpolation2 && op.expression.strings.length === 2 && op.expression.strings.every((s) => s === "")) {
-        op.expression = op.expression.expressions[0];
-      }
-    }
-  }
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/util/elements.mjs
 function createOpXrefMap(unit) {
   const map = /* @__PURE__ */ new Map();
@@ -8954,6 +8943,18 @@ function chainOperationsInList(opList) {
         instruction,
         expression: op.statement.expr
       };
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/collapse_singleton_interpolations.mjs
+function phaseCollapseSingletonInterpolations(job) {
+  for (const unit of job.units) {
+    for (const op of unit.update) {
+      const eligibleOpKind = op.kind === OpKind.Attribute;
+      if (eligibleOpKind && op.expression instanceof Interpolation2 && op.expression.strings.length === 2 && op.expression.strings.every((s) => s === "")) {
+        op.expression = op.expression.expressions[0];
+      }
     }
   }
 }
@@ -9375,36 +9376,66 @@ function ternaryTransform(e) {
   return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.Equals, e.guard, NULL_EXPR), NULL_EXPR, e.expr);
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/repeater_derived_vars.mjs
-function phaseRepeaterDerivedVars(job) {
-  const repeaters = /* @__PURE__ */ new Map();
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/format_i18n_params.mjs
+var ESCAPE = "\uFFFD";
+var ELEMENT_MARKER = "#";
+var TEMPLATE_MARKER = "*";
+var TAG_CLOSE_MARKER = "/";
+var CONTEXT_MARKER = ":";
+var LIST_START_MARKER = "[";
+var LIST_END_MARKER = "]";
+var LIST_DELIMITER = "|";
+function phaseFormatI18nParams(job) {
   for (const unit of job.units) {
-    for (const op of unit.ops()) {
-      if (op.kind === OpKind.RepeaterCreate) {
-        repeaters.set(op.xref, op);
+    for (const op of unit.create) {
+      if (op.kind === OpKind.ExtractedMessage) {
+        if (op.isRoot) {
+          op.formattedParams = formatParams(op.params);
+          op.formattedPostprocessingParams = formatParams(op.postprocessingParams);
+          op.needsPostprocessing = op.postprocessingParams.size > 0;
+          for (const [param, values] of op.params) {
+            if (values.length > 1) {
+              op.needsPostprocessing = true;
+            }
+          }
+        }
       }
     }
   }
-  for (const unit of job.units) {
-    for (const op of unit.ops()) {
-      transformExpressionsInOp(op, (expr) => {
-        if (!(expr instanceof DerivedRepeaterVarExpr)) {
-          return expr;
-        }
-        const repeaterOp = repeaters.get(expr.xref);
-        switch (expr.identity) {
-          case DerivedRepeaterVarIdentity.First:
-            return new BinaryOperatorExpr(BinaryOperator.Identical, new LexicalReadExpr(repeaterOp.varNames.$index), literal(0));
-          case DerivedRepeaterVarIdentity.Last:
-            return new BinaryOperatorExpr(BinaryOperator.Identical, new LexicalReadExpr(repeaterOp.varNames.$index), new BinaryOperatorExpr(BinaryOperator.Minus, new LexicalReadExpr(repeaterOp.varNames.$count), literal(1)));
-          case DerivedRepeaterVarIdentity.Even:
-            return new BinaryOperatorExpr(BinaryOperator.Identical, new BinaryOperatorExpr(BinaryOperator.Modulo, new LexicalReadExpr(repeaterOp.varNames.$index), literal(2)), literal(0));
-          case DerivedRepeaterVarIdentity.Odd:
-            return new BinaryOperatorExpr(BinaryOperator.NotIdentical, new BinaryOperatorExpr(BinaryOperator.Modulo, new LexicalReadExpr(repeaterOp.varNames.$index), literal(2)), literal(0));
-        }
-      }, VisitorContextFlag.None);
+}
+function formatParams(params) {
+  const result = /* @__PURE__ */ new Map();
+  for (const [placeholder, placeholderValues] of [...params].sort()) {
+    const serializedValues = formatParamValues(placeholderValues);
+    if (serializedValues !== null) {
+      result.set(placeholder, literal(formatParamValues(placeholderValues)));
     }
   }
+  return result;
+}
+function formatParamValues(values) {
+  if (values.length === 0) {
+    return null;
+  }
+  const serializedValues = values.map((value) => formatValue(value));
+  return serializedValues.length === 1 ? serializedValues[0] : `${LIST_START_MARKER}${serializedValues.join(LIST_DELIMITER)}${LIST_END_MARKER}`;
+}
+function formatValue(value) {
+  let tagMarker = "";
+  let closeMarker = "";
+  if (value.flags & I18nParamValueFlags.ElementTag) {
+    tagMarker = ELEMENT_MARKER;
+  } else if (value.flags & I18nParamValueFlags.TemplateTag) {
+    tagMarker = TEMPLATE_MARKER;
+  }
+  if (tagMarker !== "") {
+    closeMarker = value.flags & I18nParamValueFlags.CloseTag ? TAG_CLOSE_MARKER : "";
+  }
+  const context = value.subTemplateIndex === null ? "" : `${CONTEXT_MARKER}${value.subTemplateIndex}`;
+  if (value.flags & I18nParamValueFlags.OpenTag && value.flags & I18nParamValueFlags.CloseTag) {
+    return `${ESCAPE}${tagMarker}${value.value}${context}${ESCAPE}${ESCAPE}${closeMarker}${tagMarker}${value.value}${context}${ESCAPE}`;
+  }
+  return `${ESCAPE}${closeMarker}${tagMarker}${value.value}${context}${ESCAPE}`;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_advance.mjs
@@ -9627,26 +9658,6 @@ function parseProperty(name) {
     property2 = name.substring(0, unitIndex);
   }
   return { property: property2, suffix };
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_const_collection.mjs
-function phaseI18nConstCollection(job) {
-  const messageConstIndices = {};
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.ExtractedMessage) {
-        messageConstIndices[op.owner] = job.addConst(op.expression, op.statements);
-        OpList.remove(op);
-      }
-    }
-  }
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart) {
-        op.messageIndex = messageConstIndices[op.root];
-      }
-    }
-  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/output/map_util.mjs
@@ -15572,29 +15583,38 @@ function createEmptyMessagePart(location) {
   return new LiteralPiece("", new ParseSourceSpan(location, location));
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_message_extraction.mjs
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_const_collection.mjs
 var NG_I18N_CLOSURE_MODE = "ngI18nClosureMode";
 var TRANSLATION_VAR_PREFIX2 = "i18n_";
-function phaseI18nMessageExtraction(job) {
+function phaseI18nConstCollection(job) {
   const fileBasedI18nSuffix = job.relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_").toUpperCase() + "_";
+  const messageConstIndices = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart) {
-        if (op.xref === op.root) {
-          const params = new Map([...op.params.entries()].sort());
+      if (op.kind === OpKind.ExtractedMessage) {
+        if (op.isRoot) {
+          assertAllParamsResolved(op);
           const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
           const closureVar = i18nGenerateClosureVar(job.pool, op.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
           let transformFn = void 0;
           if (op.needsPostprocessing) {
             const extraTransformFnParams = [];
-            if (op.postprocessingParams.size > 0) {
-              extraTransformFnParams.push(literalMap([...op.postprocessingParams.entries()].map(([key, value]) => ({ key, value, quoted: true }))));
+            if (op.formattedPostprocessingParams.size > 0) {
+              extraTransformFnParams.push(literalMap([...op.formattedPostprocessingParams].map(([key, value]) => ({ key, value, quoted: true }))));
             }
             transformFn = (expr) => importExpr(Identifiers.i18nPostprocess).callFn([expr, ...extraTransformFnParams]);
           }
-          const statements = getTranslationDeclStmts(op.message, mainVar, closureVar, params, transformFn);
-          unit.create.push(createExtractedMessageOp(op.xref, mainVar, statements));
+          const statements = getTranslationDeclStmts(op.message, mainVar, closureVar, op.formattedParams, transformFn);
+          messageConstIndices.set(op.owner, job.addConst(mainVar, statements));
         }
+        OpList.remove(op);
+      }
+    }
+  }
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.I18nStart) {
+        op.messageIndex = messageConstIndices.get(op.root);
       }
     }
   }
@@ -15625,6 +15645,32 @@ function i18nGenerateClosureVar(pool, messageId, fileBasedI18nSuffix, useExterna
     name = pool.uniqueName(prefix);
   }
   return variable(name);
+}
+function assertAllParamsResolved(op) {
+  if (op.formattedParams === null || op.formattedPostprocessingParams === null) {
+    throw Error("Params should have been formatted.");
+  }
+  for (const placeholder in op.message.placeholders) {
+    if (!op.formattedParams.has(placeholder) && !op.formattedPostprocessingParams.has(placeholder)) {
+      throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
+    }
+  }
+  for (const placeholder in op.message.placeholderToMessage) {
+    if (!op.formattedParams.has(placeholder) && !op.formattedPostprocessingParams.has(placeholder)) {
+      throw Error(`Failed to resolve i18n message placeholder: ${placeholder}`);
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_message_extraction.mjs
+function phaseI18nMessageExtraction(job) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.I18nStart) {
+        unit.create.push(createExtractedMessageOp(op.xref, op.message, op.xref === op.root));
+      }
+    }
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_text_extraction.mjs
@@ -16262,6 +16308,49 @@ function wrapTemplateWithI18n(unit, parentI18n) {
     const id = unit.job.allocateXrefId();
     OpList.insertAfter(createI18nStartOp(id, parentI18n.message, parentI18n.root), unit.create.head);
     OpList.insertBefore(createI18nEndOp(id), unit.create.tail);
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/propagate_i18n_placeholders.mjs
+function phasePropagateI18nPlaceholders(job) {
+  const i18nOps = /* @__PURE__ */ new Map();
+  const extractedMessageOps = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.I18nStart:
+          i18nOps.set(op.xref, op);
+          break;
+        case OpKind.ExtractedMessage:
+          extractedMessageOps.set(op.owner, op);
+          break;
+      }
+    }
+  }
+  for (const [xref, childExtractedMessageOp] of extractedMessageOps) {
+    if (!childExtractedMessageOp.isRoot) {
+      const i18nOp = i18nOps.get(xref);
+      if (i18nOp === void 0) {
+        throw Error("Could not find owner i18n block for extracted message.");
+      }
+      const rootExtractedMessageOp = extractedMessageOps.get(i18nOp.root);
+      if (rootExtractedMessageOp === void 0) {
+        throw Error("Could not find extracted message op for root i18n block.");
+      }
+      mergeParams(rootExtractedMessageOp.params, childExtractedMessageOp.params);
+      mergeParams(rootExtractedMessageOp.postprocessingParams, childExtractedMessageOp.postprocessingParams);
+    }
+  }
+}
+function mergeParams(to, from) {
+  for (const [placeholder, fromValues] of from) {
+    const toValues = to.get(placeholder) || [];
+    const flags = fromValues[0].flags;
+    if (flags & I18nParamValueFlags.CloseTag && !(flags & I18nParamValueFlags.OpenTag)) {
+      to.set(placeholder, [...fromValues, ...toValues]);
+    } else {
+      to.set(placeholder, [...toValues, ...fromValues]);
+    }
   }
 }
 
@@ -17154,6 +17243,38 @@ function phaseRemoveEmptyBindings(job) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/repeater_derived_vars.mjs
+function phaseRepeaterDerivedVars(job) {
+  const repeaters = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.ops()) {
+      if (op.kind === OpKind.RepeaterCreate) {
+        repeaters.set(op.xref, op);
+      }
+    }
+  }
+  for (const unit of job.units) {
+    for (const op of unit.ops()) {
+      transformExpressionsInOp(op, (expr) => {
+        if (!(expr instanceof DerivedRepeaterVarExpr)) {
+          return expr;
+        }
+        const repeaterOp = repeaters.get(expr.xref);
+        switch (expr.identity) {
+          case DerivedRepeaterVarIdentity.First:
+            return new BinaryOperatorExpr(BinaryOperator.Identical, new LexicalReadExpr(repeaterOp.varNames.$index), literal(0));
+          case DerivedRepeaterVarIdentity.Last:
+            return new BinaryOperatorExpr(BinaryOperator.Identical, new LexicalReadExpr(repeaterOp.varNames.$index), new BinaryOperatorExpr(BinaryOperator.Minus, new LexicalReadExpr(repeaterOp.varNames.$count), literal(1)));
+          case DerivedRepeaterVarIdentity.Even:
+            return new BinaryOperatorExpr(BinaryOperator.Identical, new BinaryOperatorExpr(BinaryOperator.Modulo, new LexicalReadExpr(repeaterOp.varNames.$index), literal(2)), literal(0));
+          case DerivedRepeaterVarIdentity.Odd:
+            return new BinaryOperatorExpr(BinaryOperator.NotIdentical, new BinaryOperatorExpr(BinaryOperator.Modulo, new LexicalReadExpr(repeaterOp.varNames.$index), literal(2)), literal(0));
+        }
+      }, VisitorContextFlag.None);
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_contexts.mjs
 function phaseResolveContexts(cpl) {
   for (const unit of cpl.units) {
@@ -17216,173 +17337,73 @@ function resolveDollarEvent(unit, ops) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_placeholders.mjs
-var ESCAPE = "\uFFFD";
-var ELEMENT_MARKER = "#";
-var TEMPLATE_MARKER = "*";
-var TAG_CLOSE_MARKER = "/";
-var CONTEXT_MARKER = ":";
-var LIST_START_MARKER = "[";
-var LIST_END_MARKER = "]";
-var LIST_DELIMITER = "|";
-var I18nParamValueFlags;
-(function(I18nParamValueFlags2) {
-  I18nParamValueFlags2[I18nParamValueFlags2["None"] = 0] = "None";
-  I18nParamValueFlags2[I18nParamValueFlags2["ElementTag"] = 1] = "ElementTag";
-  I18nParamValueFlags2[I18nParamValueFlags2["TemplateTag"] = 2] = "TemplateTag";
-  I18nParamValueFlags2[I18nParamValueFlags2["OpenTag"] = 4] = "OpenTag";
-  I18nParamValueFlags2[I18nParamValueFlags2["CloseTag"] = 8] = "CloseTag";
-})(I18nParamValueFlags || (I18nParamValueFlags = {}));
-var I18nPlaceholderParams = class {
-  constructor() {
-    this.values = /* @__PURE__ */ new Map();
-  }
-  addValue(placeholder, value, subTemplateIndex, resolutionTime, flags) {
-    var _a2;
-    const placeholderValues = (_a2 = this.values.get(placeholder)) != null ? _a2 : [];
-    placeholderValues.push({ value, subTemplateIndex, resolutionTime, flags });
-    this.values.set(placeholder, placeholderValues);
-  }
-  saveToOp(op) {
-    for (const [placeholder, placeholderValues] of this.values) {
-      const creationValues = placeholderValues.filter(({ resolutionTime }) => resolutionTime === I18nParamResolutionTime.Creation);
-      if (creationValues.length > 1) {
-        op.needsPostprocessing = true;
-      }
-      const serializedCreationValues = this.serializeValues(creationValues);
-      if (serializedCreationValues !== null) {
-        op.params.set(placeholder, literal(serializedCreationValues));
-      }
-      const serializedPostprocessingValues = this.serializeValues(placeholderValues.filter(({ resolutionTime }) => resolutionTime === I18nParamResolutionTime.Postproccessing));
-      if (serializedPostprocessingValues !== null) {
-        op.needsPostprocessing = true;
-        op.postprocessingParams.set(placeholder, literal(serializedPostprocessingValues));
-      }
-    }
-  }
-  merge(other) {
-    for (const [placeholder, otherValues] of other.values) {
-      const currentValues = this.values.get(placeholder) || [];
-      const flags = otherValues[0].flags;
-      if (flags & I18nParamValueFlags.CloseTag && !(flags & I18nParamValueFlags.OpenTag)) {
-        this.values.set(placeholder, [...otherValues, ...currentValues]);
-      } else {
-        this.values.set(placeholder, [...currentValues, ...otherValues]);
-      }
-    }
-  }
-  serializeValues(values) {
-    if (values.length === 0) {
-      return null;
-    }
-    const serializedValues = values.map((value) => this.serializeValue(value));
-    return serializedValues.length === 1 ? serializedValues[0] : `${LIST_START_MARKER}${serializedValues.join(LIST_DELIMITER)}${LIST_END_MARKER}`;
-  }
-  serializeValue(value) {
-    let tagMarker = "";
-    let closeMarker = "";
-    if (value.flags & I18nParamValueFlags.ElementTag) {
-      tagMarker = ELEMENT_MARKER;
-    } else if (value.flags & I18nParamValueFlags.TemplateTag) {
-      tagMarker = TEMPLATE_MARKER;
-    }
-    if (tagMarker !== "") {
-      closeMarker = value.flags & I18nParamValueFlags.CloseTag ? TAG_CLOSE_MARKER : "";
-    }
-    const context = value.subTemplateIndex === null ? "" : `${CONTEXT_MARKER}${value.subTemplateIndex}`;
-    if (value.flags & I18nParamValueFlags.OpenTag && value.flags & I18nParamValueFlags.CloseTag) {
-      return `${ESCAPE}${tagMarker}${value.value}${context}${ESCAPE}${ESCAPE}${closeMarker}${tagMarker}${value.value}${context}${ESCAPE}`;
-    }
-    return `${ESCAPE}${closeMarker}${tagMarker}${value.value}${context}${ESCAPE}`;
-  }
-};
-function phaseResolveI18nPlaceholders(job) {
-  const params = /* @__PURE__ */ new Map();
-  const i18nOps = /* @__PURE__ */ new Map();
-  resolvePlaceholders(job, params, i18nOps);
-  propagatePlaceholders(params, i18nOps);
-  for (const [xref, i18nOpParams] of params) {
-    i18nOpParams.saveToOp(i18nOps.get(xref));
-  }
-  for (const op of i18nOps.values()) {
-    if (op.xref === op.root) {
-      for (const placeholder in op.message.placeholders) {
-        if (!op.params.has(placeholder) && !op.postprocessingParams.has(placeholder)) {
-          throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
-        }
-      }
-    }
-  }
-}
-function resolvePlaceholders(job, params, i18nOps) {
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_element_placeholders.mjs
+function phaseResolveI18nElementPlaceholders(job) {
+  const extractedMessageOps = /* @__PURE__ */ new Map();
+  const elements = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
-    const elements = /* @__PURE__ */ new Map();
-    let currentI18nOp = null;
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.ExtractedMessage:
+          extractedMessageOps.set(op.owner, op);
+          break;
+        case OpKind.ElementStart:
+          elements.set(op.xref, op);
+          break;
+      }
+    }
+  }
+  for (const unit of job.units) {
+    let currentOps = null;
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
-          i18nOps.set(op.xref, op);
-          currentI18nOp = op.kind === OpKind.I18nStart ? op : null;
+          if (!extractedMessageOps.has(op.xref)) {
+            throw Error("Could not find extracted message for i18n op");
+          }
+          currentOps = { i18n: op, extractedMessage: extractedMessageOps.get(op.xref) };
           break;
         case OpKind.I18nEnd:
-          currentI18nOp = null;
+          currentOps = null;
           break;
         case OpKind.ElementStart:
           if (op.i18nPlaceholder !== void 0) {
-            if (currentI18nOp === null) {
+            if (currentOps === null) {
               throw Error("i18n tag placeholder should only occur inside an i18n block");
             }
-            elements.set(op.xref, op);
             const { startName, closeName } = op.i18nPlaceholder;
             let flags = I18nParamValueFlags.ElementTag | I18nParamValueFlags.OpenTag;
             if (closeName === "") {
               flags |= I18nParamValueFlags.CloseTag;
             }
-            addParam(params, currentI18nOp, startName, op.slot, currentI18nOp.subTemplateIndex, I18nParamResolutionTime.Creation, flags);
+            addParam(currentOps.extractedMessage.params, startName, op.slot, currentOps.i18n.subTemplateIndex, flags);
           }
           break;
         case OpKind.ElementEnd:
           const startOp = elements.get(op.xref);
           if (startOp && startOp.i18nPlaceholder !== void 0) {
-            if (currentI18nOp === null) {
+            if (currentOps === null) {
               throw Error("i18n tag placeholder should only occur inside an i18n block");
             }
             const { closeName } = startOp.i18nPlaceholder;
             if (closeName !== "") {
-              addParam(params, currentI18nOp, closeName, startOp.slot, currentI18nOp.subTemplateIndex, I18nParamResolutionTime.Creation, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
+              addParam(currentOps.extractedMessage.params, closeName, startOp.slot, currentOps.i18n.subTemplateIndex, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
             }
           }
           break;
         case OpKind.Template:
           if (op.i18nPlaceholder !== void 0) {
-            if (currentI18nOp === null) {
+            if (currentOps === null) {
               throw Error("i18n tag placeholder should only occur inside an i18n block");
             }
-            const subTemplateIndex = getSubTemplateIndexForTemplateTag(job, currentI18nOp, op);
-            addParam(params, currentI18nOp, op.i18nPlaceholder.startName, op.slot, subTemplateIndex, I18nParamResolutionTime.Creation, I18nParamValueFlags.TemplateTag);
-            addParam(params, currentI18nOp, op.i18nPlaceholder.closeName, op.slot, subTemplateIndex, I18nParamResolutionTime.Creation, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
+            const subTemplateIndex = getSubTemplateIndexForTemplateTag(job, currentOps.i18n, op);
+            addParam(currentOps.extractedMessage.params, op.i18nPlaceholder.startName, op.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag);
+            addParam(currentOps.extractedMessage.params, op.i18nPlaceholder.closeName, op.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
           }
           break;
       }
     }
-    const i18nBlockPlaceholderIndices = /* @__PURE__ */ new Map();
-    for (const op of unit.update) {
-      if (op.kind === OpKind.I18nExpression) {
-        const i18nOp = i18nOps.get(op.owner);
-        let index = i18nBlockPlaceholderIndices.get(op.owner) || 0;
-        if (!i18nOp) {
-          throw Error("Cannot find corresponding i18nStart for i18nExpr");
-        }
-        addParam(params, i18nOp, op.i18nPlaceholder, index++, i18nOp.subTemplateIndex, op.resolutionTime);
-        i18nBlockPlaceholderIndices.set(op.owner, index);
-      }
-    }
   }
-}
-function addParam(params, i18nOp, placeholder, value, subTemplateIndex, resolutionTime, flags = I18nParamValueFlags.None) {
-  const i18nOpParams = params.get(i18nOp.xref) || new I18nPlaceholderParams();
-  i18nOpParams.addValue(placeholder, value, subTemplateIndex, resolutionTime, flags);
-  params.set(i18nOp.xref, i18nOpParams);
 }
 function getSubTemplateIndexForTemplateTag(job, i18nOp, op) {
   for (const childOp of job.views.get(op.xref).create) {
@@ -17392,12 +17413,52 @@ function getSubTemplateIndexForTemplateTag(job, i18nOp, op) {
   }
   return i18nOp.subTemplateIndex;
 }
-function propagatePlaceholders(params, i18nOps) {
-  for (const [xref, opParams] of params) {
-    const op = i18nOps.get(xref);
-    if (op.xref !== op.root) {
-      const rootParams = params.get(op.root) || new I18nPlaceholderParams();
-      rootParams.merge(opParams);
+function addParam(params, placeholder, value, subTemplateIndex, flags = I18nParamValueFlags.None) {
+  var _a2;
+  const values = (_a2 = params.get(placeholder)) != null ? _a2 : [];
+  values.push({ value, subTemplateIndex, flags });
+  params.set(placeholder, values);
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_expression_placeholders.mjs
+function phaseResolveI18nExpressionPlaceholders(job) {
+  const i18nOps = /* @__PURE__ */ new Map();
+  const extractedMessageOps = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.I18nStart:
+          i18nOps.set(op.xref, op);
+          break;
+        case OpKind.ExtractedMessage:
+          extractedMessageOps.set(op.owner, op);
+          break;
+      }
+    }
+  }
+  const expressionIndices = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.update) {
+      if (op.kind === OpKind.I18nExpression) {
+        const i18nOp = i18nOps.get(op.owner);
+        let index = expressionIndices.get(op.owner) || 0;
+        if (!i18nOp) {
+          throw Error("Cannot find corresponding i18n block for i18nExpr");
+        }
+        const extractedMessageOp = extractedMessageOps.get(i18nOp.xref);
+        if (!extractedMessageOp) {
+          throw Error("Cannot find extracted message for i18n block");
+        }
+        const params = op.resolutionTime === I18nParamResolutionTime.Creation ? extractedMessageOp.params : extractedMessageOp.postprocessingParams;
+        const values = params.get(op.i18nPlaceholder) || [];
+        values.push({
+          value: index,
+          subTemplateIndex: i18nOp.subTemplateIndex,
+          flags: I18nParamValueFlags.None
+        });
+        params.set(op.i18nPlaceholder, values);
+        expressionIndices.set(op.owner, index + 1);
+      }
     }
   }
 }
@@ -17677,6 +17738,104 @@ function assignName(names, expr) {
     throw new Error(`Found xref with unassigned name: ${expr.xref}`);
   }
   expr.name = name;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/track_fn_generation.mjs
+function phaseTrackFnGeneration(job) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind !== OpKind.RepeaterCreate) {
+        continue;
+      }
+      if (op.trackByFn !== null) {
+        continue;
+      }
+      let usesComponentContext = false;
+      op.track = transformExpressionsInExpression(op.track, (expr) => {
+        if (expr instanceof TrackContextExpr) {
+          usesComponentContext = true;
+          return variable("this");
+        }
+        return expr;
+      }, VisitorContextFlag.None);
+      let fn2;
+      const fnParams = [new FnParam("$index"), new FnParam("$item")];
+      if (usesComponentContext) {
+        fn2 = new FunctionExpr(fnParams, [new ReturnStatement(op.track)]);
+      } else {
+        fn2 = arrowFn(fnParams, op.track);
+      }
+      op.trackByFn = job.pool.getSharedFunctionReference(fn2, "_forTrack");
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/track_fn_optimization.mjs
+function phaseTrackFnOptimization(job) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind !== OpKind.RepeaterCreate) {
+        continue;
+      }
+      if (op.track instanceof ReadVarExpr && op.track.name === "$index") {
+        op.trackByFn = importExpr(Identifiers.repeaterTrackByIndex);
+      } else if (op.track instanceof ReadVarExpr && op.track.name === "$item") {
+        op.trackByFn = importExpr(Identifiers.repeaterTrackByIdentity);
+      } else if (isTrackByFunctionCall(job.root.xref, op.track)) {
+        if (op.track.receiver.receiver.view === unit.xref) {
+          op.trackByFn = op.track.receiver;
+        } else {
+          op.trackByFn = importExpr(Identifiers.componentInstance).callFn([]).prop(op.track.receiver.name);
+          op.track = op.trackByFn;
+        }
+      } else {
+        op.track = transformExpressionsInExpression(op.track, (expr) => {
+          if (expr instanceof ContextExpr) {
+            op.usesComponentInstance = true;
+            return new TrackContextExpr(expr.view);
+          }
+          return expr;
+        }, VisitorContextFlag.None);
+      }
+    }
+  }
+}
+function isTrackByFunctionCall(rootView, expr) {
+  if (!(expr instanceof InvokeFunctionExpr) || expr.args.length !== 2) {
+    return false;
+  }
+  if (!(expr.receiver instanceof ReadPropExpr && expr.receiver.receiver instanceof ContextExpr) || expr.receiver.receiver.view !== rootView) {
+    return false;
+  }
+  const [arg0, arg1] = expr.args;
+  if (!(arg0 instanceof ReadVarExpr) || arg0.name !== "$index") {
+    return false;
+  }
+  if (!(arg1 instanceof ReadVarExpr) || arg1.name !== "$item") {
+    return false;
+  }
+  return true;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/track_variables.mjs
+function phaseTrackVariables(job) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind !== OpKind.RepeaterCreate) {
+        continue;
+      }
+      op.track = transformExpressionsInExpression(op.track, (expr) => {
+        if (expr instanceof LexicalReadExpr) {
+          if (expr.name === op.varNames.$index) {
+            return variable("$index");
+          } else if (expr.name === op.varNames.$implicit) {
+            return variable("$item");
+          }
+        }
+        return expr;
+      }, VisitorContextFlag.None);
+    }
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/var_counting.mjs
@@ -18058,104 +18217,6 @@ function phaseWrapIcus(job) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/track_variables.mjs
-function phaseTrackVariables(job) {
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind !== OpKind.RepeaterCreate) {
-        continue;
-      }
-      op.track = transformExpressionsInExpression(op.track, (expr) => {
-        if (expr instanceof LexicalReadExpr) {
-          if (expr.name === op.varNames.$index) {
-            return variable("$index");
-          } else if (expr.name === op.varNames.$implicit) {
-            return variable("$item");
-          }
-        }
-        return expr;
-      }, VisitorContextFlag.None);
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/track_fn_generation.mjs
-function phaseTrackFnGeneration(job) {
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind !== OpKind.RepeaterCreate) {
-        continue;
-      }
-      if (op.trackByFn !== null) {
-        continue;
-      }
-      let usesComponentContext = false;
-      op.track = transformExpressionsInExpression(op.track, (expr) => {
-        if (expr instanceof TrackContextExpr) {
-          usesComponentContext = true;
-          return variable("this");
-        }
-        return expr;
-      }, VisitorContextFlag.None);
-      let fn2;
-      const fnParams = [new FnParam("$index"), new FnParam("$item")];
-      if (usesComponentContext) {
-        fn2 = new FunctionExpr(fnParams, [new ReturnStatement(op.track)]);
-      } else {
-        fn2 = arrowFn(fnParams, op.track);
-      }
-      op.trackByFn = job.pool.getSharedFunctionReference(fn2, "_forTrack");
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/track_fn_optimization.mjs
-function phaseTrackFnOptimization(job) {
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind !== OpKind.RepeaterCreate) {
-        continue;
-      }
-      if (op.track instanceof ReadVarExpr && op.track.name === "$index") {
-        op.trackByFn = importExpr(Identifiers.repeaterTrackByIndex);
-      } else if (op.track instanceof ReadVarExpr && op.track.name === "$item") {
-        op.trackByFn = importExpr(Identifiers.repeaterTrackByIdentity);
-      } else if (isTrackByFunctionCall(job.root.xref, op.track)) {
-        if (op.track.receiver.receiver.view === unit.xref) {
-          op.trackByFn = op.track.receiver;
-        } else {
-          op.trackByFn = importExpr(Identifiers.componentInstance).callFn([]).prop(op.track.receiver.name);
-          op.track = op.trackByFn;
-        }
-      } else {
-        op.track = transformExpressionsInExpression(op.track, (expr) => {
-          if (expr instanceof ContextExpr) {
-            op.usesComponentInstance = true;
-            return new TrackContextExpr(expr.view);
-          }
-          return expr;
-        }, VisitorContextFlag.None);
-      }
-    }
-  }
-}
-function isTrackByFunctionCall(rootView, expr) {
-  if (!(expr instanceof InvokeFunctionExpr) || expr.args.length !== 2) {
-    return false;
-  }
-  if (!(expr.receiver instanceof ReadPropExpr && expr.receiver.receiver instanceof ContextExpr) || expr.receiver.receiver.view !== rootView) {
-    return false;
-  }
-  const [arg0, arg1] = expr.args;
-  if (!(arg0 instanceof ReadVarExpr) || arg0.name !== "$index") {
-    return false;
-  }
-  if (!(arg1 instanceof ReadVarExpr) || arg1.name !== "$item") {
-    return false;
-  }
-  return true;
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/emit.mjs
 var phases = [
   { kind: CompilationJobKind.Tmpl, fn: phaseRemoveContentSelectors },
@@ -18193,9 +18254,12 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: phaseExpandSafeReads },
   { kind: CompilationJobKind.Both, fn: phaseTemporaryVariables },
   { kind: CompilationJobKind.Tmpl, fn: phaseSlotAllocation },
-  { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nPlaceholders },
-  { kind: CompilationJobKind.Tmpl, fn: phaseTrackFnGeneration },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nMessageExtraction },
+  { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nElementPlaceholders },
+  { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nExpressionPlaceholders },
+  { kind: CompilationJobKind.Tmpl, fn: phasePropagateI18nPlaceholders },
+  { kind: CompilationJobKind.Tmpl, fn: phaseFormatI18nParams },
+  { kind: CompilationJobKind.Tmpl, fn: phaseTrackFnGeneration },
   { kind: CompilationJobKind.Tmpl, fn: phaseI18nConstCollection },
   { kind: CompilationJobKind.Tmpl, fn: phaseConstTraitCollection },
   { kind: CompilationJobKind.Both, fn: phaseConstCollection },
@@ -24213,7 +24277,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-rc.1+sha-8e17dd7");
+var VERSION2 = new Version("17.0.0-rc.1+sha-4461cef");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24589,6 +24653,7 @@ function migrateNgFor(etm, tmpl, offset) {
   const condition = parts[0].replace("let ", "");
   const loopVar = condition.split(" of ")[0];
   let trackBy = loopVar;
+  let aliasedIndex = null;
   for (let i = 1; i < parts.length; i++) {
     const part = parts[i].trim();
     if (part.startsWith("trackBy:")) {
@@ -24598,11 +24663,20 @@ function migrateNgFor(etm, tmpl, offset) {
     if (part.match(aliasWithEqualRegexp)) {
       const aliasParts = part.split("=");
       aliases.push(` ${aliasParts[0].trim()} = $${aliasParts[1].trim()}`);
+      if (aliasParts[1].trim() === "index") {
+        aliasedIndex = aliasParts[0].trim().split(/\s+as\s+/)[1];
+      }
     }
     if (part.match(aliasWithAsRegexp)) {
       const aliasParts = part.split(/\s+as\s+/);
       aliases.push(` let ${aliasParts[1].trim()} = $${aliasParts[0].trim()}`);
+      if (aliasParts[0].trim() === "index") {
+        aliasedIndex = aliasParts[1].trim();
+      }
     }
+  }
+  if (aliasedIndex !== null && trackBy !== loopVar) {
+    trackBy = trackBy.replace("$index", aliasedIndex);
   }
   const aliasStr = aliases.length > 0 ? `;${aliases.join(";")}` : "";
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
