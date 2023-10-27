@@ -24202,7 +24202,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-rc.1+sha-becbcdc");
+var VERSION2 = new Version("17.0.0-rc.1+sha-d7397fb");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24416,17 +24416,13 @@ function migrateTemplate(template2) {
   try {
     parsed = new HtmlParser().parse(template2, "", {
       tokenizeExpansionForms: true,
-      tokenizeBlocks: false,
+      tokenizeBlocks: true,
       preserveLineEndings: true
     });
     if (parsed.errors && parsed.errors.length > 0) {
-      for (let error2 of parsed.errors) {
-        errors.push({ type: "parse", error: error2 });
-      }
       return { migrated: null, errors };
     }
-  } catch (error2) {
-    errors.push({ type: "parse", error: error2 });
+  } catch (e) {
     return { migrated: null, errors };
   }
   let result = template2;
