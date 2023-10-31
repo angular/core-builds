@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-ac2d0c6
+ * @license Angular v17.1.0-next.0+sha-73c5d1c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10444,7 +10444,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-ac2d0c6');
+const VERSION = new Version('17.1.0-next.0+sha-73c5d1c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19172,6 +19172,9 @@ function enableLocateOrCreateContainerAnchorImpl() {
     _locateOrCreateContainerAnchor = locateOrCreateContainerAnchorImpl;
 }
 
+const PERF_MARK_CONTROL_FLOW = {
+    detail: { feature: 'NgControlFlow' }
+};
 /**
  * The conditional instruction represents the basic building block on the runtime side to support
  * built-in "if" and "switch". On the high level this instruction is responsible for adding and
@@ -19184,6 +19187,7 @@ function enableLocateOrCreateContainerAnchorImpl() {
  * @codeGenApi
  */
 function ɵɵconditional(containerIndex, matchingTemplateIndex, value) {
+    performance.mark('mark_use_counter', PERF_MARK_CONTROL_FLOW);
     const hostLView = getLView();
     const bindingIndex = nextBindingIndex();
     const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
@@ -19271,6 +19275,7 @@ class RepeaterMetadata {
  * @codeGenApi
  */
 function ɵɵrepeaterCreate(index, templateFn, decls, vars, trackByFn, trackByUsesComponentInstance, emptyTemplateFn, emptyDecls, emptyVars) {
+    performance.mark('mark_use_counter', PERF_MARK_CONTROL_FLOW);
     const hasEmptyBlock = emptyTemplateFn !== undefined;
     const hostLView = getLView();
     const boundTrackBy = trackByUsesComponentInstance ?
@@ -25555,6 +25560,9 @@ class StandaloneService {
         factory: () => new StandaloneService(ɵɵinject(EnvironmentInjector)),
     }); }
 }
+const PERF_MARK_STANDALONE = {
+    detail: { feature: 'NgStandalone' }
+};
 /**
  * A feature that acts as a setup code for the {@link StandaloneService}.
  *
@@ -25566,6 +25574,7 @@ class StandaloneService {
  * @codeGenApi
  */
 function ɵɵStandaloneFeature(definition) {
+    performance.mark('mark_use_counter', PERF_MARK_STANDALONE);
     definition.getStandaloneInjector = (parentInjector) => {
         return parentInjector.get(StandaloneService).getOrCreateStandaloneInjector(definition);
     };
