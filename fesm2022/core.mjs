@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-8d52fa7
+ * @license Angular v17.1.0-next.0+sha-ac2d0c6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2758,6 +2758,24 @@ function markAncestorsForTraversal(lView) {
             }
         }
         parent = parent[PARENT];
+    }
+}
+/**
+ * Marks the component or root view of an LView for refresh.
+ *
+ * This function locates the declaration component view of a given LView and marks it for refresh.
+ * With this, we get component-level change detection granularity. Marking the `LView` itself for
+ * refresh would be view-level granularity.
+ *
+ * Note that when an LView is a root view, the DECLARATION_COMPONENT_VIEW will be the root view
+ * itself. This is a bit confusing since the TView.type is `Root`, rather than `Component`, but this
+ * is actually what we need for host bindings in a root view.
+ */
+function markViewDirtyFromSignal(lView) {
+    const declarationComponentView = lView[DECLARATION_COMPONENT_VIEW];
+    declarationComponentView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
+    if (viewAttachedToChangeDetector(declarationComponentView)) {
+        markAncestorsForTraversal(declarationComponentView);
     }
 }
 /**
@@ -10426,7 +10444,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-8d52fa7');
+const VERSION = new Version('17.1.0-next.0+sha-ac2d0c6');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11889,7 +11907,7 @@ const REACTIVE_LVIEW_CONSUMER_NODE = {
                 ` in ExpressionChangedAfterItHasBeenChecked errors or future updates not working` +
                 ` entirely.`);
         }
-        markViewDirty(node.lView);
+        markViewDirtyFromSignal(node.lView);
     },
     consumerOnSignalRead() {
         if (currentConsumer !== this) {
@@ -13804,13 +13822,20 @@ function detectChangesInViewIfAttached(lView, mode) {
  * view HasChildViewsToRefresh flag is set.
  */
 function detectChangesInView(lView, mode) {
+    const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
     const tView = lView[TVIEW];
     const flags = lView[FLAGS];
     // Flag cleared before change detection runs so that the view can be re-marked for traversal if
     // necessary.
     lView[FLAGS] &= ~(8192 /* LViewFlags.HasChildViewsToRefresh */ | 1024 /* LViewFlags.RefreshView */);
-    if ((flags & (16 /* LViewFlags.CheckAlways */ | 64 /* LViewFlags.Dirty */) &&
-        mode === 0 /* ChangeDetectionMode.Global */) ||
+    if ((flags & 16 /* LViewFlags.CheckAlways */ && mode === 0 /* ChangeDetectionMode.Global */) ||
+        (flags & 64 /* LViewFlags.Dirty */ && mode === 0 /* ChangeDetectionMode.Global */ &&
+            // CheckNoChanges never worked with `OnPush` components because the `Dirty` flag was cleared
+            // before checkNoChanges ran. Because there is now a loop for to check for backwards views,
+            // it gives an opportunity for `OnPush` components to be marked `Dirty` before the
+            // CheckNoChanges pass. We don't want existing errors that are hidden by the current
+            // CheckNoChanges bug to surface when making unrelated changes.
+            !isInCheckNoChangesPass) ||
         flags & 1024 /* LViewFlags.RefreshView */) {
         refreshView(tView, lView, tView.template, lView[CONTEXT]);
     }
