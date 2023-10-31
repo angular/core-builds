@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.1+sha-e355f05
+ * @license Angular v17.0.0-rc.1+sha-d8280ac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18,6 +18,10 @@ function defaultEquals(a, b) {
  */
 let activeConsumer = null;
 let inNotificationPhase = false;
+/**
+ * Global epoch counter. Incremented whenever a source signal is set.
+ */
+let epoch = 1;
 /**
  * Symbol used to tell `Signal`s apart from other functions.
  *
@@ -40,6 +44,7 @@ function isReactive(value) {
 }
 const REACTIVE_NODE = {
     version: 0,
+    lastCleanEpoch: 0,
     dirty: false,
     producerNode: undefined,
     producerLastReadVersion: undefined,
@@ -97,6 +102,14 @@ function producerAccessed(node) {
     activeConsumer.producerLastReadVersion[idx] = node.version;
 }
 /**
+ * Increment the global epoch counter.
+ *
+ * Called by source producers (that is, not computeds) whenever their values change.
+ */
+function producerIncrementEpoch() {
+    epoch++;
+}
+/**
  * Ensure this producer's `version` is up-to-date.
  */
 function producerUpdateValueVersion(node) {
@@ -105,15 +118,23 @@ function producerUpdateValueVersion(node) {
         // is guaranteed to be up-to-date.
         return;
     }
+    if (!node.dirty && node.lastCleanEpoch === epoch) {
+        // Even non-live consumers can skip polling if they previously found themselves to be clean at
+        // the current epoch, since their dependencies could not possibly have changed (such a change
+        // would've increased the epoch).
+        return;
+    }
     if (!node.producerMustRecompute(node) && !consumerPollProducersForChange(node)) {
         // None of our producers report a change since the last time they were read, so no
         // recomputation of our value is necessary, and we can consider ourselves clean.
         node.dirty = false;
+        node.lastCleanEpoch = epoch;
         return;
     }
     node.producerRecomputeValue(node);
     // After recomputing the value, we're no longer dirty.
     node.dirty = false;
+    node.lastCleanEpoch = epoch;
 }
 /**
  * Propagate a dirty notification to live consumers of this producer.
@@ -453,6 +474,7 @@ const SIGNAL_NODE = /* @__PURE__ */ (() => {
 })();
 function signalValueChanged(node) {
     node.version++;
+    producerIncrementEpoch();
     producerNotifyConsumers(node);
     postSignalSetFn?.();
 }

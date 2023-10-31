@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.1+sha-e355f05
+ * @license Angular v17.0.0-rc.1+sha-d8280ac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -123,6 +123,13 @@ export declare interface ReactiveNode {
      * previous value (by whatever definition of equality is in use).
      */
     version: Version;
+    /**
+     * Epoch at which this node is verified to be clean.
+     *
+     * This allows skipping of some polling operations in the case where no signals have been set
+     * since this node was last read.
+     */
+    lastCleanEpoch: Version;
     /**
      * Whether this node (in its consumer capacity) is dirty.
      *
