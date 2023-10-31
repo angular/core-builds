@@ -19831,7 +19831,7 @@ function normalizeNgContentSelect(selectAttr) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_control_flow.mjs
-var FOR_LOOP_EXPRESSION_PATTERN = /^\s*([0-9A-Za-z_$]*)\s+of\s+(.*)/;
+var FOR_LOOP_EXPRESSION_PATTERN = /^\s*([0-9A-Za-z_$]*)\s+of\s+([\S\s]*)/;
 var FOR_LOOP_TRACK_PATTERN = /^track\s+([\S\s]*)/;
 var CONDITIONAL_ALIAS_PATTERN = /^as\s+(.*)/;
 var ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
@@ -20025,7 +20025,7 @@ function validateSwitchBlock(ast) {
     return errors;
   }
   for (const node of ast.children) {
-    if (node instanceof Text4 && node.value.trim().length === 0) {
+    if (node instanceof Comment2 || node instanceof Text4 && node.value.trim().length === 0) {
       continue;
     }
     if (!(node instanceof Block) || node.name !== "case" && node.name !== "default") {
@@ -20122,7 +20122,7 @@ function stripOptionalParentheses(param, errors) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_deferred_triggers.mjs
-var TIME_PATTERN = /^\d+(ms|s)?$/;
+var TIME_PATTERN = /^\d+\.?\d*(ms|s)?$/;
 var SEPARATOR_PATTERN = /^\s$/;
 var COMMA_DELIMITED_SYNTAX = /* @__PURE__ */ new Map([
   [$LBRACE, $RBRACE],
@@ -20382,7 +20382,7 @@ function parseDeferredTime(value) {
     return null;
   }
   const [time, units] = match;
-  return parseInt(time) * (units === "s" ? 1e3 : 1);
+  return parseFloat(time) * (units === "s" ? 1e3 : 1);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_deferred_blocks.mjs
@@ -23841,8 +23841,21 @@ var R3BoundTarget = class {
     }
     const name = trigger.reference;
     if (name === null) {
-      const children = block.placeholder ? block.placeholder.children : null;
-      return children !== null && children.length === 1 && children[0] instanceof Element ? children[0] : null;
+      let trigger2 = null;
+      if (block.placeholder !== null) {
+        for (const child of block.placeholder.children) {
+          if (child instanceof Comment) {
+            continue;
+          }
+          if (trigger2 !== null) {
+            return null;
+          }
+          if (child instanceof Element) {
+            trigger2 = child;
+          }
+        }
+      }
+      return trigger2;
     }
     const outsideRef = this.findEntityInScope(block, name);
     if (outsideRef instanceof Reference && this.getDefinitionNodeOfSymbol(outsideRef) !== block) {
@@ -24467,7 +24480,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-a3028e2");
+var VERSION2 = new Version("17.1.0-next.0+sha-c5980d6");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
