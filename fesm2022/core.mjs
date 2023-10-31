@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-c5980d6
+ * @license Angular v17.1.0-next.0+sha-078ebea
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10445,7 +10445,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-c5980d6');
+const VERSION = new Version('17.1.0-next.0+sha-078ebea');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -29639,9 +29639,13 @@ function getDependenciesFromInjectable(injector, token) {
     const unformattedDependencies = getDependenciesForTokenInInjector(token, injector);
     const resolutionPath = getInjectorResolutionPath(injector);
     const dependencies = unformattedDependencies.map(dep => {
+        // injectedIn contains private fields, so we omit it from the response
+        const formattedDependency = {
+            value: dep.value,
+        };
         // convert injection flags to booleans
         const flags = dep.flags;
-        dep.flags = {
+        formattedDependency.flags = {
             optional: (8 /* InternalInjectFlags.Optional */ & flags) === 8 /* InternalInjectFlags.Optional */,
             host: (1 /* InternalInjectFlags.Host */ & flags) === 1 /* InternalInjectFlags.Host */,
             self: (2 /* InternalInjectFlags.Self */ & flags) === 2 /* InternalInjectFlags.Self */,
@@ -29651,11 +29655,11 @@ function getDependenciesFromInjectable(injector, token) {
         for (let i = 0; i < resolutionPath.length; i++) {
             const injectorToCheck = resolutionPath[i];
             // if skipSelf is true we skip the first injector
-            if (i === 0 && dep.flags.skipSelf) {
+            if (i === 0 && formattedDependency.flags.skipSelf) {
                 continue;
             }
             // host only applies to NodeInjectors
-            if (dep.flags.host && injectorToCheck instanceof EnvironmentInjector) {
+            if (formattedDependency.flags.host && injectorToCheck instanceof EnvironmentInjector) {
                 break;
             }
             const instance = injectorToCheck.get(dep.token, null, { self: true, optional: true });
@@ -29664,32 +29668,24 @@ function getDependenciesFromInjectable(injector, token) {
                 // in the resolution path by using the host flag. This is done to make sure that we've found
                 // the correct providing injector, and not a node injector that is connected to our path via
                 // a router outlet.
-                if (dep.flags.host) {
+                if (formattedDependency.flags.host) {
                     const firstInjector = resolutionPath[0];
-                    const lookupFromFirstInjector = firstInjector.get(dep.token, null, { ...dep.flags, optional: true });
+                    const lookupFromFirstInjector = firstInjector.get(dep.token, null, { ...formattedDependency.flags, optional: true });
                     if (lookupFromFirstInjector !== null) {
-                        dep.providedIn = injectorToCheck;
+                        formattedDependency.providedIn = injectorToCheck;
                     }
                     break;
                 }
-                dep.providedIn = injectorToCheck;
+                formattedDependency.providedIn = injectorToCheck;
                 break;
             }
             // if self is true we stop after the first injector
-            if (i === 0 && dep.flags.self) {
+            if (i === 0 && formattedDependency.flags.self) {
                 break;
             }
         }
-        // injectedIn contains private fields, so we omit it from the response
-        const formattedDependency = {
-            value: dep.value,
-        };
         if (dep.token)
             formattedDependency.token = dep.token;
-        if (dep.flags)
-            formattedDependency.flags = dep.flags;
-        if (dep.providedIn)
-            formattedDependency.providedIn = dep.providedIn;
         return formattedDependency;
     });
     return { instance, dependencies };
