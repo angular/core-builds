@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.1+sha-d8280ac
+ * @license Angular v17.0.0-rc.1+sha-b9ea2d6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1057,6 +1057,10 @@ export declare abstract class ChangeDetectorRef {
      *
      * Use in development mode to verify that running change detection doesn't introduce
      * other changes. Calling it in production mode is a noop.
+     *
+     * @deprecated This is a test-only API that does not have a place in production interface.
+     * `checkNoChanges` is already part of an `ApplicationRef` tick when the app is running in dev
+     * mode. For more granular `checkNoChanges` validation, use `ComponentFixture`.
      */
     abstract checkNoChanges(): void;
     /**
