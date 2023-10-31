@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-bf5bda4
+ * @license Angular v17.1.0-next.0+sha-a3028e2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -278,7 +278,7 @@ class ComponentFixture {
      */
     getDeferBlocks() {
         const deferBlocks = [];
-        const lView = this.componentRef.hostView['_lView'];
+        const lView = this.componentRef.hostView._lView;
         ɵgetDeferBlocks(lView, deferBlocks);
         const deferBlockFixtures = [];
         for (const block of deferBlocks) {
