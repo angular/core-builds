@@ -8388,14 +8388,14 @@ function createElementStartOp(tag, xref, namespace, i18nPlaceholder, sourceSpan)
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createTemplateOp(xref, tag, functionNameSuffix, namespace, i18nPlaceholder, sourceSpan) {
+function createTemplateOp(xref, tag, namespace, generatedInBlock, i18nPlaceholder, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Template,
     xref,
     attributes: null,
     tag,
     slot: new SlotHandle(),
-    functionNameSuffix,
+    block: generatedInBlock,
     decls: null,
     vars: null,
     localRefs: [],
@@ -8405,7 +8405,7 @@ function createTemplateOp(xref, tag, functionNameSuffix, namespace, i18nPlacehol
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, sourceSpan) {
+function createRepeaterCreateOp(primaryView, emptyView, track, varNames, sourceSpan) {
   return __spreadProps(__spreadValues(__spreadValues({
     kind: OpKind.RepeaterCreate,
     attributes: null,
@@ -8414,8 +8414,7 @@ function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, so
     emptyView,
     track,
     trackByFn: null,
-    tag,
-    functionNameSuffix: "For",
+    tag: "For",
     namespace: Namespace.HTML,
     nonBindable: false,
     localRefs: [],
@@ -15924,9 +15923,10 @@ function addNamesToView(unit, baseName, state, compatibility) {
         }
         if (op.emptyView !== null) {
           const emptyView = unit.job.views.get(op.emptyView);
-          addNamesToView(emptyView, `${baseName}_${`${op.functionNameSuffix}Empty`}_${op.slot.slot + 2}`, state, compatibility);
+          addNamesToView(emptyView, `${baseName}_${prefixWithNamespace(`${op.tag}Empty`, op.namespace)}_${op.slot.slot + 2}`, state, compatibility);
         }
-        addNamesToView(unit.job.views.get(op.xref), `${baseName}_${op.functionNameSuffix}_${op.slot.slot + 1}`, state, compatibility);
+        const repeaterToken = op.tag === null ? "" : "_" + prefixWithNamespace(op.tag, op.namespace);
+        addNamesToView(unit.job.views.get(op.xref), `${baseName}${repeaterToken}_${op.slot.slot + 1}`, state, compatibility);
         break;
       case OpKind.Template:
         if (!(unit instanceof ViewCompilationUnit)) {
@@ -15936,8 +15936,8 @@ function addNamesToView(unit, baseName, state, compatibility) {
         if (op.slot.slot === null) {
           throw new Error(`Expected slot to be assigned`);
         }
-        const suffix = op.functionNameSuffix.length === 0 ? "" : `_${op.functionNameSuffix}`;
-        addNamesToView(childView, `${baseName}${suffix}_${op.slot.slot}`, state, compatibility);
+        const tagToken = op.tag === null ? "" : "_" + prefixWithNamespace(op.tag, op.namespace);
+        addNamesToView(childView, `${baseName}${tagToken}_${op.slot.slot}`, state, compatibility);
         break;
       case OpKind.StyleProp:
         op.name = normalizeStylePropName(op.name);
@@ -16628,20 +16628,20 @@ function i18nStart(slot, constIndex, subTemplateIndex) {
   }
   return call(Identifiers.i18nStart, args, null);
 }
-function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, sourceSpan) {
-  const args = [
+function repeaterCreate(slot, viewFnName, decls, vars, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, sourceSpan) {
+  let args = [
     literal(slot),
     variable(viewFnName),
     literal(decls),
     literal(vars),
-    literal(tag),
-    literal(constIndex),
     trackByFn
   ];
   if (trackByUsesComponentInstance || emptyViewFnName !== null) {
     args.push(literal(trackByUsesComponentInstance));
     if (emptyViewFnName !== null) {
-      args.push(variable(emptyViewFnName), literal(emptyDecls), literal(emptyVars));
+      args.push(variable(emptyViewFnName));
+      args.push(literal(emptyDecls));
+      args.push(literal(emptyVars));
     }
   }
   return call(Identifiers.repeaterCreate, args, sourceSpan);
@@ -17010,7 +17010,7 @@ function reifyCreateOperations(unit, ops) {
           throw new Error(`AssertionError: must be compiling a component`);
         }
         const childView = unit.job.views.get(op.xref);
-        OpList.replace(op, template(op.slot.slot, variable(childView.fnName), childView.decls, childView.vars, op.tag, op.attributes, op.sourceSpan));
+        OpList.replace(op, template(op.slot.slot, variable(childView.fnName), childView.decls, childView.vars, op.block ? null : op.tag, op.attributes, op.sourceSpan));
         break;
       case OpKind.DisableBindings:
         OpList.replace(op, disableBindings());
@@ -17109,7 +17109,7 @@ function reifyCreateOperations(unit, ops) {
           emptyDecls = emptyView.decls;
           emptyVars = emptyView.vars;
         }
-        OpList.replace(op, repeaterCreate(op.slot.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.sourceSpan));
+        OpList.replace(op, repeaterCreate(op.slot.slot, repeaterView.fnName, op.decls, op.vars, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.sourceSpan));
         break;
       case OpKind.Statement:
         break;
@@ -18602,6 +18602,10 @@ function ingestElement(unit, element2) {
   if (element2.i18n !== void 0 && !(element2.i18n instanceof Message || element2.i18n instanceof TagPlaceholder)) {
     throw Error(`Unhandled i18n metadata type for element: ${element2.i18n.constructor.name}`);
   }
+  const staticAttributes = {};
+  for (const attr of element2.attributes) {
+    staticAttributes[attr.name] = attr.value;
+  }
   const id = unit.job.allocateXrefId();
   const [namespaceKey, elementName] = splitNsName(element2.name);
   const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element2.i18n instanceof TagPlaceholder ? element2.i18n : void 0, element2.startSourceSpan);
@@ -18628,9 +18632,7 @@ function ingestTemplate(unit, tmpl) {
     [namespacePrefix, tagNameWithoutNamespace] = splitNsName(tmpl.tagName);
   }
   const i18nPlaceholder = tmpl.i18n instanceof TagPlaceholder ? tmpl.i18n : void 0;
-  const namespace = namespaceForKey(namespacePrefix);
-  const functionNameSuffix = tagNameWithoutNamespace === null ? "" : prefixWithNamespace(tagNameWithoutNamespace, namespace);
-  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace, functionNameSuffix, namespace, i18nPlaceholder, tmpl.startSourceSpan);
+  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace, namespaceForKey(namespacePrefix), false, i18nPlaceholder, tmpl.startSourceSpan);
   unit.create.push(tplOp);
   ingestBindings(unit, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
@@ -18676,17 +18678,12 @@ function ingestIfBlock(unit, ifBlock) {
   let firstXref = null;
   let firstSlotHandle = null;
   let conditions = [];
-  for (let i = 0; i < ifBlock.branches.length; i++) {
-    const ifCase = ifBlock.branches[i];
+  for (const ifCase of ifBlock.branches) {
     const cView = unit.job.allocateView(unit.xref);
-    let tagName = null;
-    if (i === 0) {
-      tagName = ingestControlFlowInsertionPoint(unit, cView.xref, ifCase);
-    }
     if (ifCase.expressionAlias !== null) {
       cView.contextVariables.set(ifCase.expressionAlias.name, CTX_REF);
     }
-    const tmplOp = createTemplateOp(cView.xref, tagName, "Conditional", Namespace.HTML, void 0, ifCase.sourceSpan);
+    const tmplOp = createTemplateOp(cView.xref, "Conditional", Namespace.HTML, true, void 0, ifCase.sourceSpan);
     unit.create.push(tmplOp);
     if (firstXref === null) {
       firstXref = cView.xref;
@@ -18706,7 +18703,7 @@ function ingestSwitchBlock(unit, switchBlock) {
   let conditions = [];
   for (const switchCase of switchBlock.cases) {
     const cView = unit.job.allocateView(unit.xref);
-    const tmplOp = createTemplateOp(cView.xref, null, "Case", Namespace.HTML, void 0, switchCase.sourceSpan);
+    const tmplOp = createTemplateOp(cView.xref, "Case", Namespace.HTML, true, void 0, switchCase.sourceSpan);
     unit.create.push(tmplOp);
     if (firstXref === null) {
       firstXref = cView.xref;
@@ -18726,7 +18723,7 @@ function ingestDeferView(unit, suffix, children, sourceSpan) {
   }
   const secondaryView = unit.job.allocateView(unit.xref);
   ingestNodes(secondaryView, children);
-  const templateOp = createTemplateOp(secondaryView.xref, null, `Defer${suffix}`, Namespace.HTML, void 0, sourceSpan);
+  const templateOp = createTemplateOp(secondaryView.xref, `Defer${suffix}`, Namespace.HTML, true, void 0, sourceSpan);
   unit.create.push(templateOp);
   return templateOp;
 }
@@ -18846,8 +18843,7 @@ function ingestForBlock(unit, forBlock) {
     $odd: forBlock.contextVariables.$odd.name,
     $implicit: forBlock.item.name
   };
-  const tagName = ingestControlFlowInsertionPoint(unit, repeaterView.xref, forBlock);
-  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_a2 = emptyView == null ? void 0 : emptyView.xref) != null ? _a2 : null, tagName, track, varNames, forBlock.sourceSpan);
+  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_a2 = emptyView == null ? void 0 : emptyView.xref) != null ? _a2 : null, track, varNames, forBlock.sourceSpan);
   unit.create.push(repeaterCreate2);
   const expression = convertAst(forBlock.expression, unit.job, convertSourceSpan(forBlock.expression.span, forBlock.sourceSpan));
   const repeater2 = createRepeaterOp(repeaterCreate2.xref, repeaterCreate2.slot, expression, forBlock.sourceSpan);
@@ -19032,27 +19028,6 @@ function convertSourceSpan(span, baseSourceSpan) {
   const end = baseSourceSpan.start.moveBy(span.end);
   const fullStart = baseSourceSpan.fullStart.moveBy(span.start);
   return new ParseSourceSpan(start, end, fullStart);
-}
-function ingestControlFlowInsertionPoint(unit, xref, node) {
-  let root = null;
-  for (const child of node.children) {
-    if (child instanceof Comment) {
-      continue;
-    }
-    if (root !== null) {
-      return null;
-    }
-    if (child instanceof Element || child instanceof Template && child.tagName !== null) {
-      root = child;
-    }
-  }
-  if (root !== null) {
-    for (const attr of root.attributes) {
-      ingestBinding(unit, xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue);
-    }
-    return root instanceof Element ? root.name : root.tagName;
-  }
-  return null;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/switch/index.mjs
@@ -20061,7 +20036,7 @@ function validateSwitchBlock(ast) {
     return errors;
   }
   for (const node of ast.children) {
-    if (node instanceof Comment2 || node instanceof Text4 && node.value.trim().length === 0) {
+    if (node instanceof Text4 && node.value.trim().length === 0) {
       continue;
     }
     if (!(node instanceof Block) || node.name !== "case" && node.name !== "default") {
@@ -20158,7 +20133,7 @@ function stripOptionalParentheses(param, errors) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_deferred_triggers.mjs
-var TIME_PATTERN = /^\d+\.?\d*(ms|s)?$/;
+var TIME_PATTERN = /^\d+(ms|s)?$/;
 var SEPARATOR_PATTERN = /^\s$/;
 var COMMA_DELIMITED_SYNTAX = /* @__PURE__ */ new Map([
   [$LBRACE, $RBRACE],
@@ -20418,7 +20393,7 @@ function parseDeferredTime(value) {
     return null;
   }
   const [time, units] = match;
-  return parseFloat(time) * (units === "s" ? 1e3 : 1);
+  return parseInt(time) * (units === "s" ? 1e3 : 1);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_deferred_blocks.mjs
@@ -21126,7 +21101,6 @@ function serializePlaceholderValue(value) {
 var NG_CONTENT_SELECT_ATTR2 = "select";
 var NG_PROJECT_AS_ATTR_NAME = "ngProjectAs";
 var EVENT_BINDING_SCOPE_GLOBALS = /* @__PURE__ */ new Set(["$event"]);
-var NG_TEMPLATE_TAG_NAME = "ng-template";
 var GLOBAL_TARGET_RESOLVERS = /* @__PURE__ */ new Map([["window", Identifiers.resolveWindow], ["document", Identifiers.resolveDocument], ["body", Identifiers.resolveBody]]);
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function renderFlagCheckIfStmt(flags, statements) {
@@ -21705,6 +21679,7 @@ var TemplateDefinitionBuilder = class {
     var _a2;
     const tagNameWithoutNamespace = template2.tagName ? splitNsName(template2.tagName)[1] : template2.tagName;
     const contextNameSuffix = template2.tagName ? "_" + sanitizeIdentifier(template2.tagName) : "";
+    const NG_TEMPLATE_TAG_NAME = "ng-template";
     const attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, template2.attributes, template2.inputs, template2.outputs, void 0, template2.templateAttrs);
     const templateIndex = this.createEmbeddedTemplateFn(tagNameWithoutNamespace, template2.children, contextNameSuffix, template2.sourceSpan, template2.variables, attrsExprs, template2.references, template2.i18n);
     this.templatePropertyBindings(templateIndex, template2.templateAttrs);
@@ -21774,19 +21749,11 @@ var TemplateDefinitionBuilder = class {
   }
   visitIfBlock(block) {
     this.allocateBindingSlots(null);
-    const branchData = block.branches.map((branch, branchIndex) => {
-      const { expression, expressionAlias, children, sourceSpan } = branch;
+    const branchData = block.branches.map(({ expression, expressionAlias, children, sourceSpan }) => {
       const variables = expressionAlias !== null ? [new Variable(expressionAlias.name, DIRECT_CONTEXT_REFERENCE, expressionAlias.sourceSpan, expressionAlias.keySpan)] : void 0;
-      let tagName = null;
-      let attrsExprs;
-      if (branchIndex === 0) {
-        const inferredData = this.inferProjectionDataFromInsertionPoint(branch);
-        tagName = inferredData.tagName;
-        attrsExprs = inferredData.attrsExprs;
-      }
-      const templateIndex = this.createEmbeddedTemplateFn(tagName, children, "_Conditional", sourceSpan, variables, attrsExprs);
+      const index = this.createEmbeddedTemplateFn(null, children, "_Conditional", sourceSpan, variables);
       const processedExpression = expression === null ? null : expression.visit(this._valueConverter);
-      return { index: templateIndex, expression: processedExpression, alias: expressionAlias };
+      return { index, expression: processedExpression, alias: expressionAlias };
     });
     const containerIndex = branchData[0].index;
     const paramsCallback = () => {
@@ -21931,34 +21898,11 @@ var TemplateDefinitionBuilder = class {
       return params;
     });
   }
-  inferProjectionDataFromInsertionPoint(node) {
-    let root = null;
-    let tagName = null;
-    let attrsExprs;
-    for (const child of node.children) {
-      if (child instanceof Comment) {
-        continue;
-      }
-      if (root !== null) {
-        root = null;
-        break;
-      }
-      if (child instanceof Element || child instanceof Template && child.tagName !== null) {
-        root = child;
-      }
-    }
-    if (root !== null) {
-      tagName = root instanceof Element ? root.name : root.tagName;
-      attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, root.attributes, root.inputs, []);
-    }
-    return { tagName, attrsExprs };
-  }
   allocateDataSlot() {
     return this._dataIndex++;
   }
   visitForLoopBlock(block) {
     const blockIndex = this.allocateDataSlot();
-    const { tagName, attrsExprs } = this.inferProjectionDataFromInsertionPoint(block);
     const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [block.item, block.contextVariables.$index, block.contextVariables.$count]);
     const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
     let emptyData = null;
@@ -21973,8 +21917,6 @@ var TemplateDefinitionBuilder = class {
         variable(primaryData.name),
         literal(primaryData.getConstCount()),
         literal(primaryData.getVarCount()),
-        literal(tagName),
-        this.addAttrsToConsts(attrsExprs || null),
         trackByExpression
       ];
       if (emptyData !== null) {
@@ -23910,21 +23852,8 @@ var R3BoundTarget = class {
     }
     const name = trigger.reference;
     if (name === null) {
-      let trigger2 = null;
-      if (block.placeholder !== null) {
-        for (const child of block.placeholder.children) {
-          if (child instanceof Comment) {
-            continue;
-          }
-          if (trigger2 !== null) {
-            return null;
-          }
-          if (child instanceof Element) {
-            trigger2 = child;
-          }
-        }
-      }
-      return trigger2;
+      const children = block.placeholder ? block.placeholder.children : null;
+      return children !== null && children.length === 1 && children[0] instanceof Element ? children[0] : null;
     }
     const outsideRef = this.findEntityInScope(block, name);
     if (outsideRef instanceof Reference && this.getDefinitionNodeOfSymbol(outsideRef) !== block) {
@@ -24549,7 +24478,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-7bb3ffb");
+var VERSION2 = new Version("17.1.0-next.0+sha-b5ef68f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24915,7 +24844,7 @@ function buildIfThenElseBlock(etm, ngTemplates, tmpl, thenString, elseString, of
   return { tmpl: updatedTmpl, offsets: { pre, post } };
 }
 function migrateNgFor(etm, tmpl, offset) {
-  const aliasWithEqualRegexp = /=\s*(count|index|first|last|even|odd)/gm;
+  const aliasWithEqualRegexp = /=\s+(count|index|first|last|even|odd)/gm;
   const aliasWithAsRegexp = /(count|index|first|last|even|odd)\s+as/gm;
   const aliases = [];
   const lbString = etm.hasLineBreaks ? lb : "";

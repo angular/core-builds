@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-7bb3ffb
+ * @license Angular v17.1.0-next.0+sha-b5ef68f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10445,7 +10445,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-7bb3ffb');
+const VERSION = new Version('17.1.0-next.0+sha-b5ef68f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19241,8 +19241,6 @@ class RepeaterMetadata {
  * @param templateFn Reference to the template of the main repeater block.
  * @param decls The number of nodes, local refs, and pipes for the main block.
  * @param vars The number of bindings for the main block.
- * @param tagName The name of the container element, if applicable
- * @param attrsIndex Index of template attributes in the `consts` array.
  * @param trackByFn Reference to the tracking function.
  * @param trackByUsesComponentInstance Whether the tracking function has any references to the
  *  component instance. If it doesn't, we can avoid rebinding it.
@@ -19252,7 +19250,7 @@ class RepeaterMetadata {
  *
  * @codeGenApi
  */
-function ɵɵrepeaterCreate(index, templateFn, decls, vars, tagName, attrsIndex, trackByFn, trackByUsesComponentInstance, emptyTemplateFn, emptyDecls, emptyVars) {
+function ɵɵrepeaterCreate(index, templateFn, decls, vars, trackByFn, trackByUsesComponentInstance, emptyTemplateFn, emptyDecls, emptyVars) {
     performance.mark('mark_use_counter', PERF_MARK_CONTROL_FLOW);
     const hasEmptyBlock = emptyTemplateFn !== undefined;
     const hostLView = getLView();
@@ -19263,7 +19261,7 @@ function ɵɵrepeaterCreate(index, templateFn, decls, vars, tagName, attrsIndex,
         trackByFn;
     const metadata = new RepeaterMetadata(hasEmptyBlock, boundTrackBy);
     hostLView[HEADER_OFFSET + index] = metadata;
-    ɵɵtemplate(index + 1, templateFn, decls, vars, tagName, attrsIndex);
+    ɵɵtemplate(index + 1, templateFn, decls, vars);
     if (hasEmptyBlock) {
         ngDevMode &&
             assertDefined(emptyDecls, 'Missing number of declarations for the empty repeater block.');
@@ -29641,13 +29639,9 @@ function getDependenciesFromInjectable(injector, token) {
     const unformattedDependencies = getDependenciesForTokenInInjector(token, injector);
     const resolutionPath = getInjectorResolutionPath(injector);
     const dependencies = unformattedDependencies.map(dep => {
-        // injectedIn contains private fields, so we omit it from the response
-        const formattedDependency = {
-            value: dep.value,
-        };
         // convert injection flags to booleans
         const flags = dep.flags;
-        formattedDependency.flags = {
+        dep.flags = {
             optional: (8 /* InternalInjectFlags.Optional */ & flags) === 8 /* InternalInjectFlags.Optional */,
             host: (1 /* InternalInjectFlags.Host */ & flags) === 1 /* InternalInjectFlags.Host */,
             self: (2 /* InternalInjectFlags.Self */ & flags) === 2 /* InternalInjectFlags.Self */,
@@ -29657,11 +29651,11 @@ function getDependenciesFromInjectable(injector, token) {
         for (let i = 0; i < resolutionPath.length; i++) {
             const injectorToCheck = resolutionPath[i];
             // if skipSelf is true we skip the first injector
-            if (i === 0 && formattedDependency.flags.skipSelf) {
+            if (i === 0 && dep.flags.skipSelf) {
                 continue;
             }
             // host only applies to NodeInjectors
-            if (formattedDependency.flags.host && injectorToCheck instanceof EnvironmentInjector) {
+            if (dep.flags.host && injectorToCheck instanceof EnvironmentInjector) {
                 break;
             }
             const instance = injectorToCheck.get(dep.token, null, { self: true, optional: true });
@@ -29670,24 +29664,32 @@ function getDependenciesFromInjectable(injector, token) {
                 // in the resolution path by using the host flag. This is done to make sure that we've found
                 // the correct providing injector, and not a node injector that is connected to our path via
                 // a router outlet.
-                if (formattedDependency.flags.host) {
+                if (dep.flags.host) {
                     const firstInjector = resolutionPath[0];
-                    const lookupFromFirstInjector = firstInjector.get(dep.token, null, { ...formattedDependency.flags, optional: true });
+                    const lookupFromFirstInjector = firstInjector.get(dep.token, null, { ...dep.flags, optional: true });
                     if (lookupFromFirstInjector !== null) {
-                        formattedDependency.providedIn = injectorToCheck;
+                        dep.providedIn = injectorToCheck;
                     }
                     break;
                 }
-                formattedDependency.providedIn = injectorToCheck;
+                dep.providedIn = injectorToCheck;
                 break;
             }
             // if self is true we stop after the first injector
-            if (i === 0 && formattedDependency.flags.self) {
+            if (i === 0 && dep.flags.self) {
                 break;
             }
         }
+        // injectedIn contains private fields, so we omit it from the response
+        const formattedDependency = {
+            value: dep.value,
+        };
         if (dep.token)
             formattedDependency.token = dep.token;
+        if (dep.flags)
+            formattedDependency.flags = dep.flags;
+        if (dep.providedIn)
+            formattedDependency.providedIn = dep.providedIn;
         return formattedDependency;
     });
     return { instance, dependencies };
@@ -29928,11 +29930,11 @@ function walkProviderTreeToDiscoverImportPaths(providerToPath, visitedContainers
  * @returns an array of objects representing the providers of the given injector
  */
 function getEnvironmentInjectorProviders(injector) {
-    const providerRecordsWithoutImportPaths = getFrameworkDIDebugData().resolverToProviders.get(injector) ?? [];
+    const providerRecords = getFrameworkDIDebugData().resolverToProviders.get(injector) ?? [];
     // platform injector has no provider imports container so can we skip trying to
     // find import paths
     if (isPlatformInjector(injector)) {
-        return providerRecordsWithoutImportPaths;
+        return providerRecords;
     }
     const providerImportsContainer = getProviderImportsContainer(injector);
     if (providerImportsContainer === null) {
@@ -29942,31 +29944,22 @@ function getEnvironmentInjectorProviders(injector) {
         // container (and thus no concept of module import paths). Therefore we simply
         // return the provider records as is.
         if (isRootInjector(injector)) {
-            return providerRecordsWithoutImportPaths;
+            return providerRecords;
         }
         throwError('Could not determine where injector providers were configured.');
     }
     const providerToPath = getProviderImportPaths(providerImportsContainer);
-    const providerRecords = [];
-    for (const providerRecord of providerRecordsWithoutImportPaths) {
-        const provider = providerRecord.provider;
-        // Ignore these special providers for now until we have a cleaner way of
-        // determing when they are provided by the framework vs provided by the user.
-        const token = provider.provide;
-        if (token === ENVIRONMENT_INITIALIZER || token === INJECTOR_DEF_TYPES) {
-            continue;
-        }
-        let importPath = providerToPath.get(provider) ?? [];
+    return providerRecords.map(providerRecord => {
+        let importPath = providerToPath.get(providerRecord.provider) ?? [providerImportsContainer];
         const def = getComponentDef(providerImportsContainer);
         const isStandaloneComponent = !!def?.standalone;
         // We prepend the component constructor in the standalone case
         // because walkProviderTree does not visit this constructor during it's traversal
         if (isStandaloneComponent) {
-            importPath = [providerImportsContainer, ...importPath];
+            importPath = [providerImportsContainer, ...providerToPath.get(providerRecord.provider) ?? []];
         }
-        providerRecords.push({ ...providerRecord, importPath });
-    }
-    return providerRecords;
+        return { ...providerRecord, importPath };
+    });
 }
 function isPlatformInjector(injector) {
     return injector instanceof R3Injector && injector.scopes.has('platform');

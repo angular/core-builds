@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-7bb3ffb
+ * @license Angular v17.1.0-next.0+sha-b5ef68f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1057,10 +1057,6 @@ export declare abstract class ChangeDetectorRef {
      *
      * Use in development mode to verify that running change detection doesn't introduce
      * other changes. Calling it in production mode is a noop.
-     *
-     * @deprecated This is a test-only API that does not have a place in production interface.
-     * `checkNoChanges` is already part of an `ApplicationRef` tick when the app is running in dev
-     * mode. For more granular `checkNoChanges` validation, use `ComponentFixture`.
      */
     abstract checkNoChanges(): void;
     /**
@@ -15142,8 +15138,6 @@ export declare function ɵɵrepeater(metadataSlotIdx: number, collection: Iterab
  * @param templateFn Reference to the template of the main repeater block.
  * @param decls The number of nodes, local refs, and pipes for the main block.
  * @param vars The number of bindings for the main block.
- * @param tagName The name of the container element, if applicable
- * @param attrsIndex Index of template attributes in the `consts` array.
  * @param trackByFn Reference to the tracking function.
  * @param trackByUsesComponentInstance Whether the tracking function has any references to the
  *  component instance. If it doesn't, we can avoid rebinding it.
@@ -15153,7 +15147,7 @@ export declare function ɵɵrepeater(metadataSlotIdx: number, collection: Iterab
  *
  * @codeGenApi
  */
-export declare function ɵɵrepeaterCreate(index: number, templateFn: ComponentTemplate<unknown>, decls: number, vars: number, tagName: string | null, attrsIndex: number | null, trackByFn: TrackByFunction<unknown>, trackByUsesComponentInstance?: boolean, emptyTemplateFn?: ComponentTemplate<unknown>, emptyDecls?: number, emptyVars?: number): void;
+export declare function ɵɵrepeaterCreate(index: number, templateFn: ComponentTemplate<unknown>, decls: number, vars: number, trackByFn: TrackByFunction<unknown>, trackByUsesComponentInstance?: boolean, emptyTemplateFn?: ComponentTemplate<unknown>, emptyDecls?: number, emptyVars?: number): void;
 
 /**
  * A built-in trackBy function used for situations where users specified collection item reference

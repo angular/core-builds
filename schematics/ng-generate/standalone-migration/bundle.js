@@ -9242,14 +9242,14 @@ function createElementStartOp(tag, xref, namespace, i18nPlaceholder, sourceSpan)
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createTemplateOp(xref, tag, functionNameSuffix, namespace, i18nPlaceholder, sourceSpan) {
+function createTemplateOp(xref, tag, namespace, generatedInBlock, i18nPlaceholder, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Template,
     xref,
     attributes: null,
     tag,
     slot: new SlotHandle(),
-    functionNameSuffix,
+    block: generatedInBlock,
     decls: null,
     vars: null,
     localRefs: [],
@@ -9259,7 +9259,7 @@ function createTemplateOp(xref, tag, functionNameSuffix, namespace, i18nPlacehol
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, sourceSpan) {
+function createRepeaterCreateOp(primaryView, emptyView, track, varNames, sourceSpan) {
   return __spreadProps(__spreadValues(__spreadValues({
     kind: OpKind.RepeaterCreate,
     attributes: null,
@@ -9268,8 +9268,7 @@ function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, so
     emptyView,
     track,
     trackByFn: null,
-    tag,
-    functionNameSuffix: "For",
+    tag: "For",
     namespace: Namespace.HTML,
     nonBindable: false,
     localRefs: [],
@@ -16737,9 +16736,10 @@ function addNamesToView(unit, baseName, state, compatibility) {
         }
         if (op.emptyView !== null) {
           const emptyView = unit.job.views.get(op.emptyView);
-          addNamesToView(emptyView, `${baseName}_${`${op.functionNameSuffix}Empty`}_${op.slot.slot + 2}`, state, compatibility);
+          addNamesToView(emptyView, `${baseName}_${prefixWithNamespace(`${op.tag}Empty`, op.namespace)}_${op.slot.slot + 2}`, state, compatibility);
         }
-        addNamesToView(unit.job.views.get(op.xref), `${baseName}_${op.functionNameSuffix}_${op.slot.slot + 1}`, state, compatibility);
+        const repeaterToken = op.tag === null ? "" : "_" + prefixWithNamespace(op.tag, op.namespace);
+        addNamesToView(unit.job.views.get(op.xref), `${baseName}${repeaterToken}_${op.slot.slot + 1}`, state, compatibility);
         break;
       case OpKind.Template:
         if (!(unit instanceof ViewCompilationUnit)) {
@@ -16749,8 +16749,8 @@ function addNamesToView(unit, baseName, state, compatibility) {
         if (op.slot.slot === null) {
           throw new Error(`Expected slot to be assigned`);
         }
-        const suffix = op.functionNameSuffix.length === 0 ? "" : `_${op.functionNameSuffix}`;
-        addNamesToView(childView, `${baseName}${suffix}_${op.slot.slot}`, state, compatibility);
+        const tagToken = op.tag === null ? "" : "_" + prefixWithNamespace(op.tag, op.namespace);
+        addNamesToView(childView, `${baseName}${tagToken}_${op.slot.slot}`, state, compatibility);
         break;
       case OpKind.StyleProp:
         op.name = normalizeStylePropName(op.name);
@@ -17441,20 +17441,20 @@ function i18nStart(slot, constIndex, subTemplateIndex) {
   }
   return call(Identifiers.i18nStart, args, null);
 }
-function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, sourceSpan) {
-  const args = [
+function repeaterCreate(slot, viewFnName, decls, vars, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, sourceSpan) {
+  let args = [
     literal(slot),
     variable(viewFnName),
     literal(decls),
     literal(vars),
-    literal(tag),
-    literal(constIndex),
     trackByFn
   ];
   if (trackByUsesComponentInstance || emptyViewFnName !== null) {
     args.push(literal(trackByUsesComponentInstance));
     if (emptyViewFnName !== null) {
-      args.push(variable(emptyViewFnName), literal(emptyDecls), literal(emptyVars));
+      args.push(variable(emptyViewFnName));
+      args.push(literal(emptyDecls));
+      args.push(literal(emptyVars));
     }
   }
   return call(Identifiers.repeaterCreate, args, sourceSpan);
@@ -17823,7 +17823,7 @@ function reifyCreateOperations(unit, ops) {
           throw new Error(`AssertionError: must be compiling a component`);
         }
         const childView = unit.job.views.get(op.xref);
-        OpList.replace(op, template(op.slot.slot, variable(childView.fnName), childView.decls, childView.vars, op.tag, op.attributes, op.sourceSpan));
+        OpList.replace(op, template(op.slot.slot, variable(childView.fnName), childView.decls, childView.vars, op.block ? null : op.tag, op.attributes, op.sourceSpan));
         break;
       case OpKind.DisableBindings:
         OpList.replace(op, disableBindings());
@@ -17922,7 +17922,7 @@ function reifyCreateOperations(unit, ops) {
           emptyDecls = emptyView.decls;
           emptyVars = emptyView.vars;
         }
-        OpList.replace(op, repeaterCreate(op.slot.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.sourceSpan));
+        OpList.replace(op, repeaterCreate(op.slot.slot, repeaterView.fnName, op.decls, op.vars, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.sourceSpan));
         break;
       case OpKind.Statement:
         break;
@@ -19415,6 +19415,10 @@ function ingestElement(unit, element2) {
   if (element2.i18n !== void 0 && !(element2.i18n instanceof Message || element2.i18n instanceof TagPlaceholder)) {
     throw Error(`Unhandled i18n metadata type for element: ${element2.i18n.constructor.name}`);
   }
+  const staticAttributes = {};
+  for (const attr of element2.attributes) {
+    staticAttributes[attr.name] = attr.value;
+  }
   const id = unit.job.allocateXrefId();
   const [namespaceKey, elementName] = splitNsName(element2.name);
   const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element2.i18n instanceof TagPlaceholder ? element2.i18n : void 0, element2.startSourceSpan);
@@ -19441,9 +19445,7 @@ function ingestTemplate(unit, tmpl) {
     [namespacePrefix, tagNameWithoutNamespace] = splitNsName(tmpl.tagName);
   }
   const i18nPlaceholder = tmpl.i18n instanceof TagPlaceholder ? tmpl.i18n : void 0;
-  const namespace = namespaceForKey(namespacePrefix);
-  const functionNameSuffix = tagNameWithoutNamespace === null ? "" : prefixWithNamespace(tagNameWithoutNamespace, namespace);
-  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace, functionNameSuffix, namespace, i18nPlaceholder, tmpl.startSourceSpan);
+  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace, namespaceForKey(namespacePrefix), false, i18nPlaceholder, tmpl.startSourceSpan);
   unit.create.push(tplOp);
   ingestBindings(unit, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
@@ -19489,17 +19491,12 @@ function ingestIfBlock(unit, ifBlock) {
   let firstXref = null;
   let firstSlotHandle = null;
   let conditions = [];
-  for (let i = 0; i < ifBlock.branches.length; i++) {
-    const ifCase = ifBlock.branches[i];
+  for (const ifCase of ifBlock.branches) {
     const cView = unit.job.allocateView(unit.xref);
-    let tagName = null;
-    if (i === 0) {
-      tagName = ingestControlFlowInsertionPoint(unit, cView.xref, ifCase);
-    }
     if (ifCase.expressionAlias !== null) {
       cView.contextVariables.set(ifCase.expressionAlias.name, CTX_REF);
     }
-    const tmplOp = createTemplateOp(cView.xref, tagName, "Conditional", Namespace.HTML, void 0, ifCase.sourceSpan);
+    const tmplOp = createTemplateOp(cView.xref, "Conditional", Namespace.HTML, true, void 0, ifCase.sourceSpan);
     unit.create.push(tmplOp);
     if (firstXref === null) {
       firstXref = cView.xref;
@@ -19519,7 +19516,7 @@ function ingestSwitchBlock(unit, switchBlock) {
   let conditions = [];
   for (const switchCase of switchBlock.cases) {
     const cView = unit.job.allocateView(unit.xref);
-    const tmplOp = createTemplateOp(cView.xref, null, "Case", Namespace.HTML, void 0, switchCase.sourceSpan);
+    const tmplOp = createTemplateOp(cView.xref, "Case", Namespace.HTML, true, void 0, switchCase.sourceSpan);
     unit.create.push(tmplOp);
     if (firstXref === null) {
       firstXref = cView.xref;
@@ -19539,7 +19536,7 @@ function ingestDeferView(unit, suffix, children, sourceSpan) {
   }
   const secondaryView = unit.job.allocateView(unit.xref);
   ingestNodes(secondaryView, children);
-  const templateOp = createTemplateOp(secondaryView.xref, null, `Defer${suffix}`, Namespace.HTML, void 0, sourceSpan);
+  const templateOp = createTemplateOp(secondaryView.xref, `Defer${suffix}`, Namespace.HTML, true, void 0, sourceSpan);
   unit.create.push(templateOp);
   return templateOp;
 }
@@ -19659,8 +19656,7 @@ function ingestForBlock(unit, forBlock) {
     $odd: forBlock.contextVariables.$odd.name,
     $implicit: forBlock.item.name
   };
-  const tagName = ingestControlFlowInsertionPoint(unit, repeaterView.xref, forBlock);
-  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_a2 = emptyView == null ? void 0 : emptyView.xref) != null ? _a2 : null, tagName, track, varNames, forBlock.sourceSpan);
+  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_a2 = emptyView == null ? void 0 : emptyView.xref) != null ? _a2 : null, track, varNames, forBlock.sourceSpan);
   unit.create.push(repeaterCreate2);
   const expression = convertAst(forBlock.expression, unit.job, convertSourceSpan(forBlock.expression.span, forBlock.sourceSpan));
   const repeater2 = createRepeaterOp(repeaterCreate2.xref, repeaterCreate2.slot, expression, forBlock.sourceSpan);
@@ -19845,27 +19841,6 @@ function convertSourceSpan(span, baseSourceSpan) {
   const end = baseSourceSpan.start.moveBy(span.end);
   const fullStart = baseSourceSpan.fullStart.moveBy(span.start);
   return new ParseSourceSpan(start, end, fullStart);
-}
-function ingestControlFlowInsertionPoint(unit, xref, node) {
-  let root = null;
-  for (const child of node.children) {
-    if (child instanceof Comment) {
-      continue;
-    }
-    if (root !== null) {
-      return null;
-    }
-    if (child instanceof Element || child instanceof Template && child.tagName !== null) {
-      root = child;
-    }
-  }
-  if (root !== null) {
-    for (const attr of root.attributes) {
-      ingestBinding(unit, xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue);
-    }
-    return root instanceof Element ? root.name : root.tagName;
-  }
-  return null;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/switch/index.mjs
@@ -20874,7 +20849,7 @@ function validateSwitchBlock(ast) {
     return errors;
   }
   for (const node of ast.children) {
-    if (node instanceof Comment2 || node instanceof Text4 && node.value.trim().length === 0) {
+    if (node instanceof Text4 && node.value.trim().length === 0) {
       continue;
     }
     if (!(node instanceof Block) || node.name !== "case" && node.name !== "default") {
@@ -20971,7 +20946,7 @@ function stripOptionalParentheses(param, errors) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_deferred_triggers.mjs
-var TIME_PATTERN = /^\d+\.?\d*(ms|s)?$/;
+var TIME_PATTERN = /^\d+(ms|s)?$/;
 var SEPARATOR_PATTERN = /^\s$/;
 var COMMA_DELIMITED_SYNTAX = /* @__PURE__ */ new Map([
   [$LBRACE, $RBRACE],
@@ -21231,7 +21206,7 @@ function parseDeferredTime(value) {
     return null;
   }
   const [time, units] = match;
-  return parseFloat(time) * (units === "s" ? 1e3 : 1);
+  return parseInt(time) * (units === "s" ? 1e3 : 1);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_deferred_blocks.mjs
@@ -21939,7 +21914,6 @@ function serializePlaceholderValue(value) {
 var NG_CONTENT_SELECT_ATTR2 = "select";
 var NG_PROJECT_AS_ATTR_NAME = "ngProjectAs";
 var EVENT_BINDING_SCOPE_GLOBALS = /* @__PURE__ */ new Set(["$event"]);
-var NG_TEMPLATE_TAG_NAME = "ng-template";
 var GLOBAL_TARGET_RESOLVERS = /* @__PURE__ */ new Map([["window", Identifiers.resolveWindow], ["document", Identifiers.resolveDocument], ["body", Identifiers.resolveBody]]);
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function renderFlagCheckIfStmt(flags, statements) {
@@ -22518,6 +22492,7 @@ var TemplateDefinitionBuilder = class {
     var _a2;
     const tagNameWithoutNamespace = template2.tagName ? splitNsName(template2.tagName)[1] : template2.tagName;
     const contextNameSuffix = template2.tagName ? "_" + sanitizeIdentifier(template2.tagName) : "";
+    const NG_TEMPLATE_TAG_NAME = "ng-template";
     const attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, template2.attributes, template2.inputs, template2.outputs, void 0, template2.templateAttrs);
     const templateIndex = this.createEmbeddedTemplateFn(tagNameWithoutNamespace, template2.children, contextNameSuffix, template2.sourceSpan, template2.variables, attrsExprs, template2.references, template2.i18n);
     this.templatePropertyBindings(templateIndex, template2.templateAttrs);
@@ -22587,19 +22562,11 @@ var TemplateDefinitionBuilder = class {
   }
   visitIfBlock(block) {
     this.allocateBindingSlots(null);
-    const branchData = block.branches.map((branch, branchIndex) => {
-      const { expression, expressionAlias, children, sourceSpan } = branch;
+    const branchData = block.branches.map(({ expression, expressionAlias, children, sourceSpan }) => {
       const variables = expressionAlias !== null ? [new Variable(expressionAlias.name, DIRECT_CONTEXT_REFERENCE, expressionAlias.sourceSpan, expressionAlias.keySpan)] : void 0;
-      let tagName = null;
-      let attrsExprs;
-      if (branchIndex === 0) {
-        const inferredData = this.inferProjectionDataFromInsertionPoint(branch);
-        tagName = inferredData.tagName;
-        attrsExprs = inferredData.attrsExprs;
-      }
-      const templateIndex = this.createEmbeddedTemplateFn(tagName, children, "_Conditional", sourceSpan, variables, attrsExprs);
+      const index = this.createEmbeddedTemplateFn(null, children, "_Conditional", sourceSpan, variables);
       const processedExpression = expression === null ? null : expression.visit(this._valueConverter);
-      return { index: templateIndex, expression: processedExpression, alias: expressionAlias };
+      return { index, expression: processedExpression, alias: expressionAlias };
     });
     const containerIndex = branchData[0].index;
     const paramsCallback = () => {
@@ -22744,34 +22711,11 @@ var TemplateDefinitionBuilder = class {
       return params;
     });
   }
-  inferProjectionDataFromInsertionPoint(node) {
-    let root = null;
-    let tagName = null;
-    let attrsExprs;
-    for (const child of node.children) {
-      if (child instanceof Comment) {
-        continue;
-      }
-      if (root !== null) {
-        root = null;
-        break;
-      }
-      if (child instanceof Element || child instanceof Template && child.tagName !== null) {
-        root = child;
-      }
-    }
-    if (root !== null) {
-      tagName = root instanceof Element ? root.name : root.tagName;
-      attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, root.attributes, root.inputs, []);
-    }
-    return { tagName, attrsExprs };
-  }
   allocateDataSlot() {
     return this._dataIndex++;
   }
   visitForLoopBlock(block) {
     const blockIndex = this.allocateDataSlot();
-    const { tagName, attrsExprs } = this.inferProjectionDataFromInsertionPoint(block);
     const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [block.item, block.contextVariables.$index, block.contextVariables.$count]);
     const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
     let emptyData = null;
@@ -22786,8 +22730,6 @@ var TemplateDefinitionBuilder = class {
         variable(primaryData.name),
         literal(primaryData.getConstCount()),
         literal(primaryData.getVarCount()),
-        literal(tagName),
-        this.addAttrsToConsts(attrsExprs || null),
         trackByExpression
       ];
       if (emptyData !== null) {
@@ -24723,21 +24665,8 @@ var R3BoundTarget = class {
     }
     const name = trigger.reference;
     if (name === null) {
-      let trigger2 = null;
-      if (block.placeholder !== null) {
-        for (const child of block.placeholder.children) {
-          if (child instanceof Comment) {
-            continue;
-          }
-          if (trigger2 !== null) {
-            return null;
-          }
-          if (child instanceof Element) {
-            trigger2 = child;
-          }
-        }
-      }
-      return trigger2;
+      const children = block.placeholder ? block.placeholder.children : null;
+      return children !== null && children.length === 1 && children[0] instanceof Element ? children[0] : null;
     }
     const outsideRef = this.findEntityInScope(block, name);
     if (outsideRef instanceof Reference && this.getDefinitionNodeOfSymbol(outsideRef) !== block) {
@@ -25362,7 +25291,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-7bb3ffb");
+var VERSION2 = new Version("17.1.0-next.0+sha-b5ef68f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -26399,7 +26328,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7bb3ffb"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-b5ef68f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -26470,7 +26399,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7bb3ffb"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-b5ef68f"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -26702,7 +26631,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7bb3ffb"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-b5ef68f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -26725,7 +26654,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7bb3ffb"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-b5ef68f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -26763,7 +26692,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7bb3ffb"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-b5ef68f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -26787,7 +26716,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7bb3ffb"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-b5ef68f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -26822,7 +26751,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-7bb3ffb"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-b5ef68f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -26839,7 +26768,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.0+sha-7bb3ffb");
+var VERSION3 = new Version("17.1.0-next.0+sha-b5ef68f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -30997,7 +30926,7 @@ function compileInputTransformFields(inputs) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/component/src/handler.mjs
-var import_typescript54 = __toESM(require("typescript"), 1);
+var import_typescript53 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/incremental/semantic_graph/src/api.mjs
 var import_typescript33 = __toESM(require("typescript"), 1);
@@ -32504,7 +32433,7 @@ function containsErrors(diagnostics) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/src/declaration.mjs
-var import_typescript46 = __toESM(require("typescript"), 1);
+var import_typescript45 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/translator/src/context.mjs
 var Context = class {
@@ -32792,83 +32721,8 @@ function createRange(span) {
   };
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/translator/src/type_emitter.mjs
-var import_typescript42 = __toESM(require("typescript"), 1);
-var INELIGIBLE = {};
-function canEmitType(type, canEmit) {
-  return canEmitTypeWorker(type);
-  function canEmitTypeWorker(type2) {
-    return visitNode(type2) !== INELIGIBLE;
-  }
-  function visitNode(node) {
-    if (import_typescript42.default.isImportTypeNode(node)) {
-      return INELIGIBLE;
-    }
-    if (import_typescript42.default.isTypeReferenceNode(node) && !canEmitTypeReference(node)) {
-      return INELIGIBLE;
-    } else {
-      return import_typescript42.default.forEachChild(node, visitNode);
-    }
-  }
-  function canEmitTypeReference(type2) {
-    if (!canEmit(type2)) {
-      return false;
-    }
-    return type2.typeArguments === void 0 || type2.typeArguments.every(canEmitTypeWorker);
-  }
-}
-var TypeEmitter = class {
-  constructor(translator) {
-    this.translator = translator;
-  }
-  emitType(type) {
-    const typeReferenceTransformer = (context) => {
-      const visitNode = (node) => {
-        if (import_typescript42.default.isImportTypeNode(node)) {
-          throw new Error("Unable to emit import type");
-        }
-        if (import_typescript42.default.isTypeReferenceNode(node)) {
-          return this.emitTypeReference(node);
-        } else if (import_typescript42.default.isLiteralExpression(node)) {
-          let clone;
-          if (import_typescript42.default.isStringLiteral(node)) {
-            clone = import_typescript42.default.factory.createStringLiteral(node.text);
-          } else if (import_typescript42.default.isNumericLiteral(node)) {
-            clone = import_typescript42.default.factory.createNumericLiteral(node.text);
-          } else if (import_typescript42.default.isBigIntLiteral(node)) {
-            clone = import_typescript42.default.factory.createBigIntLiteral(node.text);
-          } else if (import_typescript42.default.isNoSubstitutionTemplateLiteral(node)) {
-            clone = import_typescript42.default.factory.createNoSubstitutionTemplateLiteral(node.text, node.rawText);
-          } else if (import_typescript42.default.isRegularExpressionLiteral(node)) {
-            clone = import_typescript42.default.factory.createRegularExpressionLiteral(node.text);
-          } else {
-            throw new Error(`Unsupported literal kind ${import_typescript42.default.SyntaxKind[node.kind]}`);
-          }
-          import_typescript42.default.setTextRange(clone, { pos: -1, end: -1 });
-          return clone;
-        } else {
-          return import_typescript42.default.visitEachChild(node, visitNode, context);
-        }
-      };
-      return (node) => import_typescript42.default.visitNode(node, visitNode, import_typescript42.default.isTypeNode);
-    };
-    return import_typescript42.default.transform(type, [typeReferenceTransformer]).transformed[0];
-  }
-  emitTypeReference(type) {
-    const translatedType = this.translator(type);
-    if (translatedType === null) {
-      throw new Error("Unable to emit an unresolved reference");
-    }
-    let typeArguments = void 0;
-    if (type.typeArguments !== void 0) {
-      typeArguments = import_typescript42.default.factory.createNodeArray(type.typeArguments.map((typeArg) => this.emitType(typeArg)));
-    }
-    return import_typescript42.default.factory.updateTypeReferenceNode(type, translatedType.typeName, typeArguments);
-  }
-};
-
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/translator/src/type_translator.mjs
-var import_typescript43 = __toESM(require("typescript"), 1);
+var import_typescript42 = __toESM(require("typescript"), 1);
 function translateType(type, contextFile, reflector, refEmitter, imports) {
   return type.visitType(new TypeTranslatorVisitor(imports, contextFile, reflector, refEmitter), new Context(false));
 }
@@ -32882,16 +32736,16 @@ var TypeTranslatorVisitor = class {
   visitBuiltinType(type, context) {
     switch (type.name) {
       case BuiltinTypeName.Bool:
-        return import_typescript43.default.factory.createKeywordTypeNode(import_typescript43.default.SyntaxKind.BooleanKeyword);
+        return import_typescript42.default.factory.createKeywordTypeNode(import_typescript42.default.SyntaxKind.BooleanKeyword);
       case BuiltinTypeName.Dynamic:
-        return import_typescript43.default.factory.createKeywordTypeNode(import_typescript43.default.SyntaxKind.AnyKeyword);
+        return import_typescript42.default.factory.createKeywordTypeNode(import_typescript42.default.SyntaxKind.AnyKeyword);
       case BuiltinTypeName.Int:
       case BuiltinTypeName.Number:
-        return import_typescript43.default.factory.createKeywordTypeNode(import_typescript43.default.SyntaxKind.NumberKeyword);
+        return import_typescript42.default.factory.createKeywordTypeNode(import_typescript42.default.SyntaxKind.NumberKeyword);
       case BuiltinTypeName.String:
-        return import_typescript43.default.factory.createKeywordTypeNode(import_typescript43.default.SyntaxKind.StringKeyword);
+        return import_typescript42.default.factory.createKeywordTypeNode(import_typescript42.default.SyntaxKind.StringKeyword);
       case BuiltinTypeName.None:
-        return import_typescript43.default.factory.createKeywordTypeNode(import_typescript43.default.SyntaxKind.NeverKeyword);
+        return import_typescript42.default.factory.createKeywordTypeNode(import_typescript42.default.SyntaxKind.NeverKeyword);
       default:
         throw new Error(`Unsupported builtin type: ${BuiltinTypeName[type.name]}`);
     }
@@ -32901,37 +32755,34 @@ var TypeTranslatorVisitor = class {
     if (type.typeParams === null) {
       return typeNode;
     }
-    if (!import_typescript43.default.isTypeReferenceNode(typeNode)) {
+    if (!import_typescript42.default.isTypeReferenceNode(typeNode)) {
       throw new Error("An ExpressionType with type arguments must translate into a TypeReferenceNode");
     } else if (typeNode.typeArguments !== void 0) {
       throw new Error(`An ExpressionType with type arguments cannot have multiple levels of type arguments`);
     }
     const typeArgs = type.typeParams.map((param) => this.translateType(param, context));
-    return import_typescript43.default.factory.createTypeReferenceNode(typeNode.typeName, typeArgs);
+    return import_typescript42.default.factory.createTypeReferenceNode(typeNode.typeName, typeArgs);
   }
   visitArrayType(type, context) {
-    return import_typescript43.default.factory.createArrayTypeNode(this.translateType(type.of, context));
+    return import_typescript42.default.factory.createArrayTypeNode(this.translateType(type.of, context));
   }
   visitMapType(type, context) {
-    const parameter = import_typescript43.default.factory.createParameterDeclaration(void 0, void 0, "key", void 0, import_typescript43.default.factory.createKeywordTypeNode(import_typescript43.default.SyntaxKind.StringKeyword));
-    const typeArgs = type.valueType !== null ? this.translateType(type.valueType, context) : import_typescript43.default.factory.createKeywordTypeNode(import_typescript43.default.SyntaxKind.UnknownKeyword);
-    const indexSignature = import_typescript43.default.factory.createIndexSignature(void 0, [parameter], typeArgs);
-    return import_typescript43.default.factory.createTypeLiteralNode([indexSignature]);
+    const parameter = import_typescript42.default.factory.createParameterDeclaration(void 0, void 0, "key", void 0, import_typescript42.default.factory.createKeywordTypeNode(import_typescript42.default.SyntaxKind.StringKeyword));
+    const typeArgs = type.valueType !== null ? this.translateType(type.valueType, context) : import_typescript42.default.factory.createKeywordTypeNode(import_typescript42.default.SyntaxKind.UnknownKeyword);
+    const indexSignature = import_typescript42.default.factory.createIndexSignature(void 0, [parameter], typeArgs);
+    return import_typescript42.default.factory.createTypeLiteralNode([indexSignature]);
   }
   visitTransplantedType(ast, context) {
-    const node = ast.type instanceof Reference2 ? ast.type.node : ast.type;
-    if (!import_typescript43.default.isTypeNode(node)) {
+    if (!import_typescript42.default.isTypeNode(ast.type)) {
       throw new Error(`A TransplantedType must wrap a TypeNode`);
     }
-    const viaModule = ast.type instanceof Reference2 ? ast.type.bestGuessOwningModule : null;
-    const emitter = new TypeEmitter((typeRef) => this.translateTypeReference(typeRef, context, viaModule));
-    return emitter.emitType(node);
+    return this.translateTransplantedTypeNode(ast.type, context);
   }
   visitReadVarExpr(ast, context) {
     if (ast.name === null) {
       throw new Error(`ReadVarExpr with no variable name in type`);
     }
-    return import_typescript43.default.factory.createTypeQueryNode(import_typescript43.default.factory.createIdentifier(ast.name));
+    return import_typescript42.default.factory.createTypeQueryNode(import_typescript42.default.factory.createIdentifier(ast.name));
   }
   visitWriteVarExpr(expr, context) {
     throw new Error("Method not implemented.");
@@ -32953,15 +32804,15 @@ var TypeTranslatorVisitor = class {
   }
   visitLiteralExpr(ast, context) {
     if (ast.value === null) {
-      return import_typescript43.default.factory.createLiteralTypeNode(import_typescript43.default.factory.createNull());
+      return import_typescript42.default.factory.createLiteralTypeNode(import_typescript42.default.factory.createNull());
     } else if (ast.value === void 0) {
-      return import_typescript43.default.factory.createKeywordTypeNode(import_typescript43.default.SyntaxKind.UndefinedKeyword);
+      return import_typescript42.default.factory.createKeywordTypeNode(import_typescript42.default.SyntaxKind.UndefinedKeyword);
     } else if (typeof ast.value === "boolean") {
-      return import_typescript43.default.factory.createLiteralTypeNode(ast.value ? import_typescript43.default.factory.createTrue() : import_typescript43.default.factory.createFalse());
+      return import_typescript42.default.factory.createLiteralTypeNode(ast.value ? import_typescript42.default.factory.createTrue() : import_typescript42.default.factory.createFalse());
     } else if (typeof ast.value === "number") {
-      return import_typescript43.default.factory.createLiteralTypeNode(import_typescript43.default.factory.createNumericLiteral(ast.value));
+      return import_typescript42.default.factory.createLiteralTypeNode(import_typescript42.default.factory.createNumericLiteral(ast.value));
     } else {
-      return import_typescript43.default.factory.createLiteralTypeNode(import_typescript43.default.factory.createStringLiteral(ast.value));
+      return import_typescript42.default.factory.createLiteralTypeNode(import_typescript42.default.factory.createStringLiteral(ast.value));
     }
   }
   visitLocalizedString(ast, context) {
@@ -32972,10 +32823,10 @@ var TypeTranslatorVisitor = class {
       throw new Error(`Import unknown module or symbol`);
     }
     const { moduleImport, symbol } = this.imports.generateNamedImport(ast.value.moduleName, ast.value.name);
-    const symbolIdentifier = import_typescript43.default.factory.createIdentifier(symbol);
-    const typeName = moduleImport ? import_typescript43.default.factory.createQualifiedName(moduleImport, symbolIdentifier) : symbolIdentifier;
+    const symbolIdentifier = import_typescript42.default.factory.createIdentifier(symbol);
+    const typeName = moduleImport ? import_typescript42.default.factory.createQualifiedName(moduleImport, symbolIdentifier) : symbolIdentifier;
     const typeArguments = ast.typeParams !== null ? ast.typeParams.map((type) => this.translateType(type, context)) : void 0;
-    return import_typescript43.default.factory.createTypeReferenceNode(typeName, typeArguments);
+    return import_typescript42.default.factory.createTypeReferenceNode(typeName, typeArguments);
   }
   visitConditionalExpr(ast, context) {
     throw new Error("Method not implemented.");
@@ -33006,147 +32857,157 @@ var TypeTranslatorVisitor = class {
   }
   visitLiteralArrayExpr(ast, context) {
     const values = ast.entries.map((expr) => this.translateExpression(expr, context));
-    return import_typescript43.default.factory.createTupleTypeNode(values);
+    return import_typescript42.default.factory.createTupleTypeNode(values);
   }
   visitLiteralMapExpr(ast, context) {
     const entries = ast.entries.map((entry) => {
       const { key, quoted } = entry;
       const type = this.translateExpression(entry.value, context);
-      return import_typescript43.default.factory.createPropertySignature(
+      return import_typescript42.default.factory.createPropertySignature(
         void 0,
-        quoted ? import_typescript43.default.factory.createStringLiteral(key) : key,
+        quoted ? import_typescript42.default.factory.createStringLiteral(key) : key,
         void 0,
         type
       );
     });
-    return import_typescript43.default.factory.createTypeLiteralNode(entries);
+    return import_typescript42.default.factory.createTypeLiteralNode(entries);
   }
   visitCommaExpr(ast, context) {
     throw new Error("Method not implemented.");
   }
   visitWrappedNodeExpr(ast, context) {
     const node = ast.node;
-    if (import_typescript43.default.isEntityName(node)) {
-      return import_typescript43.default.factory.createTypeReferenceNode(node, void 0);
-    } else if (import_typescript43.default.isTypeNode(node)) {
+    if (import_typescript42.default.isEntityName(node)) {
+      return import_typescript42.default.factory.createTypeReferenceNode(node, void 0);
+    } else if (import_typescript42.default.isTypeNode(node)) {
       return node;
-    } else if (import_typescript43.default.isLiteralExpression(node)) {
-      return import_typescript43.default.factory.createLiteralTypeNode(node);
+    } else if (import_typescript42.default.isLiteralExpression(node)) {
+      return import_typescript42.default.factory.createLiteralTypeNode(node);
     } else {
-      throw new Error(`Unsupported WrappedNodeExpr in TypeTranslatorVisitor: ${import_typescript43.default.SyntaxKind[node.kind]}`);
+      throw new Error(`Unsupported WrappedNodeExpr in TypeTranslatorVisitor: ${import_typescript42.default.SyntaxKind[node.kind]}`);
     }
   }
   visitTypeofExpr(ast, context) {
     const typeNode = this.translateExpression(ast.expr, context);
-    if (!import_typescript43.default.isTypeReferenceNode(typeNode)) {
+    if (!import_typescript42.default.isTypeReferenceNode(typeNode)) {
       throw new Error(`The target of a typeof expression must be a type reference, but it was
-          ${import_typescript43.default.SyntaxKind[typeNode.kind]}`);
+          ${import_typescript42.default.SyntaxKind[typeNode.kind]}`);
     }
-    return import_typescript43.default.factory.createTypeQueryNode(typeNode.typeName);
+    return import_typescript42.default.factory.createTypeQueryNode(typeNode.typeName);
   }
   translateType(type, context) {
     const typeNode = type.visitType(this, context);
-    if (!import_typescript43.default.isTypeNode(typeNode)) {
-      throw new Error(`A Type must translate to a TypeNode, but was ${import_typescript43.default.SyntaxKind[typeNode.kind]}`);
+    if (!import_typescript42.default.isTypeNode(typeNode)) {
+      throw new Error(`A Type must translate to a TypeNode, but was ${import_typescript42.default.SyntaxKind[typeNode.kind]}`);
     }
     return typeNode;
   }
   translateExpression(expr, context) {
     const typeNode = expr.visitExpression(this, context);
-    if (!import_typescript43.default.isTypeNode(typeNode)) {
-      throw new Error(`An Expression must translate to a TypeNode, but was ${import_typescript43.default.SyntaxKind[typeNode.kind]}`);
+    if (!import_typescript42.default.isTypeNode(typeNode)) {
+      throw new Error(`An Expression must translate to a TypeNode, but was ${import_typescript42.default.SyntaxKind[typeNode.kind]}`);
     }
     return typeNode;
   }
-  translateTypeReference(type, context, viaModule) {
-    const target = import_typescript43.default.isIdentifier(type.typeName) ? type.typeName : type.typeName.right;
-    const declaration = this.reflector.getDeclarationOfIdentifier(target);
+  translateTransplantedTypeReferenceNode(node, context) {
+    const declaration = this.reflector.getDeclarationOfIdentifier(node.typeName);
     if (declaration === null) {
-      throw new Error(`Unable to statically determine the declaration file of type node ${target.text}`);
+      throw new Error(`Unable to statically determine the declaration file of type node ${node.typeName.text}`);
     }
-    let owningModule2 = viaModule;
-    if (declaration.viaModule !== null) {
-      owningModule2 = {
-        specifier: declaration.viaModule,
-        resolutionContext: type.getSourceFile().fileName
+    const emittedType = this.refEmitter.emit(new Reference2(declaration.node), this.contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports);
+    assertSuccessfulReferenceEmit(emittedType, node, "type");
+    const result = emittedType.expression.visitExpression(this, context);
+    if (!import_typescript42.default.isTypeReferenceNode(result)) {
+      throw new Error(`Expected TypeReferenceNode when referencing the type for ${node.typeName.text}, but received ${import_typescript42.default.SyntaxKind[result.kind]}`);
+    }
+    if (node.typeArguments === void 0 || node.typeArguments.length === 0) {
+      return result;
+    }
+    const translatedArgs = node.typeArguments.map((arg) => this.translateTransplantedTypeNode(arg, context));
+    return import_typescript42.default.factory.updateTypeReferenceNode(result, result.typeName, import_typescript42.default.factory.createNodeArray(translatedArgs));
+  }
+  translateTransplantedTypeNode(rootNode, context) {
+    const factory8 = (transformContext) => (root) => {
+      const walk = (node) => {
+        if (import_typescript42.default.isTypeReferenceNode(node) && import_typescript42.default.isIdentifier(node.typeName)) {
+          const translated = this.translateTransplantedTypeReferenceNode(node, context);
+          if (translated !== node) {
+            return translated;
+          }
+        }
+        return import_typescript42.default.visitEachChild(node, walk, transformContext);
       };
-    }
-    const reference2 = new Reference2(declaration.node, owningModule2);
-    const emittedType = this.refEmitter.emit(reference2, this.contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports);
-    assertSuccessfulReferenceEmit(emittedType, target, "type");
-    const typeNode = this.translateExpression(emittedType.expression, context);
-    if (!import_typescript43.default.isTypeReferenceNode(typeNode)) {
-      throw new Error(`Expected TypeReferenceNode for emitted reference, got ${import_typescript43.default.SyntaxKind[typeNode.kind]}.`);
-    }
-    return typeNode;
+      return import_typescript42.default.visitNode(root, walk);
+    };
+    return import_typescript42.default.transform(rootNode, [factory8]).transformed[0];
   }
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/translator/src/typescript_ast_factory.mjs
-var import_typescript44 = __toESM(require("typescript"), 1);
+var import_typescript43 = __toESM(require("typescript"), 1);
 var PureAnnotation;
 (function(PureAnnotation2) {
   PureAnnotation2["CLOSURE"] = "* @pureOrBreakMyCode ";
   PureAnnotation2["TERSER"] = "@__PURE__";
 })(PureAnnotation || (PureAnnotation = {}));
 var UNARY_OPERATORS3 = {
-  "+": import_typescript44.default.SyntaxKind.PlusToken,
-  "-": import_typescript44.default.SyntaxKind.MinusToken,
-  "!": import_typescript44.default.SyntaxKind.ExclamationToken
+  "+": import_typescript43.default.SyntaxKind.PlusToken,
+  "-": import_typescript43.default.SyntaxKind.MinusToken,
+  "!": import_typescript43.default.SyntaxKind.ExclamationToken
 };
 var BINARY_OPERATORS4 = {
-  "&&": import_typescript44.default.SyntaxKind.AmpersandAmpersandToken,
-  ">": import_typescript44.default.SyntaxKind.GreaterThanToken,
-  ">=": import_typescript44.default.SyntaxKind.GreaterThanEqualsToken,
-  "&": import_typescript44.default.SyntaxKind.AmpersandToken,
-  "/": import_typescript44.default.SyntaxKind.SlashToken,
-  "==": import_typescript44.default.SyntaxKind.EqualsEqualsToken,
-  "===": import_typescript44.default.SyntaxKind.EqualsEqualsEqualsToken,
-  "<": import_typescript44.default.SyntaxKind.LessThanToken,
-  "<=": import_typescript44.default.SyntaxKind.LessThanEqualsToken,
-  "-": import_typescript44.default.SyntaxKind.MinusToken,
-  "%": import_typescript44.default.SyntaxKind.PercentToken,
-  "*": import_typescript44.default.SyntaxKind.AsteriskToken,
-  "!=": import_typescript44.default.SyntaxKind.ExclamationEqualsToken,
-  "!==": import_typescript44.default.SyntaxKind.ExclamationEqualsEqualsToken,
-  "||": import_typescript44.default.SyntaxKind.BarBarToken,
-  "+": import_typescript44.default.SyntaxKind.PlusToken,
-  "??": import_typescript44.default.SyntaxKind.QuestionQuestionToken
+  "&&": import_typescript43.default.SyntaxKind.AmpersandAmpersandToken,
+  ">": import_typescript43.default.SyntaxKind.GreaterThanToken,
+  ">=": import_typescript43.default.SyntaxKind.GreaterThanEqualsToken,
+  "&": import_typescript43.default.SyntaxKind.AmpersandToken,
+  "/": import_typescript43.default.SyntaxKind.SlashToken,
+  "==": import_typescript43.default.SyntaxKind.EqualsEqualsToken,
+  "===": import_typescript43.default.SyntaxKind.EqualsEqualsEqualsToken,
+  "<": import_typescript43.default.SyntaxKind.LessThanToken,
+  "<=": import_typescript43.default.SyntaxKind.LessThanEqualsToken,
+  "-": import_typescript43.default.SyntaxKind.MinusToken,
+  "%": import_typescript43.default.SyntaxKind.PercentToken,
+  "*": import_typescript43.default.SyntaxKind.AsteriskToken,
+  "!=": import_typescript43.default.SyntaxKind.ExclamationEqualsToken,
+  "!==": import_typescript43.default.SyntaxKind.ExclamationEqualsEqualsToken,
+  "||": import_typescript43.default.SyntaxKind.BarBarToken,
+  "+": import_typescript43.default.SyntaxKind.PlusToken,
+  "??": import_typescript43.default.SyntaxKind.QuestionQuestionToken
 };
 var VAR_TYPES = {
-  "const": import_typescript44.default.NodeFlags.Const,
-  "let": import_typescript44.default.NodeFlags.Let,
-  "var": import_typescript44.default.NodeFlags.None
+  "const": import_typescript43.default.NodeFlags.Const,
+  "let": import_typescript43.default.NodeFlags.Let,
+  "var": import_typescript43.default.NodeFlags.None
 };
 var TypeScriptAstFactory = class {
   constructor(annotateForClosureCompiler) {
     this.annotateForClosureCompiler = annotateForClosureCompiler;
     this.externalSourceFiles = /* @__PURE__ */ new Map();
     this.attachComments = attachComments;
-    this.createArrayLiteral = import_typescript44.default.factory.createArrayLiteralExpression;
-    this.createElementAccess = import_typescript44.default.factory.createElementAccessExpression;
-    this.createExpressionStatement = import_typescript44.default.factory.createExpressionStatement;
-    this.createIdentifier = import_typescript44.default.factory.createIdentifier;
-    this.createParenthesizedExpression = import_typescript44.default.factory.createParenthesizedExpression;
-    this.createPropertyAccess = import_typescript44.default.factory.createPropertyAccessExpression;
-    this.createThrowStatement = import_typescript44.default.factory.createThrowStatement;
-    this.createTypeOfExpression = import_typescript44.default.factory.createTypeOfExpression;
+    this.createArrayLiteral = import_typescript43.default.factory.createArrayLiteralExpression;
+    this.createElementAccess = import_typescript43.default.factory.createElementAccessExpression;
+    this.createExpressionStatement = import_typescript43.default.factory.createExpressionStatement;
+    this.createIdentifier = import_typescript43.default.factory.createIdentifier;
+    this.createParenthesizedExpression = import_typescript43.default.factory.createParenthesizedExpression;
+    this.createPropertyAccess = import_typescript43.default.factory.createPropertyAccessExpression;
+    this.createThrowStatement = import_typescript43.default.factory.createThrowStatement;
+    this.createTypeOfExpression = import_typescript43.default.factory.createTypeOfExpression;
   }
   createAssignment(target, value) {
-    return import_typescript44.default.factory.createBinaryExpression(target, import_typescript44.default.SyntaxKind.EqualsToken, value);
+    return import_typescript43.default.factory.createBinaryExpression(target, import_typescript43.default.SyntaxKind.EqualsToken, value);
   }
   createBinaryExpression(leftOperand, operator, rightOperand) {
-    return import_typescript44.default.factory.createBinaryExpression(leftOperand, BINARY_OPERATORS4[operator], rightOperand);
+    return import_typescript43.default.factory.createBinaryExpression(leftOperand, BINARY_OPERATORS4[operator], rightOperand);
   }
   createBlock(body) {
-    return import_typescript44.default.factory.createBlock(body);
+    return import_typescript43.default.factory.createBlock(body);
   }
   createCallExpression(callee, args, pure) {
-    const call2 = import_typescript44.default.factory.createCallExpression(callee, void 0, args);
+    const call2 = import_typescript43.default.factory.createCallExpression(callee, void 0, args);
     if (pure) {
-      import_typescript44.default.addSyntheticLeadingComment(
+      import_typescript43.default.addSyntheticLeadingComment(
         call2,
-        import_typescript44.default.SyntaxKind.MultiLineCommentTrivia,
+        import_typescript43.default.SyntaxKind.MultiLineCommentTrivia,
         this.annotateForClosureCompiler ? PureAnnotation.CLOSURE : PureAnnotation.TERSER,
         false
       );
@@ -33154,64 +33015,64 @@ var TypeScriptAstFactory = class {
     return call2;
   }
   createConditional(condition, whenTrue, whenFalse) {
-    return import_typescript44.default.factory.createConditionalExpression(condition, void 0, whenTrue, void 0, whenFalse);
+    return import_typescript43.default.factory.createConditionalExpression(condition, void 0, whenTrue, void 0, whenFalse);
   }
   createDynamicImport(url) {
-    return import_typescript44.default.factory.createCallExpression(
-      import_typescript44.default.factory.createToken(import_typescript44.default.SyntaxKind.ImportKeyword),
+    return import_typescript43.default.factory.createCallExpression(
+      import_typescript43.default.factory.createToken(import_typescript43.default.SyntaxKind.ImportKeyword),
       void 0,
-      [import_typescript44.default.factory.createStringLiteral(url)]
+      [import_typescript43.default.factory.createStringLiteral(url)]
     );
   }
   createFunctionDeclaration(functionName, parameters, body) {
-    if (!import_typescript44.default.isBlock(body)) {
-      throw new Error(`Invalid syntax, expected a block, but got ${import_typescript44.default.SyntaxKind[body.kind]}.`);
+    if (!import_typescript43.default.isBlock(body)) {
+      throw new Error(`Invalid syntax, expected a block, but got ${import_typescript43.default.SyntaxKind[body.kind]}.`);
     }
-    return import_typescript44.default.factory.createFunctionDeclaration(void 0, void 0, functionName, void 0, parameters.map((param) => import_typescript44.default.factory.createParameterDeclaration(void 0, void 0, param)), void 0, body);
+    return import_typescript43.default.factory.createFunctionDeclaration(void 0, void 0, functionName, void 0, parameters.map((param) => import_typescript43.default.factory.createParameterDeclaration(void 0, void 0, param)), void 0, body);
   }
   createFunctionExpression(functionName, parameters, body) {
-    if (!import_typescript44.default.isBlock(body)) {
-      throw new Error(`Invalid syntax, expected a block, but got ${import_typescript44.default.SyntaxKind[body.kind]}.`);
+    if (!import_typescript43.default.isBlock(body)) {
+      throw new Error(`Invalid syntax, expected a block, but got ${import_typescript43.default.SyntaxKind[body.kind]}.`);
     }
-    return import_typescript44.default.factory.createFunctionExpression(void 0, void 0, functionName != null ? functionName : void 0, void 0, parameters.map((param) => import_typescript44.default.factory.createParameterDeclaration(void 0, void 0, param)), void 0, body);
+    return import_typescript43.default.factory.createFunctionExpression(void 0, void 0, functionName != null ? functionName : void 0, void 0, parameters.map((param) => import_typescript43.default.factory.createParameterDeclaration(void 0, void 0, param)), void 0, body);
   }
   createArrowFunctionExpression(parameters, body) {
-    if (import_typescript44.default.isStatement(body) && !import_typescript44.default.isBlock(body)) {
-      throw new Error(`Invalid syntax, expected a block, but got ${import_typescript44.default.SyntaxKind[body.kind]}.`);
+    if (import_typescript43.default.isStatement(body) && !import_typescript43.default.isBlock(body)) {
+      throw new Error(`Invalid syntax, expected a block, but got ${import_typescript43.default.SyntaxKind[body.kind]}.`);
     }
-    return import_typescript44.default.factory.createArrowFunction(void 0, void 0, parameters.map((param) => import_typescript44.default.factory.createParameterDeclaration(void 0, void 0, param)), void 0, void 0, body);
+    return import_typescript43.default.factory.createArrowFunction(void 0, void 0, parameters.map((param) => import_typescript43.default.factory.createParameterDeclaration(void 0, void 0, param)), void 0, void 0, body);
   }
   createIfStatement(condition, thenStatement, elseStatement) {
-    return import_typescript44.default.factory.createIfStatement(condition, thenStatement, elseStatement != null ? elseStatement : void 0);
+    return import_typescript43.default.factory.createIfStatement(condition, thenStatement, elseStatement != null ? elseStatement : void 0);
   }
   createLiteral(value) {
     if (value === void 0) {
-      return import_typescript44.default.factory.createIdentifier("undefined");
+      return import_typescript43.default.factory.createIdentifier("undefined");
     } else if (value === null) {
-      return import_typescript44.default.factory.createNull();
+      return import_typescript43.default.factory.createNull();
     } else if (typeof value === "boolean") {
-      return value ? import_typescript44.default.factory.createTrue() : import_typescript44.default.factory.createFalse();
+      return value ? import_typescript43.default.factory.createTrue() : import_typescript43.default.factory.createFalse();
     } else if (typeof value === "number") {
-      return import_typescript44.default.factory.createNumericLiteral(value);
+      return import_typescript43.default.factory.createNumericLiteral(value);
     } else {
-      return import_typescript44.default.factory.createStringLiteral(value);
+      return import_typescript43.default.factory.createStringLiteral(value);
     }
   }
   createNewExpression(expression, args) {
-    return import_typescript44.default.factory.createNewExpression(expression, void 0, args);
+    return import_typescript43.default.factory.createNewExpression(expression, void 0, args);
   }
   createObjectLiteral(properties) {
-    return import_typescript44.default.factory.createObjectLiteralExpression(properties.map((prop) => import_typescript44.default.factory.createPropertyAssignment(prop.quoted ? import_typescript44.default.factory.createStringLiteral(prop.propertyName) : import_typescript44.default.factory.createIdentifier(prop.propertyName), prop.value)));
+    return import_typescript43.default.factory.createObjectLiteralExpression(properties.map((prop) => import_typescript43.default.factory.createPropertyAssignment(prop.quoted ? import_typescript43.default.factory.createStringLiteral(prop.propertyName) : import_typescript43.default.factory.createIdentifier(prop.propertyName), prop.value)));
   }
   createReturnStatement(expression) {
-    return import_typescript44.default.factory.createReturnStatement(expression != null ? expression : void 0);
+    return import_typescript43.default.factory.createReturnStatement(expression != null ? expression : void 0);
   }
   createTaggedTemplate(tag, template2) {
     let templateLiteral;
     const length = template2.elements.length;
     const head = template2.elements[0];
     if (length === 1) {
-      templateLiteral = import_typescript44.default.factory.createNoSubstitutionTemplateLiteral(head.cooked, head.raw);
+      templateLiteral = import_typescript43.default.factory.createNoSubstitutionTemplateLiteral(head.cooked, head.raw);
     } else {
       const spans = [];
       for (let i = 1; i < length - 1; i++) {
@@ -33220,7 +33081,7 @@ var TypeScriptAstFactory = class {
         if (range !== null) {
           this.setSourceMapRange(middle, range);
         }
-        spans.push(import_typescript44.default.factory.createTemplateSpan(template2.expressions[i - 1], middle));
+        spans.push(import_typescript43.default.factory.createTemplateSpan(template2.expressions[i - 1], middle));
       }
       const resolvedExpression = template2.expressions[length - 2];
       const templatePart = template2.elements[length - 1];
@@ -33228,19 +33089,19 @@ var TypeScriptAstFactory = class {
       if (templatePart.range !== null) {
         this.setSourceMapRange(templateTail, templatePart.range);
       }
-      spans.push(import_typescript44.default.factory.createTemplateSpan(resolvedExpression, templateTail));
-      templateLiteral = import_typescript44.default.factory.createTemplateExpression(import_typescript44.default.factory.createTemplateHead(head.cooked, head.raw), spans);
+      spans.push(import_typescript43.default.factory.createTemplateSpan(resolvedExpression, templateTail));
+      templateLiteral = import_typescript43.default.factory.createTemplateExpression(import_typescript43.default.factory.createTemplateHead(head.cooked, head.raw), spans);
     }
     if (head.range !== null) {
       this.setSourceMapRange(templateLiteral, head.range);
     }
-    return import_typescript44.default.factory.createTaggedTemplateExpression(tag, void 0, templateLiteral);
+    return import_typescript43.default.factory.createTaggedTemplateExpression(tag, void 0, templateLiteral);
   }
   createUnaryExpression(operator, operand) {
-    return import_typescript44.default.factory.createPrefixUnaryExpression(UNARY_OPERATORS3[operator], operand);
+    return import_typescript43.default.factory.createPrefixUnaryExpression(UNARY_OPERATORS3[operator], operand);
   }
   createVariableDeclaration(variableName, initializer, type) {
-    return import_typescript44.default.factory.createVariableStatement(void 0, import_typescript44.default.factory.createVariableDeclarationList([import_typescript44.default.factory.createVariableDeclaration(variableName, void 0, void 0, initializer != null ? initializer : void 0)], VAR_TYPES[type]));
+    return import_typescript43.default.factory.createVariableStatement(void 0, import_typescript43.default.factory.createVariableDeclarationList([import_typescript43.default.factory.createVariableDeclaration(variableName, void 0, void 0, initializer != null ? initializer : void 0)], VAR_TYPES[type]));
   }
   setSourceMapRange(node, sourceMapRange) {
     if (sourceMapRange === null) {
@@ -33248,31 +33109,31 @@ var TypeScriptAstFactory = class {
     }
     const url = sourceMapRange.url;
     if (!this.externalSourceFiles.has(url)) {
-      this.externalSourceFiles.set(url, import_typescript44.default.createSourceMapSource(url, sourceMapRange.content, (pos) => pos));
+      this.externalSourceFiles.set(url, import_typescript43.default.createSourceMapSource(url, sourceMapRange.content, (pos) => pos));
     }
     const source = this.externalSourceFiles.get(url);
-    import_typescript44.default.setSourceMapRange(node, { pos: sourceMapRange.start.offset, end: sourceMapRange.end.offset, source });
+    import_typescript43.default.setSourceMapRange(node, { pos: sourceMapRange.start.offset, end: sourceMapRange.end.offset, source });
     return node;
   }
 };
 function createTemplateMiddle(cooked, raw) {
-  const node = import_typescript44.default.factory.createTemplateHead(cooked, raw);
-  node.kind = import_typescript44.default.SyntaxKind.TemplateMiddle;
+  const node = import_typescript43.default.factory.createTemplateHead(cooked, raw);
+  node.kind = import_typescript43.default.SyntaxKind.TemplateMiddle;
   return node;
 }
 function createTemplateTail(cooked, raw) {
-  const node = import_typescript44.default.factory.createTemplateHead(cooked, raw);
-  node.kind = import_typescript44.default.SyntaxKind.TemplateTail;
+  const node = import_typescript43.default.factory.createTemplateHead(cooked, raw);
+  node.kind = import_typescript43.default.SyntaxKind.TemplateTail;
   return node;
 }
 function attachComments(statement, leadingComments) {
   for (const comment of leadingComments) {
-    const commentKind = comment.multiline ? import_typescript44.default.SyntaxKind.MultiLineCommentTrivia : import_typescript44.default.SyntaxKind.SingleLineCommentTrivia;
+    const commentKind = comment.multiline ? import_typescript43.default.SyntaxKind.MultiLineCommentTrivia : import_typescript43.default.SyntaxKind.SingleLineCommentTrivia;
     if (comment.multiline) {
-      import_typescript44.default.addSyntheticLeadingComment(statement, commentKind, comment.toString(), comment.trailingNewline);
+      import_typescript43.default.addSyntheticLeadingComment(statement, commentKind, comment.toString(), comment.trailingNewline);
     } else {
       for (const line of comment.toString().split("\n")) {
-        import_typescript44.default.addSyntheticLeadingComment(statement, commentKind, line, comment.trailingNewline);
+        import_typescript43.default.addSyntheticLeadingComment(statement, commentKind, line, comment.trailingNewline);
       }
     }
   }
@@ -33287,28 +33148,28 @@ function translateStatement(statement, imports, options = {}) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/src/utils.mjs
-var import_typescript45 = __toESM(require("typescript"), 1);
+var import_typescript44 = __toESM(require("typescript"), 1);
 function addImports(importManager, sf, extraStatements = []) {
   const addedImports = importManager.getAllImports(sf.fileName).map((i) => {
-    const qualifier = import_typescript45.default.factory.createIdentifier(i.qualifier.text);
-    const importClause = import_typescript45.default.factory.createImportClause(
+    const qualifier = import_typescript44.default.factory.createIdentifier(i.qualifier.text);
+    const importClause = import_typescript44.default.factory.createImportClause(
       false,
       void 0,
-      import_typescript45.default.factory.createNamespaceImport(qualifier)
+      import_typescript44.default.factory.createNamespaceImport(qualifier)
     );
-    const decl = import_typescript45.default.factory.createImportDeclaration(
+    const decl = import_typescript44.default.factory.createImportDeclaration(
       void 0,
       importClause,
-      import_typescript45.default.factory.createStringLiteral(i.specifier)
+      import_typescript44.default.factory.createStringLiteral(i.specifier)
     );
-    import_typescript45.default.setOriginalNode(i.qualifier, decl);
+    import_typescript44.default.setOriginalNode(i.qualifier, decl);
     return decl;
   });
   const existingImports = sf.statements.filter((stmt) => isImportStatement(stmt));
   const body = sf.statements.filter((stmt) => !isImportStatement(stmt));
   if (addedImports.length > 0) {
-    const fileoverviewAnchorStmt = import_typescript45.default.factory.createNotEmittedStatement(sf);
-    return import_typescript45.default.factory.updateSourceFile(sf, import_typescript45.default.factory.createNodeArray([
+    const fileoverviewAnchorStmt = import_typescript44.default.factory.createNotEmittedStatement(sf);
+    return import_typescript44.default.factory.updateSourceFile(sf, import_typescript44.default.factory.createNodeArray([
       fileoverviewAnchorStmt,
       ...existingImports,
       ...addedImports,
@@ -33319,7 +33180,7 @@ function addImports(importManager, sf, extraStatements = []) {
   return sf;
 }
 function isImportStatement(stmt) {
-  return import_typescript45.default.isImportDeclaration(stmt) || import_typescript45.default.isImportEqualsDeclaration(stmt) || import_typescript45.default.isNamespaceImport(stmt);
+  return import_typescript44.default.isImportDeclaration(stmt) || import_typescript44.default.isImportEqualsDeclaration(stmt) || import_typescript44.default.isNamespaceImport(stmt);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/src/declaration.mjs
@@ -33337,7 +33198,7 @@ var DtsTransformRegistry = class {
     if (!sf.isDeclarationFile) {
       return null;
     }
-    const originalSf = import_typescript46.default.getOriginalNode(sf);
+    const originalSf = import_typescript45.default.getOriginalNode(sf);
     let transforms = null;
     if (this.ivyDeclarationTransforms.has(originalSf)) {
       transforms = [];
@@ -33350,7 +33211,7 @@ function declarationTransformFactory(transformRegistry, reflector, refEmitter, i
   return (context) => {
     const transformer = new DtsTransformer(context, reflector, refEmitter, importRewriter, importPrefix);
     return (fileOrBundle) => {
-      if (import_typescript46.default.isBundle(fileOrBundle)) {
+      if (import_typescript45.default.isBundle(fileOrBundle)) {
         return fileOrBundle;
       }
       const transforms = transformRegistry.getAllTransforms(fileOrBundle);
@@ -33372,15 +33233,15 @@ var DtsTransformer = class {
   transform(sf, transforms) {
     const imports = new ImportManager(this.importRewriter, this.importPrefix);
     const visitor = (node) => {
-      if (import_typescript46.default.isClassDeclaration(node)) {
+      if (import_typescript45.default.isClassDeclaration(node)) {
         return this.transformClassDeclaration(node, transforms, imports);
-      } else if (import_typescript46.default.isFunctionDeclaration(node)) {
+      } else if (import_typescript45.default.isFunctionDeclaration(node)) {
         return this.transformFunctionDeclaration(node, transforms, imports);
       } else {
-        return import_typescript46.default.visitEachChild(node, visitor, this.ctx);
+        return import_typescript45.default.visitEachChild(node, visitor, this.ctx);
       }
     };
-    sf = import_typescript46.default.visitNode(sf, visitor, import_typescript46.default.isSourceFile) || sf;
+    sf = import_typescript45.default.visitNode(sf, visitor, import_typescript45.default.isSourceFile) || sf;
     return addImports(imports, sf);
   }
   transformClassDeclaration(clazz, transforms, imports) {
@@ -33408,7 +33269,7 @@ var DtsTransformer = class {
       }
     }
     if (elementsChanged && clazz === newClazz) {
-      newClazz = import_typescript46.default.factory.updateClassDeclaration(
+      newClazz = import_typescript45.default.factory.updateClassDeclaration(
         clazz,
         clazz.modifiers,
         clazz.name,
@@ -33437,16 +33298,16 @@ var IvyDeclarationDtsTransform = class {
     this.declarationFields.set(decl, fields);
   }
   transformClass(clazz, members, reflector, refEmitter, imports) {
-    const original = import_typescript46.default.getOriginalNode(clazz);
+    const original = import_typescript45.default.getOriginalNode(clazz);
     if (!this.declarationFields.has(original)) {
       return clazz;
     }
     const fields = this.declarationFields.get(original);
     const newMembers = fields.map((decl) => {
-      const modifiers = [import_typescript46.default.factory.createModifier(import_typescript46.default.SyntaxKind.StaticKeyword)];
+      const modifiers = [import_typescript45.default.factory.createModifier(import_typescript45.default.SyntaxKind.StaticKeyword)];
       const typeRef = translateType(decl.type, original.getSourceFile(), reflector, refEmitter, imports);
       markForEmitAsSingleLine(typeRef);
-      return import_typescript46.default.factory.createPropertyDeclaration(
+      return import_typescript45.default.factory.createPropertyDeclaration(
         modifiers,
         decl.name,
         void 0,
@@ -33454,7 +33315,7 @@ var IvyDeclarationDtsTransform = class {
         void 0
       );
     });
-    return import_typescript46.default.factory.updateClassDeclaration(
+    return import_typescript45.default.factory.updateClassDeclaration(
       clazz,
       clazz.modifiers,
       clazz.name,
@@ -33465,15 +33326,15 @@ var IvyDeclarationDtsTransform = class {
   }
 };
 function markForEmitAsSingleLine(node) {
-  import_typescript46.default.setEmitFlags(node, import_typescript46.default.EmitFlags.SingleLine);
-  import_typescript46.default.forEachChild(node, markForEmitAsSingleLine);
+  import_typescript45.default.setEmitFlags(node, import_typescript45.default.EmitFlags.SingleLine);
+  import_typescript45.default.forEachChild(node, markForEmitAsSingleLine);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/src/transform.mjs
-var import_typescript48 = __toESM(require("typescript"), 1);
+var import_typescript47 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/util/src/visitor.mjs
-var import_typescript47 = __toESM(require("typescript"), 1);
+var import_typescript46 = __toESM(require("typescript"), 1);
 function visit(node, visitor, context) {
   return visitor._visit(node, context);
 }
@@ -33497,13 +33358,13 @@ var Visitor = class {
   }
   _visit(node, context) {
     let visitedNode = null;
-    node = import_typescript47.default.visitEachChild(node, (child) => child && this._visit(child, context), context);
-    if (import_typescript47.default.isClassDeclaration(node)) {
+    node = import_typescript46.default.visitEachChild(node, (child) => child && this._visit(child, context), context);
+    if (import_typescript46.default.isClassDeclaration(node)) {
       visitedNode = this._visitListEntryNode(node, (node2) => this.visitClassDeclaration(node2));
     } else {
       visitedNode = this.visitOtherNode(node);
     }
-    if (visitedNode && (import_typescript47.default.isBlock(visitedNode) || import_typescript47.default.isSourceFile(visitedNode))) {
+    if (visitedNode && (import_typescript46.default.isBlock(visitedNode) || import_typescript46.default.isSourceFile(visitedNode))) {
       visitedNode = this._maybeProcessStatements(visitedNode);
     }
     return visitedNode;
@@ -33524,11 +33385,11 @@ var Visitor = class {
         this._after.delete(stmt);
       }
     });
-    const statementsArray = import_typescript47.default.factory.createNodeArray(newStatements, node.statements.hasTrailingComma);
-    if (import_typescript47.default.isBlock(node)) {
-      return import_typescript47.default.factory.updateBlock(node, statementsArray);
+    const statementsArray = import_typescript46.default.factory.createNodeArray(newStatements, node.statements.hasTrailingComma);
+    if (import_typescript46.default.isBlock(node)) {
+      return import_typescript46.default.factory.updateBlock(node, statementsArray);
     } else {
-      return import_typescript47.default.factory.updateSourceFile(node, statementsArray, node.isDeclarationFile, node.referencedFiles, node.typeReferenceDirectives, node.hasNoDefaultLib, node.libReferenceDirectives);
+      return import_typescript46.default.factory.updateSourceFile(node, statementsArray, node.isDeclarationFile, node.referencedFiles, node.typeReferenceDirectives, node.hasNoDefaultLib, node.libReferenceDirectives);
     }
   }
 };
@@ -33592,11 +33453,11 @@ var IvyTransformationVisitor = class extends Visitor {
         continue;
       }
       const exprNode = translateExpression(field.initializer, this.importManager, translateOptions);
-      const property2 = import_typescript48.default.factory.createPropertyDeclaration([import_typescript48.default.factory.createToken(import_typescript48.default.SyntaxKind.StaticKeyword)], field.name, void 0, void 0, exprNode);
+      const property2 = import_typescript47.default.factory.createPropertyDeclaration([import_typescript47.default.factory.createToken(import_typescript47.default.SyntaxKind.StaticKeyword)], field.name, void 0, void 0, exprNode);
       if (this.isClosureCompilerEnabled) {
-        import_typescript48.default.addSyntheticLeadingComment(
+        import_typescript47.default.addSyntheticLeadingComment(
           property2,
-          import_typescript48.default.SyntaxKind.MultiLineCommentTrivia,
+          import_typescript47.default.SyntaxKind.MultiLineCommentTrivia,
           "* @nocollapse ",
           false
         );
@@ -33604,13 +33465,13 @@ var IvyTransformationVisitor = class extends Visitor {
       field.statements.map((stmt) => translateStatement(stmt, this.importManager, translateOptions)).forEach((stmt) => statements.push(stmt));
       members.push(property2);
     }
-    const filteredDecorators = maybeFilterDecorator(import_typescript48.default.getDecorators(node), this.compilation.decoratorsFor(node));
-    const nodeModifiers = import_typescript48.default.getModifiers(node);
+    const filteredDecorators = maybeFilterDecorator(import_typescript47.default.getDecorators(node), this.compilation.decoratorsFor(node));
+    const nodeModifiers = import_typescript47.default.getModifiers(node);
     let updatedModifiers;
     if ((filteredDecorators == null ? void 0 : filteredDecorators.length) || (nodeModifiers == null ? void 0 : nodeModifiers.length)) {
       updatedModifiers = [...filteredDecorators || [], ...nodeModifiers || []];
     }
-    node = import_typescript48.default.factory.updateClassDeclaration(
+    node = import_typescript47.default.factory.updateClassDeclaration(
       node,
       updatedModifiers,
       node.name,
@@ -33621,7 +33482,7 @@ var IvyTransformationVisitor = class extends Visitor {
     return { node, after: statements };
   }
   visitOtherNode(node) {
-    if (import_typescript48.default.isImportDeclaration(node) && this.deferrableImports.has(node)) {
+    if (import_typescript47.default.isImportDeclaration(node) && this.deferrableImports.has(node)) {
       return null;
     }
     return node;
@@ -33639,7 +33500,7 @@ var IvyTransformationVisitor = class extends Visitor {
     }
   }
   _nonCoreDecoratorsOnly(node) {
-    const decorators = import_typescript48.default.getDecorators(node);
+    const decorators = import_typescript47.default.getDecorators(node);
     if (decorators === void 0) {
       return void 0;
     }
@@ -33656,22 +33517,22 @@ var IvyTransformationVisitor = class extends Visitor {
     return nodeArrayFromDecoratorsArray(filtered);
   }
   _stripAngularDecorators(node) {
-    const modifiers = import_typescript48.default.canHaveModifiers(node) ? import_typescript48.default.getModifiers(node) : void 0;
-    const nonCoreDecorators = import_typescript48.default.canHaveDecorators(node) ? this._nonCoreDecoratorsOnly(node) : void 0;
+    const modifiers = import_typescript47.default.canHaveModifiers(node) ? import_typescript47.default.getModifiers(node) : void 0;
+    const nonCoreDecorators = import_typescript47.default.canHaveDecorators(node) ? this._nonCoreDecoratorsOnly(node) : void 0;
     const combinedModifiers = [...nonCoreDecorators || [], ...modifiers || []];
-    if (import_typescript48.default.isParameter(node)) {
-      node = import_typescript48.default.factory.updateParameterDeclaration(node, combinedModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
-    } else if (import_typescript48.default.isMethodDeclaration(node)) {
-      node = import_typescript48.default.factory.updateMethodDeclaration(node, combinedModifiers, node.asteriskToken, node.name, node.questionToken, node.typeParameters, node.parameters, node.type, node.body);
-    } else if (import_typescript48.default.isPropertyDeclaration(node)) {
-      node = import_typescript48.default.factory.updatePropertyDeclaration(node, combinedModifiers, node.name, node.questionToken, node.type, node.initializer);
-    } else if (import_typescript48.default.isGetAccessor(node)) {
-      node = import_typescript48.default.factory.updateGetAccessorDeclaration(node, combinedModifiers, node.name, node.parameters, node.type, node.body);
-    } else if (import_typescript48.default.isSetAccessor(node)) {
-      node = import_typescript48.default.factory.updateSetAccessorDeclaration(node, combinedModifiers, node.name, node.parameters, node.body);
-    } else if (import_typescript48.default.isConstructorDeclaration(node)) {
+    if (import_typescript47.default.isParameter(node)) {
+      node = import_typescript47.default.factory.updateParameterDeclaration(node, combinedModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
+    } else if (import_typescript47.default.isMethodDeclaration(node)) {
+      node = import_typescript47.default.factory.updateMethodDeclaration(node, combinedModifiers, node.asteriskToken, node.name, node.questionToken, node.typeParameters, node.parameters, node.type, node.body);
+    } else if (import_typescript47.default.isPropertyDeclaration(node)) {
+      node = import_typescript47.default.factory.updatePropertyDeclaration(node, combinedModifiers, node.name, node.questionToken, node.type, node.initializer);
+    } else if (import_typescript47.default.isGetAccessor(node)) {
+      node = import_typescript47.default.factory.updateGetAccessorDeclaration(node, combinedModifiers, node.name, node.parameters, node.type, node.body);
+    } else if (import_typescript47.default.isSetAccessor(node)) {
+      node = import_typescript47.default.factory.updateSetAccessorDeclaration(node, combinedModifiers, node.name, node.parameters, node.body);
+    } else if (import_typescript47.default.isConstructorDeclaration(node)) {
       const parameters = node.parameters.map((param) => this._stripAngularDecorators(param));
-      node = import_typescript48.default.factory.updateConstructorDeclaration(node, modifiers, parameters, node.body);
+      node = import_typescript47.default.factory.updateConstructorDeclaration(node, modifiers, parameters, node.body);
     }
     return node;
   }
@@ -33683,7 +33544,7 @@ function transformIvySourceFile(compilation, context, reflector, importRewriter,
   visit(file, compilationVisitor, context);
   const transformationVisitor = new IvyTransformationVisitor(compilation, compilationVisitor.classCompilationMap, reflector, importManager, recordWrappedNode, isClosureCompilerEnabled, isCore, compilationVisitor.deferrableImports);
   let sf = visit(file, transformationVisitor, context);
-  const downlevelTranslatedCode = getLocalizeCompileTarget(context) < import_typescript48.default.ScriptTarget.ES2015;
+  const downlevelTranslatedCode = getLocalizeCompileTarget(context) < import_typescript47.default.ScriptTarget.ES2015;
   const constants = constantPool.statements.map((stmt) => translateStatement(stmt, importManager, {
     recordWrappedNode,
     downlevelTaggedTemplates: downlevelTranslatedCode,
@@ -33698,17 +33559,17 @@ function transformIvySourceFile(compilation, context, reflector, importRewriter,
   return sf;
 }
 function getLocalizeCompileTarget(context) {
-  const target = context.getCompilerOptions().target || import_typescript48.default.ScriptTarget.ES2015;
-  return target !== import_typescript48.default.ScriptTarget.JSON ? target : import_typescript48.default.ScriptTarget.ES2015;
+  const target = context.getCompilerOptions().target || import_typescript47.default.ScriptTarget.ES2015;
+  return target !== import_typescript47.default.ScriptTarget.JSON ? target : import_typescript47.default.ScriptTarget.ES2015;
 }
 function getFileOverviewComment(statements) {
   if (statements.length > 0) {
     const host = statements[0];
     let trailing = false;
-    let comments = import_typescript48.default.getSyntheticLeadingComments(host);
+    let comments = import_typescript47.default.getSyntheticLeadingComments(host);
     if (!comments || comments.length === 0) {
       trailing = true;
-      comments = import_typescript48.default.getSyntheticTrailingComments(host);
+      comments = import_typescript47.default.getSyntheticTrailingComments(host);
     }
     if (comments && comments.length > 0 && CLOSURE_FILE_OVERVIEW_REGEXP.test(comments[0].text)) {
       return { comments, host, trailing };
@@ -33720,22 +33581,22 @@ function setFileOverviewComment(sf, fileoverview) {
   const { comments, host, trailing } = fileoverview;
   if (sf.statements.length > 0 && host !== sf.statements[0]) {
     if (trailing) {
-      import_typescript48.default.setSyntheticTrailingComments(host, void 0);
+      import_typescript47.default.setSyntheticTrailingComments(host, void 0);
     } else {
-      import_typescript48.default.setSyntheticLeadingComments(host, void 0);
+      import_typescript47.default.setSyntheticLeadingComments(host, void 0);
     }
-    import_typescript48.default.setSyntheticLeadingComments(sf.statements[0], comments);
+    import_typescript47.default.setSyntheticLeadingComments(sf.statements[0], comments);
   }
 }
 function maybeFilterDecorator(decorators, toRemove) {
   if (decorators === void 0) {
     return void 0;
   }
-  const filtered = decorators.filter((dec) => toRemove.find((decToRemove) => import_typescript48.default.getOriginalNode(dec) === decToRemove) === void 0);
+  const filtered = decorators.filter((dec) => toRemove.find((decToRemove) => import_typescript47.default.getOriginalNode(dec) === decToRemove) === void 0);
   if (filtered.length === 0) {
     return void 0;
   }
-  return import_typescript48.default.factory.createNodeArray(filtered);
+  return import_typescript47.default.factory.createNodeArray(filtered);
 }
 function isFromAngularCore(decorator) {
   return decorator.import !== null && decorator.import.from === "@angular/core";
@@ -33749,7 +33610,7 @@ function createRecorderFn(defaultImportTracker) {
   };
 }
 function nodeArrayFromDecoratorsArray(decorators) {
-  const array = import_typescript48.default.factory.createNodeArray(decorators);
+  const array = import_typescript47.default.factory.createNodeArray(decorators);
   if (array.length > 0) {
     array.pos = decorators[0].pos;
     array.end = decorators[decorators.length - 1].end;
@@ -33758,7 +33619,7 @@ function nodeArrayFromDecoratorsArray(decorators) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/directive/src/shared.mjs
-var import_typescript49 = __toESM(require("typescript"), 1);
+var import_typescript48 = __toESM(require("typescript"), 1);
 var EMPTY_OBJECT = {};
 var QUERY_TYPES = /* @__PURE__ */ new Set([
   "ContentChild",
@@ -33774,7 +33635,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
     throw new FatalDiagnosticError(ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `Incorrect number of arguments to @${decorator.name} decorator`);
   } else {
     const meta = unwrapExpression(decorator.args[0]);
-    if (!import_typescript49.default.isObjectLiteralExpression(meta)) {
+    if (!import_typescript48.default.isObjectLiteralExpression(meta)) {
       throw new FatalDiagnosticError(ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, `@${decorator.name} argument must be an object literal`);
     }
     directive = reflectObjectLiteral(meta);
@@ -33912,7 +33773,7 @@ function extractQueryMetadata(exprNode, name, args, propertyName, reflector, eva
   let emitDistinctChangesOnly = emitDistinctChangesOnlyDefaultValue;
   if (args.length === 2) {
     const optionsExpr = unwrapExpression(args[1]);
-    if (!import_typescript49.default.isObjectLiteralExpression(optionsExpr)) {
+    if (!import_typescript48.default.isObjectLiteralExpression(optionsExpr)) {
       throw new FatalDiagnosticError(ErrorCode.DECORATOR_ARG_NOT_LITERAL, optionsExpr, `@${name} options must be an object literal`);
     }
     const options = reflectObjectLiteral(optionsExpr);
@@ -34007,16 +33868,16 @@ function extractHostBindings2(members, evaluator, coreModule, metadata) {
 }
 function extractQueriesFromDecorator(queryData, reflector, evaluator, isCore) {
   const content = [], view = [];
-  if (!import_typescript49.default.isObjectLiteralExpression(queryData)) {
+  if (!import_typescript48.default.isObjectLiteralExpression(queryData)) {
     throw new FatalDiagnosticError(ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, "Decorator queries metadata must be an object literal");
   }
   reflectObjectLiteral(queryData).forEach((queryExpr, propertyName) => {
     queryExpr = unwrapExpression(queryExpr);
-    if (!import_typescript49.default.isNewExpression(queryExpr)) {
+    if (!import_typescript48.default.isNewExpression(queryExpr)) {
       throw new FatalDiagnosticError(ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, "Decorator query metadata must be an instance of a query type");
     }
-    const queryType = import_typescript49.default.isPropertyAccessExpression(queryExpr.expression) ? queryExpr.expression.name : queryExpr.expression;
-    if (!import_typescript49.default.isIdentifier(queryType)) {
+    const queryType = import_typescript48.default.isPropertyAccessExpression(queryExpr.expression) ? queryExpr.expression.name : queryExpr.expression;
+    if (!import_typescript48.default.isIdentifier(queryType)) {
       throw new FatalDiagnosticError(ErrorCode.VALUE_HAS_WRONG_TYPE, queryData, "Decorator query metadata must be an instance of a query type");
     }
     const type = reflector.getImportOfIdentifier(queryType);
@@ -34045,7 +33906,7 @@ function parseDirectiveStyles(directive, evaluator, compilationMode) {
         const relatedInformation = traceDynamicValue(expression, entry);
         const chain = {
           messageText: `Unknown identifier used as styles string: ${entry.node.getText()} (did you import this string from another file? This is not allowed in local compilation mode. Please either inline it or move it to a separate file and include it using 'styleUrl')`,
-          category: import_typescript49.default.DiagnosticCategory.Error,
+          category: import_typescript48.default.DiagnosticCategory.Error,
           code: 0
         };
         throw new FatalDiagnosticError(ErrorCode.LOCAL_COMPILATION_IMPORTED_STYLES_STRING, expression, chain, relatedInformation);
@@ -34223,10 +34084,7 @@ function parseInputTransformFunction(clazz, classPropertyName, value, reflector,
   }
   const firstParam = ((_a2 = definition.parameters[0]) == null ? void 0 : _a2.name) === "this" ? definition.parameters[1] : definition.parameters[0];
   if (!firstParam) {
-    return {
-      node,
-      type: new Reference2(import_typescript49.default.factory.createKeywordTypeNode(import_typescript49.default.SyntaxKind.UnknownKeyword))
-    };
+    return { node, type: import_typescript48.default.factory.createKeywordTypeNode(import_typescript48.default.SyntaxKind.UnknownKeyword) };
   }
   if (!firstParam.type) {
     throw createValueHasWrongTypeError(value.node, value, "Input transform function first parameter must have a type");
@@ -34235,12 +34093,11 @@ function parseInputTransformFunction(clazz, classPropertyName, value, reflector,
     throw createValueHasWrongTypeError(value.node, value, "Input transform function first parameter cannot be a spread parameter");
   }
   assertEmittableInputType(firstParam.type, clazz.getSourceFile(), reflector, refEmitter);
-  const viaModule = value instanceof Reference2 ? value.bestGuessOwningModule : null;
-  return { node, type: new Reference2(firstParam.type, viaModule) };
+  return { node, type: firstParam.type };
 }
 function assertEmittableInputType(type, contextFile, reflector, refEmitter) {
   (function walk(node) {
-    if (import_typescript49.default.isTypeReferenceNode(node) && import_typescript49.default.isIdentifier(node.typeName)) {
+    if (import_typescript48.default.isTypeReferenceNode(node) && import_typescript48.default.isIdentifier(node.typeName)) {
       const declaration = reflector.getDeclarationOfIdentifier(node.typeName);
       if (declaration !== null) {
         if (declaration.node.getSourceFile() !== contextFile) {
@@ -34602,16 +34459,16 @@ var DirectiveDecoratorHandler = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/ng_module/src/handler.mjs
-var import_typescript51 = __toESM(require("typescript"), 1);
+var import_typescript50 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/ng_module/src/module_with_providers.mjs
-var import_typescript50 = __toESM(require("typescript"), 1);
+var import_typescript49 = __toESM(require("typescript"), 1);
 function createModuleWithProvidersResolver(reflector, isCore) {
   function _reflectModuleFromTypeParam(type, node) {
-    if (!import_typescript50.default.isTypeReferenceNode(type)) {
+    if (!import_typescript49.default.isTypeReferenceNode(type)) {
       return null;
     }
-    const typeName = type && (import_typescript50.default.isIdentifier(type.typeName) && type.typeName || import_typescript50.default.isQualifiedName(type.typeName) && type.typeName.right) || null;
+    const typeName = type && (import_typescript49.default.isIdentifier(type.typeName) && type.typeName || import_typescript49.default.isQualifiedName(type.typeName) && type.typeName.right) || null;
     if (typeName === null) {
       return null;
     }
@@ -34623,7 +34480,7 @@ function createModuleWithProvidersResolver(reflector, isCore) {
       return null;
     }
     if (type.typeArguments === void 0 || type.typeArguments.length !== 1) {
-      const parent = import_typescript50.default.isMethodDeclaration(node) && import_typescript50.default.isClassDeclaration(node.parent) ? node.parent : null;
+      const parent = import_typescript49.default.isMethodDeclaration(node) && import_typescript49.default.isClassDeclaration(node.parent) ? node.parent : null;
       const symbolName = (parent && parent.name ? parent.name.getText() + "." : "") + (node.name ? node.name.getText() : "anonymous");
       throw new FatalDiagnosticError(ErrorCode.NGMODULE_MODULE_WITH_PROVIDERS_MISSING_GENERIC, type, `${symbolName} returns a ModuleWithProviders type without a generic type argument. Please add a generic type argument to the ModuleWithProviders type. If this occurrence is in library code you don't control, please contact the library authors.`);
     }
@@ -34631,13 +34488,13 @@ function createModuleWithProvidersResolver(reflector, isCore) {
     return typeNodeToValueExpr(arg);
   }
   function _reflectModuleFromLiteralType(type) {
-    if (!import_typescript50.default.isIntersectionTypeNode(type)) {
+    if (!import_typescript49.default.isIntersectionTypeNode(type)) {
       return null;
     }
     for (const t of type.types) {
-      if (import_typescript50.default.isTypeLiteralNode(t)) {
+      if (import_typescript49.default.isTypeLiteralNode(t)) {
         for (const m of t.members) {
-          const ngModuleType = import_typescript50.default.isPropertySignature(m) && import_typescript50.default.isIdentifier(m.name) && m.name.text === "ngModule" && m.type || null;
+          const ngModuleType = import_typescript49.default.isPropertySignature(m) && import_typescript49.default.isIdentifier(m.name) && m.name.text === "ngModule" && m.type || null;
           const ngModuleExpression = ngModuleType && typeNodeToValueExpr(ngModuleType);
           if (ngModuleExpression) {
             return ngModuleExpression;
@@ -34781,8 +34638,8 @@ var NgModuleDecoratorHandler = class {
     if (decorator.args === null || decorator.args.length > 1) {
       throw new FatalDiagnosticError(ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, `Incorrect number of arguments to @NgModule decorator`);
     }
-    const meta = decorator.args.length === 1 ? unwrapExpression(decorator.args[0]) : import_typescript51.default.factory.createObjectLiteralExpression([]);
-    if (!import_typescript51.default.isObjectLiteralExpression(meta)) {
+    const meta = decorator.args.length === 1 ? unwrapExpression(decorator.args[0]) : import_typescript50.default.factory.createObjectLiteralExpression([]);
+    if (!import_typescript50.default.isObjectLiteralExpression(meta)) {
       throw new FatalDiagnosticError(ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, "@NgModule argument must be an object literal");
     }
     const ngModule = reflectObjectLiteral(meta);
@@ -34842,7 +34699,7 @@ var NgModuleDecoratorHandler = class {
         id = new WrappedNodeExpr(idExpr);
       } else {
         const diag = makeDiagnostic(ErrorCode.WARN_NGMODULE_ID_UNNECESSARY, idExpr, `Using 'module.id' for NgModule.id is a common anti-pattern that is ignored by the Angular compiler.`);
-        diag.category = import_typescript51.default.DiagnosticCategory.Warning;
+        diag.category = import_typescript50.default.DiagnosticCategory.Warning;
         diagnostics.push(diag);
       }
     }
@@ -34894,16 +34751,16 @@ var NgModuleDecoratorHandler = class {
     }
     const rawProviders = ngModule.has("providers") ? ngModule.get("providers") : null;
     let wrappedProviders = null;
-    if (rawProviders !== null && (!import_typescript51.default.isArrayLiteralExpression(rawProviders) || rawProviders.elements.length > 0)) {
+    if (rawProviders !== null && (!import_typescript50.default.isArrayLiteralExpression(rawProviders) || rawProviders.elements.length > 0)) {
       wrappedProviders = new WrappedNodeExpr(this.annotateForClosureCompiler ? wrapFunctionExpressionsInParens(rawProviders) : rawProviders);
     }
     const topLevelImports = [];
     if (this.compilationMode !== CompilationMode.LOCAL && ngModule.has("imports")) {
       const rawImports2 = unwrapExpression(ngModule.get("imports"));
       let topLevelExpressions = [];
-      if (import_typescript51.default.isArrayLiteralExpression(rawImports2)) {
+      if (import_typescript50.default.isArrayLiteralExpression(rawImports2)) {
         for (const element2 of rawImports2.elements) {
-          if (import_typescript51.default.isSpreadElement(element2)) {
+          if (import_typescript50.default.isSpreadElement(element2)) {
             topLevelExpressions.push(element2.expression);
             continue;
           }
@@ -34935,7 +34792,7 @@ var NgModuleDecoratorHandler = class {
         if (exp === null) {
           continue;
         }
-        if (import_typescript51.default.isArrayLiteralExpression(exp)) {
+        if (import_typescript50.default.isArrayLiteralExpression(exp)) {
           if (exp.elements) {
             injectorMetadata.imports.push(...exp.elements.map((n) => new WrappedNodeExpr(n)));
           }
@@ -35224,7 +35081,7 @@ function isNgModule(node, compilation) {
   return !compilation.dependencies.some((dep) => dep.ref.node === node);
 }
 function isModuleIdExpression(expr) {
-  return import_typescript51.default.isPropertyAccessExpression(expr) && import_typescript51.default.isIdentifier(expr.expression) && expr.expression.text === "module" && expr.name.text === "id";
+  return import_typescript50.default.isPropertyAccessExpression(expr) && import_typescript50.default.isIdentifier(expr.expression) && expr.expression.text === "module" && expr.name.text === "id";
 }
 function makeStandaloneBootstrapDiagnostic(ngModuleClass, bootstrappedClassRef, rawBootstrapExpr) {
   const componentClassName = bootstrappedClassRef.node.name.text;
@@ -35260,7 +35117,7 @@ function checkCustomElementSelectorForErrors(selector) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/component/src/resources.mjs
-var import_typescript53 = __toESM(require("typescript"), 1);
+var import_typescript52 = __toESM(require("typescript"), 1);
 function getTemplateDeclarationNodeForError(declaration) {
   return declaration.isInline ? declaration.expression : declaration.templateUrlExpression;
 }
@@ -35272,7 +35129,7 @@ function extractTemplate(node, template2, evaluator, depTracker, resourceLoader,
     let sourceMapping;
     let escapedString = false;
     let sourceMapUrl;
-    if (import_typescript53.default.isStringLiteral(template2.expression) || import_typescript53.default.isNoSubstitutionTemplateLiteral(template2.expression)) {
+    if (import_typescript52.default.isStringLiteral(template2.expression) || import_typescript52.default.isNoSubstitutionTemplateLiteral(template2.expression)) {
       sourceParseRange = getTemplateRange(template2.expression);
       sourceStr = template2.expression.getSourceFile().text;
       templateContent = template2.expression.text;
@@ -35288,7 +35145,7 @@ function extractTemplate(node, template2, evaluator, depTracker, resourceLoader,
         const relatedInformation = traceDynamicValue(template2.expression, resolvedTemplate);
         const chain = {
           messageText: `Unknown identifier used as template string: ${template2.expression.getText()} (did you import this string from another file? This is not allowed in local compilation mode. Please either inline it or move it to a separate file and include it using 'templateUrl')`,
-          category: import_typescript53.default.DiagnosticCategory.Error,
+          category: import_typescript52.default.DiagnosticCategory.Error,
           code: 0
         };
         throw new FatalDiagnosticError(ErrorCode.LOCAL_COMPILATION_IMPORTED_TEMPLATE_STRING, template2.expression, chain, relatedInformation);
@@ -35452,7 +35309,7 @@ function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanaly
 }
 function getTemplateRange(templateExpr) {
   const startPos = templateExpr.getStart() + 1;
-  const { line, character } = import_typescript53.default.getLineAndCharacterOfPosition(templateExpr.getSourceFile(), startPos);
+  const { line, character } = import_typescript52.default.getLineAndCharacterOfPosition(templateExpr.getSourceFile(), startPos);
   return {
     startPos,
     startLine: line,
@@ -35485,7 +35342,7 @@ function transformDecoratorResources(dec, component, styles, template2) {
   const metadata = new Map(component);
   if (metadata.has("templateUrl")) {
     metadata.delete("templateUrl");
-    metadata.set("template", import_typescript53.default.factory.createStringLiteral(template2.content));
+    metadata.set("template", import_typescript52.default.factory.createStringLiteral(template2.content));
   }
   if (metadata.has("styleUrls") || metadata.has("styleUrl") || metadata.has("styles")) {
     metadata.delete("styles");
@@ -35494,20 +35351,20 @@ function transformDecoratorResources(dec, component, styles, template2) {
     if (styles.length > 0) {
       const styleNodes = styles.reduce((result, style) => {
         if (style.trim().length > 0) {
-          result.push(import_typescript53.default.factory.createStringLiteral(style));
+          result.push(import_typescript52.default.factory.createStringLiteral(style));
         }
         return result;
       }, []);
       if (styleNodes.length > 0) {
-        metadata.set("styles", import_typescript53.default.factory.createArrayLiteralExpression(styleNodes));
+        metadata.set("styles", import_typescript52.default.factory.createArrayLiteralExpression(styleNodes));
       }
     }
   }
   const newMetadataFields = [];
   for (const [name, value] of metadata.entries()) {
-    newMetadataFields.push(import_typescript53.default.factory.createPropertyAssignment(name, value));
+    newMetadataFields.push(import_typescript52.default.factory.createPropertyAssignment(name, value));
   }
-  return __spreadProps(__spreadValues({}, dec), { args: [import_typescript53.default.factory.createObjectLiteralExpression(newMetadataFields)] });
+  return __spreadProps(__spreadValues({}, dec), { args: [import_typescript52.default.factory.createObjectLiteralExpression(newMetadataFields)] });
 }
 function extractComponentStyleUrls(evaluator, component) {
   const styleUrlsExpr = component.get("styleUrls");
@@ -35533,9 +35390,9 @@ function extractComponentStyleUrls(evaluator, component) {
 }
 function extractStyleUrlsFromExpression(evaluator, styleUrlsExpr) {
   const styleUrls = [];
-  if (import_typescript53.default.isArrayLiteralExpression(styleUrlsExpr)) {
+  if (import_typescript52.default.isArrayLiteralExpression(styleUrlsExpr)) {
     for (const styleUrlExpr of styleUrlsExpr.elements) {
-      if (import_typescript53.default.isSpreadElement(styleUrlExpr)) {
+      if (import_typescript52.default.isSpreadElement(styleUrlExpr)) {
         styleUrls.push(...extractStyleUrlsFromExpression(evaluator, styleUrlExpr.expression));
       } else {
         const styleUrl = evaluator.evaluate(styleUrlExpr);
@@ -35567,18 +35424,18 @@ function extractStyleUrlsFromExpression(evaluator, styleUrlsExpr) {
 function extractStyleResources(resourceLoader, component, containingFile) {
   const styles = /* @__PURE__ */ new Set();
   function stringLiteralElements(array) {
-    return array.elements.filter((e) => import_typescript53.default.isStringLiteralLike(e));
+    return array.elements.filter((e) => import_typescript52.default.isStringLiteralLike(e));
   }
   const styleUrlExpr = component.get("styleUrl");
   const styleUrlsExpr = component.get("styleUrls");
-  if (styleUrlsExpr !== void 0 && import_typescript53.default.isArrayLiteralExpression(styleUrlsExpr)) {
+  if (styleUrlsExpr !== void 0 && import_typescript52.default.isArrayLiteralExpression(styleUrlsExpr)) {
     for (const expression of stringLiteralElements(styleUrlsExpr)) {
       const resource = stringLiteralUrlToResource(resourceLoader, expression, containingFile);
       if (resource !== null) {
         styles.add(resource);
       }
     }
-  } else if (styleUrlExpr !== void 0 && import_typescript53.default.isStringLiteralLike(styleUrlExpr)) {
+  } else if (styleUrlExpr !== void 0 && import_typescript52.default.isStringLiteralLike(styleUrlExpr)) {
     const resource = stringLiteralUrlToResource(resourceLoader, styleUrlExpr, containingFile);
     if (resource !== null) {
       styles.add(resource);
@@ -35586,11 +35443,11 @@ function extractStyleResources(resourceLoader, component, containingFile) {
   }
   const stylesExpr = component.get("styles");
   if (stylesExpr !== void 0) {
-    if (import_typescript53.default.isArrayLiteralExpression(stylesExpr)) {
+    if (import_typescript52.default.isArrayLiteralExpression(stylesExpr)) {
       for (const expression of stringLiteralElements(stylesExpr)) {
         styles.add({ path: null, expression });
       }
-    } else if (import_typescript53.default.isStringLiteralLike(stylesExpr)) {
+    } else if (import_typescript52.default.isStringLiteralLike(stylesExpr)) {
       styles.add({ path: null, expression: stylesExpr });
     }
   }
@@ -36104,7 +35961,7 @@ var ComponentDecoratorHandler = class {
     return null;
   }
   typeCheck(ctx, node, meta) {
-    if (this.typeCheckScopeRegistry === null || !import_typescript54.default.isClassDeclaration(node)) {
+    if (this.typeCheckScopeRegistry === null || !import_typescript53.default.isClassDeclaration(node)) {
       return;
     }
     if (meta.isPoisoned && !this.usePoisonedData) {
@@ -36458,10 +36315,10 @@ var ComponentDecoratorHandler = class {
       this.resolveDeferTriggers(deferBlock, deferBlock.prefetchTriggers, componentBoundTarget, triggerElements);
       resolutionData.deferBlocks.set(deferBlock, { deps, triggerElements });
     }
-    if (analysisData.meta.isStandalone && analysisData.rawImports !== null && import_typescript54.default.isArrayLiteralExpression(analysisData.rawImports)) {
+    if (analysisData.meta.isStandalone && analysisData.rawImports !== null && import_typescript53.default.isArrayLiteralExpression(analysisData.rawImports)) {
       for (const element2 of analysisData.rawImports.elements) {
         const node = tryUnwrapForwardRef(element2, this.reflector) || element2;
-        if (!import_typescript54.default.isIdentifier(node)) {
+        if (!import_typescript53.default.isIdentifier(node)) {
           continue;
         }
         const imp = this.reflector.getImportOfIdentifier(node);
@@ -36531,7 +36388,7 @@ function validateStandaloneImports(importRefs, importExpr2, metaReader, scopeRea
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/src/injectable.mjs
-var import_typescript56 = __toESM(require("typescript"), 1);
+var import_typescript55 = __toESM(require("typescript"), 1);
 var InjectableDecoratorHandler = class {
   constructor(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, perf, includeClassMetadata, compilationMode, errorOnDuplicateProv = true) {
     this.reflector = reflector;
@@ -36645,7 +36502,7 @@ function extractInjectableMetadata(clazz, decorator, reflector) {
     };
   } else if (decorator.args.length === 1) {
     const metaNode = decorator.args[0];
-    if (!import_typescript56.default.isObjectLiteralExpression(metaNode)) {
+    if (!import_typescript55.default.isObjectLiteralExpression(metaNode)) {
       throw new FatalDiagnosticError(ErrorCode.DECORATOR_ARG_NOT_LITERAL, metaNode, `@Injectable argument must be an object literal`);
     }
     const meta = reflectObjectLiteral(metaNode);
@@ -36653,7 +36510,7 @@ function extractInjectableMetadata(clazz, decorator, reflector) {
     let deps = void 0;
     if ((meta.has("useClass") || meta.has("useFactory")) && meta.has("deps")) {
       const depsExpr = meta.get("deps");
-      if (!import_typescript56.default.isArrayLiteralExpression(depsExpr)) {
+      if (!import_typescript55.default.isArrayLiteralExpression(depsExpr)) {
         throw new FatalDiagnosticError(ErrorCode.VALUE_NOT_LITERAL, depsExpr, `@Injectable deps metadata must be an inline array`);
       }
       deps = depsExpr.elements.map((dep) => getDep(dep, reflector));
@@ -36738,12 +36595,12 @@ function getDep(dep, reflector) {
     }
     return true;
   }
-  if (import_typescript56.default.isArrayLiteralExpression(dep)) {
+  if (import_typescript55.default.isArrayLiteralExpression(dep)) {
     dep.elements.forEach((el) => {
       let isDecorator = false;
-      if (import_typescript56.default.isIdentifier(el)) {
+      if (import_typescript55.default.isIdentifier(el)) {
         isDecorator = maybeUpdateDecorator(el, reflector);
-      } else if (import_typescript56.default.isNewExpression(el) && import_typescript56.default.isIdentifier(el.expression)) {
+      } else if (import_typescript55.default.isNewExpression(el) && import_typescript55.default.isIdentifier(el.expression)) {
         const token = el.arguments && el.arguments.length > 0 && el.arguments[0] || void 0;
         isDecorator = maybeUpdateDecorator(el.expression, reflector, token);
       }
@@ -36756,7 +36613,7 @@ function getDep(dep, reflector) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/src/pipe.mjs
-var import_typescript57 = __toESM(require("typescript"), 1);
+var import_typescript56 = __toESM(require("typescript"), 1);
 var PipeSymbol = class extends SemanticSymbol {
   constructor(decl, name) {
     super(decl);
@@ -36813,7 +36670,7 @@ var PipeDecoratorHandler = class {
       throw new FatalDiagnosticError(ErrorCode.DECORATOR_ARITY_WRONG, decorator.node, "@Pipe must have exactly one argument");
     }
     const meta = unwrapExpression(decorator.args[0]);
-    if (!import_typescript57.default.isObjectLiteralExpression(meta)) {
+    if (!import_typescript56.default.isObjectLiteralExpression(meta)) {
       throw new FatalDiagnosticError(ErrorCode.DECORATOR_ARG_NOT_LITERAL, meta, "@Pipe must have a literal argument");
     }
     const pipe2 = reflectObjectLiteral(meta);
@@ -36978,7 +36835,7 @@ var Cycle = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/cycles/src/imports.mjs
-var import_typescript58 = __toESM(require("typescript"), 1);
+var import_typescript57 = __toESM(require("typescript"), 1);
 var ImportGraph = class {
   constructor(checker, perf) {
     this.checker = checker;
@@ -37022,10 +36879,10 @@ var ImportGraph = class {
     return this.perf.inPhase(PerfPhase.CycleDetection, () => {
       const imports = /* @__PURE__ */ new Set();
       for (const stmt of sf.statements) {
-        if (!import_typescript58.default.isImportDeclaration(stmt) && !import_typescript58.default.isExportDeclaration(stmt) || stmt.moduleSpecifier === void 0) {
+        if (!import_typescript57.default.isImportDeclaration(stmt) && !import_typescript57.default.isExportDeclaration(stmt) || stmt.moduleSpecifier === void 0) {
           continue;
         }
-        if (import_typescript58.default.isImportDeclaration(stmt) && stmt.importClause !== void 0 && isTypeOnlyImportClause(stmt.importClause)) {
+        if (import_typescript57.default.isImportDeclaration(stmt) && stmt.importClause !== void 0 && isTypeOnlyImportClause(stmt.importClause)) {
           continue;
         }
         const symbol = this.checker.getSymbolAtLocation(stmt.moduleSpecifier);
@@ -37033,7 +36890,7 @@ var ImportGraph = class {
           continue;
         }
         const moduleFile = symbol.valueDeclaration;
-        if (import_typescript58.default.isSourceFile(moduleFile) && isLocalFile(moduleFile)) {
+        if (import_typescript57.default.isSourceFile(moduleFile) && isLocalFile(moduleFile)) {
           imports.add(moduleFile);
         }
       }
@@ -37048,7 +36905,7 @@ function isTypeOnlyImportClause(node) {
   if (node.isTypeOnly) {
     return true;
   }
-  if (node.namedBindings !== void 0 && import_typescript58.default.isNamedImports(node.namedBindings) && node.namedBindings.elements.every((specifier) => specifier.isTypeOnly)) {
+  if (node.namedBindings !== void 0 && import_typescript57.default.isNamedImports(node.namedBindings) && node.namedBindings.elements.every((specifier) => specifier.isTypeOnly)) {
     return true;
   }
   return false;
@@ -37070,10 +36927,10 @@ var Found = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/extractor.mjs
-var import_typescript64 = __toESM(require("typescript"), 1);
+var import_typescript63 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/class_extractor.mjs
-var import_typescript61 = __toESM(require("typescript"), 1);
+var import_typescript60 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/entities.mjs
 var EntryType;
@@ -37126,7 +36983,7 @@ function isAngularPrivateName(name) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/function_extractor.mjs
-var import_typescript60 = __toESM(require("typescript"), 1);
+var import_typescript59 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/generics_extractor.mjs
 function extractGenerics(declaration) {
@@ -37142,27 +36999,27 @@ function extractGenerics(declaration) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/jsdoc_extractor.mjs
-var import_typescript59 = __toESM(require("typescript"), 1);
+var import_typescript58 = __toESM(require("typescript"), 1);
 function extractJsDocTags(node) {
-  return import_typescript59.default.getJSDocTags(node).map((t) => {
+  return import_typescript58.default.getJSDocTags(node).map((t) => {
     var _a2;
     return {
       name: t.tagName.getText(),
-      comment: (_a2 = import_typescript59.default.getTextOfJSDocComment(t.comment)) != null ? _a2 : ""
+      comment: (_a2 = import_typescript58.default.getTextOfJSDocComment(t.comment)) != null ? _a2 : ""
     };
   });
 }
 function extractJsDocDescription(node) {
   var _a2, _b2;
-  const commentOrTag = import_typescript59.default.getJSDocCommentsAndTags(node).find((d) => {
-    return import_typescript59.default.isJSDoc(d) || import_typescript59.default.isJSDocParameterTag(d);
+  const commentOrTag = import_typescript58.default.getJSDocCommentsAndTags(node).find((d) => {
+    return import_typescript58.default.isJSDoc(d) || import_typescript58.default.isJSDocParameterTag(d);
   });
   const comment = (_a2 = commentOrTag == null ? void 0 : commentOrTag.comment) != null ? _a2 : "";
-  return typeof comment === "string" ? comment : (_b2 = import_typescript59.default.getTextOfJSDocComment(comment)) != null ? _b2 : "";
+  return typeof comment === "string" ? comment : (_b2 = import_typescript58.default.getTextOfJSDocComment(comment)) != null ? _b2 : "";
 }
 function extractRawJsDoc(node) {
   var _a2, _b2;
-  return (_b2 = (_a2 = import_typescript59.default.getJSDocCommentsAndTags(node).find(import_typescript59.default.isJSDoc)) == null ? void 0 : _a2.getFullText()) != null ? _b2 : "";
+  return (_b2 = (_a2 = import_typescript58.default.getJSDocCommentsAndTags(node).find(import_typescript58.default.isJSDoc)) == null ? void 0 : _a2.getFullText()) != null ? _b2 : "";
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/type_extractor.mjs
@@ -37209,7 +37066,7 @@ var FunctionExtractor = class {
         const overloadDeclaration = (_c2 = symbol == null ? void 0 : symbol.declarations) == null ? void 0 : _c2[i];
         if ((overloadDeclaration == null ? void 0 : overloadDeclaration.pos) === this.declaration.pos)
           continue;
-        if (overloadDeclaration && import_typescript60.default.isFunctionDeclaration(overloadDeclaration) && ((_d2 = overloadDeclaration.modifiers) == null ? void 0 : _d2.some((mod) => mod.kind === import_typescript60.default.SyntaxKind.ExportKeyword))) {
+        if (overloadDeclaration && import_typescript59.default.isFunctionDeclaration(overloadDeclaration) && ((_d2 = overloadDeclaration.modifiers) == null ? void 0 : _d2.some((mod) => mod.kind === import_typescript59.default.SyntaxKind.ExportKeyword))) {
           overloads.push(overloadDeclaration);
         }
       }
@@ -37217,7 +37074,7 @@ var FunctionExtractor = class {
     return overloads;
   }
   getSymbol() {
-    return this.typeChecker.getSymbolsInScope(this.declaration, import_typescript60.default.SymbolFlags.Function).find((s) => {
+    return this.typeChecker.getSymbolsInScope(this.declaration, import_typescript59.default.SymbolFlags.Function).find((s) => {
       var _a2;
       return s.name === ((_a2 = this.declaration.name) == null ? void 0 : _a2.getText());
     });
@@ -37234,7 +37091,7 @@ var ClassExtractor = class {
     return {
       name: this.declaration.name.text,
       isAbstract: this.isAbstract(),
-      entryType: import_typescript61.default.isInterfaceDeclaration(this.declaration) ? EntryType.Interface : EntryType.UndecoratedClass,
+      entryType: import_typescript60.default.isInterfaceDeclaration(this.declaration) ? EntryType.Interface : EntryType.UndecoratedClass,
       members: this.extractAllClassMembers(),
       generics: extractGenerics(this.declaration),
       description: extractJsDocDescription(this.declaration),
@@ -37259,7 +37116,7 @@ var ClassExtractor = class {
       return this.extractMethod(memberDeclaration);
     } else if (this.isProperty(memberDeclaration)) {
       return this.extractClassProperty(memberDeclaration);
-    } else if (import_typescript61.default.isAccessor(memberDeclaration)) {
+    } else if (import_typescript60.default.isAccessor(memberDeclaration)) {
       return this.extractGetterSetter(memberDeclaration);
     }
     return void 0;
@@ -37283,7 +37140,7 @@ var ClassExtractor = class {
   }
   extractGetterSetter(accessor) {
     return __spreadProps(__spreadValues({}, this.extractClassProperty(accessor)), {
-      memberType: import_typescript61.default.isGetAccessor(accessor) ? MemberType.Getter : MemberType.Setter
+      memberType: import_typescript60.default.isGetAccessor(accessor) ? MemberType.Getter : MemberType.Setter
     });
   }
   getMemberTags(member) {
@@ -37325,13 +37182,13 @@ var ClassExtractor = class {
   }
   getTagForMemberModifier(mod) {
     switch (mod.kind) {
-      case import_typescript61.default.SyntaxKind.StaticKeyword:
+      case import_typescript60.default.SyntaxKind.StaticKeyword:
         return MemberTags.Static;
-      case import_typescript61.default.SyntaxKind.ReadonlyKeyword:
+      case import_typescript60.default.SyntaxKind.ReadonlyKeyword:
         return MemberTags.Readonly;
-      case import_typescript61.default.SyntaxKind.ProtectedKeyword:
+      case import_typescript60.default.SyntaxKind.ProtectedKeyword:
         return MemberTags.Protected;
-      case import_typescript61.default.SyntaxKind.AbstractKeyword:
+      case import_typescript60.default.SyntaxKind.AbstractKeyword:
         return MemberTags.Abstract;
       default:
         return void 0;
@@ -37339,24 +37196,24 @@ var ClassExtractor = class {
   }
   isMemberExcluded(member) {
     var _a2;
-    return !member.name || !this.isDocumentableMember(member) || !!((_a2 = member.modifiers) == null ? void 0 : _a2.some((mod) => mod.kind === import_typescript61.default.SyntaxKind.PrivateKeyword)) || member.name.getText() === "prototype" || isAngularPrivateName(member.name.getText());
+    return !member.name || !this.isDocumentableMember(member) || !!((_a2 = member.modifiers) == null ? void 0 : _a2.some((mod) => mod.kind === import_typescript60.default.SyntaxKind.PrivateKeyword)) || member.name.getText() === "prototype" || isAngularPrivateName(member.name.getText());
   }
   isDocumentableMember(member) {
-    return this.isMethod(member) || this.isProperty(member) || import_typescript61.default.isAccessor(member);
+    return this.isMethod(member) || this.isProperty(member) || import_typescript60.default.isAccessor(member);
   }
   isProperty(member) {
-    return import_typescript61.default.isPropertyDeclaration(member) || import_typescript61.default.isPropertySignature(member);
+    return import_typescript60.default.isPropertyDeclaration(member) || import_typescript60.default.isPropertySignature(member);
   }
   isMethod(member) {
-    return import_typescript61.default.isMethodDeclaration(member) || import_typescript61.default.isMethodSignature(member);
+    return import_typescript60.default.isMethodDeclaration(member) || import_typescript60.default.isMethodSignature(member);
   }
   isAbstract() {
     var _a2;
     const modifiers = (_a2 = this.declaration.modifiers) != null ? _a2 : [];
-    return modifiers.some((mod) => mod.kind === import_typescript61.default.SyntaxKind.AbstractKeyword);
+    return modifiers.some((mod) => mod.kind === import_typescript60.default.SyntaxKind.AbstractKeyword);
   }
   isImplementationForOverload(method) {
-    if (method.kind === import_typescript61.default.SyntaxKind.MethodSignature)
+    if (method.kind === import_typescript60.default.SyntaxKind.MethodSignature)
       return false;
     const signature = this.typeChecker.getSignatureFromDeclaration(method);
     return signature && this.typeChecker.isImplementationOfOverload(signature.declaration);
@@ -37470,7 +37327,7 @@ function isSyntheticAngularConstant(declaration) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/decorator_extractor.mjs
-var import_typescript62 = __toESM(require("typescript"), 1);
+var import_typescript61 = __toESM(require("typescript"), 1);
 function extractorDecorator(declaration, typeChecker) {
   const documentedNode = getDecoratorJsDocNode(declaration);
   const decoratorType = getDecoratorType(declaration);
@@ -37484,14 +37341,14 @@ function extractorDecorator(declaration, typeChecker) {
     rawComment: extractRawJsDoc(documentedNode),
     description: extractJsDocDescription(documentedNode),
     jsdocTags: extractJsDocTags(documentedNode),
-    members: getDecoratorOptions(declaration, typeChecker)
+    options: getDecoratorOptions(declaration, typeChecker)
   };
 }
 function isDecoratorDeclaration(declaration) {
   return !!getDecoratorType(declaration);
 }
 function isDecoratorOptionsInterface(declaration) {
-  return declaration.getSourceFile().statements.some((s) => import_typescript62.default.isVariableStatement(s) && s.declarationList.declarations.some((d) => isDecoratorDeclaration(d) && d.name.getText() === declaration.name.getText()));
+  return declaration.getSourceFile().statements.some((s) => import_typescript61.default.isVariableStatement(s) && s.declarationList.declarations.some((d) => isDecoratorDeclaration(d) && d.name.getText() === declaration.name.getText()));
 }
 function getDecoratorType(declaration) {
   var _a2, _b2;
@@ -37508,19 +37365,19 @@ function getDecoratorOptions(declaration, typeChecker) {
   var _a2, _b2;
   const name = declaration.name.getText();
   const optionsDeclaration = declaration.getSourceFile().statements.find((node) => {
-    return (import_typescript62.default.isInterfaceDeclaration(node) || import_typescript62.default.isTypeAliasDeclaration(node)) && node.name.getText() === name;
+    return (import_typescript61.default.isInterfaceDeclaration(node) || import_typescript61.default.isTypeAliasDeclaration(node)) && node.name.getText() === name;
   });
   if (!optionsDeclaration) {
     throw new Error(`Decorator "${name}" has no corresponding options interface.`);
   }
   let optionsInterface;
-  if (import_typescript62.default.isTypeAliasDeclaration(optionsDeclaration)) {
+  if (import_typescript61.default.isTypeAliasDeclaration(optionsDeclaration)) {
     const aliasedType = typeChecker.getTypeAtLocation(optionsDeclaration.type);
-    optionsInterface = ((_b2 = (_a2 = aliasedType.getSymbol()) == null ? void 0 : _a2.getDeclarations()) != null ? _b2 : []).find((d) => import_typescript62.default.isInterfaceDeclaration(d));
+    optionsInterface = ((_b2 = (_a2 = aliasedType.getSymbol()) == null ? void 0 : _a2.getDeclarations()) != null ? _b2 : []).find((d) => import_typescript61.default.isInterfaceDeclaration(d));
   } else {
     optionsInterface = optionsDeclaration;
   }
-  if (!optionsInterface || !import_typescript62.default.isInterfaceDeclaration(optionsInterface)) {
+  if (!optionsInterface || !import_typescript61.default.isInterfaceDeclaration(optionsInterface)) {
     throw new Error(`Options for decorator "${name}" is not an interface.`);
   }
   return extractInterface(optionsInterface, typeChecker).members;
@@ -37528,22 +37385,22 @@ function getDecoratorOptions(declaration, typeChecker) {
 function getDecoratorJsDocNode(declaration) {
   const name = declaration.name.getText();
   const decoratorInterface = declaration.getSourceFile().statements.find((s) => {
-    return import_typescript62.default.isInterfaceDeclaration(s) && s.name.getText() === `${name}Decorator`;
+    return import_typescript61.default.isInterfaceDeclaration(s) && s.name.getText() === `${name}Decorator`;
   });
-  if (!decoratorInterface || !import_typescript62.default.isInterfaceDeclaration(decoratorInterface)) {
+  if (!decoratorInterface || !import_typescript61.default.isInterfaceDeclaration(decoratorInterface)) {
     throw new Error(`No interface "${name}Decorator" found.`);
   }
   const callSignature = decoratorInterface.members.find((node) => {
-    return import_typescript62.default.isCallSignatureDeclaration(node) && extractRawJsDoc(node);
+    return import_typescript61.default.isCallSignatureDeclaration(node) && extractRawJsDoc(node);
   });
-  if (!callSignature || !import_typescript62.default.isCallSignatureDeclaration(callSignature)) {
+  if (!callSignature || !import_typescript61.default.isCallSignatureDeclaration(callSignature)) {
     throw new Error(`No call signature with JsDoc on "${name}Decorator"`);
   }
   return callSignature;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/enum_extractor.mjs
-var import_typescript63 = __toESM(require("typescript"), 1);
+var import_typescript62 = __toESM(require("typescript"), 1);
 function extractEnum(declaration, typeChecker) {
   return {
     name: declaration.name.getText(),
@@ -37567,7 +37424,7 @@ function extractEnumMembers(declaration, checker) {
 }
 function getEnumMemberValue(memberNode) {
   var _a2;
-  const literal3 = memberNode.getChildren().find((n) => import_typescript63.default.isNumericLiteral(n) || import_typescript63.default.isStringLiteral(n));
+  const literal3 = memberNode.getChildren().find((n) => import_typescript62.default.isNumericLiteral(n) || import_typescript62.default.isStringLiteral(n));
   return (_a2 = literal3 == null ? void 0 : literal3.getText()) != null ? _a2 : "";
 }
 
@@ -37606,20 +37463,20 @@ var DocsExtractor = class {
     if (isNamedClassDeclaration(node)) {
       return extractClass(node, this.metadataReader, this.typeChecker);
     }
-    if (import_typescript64.default.isInterfaceDeclaration(node) && !isIgnoredInterface(node)) {
+    if (import_typescript63.default.isInterfaceDeclaration(node) && !isIgnoredInterface(node)) {
       return extractInterface(node, this.typeChecker);
     }
-    if (import_typescript64.default.isFunctionDeclaration(node)) {
+    if (import_typescript63.default.isFunctionDeclaration(node)) {
       const functionExtractor = new FunctionExtractor(node, this.typeChecker);
       return functionExtractor.extract();
     }
-    if (import_typescript64.default.isVariableDeclaration(node) && !isSyntheticAngularConstant(node)) {
+    if (import_typescript63.default.isVariableDeclaration(node) && !isSyntheticAngularConstant(node)) {
       return isDecoratorDeclaration(node) ? extractorDecorator(node, this.typeChecker) : extractConstant(node, this.typeChecker);
     }
-    if (import_typescript64.default.isTypeAliasDeclaration(node)) {
+    if (import_typescript63.default.isTypeAliasDeclaration(node)) {
       return extractTypeAlias(node);
     }
-    if (import_typescript64.default.isEnumDeclaration(node)) {
+    if (import_typescript63.default.isEnumDeclaration(node)) {
       return extractEnum(node, this.typeChecker);
     }
     return null;
@@ -37632,7 +37489,7 @@ var DocsExtractor = class {
     const declarationCount = exportedDeclarations.length;
     for (let i = 0; i < declarationCount; i++) {
       const [exportName, declaration] = exportedDeclarations[i];
-      if (import_typescript64.default.isFunctionDeclaration(declaration)) {
+      if (import_typescript63.default.isFunctionDeclaration(declaration)) {
         const extractor = new FunctionExtractor(declaration, this.typeChecker);
         const overloads = extractor.getOverloads().map((overload) => [exportName, overload]);
         exportedDeclarations.push(...overloads);
@@ -37646,7 +37503,7 @@ function isIgnoredInterface(node) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/entry_point/src/generator.mjs
-var import_typescript65 = __toESM(require("typescript"), 1);
+var import_typescript64 = __toESM(require("typescript"), 1);
 var FlatIndexGenerator = class {
   constructor(entryPoint, relativeFlatIndexPath, moduleName) {
     this.entryPoint = entryPoint;
@@ -37662,7 +37519,7 @@ var FlatIndexGenerator = class {
 
 export * from '${relativeEntryPoint}';
 `;
-    const genFile = import_typescript65.default.createSourceFile(this.flatIndexPath, contents, import_typescript65.default.ScriptTarget.ES2015, true, import_typescript65.default.ScriptKind.TS);
+    const genFile = import_typescript64.default.createSourceFile(this.flatIndexPath, contents, import_typescript64.default.ScriptTarget.ES2015, true, import_typescript64.default.ScriptKind.TS);
     if (this.moduleName !== null) {
       genFile.moduleName = this.moduleName;
     }
@@ -37687,7 +37544,7 @@ function findFlatIndexEntryPoint(rootFiles) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/entry_point/src/private_export_checker.mjs
-var import_typescript67 = __toESM(require("typescript"), 1);
+var import_typescript66 = __toESM(require("typescript"), 1);
 function checkForPrivateExports(entryPoint, checker, refGraph) {
   const diagnostics = [];
   const topLevelExports = /* @__PURE__ */ new Set();
@@ -37697,7 +37554,7 @@ function checkForPrivateExports(entryPoint, checker, refGraph) {
   }
   const exportedSymbols = checker.getExportsOfModule(moduleSymbol);
   exportedSymbols.forEach((symbol) => {
-    if (symbol.flags & import_typescript67.default.SymbolFlags.Alias) {
+    if (symbol.flags & import_typescript66.default.SymbolFlags.Alias) {
       symbol = checker.getAliasedSymbol(symbol);
     }
     const decl = symbol.valueDeclaration;
@@ -37721,7 +37578,7 @@ function checkForPrivateExports(entryPoint, checker, refGraph) {
           visibleVia = transitivePath.map((seg) => getNameOfDeclaration(seg)).join(" -> ");
         }
         const diagnostic = __spreadProps(__spreadValues({
-          category: import_typescript67.default.DiagnosticCategory.Error,
+          category: import_typescript66.default.DiagnosticCategory.Error,
           code: ngErrorCode(ErrorCode.SYMBOL_NOT_EXPORTED),
           file: transitiveReference.getSourceFile()
         }, getPosOfDeclaration(transitiveReference)), {
@@ -37741,7 +37598,7 @@ function getPosOfDeclaration(decl) {
   };
 }
 function getIdentifierOfDeclaration(decl) {
-  if ((import_typescript67.default.isClassDeclaration(decl) || import_typescript67.default.isVariableDeclaration(decl) || import_typescript67.default.isFunctionDeclaration(decl)) && decl.name !== void 0 && import_typescript67.default.isIdentifier(decl.name)) {
+  if ((import_typescript66.default.isClassDeclaration(decl) || import_typescript66.default.isVariableDeclaration(decl) || import_typescript66.default.isFunctionDeclaration(decl)) && decl.name !== void 0 && import_typescript66.default.isIdentifier(decl.name)) {
     return decl.name;
   } else {
     return null;
@@ -37753,13 +37610,13 @@ function getNameOfDeclaration(decl) {
 }
 function getDescriptorOfDeclaration(decl) {
   switch (decl.kind) {
-    case import_typescript67.default.SyntaxKind.ClassDeclaration:
+    case import_typescript66.default.SyntaxKind.ClassDeclaration:
       return "class";
-    case import_typescript67.default.SyntaxKind.FunctionDeclaration:
+    case import_typescript66.default.SyntaxKind.FunctionDeclaration:
       return "function";
-    case import_typescript67.default.SyntaxKind.VariableDeclaration:
+    case import_typescript66.default.SyntaxKind.VariableDeclaration:
       return "variable";
-    case import_typescript67.default.SyntaxKind.EnumDeclaration:
+    case import_typescript66.default.SyntaxKind.EnumDeclaration:
       return "enum";
     default:
       return "declaration";
@@ -37829,10 +37686,10 @@ var UpdateMode;
 })(UpdateMode || (UpdateMode = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/program_driver/src/ts_create_program_driver.mjs
-var import_typescript71 = __toESM(require("typescript"), 1);
+var import_typescript70 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/shims/src/adapter.mjs
-var import_typescript68 = __toESM(require("typescript"), 1);
+var import_typescript67 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/shims/src/expando.mjs
 var NgExtension = Symbol("NgExtension");
@@ -37963,10 +37820,10 @@ var ShimAdapter = class {
       }
       const prefix = match[1];
       let baseFileName = absoluteFrom(prefix + ".ts");
-      let inputFile = this.delegate.getSourceFile(baseFileName, import_typescript68.default.ScriptTarget.Latest);
+      let inputFile = this.delegate.getSourceFile(baseFileName, import_typescript67.default.ScriptTarget.Latest);
       if (inputFile === void 0) {
         baseFileName = absoluteFrom(prefix + ".tsx");
-        inputFile = this.delegate.getSourceFile(baseFileName, import_typescript68.default.ScriptTarget.Latest);
+        inputFile = this.delegate.getSourceFile(baseFileName, import_typescript67.default.ScriptTarget.Latest);
       }
       if (inputFile === void 0 || isShim(inputFile)) {
         return void 0;
@@ -38121,7 +37978,7 @@ var TsCreateProgramDriver = class {
       this.sfMap.clear();
     }
     for (const [filePath, { newText, originalFile }] of contents.entries()) {
-      const sf = import_typescript71.default.createSourceFile(filePath, newText, import_typescript71.default.ScriptTarget.Latest, true);
+      const sf = import_typescript70.default.createSourceFile(filePath, newText, import_typescript70.default.ScriptTarget.Latest, true);
       if (originalFile !== null) {
         sf[NgOriginalFile] = originalFile;
       }
@@ -38130,7 +37987,7 @@ var TsCreateProgramDriver = class {
     const host = new UpdatedProgramHost(this.sfMap, this.originalProgram, this.originalHost, this.shimExtensionPrefixes);
     const oldProgram = this.program;
     retagAllTsFiles(oldProgram);
-    this.program = import_typescript71.default.createProgram({
+    this.program = import_typescript70.default.createProgram({
       host,
       rootNames: this.program.getRootFileNames(),
       options: this.options,
@@ -38874,7 +38731,7 @@ var NgModuleIndexImpl = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/resource/src/loader.mjs
-var import_typescript74 = __toESM(require("typescript"), 1);
+var import_typescript73 = __toESM(require("typescript"), 1);
 var CSS_PREPROCESSOR_EXT = /(\.scss|\.sass|\.less|\.styl)$/;
 var RESOURCE_MARKER = ".$ngresource$";
 var RESOURCE_MARKER_TS = RESOURCE_MARKER + ".ts";
@@ -38986,7 +38843,7 @@ var AdapterResourceLoader = class {
     return this.adapter.rootDirs.map((rootDir) => join(rootDir, segment));
   }
   getResolvedCandidateLocations(url, fromFile) {
-    const failedLookup = import_typescript74.default.resolveModuleName(url + RESOURCE_MARKER, fromFile, this.options, this.lookupResolutionHost);
+    const failedLookup = import_typescript73.default.resolveModuleName(url + RESOURCE_MARKER, fromFile, this.options, this.lookupResolutionHost);
     if (failedLookup.failedLookupLocations === void 0) {
       throw new Error(`Internal error: expected to find failedLookupLocations during resolution of resource '${url}' in context of ${fromFile}`);
     }
@@ -39142,7 +38999,7 @@ var SymbolKind;
 })(SymbolKind || (SymbolKind = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/diagnostics/src/diagnostic.mjs
-var import_typescript75 = __toESM(require("typescript"), 1);
+var import_typescript74 = __toESM(require("typescript"), 1);
 function makeTemplateDiagnostic(templateId, mapping, span, category, code, messageText, relatedMessages) {
   var _a2;
   if (mapping.type === "direct") {
@@ -39151,7 +39008,7 @@ function makeTemplateDiagnostic(templateId, mapping, span, category, code, messa
       relatedInformation = [];
       for (const relatedMessage of relatedMessages) {
         relatedInformation.push({
-          category: import_typescript75.default.DiagnosticCategory.Message,
+          category: import_typescript74.default.DiagnosticCategory.Message,
           code: 0,
           file: relatedMessage.sourceFile,
           start: relatedMessage.start,
@@ -39180,7 +39037,7 @@ function makeTemplateDiagnostic(templateId, mapping, span, category, code, messa
     if (relatedMessages !== void 0) {
       for (const relatedMessage of relatedMessages) {
         relatedInformation.push({
-          category: import_typescript75.default.DiagnosticCategory.Message,
+          category: import_typescript74.default.DiagnosticCategory.Message,
           code: 0,
           file: relatedMessage.sourceFile,
           start: relatedMessage.start,
@@ -39210,7 +39067,7 @@ function makeTemplateDiagnostic(templateId, mapping, span, category, code, messa
       };
     }
     relatedInformation.push({
-      category: import_typescript75.default.DiagnosticCategory.Message,
+      category: import_typescript74.default.DiagnosticCategory.Message,
       code: 0,
       file: componentSf,
       start: mapping.node.getStart(),
@@ -39245,7 +39102,7 @@ function parseTemplateAsSourceFile(fileName, template2) {
   if (parseTemplateAsSourceFileForTest !== null) {
     return parseTemplateAsSourceFileForTest(fileName, template2);
   }
-  return import_typescript75.default.createSourceFile(fileName, template2, import_typescript75.default.ScriptTarget.Latest, false, import_typescript75.default.ScriptKind.JSX);
+  return import_typescript74.default.createSourceFile(fileName, template2, import_typescript74.default.ScriptTarget.Latest, false, import_typescript74.default.ScriptKind.JSX);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/diagnostics/src/id.mjs
@@ -39266,14 +39123,14 @@ function allocateTemplateId(sf) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/completion.mjs
-var import_typescript77 = __toESM(require("typescript"), 1);
+var import_typescript76 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/comments.mjs
-var import_typescript76 = __toESM(require("typescript"), 1);
+var import_typescript75 = __toESM(require("typescript"), 1);
 var parseSpanComment = /^(\d+),(\d+)$/;
 function readSpanComment(node, sourceFile = node.getSourceFile()) {
-  return import_typescript76.default.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
-    if (kind !== import_typescript76.default.SyntaxKind.MultiLineCommentTrivia) {
+  return import_typescript75.default.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
+    if (kind !== import_typescript75.default.SyntaxKind.MultiLineCommentTrivia) {
       return null;
     }
     const commentText = sourceFile.text.substring(pos + 2, end - 2);
@@ -39296,25 +39153,25 @@ var ExpressionIdentifier;
   ExpressionIdentifier2["EVENT_PARAMETER"] = "EP";
 })(ExpressionIdentifier || (ExpressionIdentifier = {}));
 function addExpressionIdentifier(node, identifier) {
-  import_typescript76.default.addSyntheticTrailingComment(
+  import_typescript75.default.addSyntheticTrailingComment(
     node,
-    import_typescript76.default.SyntaxKind.MultiLineCommentTrivia,
+    import_typescript75.default.SyntaxKind.MultiLineCommentTrivia,
     `${CommentTriviaType.EXPRESSION_TYPE_IDENTIFIER}:${identifier}`,
     false
   );
 }
 var IGNORE_FOR_DIAGNOSTICS_MARKER = `${CommentTriviaType.DIAGNOSTIC}:ignore`;
 function markIgnoreDiagnostics(node) {
-  import_typescript76.default.addSyntheticTrailingComment(
+  import_typescript75.default.addSyntheticTrailingComment(
     node,
-    import_typescript76.default.SyntaxKind.MultiLineCommentTrivia,
+    import_typescript75.default.SyntaxKind.MultiLineCommentTrivia,
     IGNORE_FOR_DIAGNOSTICS_MARKER,
     false
   );
 }
 function hasIgnoreForDiagnosticsMarker(node, sourceFile) {
-  return import_typescript76.default.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
-    if (kind !== import_typescript76.default.SyntaxKind.MultiLineCommentTrivia) {
+  return import_typescript75.default.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
+    if (kind !== import_typescript75.default.SyntaxKind.MultiLineCommentTrivia) {
       return null;
     }
     const commentText = sourceFile.text.substring(pos + 2, end - 2);
@@ -39388,8 +39245,8 @@ function findAllMatchingNodes(tcb, opts) {
   return results;
 }
 function hasExpressionIdentifier(sourceFile, node, identifier) {
-  return import_typescript76.default.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
-    if (kind !== import_typescript76.default.SyntaxKind.MultiLineCommentTrivia) {
+  return import_typescript75.default.forEachTrailingCommentRange(sourceFile.text, node.getEnd(), (pos, end, kind) => {
+    if (kind !== import_typescript75.default.SyntaxKind.MultiLineCommentTrivia) {
       return false;
     }
     const commentText = sourceFile.text.substring(pos + 2, end - 2);
@@ -39407,7 +39264,7 @@ var CompletionEngine = class {
     this.templateContextCache = /* @__PURE__ */ new Map();
     this.expressionCompletionCache = /* @__PURE__ */ new Map();
     const globalRead = findFirstMatchingNode(this.tcb, {
-      filter: import_typescript77.default.isPropertyAccessExpression,
+      filter: import_typescript76.default.isPropertyAccessExpression,
       withExpressionIdentifier: ExpressionIdentifier.COMPONENT_COMPLETION
     });
     if (globalRead !== null) {
@@ -39431,7 +39288,7 @@ var CompletionEngine = class {
     let nodeContext = null;
     if (node instanceof EmptyExpr) {
       const nodeLocation = findFirstMatchingNode(this.tcb, {
-        filter: import_typescript77.default.isIdentifier,
+        filter: import_typescript76.default.isIdentifier,
         withSpan: node.sourceSpan
       });
       if (nodeLocation !== null) {
@@ -39444,7 +39301,7 @@ var CompletionEngine = class {
     }
     if (node instanceof PropertyRead && node.receiver instanceof ImplicitReceiver) {
       const nodeLocation = findFirstMatchingNode(this.tcb, {
-        filter: import_typescript77.default.isPropertyAccessExpression,
+        filter: import_typescript76.default.isPropertyAccessExpression,
         withSpan: node.sourceSpan
       });
       if (nodeLocation) {
@@ -39468,21 +39325,21 @@ var CompletionEngine = class {
     let tsExpr = null;
     if (expr instanceof PropertyRead || expr instanceof PropertyWrite) {
       tsExpr = findFirstMatchingNode(this.tcb, {
-        filter: import_typescript77.default.isPropertyAccessExpression,
+        filter: import_typescript76.default.isPropertyAccessExpression,
         withSpan: expr.nameSpan
       });
     } else if (expr instanceof SafePropertyRead) {
       const ternaryExpr = findFirstMatchingNode(this.tcb, {
-        filter: import_typescript77.default.isParenthesizedExpression,
+        filter: import_typescript76.default.isParenthesizedExpression,
         withSpan: expr.sourceSpan
       });
-      if (ternaryExpr === null || !import_typescript77.default.isConditionalExpression(ternaryExpr.expression)) {
+      if (ternaryExpr === null || !import_typescript76.default.isConditionalExpression(ternaryExpr.expression)) {
         return null;
       }
       const whenTrue = ternaryExpr.expression.whenTrue;
-      if (import_typescript77.default.isPropertyAccessExpression(whenTrue)) {
+      if (import_typescript76.default.isPropertyAccessExpression(whenTrue)) {
         tsExpr = whenTrue;
-      } else if (import_typescript77.default.isCallExpression(whenTrue) && import_typescript77.default.isPropertyAccessExpression(whenTrue.expression)) {
+      } else if (import_typescript76.default.isCallExpression(whenTrue) && import_typescript76.default.isPropertyAccessExpression(whenTrue.expression)) {
         tsExpr = whenTrue.expression;
       }
     }
@@ -39504,15 +39361,15 @@ var CompletionEngine = class {
     let tsExpr = null;
     if (expr instanceof TextAttribute) {
       const strNode = findFirstMatchingNode(this.tcb, {
-        filter: import_typescript77.default.isParenthesizedExpression,
+        filter: import_typescript76.default.isParenthesizedExpression,
         withSpan: expr.sourceSpan
       });
-      if (strNode !== null && import_typescript77.default.isStringLiteral(strNode.expression)) {
+      if (strNode !== null && import_typescript76.default.isStringLiteral(strNode.expression)) {
         tsExpr = strNode.expression;
       }
     } else {
       tsExpr = findFirstMatchingNode(this.tcb, {
-        filter: (n) => import_typescript77.default.isStringLiteral(n) || import_typescript77.default.isNumericLiteral(n),
+        filter: (n) => import_typescript76.default.isStringLiteral(n) || import_typescript76.default.isNumericLiteral(n),
         withSpan: expr.sourceSpan
       });
     }
@@ -39520,7 +39377,7 @@ var CompletionEngine = class {
       return null;
     }
     let positionInShimFile = tsExpr.getEnd();
-    if (import_typescript77.default.isStringLiteral(tsExpr)) {
+    if (import_typescript76.default.isStringLiteral(tsExpr)) {
       positionInShimFile -= 1;
     }
     const res = {
@@ -39558,7 +39415,7 @@ var CompletionEngine = class {
 var import_typescript91 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/dom.mjs
-var import_typescript78 = __toESM(require("typescript"), 1);
+var import_typescript77 = __toESM(require("typescript"), 1);
 var REGISTRY = new DomElementSchemaRegistry();
 var REMOVE_XHTML_REGEX = /^:xhtml:/;
 var RegistryDomSchemaChecker = class {
@@ -39583,7 +39440,7 @@ var RegistryDomSchemaChecker = class {
       } else {
         errorMsg += `2. To allow any element add 'NO_ERRORS_SCHEMA' to the ${schemas2} of this component.`;
       }
-      const diag = makeTemplateDiagnostic(id, mapping, element2.startSourceSpan, import_typescript78.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.SCHEMA_INVALID_ELEMENT), errorMsg);
+      const diag = makeTemplateDiagnostic(id, mapping, element2.startSourceSpan, import_typescript77.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.SCHEMA_INVALID_ELEMENT), errorMsg);
       this._diagnostics.push(diag);
     }
   }
@@ -39603,7 +39460,7 @@ var RegistryDomSchemaChecker = class {
 2. If '${element2.name}' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the ${schemas2} of this component to suppress this message.
 3. To allow any property add 'NO_ERRORS_SCHEMA' to the ${schemas2} of this component.`;
       }
-      const diag = makeTemplateDiagnostic(id, mapping, span, import_typescript78.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.SCHEMA_INVALID_ATTRIBUTE), errorMsg);
+      const diag = makeTemplateDiagnostic(id, mapping, span, import_typescript77.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.SCHEMA_INVALID_ATTRIBUTE), errorMsg);
       this._diagnostics.push(diag);
     }
   }
@@ -39613,77 +39470,77 @@ var RegistryDomSchemaChecker = class {
 var import_typescript84 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/ts_util.mjs
-var import_typescript79 = __toESM(require("typescript"), 1);
+var import_typescript78 = __toESM(require("typescript"), 1);
 var SAFE_TO_CAST_WITHOUT_PARENS = /* @__PURE__ */ new Set([
-  import_typescript79.default.SyntaxKind.ParenthesizedExpression,
-  import_typescript79.default.SyntaxKind.Identifier,
-  import_typescript79.default.SyntaxKind.CallExpression,
-  import_typescript79.default.SyntaxKind.NonNullExpression,
-  import_typescript79.default.SyntaxKind.ElementAccessExpression,
-  import_typescript79.default.SyntaxKind.PropertyAccessExpression,
-  import_typescript79.default.SyntaxKind.ArrayLiteralExpression,
-  import_typescript79.default.SyntaxKind.ObjectLiteralExpression,
-  import_typescript79.default.SyntaxKind.StringLiteral,
-  import_typescript79.default.SyntaxKind.NumericLiteral,
-  import_typescript79.default.SyntaxKind.TrueKeyword,
-  import_typescript79.default.SyntaxKind.FalseKeyword,
-  import_typescript79.default.SyntaxKind.NullKeyword,
-  import_typescript79.default.SyntaxKind.UndefinedKeyword
+  import_typescript78.default.SyntaxKind.ParenthesizedExpression,
+  import_typescript78.default.SyntaxKind.Identifier,
+  import_typescript78.default.SyntaxKind.CallExpression,
+  import_typescript78.default.SyntaxKind.NonNullExpression,
+  import_typescript78.default.SyntaxKind.ElementAccessExpression,
+  import_typescript78.default.SyntaxKind.PropertyAccessExpression,
+  import_typescript78.default.SyntaxKind.ArrayLiteralExpression,
+  import_typescript78.default.SyntaxKind.ObjectLiteralExpression,
+  import_typescript78.default.SyntaxKind.StringLiteral,
+  import_typescript78.default.SyntaxKind.NumericLiteral,
+  import_typescript78.default.SyntaxKind.TrueKeyword,
+  import_typescript78.default.SyntaxKind.FalseKeyword,
+  import_typescript78.default.SyntaxKind.NullKeyword,
+  import_typescript78.default.SyntaxKind.UndefinedKeyword
 ]);
 function tsCastToAny(expr) {
   if (!SAFE_TO_CAST_WITHOUT_PARENS.has(expr.kind)) {
-    expr = import_typescript79.default.factory.createParenthesizedExpression(expr);
+    expr = import_typescript78.default.factory.createParenthesizedExpression(expr);
   }
-  return import_typescript79.default.factory.createParenthesizedExpression(import_typescript79.default.factory.createAsExpression(expr, import_typescript79.default.factory.createKeywordTypeNode(import_typescript79.default.SyntaxKind.AnyKeyword)));
+  return import_typescript78.default.factory.createParenthesizedExpression(import_typescript78.default.factory.createAsExpression(expr, import_typescript78.default.factory.createKeywordTypeNode(import_typescript78.default.SyntaxKind.AnyKeyword)));
 }
 function tsCreateElement(tagName) {
-  const createElement = import_typescript79.default.factory.createPropertyAccessExpression(
-    import_typescript79.default.factory.createIdentifier("document"),
+  const createElement = import_typescript78.default.factory.createPropertyAccessExpression(
+    import_typescript78.default.factory.createIdentifier("document"),
     "createElement"
   );
-  return import_typescript79.default.factory.createCallExpression(
+  return import_typescript78.default.factory.createCallExpression(
     createElement,
     void 0,
-    [import_typescript79.default.factory.createStringLiteral(tagName)]
+    [import_typescript78.default.factory.createStringLiteral(tagName)]
   );
 }
 function tsDeclareVariable(id, type) {
-  const decl = import_typescript79.default.factory.createVariableDeclaration(
+  const decl = import_typescript78.default.factory.createVariableDeclaration(
     id,
     void 0,
     type,
-    import_typescript79.default.factory.createNonNullExpression(import_typescript79.default.factory.createNull())
+    import_typescript78.default.factory.createNonNullExpression(import_typescript78.default.factory.createNull())
   );
-  return import_typescript79.default.factory.createVariableStatement(
+  return import_typescript78.default.factory.createVariableStatement(
     void 0,
     [decl]
   );
 }
 function tsCreateTypeQueryForCoercedInput(typeName, coercedInputName) {
-  return import_typescript79.default.factory.createTypeQueryNode(import_typescript79.default.factory.createQualifiedName(typeName, `ngAcceptInputType_${coercedInputName}`));
+  return import_typescript78.default.factory.createTypeQueryNode(import_typescript78.default.factory.createQualifiedName(typeName, `ngAcceptInputType_${coercedInputName}`));
 }
 function tsCreateVariable(id, initializer) {
-  const decl = import_typescript79.default.factory.createVariableDeclaration(
+  const decl = import_typescript78.default.factory.createVariableDeclaration(
     id,
     void 0,
     void 0,
     initializer
   );
-  return import_typescript79.default.factory.createVariableStatement(
+  return import_typescript78.default.factory.createVariableStatement(
     void 0,
     [decl]
   );
 }
 function tsCallMethod(receiver, methodName, args = []) {
-  const methodAccess = import_typescript79.default.factory.createPropertyAccessExpression(receiver, methodName);
-  return import_typescript79.default.factory.createCallExpression(
+  const methodAccess = import_typescript78.default.factory.createPropertyAccessExpression(receiver, methodName);
+  return import_typescript78.default.factory.createCallExpression(
     methodAccess,
     void 0,
     args
   );
 }
 function isAccessExpression2(node) {
-  return import_typescript79.default.isPropertyAccessExpression(node) || import_typescript79.default.isElementAccessExpression(node);
+  return import_typescript78.default.isPropertyAccessExpression(node) || import_typescript78.default.isElementAccessExpression(node);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/type_constructor.mjs
@@ -39694,6 +39551,83 @@ var import_typescript81 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/type_parameter_emitter.mjs
 var import_typescript80 = __toESM(require("typescript"), 1);
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/type_emitter.mjs
+var import_typescript79 = __toESM(require("typescript"), 1);
+var INELIGIBLE = {};
+function canEmitType(type, canEmit) {
+  return canEmitTypeWorker(type);
+  function canEmitTypeWorker(type2) {
+    return visitNode(type2) !== INELIGIBLE;
+  }
+  function visitNode(node) {
+    if (import_typescript79.default.isImportTypeNode(node)) {
+      return INELIGIBLE;
+    }
+    if (import_typescript79.default.isTypeReferenceNode(node) && !canEmitTypeReference(node)) {
+      return INELIGIBLE;
+    } else {
+      return import_typescript79.default.forEachChild(node, visitNode);
+    }
+  }
+  function canEmitTypeReference(type2) {
+    if (!canEmit(type2)) {
+      return false;
+    }
+    return type2.typeArguments === void 0 || type2.typeArguments.every(canEmitTypeWorker);
+  }
+}
+var TypeEmitter = class {
+  constructor(translator) {
+    this.translator = translator;
+  }
+  emitType(type) {
+    const typeReferenceTransformer = (context) => {
+      const visitNode = (node) => {
+        if (import_typescript79.default.isImportTypeNode(node)) {
+          throw new Error("Unable to emit import type");
+        }
+        if (import_typescript79.default.isTypeReferenceNode(node)) {
+          return this.emitTypeReference(node);
+        } else if (import_typescript79.default.isLiteralExpression(node)) {
+          let clone;
+          if (import_typescript79.default.isStringLiteral(node)) {
+            clone = import_typescript79.default.factory.createStringLiteral(node.text);
+          } else if (import_typescript79.default.isNumericLiteral(node)) {
+            clone = import_typescript79.default.factory.createNumericLiteral(node.text);
+          } else if (import_typescript79.default.isBigIntLiteral(node)) {
+            clone = import_typescript79.default.factory.createBigIntLiteral(node.text);
+          } else if (import_typescript79.default.isNoSubstitutionTemplateLiteral(node)) {
+            clone = import_typescript79.default.factory.createNoSubstitutionTemplateLiteral(node.text, node.rawText);
+          } else if (import_typescript79.default.isRegularExpressionLiteral(node)) {
+            clone = import_typescript79.default.factory.createRegularExpressionLiteral(node.text);
+          } else {
+            throw new Error(`Unsupported literal kind ${import_typescript79.default.SyntaxKind[node.kind]}`);
+          }
+          import_typescript79.default.setTextRange(clone, { pos: -1, end: -1 });
+          return clone;
+        } else {
+          return import_typescript79.default.visitEachChild(node, visitNode, context);
+        }
+      };
+      return (node) => import_typescript79.default.visitNode(node, visitNode, import_typescript79.default.isTypeNode);
+    };
+    return import_typescript79.default.transform(type, [typeReferenceTransformer]).transformed[0];
+  }
+  emitTypeReference(type) {
+    const translatedType = this.translator(type);
+    if (translatedType === null) {
+      throw new Error("Unable to emit an unresolved reference");
+    }
+    let typeArguments = void 0;
+    if (type.typeArguments !== void 0) {
+      typeArguments = import_typescript79.default.factory.createNodeArray(type.typeArguments.map((typeArg) => this.emitType(typeArg)));
+    }
+    return import_typescript79.default.factory.updateTypeReferenceNode(type, translatedType.typeName, typeArguments);
+  }
+};
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/type_parameter_emitter.mjs
 var TypeParameterEmitter = class {
   constructor(typeParameters, reflector) {
     this.typeParameters = typeParameters;
@@ -39918,7 +39852,7 @@ function constructTypeCtorParameter(node, meta, rawType) {
         void 0,
         classPropertyName,
         void 0,
-        transform2 == null ? tsCreateTypeQueryForCoercedInput(rawType.typeName, classPropertyName) : transform2.type.node
+        transform2 == null ? tsCreateTypeQueryForCoercedInput(rawType.typeName, classPropertyName) : transform2.type
       ));
     }
   }
@@ -40986,7 +40920,7 @@ var TcbDirectiveInputsOp = class extends TcbOp {
         }
         if (this.dir.coercedInputFields.has(fieldName)) {
           let type;
-          if (transformType !== null) {
+          if (transformType) {
             type = this.tcb.env.referenceTransplantedType(new TransplantedType(transformType));
           } else {
             const dirTypeRef = this.tcb.env.referenceType(this.dir.ref);
