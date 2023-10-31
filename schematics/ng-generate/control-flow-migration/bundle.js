@@ -3612,16 +3612,19 @@ var Element = class {
   }
 };
 var DeferredTrigger = class {
-  constructor(sourceSpan) {
+  constructor(nameSpan, sourceSpan, prefetchSpan, whenOrOnSourceSpan) {
+    this.nameSpan = nameSpan;
     this.sourceSpan = sourceSpan;
+    this.prefetchSpan = prefetchSpan;
+    this.whenOrOnSourceSpan = whenOrOnSourceSpan;
   }
   visit(visitor) {
     return visitor.visitDeferredTrigger(this);
   }
 };
 var BoundDeferredTrigger = class extends DeferredTrigger {
-  constructor(value, sourceSpan) {
-    super(sourceSpan);
+  constructor(value, sourceSpan, prefetchSpan, whenSourceSpan) {
+    super(null, sourceSpan, prefetchSpan, whenSourceSpan);
     this.value = value;
   }
 };
@@ -3630,75 +3633,75 @@ var IdleDeferredTrigger = class extends DeferredTrigger {
 var ImmediateDeferredTrigger = class extends DeferredTrigger {
 };
 var HoverDeferredTrigger = class extends DeferredTrigger {
-  constructor(reference2, sourceSpan) {
-    super(sourceSpan);
+  constructor(reference2, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
+    super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
     this.reference = reference2;
   }
 };
 var TimerDeferredTrigger = class extends DeferredTrigger {
-  constructor(delay, sourceSpan) {
-    super(sourceSpan);
+  constructor(delay, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
+    super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
     this.delay = delay;
   }
 };
 var InteractionDeferredTrigger = class extends DeferredTrigger {
-  constructor(reference2, sourceSpan) {
-    super(sourceSpan);
+  constructor(reference2, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
+    super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
     this.reference = reference2;
   }
 };
 var ViewportDeferredTrigger = class extends DeferredTrigger {
-  constructor(reference2, sourceSpan) {
-    super(sourceSpan);
+  constructor(reference2, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
+    super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
     this.reference = reference2;
   }
 };
-var DeferredBlockPlaceholder = class {
-  constructor(children, minimumTime, sourceSpan, startSourceSpan, endSourceSpan) {
-    this.children = children;
-    this.minimumTime = minimumTime;
+var BlockNode = class {
+  constructor(nameSpan, sourceSpan, startSourceSpan, endSourceSpan) {
+    this.nameSpan = nameSpan;
     this.sourceSpan = sourceSpan;
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
+  }
+};
+var DeferredBlockPlaceholder = class extends BlockNode {
+  constructor(children, minimumTime, nameSpan, sourceSpan, startSourceSpan, endSourceSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
+    this.children = children;
+    this.minimumTime = minimumTime;
   }
   visit(visitor) {
     return visitor.visitDeferredBlockPlaceholder(this);
   }
 };
-var DeferredBlockLoading = class {
-  constructor(children, afterTime, minimumTime, sourceSpan, startSourceSpan, endSourceSpan) {
+var DeferredBlockLoading = class extends BlockNode {
+  constructor(children, afterTime, minimumTime, nameSpan, sourceSpan, startSourceSpan, endSourceSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
     this.afterTime = afterTime;
     this.minimumTime = minimumTime;
-    this.sourceSpan = sourceSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitDeferredBlockLoading(this);
   }
 };
-var DeferredBlockError = class {
-  constructor(children, sourceSpan, startSourceSpan, endSourceSpan) {
+var DeferredBlockError = class extends BlockNode {
+  constructor(children, nameSpan, sourceSpan, startSourceSpan, endSourceSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
-    this.sourceSpan = sourceSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitDeferredBlockError(this);
   }
 };
-var DeferredBlock = class {
-  constructor(children, triggers, prefetchTriggers, placeholder, loading, error2, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan) {
+var DeferredBlock = class extends BlockNode {
+  constructor(children, triggers, prefetchTriggers, placeholder, loading, error2, nameSpan, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
     this.placeholder = placeholder;
     this.loading = loading;
     this.error = error2;
-    this.sourceSpan = sourceSpan;
     this.mainBlockSpan = mainBlockSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
     this.triggers = triggers;
     this.prefetchTriggers = prefetchTriggers;
     this.definedTriggers = Object.keys(triggers);
@@ -3718,78 +3721,67 @@ var DeferredBlock = class {
     visitAll(visitor, keys.map((k) => triggers[k]));
   }
 };
-var SwitchBlock = class {
-  constructor(expression, cases, unknownBlocks, sourceSpan, startSourceSpan, endSourceSpan) {
+var SwitchBlock = class extends BlockNode {
+  constructor(expression, cases, unknownBlocks, sourceSpan, startSourceSpan, endSourceSpan, nameSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.expression = expression;
     this.cases = cases;
     this.unknownBlocks = unknownBlocks;
-    this.sourceSpan = sourceSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitSwitchBlock(this);
   }
 };
-var SwitchBlockCase = class {
-  constructor(expression, children, sourceSpan, startSourceSpan, endSourceSpan) {
+var SwitchBlockCase = class extends BlockNode {
+  constructor(expression, children, sourceSpan, startSourceSpan, endSourceSpan, nameSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.expression = expression;
     this.children = children;
-    this.sourceSpan = sourceSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitSwitchBlockCase(this);
   }
 };
-var ForLoopBlock = class {
-  constructor(item, expression, trackBy, contextVariables, children, empty, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan) {
+var ForLoopBlock = class extends BlockNode {
+  constructor(item, expression, trackBy, trackKeywordSpan, contextVariables, children, empty, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan, nameSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.item = item;
     this.expression = expression;
     this.trackBy = trackBy;
+    this.trackKeywordSpan = trackKeywordSpan;
     this.contextVariables = contextVariables;
     this.children = children;
     this.empty = empty;
-    this.sourceSpan = sourceSpan;
     this.mainBlockSpan = mainBlockSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitForLoopBlock(this);
   }
 };
-var ForLoopBlockEmpty = class {
-  constructor(children, sourceSpan, startSourceSpan, endSourceSpan) {
+var ForLoopBlockEmpty = class extends BlockNode {
+  constructor(children, sourceSpan, startSourceSpan, endSourceSpan, nameSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
-    this.sourceSpan = sourceSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitForLoopBlockEmpty(this);
   }
 };
-var IfBlock = class {
-  constructor(branches, sourceSpan, startSourceSpan, endSourceSpan) {
+var IfBlock = class extends BlockNode {
+  constructor(branches, sourceSpan, startSourceSpan, endSourceSpan, nameSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.branches = branches;
-    this.sourceSpan = sourceSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitIfBlock(this);
   }
 };
-var IfBlockBranch = class {
-  constructor(expression, children, expressionAlias, sourceSpan, startSourceSpan, endSourceSpan) {
+var IfBlockBranch = class extends BlockNode {
+  constructor(expression, children, expressionAlias, sourceSpan, startSourceSpan, endSourceSpan, nameSpan) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.expression = expression;
     this.children = children;
     this.expressionAlias = expressionAlias;
-    this.sourceSpan = sourceSpan;
-    this.startSourceSpan = startSourceSpan;
-    this.endSourceSpan = endSourceSpan;
   }
   visit(visitor) {
     return visitor.visitIfBlockBranch(this);
@@ -19867,18 +19859,18 @@ function createIfBlock(ast, connectedBlocks, visitor, bindingParser) {
   const branches = [];
   const mainBlockParams = parseConditionalBlockParameters(ast, errors, bindingParser);
   if (mainBlockParams !== null) {
-    branches.push(new IfBlockBranch(mainBlockParams.expression, visitAll2(visitor, ast.children, ast.children), mainBlockParams.expressionAlias, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan));
+    branches.push(new IfBlockBranch(mainBlockParams.expression, visitAll2(visitor, ast.children, ast.children), mainBlockParams.expressionAlias, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan, ast.nameSpan));
   }
   for (const block of connectedBlocks) {
     if (ELSE_IF_PATTERN.test(block.name)) {
       const params = parseConditionalBlockParameters(block, errors, bindingParser);
       if (params !== null) {
         const children = visitAll2(visitor, block.children, block.children);
-        branches.push(new IfBlockBranch(params.expression, children, params.expressionAlias, block.sourceSpan, block.startSourceSpan, block.endSourceSpan));
+        branches.push(new IfBlockBranch(params.expression, children, params.expressionAlias, block.sourceSpan, block.startSourceSpan, block.endSourceSpan, block.nameSpan));
       }
     } else if (block.name === "else") {
       const children = visitAll2(visitor, block.children, block.children);
-      branches.push(new IfBlockBranch(null, children, null, block.sourceSpan, block.startSourceSpan, block.endSourceSpan));
+      branches.push(new IfBlockBranch(null, children, null, block.sourceSpan, block.startSourceSpan, block.endSourceSpan, block.nameSpan));
     }
   }
   const ifBlockStartSourceSpan = branches.length > 0 ? branches[0].startSourceSpan : ast.startSourceSpan;
@@ -19889,7 +19881,7 @@ function createIfBlock(ast, connectedBlocks, visitor, bindingParser) {
     wholeSourceSpan = new ParseSourceSpan(ifBlockStartSourceSpan.start, lastBranch.sourceSpan.end);
   }
   return {
-    node: new IfBlock(branches, wholeSourceSpan, ast.startSourceSpan, ifBlockEndSourceSpan),
+    node: new IfBlock(branches, wholeSourceSpan, ast.startSourceSpan, ifBlockEndSourceSpan, ast.nameSpan),
     errors
   };
 }
@@ -19906,7 +19898,7 @@ function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
       } else if (block.parameters.length > 0) {
         errors.push(new ParseError(block.sourceSpan, "@empty block cannot have parameters"));
       } else {
-        empty = new ForLoopBlockEmpty(visitAll2(visitor, block.children, block.children), block.sourceSpan, block.startSourceSpan, block.endSourceSpan);
+        empty = new ForLoopBlockEmpty(visitAll2(visitor, block.children, block.children), block.sourceSpan, block.startSourceSpan, block.endSourceSpan, block.nameSpan);
       }
     } else {
       errors.push(new ParseError(block.sourceSpan, `Unrecognized @for loop block "${block.name}"`));
@@ -19918,7 +19910,7 @@ function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
     } else {
       const endSpan = (_a2 = empty == null ? void 0 : empty.endSourceSpan) != null ? _a2 : ast.endSourceSpan;
       const sourceSpan = new ParseSourceSpan(ast.sourceSpan.start, (_b2 = endSpan == null ? void 0 : endSpan.end) != null ? _b2 : ast.sourceSpan.end);
-      node = new ForLoopBlock(params.itemName, params.expression, params.trackBy, params.context, visitAll2(visitor, ast.children, ast.children), empty, sourceSpan, ast.sourceSpan, ast.startSourceSpan, endSpan);
+      node = new ForLoopBlock(params.itemName, params.expression, params.trackBy.expression, params.trackBy.keywordSpan, params.context, visitAll2(visitor, ast.children, ast.children), empty, sourceSpan, ast.sourceSpan, ast.startSourceSpan, endSpan, ast.nameSpan);
     }
   }
   return { node, errors };
@@ -19938,7 +19930,7 @@ function createSwitchBlock(ast, visitor, bindingParser) {
       continue;
     }
     const expression = node.name === "case" ? parseBlockParameterToBinding(node.parameters[0], bindingParser) : null;
-    const ast2 = new SwitchBlockCase(expression, visitAll2(visitor, node.children, node.children), node.sourceSpan, node.startSourceSpan, node.endSourceSpan);
+    const ast2 = new SwitchBlockCase(expression, visitAll2(visitor, node.children, node.children), node.sourceSpan, node.startSourceSpan, node.endSourceSpan, node.nameSpan);
     if (expression === null) {
       defaultCase = ast2;
     } else {
@@ -19949,7 +19941,7 @@ function createSwitchBlock(ast, visitor, bindingParser) {
     cases.push(defaultCase);
   }
   return {
-    node: new SwitchBlock(primaryExpression, cases, unknownBlocks, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan),
+    node: new SwitchBlock(primaryExpression, cases, unknownBlocks, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan, ast.nameSpan),
     errors
   };
 }
@@ -19983,7 +19975,9 @@ function parseForLoopParameters(block, errors, bindingParser) {
       if (result.trackBy !== null) {
         errors.push(new ParseError(param.sourceSpan, '@for loop can only have one "track" expression'));
       } else {
-        result.trackBy = parseBlockParameterToBinding(param, bindingParser, trackMatch[1]);
+        const expression = parseBlockParameterToBinding(param, bindingParser, trackMatch[1]);
+        const keywordSpan = new ParseSourceSpan(param.sourceSpan.start, param.sourceSpan.start.moveBy("track".length));
+        result.trackBy = { expression, keywordSpan };
       }
       continue;
     }
@@ -20157,32 +20151,44 @@ var OnTriggerType;
 })(OnTriggerType || (OnTriggerType = {}));
 function parseWhenTrigger({ expression, sourceSpan }, bindingParser, triggers, errors) {
   const whenIndex = expression.indexOf("when");
+  const whenSourceSpan = new ParseSourceSpan(sourceSpan.start.moveBy(whenIndex), sourceSpan.start.moveBy(whenIndex + "when".length));
+  const prefetchSpan = getPrefetchSpan(expression, sourceSpan);
   if (whenIndex === -1) {
     errors.push(new ParseError(sourceSpan, `Could not find "when" keyword in expression`));
   } else {
     const start = getTriggerParametersStart(expression, whenIndex + 1);
     const parsed = bindingParser.parseBinding(expression.slice(start), false, sourceSpan, sourceSpan.start.offset + start);
-    trackTrigger("when", triggers, errors, new BoundDeferredTrigger(parsed, sourceSpan));
+    trackTrigger("when", triggers, errors, new BoundDeferredTrigger(parsed, sourceSpan, prefetchSpan, whenSourceSpan));
   }
 }
 function parseOnTrigger({ expression, sourceSpan }, triggers, errors, placeholder) {
   const onIndex = expression.indexOf("on");
+  const onSourceSpan = new ParseSourceSpan(sourceSpan.start.moveBy(onIndex), sourceSpan.start.moveBy(onIndex + "on".length));
+  const prefetchSpan = getPrefetchSpan(expression, sourceSpan);
   if (onIndex === -1) {
     errors.push(new ParseError(sourceSpan, `Could not find "on" keyword in expression`));
   } else {
     const start = getTriggerParametersStart(expression, onIndex + 1);
-    const parser = new OnTriggerParser(expression, start, sourceSpan, triggers, errors, placeholder);
+    const parser = new OnTriggerParser(expression, start, sourceSpan, triggers, errors, placeholder, prefetchSpan, onSourceSpan);
     parser.parse();
   }
 }
+function getPrefetchSpan(expression, sourceSpan) {
+  if (!expression.startsWith("prefetch")) {
+    return null;
+  }
+  return new ParseSourceSpan(sourceSpan.start, sourceSpan.start.moveBy("prefetch".length));
+}
 var OnTriggerParser = class {
-  constructor(expression, start, span, triggers, errors, placeholder) {
+  constructor(expression, start, span, triggers, errors, placeholder, prefetchSpan, onSourceSpan) {
     this.expression = expression;
     this.start = start;
     this.span = span;
     this.triggers = triggers;
     this.errors = errors;
     this.placeholder = placeholder;
+    this.prefetchSpan = prefetchSpan;
+    this.onSourceSpan = onSourceSpan;
     this.index = 0;
     this.tokens = new Lexer().tokenize(expression.slice(start));
   }
@@ -20224,28 +20230,32 @@ var OnTriggerParser = class {
     return this.tokens[Math.min(this.index, this.tokens.length - 1)];
   }
   consumeTrigger(identifier, parameters) {
-    const startSpan = this.span.start.moveBy(this.start + identifier.index - this.tokens[0].index);
-    const endSpan = startSpan.moveBy(this.token().end - identifier.index);
-    const sourceSpan = new ParseSourceSpan(startSpan, endSpan);
+    const triggerNameStartSpan = this.span.start.moveBy(this.start + identifier.index - this.tokens[0].index);
+    const nameSpan = new ParseSourceSpan(triggerNameStartSpan, triggerNameStartSpan.moveBy(identifier.strValue.length));
+    const endSpan = triggerNameStartSpan.moveBy(this.token().end - identifier.index);
+    const isFirstTrigger = identifier.index === 0;
+    const onSourceSpan = isFirstTrigger ? this.onSourceSpan : null;
+    const prefetchSourceSpan = isFirstTrigger ? this.prefetchSpan : null;
+    const sourceSpan = new ParseSourceSpan(isFirstTrigger ? this.span.start : triggerNameStartSpan, endSpan);
     try {
       switch (identifier.toString()) {
         case OnTriggerType.IDLE:
-          this.trackTrigger("idle", createIdleTrigger(parameters, sourceSpan));
+          this.trackTrigger("idle", createIdleTrigger(parameters, nameSpan, sourceSpan, prefetchSourceSpan, onSourceSpan));
           break;
         case OnTriggerType.TIMER:
-          this.trackTrigger("timer", createTimerTrigger(parameters, sourceSpan));
+          this.trackTrigger("timer", createTimerTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan));
           break;
         case OnTriggerType.INTERACTION:
-          this.trackTrigger("interaction", createInteractionTrigger(parameters, sourceSpan, this.placeholder));
+          this.trackTrigger("interaction", createInteractionTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.placeholder));
           break;
         case OnTriggerType.IMMEDIATE:
-          this.trackTrigger("immediate", createImmediateTrigger(parameters, sourceSpan));
+          this.trackTrigger("immediate", createImmediateTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan));
           break;
         case OnTriggerType.HOVER:
-          this.trackTrigger("hover", createHoverTrigger(parameters, sourceSpan, this.placeholder));
+          this.trackTrigger("hover", createHoverTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.placeholder));
           break;
         case OnTriggerType.VIEWPORT:
-          this.trackTrigger("viewport", createViewportTrigger(parameters, sourceSpan, this.placeholder));
+          this.trackTrigger("viewport", createViewportTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.placeholder));
           break;
         default:
           throw new Error(`Unrecognized trigger type "${identifier}"`);
@@ -20316,13 +20326,13 @@ function trackTrigger(name, allTriggers, errors, trigger) {
     allTriggers[name] = trigger;
   }
 }
-function createIdleTrigger(parameters, sourceSpan) {
+function createIdleTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
   if (parameters.length > 0) {
     throw new Error(`"${OnTriggerType.IDLE}" trigger cannot have parameters`);
   }
-  return new IdleDeferredTrigger(sourceSpan);
+  return new IdleDeferredTrigger(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
 }
-function createTimerTrigger(parameters, sourceSpan) {
+function createTimerTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
   if (parameters.length !== 1) {
     throw new Error(`"${OnTriggerType.TIMER}" trigger must have exactly one parameter`);
   }
@@ -20330,28 +20340,28 @@ function createTimerTrigger(parameters, sourceSpan) {
   if (delay === null) {
     throw new Error(`Could not parse time value of trigger "${OnTriggerType.TIMER}"`);
   }
-  return new TimerDeferredTrigger(delay, sourceSpan);
+  return new TimerDeferredTrigger(delay, nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
 }
-function createImmediateTrigger(parameters, sourceSpan) {
+function createImmediateTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
   if (parameters.length > 0) {
     throw new Error(`"${OnTriggerType.IMMEDIATE}" trigger cannot have parameters`);
   }
-  return new ImmediateDeferredTrigger(sourceSpan);
+  return new ImmediateDeferredTrigger(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
 }
-function createHoverTrigger(parameters, sourceSpan, placeholder) {
+function createHoverTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, placeholder) {
   var _a2;
   validateReferenceBasedTrigger(OnTriggerType.HOVER, parameters, placeholder);
-  return new HoverDeferredTrigger((_a2 = parameters[0]) != null ? _a2 : null, sourceSpan);
+  return new HoverDeferredTrigger((_a2 = parameters[0]) != null ? _a2 : null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
 }
-function createInteractionTrigger(parameters, sourceSpan, placeholder) {
+function createInteractionTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, placeholder) {
   var _a2;
   validateReferenceBasedTrigger(OnTriggerType.INTERACTION, parameters, placeholder);
-  return new InteractionDeferredTrigger((_a2 = parameters[0]) != null ? _a2 : null, sourceSpan);
+  return new InteractionDeferredTrigger((_a2 = parameters[0]) != null ? _a2 : null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
 }
-function createViewportTrigger(parameters, sourceSpan, placeholder) {
+function createViewportTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, placeholder) {
   var _a2;
   validateReferenceBasedTrigger(OnTriggerType.VIEWPORT, parameters, placeholder);
-  return new ViewportDeferredTrigger((_a2 = parameters[0]) != null ? _a2 : null, sourceSpan);
+  return new ViewportDeferredTrigger((_a2 = parameters[0]) != null ? _a2 : null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
 }
 function validateReferenceBasedTrigger(type, parameters, placeholder) {
   if (parameters.length > 1) {
@@ -20407,8 +20417,8 @@ function createDeferredBlock(ast, connectedBlocks, visitor, bindingParser) {
     lastEndSourceSpan = lastConnectedBlock.endSourceSpan;
     endOfLastSourceSpan = lastConnectedBlock.sourceSpan.end;
   }
-  const mainDeferredSourceSpan = new ParseSourceSpan(ast.sourceSpan.start, endOfLastSourceSpan);
-  const node = new DeferredBlock(visitAll2(visitor, ast.children, ast.children), triggers, prefetchTriggers, placeholder, loading, error2, mainDeferredSourceSpan, ast.sourceSpan, ast.startSourceSpan, lastEndSourceSpan);
+  const sourceSpanWithConnectedBlocks = new ParseSourceSpan(ast.sourceSpan.start, endOfLastSourceSpan);
+  const node = new DeferredBlock(visitAll2(visitor, ast.children, ast.children), triggers, prefetchTriggers, placeholder, loading, error2, ast.nameSpan, sourceSpanWithConnectedBlocks, ast.sourceSpan, ast.startSourceSpan, lastEndSourceSpan);
   return { node, errors };
 }
 function parseConnectedBlocks(connectedBlocks, errors, visitor) {
@@ -20466,7 +20476,7 @@ function parsePlaceholderBlock(ast, visitor) {
       throw new Error(`Unrecognized parameter in @placeholder block: "${param.expression}"`);
     }
   }
-  return new DeferredBlockPlaceholder(visitAll2(visitor, ast.children, ast.children), minimumTime, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+  return new DeferredBlockPlaceholder(visitAll2(visitor, ast.children, ast.children), minimumTime, ast.nameSpan, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
 }
 function parseLoadingBlock(ast, visitor) {
   let afterTime = null;
@@ -20494,13 +20504,13 @@ function parseLoadingBlock(ast, visitor) {
       throw new Error(`Unrecognized parameter in @loading block: "${param.expression}"`);
     }
   }
-  return new DeferredBlockLoading(visitAll2(visitor, ast.children, ast.children), afterTime, minimumTime, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+  return new DeferredBlockLoading(visitAll2(visitor, ast.children, ast.children), afterTime, minimumTime, ast.nameSpan, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
 }
 function parseErrorBlock(ast, visitor) {
   if (ast.parameters.length > 0) {
     throw new Error(`@error block cannot have parameters`);
   }
-  return new DeferredBlockError(visitAll2(visitor, ast.children, ast.children), ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
+  return new DeferredBlockError(visitAll2(visitor, ast.children, ast.children), ast.nameSpan, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan);
 }
 function parsePrimaryTriggers(params, bindingParser, errors, placeholder) {
   const triggers = {};
@@ -24468,7 +24478,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-73c5d1c");
+var VERSION2 = new Version("17.1.0-next.0+sha-bf5bda4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
