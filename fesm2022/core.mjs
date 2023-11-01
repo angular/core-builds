@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.0.0-rc.1+sha-935c181
+ * @license Angular v17.0.0-rc.1+sha-ddef3ac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
+import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, Observable, merge as merge$1, BehaviorSubject, of } from 'rxjs';
 import { share, switchMap, distinctUntilChanged, first } from 'rxjs/operators';
 
@@ -2201,6 +2201,7 @@ const QUERIES = 18;
 const ID = 19;
 const EMBEDDED_VIEW_INJECTOR = 20;
 const ON_DESTROY_HOOKS = 21;
+const EFFECTS_TO_SCHEDULE = 22;
 const REACTIVE_TEMPLATE_CONSUMER = 23;
 const REACTIVE_HOST_BINDING_CONSUMER = 24;
 /**
@@ -10445,7 +10446,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-rc.1+sha-935c181');
+const VERSION = new Version('17.0.0-rc.1+sha-ddef3ac');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -10524,6 +10525,1170 @@ function untracked(nonReactiveReadsFn) {
     }
 }
 
+function isIterable(obj) {
+    return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
+}
+function isListLikeIterable(obj) {
+    if (!isJsObject(obj))
+        return false;
+    return Array.isArray(obj) ||
+        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
+            Symbol.iterator in obj); // JS Iterable have a Symbol.iterator prop
+}
+function areIterablesEqual(a, b, comparator) {
+    const iterator1 = a[Symbol.iterator]();
+    const iterator2 = b[Symbol.iterator]();
+    while (true) {
+        const item1 = iterator1.next();
+        const item2 = iterator2.next();
+        if (item1.done && item2.done)
+            return true;
+        if (item1.done || item2.done)
+            return false;
+        if (!comparator(item1.value, item2.value))
+            return false;
+    }
+}
+function iterateListLike(obj, fn) {
+    if (Array.isArray(obj)) {
+        for (let i = 0; i < obj.length; i++) {
+            fn(obj[i]);
+        }
+    }
+    else {
+        const iterator = obj[Symbol.iterator]();
+        let item;
+        while (!((item = iterator.next()).done)) {
+            fn(item.value);
+        }
+    }
+}
+function isJsObject(o) {
+    return o !== null && (typeof o === 'function' || typeof o === 'object');
+}
+
+class DefaultIterableDifferFactory {
+    constructor() { }
+    supports(obj) {
+        return isListLikeIterable(obj);
+    }
+    create(trackByFn) {
+        return new DefaultIterableDiffer(trackByFn);
+    }
+}
+const trackByIdentity = (index, item) => item;
+/**
+ * @deprecated v4.0.0 - Should not be part of public API.
+ * @publicApi
+ */
+class DefaultIterableDiffer {
+    constructor(trackByFn) {
+        this.length = 0;
+        // Keeps track of the used records at any point in time (during & across `_check()` calls)
+        this._linkedRecords = null;
+        // Keeps track of the removed records at any point in time during `_check()` calls.
+        this._unlinkedRecords = null;
+        this._previousItHead = null;
+        this._itHead = null;
+        this._itTail = null;
+        this._additionsHead = null;
+        this._additionsTail = null;
+        this._movesHead = null;
+        this._movesTail = null;
+        this._removalsHead = null;
+        this._removalsTail = null;
+        // Keeps track of records where custom track by is the same, but item identity has changed
+        this._identityChangesHead = null;
+        this._identityChangesTail = null;
+        this._trackByFn = trackByFn || trackByIdentity;
+    }
+    forEachItem(fn) {
+        let record;
+        for (record = this._itHead; record !== null; record = record._next) {
+            fn(record);
+        }
+    }
+    forEachOperation(fn) {
+        let nextIt = this._itHead;
+        let nextRemove = this._removalsHead;
+        let addRemoveOffset = 0;
+        let moveOffsets = null;
+        while (nextIt || nextRemove) {
+            // Figure out which is the next record to process
+            // Order: remove, add, move
+            const record = !nextRemove ||
+                nextIt &&
+                    nextIt.currentIndex <
+                        getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
+                nextIt :
+                nextRemove;
+            const adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
+            const currentIndex = record.currentIndex;
+            // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
+            if (record === nextRemove) {
+                addRemoveOffset--;
+                nextRemove = nextRemove._nextRemoved;
+            }
+            else {
+                nextIt = nextIt._next;
+                if (record.previousIndex == null) {
+                    addRemoveOffset++;
+                }
+                else {
+                    // INVARIANT:  currentIndex < previousIndex
+                    if (!moveOffsets)
+                        moveOffsets = [];
+                    const localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
+                    const localCurrentIndex = currentIndex - addRemoveOffset;
+                    if (localMovePreviousIndex != localCurrentIndex) {
+                        for (let i = 0; i < localMovePreviousIndex; i++) {
+                            const offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
+                            const index = offset + i;
+                            if (localCurrentIndex <= index && index < localMovePreviousIndex) {
+                                moveOffsets[i] = offset + 1;
+                            }
+                        }
+                        const previousIndex = record.previousIndex;
+                        moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
+                    }
+                }
+            }
+            if (adjPreviousIndex !== currentIndex) {
+                fn(record, adjPreviousIndex, currentIndex);
+            }
+        }
+    }
+    forEachPreviousItem(fn) {
+        let record;
+        for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
+            fn(record);
+        }
+    }
+    forEachAddedItem(fn) {
+        let record;
+        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+            fn(record);
+        }
+    }
+    forEachMovedItem(fn) {
+        let record;
+        for (record = this._movesHead; record !== null; record = record._nextMoved) {
+            fn(record);
+        }
+    }
+    forEachRemovedItem(fn) {
+        let record;
+        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
+            fn(record);
+        }
+    }
+    forEachIdentityChange(fn) {
+        let record;
+        for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
+            fn(record);
+        }
+    }
+    diff(collection) {
+        if (collection == null)
+            collection = [];
+        if (!isListLikeIterable(collection)) {
+            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
+                `Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed`);
+        }
+        if (this.check(collection)) {
+            return this;
+        }
+        else {
+            return null;
+        }
+    }
+    onDestroy() { }
+    check(collection) {
+        this._reset();
+        let record = this._itHead;
+        let mayBeDirty = false;
+        let index;
+        let item;
+        let itemTrackBy;
+        if (Array.isArray(collection)) {
+            this.length = collection.length;
+            for (let index = 0; index < this.length; index++) {
+                item = collection[index];
+                itemTrackBy = this._trackByFn(index, item);
+                if (record === null || !Object.is(record.trackById, itemTrackBy)) {
+                    record = this._mismatch(record, item, itemTrackBy, index);
+                    mayBeDirty = true;
+                }
+                else {
+                    if (mayBeDirty) {
+                        // TODO(misko): can we limit this to duplicates only?
+                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
+                    }
+                    if (!Object.is(record.item, item))
+                        this._addIdentityChange(record, item);
+                }
+                record = record._next;
+            }
+        }
+        else {
+            index = 0;
+            iterateListLike(collection, (item) => {
+                itemTrackBy = this._trackByFn(index, item);
+                if (record === null || !Object.is(record.trackById, itemTrackBy)) {
+                    record = this._mismatch(record, item, itemTrackBy, index);
+                    mayBeDirty = true;
+                }
+                else {
+                    if (mayBeDirty) {
+                        // TODO(misko): can we limit this to duplicates only?
+                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
+                    }
+                    if (!Object.is(record.item, item))
+                        this._addIdentityChange(record, item);
+                }
+                record = record._next;
+                index++;
+            });
+            this.length = index;
+        }
+        this._truncate(record);
+        this.collection = collection;
+        return this.isDirty;
+    }
+    /* CollectionChanges is considered dirty if it has any additions, moves, removals, or identity
+     * changes.
+     */
+    get isDirty() {
+        return this._additionsHead !== null || this._movesHead !== null ||
+            this._removalsHead !== null || this._identityChangesHead !== null;
+    }
+    /**
+     * Reset the state of the change objects to show no changes. This means set previousKey to
+     * currentKey, and clear all of the queues (additions, moves, removals).
+     * Set the previousIndexes of moved and added items to their currentIndexes
+     * Reset the list of additions, moves and removals
+     *
+     * @internal
+     */
+    _reset() {
+        if (this.isDirty) {
+            let record;
+            for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
+                record._nextPrevious = record._next;
+            }
+            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+                record.previousIndex = record.currentIndex;
+            }
+            this._additionsHead = this._additionsTail = null;
+            for (record = this._movesHead; record !== null; record = record._nextMoved) {
+                record.previousIndex = record.currentIndex;
+            }
+            this._movesHead = this._movesTail = null;
+            this._removalsHead = this._removalsTail = null;
+            this._identityChangesHead = this._identityChangesTail = null;
+            // TODO(vicb): when assert gets supported
+            // assert(!this.isDirty);
+        }
+    }
+    /**
+     * This is the core function which handles differences between collections.
+     *
+     * - `record` is the record which we saw at this position last time. If null then it is a new
+     *   item.
+     * - `item` is the current item in the collection
+     * - `index` is the position of the item in the collection
+     *
+     * @internal
+     */
+    _mismatch(record, item, itemTrackBy, index) {
+        // The previous record after which we will append the current one.
+        let previousRecord;
+        if (record === null) {
+            previousRecord = this._itTail;
+        }
+        else {
+            previousRecord = record._prev;
+            // Remove the record from the collection since we know it does not match the item.
+            this._remove(record);
+        }
+        // See if we have evicted the item, which used to be at some anterior position of _itHead list.
+        record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
+        if (record !== null) {
+            // It is an item which we have evicted earlier: reinsert it back into the list.
+            // But first we need to check if identity changed, so we can update in view if necessary.
+            if (!Object.is(record.item, item))
+                this._addIdentityChange(record, item);
+            this._reinsertAfter(record, previousRecord, index);
+        }
+        else {
+            // Attempt to see if the item is at some posterior position of _itHead list.
+            record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
+            if (record !== null) {
+                // We have the item in _itHead at/after `index` position. We need to move it forward in the
+                // collection.
+                // But first we need to check if identity changed, so we can update in view if necessary.
+                if (!Object.is(record.item, item))
+                    this._addIdentityChange(record, item);
+                this._moveAfter(record, previousRecord, index);
+            }
+            else {
+                // It is a new item: add it.
+                record =
+                    this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
+            }
+        }
+        return record;
+    }
+    /**
+     * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
+     *
+     * Use case: `[a, a]` => `[b, a, a]`
+     *
+     * If we did not have this check then the insertion of `b` would:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) leave `a` at index `1` as is. <-- this is wrong!
+     *   3) reinsert `a` at index 2. <-- this is wrong!
+     *
+     * The correct behavior is:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) reinsert `a` at index 1.
+     *   3) move `a` at from `1` to `2`.
+     *
+     *
+     * Double check that we have not evicted a duplicate item. We need to check if the item type may
+     * have already been removed:
+     * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
+     * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
+     * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
+     * at the end.
+     *
+     * @internal
+     */
+    _verifyReinsertion(record, item, itemTrackBy, index) {
+        let reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
+        if (reinsertRecord !== null) {
+            record = this._reinsertAfter(reinsertRecord, record._prev, index);
+        }
+        else if (record.currentIndex != index) {
+            record.currentIndex = index;
+            this._addToMoves(record, index);
+        }
+        return record;
+    }
+    /**
+     * Get rid of any excess {@link IterableChangeRecord_}s from the previous collection
+     *
+     * - `record` The first excess {@link IterableChangeRecord_}.
+     *
+     * @internal
+     */
+    _truncate(record) {
+        // Anything after that needs to be removed;
+        while (record !== null) {
+            const nextRecord = record._next;
+            this._addToRemovals(this._unlink(record));
+            record = nextRecord;
+        }
+        if (this._unlinkedRecords !== null) {
+            this._unlinkedRecords.clear();
+        }
+        if (this._additionsTail !== null) {
+            this._additionsTail._nextAdded = null;
+        }
+        if (this._movesTail !== null) {
+            this._movesTail._nextMoved = null;
+        }
+        if (this._itTail !== null) {
+            this._itTail._next = null;
+        }
+        if (this._removalsTail !== null) {
+            this._removalsTail._nextRemoved = null;
+        }
+        if (this._identityChangesTail !== null) {
+            this._identityChangesTail._nextIdentityChange = null;
+        }
+    }
+    /** @internal */
+    _reinsertAfter(record, prevRecord, index) {
+        if (this._unlinkedRecords !== null) {
+            this._unlinkedRecords.remove(record);
+        }
+        const prev = record._prevRemoved;
+        const next = record._nextRemoved;
+        if (prev === null) {
+            this._removalsHead = next;
+        }
+        else {
+            prev._nextRemoved = next;
+        }
+        if (next === null) {
+            this._removalsTail = prev;
+        }
+        else {
+            next._prevRemoved = prev;
+        }
+        this._insertAfter(record, prevRecord, index);
+        this._addToMoves(record, index);
+        return record;
+    }
+    /** @internal */
+    _moveAfter(record, prevRecord, index) {
+        this._unlink(record);
+        this._insertAfter(record, prevRecord, index);
+        this._addToMoves(record, index);
+        return record;
+    }
+    /** @internal */
+    _addAfter(record, prevRecord, index) {
+        this._insertAfter(record, prevRecord, index);
+        if (this._additionsTail === null) {
+            // TODO(vicb):
+            // assert(this._additionsHead === null);
+            this._additionsTail = this._additionsHead = record;
+        }
+        else {
+            // TODO(vicb):
+            // assert(_additionsTail._nextAdded === null);
+            // assert(record._nextAdded === null);
+            this._additionsTail = this._additionsTail._nextAdded = record;
+        }
+        return record;
+    }
+    /** @internal */
+    _insertAfter(record, prevRecord, index) {
+        // TODO(vicb):
+        // assert(record != prevRecord);
+        // assert(record._next === null);
+        // assert(record._prev === null);
+        const next = prevRecord === null ? this._itHead : prevRecord._next;
+        // TODO(vicb):
+        // assert(next != record);
+        // assert(prevRecord != record);
+        record._next = next;
+        record._prev = prevRecord;
+        if (next === null) {
+            this._itTail = record;
+        }
+        else {
+            next._prev = record;
+        }
+        if (prevRecord === null) {
+            this._itHead = record;
+        }
+        else {
+            prevRecord._next = record;
+        }
+        if (this._linkedRecords === null) {
+            this._linkedRecords = new _DuplicateMap();
+        }
+        this._linkedRecords.put(record);
+        record.currentIndex = index;
+        return record;
+    }
+    /** @internal */
+    _remove(record) {
+        return this._addToRemovals(this._unlink(record));
+    }
+    /** @internal */
+    _unlink(record) {
+        if (this._linkedRecords !== null) {
+            this._linkedRecords.remove(record);
+        }
+        const prev = record._prev;
+        const next = record._next;
+        // TODO(vicb):
+        // assert((record._prev = null) === null);
+        // assert((record._next = null) === null);
+        if (prev === null) {
+            this._itHead = next;
+        }
+        else {
+            prev._next = next;
+        }
+        if (next === null) {
+            this._itTail = prev;
+        }
+        else {
+            next._prev = prev;
+        }
+        return record;
+    }
+    /** @internal */
+    _addToMoves(record, toIndex) {
+        // TODO(vicb):
+        // assert(record._nextMoved === null);
+        if (record.previousIndex === toIndex) {
+            return record;
+        }
+        if (this._movesTail === null) {
+            // TODO(vicb):
+            // assert(_movesHead === null);
+            this._movesTail = this._movesHead = record;
+        }
+        else {
+            // TODO(vicb):
+            // assert(_movesTail._nextMoved === null);
+            this._movesTail = this._movesTail._nextMoved = record;
+        }
+        return record;
+    }
+    _addToRemovals(record) {
+        if (this._unlinkedRecords === null) {
+            this._unlinkedRecords = new _DuplicateMap();
+        }
+        this._unlinkedRecords.put(record);
+        record.currentIndex = null;
+        record._nextRemoved = null;
+        if (this._removalsTail === null) {
+            // TODO(vicb):
+            // assert(_removalsHead === null);
+            this._removalsTail = this._removalsHead = record;
+            record._prevRemoved = null;
+        }
+        else {
+            // TODO(vicb):
+            // assert(_removalsTail._nextRemoved === null);
+            // assert(record._nextRemoved === null);
+            record._prevRemoved = this._removalsTail;
+            this._removalsTail = this._removalsTail._nextRemoved = record;
+        }
+        return record;
+    }
+    /** @internal */
+    _addIdentityChange(record, item) {
+        record.item = item;
+        if (this._identityChangesTail === null) {
+            this._identityChangesTail = this._identityChangesHead = record;
+        }
+        else {
+            this._identityChangesTail = this._identityChangesTail._nextIdentityChange = record;
+        }
+        return record;
+    }
+}
+class IterableChangeRecord_ {
+    constructor(item, trackById) {
+        this.item = item;
+        this.trackById = trackById;
+        this.currentIndex = null;
+        this.previousIndex = null;
+        /** @internal */
+        this._nextPrevious = null;
+        /** @internal */
+        this._prev = null;
+        /** @internal */
+        this._next = null;
+        /** @internal */
+        this._prevDup = null;
+        /** @internal */
+        this._nextDup = null;
+        /** @internal */
+        this._prevRemoved = null;
+        /** @internal */
+        this._nextRemoved = null;
+        /** @internal */
+        this._nextAdded = null;
+        /** @internal */
+        this._nextMoved = null;
+        /** @internal */
+        this._nextIdentityChange = null;
+    }
+}
+// A linked list of IterableChangeRecords with the same IterableChangeRecord_.item
+class _DuplicateItemRecordList {
+    constructor() {
+        /** @internal */
+        this._head = null;
+        /** @internal */
+        this._tail = null;
+    }
+    /**
+     * Append the record to the list of duplicates.
+     *
+     * Note: by design all records in the list of duplicates hold the same value in record.item.
+     */
+    add(record) {
+        if (this._head === null) {
+            this._head = this._tail = record;
+            record._nextDup = null;
+            record._prevDup = null;
+        }
+        else {
+            // TODO(vicb):
+            // assert(record.item ==  _head.item ||
+            //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
+            this._tail._nextDup = record;
+            record._prevDup = this._tail;
+            record._nextDup = null;
+            this._tail = record;
+        }
+    }
+    // Returns a IterableChangeRecord_ having IterableChangeRecord_.trackById == trackById and
+    // IterableChangeRecord_.currentIndex >= atOrAfterIndex
+    get(trackById, atOrAfterIndex) {
+        let record;
+        for (record = this._head; record !== null; record = record._nextDup) {
+            if ((atOrAfterIndex === null || atOrAfterIndex <= record.currentIndex) &&
+                Object.is(record.trackById, trackById)) {
+                return record;
+            }
+        }
+        return null;
+    }
+    /**
+     * Remove one {@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * Returns whether the list of duplicates is empty.
+     */
+    remove(record) {
+        // TODO(vicb):
+        // assert(() {
+        //  // verify that the record being removed is in the list.
+        //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
+        //    if (identical(cursor, record)) return true;
+        //  }
+        //  return false;
+        //});
+        const prev = record._prevDup;
+        const next = record._nextDup;
+        if (prev === null) {
+            this._head = next;
+        }
+        else {
+            prev._nextDup = next;
+        }
+        if (next === null) {
+            this._tail = prev;
+        }
+        else {
+            next._prevDup = prev;
+        }
+        return this._head === null;
+    }
+}
+class _DuplicateMap {
+    constructor() {
+        this.map = new Map();
+    }
+    put(record) {
+        const key = record.trackById;
+        let duplicates = this.map.get(key);
+        if (!duplicates) {
+            duplicates = new _DuplicateItemRecordList();
+            this.map.set(key, duplicates);
+        }
+        duplicates.add(record);
+    }
+    /**
+     * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
+     * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
+     *
+     * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
+     * have any more `a`s needs to return the second `a`.
+     */
+    get(trackById, atOrAfterIndex) {
+        const key = trackById;
+        const recordList = this.map.get(key);
+        return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
+    }
+    /**
+     * Removes a {@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * The list of duplicates also is removed from the map if it gets empty.
+     */
+    remove(record) {
+        const key = record.trackById;
+        const recordList = this.map.get(key);
+        // Remove the list of duplicates when it gets empty
+        if (recordList.remove(record)) {
+            this.map.delete(key);
+        }
+        return record;
+    }
+    get isEmpty() {
+        return this.map.size === 0;
+    }
+    clear() {
+        this.map.clear();
+    }
+}
+function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
+    const previousIndex = item.previousIndex;
+    if (previousIndex === null)
+        return previousIndex;
+    let moveOffset = 0;
+    if (moveOffsets && previousIndex < moveOffsets.length) {
+        moveOffset = moveOffsets[previousIndex];
+    }
+    return previousIndex + addRemoveOffset + moveOffset;
+}
+
+class DefaultKeyValueDifferFactory {
+    constructor() { }
+    supports(obj) {
+        return obj instanceof Map || isJsObject(obj);
+    }
+    create() {
+        return new DefaultKeyValueDiffer();
+    }
+}
+class DefaultKeyValueDiffer {
+    constructor() {
+        this._records = new Map();
+        this._mapHead = null;
+        // _appendAfter is used in the check loop
+        this._appendAfter = null;
+        this._previousMapHead = null;
+        this._changesHead = null;
+        this._changesTail = null;
+        this._additionsHead = null;
+        this._additionsTail = null;
+        this._removalsHead = null;
+        this._removalsTail = null;
+    }
+    get isDirty() {
+        return this._additionsHead !== null || this._changesHead !== null ||
+            this._removalsHead !== null;
+    }
+    forEachItem(fn) {
+        let record;
+        for (record = this._mapHead; record !== null; record = record._next) {
+            fn(record);
+        }
+    }
+    forEachPreviousItem(fn) {
+        let record;
+        for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
+            fn(record);
+        }
+    }
+    forEachChangedItem(fn) {
+        let record;
+        for (record = this._changesHead; record !== null; record = record._nextChanged) {
+            fn(record);
+        }
+    }
+    forEachAddedItem(fn) {
+        let record;
+        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+            fn(record);
+        }
+    }
+    forEachRemovedItem(fn) {
+        let record;
+        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
+            fn(record);
+        }
+    }
+    diff(map) {
+        if (!map) {
+            map = new Map();
+        }
+        else if (!(map instanceof Map || isJsObject(map))) {
+            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
+                `Error trying to diff '${stringify(map)}'. Only maps and objects are allowed`);
+        }
+        return this.check(map) ? this : null;
+    }
+    onDestroy() { }
+    /**
+     * Check the current state of the map vs the previous.
+     * The algorithm is optimised for when the keys do no change.
+     */
+    check(map) {
+        this._reset();
+        let insertBefore = this._mapHead;
+        this._appendAfter = null;
+        this._forEach(map, (value, key) => {
+            if (insertBefore && insertBefore.key === key) {
+                this._maybeAddToChanges(insertBefore, value);
+                this._appendAfter = insertBefore;
+                insertBefore = insertBefore._next;
+            }
+            else {
+                const record = this._getOrCreateRecordForKey(key, value);
+                insertBefore = this._insertBeforeOrAppend(insertBefore, record);
+            }
+        });
+        // Items remaining at the end of the list have been deleted
+        if (insertBefore) {
+            if (insertBefore._prev) {
+                insertBefore._prev._next = null;
+            }
+            this._removalsHead = insertBefore;
+            for (let record = insertBefore; record !== null; record = record._nextRemoved) {
+                if (record === this._mapHead) {
+                    this._mapHead = null;
+                }
+                this._records.delete(record.key);
+                record._nextRemoved = record._next;
+                record.previousValue = record.currentValue;
+                record.currentValue = null;
+                record._prev = null;
+                record._next = null;
+            }
+        }
+        // Make sure tails have no next records from previous runs
+        if (this._changesTail)
+            this._changesTail._nextChanged = null;
+        if (this._additionsTail)
+            this._additionsTail._nextAdded = null;
+        return this.isDirty;
+    }
+    /**
+     * Inserts a record before `before` or append at the end of the list when `before` is null.
+     *
+     * Notes:
+     * - This method appends at `this._appendAfter`,
+     * - This method updates `this._appendAfter`,
+     * - The return value is the new value for the insertion pointer.
+     */
+    _insertBeforeOrAppend(before, record) {
+        if (before) {
+            const prev = before._prev;
+            record._next = before;
+            record._prev = prev;
+            before._prev = record;
+            if (prev) {
+                prev._next = record;
+            }
+            if (before === this._mapHead) {
+                this._mapHead = record;
+            }
+            this._appendAfter = before;
+            return before;
+        }
+        if (this._appendAfter) {
+            this._appendAfter._next = record;
+            record._prev = this._appendAfter;
+        }
+        else {
+            this._mapHead = record;
+        }
+        this._appendAfter = record;
+        return null;
+    }
+    _getOrCreateRecordForKey(key, value) {
+        if (this._records.has(key)) {
+            const record = this._records.get(key);
+            this._maybeAddToChanges(record, value);
+            const prev = record._prev;
+            const next = record._next;
+            if (prev) {
+                prev._next = next;
+            }
+            if (next) {
+                next._prev = prev;
+            }
+            record._next = null;
+            record._prev = null;
+            return record;
+        }
+        const record = new KeyValueChangeRecord_(key);
+        this._records.set(key, record);
+        record.currentValue = value;
+        this._addToAdditions(record);
+        return record;
+    }
+    /** @internal */
+    _reset() {
+        if (this.isDirty) {
+            let record;
+            // let `_previousMapHead` contain the state of the map before the changes
+            this._previousMapHead = this._mapHead;
+            for (record = this._previousMapHead; record !== null; record = record._next) {
+                record._nextPrevious = record._next;
+            }
+            // Update `record.previousValue` with the value of the item before the changes
+            // We need to update all changed items (that's those which have been added and changed)
+            for (record = this._changesHead; record !== null; record = record._nextChanged) {
+                record.previousValue = record.currentValue;
+            }
+            for (record = this._additionsHead; record != null; record = record._nextAdded) {
+                record.previousValue = record.currentValue;
+            }
+            this._changesHead = this._changesTail = null;
+            this._additionsHead = this._additionsTail = null;
+            this._removalsHead = null;
+        }
+    }
+    // Add the record or a given key to the list of changes only when the value has actually changed
+    _maybeAddToChanges(record, newValue) {
+        if (!Object.is(newValue, record.currentValue)) {
+            record.previousValue = record.currentValue;
+            record.currentValue = newValue;
+            this._addToChanges(record);
+        }
+    }
+    _addToAdditions(record) {
+        if (this._additionsHead === null) {
+            this._additionsHead = this._additionsTail = record;
+        }
+        else {
+            this._additionsTail._nextAdded = record;
+            this._additionsTail = record;
+        }
+    }
+    _addToChanges(record) {
+        if (this._changesHead === null) {
+            this._changesHead = this._changesTail = record;
+        }
+        else {
+            this._changesTail._nextChanged = record;
+            this._changesTail = record;
+        }
+    }
+    /** @internal */
+    _forEach(obj, fn) {
+        if (obj instanceof Map) {
+            obj.forEach(fn);
+        }
+        else {
+            Object.keys(obj).forEach(k => fn(obj[k], k));
+        }
+    }
+}
+class KeyValueChangeRecord_ {
+    constructor(key) {
+        this.key = key;
+        this.previousValue = null;
+        this.currentValue = null;
+        /** @internal */
+        this._nextPrevious = null;
+        /** @internal */
+        this._next = null;
+        /** @internal */
+        this._prev = null;
+        /** @internal */
+        this._nextAdded = null;
+        /** @internal */
+        this._nextRemoved = null;
+        /** @internal */
+        this._nextChanged = null;
+    }
+}
+
+function defaultIterableDiffersFactory() {
+    return new IterableDiffers([new DefaultIterableDifferFactory()]);
+}
+/**
+ * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
+ *
+ * @publicApi
+ */
+class IterableDiffers {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({ token: IterableDiffers, providedIn: 'root', factory: defaultIterableDiffersFactory }); }
+    constructor(factories) {
+        this.factories = factories;
+    }
+    static create(factories, parent) {
+        if (parent != null) {
+            const copied = parent.factories.slice();
+            factories = factories.concat(copied);
+        }
+        return new IterableDiffers(factories);
+    }
+    /**
+     * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
+     * inherited {@link IterableDiffers} instance with the provided factories and return a new
+     * {@link IterableDiffers} instance.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {@link IterableDiffer} available.
+     *
+     * ```
+     * @Component({
+     *   viewProviders: [
+     *     IterableDiffers.extend([new ImmutableListDiffer()])
+     *   ]
+     * })
+     * ```
+     */
+    static extend(factories) {
+        return {
+            provide: IterableDiffers,
+            useFactory: (parent) => {
+                // if parent is null, it means that we are in the root injector and we have just overridden
+                // the default injection mechanism for IterableDiffers, in such a case just assume
+                // `defaultIterableDiffersFactory`.
+                return IterableDiffers.create(factories, parent || defaultIterableDiffersFactory());
+            },
+            // Dependency technically isn't optional, but we can provide a better error message this way.
+            deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
+        };
+    }
+    find(iterable) {
+        const factory = this.factories.find(f => f.supports(iterable));
+        if (factory != null) {
+            return factory;
+        }
+        else {
+            throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode &&
+                `Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
+        }
+    }
+}
+function getTypeNameForDebugging(type) {
+    return type['name'] || typeof type;
+}
+
+function defaultKeyValueDiffersFactory() {
+    return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]);
+}
+/**
+ * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
+ *
+ * @publicApi
+ */
+class KeyValueDiffers {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({ token: KeyValueDiffers, providedIn: 'root', factory: defaultKeyValueDiffersFactory }); }
+    constructor(factories) {
+        this.factories = factories;
+    }
+    static create(factories, parent) {
+        if (parent) {
+            const copied = parent.factories.slice();
+            factories = factories.concat(copied);
+        }
+        return new KeyValueDiffers(factories);
+    }
+    /**
+     * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
+     * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
+     * {@link KeyValueDiffers} instance.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {@link KeyValueDiffer} available.
+     *
+     * ```
+     * @Component({
+     *   viewProviders: [
+     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+     *   ]
+     * })
+     * ```
+     */
+    static extend(factories) {
+        return {
+            provide: KeyValueDiffers,
+            useFactory: (parent) => {
+                // if parent is null, it means that we are in the root injector and we have just overridden
+                // the default injection mechanism for KeyValueDiffers, in such a case just assume
+                // `defaultKeyValueDiffersFactory`.
+                return KeyValueDiffers.create(factories, parent || defaultKeyValueDiffersFactory());
+            },
+            // Dependency technically isn't optional, but we can provide a better error message this way.
+            deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
+        };
+    }
+    find(kv) {
+        const factory = this.factories.find(f => f.supports(kv));
+        if (factory) {
+            return factory;
+        }
+        throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode && `Cannot find a differ supporting object '${kv}'`);
+    }
+}
+
+function devModeEqual(a, b) {
+    const isListLikeIterableA = isListLikeIterable(a);
+    const isListLikeIterableB = isListLikeIterable(b);
+    if (isListLikeIterableA && isListLikeIterableB) {
+        return areIterablesEqual(a, b, devModeEqual);
+    }
+    else {
+        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
+        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
+        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
+            return true;
+        }
+        else {
+            return Object.is(a, b);
+        }
+    }
+}
+
+function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
+    while (tNode !== null) {
+        ngDevMode &&
+            assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 16 /* TNodeType.Projection */ | 32 /* TNodeType.Icu */);
+        const lNode = lView[tNode.index];
+        if (lNode !== null) {
+            result.push(unwrapRNode(lNode));
+        }
+        // A given lNode can represent either a native node or a LContainer (when it is a host of a
+        // ViewContainerRef). When we find a LContainer we need to descend into it to collect root nodes
+        // from the views in this container.
+        if (isLContainer(lNode)) {
+            collectNativeNodesInLContainer(lNode, result);
+        }
+        const tNodeType = tNode.type;
+        if (tNodeType & 8 /* TNodeType.ElementContainer */) {
+            collectNativeNodes(tView, lView, tNode.child, result);
+        }
+        else if (tNodeType & 32 /* TNodeType.Icu */) {
+            const nextRNode = icuContainerIterate(tNode, lView);
+            let rNode;
+            while (rNode = nextRNode()) {
+                result.push(rNode);
+            }
+        }
+        else if (tNodeType & 16 /* TNodeType.Projection */) {
+            const nodesInSlot = getProjectionNodes(lView, tNode);
+            if (Array.isArray(nodesInSlot)) {
+                result.push(...nodesInSlot);
+            }
+            else {
+                const parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
+                ngDevMode && assertParentView(parentView);
+                collectNativeNodes(parentView[TVIEW], parentView, nodesInSlot, result, true);
+            }
+        }
+        tNode = isProjection ? tNode.projectionNext : tNode.next;
+    }
+    return result;
+}
+/**
+ * Collects all root nodes in all views in a given LContainer.
+ */
+function collectNativeNodesInLContainer(lContainer, result) {
+    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        const lViewInAContainer = lContainer[i];
+        const lViewFirstChildTNode = lViewInAContainer[TVIEW].firstChild;
+        if (lViewFirstChildTNode !== null) {
+            collectNativeNodes(lViewInAContainer[TVIEW], lViewInAContainer, lViewFirstChildTNode, result);
+        }
+    }
+    // When an LContainer is created, the anchor (comment) node is:
+    // - (1) either reused in case of an ElementContainer (<ng-container>)
+    // - (2) or a new comment node is created
+    // In the first case, the anchor comment node would be added to the final
+    // list by the code in the `collectNativeNodes` function
+    // (see the `result.push(unwrapRNode(lNode))` line), but the second
+    // case requires extra handling: the anchor node needs to be added to the
+    // final list manually. See additional information in the `createAnchorNode`
+    // function in the `view_container_ref.ts`.
+    //
+    // In the first case, the same reference would be stored in the `NATIVE`
+    // and `HOST` slots in an LContainer. Otherwise, this is the second case and
+    // we should add an element to the final list.
+    if (lContainer[NATIVE] !== lContainer[HOST]) {
+        result.push(lContainer[NATIVE]);
+    }
+}
+
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 function wrappedError(message, originalError) {
     const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
@@ -10582,1169 +11747,6 @@ class ErrorHandler {
         }
         return e || null;
     }
-}
-
-/**
- * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
- * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
- * is injected in a component or directive, the callbacks run when that component or
- * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
- *
- * @publicApi
- */
-class DestroyRef {
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static { this.__NG_ELEMENT_ID__ = injectDestroyRef; }
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static { this.__NG_ENV_ID__ = (injector) => injector; }
-}
-class NodeInjectorDestroyRef extends DestroyRef {
-    constructor(_lView) {
-        super();
-        this._lView = _lView;
-    }
-    onDestroy(callback) {
-        storeLViewOnDestroy(this._lView, callback);
-        return () => removeLViewOnDestroy(this._lView, callback);
-    }
-}
-function injectDestroyRef() {
-    return new NodeInjectorDestroyRef(getLView());
-}
-
-/**
- * Asserts that the current stack frame is not within a reactive context. Useful
- * to disallow certain code from running inside a reactive context (see {@link toSignal}).
- *
- * @param debugFn a reference to the function making the assertion (used for the error message).
- *
- * @publicApi
- */
-function assertNotInReactiveContext(debugFn, extraContext) {
-    // Taking a `Function` instead of a string name here prevents the un-minified name of the function
-    // from being retained in the bundle regardless of minification.
-    if (getActiveConsumer$1() !== null) {
-        throw new RuntimeError(-602 /* RuntimeErrorCode.ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT */, ngDevMode &&
-            `${debugFn.name}() cannot be called from within a reactive context.${extraContext ? ` ${extraContext}` : ''}`);
-    }
-}
-
-/**
- * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
- * injector.
- */
-const APP_EFFECT_SCHEDULER = new InjectionToken('', {
-    providedIn: 'root',
-    factory: () => inject(EffectScheduler),
-});
-/**
- * A scheduler which manages the execution of effects.
- */
-class EffectScheduler {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: EffectScheduler,
-        providedIn: 'root',
-        factory: () => new ZoneAwareMicrotaskScheduler(),
-    }); }
-}
-/**
- * An `EffectScheduler` which is capable of queueing scheduled effects per-zone, and flushing them
- * as an explicit operation.
- */
-class ZoneAwareQueueingScheduler {
-    constructor() {
-        this.queuedEffectCount = 0;
-        this.queues = new Map();
-    }
-    scheduleEffect(handle) {
-        const zone = handle.creationZone;
-        if (!this.queues.has(zone)) {
-            this.queues.set(zone, new Set());
-        }
-        const queue = this.queues.get(zone);
-        if (queue.has(handle)) {
-            return;
-        }
-        this.queuedEffectCount++;
-        queue.add(handle);
-    }
-    /**
-     * Run all scheduled effects.
-     *
-     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
-     * ordering guarantee between effects scheduled in different zones.
-     */
-    flush() {
-        while (this.queuedEffectCount > 0) {
-            for (const [zone, queue] of this.queues) {
-                // `zone` here must be defined.
-                if (zone === null) {
-                    this.flushQueue(queue);
-                }
-                else {
-                    zone.run(() => this.flushQueue(queue));
-                }
-            }
-        }
-    }
-    flushQueue(queue) {
-        for (const handle of queue) {
-            queue.delete(handle);
-            this.queuedEffectCount--;
-            // TODO: what happens if this throws an error?
-            handle.run();
-        }
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: ZoneAwareQueueingScheduler,
-        providedIn: 'root',
-        factory: () => new ZoneAwareQueueingScheduler(),
-    }); }
-}
-/**
- * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
- * when.
- */
-class ZoneAwareMicrotaskScheduler {
-    constructor() {
-        this.hasQueuedFlush = false;
-        this.delegate = new ZoneAwareQueueingScheduler();
-        this.flushTask = () => {
-            // Leave `hasQueuedFlush` as `true` so we don't queue another microtask if more effects are
-            // scheduled during flushing. The flush of the `ZoneAwareQueueingScheduler` delegate is
-            // guaranteed to empty the queue.
-            this.delegate.flush();
-            this.hasQueuedFlush = false;
-            // This is a variable initialization, not a method.
-            // tslint:disable-next-line:semicolon
-        };
-    }
-    scheduleEffect(handle) {
-        this.delegate.scheduleEffect(handle);
-        if (!this.hasQueuedFlush) {
-            queueMicrotask(this.flushTask);
-            this.hasQueuedFlush = true;
-        }
-    }
-}
-/**
- * Core reactive node for an Angular effect.
- *
- * `EffectHandle` combines the reactive graph's `Watch` base node for effects with the framework's
- * scheduling abstraction (`EffectScheduler`) as well as automatic cleanup via `DestroyRef` if
- * available/requested.
- */
-class EffectHandle {
-    constructor(scheduler, effectFn, creationZone, destroyRef, errorHandler, allowSignalWrites) {
-        this.scheduler = scheduler;
-        this.effectFn = effectFn;
-        this.creationZone = creationZone;
-        this.errorHandler = errorHandler;
-        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
-        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
-    }
-    runEffect(onCleanup) {
-        try {
-            this.effectFn(onCleanup);
-        }
-        catch (err) {
-            this.errorHandler?.handleError(err);
-        }
-    }
-    run() {
-        this.watcher.run();
-    }
-    schedule() {
-        this.scheduler.scheduleEffect(this);
-    }
-    notify() {
-        this.watcher.notify();
-    }
-    destroy() {
-        this.watcher.destroy();
-        this.unregisterOnDestroy?.();
-        // Note: if the effect is currently scheduled, it's not un-scheduled, and so the scheduler will
-        // retain a reference to it. Attempting to execute it will be a no-op.
-    }
-}
-/**
- * Create a global `Effect` for the given reactive function.
- */
-function effect(effectFn, options) {
-    ngDevMode &&
-        assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
-            'effect inside the component constructor.');
-    !options?.injector && assertInInjectionContext(effect);
-    const injector = options?.injector ?? inject(Injector);
-    const errorHandler = injector.get(ErrorHandler, null, { optional: true });
-    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, errorHandler, options?.allowSignalWrites ?? false);
-    // Effects start dirty.
-    handle.notify();
-    return handle;
-}
-
-// clang-format off
-// clang-format on
-
-/// <reference types="rxjs" />
-class EventEmitter_ extends Subject {
-    constructor(isAsync = false) {
-        super();
-        this.__isAsync = isAsync;
-    }
-    emit(value) {
-        super.next(value);
-    }
-    subscribe(observerOrNext, error, complete) {
-        let nextFn = observerOrNext;
-        let errorFn = error || (() => null);
-        let completeFn = complete;
-        if (observerOrNext && typeof observerOrNext === 'object') {
-            const observer = observerOrNext;
-            nextFn = observer.next?.bind(observer);
-            errorFn = observer.error?.bind(observer);
-            completeFn = observer.complete?.bind(observer);
-        }
-        if (this.__isAsync) {
-            errorFn = _wrapInTimeout(errorFn);
-            if (nextFn) {
-                nextFn = _wrapInTimeout(nextFn);
-            }
-            if (completeFn) {
-                completeFn = _wrapInTimeout(completeFn);
-            }
-        }
-        const sink = super.subscribe({ next: nextFn, error: errorFn, complete: completeFn });
-        if (observerOrNext instanceof Subscription) {
-            observerOrNext.add(sink);
-        }
-        return sink;
-    }
-}
-function _wrapInTimeout(fn) {
-    return (value) => {
-        setTimeout(fn, undefined, value);
-    };
-}
-/**
- * @publicApi
- */
-const EventEmitter = EventEmitter_;
-
-function noop(...args) {
-    // Do nothing.
-}
-
-function getNativeRequestAnimationFrame() {
-    // Note: the `getNativeRequestAnimationFrame` is used in the `NgZone` class, but we cannot use the
-    // `inject` function. The `NgZone` instance may be created manually, and thus the injection
-    // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
-    // available because otherwise, we'll fall back to `setTimeout`.
-    const isBrowser = typeof _global['requestAnimationFrame'] === 'function';
-    // Note: `requestAnimationFrame` is unavailable when the code runs in the Node.js environment. We
-    // use `setTimeout` because no changes are required other than checking if the current platform is
-    // the browser. `setTimeout` is a well-established API that is available in both environments.
-    // `requestAnimationFrame` is used in the browser to coalesce event tasks since event tasks are
-    // usually executed within the same rendering frame (but this is more implementation details of
-    // browsers).
-    let nativeRequestAnimationFrame = _global[isBrowser ? 'requestAnimationFrame' : 'setTimeout'];
-    let nativeCancelAnimationFrame = _global[isBrowser ? 'cancelAnimationFrame' : 'clearTimeout'];
-    if (typeof Zone !== 'undefined' && nativeRequestAnimationFrame && nativeCancelAnimationFrame) {
-        // Note: zone.js sets original implementations on patched APIs behind the
-        // `__zone_symbol__OriginalDelegate` key (see `attachOriginToPatched`). Given the following
-        // example: `window.requestAnimationFrame.__zone_symbol__OriginalDelegate`; this would return an
-        // unpatched implementation of the `requestAnimationFrame`, which isn't intercepted by the
-        // Angular zone. We use the unpatched implementation to avoid another change detection when
-        // coalescing tasks.
-        const unpatchedRequestAnimationFrame = nativeRequestAnimationFrame[Zone.__symbol__('OriginalDelegate')];
-        if (unpatchedRequestAnimationFrame) {
-            nativeRequestAnimationFrame = unpatchedRequestAnimationFrame;
-        }
-        const unpatchedCancelAnimationFrame = nativeCancelAnimationFrame[Zone.__symbol__('OriginalDelegate')];
-        if (unpatchedCancelAnimationFrame) {
-            nativeCancelAnimationFrame = unpatchedCancelAnimationFrame;
-        }
-    }
-    return { nativeRequestAnimationFrame, nativeCancelAnimationFrame };
-}
-
-class AsyncStackTaggingZoneSpec {
-    constructor(namePrefix, consoleAsyncStackTaggingImpl = console) {
-        this.name = 'asyncStackTagging for ' + namePrefix;
-        this.createTask = consoleAsyncStackTaggingImpl?.createTask ?? (() => null);
-    }
-    onScheduleTask(delegate, _current, target, task) {
-        task.consoleTask = this.createTask(`Zone - ${task.source || task.type}`);
-        return delegate.scheduleTask(target, task);
-    }
-    onInvokeTask(delegate, _currentZone, targetZone, task, applyThis, applyArgs) {
-        let ret;
-        if (task.consoleTask) {
-            ret = task.consoleTask.run(() => delegate.invokeTask(targetZone, task, applyThis, applyArgs));
-        }
-        else {
-            ret = delegate.invokeTask(targetZone, task, applyThis, applyArgs);
-        }
-        return ret;
-    }
-}
-
-/**
- * An injectable service for executing work inside or outside of the Angular zone.
- *
- * The most common use of this service is to optimize performance when starting a work consisting of
- * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
- * Angular. Such tasks can be kicked off via {@link #runOutsideAngular} and if needed, these tasks
- * can reenter the Angular zone via {@link #run}.
- *
- * <!-- TODO: add/fix links to:
- *   - docs explaining zones and the use of zones in Angular and change-detection
- *   - link to runOutsideAngular/run (throughout this file!)
- *   -->
- *
- * @usageNotes
- * ### Example
- *
- * ```
- * import {Component, NgZone} from '@angular/core';
- * import {NgIf} from '@angular/common';
- *
- * @Component({
- *   selector: 'ng-zone-demo',
- *   template: `
- *     <h2>Demo: NgZone</h2>
- *
- *     <p>Progress: {{progress}}%</p>
- *     <p *ngIf="progress >= 100">Done processing {{label}} of Angular zone!</p>
- *
- *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
- *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
- *   `,
- * })
- * export class NgZoneDemo {
- *   progress: number = 0;
- *   label: string;
- *
- *   constructor(private _ngZone: NgZone) {}
- *
- *   // Loop inside the Angular zone
- *   // so the UI DOES refresh after each setTimeout cycle
- *   processWithinAngularZone() {
- *     this.label = 'inside';
- *     this.progress = 0;
- *     this._increaseProgress(() => console.log('Inside Done!'));
- *   }
- *
- *   // Loop outside of the Angular zone
- *   // so the UI DOES NOT refresh after each setTimeout cycle
- *   processOutsideOfAngularZone() {
- *     this.label = 'outside';
- *     this.progress = 0;
- *     this._ngZone.runOutsideAngular(() => {
- *       this._increaseProgress(() => {
- *         // reenter the Angular zone and display done
- *         this._ngZone.run(() => { console.log('Outside Done!'); });
- *       });
- *     });
- *   }
- *
- *   _increaseProgress(doneCallback: () => void) {
- *     this.progress += 1;
- *     console.log(`Current progress: ${this.progress}%`);
- *
- *     if (this.progress < 100) {
- *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
- *     } else {
- *       doneCallback();
- *     }
- *   }
- * }
- * ```
- *
- * @publicApi
- */
-class NgZone {
-    constructor({ enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false }) {
-        this.hasPendingMacrotasks = false;
-        this.hasPendingMicrotasks = false;
-        /**
-         * Whether there are no outstanding microtasks or macrotasks.
-         */
-        this.isStable = true;
-        /**
-         * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
-         */
-        this.onUnstable = new EventEmitter(false);
-        /**
-         * Notifies when there is no more microtasks enqueued in the current VM Turn.
-         * This is a hint for Angular to do change detection, which may enqueue more microtasks.
-         * For this reason this event can fire multiple times per VM Turn.
-         */
-        this.onMicrotaskEmpty = new EventEmitter(false);
-        /**
-         * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
-         * implies we are about to relinquish VM turn.
-         * This event gets called just once.
-         */
-        this.onStable = new EventEmitter(false);
-        /**
-         * Notifies that an error has been delivered.
-         */
-        this.onError = new EventEmitter(false);
-        if (typeof Zone == 'undefined') {
-            throw new RuntimeError(908 /* RuntimeErrorCode.MISSING_ZONEJS */, ngDevMode && `In this configuration Angular requires Zone.js`);
-        }
-        Zone.assertZonePatched();
-        const self = this;
-        self._nesting = 0;
-        self._outer = self._inner = Zone.current;
-        // AsyncStackTaggingZoneSpec provides `linked stack traces` to show
-        // where the async operation is scheduled. For more details, refer
-        // to this article, https://developer.chrome.com/blog/devtools-better-angular-debugging/
-        // And we only import this AsyncStackTaggingZoneSpec in development mode,
-        // in the production mode, the AsyncStackTaggingZoneSpec will be tree shaken away.
-        if (ngDevMode) {
-            self._inner = self._inner.fork(new AsyncStackTaggingZoneSpec('Angular'));
-        }
-        if (Zone['TaskTrackingZoneSpec']) {
-            self._inner = self._inner.fork(new Zone['TaskTrackingZoneSpec']);
-        }
-        if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
-            self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
-        }
-        // if shouldCoalesceRunChangeDetection is true, all tasks including event tasks will be
-        // coalesced, so shouldCoalesceEventChangeDetection option is not necessary and can be skipped.
-        self.shouldCoalesceEventChangeDetection =
-            !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
-        self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
-        self.lastRequestAnimationFrameId = -1;
-        self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
-        forkInnerZoneWithAngularBehavior(self);
-    }
-    /**
-      This method checks whether the method call happens within an Angular Zone instance.
-    */
-    static isInAngularZone() {
-        // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
-        return typeof Zone !== 'undefined' && Zone.current.get('isAngularZone') === true;
-    }
-    /**
-      Assures that the method is called within the Angular Zone, otherwise throws an error.
-    */
-    static assertInAngularZone() {
-        if (!NgZone.isInAngularZone()) {
-            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
-        }
-    }
-    /**
-      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
-    */
-    static assertNotInAngularZone() {
-        if (NgZone.isInAngularZone()) {
-            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
-        }
-    }
-    /**
-     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
-     * the function.
-     *
-     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
-     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * within the Angular zone.
-     *
-     * If a synchronous error happens it will be rethrown and not reported via `onError`.
-     */
-    run(fn, applyThis, applyArgs) {
-        return this._inner.run(fn, applyThis, applyArgs);
-    }
-    /**
-     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
-     * returned by the function.
-     *
-     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
-     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * within the Angular zone.
-     *
-     * If a synchronous error happens it will be rethrown and not reported via `onError`.
-     */
-    runTask(fn, applyThis, applyArgs, name) {
-        const zone = this._inner;
-        const task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop, noop);
-        try {
-            return zone.runTask(task, applyThis, applyArgs);
-        }
-        finally {
-            zone.cancelTask(task);
-        }
-    }
-    /**
-     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
-     * rethrown.
-     */
-    runGuarded(fn, applyThis, applyArgs) {
-        return this._inner.runGuarded(fn, applyThis, applyArgs);
-    }
-    /**
-     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
-     * the function.
-     *
-     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
-     * work that
-     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * outside of the Angular zone.
-     *
-     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
-     */
-    runOutsideAngular(fn) {
-        return this._outer.run(fn);
-    }
-}
-const EMPTY_PAYLOAD = {};
-function checkStable(zone) {
-    // TODO: @JiaLiPassion, should check zone.isCheckStableRunning to prevent
-    // re-entry. The case is:
-    //
-    // @Component({...})
-    // export class AppComponent {
-    // constructor(private ngZone: NgZone) {
-    //   this.ngZone.onStable.subscribe(() => {
-    //     this.ngZone.run(() => console.log('stable'););
-    //   });
-    // }
-    //
-    // The onStable subscriber run another function inside ngZone
-    // which causes `checkStable()` re-entry.
-    // But this fix causes some issues in g3, so this fix will be
-    // launched in another PR.
-    if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
-        try {
-            zone._nesting++;
-            zone.onMicrotaskEmpty.emit(null);
-        }
-        finally {
-            zone._nesting--;
-            if (!zone.hasPendingMicrotasks) {
-                try {
-                    zone.runOutsideAngular(() => zone.onStable.emit(null));
-                }
-                finally {
-                    zone.isStable = true;
-                }
-            }
-        }
-    }
-}
-function delayChangeDetectionForEvents(zone) {
-    /**
-     * We also need to check _nesting here
-     * Consider the following case with shouldCoalesceRunChangeDetection = true
-     *
-     * ngZone.run(() => {});
-     * ngZone.run(() => {});
-     *
-     * We want the two `ngZone.run()` only trigger one change detection
-     * when shouldCoalesceRunChangeDetection is true.
-     * And because in this case, change detection run in async way(requestAnimationFrame),
-     * so we also need to check the _nesting here to prevent multiple
-     * change detections.
-     */
-    if (zone.isCheckStableRunning || zone.lastRequestAnimationFrameId !== -1) {
-        return;
-    }
-    zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, () => {
-        // This is a work around for https://github.com/angular/angular/issues/36839.
-        // The core issue is that when event coalescing is enabled it is possible for microtasks
-        // to get flushed too early (As is the case with `Promise.then`) between the
-        // coalescing eventTasks.
-        //
-        // To workaround this we schedule a "fake" eventTask before we process the
-        // coalescing eventTasks. The benefit of this is that the "fake" container eventTask
-        //  will prevent the microtasks queue from getting drained in between the coalescing
-        // eventTask execution.
-        if (!zone.fakeTopEventTask) {
-            zone.fakeTopEventTask = Zone.root.scheduleEventTask('fakeTopEventTask', () => {
-                zone.lastRequestAnimationFrameId = -1;
-                updateMicroTaskStatus(zone);
-                zone.isCheckStableRunning = true;
-                checkStable(zone);
-                zone.isCheckStableRunning = false;
-            }, undefined, () => { }, () => { });
-        }
-        zone.fakeTopEventTask.invoke();
-    });
-    updateMicroTaskStatus(zone);
-}
-function forkInnerZoneWithAngularBehavior(zone) {
-    const delayChangeDetectionForEventsDelegate = () => {
-        delayChangeDetectionForEvents(zone);
-    };
-    zone._inner = zone._inner.fork({
-        name: 'angular',
-        properties: { 'isAngularZone': true },
-        onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
-            if (shouldBeIgnoredByZone(applyArgs)) {
-                return delegate.invokeTask(target, task, applyThis, applyArgs);
-            }
-            try {
-                onEnter(zone);
-                return delegate.invokeTask(target, task, applyThis, applyArgs);
-            }
-            finally {
-                if ((zone.shouldCoalesceEventChangeDetection && task.type === 'eventTask') ||
-                    zone.shouldCoalesceRunChangeDetection) {
-                    delayChangeDetectionForEventsDelegate();
-                }
-                onLeave(zone);
-            }
-        },
-        onInvoke: (delegate, current, target, callback, applyThis, applyArgs, source) => {
-            try {
-                onEnter(zone);
-                return delegate.invoke(target, callback, applyThis, applyArgs, source);
-            }
-            finally {
-                if (zone.shouldCoalesceRunChangeDetection) {
-                    delayChangeDetectionForEventsDelegate();
-                }
-                onLeave(zone);
-            }
-        },
-        onHasTask: (delegate, current, target, hasTaskState) => {
-            delegate.hasTask(target, hasTaskState);
-            if (current === target) {
-                // We are only interested in hasTask events which originate from our zone
-                // (A child hasTask event is not interesting to us)
-                if (hasTaskState.change == 'microTask') {
-                    zone._hasPendingMicrotasks = hasTaskState.microTask;
-                    updateMicroTaskStatus(zone);
-                    checkStable(zone);
-                }
-                else if (hasTaskState.change == 'macroTask') {
-                    zone.hasPendingMacrotasks = hasTaskState.macroTask;
-                }
-            }
-        },
-        onHandleError: (delegate, current, target, error) => {
-            delegate.handleError(target, error);
-            zone.runOutsideAngular(() => zone.onError.emit(error));
-            return false;
-        }
-    });
-}
-function updateMicroTaskStatus(zone) {
-    if (zone._hasPendingMicrotasks ||
-        ((zone.shouldCoalesceEventChangeDetection || zone.shouldCoalesceRunChangeDetection) &&
-            zone.lastRequestAnimationFrameId !== -1)) {
-        zone.hasPendingMicrotasks = true;
-    }
-    else {
-        zone.hasPendingMicrotasks = false;
-    }
-}
-function onEnter(zone) {
-    zone._nesting++;
-    if (zone.isStable) {
-        zone.isStable = false;
-        zone.onUnstable.emit(null);
-    }
-}
-function onLeave(zone) {
-    zone._nesting--;
-    checkStable(zone);
-}
-/**
- * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
- * to framework to perform rendering.
- */
-class NoopNgZone {
-    constructor() {
-        this.hasPendingMicrotasks = false;
-        this.hasPendingMacrotasks = false;
-        this.isStable = true;
-        this.onUnstable = new EventEmitter();
-        this.onMicrotaskEmpty = new EventEmitter();
-        this.onStable = new EventEmitter();
-        this.onError = new EventEmitter();
-    }
-    run(fn, applyThis, applyArgs) {
-        return fn.apply(applyThis, applyArgs);
-    }
-    runGuarded(fn, applyThis, applyArgs) {
-        return fn.apply(applyThis, applyArgs);
-    }
-    runOutsideAngular(fn) {
-        return fn();
-    }
-    runTask(fn, applyThis, applyArgs, name) {
-        return fn.apply(applyThis, applyArgs);
-    }
-}
-/**
- * Token used to drive ApplicationRef.isStable
- *
- * TODO: This should be moved entirely to NgZone (as a breaking change) so it can be tree-shakeable
- * for `NoopNgZone` which is always just an `Observable` of `true`. Additionally, we should consider
- * whether the property on `NgZone` should be `Observable` or `Signal`.
- */
-const ZONE_IS_STABLE_OBSERVABLE = new InjectionToken(ngDevMode ? 'isStable Observable' : '', {
-    providedIn: 'root',
-    // TODO(atscott): Replace this with a suitable default like `new
-    // BehaviorSubject(true).asObservable`. Again, long term this won't exist on ApplicationRef at
-    // all but until we can remove it, we need a default value zoneless.
-    factory: isStableFactory,
-});
-function isStableFactory() {
-    const zone = inject(NgZone);
-    let _stable = true;
-    const isCurrentlyStable = new Observable((observer) => {
-        _stable = zone.isStable && !zone.hasPendingMacrotasks && !zone.hasPendingMicrotasks;
-        zone.runOutsideAngular(() => {
-            observer.next(_stable);
-            observer.complete();
-        });
-    });
-    const isStable = new Observable((observer) => {
-        // Create the subscription to onStable outside the Angular Zone so that
-        // the callback is run outside the Angular Zone.
-        let stableSub;
-        zone.runOutsideAngular(() => {
-            stableSub = zone.onStable.subscribe(() => {
-                NgZone.assertNotInAngularZone();
-                // Check whether there are no pending macro/micro tasks in the next tick
-                // to allow for NgZone to update the state.
-                queueMicrotask(() => {
-                    if (!_stable && !zone.hasPendingMacrotasks && !zone.hasPendingMicrotasks) {
-                        _stable = true;
-                        observer.next(true);
-                    }
-                });
-            });
-        });
-        const unstableSub = zone.onUnstable.subscribe(() => {
-            NgZone.assertInAngularZone();
-            if (_stable) {
-                _stable = false;
-                zone.runOutsideAngular(() => {
-                    observer.next(false);
-                });
-            }
-        });
-        return () => {
-            stableSub.unsubscribe();
-            unstableSub.unsubscribe();
-        };
-    });
-    return merge$1(isCurrentlyStable, isStable.pipe(share()));
-}
-function shouldBeIgnoredByZone(applyArgs) {
-    if (!Array.isArray(applyArgs)) {
-        return false;
-    }
-    // We should only ever get 1 arg passed through to invokeTask.
-    // Short circuit here incase that behavior changes.
-    if (applyArgs.length !== 1) {
-        return false;
-    }
-    // Prevent triggering change detection when the __ignore_ng_zone__ flag is detected.
-    return applyArgs[0].data?.['__ignore_ng_zone__'] === true;
-}
-
-// Public API for Zone
-
-/**
- * The phase to run an `afterRender` or `afterNextRender` callback in.
- *
- * Callbacks in the same phase run in the order they are registered. Phases run in the
- * following order after each render:
- *
- *   1. `AfterRenderPhase.EarlyRead`
- *   2. `AfterRenderPhase.Write`
- *   3. `AfterRenderPhase.MixedReadWrite`
- *   4. `AfterRenderPhase.Read`
- *
- * Angular is unable to verify or enforce that phases are used correctly, and instead
- * relies on each developer to follow the guidelines documented for each value and
- * carefully choose the appropriate one, refactoring their code if necessary. By doing
- * so, Angular is better able to minimize the performance degradation associated with
- * manual DOM access, ensuring the best experience for the end users of your application
- * or library.
- *
- * @developerPreview
- */
-var AfterRenderPhase;
-(function (AfterRenderPhase) {
-    /**
-     * Use `AfterRenderPhase.EarlyRead` for callbacks that only need to **read** from the
-     * DOM before a subsequent `AfterRenderPhase.Write` callback, for example to perform
-     * custom layout that the browser doesn't natively support. **Never** use this phase
-     * for callbacks that can write to the DOM or when `AfterRenderPhase.Read` is adequate.
-     *
-     * <div class="alert is-important">
-     *
-     * Using this value can degrade performance.
-     * Instead, prefer using built-in browser functionality when possible.
-     *
-     * </div>
-     */
-    AfterRenderPhase[AfterRenderPhase["EarlyRead"] = 0] = "EarlyRead";
-    /**
-     * Use `AfterRenderPhase.Write` for callbacks that only **write** to the DOM. **Never**
-     * use this phase for callbacks that can read from the DOM.
-     */
-    AfterRenderPhase[AfterRenderPhase["Write"] = 1] = "Write";
-    /**
-     * Use `AfterRenderPhase.MixedReadWrite` for callbacks that read from or write to the
-     * DOM, that haven't been refactored to use a different phase. **Never** use this phase
-     * for callbacks that can use a different phase instead.
-     *
-     * <div class="alert is-critical">
-     *
-     * Using this value can **significantly** degrade performance.
-     * Instead, prefer refactoring into multiple callbacks using a more specific phase.
-     *
-     * </div>
-     */
-    AfterRenderPhase[AfterRenderPhase["MixedReadWrite"] = 2] = "MixedReadWrite";
-    /**
-     * Use `AfterRenderPhase.Read` for callbacks that only **read** from the DOM. **Never**
-     * use this phase for callbacks that can write to the DOM.
-     */
-    AfterRenderPhase[AfterRenderPhase["Read"] = 3] = "Read";
-})(AfterRenderPhase || (AfterRenderPhase = {}));
-/** `AfterRenderRef` that does nothing. */
-const NOOP_AFTER_RENDER_REF = {
-    destroy() { }
-};
-/**
- * Register a callback to run once before any userspace `afterRender` or
- * `afterNextRender` callbacks.
- *
- * This function should almost always be used instead of `afterRender` or
- * `afterNextRender` for implementing framework functionality. Consider:
- *
- *   1.) `AfterRenderPhase.EarlyRead` is intended to be used for implementing
- *       custom layout. If the framework itself mutates the DOM after *any*
- *       `AfterRenderPhase.EarlyRead` callbacks are run, the phase can no
- *       longer reliably serve its purpose.
- *
- *   2.) Importing `afterRender` in the framework can reduce the ability for it
- *       to be tree-shaken, and the framework shouldn't need much of the behavior.
- */
-function internalAfterNextRender(callback, options) {
-    const injector = options?.injector ?? inject(Injector);
-    // Similarly to the public `afterNextRender` function, an internal one
-    // is only invoked in a browser.
-    if (!isPlatformBrowser(injector))
-        return;
-    const afterRenderEventManager = injector.get(AfterRenderEventManager);
-    afterRenderEventManager.internalCallbacks.push(callback);
-}
-/**
- * Register a callback to be invoked each time the application
- * finishes rendering.
- *
- * <div class="alert is-critical">
- *
- * You should always explicitly specify a non-default [phase](api/core/AfterRenderPhase), or you
- * risk significant performance degradation.
- *
- * </div>
- *
- * Note that the callback will run
- * - in the order it was registered
- * - once per render
- * - on browser platforms only
- *
- * <div class="alert is-important">
- *
- * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
- * You must use caution when directly reading or writing the DOM and layout.
- *
- * </div>
- *
- * @param callback A callback function to register
- *
- * @usageNotes
- *
- * Use `afterRender` to read or write the DOM after each render.
- *
- * ### Example
- * ```ts
- * @Component({
- *   selector: 'my-cmp',
- *   template: `<span #content>{{ ... }}</span>`,
- * })
- * export class MyComponent {
- *   @ViewChild('content') contentRef: ElementRef;
- *
- *   constructor() {
- *     afterRender(() => {
- *       console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
- *     }, {phase: AfterRenderPhase.Read});
- *   }
- * }
- * ```
- *
- * @developerPreview
- */
-function afterRender(callback, options) {
-    ngDevMode &&
-        assertNotInReactiveContext(afterRender, 'Call `afterRender` outside of a reactive context. For example, schedule the render ' +
-            'callback inside the component constructor`.');
-    !options && assertInInjectionContext(afterRender);
-    const injector = options?.injector ?? inject(Injector);
-    if (!isPlatformBrowser(injector)) {
-        return NOOP_AFTER_RENDER_REF;
-    }
-    performance.mark('mark_use_counter', { detail: { feature: 'NgAfterRender' } });
-    const afterRenderEventManager = injector.get(AfterRenderEventManager);
-    // Lazily initialize the handler implementation, if necessary. This is so that it can be
-    // tree-shaken if `afterRender` and `afterNextRender` aren't used.
-    const callbackHandler = afterRenderEventManager.handler ??= new AfterRenderCallbackHandlerImpl();
-    const phase = options?.phase ?? AfterRenderPhase.MixedReadWrite;
-    const destroy = () => {
-        callbackHandler.unregister(instance);
-        unregisterFn();
-    };
-    const unregisterFn = injector.get(DestroyRef).onDestroy(destroy);
-    const instance = new AfterRenderCallback(injector, phase, callback);
-    callbackHandler.register(instance);
-    return { destroy };
-}
-/**
- * Register a callback to be invoked the next time the application
- * finishes rendering.
- *
- * <div class="alert is-critical">
- *
- * You should always explicitly specify a non-default [phase](api/core/AfterRenderPhase), or you
- * risk significant performance degradation.
- *
- * </div>
- *
- * Note that the callback will run
- * - in the order it was registered
- * - on browser platforms only
- *
- * <div class="alert is-important">
- *
- * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
- * You must use caution when directly reading or writing the DOM and layout.
- *
- * </div>
- *
- * @param callback A callback function to register
- *
- * @usageNotes
- *
- * Use `afterNextRender` to read or write the DOM once,
- * for example to initialize a non-Angular library.
- *
- * ### Example
- * ```ts
- * @Component({
- *   selector: 'my-chart-cmp',
- *   template: `<div #chart>{{ ... }}</div>`,
- * })
- * export class MyChartCmp {
- *   @ViewChild('chart') chartRef: ElementRef;
- *   chart: MyChart|null;
- *
- *   constructor() {
- *     afterNextRender(() => {
- *       this.chart = new MyChart(this.chartRef.nativeElement);
- *     }, {phase: AfterRenderPhase.Write});
- *   }
- * }
- * ```
- *
- * @developerPreview
- */
-function afterNextRender(callback, options) {
-    !options && assertInInjectionContext(afterNextRender);
-    const injector = options?.injector ?? inject(Injector);
-    if (!isPlatformBrowser(injector)) {
-        return NOOP_AFTER_RENDER_REF;
-    }
-    performance.mark('mark_use_counter', { detail: { feature: 'NgAfterNextRender' } });
-    const afterRenderEventManager = injector.get(AfterRenderEventManager);
-    // Lazily initialize the handler implementation, if necessary. This is so that it can be
-    // tree-shaken if `afterRender` and `afterNextRender` aren't used.
-    const callbackHandler = afterRenderEventManager.handler ??= new AfterRenderCallbackHandlerImpl();
-    const phase = options?.phase ?? AfterRenderPhase.MixedReadWrite;
-    const destroy = () => {
-        callbackHandler.unregister(instance);
-        unregisterFn();
-    };
-    const unregisterFn = injector.get(DestroyRef).onDestroy(destroy);
-    const instance = new AfterRenderCallback(injector, phase, () => {
-        destroy();
-        callback();
-    });
-    callbackHandler.register(instance);
-    return { destroy };
-}
-/**
- * A wrapper around a function to be used as an after render callback.
- */
-class AfterRenderCallback {
-    constructor(injector, phase, callbackFn) {
-        this.phase = phase;
-        this.callbackFn = callbackFn;
-        this.zone = injector.get(NgZone);
-        this.errorHandler = injector.get(ErrorHandler, null, { optional: true });
-    }
-    invoke() {
-        try {
-            this.zone.runOutsideAngular(this.callbackFn);
-        }
-        catch (err) {
-            this.errorHandler?.handleError(err);
-        }
-    }
-}
-/**
- * Core functionality for `afterRender` and `afterNextRender`. Kept separate from
- * `AfterRenderEventManager` for tree-shaking.
- */
-class AfterRenderCallbackHandlerImpl {
-    constructor() {
-        this.executingCallbacks = false;
-        this.buckets = {
-            // Note: the order of these keys controls the order the phases are run.
-            [AfterRenderPhase.EarlyRead]: new Set(),
-            [AfterRenderPhase.Write]: new Set(),
-            [AfterRenderPhase.MixedReadWrite]: new Set(),
-            [AfterRenderPhase.Read]: new Set(),
-        };
-        this.deferredCallbacks = new Set();
-    }
-    validateBegin() {
-        if (this.executingCallbacks) {
-            throw new RuntimeError(102 /* RuntimeErrorCode.RECURSIVE_APPLICATION_RENDER */, ngDevMode &&
-                'A new render operation began before the previous operation ended. ' +
-                    'Did you trigger change detection from afterRender or afterNextRender?');
-        }
-    }
-    register(callback) {
-        // If we're currently running callbacks, new callbacks should be deferred
-        // until the next render operation.
-        const target = this.executingCallbacks ? this.deferredCallbacks : this.buckets[callback.phase];
-        target.add(callback);
-    }
-    unregister(callback) {
-        this.buckets[callback.phase].delete(callback);
-        this.deferredCallbacks.delete(callback);
-    }
-    execute() {
-        this.executingCallbacks = true;
-        for (const bucket of Object.values(this.buckets)) {
-            for (const callback of bucket) {
-                callback.invoke();
-            }
-        }
-        this.executingCallbacks = false;
-        for (const callback of this.deferredCallbacks) {
-            this.buckets[callback.phase].add(callback);
-        }
-        this.deferredCallbacks.clear();
-    }
-    destroy() {
-        for (const bucket of Object.values(this.buckets)) {
-            bucket.clear();
-        }
-        this.deferredCallbacks.clear();
-    }
-}
-/**
- * Implements core timing for `afterRender` and `afterNextRender` events.
- * Delegates to an optional `AfterRenderCallbackHandler` for implementation.
- */
-class AfterRenderEventManager {
-    constructor() {
-        this.renderDepth = 0;
-        /* @internal */
-        this.handler = null;
-        /* @internal */
-        this.internalCallbacks = [];
-    }
-    /**
-     * Mark the beginning of a render operation (i.e. CD cycle).
-     * Throws if called while executing callbacks.
-     */
-    begin() {
-        this.handler?.validateBegin();
-        this.renderDepth++;
-    }
-    /**
-     * Mark the end of a render operation. Callbacks will be
-     * executed if there are no more pending operations.
-     */
-    end() {
-        ngDevMode && assertGreaterThan(this.renderDepth, 0, 'renderDepth must be greater than 0');
-        this.renderDepth--;
-        if (this.renderDepth === 0) {
-            // Note: internal callbacks power `internalAfterNextRender`. Since internal callbacks
-            // are fairly trivial, they are kept separate so that `AfterRenderCallbackHandlerImpl`
-            // can still be tree-shaken unless used by the application.
-            for (const callback of this.internalCallbacks) {
-                callback();
-            }
-            this.internalCallbacks.length = 0;
-            this.handler?.execute();
-        }
-    }
-    ngOnDestroy() {
-        this.handler?.destroy();
-        this.handler = null;
-        this.internalCallbacks.length = 0;
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: AfterRenderEventManager,
-        providedIn: 'root',
-        factory: () => new AfterRenderEventManager(),
-    }); }
-}
-
-/**
- * Marks current view and all ancestors dirty.
- *
- * Returns the root view because it is found as a byproduct of marking the view tree
- * dirty, and can be used by methods that consume markViewDirty() to easily schedule
- * change detection. Otherwise, such methods would need to traverse up the view tree
- * an additional time to get the root view and schedule a tick on it.
- *
- * @param lView The starting LView to mark dirty
- * @returns the root LView
- */
-function markViewDirty(lView) {
-    while (lView) {
-        lView[FLAGS] |= 64 /* LViewFlags.Dirty */;
-        const parent = getLViewParent(lView);
-        // Stop traversing up as soon as you find a root view that wasn't attached to any container
-        if (isRootView(lView) && !parent) {
-            return lView;
-        }
-        // continue otherwise
-        lView = parent;
-    }
-    return null;
 }
 
 /**
@@ -13331,224 +13333,6 @@ function textBindingInternal(lView, index, value) {
     updateTextNode(lView[RENDERER], element, value);
 }
 
-function renderComponent(hostLView, componentHostIdx) {
-    ngDevMode && assertEqual(isCreationMode(hostLView), true, 'Should be run in creation mode');
-    const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
-    const componentTView = componentView[TVIEW];
-    syncViewWithBlueprint(componentTView, componentView);
-    const hostRNode = componentView[HOST];
-    // Populate an LView with hydration info retrieved from the DOM via TransferState.
-    if (hostRNode !== null && componentView[HYDRATION] === null) {
-        componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR$1]);
-    }
-    renderView(componentTView, componentView, componentView[CONTEXT]);
-}
-/**
- * Syncs an LView instance with its blueprint if they have gotten out of sync.
- *
- * Typically, blueprints and their view instances should always be in sync, so the loop here
- * will be skipped. However, consider this case of two components side-by-side:
- *
- * App template:
- * ```
- * <comp></comp>
- * <comp></comp>
- * ```
- *
- * The following will happen:
- * 1. App template begins processing.
- * 2. First <comp> is matched as a component and its LView is created.
- * 3. Second <comp> is matched as a component and its LView is created.
- * 4. App template completes processing, so it's time to check child templates.
- * 5. First <comp> template is checked. It has a directive, so its def is pushed to blueprint.
- * 6. Second <comp> template is checked. Its blueprint has been updated by the first
- * <comp> template, but its LView was created before this update, so it is out of sync.
- *
- * Note that embedded views inside ngFor loops will never be out of sync because these views
- * are processed as soon as they are created.
- *
- * @param tView The `TView` that contains the blueprint for syncing
- * @param lView The view to sync
- */
-function syncViewWithBlueprint(tView, lView) {
-    for (let i = lView.length; i < tView.blueprint.length; i++) {
-        lView.push(tView.blueprint[i]);
-    }
-}
-/**
- * Processes a view in the creation mode. This includes a number of steps in a specific order:
- * - creating view query functions (if any);
- * - executing a template function in the creation mode;
- * - updating static queries (if any);
- * - creating child components defined in a given view.
- */
-function renderView(tView, lView, context) {
-    ngDevMode && assertEqual(isCreationMode(lView), true, 'Should be run in creation mode');
-    enterView(lView);
-    try {
-        const viewQuery = tView.viewQuery;
-        if (viewQuery !== null) {
-            executeViewQueryFn(1 /* RenderFlags.Create */, viewQuery, context);
-        }
-        // Execute a template associated with this view, if it exists. A template function might not be
-        // defined for the root component views.
-        const templateFn = tView.template;
-        if (templateFn !== null) {
-            executeTemplate(tView, lView, templateFn, 1 /* RenderFlags.Create */, context);
-        }
-        // This needs to be set before children are processed to support recursive components.
-        // This must be set to false immediately after the first creation run because in an
-        // ngFor loop, all the views will be created together before update mode runs and turns
-        // off firstCreatePass. If we don't set it here, instances will perform directive
-        // matching, etc again and again.
-        if (tView.firstCreatePass) {
-            tView.firstCreatePass = false;
-        }
-        // We resolve content queries specifically marked as `static` in creation mode. Dynamic
-        // content queries are resolved during change detection (i.e. update mode), after embedded
-        // views are refreshed (see block above).
-        if (tView.staticContentQueries) {
-            refreshContentQueries(tView, lView);
-        }
-        // We must materialize query results before child components are processed
-        // in case a child component has projected a container. The LContainer needs
-        // to exist so the embedded views are properly attached by the container.
-        if (tView.staticViewQueries) {
-            executeViewQueryFn(2 /* RenderFlags.Update */, tView.viewQuery, context);
-        }
-        // Render child component views.
-        const components = tView.components;
-        if (components !== null) {
-            renderChildComponents(lView, components);
-        }
-    }
-    catch (error) {
-        // If we didn't manage to get past the first template pass due to
-        // an error, mark the view as corrupted so we can try to recover.
-        if (tView.firstCreatePass) {
-            tView.incompleteFirstPass = true;
-            tView.firstCreatePass = false;
-        }
-        throw error;
-    }
-    finally {
-        lView[FLAGS] &= ~4 /* LViewFlags.CreationMode */;
-        leaveView();
-    }
-}
-/** Renders child components in the current view (creation mode). */
-function renderChildComponents(hostLView, components) {
-    for (let i = 0; i < components.length; i++) {
-        renderComponent(hostLView, components[i]);
-    }
-}
-
-/**
- * Compute the static styling (class/style) from `TAttributes`.
- *
- * This function should be called during `firstCreatePass` only.
- *
- * @param tNode The `TNode` into which the styling information should be loaded.
- * @param attrs `TAttributes` containing the styling information.
- * @param writeToHost Where should the resulting static styles be written?
- *   - `false` Write to `TNode.stylesWithoutHost` / `TNode.classesWithoutHost`
- *   - `true` Write to `TNode.styles` / `TNode.classes`
- */
-function computeStaticStyling(tNode, attrs, writeToHost) {
-    ngDevMode &&
-        assertFirstCreatePass(getTView(), 'Expecting to be called in first template pass only');
-    let styles = writeToHost ? tNode.styles : null;
-    let classes = writeToHost ? tNode.classes : null;
-    let mode = 0;
-    if (attrs !== null) {
-        for (let i = 0; i < attrs.length; i++) {
-            const value = attrs[i];
-            if (typeof value === 'number') {
-                mode = value;
-            }
-            else if (mode == 1 /* AttributeMarker.Classes */) {
-                classes = concatStringsWithSpace(classes, value);
-            }
-            else if (mode == 2 /* AttributeMarker.Styles */) {
-                const style = value;
-                const styleValue = attrs[++i];
-                styles = concatStringsWithSpace(styles, style + ': ' + styleValue + ';');
-            }
-        }
-    }
-    writeToHost ? tNode.styles = styles : tNode.stylesWithoutHost = styles;
-    writeToHost ? tNode.classes = classes : tNode.classesWithoutHost = classes;
-}
-
-function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
-    while (tNode !== null) {
-        ngDevMode &&
-            assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 16 /* TNodeType.Projection */ | 32 /* TNodeType.Icu */);
-        const lNode = lView[tNode.index];
-        if (lNode !== null) {
-            result.push(unwrapRNode(lNode));
-        }
-        // A given lNode can represent either a native node or a LContainer (when it is a host of a
-        // ViewContainerRef). When we find a LContainer we need to descend into it to collect root nodes
-        // from the views in this container.
-        if (isLContainer(lNode)) {
-            collectNativeNodesInLContainer(lNode, result);
-        }
-        const tNodeType = tNode.type;
-        if (tNodeType & 8 /* TNodeType.ElementContainer */) {
-            collectNativeNodes(tView, lView, tNode.child, result);
-        }
-        else if (tNodeType & 32 /* TNodeType.Icu */) {
-            const nextRNode = icuContainerIterate(tNode, lView);
-            let rNode;
-            while (rNode = nextRNode()) {
-                result.push(rNode);
-            }
-        }
-        else if (tNodeType & 16 /* TNodeType.Projection */) {
-            const nodesInSlot = getProjectionNodes(lView, tNode);
-            if (Array.isArray(nodesInSlot)) {
-                result.push(...nodesInSlot);
-            }
-            else {
-                const parentView = getLViewParent(lView[DECLARATION_COMPONENT_VIEW]);
-                ngDevMode && assertParentView(parentView);
-                collectNativeNodes(parentView[TVIEW], parentView, nodesInSlot, result, true);
-            }
-        }
-        tNode = isProjection ? tNode.projectionNext : tNode.next;
-    }
-    return result;
-}
-/**
- * Collects all root nodes in all views in a given LContainer.
- */
-function collectNativeNodesInLContainer(lContainer, result) {
-    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-        const lViewInAContainer = lContainer[i];
-        const lViewFirstChildTNode = lViewInAContainer[TVIEW].firstChild;
-        if (lViewFirstChildTNode !== null) {
-            collectNativeNodes(lViewInAContainer[TVIEW], lViewInAContainer, lViewFirstChildTNode, result);
-        }
-    }
-    // When an LContainer is created, the anchor (comment) node is:
-    // - (1) either reused in case of an ElementContainer (<ng-container>)
-    // - (2) or a new comment node is created
-    // In the first case, the anchor comment node would be added to the final
-    // list by the code in the `collectNativeNodes` function
-    // (see the `result.push(unwrapRNode(lNode))` line), but the second
-    // case requires extra handling: the anchor node needs to be added to the
-    // final list manually. See additional information in the `createAnchorNode`
-    // function in the `view_container_ref.ts`.
-    //
-    // In the first case, the same reference would be stored in the `NATIVE`
-    // and `HOST` slots in an LContainer. Otherwise, this is the second case and
-    // we should add an element to the final list.
-    if (lContainer[NATIVE] !== lContainer[HOST]) {
-        result.push(lContainer[NATIVE]);
-    }
-}
-
 /**
  * The maximum number of times the change detection traversal will rerun before throwing an error.
  */
@@ -13736,6 +13520,14 @@ function refreshView(tView, lView, templateFn, context) {
             // the styling would be unable to process it data and reflect to the DOM.
             tView.firstUpdatePass = false;
         }
+        // Schedule any effects that are waiting on the update pass of this view.
+        if (lView[EFFECTS_TO_SCHEDULE]) {
+            for (const notifyEffect of lView[EFFECTS_TO_SCHEDULE]) {
+                notifyEffect();
+            }
+            // Once they've been run, we can drop the array.
+            lView[EFFECTS_TO_SCHEDULE] = null;
+        }
         // Do not reset the dirty state when running in check no changes mode. We don't want components
         // to behave differently depending on whether check no changes is enabled or not. For example:
         // Marking an OnPush component as dirty from within the `ngAfterViewInit` hook in order to
@@ -13853,6 +13645,31 @@ function detectChangesInChildComponents(hostLView, components, mode) {
     for (let i = 0; i < components.length; i++) {
         detectChangesInComponent(hostLView, components[i], mode);
     }
+}
+
+/**
+ * Marks current view and all ancestors dirty.
+ *
+ * Returns the root view because it is found as a byproduct of marking the view tree
+ * dirty, and can be used by methods that consume markViewDirty() to easily schedule
+ * change detection. Otherwise, such methods would need to traverse up the view tree
+ * an additional time to get the root view and schedule a tick on it.
+ *
+ * @param lView The starting LView to mark dirty
+ * @returns the root LView
+ */
+function markViewDirty(lView) {
+    while (lView) {
+        lView[FLAGS] |= 64 /* LViewFlags.Dirty */;
+        const parent = getLViewParent(lView);
+        // Stop traversing up as soon as you find a root view that wasn't attached to any container
+        if (isRootView(lView) && !parent) {
+            return lView;
+        }
+        // continue otherwise
+        lView = parent;
+    }
+    return null;
 }
 
 class InternalViewRef {
@@ -14128,6 +13945,1404 @@ class InternalViewRef {
         }
         this._appRef = appRef;
     }
+}
+
+/**
+ * Base class that provides change detection functionality.
+ * A change-detection tree collects all views that are to be checked for changes.
+ * Use the methods to add and remove views from the tree, initiate change-detection,
+ * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
+ *
+ * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
+ * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
+ *
+ * @usageNotes
+ *
+ * The following examples demonstrate how to modify default change-detection behavior
+ * to perform explicit detection when needed.
+ *
+ * ### Use `markForCheck()` with `CheckOnce` strategy
+ *
+ * The following example sets the `OnPush` change-detection strategy for a component
+ * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
+ * after an interval.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts"
+ * region="mark-for-check"></code-example>
+ *
+ * ### Detach change detector to limit how often check occurs
+ *
+ * The following example defines a component with a large list of read-only data
+ * that is expected to change constantly, many times per second.
+ * To improve performance, we want to check and update the list
+ * less often than the changes actually occur. To do that, we detach
+ * the component's change detector and perform an explicit local check every five seconds.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+ *
+ *
+ * ### Reattaching a detached component
+ *
+ * The following example creates a component displaying live data.
+ * The component detaches its change detector from the main change detector tree
+ * when the `live` property is set to false, and reattaches it when the property
+ * becomes true.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
+ *
+ * @publicApi
+ */
+class ChangeDetectorRef {
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ELEMENT_ID__ = injectChangeDetectorRef; }
+}
+/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
+function injectChangeDetectorRef(flags) {
+    return createViewRef(getCurrentTNode(), getLView(), (flags & 16 /* InternalInjectFlags.ForPipe */) === 16 /* InternalInjectFlags.ForPipe */);
+}
+/**
+ * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
+ *
+ * @param tNode The node that is requesting a ChangeDetectorRef
+ * @param lView The view to which the node belongs
+ * @param isPipe Whether the view is being injected into a pipe.
+ * @returns The ChangeDetectorRef to use
+ */
+function createViewRef(tNode, lView, isPipe) {
+    if (isComponentHost(tNode) && !isPipe) {
+        // The LView represents the location where the component is declared.
+        // Instead we want the LView for the component View and so we need to look it up.
+        const componentView = getComponentLViewByIndex(tNode.index, lView); // look down
+        return new InternalViewRef(componentView, componentView);
+    }
+    else if (tNode.type & (3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 32 /* TNodeType.Icu */)) {
+        // The LView represents the location where the injection is requested from.
+        // We need to locate the containing LView (in case where the `lView` is an embedded view)
+        const hostComponentView = lView[DECLARATION_COMPONENT_VIEW]; // look up
+        return new InternalViewRef(hostComponentView, lView);
+    }
+    return null;
+}
+
+/**
+ * Structural diffing for `Object`s and `Map`s.
+ */
+const keyValDiff = [new DefaultKeyValueDifferFactory()];
+/**
+ * Structural diffing for `Iterable` types such as `Array`s.
+ */
+const iterableDiff = [new DefaultIterableDifferFactory()];
+const defaultIterableDiffers = new IterableDiffers(iterableDiff);
+const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
+
+/**
+ * @module
+ * @description
+ * Change detection enables data binding in Angular.
+ */
+
+/**
+ * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
+ * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
+ * is injected in a component or directive, the callbacks run when that component or
+ * directive is destroyed. Otherwise the callbacks run when a corresponding injector is destroyed.
+ *
+ * @publicApi
+ */
+class DestroyRef {
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ELEMENT_ID__ = injectDestroyRef; }
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ENV_ID__ = (injector) => injector; }
+}
+class NodeInjectorDestroyRef extends DestroyRef {
+    constructor(_lView) {
+        super();
+        this._lView = _lView;
+    }
+    onDestroy(callback) {
+        storeLViewOnDestroy(this._lView, callback);
+        return () => removeLViewOnDestroy(this._lView, callback);
+    }
+}
+function injectDestroyRef() {
+    return new NodeInjectorDestroyRef(getLView());
+}
+
+/**
+ * Asserts that the current stack frame is not within a reactive context. Useful
+ * to disallow certain code from running inside a reactive context (see {@link toSignal}).
+ *
+ * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @publicApi
+ */
+function assertNotInReactiveContext(debugFn, extraContext) {
+    // Taking a `Function` instead of a string name here prevents the un-minified name of the function
+    // from being retained in the bundle regardless of minification.
+    if (getActiveConsumer$1() !== null) {
+        throw new RuntimeError(-602 /* RuntimeErrorCode.ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT */, ngDevMode &&
+            `${debugFn.name}() cannot be called from within a reactive context.${extraContext ? ` ${extraContext}` : ''}`);
+    }
+}
+
+/**
+ * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
+ * injector.
+ */
+const APP_EFFECT_SCHEDULER = new InjectionToken('', {
+    providedIn: 'root',
+    factory: () => inject(EffectScheduler),
+});
+/**
+ * A scheduler which manages the execution of effects.
+ */
+class EffectScheduler {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: EffectScheduler,
+        providedIn: 'root',
+        factory: () => new ZoneAwareMicrotaskScheduler(),
+    }); }
+}
+/**
+ * An `EffectScheduler` which is capable of queueing scheduled effects per-zone, and flushing them
+ * as an explicit operation.
+ */
+class ZoneAwareQueueingScheduler {
+    constructor() {
+        this.queuedEffectCount = 0;
+        this.queues = new Map();
+    }
+    scheduleEffect(handle) {
+        const zone = handle.creationZone;
+        if (!this.queues.has(zone)) {
+            this.queues.set(zone, new Set());
+        }
+        const queue = this.queues.get(zone);
+        if (queue.has(handle)) {
+            return;
+        }
+        this.queuedEffectCount++;
+        queue.add(handle);
+    }
+    /**
+     * Run all scheduled effects.
+     *
+     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
+     * ordering guarantee between effects scheduled in different zones.
+     */
+    flush() {
+        while (this.queuedEffectCount > 0) {
+            for (const [zone, queue] of this.queues) {
+                // `zone` here must be defined.
+                if (zone === null) {
+                    this.flushQueue(queue);
+                }
+                else {
+                    zone.run(() => this.flushQueue(queue));
+                }
+            }
+        }
+    }
+    flushQueue(queue) {
+        for (const handle of queue) {
+            queue.delete(handle);
+            this.queuedEffectCount--;
+            // TODO: what happens if this throws an error?
+            handle.run();
+        }
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: ZoneAwareQueueingScheduler,
+        providedIn: 'root',
+        factory: () => new ZoneAwareQueueingScheduler(),
+    }); }
+}
+/**
+ * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
+ * when.
+ */
+class ZoneAwareMicrotaskScheduler {
+    constructor() {
+        this.hasQueuedFlush = false;
+        this.delegate = new ZoneAwareQueueingScheduler();
+        this.flushTask = () => {
+            // Leave `hasQueuedFlush` as `true` so we don't queue another microtask if more effects are
+            // scheduled during flushing. The flush of the `ZoneAwareQueueingScheduler` delegate is
+            // guaranteed to empty the queue.
+            this.delegate.flush();
+            this.hasQueuedFlush = false;
+            // This is a variable initialization, not a method.
+            // tslint:disable-next-line:semicolon
+        };
+    }
+    scheduleEffect(handle) {
+        this.delegate.scheduleEffect(handle);
+        if (!this.hasQueuedFlush) {
+            queueMicrotask(this.flushTask);
+            this.hasQueuedFlush = true;
+        }
+    }
+}
+/**
+ * Core reactive node for an Angular effect.
+ *
+ * `EffectHandle` combines the reactive graph's `Watch` base node for effects with the framework's
+ * scheduling abstraction (`EffectScheduler`) as well as automatic cleanup via `DestroyRef` if
+ * available/requested.
+ */
+class EffectHandle {
+    constructor(scheduler, effectFn, creationZone, destroyRef, errorHandler, allowSignalWrites) {
+        this.scheduler = scheduler;
+        this.effectFn = effectFn;
+        this.creationZone = creationZone;
+        this.errorHandler = errorHandler;
+        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
+        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
+    }
+    runEffect(onCleanup) {
+        try {
+            this.effectFn(onCleanup);
+        }
+        catch (err) {
+            this.errorHandler?.handleError(err);
+        }
+    }
+    run() {
+        this.watcher.run();
+    }
+    schedule() {
+        this.scheduler.scheduleEffect(this);
+    }
+    destroy() {
+        this.watcher.destroy();
+        this.unregisterOnDestroy?.();
+        // Note: if the effect is currently scheduled, it's not un-scheduled, and so the scheduler will
+        // retain a reference to it. Attempting to execute it will be a no-op.
+    }
+}
+/**
+ * Create a global `Effect` for the given reactive function.
+ */
+function effect(effectFn, options) {
+    ngDevMode &&
+        assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
+            'effect inside the component constructor.');
+    !options?.injector && assertInInjectionContext(effect);
+    const injector = options?.injector ?? inject(Injector);
+    const errorHandler = injector.get(ErrorHandler, null, { optional: true });
+    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
+    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, errorHandler, options?.allowSignalWrites ?? false);
+    // Effects need to be marked dirty manually to trigger their initial run. The timing of this
+    // marking matters, because the effects may read signals that track component inputs, which are
+    // only available after those components have had their first update pass.
+    //
+    // We inject `ChangeDetectorRef` optionally, to determine whether this effect is being created in
+    // the context of a component or not. If it is, then we check whether the component has already
+    // run its update pass, and defer the effect's initial scheduling until the update pass if it
+    // hasn't already run.
+    const cdr = injector.get(ChangeDetectorRef, null, { optional: true });
+    if (!cdr || !(cdr._lView[FLAGS] & 8 /* LViewFlags.FirstLViewPass */)) {
+        // This effect is either not running in a view injector, or the view has already
+        // undergone its first change detection pass, which is necessary for any required inputs to be
+        // set.
+        handle.watcher.notify();
+    }
+    else {
+        // Delay the initialization of the effect until the view is fully initialized.
+        (cdr._lView[EFFECTS_TO_SCHEDULE] ??= []).push(handle.watcher.notify);
+    }
+    return handle;
+}
+
+// clang-format off
+// clang-format on
+
+/// <reference types="rxjs" />
+class EventEmitter_ extends Subject {
+    constructor(isAsync = false) {
+        super();
+        this.__isAsync = isAsync;
+    }
+    emit(value) {
+        super.next(value);
+    }
+    subscribe(observerOrNext, error, complete) {
+        let nextFn = observerOrNext;
+        let errorFn = error || (() => null);
+        let completeFn = complete;
+        if (observerOrNext && typeof observerOrNext === 'object') {
+            const observer = observerOrNext;
+            nextFn = observer.next?.bind(observer);
+            errorFn = observer.error?.bind(observer);
+            completeFn = observer.complete?.bind(observer);
+        }
+        if (this.__isAsync) {
+            errorFn = _wrapInTimeout(errorFn);
+            if (nextFn) {
+                nextFn = _wrapInTimeout(nextFn);
+            }
+            if (completeFn) {
+                completeFn = _wrapInTimeout(completeFn);
+            }
+        }
+        const sink = super.subscribe({ next: nextFn, error: errorFn, complete: completeFn });
+        if (observerOrNext instanceof Subscription) {
+            observerOrNext.add(sink);
+        }
+        return sink;
+    }
+}
+function _wrapInTimeout(fn) {
+    return (value) => {
+        setTimeout(fn, undefined, value);
+    };
+}
+/**
+ * @publicApi
+ */
+const EventEmitter = EventEmitter_;
+
+function noop(...args) {
+    // Do nothing.
+}
+
+function getNativeRequestAnimationFrame() {
+    // Note: the `getNativeRequestAnimationFrame` is used in the `NgZone` class, but we cannot use the
+    // `inject` function. The `NgZone` instance may be created manually, and thus the injection
+    // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
+    // available because otherwise, we'll fall back to `setTimeout`.
+    const isBrowser = typeof _global['requestAnimationFrame'] === 'function';
+    // Note: `requestAnimationFrame` is unavailable when the code runs in the Node.js environment. We
+    // use `setTimeout` because no changes are required other than checking if the current platform is
+    // the browser. `setTimeout` is a well-established API that is available in both environments.
+    // `requestAnimationFrame` is used in the browser to coalesce event tasks since event tasks are
+    // usually executed within the same rendering frame (but this is more implementation details of
+    // browsers).
+    let nativeRequestAnimationFrame = _global[isBrowser ? 'requestAnimationFrame' : 'setTimeout'];
+    let nativeCancelAnimationFrame = _global[isBrowser ? 'cancelAnimationFrame' : 'clearTimeout'];
+    if (typeof Zone !== 'undefined' && nativeRequestAnimationFrame && nativeCancelAnimationFrame) {
+        // Note: zone.js sets original implementations on patched APIs behind the
+        // `__zone_symbol__OriginalDelegate` key (see `attachOriginToPatched`). Given the following
+        // example: `window.requestAnimationFrame.__zone_symbol__OriginalDelegate`; this would return an
+        // unpatched implementation of the `requestAnimationFrame`, which isn't intercepted by the
+        // Angular zone. We use the unpatched implementation to avoid another change detection when
+        // coalescing tasks.
+        const unpatchedRequestAnimationFrame = nativeRequestAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+        if (unpatchedRequestAnimationFrame) {
+            nativeRequestAnimationFrame = unpatchedRequestAnimationFrame;
+        }
+        const unpatchedCancelAnimationFrame = nativeCancelAnimationFrame[Zone.__symbol__('OriginalDelegate')];
+        if (unpatchedCancelAnimationFrame) {
+            nativeCancelAnimationFrame = unpatchedCancelAnimationFrame;
+        }
+    }
+    return { nativeRequestAnimationFrame, nativeCancelAnimationFrame };
+}
+
+class AsyncStackTaggingZoneSpec {
+    constructor(namePrefix, consoleAsyncStackTaggingImpl = console) {
+        this.name = 'asyncStackTagging for ' + namePrefix;
+        this.createTask = consoleAsyncStackTaggingImpl?.createTask ?? (() => null);
+    }
+    onScheduleTask(delegate, _current, target, task) {
+        task.consoleTask = this.createTask(`Zone - ${task.source || task.type}`);
+        return delegate.scheduleTask(target, task);
+    }
+    onInvokeTask(delegate, _currentZone, targetZone, task, applyThis, applyArgs) {
+        let ret;
+        if (task.consoleTask) {
+            ret = task.consoleTask.run(() => delegate.invokeTask(targetZone, task, applyThis, applyArgs));
+        }
+        else {
+            ret = delegate.invokeTask(targetZone, task, applyThis, applyArgs);
+        }
+        return ret;
+    }
+}
+
+/**
+ * An injectable service for executing work inside or outside of the Angular zone.
+ *
+ * The most common use of this service is to optimize performance when starting a work consisting of
+ * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
+ * Angular. Such tasks can be kicked off via {@link #runOutsideAngular} and if needed, these tasks
+ * can reenter the Angular zone via {@link #run}.
+ *
+ * <!-- TODO: add/fix links to:
+ *   - docs explaining zones and the use of zones in Angular and change-detection
+ *   - link to runOutsideAngular/run (throughout this file!)
+ *   -->
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```
+ * import {Component, NgZone} from '@angular/core';
+ * import {NgIf} from '@angular/common';
+ *
+ * @Component({
+ *   selector: 'ng-zone-demo',
+ *   template: `
+ *     <h2>Demo: NgZone</h2>
+ *
+ *     <p>Progress: {{progress}}%</p>
+ *     <p *ngIf="progress >= 100">Done processing {{label}} of Angular zone!</p>
+ *
+ *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
+ *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
+ *   `,
+ * })
+ * export class NgZoneDemo {
+ *   progress: number = 0;
+ *   label: string;
+ *
+ *   constructor(private _ngZone: NgZone) {}
+ *
+ *   // Loop inside the Angular zone
+ *   // so the UI DOES refresh after each setTimeout cycle
+ *   processWithinAngularZone() {
+ *     this.label = 'inside';
+ *     this.progress = 0;
+ *     this._increaseProgress(() => console.log('Inside Done!'));
+ *   }
+ *
+ *   // Loop outside of the Angular zone
+ *   // so the UI DOES NOT refresh after each setTimeout cycle
+ *   processOutsideOfAngularZone() {
+ *     this.label = 'outside';
+ *     this.progress = 0;
+ *     this._ngZone.runOutsideAngular(() => {
+ *       this._increaseProgress(() => {
+ *         // reenter the Angular zone and display done
+ *         this._ngZone.run(() => { console.log('Outside Done!'); });
+ *       });
+ *     });
+ *   }
+ *
+ *   _increaseProgress(doneCallback: () => void) {
+ *     this.progress += 1;
+ *     console.log(`Current progress: ${this.progress}%`);
+ *
+ *     if (this.progress < 100) {
+ *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
+ *     } else {
+ *       doneCallback();
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @publicApi
+ */
+class NgZone {
+    constructor({ enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false }) {
+        this.hasPendingMacrotasks = false;
+        this.hasPendingMicrotasks = false;
+        /**
+         * Whether there are no outstanding microtasks or macrotasks.
+         */
+        this.isStable = true;
+        /**
+         * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+         */
+        this.onUnstable = new EventEmitter(false);
+        /**
+         * Notifies when there is no more microtasks enqueued in the current VM Turn.
+         * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+         * For this reason this event can fire multiple times per VM Turn.
+         */
+        this.onMicrotaskEmpty = new EventEmitter(false);
+        /**
+         * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+         * implies we are about to relinquish VM turn.
+         * This event gets called just once.
+         */
+        this.onStable = new EventEmitter(false);
+        /**
+         * Notifies that an error has been delivered.
+         */
+        this.onError = new EventEmitter(false);
+        if (typeof Zone == 'undefined') {
+            throw new RuntimeError(908 /* RuntimeErrorCode.MISSING_ZONEJS */, ngDevMode && `In this configuration Angular requires Zone.js`);
+        }
+        Zone.assertZonePatched();
+        const self = this;
+        self._nesting = 0;
+        self._outer = self._inner = Zone.current;
+        // AsyncStackTaggingZoneSpec provides `linked stack traces` to show
+        // where the async operation is scheduled. For more details, refer
+        // to this article, https://developer.chrome.com/blog/devtools-better-angular-debugging/
+        // And we only import this AsyncStackTaggingZoneSpec in development mode,
+        // in the production mode, the AsyncStackTaggingZoneSpec will be tree shaken away.
+        if (ngDevMode) {
+            self._inner = self._inner.fork(new AsyncStackTaggingZoneSpec('Angular'));
+        }
+        if (Zone['TaskTrackingZoneSpec']) {
+            self._inner = self._inner.fork(new Zone['TaskTrackingZoneSpec']);
+        }
+        if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
+            self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
+        }
+        // if shouldCoalesceRunChangeDetection is true, all tasks including event tasks will be
+        // coalesced, so shouldCoalesceEventChangeDetection option is not necessary and can be skipped.
+        self.shouldCoalesceEventChangeDetection =
+            !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
+        self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
+        self.lastRequestAnimationFrameId = -1;
+        self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
+        forkInnerZoneWithAngularBehavior(self);
+    }
+    /**
+      This method checks whether the method call happens within an Angular Zone instance.
+    */
+    static isInAngularZone() {
+        // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
+        return typeof Zone !== 'undefined' && Zone.current.get('isAngularZone') === true;
+    }
+    /**
+      Assures that the method is called within the Angular Zone, otherwise throws an error.
+    */
+    static assertInAngularZone() {
+        if (!NgZone.isInAngularZone()) {
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
+        }
+    }
+    /**
+      Assures that the method is called outside of the Angular Zone, otherwise throws an error.
+    */
+    static assertNotInAngularZone() {
+        if (NgZone.isInAngularZone()) {
+            throw new RuntimeError(909 /* RuntimeErrorCode.UNEXPECTED_ZONE_STATE */, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
+        }
+    }
+    /**
+     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    run(fn, applyThis, applyArgs) {
+        return this._inner.run(fn, applyThis, applyArgs);
+    }
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    runTask(fn, applyThis, applyArgs, name) {
+        const zone = this._inner;
+        const task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop, noop);
+        try {
+            return zone.runTask(task, applyThis, applyArgs);
+        }
+        finally {
+            zone.cancelTask(task);
+        }
+    }
+    /**
+     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
+     * rethrown.
+     */
+    runGuarded(fn, applyThis, applyArgs) {
+        return this._inner.runGuarded(fn, applyThis, applyArgs);
+    }
+    /**
+     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
+     * the function.
+     *
+     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
+     * work that
+     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * outside of the Angular zone.
+     *
+     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
+     */
+    runOutsideAngular(fn) {
+        return this._outer.run(fn);
+    }
+}
+const EMPTY_PAYLOAD = {};
+function checkStable(zone) {
+    // TODO: @JiaLiPassion, should check zone.isCheckStableRunning to prevent
+    // re-entry. The case is:
+    //
+    // @Component({...})
+    // export class AppComponent {
+    // constructor(private ngZone: NgZone) {
+    //   this.ngZone.onStable.subscribe(() => {
+    //     this.ngZone.run(() => console.log('stable'););
+    //   });
+    // }
+    //
+    // The onStable subscriber run another function inside ngZone
+    // which causes `checkStable()` re-entry.
+    // But this fix causes some issues in g3, so this fix will be
+    // launched in another PR.
+    if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
+        try {
+            zone._nesting++;
+            zone.onMicrotaskEmpty.emit(null);
+        }
+        finally {
+            zone._nesting--;
+            if (!zone.hasPendingMicrotasks) {
+                try {
+                    zone.runOutsideAngular(() => zone.onStable.emit(null));
+                }
+                finally {
+                    zone.isStable = true;
+                }
+            }
+        }
+    }
+}
+function delayChangeDetectionForEvents(zone) {
+    /**
+     * We also need to check _nesting here
+     * Consider the following case with shouldCoalesceRunChangeDetection = true
+     *
+     * ngZone.run(() => {});
+     * ngZone.run(() => {});
+     *
+     * We want the two `ngZone.run()` only trigger one change detection
+     * when shouldCoalesceRunChangeDetection is true.
+     * And because in this case, change detection run in async way(requestAnimationFrame),
+     * so we also need to check the _nesting here to prevent multiple
+     * change detections.
+     */
+    if (zone.isCheckStableRunning || zone.lastRequestAnimationFrameId !== -1) {
+        return;
+    }
+    zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, () => {
+        // This is a work around for https://github.com/angular/angular/issues/36839.
+        // The core issue is that when event coalescing is enabled it is possible for microtasks
+        // to get flushed too early (As is the case with `Promise.then`) between the
+        // coalescing eventTasks.
+        //
+        // To workaround this we schedule a "fake" eventTask before we process the
+        // coalescing eventTasks. The benefit of this is that the "fake" container eventTask
+        //  will prevent the microtasks queue from getting drained in between the coalescing
+        // eventTask execution.
+        if (!zone.fakeTopEventTask) {
+            zone.fakeTopEventTask = Zone.root.scheduleEventTask('fakeTopEventTask', () => {
+                zone.lastRequestAnimationFrameId = -1;
+                updateMicroTaskStatus(zone);
+                zone.isCheckStableRunning = true;
+                checkStable(zone);
+                zone.isCheckStableRunning = false;
+            }, undefined, () => { }, () => { });
+        }
+        zone.fakeTopEventTask.invoke();
+    });
+    updateMicroTaskStatus(zone);
+}
+function forkInnerZoneWithAngularBehavior(zone) {
+    const delayChangeDetectionForEventsDelegate = () => {
+        delayChangeDetectionForEvents(zone);
+    };
+    zone._inner = zone._inner.fork({
+        name: 'angular',
+        properties: { 'isAngularZone': true },
+        onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
+            if (shouldBeIgnoredByZone(applyArgs)) {
+                return delegate.invokeTask(target, task, applyThis, applyArgs);
+            }
+            try {
+                onEnter(zone);
+                return delegate.invokeTask(target, task, applyThis, applyArgs);
+            }
+            finally {
+                if ((zone.shouldCoalesceEventChangeDetection && task.type === 'eventTask') ||
+                    zone.shouldCoalesceRunChangeDetection) {
+                    delayChangeDetectionForEventsDelegate();
+                }
+                onLeave(zone);
+            }
+        },
+        onInvoke: (delegate, current, target, callback, applyThis, applyArgs, source) => {
+            try {
+                onEnter(zone);
+                return delegate.invoke(target, callback, applyThis, applyArgs, source);
+            }
+            finally {
+                if (zone.shouldCoalesceRunChangeDetection) {
+                    delayChangeDetectionForEventsDelegate();
+                }
+                onLeave(zone);
+            }
+        },
+        onHasTask: (delegate, current, target, hasTaskState) => {
+            delegate.hasTask(target, hasTaskState);
+            if (current === target) {
+                // We are only interested in hasTask events which originate from our zone
+                // (A child hasTask event is not interesting to us)
+                if (hasTaskState.change == 'microTask') {
+                    zone._hasPendingMicrotasks = hasTaskState.microTask;
+                    updateMicroTaskStatus(zone);
+                    checkStable(zone);
+                }
+                else if (hasTaskState.change == 'macroTask') {
+                    zone.hasPendingMacrotasks = hasTaskState.macroTask;
+                }
+            }
+        },
+        onHandleError: (delegate, current, target, error) => {
+            delegate.handleError(target, error);
+            zone.runOutsideAngular(() => zone.onError.emit(error));
+            return false;
+        }
+    });
+}
+function updateMicroTaskStatus(zone) {
+    if (zone._hasPendingMicrotasks ||
+        ((zone.shouldCoalesceEventChangeDetection || zone.shouldCoalesceRunChangeDetection) &&
+            zone.lastRequestAnimationFrameId !== -1)) {
+        zone.hasPendingMicrotasks = true;
+    }
+    else {
+        zone.hasPendingMicrotasks = false;
+    }
+}
+function onEnter(zone) {
+    zone._nesting++;
+    if (zone.isStable) {
+        zone.isStable = false;
+        zone.onUnstable.emit(null);
+    }
+}
+function onLeave(zone) {
+    zone._nesting--;
+    checkStable(zone);
+}
+/**
+ * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
+ * to framework to perform rendering.
+ */
+class NoopNgZone {
+    constructor() {
+        this.hasPendingMicrotasks = false;
+        this.hasPendingMacrotasks = false;
+        this.isStable = true;
+        this.onUnstable = new EventEmitter();
+        this.onMicrotaskEmpty = new EventEmitter();
+        this.onStable = new EventEmitter();
+        this.onError = new EventEmitter();
+    }
+    run(fn, applyThis, applyArgs) {
+        return fn.apply(applyThis, applyArgs);
+    }
+    runGuarded(fn, applyThis, applyArgs) {
+        return fn.apply(applyThis, applyArgs);
+    }
+    runOutsideAngular(fn) {
+        return fn();
+    }
+    runTask(fn, applyThis, applyArgs, name) {
+        return fn.apply(applyThis, applyArgs);
+    }
+}
+/**
+ * Token used to drive ApplicationRef.isStable
+ *
+ * TODO: This should be moved entirely to NgZone (as a breaking change) so it can be tree-shakeable
+ * for `NoopNgZone` which is always just an `Observable` of `true`. Additionally, we should consider
+ * whether the property on `NgZone` should be `Observable` or `Signal`.
+ */
+const ZONE_IS_STABLE_OBSERVABLE = new InjectionToken(ngDevMode ? 'isStable Observable' : '', {
+    providedIn: 'root',
+    // TODO(atscott): Replace this with a suitable default like `new
+    // BehaviorSubject(true).asObservable`. Again, long term this won't exist on ApplicationRef at
+    // all but until we can remove it, we need a default value zoneless.
+    factory: isStableFactory,
+});
+function isStableFactory() {
+    const zone = inject(NgZone);
+    let _stable = true;
+    const isCurrentlyStable = new Observable((observer) => {
+        _stable = zone.isStable && !zone.hasPendingMacrotasks && !zone.hasPendingMicrotasks;
+        zone.runOutsideAngular(() => {
+            observer.next(_stable);
+            observer.complete();
+        });
+    });
+    const isStable = new Observable((observer) => {
+        // Create the subscription to onStable outside the Angular Zone so that
+        // the callback is run outside the Angular Zone.
+        let stableSub;
+        zone.runOutsideAngular(() => {
+            stableSub = zone.onStable.subscribe(() => {
+                NgZone.assertNotInAngularZone();
+                // Check whether there are no pending macro/micro tasks in the next tick
+                // to allow for NgZone to update the state.
+                queueMicrotask(() => {
+                    if (!_stable && !zone.hasPendingMacrotasks && !zone.hasPendingMicrotasks) {
+                        _stable = true;
+                        observer.next(true);
+                    }
+                });
+            });
+        });
+        const unstableSub = zone.onUnstable.subscribe(() => {
+            NgZone.assertInAngularZone();
+            if (_stable) {
+                _stable = false;
+                zone.runOutsideAngular(() => {
+                    observer.next(false);
+                });
+            }
+        });
+        return () => {
+            stableSub.unsubscribe();
+            unstableSub.unsubscribe();
+        };
+    });
+    return merge$1(isCurrentlyStable, isStable.pipe(share()));
+}
+function shouldBeIgnoredByZone(applyArgs) {
+    if (!Array.isArray(applyArgs)) {
+        return false;
+    }
+    // We should only ever get 1 arg passed through to invokeTask.
+    // Short circuit here incase that behavior changes.
+    if (applyArgs.length !== 1) {
+        return false;
+    }
+    // Prevent triggering change detection when the __ignore_ng_zone__ flag is detected.
+    return applyArgs[0].data?.['__ignore_ng_zone__'] === true;
+}
+
+// Public API for Zone
+
+/**
+ * The phase to run an `afterRender` or `afterNextRender` callback in.
+ *
+ * Callbacks in the same phase run in the order they are registered. Phases run in the
+ * following order after each render:
+ *
+ *   1. `AfterRenderPhase.EarlyRead`
+ *   2. `AfterRenderPhase.Write`
+ *   3. `AfterRenderPhase.MixedReadWrite`
+ *   4. `AfterRenderPhase.Read`
+ *
+ * Angular is unable to verify or enforce that phases are used correctly, and instead
+ * relies on each developer to follow the guidelines documented for each value and
+ * carefully choose the appropriate one, refactoring their code if necessary. By doing
+ * so, Angular is better able to minimize the performance degradation associated with
+ * manual DOM access, ensuring the best experience for the end users of your application
+ * or library.
+ *
+ * @developerPreview
+ */
+var AfterRenderPhase;
+(function (AfterRenderPhase) {
+    /**
+     * Use `AfterRenderPhase.EarlyRead` for callbacks that only need to **read** from the
+     * DOM before a subsequent `AfterRenderPhase.Write` callback, for example to perform
+     * custom layout that the browser doesn't natively support. **Never** use this phase
+     * for callbacks that can write to the DOM or when `AfterRenderPhase.Read` is adequate.
+     *
+     * <div class="alert is-important">
+     *
+     * Using this value can degrade performance.
+     * Instead, prefer using built-in browser functionality when possible.
+     *
+     * </div>
+     */
+    AfterRenderPhase[AfterRenderPhase["EarlyRead"] = 0] = "EarlyRead";
+    /**
+     * Use `AfterRenderPhase.Write` for callbacks that only **write** to the DOM. **Never**
+     * use this phase for callbacks that can read from the DOM.
+     */
+    AfterRenderPhase[AfterRenderPhase["Write"] = 1] = "Write";
+    /**
+     * Use `AfterRenderPhase.MixedReadWrite` for callbacks that read from or write to the
+     * DOM, that haven't been refactored to use a different phase. **Never** use this phase
+     * for callbacks that can use a different phase instead.
+     *
+     * <div class="alert is-critical">
+     *
+     * Using this value can **significantly** degrade performance.
+     * Instead, prefer refactoring into multiple callbacks using a more specific phase.
+     *
+     * </div>
+     */
+    AfterRenderPhase[AfterRenderPhase["MixedReadWrite"] = 2] = "MixedReadWrite";
+    /**
+     * Use `AfterRenderPhase.Read` for callbacks that only **read** from the DOM. **Never**
+     * use this phase for callbacks that can write to the DOM.
+     */
+    AfterRenderPhase[AfterRenderPhase["Read"] = 3] = "Read";
+})(AfterRenderPhase || (AfterRenderPhase = {}));
+/** `AfterRenderRef` that does nothing. */
+const NOOP_AFTER_RENDER_REF = {
+    destroy() { }
+};
+/**
+ * Register a callback to run once before any userspace `afterRender` or
+ * `afterNextRender` callbacks.
+ *
+ * This function should almost always be used instead of `afterRender` or
+ * `afterNextRender` for implementing framework functionality. Consider:
+ *
+ *   1.) `AfterRenderPhase.EarlyRead` is intended to be used for implementing
+ *       custom layout. If the framework itself mutates the DOM after *any*
+ *       `AfterRenderPhase.EarlyRead` callbacks are run, the phase can no
+ *       longer reliably serve its purpose.
+ *
+ *   2.) Importing `afterRender` in the framework can reduce the ability for it
+ *       to be tree-shaken, and the framework shouldn't need much of the behavior.
+ */
+function internalAfterNextRender(callback, options) {
+    const injector = options?.injector ?? inject(Injector);
+    // Similarly to the public `afterNextRender` function, an internal one
+    // is only invoked in a browser.
+    if (!isPlatformBrowser(injector))
+        return;
+    const afterRenderEventManager = injector.get(AfterRenderEventManager);
+    afterRenderEventManager.internalCallbacks.push(callback);
+}
+/**
+ * Register a callback to be invoked each time the application
+ * finishes rendering.
+ *
+ * <div class="alert is-critical">
+ *
+ * You should always explicitly specify a non-default [phase](api/core/AfterRenderPhase), or you
+ * risk significant performance degradation.
+ *
+ * </div>
+ *
+ * Note that the callback will run
+ * - in the order it was registered
+ * - once per render
+ * - on browser platforms only
+ *
+ * <div class="alert is-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param callback A callback function to register
+ *
+ * @usageNotes
+ *
+ * Use `afterRender` to read or write the DOM after each render.
+ *
+ * ### Example
+ * ```ts
+ * @Component({
+ *   selector: 'my-cmp',
+ *   template: `<span #content>{{ ... }}</span>`,
+ * })
+ * export class MyComponent {
+ *   @ViewChild('content') contentRef: ElementRef;
+ *
+ *   constructor() {
+ *     afterRender(() => {
+ *       console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
+ *     }, {phase: AfterRenderPhase.Read});
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+function afterRender(callback, options) {
+    ngDevMode &&
+        assertNotInReactiveContext(afterRender, 'Call `afterRender` outside of a reactive context. For example, schedule the render ' +
+            'callback inside the component constructor`.');
+    !options && assertInInjectionContext(afterRender);
+    const injector = options?.injector ?? inject(Injector);
+    if (!isPlatformBrowser(injector)) {
+        return NOOP_AFTER_RENDER_REF;
+    }
+    performance.mark('mark_use_counter', { detail: { feature: 'NgAfterRender' } });
+    const afterRenderEventManager = injector.get(AfterRenderEventManager);
+    // Lazily initialize the handler implementation, if necessary. This is so that it can be
+    // tree-shaken if `afterRender` and `afterNextRender` aren't used.
+    const callbackHandler = afterRenderEventManager.handler ??= new AfterRenderCallbackHandlerImpl();
+    const phase = options?.phase ?? AfterRenderPhase.MixedReadWrite;
+    const destroy = () => {
+        callbackHandler.unregister(instance);
+        unregisterFn();
+    };
+    const unregisterFn = injector.get(DestroyRef).onDestroy(destroy);
+    const instance = new AfterRenderCallback(injector, phase, callback);
+    callbackHandler.register(instance);
+    return { destroy };
+}
+/**
+ * Register a callback to be invoked the next time the application
+ * finishes rendering.
+ *
+ * <div class="alert is-critical">
+ *
+ * You should always explicitly specify a non-default [phase](api/core/AfterRenderPhase), or you
+ * risk significant performance degradation.
+ *
+ * </div>
+ *
+ * Note that the callback will run
+ * - in the order it was registered
+ * - on browser platforms only
+ *
+ * <div class="alert is-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param callback A callback function to register
+ *
+ * @usageNotes
+ *
+ * Use `afterNextRender` to read or write the DOM once,
+ * for example to initialize a non-Angular library.
+ *
+ * ### Example
+ * ```ts
+ * @Component({
+ *   selector: 'my-chart-cmp',
+ *   template: `<div #chart>{{ ... }}</div>`,
+ * })
+ * export class MyChartCmp {
+ *   @ViewChild('chart') chartRef: ElementRef;
+ *   chart: MyChart|null;
+ *
+ *   constructor() {
+ *     afterNextRender(() => {
+ *       this.chart = new MyChart(this.chartRef.nativeElement);
+ *     }, {phase: AfterRenderPhase.Write});
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+function afterNextRender(callback, options) {
+    !options && assertInInjectionContext(afterNextRender);
+    const injector = options?.injector ?? inject(Injector);
+    if (!isPlatformBrowser(injector)) {
+        return NOOP_AFTER_RENDER_REF;
+    }
+    performance.mark('mark_use_counter', { detail: { feature: 'NgAfterNextRender' } });
+    const afterRenderEventManager = injector.get(AfterRenderEventManager);
+    // Lazily initialize the handler implementation, if necessary. This is so that it can be
+    // tree-shaken if `afterRender` and `afterNextRender` aren't used.
+    const callbackHandler = afterRenderEventManager.handler ??= new AfterRenderCallbackHandlerImpl();
+    const phase = options?.phase ?? AfterRenderPhase.MixedReadWrite;
+    const destroy = () => {
+        callbackHandler.unregister(instance);
+        unregisterFn();
+    };
+    const unregisterFn = injector.get(DestroyRef).onDestroy(destroy);
+    const instance = new AfterRenderCallback(injector, phase, () => {
+        destroy();
+        callback();
+    });
+    callbackHandler.register(instance);
+    return { destroy };
+}
+/**
+ * A wrapper around a function to be used as an after render callback.
+ */
+class AfterRenderCallback {
+    constructor(injector, phase, callbackFn) {
+        this.phase = phase;
+        this.callbackFn = callbackFn;
+        this.zone = injector.get(NgZone);
+        this.errorHandler = injector.get(ErrorHandler, null, { optional: true });
+    }
+    invoke() {
+        try {
+            this.zone.runOutsideAngular(this.callbackFn);
+        }
+        catch (err) {
+            this.errorHandler?.handleError(err);
+        }
+    }
+}
+/**
+ * Core functionality for `afterRender` and `afterNextRender`. Kept separate from
+ * `AfterRenderEventManager` for tree-shaking.
+ */
+class AfterRenderCallbackHandlerImpl {
+    constructor() {
+        this.executingCallbacks = false;
+        this.buckets = {
+            // Note: the order of these keys controls the order the phases are run.
+            [AfterRenderPhase.EarlyRead]: new Set(),
+            [AfterRenderPhase.Write]: new Set(),
+            [AfterRenderPhase.MixedReadWrite]: new Set(),
+            [AfterRenderPhase.Read]: new Set(),
+        };
+        this.deferredCallbacks = new Set();
+    }
+    validateBegin() {
+        if (this.executingCallbacks) {
+            throw new RuntimeError(102 /* RuntimeErrorCode.RECURSIVE_APPLICATION_RENDER */, ngDevMode &&
+                'A new render operation began before the previous operation ended. ' +
+                    'Did you trigger change detection from afterRender or afterNextRender?');
+        }
+    }
+    register(callback) {
+        // If we're currently running callbacks, new callbacks should be deferred
+        // until the next render operation.
+        const target = this.executingCallbacks ? this.deferredCallbacks : this.buckets[callback.phase];
+        target.add(callback);
+    }
+    unregister(callback) {
+        this.buckets[callback.phase].delete(callback);
+        this.deferredCallbacks.delete(callback);
+    }
+    execute() {
+        this.executingCallbacks = true;
+        for (const bucket of Object.values(this.buckets)) {
+            for (const callback of bucket) {
+                callback.invoke();
+            }
+        }
+        this.executingCallbacks = false;
+        for (const callback of this.deferredCallbacks) {
+            this.buckets[callback.phase].add(callback);
+        }
+        this.deferredCallbacks.clear();
+    }
+    destroy() {
+        for (const bucket of Object.values(this.buckets)) {
+            bucket.clear();
+        }
+        this.deferredCallbacks.clear();
+    }
+}
+/**
+ * Implements core timing for `afterRender` and `afterNextRender` events.
+ * Delegates to an optional `AfterRenderCallbackHandler` for implementation.
+ */
+class AfterRenderEventManager {
+    constructor() {
+        this.renderDepth = 0;
+        /* @internal */
+        this.handler = null;
+        /* @internal */
+        this.internalCallbacks = [];
+    }
+    /**
+     * Mark the beginning of a render operation (i.e. CD cycle).
+     * Throws if called while executing callbacks.
+     */
+    begin() {
+        this.handler?.validateBegin();
+        this.renderDepth++;
+    }
+    /**
+     * Mark the end of a render operation. Callbacks will be
+     * executed if there are no more pending operations.
+     */
+    end() {
+        ngDevMode && assertGreaterThan(this.renderDepth, 0, 'renderDepth must be greater than 0');
+        this.renderDepth--;
+        if (this.renderDepth === 0) {
+            // Note: internal callbacks power `internalAfterNextRender`. Since internal callbacks
+            // are fairly trivial, they are kept separate so that `AfterRenderCallbackHandlerImpl`
+            // can still be tree-shaken unless used by the application.
+            for (const callback of this.internalCallbacks) {
+                callback();
+            }
+            this.internalCallbacks.length = 0;
+            this.handler?.execute();
+        }
+    }
+    ngOnDestroy() {
+        this.handler?.destroy();
+        this.handler = null;
+        this.internalCallbacks.length = 0;
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: AfterRenderEventManager,
+        providedIn: 'root',
+        factory: () => new AfterRenderEventManager(),
+    }); }
+}
+
+function renderComponent(hostLView, componentHostIdx) {
+    ngDevMode && assertEqual(isCreationMode(hostLView), true, 'Should be run in creation mode');
+    const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
+    const componentTView = componentView[TVIEW];
+    syncViewWithBlueprint(componentTView, componentView);
+    const hostRNode = componentView[HOST];
+    // Populate an LView with hydration info retrieved from the DOM via TransferState.
+    if (hostRNode !== null && componentView[HYDRATION] === null) {
+        componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR$1]);
+    }
+    renderView(componentTView, componentView, componentView[CONTEXT]);
+}
+/**
+ * Syncs an LView instance with its blueprint if they have gotten out of sync.
+ *
+ * Typically, blueprints and their view instances should always be in sync, so the loop here
+ * will be skipped. However, consider this case of two components side-by-side:
+ *
+ * App template:
+ * ```
+ * <comp></comp>
+ * <comp></comp>
+ * ```
+ *
+ * The following will happen:
+ * 1. App template begins processing.
+ * 2. First <comp> is matched as a component and its LView is created.
+ * 3. Second <comp> is matched as a component and its LView is created.
+ * 4. App template completes processing, so it's time to check child templates.
+ * 5. First <comp> template is checked. It has a directive, so its def is pushed to blueprint.
+ * 6. Second <comp> template is checked. Its blueprint has been updated by the first
+ * <comp> template, but its LView was created before this update, so it is out of sync.
+ *
+ * Note that embedded views inside ngFor loops will never be out of sync because these views
+ * are processed as soon as they are created.
+ *
+ * @param tView The `TView` that contains the blueprint for syncing
+ * @param lView The view to sync
+ */
+function syncViewWithBlueprint(tView, lView) {
+    for (let i = lView.length; i < tView.blueprint.length; i++) {
+        lView.push(tView.blueprint[i]);
+    }
+}
+/**
+ * Processes a view in the creation mode. This includes a number of steps in a specific order:
+ * - creating view query functions (if any);
+ * - executing a template function in the creation mode;
+ * - updating static queries (if any);
+ * - creating child components defined in a given view.
+ */
+function renderView(tView, lView, context) {
+    ngDevMode && assertEqual(isCreationMode(lView), true, 'Should be run in creation mode');
+    enterView(lView);
+    try {
+        const viewQuery = tView.viewQuery;
+        if (viewQuery !== null) {
+            executeViewQueryFn(1 /* RenderFlags.Create */, viewQuery, context);
+        }
+        // Execute a template associated with this view, if it exists. A template function might not be
+        // defined for the root component views.
+        const templateFn = tView.template;
+        if (templateFn !== null) {
+            executeTemplate(tView, lView, templateFn, 1 /* RenderFlags.Create */, context);
+        }
+        // This needs to be set before children are processed to support recursive components.
+        // This must be set to false immediately after the first creation run because in an
+        // ngFor loop, all the views will be created together before update mode runs and turns
+        // off firstCreatePass. If we don't set it here, instances will perform directive
+        // matching, etc again and again.
+        if (tView.firstCreatePass) {
+            tView.firstCreatePass = false;
+        }
+        // We resolve content queries specifically marked as `static` in creation mode. Dynamic
+        // content queries are resolved during change detection (i.e. update mode), after embedded
+        // views are refreshed (see block above).
+        if (tView.staticContentQueries) {
+            refreshContentQueries(tView, lView);
+        }
+        // We must materialize query results before child components are processed
+        // in case a child component has projected a container. The LContainer needs
+        // to exist so the embedded views are properly attached by the container.
+        if (tView.staticViewQueries) {
+            executeViewQueryFn(2 /* RenderFlags.Update */, tView.viewQuery, context);
+        }
+        // Render child component views.
+        const components = tView.components;
+        if (components !== null) {
+            renderChildComponents(lView, components);
+        }
+    }
+    catch (error) {
+        // If we didn't manage to get past the first template pass due to
+        // an error, mark the view as corrupted so we can try to recover.
+        if (tView.firstCreatePass) {
+            tView.incompleteFirstPass = true;
+            tView.firstCreatePass = false;
+        }
+        throw error;
+    }
+    finally {
+        lView[FLAGS] &= ~4 /* LViewFlags.CreationMode */;
+        leaveView();
+    }
+}
+/** Renders child components in the current view (creation mode). */
+function renderChildComponents(hostLView, components) {
+    for (let i = 0; i < components.length; i++) {
+        renderComponent(hostLView, components[i]);
+    }
+}
+
+/**
+ * Compute the static styling (class/style) from `TAttributes`.
+ *
+ * This function should be called during `firstCreatePass` only.
+ *
+ * @param tNode The `TNode` into which the styling information should be loaded.
+ * @param attrs `TAttributes` containing the styling information.
+ * @param writeToHost Where should the resulting static styles be written?
+ *   - `false` Write to `TNode.stylesWithoutHost` / `TNode.classesWithoutHost`
+ *   - `true` Write to `TNode.styles` / `TNode.classes`
+ */
+function computeStaticStyling(tNode, attrs, writeToHost) {
+    ngDevMode &&
+        assertFirstCreatePass(getTView(), 'Expecting to be called in first template pass only');
+    let styles = writeToHost ? tNode.styles : null;
+    let classes = writeToHost ? tNode.classes : null;
+    let mode = 0;
+    if (attrs !== null) {
+        for (let i = 0; i < attrs.length; i++) {
+            const value = attrs[i];
+            if (typeof value === 'number') {
+                mode = value;
+            }
+            else if (mode == 1 /* AttributeMarker.Classes */) {
+                classes = concatStringsWithSpace(classes, value);
+            }
+            else if (mode == 2 /* AttributeMarker.Styles */) {
+                const style = value;
+                const styleValue = attrs[++i];
+                styles = concatStringsWithSpace(styles, style + ': ' + styleValue + ';');
+            }
+        }
+    }
+    writeToHost ? tNode.styles = styles : tNode.stylesWithoutHost = styles;
+    writeToHost ? tNode.classes = classes : tNode.classesWithoutHost = classes;
 }
 
 class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
@@ -14913,66 +16128,6 @@ function ɵɵInputTransformsFeature(definition) {
     }
     definition.inputTransforms =
         inputTransforms;
-}
-
-function isIterable(obj) {
-    return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
-}
-function isListLikeIterable(obj) {
-    if (!isJsObject(obj))
-        return false;
-    return Array.isArray(obj) ||
-        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
-            Symbol.iterator in obj); // JS Iterable have a Symbol.iterator prop
-}
-function areIterablesEqual(a, b, comparator) {
-    const iterator1 = a[Symbol.iterator]();
-    const iterator2 = b[Symbol.iterator]();
-    while (true) {
-        const item1 = iterator1.next();
-        const item2 = iterator2.next();
-        if (item1.done && item2.done)
-            return true;
-        if (item1.done || item2.done)
-            return false;
-        if (!comparator(item1.value, item2.value))
-            return false;
-    }
-}
-function iterateListLike(obj, fn) {
-    if (Array.isArray(obj)) {
-        for (let i = 0; i < obj.length; i++) {
-            fn(obj[i]);
-        }
-    }
-    else {
-        const iterator = obj[Symbol.iterator]();
-        let item;
-        while (!((item = iterator.next()).done)) {
-            fn(item.value);
-        }
-    }
-}
-function isJsObject(o) {
-    return o !== null && (typeof o === 'function' || typeof o === 'object');
-}
-
-function devModeEqual(a, b) {
-    const isListLikeIterableA = isListLikeIterable(a);
-    const isListLikeIterableB = isListLikeIterable(b);
-    if (isListLikeIterableA && isListLikeIterableB) {
-        return areIterablesEqual(a, b, devModeEqual);
-    }
-    else {
-        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
-        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
-        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
-            return true;
-        }
-        else {
-            return Object.is(a, b);
-        }
-    }
 }
 
 // TODO(misko): consider inlining
@@ -31532,86 +32687,6 @@ function noModuleError(id) {
 }
 
 /**
- * Base class that provides change detection functionality.
- * A change-detection tree collects all views that are to be checked for changes.
- * Use the methods to add and remove views from the tree, initiate change-detection,
- * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
- *
- * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
- * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
- *
- * @usageNotes
- *
- * The following examples demonstrate how to modify default change-detection behavior
- * to perform explicit detection when needed.
- *
- * ### Use `markForCheck()` with `CheckOnce` strategy
- *
- * The following example sets the `OnPush` change-detection strategy for a component
- * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval.
- *
- * <code-example path="core/ts/change_detect/change-detection.ts"
- * region="mark-for-check"></code-example>
- *
- * ### Detach change detector to limit how often check occurs
- *
- * The following example defines a component with a large list of read-only data
- * that is expected to change constantly, many times per second.
- * To improve performance, we want to check and update the list
- * less often than the changes actually occur. To do that, we detach
- * the component's change detector and perform an explicit local check every five seconds.
- *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
- *
- *
- * ### Reattaching a detached component
- *
- * The following example creates a component displaying live data.
- * The component detaches its change detector from the main change detector tree
- * when the `live` property is set to false, and reattaches it when the property
- * becomes true.
- *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
- *
- * @publicApi
- */
-class ChangeDetectorRef {
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static { this.__NG_ELEMENT_ID__ = injectChangeDetectorRef; }
-}
-/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-function injectChangeDetectorRef(flags) {
-    return createViewRef(getCurrentTNode(), getLView(), (flags & 16 /* InternalInjectFlags.ForPipe */) === 16 /* InternalInjectFlags.ForPipe */);
-}
-/**
- * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
- *
- * @param tNode The node that is requesting a ChangeDetectorRef
- * @param lView The view to which the node belongs
- * @param isPipe Whether the view is being injected into a pipe.
- * @returns The ChangeDetectorRef to use
- */
-function createViewRef(tNode, lView, isPipe) {
-    if (isComponentHost(tNode) && !isPipe) {
-        // The LView represents the location where the component is declared.
-        // Instead we want the LView for the component View and so we need to look it up.
-        const componentView = getComponentLViewByIndex(tNode.index, lView); // look down
-        return new InternalViewRef(componentView, componentView);
-    }
-    else if (tNode.type & (3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 32 /* TNodeType.Icu */)) {
-        // The LView represents the location where the injection is requested from.
-        // We need to locate the containing LView (in case where the `lView` is an embedded view)
-        const hostComponentView = lView[DECLARATION_COMPONENT_VIEW]; // look up
-        return new InternalViewRef(hostComponentView, lView);
-    }
-    return null;
-}
-
-/**
  * Represents an Angular [view](guide/glossary#view "Definition").
  *
  * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
@@ -32238,1058 +33313,6 @@ function indexDebugNode(node) {
 function removeDebugNodeFromIndex(node) {
     _nativeNodeToDebugNode.delete(node.nativeNode);
 }
-
-class DefaultIterableDifferFactory {
-    constructor() { }
-    supports(obj) {
-        return isListLikeIterable(obj);
-    }
-    create(trackByFn) {
-        return new DefaultIterableDiffer(trackByFn);
-    }
-}
-const trackByIdentity = (index, item) => item;
-/**
- * @deprecated v4.0.0 - Should not be part of public API.
- * @publicApi
- */
-class DefaultIterableDiffer {
-    constructor(trackByFn) {
-        this.length = 0;
-        // Keeps track of the used records at any point in time (during & across `_check()` calls)
-        this._linkedRecords = null;
-        // Keeps track of the removed records at any point in time during `_check()` calls.
-        this._unlinkedRecords = null;
-        this._previousItHead = null;
-        this._itHead = null;
-        this._itTail = null;
-        this._additionsHead = null;
-        this._additionsTail = null;
-        this._movesHead = null;
-        this._movesTail = null;
-        this._removalsHead = null;
-        this._removalsTail = null;
-        // Keeps track of records where custom track by is the same, but item identity has changed
-        this._identityChangesHead = null;
-        this._identityChangesTail = null;
-        this._trackByFn = trackByFn || trackByIdentity;
-    }
-    forEachItem(fn) {
-        let record;
-        for (record = this._itHead; record !== null; record = record._next) {
-            fn(record);
-        }
-    }
-    forEachOperation(fn) {
-        let nextIt = this._itHead;
-        let nextRemove = this._removalsHead;
-        let addRemoveOffset = 0;
-        let moveOffsets = null;
-        while (nextIt || nextRemove) {
-            // Figure out which is the next record to process
-            // Order: remove, add, move
-            const record = !nextRemove ||
-                nextIt &&
-                    nextIt.currentIndex <
-                        getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
-                nextIt :
-                nextRemove;
-            const adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
-            const currentIndex = record.currentIndex;
-            // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
-            if (record === nextRemove) {
-                addRemoveOffset--;
-                nextRemove = nextRemove._nextRemoved;
-            }
-            else {
-                nextIt = nextIt._next;
-                if (record.previousIndex == null) {
-                    addRemoveOffset++;
-                }
-                else {
-                    // INVARIANT:  currentIndex < previousIndex
-                    if (!moveOffsets)
-                        moveOffsets = [];
-                    const localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
-                    const localCurrentIndex = currentIndex - addRemoveOffset;
-                    if (localMovePreviousIndex != localCurrentIndex) {
-                        for (let i = 0; i < localMovePreviousIndex; i++) {
-                            const offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
-                            const index = offset + i;
-                            if (localCurrentIndex <= index && index < localMovePreviousIndex) {
-                                moveOffsets[i] = offset + 1;
-                            }
-                        }
-                        const previousIndex = record.previousIndex;
-                        moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
-                    }
-                }
-            }
-            if (adjPreviousIndex !== currentIndex) {
-                fn(record, adjPreviousIndex, currentIndex);
-            }
-        }
-    }
-    forEachPreviousItem(fn) {
-        let record;
-        for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
-            fn(record);
-        }
-    }
-    forEachAddedItem(fn) {
-        let record;
-        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-            fn(record);
-        }
-    }
-    forEachMovedItem(fn) {
-        let record;
-        for (record = this._movesHead; record !== null; record = record._nextMoved) {
-            fn(record);
-        }
-    }
-    forEachRemovedItem(fn) {
-        let record;
-        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-            fn(record);
-        }
-    }
-    forEachIdentityChange(fn) {
-        let record;
-        for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
-            fn(record);
-        }
-    }
-    diff(collection) {
-        if (collection == null)
-            collection = [];
-        if (!isListLikeIterable(collection)) {
-            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
-                `Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed`);
-        }
-        if (this.check(collection)) {
-            return this;
-        }
-        else {
-            return null;
-        }
-    }
-    onDestroy() { }
-    check(collection) {
-        this._reset();
-        let record = this._itHead;
-        let mayBeDirty = false;
-        let index;
-        let item;
-        let itemTrackBy;
-        if (Array.isArray(collection)) {
-            this.length = collection.length;
-            for (let index = 0; index < this.length; index++) {
-                item = collection[index];
-                itemTrackBy = this._trackByFn(index, item);
-                if (record === null || !Object.is(record.trackById, itemTrackBy)) {
-                    record = this._mismatch(record, item, itemTrackBy, index);
-                    mayBeDirty = true;
-                }
-                else {
-                    if (mayBeDirty) {
-                        // TODO(misko): can we limit this to duplicates only?
-                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
-                    }
-                    if (!Object.is(record.item, item))
-                        this._addIdentityChange(record, item);
-                }
-                record = record._next;
-            }
-        }
-        else {
-            index = 0;
-            iterateListLike(collection, (item) => {
-                itemTrackBy = this._trackByFn(index, item);
-                if (record === null || !Object.is(record.trackById, itemTrackBy)) {
-                    record = this._mismatch(record, item, itemTrackBy, index);
-                    mayBeDirty = true;
-                }
-                else {
-                    if (mayBeDirty) {
-                        // TODO(misko): can we limit this to duplicates only?
-                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
-                    }
-                    if (!Object.is(record.item, item))
-                        this._addIdentityChange(record, item);
-                }
-                record = record._next;
-                index++;
-            });
-            this.length = index;
-        }
-        this._truncate(record);
-        this.collection = collection;
-        return this.isDirty;
-    }
-    /* CollectionChanges is considered dirty if it has any additions, moves, removals, or identity
-     * changes.
-     */
-    get isDirty() {
-        return this._additionsHead !== null || this._movesHead !== null ||
-            this._removalsHead !== null || this._identityChangesHead !== null;
-    }
-    /**
-     * Reset the state of the change objects to show no changes. This means set previousKey to
-     * currentKey, and clear all of the queues (additions, moves, removals).
-     * Set the previousIndexes of moved and added items to their currentIndexes
-     * Reset the list of additions, moves and removals
-     *
-     * @internal
-     */
-    _reset() {
-        if (this.isDirty) {
-            let record;
-            for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
-                record._nextPrevious = record._next;
-            }
-            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-                record.previousIndex = record.currentIndex;
-            }
-            this._additionsHead = this._additionsTail = null;
-            for (record = this._movesHead; record !== null; record = record._nextMoved) {
-                record.previousIndex = record.currentIndex;
-            }
-            this._movesHead = this._movesTail = null;
-            this._removalsHead = this._removalsTail = null;
-            this._identityChangesHead = this._identityChangesTail = null;
-            // TODO(vicb): when assert gets supported
-            // assert(!this.isDirty);
-        }
-    }
-    /**
-     * This is the core function which handles differences between collections.
-     *
-     * - `record` is the record which we saw at this position last time. If null then it is a new
-     *   item.
-     * - `item` is the current item in the collection
-     * - `index` is the position of the item in the collection
-     *
-     * @internal
-     */
-    _mismatch(record, item, itemTrackBy, index) {
-        // The previous record after which we will append the current one.
-        let previousRecord;
-        if (record === null) {
-            previousRecord = this._itTail;
-        }
-        else {
-            previousRecord = record._prev;
-            // Remove the record from the collection since we know it does not match the item.
-            this._remove(record);
-        }
-        // See if we have evicted the item, which used to be at some anterior position of _itHead list.
-        record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
-        if (record !== null) {
-            // It is an item which we have evicted earlier: reinsert it back into the list.
-            // But first we need to check if identity changed, so we can update in view if necessary.
-            if (!Object.is(record.item, item))
-                this._addIdentityChange(record, item);
-            this._reinsertAfter(record, previousRecord, index);
-        }
-        else {
-            // Attempt to see if the item is at some posterior position of _itHead list.
-            record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
-            if (record !== null) {
-                // We have the item in _itHead at/after `index` position. We need to move it forward in the
-                // collection.
-                // But first we need to check if identity changed, so we can update in view if necessary.
-                if (!Object.is(record.item, item))
-                    this._addIdentityChange(record, item);
-                this._moveAfter(record, previousRecord, index);
-            }
-            else {
-                // It is a new item: add it.
-                record =
-                    this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
-            }
-        }
-        return record;
-    }
-    /**
-     * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
-     *
-     * Use case: `[a, a]` => `[b, a, a]`
-     *
-     * If we did not have this check then the insertion of `b` would:
-     *   1) evict first `a`
-     *   2) insert `b` at `0` index.
-     *   3) leave `a` at index `1` as is. <-- this is wrong!
-     *   3) reinsert `a` at index 2. <-- this is wrong!
-     *
-     * The correct behavior is:
-     *   1) evict first `a`
-     *   2) insert `b` at `0` index.
-     *   3) reinsert `a` at index 1.
-     *   3) move `a` at from `1` to `2`.
-     *
-     *
-     * Double check that we have not evicted a duplicate item. We need to check if the item type may
-     * have already been removed:
-     * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
-     * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
-     * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
-     * at the end.
-     *
-     * @internal
-     */
-    _verifyReinsertion(record, item, itemTrackBy, index) {
-        let reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
-        if (reinsertRecord !== null) {
-            record = this._reinsertAfter(reinsertRecord, record._prev, index);
-        }
-        else if (record.currentIndex != index) {
-            record.currentIndex = index;
-            this._addToMoves(record, index);
-        }
-        return record;
-    }
-    /**
-     * Get rid of any excess {@link IterableChangeRecord_}s from the previous collection
-     *
-     * - `record` The first excess {@link IterableChangeRecord_}.
-     *
-     * @internal
-     */
-    _truncate(record) {
-        // Anything after that needs to be removed;
-        while (record !== null) {
-            const nextRecord = record._next;
-            this._addToRemovals(this._unlink(record));
-            record = nextRecord;
-        }
-        if (this._unlinkedRecords !== null) {
-            this._unlinkedRecords.clear();
-        }
-        if (this._additionsTail !== null) {
-            this._additionsTail._nextAdded = null;
-        }
-        if (this._movesTail !== null) {
-            this._movesTail._nextMoved = null;
-        }
-        if (this._itTail !== null) {
-            this._itTail._next = null;
-        }
-        if (this._removalsTail !== null) {
-            this._removalsTail._nextRemoved = null;
-        }
-        if (this._identityChangesTail !== null) {
-            this._identityChangesTail._nextIdentityChange = null;
-        }
-    }
-    /** @internal */
-    _reinsertAfter(record, prevRecord, index) {
-        if (this._unlinkedRecords !== null) {
-            this._unlinkedRecords.remove(record);
-        }
-        const prev = record._prevRemoved;
-        const next = record._nextRemoved;
-        if (prev === null) {
-            this._removalsHead = next;
-        }
-        else {
-            prev._nextRemoved = next;
-        }
-        if (next === null) {
-            this._removalsTail = prev;
-        }
-        else {
-            next._prevRemoved = prev;
-        }
-        this._insertAfter(record, prevRecord, index);
-        this._addToMoves(record, index);
-        return record;
-    }
-    /** @internal */
-    _moveAfter(record, prevRecord, index) {
-        this._unlink(record);
-        this._insertAfter(record, prevRecord, index);
-        this._addToMoves(record, index);
-        return record;
-    }
-    /** @internal */
-    _addAfter(record, prevRecord, index) {
-        this._insertAfter(record, prevRecord, index);
-        if (this._additionsTail === null) {
-            // TODO(vicb):
-            // assert(this._additionsHead === null);
-            this._additionsTail = this._additionsHead = record;
-        }
-        else {
-            // TODO(vicb):
-            // assert(_additionsTail._nextAdded === null);
-            // assert(record._nextAdded === null);
-            this._additionsTail = this._additionsTail._nextAdded = record;
-        }
-        return record;
-    }
-    /** @internal */
-    _insertAfter(record, prevRecord, index) {
-        // TODO(vicb):
-        // assert(record != prevRecord);
-        // assert(record._next === null);
-        // assert(record._prev === null);
-        const next = prevRecord === null ? this._itHead : prevRecord._next;
-        // TODO(vicb):
-        // assert(next != record);
-        // assert(prevRecord != record);
-        record._next = next;
-        record._prev = prevRecord;
-        if (next === null) {
-            this._itTail = record;
-        }
-        else {
-            next._prev = record;
-        }
-        if (prevRecord === null) {
-            this._itHead = record;
-        }
-        else {
-            prevRecord._next = record;
-        }
-        if (this._linkedRecords === null) {
-            this._linkedRecords = new _DuplicateMap();
-        }
-        this._linkedRecords.put(record);
-        record.currentIndex = index;
-        return record;
-    }
-    /** @internal */
-    _remove(record) {
-        return this._addToRemovals(this._unlink(record));
-    }
-    /** @internal */
-    _unlink(record) {
-        if (this._linkedRecords !== null) {
-            this._linkedRecords.remove(record);
-        }
-        const prev = record._prev;
-        const next = record._next;
-        // TODO(vicb):
-        // assert((record._prev = null) === null);
-        // assert((record._next = null) === null);
-        if (prev === null) {
-            this._itHead = next;
-        }
-        else {
-            prev._next = next;
-        }
-        if (next === null) {
-            this._itTail = prev;
-        }
-        else {
-            next._prev = prev;
-        }
-        return record;
-    }
-    /** @internal */
-    _addToMoves(record, toIndex) {
-        // TODO(vicb):
-        // assert(record._nextMoved === null);
-        if (record.previousIndex === toIndex) {
-            return record;
-        }
-        if (this._movesTail === null) {
-            // TODO(vicb):
-            // assert(_movesHead === null);
-            this._movesTail = this._movesHead = record;
-        }
-        else {
-            // TODO(vicb):
-            // assert(_movesTail._nextMoved === null);
-            this._movesTail = this._movesTail._nextMoved = record;
-        }
-        return record;
-    }
-    _addToRemovals(record) {
-        if (this._unlinkedRecords === null) {
-            this._unlinkedRecords = new _DuplicateMap();
-        }
-        this._unlinkedRecords.put(record);
-        record.currentIndex = null;
-        record._nextRemoved = null;
-        if (this._removalsTail === null) {
-            // TODO(vicb):
-            // assert(_removalsHead === null);
-            this._removalsTail = this._removalsHead = record;
-            record._prevRemoved = null;
-        }
-        else {
-            // TODO(vicb):
-            // assert(_removalsTail._nextRemoved === null);
-            // assert(record._nextRemoved === null);
-            record._prevRemoved = this._removalsTail;
-            this._removalsTail = this._removalsTail._nextRemoved = record;
-        }
-        return record;
-    }
-    /** @internal */
-    _addIdentityChange(record, item) {
-        record.item = item;
-        if (this._identityChangesTail === null) {
-            this._identityChangesTail = this._identityChangesHead = record;
-        }
-        else {
-            this._identityChangesTail = this._identityChangesTail._nextIdentityChange = record;
-        }
-        return record;
-    }
-}
-class IterableChangeRecord_ {
-    constructor(item, trackById) {
-        this.item = item;
-        this.trackById = trackById;
-        this.currentIndex = null;
-        this.previousIndex = null;
-        /** @internal */
-        this._nextPrevious = null;
-        /** @internal */
-        this._prev = null;
-        /** @internal */
-        this._next = null;
-        /** @internal */
-        this._prevDup = null;
-        /** @internal */
-        this._nextDup = null;
-        /** @internal */
-        this._prevRemoved = null;
-        /** @internal */
-        this._nextRemoved = null;
-        /** @internal */
-        this._nextAdded = null;
-        /** @internal */
-        this._nextMoved = null;
-        /** @internal */
-        this._nextIdentityChange = null;
-    }
-}
-// A linked list of IterableChangeRecords with the same IterableChangeRecord_.item
-class _DuplicateItemRecordList {
-    constructor() {
-        /** @internal */
-        this._head = null;
-        /** @internal */
-        this._tail = null;
-    }
-    /**
-     * Append the record to the list of duplicates.
-     *
-     * Note: by design all records in the list of duplicates hold the same value in record.item.
-     */
-    add(record) {
-        if (this._head === null) {
-            this._head = this._tail = record;
-            record._nextDup = null;
-            record._prevDup = null;
-        }
-        else {
-            // TODO(vicb):
-            // assert(record.item ==  _head.item ||
-            //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
-            this._tail._nextDup = record;
-            record._prevDup = this._tail;
-            record._nextDup = null;
-            this._tail = record;
-        }
-    }
-    // Returns a IterableChangeRecord_ having IterableChangeRecord_.trackById == trackById and
-    // IterableChangeRecord_.currentIndex >= atOrAfterIndex
-    get(trackById, atOrAfterIndex) {
-        let record;
-        for (record = this._head; record !== null; record = record._nextDup) {
-            if ((atOrAfterIndex === null || atOrAfterIndex <= record.currentIndex) &&
-                Object.is(record.trackById, trackById)) {
-                return record;
-            }
-        }
-        return null;
-    }
-    /**
-     * Remove one {@link IterableChangeRecord_} from the list of duplicates.
-     *
-     * Returns whether the list of duplicates is empty.
-     */
-    remove(record) {
-        // TODO(vicb):
-        // assert(() {
-        //  // verify that the record being removed is in the list.
-        //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
-        //    if (identical(cursor, record)) return true;
-        //  }
-        //  return false;
-        //});
-        const prev = record._prevDup;
-        const next = record._nextDup;
-        if (prev === null) {
-            this._head = next;
-        }
-        else {
-            prev._nextDup = next;
-        }
-        if (next === null) {
-            this._tail = prev;
-        }
-        else {
-            next._prevDup = prev;
-        }
-        return this._head === null;
-    }
-}
-class _DuplicateMap {
-    constructor() {
-        this.map = new Map();
-    }
-    put(record) {
-        const key = record.trackById;
-        let duplicates = this.map.get(key);
-        if (!duplicates) {
-            duplicates = new _DuplicateItemRecordList();
-            this.map.set(key, duplicates);
-        }
-        duplicates.add(record);
-    }
-    /**
-     * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
-     * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
-     *
-     * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
-     * have any more `a`s needs to return the second `a`.
-     */
-    get(trackById, atOrAfterIndex) {
-        const key = trackById;
-        const recordList = this.map.get(key);
-        return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
-    }
-    /**
-     * Removes a {@link IterableChangeRecord_} from the list of duplicates.
-     *
-     * The list of duplicates also is removed from the map if it gets empty.
-     */
-    remove(record) {
-        const key = record.trackById;
-        const recordList = this.map.get(key);
-        // Remove the list of duplicates when it gets empty
-        if (recordList.remove(record)) {
-            this.map.delete(key);
-        }
-        return record;
-    }
-    get isEmpty() {
-        return this.map.size === 0;
-    }
-    clear() {
-        this.map.clear();
-    }
-}
-function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
-    const previousIndex = item.previousIndex;
-    if (previousIndex === null)
-        return previousIndex;
-    let moveOffset = 0;
-    if (moveOffsets && previousIndex < moveOffsets.length) {
-        moveOffset = moveOffsets[previousIndex];
-    }
-    return previousIndex + addRemoveOffset + moveOffset;
-}
-
-class DefaultKeyValueDifferFactory {
-    constructor() { }
-    supports(obj) {
-        return obj instanceof Map || isJsObject(obj);
-    }
-    create() {
-        return new DefaultKeyValueDiffer();
-    }
-}
-class DefaultKeyValueDiffer {
-    constructor() {
-        this._records = new Map();
-        this._mapHead = null;
-        // _appendAfter is used in the check loop
-        this._appendAfter = null;
-        this._previousMapHead = null;
-        this._changesHead = null;
-        this._changesTail = null;
-        this._additionsHead = null;
-        this._additionsTail = null;
-        this._removalsHead = null;
-        this._removalsTail = null;
-    }
-    get isDirty() {
-        return this._additionsHead !== null || this._changesHead !== null ||
-            this._removalsHead !== null;
-    }
-    forEachItem(fn) {
-        let record;
-        for (record = this._mapHead; record !== null; record = record._next) {
-            fn(record);
-        }
-    }
-    forEachPreviousItem(fn) {
-        let record;
-        for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
-            fn(record);
-        }
-    }
-    forEachChangedItem(fn) {
-        let record;
-        for (record = this._changesHead; record !== null; record = record._nextChanged) {
-            fn(record);
-        }
-    }
-    forEachAddedItem(fn) {
-        let record;
-        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-            fn(record);
-        }
-    }
-    forEachRemovedItem(fn) {
-        let record;
-        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-            fn(record);
-        }
-    }
-    diff(map) {
-        if (!map) {
-            map = new Map();
-        }
-        else if (!(map instanceof Map || isJsObject(map))) {
-            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
-                `Error trying to diff '${stringify(map)}'. Only maps and objects are allowed`);
-        }
-        return this.check(map) ? this : null;
-    }
-    onDestroy() { }
-    /**
-     * Check the current state of the map vs the previous.
-     * The algorithm is optimised for when the keys do no change.
-     */
-    check(map) {
-        this._reset();
-        let insertBefore = this._mapHead;
-        this._appendAfter = null;
-        this._forEach(map, (value, key) => {
-            if (insertBefore && insertBefore.key === key) {
-                this._maybeAddToChanges(insertBefore, value);
-                this._appendAfter = insertBefore;
-                insertBefore = insertBefore._next;
-            }
-            else {
-                const record = this._getOrCreateRecordForKey(key, value);
-                insertBefore = this._insertBeforeOrAppend(insertBefore, record);
-            }
-        });
-        // Items remaining at the end of the list have been deleted
-        if (insertBefore) {
-            if (insertBefore._prev) {
-                insertBefore._prev._next = null;
-            }
-            this._removalsHead = insertBefore;
-            for (let record = insertBefore; record !== null; record = record._nextRemoved) {
-                if (record === this._mapHead) {
-                    this._mapHead = null;
-                }
-                this._records.delete(record.key);
-                record._nextRemoved = record._next;
-                record.previousValue = record.currentValue;
-                record.currentValue = null;
-                record._prev = null;
-                record._next = null;
-            }
-        }
-        // Make sure tails have no next records from previous runs
-        if (this._changesTail)
-            this._changesTail._nextChanged = null;
-        if (this._additionsTail)
-            this._additionsTail._nextAdded = null;
-        return this.isDirty;
-    }
-    /**
-     * Inserts a record before `before` or append at the end of the list when `before` is null.
-     *
-     * Notes:
-     * - This method appends at `this._appendAfter`,
-     * - This method updates `this._appendAfter`,
-     * - The return value is the new value for the insertion pointer.
-     */
-    _insertBeforeOrAppend(before, record) {
-        if (before) {
-            const prev = before._prev;
-            record._next = before;
-            record._prev = prev;
-            before._prev = record;
-            if (prev) {
-                prev._next = record;
-            }
-            if (before === this._mapHead) {
-                this._mapHead = record;
-            }
-            this._appendAfter = before;
-            return before;
-        }
-        if (this._appendAfter) {
-            this._appendAfter._next = record;
-            record._prev = this._appendAfter;
-        }
-        else {
-            this._mapHead = record;
-        }
-        this._appendAfter = record;
-        return null;
-    }
-    _getOrCreateRecordForKey(key, value) {
-        if (this._records.has(key)) {
-            const record = this._records.get(key);
-            this._maybeAddToChanges(record, value);
-            const prev = record._prev;
-            const next = record._next;
-            if (prev) {
-                prev._next = next;
-            }
-            if (next) {
-                next._prev = prev;
-            }
-            record._next = null;
-            record._prev = null;
-            return record;
-        }
-        const record = new KeyValueChangeRecord_(key);
-        this._records.set(key, record);
-        record.currentValue = value;
-        this._addToAdditions(record);
-        return record;
-    }
-    /** @internal */
-    _reset() {
-        if (this.isDirty) {
-            let record;
-            // let `_previousMapHead` contain the state of the map before the changes
-            this._previousMapHead = this._mapHead;
-            for (record = this._previousMapHead; record !== null; record = record._next) {
-                record._nextPrevious = record._next;
-            }
-            // Update `record.previousValue` with the value of the item before the changes
-            // We need to update all changed items (that's those which have been added and changed)
-            for (record = this._changesHead; record !== null; record = record._nextChanged) {
-                record.previousValue = record.currentValue;
-            }
-            for (record = this._additionsHead; record != null; record = record._nextAdded) {
-                record.previousValue = record.currentValue;
-            }
-            this._changesHead = this._changesTail = null;
-            this._additionsHead = this._additionsTail = null;
-            this._removalsHead = null;
-        }
-    }
-    // Add the record or a given key to the list of changes only when the value has actually changed
-    _maybeAddToChanges(record, newValue) {
-        if (!Object.is(newValue, record.currentValue)) {
-            record.previousValue = record.currentValue;
-            record.currentValue = newValue;
-            this._addToChanges(record);
-        }
-    }
-    _addToAdditions(record) {
-        if (this._additionsHead === null) {
-            this._additionsHead = this._additionsTail = record;
-        }
-        else {
-            this._additionsTail._nextAdded = record;
-            this._additionsTail = record;
-        }
-    }
-    _addToChanges(record) {
-        if (this._changesHead === null) {
-            this._changesHead = this._changesTail = record;
-        }
-        else {
-            this._changesTail._nextChanged = record;
-            this._changesTail = record;
-        }
-    }
-    /** @internal */
-    _forEach(obj, fn) {
-        if (obj instanceof Map) {
-            obj.forEach(fn);
-        }
-        else {
-            Object.keys(obj).forEach(k => fn(obj[k], k));
-        }
-    }
-}
-class KeyValueChangeRecord_ {
-    constructor(key) {
-        this.key = key;
-        this.previousValue = null;
-        this.currentValue = null;
-        /** @internal */
-        this._nextPrevious = null;
-        /** @internal */
-        this._next = null;
-        /** @internal */
-        this._prev = null;
-        /** @internal */
-        this._nextAdded = null;
-        /** @internal */
-        this._nextRemoved = null;
-        /** @internal */
-        this._nextChanged = null;
-    }
-}
-
-function defaultIterableDiffersFactory() {
-    return new IterableDiffers([new DefaultIterableDifferFactory()]);
-}
-/**
- * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- *
- * @publicApi
- */
-class IterableDiffers {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({ token: IterableDiffers, providedIn: 'root', factory: defaultIterableDiffersFactory }); }
-    constructor(factories) {
-        this.factories = factories;
-    }
-    static create(factories, parent) {
-        if (parent != null) {
-            const copied = parent.factories.slice();
-            factories = factories.concat(copied);
-        }
-        return new IterableDiffers(factories);
-    }
-    /**
-     * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
-     * inherited {@link IterableDiffers} instance with the provided factories and return a new
-     * {@link IterableDiffers} instance.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example shows how to extend an existing list of factories,
-     * which will only be applied to the injector for this component and its children.
-     * This step is all that's required to make a new {@link IterableDiffer} available.
-     *
-     * ```
-     * @Component({
-     *   viewProviders: [
-     *     IterableDiffers.extend([new ImmutableListDiffer()])
-     *   ]
-     * })
-     * ```
-     */
-    static extend(factories) {
-        return {
-            provide: IterableDiffers,
-            useFactory: (parent) => {
-                // if parent is null, it means that we are in the root injector and we have just overridden
-                // the default injection mechanism for IterableDiffers, in such a case just assume
-                // `defaultIterableDiffersFactory`.
-                return IterableDiffers.create(factories, parent || defaultIterableDiffersFactory());
-            },
-            // Dependency technically isn't optional, but we can provide a better error message this way.
-            deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
-        };
-    }
-    find(iterable) {
-        const factory = this.factories.find(f => f.supports(iterable));
-        if (factory != null) {
-            return factory;
-        }
-        else {
-            throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode &&
-                `Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
-        }
-    }
-}
-function getTypeNameForDebugging(type) {
-    return type['name'] || typeof type;
-}
-
-function defaultKeyValueDiffersFactory() {
-    return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]);
-}
-/**
- * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
- *
- * @publicApi
- */
-class KeyValueDiffers {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({ token: KeyValueDiffers, providedIn: 'root', factory: defaultKeyValueDiffersFactory }); }
-    constructor(factories) {
-        this.factories = factories;
-    }
-    static create(factories, parent) {
-        if (parent) {
-            const copied = parent.factories.slice();
-            factories = factories.concat(copied);
-        }
-        return new KeyValueDiffers(factories);
-    }
-    /**
-     * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
-     * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
-     * {@link KeyValueDiffers} instance.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example shows how to extend an existing list of factories,
-     * which will only be applied to the injector for this component and its children.
-     * This step is all that's required to make a new {@link KeyValueDiffer} available.
-     *
-     * ```
-     * @Component({
-     *   viewProviders: [
-     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
-     *   ]
-     * })
-     * ```
-     */
-    static extend(factories) {
-        return {
-            provide: KeyValueDiffers,
-            useFactory: (parent) => {
-                // if parent is null, it means that we are in the root injector and we have just overridden
-                // the default injection mechanism for KeyValueDiffers, in such a case just assume
-                // `defaultKeyValueDiffersFactory`.
-                return KeyValueDiffers.create(factories, parent || defaultKeyValueDiffersFactory());
-            },
-            // Dependency technically isn't optional, but we can provide a better error message this way.
-            deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
-        };
-    }
-    find(kv) {
-        const factory = this.factories.find(f => f.supports(kv));
-        if (factory) {
-            return factory;
-        }
-        throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode && `Cannot find a differ supporting object '${kv}'`);
-    }
-}
-
-/**
- * Structural diffing for `Object`s and `Map`s.
- */
-const keyValDiff = [new DefaultKeyValueDifferFactory()];
-/**
- * Structural diffing for `Iterable` types such as `Array`s.
- */
-const iterableDiff = [new DefaultIterableDifferFactory()];
-const defaultIterableDiffers = new IterableDiffers(iterableDiff);
-const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
-
-/**
- * @module
- * @description
- * Change detection enables data binding in Angular.
- */
 
 /**
  * This platform has to be included in any other platform

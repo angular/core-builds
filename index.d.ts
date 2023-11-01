@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.1+sha-935c181
+ * @license Angular v17.0.0-rc.1+sha-ddef3ac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3388,6 +3388,8 @@ export declare interface EffectRef {
     destroy(): void;
 }
 
+declare const EFFECTS_TO_SCHEDULE = 22;
+
 /**
  * Keys within serialized view data structure to represent various
  * parts. See the `SerializedView` interface below for additional information.
@@ -6098,6 +6100,10 @@ declare interface LView<T = unknown> extends Array<any> {
      * precedence over the element and module injectors.
      */
     readonly [EMBEDDED_VIEW_INJECTOR]: Injector | null;
+    /**
+     * Effect scheduling operations that need to run during this views's update pass.
+     */
+    [EFFECTS_TO_SCHEDULE]: Array<() => void> | null;
     /**
      * A collection of callbacks functions that are executed when a given LView is destroyed. Those
      * are user defined, LView-specific destroy callbacks that don't have any corresponding TView
