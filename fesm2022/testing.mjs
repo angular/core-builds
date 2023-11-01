@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-de802f0
+ * @license Angular v17.1.0-next.0+sha-ee9605f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -225,6 +225,9 @@ class ComponentFixture {
             // Running without zone. Just do the change detection.
             this._tick(checkNoChanges);
         }
+        // Run any effects that were created/dirtied during change detection. Such effects might become
+        // dirty in response to input signals changing.
+        this.effectRunner?.flush();
     }
     /**
      * Do a change detection run to make sure there were no changes.
