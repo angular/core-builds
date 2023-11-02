@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.1+sha-0d88e25
+ * @license Angular v17.0.0-rc.1+sha-32f417f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -560,5 +560,5 @@ function setAlternateWeakRefImpl(impl) {
     // TODO: remove this function
 }
 
-export { REACTIVE_NODE, SIGNAL, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, createComputed, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalMutateFn, signalSetFn, signalUpdateFn };
+export { REACTIVE_NODE, SIGNAL, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerPollProducersForChange, createComputed, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalMutateFn, signalSetFn, signalUpdateFn };
 //# sourceMappingURL=signals.mjs.map
