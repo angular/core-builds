@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-181dc7e
+ * @license Angular v17.1.0-next.0+sha-1f528f1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2132,6 +2132,8 @@ export declare interface CreateComputedOptions<T> {
 
 /**
  * Options passed to the `effect` function.
+ *
+ * @developerPreview
  */
 export declare interface CreateEffectOptions {
     /**
@@ -3363,6 +3365,8 @@ export declare interface DoCheck {
 
 /**
  * Create a global `Effect` for the given reactive function.
+ *
+ * @developerPreview
  */
 export declare function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, options?: CreateEffectOptions): EffectRef;
 
@@ -3370,16 +3374,22 @@ export declare function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) =>
  * An effect can, optionally, register a cleanup function. If registered, the cleanup is executed
  * before the next effect run. The cleanup function makes it possible to "cancel" any work that the
  * previous effect run might have started.
+ *
+ * @developerPreview
  */
 export declare type EffectCleanupFn = () => void;
 
 /**
  * A callback passed to the effect function that makes it possible to register cleanup logic.
+ *
+ * @developerPreview
  */
-declare type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
+export declare type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
 
 /**
  * A global reactive effect, which can be manually destroyed.
+ *
+ * @developerPreview
  */
 export declare interface EffectRef {
     /**
