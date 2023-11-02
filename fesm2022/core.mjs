@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-a6b8752
+ * @license Angular v17.1.0-next.0+sha-664099b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10445,7 +10445,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-a6b8752');
+const VERSION = new Version('17.1.0-next.0+sha-664099b');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11687,6 +11687,11 @@ function collectNativeNodesInLContainer(lContainer, result) {
         result.push(lContainer[NATIVE]);
     }
 }
+
+/**
+ * Whether we should skip specific logic in checkNoChanges mode.
+ */
+const RUN_IN_CHECK_NO_CHANGES_ANYWAY = false;
 
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 function wrappedError(message, originalError) {
@@ -13627,7 +13632,7 @@ function detectChangesInView(lView, mode) {
             // it gives an opportunity for `OnPush` components to be marked `Dirty` before the
             // CheckNoChanges pass. We don't want existing errors that are hidden by the current
             // CheckNoChanges bug to surface when making unrelated changes.
-            !isInCheckNoChangesPass) ||
+            (!isInCheckNoChangesPass || RUN_IN_CHECK_NO_CHANGES_ANYWAY)) ||
         flags & 1024 /* LViewFlags.RefreshView */) {
         refreshView(tView, lView, tView.template, lView[CONTEXT]);
     }
