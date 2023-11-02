@@ -6989,22 +6989,21 @@ var OpKind;
   OpKind2[OpKind2["Attribute"] = 24] = "Attribute";
   OpKind2[OpKind2["ExtractedAttribute"] = 25] = "ExtractedAttribute";
   OpKind2[OpKind2["Defer"] = 26] = "Defer";
-  OpKind2[OpKind2["DeferSecondaryBlock"] = 27] = "DeferSecondaryBlock";
-  OpKind2[OpKind2["DeferOn"] = 28] = "DeferOn";
-  OpKind2[OpKind2["ExtractedMessage"] = 29] = "ExtractedMessage";
-  OpKind2[OpKind2["HostProperty"] = 30] = "HostProperty";
-  OpKind2[OpKind2["Namespace"] = 31] = "Namespace";
-  OpKind2[OpKind2["ProjectionDef"] = 32] = "ProjectionDef";
-  OpKind2[OpKind2["Projection"] = 33] = "Projection";
-  OpKind2[OpKind2["RepeaterCreate"] = 34] = "RepeaterCreate";
-  OpKind2[OpKind2["Repeater"] = 35] = "Repeater";
-  OpKind2[OpKind2["I18nStart"] = 36] = "I18nStart";
-  OpKind2[OpKind2["I18n"] = 37] = "I18n";
-  OpKind2[OpKind2["I18nEnd"] = 38] = "I18nEnd";
-  OpKind2[OpKind2["I18nExpression"] = 39] = "I18nExpression";
-  OpKind2[OpKind2["I18nApply"] = 40] = "I18nApply";
-  OpKind2[OpKind2["Icu"] = 41] = "Icu";
-  OpKind2[OpKind2["IcuUpdate"] = 42] = "IcuUpdate";
+  OpKind2[OpKind2["DeferOn"] = 27] = "DeferOn";
+  OpKind2[OpKind2["ExtractedMessage"] = 28] = "ExtractedMessage";
+  OpKind2[OpKind2["HostProperty"] = 29] = "HostProperty";
+  OpKind2[OpKind2["Namespace"] = 30] = "Namespace";
+  OpKind2[OpKind2["ProjectionDef"] = 31] = "ProjectionDef";
+  OpKind2[OpKind2["Projection"] = 32] = "Projection";
+  OpKind2[OpKind2["RepeaterCreate"] = 33] = "RepeaterCreate";
+  OpKind2[OpKind2["Repeater"] = 34] = "Repeater";
+  OpKind2[OpKind2["I18nStart"] = 35] = "I18nStart";
+  OpKind2[OpKind2["I18n"] = 36] = "I18n";
+  OpKind2[OpKind2["I18nEnd"] = 37] = "I18nEnd";
+  OpKind2[OpKind2["I18nExpression"] = 38] = "I18nExpression";
+  OpKind2[OpKind2["I18nApply"] = 39] = "I18nApply";
+  OpKind2[OpKind2["Icu"] = 40] = "Icu";
+  OpKind2[OpKind2["IcuUpdate"] = 41] = "IcuUpdate";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -7104,6 +7103,13 @@ var DeferTriggerKind;
   DeferTriggerKind2[DeferTriggerKind2["Interaction"] = 4] = "Interaction";
   DeferTriggerKind2[DeferTriggerKind2["Viewport"] = 5] = "Viewport";
 })(DeferTriggerKind || (DeferTriggerKind = {}));
+var DerivedRepeaterVarIdentity;
+(function(DerivedRepeaterVarIdentity2) {
+  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["First"] = 0] = "First";
+  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Last"] = 1] = "Last";
+  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Even"] = 2] = "Even";
+  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Odd"] = 3] = "Odd";
+})(DerivedRepeaterVarIdentity || (DerivedRepeaterVarIdentity = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/traits.mjs
 var ConsumesSlot = Symbol("ConsumesSlot");
@@ -7906,13 +7912,6 @@ var ConditionalCaseExpr = class extends ExpressionBase {
     }
   }
 };
-var DerivedRepeaterVarIdentity;
-(function(DerivedRepeaterVarIdentity2) {
-  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["First"] = 0] = "First";
-  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Last"] = 1] = "Last";
-  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Even"] = 2] = "Even";
-  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Odd"] = 3] = "Odd";
-})(DerivedRepeaterVarIdentity || (DerivedRepeaterVarIdentity = {}));
 var DerivedRepeaterVarExpr = class extends ExpressionBase {
   constructor(xref, identity) {
     super();
@@ -8368,7 +8367,7 @@ function createElementStartOp(tag, xref, namespace, i18nPlaceholder, sourceSpan)
     kind: OpKind.ElementStart,
     xref,
     tag,
-    slot: new SlotHandle(),
+    handle: new SlotHandle(),
     attributes: null,
     localRefs: [],
     nonBindable: false,
@@ -8383,7 +8382,7 @@ function createTemplateOp(xref, tag, functionNameSuffix, namespace, i18nPlacehol
     xref,
     attributes: null,
     tag,
-    slot: new SlotHandle(),
+    handle: new SlotHandle(),
     functionNameSuffix,
     decls: null,
     vars: null,
@@ -8399,7 +8398,7 @@ function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, so
     kind: OpKind.RepeaterCreate,
     attributes: null,
     xref: primaryView,
-    slot: new SlotHandle(),
+    handle: new SlotHandle(),
     emptyView,
     track,
     trackByFn: null,
@@ -8440,7 +8439,7 @@ function createTextOp(xref, initialValue, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Text,
     xref,
-    slot: new SlotHandle(),
+    handle: new SlotHandle(),
     initialValue,
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
@@ -8465,7 +8464,7 @@ function createPipeOp(xref, slot, name) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Pipe,
     xref,
-    slot,
+    handle: slot,
     name
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
@@ -8485,7 +8484,7 @@ function createProjectionOp(xref, selector, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Projection,
     xref,
-    slot: new SlotHandle(),
+    handle: new SlotHandle(),
     selector,
     projectionSlotIndex: 0,
     attributes: [],
@@ -8506,7 +8505,7 @@ function createDeferOp(xref, main, mainSlot, sourceSpan) {
   return __spreadProps(__spreadValues(__spreadValues({
     kind: OpKind.Defer,
     xref,
-    slot: new SlotHandle(),
+    handle: new SlotHandle(),
     mainView: main,
     mainSlot,
     loadingView: null,
@@ -8551,7 +8550,7 @@ function createI18nStartOp(xref, message, root) {
   return __spreadValues(__spreadValues({
     kind: OpKind.I18nStart,
     xref,
-    slot: new SlotHandle(),
+    handle: new SlotHandle(),
     root: root != null ? root : xref,
     message,
     messageIndex: null,
@@ -8694,7 +8693,7 @@ var HostBindingCompilationUnit = class extends CompilationUnit {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/any_cast.mjs
-function phaseFindAnyCasts(job) {
+function deleteAnyCasts(job) {
   for (const unit of job.units) {
     for (const op of unit.ops()) {
       transformExpressionsInOp(op, removeAnys, VisitorContextFlag.None);
@@ -8712,7 +8711,7 @@ function removeAnys(e) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/apply_i18n_expressions.mjs
-function phaseApplyI18nExpressions(job) {
+function applyI18nExpressions(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression && needsApplication(op)) {
@@ -8733,7 +8732,7 @@ function needsApplication(op) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/assign_i18n_slot_dependencies.mjs
-function phaseAssignI18nSlotDependencies(job) {
+function assignI18nSlotDependencies(job) {
   const i18nLastSlotConsumers = /* @__PURE__ */ new Map();
   let lastSlotConsumer = null;
   for (const unit of job.units) {
@@ -8766,7 +8765,7 @@ function createOpXrefMap(unit) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/attribute_extraction.mjs
-function phaseAttributeExtraction(job) {
+function extractAttributes(job) {
   for (const unit of job.units) {
     const elements = createOpXrefMap(unit);
     for (const op of unit.ops()) {
@@ -8840,7 +8839,7 @@ function lookupElement2(elements, xref) {
   }
   return el;
 }
-function phaseBindingSpecialization(job) {
+function specializeBindings(job) {
   const elements = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
@@ -8911,35 +8910,35 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.syntheticHostProperty,
   Identifiers.templateCreate
 ]);
-function phaseChaining(job) {
+function chain(job) {
   for (const unit of job.units) {
     chainOperationsInList(unit.create);
     chainOperationsInList(unit.update);
   }
 }
 function chainOperationsInList(opList) {
-  let chain = null;
+  let chain2 = null;
   for (const op of opList) {
     if (op.kind !== OpKind.Statement || !(op.statement instanceof ExpressionStatement)) {
-      chain = null;
+      chain2 = null;
       continue;
     }
     if (!(op.statement.expr instanceof InvokeFunctionExpr) || !(op.statement.expr.fn instanceof ExternalExpr)) {
-      chain = null;
+      chain2 = null;
       continue;
     }
     const instruction = op.statement.expr.fn.value;
     if (!CHAINABLE.has(instruction)) {
-      chain = null;
+      chain2 = null;
       continue;
     }
-    if (chain !== null && chain.instruction === instruction) {
-      const expression = chain.expression.callFn(op.statement.expr.args, op.statement.expr.sourceSpan, op.statement.expr.pure);
-      chain.expression = expression;
-      chain.op.statement = expression.toStmt();
+    if (chain2 !== null && chain2.instruction === instruction) {
+      const expression = chain2.expression.callFn(op.statement.expr.args, op.statement.expr.sourceSpan, op.statement.expr.pure);
+      chain2.expression = expression;
+      chain2.op.statement = expression.toStmt();
       OpList.remove(op);
     } else {
-      chain = {
+      chain2 = {
         op,
         instruction,
         expression: op.statement.expr
@@ -8949,7 +8948,7 @@ function chainOperationsInList(opList) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/collapse_singleton_interpolations.mjs
-function phaseCollapseSingletonInterpolations(job) {
+function collapseSingletonInterpolations(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       const eligibleOpKind = op.kind === OpKind.Attribute;
@@ -8961,7 +8960,7 @@ function phaseCollapseSingletonInterpolations(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/conditionals.mjs
-function phaseConditionals(job) {
+function generateConditionalExpressions(job) {
   for (const unit of job.units) {
     for (const op of unit.ops()) {
       if (op.kind !== OpKind.Conditional) {
@@ -9081,7 +9080,7 @@ function literalOrArrayLiteral(value) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/const_collection.mjs
-function phaseConstCollection(job) {
+function collectElementConsts(job) {
   const allElementAttributes = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
@@ -9214,6 +9213,101 @@ function serializeAttributes({ attributes, bindings, classes, i18n: i18n2, proje
   return literalArr(attrArray);
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/defer_configs.mjs
+function configureDeferInstructions(job) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind !== OpKind.Defer) {
+        continue;
+      }
+      if (op.placeholderMinimumTime !== null) {
+        op.placeholderConfig = new ConstCollectedExpr(literalOrArrayLiteral([op.placeholderMinimumTime]));
+      }
+      if (op.loadingMinimumTime !== null || op.loadingAfterTime !== null) {
+        op.loadingConfig = new ConstCollectedExpr(literalOrArrayLiteral([op.loadingMinimumTime, op.loadingAfterTime]));
+      }
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/defer_resolve_targets.mjs
+function resolveDeferTargetNames(job) {
+  const scopes = /* @__PURE__ */ new Map();
+  function getScopeForView2(view) {
+    if (scopes.has(view.xref)) {
+      return scopes.get(view.xref);
+    }
+    const scope = new Scope();
+    for (const op of view.create) {
+      if (!isElementOrContainerOp(op) || op.localRefs === null) {
+        continue;
+      }
+      if (!Array.isArray(op.localRefs)) {
+        throw new Error("LocalRefs were already processed, but were needed to resolve defer targets.");
+      }
+      for (const ref of op.localRefs) {
+        if (ref.target !== "") {
+          continue;
+        }
+        scope.targets.set(ref.name, { xref: op.xref, slot: op.handle });
+      }
+    }
+    scopes.set(view.xref, scope);
+    return scope;
+  }
+  function resolveTrigger(deferOwnerView, op, placeholderView) {
+    switch (op.trigger.kind) {
+      case DeferTriggerKind.Idle:
+      case DeferTriggerKind.Immediate:
+      case DeferTriggerKind.Timer:
+        return;
+      case DeferTriggerKind.Hover:
+      case DeferTriggerKind.Interaction:
+      case DeferTriggerKind.Viewport:
+        if (op.trigger.targetName === null) {
+          return;
+        }
+        let view = placeholderView !== null ? job.views.get(placeholderView) : deferOwnerView;
+        let step = placeholderView !== null ? -1 : 0;
+        while (view !== null) {
+          const scope = getScopeForView2(view);
+          if (scope.targets.has(op.trigger.targetName)) {
+            const { xref, slot } = scope.targets.get(op.trigger.targetName);
+            op.trigger.targetXref = xref;
+            op.trigger.targetView = view.xref;
+            op.trigger.targetSlotViewSteps = step;
+            op.trigger.targetSlot = slot;
+            return;
+          }
+          view = view.parent !== null ? job.views.get(view.parent) : null;
+          step++;
+        }
+        break;
+      default:
+        throw new Error(`Trigger kind ${op.trigger.kind} not handled`);
+    }
+  }
+  for (const unit of job.units) {
+    const defers = /* @__PURE__ */ new Map();
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.Defer:
+          defers.set(op.xref, op);
+          break;
+        case OpKind.DeferOn:
+          const deferOp = defers.get(op.defer);
+          resolveTrigger(unit, op, deferOp.placeholderView);
+          break;
+      }
+    }
+  }
+}
+var Scope = class {
+  constructor() {
+    this.targets = /* @__PURE__ */ new Map();
+  }
+};
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/empty_elements.mjs
 var REPLACEMENTS = /* @__PURE__ */ new Map([
   [OpKind.ElementEnd, [OpKind.ElementStart, OpKind.Element]],
@@ -9221,7 +9315,7 @@ var REPLACEMENTS = /* @__PURE__ */ new Map([
   [OpKind.I18nEnd, [OpKind.I18nStart, OpKind.I18n]]
 ]);
 var IGNORED_OP_KINDS = /* @__PURE__ */ new Set([OpKind.Pipe]);
-function phaseEmptyElements(job) {
+function collapseEmptyInstructions(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       const opReplacements = REPLACEMENTS.get(op.kind);
@@ -9242,7 +9336,7 @@ function phaseEmptyElements(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/expand_safe_reads.mjs
-function phaseExpandSafeReads(job) {
+function expandSafeReads(job) {
   for (const unit of job.units) {
     for (const op of unit.ops()) {
       transformExpressionsInOp(op, (e) => safeTransform(e, { job }), VisitorContextFlag.None);
@@ -9386,7 +9480,7 @@ var CONTEXT_MARKER = ":";
 var LIST_START_MARKER = "[";
 var LIST_END_MARKER = "]";
 var LIST_DELIMITER = "|";
-function phaseFormatI18nParams(job) {
+function formatI18nParams(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.ExtractedMessage) {
@@ -9440,16 +9534,16 @@ function formatValue(value) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_advance.mjs
-function phaseGenerateAdvance(job) {
+function generateAdvance(job) {
   for (const unit of job.units) {
     const slotMap = /* @__PURE__ */ new Map();
     for (const op of unit.create) {
       if (!hasConsumesSlotTrait(op)) {
         continue;
-      } else if (op.slot.slot === null) {
+      } else if (op.handle.slot === null) {
         throw new Error(`AssertionError: expected slots to have been allocated before generating advance() calls`);
       }
-      slotMap.set(op.xref, op.slot.slot);
+      slotMap.set(op.xref, op.handle.slot);
     }
     let slotContext = 0;
     for (const op of unit.update) {
@@ -9472,7 +9566,7 @@ function phaseGenerateAdvance(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_projection_def.mjs
-function phaseGenerateProjectionDef(job) {
+function generateProjectionDefs(job) {
   const share = job.compatibility === CompatibilityMode.TemplateDefinitionBuilder;
   const selectors = [];
   let projectionSlotIndex = 0;
@@ -9496,7 +9590,7 @@ function phaseGenerateProjectionDef(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/generate_variables.mjs
-function phaseGenerateVariables(job) {
+function generateVariables(job) {
   recursivelyProcessView(job.root, null);
 }
 function recursivelyProcessView(view, parentScope) {
@@ -9546,7 +9640,7 @@ function getScopeForView(view, parent) {
           scope.references.push({
             name: op.localRefs[offset].name,
             targetId: op.xref,
-            targetSlot: op.slot,
+            targetSlot: op.handle,
             offset,
             variable: {
               kind: SemanticVariableKind.Identifier,
@@ -9584,7 +9678,7 @@ function generateVariablesInScopeForView(view, scope) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/has_const_expression_collection.mjs
-function phaseConstExpressionCollection(job) {
+function collectConstExpressions(job) {
   for (const unit of job.units) {
     for (const op of unit.ops()) {
       transformExpressionsInOp(op, (expr) => {
@@ -9603,7 +9697,7 @@ var CLASS_DOT = "class.";
 var STYLE_BANG = "style!";
 var CLASS_BANG = "class!";
 var BANG_IMPORTANT = "!important";
-function phaseHostStylePropertyParsing(job) {
+function parseHostStyleProperties(job) {
   for (const op of job.root.update) {
     if (op.kind !== OpKind.Binding) {
       continue;
@@ -15581,7 +15675,7 @@ function createEmptyMessagePart(location) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_const_collection.mjs
 var NG_I18N_CLOSURE_MODE = "ngI18nClosureMode";
 var TRANSLATION_VAR_PREFIX2 = "i18n_";
-function phaseI18nConstCollection(job) {
+function collectI18nConsts(job) {
   const fileBasedI18nSuffix = job.relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_").toUpperCase() + "_";
   const messageConstIndices = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
@@ -15658,7 +15752,7 @@ function assertAllParamsResolved(op) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_message_extraction.mjs
-function phaseI18nMessageExtraction(job) {
+function extractI18nMessages(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.I18nStart) {
@@ -15669,7 +15763,7 @@ function phaseI18nMessageExtraction(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_text_extraction.mjs
-function phaseI18nTextExtraction(job) {
+function extractI18nText(job) {
   var _a2;
   for (const unit of job.units) {
     let currentI18nId = null;
@@ -15679,7 +15773,7 @@ function phaseI18nTextExtraction(job) {
       switch (op.kind) {
         case OpKind.I18nStart:
           currentI18nId = op.xref;
-          currentI18nSlot = op.slot;
+          currentI18nSlot = op.handle;
           break;
         case OpKind.I18nEnd:
           currentI18nId = null;
@@ -15716,7 +15810,7 @@ function phaseI18nTextExtraction(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/icu_extraction.mjs
-function phaseIcuExtraction(job) {
+function extractI18nICUs(job) {
   for (const unit of job.units) {
     const icus = /* @__PURE__ */ new Map();
     let currentI18nId = null;
@@ -15725,7 +15819,7 @@ function phaseIcuExtraction(job) {
       switch (op.kind) {
         case OpKind.I18nStart:
           currentI18nId = op.xref;
-          currentI18nSlot = op.slot;
+          currentI18nSlot = op.handle;
           break;
         case OpKind.I18nEnd:
           currentI18nId = null;
@@ -15759,7 +15853,7 @@ function phaseIcuExtraction(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/local_refs.mjs
-function phaseLocalRefs(job) {
+function liftLocalRefs(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       switch (op.kind) {
@@ -15789,7 +15883,7 @@ function serializeLocalRefs(refs) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/namespace.mjs
-function phaseNamespace(job) {
+function emitNamespaceChanges(job) {
   for (const unit of job.units) {
     let activeNamespace = Namespace.HTML;
     for (const op of unit.create) {
@@ -15866,8 +15960,8 @@ function hyphenate2(value) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/naming.mjs
-function phaseNaming(cpl) {
-  addNamesToView(cpl.root, cpl.componentName, { index: 0 }, cpl.compatibility === CompatibilityMode.TemplateDefinitionBuilder);
+function nameFunctionsAndVariables(job) {
+  addNamesToView(job.root, job.componentName, { index: 0 }, job.compatibility === CompatibilityMode.TemplateDefinitionBuilder);
 }
 function addNamesToView(unit, baseName, state, compatibility) {
   if (unit.fnName === null) {
@@ -15908,25 +16002,25 @@ function addNamesToView(unit, baseName, state, compatibility) {
         if (!(unit instanceof ViewCompilationUnit)) {
           throw new Error(`AssertionError: must be compiling a component`);
         }
-        if (op.slot.slot === null) {
+        if (op.handle.slot === null) {
           throw new Error(`Expected slot to be assigned`);
         }
         if (op.emptyView !== null) {
           const emptyView = unit.job.views.get(op.emptyView);
-          addNamesToView(emptyView, `${baseName}_${`${op.functionNameSuffix}Empty`}_${op.slot.slot + 2}`, state, compatibility);
+          addNamesToView(emptyView, `${baseName}_${`${op.functionNameSuffix}Empty`}_${op.handle.slot + 2}`, state, compatibility);
         }
-        addNamesToView(unit.job.views.get(op.xref), `${baseName}_${op.functionNameSuffix}_${op.slot.slot + 1}`, state, compatibility);
+        addNamesToView(unit.job.views.get(op.xref), `${baseName}_${op.functionNameSuffix}_${op.handle.slot + 1}`, state, compatibility);
         break;
       case OpKind.Template:
         if (!(unit instanceof ViewCompilationUnit)) {
           throw new Error(`AssertionError: must be compiling a component`);
         }
         const childView = unit.job.views.get(op.xref);
-        if (op.slot.slot === null) {
+        if (op.handle.slot === null) {
           throw new Error(`Expected slot to be assigned`);
         }
         const suffix = op.functionNameSuffix.length === 0 ? "" : `_${op.functionNameSuffix}`;
-        addNamesToView(childView, `${baseName}${suffix}_${op.slot.slot}`, state, compatibility);
+        addNamesToView(childView, `${baseName}${suffix}_${op.handle.slot}`, state, compatibility);
         break;
       case OpKind.StyleProp:
         op.name = normalizeStylePropName(op.name);
@@ -15981,7 +16075,7 @@ function stripImportant(name) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/next_context_merging.mjs
-function phaseMergeNextContext(job) {
+function mergeNextContextExpressions(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.Listener) {
@@ -16028,7 +16122,7 @@ function mergeNextContextsInOps(ops) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/ng_container.mjs
 var CONTAINER_TAG = "ng-container";
-function phaseNgContainer(job) {
+function generateNgContainerOps(job) {
   for (const unit of job.units) {
     const updatedElementXrefs = /* @__PURE__ */ new Set();
     for (const op of unit.create) {
@@ -16051,7 +16145,7 @@ function lookupElement3(elements, xref) {
   }
   return el;
 }
-function phaseNonbindable(job) {
+function disableBindings(job) {
   const elements = /* @__PURE__ */ new Map();
   for (const view of job.units) {
     for (const op of view.create) {
@@ -16074,7 +16168,7 @@ function phaseNonbindable(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/nullish_coalescing.mjs
-function phaseNullishCoalescing(job) {
+function generateNullishCoalesceExpressions(job) {
   for (const unit of job.units) {
     for (const op of unit.ops()) {
       transformExpressionsInOp(op, (expr) => {
@@ -16124,7 +16218,7 @@ var handledOpKinds = /* @__PURE__ */ new Set([
   OpKind.HostProperty,
   OpKind.Attribute
 ]);
-function phaseOrdering(job) {
+function orderOps(job) {
   for (const unit of job.units) {
     orderWithin(unit.create, CREATE_ORDERING);
     orderWithin(unit.update, UPDATE_ORDERING);
@@ -16164,8 +16258,8 @@ function keepLast(ops) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/parse_extracted_styles.mjs
-function phaseParseExtractedStyles(cpl) {
-  for (const unit of cpl.units) {
+function parseExtractedStyles(job) {
+  for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.ExtractedAttribute && op.bindingKind === BindingKind.Attribute && isStringLiteral(op.expression)) {
         if (op.name === "style") {
@@ -16187,7 +16281,7 @@ function phaseParseExtractedStyles(cpl) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/phase_remove_content_selectors.mjs
-function phaseRemoveContentSelectors(job) {
+function removeContentSelectors(job) {
   for (const unit of job.units) {
     const elements = createOpXrefMap(unit);
     for (const op of unit.update) {
@@ -16211,7 +16305,7 @@ function lookupInXrefMap(map, xref) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_creation.mjs
-function phasePipeCreation(job) {
+function createPipes(job) {
   for (const unit of job.units) {
     processPipeBindingsInView(unit);
   }
@@ -16259,7 +16353,7 @@ function addPipeToCreationBlock(unit, afterTargetXref, binding) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pipe_variadic.mjs
-function phasePipeVariadic(job) {
+function createVariadicPipes(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       transformExpressionsInOp(op, (expr) => {
@@ -16276,7 +16370,7 @@ function phasePipeVariadic(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/propagate_i18n_blocks.mjs
-function phasePropagateI18nBlocks(job) {
+function propagateI18nBlocks(job) {
   propagateI18nBlocksToTemplates(job.root, 0);
 }
 function propagateI18nBlocksToTemplates(unit, subTemplateIndex) {
@@ -16313,7 +16407,7 @@ function wrapTemplateWithI18n(unit, parentI18n) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/propagate_i18n_placeholders.mjs
-function phasePropagateI18nPlaceholders(job) {
+function propogateI18nPlaceholders(job) {
   const i18nOps = /* @__PURE__ */ new Map();
   const extractedMessageOps = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
@@ -16356,7 +16450,7 @@ function mergeParams(to, from) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pure_function_extraction.mjs
-function phasePureFunctionExtraction(job) {
+function extractPureFunctions(job) {
   for (const view of job.units) {
     for (const op of view.ops()) {
       visitExpressionsInOp(op, (expr) => {
@@ -16398,9 +16492,9 @@ var PureFunctionConstant = class extends GenericKeyFn {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/pure_literal_structures.mjs
-function phasePureLiteralStructures(job) {
-  for (const view of job.units) {
-    for (const op of view.update) {
+function generatePureLiteralStructures(job) {
+  for (const unit of job.units) {
+    for (const op of unit.update) {
       transformExpressionsInOp(op, (expr, flags) => {
         if (flags & VisitorContextFlag.InChildOperation) {
           return expr;
@@ -16488,7 +16582,7 @@ function template(slot, templateFnRef, decls, vars, tag, constIndex, sourceSpan)
   }
   return call(Identifiers.templateCreate, args, sourceSpan);
 }
-function disableBindings() {
+function disableBindings2() {
   return call(Identifiers.disableBindings, [], null);
 }
 function enableBindings() {
@@ -16953,8 +17047,8 @@ var sanitizerIdentifierMap = /* @__PURE__ */ new Map([
   [SanitizerFn.Style, Identifiers.sanitizeStyle],
   [SanitizerFn.Url, Identifiers.sanitizeUrl]
 ]);
-function phaseReify(cpl) {
-  for (const unit of cpl.units) {
+function reify(job) {
+  for (const unit of job.units) {
     reifyCreateOperations(unit, unit.create);
     reifyUpdateOperations(unit, unit.update);
   }
@@ -16965,50 +17059,50 @@ function reifyCreateOperations(unit, ops) {
     transformExpressionsInOp(op, reifyIrExpression, VisitorContextFlag.None);
     switch (op.kind) {
       case OpKind.Text:
-        OpList.replace(op, text(op.slot.slot, op.initialValue, op.sourceSpan));
+        OpList.replace(op, text(op.handle.slot, op.initialValue, op.sourceSpan));
         break;
       case OpKind.ElementStart:
-        OpList.replace(op, elementStart(op.slot.slot, op.tag, op.attributes, op.localRefs, op.sourceSpan));
+        OpList.replace(op, elementStart(op.handle.slot, op.tag, op.attributes, op.localRefs, op.sourceSpan));
         break;
       case OpKind.Element:
-        OpList.replace(op, element(op.slot.slot, op.tag, op.attributes, op.localRefs, op.sourceSpan));
+        OpList.replace(op, element(op.handle.slot, op.tag, op.attributes, op.localRefs, op.sourceSpan));
         break;
       case OpKind.ElementEnd:
         OpList.replace(op, elementEnd(op.sourceSpan));
         break;
       case OpKind.ContainerStart:
-        OpList.replace(op, elementContainerStart(op.slot.slot, op.attributes, op.localRefs, op.sourceSpan));
+        OpList.replace(op, elementContainerStart(op.handle.slot, op.attributes, op.localRefs, op.sourceSpan));
         break;
       case OpKind.Container:
-        OpList.replace(op, elementContainer(op.slot.slot, op.attributes, op.localRefs, op.sourceSpan));
+        OpList.replace(op, elementContainer(op.handle.slot, op.attributes, op.localRefs, op.sourceSpan));
         break;
       case OpKind.ContainerEnd:
         OpList.replace(op, elementContainerEnd());
         break;
       case OpKind.I18nStart:
-        OpList.replace(op, i18nStart(op.slot.slot, op.messageIndex, op.subTemplateIndex));
+        OpList.replace(op, i18nStart(op.handle.slot, op.messageIndex, op.subTemplateIndex));
         break;
       case OpKind.I18nEnd:
         OpList.replace(op, i18nEnd());
         break;
       case OpKind.I18n:
-        OpList.replace(op, i18n(op.slot.slot, op.messageIndex, op.subTemplateIndex));
+        OpList.replace(op, i18n(op.handle.slot, op.messageIndex, op.subTemplateIndex));
         break;
       case OpKind.Template:
         if (!(unit instanceof ViewCompilationUnit)) {
           throw new Error(`AssertionError: must be compiling a component`);
         }
         const childView = unit.job.views.get(op.xref);
-        OpList.replace(op, template(op.slot.slot, variable(childView.fnName), childView.decls, childView.vars, op.tag, op.attributes, op.sourceSpan));
+        OpList.replace(op, template(op.handle.slot, variable(childView.fnName), childView.decls, childView.vars, op.tag, op.attributes, op.sourceSpan));
         break;
       case OpKind.DisableBindings:
-        OpList.replace(op, disableBindings());
+        OpList.replace(op, disableBindings2());
         break;
       case OpKind.EnableBindings:
         OpList.replace(op, enableBindings());
         break;
       case OpKind.Pipe:
-        OpList.replace(op, pipe(op.slot.slot, op.name));
+        OpList.replace(op, pipe(op.handle.slot, op.name));
         break;
       case OpKind.Listener:
         const listenerFn = reifyListenerHandler(unit, op.handlerFnName, op.handlerOps, op.consumesDollarEvent);
@@ -17036,7 +17130,7 @@ function reifyCreateOperations(unit, ops) {
         break;
       case OpKind.Defer:
         const timerScheduling = !!op.loadingMinimumTime || !!op.loadingAfterTime || !!op.placeholderMinimumTime;
-        OpList.replace(op, defer(op.slot.slot, op.mainSlot.slot, null, (_b2 = (_a2 = op.loadingSlot) == null ? void 0 : _a2.slot) != null ? _b2 : null, (_d2 = (_c2 = op.placeholderSlot) == null ? void 0 : _c2.slot) != null ? _d2 : null, (_f2 = (_e2 = op.errorSlot) == null ? void 0 : _e2.slot) != null ? _f2 : null, op.loadingConfig, op.placeholderConfig, timerScheduling, op.sourceSpan));
+        OpList.replace(op, defer(op.handle.slot, op.mainSlot.slot, null, (_b2 = (_a2 = op.loadingSlot) == null ? void 0 : _a2.slot) != null ? _b2 : null, (_d2 = (_c2 = op.placeholderSlot) == null ? void 0 : _c2.slot) != null ? _d2 : null, (_f2 = (_e2 = op.errorSlot) == null ? void 0 : _e2.slot) != null ? _f2 : null, op.loadingConfig, op.placeholderConfig, timerScheduling, op.sourceSpan));
         break;
       case OpKind.DeferOn:
         let args = [];
@@ -17067,13 +17161,13 @@ function reifyCreateOperations(unit, ops) {
         OpList.replace(op, projectionDef(op.def));
         break;
       case OpKind.Projection:
-        if (op.slot.slot === null) {
+        if (op.handle.slot === null) {
           throw new Error("No slot was assigned for project instruction");
         }
-        OpList.replace(op, projection(op.slot.slot, op.projectionSlotIndex, op.attributes, op.sourceSpan));
+        OpList.replace(op, projection(op.handle.slot, op.projectionSlotIndex, op.attributes, op.sourceSpan));
         break;
       case OpKind.RepeaterCreate:
-        if (op.slot.slot === null) {
+        if (op.handle.slot === null) {
           throw new Error("No slot was assigned for repeater instruction");
         }
         if (!(unit instanceof ViewCompilationUnit)) {
@@ -17098,7 +17192,7 @@ function reifyCreateOperations(unit, ops) {
           emptyDecls = emptyView.decls;
           emptyVars = emptyView.vars;
         }
-        OpList.replace(op, repeaterCreate(op.slot.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.sourceSpan));
+        OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.sourceSpan));
         break;
       case OpKind.Statement:
         break;
@@ -17268,7 +17362,7 @@ function reifyListenerHandler(unit, name, handlerOps, consumesDollarEvent) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/remove_empty_bindings.mjs
-function phaseRemoveEmptyBindings(job) {
+function removeEmptyBindings(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       switch (op.kind) {
@@ -17289,7 +17383,7 @@ function phaseRemoveEmptyBindings(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/repeater_derived_vars.mjs
-function phaseRepeaterDerivedVars(job) {
+function generateRepeaterDerivedVars(job) {
   const repeaters = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.ops()) {
@@ -17321,8 +17415,8 @@ function phaseRepeaterDerivedVars(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_contexts.mjs
-function phaseResolveContexts(cpl) {
-  for (const unit of cpl.units) {
+function resolveContexts(job) {
+  for (const unit of job.units) {
     processLexicalScope(unit, unit.create);
     processLexicalScope(unit, unit.update);
   }
@@ -17362,13 +17456,13 @@ function processLexicalScope(view, ops) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_dollar_event.mjs
-function phaseResolveDollarEvent(job) {
+function resolveDollarEvent(job) {
   for (const unit of job.units) {
-    resolveDollarEvent(unit, unit.create);
-    resolveDollarEvent(unit, unit.update);
+    transformDollarEvent(unit, unit.create);
+    transformDollarEvent(unit, unit.update);
   }
 }
-function resolveDollarEvent(unit, ops) {
+function transformDollarEvent(unit, ops) {
   for (const op of ops) {
     if (op.kind === OpKind.Listener) {
       transformExpressionsInOp(op, (expr) => {
@@ -17383,7 +17477,7 @@ function resolveDollarEvent(unit, ops) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_element_placeholders.mjs
-function phaseResolveI18nElementPlaceholders(job) {
+function resolveI18nElementPlaceholders(job) {
   const extractedMessageOps = /* @__PURE__ */ new Map();
   const elements = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
@@ -17421,7 +17515,7 @@ function phaseResolveI18nElementPlaceholders(job) {
             if (closeName === "") {
               flags |= I18nParamValueFlags.CloseTag;
             }
-            addParam(currentOps.extractedMessage.params, startName, op.slot.slot, currentOps.i18n.subTemplateIndex, flags);
+            addParam(currentOps.extractedMessage.params, startName, op.handle.slot, currentOps.i18n.subTemplateIndex, flags);
           }
           break;
         case OpKind.ElementEnd:
@@ -17432,7 +17526,7 @@ function phaseResolveI18nElementPlaceholders(job) {
             }
             const { closeName } = startOp.i18nPlaceholder;
             if (closeName !== "") {
-              addParam(currentOps.extractedMessage.params, closeName, startOp.slot.slot, currentOps.i18n.subTemplateIndex, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
+              addParam(currentOps.extractedMessage.params, closeName, startOp.handle.slot, currentOps.i18n.subTemplateIndex, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
             }
           }
           break;
@@ -17442,8 +17536,8 @@ function phaseResolveI18nElementPlaceholders(job) {
               throw Error("i18n tag placeholder should only occur inside an i18n block");
             }
             const subTemplateIndex = getSubTemplateIndexForTemplateTag(job, currentOps.i18n, op);
-            addParam(currentOps.extractedMessage.params, op.i18nPlaceholder.startName, op.slot.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag);
-            addParam(currentOps.extractedMessage.params, op.i18nPlaceholder.closeName, op.slot.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
+            addParam(currentOps.extractedMessage.params, op.i18nPlaceholder.startName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag);
+            addParam(currentOps.extractedMessage.params, op.i18nPlaceholder.closeName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
           }
           break;
       }
@@ -17466,7 +17560,7 @@ function addParam(params, placeholder, value, subTemplateIndex, flags = I18nPara
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_expression_placeholders.mjs
-function phaseResolveI18nExpressionPlaceholders(job) {
+function resolveI18nExpressionPlaceholders(job) {
   const i18nOps = /* @__PURE__ */ new Map();
   const extractedMessageOps = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
@@ -17509,8 +17603,8 @@ function phaseResolveI18nExpressionPlaceholders(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_names.mjs
-function phaseResolveNames(cpl) {
-  for (const unit of cpl.units) {
+function resolveNames(job) {
+  for (const unit of job.units) {
     processLexicalScope2(unit, unit.create, null);
     processLexicalScope2(unit, unit.update, null);
   }
@@ -17580,7 +17674,7 @@ var sanitizers = /* @__PURE__ */ new Map([
   [SecurityContext.URL, SanitizerFn.Url],
   [SecurityContext.RESOURCE_URL, SanitizerFn.ResourceUrl]
 ]);
-function phaseResolveSanitizers(job) {
+function resolveSanitizers(job) {
   for (const unit of job.units) {
     const elements = createOpXrefMap(unit);
     let sanitizerFn;
@@ -17610,20 +17704,20 @@ function isIframeElement(op) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/save_restore_view.mjs
-function phaseSaveRestoreView(job) {
-  for (const view of job.views.values()) {
-    view.create.prepend([
-      createVariableOp(view.job.allocateXrefId(), {
+function saveAndRestoreView(job) {
+  for (const unit of job.units) {
+    unit.create.prepend([
+      createVariableOp(unit.job.allocateXrefId(), {
         kind: SemanticVariableKind.SavedView,
         name: null,
-        view: view.xref
+        view: unit.xref
       }, new GetCurrentViewExpr(), VariableFlags.None)
     ]);
-    for (const op of view.create) {
+    for (const op of unit.create) {
       if (op.kind !== OpKind.Listener) {
         continue;
       }
-      let needsRestoreView = view !== job.root;
+      let needsRestoreView = unit !== job.root;
       if (!needsRestoreView) {
         for (const handlerOp of op.handlerOps) {
           visitExpressionsInOp(handlerOp, (expr) => {
@@ -17634,7 +17728,7 @@ function phaseSaveRestoreView(job) {
         }
       }
       if (needsRestoreView) {
-        addSaveRestoreViewOperationToListener(view, op);
+        addSaveRestoreViewOperationToListener(unit, op);
       }
     }
   }
@@ -17655,7 +17749,7 @@ function addSaveRestoreViewOperationToListener(unit, op) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/slot_allocation.mjs
-function phaseSlotAllocation(job) {
+function allocateSlots(job) {
   const slotMap = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     let slotCount = 0;
@@ -17663,8 +17757,8 @@ function phaseSlotAllocation(job) {
       if (!hasConsumesSlotTrait(op)) {
         continue;
       }
-      op.slot.slot = slotCount;
-      slotMap.set(op.xref, op.slot.slot);
+      op.handle.slot = slotCount;
+      slotMap.set(op.xref, op.handle.slot);
       slotCount += op.numSlotsUsed;
     }
     unit.decls = slotCount;
@@ -17680,8 +17774,8 @@ function phaseSlotAllocation(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/style_binding_specialization.mjs
-function phaseStyleBindingSpecialization(cpl) {
-  for (const unit of cpl.units) {
+function specializeStyleBindings(job) {
+  for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind !== OpKind.Binding) {
         continue;
@@ -17710,8 +17804,8 @@ function phaseStyleBindingSpecialization(cpl) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/temporary_variables.mjs
-function phaseTemporaryVariables(cpl) {
-  for (const unit of cpl.units) {
+function generateTemporaryVariables(job) {
+  for (const unit of job.units) {
     unit.create.prepend(generateTemporaries(unit.create));
     unit.update.prepend(generateTemporaries(unit.update));
   }
@@ -17768,7 +17862,7 @@ function assignName(names, expr) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/track_fn_generation.mjs
-function phaseTrackFnGeneration(job) {
+function generateTrackFns(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind !== OpKind.RepeaterCreate) {
@@ -17798,7 +17892,7 @@ function phaseTrackFnGeneration(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/track_fn_optimization.mjs
-function phaseTrackFnOptimization(job) {
+function optimizeTrackFns(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind !== OpKind.RepeaterCreate) {
@@ -17845,7 +17939,7 @@ function isTrackByFunctionCall(rootView, expr) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/track_variables.mjs
-function phaseTrackVariables(job) {
+function generateTrackVariables(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind !== OpKind.RepeaterCreate) {
@@ -17866,7 +17960,7 @@ function phaseTrackVariables(job) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/var_counting.mjs
-function phaseVarCounting(job) {
+function countVariables(job) {
   for (const unit of job.units) {
     let varCount = 0;
     for (const op of unit.ops()) {
@@ -17971,7 +18065,7 @@ function isSingletonInterpolation(expr) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/variable_optimization.mjs
-function phaseVariableOptimization(job) {
+function optimizeVariables(job) {
   for (const unit of job.units) {
     inlineAlwaysInlineVariables(unit.create);
     inlineAlwaysInlineVariables(unit.update);
@@ -18221,7 +18315,7 @@ function allowConservativeInlining(decl, target) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/wrap_icus.mjs
-function phaseWrapIcus(job) {
+function wrapI18nIcus(job) {
   for (const unit of job.units) {
     let currentI18nOp = null;
     for (const op of unit.create) {
@@ -18244,161 +18338,66 @@ function phaseWrapIcus(job) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/defer_resolve_targets.mjs
-function phaseDeferResolveTargets(job) {
-  const scopes = /* @__PURE__ */ new Map();
-  function getScopeForView2(view) {
-    if (scopes.has(view.xref)) {
-      return scopes.get(view.xref);
-    }
-    const scope = new Scope();
-    for (const op of view.create) {
-      if (!isElementOrContainerOp(op) || op.localRefs === null) {
-        continue;
-      }
-      if (!Array.isArray(op.localRefs)) {
-        throw new Error("LocalRefs were already processed, but were needed to resolve defer targets.");
-      }
-      for (const ref of op.localRefs) {
-        if (ref.target !== "") {
-          continue;
-        }
-        scope.targets.set(ref.name, { xref: op.xref, slot: op.slot });
-      }
-    }
-    scopes.set(view.xref, scope);
-    return scope;
-  }
-  function resolveTrigger(deferOwnerView, op, placeholderView) {
-    switch (op.trigger.kind) {
-      case DeferTriggerKind.Idle:
-      case DeferTriggerKind.Immediate:
-      case DeferTriggerKind.Timer:
-        return;
-      case DeferTriggerKind.Hover:
-      case DeferTriggerKind.Interaction:
-      case DeferTriggerKind.Viewport:
-        if (op.trigger.targetName === null) {
-          return;
-        }
-        let view = placeholderView !== null ? job.views.get(placeholderView) : deferOwnerView;
-        let step = placeholderView !== null ? -1 : 0;
-        while (view !== null) {
-          const scope = getScopeForView2(view);
-          if (scope.targets.has(op.trigger.targetName)) {
-            const { xref, slot } = scope.targets.get(op.trigger.targetName);
-            op.trigger.targetXref = xref;
-            op.trigger.targetView = view.xref;
-            op.trigger.targetSlotViewSteps = step;
-            op.trigger.targetSlot = slot;
-            return;
-          }
-          view = view.parent !== null ? job.views.get(view.parent) : null;
-          step++;
-        }
-        break;
-      default:
-        throw new Error(`Trigger kind ${op.trigger.kind} not handled`);
-    }
-  }
-  for (const unit of job.units) {
-    const defers = /* @__PURE__ */ new Map();
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.Defer:
-          defers.set(op.xref, op);
-          break;
-        case OpKind.DeferOn:
-          const deferOp = defers.get(op.defer);
-          resolveTrigger(unit, op, deferOp.placeholderView);
-          break;
-      }
-    }
-  }
-}
-var Scope = class {
-  constructor() {
-    this.targets = /* @__PURE__ */ new Map();
-  }
-};
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/defer_configs.mjs
-function phaseDeferConfigs(job) {
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind !== OpKind.Defer) {
-        continue;
-      }
-      if (op.placeholderMinimumTime !== null) {
-        op.placeholderConfig = new ConstCollectedExpr(literalOrArrayLiteral([op.placeholderMinimumTime]));
-      }
-      if (op.loadingMinimumTime !== null || op.loadingAfterTime !== null) {
-        op.loadingConfig = new ConstCollectedExpr(literalOrArrayLiteral([op.loadingMinimumTime, op.loadingAfterTime]));
-      }
-    }
-  }
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/emit.mjs
 var phases = [
-  { kind: CompilationJobKind.Tmpl, fn: phaseRemoveContentSelectors },
-  { kind: CompilationJobKind.Host, fn: phaseHostStylePropertyParsing },
-  { kind: CompilationJobKind.Tmpl, fn: phaseNamespace },
-  { kind: CompilationJobKind.Both, fn: phaseStyleBindingSpecialization },
-  { kind: CompilationJobKind.Both, fn: phaseBindingSpecialization },
-  { kind: CompilationJobKind.Tmpl, fn: phasePropagateI18nBlocks },
-  { kind: CompilationJobKind.Tmpl, fn: phaseWrapIcus },
-  { kind: CompilationJobKind.Both, fn: phaseAttributeExtraction },
-  { kind: CompilationJobKind.Both, fn: phaseParseExtractedStyles },
-  { kind: CompilationJobKind.Tmpl, fn: phaseRemoveEmptyBindings },
-  { kind: CompilationJobKind.Both, fn: phaseCollapseSingletonInterpolations },
-  { kind: CompilationJobKind.Both, fn: phaseOrdering },
-  { kind: CompilationJobKind.Tmpl, fn: phaseConditionals },
-  { kind: CompilationJobKind.Tmpl, fn: phasePipeCreation },
-  { kind: CompilationJobKind.Tmpl, fn: phaseDeferConfigs },
-  { kind: CompilationJobKind.Tmpl, fn: phaseI18nTextExtraction },
-  { kind: CompilationJobKind.Tmpl, fn: phaseIcuExtraction },
-  { kind: CompilationJobKind.Tmpl, fn: phaseApplyI18nExpressions },
-  { kind: CompilationJobKind.Tmpl, fn: phasePipeVariadic },
-  { kind: CompilationJobKind.Both, fn: phasePureLiteralStructures },
-  { kind: CompilationJobKind.Tmpl, fn: phaseGenerateProjectionDef },
-  { kind: CompilationJobKind.Tmpl, fn: phaseGenerateVariables },
-  { kind: CompilationJobKind.Tmpl, fn: phaseSaveRestoreView },
-  { kind: CompilationJobKind.Tmpl, fn: phaseFindAnyCasts },
-  { kind: CompilationJobKind.Both, fn: phaseResolveDollarEvent },
-  { kind: CompilationJobKind.Tmpl, fn: phaseRepeaterDerivedVars },
-  { kind: CompilationJobKind.Tmpl, fn: phaseTrackVariables },
-  { kind: CompilationJobKind.Both, fn: phaseResolveNames },
-  { kind: CompilationJobKind.Tmpl, fn: phaseDeferResolveTargets },
-  { kind: CompilationJobKind.Tmpl, fn: phaseTrackFnOptimization },
-  { kind: CompilationJobKind.Both, fn: phaseResolveContexts },
-  { kind: CompilationJobKind.Tmpl, fn: phaseResolveSanitizers },
-  { kind: CompilationJobKind.Tmpl, fn: phaseLocalRefs },
-  { kind: CompilationJobKind.Both, fn: phaseNullishCoalescing },
-  { kind: CompilationJobKind.Both, fn: phaseExpandSafeReads },
-  { kind: CompilationJobKind.Both, fn: phaseTemporaryVariables },
-  { kind: CompilationJobKind.Tmpl, fn: phaseSlotAllocation },
-  { kind: CompilationJobKind.Tmpl, fn: phaseI18nMessageExtraction },
-  { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nElementPlaceholders },
-  { kind: CompilationJobKind.Tmpl, fn: phaseResolveI18nExpressionPlaceholders },
-  { kind: CompilationJobKind.Tmpl, fn: phasePropagateI18nPlaceholders },
-  { kind: CompilationJobKind.Tmpl, fn: phaseFormatI18nParams },
-  { kind: CompilationJobKind.Tmpl, fn: phaseTrackFnGeneration },
-  { kind: CompilationJobKind.Tmpl, fn: phaseI18nConstCollection },
-  { kind: CompilationJobKind.Tmpl, fn: phaseConstExpressionCollection },
-  { kind: CompilationJobKind.Both, fn: phaseConstCollection },
-  { kind: CompilationJobKind.Tmpl, fn: phaseAssignI18nSlotDependencies },
-  { kind: CompilationJobKind.Both, fn: phaseVarCounting },
-  { kind: CompilationJobKind.Tmpl, fn: phaseGenerateAdvance },
-  { kind: CompilationJobKind.Both, fn: phaseVariableOptimization },
-  { kind: CompilationJobKind.Both, fn: phaseNaming },
-  { kind: CompilationJobKind.Tmpl, fn: phaseMergeNextContext },
-  { kind: CompilationJobKind.Tmpl, fn: phaseNgContainer },
-  { kind: CompilationJobKind.Tmpl, fn: phaseEmptyElements },
-  { kind: CompilationJobKind.Tmpl, fn: phaseNonbindable },
-  { kind: CompilationJobKind.Both, fn: phasePureFunctionExtraction },
-  { kind: CompilationJobKind.Both, fn: phaseReify },
-  { kind: CompilationJobKind.Both, fn: phaseChaining }
+  { kind: CompilationJobKind.Tmpl, fn: removeContentSelectors },
+  { kind: CompilationJobKind.Host, fn: parseHostStyleProperties },
+  { kind: CompilationJobKind.Tmpl, fn: emitNamespaceChanges },
+  { kind: CompilationJobKind.Both, fn: specializeStyleBindings },
+  { kind: CompilationJobKind.Both, fn: specializeBindings },
+  { kind: CompilationJobKind.Tmpl, fn: propagateI18nBlocks },
+  { kind: CompilationJobKind.Tmpl, fn: wrapI18nIcus },
+  { kind: CompilationJobKind.Both, fn: extractAttributes },
+  { kind: CompilationJobKind.Both, fn: parseExtractedStyles },
+  { kind: CompilationJobKind.Tmpl, fn: removeEmptyBindings },
+  { kind: CompilationJobKind.Both, fn: collapseSingletonInterpolations },
+  { kind: CompilationJobKind.Both, fn: orderOps },
+  { kind: CompilationJobKind.Tmpl, fn: generateConditionalExpressions },
+  { kind: CompilationJobKind.Tmpl, fn: createPipes },
+  { kind: CompilationJobKind.Tmpl, fn: configureDeferInstructions },
+  { kind: CompilationJobKind.Tmpl, fn: extractI18nText },
+  { kind: CompilationJobKind.Tmpl, fn: extractI18nICUs },
+  { kind: CompilationJobKind.Tmpl, fn: applyI18nExpressions },
+  { kind: CompilationJobKind.Tmpl, fn: createVariadicPipes },
+  { kind: CompilationJobKind.Both, fn: generatePureLiteralStructures },
+  { kind: CompilationJobKind.Tmpl, fn: generateProjectionDefs },
+  { kind: CompilationJobKind.Tmpl, fn: generateVariables },
+  { kind: CompilationJobKind.Tmpl, fn: saveAndRestoreView },
+  { kind: CompilationJobKind.Tmpl, fn: deleteAnyCasts },
+  { kind: CompilationJobKind.Both, fn: resolveDollarEvent },
+  { kind: CompilationJobKind.Tmpl, fn: generateRepeaterDerivedVars },
+  { kind: CompilationJobKind.Tmpl, fn: generateTrackVariables },
+  { kind: CompilationJobKind.Both, fn: resolveNames },
+  { kind: CompilationJobKind.Tmpl, fn: resolveDeferTargetNames },
+  { kind: CompilationJobKind.Tmpl, fn: optimizeTrackFns },
+  { kind: CompilationJobKind.Both, fn: resolveContexts },
+  { kind: CompilationJobKind.Tmpl, fn: resolveSanitizers },
+  { kind: CompilationJobKind.Tmpl, fn: liftLocalRefs },
+  { kind: CompilationJobKind.Both, fn: generateNullishCoalesceExpressions },
+  { kind: CompilationJobKind.Both, fn: expandSafeReads },
+  { kind: CompilationJobKind.Both, fn: generateTemporaryVariables },
+  { kind: CompilationJobKind.Tmpl, fn: allocateSlots },
+  { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
+  { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
+  { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
+  { kind: CompilationJobKind.Tmpl, fn: propogateI18nPlaceholders },
+  { kind: CompilationJobKind.Tmpl, fn: formatI18nParams },
+  { kind: CompilationJobKind.Tmpl, fn: generateTrackFns },
+  { kind: CompilationJobKind.Tmpl, fn: collectI18nConsts },
+  { kind: CompilationJobKind.Tmpl, fn: collectConstExpressions },
+  { kind: CompilationJobKind.Both, fn: collectElementConsts },
+  { kind: CompilationJobKind.Tmpl, fn: assignI18nSlotDependencies },
+  { kind: CompilationJobKind.Both, fn: countVariables },
+  { kind: CompilationJobKind.Tmpl, fn: generateAdvance },
+  { kind: CompilationJobKind.Both, fn: optimizeVariables },
+  { kind: CompilationJobKind.Both, fn: nameFunctionsAndVariables },
+  { kind: CompilationJobKind.Tmpl, fn: mergeNextContextExpressions },
+  { kind: CompilationJobKind.Tmpl, fn: generateNgContainerOps },
+  { kind: CompilationJobKind.Tmpl, fn: collapseEmptyInstructions },
+  { kind: CompilationJobKind.Tmpl, fn: disableBindings },
+  { kind: CompilationJobKind.Both, fn: extractPureFunctions },
+  { kind: CompilationJobKind.Both, fn: reify },
+  { kind: CompilationJobKind.Both, fn: chain }
 ];
 function transform(job, kind) {
   for (const phase of phases) {
@@ -18505,9 +18504,9 @@ function emitHostBindingFunction(job) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/ingest.mjs
 var compatibilityMode = CompatibilityMode.TemplateDefinitionBuilder;
 function ingestComponent(componentName, template2, constantPool, relativeContextFilePath, i18nUseExternalIds) {
-  const cpl = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds);
-  ingestNodes(cpl.root, template2);
-  return cpl;
+  const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds);
+  ingestNodes(job.root, template2);
+  return job;
 }
 function ingestHostBinding(input, bindingParser, constantPool) {
   var _a2, _b2, _c2;
@@ -18679,10 +18678,10 @@ function ingestIfBlock(unit, ifBlock) {
     unit.create.push(tmplOp);
     if (firstXref === null) {
       firstXref = cView.xref;
-      firstSlotHandle = tmplOp.slot;
+      firstSlotHandle = tmplOp.handle;
     }
     const caseExpr = ifCase.expression ? convertAst(ifCase.expression, unit.job, null) : null;
-    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, tmplOp.xref, tmplOp.slot, ifCase.expressionAlias);
+    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, tmplOp.xref, tmplOp.handle, ifCase.expressionAlias);
     conditions.push(conditionalCaseExpr);
     ingestNodes(cView, ifCase.children);
   }
@@ -18699,10 +18698,10 @@ function ingestSwitchBlock(unit, switchBlock) {
     unit.create.push(tmplOp);
     if (firstXref === null) {
       firstXref = cView.xref;
-      firstSlotHandle = tmplOp.slot;
+      firstSlotHandle = tmplOp.handle;
     }
     const caseExpr = switchCase.expression ? convertAst(switchCase.expression, unit.job, switchBlock.startSourceSpan) : null;
-    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, tmplOp.xref, tmplOp.slot);
+    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, tmplOp.xref, tmplOp.handle);
     conditions.push(conditionalCaseExpr);
     ingestNodes(cView, switchCase.children);
   }
@@ -18726,11 +18725,11 @@ function ingestDeferBlock(unit, deferBlock) {
   const placeholder = ingestDeferView(unit, "Placeholder", (_c2 = deferBlock.placeholder) == null ? void 0 : _c2.children, (_d2 = deferBlock.placeholder) == null ? void 0 : _d2.sourceSpan);
   const error2 = ingestDeferView(unit, "Error", (_e2 = deferBlock.error) == null ? void 0 : _e2.children, (_f2 = deferBlock.error) == null ? void 0 : _f2.sourceSpan);
   const deferXref = unit.job.allocateXrefId();
-  const deferOp = createDeferOp(deferXref, main.xref, main.slot, deferBlock.sourceSpan);
+  const deferOp = createDeferOp(deferXref, main.xref, main.handle, deferBlock.sourceSpan);
   deferOp.placeholderView = (_g = placeholder == null ? void 0 : placeholder.xref) != null ? _g : null;
-  deferOp.placeholderSlot = (_h = placeholder == null ? void 0 : placeholder.slot) != null ? _h : null;
-  deferOp.loadingSlot = (_i = loading == null ? void 0 : loading.slot) != null ? _i : null;
-  deferOp.errorSlot = (_j = error2 == null ? void 0 : error2.slot) != null ? _j : null;
+  deferOp.placeholderSlot = (_h = placeholder == null ? void 0 : placeholder.handle) != null ? _h : null;
+  deferOp.loadingSlot = (_i = loading == null ? void 0 : loading.handle) != null ? _i : null;
+  deferOp.errorSlot = (_j = error2 == null ? void 0 : error2.handle) != null ? _j : null;
   deferOp.placeholderMinimumTime = (_l = (_k = deferBlock.placeholder) == null ? void 0 : _k.minimumTime) != null ? _l : null;
   deferOp.loadingMinimumTime = (_n = (_m = deferBlock.loading) == null ? void 0 : _m.minimumTime) != null ? _n : null;
   deferOp.loadingAfterTime = (_p = (_o = deferBlock.loading) == null ? void 0 : _o.afterTime) != null ? _p : null;
@@ -18839,7 +18838,7 @@ function ingestForBlock(unit, forBlock) {
   const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_a2 = emptyView == null ? void 0 : emptyView.xref) != null ? _a2 : null, tagName, track, varNames, forBlock.sourceSpan);
   unit.create.push(repeaterCreate2);
   const expression = convertAst(forBlock.expression, unit.job, convertSourceSpan(forBlock.expression.span, forBlock.sourceSpan));
-  const repeater2 = createRepeaterOp(repeaterCreate2.xref, repeaterCreate2.slot, expression, forBlock.sourceSpan);
+  const repeater2 = createRepeaterOp(repeaterCreate2.xref, repeaterCreate2.handle, expression, forBlock.sourceSpan);
   unit.update.push(repeater2);
 }
 function convertAst(ast, job, baseSourceSpan) {
@@ -18941,7 +18940,7 @@ function ingestBindings(unit, op, element2) {
       unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null));
       continue;
     }
-    listenerOp = createListenerOp(op.xref, op.slot, output.name, op.tag, output.phase, false, output.sourceSpan);
+    listenerOp = createListenerOp(op.xref, op.handle, output.name, op.tag, output.phase, false, output.sourceSpan);
     let handlerExprs;
     let handler = output.handler;
     if (handler instanceof ASTWithSource) {
@@ -22330,9 +22329,9 @@ function pureFunctionCallInfo(args) {
 function generateNextContextExpr(relativeLevelDiff) {
   return importExpr(Identifiers.nextContext).callFn(relativeLevelDiff > 1 ? [literal(relativeLevelDiff)] : []);
 }
-function getLiteralFactory(constantPool, literal2, allocateSlots) {
+function getLiteralFactory(constantPool, literal2, allocateSlots2) {
   const { literalFactory, literalFactoryArguments } = constantPool.getLiteralFactory(literal2);
-  const startSlot = allocateSlots(1 + literalFactoryArguments.length);
+  const startSlot = allocateSlots2(1 + literalFactoryArguments.length);
   const { identifier, isVarLength } = pureFunctionCallInfo(literalFactoryArguments);
   const args = [literal(startSlot), literalFactory];
   if (isVarLength) {
@@ -24538,7 +24537,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-rc.1+sha-cc13d6f");
+var VERSION2 = new Version("17.0.0-rc.1+sha-0d88e25");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
