@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-f615f4f
+ * @license Angular v17.1.0-next.0+sha-83a3b85
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5893,10 +5893,6 @@ declare interface LView<T = unknown> extends Array<any> {
      * if any signals were read.
      */
     [REACTIVE_TEMPLATE_CONSUMER]: ReactiveLViewConsumer | null;
-    /**
-     * Same as REACTIVE_TEMPLATE_CONSUMER, but for the host bindings of the LView.
-     */
-    [REACTIVE_HOST_BINDING_CONSUMER]: ReactiveLViewConsumer | null;
 }
 
 /**
@@ -7512,14 +7508,11 @@ declare interface RDomTokenList {
     remove(token: string): void;
 }
 
-declare const REACTIVE_HOST_BINDING_CONSUMER = 24;
-
 declare const REACTIVE_TEMPLATE_CONSUMER = 23;
 
 declare interface ReactiveLViewConsumer extends ReactiveNode {
-    lView: LView;
-    slot: typeof REACTIVE_TEMPLATE_CONSUMER | typeof REACTIVE_HOST_BINDING_CONSUMER;
-    isRunning: boolean;
+    lView: LView | null;
+    slot: typeof REACTIVE_TEMPLATE_CONSUMER;
 }
 
 /**

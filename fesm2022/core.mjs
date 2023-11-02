@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.1.0-next.0+sha-f615f4f
+ * @license Angular v17.1.0-next.0+sha-83a3b85
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
+import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, Observable, merge as merge$1, BehaviorSubject, of } from 'rxjs';
 import { share, switchMap, distinctUntilChanged, first } from 'rxjs/operators';
 
@@ -2203,7 +2203,6 @@ const EMBEDDED_VIEW_INJECTOR = 20;
 const ON_DESTROY_HOOKS = 21;
 const EFFECTS_TO_SCHEDULE = 22;
 const REACTIVE_TEMPLATE_CONSUMER = 23;
-const REACTIVE_HOST_BINDING_CONSUMER = 24;
 /**
  * Size of LView's header. Necessary to adjust for it when setting slots.
  *
@@ -2759,24 +2758,6 @@ function markAncestorsForTraversal(lView) {
             }
         }
         parent = parent[PARENT];
-    }
-}
-/**
- * Marks the component or root view of an LView for refresh.
- *
- * This function locates the declaration component view of a given LView and marks it for refresh.
- * With this, we get component-level change detection granularity. Marking the `LView` itself for
- * refresh would be view-level granularity.
- *
- * Note that when an LView is a root view, the DECLARATION_COMPONENT_VIEW will be the root view
- * itself. This is a bit confusing since the TView.type is `Root`, rather than `Component`, but this
- * is actually what we need for host bindings in a root view.
- */
-function markViewDirtyFromSignal(lView) {
-    const declarationComponentView = lView[DECLARATION_COMPONENT_VIEW];
-    declarationComponentView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
-    if (viewAttachedToChangeDetector(declarationComponentView)) {
-        markAncestorsForTraversal(declarationComponentView);
     }
 }
 /**
@@ -8283,7 +8264,6 @@ function destroyLView(tView, lView) {
     if (!(lView[FLAGS] & 256 /* LViewFlags.Destroyed */)) {
         const renderer = lView[RENDERER];
         lView[REACTIVE_TEMPLATE_CONSUMER] && consumerDestroy$1(lView[REACTIVE_TEMPLATE_CONSUMER]);
-        lView[REACTIVE_HOST_BINDING_CONSUMER] && consumerDestroy$1(lView[REACTIVE_HOST_BINDING_CONSUMER]);
         if (renderer.destroyNode) {
             applyView(tView, lView, renderer, 3 /* WalkTNodeTreeAction.Destroy */, null, null);
         }
@@ -10445,7 +10425,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-f615f4f');
+const VERSION = new Version('17.1.0-next.0+sha-83a3b85');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11688,6 +11668,39 @@ function collectNativeNodesInLContainer(lContainer, result) {
     }
 }
 
+let freeConsumers = [];
+/**
+ * Create a new template consumer pointing at the specified LView.
+ * Sometimes, a previously created consumer may be reused, in order to save on allocations. In that
+ * case, the LView will be updated.
+ */
+function getOrBorrowReactiveLViewConsumer(lView) {
+    return lView[REACTIVE_TEMPLATE_CONSUMER] ?? borrowReactiveLViewConsumer(lView);
+}
+function borrowReactiveLViewConsumer(lView) {
+    const consumer = freeConsumers.pop() ?? Object.create(REACTIVE_LVIEW_CONSUMER_NODE);
+    consumer.lView = lView;
+    return consumer;
+}
+function maybeReturnReactiveLViewConsumer(consumer) {
+    if (consumer.lView[REACTIVE_TEMPLATE_CONSUMER] === consumer) {
+        // The consumer got committed.
+        return;
+    }
+    consumer.lView = null;
+    freeConsumers.push(consumer);
+}
+const REACTIVE_LVIEW_CONSUMER_NODE = {
+    ...REACTIVE_NODE$1,
+    consumerIsAlwaysLive: true,
+    consumerMarkedDirty: (node) => {
+        markAncestorsForTraversal(node.lView);
+    },
+    consumerOnSignalRead() {
+        this.lView[REACTIVE_TEMPLATE_CONSUMER] = this;
+    },
+};
+
 /**
  * Whether we should skip specific logic in checkNoChanges mode.
  */
@@ -11895,46 +11908,6 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
     return { propName: undefined, oldValue, newValue };
 }
 
-let currentConsumer = null;
-/**
- * Create a new template consumer pointing at the specified LView.
- * Sometimes, a previously created consumer may be reused, in order to save on allocations. In that
- * case, the LView will be updated.
- */
-function getReactiveLViewConsumer(lView, slot) {
-    return lView[slot] ?? getOrCreateCurrentLViewConsumer(lView, slot);
-}
-const REACTIVE_LVIEW_CONSUMER_NODE = {
-    ...REACTIVE_NODE$1,
-    consumerIsAlwaysLive: true,
-    consumerMarkedDirty: (node) => {
-        if (ngDevMode && node.isRunning) {
-            console.warn(`Angular detected a signal being set which makes the template for this component dirty` +
-                ` while it's being executed, which is not currently supported and will likely result` +
-                ` in ExpressionChangedAfterItHasBeenChecked errors or future updates not working` +
-                ` entirely.`);
-        }
-        markViewDirtyFromSignal(node.lView);
-    },
-    consumerOnSignalRead() {
-        if (currentConsumer !== this) {
-            return;
-        }
-        this.lView[this.slot] = currentConsumer;
-        currentConsumer = null;
-    },
-    isRunning: false,
-};
-function createLViewConsumer() {
-    return Object.create(REACTIVE_LVIEW_CONSUMER_NODE);
-}
-function getOrCreateCurrentLViewConsumer(lView, slot) {
-    currentConsumer ??= createLViewConsumer();
-    currentConsumer.lView = lView;
-    currentConsumer.slot = slot;
-    return currentConsumer;
-}
-
 /** A special value which designates that a value has not changed. */
 const NO_CHANGE = (typeof ngDevMode === 'undefined' || ngDevMode) ? { __brand__: 'NO_CHANGE' } : {};
 
@@ -12035,7 +12008,6 @@ function processHostBindingOpCodes(tView, lView) {
     const hostBindingOpCodes = tView.hostBindingOpCodes;
     if (hostBindingOpCodes === null)
         return;
-    const consumer = getReactiveLViewConsumer(lView, REACTIVE_HOST_BINDING_CONSUMER);
     try {
         for (let i = 0; i < hostBindingOpCodes.length; i++) {
             const opCode = hostBindingOpCodes[i];
@@ -12049,17 +12021,8 @@ function processHostBindingOpCodes(tView, lView) {
                 const bindingRootIndx = hostBindingOpCodes[++i];
                 const hostBindingFn = hostBindingOpCodes[++i];
                 setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
-                consumer.dirty = false;
-                const prevConsumer = consumerBeforeComputation$1(consumer);
-                consumer.isRunning = true;
-                try {
-                    const context = lView[directiveIdx];
-                    hostBindingFn(2 /* RenderFlags.Update */, context);
-                }
-                finally {
-                    consumerAfterComputation$1(consumer, prevConsumer);
-                    consumer.isRunning = false;
-                }
+                const context = lView[directiveIdx];
+                hostBindingFn(2 /* RenderFlags.Update */, context);
             }
         }
     }
@@ -12184,7 +12147,6 @@ function allocExpando(tView, lView, numSlotsToAlloc, initialValue) {
     return allocIdx;
 }
 function executeTemplate(tView, lView, templateFn, rf, context) {
-    const consumer = getReactiveLViewConsumer(lView, REACTIVE_TEMPLATE_CONSUMER);
     const prevSelectedIndex = getSelectedIndex();
     const isUpdatePhase = rf & 2 /* RenderFlags.Update */;
     try {
@@ -12196,19 +12158,7 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
         }
         const preHookType = isUpdatePhase ? 2 /* ProfilerEvent.TemplateUpdateStart */ : 0 /* ProfilerEvent.TemplateCreateStart */;
         profiler(preHookType, context);
-        const effectiveConsumer = isUpdatePhase ? consumer : null;
-        const prevConsumer = consumerBeforeComputation$1(effectiveConsumer);
-        try {
-            if (effectiveConsumer !== null) {
-                effectiveConsumer.dirty = false;
-                effectiveConsumer.isRunning = true;
-            }
-            templateFn(rf, context);
-        }
-        finally {
-            consumerAfterComputation$1(effectiveConsumer, prevConsumer);
-            effectiveConsumer && (effectiveConsumer.isRunning = false);
-        }
+        templateFn(rf, context);
     }
     finally {
         setSelectedIndex(prevSelectedIndex);
@@ -13183,17 +13133,23 @@ function createLContainer(hostNative, currentView, native, tNode) {
 function refreshContentQueries(tView, lView) {
     const contentQueries = tView.contentQueries;
     if (contentQueries !== null) {
-        for (let i = 0; i < contentQueries.length; i += 2) {
-            const queryStartIdx = contentQueries[i];
-            const directiveDefIdx = contentQueries[i + 1];
-            if (directiveDefIdx !== -1) {
-                const directiveDef = tView.data[directiveDefIdx];
-                ngDevMode && assertDefined(directiveDef, 'DirectiveDef not found.');
-                ngDevMode &&
-                    assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
-                setCurrentQueryIndex(queryStartIdx);
-                directiveDef.contentQueries(2 /* RenderFlags.Update */, lView[directiveDefIdx], directiveDefIdx);
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            for (let i = 0; i < contentQueries.length; i += 2) {
+                const queryStartIdx = contentQueries[i];
+                const directiveDefIdx = contentQueries[i + 1];
+                if (directiveDefIdx !== -1) {
+                    const directiveDef = tView.data[directiveDefIdx];
+                    ngDevMode && assertDefined(directiveDef, 'DirectiveDef not found.');
+                    ngDevMode &&
+                        assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
+                    setCurrentQueryIndex(queryStartIdx);
+                    directiveDef.contentQueries(2 /* RenderFlags.Update */, lView[directiveDefIdx], directiveDefIdx);
+                }
             }
+        }
+        finally {
+            setActiveConsumer$1(prevConsumer);
         }
     }
 }
@@ -13360,7 +13316,8 @@ function detectChangesInternal(tView, lView, context, notifyErrorHandler = true)
         // descendants views that need to be refreshed due to re-dirtying during the change detection
         // run, detect changes on the view again. We run change detection in `Targeted` mode to only
         // refresh views with the `RefreshView` flag.
-        while (lView[FLAGS] & (1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */)) {
+        while (lView[FLAGS] & (1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */) ||
+            lView[REACTIVE_TEMPLATE_CONSUMER]?.dirty) {
             if (retries === MAXIMUM_REFRESH_RERUNS) {
                 throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
                     'Infinite change detection while trying to refresh views. ' +
@@ -13427,7 +13384,16 @@ function refreshView(tView, lView, templateFn, context) {
     // since they were assigned. We do not want to execute lifecycle hooks in that mode.
     const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
     !isInCheckNoChangesPass && lView[ENVIRONMENT].inlineEffectRunner?.flush();
+    // Start component reactive context
+    // - We might already be in a reactive context if this is an embedded view of the host.
+    // - We might be descending into a view that needs a consumer.
     enterView(lView);
+    let prevConsumer = null;
+    let currentConsumer = null;
+    if (!isInCheckNoChangesPass && viewShouldHaveReactiveConsumer(tView)) {
+        currentConsumer = getOrBorrowReactiveLViewConsumer(lView);
+        prevConsumer = consumerBeforeComputation$1(currentConsumer);
+    }
     try {
         resetPreOrderHookFlags(lView);
         setBindingIndex(tView.bindingStartIndex);
@@ -13438,25 +13404,18 @@ function refreshView(tView, lView, templateFn, context) {
         // execute pre-order hooks (OnInit, OnChanges, DoCheck)
         // PERF WARNING: do NOT extract this to a separate function without running benchmarks
         if (!isInCheckNoChangesPass) {
-            const consumer = lView[REACTIVE_TEMPLATE_CONSUMER];
-            try {
-                consumer && (consumer.isRunning = true);
-                if (hooksInitPhaseCompleted) {
-                    const preOrderCheckHooks = tView.preOrderCheckHooks;
-                    if (preOrderCheckHooks !== null) {
-                        executeCheckHooks(lView, preOrderCheckHooks, null);
-                    }
-                }
-                else {
-                    const preOrderHooks = tView.preOrderHooks;
-                    if (preOrderHooks !== null) {
-                        executeInitAndCheckHooks(lView, preOrderHooks, 0 /* InitPhaseState.OnInitHooksToBeRun */, null);
-                    }
-                    incrementInitPhaseFlags(lView, 0 /* InitPhaseState.OnInitHooksToBeRun */);
+            if (hooksInitPhaseCompleted) {
+                const preOrderCheckHooks = tView.preOrderCheckHooks;
+                if (preOrderCheckHooks !== null) {
+                    executeCheckHooks(lView, preOrderCheckHooks, null);
                 }
             }
-            finally {
-                consumer && (consumer.isRunning = false);
+            else {
+                const preOrderHooks = tView.preOrderHooks;
+                if (preOrderHooks !== null) {
+                    executeInitAndCheckHooks(lView, preOrderHooks, 0 /* InitPhaseState.OnInitHooksToBeRun */, null);
+                }
+                incrementInitPhaseFlags(lView, 0 /* InitPhaseState.OnInitHooksToBeRun */);
             }
         }
         // First mark transplanted views that are declared in this lView as needing a refresh at their
@@ -13551,8 +13510,29 @@ function refreshView(tView, lView, templateFn, context) {
         throw e;
     }
     finally {
+        if (currentConsumer !== null) {
+            consumerAfterComputation$1(currentConsumer, prevConsumer);
+            maybeReturnReactiveLViewConsumer(currentConsumer);
+        }
         leaveView();
     }
+}
+/**
+ * Indicates if the view should get its own reactive consumer node.
+ *
+ * In the current design, all embedded views share a consumer with the component view. This allows
+ * us to refresh at the component level rather than at a per-view level. In addition, root views get
+ * their own reactive node because root component will have a host view that executes the
+ * component's host bindings. This needs to be tracked in a consumer as well.
+ *
+ * To get a more granular change detection than per-component, all we would just need to update the
+ * condition here so that a given view gets a reactive consumer which can become dirty independently
+ * from its parent component. For example embedded views for signal components could be created with
+ * a new type "SignalEmbeddedView" and the condition here wouldn't even need updating in order to
+ * get granular per-view change detection for signal components.
+ */
+function viewShouldHaveReactiveConsumer(tView) {
+    return tView.type !== 2 /* TViewType.Embedded */;
 }
 /**
  * Goes over embedded views (ones created through ViewContainerRef APIs) and refreshes
@@ -13622,18 +13602,29 @@ function detectChangesInView(lView, mode) {
     const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
     const tView = lView[TVIEW];
     const flags = lView[FLAGS];
-    // Flag cleared before change detection runs so that the view can be re-marked for traversal if
-    // necessary.
+    const consumer = lView[REACTIVE_TEMPLATE_CONSUMER];
+    // Refresh CheckAlways views in Global mode.
+    let shouldRefreshView = !!(mode === 0 /* ChangeDetectionMode.Global */ && flags & 16 /* LViewFlags.CheckAlways */);
+    // Refresh Dirty views in Global mode, as long as we're not in checkNoChanges.
+    // CheckNoChanges never worked with `OnPush` components because the `Dirty` flag was
+    // cleared before checkNoChanges ran. Because there is now a loop for to check for
+    // backwards views, it gives an opportunity for `OnPush` components to be marked `Dirty`
+    // before the CheckNoChanges pass. We don't want existing errors that are hidden by the
+    // current CheckNoChanges bug to surface when making unrelated changes.
+    shouldRefreshView ||=
+        !!(flags & 64 /* LViewFlags.Dirty */ && mode === 0 /* ChangeDetectionMode.Global */ &&
+            (!isInCheckNoChangesPass || RUN_IN_CHECK_NO_CHANGES_ANYWAY));
+    // Always refresh views marked for refresh, regardless of mode.
+    shouldRefreshView ||= !!(flags & 1024 /* LViewFlags.RefreshView */);
+    // Refresh views when they have a dirty reactive consumer, regardless of mode.
+    shouldRefreshView ||= !!(consumer?.dirty && consumerPollProducersForChange$1(consumer));
+    // Mark the Flags and `ReactiveNode` as not dirty before refreshing the component, so that they
+    // can be re-dirtied during the refresh process.
+    if (consumer) {
+        consumer.dirty = false;
+    }
     lView[FLAGS] &= ~(8192 /* LViewFlags.HasChildViewsToRefresh */ | 1024 /* LViewFlags.RefreshView */);
-    if ((flags & 16 /* LViewFlags.CheckAlways */ && mode === 0 /* ChangeDetectionMode.Global */) ||
-        (flags & 64 /* LViewFlags.Dirty */ && mode === 0 /* ChangeDetectionMode.Global */ &&
-            // CheckNoChanges never worked with `OnPush` components because the `Dirty` flag was cleared
-            // before checkNoChanges ran. Because there is now a loop for to check for backwards views,
-            // it gives an opportunity for `OnPush` components to be marked `Dirty` before the
-            // CheckNoChanges pass. We don't want existing errors that are hidden by the current
-            // CheckNoChanges bug to surface when making unrelated changes.
-            (!isInCheckNoChangesPass || RUN_IN_CHECK_NO_CHANGES_ANYWAY)) ||
-        flags & 1024 /* LViewFlags.RefreshView */) {
+    if (shouldRefreshView) {
         refreshView(tView, lView, tView.template, lView[CONTEXT]);
     }
     else if (flags & 8192 /* LViewFlags.HasChildViewsToRefresh */) {
@@ -20353,16 +20344,22 @@ function ɵɵconditional(containerIndex, matchingTemplateIndex, value) {
     const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
     const viewInContainerIdx = 0;
     if (bindingUpdated(hostLView, bindingIndex, matchingTemplateIndex)) {
-        // The index of the view to show changed - remove the previously displayed one
-        // (it is a noop if there are no active views in a container).
-        removeLViewFromLContainer(lContainer, viewInContainerIdx);
-        // Index -1 is a special case where none of the conditions evaluates to
-        // a truthy value and as the consequence we've got no view to show.
-        if (matchingTemplateIndex !== -1) {
-            const templateTNode = getExistingTNode(hostLView[TVIEW], matchingTemplateIndex);
-            const dehydratedView = findMatchingDehydratedView(lContainer, templateTNode.tView.ssrId);
-            const embeddedLView = createAndRenderEmbeddedLView(hostLView, templateTNode, value, { dehydratedView });
-            addLViewToLContainer(lContainer, embeddedLView, viewInContainerIdx, shouldAddViewToDom(templateTNode, dehydratedView));
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            // The index of the view to show changed - remove the previously displayed one
+            // (it is a noop if there are no active views in a container).
+            removeLViewFromLContainer(lContainer, viewInContainerIdx);
+            // Index -1 is a special case where none of the conditions evaluates to
+            // a truthy value and as the consequence we've got no view to show.
+            if (matchingTemplateIndex !== -1) {
+                const templateTNode = getExistingTNode(hostLView[TVIEW], matchingTemplateIndex);
+                const dehydratedView = findMatchingDehydratedView(lContainer, templateTNode.tView.ssrId);
+                const embeddedLView = createAndRenderEmbeddedLView(hostLView, templateTNode, value, { dehydratedView });
+                addLViewToLContainer(lContainer, embeddedLView, viewInContainerIdx, shouldAddViewToDom(templateTNode, dehydratedView));
+            }
+        }
+        finally {
+            setActiveConsumer$1(prevConsumer);
         }
     }
     else {
@@ -20520,40 +20517,46 @@ class LiveCollectionLContainerImpl extends LiveCollection {
  * @codeGenApi
  */
 function ɵɵrepeater(metadataSlotIdx, collection) {
-    const hostLView = getLView();
-    const hostTView = hostLView[TVIEW];
-    const metadata = hostLView[HEADER_OFFSET + metadataSlotIdx];
-    if (metadata.liveCollection === undefined) {
-        const containerIndex = metadataSlotIdx + 1;
-        const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
-        const itemTemplateTNode = getExistingTNode(hostTView, containerIndex);
-        metadata.liveCollection =
-            new LiveCollectionLContainerImpl(lContainer, hostLView, itemTemplateTNode);
-    }
-    else {
-        metadata.liveCollection.reset();
-    }
-    const liveCollection = metadata.liveCollection;
-    reconcile(liveCollection, collection, metadata.trackByFn);
-    // moves in the container might caused context's index to get out of order, re-adjust if needed
-    liveCollection.updateIndexes();
-    // handle empty blocks
-    if (metadata.hasEmptyBlock) {
-        const bindingIndex = nextBindingIndex();
-        const isCollectionEmpty = liveCollection.length === 0;
-        if (bindingUpdated(hostLView, bindingIndex, isCollectionEmpty)) {
-            const emptyTemplateIndex = metadataSlotIdx + 2;
-            const lContainerForEmpty = getLContainer(hostLView, HEADER_OFFSET + emptyTemplateIndex);
-            if (isCollectionEmpty) {
-                const emptyTemplateTNode = getExistingTNode(hostTView, emptyTemplateIndex);
-                const dehydratedView = findMatchingDehydratedView(lContainerForEmpty, emptyTemplateTNode.tView.ssrId);
-                const embeddedLView = createAndRenderEmbeddedLView(hostLView, emptyTemplateTNode, undefined, { dehydratedView });
-                addLViewToLContainer(lContainerForEmpty, embeddedLView, 0, shouldAddViewToDom(emptyTemplateTNode, dehydratedView));
-            }
-            else {
-                removeLViewFromLContainer(lContainerForEmpty, 0);
+    const prevConsumer = setActiveConsumer$1(null);
+    try {
+        const hostLView = getLView();
+        const hostTView = hostLView[TVIEW];
+        const metadata = hostLView[HEADER_OFFSET + metadataSlotIdx];
+        if (metadata.liveCollection === undefined) {
+            const containerIndex = metadataSlotIdx + 1;
+            const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
+            const itemTemplateTNode = getExistingTNode(hostTView, containerIndex);
+            metadata.liveCollection =
+                new LiveCollectionLContainerImpl(lContainer, hostLView, itemTemplateTNode);
+        }
+        else {
+            metadata.liveCollection.reset();
+        }
+        const liveCollection = metadata.liveCollection;
+        reconcile(liveCollection, collection, metadata.trackByFn);
+        // moves in the container might caused context's index to get out of order, re-adjust if needed
+        liveCollection.updateIndexes();
+        // handle empty blocks
+        if (metadata.hasEmptyBlock) {
+            const bindingIndex = nextBindingIndex();
+            const isCollectionEmpty = liveCollection.length === 0;
+            if (bindingUpdated(hostLView, bindingIndex, isCollectionEmpty)) {
+                const emptyTemplateIndex = metadataSlotIdx + 2;
+                const lContainerForEmpty = getLContainer(hostLView, HEADER_OFFSET + emptyTemplateIndex);
+                if (isCollectionEmpty) {
+                    const emptyTemplateTNode = getExistingTNode(hostTView, emptyTemplateIndex);
+                    const dehydratedView = findMatchingDehydratedView(lContainerForEmpty, emptyTemplateTNode.tView.ssrId);
+                    const embeddedLView = createAndRenderEmbeddedLView(hostLView, emptyTemplateTNode, undefined, { dehydratedView });
+                    addLViewToLContainer(lContainerForEmpty, embeddedLView, 0, shouldAddViewToDom(emptyTemplateTNode, dehydratedView));
+                }
+                else {
+                    removeLViewFromLContainer(lContainerForEmpty, 0);
+                }
             }
         }
+    }
+    finally {
+        setActiveConsumer$1(prevConsumer);
     }
 }
 function getLContainer(lView, index) {
@@ -21457,21 +21460,27 @@ function ɵɵdeferWhen(rawValue) {
     const lView = getLView();
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, rawValue)) {
-        const value = Boolean(rawValue); // handle truthy or falsy values
-        const tNode = getSelectedTNode();
-        const lDetails = getLDeferBlockDetails(lView, tNode);
-        const renderedState = lDetails[DEFER_BLOCK_STATE];
-        if (value === false && renderedState === DeferBlockInternalState.Initial) {
-            // If nothing is rendered yet, render a placeholder (if defined).
-            renderPlaceholder(lView, tNode);
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            const value = Boolean(rawValue); // handle truthy or falsy values
+            const tNode = getSelectedTNode();
+            const lDetails = getLDeferBlockDetails(lView, tNode);
+            const renderedState = lDetails[DEFER_BLOCK_STATE];
+            if (value === false && renderedState === DeferBlockInternalState.Initial) {
+                // If nothing is rendered yet, render a placeholder (if defined).
+                renderPlaceholder(lView, tNode);
+            }
+            else if (value === true &&
+                (renderedState === DeferBlockInternalState.Initial ||
+                    renderedState === DeferBlockState.Placeholder)) {
+                // The `when` condition has changed to `true`, trigger defer block loading
+                // if the block is either in initial (nothing is rendered) or a placeholder
+                // state.
+                triggerDeferBlock(lView, tNode);
+            }
         }
-        else if (value === true &&
-            (renderedState === DeferBlockInternalState.Initial ||
-                renderedState === DeferBlockState.Placeholder)) {
-            // The `when` condition has changed to `true`, trigger defer block loading
-            // if the block is either in initial (nothing is rendered) or a placeholder
-            // state.
-            triggerDeferBlock(lView, tNode);
+        finally {
+            setActiveConsumer$1(prevConsumer);
         }
     }
 }
@@ -21483,13 +21492,19 @@ function ɵɵdeferPrefetchWhen(rawValue) {
     const lView = getLView();
     const bindingIndex = nextBindingIndex();
     if (bindingUpdated(lView, bindingIndex, rawValue)) {
-        const value = Boolean(rawValue); // handle truthy or falsy values
-        const tView = lView[TVIEW];
-        const tNode = getSelectedTNode();
-        const tDetails = getTDeferBlockDetails(tView, tNode);
-        if (value === true && tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-            // If loading has not been started yet, trigger it now.
-            triggerPrefetching(tDetails, lView, tNode);
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            const value = Boolean(rawValue); // handle truthy or falsy values
+            const tView = lView[TVIEW];
+            const tNode = getSelectedTNode();
+            const tDetails = getTDeferBlockDetails(tView, tNode);
+            if (value === true && tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+                // If loading has not been started yet, trigger it now.
+                triggerPrefetching(tDetails, lView, tNode);
+            }
+        }
+        finally {
+            setActiveConsumer$1(prevConsumer);
         }
     }
 }

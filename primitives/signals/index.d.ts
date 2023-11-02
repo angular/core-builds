@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-f615f4f
+ * @license Angular v17.1.0-next.0+sha-83a3b85
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -52,6 +52,12 @@ export declare function consumerBeforeComputation(node: ReactiveNode | null): Re
  * Disconnect this consumer from the graph.
  */
 export declare function consumerDestroy(node: ReactiveNode): void;
+
+/**
+ * Determine whether this consumer has any dependencies which have changed since the last time
+ * they were read.
+ */
+export declare function consumerPollProducersForChange(node: ReactiveNode): boolean;
 
 /**
  * Create a computed signal which derives a reactive value from an expression.
