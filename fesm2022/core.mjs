@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-8f045c1
+ * @license Angular v17.1.0-next.0+sha-f615f4f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10445,7 +10445,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-8f045c1');
+const VERSION = new Version('17.1.0-next.0+sha-f615f4f');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -30286,6 +30286,7 @@ class ImagePerformanceWarning {
         this.window = null;
         this.observer = null;
         this.options = inject(IMAGE_CONFIG);
+        this.ngZone = inject(NgZone);
     }
     start() {
         if (typeof PerformanceObserver === 'undefined' ||
@@ -30301,7 +30302,11 @@ class ImagePerformanceWarning {
             const waitToScan = () => {
                 setTimeout(this.scanImages.bind(this), SCAN_DELAY);
             };
-            this.window?.addEventListener('load', waitToScan);
+            // Angular doesn't have to run change detection whenever any asynchronous tasks are invoked in
+            // the scope of this functionality.
+            this.ngZone.runOutsideAngular(() => {
+                this.window?.addEventListener('load', waitToScan);
+            });
         }
     }
     ngOnDestroy() {
@@ -30398,7 +30403,7 @@ class ImagePerformanceWarning {
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ImagePerformanceWarning, [{
         type: Injectable,
         args: [{ providedIn: 'root' }]
-    }], () => [], null); })();
+    }], null, null); })();
 function logLazyLCPWarning(src) {
     console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} is the Largest Contentful Paint (LCP) element ` +
         `but was given a "loading" value of "lazy", which can negatively impact` +
@@ -33807,7 +33812,10 @@ function signalSetFn(node, newValue) {
     if (!producerUpdatesAllowed()) {
         throwInvalidWriteToSignalError();
     }
-    if (!node.equal(node.value, newValue)) {
+    const value = node.value;
+    // assuming that signal value equality implementations should always return true for values that
+    // are the same according to Object.is
+    if (!Object.is(value, newValue) && !node.equal(value, newValue)) {
         node.value = newValue;
         signalValueChanged(node);
     }

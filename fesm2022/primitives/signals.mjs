@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-8f045c1
+ * @license Angular v17.1.0-next.0+sha-f615f4f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -443,7 +443,10 @@ function signalSetFn(node, newValue) {
     if (!producerUpdatesAllowed()) {
         throwInvalidWriteToSignalError();
     }
-    if (!node.equal(node.value, newValue)) {
+    const value = node.value;
+    // assuming that signal value equality implementations should always return true for values that
+    // are the same according to Object.is
+    if (!Object.is(value, newValue) && !node.equal(value, newValue)) {
         node.value = newValue;
         signalValueChanged(node);
     }
