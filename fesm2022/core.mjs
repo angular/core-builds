@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.2+sha-a8e57a1
+ * @license Angular v17.0.0-rc.2+sha-739c0d2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10425,7 +10425,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-rc.2+sha-a8e57a1');
+const VERSION = new Version('17.0.0-rc.2+sha-739c0d2');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -14254,6 +14254,8 @@ class EffectHandle {
 }
 /**
  * Create a global `Effect` for the given reactive function.
+ *
+ * @developerPreview
  */
 function effect(effectFn, options) {
     ngDevMode &&
