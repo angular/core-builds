@@ -24548,7 +24548,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-2560037");
+var VERSION2 = new Version("17.1.0-next.0+sha-3d73b0c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24851,8 +24851,8 @@ function migrateTemplate(template2) {
   return { migrated: result, errors };
 }
 function migrateNgIf(etm, ngTemplates, tmpl, offset) {
-  const matchThen = etm.attr.value.match(/;\s+then/gm);
-  const matchElse = etm.attr.value.match(/;\s+else/gm);
+  const matchThen = etm.attr.value.match(/;\s*then/gm);
+  const matchElse = etm.attr.value.match(/;\s*else/gm);
   if (matchThen && matchThen.length > 0) {
     return buildIfThenElseBlock(etm, ngTemplates, tmpl, matchThen[0], matchElse[0], offset);
   } else if (matchElse && matchElse.length > 0) {
