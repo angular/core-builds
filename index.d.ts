@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.2+sha-739c0d2
+ * @license Angular v17.0.0-rc.2+sha-236b448
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11880,6 +11880,16 @@ export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
  * a given module.
  */
 export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
+
+
+/**
+ * A guarded `performance.mark`.
+ *
+ * This method exists because while all supported browser and node.js version supported by Angular
+ * support performance.mark API. This is not the case for other environments such as JSDOM and
+ * Cloudflare workers.
+ */
+export declare function ɵperformanceMark(markName: string, markOptions?: PerformanceMarkOptions | undefined): PerformanceMark | undefined;
 
 /**
  * Runtime link information for Pipes.
