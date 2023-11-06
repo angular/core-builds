@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-651c347
+ * @license Angular v17.1.0-next.0+sha-699ae60
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10425,7 +10425,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-651c347');
+const VERSION = new Version('17.1.0-next.0+sha-699ae60');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11700,11 +11700,6 @@ const REACTIVE_LVIEW_CONSUMER_NODE = {
         this.lView[REACTIVE_TEMPLATE_CONSUMER] = this;
     },
 };
-
-/**
- * Whether we should skip specific logic in checkNoChanges mode.
- */
-const RUN_IN_CHECK_NO_CHANGES_ANYWAY = false;
 
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 function wrappedError(message, originalError) {
@@ -13611,9 +13606,7 @@ function detectChangesInView(lView, mode) {
     // backwards views, it gives an opportunity for `OnPush` components to be marked `Dirty`
     // before the CheckNoChanges pass. We don't want existing errors that are hidden by the
     // current CheckNoChanges bug to surface when making unrelated changes.
-    shouldRefreshView ||=
-        !!(flags & 64 /* LViewFlags.Dirty */ && mode === 0 /* ChangeDetectionMode.Global */ &&
-            (!isInCheckNoChangesPass || RUN_IN_CHECK_NO_CHANGES_ANYWAY));
+    shouldRefreshView ||= !!(flags & 64 /* LViewFlags.Dirty */ && mode === 0 /* ChangeDetectionMode.Global */ && !isInCheckNoChangesPass);
     // Always refresh views marked for refresh, regardless of mode.
     shouldRefreshView ||= !!(flags & 1024 /* LViewFlags.RefreshView */);
     // Refresh views when they have a dirty reactive consumer, regardless of mode.
