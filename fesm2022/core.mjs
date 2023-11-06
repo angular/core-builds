@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0-rc.2+sha-a86661f
+ * @license Angular v17.0.0-rc.2+sha-d4c20ac
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10425,7 +10425,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0-rc.2+sha-a86661f');
+const VERSION = new Version('17.0.0-rc.2+sha-d4c20ac');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -33844,9 +33844,13 @@ function signalSetFn(node, newValue) {
         throwInvalidWriteToSignalError();
     }
     const value = node.value;
-    // assuming that signal value equality implementations should always return true for values that
-    // are the same according to Object.is
-    if (!Object.is(value, newValue) && !node.equal(value, newValue)) {
+    if (Object.is(value, newValue)) {
+        if (typeof ngDevMode !== 'undefined' && ngDevMode && !node.equal(value, newValue)) {
+            console.warn('Signal value equality implementations should always return `true` for' +
+                ' values that are the same according to `Object.is` but returned `false` instead.');
+        }
+    }
+    else if (!node.equal(value, newValue)) {
         node.value = newValue;
         signalValueChanged(node);
     }
