@@ -19049,7 +19049,8 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
     for (const attr of root.attributes) {
       ingestBinding(unit, xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue);
     }
-    return root instanceof Element ? root.name : root.tagName;
+    const tagName = root instanceof Element ? root.name : root.tagName;
+    return tagName === "ng-template" ? null : tagName;
   }
   return null;
 }
@@ -21947,7 +21948,8 @@ var TemplateDefinitionBuilder = class {
       }
     }
     if (root !== null) {
-      tagName = root instanceof Element ? root.name : root.tagName;
+      const name = root instanceof Element ? root.name : root.tagName;
+      tagName = name === NG_TEMPLATE_TAG_NAME ? null : name;
       attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, root.attributes, root.inputs, []);
     }
     return { tagName, attrsExprs };
@@ -24548,7 +24550,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-rc.2+sha-1c92609");
+var VERSION2 = new Version("17.0.0-rc.2+sha-c267f54");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24607,6 +24609,15 @@ var switchcase = "*ngSwitchCase";
 var nakedcase = "ngSwitchCase";
 var switchdefault = "*ngSwitchDefault";
 var nakeddefault = "ngSwitchDefault";
+var commaSeparatedSyntax = /* @__PURE__ */ new Map([
+  ["(", ")"],
+  ["{", "}"],
+  ["[", "]"]
+]);
+var stringPairs = /* @__PURE__ */ new Map([
+  [`"`, `"`],
+  [`'`, `'`]
+]);
 var attributesToMigrate = [
   ngif,
   nakedngif,
@@ -24777,7 +24788,7 @@ function migrateTemplate(template2) {
   const visitor = new ElementCollector();
   visitAll2(visitor, parsed.rootNodes);
   for (let [key, tmpl] of visitor.templates) {
-    const regex = new RegExp(`\\W${key.slice(1)}\\W`, "gm");
+    const regex = new RegExp(`[^a-zA-Z0-9-<]+${key.slice(1)}\\W`, "gm");
     const matches = template2.match(regex);
     tmpl.count = (_a2 = matches == null ? void 0 : matches.length) != null ? _a2 : 0;
     tmpl.generateContents(template2);
@@ -24919,7 +24930,7 @@ function migrateNgFor(etm, tmpl, offset) {
   const aliases = [];
   const lbString = etm.hasLineBreaks ? lb : "";
   const lbSpaces = etm.hasLineBreaks ? `${lb}  ` : "";
-  const parts = etm.attr.value.split(";");
+  const parts = getNgForParts(etm.attr.value);
   const originals = getOriginals(etm, tmpl, offset);
   const condition = parts[0].replace("let ", "");
   const loopVar = condition.split(" of ")[0];
@@ -24958,6 +24969,37 @@ function migrateNgFor(etm, tmpl, offset) {
   const pre = originals.start.length - startBlock.length;
   const post = originals.end.length - endBlock.length;
   return { tmpl: updatedTmpl, offsets: { pre, post } };
+}
+function getNgForParts(expression) {
+  const parts = [];
+  const commaSeparatedStack = [];
+  const stringStack = [];
+  let current = "";
+  for (let i = 0; i < expression.length; i++) {
+    const char = expression[i];
+    const isInString = stringStack.length === 0;
+    const isInCommaSeparated = commaSeparatedStack.length === 0;
+    if (isInString && current.length > 0 && (char === ";" || char === "," && isInCommaSeparated)) {
+      parts.push(current);
+      current = "";
+      continue;
+    }
+    if (stringPairs.has(char)) {
+      stringStack.push(stringPairs.get(char));
+    } else if (stringStack.length > 0 && stringStack[stringStack.length - 1] === char) {
+      stringStack.pop();
+    }
+    if (commaSeparatedSyntax.has(char)) {
+      commaSeparatedStack.push(commaSeparatedSyntax.get(char));
+    } else if (commaSeparatedStack.length > 0 && commaSeparatedStack[commaSeparatedStack.length - 1] === char) {
+      commaSeparatedStack.pop();
+    }
+    current += char;
+  }
+  if (current.length > 0) {
+    parts.push(current);
+  }
+  return parts;
 }
 function getOriginals(etm, tmpl, offset) {
   if (etm.el.children.length > 0) {

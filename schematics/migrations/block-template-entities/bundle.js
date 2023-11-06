@@ -19038,7 +19038,8 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
     for (const attr of root.attributes) {
       ingestBinding(unit, xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue);
     }
-    return root instanceof Element ? root.name : root.tagName;
+    const tagName = root instanceof Element ? root.name : root.tagName;
+    return tagName === "ng-template" ? null : tagName;
   }
   return null;
 }
@@ -21936,7 +21937,8 @@ var TemplateDefinitionBuilder = class {
       }
     }
     if (root !== null) {
-      tagName = root instanceof Element ? root.name : root.tagName;
+      const name = root instanceof Element ? root.name : root.tagName;
+      tagName = name === NG_TEMPLATE_TAG_NAME ? null : name;
       attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, root.attributes, root.inputs, []);
     }
     return { tagName, attrsExprs };
@@ -24537,7 +24539,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0-rc.2+sha-1c92609");
+var VERSION2 = new Version("17.0.0-rc.2+sha-c267f54");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
