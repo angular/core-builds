@@ -6990,7 +6990,7 @@ var OpKind;
   OpKind2[OpKind2["ExtractedAttribute"] = 25] = "ExtractedAttribute";
   OpKind2[OpKind2["Defer"] = 26] = "Defer";
   OpKind2[OpKind2["DeferOn"] = 27] = "DeferOn";
-  OpKind2[OpKind2["ExtractedMessage"] = 28] = "ExtractedMessage";
+  OpKind2[OpKind2["I18nMessage"] = 28] = "I18nMessage";
   OpKind2[OpKind2["HostProperty"] = 29] = "HostProperty";
   OpKind2[OpKind2["Namespace"] = 30] = "Namespace";
   OpKind2[OpKind2["ProjectionDef"] = 31] = "ProjectionDef";
@@ -7004,6 +7004,7 @@ var OpKind;
   OpKind2[OpKind2["I18nApply"] = 39] = "I18nApply";
   OpKind2[OpKind2["Icu"] = 40] = "Icu";
   OpKind2[OpKind2["IcuUpdate"] = 41] = "IcuUpdate";
+  OpKind2[OpKind2["I18nContext"] = 42] = "I18nContext";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -7284,23 +7285,23 @@ function createRepeaterOp(repeaterCreate2, targetSlot, collection, sourceSpan) {
     sourceSpan
   }, NEW_OP);
 }
-function createI18nExpressionOp(owner, ownerSlot, expression, i18nPlaceholder, resolutionTime, sourceSpan) {
+function createI18nExpressionOp(context, target, handle, expression, i18nPlaceholder, resolutionTime, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.I18nExpression,
-    owner,
-    ownerSlot,
-    target: owner,
+    context,
+    target,
+    handle,
     expression,
     i18nPlaceholder,
     resolutionTime,
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_VARS), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
 }
-function createI18nApplyOp(target, targetSlot, sourceSpan) {
+function createI18nApplyOp(target, handle, sourceSpan) {
   return __spreadValues({
     kind: OpKind.I18nApply,
     target,
-    targetSlot,
+    handle,
     sourceSpan
   }, NEW_OP);
 }
@@ -8048,6 +8049,14 @@ function transformExpressionsInOp(op, transform2, flags) {
         op.placeholderConfig = transformExpressionsInExpression(op.placeholderConfig, transform2, flags);
       }
       break;
+    case OpKind.I18nMessage:
+      for (const [placeholder, expr] of op.params) {
+        op.params.set(placeholder, transformExpressionsInExpression(expr, transform2, flags));
+      }
+      for (const [placeholder, expr] of op.postprocessingParams) {
+        op.postprocessingParams.set(placeholder, transformExpressionsInExpression(expr, transform2, flags));
+      }
+      break;
     case OpKind.Advance:
     case OpKind.Container:
     case OpKind.ContainerEnd:
@@ -8058,9 +8067,9 @@ function transformExpressionsInOp(op, transform2, flags) {
     case OpKind.ElementEnd:
     case OpKind.ElementStart:
     case OpKind.EnableBindings:
-    case OpKind.ExtractedMessage:
     case OpKind.I18n:
     case OpKind.I18nApply:
+    case OpKind.I18nContext:
     case OpKind.I18nEnd:
     case OpKind.I18nStart:
     case OpKind.Icu:
@@ -8533,17 +8542,17 @@ function createDeferOnOp(defer2, trigger, prefetch, sourceSpan) {
     sourceSpan
   }, NEW_OP);
 }
-function createExtractedMessageOp(owner, message, isRoot) {
+function createI18nMessageOp(xref, i18nBlock, message, messagePlaceholder, params, postprocessingParams, needsPostprocessing) {
   return __spreadValues({
-    kind: OpKind.ExtractedMessage,
-    owner,
+    kind: OpKind.I18nMessage,
+    xref,
+    i18nBlock,
     message,
-    isRoot,
-    params: /* @__PURE__ */ new Map(),
-    postprocessingParams: /* @__PURE__ */ new Map(),
-    needsPostprocessing: false,
-    formattedParams: null,
-    formattedPostprocessingParams: null
+    messagePlaceholder,
+    params,
+    postprocessingParams,
+    needsPostprocessing,
+    subMessages: []
   }, NEW_OP);
 }
 function createI18nStartOp(xref, message, root) {
@@ -8554,7 +8563,8 @@ function createI18nStartOp(xref, message, root) {
     root: root != null ? root : xref,
     message,
     messageIndex: null,
-    subTemplateIndex: null
+    subTemplateIndex: null,
+    context: null
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
 function createI18nEndOp(xref) {
@@ -8563,12 +8573,26 @@ function createI18nEndOp(xref) {
     xref
   }, NEW_OP);
 }
-function createIcuOp(xref, message, sourceSpan) {
+function createIcuOp(xref, message, icu, messagePlaceholder, sourceSpan) {
   return __spreadValues({
     kind: OpKind.Icu,
     xref,
     message,
+    icu,
+    messagePlaceholder,
+    context: null,
     sourceSpan
+  }, NEW_OP);
+}
+function createI18nContextOp(xref, i18nBlock, message, sourceSpan) {
+  return __spreadValues({
+    kind: OpKind.I18nContext,
+    xref,
+    i18nBlock,
+    message,
+    sourceSpan,
+    params: /* @__PURE__ */ new Map(),
+    postprocessingParams: /* @__PURE__ */ new Map()
   }, NEW_OP);
 }
 
@@ -8715,7 +8739,7 @@ function applyI18nExpressions(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression && needsApplication(op)) {
-        OpList.insertAfter(createI18nApplyOp(op.owner, op.ownerSlot, null), op);
+        OpList.insertAfter(createI18nApplyOp(op.target, op.handle, null), op);
       }
     }
   }
@@ -8725,7 +8749,7 @@ function needsApplication(op) {
   if (((_a2 = op.next) == null ? void 0 : _a2.kind) !== OpKind.I18nExpression) {
     return true;
   }
-  if (op.next.owner !== op.owner) {
+  if (op.next.context !== op.context) {
     return true;
   }
   return false;
@@ -8734,19 +8758,31 @@ function needsApplication(op) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/assign_i18n_slot_dependencies.mjs
 function assignI18nSlotDependencies(job) {
   const i18nLastSlotConsumers = /* @__PURE__ */ new Map();
+  const i18nContexts = /* @__PURE__ */ new Map();
   let lastSlotConsumer = null;
+  let currentI18nOp = null;
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if (op.kind === OpKind.I18nEnd) {
-        i18nLastSlotConsumers.set(op.xref, lastSlotConsumer);
-      }
       if (hasConsumesSlotTrait(op)) {
         lastSlotConsumer = op.xref;
+      }
+      switch (op.kind) {
+        case OpKind.I18nStart:
+          currentI18nOp = op;
+          break;
+        case OpKind.I18nEnd:
+          i18nLastSlotConsumers.set(currentI18nOp.xref, lastSlotConsumer);
+          currentI18nOp = null;
+          break;
+        case OpKind.I18nContext:
+          i18nContexts.set(op.xref, op);
+          break;
       }
     }
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
-        op.target = i18nLastSlotConsumers.get(op.owner);
+        const i18nContext = i18nContexts.get(op.context);
+        op.target = i18nLastSlotConsumers.get(i18nContext.i18nBlock);
       }
     }
   }
@@ -9213,6 +9249,85 @@ function serializeAttributes({ attributes, bindings, classes, i18n: i18n2, proje
   return literalArr(attrArray);
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/create_i18n_contexts.mjs
+function createI18nContexts(job) {
+  let currentI18nOp = null;
+  let xref;
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.I18nStart:
+          xref = job.allocateXrefId();
+          unit.create.push(createI18nContextOp(xref, op.xref, op.message, null));
+          op.context = xref;
+          currentI18nOp = op;
+          break;
+        case OpKind.I18nEnd:
+          currentI18nOp = null;
+          break;
+        case OpKind.Icu:
+          if (currentI18nOp === null) {
+            throw Error("Unexpected ICU outside of an i18n block.");
+          }
+          if (op.message.id !== currentI18nOp.message.id) {
+            xref = job.allocateXrefId();
+            unit.create.push(createI18nContextOp(xref, currentI18nOp.xref, op.message, null));
+            op.context = xref;
+          } else {
+            op.context = currentI18nOp.context;
+          }
+          break;
+      }
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/create_i18n_icu_expressions.mjs
+function createI18nIcuExpressions(job) {
+  const icus = /* @__PURE__ */ new Map();
+  const i18nContexts = /* @__PURE__ */ new Map();
+  const i18nBlocks = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.Icu:
+          icus.set(op.xref, op);
+          break;
+        case OpKind.I18nContext:
+          i18nContexts.set(op.xref, op);
+          break;
+        case OpKind.I18nStart:
+          i18nBlocks.set(op.xref, op);
+          break;
+      }
+    }
+    for (const op of unit.update) {
+      switch (op.kind) {
+        case OpKind.IcuUpdate:
+          const icuOp = icus.get(op.xref);
+          if ((icuOp == null ? void 0 : icuOp.icu.expressionPlaceholder) === void 0) {
+            throw Error("ICU should have an i18n placeholder");
+          }
+          if (icuOp.context === null) {
+            throw Error("ICU should have its i18n context set");
+          }
+          const i18nContext = i18nContexts.get(icuOp.context);
+          const i18nBlock = i18nBlocks.get(i18nContext.i18nBlock);
+          OpList.replace(op, createI18nExpressionOp(
+            i18nContext.xref,
+            i18nBlock.xref,
+            i18nBlock.handle,
+            new LexicalReadExpr(icuOp.icu.expression),
+            icuOp.icu.expressionPlaceholder,
+            I18nParamResolutionTime.Postproccessing,
+            null
+          ));
+          break;
+      }
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/defer_configs.mjs
 function configureDeferInstructions(job) {
   for (const unit of job.units) {
@@ -9471,7 +9586,7 @@ function ternaryTransform(e) {
   return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.Equals, e.guard, NULL_EXPR), NULL_EXPR, e.expr);
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/format_i18n_params.mjs
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/extract_i18n_messages.mjs
 var ESCAPE = "\uFFFD";
 var ELEMENT_MARKER = "#";
 var TEMPLATE_MARKER = "*";
@@ -9480,23 +9595,60 @@ var CONTEXT_MARKER = ":";
 var LIST_START_MARKER = "[";
 var LIST_END_MARKER = "]";
 var LIST_DELIMITER = "|";
-function formatI18nParams(job) {
+function extractI18nMessages(job) {
+  const i18nContexts = /* @__PURE__ */ new Map();
+  const i18nBlockContexts = /* @__PURE__ */ new Set();
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if (op.kind === OpKind.ExtractedMessage) {
-        if (op.isRoot) {
-          op.formattedParams = formatParams(op.params);
-          op.formattedPostprocessingParams = formatParams(op.postprocessingParams);
-          op.needsPostprocessing = op.postprocessingParams.size > 0;
-          for (const [param, values] of op.params) {
-            if (values.length > 1) {
-              op.needsPostprocessing = true;
-            }
-          }
-        }
+      switch (op.kind) {
+        case OpKind.I18nContext:
+          i18nContexts.set(op.xref, op);
+          break;
+        case OpKind.I18nStart:
+          i18nBlockContexts.add(op.context);
+          break;
       }
     }
   }
+  const i18nBlockMessages = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.I18nStart && op.xref === op.root) {
+        if (!op.context) {
+          throw Error("I18n start op should have its context set.");
+        }
+        const i18nMessageOp = createI18nMessage(job, i18nContexts.get(op.context));
+        i18nBlockMessages.set(op.xref, i18nMessageOp);
+        unit.create.push(i18nMessageOp);
+      }
+    }
+  }
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.Icu) {
+        if (!op.context) {
+          throw Error("ICU op should have its context set.");
+        }
+        if (!i18nBlockContexts.has(op.context)) {
+          const i18nContext = i18nContexts.get(op.context);
+          const subMessage = createI18nMessage(job, i18nContext, op.messagePlaceholder);
+          unit.create.push(subMessage);
+          const parentMessage = i18nBlockMessages.get(i18nContext.i18nBlock);
+          parentMessage == null ? void 0 : parentMessage.subMessages.push(subMessage.xref);
+        }
+        OpList.remove(op);
+      }
+    }
+  }
+}
+function createI18nMessage(job, context, messagePlaceholder) {
+  let needsPostprocessing = context.postprocessingParams.size > 0;
+  for (const values of context.params.values()) {
+    if (values.length > 1) {
+      needsPostprocessing = true;
+    }
+  }
+  return createI18nMessageOp(job.allocateXrefId(), context.i18nBlock, context.message, messagePlaceholder != null ? messagePlaceholder : null, formatParams(context.params), formatParams(context.postprocessingParams), needsPostprocessing);
 }
 function formatParams(params) {
   const result = /* @__PURE__ */ new Map();
@@ -15405,8 +15557,8 @@ var I18nMetaVisitor = class {
   }
   _generateI18nMessage(nodes, meta = "", visitNodeFn) {
     const { meaning, description, customId } = this._parseMetadata(meta);
-    const createI18nMessage = createI18nMessageFactory(this.interpolationConfig);
-    const message = createI18nMessage(nodes, meaning, description, customId, visitNodeFn);
+    const createI18nMessage2 = createI18nMessageFactory(this.interpolationConfig);
+    const message = createI18nMessage2(nodes, meaning, description, customId, visitNodeFn);
     this._setMessageId(message, meta);
     this._setLegacyIds(message, meta);
     return message;
@@ -15678,26 +15830,19 @@ var TRANSLATION_VAR_PREFIX2 = "i18n_";
 function collectI18nConsts(job) {
   const fileBasedI18nSuffix = job.relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_").toUpperCase() + "_";
   const messageConstIndices = /* @__PURE__ */ new Map();
+  const messages = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if (op.kind === OpKind.ExtractedMessage) {
-        if (op.isRoot) {
-          assertAllParamsResolved(op);
-          const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
-          const closureVar = i18nGenerateClosureVar(job.pool, op.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
-          let transformFn = void 0;
-          if (op.needsPostprocessing) {
-            const extraTransformFnParams = [];
-            if (op.formattedPostprocessingParams.size > 0) {
-              extraTransformFnParams.push(literalMap([...op.formattedPostprocessingParams].map(([key, value]) => ({ key, value, quoted: true }))));
-            }
-            transformFn = (expr) => importExpr(Identifiers.i18nPostprocess).callFn([expr, ...extraTransformFnParams]);
-          }
-          const statements = getTranslationDeclStmts(op.message, mainVar, closureVar, op.formattedParams, transformFn);
-          messageConstIndices.set(op.owner, job.addConst(mainVar, statements));
-        }
+      if (op.kind === OpKind.I18nMessage) {
+        messages.set(op.xref, op);
         OpList.remove(op);
       }
+    }
+  }
+  for (const op of messages.values()) {
+    if (op.kind === OpKind.I18nMessage && op.messagePlaceholder === null) {
+      const { mainVar, statements } = collectMessage(job, fileBasedI18nSuffix, messages, op);
+      messageConstIndices.set(op.i18nBlock, job.addConst(mainVar, statements));
     }
   }
   for (const unit of job.units) {
@@ -15707,6 +15852,28 @@ function collectI18nConsts(job) {
       }
     }
   }
+}
+function collectMessage(job, fileBasedI18nSuffix, messages, messageOp) {
+  const statements = [];
+  for (const subMessageId of messageOp.subMessages) {
+    const subMessage = messages.get(subMessageId);
+    const { mainVar: subMessageVar, statements: subMessageStatements } = collectMessage(job, fileBasedI18nSuffix, messages, subMessage);
+    statements.push(...subMessageStatements);
+    messageOp.params.set(subMessage.messagePlaceholder, subMessageVar);
+  }
+  assertAllParamsResolved(messageOp);
+  const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
+  const closureVar = i18nGenerateClosureVar(job.pool, messageOp.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
+  let transformFn = void 0;
+  if (messageOp.needsPostprocessing) {
+    const extraTransformFnParams = [];
+    if (messageOp.postprocessingParams.size > 0) {
+      extraTransformFnParams.push(literalMap([...messageOp.postprocessingParams].map(([key, value]) => ({ key, value, quoted: true }))));
+    }
+    transformFn = (expr) => importExpr(Identifiers.i18nPostprocess).callFn([expr, ...extraTransformFnParams]);
+  }
+  statements.push(...getTranslationDeclStmts(messageOp.message, mainVar, closureVar, messageOp.params, transformFn));
+  return { mainVar, statements };
 }
 function getTranslationDeclStmts(message, variable2, closureVar, params, transformFn) {
   const paramsObject = Object.fromEntries(params);
@@ -15736,28 +15903,14 @@ function i18nGenerateClosureVar(pool, messageId, fileBasedI18nSuffix, useExterna
   return variable(name);
 }
 function assertAllParamsResolved(op) {
-  if (op.formattedParams === null || op.formattedPostprocessingParams === null) {
-    throw Error("Params should have been formatted.");
-  }
   for (const placeholder in op.message.placeholders) {
-    if (!op.formattedParams.has(placeholder) && !op.formattedPostprocessingParams.has(placeholder)) {
+    if (!op.params.has(placeholder) && !op.postprocessingParams.has(placeholder)) {
       throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
     }
   }
   for (const placeholder in op.message.placeholderToMessage) {
-    if (!op.formattedParams.has(placeholder) && !op.formattedPostprocessingParams.has(placeholder)) {
+    if (!op.params.has(placeholder) && !op.postprocessingParams.has(placeholder)) {
       throw Error(`Failed to resolve i18n message placeholder: ${placeholder}`);
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_message_extraction.mjs
-function extractI18nMessages(job) {
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart) {
-        unit.create.push(createExtractedMessageOp(op.xref, op.message, op.xref === op.root));
-      }
     }
   }
 }
@@ -15766,22 +15919,22 @@ function extractI18nMessages(job) {
 function extractI18nText(job) {
   var _a2;
   for (const unit of job.units) {
-    let currentI18nId = null;
-    let currentI18nSlot = null;
-    const textNodes = /* @__PURE__ */ new Map();
+    let currentI18n = null;
+    const textNodeI18nBlocks = /* @__PURE__ */ new Map();
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
-          currentI18nId = op.xref;
-          currentI18nSlot = op.handle;
+          if (op.context === null) {
+            throw Error("I18n op should have its context set.");
+          }
+          currentI18n = op;
           break;
         case OpKind.I18nEnd:
-          currentI18nId = null;
-          currentI18nSlot = null;
+          currentI18n = null;
           break;
         case OpKind.Text:
-          if (currentI18nId !== null && currentI18nSlot !== null) {
-            textNodes.set(op.xref, { xref: currentI18nId, slot: currentI18nSlot });
+          if (currentI18n !== null) {
+            textNodeI18nBlocks.set(op.xref, currentI18n);
             OpList.remove(op);
           }
           break;
@@ -15790,62 +15943,17 @@ function extractI18nText(job) {
     for (const op of unit.update) {
       switch (op.kind) {
         case OpKind.InterpolateText:
-          if (!textNodes.has(op.target)) {
+          if (!textNodeI18nBlocks.has(op.target)) {
             continue;
           }
-          const i18nBlock = textNodes.get(op.target);
+          const i18nOp = textNodeI18nBlocks.get(op.target);
           const ops = [];
           for (let i = 0; i < op.interpolation.expressions.length; i++) {
             const expr = op.interpolation.expressions[i];
             const placeholder = op.i18nPlaceholders[i];
-            ops.push(createI18nExpressionOp(i18nBlock.xref, i18nBlock.slot, expr, placeholder.name, I18nParamResolutionTime.Creation, (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
-          }
-          if (ops.length > 0) {
+            ops.push(createI18nExpressionOp(i18nOp.context, i18nOp.xref, i18nOp.handle, expr, placeholder.name, I18nParamResolutionTime.Creation, (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
           }
           OpList.replaceWithMany(op, ops);
-          break;
-      }
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/icu_extraction.mjs
-function extractI18nICUs(job) {
-  for (const unit of job.units) {
-    const icus = /* @__PURE__ */ new Map();
-    let currentI18nId = null;
-    let currentI18nSlot = null;
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.I18nStart:
-          currentI18nId = op.xref;
-          currentI18nSlot = op.handle;
-          break;
-        case OpKind.I18nEnd:
-          currentI18nId = null;
-          currentI18nSlot = null;
-          break;
-        case OpKind.Icu:
-          if (currentI18nId === null) {
-            throw Error("Unexpected ICU outside of an i18n block.");
-          }
-          icus.set(op.xref, { message: op.message, i18nBlockId: currentI18nId, i18nBlockSlot: currentI18nSlot });
-          OpList.remove(op);
-          break;
-      }
-    }
-    for (const op of unit.update) {
-      switch (op.kind) {
-        case OpKind.IcuUpdate:
-          const { message, i18nBlockId, i18nBlockSlot } = icus.get(op.xref);
-          const icuNode = message.nodes.find((n) => n instanceof Icu2);
-          if (icuNode === void 0) {
-            throw Error("Could not find ICU in i18n AST");
-          }
-          if (icuNode.expressionPlaceholder === void 0) {
-            throw Error("ICU is missing an i18n placeholder");
-          }
-          OpList.replace(op, createI18nExpressionOp(i18nBlockId, i18nBlockSlot, new LexicalReadExpr(icuNode.expression), icuNode.expressionPlaceholder, I18nParamResolutionTime.Postproccessing, null));
           break;
       }
     }
@@ -15880,6 +15988,47 @@ function serializeLocalRefs(refs) {
     constRefs.push(literal(ref.name), literal(ref.target));
   }
   return literalArr(constRefs);
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/merge_i18n_contexts.mjs
+function mergeI18nContexts(job) {
+  const i18nOps = /* @__PURE__ */ new Map();
+  const i18nContexts = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.I18nStart:
+          if (!op.context) {
+            throw Error("I18n op should have its context set.");
+          }
+          i18nOps.set(op.xref, op);
+          break;
+        case OpKind.I18nContext:
+          i18nContexts.set(op.xref, op);
+          break;
+      }
+    }
+  }
+  for (const childI18nOp of i18nOps.values()) {
+    if (childI18nOp.xref !== childI18nOp.root) {
+      const childContext = i18nContexts.get(childI18nOp.context);
+      const rootI18nOp = i18nOps.get(childI18nOp.root);
+      const rootContext = i18nContexts.get(rootI18nOp.context);
+      mergeParams(rootContext.params, childContext.params);
+      mergeParams(rootContext.postprocessingParams, childContext.postprocessingParams);
+    }
+  }
+}
+function mergeParams(to, from) {
+  for (const [placeholder, fromValues] of from) {
+    const toValues = to.get(placeholder) || [];
+    const flags = fromValues[0].flags;
+    if (flags & I18nParamValueFlags.CloseTag && !(flags & I18nParamValueFlags.OpenTag)) {
+      to.set(placeholder, [...fromValues, ...toValues]);
+    } else {
+      to.set(placeholder, [...toValues, ...fromValues]);
+    }
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/namespace.mjs
@@ -16403,49 +16552,6 @@ function wrapTemplateWithI18n(unit, parentI18n) {
     const id = unit.job.allocateXrefId();
     OpList.insertAfter(createI18nStartOp(id, parentI18n.message, parentI18n.root), unit.create.head);
     OpList.insertBefore(createI18nEndOp(id), unit.create.tail);
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/propagate_i18n_placeholders.mjs
-function propogateI18nPlaceholders(job) {
-  const i18nOps = /* @__PURE__ */ new Map();
-  const extractedMessageOps = /* @__PURE__ */ new Map();
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.I18nStart:
-          i18nOps.set(op.xref, op);
-          break;
-        case OpKind.ExtractedMessage:
-          extractedMessageOps.set(op.owner, op);
-          break;
-      }
-    }
-  }
-  for (const [xref, childExtractedMessageOp] of extractedMessageOps) {
-    if (!childExtractedMessageOp.isRoot) {
-      const i18nOp = i18nOps.get(xref);
-      if (i18nOp === void 0) {
-        throw Error("Could not find owner i18n block for extracted message.");
-      }
-      const rootExtractedMessageOp = extractedMessageOps.get(i18nOp.root);
-      if (rootExtractedMessageOp === void 0) {
-        throw Error("Could not find extracted message op for root i18n block.");
-      }
-      mergeParams(rootExtractedMessageOp.params, childExtractedMessageOp.params);
-      mergeParams(rootExtractedMessageOp.postprocessingParams, childExtractedMessageOp.postprocessingParams);
-    }
-  }
-}
-function mergeParams(to, from) {
-  for (const [placeholder, fromValues] of from) {
-    const toValues = to.get(placeholder) || [];
-    const flags = fromValues[0].flags;
-    if (flags & I18nParamValueFlags.CloseTag && !(flags & I18nParamValueFlags.OpenTag)) {
-      to.set(placeholder, [...fromValues, ...toValues]);
-    } else {
-      to.set(placeholder, [...toValues, ...fromValues]);
-    }
   }
 }
 
@@ -17243,7 +17349,7 @@ function reifyUpdateOperations(_unit, ops) {
         OpList.replace(op, i18nExp(op.expression, op.sourceSpan));
         break;
       case OpKind.I18nApply:
-        OpList.replace(op, i18nApply(op.targetSlot.slot, op.sourceSpan));
+        OpList.replace(op, i18nApply(op.handle.slot, op.sourceSpan));
         break;
       case OpKind.InterpolateText:
         OpList.replace(op, textInterpolate(op.interpolation.strings, op.interpolation.expressions, op.sourceSpan));
@@ -17382,6 +17488,22 @@ function removeEmptyBindings(job) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/remove_i18n_contexts.mjs
+function removeI18nContexts(job) {
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.I18nContext:
+          OpList.remove(op);
+          break;
+        case OpKind.I18nStart:
+          op.context = null;
+          break;
+      }
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/repeater_derived_vars.mjs
 function generateRepeaterDerivedVars(job) {
   const repeaters = /* @__PURE__ */ new Map();
@@ -17478,13 +17600,13 @@ function transformDollarEvent(unit, ops) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_element_placeholders.mjs
 function resolveI18nElementPlaceholders(job) {
-  const extractedMessageOps = /* @__PURE__ */ new Map();
+  const i18nContexts = /* @__PURE__ */ new Map();
   const elements = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
       switch (op.kind) {
-        case OpKind.ExtractedMessage:
-          extractedMessageOps.set(op.owner, op);
+        case OpKind.I18nContext:
+          i18nContexts.set(op.xref, op);
           break;
         case OpKind.ElementStart:
           elements.set(op.xref, op);
@@ -17497,10 +17619,10 @@ function resolveI18nElementPlaceholders(job) {
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
-          if (!extractedMessageOps.has(op.xref)) {
-            throw Error("Could not find extracted message for i18n op");
+          if (!op.context) {
+            throw Error("Could not find i18n context for i18n op");
           }
-          currentOps = { i18n: op, extractedMessage: extractedMessageOps.get(op.xref) };
+          currentOps = { i18nBlock: op, i18nContext: i18nContexts.get(op.context) };
           break;
         case OpKind.I18nEnd:
           currentOps = null;
@@ -17515,7 +17637,7 @@ function resolveI18nElementPlaceholders(job) {
             if (closeName === "") {
               flags |= I18nParamValueFlags.CloseTag;
             }
-            addParam(currentOps.extractedMessage.params, startName, op.handle.slot, currentOps.i18n.subTemplateIndex, flags);
+            addParam(currentOps.i18nContext.params, startName, op.handle.slot, currentOps.i18nBlock.subTemplateIndex, flags);
           }
           break;
         case OpKind.ElementEnd:
@@ -17526,7 +17648,7 @@ function resolveI18nElementPlaceholders(job) {
             }
             const { closeName } = startOp.i18nPlaceholder;
             if (closeName !== "") {
-              addParam(currentOps.extractedMessage.params, closeName, startOp.handle.slot, currentOps.i18n.subTemplateIndex, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
+              addParam(currentOps.i18nContext.params, closeName, startOp.handle.slot, currentOps.i18nBlock.subTemplateIndex, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
             }
           }
           break;
@@ -17535,9 +17657,9 @@ function resolveI18nElementPlaceholders(job) {
             if (currentOps === null) {
               throw Error("i18n tag placeholder should only occur inside an i18n block");
             }
-            const subTemplateIndex = getSubTemplateIndexForTemplateTag(job, currentOps.i18n, op);
-            addParam(currentOps.extractedMessage.params, op.i18nPlaceholder.startName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag);
-            addParam(currentOps.extractedMessage.params, op.i18nPlaceholder.closeName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
+            const subTemplateIndex = getSubTemplateIndexForTemplateTag(job, currentOps.i18nBlock, op);
+            addParam(currentOps.i18nContext.params, op.i18nPlaceholder.startName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag);
+            addParam(currentOps.i18nContext.params, op.i18nPlaceholder.closeName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
           }
           break;
       }
@@ -17561,16 +17683,16 @@ function addParam(params, placeholder, value, subTemplateIndex, flags = I18nPara
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_expression_placeholders.mjs
 function resolveI18nExpressionPlaceholders(job) {
-  const i18nOps = /* @__PURE__ */ new Map();
-  const extractedMessageOps = /* @__PURE__ */ new Map();
+  const subTemplateIndicies = /* @__PURE__ */ new Map();
+  const i18nContexts = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
-          i18nOps.set(op.xref, op);
+          subTemplateIndicies.set(op.xref, op.subTemplateIndex);
           break;
-        case OpKind.ExtractedMessage:
-          extractedMessageOps.set(op.owner, op);
+        case OpKind.I18nContext:
+          i18nContexts.set(op.xref, op);
           break;
       }
     }
@@ -17579,24 +17701,14 @@ function resolveI18nExpressionPlaceholders(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
-        const i18nOp = i18nOps.get(op.owner);
-        let index = expressionIndices.get(op.owner) || 0;
-        if (!i18nOp) {
-          throw Error("Cannot find corresponding i18n block for i18nExpr");
-        }
-        const extractedMessageOp = extractedMessageOps.get(i18nOp.xref);
-        if (!extractedMessageOp) {
-          throw Error("Cannot find extracted message for i18n block");
-        }
-        const params = op.resolutionTime === I18nParamResolutionTime.Creation ? extractedMessageOp.params : extractedMessageOp.postprocessingParams;
+        const index = expressionIndices.get(op.context) || 0;
+        const i18nContext = i18nContexts.get(op.context);
+        const subTemplateIndex = subTemplateIndicies.get(i18nContext.i18nBlock);
+        const params = op.resolutionTime === I18nParamResolutionTime.Creation ? i18nContext.params : i18nContext.postprocessingParams;
         const values = params.get(op.i18nPlaceholder) || [];
-        values.push({
-          value: index,
-          subTemplateIndex: i18nOp.subTemplateIndex,
-          flags: I18nParamValueFlags.None
-        });
+        values.push({ value: index, subTemplateIndex, flags: I18nParamValueFlags.None });
         params.set(op.i18nPlaceholder, values);
-        expressionIndices.set(op.owner, index + 1);
+        expressionIndices.set(op.context, index + 1);
       }
     }
   }
@@ -18347,6 +18459,7 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: specializeBindings },
   { kind: CompilationJobKind.Tmpl, fn: propagateI18nBlocks },
   { kind: CompilationJobKind.Tmpl, fn: wrapI18nIcus },
+  { kind: CompilationJobKind.Tmpl, fn: createI18nContexts },
   { kind: CompilationJobKind.Both, fn: extractAttributes },
   { kind: CompilationJobKind.Both, fn: parseExtractedStyles },
   { kind: CompilationJobKind.Tmpl, fn: removeEmptyBindings },
@@ -18356,7 +18469,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: createPipes },
   { kind: CompilationJobKind.Tmpl, fn: configureDeferInstructions },
   { kind: CompilationJobKind.Tmpl, fn: extractI18nText },
-  { kind: CompilationJobKind.Tmpl, fn: extractI18nICUs },
+  { kind: CompilationJobKind.Tmpl, fn: createI18nIcuExpressions },
   { kind: CompilationJobKind.Tmpl, fn: applyI18nExpressions },
   { kind: CompilationJobKind.Tmpl, fn: createVariadicPipes },
   { kind: CompilationJobKind.Both, fn: generatePureLiteralStructures },
@@ -18377,16 +18490,16 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: expandSafeReads },
   { kind: CompilationJobKind.Both, fn: generateTemporaryVariables },
   { kind: CompilationJobKind.Tmpl, fn: allocateSlots },
-  { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
-  { kind: CompilationJobKind.Tmpl, fn: propogateI18nPlaceholders },
-  { kind: CompilationJobKind.Tmpl, fn: formatI18nParams },
+  { kind: CompilationJobKind.Tmpl, fn: mergeI18nContexts },
+  { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackFns },
   { kind: CompilationJobKind.Tmpl, fn: collectI18nConsts },
   { kind: CompilationJobKind.Tmpl, fn: collectConstExpressions },
   { kind: CompilationJobKind.Both, fn: collectElementConsts },
   { kind: CompilationJobKind.Tmpl, fn: assignI18nSlotDependencies },
+  { kind: CompilationJobKind.Tmpl, fn: removeI18nContexts },
   { kind: CompilationJobKind.Both, fn: countVariables },
   { kind: CompilationJobKind.Tmpl, fn: generateAdvance },
   { kind: CompilationJobKind.Both, fn: optimizeVariables },
@@ -18791,9 +18904,9 @@ function ingestDeferBlock(unit, deferBlock) {
 }
 function ingestIcu(unit, icu) {
   var _a2;
-  if (icu.i18n instanceof Message) {
+  if (icu.i18n instanceof Message && isSingleI18nIcu(icu.i18n)) {
     const xref = unit.job.allocateXrefId();
-    unit.create.push(createIcuOp(xref, icu.i18n, null));
+    unit.create.push(createIcuOp(xref, icu.i18n, icu.i18n.nodes[0], icuFromI18nMessage(icu.i18n).name, null));
     unit.update.push(createIcuUpdateOp(xref, null));
   } else {
     throw Error(`Unhandled i18n metadata type for ICU: ${(_a2 = icu.i18n) == null ? void 0 : _a2.constructor.name}`);
@@ -24539,7 +24652,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-f2fbe86");
+var VERSION2 = new Version("17.1.0-next.0+sha-89cfadd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
