@@ -24761,7 +24761,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-49cbe43");
+var VERSION2 = new Version("17.1.0-next.0+sha-12f979d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24842,12 +24842,14 @@ var ElementToMigrate = class {
   }
 };
 var Template2 = class {
-  constructor(el) {
+  constructor(el, i18n2) {
     __publicField(this, "el");
     __publicField(this, "count", 0);
     __publicField(this, "contents", "");
     __publicField(this, "children", "");
+    __publicField(this, "i18n", null);
     this.el = el;
+    this.i18n = i18n2;
   }
   generateContents(tmpl) {
     this.contents = tmpl.slice(this.el.sourceSpan.start.offset, this.el.sourceSpan.end.offset + 1);
@@ -24902,11 +24904,19 @@ var TemplateCollector = class extends RecursiveVisitor {
   }
   visitElement(el) {
     if (el.name === ngtemplate) {
+      let i18n2 = null;
+      let templateAttr = null;
       for (const attr of el.attrs) {
-        if (attr.name.startsWith("#")) {
-          this.elements.push(new ElementToMigrate(el, attr));
-          this.templates.set(attr.name, new Template2(el));
+        if (attr.name === "i18n") {
+          i18n2 = attr;
         }
+        if (attr.name.startsWith("#")) {
+          templateAttr = attr;
+        }
+      }
+      if (templateAttr !== null) {
+        this.elements.push(new ElementToMigrate(el, templateAttr));
+        this.templates.set(templateAttr.name, new Template2(el, i18n2));
       }
     }
     super.visitElement(el, null);
@@ -25019,12 +25029,21 @@ function countTemplateUsage(template2) {
   }
   return /* @__PURE__ */ new Map();
 }
+function wrapIntoI18nContainer(i18nAttr, content) {
+  const i18n2 = i18nAttr.value === "" ? "i18n" : `i18n="${i18nAttr.value}"`;
+  return `<ng-container ${i18n2}>${content}</ng-container>`;
+}
 function processNgTemplates(template2) {
   const templates = countTemplateUsage(template2);
   for (const [name, t] of templates) {
     const placeholder = `${name}|`;
     if (template2.indexOf(placeholder) > -1) {
-      template2 = template2.replace(placeholder, t.children);
+      if (t.i18n !== null) {
+        const container = wrapIntoI18nContainer(t.i18n, t.children);
+        template2 = template2.replace(placeholder, container);
+      } else {
+        template2 = template2.replace(placeholder, t.children);
+      }
       if (t.count <= 2) {
         template2 = template2.replace(t.contents, "");
       }
@@ -25042,10 +25061,16 @@ function getOriginals(etm, tmpl, offset) {
   return { start, end: "" };
 }
 function getMainBlock(etm, tmpl, offset) {
+  const i18nAttr = etm.el.attrs.find((x) => x.name === "i18n");
   if ((etm.el.name === "ng-container" || etm.el.name === "ng-template") && etm.el.attrs.length === 1) {
     const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
     const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
     const middle2 = tmpl.slice(childStart2, childEnd2);
+    return { start: "", middle: middle2, end: "" };
+  } else if (etm.el.name === "ng-template" && etm.el.attrs.length === 2 && i18nAttr !== void 0) {
+    const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
+    const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
+    const middle2 = wrapIntoI18nContainer(i18nAttr, tmpl.slice(childStart2, childEnd2));
     return { start: "", middle: middle2, end: "" };
   }
   const attrStart = etm.attr.keySpan.start.offset - 1 - offset;
