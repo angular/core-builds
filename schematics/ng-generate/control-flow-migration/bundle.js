@@ -24761,7 +24761,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0+sha-c30dde2");
+var VERSION2 = new Version("17.0.0+sha-1d31a0c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24805,42 +24805,8 @@ var FactoryTarget2;
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/compiler.mjs
 publishFacade(_global);
 
-// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
-var import_path2 = require("path");
-var import_typescript5 = __toESM(require("typescript"), 1);
-
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/types.mjs
-var ngif = "*ngIf";
-var boundngif = "[ngIf]";
-var nakedngif = "ngIf";
-var ngfor = "*ngFor";
-var ngswitch = "[ngSwitch]";
-var boundcase = "[ngSwitchCase]";
-var switchcase = "*ngSwitchCase";
-var nakedcase = "ngSwitchCase";
-var switchdefault = "*ngSwitchDefault";
-var nakeddefault = "ngSwitchDefault";
-var commaSeparatedSyntax = /* @__PURE__ */ new Map([
-  ["(", ")"],
-  ["{", "}"],
-  ["[", "]"]
-]);
-var stringPairs = /* @__PURE__ */ new Map([
-  [`"`, `"`],
-  [`'`, `'`]
-]);
-var attributesToMigrate = [
-  ngif,
-  nakedngif,
-  boundngif,
-  ngfor,
-  ngswitch,
-  boundcase,
-  switchcase,
-  nakedcase,
-  switchdefault,
-  nakeddefault
-];
+var ngtemplate = "ng-template";
 var ElementToMigrate = class {
   constructor(el, attr) {
     __publicField(this, "el");
@@ -24881,7 +24847,6 @@ var Template2 = class {
     __publicField(this, "count", 0);
     __publicField(this, "contents", "");
     __publicField(this, "children", "");
-    __publicField(this, "used", false);
     this.el = el;
   }
   generateContents(tmpl) {
@@ -24912,20 +24877,31 @@ var AnalyzedFile = class {
   }
 };
 var ElementCollector = class extends RecursiveVisitor {
+  constructor(_attributes = []) {
+    super();
+    __publicField(this, "_attributes");
+    __publicField(this, "elements", []);
+    this._attributes = _attributes;
+  }
+  visitElement(el) {
+    if (el.attrs.length > 0) {
+      for (const attr of el.attrs) {
+        if (this._attributes.includes(attr.name)) {
+          this.elements.push(new ElementToMigrate(el, attr));
+        }
+      }
+    }
+    super.visitElement(el, null);
+  }
+};
+var TemplateCollector = class extends RecursiveVisitor {
   constructor() {
     super(...arguments);
     __publicField(this, "elements", []);
     __publicField(this, "templates", /* @__PURE__ */ new Map());
   }
   visitElement(el) {
-    if (el.attrs.length > 0) {
-      for (const attr of el.attrs) {
-        if (attributesToMigrate.includes(attr.name)) {
-          this.elements.push(new ElementToMigrate(el, attr));
-        }
-      }
-    }
-    if (el.name === "ng-template") {
+    if (el.name === ngtemplate) {
       for (const attr of el.attrs) {
         if (attr.name.startsWith("#")) {
           this.elements.push(new ElementToMigrate(el, attr));
@@ -24938,6 +24914,8 @@ var ElementCollector = class extends RecursiveVisitor {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
+var import_path2 = require("path");
+var import_typescript5 = __toESM(require("typescript"), 1);
 function analyze(sourceFile, analyzedFiles) {
   forEachClass(sourceFile, (node) => {
     var _a2;
@@ -24976,11 +24954,8 @@ function getNestedCount(etm, aggregator) {
     return getNestedCount(etm, aggregator);
   }
 }
-var lb = "\n";
-function migrateTemplate(template2) {
-  var _a2, _b2;
+function parseTemplate2(template2) {
   let parsed;
-  let errors = [];
   try {
     parsed = new HtmlParser().parse(template2, "", {
       tokenizeExpansionForms: true,
@@ -24988,159 +24963,160 @@ function migrateTemplate(template2) {
       preserveLineEndings: true
     });
     if (parsed.errors && parsed.errors.length > 0) {
-      return { migrated: null, errors };
+      return null;
     }
   } catch (e) {
-    return { migrated: null, errors };
+    return null;
   }
-  let result = template2;
-  const lineBreaks = template2.match(/\r|\n/g);
-  const hasLineBreaks = lineBreaks !== null;
-  const visitor = new ElementCollector();
-  visitAll2(visitor, parsed.rootNodes);
-  for (let [key, tmpl] of visitor.templates) {
-    const regex = new RegExp(`[^a-zA-Z0-9-<]+${key.slice(1)}\\W`, "gm");
-    const matches = template2.match(regex);
-    tmpl.count = (_a2 = matches == null ? void 0 : matches.length) != null ? _a2 : 0;
-    tmpl.generateContents(template2);
-  }
+  return parsed;
+}
+function calculateNesting(visitor, hasLineBreaks2) {
   let nestedQueue = [];
   for (let i = 0; i < visitor.elements.length; i++) {
     let currEl = visitor.elements[i];
     if (i === 0) {
       nestedQueue.push(currEl.el.sourceSpan.end.offset);
-      currEl.hasLineBreaks = hasLineBreaks;
+      currEl.hasLineBreaks = hasLineBreaks2;
       continue;
     }
-    currEl.hasLineBreaks = hasLineBreaks;
+    currEl.hasLineBreaks = hasLineBreaks2;
     currEl.nestCount = getNestedCount(currEl, nestedQueue);
     if (currEl.el.sourceSpan.end.offset !== nestedQueue[nestedQueue.length - 1]) {
       nestedQueue.push(currEl.el.sourceSpan.end.offset);
     }
   }
+}
+function escapeRegExp(val) {
+  return val.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function hasLineBreaks(template2) {
+  return /\r|\n/.test(template2);
+}
+function reduceNestingOffset(el, nestLevel, offset, postOffsets) {
+  var _a2;
+  if (el.nestCount <= nestLevel) {
+    const count = nestLevel - el.nestCount;
+    for (let i = 0; i <= count; i++) {
+      offset += (_a2 = postOffsets.pop()) != null ? _a2 : 0;
+    }
+  }
+  return offset;
+}
+function countTemplateUsage(template2) {
+  var _a2;
+  const parsed = parseTemplate2(template2);
+  if (parsed !== null) {
+    const visitor = new TemplateCollector();
+    visitAll2(visitor, parsed.rootNodes);
+    for (let [key, tmpl] of visitor.templates) {
+      const escapeKey = escapeRegExp(key.slice(1));
+      const regex = new RegExp(`[^a-zA-Z0-9-<]${escapeKey}\\W`, "gm");
+      const matches = template2.match(regex);
+      tmpl.count = (_a2 = matches == null ? void 0 : matches.length) != null ? _a2 : 0;
+      tmpl.generateContents(template2);
+    }
+    return visitor.templates;
+  }
+  return /* @__PURE__ */ new Map();
+}
+function processNgTemplates(template2) {
+  const templates = countTemplateUsage(template2);
+  for (const [name, t] of templates) {
+    const placeholder = `${name}|`;
+    if (template2.indexOf(placeholder) > -1) {
+      template2 = template2.replace(placeholder, t.children);
+      if (t.count <= 2) {
+        template2 = template2.replace(t.contents, "");
+      }
+    }
+  }
+  return template2;
+}
+function getOriginals(etm, tmpl, offset) {
+  if (etm.el.children.length > 0) {
+    const start2 = tmpl.slice(etm.el.sourceSpan.start.offset - offset, etm.el.children[0].sourceSpan.start.offset - offset);
+    const end = tmpl.slice(etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset, etm.el.sourceSpan.end.offset - offset);
+    return { start: start2, end };
+  }
+  const start = tmpl.slice(etm.el.sourceSpan.start.offset - offset, etm.el.sourceSpan.end.offset - offset);
+  return { start, end: "" };
+}
+function getMainBlock(etm, tmpl, offset) {
+  if ((etm.el.name === "ng-container" || etm.el.name === "ng-template") && etm.el.attrs.length === 1) {
+    const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
+    const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
+    const middle2 = tmpl.slice(childStart2, childEnd2);
+    return { start: "", middle: middle2, end: "" };
+  }
+  const attrStart = etm.attr.keySpan.start.offset - 1 - offset;
+  const valEnd = (etm.attr.valueSpan ? etm.attr.valueSpan.end.offset + 1 : etm.attr.keySpan.end.offset) - offset;
+  let childStart = valEnd;
+  let childEnd = valEnd;
+  if (etm.el.children.length > 0) {
+    childStart = etm.el.children[0].sourceSpan.start.offset - offset;
+    childEnd = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
+  }
+  let start = tmpl.slice(etm.start(offset), attrStart);
+  start += tmpl.slice(valEnd, childStart);
+  const middle = tmpl.slice(childStart, childEnd);
+  const end = tmpl.slice(childEnd, etm.end(offset));
+  return { start, middle, end };
+}
+function forEachClass(sourceFile, callback) {
+  sourceFile.forEachChild(function walk(node) {
+    if (import_typescript5.default.isClassDeclaration(node)) {
+      callback(node);
+    }
+    node.forEachChild(walk);
+  });
+}
+
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/fors.mjs
+var ngfor = "*ngFor";
+var commaSeparatedSyntax = /* @__PURE__ */ new Map([
+  ["(", ")"],
+  ["{", "}"],
+  ["[", "]"]
+]);
+var stringPairs = /* @__PURE__ */ new Map([
+  [`"`, `"`],
+  [`'`, `'`]
+]);
+function migrateFor(template2) {
+  let errors = [];
+  let parsed = parseTemplate2(template2);
+  if (parsed === null) {
+    return { migrated: template2, errors };
+  }
+  let result = template2;
+  const visitor = new ElementCollector([ngfor]);
+  visitAll2(visitor, parsed.rootNodes);
+  calculateNesting(visitor, hasLineBreaks(template2));
   let offset = 0;
   let nestLevel = -1;
   let postOffsets = [];
   for (const el of visitor.elements) {
     let migrateResult = { tmpl: result, offsets: { pre: 0, post: 0 } };
-    if (el.nestCount <= nestLevel) {
-      const count = nestLevel - el.nestCount;
-      for (let i = 0; i <= count; i++) {
-        offset += (_b2 = postOffsets.pop()) != null ? _b2 : 0;
-      }
-    }
-    if (el.attr.name === ngif || el.attr.name === nakedngif || el.attr.name === boundngif) {
-      try {
-        migrateResult = migrateNgIf(el, visitor.templates, result, offset);
-      } catch (error2) {
-        errors.push({ type: ngif, error: error2 });
-      }
-    } else if (el.attr.name === ngfor) {
-      try {
-        migrateResult = migrateNgFor(el, result, offset);
-      } catch (error2) {
-        errors.push({ type: ngfor, error: error2 });
-      }
-    } else if (el.attr.name === ngswitch) {
-      try {
-        migrateResult = migrateNgSwitch(el, result, offset);
-      } catch (error2) {
-        errors.push({ type: ngswitch, error: error2 });
-      }
-    } else if (el.attr.name === switchcase || el.attr.name === nakedcase || el.attr.name === boundcase) {
-      try {
-        migrateResult = migrateNgSwitchCase(el, result, offset);
-      } catch (error2) {
-        errors.push({ type: ngswitch, error: error2 });
-      }
-    } else if (el.attr.name === switchdefault || el.attr.name === nakeddefault) {
-      try {
-        migrateResult = migrateNgSwitchDefault(el, result, offset);
-      } catch (error2) {
-        errors.push({ type: ngswitch, error: error2 });
-      }
+    offset = reduceNestingOffset(el, nestLevel, offset, postOffsets);
+    try {
+      migrateResult = migrateNgFor(el, result, offset);
+    } catch (error2) {
+      errors.push({ type: ngfor, error: error2 });
     }
     result = migrateResult.tmpl;
     offset += migrateResult.offsets.pre;
     postOffsets.push(migrateResult.offsets.post);
     nestLevel = el.nestCount;
   }
-  for (const [_, t] of visitor.templates) {
-    if (t.count < 2 && t.used) {
-      result = result.replace(t.contents, "");
-    }
-  }
   return { migrated: result, errors };
-}
-function migrateNgIf(etm, ngTemplates, tmpl, offset) {
-  const matchThen = etm.attr.value.match(/;\s*then/gm);
-  const matchElse = etm.attr.value.match(/;\s*else/gm);
-  if (matchThen && matchThen.length > 0) {
-    return buildIfThenElseBlock(etm, ngTemplates, tmpl, matchThen[0], matchElse[0], offset);
-  } else if (matchElse && matchElse.length > 0) {
-    return buildIfElseBlock(etm, ngTemplates, tmpl, matchElse[0], offset);
-  }
-  return buildIfBlock(etm, tmpl, offset);
-}
-function buildIfBlock(etm, tmpl, offset) {
-  const lbString = etm.hasLineBreaks ? lb : "";
-  const condition = etm.attr.value.replace(" as ", "; as ");
-  const originals = getOriginals(etm, tmpl, offset);
-  const { start, middle, end } = getMainBlock(etm, tmpl, offset);
-  const startBlock = `@if (${condition}) {${lbString}${start}`;
-  const endBlock = `${end}${lbString}}`;
-  const ifBlock = startBlock + middle + endBlock;
-  const updatedTmpl = tmpl.slice(0, etm.start(offset)) + ifBlock + tmpl.slice(etm.end(offset));
-  const pre = originals.start.length - startBlock.length;
-  const post = originals.end.length - endBlock.length;
-  return { tmpl: updatedTmpl, offsets: { pre, post } };
-}
-function buildIfElseBlock(etm, ngTemplates, tmpl, elseString, offset) {
-  const lbString = etm.hasLineBreaks ? lb : "";
-  const condition = etm.getCondition(elseString).replace(" as ", "; as ");
-  const originals = getOriginals(etm, tmpl, offset);
-  const elseTmpl = ngTemplates.get(`#${etm.getTemplateName(elseString)}`);
-  const { start, middle, end } = getMainBlock(etm, tmpl, offset);
-  const startBlock = `@if (${condition}) {${lbString}${start}`;
-  const elseBlock = `${end}${lbString}} @else {${lbString}`;
-  const postBlock = elseBlock + elseTmpl.children + `${lbString}}`;
-  const ifElseBlock = startBlock + middle + postBlock;
-  const tmplStart = tmpl.slice(0, etm.start(offset));
-  const tmplEnd = tmpl.slice(etm.end(offset));
-  const updatedTmpl = tmplStart + ifElseBlock + tmplEnd;
-  elseTmpl.count--;
-  elseTmpl.used = true;
-  const pre = originals.start.length - startBlock.length;
-  const post = originals.end.length - postBlock.length;
-  return { tmpl: updatedTmpl, offsets: { pre, post } };
-}
-function buildIfThenElseBlock(etm, ngTemplates, tmpl, thenString, elseString, offset) {
-  const condition = etm.getCondition(thenString).replace(" as ", "; as ");
-  const lbString = etm.hasLineBreaks ? lb : "";
-  const originals = getOriginals(etm, tmpl, offset);
-  const startBlock = `@if (${condition}) {${lbString}`;
-  const elseBlock = `${lbString}} @else {${lbString}`;
-  const thenTmpl = ngTemplates.get(`#${etm.getTemplateName(thenString, elseString)}`);
-  const elseTmpl = ngTemplates.get(`#${etm.getTemplateName(elseString)}`);
-  const postBlock = thenTmpl.children + elseBlock + elseTmpl.children + `${lbString}}`;
-  const ifThenElseBlock = startBlock + postBlock;
-  const tmplStart = tmpl.slice(0, etm.start(offset));
-  const tmplEnd = tmpl.slice(etm.end(offset));
-  const updatedTmpl = tmplStart + ifThenElseBlock + tmplEnd;
-  thenTmpl.count--;
-  thenTmpl.used = true;
-  elseTmpl.count--;
-  elseTmpl.used = true;
-  const pre = originals.start.length - startBlock.length;
-  const post = originals.end.length - postBlock.length;
-  return { tmpl: updatedTmpl, offsets: { pre, post } };
 }
 function migrateNgFor(etm, tmpl, offset) {
   const aliasWithEqualRegexp = /=\s*(count|index|first|last|even|odd)/gm;
   const aliasWithAsRegexp = /(count|index|first|last|even|odd)\s+as/gm;
   const aliases = [];
-  const lbString = etm.hasLineBreaks ? lb : "";
-  const lbSpaces = etm.hasLineBreaks ? `${lb}  ` : "";
+  const lbString = etm.hasLineBreaks ? "\n" : "";
+  const lbSpaces = etm.hasLineBreaks ? `
+  ` : "";
   const parts = getNgForParts(etm.attr.value);
   const originals = getOriginals(etm, tmpl, offset);
   const condition = parts[0].replace("let ", "");
@@ -25212,38 +25188,161 @@ function getNgForParts(expression) {
   }
   return parts;
 }
-function getOriginals(etm, tmpl, offset) {
-  if (etm.el.children.length > 0) {
-    const start2 = tmpl.slice(etm.el.sourceSpan.start.offset - offset, etm.el.children[0].sourceSpan.start.offset - offset);
-    const end = tmpl.slice(etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset, etm.el.sourceSpan.end.offset - offset);
-    return { start: start2, end };
+
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/ifs.mjs
+var ngif = "*ngIf";
+var boundngif = "[ngIf]";
+var nakedngif = "ngIf";
+var ifs = [
+  ngif,
+  nakedngif,
+  boundngif
+];
+function migrateIf(template2) {
+  let errors = [];
+  let parsed = parseTemplate2(template2);
+  if (parsed === null) {
+    return { migrated: template2, errors };
   }
-  const start = tmpl.slice(etm.el.sourceSpan.start.offset - offset, etm.el.sourceSpan.end.offset - offset);
-  return { start, end: "" };
+  let result = template2;
+  const visitor = new ElementCollector(ifs);
+  visitAll2(visitor, parsed.rootNodes);
+  calculateNesting(visitor, hasLineBreaks(template2));
+  let offset = 0;
+  let nestLevel = -1;
+  let postOffsets = [];
+  for (const el of visitor.elements) {
+    let migrateResult = { tmpl: result, offsets: { pre: 0, post: 0 } };
+    offset = reduceNestingOffset(el, nestLevel, offset, postOffsets);
+    try {
+      migrateResult = migrateNgIf(el, result, offset);
+    } catch (error2) {
+      errors.push({ type: ngif, error: error2 });
+    }
+    result = migrateResult.tmpl;
+    offset += migrateResult.offsets.pre;
+    postOffsets.push(migrateResult.offsets.post);
+    nestLevel = el.nestCount;
+  }
+  return { migrated: result, errors };
 }
-function getMainBlock(etm, tmpl, offset) {
-  if ((etm.el.name === "ng-container" || etm.el.name === "ng-template") && etm.el.attrs.length === 1) {
-    const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
-    const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
-    const middle2 = tmpl.slice(childStart2, childEnd2);
-    return { start: "", middle: middle2, end: "" };
+function migrateNgIf(etm, tmpl, offset) {
+  const matchThen = etm.attr.value.match(/;\s*then/gm);
+  const matchElse = etm.attr.value.match(/;\s*else/gm);
+  if (matchThen && matchThen.length > 0) {
+    return buildIfThenElseBlock(etm, tmpl, matchThen[0], matchElse[0], offset);
+  } else if (matchElse && matchElse.length > 0) {
+    return buildIfElseBlock(etm, tmpl, matchElse[0], offset);
   }
-  const attrStart = etm.attr.keySpan.start.offset - 1 - offset;
-  const valEnd = (etm.attr.valueSpan ? etm.attr.valueSpan.end.offset + 1 : etm.attr.keySpan.end.offset) - offset;
-  let childStart = valEnd;
-  let childEnd = valEnd;
-  if (etm.el.children.length > 0) {
-    childStart = etm.el.children[0].sourceSpan.start.offset - offset;
-    childEnd = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
+  return buildIfBlock(etm, tmpl, offset);
+}
+function buildIfBlock(etm, tmpl, offset) {
+  const lbString = etm.hasLineBreaks ? "\n" : "";
+  const condition = etm.attr.value.replace(" as ", "; as ");
+  const originals = getOriginals(etm, tmpl, offset);
+  const { start, middle, end } = getMainBlock(etm, tmpl, offset);
+  const startBlock = `@if (${condition}) {${lbString}${start}`;
+  const endBlock = `${end}${lbString}}`;
+  const ifBlock = startBlock + middle + endBlock;
+  const updatedTmpl = tmpl.slice(0, etm.start(offset)) + ifBlock + tmpl.slice(etm.end(offset));
+  const pre = originals.start.length - startBlock.length;
+  const post = originals.end.length - endBlock.length;
+  return { tmpl: updatedTmpl, offsets: { pre, post } };
+}
+function buildIfElseBlock(etm, tmpl, elseString, offset) {
+  const lbString = etm.hasLineBreaks ? "\n" : "";
+  const condition = etm.getCondition(elseString).replace(" as ", "; as ");
+  const originals = getOriginals(etm, tmpl, offset);
+  const elsePlaceholder = `#${etm.getTemplateName(elseString)}|`;
+  const { start, middle, end } = getMainBlock(etm, tmpl, offset);
+  const startBlock = `@if (${condition}) {${lbString}${start}`;
+  const elseBlock = `${end}${lbString}} @else {${lbString}`;
+  const postBlock = elseBlock + elsePlaceholder + `${lbString}}`;
+  const ifElseBlock = startBlock + middle + postBlock;
+  const tmplStart = tmpl.slice(0, etm.start(offset));
+  const tmplEnd = tmpl.slice(etm.end(offset));
+  const updatedTmpl = tmplStart + ifElseBlock + tmplEnd;
+  const pre = originals.start.length - startBlock.length;
+  const post = originals.end.length - postBlock.length;
+  return { tmpl: updatedTmpl, offsets: { pre, post } };
+}
+function buildIfThenElseBlock(etm, tmpl, thenString, elseString, offset) {
+  const condition = etm.getCondition(thenString).replace(" as ", "; as ");
+  const lbString = etm.hasLineBreaks ? "\n" : "";
+  const originals = getOriginals(etm, tmpl, offset);
+  const startBlock = `@if (${condition}) {${lbString}`;
+  const elseBlock = `${lbString}} @else {${lbString}`;
+  const thenPlaceholder = `#${etm.getTemplateName(thenString, elseString)}|`;
+  const elsePlaceholder = `#${etm.getTemplateName(elseString)}|`;
+  const postBlock = thenPlaceholder + elseBlock + elsePlaceholder + `${lbString}}`;
+  const ifThenElseBlock = startBlock + postBlock;
+  const tmplStart = tmpl.slice(0, etm.start(offset));
+  const tmplEnd = tmpl.slice(etm.end(offset));
+  const updatedTmpl = tmplStart + ifThenElseBlock + tmplEnd;
+  const pre = originals.start.length - startBlock.length;
+  const post = originals.end.length - postBlock.length;
+  return { tmpl: updatedTmpl, offsets: { pre, post } };
+}
+
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/switches.mjs
+var ngswitch = "[ngSwitch]";
+var boundcase = "[ngSwitchCase]";
+var switchcase = "*ngSwitchCase";
+var nakedcase = "ngSwitchCase";
+var switchdefault = "*ngSwitchDefault";
+var nakeddefault = "ngSwitchDefault";
+var switches = [
+  ngswitch,
+  boundcase,
+  switchcase,
+  nakedcase,
+  switchdefault,
+  nakeddefault
+];
+function migrateSwitch(template2) {
+  let errors = [];
+  let parsed = parseTemplate2(template2);
+  if (parsed === null) {
+    return { migrated: template2, errors };
   }
-  let start = tmpl.slice(etm.start(offset), attrStart);
-  start += tmpl.slice(valEnd, childStart);
-  const middle = tmpl.slice(childStart, childEnd);
-  const end = tmpl.slice(childEnd, etm.end(offset));
-  return { start, middle, end };
+  let result = template2;
+  const visitor = new ElementCollector(switches);
+  visitAll2(visitor, parsed.rootNodes);
+  calculateNesting(visitor, hasLineBreaks(template2));
+  let offset = 0;
+  let nestLevel = -1;
+  let postOffsets = [];
+  for (const el of visitor.elements) {
+    let migrateResult = { tmpl: result, offsets: { pre: 0, post: 0 } };
+    offset = reduceNestingOffset(el, nestLevel, offset, postOffsets);
+    if (el.attr.name === ngswitch) {
+      try {
+        migrateResult = migrateNgSwitch(el, result, offset);
+      } catch (error2) {
+        errors.push({ type: ngswitch, error: error2 });
+      }
+    } else if (el.attr.name === switchcase || el.attr.name === nakedcase || el.attr.name === boundcase) {
+      try {
+        migrateResult = migrateNgSwitchCase(el, result, offset);
+      } catch (error2) {
+        errors.push({ type: ngswitch, error: error2 });
+      }
+    } else if (el.attr.name === switchdefault || el.attr.name === nakeddefault) {
+      try {
+        migrateResult = migrateNgSwitchDefault(el, result, offset);
+      } catch (error2) {
+        errors.push({ type: ngswitch, error: error2 });
+      }
+    }
+    result = migrateResult.tmpl;
+    offset += migrateResult.offsets.pre;
+    postOffsets.push(migrateResult.offsets.post);
+    nestLevel = el.nestCount;
+  }
+  return { migrated: result, errors };
 }
 function migrateNgSwitch(etm, tmpl, offset) {
-  const lbString = etm.hasLineBreaks ? lb : "";
+  const lbString = etm.hasLineBreaks ? "\n" : "";
   const condition = etm.attr.value;
   const originals = getOriginals(etm, tmpl, offset);
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
@@ -25256,7 +25355,7 @@ function migrateNgSwitch(etm, tmpl, offset) {
   return { tmpl: updatedTmpl, offsets: { pre, post } };
 }
 function migrateNgSwitchCase(etm, tmpl, offset) {
-  const lbString = etm.hasLineBreaks ? lb : "";
+  const lbString = etm.hasLineBreaks ? "\n" : "";
   const lbSpaces = etm.hasLineBreaks ? "  " : "";
   const leadingSpace = etm.hasLineBreaks ? "" : " ";
   const condition = etm.attr.value;
@@ -25271,7 +25370,7 @@ function migrateNgSwitchCase(etm, tmpl, offset) {
   return { tmpl: updatedTmpl, offsets: { pre, post } };
 }
 function migrateNgSwitchDefault(etm, tmpl, offset) {
-  const lbString = etm.hasLineBreaks ? lb : "";
+  const lbString = etm.hasLineBreaks ? "\n" : "";
   const lbSpaces = etm.hasLineBreaks ? "  " : "";
   const leadingSpace = etm.hasLineBreaks ? "" : " ";
   const originals = getOriginals(etm, tmpl, offset);
@@ -25283,14 +25382,6 @@ function migrateNgSwitchDefault(etm, tmpl, offset) {
   const pre = originals.start.length - startBlock.length;
   const post = originals.end.length - endBlock.length;
   return { tmpl: updatedTmpl, offsets: { pre, post } };
-}
-function forEachClass(sourceFile, callback) {
-  sourceFile.forEachChild(function walk(node) {
-    if (import_typescript5.default.isClassDeclaration(node)) {
-      callback(node);
-    }
-    node.forEachChild(walk);
-  });
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/index.mjs
@@ -25340,7 +25431,15 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
     for (const [start, end] of ranges) {
       const template2 = content.slice(start, end);
       const length = (end != null ? end : content.length) - start;
-      const { migrated, errors } = migrateTemplate(template2);
+      const ifResult = migrateIf(template2);
+      const forResult = migrateFor(ifResult.migrated);
+      const switchResult = migrateSwitch(forResult.migrated);
+      const errors = [
+        ...ifResult.errors,
+        ...forResult.errors,
+        ...switchResult.errors
+      ];
+      const migrated = processNgTemplates(switchResult.migrated);
       if (migrated !== null) {
         update.remove(start, length);
         update.insertLeft(start, migrated);

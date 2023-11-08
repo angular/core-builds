@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0+sha-c30dde2
+ * @license Angular v17.0.0+sha-1d31a0c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5166,11 +5166,6 @@ declare interface InternalAfterNextRenderOptions {
 
 declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
     _bootstrapComponents: Type<any>[];
-}
-
-declare interface InternalViewRef extends ViewRef {
-    detachFromAppRef(): void;
-    attachToAppRef(appRef: ViewRefTracker): void;
 }
 
 
@@ -12466,7 +12461,7 @@ export declare function ɵunwrapSafeValue<T>(value: T): T;
  */
 export declare const ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT = true;
 
-export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef, ChangeDetectorRefInterface {
+export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorRefInterface {
     /**
      * This represents the `LView` associated with the point where `ChangeDetectorRef` was
      * requested.
@@ -12474,6 +12469,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
     private _cdRefInjectingView?;
+    private readonly notifyErrorHandler;
     private _appRef;
     private _attachedToViewContainer;
     get rootNodes(): any[];
@@ -12496,7 +12492,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, InternalViewRef
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView?: LView<unknown> | undefined);
+    _cdRefInjectingView?: LView<unknown> | undefined, notifyErrorHandler?: boolean);
     get context(): T;
     /**
      * @deprecated Replacing the full context object is not supported. Modify the context

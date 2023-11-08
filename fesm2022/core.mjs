@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.0+sha-c30dde2
+ * @license Angular v17.0.0+sha-1d31a0c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10425,7 +10425,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.0+sha-c30dde2');
+const VERSION = new Version('17.0.0+sha-1d31a0c');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13306,24 +13306,7 @@ function detectChangesInternal(tView, lView, context, notifyErrorHandler = true)
     }
     try {
         refreshView(tView, lView, tView.template, context);
-        let retries = 0;
-        // If after running change detection, this view still needs to be refreshed or there are
-        // descendants views that need to be refreshed due to re-dirtying during the change detection
-        // run, detect changes on the view again. We run change detection in `Targeted` mode to only
-        // refresh views with the `RefreshView` flag.
-        while (lView[FLAGS] & (1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */) ||
-            lView[REACTIVE_TEMPLATE_CONSUMER]?.dirty) {
-            if (retries === MAXIMUM_REFRESH_RERUNS) {
-                throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
-                    'Infinite change detection while trying to refresh views. ' +
-                        'There may be components which each cause the other to require a refresh, ' +
-                        'causing an infinite loop.');
-            }
-            retries++;
-            // Even if this view is detached, we still detect changes in targeted mode because this was
-            // the root of the change detection run.
-            detectChangesInView(lView, 1 /* ChangeDetectionMode.Targeted */);
-        }
+        detectChangesInViewWhileDirty(lView);
     }
     catch (error) {
         if (notifyErrorHandler) {
@@ -13340,6 +13323,26 @@ function detectChangesInternal(tView, lView, context, notifyErrorHandler = true)
             // Invoke all callbacks registered via `after*Render`, if needed.
             afterRenderEventManager?.end();
         }
+    }
+}
+function detectChangesInViewWhileDirty(lView) {
+    let retries = 0;
+    // If after running change detection, this view still needs to be refreshed or there are
+    // descendants views that need to be refreshed due to re-dirtying during the change detection
+    // run, detect changes on the view again. We run change detection in `Targeted` mode to only
+    // refresh views with the `RefreshView` flag.
+    while (lView[FLAGS] & (1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */) ||
+        lView[REACTIVE_TEMPLATE_CONSUMER]?.dirty) {
+        if (retries === MAXIMUM_REFRESH_RERUNS) {
+            throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
+                'Infinite change detection while trying to refresh views. ' +
+                    'There may be components which each cause the other to require a refresh, ' +
+                    'causing an infinite loop.');
+        }
+        retries++;
+        // Even if this view is detached, we still detect changes in targeted mode because this was
+        // the root of the change detection run.
+        detectChangesInView(lView, 1 /* ChangeDetectionMode.Targeted */);
     }
 }
 function checkNoChangesInternal(tView, lView, context, notifyErrorHandler = true) {
@@ -13685,9 +13688,10 @@ class ViewRef$1 {
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView) {
+    _cdRefInjectingView, notifyErrorHandler = true) {
         this._lView = _lView;
         this._cdRefInjectingView = _cdRefInjectingView;
+        this.notifyErrorHandler = notifyErrorHandler;
         this._appRef = null;
         this._attachedToViewContainer = false;
     }
@@ -13905,7 +13909,7 @@ class ViewRef$1 {
      * See {@link ChangeDetectorRef#detach} for more information.
      */
     detectChanges() {
-        detectChangesInternal(this._lView[TVIEW], this._lView, this.context);
+        detectChangesInternal(this._lView[TVIEW], this._lView, this.context, this.notifyErrorHandler);
     }
     /**
      * Checks the change detector and its children, and throws if any changes are detected.
@@ -13915,7 +13919,7 @@ class ViewRef$1 {
      */
     checkNoChanges() {
         if (ngDevMode) {
-            checkNoChangesInternal(this._lView[TVIEW], this._lView, this.context);
+            checkNoChangesInternal(this._lView[TVIEW], this._lView, this.context, this.notifyErrorHandler);
         }
     }
     attachToViewContainerRef() {
@@ -13933,30 +13937,6 @@ class ViewRef$1 {
             throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached to a ViewContainer!');
         }
         this._appRef = appRef;
-    }
-}
-/** @internal */
-class RootViewRef extends ViewRef$1 {
-    constructor(_view) {
-        super(_view);
-        this._view = _view;
-    }
-    detectChanges() {
-        const lView = this._view;
-        const tView = lView[TVIEW];
-        const context = lView[CONTEXT];
-        detectChangesInternal(tView, lView, context, false);
-    }
-    checkNoChanges() {
-        if (ngDevMode) {
-            const lView = this._view;
-            const tView = lView[TVIEW];
-            const context = lView[CONTEXT];
-            checkNoChangesInternal(tView, lView, context, false);
-        }
-    }
-    get context() {
-        return null;
     }
 }
 
@@ -15573,7 +15553,7 @@ class ComponentRef extends ComponentRef$1 {
         this._tNode = _tNode;
         this.previousInputValues = null;
         this.instance = instance;
-        this.hostView = this.changeDetectorRef = new RootViewRef(_rootLView);
+        this.hostView = this.changeDetectorRef = new ViewRef$1(_rootLView, undefined, /* _cdRefInjectingView */ false);
         this.componentType = componentType;
     }
     setInput(name, value) {
