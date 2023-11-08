@@ -25574,7 +25574,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.0+sha-a46c8cb");
+var VERSION2 = new Version("17.0.0+sha-227de98");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -26611,7 +26611,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.0+sha-a46c8cb"));
+  definitionMap.set("version", literal("17.0.0+sha-227de98"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -26682,7 +26682,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.0+sha-a46c8cb"));
+  definitionMap.set("version", literal("17.0.0+sha-227de98"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -26914,7 +26914,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.0+sha-a46c8cb"));
+  definitionMap.set("version", literal("17.0.0+sha-227de98"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -26937,7 +26937,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.0+sha-a46c8cb"));
+  definitionMap.set("version", literal("17.0.0+sha-227de98"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -26975,7 +26975,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.0+sha-a46c8cb"));
+  definitionMap.set("version", literal("17.0.0+sha-227de98"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -26999,7 +26999,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.0+sha-a46c8cb"));
+  definitionMap.set("version", literal("17.0.0+sha-227de98"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27034,7 +27034,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.0+sha-a46c8cb"));
+  definitionMap.set("version", literal("17.0.0+sha-227de98"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27051,7 +27051,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.0+sha-a46c8cb");
+var VERSION3 = new Version("17.0.0+sha-227de98");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35561,7 +35561,8 @@ function parseExtractedTemplate(template2, sourceStr, sourceParseRange, escapedS
     escapedString,
     enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat,
     i18nNormalizeLineEndingsInICUs,
-    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData
+    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData,
+    enableBlockSyntax: options.enableBlockSyntax
   });
   const { nodes: diagNodes } = parseTemplate(sourceStr, sourceMapUrl != null ? sourceMapUrl : "", {
     preserveWhitespaces: true,
@@ -35572,7 +35573,8 @@ function parseExtractedTemplate(template2, sourceStr, sourceParseRange, escapedS
     enableI18nLegacyMessageIdFormat: options.enableI18nLegacyMessageIdFormat,
     i18nNormalizeLineEndingsInICUs,
     leadingTriviaChars: [],
-    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData
+    alwaysAttemptHtmlToR3AstConversion: options.usePoisonedData,
+    enableBlockSyntax: options.enableBlockSyntax
   });
   return __spreadProps(__spreadValues({}, parsedTemplate), {
     diagNodes,
@@ -35944,7 +35946,7 @@ var EMPTY_ARRAY2 = [];
 var isUsedDirective = (decl) => decl.kind === R3TemplateDependencyKind.Directive;
 var isUsedPipe = (decl) => decl.kind === R3TemplateDependencyKind.Pipe;
 var ComponentDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering) {
+  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -35978,6 +35980,7 @@ var ComponentDecoratorHandler = class {
     this.compilationMode = compilationMode;
     this.deferredSymbolTracker = deferredSymbolTracker;
     this.forbidOrphanRendering = forbidOrphanRendering;
+    this.enableBlockSyntax = enableBlockSyntax;
     this.literalCache = /* @__PURE__ */ new Map();
     this.elementSchemaRegistry = new DomElementSchemaRegistry();
     this.preanalyzeTemplateCache = /* @__PURE__ */ new Map();
@@ -35987,7 +35990,8 @@ var ComponentDecoratorHandler = class {
     this.extractTemplateOptions = {
       enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
       i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
-      usePoisonedData: this.usePoisonedData
+      usePoisonedData: this.usePoisonedData,
+      enableBlockSyntax: this.enableBlockSyntax
     };
   }
   detect(node, decorators) {
@@ -36140,7 +36144,8 @@ var ComponentDecoratorHandler = class {
       template2 = extractTemplate(node, templateDecl, this.evaluator, this.depTracker, this.resourceLoader, {
         enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
         i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
-        usePoisonedData: this.usePoisonedData
+        usePoisonedData: this.usePoisonedData,
+        enableBlockSyntax: this.enableBlockSyntax
       }, this.compilationMode);
     }
     const templateResource = template2.declaration.isInline ? { path: null, expression: component.get("template") } : {
@@ -44279,7 +44284,7 @@ var NgCompiler = class {
     }
   }
   constructor(adapter, options, inputProgram, programDriver, incrementalStrategy, incrementalCompilation, enableTemplateTypeChecker, usePoisonedData, livePerfRecorder) {
-    var _a2;
+    var _a2, _b2;
     this.adapter = adapter;
     this.options = options;
     this.inputProgram = inputProgram;
@@ -44293,6 +44298,7 @@ var NgCompiler = class {
     this.nonTemplateDiagnostics = null;
     this.delegatingPerfRecorder = new DelegatingPerfRecorder(this.perfRecorder);
     this.enableTemplateTypeChecker = enableTemplateTypeChecker || ((_a2 = options["_enableTemplateTypeChecker"]) != null ? _a2 : false);
+    this.enableBlockSyntax = (_b2 = options["_enableBlockSyntax"]) != null ? _b2 : true;
     this.constructionDiagnostics.push(...this.adapter.constructionDiagnostics, ...verifyCompatibleTypeCheckOptions(this.options));
     this.currentProgram = inputProgram;
     this.closureCompilerEnabled = !!this.options.annotateForClosureCompiler;
@@ -44776,7 +44782,7 @@ var NgCompiler = class {
       throw new Error('JIT mode support ("supportJitMode" option) cannot be disabled when forbidOrphanComponents is set to true');
     }
     const handlers = [
-      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents),
+      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax),
       new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, supportTestBed, compilationMode),
       new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder, supportTestBed, compilationMode),
       new InjectableDecoratorHandler(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, compilationMode),
