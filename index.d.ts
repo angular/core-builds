@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.1+sha-27bf371
+ * @license Angular v17.0.1+sha-158b198
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1619,8 +1619,6 @@ declare interface ComponentDependencies {
  * Base class for a factory that can create a component dynamically.
  * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
  * Use the resulting `ComponentFactory.create()` method to create a component of that type.
- *
- * @see [Dynamic Components](guide/dynamic-component-loader)
  *
  * @publicApi
  *

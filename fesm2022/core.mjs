@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.1+sha-27bf371
+ * @license Angular v17.0.1+sha-158b198
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10253,8 +10253,6 @@ class ComponentRef$1 {
  * Instantiate a factory for a given type of component with `resolveComponentFactory()`.
  * Use the resulting `ComponentFactory.create()` method to create a component of that type.
  *
- * @see [Dynamic Components](guide/dynamic-component-loader)
- *
  * @publicApi
  *
  * @deprecated Angular no longer requires Component factories. Please use other APIs where
@@ -10425,7 +10423,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.1+sha-27bf371');
+const VERSION = new Version('17.0.1+sha-158b198');
 
 // This default value is when checking the hierarchy for a token.
 //
