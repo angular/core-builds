@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-b1cc092
+ * @license Angular v17.1.0-next.0+sha-645447d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10425,7 +10425,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-b1cc092');
+const VERSION = new Version('17.1.0-next.0+sha-645447d');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19648,7 +19648,9 @@ function reconcile(liveCollection, newCollection, trackByFn) {
         liveCollection.destroy(liveCollection.detach(liveEndIdx--));
     }
     // - destroy items that were detached but never attached again.
-    detachedItems?.forEach(item => liveCollection.destroy(item));
+    detachedItems?.forEach(item => {
+        liveCollection.destroy(item);
+    });
 }
 function attachPreviouslyDetached(prevCollection, detachedItems, index, key) {
     if (detachedItems !== undefined && detachedItems.has(key)) {
@@ -19685,8 +19687,7 @@ class MultiMap {
     delete(key) {
         const listOfKeys = this.map.get(key);
         if (listOfKeys !== undefined) {
-            // THINK: pop from the end or shift from the front? "Correct" vs. "slow".
-            listOfKeys.pop();
+            listOfKeys.shift();
             return true;
         }
         return false;
@@ -30408,18 +30409,18 @@ class ImagePerformanceWarning {
     }], null, null); })();
 function logLazyLCPWarning(src) {
     console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} is the Largest Contentful Paint (LCP) element ` +
-        `but was given a "loading" value of "lazy", which can negatively impact` +
+        `but was given a "loading" value of "lazy", which can negatively impact ` +
         `application loading performance. This warning can be addressed by ` +
         `changing the loading value of the LCP image to "eager", or by using the ` +
         `NgOptimizedImage directive's prioritization utilities. For more ` +
         `information about addressing or disabling this warning, see ` +
-        `https://angular.io/errors/NG2965`));
+        `https://angular.io/errors/NG0913`));
 }
 function logOversizedImageWarning(src) {
     console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} has intrinsic file dimensions much larger than its ` +
         `rendered size. This can negatively impact application loading performance. ` +
         `For more information about addressing or disabling this warning, see ` +
-        `https://angular.io/errors/NG2965`));
+        `https://angular.io/errors/NG0913`));
 }
 
 /**

@@ -25574,7 +25574,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-b1cc092");
+var VERSION2 = new Version("17.1.0-next.0+sha-645447d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -26611,7 +26611,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-b1cc092"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-645447d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -26682,7 +26682,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-b1cc092"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-645447d"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -26914,7 +26914,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-b1cc092"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-645447d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -26937,7 +26937,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-b1cc092"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-645447d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -26975,7 +26975,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-b1cc092"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-645447d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -26999,7 +26999,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-b1cc092"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-645447d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27034,7 +27034,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-b1cc092"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-645447d"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27051,7 +27051,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.0+sha-b1cc092");
+var VERSION3 = new Version("17.1.0-next.0+sha-645447d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -32792,8 +32792,8 @@ var BINARY_OPERATORS3 = /* @__PURE__ */ new Map([
   [BinaryOperator.NullishCoalesce, "??"]
 ]);
 var ExpressionTranslatorVisitor = class {
-  constructor(factory8, imports, options) {
-    this.factory = factory8;
+  constructor(factory9, imports, options) {
+    this.factory = factory9;
     this.imports = imports;
     this.downlevelTaggedTemplates = options.downlevelTaggedTemplates === true;
     this.downlevelVariableDeclarations = options.downlevelVariableDeclarations === true;
@@ -39885,11 +39885,15 @@ function tsCreateElement(tagName) {
   );
 }
 function tsDeclareVariable(id, type) {
+  let initializer = import_typescript79.default.factory.createNonNullExpression(import_typescript79.default.factory.createNull());
+  if (type.kind === import_typescript79.default.SyntaxKind.BooleanKeyword) {
+    initializer = import_typescript79.default.factory.createAsExpression(initializer, import_typescript79.default.factory.createKeywordTypeNode(import_typescript79.default.SyntaxKind.BooleanKeyword));
+  }
   const decl = import_typescript79.default.factory.createVariableDeclaration(
     id,
     void 0,
     type,
-    import_typescript79.default.factory.createNonNullExpression(import_typescript79.default.factory.createNull())
+    initializer
   );
   return import_typescript79.default.factory.createVariableStatement(
     void 0,
@@ -41685,7 +41689,7 @@ var Context2 = class {
     return this.pipes.get(name);
   }
 };
-var Scope3 = class {
+var _Scope = class {
   constructor(tcb, parent = null, guard = null) {
     this.tcb = tcb;
     this.parent = parent;
@@ -41699,7 +41703,7 @@ var Scope3 = class {
     this.statements = [];
   }
   static forNodes(tcb, parentScope, scopedNode, children, guard) {
-    const scope = new Scope3(tcb, parentScope, guard);
+    const scope = new _Scope(tcb, parentScope, guard);
     if (parentScope === null && tcb.env.config.enableTemplateTypeChecker) {
       scope.opQueue.push(new TcbComponentContextCompletionOp(scope));
     }
@@ -41721,8 +41725,11 @@ var Scope3 = class {
       }
     } else if (scopedNode instanceof ForLoopBlock) {
       this.registerVariable(scope, scopedNode.item, new TcbBlockVariableOp(tcb, scope, import_typescript89.default.factory.createIdentifier(scopedNode.item.name), scopedNode.item));
-      for (const variable2 of Object.values(scopedNode.contextVariables)) {
-        const type = import_typescript89.default.factory.createKeywordTypeNode(import_typescript89.default.SyntaxKind.NumberKeyword);
+      for (const [name, variable2] of Object.entries(scopedNode.contextVariables)) {
+        if (!this.forLoopContextVariableTypes.has(name)) {
+          throw new Error(`Unrecognized for loop context variable ${name}`);
+        }
+        const type = import_typescript89.default.factory.createKeywordTypeNode(this.forLoopContextVariableTypes.get(name));
         this.registerVariable(scope, variable2, new TcbBlockImplicitVariableOp(tcb, scope, type, variable2));
       }
     }
@@ -41999,6 +42006,17 @@ var Scope3 = class {
     }
   }
 };
+var Scope3 = _Scope;
+(() => {
+  _Scope.forLoopContextVariableTypes = /* @__PURE__ */ new Map([
+    ["$first", import_typescript89.default.SyntaxKind.BooleanKeyword],
+    ["$last", import_typescript89.default.SyntaxKind.BooleanKeyword],
+    ["$even", import_typescript89.default.SyntaxKind.BooleanKeyword],
+    ["$odd", import_typescript89.default.SyntaxKind.BooleanKeyword],
+    ["$index", import_typescript89.default.SyntaxKind.NumberKeyword],
+    ["$count", import_typescript89.default.SyntaxKind.NumberKeyword]
+  ]);
+})();
 function tcbThisParam(name, typeArguments) {
   return import_typescript89.default.factory.createParameterDeclaration(
     void 0,
@@ -43900,6 +43918,41 @@ var TemplateVisitor2 = class extends RecursiveAstVisitor2 {
   }
 };
 
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/extended/checks/interpolated_signal_not_invoked/index.mjs
+var InterpolatedSignalCheck = class extends TemplateCheckWithVisitor {
+  constructor() {
+    super(...arguments);
+    this.code = ErrorCode.INTERPOLATED_SIGNAL_NOT_INVOKED;
+  }
+  visitNode(ctx, component, node) {
+    if (node instanceof Interpolation) {
+      return node.expressions.filter((item) => item instanceof PropertyRead).flatMap((item) => {
+        if (item instanceof PropertyRead) {
+          return buildDiagnosticForSignal(ctx, item, component);
+        }
+        return [];
+      });
+    }
+    return [];
+  }
+};
+function buildDiagnosticForSignal(ctx, node, component) {
+  var _a2, _b2;
+  const symbol = ctx.templateTypeChecker.getSymbolOfNode(node, component);
+  if ((symbol == null ? void 0 : symbol.kind) === SymbolKind.Expression && (((_a2 = symbol.tsType.symbol) == null ? void 0 : _a2.escapedName) === "WritableSignal" || ((_b2 = symbol.tsType.symbol) == null ? void 0 : _b2.escapedName) === "Signal") && symbol.tsType.symbol.parent.escapedName.includes("@angular/core")) {
+    const templateMapping = ctx.templateTypeChecker.getTemplateMappingAtTcbLocation(symbol.tcbLocation);
+    const errorString = `${node.name} is a function and should be invoked: ${node.name}()`;
+    const diagnostic = ctx.makeTemplateDiagnostic(templateMapping.span, errorString);
+    return [diagnostic];
+  }
+  return [];
+}
+var factory = {
+  code: ErrorCode.INTERPOLATED_SIGNAL_NOT_INVOKED,
+  name: ExtendedTemplateDiagnosticName.INTERPOLATED_SIGNAL_NOT_INVOKED,
+  create: () => new InterpolatedSignalCheck()
+};
+
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/extended/checks/invalid_banana_in_box/index.mjs
 var InvalidBananaInBoxCheck = class extends TemplateCheckWithVisitor {
   constructor() {
@@ -43919,7 +43972,7 @@ var InvalidBananaInBoxCheck = class extends TemplateCheckWithVisitor {
     return [diagnostic];
   }
 };
-var factory = {
+var factory2 = {
   code: ErrorCode.INVALID_BANANA_IN_BOX,
   name: ExtendedTemplateDiagnosticName.INVALID_BANANA_IN_BOX,
   create: () => new InvalidBananaInBoxCheck()
@@ -43961,7 +44014,7 @@ var MissingControlFlowDirectiveCheck = class extends TemplateCheckWithVisitor {
     return [diagnostic];
   }
 };
-var factory2 = {
+var factory3 = {
   code: ErrorCode.MISSING_CONTROL_FLOW_DIRECTIVE,
   name: ExtendedTemplateDiagnosticName.MISSING_CONTROL_FLOW_DIRECTIVE,
   create: (options) => {
@@ -43995,7 +44048,7 @@ var MissingNgForOfLetCheck = class extends TemplateCheckWithVisitor {
     return [diagnostic];
   }
 };
-var factory3 = {
+var factory4 = {
   code: ErrorCode.MISSING_NGFOROF_LET,
   name: ExtendedTemplateDiagnosticName.MISSING_NGFOROF_LET,
   create: () => new MissingNgForOfLetCheck()
@@ -44033,7 +44086,7 @@ var NullishCoalescingNotNullableCheck = class extends TemplateCheckWithVisitor {
     return [diagnostic];
   }
 };
-var factory4 = {
+var factory5 = {
   code: ErrorCode.NULLISH_COALESCING_NOT_NULLABLE,
   name: ExtendedTemplateDiagnosticName.NULLISH_COALESCING_NOT_NULLABLE,
   create: (options) => {
@@ -44078,7 +44131,7 @@ var OptionalChainNotNullableCheck = class extends TemplateCheckWithVisitor {
     return [diagnostic];
   }
 };
-var factory5 = {
+var factory6 = {
   code: ErrorCode.OPTIONAL_CHAIN_NOT_NULLABLE,
   name: ExtendedTemplateDiagnosticName.OPTIONAL_CHAIN_NOT_NULLABLE,
   create: (options) => {
@@ -44107,7 +44160,7 @@ var SuffixNotSupportedCheck = class extends TemplateCheckWithVisitor {
     return [diagnostic];
   }
 };
-var factory6 = {
+var factory7 = {
   code: ErrorCode.SUFFIX_NOT_SUPPORTED,
   name: ExtendedTemplateDiagnosticName.SUFFIX_NOT_SUPPORTED,
   create: () => new SuffixNotSupportedCheck()
@@ -44145,7 +44198,7 @@ var TextAttributeNotBindingSpec = class extends TemplateCheckWithVisitor {
     return [diagnostic];
   }
 };
-var factory7 = {
+var factory8 = {
   code: ErrorCode.TEXT_ATTRIBUTE_NOT_BINDING,
   name: ExtendedTemplateDiagnosticName.TEXT_ATTRIBUTE_NOT_BINDING,
   create: () => new TextAttributeNotBindingSpec()
@@ -44168,12 +44221,12 @@ var ExtendedTemplateCheckerImpl = class {
     var _a2, _b2, _c2, _d2, _e2;
     this.partialCtx = { templateTypeChecker, typeChecker };
     this.templateChecks = /* @__PURE__ */ new Map();
-    for (const factory8 of templateCheckFactories) {
-      const category = diagnosticLabelToCategory((_e2 = (_d2 = (_b2 = (_a2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _a2.checks) == null ? void 0 : _b2[factory8.name]) != null ? _d2 : (_c2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _c2.defaultCategory) != null ? _e2 : DiagnosticCategoryLabel.Warning);
+    for (const factory9 of templateCheckFactories) {
+      const category = diagnosticLabelToCategory((_e2 = (_d2 = (_b2 = (_a2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _a2.checks) == null ? void 0 : _b2[factory9.name]) != null ? _d2 : (_c2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _c2.defaultCategory) != null ? _e2 : DiagnosticCategoryLabel.Warning);
       if (category === null) {
         continue;
       }
-      const check = factory8.create(options);
+      const check = factory9.create(options);
       if (check === null) {
         continue;
       }
@@ -44216,13 +44269,14 @@ ${value}`);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/extended/index.mjs
 var ALL_DIAGNOSTIC_FACTORIES = [
-  factory,
-  factory4,
-  factory5,
   factory2,
-  factory7,
+  factory5,
+  factory6,
   factory3,
-  factory6
+  factory8,
+  factory4,
+  factory7,
+  factory
 ];
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/core/src/compiler.mjs
@@ -44885,7 +44939,7 @@ ${allowedCategoryLabels.join("\n")}
       `.trim()
     });
   }
-  const allExtendedDiagnosticNames = ALL_DIAGNOSTIC_FACTORIES.map((factory8) => factory8.name);
+  const allExtendedDiagnosticNames = ALL_DIAGNOSTIC_FACTORIES.map((factory9) => factory9.name);
   for (const [checkName, category] of Object.entries((_c2 = (_b2 = options.extendedDiagnostics) == null ? void 0 : _b2.checks) != null ? _c2 : {})) {
     if (!allExtendedDiagnosticNames.includes(checkName)) {
       yield makeConfigDiagnostic({
