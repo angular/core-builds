@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.1+sha-cfb42ee
+ * @license Angular v17.0.1+sha-b16fc26
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11877,13 +11877,13 @@ export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponen
 
 
 /**
- * A guarded `performance.mark`.
+ * A guarded `performance.mark` for feature marking.
  *
  * This method exists because while all supported browser and node.js version supported by Angular
  * support performance.mark API. This is not the case for other environments such as JSDOM and
  * Cloudflare workers.
  */
-export declare function ɵperformanceMark(markName: string, markOptions?: PerformanceMarkOptions | undefined): PerformanceMark | undefined;
+export declare function ɵperformanceMarkFeature(feature: string): void;
 
 /**
  * Runtime link information for Pipes.
