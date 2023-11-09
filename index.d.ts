@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.1+sha-b651648
+ * @license Angular v17.0.1+sha-f61519a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11369,10 +11369,11 @@ export declare function ɵformatRuntimeError<T extends number = ɵRuntimeErrorCo
 export declare function ɵgenerateStandaloneInDeclarationsError(type: Type<any>, location: string): string;
 
 /**
- * If a given component has unresolved async metadata - this function returns a reference to
- * a Promise that represents dependency loading. Otherwise - this function returns `null`.
+ * If a given component has unresolved async metadata - returns a reference
+ * to a function that applies component metadata after resolving defer-loadable
+ * dependencies. Otherwise - this function returns `null`.
  */
-export declare function ɵgetAsyncClassMetadata(type: Type<unknown>): Promise<Array<Type<unknown>>> | null;
+export declare function ɵgetAsyncClassMetadataFn(type: Type<unknown>): (() => Promise<Array<Type<unknown>>>) | null;
 
 /**
  * Retrieves all defer blocks in a given LView.
@@ -12347,13 +12348,13 @@ export declare function ɵsetClassMetadata(type: Type<any>, decorators: any[] | 
 
 /**
  * Handles the process of applying metadata info to a component class in case
- * component template had defer blocks (thus some dependencies became deferrable).
+ * component template has defer blocks (thus some dependencies became deferrable).
  *
  * @param type Component class where metadata should be added
  * @param dependencyLoaderFn Function that loads dependencies
  * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
  */
-export declare function ɵsetClassMetadataAsync(type: Type<any>, dependencyLoaderFn: () => Array<Promise<Type<unknown>>>, metadataSetterFn: (...types: Type<unknown>[]) => void): Promise<Array<Type<unknown>>>;
+export declare function ɵsetClassMetadataAsync(type: Type<any>, dependencyLoaderFn: () => Array<Promise<Type<unknown>>>, metadataSetterFn: (...types: Type<unknown>[]) => void): () => Promise<Array<Type<unknown>>>;
 
 export declare function ɵsetCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 
