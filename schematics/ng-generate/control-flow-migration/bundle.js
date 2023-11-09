@@ -24761,7 +24761,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-f84cce0");
+var VERSION2 = new Version("17.1.0-next.0+sha-94096c6");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25409,6 +25409,20 @@ function migrateNgSwitchDefault(etm, tmpl, offset) {
   return { tmpl: updatedTmpl, offsets: { pre, post } };
 }
 
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/migration.mjs
+function migrateTemplate(template2) {
+  const ifResult = migrateIf(template2);
+  const forResult = migrateFor(ifResult.migrated);
+  const switchResult = migrateSwitch(forResult.migrated);
+  const migrated = processNgTemplates(switchResult.migrated);
+  const errors = [
+    ...ifResult.errors,
+    ...forResult.errors,
+    ...switchResult.errors
+  ];
+  return { migrated, errors };
+}
+
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/index.mjs
 function control_flow_migration_default(options) {
   return (tree, context) => __async(this, null, function* () {
@@ -25456,15 +25470,7 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
     for (const [start, end] of ranges) {
       const template2 = content.slice(start, end);
       const length = (end != null ? end : content.length) - start;
-      const ifResult = migrateIf(template2);
-      const forResult = migrateFor(ifResult.migrated);
-      const switchResult = migrateSwitch(forResult.migrated);
-      const errors = [
-        ...ifResult.errors,
-        ...forResult.errors,
-        ...switchResult.errors
-      ];
-      const migrated = processNgTemplates(switchResult.migrated);
+      const { migrated, errors } = migrateTemplate(template2);
       if (migrated !== null) {
         update.remove(start, length);
         update.insertLeft(start, migrated);

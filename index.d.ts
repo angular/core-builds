@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-f84cce0
+ * @license Angular v17.1.0-next.0+sha-94096c6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9244,7 +9244,7 @@ declare const enum TNodeType {
      * existing `TNode` (rather than create a new one) and just update the missing information.
      */
     Placeholder = 64,
-    AnyRNode = 3,
+    AnyRNode = 3,// Text | Element
     AnyContainer = 12
 }
 

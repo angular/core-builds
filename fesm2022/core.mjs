@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-f84cce0
+ * @license Angular v17.1.0-next.0+sha-94096c6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1871,8 +1871,8 @@ function ɵɵdefineComponent(componentDefinition) {
             consts: componentDefinition.consts || null,
             ngContentSelectors: componentDefinition.ngContentSelectors,
             onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
-            directiveDefs: null,
-            pipeDefs: null,
+            directiveDefs: null, // assigned in noSideEffects
+            pipeDefs: null, // assigned in noSideEffects
             dependencies: baseDef.standalone && componentDefinition.dependencies || null,
             getStandaloneInjector: null,
             signals: componentDefinition.signals ?? false,
@@ -6405,7 +6405,7 @@ function compileInjectable(type, meta) {
                     ngFactoryDef = compiler.compileFactory(angularCoreDiEnv, `ng:///${type.name}/ɵfac.js`, {
                         name: type.name,
                         type,
-                        typeArgumentCount: 0,
+                        typeArgumentCount: 0, // In JIT mode types are not available nor used.
                         deps: reflectDependencies(type),
                         target: compiler.FactoryTarget.Injectable
                     });
@@ -10423,7 +10423,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-f84cce0');
+const VERSION = new Version('17.1.0-next.0+sha-94096c6');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13106,16 +13106,16 @@ function generateInitialInputs(inputs, directiveIndex, attrs) {
 function createLContainer(hostNative, currentView, native, tNode) {
     ngDevMode && assertLView(currentView);
     const lContainer = [
-        hostNative,
-        true,
-        false,
-        currentView,
-        null,
-        tNode,
-        false,
-        native,
-        null,
-        null,
+        hostNative, // host native
+        true, // Boolean `true` in this position signifies that this is an `LContainer`
+        false, // has transplanted views
+        currentView, // parent
+        null, // next
+        tNode, // t_host
+        false, // has child views to refresh
+        native, // native,
+        null, // view refs
+        null, // moved views
         null, // dehydrated views
     ];
     ngDevMode &&
@@ -21427,11 +21427,11 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
     populateDehydratedViewsInLContainer(lContainer, tNode, lView);
     // Init instance-specific defer details and store it.
     const lDetails = [
-        null,
-        DeferBlockInternalState.Initial,
-        null,
-        null,
-        null,
+        null, // NEXT_DEFER_BLOCK_STATE
+        DeferBlockInternalState.Initial, // DEFER_BLOCK_STATE
+        null, // STATE_IS_FROZEN_UNTIL
+        null, // LOADING_AFTER_CLEANUP_FN
+        null, // TRIGGER_CLEANUP_FNS
         null // PREFETCH_TRIGGER_CLEANUP_FNS
     ];
     setLDeferBlockDetails(lView, adjustedIndex, lDetails);
@@ -31940,8 +31940,8 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
         let platform = getPlatform();
         if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
             const platformProviders = [
-                ...providers,
-                ...extraProviders,
+                ...providers, //
+                ...extraProviders, //
                 { provide: marker, useValue: true }
             ];
             if (parentPlatformFactory) {
