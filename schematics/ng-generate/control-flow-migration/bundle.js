@@ -3971,6 +3971,25 @@ var IcuPlaceholder = class {
     return visitor.visitIcuPlaceholder(this, context);
   }
 };
+var RecurseVisitor = class {
+  visitText(text2, context) {
+  }
+  visitContainer(container, context) {
+    container.children.forEach((child) => child.visit(this));
+  }
+  visitIcu(icu, context) {
+    Object.keys(icu.cases).forEach((k) => {
+      icu.cases[k].visit(this);
+    });
+  }
+  visitTagPlaceholder(ph, context) {
+    ph.children.forEach((child) => child.visit(this));
+  }
+  visitPlaceholder(ph, context) {
+  }
+  visitIcuPlaceholder(ph, context) {
+  }
+};
 function serializeMessage(messageNodes) {
   const visitor = new LocalizeMessageStringVisitor();
   const str = messageNodes.map((n) => n.visit(visitor)).join("");
@@ -7014,8 +7033,8 @@ var OpKind;
   OpKind2[OpKind2["I18nEnd"] = 38] = "I18nEnd";
   OpKind2[OpKind2["I18nExpression"] = 39] = "I18nExpression";
   OpKind2[OpKind2["I18nApply"] = 40] = "I18nApply";
-  OpKind2[OpKind2["Icu"] = 41] = "Icu";
-  OpKind2[OpKind2["IcuUpdate"] = 42] = "IcuUpdate";
+  OpKind2[OpKind2["IcuStart"] = 41] = "IcuStart";
+  OpKind2[OpKind2["IcuEnd"] = 42] = "IcuEnd";
   OpKind2[OpKind2["I18nContext"] = 43] = "I18nContext";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
@@ -7100,6 +7119,7 @@ var I18nParamValueFlags;
   I18nParamValueFlags2[I18nParamValueFlags2["TemplateTag"] = 2] = "TemplateTag";
   I18nParamValueFlags2[I18nParamValueFlags2["OpenTag"] = 4] = "OpenTag";
   I18nParamValueFlags2[I18nParamValueFlags2["CloseTag"] = 8] = "CloseTag";
+  I18nParamValueFlags2[I18nParamValueFlags2["ExpressionIndex"] = 16] = "ExpressionIndex";
 })(I18nParamValueFlags || (I18nParamValueFlags = {}));
 var Namespace;
 (function(Namespace2) {
@@ -7323,13 +7343,6 @@ function createI18nApplyOp(target, handle, sourceSpan) {
     kind: OpKind.I18nApply,
     target,
     handle,
-    sourceSpan
-  }, NEW_OP);
-}
-function createIcuUpdateOp(xref, sourceSpan) {
-  return __spreadValues({
-    kind: OpKind.IcuUpdate,
-    xref,
     sourceSpan
   }, NEW_OP);
 }
@@ -8096,8 +8109,8 @@ function transformExpressionsInOp(op, transform2, flags) {
     case OpKind.I18nContext:
     case OpKind.I18nEnd:
     case OpKind.I18nStart:
-    case OpKind.Icu:
-    case OpKind.IcuUpdate:
+    case OpKind.IcuEnd:
+    case OpKind.IcuStart:
     case OpKind.Namespace:
     case OpKind.Pipe:
     case OpKind.Projection:
@@ -8599,15 +8612,20 @@ function createI18nEndOp(xref) {
     xref
   }, NEW_OP);
 }
-function createIcuOp(xref, message, icu, messagePlaceholder, sourceSpan) {
+function createIcuStartOp(xref, message, messagePlaceholder, sourceSpan) {
   return __spreadValues({
-    kind: OpKind.Icu,
+    kind: OpKind.IcuStart,
     xref,
     message,
-    icu,
     messagePlaceholder,
     context: null,
     sourceSpan
+  }, NEW_OP);
+}
+function createIcuEndOp(xref) {
+  return __spreadValues({
+    kind: OpKind.IcuEnd,
+    xref
   }, NEW_OP);
 }
 function createI18nContextOp(xref, i18nBlock, message, sourceSpan) {
@@ -8763,20 +8781,30 @@ function removeAnys(e) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/apply_i18n_expressions.mjs
 function applyI18nExpressions(job) {
+  const i18nContexts = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.I18nContext) {
+        i18nContexts.set(op.xref, op);
+      }
+    }
+  }
   for (const unit of job.units) {
     for (const op of unit.update) {
-      if (op.kind === OpKind.I18nExpression && needsApplication(op)) {
+      if (op.kind === OpKind.I18nExpression && needsApplication(i18nContexts, op)) {
         OpList.insertAfter(createI18nApplyOp(op.target, op.handle, null), op);
       }
     }
   }
 }
-function needsApplication(op) {
+function needsApplication(i18nContexts, op) {
   var _a2;
   if (((_a2 = op.next) == null ? void 0 : _a2.kind) !== OpKind.I18nExpression) {
     return true;
   }
-  if (op.next.context !== op.context) {
+  const context = i18nContexts.get(op.context);
+  const nextContext2 = i18nContexts.get(op.next.context);
+  if (context.i18nBlock !== nextContext2.i18nBlock) {
     return true;
   }
   return false;
@@ -9320,7 +9348,7 @@ function createI18nContexts(job) {
         case OpKind.I18nEnd:
           currentI18nOp = null;
           break;
-        case OpKind.Icu:
+        case OpKind.IcuStart:
           if (currentI18nOp === null) {
             throw Error("Unexpected ICU outside of an i18n block.");
           }
@@ -9331,52 +9359,6 @@ function createI18nContexts(job) {
           } else {
             op.context = currentI18nOp.context;
           }
-          break;
-      }
-    }
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/create_i18n_icu_expressions.mjs
-function createI18nIcuExpressions(job) {
-  const icus = /* @__PURE__ */ new Map();
-  const i18nContexts = /* @__PURE__ */ new Map();
-  const i18nBlocks = /* @__PURE__ */ new Map();
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.Icu:
-          icus.set(op.xref, op);
-          break;
-        case OpKind.I18nContext:
-          i18nContexts.set(op.xref, op);
-          break;
-        case OpKind.I18nStart:
-          i18nBlocks.set(op.xref, op);
-          break;
-      }
-    }
-    for (const op of unit.update) {
-      switch (op.kind) {
-        case OpKind.IcuUpdate:
-          const icuOp = icus.get(op.xref);
-          if ((icuOp == null ? void 0 : icuOp.icu.expressionPlaceholder) === void 0) {
-            throw Error("ICU should have an i18n placeholder");
-          }
-          if (icuOp.context === null) {
-            throw Error("ICU should have its i18n context set");
-          }
-          const i18nContext = i18nContexts.get(icuOp.context);
-          const i18nBlock = i18nBlocks.get(i18nContext.i18nBlock);
-          OpList.replace(op, createI18nExpressionOp(
-            i18nContext.xref,
-            i18nBlock.xref,
-            i18nBlock.handle,
-            new LexicalReadExpr(icuOp.icu.expression),
-            icuOp.icu.expressionPlaceholder,
-            I18nParamResolutionTime.Postproccessing,
-            null
-          ));
           break;
       }
     }
@@ -9696,18 +9678,23 @@ function extractI18nMessages(job) {
   }
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if (op.kind === OpKind.Icu) {
-        if (!op.context) {
-          throw Error("ICU op should have its context set.");
-        }
-        if (!i18nBlockContexts.has(op.context)) {
-          const i18nContext = i18nContexts.get(op.context);
-          const subMessage = createI18nMessage(job, i18nContext, op.messagePlaceholder);
-          unit.create.push(subMessage);
-          const parentMessage = i18nBlockMessages.get(i18nContext.i18nBlock);
-          parentMessage == null ? void 0 : parentMessage.subMessages.push(subMessage.xref);
-        }
-        OpList.remove(op);
+      switch (op.kind) {
+        case OpKind.IcuStart:
+          if (!op.context) {
+            throw Error("ICU op should have its context set.");
+          }
+          if (!i18nBlockContexts.has(op.context)) {
+            const i18nContext = i18nContexts.get(op.context);
+            const subMessage = createI18nMessage(job, i18nContext, op.messagePlaceholder);
+            unit.create.push(subMessage);
+            const parentMessage = i18nBlockMessages.get(i18nContext.i18nBlock);
+            parentMessage == null ? void 0 : parentMessage.subMessages.push(subMessage.xref);
+          }
+          OpList.remove(op);
+          break;
+        case OpKind.IcuEnd:
+          OpList.remove(op);
+          break;
       }
     }
   }
@@ -9723,7 +9710,7 @@ function createI18nMessage(job, context, messagePlaceholder) {
 }
 function formatParams(params) {
   const result = /* @__PURE__ */ new Map();
-  for (const [placeholder, placeholderValues] of [...params].sort()) {
+  for (const [placeholder, placeholderValues] of params) {
     const serializedValues = formatParamValues(placeholderValues);
     if (serializedValues !== null) {
       result.set(placeholder, literal(formatParamValues(placeholderValues)));
@@ -9739,6 +9726,9 @@ function formatParamValues(values) {
   return serializedValues.length === 1 ? serializedValues[0] : `${LIST_START_MARKER}${serializedValues.join(LIST_DELIMITER)}${LIST_END_MARKER}`;
 }
 function formatValue(value) {
+  if (value.flags === I18nParamValueFlags.None) {
+    return `${value.value}`;
+  }
   let tagMarker = "";
   let closeMarker = "";
   if (value.flags & I18nParamValueFlags.ElementTag) {
@@ -15932,11 +15922,13 @@ function collectMessage(job, fileBasedI18nSuffix, messages, messageOp) {
     statements.push(...subMessageStatements);
     messageOp.params.set(subMessage.messagePlaceholder, subMessageVar);
   }
+  messageOp.params = new Map([...messageOp.params.entries()].sort());
   assertAllParamsResolved(messageOp);
   const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
   const closureVar = i18nGenerateClosureVar(job.pool, messageOp.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
   let transformFn = void 0;
   if (messageOp.needsPostprocessing) {
+    messageOp.postprocessingParams = new Map([...messageOp.postprocessingParams.entries()].sort());
     const extraTransformFnParams = [];
     if (messageOp.postprocessingParams.size > 0) {
       extraTransformFnParams.push(literalMap([...messageOp.postprocessingParams].map(([key, value]) => ({ key, value, quoted: true }))));
@@ -15974,12 +15966,14 @@ function i18nGenerateClosureVar(pool, messageId, fileBasedI18nSuffix, useExterna
   return variable(name);
 }
 function assertAllParamsResolved(op) {
-  for (const placeholder in op.message.placeholders) {
+  for (let placeholder in op.message.placeholders) {
+    placeholder = placeholder.trimEnd();
     if (!op.params.has(placeholder) && !op.postprocessingParams.has(placeholder)) {
       throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
     }
   }
-  for (const placeholder in op.message.placeholderToMessage) {
+  for (let placeholder in op.message.placeholderToMessage) {
+    placeholder = placeholder.trimEnd();
     if (!op.params.has(placeholder) && !op.postprocessingParams.has(placeholder)) {
       throw Error(`Failed to resolve i18n message placeholder: ${placeholder}`);
     }
@@ -15991,7 +15985,9 @@ function extractI18nText(job) {
   var _a2;
   for (const unit of job.units) {
     let currentI18n = null;
+    let currentIcu = null;
     const textNodeI18nBlocks = /* @__PURE__ */ new Map();
+    const textNodeIcus = /* @__PURE__ */ new Map();
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
@@ -16003,9 +15999,19 @@ function extractI18nText(job) {
         case OpKind.I18nEnd:
           currentI18n = null;
           break;
+        case OpKind.IcuStart:
+          if (op.context === null) {
+            throw Error("Icu op should have its context set.");
+          }
+          currentIcu = op;
+          break;
+        case OpKind.IcuEnd:
+          currentIcu = null;
+          break;
         case OpKind.Text:
           if (currentI18n !== null) {
             textNodeI18nBlocks.set(op.xref, currentI18n);
+            textNodeIcus.set(op.xref, currentIcu);
             OpList.remove(op);
           }
           break;
@@ -16018,11 +16024,13 @@ function extractI18nText(job) {
             continue;
           }
           const i18nOp = textNodeI18nBlocks.get(op.target);
+          const icuOp = textNodeIcus.get(op.target);
+          const contextId = icuOp ? icuOp.context : i18nOp.context;
+          const resolutionTime = icuOp ? I18nParamResolutionTime.Postproccessing : I18nParamResolutionTime.Creation;
           const ops = [];
           for (let i = 0; i < op.interpolation.expressions.length; i++) {
             const expr = op.interpolation.expressions[i];
-            const placeholder = op.i18nPlaceholders[i];
-            ops.push(createI18nExpressionOp(i18nOp.context, i18nOp.xref, i18nOp.handle, expr, placeholder.name, I18nParamResolutionTime.Creation, (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
+            ops.push(createI18nExpressionOp(contextId, i18nOp.xref, i18nOp.handle, expr, op.i18nPlaceholders[i], resolutionTime, (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
           }
           OpList.replaceWithMany(op, ops);
           break;
@@ -17762,7 +17770,7 @@ function getSubTemplateIndexForTemplateTag(job, i18nOp, op) {
   }
   return i18nOp.subTemplateIndex;
 }
-function addParam(params, placeholder, value, subTemplateIndex, flags = I18nParamValueFlags.None) {
+function addParam(params, placeholder, value, subTemplateIndex, flags) {
   var _a2;
   const values = (_a2 = params.get(placeholder)) != null ? _a2 : [];
   values.push({ value, subTemplateIndex, flags });
@@ -17789,18 +17797,75 @@ function resolveI18nExpressionPlaceholders(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
-        const index = expressionIndices.get(op.context) || 0;
         const i18nContext = i18nContexts.get(op.context);
+        const index = expressionIndices.get(i18nContext.i18nBlock) || 0;
         const subTemplateIndex = subTemplateIndicies.get(i18nContext.i18nBlock);
         const params = op.resolutionTime === I18nParamResolutionTime.Creation ? i18nContext.params : i18nContext.postprocessingParams;
         const values = params.get(op.i18nPlaceholder) || [];
-        values.push({ value: index, subTemplateIndex, flags: I18nParamValueFlags.None });
+        values.push({
+          value: index,
+          subTemplateIndex,
+          flags: I18nParamValueFlags.ExpressionIndex
+        });
         params.set(op.i18nPlaceholder, values);
-        expressionIndices.set(op.context, index + 1);
+        expressionIndices.set(i18nContext.i18nBlock, index + 1);
       }
     }
   }
 }
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_icu_placeholders.mjs
+function resolveI18nIcuPlaceholders(job) {
+  const contextOps = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.I18nContext:
+          contextOps.set(op.xref, op);
+          break;
+      }
+    }
+  }
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.IcuStart:
+          if (op.context === null) {
+            throw Error("Icu should have its i18n context set.");
+          }
+          const i18nContext = contextOps.get(op.context);
+          for (const node of op.message.nodes) {
+            node.visit(new ResolveIcuPlaceholdersVisitor(i18nContext.postprocessingParams));
+          }
+          break;
+      }
+    }
+  }
+}
+var ResolveIcuPlaceholdersVisitor = class extends RecurseVisitor {
+  constructor(params) {
+    super();
+    this.params = params;
+  }
+  visitTagPlaceholder(placeholder) {
+    var _a2, _b2;
+    super.visitTagPlaceholder(placeholder);
+    if (placeholder.startName && placeholder.startSourceSpan && !this.params.has(placeholder.startName)) {
+      this.params.set(placeholder.startName, [{
+        value: (_a2 = placeholder.startSourceSpan) == null ? void 0 : _a2.toString(),
+        subTemplateIndex: null,
+        flags: I18nParamValueFlags.None
+      }]);
+    }
+    if (placeholder.closeName && placeholder.endSourceSpan && !this.params.has(placeholder.closeName)) {
+      this.params.set(placeholder.closeName, [{
+        value: (_b2 = placeholder.endSourceSpan) == null ? void 0 : _b2.toString(),
+        subTemplateIndex: null,
+        flags: I18nParamValueFlags.None
+      }]);
+    }
+  }
+};
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_names.mjs
 function resolveNames(job) {
@@ -18518,6 +18583,7 @@ function allowConservativeInlining(decl, target) {
 function wrapI18nIcus(job) {
   for (const unit of job.units) {
     let currentI18nOp = null;
+    let addedI18nId = null;
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
@@ -18526,11 +18592,16 @@ function wrapI18nIcus(job) {
         case OpKind.I18nEnd:
           currentI18nOp = null;
           break;
-        case OpKind.Icu:
+        case OpKind.IcuStart:
           if (currentI18nOp === null) {
-            const id = job.allocateXrefId();
-            OpList.insertBefore(createI18nStartOp(id, op.message), op);
-            OpList.insertAfter(createI18nEndOp(id), op);
+            addedI18nId = job.allocateXrefId();
+            OpList.insertBefore(createI18nStartOp(addedI18nId, op.message), op);
+          }
+          break;
+        case OpKind.IcuEnd:
+          if (addedI18nId !== null) {
+            OpList.insertAfter(createI18nEndOp(addedI18nId), op);
+            addedI18nId = null;
           }
           break;
       }
@@ -18557,7 +18628,6 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: createPipes },
   { kind: CompilationJobKind.Tmpl, fn: configureDeferInstructions },
   { kind: CompilationJobKind.Tmpl, fn: extractI18nText },
-  { kind: CompilationJobKind.Tmpl, fn: createI18nIcuExpressions },
   { kind: CompilationJobKind.Tmpl, fn: applyI18nExpressions },
   { kind: CompilationJobKind.Tmpl, fn: createVariadicPipes },
   { kind: CompilationJobKind.Both, fn: generatePureLiteralStructures },
@@ -18581,6 +18651,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: createDeferDepsFns },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
+  { kind: CompilationJobKind.Tmpl, fn: resolveI18nIcuPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: mergeI18nContexts },
   { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackFns },
@@ -18845,7 +18916,7 @@ function ingestContent(unit, content) {
 function ingestText(unit, text2) {
   unit.create.push(createTextOp(unit.job.allocateXrefId(), text2.value, text2.sourceSpan));
 }
-function ingestBoundText(unit, text2) {
+function ingestBoundText(unit, text2, i18nPlaceholders) {
   var _a2;
   let value = text2.value;
   if (value instanceof ASTWithSource) {
@@ -18857,7 +18928,12 @@ function ingestBoundText(unit, text2) {
   if (text2.i18n !== void 0 && !(text2.i18n instanceof Container)) {
     throw Error(`Unhandled i18n metadata type for text interpolation: ${(_a2 = text2.i18n) == null ? void 0 : _a2.constructor.name}`);
   }
-  const i18nPlaceholders = text2.i18n instanceof Container ? text2.i18n.children.filter((node) => node instanceof Placeholder) : [];
+  if (i18nPlaceholders === void 0) {
+    i18nPlaceholders = text2.i18n instanceof Container ? text2.i18n.children.filter((node) => node instanceof Placeholder).map((placeholder) => placeholder.name) : [];
+  }
+  if (i18nPlaceholders.length > 0 && i18nPlaceholders.length !== value.expressions.length) {
+    throw Error(`Unexpected number of i18n placeholders (${value.expressions.length}) for BoundText with ${value.expressions.length} expressions`);
+  }
   const textXref = unit.job.allocateXrefId();
   unit.create.push(createTextOp(textXref, "", text2.sourceSpan));
   const baseSourceSpan = unit.job.compatibility ? null : text2.sourceSpan;
@@ -19003,13 +19079,26 @@ function ingestDeferBlock(unit, deferBlock) {
   unit.update.push(deferWhenOps);
 }
 function ingestIcu(unit, icu) {
-  var _a2;
+  var _a2, _b2;
   if (icu.i18n instanceof Message && isSingleI18nIcu(icu.i18n)) {
     const xref = unit.job.allocateXrefId();
-    unit.create.push(createIcuOp(xref, icu.i18n, icu.i18n.nodes[0], icuFromI18nMessage(icu.i18n).name, null));
-    unit.update.push(createIcuUpdateOp(xref, null));
+    const icuNode = icu.i18n.nodes[0];
+    unit.create.push(createIcuStartOp(xref, icu.i18n, icuFromI18nMessage(icu.i18n).name, null));
+    const expressionPlaceholder = (_a2 = icuNode.expressionPlaceholder) == null ? void 0 : _a2.trimEnd();
+    if (expressionPlaceholder === void 0 || icu.vars[expressionPlaceholder] === void 0) {
+      throw Error("ICU should have a text binding");
+    }
+    ingestBoundText(unit, icu.vars[expressionPlaceholder], [expressionPlaceholder]);
+    for (const [placeholder, text2] of Object.entries(icu.placeholders)) {
+      if (text2 instanceof BoundText) {
+        ingestBoundText(unit, text2, [placeholder]);
+      } else {
+        ingestText(unit, text2);
+      }
+    }
+    unit.create.push(createIcuEndOp(xref));
   } else {
-    throw Error(`Unhandled i18n metadata type for ICU: ${(_a2 = icu.i18n) == null ? void 0 : _a2.constructor.name}`);
+    throw Error(`Unhandled i18n metadata type for ICU: ${(_b2 = icu.i18n) == null ? void 0 : _b2.constructor.name}`);
   }
 }
 function ingestForBlock(unit, forBlock) {
@@ -21968,7 +22057,7 @@ var TemplateDefinitionBuilder = class {
     const placeholders = this.i18nBindProps(icu.placeholders);
     const message = icu.i18n;
     const transformFn = (raw) => {
-      const params = __spreadValues(__spreadValues({}, vars), placeholders);
+      const params = Object.fromEntries(Object.entries(__spreadValues(__spreadValues({}, vars), placeholders)).sort());
       const formatted = formatI18nPlaceholderNamesInMap(params, false);
       return invokeInstruction(null, Identifiers.i18nPostprocess, [raw, mapLiteral(formatted, true)]);
     };
@@ -24761,7 +24850,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-94096c6");
+var VERSION2 = new Version("17.1.0-next.0+sha-70fe5e6");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
