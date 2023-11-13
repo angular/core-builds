@@ -83,86 +83,6 @@ function normalizePath(path2) {
   return path2.replace(/\\/g, "/");
 }
 
-// bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/project_tsconfig_paths.mjs
-var import_core = require("@angular-devkit/core");
-function getProjectTsConfigPaths(tree) {
-  return __async(this, null, function* () {
-    const buildPaths = /* @__PURE__ */ new Set();
-    const testPaths = /* @__PURE__ */ new Set();
-    const workspace = yield getWorkspace(tree);
-    for (const [, project] of workspace.projects) {
-      for (const [name, target] of project.targets) {
-        if (name !== "build" && name !== "test") {
-          continue;
-        }
-        for (const [, options] of allTargetOptions(target)) {
-          const tsConfig = options["tsConfig"];
-          if (typeof tsConfig !== "string" || !tree.exists(tsConfig)) {
-            continue;
-          }
-          if (name === "build") {
-            buildPaths.add((0, import_core.normalize)(tsConfig));
-          } else {
-            testPaths.add((0, import_core.normalize)(tsConfig));
-          }
-        }
-      }
-    }
-    return {
-      buildPaths: [...buildPaths],
-      testPaths: [...testPaths]
-    };
-  });
-}
-function* allTargetOptions(target) {
-  if (target.options) {
-    yield [void 0, target.options];
-  }
-  if (!target.configurations) {
-    return;
-  }
-  for (const [name, options] of Object.entries(target.configurations)) {
-    if (options) {
-      yield [name, options];
-    }
-  }
-}
-function createHost(tree) {
-  return {
-    readFile(path2) {
-      return __async(this, null, function* () {
-        const data = tree.read(path2);
-        if (!data) {
-          throw new Error("File not found.");
-        }
-        return import_core.virtualFs.fileBufferToString(data);
-      });
-    },
-    writeFile(path2, data) {
-      return __async(this, null, function* () {
-        return tree.overwrite(path2, data);
-      });
-    },
-    isDirectory(path2) {
-      return __async(this, null, function* () {
-        return !tree.exists(path2) && tree.getDir(path2).subfiles.length > 0;
-      });
-    },
-    isFile(path2) {
-      return __async(this, null, function* () {
-        return tree.exists(path2);
-      });
-    }
-  };
-}
-function getWorkspace(tree) {
-  return __async(this, null, function* () {
-    const host = createHost(tree);
-    const { workspace } = yield import_core.workspaces.readWorkspace("/", host);
-    return workspace;
-  });
-}
-
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/compiler_host.mjs
 var import_path = require("path");
 var import_typescript4 = __toESM(require("typescript"), 1);
@@ -24850,7 +24770,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-3cf18bb");
+var VERSION2 = new Version("17.1.0-next.0+sha-da97bbc");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24896,6 +24816,42 @@ publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/types.mjs
 var ngtemplate = "ng-template";
+function allFormsOf(selector) {
+  return [
+    selector,
+    `*${selector}`,
+    `[${selector}]`
+  ];
+}
+var commonModuleDirectives = /* @__PURE__ */ new Set([
+  ...allFormsOf("ngComponentOutlet"),
+  ...allFormsOf("ngTemplateOutlet"),
+  ...allFormsOf("ngClass"),
+  ...allFormsOf("ngPlural"),
+  ...allFormsOf("ngPluralCase"),
+  ...allFormsOf("ngStyle"),
+  ...allFormsOf("ngTemplateOutlet"),
+  ...allFormsOf("ngComponentOutlet")
+]);
+function pipeMatchRegExpFor(name) {
+  return new RegExp(`\\|\\s*${name}`);
+}
+var commonModulePipes = [
+  "date",
+  "async",
+  "currency",
+  "number",
+  "i18nPlural",
+  "i18nSelect",
+  "json",
+  "keyvalue",
+  "slice",
+  "lowercase",
+  "uppercase",
+  "titlecase",
+  "percent",
+  "titlecase"
+].map((name) => pipeMatchRegExpFor(name));
 var ElementToMigrate = class {
   constructor(el, attr) {
     __publicField(this, "el");
@@ -24951,9 +24907,12 @@ var Template2 = class {
 var AnalyzedFile = class {
   constructor() {
     __publicField(this, "ranges", []);
+    __publicField(this, "removeCommonModule", false);
   }
   getSortedRanges() {
-    return this.ranges.slice().sort(([aStart], [bStart]) => bStart - aStart);
+    const templateRanges = this.ranges.slice().filter((x) => x.type === "template").sort((aStart, bStart) => bStart.start - aStart.start);
+    const importRanges = this.ranges.slice().filter((x) => x.type === "import").sort((aStart, bStart) => bStart.start - aStart.start);
+    return [...templateRanges, ...importRanges];
   }
   static addRange(path2, analyzedFiles, range) {
     let analysis = analyzedFiles.get(path2);
@@ -24961,10 +24920,37 @@ var AnalyzedFile = class {
       analysis = new AnalyzedFile();
       analyzedFiles.set(path2, analysis);
     }
-    const duplicate = analysis.ranges.find((current) => current[0] === range[0] && current[1] === range[1]);
+    const duplicate = analysis.ranges.find((current) => current.start === range.start && current.end === range.end);
     if (!duplicate) {
       analysis.ranges.push(range);
     }
+  }
+};
+var CommonCollector = class extends RecursiveVisitor {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "count", 0);
+  }
+  visitElement(el) {
+    if (el.attrs.length > 0) {
+      for (const attr of el.attrs) {
+        if (this.hasDirectives(attr.name) || this.hasPipes(attr.value)) {
+          this.count++;
+        }
+      }
+    }
+    super.visitElement(el, null);
+  }
+  visitText(ast) {
+    if (this.hasPipes(ast.value)) {
+      this.count++;
+    }
+  }
+  hasDirectives(input) {
+    return commonModuleDirectives.has(input);
+  }
+  hasPipes(input) {
+    return commonModulePipes.some((regexp) => regexp.test(input));
   }
 };
 var ElementCollector = class extends RecursiveVisitor {
@@ -25015,31 +25001,97 @@ var TemplateCollector = class extends RecursiveVisitor {
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
 var import_path2 = require("path");
 var import_typescript5 = __toESM(require("typescript"), 1);
+var importRemovals = ["NgIf", "NgFor", "NgSwitch", "NgSwitchCase", "NgSwitchDefault"];
+var importWithCommonRemovals = [...importRemovals, "CommonModule"];
 function analyze(sourceFile, analyzedFiles) {
   forEachClass(sourceFile, (node) => {
-    var _a2;
-    const decorator = (_a2 = import_typescript5.default.getDecorators(node)) == null ? void 0 : _a2.find((dec) => {
-      return import_typescript5.default.isCallExpression(dec.expression) && import_typescript5.default.isIdentifier(dec.expression.expression) && dec.expression.expression.text === "Component";
-    });
-    const metadata = decorator && decorator.expression.arguments.length > 0 && import_typescript5.default.isObjectLiteralExpression(decorator.expression.arguments[0]) ? decorator.expression.arguments[0] : null;
-    if (!metadata) {
-      return;
-    }
-    for (const prop of metadata.properties) {
-      if (!import_typescript5.default.isPropertyAssignment(prop) || !import_typescript5.default.isStringLiteralLike(prop.initializer) || !import_typescript5.default.isIdentifier(prop.name) && !import_typescript5.default.isStringLiteralLike(prop.name)) {
-        continue;
-      }
-      switch (prop.name.text) {
-        case "template":
-          AnalyzedFile.addRange(sourceFile.fileName, analyzedFiles, [prop.initializer.getStart() + 1, prop.initializer.getEnd() - 1]);
-          break;
-        case "templateUrl":
-          const path2 = (0, import_path2.join)((0, import_path2.dirname)(sourceFile.fileName), prop.initializer.text);
-          AnalyzedFile.addRange(path2, analyzedFiles, [0]);
-          break;
-      }
+    if (import_typescript5.default.isClassDeclaration(node)) {
+      analyzeDecorators(node, sourceFile, analyzedFiles);
+    } else {
+      analyzeImportDeclarations(node, sourceFile, analyzedFiles);
     }
   });
+}
+function updateImportDeclaration(decl, removeCommonModule) {
+  const clause = decl.getChildAt(1);
+  const updatedClause = updateImportClause(clause, removeCommonModule);
+  if (updatedClause === null) {
+    return "";
+  }
+  const printer = import_typescript5.default.createPrinter();
+  const updated = import_typescript5.default.factory.updateImportDeclaration(decl, decl.modifiers, updatedClause, decl.moduleSpecifier, void 0);
+  return printer.printNode(import_typescript5.default.EmitHint.Unspecified, updated, clause.getSourceFile());
+}
+function updateImportClause(clause, removeCommonModule) {
+  if (clause.namedBindings && import_typescript5.default.isNamedImports(clause.namedBindings)) {
+    const removals = removeCommonModule ? importWithCommonRemovals : importRemovals;
+    const elements = clause.namedBindings.elements.filter((el) => !removals.includes(el.getText()));
+    if (elements.length === 0) {
+      return null;
+    }
+    clause = import_typescript5.default.factory.updateImportClause(clause, clause.isTypeOnly, clause.name, import_typescript5.default.factory.createNamedImports(elements));
+  }
+  return clause;
+}
+function updateClassImports(propAssignment, removeCommonModule) {
+  const printer = import_typescript5.default.createPrinter();
+  const importList = propAssignment.initializer;
+  const removals = removeCommonModule ? importWithCommonRemovals : importRemovals;
+  const elements = importList.elements.filter((el) => !removals.includes(el.getText()));
+  const updatedElements = import_typescript5.default.factory.updateArrayLiteralExpression(importList, elements);
+  const updatedAssignment = import_typescript5.default.factory.updatePropertyAssignment(propAssignment, propAssignment.name, updatedElements);
+  return printer.printNode(import_typescript5.default.EmitHint.Unspecified, updatedAssignment, updatedAssignment.getSourceFile());
+}
+function analyzeImportDeclarations(node, sourceFile, analyzedFiles) {
+  if (node.getText().indexOf("@angular/common") === -1) {
+    return;
+  }
+  const clause = node.getChildAt(1);
+  if (clause.namedBindings && import_typescript5.default.isNamedImports(clause.namedBindings)) {
+    const elements = clause.namedBindings.elements.filter((el) => importWithCommonRemovals.includes(el.getText()));
+    if (elements.length > 0) {
+      AnalyzedFile.addRange(sourceFile.fileName, analyzedFiles, { start: node.getStart(), end: node.getEnd(), node, type: "import" });
+    }
+  }
+}
+function analyzeDecorators(node, sourceFile, analyzedFiles) {
+  var _a2;
+  const decorator = (_a2 = import_typescript5.default.getDecorators(node)) == null ? void 0 : _a2.find((dec) => {
+    return import_typescript5.default.isCallExpression(dec.expression) && import_typescript5.default.isIdentifier(dec.expression.expression) && dec.expression.expression.text === "Component";
+  });
+  const metadata = decorator && decorator.expression.arguments.length > 0 && import_typescript5.default.isObjectLiteralExpression(decorator.expression.arguments[0]) ? decorator.expression.arguments[0] : null;
+  if (!metadata) {
+    return;
+  }
+  for (const prop of metadata.properties) {
+    if (!import_typescript5.default.isPropertyAssignment(prop) || !import_typescript5.default.isIdentifier(prop.name) && !import_typescript5.default.isStringLiteralLike(prop.name)) {
+      continue;
+    }
+    switch (prop.name.text) {
+      case "template":
+        AnalyzedFile.addRange(sourceFile.fileName, analyzedFiles, {
+          start: prop.initializer.getStart() + 1,
+          end: prop.initializer.getEnd() - 1,
+          node: prop,
+          type: "template"
+        });
+        break;
+      case "imports":
+        AnalyzedFile.addRange(sourceFile.fileName, analyzedFiles, {
+          start: prop.name.getStart(),
+          end: prop.initializer.getEnd(),
+          node: prop,
+          type: "import"
+        });
+        break;
+      case "templateUrl":
+        if (import_typescript5.default.isStringLiteralLike(prop.initializer)) {
+          const path2 = (0, import_path2.join)((0, import_path2.dirname)(sourceFile.fileName), prop.initializer.text);
+          AnalyzedFile.addRange(path2, analyzedFiles, { start: 0, node: prop, type: "template" });
+        }
+        break;
+    }
+  }
 }
 function getNestedCount(etm, aggregator) {
   if (aggregator.length === 0) {
@@ -25140,6 +25192,24 @@ function processNgTemplates(template2) {
   }
   return template2;
 }
+function canRemoveCommonModule(template2) {
+  const parsed = parseTemplate2(template2);
+  let removeCommonModule = false;
+  if (parsed !== null) {
+    const visitor = new CommonCollector();
+    visitAll2(visitor, parsed.rootNodes);
+    removeCommonModule = visitor.count === 0;
+  }
+  return removeCommonModule;
+}
+function removeImports(template2, node, removeCommonModule) {
+  if (template2.startsWith("imports") && import_typescript5.default.isPropertyAssignment(node)) {
+    return updateClassImports(node, removeCommonModule);
+  } else if (import_typescript5.default.isImportDeclaration(node)) {
+    return updateImportDeclaration(node, removeCommonModule);
+  }
+  return template2;
+}
 function getOriginals(etm, tmpl, offset) {
   if (etm.el.children.length > 0) {
     const start2 = tmpl.slice(etm.el.sourceSpan.start.offset - offset, etm.el.children[0].sourceSpan.start.offset - offset);
@@ -25178,7 +25248,7 @@ function getMainBlock(etm, tmpl, offset) {
 }
 function forEachClass(sourceFile, callback) {
   sourceFile.forEachChild(function walk(node) {
-    if (import_typescript5.default.isClassDeclaration(node)) {
+    if (import_typescript5.default.isClassDeclaration(node) || import_typescript5.default.isImportDeclaration(node)) {
       callback(node);
     }
     node.forEachChild(walk);
@@ -25499,26 +25569,35 @@ function migrateNgSwitchDefault(etm, tmpl, offset) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/migration.mjs
-function migrateTemplate(template2) {
-  const ifResult = migrateIf(template2);
-  const forResult = migrateFor(ifResult.migrated);
-  const switchResult = migrateSwitch(forResult.migrated);
-  const migrated = processNgTemplates(switchResult.migrated);
-  const errors = [
-    ...ifResult.errors,
-    ...forResult.errors,
-    ...switchResult.errors
-  ];
+function migrateTemplate(template2, templateType, node, file) {
+  let errors = [];
+  let migrated = template2;
+  if (templateType === "template") {
+    const ifResult = migrateIf(template2);
+    const forResult = migrateFor(ifResult.migrated);
+    const switchResult = migrateSwitch(forResult.migrated);
+    migrated = processNgTemplates(switchResult.migrated);
+    file.removeCommonModule = canRemoveCommonModule(template2);
+    errors = [
+      ...ifResult.errors,
+      ...forResult.errors,
+      ...switchResult.errors
+    ];
+  } else {
+    migrated = removeImports(template2, node, file.removeCommonModule);
+  }
   return { migrated, errors };
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/index.mjs
 function control_flow_migration_default(options) {
   return (tree, context) => __async(this, null, function* () {
-    const { buildPaths, testPaths } = yield getProjectTsConfigPaths(tree);
     const basePath = process.cwd();
     const pathToMigrate = normalizePath((0, import_path3.join)(basePath, options.path));
-    const allPaths = options.path !== "./" ? [...buildPaths, ...testPaths] : [pathToMigrate];
+    let allPaths = [];
+    if (pathToMigrate.trim() !== "") {
+      allPaths.push(pathToMigrate);
+    }
     if (!allPaths.length) {
       throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the control flow migration.");
     }
@@ -25556,10 +25635,10 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
     const relativePath = (0, import_path3.relative)(basePath, path2);
     const content = tree.readText(relativePath);
     const update = tree.beginUpdate(relativePath);
-    for (const [start, end] of ranges) {
+    for (const { start, end, node, type } of ranges) {
       const template2 = content.slice(start, end);
       const length = (end != null ? end : content.length) - start;
-      const { migrated, errors } = migrateTemplate(template2);
+      const { migrated, errors } = migrateTemplate(template2, type, node, file);
       if (migrated !== null) {
         update.remove(start, length);
         update.insertLeft(start, migrated);
