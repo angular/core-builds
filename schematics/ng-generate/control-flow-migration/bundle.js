@@ -24770,7 +24770,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-9135dba");
+var VERSION2 = new Version("17.1.0-next.0+sha-726530a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25177,15 +25177,16 @@ function wrapIntoI18nContainer(i18nAttr, content) {
 function processNgTemplates(template2) {
   const templates = countTemplateUsage(template2);
   for (const [name, t] of templates) {
-    const placeholder = `${name}|`;
-    if (template2.indexOf(placeholder) > -1) {
+    const replaceRegex = new RegExp(`${name}\\|`, "g");
+    const matches = [...template2.matchAll(replaceRegex)];
+    if (matches.length > 0) {
       if (t.i18n !== null) {
         const container = wrapIntoI18nContainer(t.i18n, t.children);
-        template2 = template2.replace(placeholder, container);
+        template2 = template2.replace(replaceRegex, container);
       } else {
-        template2 = template2.replace(placeholder, t.children);
+        template2 = template2.replace(replaceRegex, t.children);
       }
-      if (t.count <= 2) {
+      if (t.count === matches.length + 1) {
         template2 = template2.replace(t.contents, "");
       }
     }

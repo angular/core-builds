@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-9135dba
+ * @license Angular v17.1.0-next.0+sha-726530a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2178,8 +2178,8 @@ function getComponentId(componentDef) {
 // Uglify will inline these when minifying so there shouldn't be a cost.
 const HOST = 0;
 const TVIEW = 1;
-const FLAGS = 2;
 // Shared with LContainer
+const FLAGS = 2;
 const PARENT = 3;
 const NEXT = 4;
 const T_HOST = 5;
@@ -2223,31 +2223,36 @@ const TYPE = 1;
  * without having to remember the specific indices.
  * Uglify will inline these when minifying so there shouldn't be a cost.
  */
-/**
- * Flag to signify that this `LContainer` may have transplanted views which need to be change
- * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
- *
- * This flag, once set, is never unset for the `LContainer`. This means that when unset we can skip
- * a lot of work in `refreshEmbeddedViews`. But when set we still need to verify
- * that the `MOVED_VIEWS` are transplanted and on-push.
- */
-const HAS_TRANSPLANTED_VIEWS = 2;
-// PARENT and NEXT are indices 3 and 4
+// FLAGS, PARENT, NEXT, and T_HOST are indices 2, 3, 4, and 5
 // As we already have these constants in LView, we don't need to re-create them.
-// T_HOST is index 5
-// We already have this constants in LView, we don't need to re-create it.
-const HAS_CHILD_VIEWS_TO_REFRESH = 6;
+const DEHYDRATED_VIEWS = 6;
 const NATIVE = 7;
 const VIEW_REFS = 8;
 const MOVED_VIEWS = 9;
-const DEHYDRATED_VIEWS = 10;
 /**
  * Size of LContainer's header. Represents the index after which all views in the
  * container will be inserted. We need to keep a record of current views so we know
  * which views are already in the DOM (and don't need to be re-added) and so we can
  * remove views from the DOM when they are no longer required.
  */
-const CONTAINER_HEADER_OFFSET = 11;
+const CONTAINER_HEADER_OFFSET = 10;
+/** Flags associated with an LContainer (saved in LContainer[FLAGS]) */
+var LContainerFlags;
+(function (LContainerFlags) {
+    LContainerFlags[LContainerFlags["None"] = 0] = "None";
+    /**
+     * Flag to signify that this `LContainer` may have transplanted views which need to be change
+     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
+     *
+     * This flag, once set, is never unset for the `LContainer`.
+     */
+    LContainerFlags[LContainerFlags["HasTransplantedViews"] = 2] = "HasTransplantedViews";
+    /**
+     * Indicates that this LContainer has a view underneath it that needs to be refreshed during
+     * change detection.
+     */
+    LContainerFlags[LContainerFlags["HasChildViewsToRefresh"] = 4] = "HasChildViewsToRefresh";
+})(LContainerFlags || (LContainerFlags = {}));
 
 /**
  * True if `value` is `LView`.
@@ -2744,12 +2749,12 @@ function markAncestorsForTraversal(lView) {
     while (parent !== null) {
         // We stop adding markers to the ancestors once we reach one that already has the marker. This
         // is to avoid needlessly traversing all the way to the root when the marker already exists.
-        if ((isLContainer(parent) && parent[HAS_CHILD_VIEWS_TO_REFRESH] ||
+        if ((isLContainer(parent) && (parent[FLAGS] & LContainerFlags.HasChildViewsToRefresh) ||
             (isLView(parent) && parent[FLAGS] & 8192 /* LViewFlags.HasChildViewsToRefresh */))) {
             break;
         }
         if (isLContainer(parent)) {
-            parent[HAS_CHILD_VIEWS_TO_REFRESH] = true;
+            parent[FLAGS] |= LContainerFlags.HasChildViewsToRefresh;
         }
         else {
             parent[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
@@ -8197,7 +8202,7 @@ function trackMovedView(declarationContainer, lView) {
         // At this point the declaration-component is not same as insertion-component; this means that
         // this is a transplanted view. Mark the declared lView as having transplanted views so that
         // those views can participate in CD.
-        declarationContainer[HAS_TRANSPLANTED_VIEWS] = true;
+        declarationContainer[FLAGS] |= LContainerFlags.HasTransplantedViews;
     }
     if (movedViews === null) {
         declarationContainer[MOVED_VIEWS] = [lView];
@@ -10423,7 +10428,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-9135dba');
+const VERSION = new Version('17.1.0-next.0+sha-726530a');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13108,15 +13113,14 @@ function createLContainer(hostNative, currentView, native, tNode) {
     const lContainer = [
         hostNative, // host native
         true, // Boolean `true` in this position signifies that this is an `LContainer`
-        false, // has transplanted views
+        0, // flags
         currentView, // parent
         null, // next
         tNode, // t_host
-        false, // has child views to refresh
+        null, // dehydrated views
         native, // native,
         null, // view refs
         null, // moved views
-        null, // dehydrated views
     ];
     ngDevMode &&
         assertEqual(lContainer.length, CONTAINER_HEADER_OFFSET, 'Should allocate correct number of slots for LContainer header.');
@@ -13536,7 +13540,7 @@ function viewShouldHaveReactiveConsumer(tView) {
  */
 function detectChangesInEmbeddedViews(lView, mode) {
     for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
-        lContainer[HAS_CHILD_VIEWS_TO_REFRESH] = false;
+        lContainer[FLAGS] &= ~LContainerFlags.HasChildViewsToRefresh;
         for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             const embeddedLView = lContainer[i];
             detectChangesInViewIfAttached(embeddedLView, mode);
@@ -13550,7 +13554,7 @@ function detectChangesInEmbeddedViews(lView, mode) {
  */
 function markTransplantedViewsForRefresh(lView) {
     for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
-        if (!lContainer[HAS_TRANSPLANTED_VIEWS])
+        if (!(lContainer[FLAGS] & LContainerFlags.HasTransplantedViews))
             continue;
         const movedViews = lContainer[MOVED_VIEWS];
         ngDevMode && assertDefined(movedViews, 'Transplanted View flags set but missing MOVED_VIEWS');
