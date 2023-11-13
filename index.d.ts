@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.2+sha-30757bd
+ * @license Angular v17.0.2+sha-76aba9e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2566,7 +2566,12 @@ declare type DeferredPlaceholderBlockConfig = [minimumTime: number | null];
  */
 export declare const defineInjectable: typeof ɵɵdefineInjectable;
 
-declare const DEHYDRATED_VIEWS = 10;
+/**
+ * Below are constants for LContainer indices to help us look up LContainer members
+ * without having to remember the specific indices.
+ * Uglify will inline these when minifying so there shouldn't be a cost.
+ */
+declare const DEHYDRATED_VIEWS = 6;
 
 /**
  * An object that contains hydration-related information serialized
@@ -3945,18 +3950,6 @@ export declare interface GetTestability {
 declare type GlobalTargetName = 'document' | 'window' | 'body';
 
 declare type GlobalTargetResolver = (element: any) => EventTarget;
-
-declare const HAS_CHILD_VIEWS_TO_REFRESH = 6;
-
-/**
- * Flag to signify that this `LContainer` may have transplanted views which need to be change
- * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
- *
- * This flag, once set, is never unset for the `LContainer`. This means that when unset we can skip
- * a lot of work in `refreshEmbeddedViews`. But when set we still need to verify
- * that the `MOVED_VIEWS` are transplanted and on-push.
- */
-declare const HAS_TRANSPLANTED_VIEWS = 2;
 
 /**
  * Array of hooks that should be executed for a view and their directive indices.
@@ -5500,13 +5493,8 @@ declare interface LContainer extends Array<any> {
      * efficient way. The value is always set to `true`
      */
     [TYPE]: true;
-    /**
-     * Flag to signify that this `LContainer` may have transplanted views which need to be change
-     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
-     *
-     * This flag, once set, is never unset for the `LContainer`.
-     */
-    [HAS_TRANSPLANTED_VIEWS]: boolean;
+    /** Flags for this container. See LContainerFlags for more info. */
+    [FLAGS]: LContainerFlags;
     /**
      * Access to the parent view is necessary so we can propagate back
      * up from inside a container to parent[NEXT].
@@ -5517,11 +5505,6 @@ declare interface LContainer extends Array<any> {
      * view with the same parent, so we can remove listeners efficiently.
      */
     [NEXT]: LView | LContainer | null;
-    /**
-     * Indicates that this LContainer has a view underneath it that needs to be refreshed during
-     * change detection.
-     */
-    [HAS_CHILD_VIEWS_TO_REFRESH]: boolean;
     /**
      * A collection of views created based on the underlying `<ng-template>` element but inserted into
      * a different `LContainer`. We need to track views created from a given declaration point since
@@ -5554,6 +5537,23 @@ declare interface LContainer extends Array<any> {
      * logic finishes.
      */
     [DEHYDRATED_VIEWS]: DehydratedContainerView[] | null;
+}
+
+/** Flags associated with an LContainer (saved in LContainer[FLAGS]) */
+declare enum LContainerFlags {
+    None = 0,
+    /**
+     * Flag to signify that this `LContainer` may have transplanted views which need to be change
+     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
+     *
+     * This flag, once set, is never unset for the `LContainer`.
+     */
+    HasTransplantedViews = 2,
+    /**
+     * Indicates that this LContainer has a view underneath it that needs to be refreshed during
+     * change detection.
+     */
+    HasChildViewsToRefresh = 4
 }
 
 /**
@@ -11012,7 +11012,7 @@ export declare class ɵConsole {
  * which views are already in the DOM (and don't need to be re-added) and so we can
  * remove views from the DOM when they are no longer required.
  */
-export declare const ɵCONTAINER_HEADER_OFFSET = 11;
+export declare const ɵCONTAINER_HEADER_OFFSET = 10;
 
 export declare function ɵconvertToBitFlags(flags: InjectOptions | InjectFlags | undefined): InjectFlags | undefined;
 
