@@ -24770,7 +24770,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.2+sha-c8ff0be");
+var VERSION2 = new Version("17.0.2+sha-d033540");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24816,6 +24816,8 @@ publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/types.mjs
 var ngtemplate = "ng-template";
+var boundngifelse = "[ngIfElse]";
+var boundngifthenelse = "[ngIfThenElse]";
 function allFormsOf(selector) {
   return [
     selector,
@@ -24853,13 +24855,17 @@ var commonModulePipes = [
   "titlecase"
 ].map((name) => pipeMatchRegExpFor(name));
 var ElementToMigrate = class {
-  constructor(el, attr) {
+  constructor(el, attr, elseAttr = void 0, thenAttr = void 0) {
     __publicField(this, "el");
     __publicField(this, "attr");
+    __publicField(this, "elseAttr");
+    __publicField(this, "thenAttr");
     __publicField(this, "nestCount", 0);
     __publicField(this, "hasLineBreaks", false);
     this.el = el;
     this.attr = attr;
+    this.elseAttr = elseAttr;
+    this.thenAttr = thenAttr;
   }
   getCondition(targetStr) {
     const targetLocation = this.attr.value.indexOf(targetStr);
@@ -24964,7 +24970,9 @@ var ElementCollector = class extends RecursiveVisitor {
     if (el.attrs.length > 0) {
       for (const attr of el.attrs) {
         if (this._attributes.includes(attr.name)) {
-          this.elements.push(new ElementToMigrate(el, attr));
+          const elseAttr = el.attrs.find((x) => x.name === boundngifelse);
+          const thenAttr = el.attrs.find((x) => x.name === boundngifthenelse);
+          this.elements.push(new ElementToMigrate(el, attr, elseAttr, thenAttr));
         }
       }
     }
@@ -25222,12 +25230,12 @@ function getOriginals(etm, tmpl, offset) {
 }
 function getMainBlock(etm, tmpl, offset) {
   const i18nAttr = etm.el.attrs.find((x) => x.name === "i18n");
-  if ((etm.el.name === "ng-container" || etm.el.name === "ng-template") && etm.el.attrs.length === 1) {
+  if ((etm.el.name === "ng-container" || etm.el.name === "ng-template") && (etm.el.attrs.length === 1 || etm.el.attrs.length === 2 && etm.elseAttr !== void 0 || etm.el.attrs.length === 3 && etm.elseAttr !== void 0 && etm.thenAttr !== void 0)) {
     const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
     const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
     const middle2 = tmpl.slice(childStart2, childEnd2);
     return { start: "", middle: middle2, end: "" };
-  } else if (etm.el.name === "ng-template" && etm.el.attrs.length === 2 && i18nAttr !== void 0) {
+  } else if (etm.el.name === "ng-template" && i18nAttr !== void 0 && (etm.el.attrs.length === 2 || etm.el.attrs.length === 3 && etm.elseAttr !== void 0)) {
     const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
     const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
     const middle2 = wrapIntoI18nContainer(i18nAttr, tmpl.slice(childStart2, childEnd2));
@@ -25414,10 +25422,12 @@ function migrateIf(template2) {
 function migrateNgIf(etm, tmpl, offset) {
   const matchThen = etm.attr.value.match(/;\s*then/gm);
   const matchElse = etm.attr.value.match(/;\s*else/gm);
-  if (matchThen && matchThen.length > 0) {
-    return buildIfThenElseBlock(etm, tmpl, matchThen[0], matchElse[0], offset);
+  if (etm.thenAttr !== void 0 || etm.elseAttr !== void 0) {
+    return buildBoundIfElseBlock(etm, tmpl, offset);
+  } else if (matchThen && matchThen.length > 0) {
+    return buildStandardIfThenElseBlock(etm, tmpl, matchThen[0], matchElse[0], offset);
   } else if (matchElse && matchElse.length > 0) {
-    return buildIfElseBlock(etm, tmpl, matchElse[0], offset);
+    return buildStandardIfElseBlock(etm, tmpl, matchElse[0], offset);
   }
   return buildIfBlock(etm, tmpl, offset);
 }
@@ -25434,11 +25444,23 @@ function buildIfBlock(etm, tmpl, offset) {
   const post = originals.end.length - endBlock.length;
   return { tmpl: updatedTmpl, offsets: { pre, post } };
 }
-function buildIfElseBlock(etm, tmpl, elseString, offset) {
-  const lbString = etm.hasLineBreaks ? "\n" : "";
+function buildStandardIfElseBlock(etm, tmpl, elseString, offset) {
   const condition = etm.getCondition(elseString).replace(" as ", "; as ");
-  const originals = getOriginals(etm, tmpl, offset);
   const elsePlaceholder = `#${etm.getTemplateName(elseString)}|`;
+  return buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset);
+}
+function buildBoundIfElseBlock(etm, tmpl, offset) {
+  const condition = etm.attr.value.replace(" as ", "; as ");
+  const elsePlaceholder = `#${etm.elseAttr.value}|`;
+  if (etm.thenAttr !== void 0) {
+    const thenPlaceholder = `#${etm.thenAttr.value}|`;
+    return buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset);
+  }
+  return buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset);
+}
+function buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset) {
+  const lbString = etm.hasLineBreaks ? "\n" : "";
+  const originals = getOriginals(etm, tmpl, offset);
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
   const startBlock = `@if (${condition}) {${lbString}${start}`;
   const elseBlock = `${end}${lbString}} @else {${lbString}`;
@@ -25451,14 +25473,17 @@ function buildIfElseBlock(etm, tmpl, elseString, offset) {
   const post = originals.end.length - postBlock.length;
   return { tmpl: updatedTmpl, offsets: { pre, post } };
 }
-function buildIfThenElseBlock(etm, tmpl, thenString, elseString, offset) {
+function buildStandardIfThenElseBlock(etm, tmpl, thenString, elseString, offset) {
   const condition = etm.getCondition(thenString).replace(" as ", "; as ");
+  const thenPlaceholder = `#${etm.getTemplateName(thenString, elseString)}|`;
+  const elsePlaceholder = `#${etm.getTemplateName(elseString)}|`;
+  return buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset);
+}
+function buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset) {
   const lbString = etm.hasLineBreaks ? "\n" : "";
   const originals = getOriginals(etm, tmpl, offset);
   const startBlock = `@if (${condition}) {${lbString}`;
   const elseBlock = `${lbString}} @else {${lbString}`;
-  const thenPlaceholder = `#${etm.getTemplateName(thenString, elseString)}|`;
-  const elsePlaceholder = `#${etm.getTemplateName(elseString)}|`;
   const postBlock = thenPlaceholder + elseBlock + elsePlaceholder + `${lbString}}`;
   const ifThenElseBlock = startBlock + postBlock;
   const tmplStart = tmpl.slice(0, etm.start(offset));
