@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.2+sha-561cb1d
+ * @license Angular v17.0.2+sha-b393e37
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10428,7 +10428,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.2+sha-561cb1d');
+const VERSION = new Version('17.0.2+sha-b393e37');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13294,7 +13294,7 @@ function textBindingInternal(lView, index, value) {
  * The maximum number of times the change detection traversal will rerun before throwing an error.
  */
 const MAXIMUM_REFRESH_RERUNS = 100;
-function detectChangesInternal(tView, lView, context, notifyErrorHandler = true) {
+function detectChangesInternal(lView, notifyErrorHandler = true) {
     const environment = lView[ENVIRONMENT];
     const rendererFactory = environment.rendererFactory;
     const afterRenderEventManager = environment.afterRenderEventManager;
@@ -13307,6 +13307,8 @@ function detectChangesInternal(tView, lView, context, notifyErrorHandler = true)
         afterRenderEventManager?.begin();
     }
     try {
+        const tView = lView[TVIEW];
+        const context = lView[CONTEXT];
         refreshView(tView, lView, tView.template, context);
         detectChangesInViewWhileDirty(lView);
     }
@@ -13347,10 +13349,10 @@ function detectChangesInViewWhileDirty(lView) {
         detectChangesInView(lView, 1 /* ChangeDetectionMode.Targeted */);
     }
 }
-function checkNoChangesInternal(tView, lView, context, notifyErrorHandler = true) {
+function checkNoChangesInternal(lView, notifyErrorHandler = true) {
     setIsInCheckNoChangesMode(true);
     try {
-        detectChangesInternal(tView, lView, context, notifyErrorHandler);
+        detectChangesInternal(lView, notifyErrorHandler);
     }
     finally {
         setIsInCheckNoChangesMode(false);
@@ -13365,7 +13367,7 @@ function checkNoChangesInternal(tView, lView, context, notifyErrorHandler = true
  */
 function detectChanges(component) {
     const view = getComponentViewByInstance(component);
-    detectChangesInternal(view[TVIEW], view, component);
+    detectChangesInternal(view);
 }
 /**
  * Processes a view in update mode. This includes a number of steps in a specific order:
@@ -13911,7 +13913,7 @@ class ViewRef$1 {
      * See {@link ChangeDetectorRef#detach} for more information.
      */
     detectChanges() {
-        detectChangesInternal(this._lView[TVIEW], this._lView, this.context, this.notifyErrorHandler);
+        detectChangesInternal(this._lView, this.notifyErrorHandler);
     }
     /**
      * Checks the change detector and its children, and throws if any changes are detected.
@@ -13921,7 +13923,7 @@ class ViewRef$1 {
      */
     checkNoChanges() {
         if (ngDevMode) {
-            checkNoChangesInternal(this._lView[TVIEW], this._lView, this.context, this.notifyErrorHandler);
+            checkNoChangesInternal(this._lView, this.notifyErrorHandler);
         }
     }
     attachToViewContainerRef() {
