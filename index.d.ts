@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-faaac05
+ * @license Angular v17.1.0-next.0+sha-0a976c8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11135,15 +11135,6 @@ export declare enum ɵDeferBlockState {
 
 /** The deps tracker to be used in the current Angular app in dev mode. */
 export declare const ɵdepsTracker: DepsTracker;
-
-/**
- * Synchronously perform change detection on a component (and possibly its sub-components).
- *
- * This function triggers change detection in a synchronous way on a component.
- *
- * @param component The component which the change detection should be performed on.
- */
-export declare function ɵdetectChanges(component: {}): void;
 
 
 export declare function ɵdevModeEqual(a: any, b: any): boolean;
