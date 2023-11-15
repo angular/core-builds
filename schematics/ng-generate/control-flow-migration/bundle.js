@@ -7229,13 +7229,13 @@ function createConditionalOp(target, targetSlot, test, conditions, sourceSpan) {
   }, NEW_OP), TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS);
 }
 function createRepeaterOp(repeaterCreate2, targetSlot, collection, sourceSpan) {
-  return __spreadValues({
+  return __spreadValues(__spreadValues({
     kind: OpKind.Repeater,
     target: repeaterCreate2,
     targetSlot,
     collection,
     sourceSpan
-  }, NEW_OP);
+  }, NEW_OP), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
 }
 function createDeferWhenOp(target, expr, prefetch, sourceSpan) {
   return __spreadValues(__spreadValues({
@@ -16842,8 +16842,8 @@ function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByF
   }
   return call(Identifiers.repeaterCreate, args, sourceSpan);
 }
-function repeater(metadataSlot, collection, sourceSpan) {
-  return call(Identifiers.repeater, [literal(metadataSlot), collection], sourceSpan);
+function repeater(collection, sourceSpan) {
+  return call(Identifiers.repeater, [collection], sourceSpan);
 }
 function deferWhen(prefetch, expr, sourceSpan) {
   return call(prefetch ? Identifiers.deferPrefetchWhen : Identifiers.deferWhen, [expr], sourceSpan);
@@ -17401,7 +17401,7 @@ function reifyUpdateOperations(_unit, ops) {
         OpList.replace(op, conditional(op.targetSlot.slot, op.processed, op.contextValue, op.sourceSpan));
         break;
       case OpKind.Repeater:
-        OpList.replace(op, repeater(op.targetSlot.slot, op.collection, op.sourceSpan));
+        OpList.replace(op, repeater(op.collection, op.sourceSpan));
         break;
       case OpKind.DeferWhen:
         OpList.replace(op, deferWhen(op.prefetch, op.expr, op.sourceSpan));
@@ -22206,7 +22206,7 @@ var TemplateDefinitionBuilder = class {
       return params;
     });
     const value = block.expression.visit(this._valueConverter);
-    this.updateInstruction(block.sourceSpan, Identifiers.repeater, () => [literal(blockIndex), this.convertPropertyBinding(value)]);
+    this.updateInstructionWithAdvance(blockIndex, block.sourceSpan, Identifiers.repeater, () => [this.convertPropertyBinding(value)]);
   }
   registerComputedLoopVariables(block, bindingScope) {
     const indexLocalName = block.contextVariables.$index.name;
@@ -24770,7 +24770,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-93c0dd8");
+var VERSION2 = new Version("17.1.0-next.0+sha-ec2d6e7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
