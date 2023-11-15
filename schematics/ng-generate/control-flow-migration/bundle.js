@@ -24770,7 +24770,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.2+sha-a523801");
+var VERSION2 = new Version("17.0.2+sha-4e200bf");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24818,6 +24818,7 @@ publishFacade(_global);
 var ngtemplate = "ng-template";
 var boundngifelse = "[ngIfElse]";
 var boundngifthenelse = "[ngIfThenElse]";
+var nakedngfor = "ngFor";
 function allFormsOf(selector) {
   return [
     selector,
@@ -24833,7 +24834,11 @@ var commonModuleDirectives = /* @__PURE__ */ new Set([
   ...allFormsOf("ngPluralCase"),
   ...allFormsOf("ngStyle"),
   ...allFormsOf("ngTemplateOutlet"),
-  ...allFormsOf("ngComponentOutlet")
+  ...allFormsOf("ngComponentOutlet"),
+  "[NgForOf]",
+  "[NgForTrackBy]",
+  "[ngIfElse]",
+  "[ngIfThenElse]"
 ]);
 function pipeMatchRegExpFor(name) {
   return new RegExp(`\\|\\s*${name}`);
@@ -24855,17 +24860,19 @@ var commonModulePipes = [
   "titlecase"
 ].map((name) => pipeMatchRegExpFor(name));
 var ElementToMigrate = class {
-  constructor(el, attr, elseAttr = void 0, thenAttr = void 0) {
+  constructor(el, attr, elseAttr = void 0, thenAttr = void 0, forAttrs = void 0) {
     __publicField(this, "el");
     __publicField(this, "attr");
     __publicField(this, "elseAttr");
     __publicField(this, "thenAttr");
+    __publicField(this, "forAttrs");
     __publicField(this, "nestCount", 0);
     __publicField(this, "hasLineBreaks", false);
     this.el = el;
     this.attr = attr;
     this.elseAttr = elseAttr;
     this.thenAttr = thenAttr;
+    this.forAttrs = forAttrs;
   }
   getCondition(targetStr) {
     const targetLocation = this.attr.value.indexOf(targetStr);
@@ -24972,11 +24979,34 @@ var ElementCollector = class extends RecursiveVisitor {
         if (this._attributes.includes(attr.name)) {
           const elseAttr = el.attrs.find((x) => x.name === boundngifelse);
           const thenAttr = el.attrs.find((x) => x.name === boundngifthenelse);
-          this.elements.push(new ElementToMigrate(el, attr, elseAttr, thenAttr));
+          const forAttrs = attr.name === nakedngfor ? this.getForAttrs(el) : void 0;
+          this.elements.push(new ElementToMigrate(el, attr, elseAttr, thenAttr, forAttrs));
         }
       }
     }
     super.visitElement(el, null);
+  }
+  getForAttrs(el) {
+    const aliases = /* @__PURE__ */ new Map();
+    let item = "";
+    let trackBy = "";
+    let forOf = "";
+    for (const attr of el.attrs) {
+      if (attr.name === "[ngForTrackBy]") {
+        trackBy = attr.value;
+      }
+      if (attr.name === "[ngForOf]") {
+        forOf = attr.value;
+      }
+      if (attr.name.startsWith("let-")) {
+        if (attr.value === "") {
+          item = attr.name.replace("let-", "");
+        } else {
+          aliases.set(attr.name.replace("let-", ""), attr.value);
+        }
+      }
+    }
+    return { forOf, trackBy, item, aliases };
   }
 };
 var TemplateCollector = class extends RecursiveVisitor {
@@ -25009,7 +25039,17 @@ var TemplateCollector = class extends RecursiveVisitor {
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
 var import_path2 = require("path");
 var import_typescript5 = __toESM(require("typescript"), 1);
-var importRemovals = ["NgIf", "NgFor", "NgSwitch", "NgSwitchCase", "NgSwitchDefault"];
+var importRemovals = [
+  "NgIf",
+  "NgIfElse",
+  "NgIfThenElse",
+  "NgFor",
+  "NgForOf",
+  "NgForTrackBy",
+  "NgSwitch",
+  "NgSwitchCase",
+  "NgSwitchDefault"
+];
 var importWithCommonRemovals = [...importRemovals, "CommonModule"];
 function analyze(sourceFile, analyzedFiles) {
   forEachClass(sourceFile, (node) => {
@@ -25228,14 +25268,20 @@ function getOriginals(etm, tmpl, offset) {
   const start = tmpl.slice(etm.el.sourceSpan.start.offset - offset, etm.el.sourceSpan.end.offset - offset);
   return { start, end: "" };
 }
+function isI18nTemplate(etm, i18nAttr) {
+  return etm.el.name === "ng-template" && i18nAttr !== void 0 && (etm.el.attrs.length === 2 || etm.el.attrs.length === 3 && etm.elseAttr !== void 0);
+}
+function isRemovableContainer(etm) {
+  return (etm.el.name === "ng-container" || etm.el.name === "ng-template") && (etm.el.attrs.length === 1 || etm.forAttrs !== void 0 || etm.el.attrs.length === 2 && etm.elseAttr !== void 0 || etm.el.attrs.length === 3 && etm.elseAttr !== void 0 && etm.thenAttr !== void 0);
+}
 function getMainBlock(etm, tmpl, offset) {
   const i18nAttr = etm.el.attrs.find((x) => x.name === "i18n");
-  if ((etm.el.name === "ng-container" || etm.el.name === "ng-template") && (etm.el.attrs.length === 1 || etm.el.attrs.length === 2 && etm.elseAttr !== void 0 || etm.el.attrs.length === 3 && etm.elseAttr !== void 0 && etm.thenAttr !== void 0)) {
+  if (isRemovableContainer(etm)) {
     const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
     const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
     const middle2 = tmpl.slice(childStart2, childEnd2);
     return { start: "", middle: middle2, end: "" };
-  } else if (etm.el.name === "ng-template" && i18nAttr !== void 0 && (etm.el.attrs.length === 2 || etm.el.attrs.length === 3 && etm.elseAttr !== void 0)) {
+  } else if (isI18nTemplate(etm, i18nAttr)) {
     const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
     const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
     const middle2 = wrapIntoI18nContainer(i18nAttr, tmpl.slice(childStart2, childEnd2));
@@ -25266,6 +25312,11 @@ function forEachClass(sourceFile, callback) {
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/fors.mjs
 var ngfor = "*ngFor";
+var nakedngfor2 = "ngFor";
+var fors = [
+  ngfor,
+  nakedngfor2
+];
 var commaSeparatedSyntax = /* @__PURE__ */ new Map([
   ["(", ")"],
   ["{", "}"],
@@ -25282,7 +25333,7 @@ function migrateFor(template2) {
     return { migrated: template2, errors };
   }
   let result = template2;
-  const visitor = new ElementCollector([ngfor]);
+  const visitor = new ElementCollector(fors);
   visitAll2(visitor, parsed.rootNodes);
   calculateNesting(visitor, hasLineBreaks(template2));
   let offset = 0;
@@ -25304,6 +25355,12 @@ function migrateFor(template2) {
   return { migrated: result, errors };
 }
 function migrateNgFor(etm, tmpl, offset) {
+  if (etm.forAttrs !== void 0) {
+    return migrateBoundNgFor(etm, tmpl, offset);
+  }
+  return migrateStandardNgFor(etm, tmpl, offset);
+}
+function migrateStandardNgFor(etm, tmpl, offset) {
   const aliasWithEqualRegexp = /=\s*(count|index|first|last|even|odd)/gm;
   const aliasWithAsRegexp = /(count|index|first|last|even|odd)\s+as/gm;
   const aliases = [];
@@ -25344,6 +25401,35 @@ function migrateNgFor(etm, tmpl, offset) {
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
   const startBlock = `@for (${condition}; track ${trackBy}${aliasStr}) {${lbSpaces}${start}`;
   const endBlock = `${end}${lbString}}`;
+  const forBlock = startBlock + middle + endBlock;
+  const updatedTmpl = tmpl.slice(0, etm.start(offset)) + forBlock + tmpl.slice(etm.end(offset));
+  const pre = originals.start.length - startBlock.length;
+  const post = originals.end.length - endBlock.length;
+  return { tmpl: updatedTmpl, offsets: { pre, post } };
+}
+function migrateBoundNgFor(etm, tmpl, offset) {
+  const forAttrs = etm.forAttrs;
+  const aliasMap = forAttrs.aliases;
+  const originals = getOriginals(etm, tmpl, offset);
+  const condition = `${forAttrs.item} of ${forAttrs.forOf}`;
+  const aliases = [];
+  let aliasedIndex = "$index";
+  for (const [key, val] of aliasMap) {
+    aliases.push(` let ${key.trim()} = $${val}`);
+    if (val.trim() === "index") {
+      aliasedIndex = key;
+    }
+  }
+  const aliasStr = aliases.length > 0 ? `;${aliases.join(";")}` : "";
+  let trackBy = forAttrs.item;
+  if (forAttrs.trackBy !== "") {
+    trackBy = `${forAttrs.trackBy.trim()}(${aliasedIndex}, ${forAttrs.item})`;
+  }
+  const { start, middle, end } = getMainBlock(etm, tmpl, offset);
+  const startBlock = `@for (${condition}; track ${trackBy}${aliasStr}) {
+  ${start}`;
+  const endBlock = `${end}
+}`;
   const forBlock = startBlock + middle + endBlock;
   const updatedTmpl = tmpl.slice(0, etm.start(offset)) + forBlock + tmpl.slice(etm.end(offset));
   const pre = originals.start.length - startBlock.length;

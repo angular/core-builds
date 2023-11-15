@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.2+sha-a523801
+ * @license Angular v17.0.2+sha-4e200bf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1009,6 +1009,9 @@ class TestBedCompiler {
                 throw invalidTypeError(declaration.name, 'Component');
             }
             this.maybeStoreNgDef(ɵNG_COMP_DEF, declaration);
+            if (ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
+                ɵdepsTracker.clearScopeCacheFor(declaration);
+            }
             ɵcompileComponent(declaration, metadata);
         });
         this.pendingComponents.clear();
