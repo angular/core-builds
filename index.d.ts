@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.3+sha-f5307bf
+ * @license Angular v17.0.3+sha-98376f2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15120,13 +15120,10 @@ export declare function ɵɵregisterNgModuleType(ngModuleType: ɵNgModuleType, i
  * The repeater instruction does update-time diffing of a provided collection (against the
  * collection seen previously) and maps changes in the collection to views structure (by adding,
  * removing or moving views as needed).
- * @param metadataSlotIdx - index in data where we can find an instance of RepeaterMetadata with
- *     additional information (ex. differ) needed to process collection diffing and view
- *     manipulation
  * @param collection - the collection instance to be checked for changes
  * @codeGenApi
  */
-export declare function ɵɵrepeater(metadataSlotIdx: number, collection: Iterable<unknown> | undefined | null): void;
+export declare function ɵɵrepeater(collection: Iterable<unknown> | undefined | null): void;
 
 /**
  * The repeaterCreate instruction runs in the creation part of the template pass and initializes

@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.3+sha-f5307bf
+ * @license Angular v17.0.3+sha-98376f2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10428,7 +10428,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.3+sha-f5307bf');
+const VERSION = new Version('17.0.3+sha-98376f2');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20335,7 +20335,7 @@ function ɵɵconditional(containerIndex, matchingTemplateIndex, value) {
             // Index -1 is a special case where none of the conditions evaluates to
             // a truthy value and as the consequence we've got no view to show.
             if (matchingTemplateIndex !== -1) {
-                const templateTNode = getExistingTNode(hostLView[TVIEW], matchingTemplateIndex);
+                const templateTNode = getExistingTNode(hostLView[TVIEW], HEADER_OFFSET + matchingTemplateIndex);
                 const dehydratedView = findMatchingDehydratedView(lContainer, templateTNode.tView.ssrId);
                 const embeddedLView = createAndRenderEmbeddedLView(hostLView, templateTNode, value, { dehydratedView });
                 addLViewToLContainer(lContainer, embeddedLView, viewInContainerIdx, shouldAddViewToDom(templateTNode, dehydratedView));
@@ -20493,21 +20493,19 @@ class LiveCollectionLContainerImpl extends LiveCollection {
  * The repeater instruction does update-time diffing of a provided collection (against the
  * collection seen previously) and maps changes in the collection to views structure (by adding,
  * removing or moving views as needed).
- * @param metadataSlotIdx - index in data where we can find an instance of RepeaterMetadata with
- *     additional information (ex. differ) needed to process collection diffing and view
- *     manipulation
  * @param collection - the collection instance to be checked for changes
  * @codeGenApi
  */
-function ɵɵrepeater(metadataSlotIdx, collection) {
+function ɵɵrepeater(collection) {
     const prevConsumer = setActiveConsumer$1(null);
+    const metadataSlotIdx = getSelectedIndex();
     try {
         const hostLView = getLView();
         const hostTView = hostLView[TVIEW];
-        const metadata = hostLView[HEADER_OFFSET + metadataSlotIdx];
+        const metadata = hostLView[metadataSlotIdx];
         if (metadata.liveCollection === undefined) {
             const containerIndex = metadataSlotIdx + 1;
-            const lContainer = getLContainer(hostLView, HEADER_OFFSET + containerIndex);
+            const lContainer = getLContainer(hostLView, containerIndex);
             const itemTemplateTNode = getExistingTNode(hostTView, containerIndex);
             metadata.liveCollection =
                 new LiveCollectionLContainerImpl(lContainer, hostLView, itemTemplateTNode);
@@ -20525,7 +20523,7 @@ function ɵɵrepeater(metadataSlotIdx, collection) {
             const isCollectionEmpty = liveCollection.length === 0;
             if (bindingUpdated(hostLView, bindingIndex, isCollectionEmpty)) {
                 const emptyTemplateIndex = metadataSlotIdx + 2;
-                const lContainerForEmpty = getLContainer(hostLView, HEADER_OFFSET + emptyTemplateIndex);
+                const lContainerForEmpty = getLContainer(hostLView, emptyTemplateIndex);
                 if (isCollectionEmpty) {
                     const emptyTemplateTNode = getExistingTNode(hostTView, emptyTemplateIndex);
                     const dehydratedView = findMatchingDehydratedView(lContainerForEmpty, emptyTemplateTNode.tView.ssrId);
@@ -20558,7 +20556,7 @@ function getExistingLViewFromLContainer(lContainer, index) {
     return existingLView;
 }
 function getExistingTNode(tView, index) {
-    const tNode = getTNode(tView, index + HEADER_OFFSET);
+    const tNode = getTNode(tView, index);
     ngDevMode && assertTNode(tNode);
     return tNode;
 }
