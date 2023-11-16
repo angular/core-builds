@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-1ce31d8
+ * @license Angular v17.1.0-next.0+sha-2d41b33
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10428,7 +10428,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-1ce31d8');
+const VERSION = new Version('17.1.0-next.0+sha-2d41b33');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -30298,7 +30298,7 @@ class ImagePerformanceWarning {
             // Angular doesn't have to run change detection whenever any asynchronous tasks are invoked in
             // the scope of this functionality.
             this.ngZone.runOutsideAngular(() => {
-                this.window?.addEventListener('load', waitToScan);
+                this.window?.addEventListener('load', waitToScan, { once: true });
             });
         }
     }
