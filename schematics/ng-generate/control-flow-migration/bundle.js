@@ -21463,12 +21463,18 @@ var TemplateDefinitionBuilder = class {
       this.creationInstruction(null, Identifiers.pipe, [literal(slot), literal(name)]);
     });
   }
-  buildTemplateFunction(nodes, variables, ngContentSelectorsOffset = 0, i18n2) {
+  buildTemplateFunction(nodes, variables, ngContentSelectorsOffset = 0, i18n2, variableAliases) {
     this._ngContentSelectorsOffset = ngContentSelectorsOffset;
     if (this._namespace !== Identifiers.namespaceHTML) {
       this.creationInstruction(null, this._namespace);
     }
-    variables.forEach((v) => this.registerContextVariables(v));
+    variables.forEach((v) => {
+      const alias = variableAliases == null ? void 0 : variableAliases[v.name];
+      this.registerContextVariables(v.name, v.value);
+      if (alias) {
+        this.registerContextVariables(alias, v.value);
+      }
+    });
     const initI18nContext = this.i18nContext || isI18nRootNode(i18n2) && !isSingleI18nIcu(i18n2) && !(isSingleElementTemplate(nodes) && nodes[0].i18n === i18n2);
     const selfClosingI18nInstruction = hasTextChildrenOnly(nodes);
     if (initI18nContext) {
@@ -21523,12 +21529,12 @@ var TemplateDefinitionBuilder = class {
     this._constants.prepareStatements.push(...statements);
     return _ref;
   }
-  registerContextVariables(variable2) {
+  registerContextVariables(name, value) {
     const scopedName = this._bindingScope.freshReferenceName();
     const retrievalLevel = this.level;
-    const isDirect = variable2.value === DIRECT_CONTEXT_REFERENCE;
-    const lhs = variable(variable2.name + scopedName);
-    this._bindingScope.set(retrievalLevel, variable2.name, (scope) => {
+    const isDirect = value === DIRECT_CONTEXT_REFERENCE;
+    const lhs = variable(name + scopedName);
+    this._bindingScope.set(retrievalLevel, name, (scope) => {
       return isDirect && scope.bindingLevel === retrievalLevel && !scope.isListenerScope() ? variable(CONTEXT_NAME) : lhs;
     }, 1, (scope, relativeLevel) => {
       let rhs;
@@ -21546,7 +21552,7 @@ var TemplateDefinitionBuilder = class {
         rhs = sharedCtxVar ? sharedCtxVar : generateNextContextExpr(relativeLevel);
       }
       return [
-        lhs.set(isDirect ? rhs : rhs.prop(variable2.value || IMPLICIT_REFERENCE)).toConstDecl()
+        lhs.set(isDirect ? rhs : rhs.prop(value || IMPLICIT_REFERENCE)).toConstDecl()
       ];
     });
   }
@@ -21885,7 +21891,7 @@ var TemplateDefinitionBuilder = class {
       this.creationInstruction(span, isNgContainer2 ? Identifiers.elementContainerEnd : Identifiers.elementEnd);
     }
   }
-  prepareEmbeddedTemplateFn(children, contextNameSuffix, variables = [], i18n2) {
+  prepareEmbeddedTemplateFn(children, contextNameSuffix, variables = [], i18n2, variableAliases) {
     const index = this.allocateDataSlot();
     if (this.i18n && i18n2) {
       this.i18n.appendTemplate(i18n2, index);
@@ -21894,7 +21900,7 @@ var TemplateDefinitionBuilder = class {
     const name = `${contextName}_Template`;
     const visitor = new TemplateDefinitionBuilder(this.constantPool, this._bindingScope, this.level + 1, contextName, this.i18n, index, name, this._namespace, this.fileBasedI18nSuffix, this.i18nUseExternalIds, this.deferBlocks, this.elementLocations, this._constants);
     this._nestedTemplateFns.push(() => {
-      const templateFunctionExpr = visitor.buildTemplateFunction(children, variables, this._ngContentReservedSlots.length + this._ngContentSelectorsOffset, i18n2);
+      const templateFunctionExpr = visitor.buildTemplateFunction(children, variables, this._ngContentReservedSlots.length + this._ngContentSelectorsOffset, i18n2, variableAliases);
       this.constantPool.statements.push(templateFunctionExpr.toDeclStmt(name));
       if (visitor._ngContentReservedSlots.length) {
         this._ngContentReservedSlots.push(...visitor._ngContentReservedSlots);
@@ -22180,7 +22186,10 @@ var TemplateDefinitionBuilder = class {
   visitForLoopBlock(block) {
     const blockIndex = this.allocateDataSlot();
     const { tagName, attrsExprs } = this.inferProjectionDataFromInsertionPoint(block);
-    const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [block.item, block.contextVariables.$index, block.contextVariables.$count]);
+    const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [block.item, block.contextVariables.$index, block.contextVariables.$count], void 0, {
+      [block.contextVariables.$index.name]: this.getLevelSpecificVariableName("$index", this.level + 1),
+      [block.contextVariables.$count.name]: this.getLevelSpecificVariableName("$count", this.level + 1)
+    });
     const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
     let emptyData = null;
     if (block.empty !== null) {
@@ -22209,13 +22218,28 @@ var TemplateDefinitionBuilder = class {
     this.updateInstructionWithAdvance(blockIndex, block.sourceSpan, Identifiers.repeater, () => [this.convertPropertyBinding(value)]);
   }
   registerComputedLoopVariables(block, bindingScope) {
-    const indexLocalName = block.contextVariables.$index.name;
-    const countLocalName = block.contextVariables.$count.name;
     const level = bindingScope.bindingLevel;
-    bindingScope.set(level, block.contextVariables.$odd.name, (scope) => scope.get(indexLocalName).modulo(literal(2)).notIdentical(literal(0)));
-    bindingScope.set(level, block.contextVariables.$even.name, (scope) => scope.get(indexLocalName).modulo(literal(2)).identical(literal(0)));
-    bindingScope.set(level, block.contextVariables.$first.name, (scope) => scope.get(indexLocalName).identical(literal(0)));
-    bindingScope.set(level, block.contextVariables.$last.name, (scope) => scope.get(indexLocalName).identical(scope.get(countLocalName).minus(literal(1))));
+    bindingScope.set(level, block.contextVariables.$odd.name, (scope, retrievalLevel) => {
+      return this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$index").modulo(literal(2)).notIdentical(literal(0));
+    });
+    bindingScope.set(level, block.contextVariables.$even.name, (scope, retrievalLevel) => {
+      return this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$index").modulo(literal(2)).identical(literal(0));
+    });
+    bindingScope.set(level, block.contextVariables.$first.name, (scope, retrievalLevel) => {
+      return this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$index").identical(literal(0));
+    });
+    bindingScope.set(level, block.contextVariables.$last.name, (scope, retrievalLevel) => {
+      const index = this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$index");
+      const count = this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$count");
+      return index.identical(count.minus(literal(1)));
+    });
+  }
+  getLevelSpecificVariableName(name, level) {
+    return `\u0275${name}_${level}`;
+  }
+  getLevelSpecificForLoopVariable(block, scope, retrievalLevel, name) {
+    const scopeName = scope.bindingLevel === retrievalLevel ? block.contextVariables[name].name : this.getLevelSpecificVariableName(name, retrievalLevel);
+    return scope.get(scopeName);
   }
   optimizeTrackByFunction(block) {
     const indexLocalName = block.contextVariables.$index.name;
@@ -22625,7 +22649,7 @@ var BindingScope = class {
         if (value.declareLocalCallback && !value.declare) {
           value.declare = true;
         }
-        return typeof value.lhs === "function" ? value.lhs(this) : value.lhs;
+        return typeof value.lhs === "function" ? value.lhs(this, value.retrievalLevel) : value.lhs;
       }
       current = current.parent;
     }
@@ -22701,7 +22725,7 @@ var BindingScope = class {
     const componentValue = this.map.get(SHARED_CONTEXT_KEY + 0);
     componentValue.declare = true;
     this.maybeRestoreView();
-    const lhs = typeof componentValue.lhs === "function" ? componentValue.lhs(this) : componentValue.lhs;
+    const lhs = typeof componentValue.lhs === "function" ? componentValue.lhs(this, componentValue.retrievalLevel) : componentValue.lhs;
     return name === DIRECT_CONTEXT_REFERENCE ? lhs : lhs.prop(name);
   }
   maybeRestoreView() {
@@ -24770,7 +24794,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-ec2d6e7");
+var VERSION2 = new Version("17.1.0-next.0+sha-6e29e85");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25301,6 +25325,36 @@ function getMainBlock(etm, tmpl, offset) {
   const end = tmpl.slice(childEnd, etm.end(offset));
   return { start, middle, end };
 }
+function formatTemplate(tmpl) {
+  if (tmpl.indexOf("\n") > -1) {
+    const openBlockRegex = /^\s*\@(if|switch|case|default|for)|^\s*\}\s\@else/;
+    const openElRegex = /^\s*<([a-z]+)(?![^>]*\/>)[^>]*>?/;
+    const closeBlockRegex = /^\s*\}\s*$|^\s*\}\s\@else/;
+    const closeElRegex = /\s*<\/([a-z\-]+)*>/;
+    const closeMultiLineElRegex = /^\s*([a-z0-9\-\[\]]+)?=?"?([^”<]+)?"?\s?\/>$/;
+    const singleLineElRegex = /^\s*<([a-z]+)(?![^>]*\/>)[^>]*>.*<\/([a-z\-]+)*>/;
+    const lines = tmpl.split("\n");
+    const formatted = [];
+    let indent = "";
+    for (let line of lines) {
+      if (line.trim() === "") {
+        continue;
+      }
+      if ((closeBlockRegex.test(line) || closeElRegex.test(line) && (!singleLineElRegex.test(line) && !closeMultiLineElRegex.test(line))) && indent !== "") {
+        indent = indent.slice(2);
+      }
+      formatted.push(indent + line.trim());
+      if (closeMultiLineElRegex.test(line)) {
+        indent = indent.slice(2);
+      }
+      if ((openBlockRegex.test(line) || openElRegex.test(line)) && !singleLineElRegex.test(line)) {
+        indent += "  ";
+      }
+    }
+    tmpl = formatted.join("\n");
+  }
+  return tmpl;
+}
 function forEachClass(sourceFile, callback) {
   sourceFile.forEachChild(function walk(node) {
     if (import_typescript5.default.isClassDeclaration(node) || import_typescript5.default.isImportDeclaration(node)) {
@@ -25365,8 +25419,6 @@ function migrateStandardNgFor(etm, tmpl, offset) {
   const aliasWithAsRegexp = /(count|index|first|last|even|odd)\s+as/gm;
   const aliases = [];
   const lbString = etm.hasLineBreaks ? "\n" : "";
-  const lbSpaces = etm.hasLineBreaks ? `
-  ` : "";
   const parts = getNgForParts(etm.attr.value);
   const originals = getOriginals(etm, tmpl, offset);
   const condition = parts[0].replace("let ", "");
@@ -25399,7 +25451,7 @@ function migrateStandardNgFor(etm, tmpl, offset) {
   }
   const aliasStr = aliases.length > 0 ? `;${aliases.join(";")}` : "";
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
-  const startBlock = `@for (${condition}; track ${trackBy}${aliasStr}) {${lbSpaces}${start}`;
+  const startBlock = `@for (${condition}; track ${trackBy}${aliasStr}) {${lbString}${start}`;
   const endBlock = `${end}${lbString}}`;
   const forBlock = startBlock + middle + endBlock;
   const updatedTmpl = tmpl.slice(0, etm.start(offset)) + forBlock + tmpl.slice(etm.end(offset));
@@ -25427,7 +25479,7 @@ function migrateBoundNgFor(etm, tmpl, offset) {
   }
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
   const startBlock = `@for (${condition}; track ${trackBy}${aliasStr}) {
-  ${start}`;
+${start}`;
   const endBlock = `${end}
 }`;
   const forBlock = startBlock + middle + endBlock;
@@ -25652,12 +25704,11 @@ function migrateNgSwitch(etm, tmpl, offset) {
 }
 function migrateNgSwitchCase(etm, tmpl, offset) {
   const lbString = etm.hasLineBreaks ? "\n" : "";
-  const lbSpaces = etm.hasLineBreaks ? "  " : "";
   const leadingSpace = etm.hasLineBreaks ? "" : " ";
   const condition = etm.attr.value;
   const originals = getOriginals(etm, tmpl, offset);
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
-  const startBlock = `${leadingSpace}@case (${condition}) {${leadingSpace}${lbString}${lbSpaces}${start}`;
+  const startBlock = `${leadingSpace}@case (${condition}) {${leadingSpace}${lbString}${start}`;
   const endBlock = `${end}${lbString}${leadingSpace}}`;
   const defaultBlock = startBlock + middle + endBlock;
   const updatedTmpl = tmpl.slice(0, etm.start(offset)) + defaultBlock + tmpl.slice(etm.end(offset));
@@ -25667,11 +25718,10 @@ function migrateNgSwitchCase(etm, tmpl, offset) {
 }
 function migrateNgSwitchDefault(etm, tmpl, offset) {
   const lbString = etm.hasLineBreaks ? "\n" : "";
-  const lbSpaces = etm.hasLineBreaks ? "  " : "";
   const leadingSpace = etm.hasLineBreaks ? "" : " ";
   const originals = getOriginals(etm, tmpl, offset);
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
-  const startBlock = `${leadingSpace}@default {${leadingSpace}${lbString}${lbSpaces}${start}`;
+  const startBlock = `${leadingSpace}@default {${leadingSpace}${lbString}${start}`;
   const endBlock = `${end}${lbString}${leadingSpace}}`;
   const defaultBlock = startBlock + middle + endBlock;
   const updatedTmpl = tmpl.slice(0, etm.start(offset)) + defaultBlock + tmpl.slice(etm.end(offset));
@@ -25681,7 +25731,7 @@ function migrateNgSwitchDefault(etm, tmpl, offset) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/migration.mjs
-function migrateTemplate(template2, templateType, node, file) {
+function migrateTemplate(template2, templateType, node, file, format = false) {
   let errors = [];
   let migrated = template2;
   if (templateType === "template") {
@@ -25689,6 +25739,9 @@ function migrateTemplate(template2, templateType, node, file) {
     const forResult = migrateFor(ifResult.migrated);
     const switchResult = migrateSwitch(forResult.migrated);
     migrated = processNgTemplates(switchResult.migrated);
+    if (format) {
+      migrated = formatTemplate(migrated);
+    }
     file.removeCommonModule = canRemoveCommonModule(template2);
     errors = [
       ...ifResult.errors,
@@ -25750,7 +25803,7 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
     for (const { start, end, node, type } of ranges) {
       const template2 = content.slice(start, end);
       const length = (end != null ? end : content.length) - start;
-      const { migrated, errors } = migrateTemplate(template2, type, node, file);
+      const { migrated, errors } = migrateTemplate(template2, type, node, file, schematicOptions.format);
       if (migrated !== null) {
         update.remove(start, length);
         update.insertLeft(start, migrated);

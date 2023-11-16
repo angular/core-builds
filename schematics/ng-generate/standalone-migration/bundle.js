@@ -22337,12 +22337,18 @@ var TemplateDefinitionBuilder = class {
       this.creationInstruction(null, Identifiers.pipe, [literal(slot), literal(name)]);
     });
   }
-  buildTemplateFunction(nodes, variables, ngContentSelectorsOffset = 0, i18n2) {
+  buildTemplateFunction(nodes, variables, ngContentSelectorsOffset = 0, i18n2, variableAliases) {
     this._ngContentSelectorsOffset = ngContentSelectorsOffset;
     if (this._namespace !== Identifiers.namespaceHTML) {
       this.creationInstruction(null, this._namespace);
     }
-    variables.forEach((v) => this.registerContextVariables(v));
+    variables.forEach((v) => {
+      const alias = variableAliases == null ? void 0 : variableAliases[v.name];
+      this.registerContextVariables(v.name, v.value);
+      if (alias) {
+        this.registerContextVariables(alias, v.value);
+      }
+    });
     const initI18nContext = this.i18nContext || isI18nRootNode(i18n2) && !isSingleI18nIcu(i18n2) && !(isSingleElementTemplate(nodes) && nodes[0].i18n === i18n2);
     const selfClosingI18nInstruction = hasTextChildrenOnly(nodes);
     if (initI18nContext) {
@@ -22397,12 +22403,12 @@ var TemplateDefinitionBuilder = class {
     this._constants.prepareStatements.push(...statements);
     return _ref;
   }
-  registerContextVariables(variable2) {
+  registerContextVariables(name, value) {
     const scopedName = this._bindingScope.freshReferenceName();
     const retrievalLevel = this.level;
-    const isDirect = variable2.value === DIRECT_CONTEXT_REFERENCE;
-    const lhs = variable(variable2.name + scopedName);
-    this._bindingScope.set(retrievalLevel, variable2.name, (scope) => {
+    const isDirect = value === DIRECT_CONTEXT_REFERENCE;
+    const lhs = variable(name + scopedName);
+    this._bindingScope.set(retrievalLevel, name, (scope) => {
       return isDirect && scope.bindingLevel === retrievalLevel && !scope.isListenerScope() ? variable(CONTEXT_NAME) : lhs;
     }, 1, (scope, relativeLevel) => {
       let rhs;
@@ -22420,7 +22426,7 @@ var TemplateDefinitionBuilder = class {
         rhs = sharedCtxVar ? sharedCtxVar : generateNextContextExpr(relativeLevel);
       }
       return [
-        lhs.set(isDirect ? rhs : rhs.prop(variable2.value || IMPLICIT_REFERENCE)).toConstDecl()
+        lhs.set(isDirect ? rhs : rhs.prop(value || IMPLICIT_REFERENCE)).toConstDecl()
       ];
     });
   }
@@ -22759,7 +22765,7 @@ var TemplateDefinitionBuilder = class {
       this.creationInstruction(span, isNgContainer2 ? Identifiers.elementContainerEnd : Identifiers.elementEnd);
     }
   }
-  prepareEmbeddedTemplateFn(children, contextNameSuffix, variables = [], i18n2) {
+  prepareEmbeddedTemplateFn(children, contextNameSuffix, variables = [], i18n2, variableAliases) {
     const index = this.allocateDataSlot();
     if (this.i18n && i18n2) {
       this.i18n.appendTemplate(i18n2, index);
@@ -22768,7 +22774,7 @@ var TemplateDefinitionBuilder = class {
     const name = `${contextName}_Template`;
     const visitor = new TemplateDefinitionBuilder(this.constantPool, this._bindingScope, this.level + 1, contextName, this.i18n, index, name, this._namespace, this.fileBasedI18nSuffix, this.i18nUseExternalIds, this.deferBlocks, this.elementLocations, this._constants);
     this._nestedTemplateFns.push(() => {
-      const templateFunctionExpr = visitor.buildTemplateFunction(children, variables, this._ngContentReservedSlots.length + this._ngContentSelectorsOffset, i18n2);
+      const templateFunctionExpr = visitor.buildTemplateFunction(children, variables, this._ngContentReservedSlots.length + this._ngContentSelectorsOffset, i18n2, variableAliases);
       this.constantPool.statements.push(templateFunctionExpr.toDeclStmt(name));
       if (visitor._ngContentReservedSlots.length) {
         this._ngContentReservedSlots.push(...visitor._ngContentReservedSlots);
@@ -23054,7 +23060,10 @@ var TemplateDefinitionBuilder = class {
   visitForLoopBlock(block) {
     const blockIndex = this.allocateDataSlot();
     const { tagName, attrsExprs } = this.inferProjectionDataFromInsertionPoint(block);
-    const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [block.item, block.contextVariables.$index, block.contextVariables.$count]);
+    const primaryData = this.prepareEmbeddedTemplateFn(block.children, "_For", [block.item, block.contextVariables.$index, block.contextVariables.$count], void 0, {
+      [block.contextVariables.$index.name]: this.getLevelSpecificVariableName("$index", this.level + 1),
+      [block.contextVariables.$count.name]: this.getLevelSpecificVariableName("$count", this.level + 1)
+    });
     const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
     let emptyData = null;
     if (block.empty !== null) {
@@ -23083,13 +23092,28 @@ var TemplateDefinitionBuilder = class {
     this.updateInstructionWithAdvance(blockIndex, block.sourceSpan, Identifiers.repeater, () => [this.convertPropertyBinding(value)]);
   }
   registerComputedLoopVariables(block, bindingScope) {
-    const indexLocalName = block.contextVariables.$index.name;
-    const countLocalName = block.contextVariables.$count.name;
     const level = bindingScope.bindingLevel;
-    bindingScope.set(level, block.contextVariables.$odd.name, (scope) => scope.get(indexLocalName).modulo(literal(2)).notIdentical(literal(0)));
-    bindingScope.set(level, block.contextVariables.$even.name, (scope) => scope.get(indexLocalName).modulo(literal(2)).identical(literal(0)));
-    bindingScope.set(level, block.contextVariables.$first.name, (scope) => scope.get(indexLocalName).identical(literal(0)));
-    bindingScope.set(level, block.contextVariables.$last.name, (scope) => scope.get(indexLocalName).identical(scope.get(countLocalName).minus(literal(1))));
+    bindingScope.set(level, block.contextVariables.$odd.name, (scope, retrievalLevel) => {
+      return this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$index").modulo(literal(2)).notIdentical(literal(0));
+    });
+    bindingScope.set(level, block.contextVariables.$even.name, (scope, retrievalLevel) => {
+      return this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$index").modulo(literal(2)).identical(literal(0));
+    });
+    bindingScope.set(level, block.contextVariables.$first.name, (scope, retrievalLevel) => {
+      return this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$index").identical(literal(0));
+    });
+    bindingScope.set(level, block.contextVariables.$last.name, (scope, retrievalLevel) => {
+      const index = this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$index");
+      const count = this.getLevelSpecificForLoopVariable(block, scope, retrievalLevel, "$count");
+      return index.identical(count.minus(literal(1)));
+    });
+  }
+  getLevelSpecificVariableName(name, level) {
+    return `\u0275${name}_${level}`;
+  }
+  getLevelSpecificForLoopVariable(block, scope, retrievalLevel, name) {
+    const scopeName = scope.bindingLevel === retrievalLevel ? block.contextVariables[name].name : this.getLevelSpecificVariableName(name, retrievalLevel);
+    return scope.get(scopeName);
   }
   optimizeTrackByFunction(block) {
     const indexLocalName = block.contextVariables.$index.name;
@@ -23499,7 +23523,7 @@ var BindingScope = class {
         if (value.declareLocalCallback && !value.declare) {
           value.declare = true;
         }
-        return typeof value.lhs === "function" ? value.lhs(this) : value.lhs;
+        return typeof value.lhs === "function" ? value.lhs(this, value.retrievalLevel) : value.lhs;
       }
       current = current.parent;
     }
@@ -23575,7 +23599,7 @@ var BindingScope = class {
     const componentValue = this.map.get(SHARED_CONTEXT_KEY + 0);
     componentValue.declare = true;
     this.maybeRestoreView();
-    const lhs = typeof componentValue.lhs === "function" ? componentValue.lhs(this) : componentValue.lhs;
+    const lhs = typeof componentValue.lhs === "function" ? componentValue.lhs(this, componentValue.retrievalLevel) : componentValue.lhs;
     return name === DIRECT_CONTEXT_REFERENCE ? lhs : lhs.prop(name);
   }
   maybeRestoreView() {
@@ -25644,7 +25668,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.0+sha-ec2d6e7");
+var VERSION2 = new Version("17.1.0-next.0+sha-6e29e85");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -26681,7 +26705,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-ec2d6e7"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-6e29e85"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -26752,7 +26776,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-ec2d6e7"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-6e29e85"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -26984,7 +27008,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-ec2d6e7"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-6e29e85"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27007,7 +27031,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-ec2d6e7"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-6e29e85"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27045,7 +27069,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-ec2d6e7"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-6e29e85"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27069,7 +27093,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-ec2d6e7"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-6e29e85"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27104,7 +27128,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.0+sha-ec2d6e7"));
+  definitionMap.set("version", literal("17.1.0-next.0+sha-6e29e85"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27121,7 +27145,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.0+sha-ec2d6e7");
+var VERSION3 = new Version("17.1.0-next.0+sha-6e29e85");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
