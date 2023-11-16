@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-81e080e
+ * @license Angular v17.1.0-next.0+sha-1ce31d8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10428,7 +10428,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-81e080e');
+const VERSION = new Version('17.1.0-next.0+sha-1ce31d8');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -20780,7 +20780,7 @@ function assertDeferredDependenciesLoaded(tDetails) {
  * that a primary template exists. All the other template options are optional.
  */
 function isTDeferBlockDetails(value) {
-    return (typeof value === 'object') &&
+    return value !== null && (typeof value === 'object') &&
         (typeof value.primaryTmplIndex === 'number');
 }
 
