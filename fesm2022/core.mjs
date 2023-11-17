@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-2d41b33
+ * @license Angular v17.1.0-next.0+sha-c3e9a2b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10428,7 +10428,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-2d41b33');
+const VERSION = new Version('17.1.0-next.0+sha-c3e9a2b');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13584,7 +13584,7 @@ function detectChangesInViewIfAttached(lView, mode) {
  *
  * The view is refreshed if:
  * - If the view is CheckAlways or Dirty and ChangeDetectionMode is `Global`
- * - If the view has the `RefreshTransplantedView` flag
+ * - If the view has the `RefreshView` flag
  *
  * The view is not refreshed, but descendants are traversed in `ChangeDetectionMode.Targeted` if the
  * view HasChildViewsToRefresh flag is set.
