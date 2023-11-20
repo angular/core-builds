@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.0+sha-060ea83
+ * @license Angular v17.1.0-next.0+sha-406049b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10428,7 +10428,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.0+sha-060ea83');
+const VERSION = new Version('17.1.0-next.0+sha-406049b');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -21834,10 +21834,11 @@ function triggerResourceLoading(tDetails, lView, tNode) {
         }
     }
     // The `dependenciesFn` might be `null` when all dependencies within
-    // a given defer block were eagerly references elsewhere in a file,
+    // a given defer block were eagerly referenced elsewhere in a file,
     // thus no dynamic `import()`s were produced.
     if (!dependenciesFn) {
         tDetails.loadingPromise = Promise.resolve().then(() => {
+            tDetails.loadingPromise = null;
             tDetails.loadingState = DeferDependenciesLoadingState.COMPLETE;
         });
         return;
@@ -30287,7 +30288,8 @@ class ImagePerformanceWarning {
             return;
         }
         this.observer = this.initPerformanceObserver();
-        const win = getDocument().defaultView;
+        const doc = getDocument();
+        const win = doc.defaultView;
         if (typeof win !== 'undefined') {
             this.window = win;
             // Wait to avoid race conditions where LCP image triggers
@@ -30298,7 +30300,17 @@ class ImagePerformanceWarning {
             // Angular doesn't have to run change detection whenever any asynchronous tasks are invoked in
             // the scope of this functionality.
             this.ngZone.runOutsideAngular(() => {
-                this.window?.addEventListener('load', waitToScan, { once: true });
+                // Consider the case when the application is created and destroyed multiple times.
+                // Typically, applications are created instantly once the page is loaded, and the
+                // `window.load` listener is always triggered. However, the `window.load` event will never
+                // be fired if the page is loaded, and the application is created later. Checking for
+                // `readyState` is the easiest way to determine whether the page has been loaded or not.
+                if (doc.readyState === 'complete') {
+                    waitToScan();
+                }
+                else {
+                    this.window?.addEventListener('load', waitToScan, { once: true });
+                }
             });
         }
     }
