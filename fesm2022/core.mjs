@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.1+sha-29e0834
+ * @license Angular v17.1.0-next.1+sha-c7c7ea9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.1+sha-29e0834');
+const VERSION = new Version('17.1.0-next.1+sha-c7c7ea9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -15984,19 +15984,26 @@ function ɵɵCopyDefinitionFeature(definition) {
  * @codeGenApi
  */
 function ɵɵHostDirectivesFeature(rawHostDirectives) {
-    return (definition) => {
-        definition.findHostDirectiveDefs = findHostDirectiveDefs;
-        definition.hostDirectives =
-            (Array.isArray(rawHostDirectives) ? rawHostDirectives : rawHostDirectives()).map(dir => {
-                return typeof dir === 'function' ?
-                    { directive: resolveForwardRef(dir), inputs: EMPTY_OBJ, outputs: EMPTY_OBJ } :
-                    {
-                        directive: resolveForwardRef(dir.directive),
-                        inputs: bindingArrayToMap(dir.inputs),
-                        outputs: bindingArrayToMap(dir.outputs)
-                    };
-            });
+    const feature = (definition) => {
+        const resolved = (Array.isArray(rawHostDirectives) ? rawHostDirectives : rawHostDirectives()).map(dir => {
+            return typeof dir === 'function' ?
+                { directive: resolveForwardRef(dir), inputs: EMPTY_OBJ, outputs: EMPTY_OBJ } :
+                {
+                    directive: resolveForwardRef(dir.directive),
+                    inputs: bindingArrayToMap(dir.inputs),
+                    outputs: bindingArrayToMap(dir.outputs)
+                };
+        });
+        if (definition.hostDirectives === null) {
+            definition.findHostDirectiveDefs = findHostDirectiveDefs;
+            definition.hostDirectives = resolved;
+        }
+        else {
+            definition.hostDirectives.unshift(...resolved);
+        }
     };
+    feature.ngInherit = true;
+    return feature;
 }
 function findHostDirectiveDefs(currentDef, matchedDefs, hostDirectiveDefs) {
     if (currentDef.hostDirectives !== null) {
