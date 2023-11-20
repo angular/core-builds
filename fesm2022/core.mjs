@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.4+sha-710a24a
+ * @license Angular v17.0.4+sha-91486aa
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2722,20 +2722,19 @@ function walkUpViews(nestingLevel, currentView) {
     }
     return currentView;
 }
+function requiresRefreshOrTraversal(lView) {
+    return lView[FLAGS] & (1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */) ||
+        lView[REACTIVE_TEMPLATE_CONSUMER]?.dirty;
+}
 /**
- * Updates the `DESCENDANT_VIEWS_TO_REFRESH` counter on the parents of the `LView` as well as the
- * parents above that whose
- *  1. counter goes from 0 to 1, indicating that there is a new child that has a view to refresh
- *  or
- *  2. counter goes from 1 to 0, indicating there are no more descendant views to refresh
- * When attaching/re-attaching an `LView` to the change detection tree, we need to ensure that the
- * views above it are traversed during change detection if this one is marked for refresh or has
- * some child or descendant that needs to be refreshed.
+ * Updates the `HasChildViewsToRefresh` flag on the parents of the `LView` as well as the
+ * parents above.
  */
 function updateAncestorTraversalFlagsOnAttach(lView) {
-    if (lView[FLAGS] & (1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */)) {
-        markAncestorsForTraversal(lView);
+    if (!requiresRefreshOrTraversal(lView)) {
+        return;
     }
+    markAncestorsForTraversal(lView);
 }
 /**
  * Ensures views above the given `lView` are traversed during change detection even when they are
@@ -10428,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.4+sha-710a24a');
+const VERSION = new Version('17.0.4+sha-91486aa');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13335,8 +13334,7 @@ function detectChangesInViewWhileDirty(lView) {
     // descendants views that need to be refreshed due to re-dirtying during the change detection
     // run, detect changes on the view again. We run change detection in `Targeted` mode to only
     // refresh views with the `RefreshView` flag.
-    while (lView[FLAGS] & (1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */) ||
-        lView[REACTIVE_TEMPLATE_CONSUMER]?.dirty) {
+    while (requiresRefreshOrTraversal(lView)) {
         if (retries === MAXIMUM_REFRESH_RERUNS) {
             throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
                 'Infinite change detection while trying to refresh views. ' +
@@ -30003,7 +30001,7 @@ const ITS_JUST_ANGULAR = true;
  *     provideHttpClient(),
  *     {
  *       provide: APP_INITIALIZER,
- *       useFactory: initializeApp,
+ *       useFactory: initializeAppFactory,
  *       multi: true,
  *       deps: [HttpClient],
  *     },

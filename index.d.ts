@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.4+sha-710a24a
+ * @license Angular v17.0.4+sha-91486aa
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -490,7 +490,7 @@ export declare const APP_ID: InjectionToken<string>;
  *     provideHttpClient(),
  *     {
  *       provide: APP_INITIALIZER,
- *       useFactory: initializeApp,
+ *       useFactory: initializeAppFactory,
  *       multi: true,
  *       deps: [HttpClient],
  *     },
