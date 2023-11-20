@@ -24907,7 +24907,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.3+sha-291deac");
+var VERSION2 = new Version("17.0.3+sha-0fad36e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25197,13 +25197,19 @@ function analyze(sourceFile, analyzedFiles) {
     }
   });
 }
+function checkIfShouldChange(decl, removeCommonModule) {
+  const clause = decl.getChildAt(1);
+  return !(!removeCommonModule && clause.namedBindings && import_typescript5.default.isNamedImports(clause.namedBindings) && clause.namedBindings.elements.length === 1 && clause.namedBindings.elements[0].getText() === "CommonModule");
+}
 function updateImportDeclaration(decl, removeCommonModule) {
   const clause = decl.getChildAt(1);
   const updatedClause = updateImportClause(clause, removeCommonModule);
   if (updatedClause === null) {
     return "";
   }
-  const printer = import_typescript5.default.createPrinter();
+  const printer = import_typescript5.default.createPrinter({
+    removeComments: true
+  });
   const updated = import_typescript5.default.factory.updateImportDeclaration(decl, decl.modifiers, updatedClause, decl.moduleSpecifier, void 0);
   return printer.printNode(import_typescript5.default.EmitHint.Unspecified, updated, clause.getSourceFile());
 }
@@ -25391,7 +25397,7 @@ function canRemoveCommonModule(template2) {
 function removeImports(template2, node, removeCommonModule) {
   if (template2.startsWith("imports") && import_typescript5.default.isPropertyAssignment(node)) {
     return updateClassImports(node, removeCommonModule);
-  } else if (import_typescript5.default.isImportDeclaration(node)) {
+  } else if (import_typescript5.default.isImportDeclaration(node) && checkIfShouldChange(node, removeCommonModule)) {
     return updateImportDeclaration(node, removeCommonModule);
   }
   return template2;
@@ -25444,16 +25450,16 @@ function getMainBlock(etm, tmpl, offset) {
 function formatTemplate(tmpl) {
   if (tmpl.indexOf("\n") > -1) {
     const openBlockRegex = /^\s*\@(if|switch|case|default|for)|^\s*\}\s\@else/;
-    const openElRegex = /^\s*<([a-z]+)(?![^>]*\/>)[^>]*>?/;
+    const openElRegex = /^\s*<([a-z0-9]+)(?![^>]*\/>)[^>]*>?/;
     const closeBlockRegex = /^\s*\}\s*$|^\s*\}\s\@else/;
-    const closeElRegex = /\s*<\/([a-z\-]+)*>/;
+    const closeElRegex = /\s*<\/([a-z0-9\-]+)*>/;
     const closeMultiLineElRegex = /^\s*([a-z0-9\-\[\]]+)?=?"?([^”<]+)?"?\s?\/>$/;
-    const singleLineElRegex = /^\s*<([a-z]+)(?![^>]*\/>)[^>]*>.*<\/([a-z\-]+)*>/;
+    const singleLineElRegex = /^\s*<([a-z0-9]+)(?![^>]*\/>)[^>]*>.*<\/([a-z0-9\-]+)*>/;
     const lines = tmpl.split("\n");
     const formatted = [];
     let indent = "";
-    for (let line of lines) {
-      if (line.trim() === "") {
+    for (let [index, line] of lines.entries()) {
+      if (line.trim() === "" && index !== 0 && index !== lines.length - 1) {
         continue;
       }
       if ((closeBlockRegex.test(line) || closeElRegex.test(line) && (!singleLineElRegex.test(line) && !closeMultiLineElRegex.test(line))) && indent !== "") {
@@ -25497,7 +25503,7 @@ function migrateCase(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
   if (parsed === null) {
-    return { migrated: template2, errors };
+    return { migrated: template2, errors, changed: false };
   }
   let result = template2;
   const visitor = new ElementCollector(cases);
@@ -25527,7 +25533,8 @@ function migrateCase(template2) {
     postOffsets.push(migrateResult.offsets.post);
     nestLevel = el.nestCount;
   }
-  return { migrated: result, errors };
+  const changed = visitor.elements.length > 0;
+  return { migrated: result, errors, changed };
 }
 function migrateNgSwitchCase(etm, tmpl, offset) {
   const lbString = etm.hasLineBreaks ? "\n" : "";
@@ -25577,7 +25584,7 @@ function migrateFor(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
   if (parsed === null) {
-    return { migrated: template2, errors };
+    return { migrated: template2, errors, changed: false };
   }
   let result = template2;
   const visitor = new ElementCollector(fors);
@@ -25599,7 +25606,8 @@ function migrateFor(template2) {
     postOffsets.push(migrateResult.offsets.post);
     nestLevel = el.nestCount;
   }
-  return { migrated: result, errors };
+  const changed = visitor.elements.length > 0;
+  return { migrated: result, errors, changed };
 }
 function migrateNgFor(etm, tmpl, offset) {
   if (etm.forAttrs !== void 0) {
@@ -25726,7 +25734,7 @@ function migrateIf(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
   if (parsed === null) {
-    return { migrated: template2, errors };
+    return { migrated: template2, errors, changed: false };
   }
   let result = template2;
   const visitor = new ElementCollector(ifs);
@@ -25748,7 +25756,8 @@ function migrateIf(template2) {
     postOffsets.push(migrateResult.offsets.post);
     nestLevel = el.nestCount;
   }
-  return { migrated: result, errors };
+  const changed = visitor.elements.length > 0;
+  return { migrated: result, errors, changed };
 }
 function migrateNgIf(etm, tmpl, offset) {
   const matchThen = etm.attr.value.match(/;\s*then/gm);
@@ -25834,7 +25843,7 @@ function migrateSwitch(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
   if (parsed === null) {
-    return { migrated: template2, errors };
+    return { migrated: template2, errors, changed: false };
   }
   let result = template2;
   const visitor = new ElementCollector(switches);
@@ -25858,7 +25867,8 @@ function migrateSwitch(template2) {
     postOffsets.push(migrateResult.offsets.post);
     nestLevel = el.nestCount;
   }
-  return { migrated: result, errors };
+  const changed = visitor.elements.length > 0;
+  return { migrated: result, errors, changed };
 }
 function migrateNgSwitch(etm, tmpl, offset) {
   const lbString = etm.hasLineBreaks ? "\n" : "";
@@ -25884,7 +25894,8 @@ function migrateTemplate(template2, templateType, node, file, format = true) {
     const switchResult = migrateSwitch(forResult.migrated);
     const caseResult = migrateCase(switchResult.migrated);
     migrated = processNgTemplates(caseResult.migrated);
-    if (format) {
+    const changed = ifResult.changed || forResult.changed || switchResult.changed || caseResult.changed;
+    if (format && changed) {
       migrated = formatTemplate(migrated);
     }
     file.removeCommonModule = canRemoveCommonModule(template2);
