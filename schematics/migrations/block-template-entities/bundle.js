@@ -23263,6 +23263,9 @@ function addFeatures(definitionMap, meta) {
       break;
     }
   }
+  if ((_a2 = meta.hostDirectives) == null ? void 0 : _a2.length) {
+    features.push(importExpr(Identifiers.HostDirectivesFeature).callFn([createHostDirectivesFeatureArg(meta.hostDirectives)]));
+  }
   if (meta.usesInheritance) {
     features.push(importExpr(Identifiers.InheritDefinitionFeature));
   }
@@ -23274,9 +23277,6 @@ function addFeatures(definitionMap, meta) {
   }
   if (meta.hasOwnProperty("template") && meta.isStandalone) {
     features.push(importExpr(Identifiers.StandaloneFeature));
-  }
-  if ((_a2 = meta.hostDirectives) == null ? void 0 : _a2.length) {
-    features.push(importExpr(Identifiers.HostDirectivesFeature).callFn([createHostDirectivesFeatureArg(meta.hostDirectives)]));
   }
   if (features.length) {
     definitionMap.set("features", literalArr(features));
@@ -24976,7 +24976,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.4+sha-91486aa");
+var VERSION2 = new Version("17.0.4+sha-dee50f1");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

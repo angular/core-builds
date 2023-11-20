@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.4+sha-91486aa
+ * @license Angular v17.0.4+sha-dee50f1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13926,7 +13926,7 @@ export declare function ɵɵgetInheritedFactory<T>(type: Type<any>): (type: Type
  *
  * @codeGenApi
  */
-export declare function ɵɵHostDirectivesFeature(rawHostDirectives: HostDirectiveConfig[] | (() => HostDirectiveConfig[])): (definition: ɵDirectiveDef<unknown>) => void;
+export declare function ɵɵHostDirectivesFeature(rawHostDirectives: HostDirectiveConfig[] | (() => HostDirectiveConfig[])): DirectiveDefFeature;
 
 /**
  * Update a property on a host element. Only applies to native node properties, not inputs.
