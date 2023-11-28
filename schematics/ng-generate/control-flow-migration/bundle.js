@@ -3430,6 +3430,39 @@ function getInjectFn(target) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/tags.mjs
+var TagContentType;
+(function(TagContentType2) {
+  TagContentType2[TagContentType2["RAW_TEXT"] = 0] = "RAW_TEXT";
+  TagContentType2[TagContentType2["ESCAPABLE_RAW_TEXT"] = 1] = "ESCAPABLE_RAW_TEXT";
+  TagContentType2[TagContentType2["PARSABLE_DATA"] = 2] = "PARSABLE_DATA";
+})(TagContentType || (TagContentType = {}));
+function splitNsName(elementName) {
+  if (elementName[0] != ":") {
+    return [null, elementName];
+  }
+  const colonIndex = elementName.indexOf(":", 1);
+  if (colonIndex === -1) {
+    throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
+  }
+  return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
+}
+function isNgContainer(tagName) {
+  return splitNsName(tagName)[1] === "ng-container";
+}
+function isNgContent(tagName) {
+  return splitNsName(tagName)[1] === "ng-content";
+}
+function isNgTemplate(tagName) {
+  return splitNsName(tagName)[1] === "ng-template";
+}
+function getNsPrefix(fullName) {
+  return fullName === null ? null : splitNsName(fullName)[0];
+}
+function mergeNsAndName(prefix, localName) {
+  return prefix ? `:${prefix}:${localName}` : localName;
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_ast.mjs
 var Comment = class {
   constructor(value, sourceSpan) {
@@ -4273,6 +4306,23 @@ var DefinitionMap = class {
     return literalMap(this.values);
   }
 };
+function createCssSelectorFromNode(node) {
+  const elementName = node instanceof Element ? node.name : "ng-template";
+  const attributes = getAttrsForDirectiveMatching(node);
+  const cssSelector = new CssSelector();
+  const elementNameNoNs = splitNsName(elementName)[1];
+  cssSelector.setElement(elementNameNoNs);
+  Object.getOwnPropertyNames(attributes).forEach((name) => {
+    const nameNoNs = splitNsName(name)[1];
+    const value = attributes[name];
+    cssSelector.addAttribute(nameNoNs, value);
+    if (name.toLowerCase() === "class") {
+      const classes = value.trim().split(/\s+/);
+      classes.forEach((className) => cssSelector.addClassName(className));
+    }
+  });
+  return cssSelector;
+}
 function getAttrsForDirectiveMatching(elOrTpl) {
   const attributesMap = {};
   if (elOrTpl instanceof Template && elOrTpl.tagName !== "ng-template") {
@@ -9039,39 +9089,6 @@ function generateConditionalExpressions(job) {
       op.conditions = [];
     }
   }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/tags.mjs
-var TagContentType;
-(function(TagContentType2) {
-  TagContentType2[TagContentType2["RAW_TEXT"] = 0] = "RAW_TEXT";
-  TagContentType2[TagContentType2["ESCAPABLE_RAW_TEXT"] = 1] = "ESCAPABLE_RAW_TEXT";
-  TagContentType2[TagContentType2["PARSABLE_DATA"] = 2] = "PARSABLE_DATA";
-})(TagContentType || (TagContentType = {}));
-function splitNsName(elementName) {
-  if (elementName[0] != ":") {
-    return [null, elementName];
-  }
-  const colonIndex = elementName.indexOf(":", 1);
-  if (colonIndex === -1) {
-    throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
-  }
-  return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
-}
-function isNgContainer(tagName) {
-  return splitNsName(tagName)[1] === "ng-container";
-}
-function isNgContent(tagName) {
-  return splitNsName(tagName)[1] === "ng-content";
-}
-function isNgTemplate(tagName) {
-  return splitNsName(tagName)[1] === "ng-template";
-}
-function getNsPrefix(fullName) {
-  return fullName === null ? null : splitNsName(fullName)[0];
-}
-function mergeNsAndName(prefix, localName) {
-  return prefix ? `:${prefix}:${localName}` : localName;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/conversion.mjs
@@ -22911,21 +22928,6 @@ var TrackByBindingScope = class extends BindingScope {
     return this.componentAccessCount;
   }
 };
-function createCssSelector(elementName, attributes) {
-  const cssSelector = new CssSelector();
-  const elementNameNoNs = splitNsName(elementName)[1];
-  cssSelector.setElement(elementNameNoNs);
-  Object.getOwnPropertyNames(attributes).forEach((name) => {
-    const nameNoNs = splitNsName(name)[1];
-    const value = attributes[name];
-    cssSelector.addAttribute(nameNoNs, value);
-    if (name.toLowerCase() === "class") {
-      const classes = value.trim().split(/\s+/);
-      classes.forEach((className) => cssSelector.addClassName(className));
-    }
-  });
-  return cssSelector;
-}
 function getNgProjectAsLiteral(attribute2) {
   const parsedR3Selector = parseSelectorToR3Selector(attribute2.value)[0];
   return [literal(5), asLiteral(parsedR3Selector)];
@@ -23913,13 +23915,13 @@ var DirectiveBinder = class {
     template2.forEach((node) => node.visit(this));
   }
   visitElement(element2) {
-    this.visitElementOrTemplate(element2.name, element2);
+    this.visitElementOrTemplate(element2);
   }
   visitTemplate(template2) {
-    this.visitElementOrTemplate("ng-template", template2);
+    this.visitElementOrTemplate(template2);
   }
-  visitElementOrTemplate(elementName, node) {
-    const cssSelector = createCssSelector(elementName, getAttrsForDirectiveMatching(node));
+  visitElementOrTemplate(node) {
+    const cssSelector = createCssSelectorFromNode(node);
     const directives = [];
     this.matcher.match(cssSelector, (_selector, results) => directives.push(...results));
     if (directives.length > 0) {
@@ -24907,7 +24909,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.1+sha-e8ad51a");
+var VERSION2 = new Version("17.1.0-next.1+sha-4c1d69e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

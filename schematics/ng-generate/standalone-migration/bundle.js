@@ -3997,6 +3997,39 @@ function getInjectFn(target) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/tags.mjs
+var TagContentType;
+(function(TagContentType2) {
+  TagContentType2[TagContentType2["RAW_TEXT"] = 0] = "RAW_TEXT";
+  TagContentType2[TagContentType2["ESCAPABLE_RAW_TEXT"] = 1] = "ESCAPABLE_RAW_TEXT";
+  TagContentType2[TagContentType2["PARSABLE_DATA"] = 2] = "PARSABLE_DATA";
+})(TagContentType || (TagContentType = {}));
+function splitNsName(elementName) {
+  if (elementName[0] != ":") {
+    return [null, elementName];
+  }
+  const colonIndex = elementName.indexOf(":", 1);
+  if (colonIndex === -1) {
+    throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
+  }
+  return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
+}
+function isNgContainer(tagName) {
+  return splitNsName(tagName)[1] === "ng-container";
+}
+function isNgContent(tagName) {
+  return splitNsName(tagName)[1] === "ng-content";
+}
+function isNgTemplate(tagName) {
+  return splitNsName(tagName)[1] === "ng-template";
+}
+function getNsPrefix(fullName) {
+  return fullName === null ? null : splitNsName(fullName)[0];
+}
+function mergeNsAndName(prefix, localName) {
+  return prefix ? `:${prefix}:${localName}` : localName;
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_ast.mjs
 var Comment = class {
   constructor(value, sourceSpan) {
@@ -5206,6 +5239,23 @@ var DefinitionMap = class {
     return literalMap(this.values);
   }
 };
+function createCssSelectorFromNode(node) {
+  const elementName = node instanceof Element ? node.name : "ng-template";
+  const attributes = getAttrsForDirectiveMatching(node);
+  const cssSelector = new CssSelector();
+  const elementNameNoNs = splitNsName(elementName)[1];
+  cssSelector.setElement(elementNameNoNs);
+  Object.getOwnPropertyNames(attributes).forEach((name) => {
+    const nameNoNs = splitNsName(name)[1];
+    const value = attributes[name];
+    cssSelector.addAttribute(nameNoNs, value);
+    if (name.toLowerCase() === "class") {
+      const classes = value.trim().split(/\s+/);
+      classes.forEach((className) => cssSelector.addClassName(className));
+    }
+  });
+  return cssSelector;
+}
 function getAttrsForDirectiveMatching(elOrTpl) {
   const attributesMap = {};
   if (elOrTpl instanceof Template && elOrTpl.tagName !== "ng-template") {
@@ -9972,39 +10022,6 @@ function generateConditionalExpressions(job) {
       op.conditions = [];
     }
   }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/tags.mjs
-var TagContentType;
-(function(TagContentType2) {
-  TagContentType2[TagContentType2["RAW_TEXT"] = 0] = "RAW_TEXT";
-  TagContentType2[TagContentType2["ESCAPABLE_RAW_TEXT"] = 1] = "ESCAPABLE_RAW_TEXT";
-  TagContentType2[TagContentType2["PARSABLE_DATA"] = 2] = "PARSABLE_DATA";
-})(TagContentType || (TagContentType = {}));
-function splitNsName(elementName) {
-  if (elementName[0] != ":") {
-    return [null, elementName];
-  }
-  const colonIndex = elementName.indexOf(":", 1);
-  if (colonIndex === -1) {
-    throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
-  }
-  return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
-}
-function isNgContainer(tagName) {
-  return splitNsName(tagName)[1] === "ng-container";
-}
-function isNgContent(tagName) {
-  return splitNsName(tagName)[1] === "ng-content";
-}
-function isNgTemplate(tagName) {
-  return splitNsName(tagName)[1] === "ng-template";
-}
-function getNsPrefix(fullName) {
-  return fullName === null ? null : splitNsName(fullName)[0];
-}
-function mergeNsAndName(prefix, localName) {
-  return prefix ? `:${prefix}:${localName}` : localName;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/conversion.mjs
@@ -23803,21 +23820,6 @@ var TrackByBindingScope = class extends BindingScope {
     return this.componentAccessCount;
   }
 };
-function createCssSelector(elementName, attributes) {
-  const cssSelector = new CssSelector();
-  const elementNameNoNs = splitNsName(elementName)[1];
-  cssSelector.setElement(elementNameNoNs);
-  Object.getOwnPropertyNames(attributes).forEach((name) => {
-    const nameNoNs = splitNsName(name)[1];
-    const value = attributes[name];
-    cssSelector.addAttribute(nameNoNs, value);
-    if (name.toLowerCase() === "class") {
-      const classes = value.trim().split(/\s+/);
-      classes.forEach((className) => cssSelector.addClassName(className));
-    }
-  });
-  return cssSelector;
-}
 function getNgProjectAsLiteral(attribute2) {
   const parsedR3Selector = parseSelectorToR3Selector(attribute2.value)[0];
   return [literal(5), asLiteral(parsedR3Selector)];
@@ -24805,13 +24807,13 @@ var DirectiveBinder = class {
     template2.forEach((node) => node.visit(this));
   }
   visitElement(element2) {
-    this.visitElementOrTemplate(element2.name, element2);
+    this.visitElementOrTemplate(element2);
   }
   visitTemplate(template2) {
-    this.visitElementOrTemplate("ng-template", template2);
+    this.visitElementOrTemplate(template2);
   }
-  visitElementOrTemplate(elementName, node) {
-    const cssSelector = createCssSelector(elementName, getAttrsForDirectiveMatching(node));
+  visitElementOrTemplate(node) {
+    const cssSelector = createCssSelectorFromNode(node);
     const directives = [];
     this.matcher.match(cssSelector, (_selector, results) => directives.push(...results));
     if (directives.length > 0) {
@@ -25799,7 +25801,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.1+sha-e8ad51a");
+var VERSION2 = new Version("17.1.0-next.1+sha-4c1d69e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -26865,7 +26867,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.1+sha-e8ad51a"));
+  definitionMap.set("version", literal("17.1.0-next.1+sha-4c1d69e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -26936,7 +26938,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.1+sha-e8ad51a"));
+  definitionMap.set("version", literal("17.1.0-next.1+sha-4c1d69e"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27168,7 +27170,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.1+sha-e8ad51a"));
+  definitionMap.set("version", literal("17.1.0-next.1+sha-4c1d69e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27191,7 +27193,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.1+sha-e8ad51a"));
+  definitionMap.set("version", literal("17.1.0-next.1+sha-4c1d69e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27229,7 +27231,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.1+sha-e8ad51a"));
+  definitionMap.set("version", literal("17.1.0-next.1+sha-4c1d69e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27253,7 +27255,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.1+sha-e8ad51a"));
+  definitionMap.set("version", literal("17.1.0-next.1+sha-4c1d69e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27288,7 +27290,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.1+sha-e8ad51a"));
+  definitionMap.set("version", literal("17.1.0-next.1+sha-4c1d69e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27305,7 +27307,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.1+sha-e8ad51a");
+var VERSION3 = new Version("17.1.0-next.1+sha-4c1d69e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -27493,6 +27495,7 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["MISSING_REQUIRED_INPUTS"] = 8008] = "MISSING_REQUIRED_INPUTS";
   ErrorCode2[ErrorCode2["ILLEGAL_FOR_LOOP_TRACK_ACCESS"] = 8009] = "ILLEGAL_FOR_LOOP_TRACK_ACCESS";
   ErrorCode2[ErrorCode2["INACCESSIBLE_DEFERRED_TRIGGER_ELEMENT"] = 8010] = "INACCESSIBLE_DEFERRED_TRIGGER_ELEMENT";
+  ErrorCode2[ErrorCode2["CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION"] = 8011] = "CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION";
   ErrorCode2[ErrorCode2["INVALID_BANANA_IN_BOX"] = 8101] = "INVALID_BANANA_IN_BOX";
   ErrorCode2[ErrorCode2["NULLISH_COALESCING_NOT_NULLABLE"] = 8102] = "NULLISH_COALESCING_NOT_NULLABLE";
   ErrorCode2[ErrorCode2["MISSING_CONTROL_FLOW_DIRECTIVE"] = 8103] = "MISSING_CONTROL_FLOW_DIRECTIVE";
@@ -29681,6 +29684,7 @@ var DtsMetadataReader = class {
     const isStructural = !isComponent && ctorParams !== null && ctorParams.some((param) => {
       return param.typeValueReference.kind === 1 && param.typeValueReference.moduleName === "@angular/core" && param.typeValueReference.importedName === "TemplateRef";
     });
+    const ngContentSelectors = def.type.typeArguments.length > 6 ? readStringArrayType(def.type.typeArguments[6]) : null;
     const isStandalone = def.type.typeArguments.length > 7 && ((_a2 = readBooleanType(def.type.typeArguments[7])) != null ? _a2 : false);
     const inputs = ClassPropertyMapping.fromMappedObject(readInputsType(def.type.typeArguments[3]));
     const outputs = ClassPropertyMapping.fromMappedObject(readMapType(def.type.typeArguments[4], readStringType));
@@ -29703,12 +29707,14 @@ var DtsMetadataReader = class {
       isPoisoned: false,
       isStructural,
       animationTriggerNames: null,
+      ngContentSelectors,
       isStandalone,
       isSignal,
       imports: null,
       schemas: null,
       decorator: null,
-      assumedToExportProviders: isComponent && isStandalone
+      assumedToExportProviders: isComponent && isStandalone,
+      preserveWhitespaces: false
     });
   }
   getPipeMetadata(ref) {
@@ -35025,7 +35031,9 @@ var DirectiveDecoratorHandler = class {
       isSignal: analysis.meta.isSignal,
       imports: null,
       schemas: null,
+      ngContentSelectors: null,
       decorator: analysis.decorator,
+      preserveWhitespaces: false,
       assumedToExportProviders: false
     }));
     this.injectableRegistry.registerInjectable(node, {
@@ -36484,10 +36492,7 @@ var ComponentDecoratorHandler = class {
         hostDirectives,
         rawHostDirectives,
         meta: __spreadProps(__spreadValues({}, metadata), {
-          template: {
-            nodes: template2.nodes,
-            ngContentSelectors: template2.ngContentSelectors
-          },
+          template: template2,
           encapsulation,
           changeDetection,
           interpolation: (_c2 = template2.interpolationConfig) != null ? _c2 : DEFAULT_INTERPOLATION_CONFIG,
@@ -36531,6 +36536,7 @@ var ComponentDecoratorHandler = class {
     return new ComponentSymbol(node, analysis.meta.selector, analysis.inputs, analysis.outputs, analysis.meta.exportAs, analysis.typeCheckMeta, typeParameters);
   }
   register(node, analysis) {
+    var _a2;
     const ref = new Reference2(node);
     this.metaRegistry.registerDirectiveMetadata(__spreadProps(__spreadValues({
       kind: MetaKind.Directive,
@@ -36554,7 +36560,9 @@ var ComponentDecoratorHandler = class {
       animationTriggerNames: analysis.animationTriggerNames,
       schemas: analysis.schemas,
       decorator: analysis.decorator,
-      assumedToExportProviders: false
+      assumedToExportProviders: false,
+      ngContentSelectors: analysis.template.ngContentSelectors,
+      preserveWhitespaces: (_a2 = analysis.template.preserveWhitespaces) != null ? _a2 : false
     }));
     this.resourceRegistry.registerResources(analysis.resources, node);
     this.injectableRegistry.registerInjectable(node, {
@@ -36593,6 +36601,7 @@ var ComponentDecoratorHandler = class {
     return null;
   }
   typeCheck(ctx, node, meta) {
+    var _a2;
     if (this.typeCheckScopeRegistry === null || !import_typescript55.default.isClassDeclaration(node)) {
       return;
     }
@@ -36604,7 +36613,7 @@ var ComponentDecoratorHandler = class {
       return;
     }
     const binder = new R3TargetBinder(scope.matcher);
-    ctx.addTemplate(new Reference2(node), binder, meta.template.diagNodes, scope.pipes, scope.schemas, meta.template.sourceMapping, meta.template.file, meta.template.errors, meta.meta.isStandalone);
+    ctx.addTemplate(new Reference2(node), binder, meta.template.diagNodes, scope.pipes, scope.schemas, meta.template.sourceMapping, meta.template.file, meta.template.errors, meta.meta.isStandalone, (_a2 = meta.meta.template.preserveWhitespaces) != null ? _a2 : false);
   }
   extendedTemplateCheck(component, extendedTemplateChecker) {
     return extendedTemplateChecker.getDiagnosticsForComponent(component);
@@ -40724,6 +40733,20 @@ Deferred blocks can only access triggers in same view, a parent embedded view or
     }
     this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), trigger.sourceSpan, import_typescript86.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.INACCESSIBLE_DEFERRED_TRIGGER_ELEMENT), message));
   }
+  controlFlowPreventingContentProjection(templateId, projectionNode, componentName, slotSelector, controlFlowNode, preservesWhitespaces) {
+    const blockName = controlFlowNode instanceof IfBlockBranch ? "@if" : "@for";
+    const lines = [
+      `Node matches the "${slotSelector}" slot of the "${componentName}" component, but will not be projected into the specific slot because the surrounding ${blockName} has more than one node at its root. To project the node in the right slot, you can:
+`,
+      `1. Wrap the content of the ${blockName} block in an <ng-container/> that matches the "${slotSelector}" selector.`,
+      `2. Split the content of the ${blockName} block across multiple ${blockName} blocks such that each one only has a single projectable node at its root.`,
+      `3. Remove all content from the ${blockName} block, except for the node being projected.`
+    ];
+    if (preservesWhitespaces) {
+      lines.push(`Note: the host component has \`preserveWhitespaces: true\` which may cause whitespace to affect content projection.`);
+    }
+    this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), projectionNode.startSourceSpan, import_typescript86.default.DiagnosticCategory.Warning, ngErrorCode(ErrorCode.CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION), lines.join("\n")));
+  }
 };
 function makeInlineDiagnostic(templateId, code, node, messageText, relatedInformation) {
   return __spreadProps(__spreadValues({}, makeDiagnostic(code, node, messageText, relatedInformation)), {
@@ -41161,7 +41184,7 @@ var TcbGenericContextBehavior;
   TcbGenericContextBehavior2[TcbGenericContextBehavior2["FallbackToAny"] = 2] = "FallbackToAny";
 })(TcbGenericContextBehavior || (TcbGenericContextBehavior = {}));
 function generateTypeCheckBlock(env, ref, name, meta, domSchemaChecker, oobRecorder, genericContextBehavior) {
-  const tcb = new Context2(env, domSchemaChecker, oobRecorder, meta.id, meta.boundTarget, meta.pipes, meta.schemas, meta.isStandalone);
+  const tcb = new Context2(env, domSchemaChecker, oobRecorder, meta.id, meta.boundTarget, meta.pipes, meta.schemas, meta.isStandalone, meta.preserveWhitespaces);
   const scope = Scope3.forNodes(tcb, null, null, tcb.boundTarget.target.template, null);
   const ctxRawType = env.referenceType(ref);
   if (!import_typescript90.default.isTypeReferenceNode(ctxRawType)) {
@@ -41617,6 +41640,61 @@ var TcbDomSchemaCheckerOp = class extends TcbOp {
     return null;
   }
 };
+var TcbControlFlowContentProjectionOp = class extends TcbOp {
+  constructor(tcb, element2, ngContentSelectors, componentName) {
+    super();
+    this.tcb = tcb;
+    this.element = element2;
+    this.ngContentSelectors = ngContentSelectors;
+    this.componentName = componentName;
+    this.optional = false;
+  }
+  execute() {
+    const controlFlowToCheck = this.findPotentialControlFlowNodes();
+    if (controlFlowToCheck.length > 0) {
+      const matcher = new SelectorMatcher();
+      for (const selector of this.ngContentSelectors) {
+        if (selector !== "*") {
+          matcher.addSelectables(CssSelector.parse(selector), selector);
+        }
+      }
+      for (const root of controlFlowToCheck) {
+        for (const child of root.children) {
+          if (child instanceof Element || child instanceof Template) {
+            matcher.match(createCssSelectorFromNode(child), (_, originalSelector) => {
+              this.tcb.oobRecorder.controlFlowPreventingContentProjection(this.tcb.id, child, this.componentName, originalSelector, root, this.tcb.hostPreserveWhitespaces);
+            });
+          }
+        }
+      }
+    }
+    return null;
+  }
+  findPotentialControlFlowNodes() {
+    const result = [];
+    for (const child of this.element.children) {
+      let eligibleNode = null;
+      if (child instanceof ForLoopBlock) {
+        eligibleNode = child;
+      } else if (child instanceof IfBlock) {
+        eligibleNode = child.branches[0];
+      }
+      if (eligibleNode === null || eligibleNode.children.length < 2) {
+        continue;
+      }
+      const rootNodeCount = eligibleNode.children.reduce((count, node) => {
+        if (!(node instanceof Text) || this.tcb.hostPreserveWhitespaces || node.value.trim().length > 0) {
+          count++;
+        }
+        return count;
+      }, 0);
+      if (rootNodeCount > 1) {
+        result.push(eligibleNode);
+      }
+    }
+    return result;
+  }
+};
 var ATTR_TO_PROP = new Map(Object.entries({
   "class": "className",
   "for": "htmlFor",
@@ -41950,7 +42028,7 @@ var TcbForOfOp = class extends TcbOp {
 };
 var INFER_TYPE_FOR_CIRCULAR_OP_EXPR = import_typescript90.default.factory.createNonNullExpression(import_typescript90.default.factory.createNull());
 var Context2 = class {
-  constructor(env, domSchemaChecker, oobRecorder, id, boundTarget, pipes, schemas, hostIsStandalone) {
+  constructor(env, domSchemaChecker, oobRecorder, id, boundTarget, pipes, schemas, hostIsStandalone, hostPreserveWhitespaces) {
     this.env = env;
     this.domSchemaChecker = domSchemaChecker;
     this.oobRecorder = oobRecorder;
@@ -41959,6 +42037,7 @@ var Context2 = class {
     this.pipes = pipes;
     this.schemas = schemas;
     this.hostIsStandalone = hostIsStandalone;
+    this.hostPreserveWhitespaces = hostPreserveWhitespaces;
     this.nextId = 1;
   }
   allocateId() {
@@ -42111,6 +42190,7 @@ var _Scope = class {
     if (node instanceof Element) {
       const opIndex = this.opQueue.push(new TcbElementOp(this.tcb, this, node)) - 1;
       this.elementOpMap.set(node, opIndex);
+      this.appendContentProjectionCheckOp(node);
       this.appendDirectivesAndInputsOfNode(node);
       this.appendOutputsOfNode(node);
       this.appendChildren(node);
@@ -42251,6 +42331,16 @@ var _Scope = class {
     for (const placeholder of Object.values(node.placeholders)) {
       if (placeholder instanceof BoundText) {
         this.opQueue.push(new TcbExpressionOp(this.tcb, this, placeholder.value));
+      }
+    }
+  }
+  appendContentProjectionCheckOp(root) {
+    var _a2;
+    const meta = ((_a2 = this.tcb.boundTarget.getDirectivesOfNode(root)) == null ? void 0 : _a2.find((meta2) => meta2.isComponent)) || null;
+    if (meta !== null && meta.ngContentSelectors !== null && meta.ngContentSelectors.length > 0) {
+      const selectors = meta.ngContentSelectors;
+      if (selectors.length > 1 || selectors.length === 1 && selectors[0] !== "*") {
+        this.opQueue.push(new TcbControlFlowContentProjectionOp(this.tcb, root, selectors, meta.name));
       }
     }
   }
@@ -42597,7 +42687,7 @@ var TypeCheckContextImpl = class {
       throw new Error(`AssertionError: invalid inlining configuration.`);
     }
   }
-  addTemplate(ref, binder, template2, pipes, schemas, sourceMapping, file, parseErrors, isStandalone) {
+  addTemplate(ref, binder, template2, pipes, schemas, sourceMapping, file, parseErrors, isStandalone, preserveWhitespaces) {
     if (!this.host.shouldCheckComponent(ref.node)) {
       return;
     }
@@ -42650,7 +42740,8 @@ var TypeCheckContextImpl = class {
       boundTarget,
       pipes,
       schemas,
-      isStandalone
+      isStandalone,
+      preserveWhitespaces
     };
     this.perf.eventCount(PerfEvent.GenerateTcb);
     if (inliningRequirement !== TcbInliningRequirement.None && this.inlining === InliningMode.InlineOps) {
