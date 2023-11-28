@@ -24907,7 +24907,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.4+sha-dbd6f38");
+var VERSION2 = new Version("17.0.4+sha-ba6d7fe");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25189,9 +25189,11 @@ var TemplateCollector = class extends RecursiveVisitor {
           templateAttr = attr;
         }
       }
-      if (templateAttr !== null) {
-        this.elements.push(new ElementToMigrate(el, templateAttr));
+      if (templateAttr !== null && !this.templates.has(templateAttr.name)) {
         this.templates.set(templateAttr.name, new Template2(el, templateAttr.name, i18n2));
+        this.elements.push(new ElementToMigrate(el, templateAttr));
+      } else if (templateAttr !== null) {
+        throw new Error(`A duplicate ng-template name "${templateAttr.name}" was found. The control flow migration requires unique ng-template names within a component.`);
       }
     }
     super.visitElement(el, null);
@@ -25392,39 +25394,47 @@ function getTemplates(template2) {
   return /* @__PURE__ */ new Map();
 }
 function wrapIntoI18nContainer(i18nAttr, content) {
+  const { start, middle, end } = generatei18nContainer(i18nAttr, content);
+  return `${start}${middle}${end}`;
+}
+function generatei18nContainer(i18nAttr, middle) {
   const i18n2 = i18nAttr.value === "" ? "i18n" : `i18n="${i18nAttr.value}"`;
-  return `<ng-container ${i18n2}>${content}</ng-container>`;
+  return { start: `<ng-container ${i18n2}>`, middle, end: `</ng-container>` };
 }
 function processNgTemplates(template2) {
-  const templates = getTemplates(template2);
-  for (const [name, t] of templates) {
-    const replaceRegex = new RegExp(`${name}\\|`, "g");
-    const forRegex = new RegExp(`${name}\\#`, "g");
-    const forMatches = [...template2.matchAll(forRegex)];
-    const matches = [...forMatches, ...template2.matchAll(replaceRegex)];
-    let safeToRemove = true;
-    if (matches.length > 0) {
-      if (t.i18n !== null) {
-        const container = wrapIntoI18nContainer(t.i18n, t.children);
-        template2 = template2.replace(replaceRegex, container);
-      } else if (t.children.trim() === "" && t.isNgTemplateOutlet) {
-        template2 = template2.replace(replaceRegex, t.generateTemplateOutlet());
-      } else if (forMatches.length > 0) {
-        if (t.count === 2) {
-          template2 = template2.replace(forRegex, t.children);
+  try {
+    const templates = getTemplates(template2);
+    for (const [name, t] of templates) {
+      const replaceRegex = new RegExp(`${name}\\|`, "g");
+      const forRegex = new RegExp(`${name}\\#`, "g");
+      const forMatches = [...template2.matchAll(forRegex)];
+      const matches = [...forMatches, ...template2.matchAll(replaceRegex)];
+      let safeToRemove = true;
+      if (matches.length > 0) {
+        if (t.i18n !== null) {
+          const container = wrapIntoI18nContainer(t.i18n, t.children);
+          template2 = template2.replace(replaceRegex, container);
+        } else if (t.children.trim() === "" && t.isNgTemplateOutlet) {
+          template2 = template2.replace(replaceRegex, t.generateTemplateOutlet());
+        } else if (forMatches.length > 0) {
+          if (t.count === 2) {
+            template2 = template2.replace(forRegex, t.children);
+          } else {
+            template2 = template2.replace(forRegex, t.generateTemplateOutlet());
+            safeToRemove = false;
+          }
         } else {
-          template2 = template2.replace(forRegex, t.generateTemplateOutlet());
-          safeToRemove = false;
+          template2 = template2.replace(replaceRegex, t.children);
         }
-      } else {
-        template2 = template2.replace(replaceRegex, t.children);
-      }
-      if (t.count === matches.length + 1 && safeToRemove) {
-        template2 = template2.replace(t.contents, "");
+        if (t.count === matches.length + 1 && safeToRemove) {
+          template2 = template2.replace(t.contents, "");
+        }
       }
     }
+    return { migrated: template2, err: void 0 };
+  } catch (err) {
+    return { migrated: template2, err };
   }
-  return template2;
 }
 function canRemoveCommonModule(template2) {
   const parsed = parseTemplate2(template2);
@@ -25473,8 +25483,7 @@ function getMainBlock(etm, tmpl, offset) {
   } else if (isI18nTemplate(etm, i18nAttr)) {
     const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
     const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
-    const middle2 = wrapIntoI18nContainer(i18nAttr, tmpl.slice(childStart2, childEnd2));
-    return { start: "", middle: middle2, end: "" };
+    return generatei18nContainer(i18nAttr, tmpl.slice(childStart2, childEnd2));
   }
   const attrStart = etm.attr.keySpan.start.offset - 1 - offset;
   const valEnd = (etm.attr.valueSpan ? etm.attr.valueSpan.end.offset + 1 : etm.attr.keySpan.end.offset) - offset;
@@ -25969,7 +25978,11 @@ function migrateTemplate(template2, templateType, node, file, format = true, ana
     const forResult = migrateFor(ifResult.migrated);
     const switchResult = migrateSwitch(forResult.migrated);
     const caseResult = migrateCase(switchResult.migrated);
-    migrated = processNgTemplates(caseResult.migrated);
+    const templateResult = processNgTemplates(caseResult.migrated);
+    if (templateResult.err !== void 0) {
+      return { migrated: template2, errors: [{ type: "template", error: templateResult.err }] };
+    }
+    migrated = templateResult.migrated;
     const changed = ifResult.changed || forResult.changed || switchResult.changed || caseResult.changed;
     if (format && changed) {
       migrated = formatTemplate(migrated, templateType);
