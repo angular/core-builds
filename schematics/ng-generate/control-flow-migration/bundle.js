@@ -24907,7 +24907,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.4+sha-92a28a7");
+var VERSION2 = new Version("17.0.4+sha-dbd6f38");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25011,17 +25011,23 @@ var ElementToMigrate = class {
     this.thenAttr = thenAttr;
     this.forAttrs = forAttrs;
   }
-  getCondition(targetStr) {
-    const targetLocation = this.attr.value.indexOf(targetStr);
-    return this.attr.value.slice(0, targetLocation);
+  getCondition() {
+    const chunks = this.attr.value.split(";");
+    let condition = chunks[0];
+    const elseIx = condition.indexOf(" else ");
+    const thenIx = condition.indexOf(" then ");
+    if (thenIx > -1) {
+      condition = condition.slice(0, thenIx);
+    } else if (elseIx > -1) {
+      condition = condition.slice(0, elseIx);
+    }
+    let letVar = chunks.find((c) => c.search(/\s*let\s/) > -1);
+    return condition + (letVar ? ";" + letVar : "");
   }
   getTemplateName(targetStr, secondStr) {
     const targetLocation = this.attr.value.indexOf(targetStr);
-    if (secondStr) {
-      const secondTargetLocation = this.attr.value.indexOf(secondStr);
-      return this.attr.value.slice(targetLocation + targetStr.length, secondTargetLocation).trim();
-    }
-    return this.attr.value.slice(targetLocation + targetStr.length).trim();
+    const secondTargetLocation = secondStr ? this.attr.value.indexOf(secondStr) : void 0;
+    return this.attr.value.slice(targetLocation + targetStr.length, secondTargetLocation).replace(":", "").trim().split(";")[0].trim();
   }
   start(offset) {
     var _a2;
@@ -25037,14 +25043,31 @@ var ElementToMigrate = class {
   }
 };
 var Template2 = class {
-  constructor(el, i18n2) {
+  constructor(el, name, i18n2) {
     __publicField(this, "el");
+    __publicField(this, "name");
     __publicField(this, "count", 0);
     __publicField(this, "contents", "");
     __publicField(this, "children", "");
     __publicField(this, "i18n", null);
+    __publicField(this, "attributes");
     this.el = el;
+    this.name = name;
+    this.attributes = el.attrs;
     this.i18n = i18n2;
+  }
+  get isNgTemplateOutlet() {
+    return this.attributes.find((attr) => attr.name === "*ngTemplateOutlet") !== void 0;
+  }
+  get outletContext() {
+    const letVar = this.attributes.find((attr) => attr.name.startsWith("let-"));
+    return letVar ? `; context: {$implicit: ${letVar.name.split("-")[1]}}` : "";
+  }
+  generateTemplateOutlet() {
+    var _a2;
+    const attr = this.attributes.find((attr2) => attr2.name === "*ngTemplateOutlet");
+    const outletValue = (_a2 = attr == null ? void 0 : attr.value) != null ? _a2 : this.name.slice(1);
+    return `<ng-container *ngTemplateOutlet="${outletValue}${this.outletContext}"></ng-container>`;
   }
   generateContents(tmpl) {
     this.contents = tmpl.slice(this.el.sourceSpan.start.offset, this.el.sourceSpan.end.offset + 1);
@@ -25058,16 +25081,18 @@ var AnalyzedFile = class {
   constructor() {
     __publicField(this, "ranges", []);
     __publicField(this, "removeCommonModule", false);
+    __publicField(this, "sourceFilePath", "");
   }
   getSortedRanges() {
-    const templateRanges = this.ranges.slice().filter((x) => x.type === "template").sort((aStart, bStart) => bStart.start - aStart.start);
+    const templateRanges = this.ranges.slice().filter((x) => x.type !== "import").sort((aStart, bStart) => bStart.start - aStart.start);
     const importRanges = this.ranges.slice().filter((x) => x.type === "import").sort((aStart, bStart) => bStart.start - aStart.start);
     return [...templateRanges, ...importRanges];
   }
-  static addRange(path2, analyzedFiles, range) {
+  static addRange(path2, sourceFilePath, analyzedFiles, range) {
     let analysis = analyzedFiles.get(path2);
     if (!analysis) {
       analysis = new AnalyzedFile();
+      analysis.sourceFilePath = sourceFilePath;
       analyzedFiles.set(path2, analysis);
     }
     const duplicate = analysis.ranges.find((current) => current.start === range.start && current.end === range.end);
@@ -25166,7 +25191,7 @@ var TemplateCollector = class extends RecursiveVisitor {
       }
       if (templateAttr !== null) {
         this.elements.push(new ElementToMigrate(el, templateAttr));
-        this.templates.set(templateAttr.name, new Template2(el, i18n2));
+        this.templates.set(templateAttr.name, new Template2(el, templateAttr.name, i18n2));
       }
     }
     super.visitElement(el, null);
@@ -25225,10 +25250,15 @@ function updateImportClause(clause, removeCommonModule) {
   return clause;
 }
 function updateClassImports(propAssignment, removeCommonModule) {
-  const printer = import_typescript5.default.createPrinter();
+  const printer = import_typescript5.default.createPrinter({
+    removeComments: true
+  });
   const importList = propAssignment.initializer;
   const removals = removeCommonModule ? importWithCommonRemovals : importRemovals;
   const elements = importList.elements.filter((el) => !removals.includes(el.getText()));
+  if (elements.length === importList.elements.length) {
+    return null;
+  }
   const updatedElements = import_typescript5.default.factory.updateArrayLiteralExpression(importList, elements);
   const updatedAssignment = import_typescript5.default.factory.updatePropertyAssignment(propAssignment, propAssignment.name, updatedElements);
   return printer.printNode(import_typescript5.default.EmitHint.Unspecified, updatedAssignment, updatedAssignment.getSourceFile());
@@ -25241,7 +25271,7 @@ function analyzeImportDeclarations(node, sourceFile, analyzedFiles) {
   if (clause.namedBindings && import_typescript5.default.isNamedImports(clause.namedBindings)) {
     const elements = clause.namedBindings.elements.filter((el) => importWithCommonRemovals.includes(el.getText()));
     if (elements.length > 0) {
-      AnalyzedFile.addRange(sourceFile.fileName, analyzedFiles, { start: node.getStart(), end: node.getEnd(), node, type: "import" });
+      AnalyzedFile.addRange(sourceFile.fileName, sourceFile.fileName, analyzedFiles, { start: node.getStart(), end: node.getEnd(), node, type: "import" });
     }
   }
 }
@@ -25260,7 +25290,7 @@ function analyzeDecorators(node, sourceFile, analyzedFiles) {
     }
     switch (prop.name.text) {
       case "template":
-        AnalyzedFile.addRange(sourceFile.fileName, analyzedFiles, {
+        AnalyzedFile.addRange(sourceFile.fileName, sourceFile.fileName, analyzedFiles, {
           start: prop.initializer.getStart() + 1,
           end: prop.initializer.getEnd() - 1,
           node: prop,
@@ -25268,7 +25298,7 @@ function analyzeDecorators(node, sourceFile, analyzedFiles) {
         });
         break;
       case "imports":
-        AnalyzedFile.addRange(sourceFile.fileName, analyzedFiles, {
+        AnalyzedFile.addRange(sourceFile.fileName, sourceFile.fileName, analyzedFiles, {
           start: prop.name.getStart(),
           end: prop.initializer.getEnd(),
           node: prop,
@@ -25278,7 +25308,7 @@ function analyzeDecorators(node, sourceFile, analyzedFiles) {
       case "templateUrl":
         if (import_typescript5.default.isStringLiteralLike(prop.initializer)) {
           const path2 = (0, import_path2.join)((0, import_path2.dirname)(sourceFile.fileName), prop.initializer.text);
-          AnalyzedFile.addRange(path2, analyzedFiles, { start: 0, node: prop, type: "template" });
+          AnalyzedFile.addRange(path2, sourceFile.fileName, analyzedFiles, { start: 0, node: prop, type: "templateUrl" });
         }
         break;
     }
@@ -25344,7 +25374,7 @@ function reduceNestingOffset(el, nestLevel, offset, postOffsets) {
   }
   return offset;
 }
-function countTemplateUsage(template2) {
+function getTemplates(template2) {
   var _a2;
   const parsed = parseTemplate2(template2);
   if (parsed !== null) {
@@ -25366,18 +25396,30 @@ function wrapIntoI18nContainer(i18nAttr, content) {
   return `<ng-container ${i18n2}>${content}</ng-container>`;
 }
 function processNgTemplates(template2) {
-  const templates = countTemplateUsage(template2);
+  const templates = getTemplates(template2);
   for (const [name, t] of templates) {
     const replaceRegex = new RegExp(`${name}\\|`, "g");
-    const matches = [...template2.matchAll(replaceRegex)];
+    const forRegex = new RegExp(`${name}\\#`, "g");
+    const forMatches = [...template2.matchAll(forRegex)];
+    const matches = [...forMatches, ...template2.matchAll(replaceRegex)];
+    let safeToRemove = true;
     if (matches.length > 0) {
       if (t.i18n !== null) {
         const container = wrapIntoI18nContainer(t.i18n, t.children);
         template2 = template2.replace(replaceRegex, container);
+      } else if (t.children.trim() === "" && t.isNgTemplateOutlet) {
+        template2 = template2.replace(replaceRegex, t.generateTemplateOutlet());
+      } else if (forMatches.length > 0) {
+        if (t.count === 2) {
+          template2 = template2.replace(forRegex, t.children);
+        } else {
+          template2 = template2.replace(forRegex, t.generateTemplateOutlet());
+          safeToRemove = false;
+        }
       } else {
         template2 = template2.replace(replaceRegex, t.children);
       }
-      if (t.count === matches.length + 1) {
+      if (t.count === matches.length + 1 && safeToRemove) {
         template2 = template2.replace(t.contents, "");
       }
     }
@@ -25396,7 +25438,8 @@ function canRemoveCommonModule(template2) {
 }
 function removeImports(template2, node, removeCommonModule) {
   if (template2.startsWith("imports") && import_typescript5.default.isPropertyAssignment(node)) {
-    return updateClassImports(node, removeCommonModule);
+    const updatedImport = updateClassImports(node, removeCommonModule);
+    return updatedImport != null ? updatedImport : template2;
   } else if (import_typescript5.default.isImportDeclaration(node) && checkIfShouldChange(node, removeCommonModule)) {
     return updateImportDeclaration(node, removeCommonModule);
   }
@@ -25447,29 +25490,50 @@ function getMainBlock(etm, tmpl, offset) {
   const end = tmpl.slice(childEnd, etm.end(offset));
   return { start, middle, end };
 }
-function formatTemplate(tmpl) {
+var selfClosingList = "input|br|img|base|wbr|area|col|embed|hr|link|meta|param|source|track";
+function formatTemplate(tmpl, templateType) {
   if (tmpl.indexOf("\n") > -1) {
+    let openSelfClosingEl = false;
     const openBlockRegex = /^\s*\@(if|switch|case|default|for)|^\s*\}\s\@else/;
     const openElRegex = /^\s*<([a-z0-9]+)(?![^>]*\/>)[^>]*>?/;
+    const selfClosingRegex = new RegExp(`^\\s*<(${selfClosingList}).+\\/?>`);
+    const openSelfClosingRegex = new RegExp(`^\\s*<(${selfClosingList})(?![^>]*\\/>)[^>]*$`);
     const closeBlockRegex = /^\s*\}\s*$|^\s*\}\s\@else/;
-    const closeElRegex = /\s*<\/([a-z0-9\-]+)*>/;
-    const closeMultiLineElRegex = /^\s*([a-z0-9\-\[\]]+)?=?"?([^”<]+)?"?\s?\/>$/;
-    const singleLineElRegex = /^\s*<([a-z0-9]+)(?![^>]*\/>)[^>]*>.*<\/([a-z0-9\-]+)*>/;
+    const closeElRegex = /\s*<\/([a-zA-Z0-9\-]+)*>/;
+    const closeMultiLineElRegex = /^\s*([a-zA-Z0-9\-\[\]]+)?=?"?([^”<]+)?"?\s?\/>$/;
+    const closeSelfClosingMultiLineRegex = /^\s*([a-zA-Z0-9\-\[\]]+)?=?"?([^”\/<]+)?"?\s?>$/;
+    const singleLineElRegex = /\s*<([a-zA-Z0-9]+)(?![^>]*\/>)[^>]*>.*<\/([a-zA-Z0-9\-]+)*>/;
     const lines = tmpl.split("\n");
     const formatted = [];
     let indent = "";
+    let mindent = "";
     for (let [index, line] of lines.entries()) {
       if (line.trim() === "" && index !== 0 && index !== lines.length - 1) {
         continue;
       }
+      if (templateType === "template" && index <= 1) {
+        const ind = line.search(/\S/);
+        mindent = ind > -1 ? line.slice(0, ind) : "";
+      }
       if ((closeBlockRegex.test(line) || closeElRegex.test(line) && (!singleLineElRegex.test(line) && !closeMultiLineElRegex.test(line))) && indent !== "") {
         indent = indent.slice(2);
       }
-      formatted.push(indent + line.trim());
+      formatted.push(mindent + indent + line.trim());
       if (closeMultiLineElRegex.test(line)) {
         indent = indent.slice(2);
+        if (openSelfClosingEl) {
+          openSelfClosingEl = false;
+        }
       }
-      if ((openBlockRegex.test(line) || openElRegex.test(line)) && !singleLineElRegex.test(line)) {
+      if (closeSelfClosingMultiLineRegex.test(line) && openSelfClosingEl) {
+        openSelfClosingEl = false;
+        indent = indent.slice(2);
+      }
+      if ((openBlockRegex.test(line) || openElRegex.test(line)) && !singleLineElRegex.test(line) && !selfClosingRegex.test(line) && !openSelfClosingRegex.test(line)) {
+        indent += "  ";
+      }
+      if (openSelfClosingRegex.test(line)) {
+        openSelfClosingEl = true;
         indent += "  ";
       }
     }
@@ -25626,11 +25690,15 @@ function migrateStandardNgFor(etm, tmpl, offset) {
   const loopVar = condition.split(" of ")[0];
   let trackBy = loopVar;
   let aliasedIndex = null;
+  let tmplPlaceholder = "";
   for (let i = 1; i < parts.length; i++) {
     const part = parts[i].trim();
     if (part.startsWith("trackBy:")) {
       const trackByFn = part.replace("trackBy:", "").trim();
       trackBy = `${trackByFn}($index, ${loopVar})`;
+    }
+    if (part.startsWith("template:")) {
+      tmplPlaceholder = `#${part.split(":")[1].trim()}#`;
     }
     if (part.match(aliasWithEqualRegexp)) {
       const aliasParts = part.split("=");
@@ -25651,10 +25719,18 @@ function migrateStandardNgFor(etm, tmpl, offset) {
     trackBy = trackBy.replace("$index", aliasedIndex);
   }
   const aliasStr = aliases.length > 0 ? `;${aliases.join(";")}` : "";
-  const { start, middle, end } = getMainBlock(etm, tmpl, offset);
-  const startBlock = `@for (${condition}; track ${trackBy}${aliasStr}) {${lbString}${start}`;
-  const endBlock = `${end}${lbString}}`;
-  const forBlock = startBlock + middle + endBlock;
+  let startBlock = `@for (${condition}; track ${trackBy}${aliasStr}) {${lbString}`;
+  let endBlock = `${lbString}}`;
+  let forBlock = "";
+  if (tmplPlaceholder !== "") {
+    startBlock = startBlock + tmplPlaceholder;
+    forBlock = startBlock + endBlock;
+  } else {
+    const { start, middle, end } = getMainBlock(etm, tmpl, offset);
+    startBlock += start;
+    endBlock = end + endBlock;
+    forBlock = startBlock + middle + endBlock;
+  }
   const updatedTmpl = tmpl.slice(0, etm.start(offset)) + forBlock + tmpl.slice(etm.end(offset));
   const pre = originals.start.length - startBlock.length;
   const post = originals.end.length - endBlock.length;
@@ -25760,8 +25836,8 @@ function migrateIf(template2) {
   return { migrated: result, errors, changed };
 }
 function migrateNgIf(etm, tmpl, offset) {
-  const matchThen = etm.attr.value.match(/;\s*then/gm);
-  const matchElse = etm.attr.value.match(/;\s*else/gm);
+  const matchThen = etm.attr.value.match(/;?\s*then/gm);
+  const matchElse = etm.attr.value.match(/;?\s*else/gm);
   if (etm.thenAttr !== void 0 || etm.elseAttr !== void 0) {
     return buildBoundIfElseBlock(etm, tmpl, offset);
   } else if (matchThen && matchThen.length > 0) {
@@ -25785,7 +25861,7 @@ function buildIfBlock(etm, tmpl, offset) {
   return { tmpl: updatedTmpl, offsets: { pre, post } };
 }
 function buildStandardIfElseBlock(etm, tmpl, elseString, offset) {
-  const condition = etm.getCondition(elseString).replace(" as ", "; as ").replace(/;\s*let/g, "; as");
+  const condition = etm.getCondition().replace(" as ", "; as ").replace(/;\s*let/g, "; as");
   const elsePlaceholder = `#${etm.getTemplateName(elseString)}|`;
   return buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset);
 }
@@ -25814,7 +25890,7 @@ function buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset) {
   return { tmpl: updatedTmpl, offsets: { pre, post } };
 }
 function buildStandardIfThenElseBlock(etm, tmpl, thenString, elseString, offset) {
-  const condition = etm.getCondition(thenString).replace(" as ", "; as ").replace(/;\s*let/g, "; as");
+  const condition = etm.getCondition().replace(" as ", "; as ").replace(/;\s*let/g, "; as");
   const thenPlaceholder = `#${etm.getTemplateName(thenString, elseString)}|`;
   const elsePlaceholder = `#${etm.getTemplateName(elseString)}|`;
   return buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset);
@@ -25885,10 +25961,10 @@ function migrateNgSwitch(etm, tmpl, offset) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/migration.mjs
-function migrateTemplate(template2, templateType, node, file, format = true) {
+function migrateTemplate(template2, templateType, node, file, format = true, analyzedFiles) {
   let errors = [];
   let migrated = template2;
-  if (templateType === "template") {
+  if (templateType === "template" || templateType === "templateUrl") {
     const ifResult = migrateIf(template2);
     const forResult = migrateFor(ifResult.migrated);
     const switchResult = migrateSwitch(forResult.migrated);
@@ -25896,9 +25972,13 @@ function migrateTemplate(template2, templateType, node, file, format = true) {
     migrated = processNgTemplates(caseResult.migrated);
     const changed = ifResult.changed || forResult.changed || switchResult.changed || caseResult.changed;
     if (format && changed) {
-      migrated = formatTemplate(migrated);
+      migrated = formatTemplate(migrated, templateType);
     }
     file.removeCommonModule = canRemoveCommonModule(template2);
+    if (templateType === "templateUrl" && analyzedFiles !== null && analyzedFiles.has(file.sourceFilePath)) {
+      const componentFile = analyzedFiles.get(file.sourceFilePath);
+      componentFile.removeCommonModule = file.removeCommonModule;
+    }
     errors = [
       ...ifResult.errors,
       ...forResult.errors,
@@ -25952,7 +26032,9 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
   for (const sourceFile of sourceFiles) {
     analyze(sourceFile, analysis);
   }
-  for (const [path2, file] of analysis) {
+  const paths = sortFilePaths([...analysis.keys()]);
+  for (const path2 of paths) {
+    const file = analysis.get(path2);
     const ranges = file.getSortedRanges();
     const relativePath = (0, import_path3.relative)(basePath, path2);
     const content = tree.readText(relativePath);
@@ -25960,7 +26042,7 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
     for (const { start, end, node, type } of ranges) {
       const template2 = content.slice(start, end);
       const length = (end != null ? end : content.length) - start;
-      const { migrated, errors } = migrateTemplate(template2, type, node, file, schematicOptions.format);
+      const { migrated, errors } = migrateTemplate(template2, type, node, file, schematicOptions.format, analysis);
       if (migrated !== null) {
         update.remove(start, length);
         update.insertLeft(start, migrated);
@@ -25976,6 +26058,10 @@ function runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, sc
     errorList.push(generateErrorMessage(template2, errors));
   }
   return errorList;
+}
+function sortFilePaths(names) {
+  names.sort((a, _) => a.endsWith(".html") ? -1 : 0);
+  return names;
 }
 function generateErrorMessage(path2, errors) {
   let errorMessage = `Template "${path2}" encountered ${errors.length} errors during migration:
