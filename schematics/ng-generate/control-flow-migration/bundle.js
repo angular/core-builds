@@ -24912,7 +24912,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.4+sha-baf5830");
+var VERSION2 = new Version("17.0.4+sha-5b9f896");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25502,8 +25502,12 @@ function isRemovableContainer(etm) {
 function getMainBlock(etm, tmpl, offset) {
   const i18nAttr = etm.el.attrs.find((x) => x.name === "i18n");
   if (isRemovableContainer(etm)) {
-    const { childStart: childStart2, childEnd: childEnd2 } = etm.getChildSpan(offset);
-    return { start: "", middle: tmpl.slice(childStart2, childEnd2), end: "" };
+    let middle2 = "";
+    if (etm.hasChildren()) {
+      const { childStart: childStart2, childEnd: childEnd2 } = etm.getChildSpan(offset);
+      middle2 = tmpl.slice(childStart2, childEnd2);
+    }
+    return { start: "", middle: middle2, end: "" };
   } else if (isI18nTemplate(etm, i18nAttr)) {
     const { childStart: childStart2, childEnd: childEnd2 } = etm.getChildSpan(offset);
     return generatei18nContainer(i18nAttr, tmpl.slice(childStart2, childEnd2));
