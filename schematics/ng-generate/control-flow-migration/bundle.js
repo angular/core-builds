@@ -24912,7 +24912,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.4+sha-5b9f896");
+var VERSION2 = new Version("17.0.4+sha-6ae4088");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24960,6 +24960,7 @@ publishFacade(_global);
 var ngtemplate = "ng-template";
 var boundngifelse = "[ngIfElse]";
 var boundngifthenelse = "[ngIfThenElse]";
+var boundngifthen = "[ngIfThen]";
 var nakedngfor = "ngFor";
 function allFormsOf(selector) {
   return [
@@ -25096,7 +25097,7 @@ var Template2 = class {
     return `<ng-container *ngTemplateOutlet="${outletValue}${this.outletContext}"></ng-container>`;
   }
   generateContents(tmpl) {
-    this.contents = tmpl.slice(this.el.sourceSpan.start.offset, this.el.sourceSpan.end.offset + 1);
+    this.contents = tmpl.slice(this.el.sourceSpan.start.offset, this.el.sourceSpan.end.offset);
     this.children = "";
     if (this.el.children.length > 0) {
       this.children = tmpl.slice(this.el.children[0].sourceSpan.start.offset, this.el.children[this.el.children.length - 1].sourceSpan.end.offset);
@@ -25166,7 +25167,7 @@ var ElementCollector = class extends RecursiveVisitor {
       for (const attr of el.attrs) {
         if (this._attributes.includes(attr.name)) {
           const elseAttr = el.attrs.find((x) => x.name === boundngifelse);
-          const thenAttr = el.attrs.find((x) => x.name === boundngifthenelse);
+          const thenAttr = el.attrs.find((x) => x.name === boundngifthenelse || x.name === boundngifthen);
           const forAttrs = attr.name === nakedngfor ? this.getForAttrs(el) : void 0;
           this.elements.push(new ElementToMigrate(el, attr, elseAttr, thenAttr, forAttrs));
         }
@@ -25410,7 +25411,7 @@ function getTemplates(template2) {
     visitAll2(visitor, parsed.rootNodes);
     for (let [key, tmpl] of visitor.templates) {
       const escapeKey = escapeRegExp(key.slice(1));
-      const regex = new RegExp(`[^a-zA-Z0-9-<]${escapeKey}\\W`, "gm");
+      const regex = new RegExp(`[^a-zA-Z0-9-<']${escapeKey}\\W`, "gm");
       const matches = template2.match(regex);
       tmpl.count = (_a2 = matches == null ? void 0 : matches.length) != null ? _a2 : 0;
       tmpl.generateContents(template2);
