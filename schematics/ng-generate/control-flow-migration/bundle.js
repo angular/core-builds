@@ -24907,7 +24907,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.4+sha-b2e3b3e");
+var VERSION2 = new Version("17.0.4+sha-6be8804");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25028,6 +25028,27 @@ var ElementToMigrate = class {
     const targetLocation = this.attr.value.indexOf(targetStr);
     const secondTargetLocation = secondStr ? this.attr.value.indexOf(secondStr) : void 0;
     return this.attr.value.slice(targetLocation + targetStr.length, secondTargetLocation).replace(":", "").trim().split(";")[0].trim();
+  }
+  getValueEnd(offset) {
+    return (this.attr.valueSpan ? this.attr.valueSpan.end.offset + 1 : this.attr.keySpan.end.offset) - offset;
+  }
+  hasChildren() {
+    return this.el.children.length > 0;
+  }
+  getChildSpan(offset) {
+    const childStart = this.el.children[0].sourceSpan.start.offset - offset;
+    const childEnd = this.el.children[this.el.children.length - 1].sourceSpan.end.offset - offset;
+    return { childStart, childEnd };
+  }
+  shouldRemoveElseAttr() {
+    return (this.el.name === "ng-template" || this.el.name === "ng-container") && this.elseAttr !== void 0;
+  }
+  getElseAttrStr() {
+    if (this.elseAttr !== void 0) {
+      const elseValStr = this.elseAttr.value !== "" ? `="${this.elseAttr.value}"` : "";
+      return `${this.elseAttr.name}${elseValStr}`;
+    }
+    return "";
   }
   start(offset) {
     var _a2;
@@ -25476,25 +25497,19 @@ function isRemovableContainer(etm) {
 function getMainBlock(etm, tmpl, offset) {
   const i18nAttr = etm.el.attrs.find((x) => x.name === "i18n");
   if (isRemovableContainer(etm)) {
-    const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
-    const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
-    const middle2 = tmpl.slice(childStart2, childEnd2);
-    return { start: "", middle: middle2, end: "" };
+    const { childStart: childStart2, childEnd: childEnd2 } = etm.getChildSpan(offset);
+    return { start: "", middle: tmpl.slice(childStart2, childEnd2), end: "" };
   } else if (isI18nTemplate(etm, i18nAttr)) {
-    const childStart2 = etm.el.children[0].sourceSpan.start.offset - offset;
-    const childEnd2 = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
+    const { childStart: childStart2, childEnd: childEnd2 } = etm.getChildSpan(offset);
     return generatei18nContainer(i18nAttr, tmpl.slice(childStart2, childEnd2));
   }
   const attrStart = etm.attr.keySpan.start.offset - 1 - offset;
-  const valEnd = (etm.attr.valueSpan ? etm.attr.valueSpan.end.offset + 1 : etm.attr.keySpan.end.offset) - offset;
-  let childStart = valEnd;
-  let childEnd = valEnd;
-  if (etm.el.children.length > 0) {
-    childStart = etm.el.children[0].sourceSpan.start.offset - offset;
-    childEnd = etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset;
+  const valEnd = etm.getValueEnd(offset);
+  const { childStart, childEnd } = etm.hasChildren() ? etm.getChildSpan(offset) : { childStart: valEnd, childEnd: valEnd };
+  let start = tmpl.slice(etm.start(offset), attrStart) + tmpl.slice(valEnd, childStart);
+  if (etm.shouldRemoveElseAttr()) {
+    start = start.replace(etm.getElseAttrStr(), "");
   }
-  let start = tmpl.slice(etm.start(offset), attrStart);
-  start += tmpl.slice(valEnd, childStart);
   const middle = tmpl.slice(childStart, childEnd);
   const end = tmpl.slice(childEnd, etm.end(offset));
   return { start, middle, end };
