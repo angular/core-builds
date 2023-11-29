@@ -8030,6 +8030,11 @@ var DerivedRepeaterVarIdentity;
   DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Even"] = 2] = "Even";
   DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Odd"] = 3] = "Odd";
 })(DerivedRepeaterVarIdentity || (DerivedRepeaterVarIdentity = {}));
+var I18nContextKind;
+(function(I18nContextKind2) {
+  I18nContextKind2[I18nContextKind2["RootI18n"] = 0] = "RootI18n";
+  I18nContextKind2[I18nContextKind2["Icu"] = 1] = "Icu";
+})(I18nContextKind || (I18nContextKind = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/traits.mjs
 var ConsumesSlot = Symbol("ConsumesSlot");
@@ -9515,9 +9520,10 @@ function createIcuEndOp(xref) {
     xref
   }, NEW_OP);
 }
-function createI18nContextOp(xref, i18nBlock, message, sourceSpan) {
+function createI18nContextOp(contextKind, xref, i18nBlock, message, sourceSpan) {
   return __spreadValues({
     kind: OpKind.I18nContext,
+    contextKind,
     xref,
     i18nBlock,
     message,
@@ -9700,7 +9706,6 @@ function needsApplication(i18nContexts, op) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/assign_i18n_slot_dependencies.mjs
 function assignI18nSlotDependencies(job) {
   const i18nLastSlotConsumers = /* @__PURE__ */ new Map();
-  const i18nContexts = /* @__PURE__ */ new Map();
   let lastSlotConsumer = null;
   let currentI18nOp = null;
   for (const unit of job.units) {
@@ -9716,15 +9721,11 @@ function assignI18nSlotDependencies(job) {
           i18nLastSlotConsumers.set(currentI18nOp.xref, lastSlotConsumer);
           currentI18nOp = null;
           break;
-        case OpKind.I18nContext:
-          i18nContexts.set(op.xref, op);
-          break;
       }
     }
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
-        const i18nContext = i18nContexts.get(op.context);
-        op.target = i18nLastSlotConsumers.get(i18nContext.i18nBlock);
+        op.target = i18nLastSlotConsumers.get(op.target);
       }
     }
   }
@@ -10221,16 +10222,20 @@ function createDeferDepsFns(job) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/create_i18n_contexts.mjs
 function createI18nContexts(job) {
+  const rootContexts = /* @__PURE__ */ new Map();
   let currentI18nOp = null;
   let xref;
   for (const unit of job.units) {
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
-          xref = job.allocateXrefId();
-          unit.create.push(createI18nContextOp(xref, op.xref, op.message, null));
-          op.context = xref;
           currentI18nOp = op;
+          if (op.xref === op.root) {
+            xref = job.allocateXrefId();
+            unit.create.push(createI18nContextOp(I18nContextKind.RootI18n, xref, op.xref, op.message, null));
+            op.context = xref;
+            rootContexts.set(op.xref, xref);
+          }
           break;
         case OpKind.I18nEnd:
           currentI18nOp = null;
@@ -10241,12 +10246,19 @@ function createI18nContexts(job) {
           }
           if (op.message.id !== currentI18nOp.message.id) {
             xref = job.allocateXrefId();
-            unit.create.push(createI18nContextOp(xref, currentI18nOp.xref, op.message, null));
+            unit.create.push(createI18nContextOp(I18nContextKind.Icu, xref, currentI18nOp.xref, op.message, null));
             op.context = xref;
           } else {
             op.context = currentI18nOp.context;
           }
           break;
+      }
+    }
+  }
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.I18nStart && op.xref !== op.root) {
+        op.context = rootContexts.get(op.root);
       }
     }
   }
@@ -10537,7 +10549,7 @@ var LIST_END_MARKER = "]";
 var LIST_DELIMITER = "|";
 function extractI18nMessages(job) {
   const i18nContexts = /* @__PURE__ */ new Map();
-  const i18nBlockContexts = /* @__PURE__ */ new Set();
+  const i18nBlocks = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
       switch (op.kind) {
@@ -10545,7 +10557,7 @@ function extractI18nMessages(job) {
           i18nContexts.set(op.xref, op);
           break;
         case OpKind.I18nStart:
-          i18nBlockContexts.add(op.context);
+          i18nBlocks.set(op.xref, op);
           break;
       }
     }
@@ -10570,11 +10582,12 @@ function extractI18nMessages(job) {
           if (!op.context) {
             throw Error("ICU op should have its context set.");
           }
-          if (!i18nBlockContexts.has(op.context)) {
-            const i18nContext = i18nContexts.get(op.context);
+          const i18nContext = i18nContexts.get(op.context);
+          if (i18nContext.contextKind === I18nContextKind.Icu) {
             const subMessage = createI18nMessage(job, i18nContext, op.messagePlaceholder);
             unit.create.push(subMessage);
-            const parentMessage = i18nBlockMessages.get(i18nContext.i18nBlock);
+            const rootI18nId = i18nBlocks.get(i18nContext.i18nBlock).root;
+            const parentMessage = i18nBlockMessages.get(rootI18nId);
             parentMessage == null ? void 0 : parentMessage.subMessages.push(subMessage.xref);
           }
           OpList.remove(op);
@@ -10587,30 +10600,67 @@ function extractI18nMessages(job) {
   }
 }
 function createI18nMessage(job, context, messagePlaceholder) {
-  let needsPostprocessing = context.postprocessingParams.size > 0;
-  for (const values of context.params.values()) {
-    if (values.length > 1) {
-      needsPostprocessing = true;
-    }
-  }
-  return createI18nMessageOp(job.allocateXrefId(), context.i18nBlock, context.message, messagePlaceholder != null ? messagePlaceholder : null, formatParams(context.params), formatParams(context.postprocessingParams), needsPostprocessing);
+  let [formattedParams, needsPostprocessing] = formatParams(context.params);
+  const [formattedPostprocessingParams] = formatParams(context.postprocessingParams);
+  needsPostprocessing || (needsPostprocessing = formattedPostprocessingParams.size > 0);
+  return createI18nMessageOp(job.allocateXrefId(), context.i18nBlock, context.message, messagePlaceholder != null ? messagePlaceholder : null, formattedParams, formattedPostprocessingParams, needsPostprocessing);
 }
 function formatParams(params) {
-  const result = /* @__PURE__ */ new Map();
+  const formattedParams = /* @__PURE__ */ new Map();
+  let needsPostprocessing = false;
   for (const [placeholder, placeholderValues] of params) {
-    const serializedValues = formatParamValues(placeholderValues);
+    const [serializedValues, paramNeedsPostprocessing] = formatParamValues(placeholderValues);
+    needsPostprocessing || (needsPostprocessing = paramNeedsPostprocessing);
     if (serializedValues !== null) {
-      result.set(placeholder, literal(formatParamValues(placeholderValues)));
+      formattedParams.set(placeholder, literal(serializedValues));
     }
   }
-  return result;
+  return [formattedParams, needsPostprocessing];
 }
 function formatParamValues(values) {
   if (values.length === 0) {
-    return null;
+    return [null, false];
   }
+  collapseElementTemplatePairs(values);
   const serializedValues = values.map((value) => formatValue(value));
-  return serializedValues.length === 1 ? serializedValues[0] : `${LIST_START_MARKER}${serializedValues.join(LIST_DELIMITER)}${LIST_END_MARKER}`;
+  return serializedValues.length === 1 ? [serializedValues[0], false] : [`${LIST_START_MARKER}${serializedValues.join(LIST_DELIMITER)}${LIST_END_MARKER}`, true];
+}
+function collapseElementTemplatePairs(values) {
+  var _a2;
+  const valueIndiciesBySubTemplateIndex = /* @__PURE__ */ new Map();
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (value.subTemplateIndex !== null && value.flags & (I18nParamValueFlags.ElementTag | I18nParamValueFlags.TemplateTag)) {
+      const valueIndicies = (_a2 = valueIndiciesBySubTemplateIndex.get(value.subTemplateIndex)) != null ? _a2 : [];
+      valueIndicies.push(i);
+      valueIndiciesBySubTemplateIndex.set(value.subTemplateIndex, valueIndicies);
+    }
+  }
+  for (const [subTemplateIndex, valueIndicies] of valueIndiciesBySubTemplateIndex) {
+    if (valueIndicies.length > 1) {
+      const elementIndex = valueIndicies.find((index) => values[index].flags & I18nParamValueFlags.ElementTag);
+      const templateIndex = valueIndicies.find((index) => values[index].flags & I18nParamValueFlags.TemplateTag);
+      if (elementIndex !== void 0 && templateIndex !== void 0) {
+        const elementValue = values[elementIndex];
+        const templateValue = values[templateIndex];
+        let compundValue;
+        if (elementValue.flags & I18nParamValueFlags.OpenTag && elementValue.flags & I18nParamValueFlags.CloseTag) {
+          compundValue = `${formatValue(templateValue)}${formatValue(elementValue)}${formatValue(templateValue)}`;
+        } else if (elementValue.flags & I18nParamValueFlags.OpenTag) {
+          compundValue = `${formatValue(templateValue)}${formatValue(elementValue)}`;
+        } else {
+          compundValue = `${formatValue(elementValue)}${formatValue(templateValue)}`;
+        }
+        values.splice(elementIndex, 1, { value: compundValue, subTemplateIndex, flags: I18nParamValueFlags.None });
+        values.splice(templateIndex, 1, null);
+      }
+    }
+  }
+  for (let i = values.length - 1; i >= 0; i--) {
+    if (values[i] === null) {
+      values.splice(i, 1);
+    }
+  }
 }
 function formatValue(value) {
   if (value.flags === I18nParamValueFlags.None) {
@@ -16973,47 +17023,6 @@ function serializeLocalRefs(refs) {
   return literalArr(constRefs);
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/merge_i18n_contexts.mjs
-function mergeI18nContexts(job) {
-  const i18nOps = /* @__PURE__ */ new Map();
-  const i18nContexts = /* @__PURE__ */ new Map();
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.I18nStart:
-          if (!op.context) {
-            throw Error("I18n op should have its context set.");
-          }
-          i18nOps.set(op.xref, op);
-          break;
-        case OpKind.I18nContext:
-          i18nContexts.set(op.xref, op);
-          break;
-      }
-    }
-  }
-  for (const childI18nOp of i18nOps.values()) {
-    if (childI18nOp.xref !== childI18nOp.root) {
-      const childContext = i18nContexts.get(childI18nOp.context);
-      const rootI18nOp = i18nOps.get(childI18nOp.root);
-      const rootContext = i18nContexts.get(rootI18nOp.context);
-      mergeParams(rootContext.params, childContext.params);
-      mergeParams(rootContext.postprocessingParams, childContext.postprocessingParams);
-    }
-  }
-}
-function mergeParams(to, from) {
-  for (const [placeholder, fromValues] of from) {
-    const toValues = to.get(placeholder) || [];
-    const flags = fromValues[0].flags;
-    if (flags & I18nParamValueFlags.CloseTag && !(flags & I18nParamValueFlags.OpenTag)) {
-      to.set(placeholder, [...fromValues, ...toValues]);
-    } else {
-      to.set(placeholder, [...toValues, ...fromValues]);
-    }
-  }
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/namespace.mjs
 function emitNamespaceChanges(job) {
   for (const unit of job.units) {
@@ -17525,9 +17534,10 @@ function propagateI18nBlocksToTemplates(unit, subTemplateIndex) {
           subTemplateIndex++;
           wrapTemplateWithI18n(templateView, i18nBlock);
         }
-        propagateI18nBlocksToTemplates(templateView, subTemplateIndex);
+        subTemplateIndex = propagateI18nBlocksToTemplates(templateView, subTemplateIndex);
     }
   }
+  return subTemplateIndex;
 }
 function wrapTemplateWithI18n(unit, parentI18n) {
   var _a2;
@@ -18614,55 +18624,67 @@ function resolveI18nElementPlaceholders(job) {
       }
     }
   }
-  for (const unit of job.units) {
-    let currentOps = null;
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.I18nStart:
-          if (!op.context) {
-            throw Error("Could not find i18n context for i18n op");
+  resolvePlaceholdersForView(job, job.root, i18nContexts, elements);
+}
+function resolvePlaceholdersForView(job, unit, i18nContexts, elements) {
+  let currentOps = null;
+  for (const op of unit.create) {
+    switch (op.kind) {
+      case OpKind.I18nStart:
+        if (!op.context) {
+          throw Error("Could not find i18n context for i18n op");
+        }
+        currentOps = { i18nBlock: op, i18nContext: i18nContexts.get(op.context) };
+        break;
+      case OpKind.I18nEnd:
+        currentOps = null;
+        break;
+      case OpKind.ElementStart:
+        if (op.i18nPlaceholder !== void 0) {
+          if (currentOps === null) {
+            throw Error("i18n tag placeholder should only occur inside an i18n block");
           }
-          currentOps = { i18nBlock: op, i18nContext: i18nContexts.get(op.context) };
-          break;
-        case OpKind.I18nEnd:
-          currentOps = null;
-          break;
-        case OpKind.ElementStart:
-          if (op.i18nPlaceholder !== void 0) {
-            if (currentOps === null) {
-              throw Error("i18n tag placeholder should only occur inside an i18n block");
-            }
-            const { startName, closeName } = op.i18nPlaceholder;
-            let flags = I18nParamValueFlags.ElementTag | I18nParamValueFlags.OpenTag;
-            if (closeName === "") {
-              flags |= I18nParamValueFlags.CloseTag;
-            }
-            addParam(currentOps.i18nContext.params, startName, op.handle.slot, currentOps.i18nBlock.subTemplateIndex, flags);
+          const { startName, closeName } = op.i18nPlaceholder;
+          let flags = I18nParamValueFlags.ElementTag | I18nParamValueFlags.OpenTag;
+          if (closeName === "") {
+            flags |= I18nParamValueFlags.CloseTag;
           }
-          break;
-        case OpKind.ElementEnd:
-          const startOp = elements.get(op.xref);
-          if (startOp && startOp.i18nPlaceholder !== void 0) {
-            if (currentOps === null) {
-              throw Error("i18n tag placeholder should only occur inside an i18n block");
-            }
-            const { closeName } = startOp.i18nPlaceholder;
-            if (closeName !== "") {
-              addParam(currentOps.i18nContext.params, closeName, startOp.handle.slot, currentOps.i18nBlock.subTemplateIndex, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
-            }
+          addParam(currentOps.i18nContext.params, startName, op.handle.slot, currentOps.i18nBlock.subTemplateIndex, flags);
+        }
+        break;
+      case OpKind.ElementEnd:
+        const startOp = elements.get(op.xref);
+        if (startOp && startOp.i18nPlaceholder !== void 0) {
+          if (currentOps === null) {
+            throw Error("i18n tag placeholder should only occur inside an i18n block");
           }
-          break;
-        case OpKind.Template:
-          if (op.i18nPlaceholder !== void 0) {
-            if (currentOps === null) {
-              throw Error("i18n tag placeholder should only occur inside an i18n block");
-            }
-            const subTemplateIndex = getSubTemplateIndexForTemplateTag(job, currentOps.i18nBlock, op);
-            addParam(currentOps.i18nContext.params, op.i18nPlaceholder.startName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag);
-            addParam(currentOps.i18nContext.params, op.i18nPlaceholder.closeName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
+          const { closeName } = startOp.i18nPlaceholder;
+          if (closeName !== "") {
+            addParam(currentOps.i18nContext.params, closeName, startOp.handle.slot, currentOps.i18nBlock.subTemplateIndex, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
           }
-          break;
-      }
+        }
+        break;
+      case OpKind.Template:
+        if (op.i18nPlaceholder !== void 0) {
+          if (currentOps === null) {
+            throw Error("i18n tag placeholder should only occur inside an i18n block");
+          }
+          let startFlags = I18nParamValueFlags.TemplateTag | I18nParamValueFlags.OpenTag;
+          const subTemplateIndex = getSubTemplateIndexForTemplateTag(job, currentOps.i18nBlock, op);
+          const { startName, closeName } = op.i18nPlaceholder;
+          const isSelfClosing = closeName === "";
+          if (isSelfClosing) {
+            startFlags |= I18nParamValueFlags.CloseTag;
+          }
+          addParam(currentOps.i18nContext.params, startName, op.handle.slot, subTemplateIndex, startFlags);
+          resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements);
+          if (!isSelfClosing) {
+            addParam(currentOps.i18nContext.params, closeName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
+          }
+        } else {
+          resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements);
+        }
+        break;
     }
   }
 }
@@ -18702,8 +18724,8 @@ function resolveI18nExpressionPlaceholders(job) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
         const i18nContext = i18nContexts.get(op.context);
-        const index = expressionIndices.get(i18nContext.i18nBlock) || 0;
-        const subTemplateIndex = subTemplateIndicies.get(i18nContext.i18nBlock);
+        const index = expressionIndices.get(op.target) || 0;
+        const subTemplateIndex = subTemplateIndicies.get(op.target);
         const params = op.resolutionTime === I18nParamResolutionTime.Creation ? i18nContext.params : i18nContext.postprocessingParams;
         const values = params.get(op.i18nPlaceholder) || [];
         values.push({
@@ -18712,7 +18734,7 @@ function resolveI18nExpressionPlaceholders(job) {
           flags: I18nParamValueFlags.ExpressionIndex
         });
         params.set(op.i18nPlaceholder, values);
-        expressionIndices.set(i18nContext.i18nBlock, index + 1);
+        expressionIndices.set(op.target, index + 1);
       }
     }
   }
@@ -18720,28 +18742,12 @@ function resolveI18nExpressionPlaceholders(job) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_icu_placeholders.mjs
 function resolveI18nIcuPlaceholders(job) {
-  const contextOps = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.I18nContext:
-          contextOps.set(op.xref, op);
-          break;
-      }
-    }
-  }
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.IcuStart:
-          if (op.context === null) {
-            throw Error("Icu should have its i18n context set.");
-          }
-          const i18nContext = contextOps.get(op.context);
-          for (const node of op.message.nodes) {
-            node.visit(new ResolveIcuPlaceholdersVisitor(i18nContext.postprocessingParams));
-          }
-          break;
+      if (op.kind === OpKind.I18nContext && op.contextKind === I18nContextKind.Icu) {
+        for (const node of op.message.nodes) {
+          node.visit(new ResolveIcuPlaceholdersVisitor(op.postprocessingParams));
+        }
       }
     }
   }
@@ -19563,7 +19569,6 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nIcuPlaceholders },
-  { kind: CompilationJobKind.Tmpl, fn: mergeI18nContexts },
   { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackFns },
   { kind: CompilationJobKind.Tmpl, fn: collectI18nConsts },
@@ -25799,7 +25804,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.4+sha-6be8804");
+var VERSION2 = new Version("17.0.4+sha-baf5830");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -26865,7 +26870,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.4+sha-6be8804"));
+  definitionMap.set("version", literal("17.0.4+sha-baf5830"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -26936,7 +26941,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.4+sha-6be8804"));
+  definitionMap.set("version", literal("17.0.4+sha-baf5830"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27168,7 +27173,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.4+sha-6be8804"));
+  definitionMap.set("version", literal("17.0.4+sha-baf5830"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27191,7 +27196,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.4+sha-6be8804"));
+  definitionMap.set("version", literal("17.0.4+sha-baf5830"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27229,7 +27234,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.4+sha-6be8804"));
+  definitionMap.set("version", literal("17.0.4+sha-baf5830"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27253,7 +27258,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.4+sha-6be8804"));
+  definitionMap.set("version", literal("17.0.4+sha-baf5830"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27288,7 +27293,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.4+sha-6be8804"));
+  definitionMap.set("version", literal("17.0.4+sha-baf5830"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27305,7 +27310,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.4+sha-6be8804");
+var VERSION3 = new Version("17.0.4+sha-baf5830");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
