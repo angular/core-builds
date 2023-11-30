@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.5+sha-81e9489
+ * @license Angular v17.0.5+sha-13ade13
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.5+sha-81e9489');
+const VERSION = new Version('17.0.5+sha-13ade13');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -34332,6 +34332,10 @@ function serializeLView(lView, context) {
             if (!targetNode.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
                 annotateHostElementForHydration(targetNode, lView[i], context);
             }
+            // Include node path info to the annotation in case `tNode.next` (which hydration
+            // relies upon by default) is different from the `tNode.projectionNext`. This helps
+            // hydration runtime logic to find the right node.
+            annotateNextNodePath(ngh, tNode, lView);
         }
         else {
             // <ng-container> case
@@ -34395,17 +34399,26 @@ function serializeLView(lView, context) {
                         context.corruptedTextNodes.set(rNode, "ngtns" /* TextNodeMarker.Separator */);
                     }
                 }
-                if (tNode.projectionNext && tNode.projectionNext !== tNode.next &&
-                    !isInSkipHydrationBlock(tNode.projectionNext)) {
-                    // Check if projection next is not the same as next, in which case
-                    // the node would not be found at creation time at runtime and we
-                    // need to provide a location for that node.
-                    appendSerializedNodePath(ngh, tNode.projectionNext, lView);
-                }
+                // Include node path info to the annotation in case `tNode.next` (which hydration
+                // relies upon by default) is different from the `tNode.projectionNext`. This helps
+                // hydration runtime logic to find the right node.
+                annotateNextNodePath(ngh, tNode, lView);
             }
         }
     }
     return ngh;
+}
+/**
+ * If `tNode.projectionNext` is different from `tNode.next` - it means that
+ * the next `tNode` after projection is different from the one in the original
+ * template. In this case we need to serialize a path to that next node, so that
+ * it can be found at the right location at runtime.
+ */
+function annotateNextNodePath(ngh, tNode, lView) {
+    if (tNode.projectionNext && tNode.projectionNext !== tNode.next &&
+        !isInSkipHydrationBlock(tNode.projectionNext)) {
+        appendSerializedNodePath(ngh, tNode.projectionNext, lView);
+    }
 }
 /**
  * Determines whether a component instance that is represented

@@ -24912,7 +24912,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.5+sha-81e9489");
+var VERSION2 = new Version("17.0.5+sha-13ade13");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25003,12 +25003,13 @@ var commonModulePipes = [
   "titlecase"
 ].map((name) => pipeMatchRegExpFor(name));
 var ElementToMigrate = class {
-  constructor(el, attr, elseAttr = void 0, thenAttr = void 0, forAttrs = void 0) {
+  constructor(el, attr, elseAttr = void 0, thenAttr = void 0, forAttrs = void 0, aliasAttrs = void 0) {
     __publicField(this, "el");
     __publicField(this, "attr");
     __publicField(this, "elseAttr");
     __publicField(this, "thenAttr");
     __publicField(this, "forAttrs");
+    __publicField(this, "aliasAttrs");
     __publicField(this, "nestCount", 0);
     __publicField(this, "hasLineBreaks", false);
     this.el = el;
@@ -25016,6 +25017,7 @@ var ElementToMigrate = class {
     this.elseAttr = elseAttr;
     this.thenAttr = thenAttr;
     this.forAttrs = forAttrs;
+    this.aliasAttrs = aliasAttrs;
   }
   getCondition() {
     const chunks = this.attr.value.split(";");
@@ -25169,15 +25171,14 @@ var ElementCollector = class extends RecursiveVisitor {
           const elseAttr = el.attrs.find((x) => x.name === boundngifelse);
           const thenAttr = el.attrs.find((x) => x.name === boundngifthenelse || x.name === boundngifthen);
           const forAttrs = attr.name === nakedngfor ? this.getForAttrs(el) : void 0;
-          this.elements.push(new ElementToMigrate(el, attr, elseAttr, thenAttr, forAttrs));
+          const aliasAttrs = this.getAliasAttrs(el);
+          this.elements.push(new ElementToMigrate(el, attr, elseAttr, thenAttr, forAttrs, aliasAttrs));
         }
       }
     }
     super.visitElement(el, null);
   }
   getForAttrs(el) {
-    const aliases = /* @__PURE__ */ new Map();
-    let item = "";
     let trackBy = "";
     let forOf = "";
     for (const attr of el.attrs) {
@@ -25187,6 +25188,13 @@ var ElementCollector = class extends RecursiveVisitor {
       if (attr.name === "[ngForOf]") {
         forOf = attr.value;
       }
+    }
+    return { forOf, trackBy };
+  }
+  getAliasAttrs(el) {
+    const aliases = /* @__PURE__ */ new Map();
+    let item = "";
+    for (const attr of el.attrs) {
       if (attr.name.startsWith("let-")) {
         if (attr.value === "") {
           item = attr.name.replace("let-", "");
@@ -25195,7 +25203,7 @@ var ElementCollector = class extends RecursiveVisitor {
         }
       }
     }
-    return { forOf, trackBy, item, aliases };
+    return { item, aliases };
   }
 };
 var TemplateCollector = class extends RecursiveVisitor {
@@ -25498,7 +25506,24 @@ function isI18nTemplate(etm, i18nAttr) {
   return etm.el.name === "ng-template" && i18nAttr !== void 0 && (etm.el.attrs.length === 2 || etm.el.attrs.length === 3 && etm.elseAttr !== void 0);
 }
 function isRemovableContainer(etm) {
-  return (etm.el.name === "ng-container" || etm.el.name === "ng-template") && (etm.el.attrs.length === 1 || etm.forAttrs !== void 0 || etm.el.attrs.length === 2 && etm.elseAttr !== void 0 || etm.el.attrs.length === 3 && etm.elseAttr !== void 0 && etm.thenAttr !== void 0);
+  let attrCount = countAttributes(etm);
+  const safeToRemove = etm.el.attrs.length === attrCount;
+  return (etm.el.name === "ng-container" || etm.el.name === "ng-template") && safeToRemove;
+}
+function countAttributes(etm) {
+  var _a2, _b2, _c2, _d2, _e2;
+  let attrCount = 1;
+  if (etm.elseAttr !== void 0) {
+    attrCount++;
+  }
+  if (etm.thenAttr !== void 0) {
+    attrCount++;
+  }
+  attrCount += (_b2 = (_a2 = etm.aliasAttrs) == null ? void 0 : _a2.aliases.size) != null ? _b2 : 0;
+  attrCount += ((_c2 = etm.aliasAttrs) == null ? void 0 : _c2.item) ? 1 : 0;
+  attrCount += ((_d2 = etm.forAttrs) == null ? void 0 : _d2.trackBy) ? 1 : 0;
+  attrCount += ((_e2 = etm.forAttrs) == null ? void 0 : _e2.forOf) ? 1 : 0;
+  return attrCount;
 }
 function getMainBlock(etm, tmpl, offset) {
   const i18nAttr = etm.el.attrs.find((x) => x.name === "i18n");
@@ -25776,9 +25801,10 @@ function migrateStandardNgFor(etm, tmpl, offset) {
 }
 function migrateBoundNgFor(etm, tmpl, offset) {
   const forAttrs = etm.forAttrs;
-  const aliasMap = forAttrs.aliases;
+  const aliasAttrs = etm.aliasAttrs;
+  const aliasMap = aliasAttrs.aliases;
   const originals = getOriginals(etm, tmpl, offset);
-  const condition = `${forAttrs.item} of ${forAttrs.forOf}`;
+  const condition = `${aliasAttrs.item} of ${forAttrs.forOf}`;
   const aliases = [];
   let aliasedIndex = "$index";
   for (const [key, val] of aliasMap) {
@@ -25788,9 +25814,9 @@ function migrateBoundNgFor(etm, tmpl, offset) {
     }
   }
   const aliasStr = aliases.length > 0 ? `;${aliases.join(";")}` : "";
-  let trackBy = forAttrs.item;
+  let trackBy = aliasAttrs.item;
   if (forAttrs.trackBy !== "") {
-    trackBy = `${forAttrs.trackBy.trim()}(${aliasedIndex}, ${forAttrs.item})`;
+    trackBy = `${forAttrs.trackBy.trim()}(${aliasedIndex}, ${aliasAttrs.item})`;
   }
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
   const startBlock = `@for (${condition}; track ${trackBy}${aliasStr}) {
@@ -25874,8 +25900,8 @@ function migrateIf(template2) {
   return { migrated: result, errors, changed };
 }
 function migrateNgIf(etm, tmpl, offset) {
-  const matchThen = etm.attr.value.match(/;?\s*then/gm);
-  const matchElse = etm.attr.value.match(/;?\s*else/gm);
+  const matchThen = etm.attr.value.match(/[^\w\d];?\s*then/gm);
+  const matchElse = etm.attr.value.match(/[^\w\d];?\s*else/gm);
   if (etm.thenAttr !== void 0 || etm.elseAttr !== void 0) {
     return buildBoundIfElseBlock(etm, tmpl, offset);
   } else if (matchThen && matchThen.length > 0) {
@@ -25886,8 +25912,15 @@ function migrateNgIf(etm, tmpl, offset) {
   return buildIfBlock(etm, tmpl, offset);
 }
 function buildIfBlock(etm, tmpl, offset) {
+  const aliasAttrs = etm.aliasAttrs;
+  const aliases = [...aliasAttrs.aliases.keys()];
   const lbString = etm.hasLineBreaks ? "\n" : "";
-  const condition = etm.attr.value.replace(" as ", "; as ").replace(/;\s*let/g, "; as");
+  let condition = etm.attr.value.replace(" as ", "; as ").replace(/;\s*let/g, "; as");
+  if (aliases.length > 1 || aliases.length === 1 && condition.indexOf("; as") > -1) {
+    throw new Error("Found more than one alias on your ngIf. Remove one of them and re-run the migration.");
+  } else if (aliases.length === 1) {
+    condition += `; as ${aliases[0]}`;
+  }
   const originals = getOriginals(etm, tmpl, offset);
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
   const startBlock = `@if (${condition}) {${lbString}${start}`;
@@ -25904,7 +25937,14 @@ function buildStandardIfElseBlock(etm, tmpl, elseString, offset) {
   return buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset);
 }
 function buildBoundIfElseBlock(etm, tmpl, offset) {
-  const condition = etm.attr.value.replace(" as ", "; as ");
+  const aliasAttrs = etm.aliasAttrs;
+  const aliases = [...aliasAttrs.aliases.keys()];
+  let condition = etm.attr.value.replace(" as ", "; as ");
+  if (aliases.length > 1 || aliases.length === 1 && condition.indexOf("; as") > -1) {
+    throw new Error("Found more than one alias on your ngIf. Remove one of them and re-run the migration.");
+  } else if (aliases.length === 1) {
+    condition += `; as ${aliases[0]}`;
+  }
   const elsePlaceholder = `#${etm.elseAttr.value}|`;
   if (etm.thenAttr !== void 0) {
     const thenPlaceholder = `#${etm.thenAttr.value}|`;
