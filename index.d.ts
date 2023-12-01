@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.2+sha-2998d48
+ * @license Angular v17.1.0-next.2+sha-9423c19
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2598,6 +2598,11 @@ declare interface DehydratedView {
     /**
      * A reference to the first child in a DOM segment associated
      * with a given hydration boundary.
+     *
+     * Once a view becomes hydrated, the value is set to `null`, which
+     * indicates that further detaching/attaching view actions should result
+     * in invoking corresponding DOM actions (attaching DOM nodes action is
+     * skipped when we hydrate, since nodes are already in the DOM).
      */
     firstChild: RNode | null;
     /**

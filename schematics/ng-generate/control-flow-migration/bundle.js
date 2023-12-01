@@ -24926,7 +24926,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.2+sha-2998d48");
+var VERSION2 = new Version("17.1.0-next.2+sha-9423c19");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25558,11 +25558,12 @@ function getMainBlock(etm, tmpl, offset) {
   const valEnd = etm.getValueEnd(offset);
   const { childStart, childEnd } = etm.hasChildren() ? etm.getChildSpan(offset) : { childStart: valEnd, childEnd: valEnd };
   let start = tmpl.slice(etm.start(offset), attrStart) + tmpl.slice(valEnd, childStart);
+  const middle = tmpl.slice(childStart, childEnd);
+  let end = tmpl.slice(childEnd, etm.end(offset));
   if (etm.shouldRemoveElseAttr()) {
     start = start.replace(etm.getElseAttrStr(), "");
+    end = end.replace(etm.getElseAttrStr(), "");
   }
-  const middle = tmpl.slice(childStart, childEnd);
-  const end = tmpl.slice(childEnd, etm.end(offset));
   return { start, middle, end };
 }
 var selfClosingList = "input|br|img|base|wbr|area|col|embed|hr|link|meta|param|source|track";
@@ -25920,8 +25921,10 @@ function migrateNgIf(etm, tmpl, offset) {
   const matchElse = etm.attr.value.match(/[^\w\d];?\s*else/gm);
   if (etm.thenAttr !== void 0 || etm.elseAttr !== void 0) {
     return buildBoundIfElseBlock(etm, tmpl, offset);
-  } else if (matchThen && matchThen.length > 0) {
+  } else if (matchThen && matchThen.length > 0 && matchElse && matchElse.length > 0) {
     return buildStandardIfThenElseBlock(etm, tmpl, matchThen[0], matchElse[0], offset);
+  } else if (matchThen && matchThen.length > 0) {
+    return buildStandardIfThenBlock(etm, tmpl, matchThen[0], offset);
   } else if (matchElse && matchElse.length > 0) {
     return buildStandardIfElseBlock(etm, tmpl, matchElse[0], offset);
   }
@@ -25989,6 +25992,11 @@ function buildStandardIfThenElseBlock(etm, tmpl, thenString, elseString, offset)
   const elsePlaceholder = `#${etm.getTemplateName(elseString)}|`;
   return buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset);
 }
+function buildStandardIfThenBlock(etm, tmpl, thenString, offset) {
+  const condition = etm.getCondition().replace(" as ", "; as ").replace(/;\s*let/g, "; as");
+  const thenPlaceholder = `#${etm.getTemplateName(thenString)}|`;
+  return buildIfThenBlock(etm, tmpl, condition, thenPlaceholder, offset);
+}
 function buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset) {
   const lbString = etm.hasLineBreaks ? "\n" : "";
   const originals = getOriginals(etm, tmpl, offset);
@@ -25999,6 +26007,19 @@ function buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceho
   const tmplStart = tmpl.slice(0, etm.start(offset));
   const tmplEnd = tmpl.slice(etm.end(offset));
   const updatedTmpl = tmplStart + ifThenElseBlock + tmplEnd;
+  const pre = originals.start.length + originals.childLength - startBlock.length;
+  const post = originals.end.length - postBlock.length;
+  return { tmpl: updatedTmpl, offsets: { pre, post } };
+}
+function buildIfThenBlock(etm, tmpl, condition, thenPlaceholder, offset) {
+  const lbString = etm.hasLineBreaks ? "\n" : "";
+  const originals = getOriginals(etm, tmpl, offset);
+  const startBlock = `@if (${condition}) {${lbString}`;
+  const postBlock = thenPlaceholder + `${lbString}}`;
+  const ifThenBlock = startBlock + postBlock;
+  const tmplStart = tmpl.slice(0, etm.start(offset));
+  const tmplEnd = tmpl.slice(etm.end(offset));
+  const updatedTmpl = tmplStart + ifThenBlock + tmplEnd;
   const pre = originals.start.length + originals.childLength - startBlock.length;
   const post = originals.end.length - postBlock.length;
   return { tmpl: updatedTmpl, offsets: { pre, post } };

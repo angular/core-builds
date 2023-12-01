@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.2+sha-2998d48
+ * @license Angular v17.1.0-next.2+sha-9423c19
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.2+sha-2998d48');
+const VERSION = new Version('17.1.0-next.2+sha-9423c19');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19755,13 +19755,14 @@ function getLViewFromLContainer(lContainer, index) {
  * block (in which case view contents was re-created, thus needing insertion).
  */
 function shouldAddViewToDom(tNode, dehydratedView) {
-    return !dehydratedView || hasInSkipHydrationBlockFlag(tNode);
+    return !dehydratedView || dehydratedView.firstChild === null ||
+        hasInSkipHydrationBlockFlag(tNode);
 }
 function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
     const tView = lView[TVIEW];
-    // insert to the view tree so the new view can be change-detected
+    // Insert into the view tree so the new view can be change-detected
     insertView(tView, lView, lContainer, index);
-    // insert to the view to the DOM tree
+    // Insert elements that belong to this view into the DOM tree
     if (addToDOM) {
         const beforeNode = getBeforeNodeForView(index, lContainer);
         const renderer = lView[RENDERER];
@@ -19769,6 +19770,13 @@ function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
         if (parentRNode !== null) {
             addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
         }
+    }
+    // When in hydration mode, reset the pointer to the first child in
+    // the dehydrated view. This indicates that the view was hydrated and
+    // further attaching/detaching should work with this view as normal.
+    const hydrationInfo = lView[HYDRATION];
+    if (hydrationInfo !== null && hydrationInfo.firstChild !== null) {
+        hydrationInfo.firstChild = null;
     }
 }
 function removeLViewFromLContainer(lContainer, index) {
