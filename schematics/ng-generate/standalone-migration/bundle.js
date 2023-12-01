@@ -9723,10 +9723,29 @@ function assignI18nSlotDependencies(job) {
           break;
       }
     }
+    let moveToTarget = null;
+    let opsToMove = [];
+    let previousTarget = null;
+    let currentTarget = null;
     for (const op of unit.update) {
+      currentTarget = hasDependsOnSlotContextTrait(op) ? op.target : null;
       if (op.kind === OpKind.I18nExpression) {
         op.target = i18nLastSlotConsumers.get(op.target);
+        moveToTarget = op.target;
       }
+      if (op.kind === OpKind.I18nExpression || op.kind === OpKind.I18nApply) {
+        opsToMove.push(op);
+        OpList.remove(op);
+        currentTarget = moveToTarget;
+      }
+      if (moveToTarget !== null && previousTarget === moveToTarget && currentTarget !== previousTarget) {
+        OpList.insertBefore(opsToMove, op);
+        opsToMove = [];
+      }
+      previousTarget = currentTarget;
+    }
+    if (opsToMove) {
+      unit.update.push(opsToMove);
     }
   }
 }
@@ -16842,6 +16861,8 @@ function createEmptyMessagePart(location) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_const_collection.mjs
 var NG_I18N_CLOSURE_MODE = "ngI18nClosureMode";
 var TRANSLATION_VAR_PREFIX2 = "i18n_";
+var I18N_ICU_MAPPING_PREFIX2 = "I18N_EXP_";
+var ESCAPE2 = "\uFFFD";
 function collectI18nConsts(job) {
   const fileBasedI18nSuffix = job.relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_").toUpperCase() + "_";
   const messageConstIndices = /* @__PURE__ */ new Map();
@@ -16869,28 +16890,44 @@ function collectI18nConsts(job) {
   }
 }
 function collectMessage(job, fileBasedI18nSuffix, messages, messageOp) {
+  var _a2;
   const statements = [];
+  const subMessagePlaceholders = /* @__PURE__ */ new Map();
   for (const subMessageId of messageOp.subMessages) {
     const subMessage = messages.get(subMessageId);
     const { mainVar: subMessageVar, statements: subMessageStatements } = collectMessage(job, fileBasedI18nSuffix, messages, subMessage);
     statements.push(...subMessageStatements);
-    messageOp.params.set(subMessage.messagePlaceholder, subMessageVar);
+    const subMessages = (_a2 = subMessagePlaceholders.get(subMessage.messagePlaceholder)) != null ? _a2 : [];
+    subMessages.push(subMessageVar);
+    subMessagePlaceholders.set(subMessage.messagePlaceholder, subMessages);
   }
+  addSubMessageParams(messageOp, subMessagePlaceholders);
   messageOp.params = new Map([...messageOp.params.entries()].sort());
-  assertAllParamsResolved(messageOp);
   const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
   const closureVar = i18nGenerateClosureVar(job.pool, messageOp.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
   let transformFn = void 0;
   if (messageOp.needsPostprocessing) {
-    messageOp.postprocessingParams = new Map([...messageOp.postprocessingParams.entries()].sort());
+    const postprocessingParams = Object.fromEntries([...messageOp.postprocessingParams.entries()].sort());
+    const formattedPostprocessingParams = formatI18nPlaceholderNamesInMap(postprocessingParams, false);
     const extraTransformFnParams = [];
     if (messageOp.postprocessingParams.size > 0) {
-      extraTransformFnParams.push(literalMap([...messageOp.postprocessingParams].map(([key, value]) => ({ key, value, quoted: true }))));
+      extraTransformFnParams.push(mapLiteral(formattedPostprocessingParams, true));
     }
     transformFn = (expr) => importExpr(Identifiers.i18nPostprocess).callFn([expr, ...extraTransformFnParams]);
   }
   statements.push(...getTranslationDeclStmts(messageOp.message, mainVar, closureVar, messageOp.params, transformFn));
   return { mainVar, statements };
+}
+function addSubMessageParams(messageOp, subMessagePlaceholders) {
+  for (const [placeholder, subMessages] of subMessagePlaceholders) {
+    if (subMessages.length === 1) {
+      messageOp.params.set(placeholder, subMessages[0]);
+    } else {
+      messageOp.params.set(placeholder, literal(`${ESCAPE2}${I18N_ICU_MAPPING_PREFIX2}${placeholder}${ESCAPE2}`));
+      messageOp.postprocessingParams.set(placeholder, literalArr(subMessages));
+      messageOp.needsPostprocessing = true;
+    }
+  }
 }
 function getTranslationDeclStmts(message, variable2, closureVar, params, transformFn) {
   const paramsObject = Object.fromEntries(params);
@@ -16918,20 +16955,6 @@ function i18nGenerateClosureVar(pool, messageId, fileBasedI18nSuffix, useExterna
     name = pool.uniqueName(prefix);
   }
   return variable(name);
-}
-function assertAllParamsResolved(op) {
-  for (let placeholder in op.message.placeholders) {
-    placeholder = placeholder.trimEnd();
-    if (!op.params.has(placeholder) && !op.postprocessingParams.has(placeholder)) {
-      throw Error(`Failed to resolve i18n placeholder: ${placeholder}`);
-    }
-  }
-  for (let placeholder in op.message.placeholderToMessage) {
-    placeholder = placeholder.trimEnd();
-    if (!op.params.has(placeholder) && !op.postprocessingParams.has(placeholder)) {
-      throw Error(`Failed to resolve i18n message placeholder: ${placeholder}`);
-    }
-  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_text_extraction.mjs
@@ -19995,17 +20018,12 @@ function ingestDeferBlock(unit, deferBlock) {
   unit.update.push(deferWhenOps);
 }
 function ingestIcu(unit, icu) {
-  var _a2, _b2;
+  var _a2;
   if (icu.i18n instanceof Message && isSingleI18nIcu(icu.i18n)) {
     const xref = unit.job.allocateXrefId();
     const icuNode = icu.i18n.nodes[0];
     unit.create.push(createIcuStartOp(xref, icu.i18n, icuFromI18nMessage(icu.i18n).name, null));
-    const expressionPlaceholder = (_a2 = icuNode.expressionPlaceholder) == null ? void 0 : _a2.trimEnd();
-    if (expressionPlaceholder === void 0 || icu.vars[expressionPlaceholder] === void 0) {
-      throw Error("ICU should have a text binding");
-    }
-    ingestBoundText(unit, icu.vars[expressionPlaceholder], [expressionPlaceholder]);
-    for (const [placeholder, text2] of Object.entries(icu.placeholders)) {
+    for (const [placeholder, text2] of Object.entries(__spreadValues(__spreadValues({}, icu.vars), icu.placeholders))) {
       if (text2 instanceof BoundText) {
         ingestBoundText(unit, text2, [placeholder]);
       } else {
@@ -20014,7 +20032,7 @@ function ingestIcu(unit, icu) {
     }
     unit.create.push(createIcuEndOp(xref));
   } else {
-    throw Error(`Unhandled i18n metadata type for ICU: ${(_b2 = icu.i18n) == null ? void 0 : _b2.constructor.name}`);
+    throw Error(`Unhandled i18n metadata type for ICU: ${(_a2 = icu.i18n) == null ? void 0 : _a2.constructor.name}`);
   }
 }
 function ingestForBlock(unit, forBlock) {
@@ -25816,7 +25834,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.5+sha-af5da6d");
+var VERSION2 = new Version("17.0.5+sha-2174138");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -26882,7 +26900,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.5+sha-af5da6d"));
+  definitionMap.set("version", literal("17.0.5+sha-2174138"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -26953,7 +26971,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.5+sha-af5da6d"));
+  definitionMap.set("version", literal("17.0.5+sha-2174138"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27185,7 +27203,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.5+sha-af5da6d"));
+  definitionMap.set("version", literal("17.0.5+sha-2174138"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27208,7 +27226,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.5+sha-af5da6d"));
+  definitionMap.set("version", literal("17.0.5+sha-2174138"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27246,7 +27264,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.5+sha-af5da6d"));
+  definitionMap.set("version", literal("17.0.5+sha-2174138"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27270,7 +27288,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.5+sha-af5da6d"));
+  definitionMap.set("version", literal("17.0.5+sha-2174138"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27305,7 +27323,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.5+sha-af5da6d"));
+  definitionMap.set("version", literal("17.0.5+sha-2174138"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27322,7 +27340,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.5+sha-af5da6d");
+var VERSION3 = new Version("17.0.5+sha-2174138");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
