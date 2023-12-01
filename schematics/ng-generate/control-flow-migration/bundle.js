@@ -24926,7 +24926,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.2+sha-4b23221");
+var VERSION2 = new Version("17.1.0-next.2+sha-2998d48");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25517,7 +25517,9 @@ function getOriginals(etm, tmpl, offset) {
   return { start, end: "", childLength: 0 };
 }
 function isI18nTemplate(etm, i18nAttr) {
-  return etm.el.name === "ng-template" && i18nAttr !== void 0 && (etm.el.attrs.length === 2 || etm.el.attrs.length === 3 && etm.elseAttr !== void 0);
+  let attrCount = countAttributes(etm);
+  const safeToRemove = etm.el.attrs.length === attrCount + (i18nAttr !== void 0 ? 1 : 0);
+  return etm.el.name === "ng-template" && i18nAttr !== void 0 && safeToRemove;
 }
 function isRemovableContainer(etm) {
   let attrCount = countAttributes(etm);
