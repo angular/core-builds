@@ -8085,6 +8085,12 @@ var I18nContextKind;
   I18nContextKind2[I18nContextKind2["RootI18n"] = 0] = "RootI18n";
   I18nContextKind2[I18nContextKind2["Icu"] = 1] = "Icu";
 })(I18nContextKind || (I18nContextKind = {}));
+var TemplateKind;
+(function(TemplateKind2) {
+  TemplateKind2[TemplateKind2["NgTemplate"] = 0] = "NgTemplate";
+  TemplateKind2[TemplateKind2["Structural"] = 1] = "Structural";
+  TemplateKind2[TemplateKind2["Block"] = 2] = "Block";
+})(TemplateKind || (TemplateKind = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/traits.mjs
 var ConsumesSlot = Symbol("ConsumesSlot");
@@ -9109,6 +9115,8 @@ function transformExpressionsInExpression(expr, transform2, flags) {
     for (let i = 0; i < expr.expressions.length; i++) {
       expr.expressions[i] = transformExpressionsInExpression(expr.expressions[i], transform2, flags);
     }
+  } else if (expr instanceof NotExpr) {
+    expr.condition = transformExpressionsInExpression(expr.condition, transform2, flags);
   } else if (expr instanceof ReadVarExpr || expr instanceof ExternalExpr || expr instanceof LiteralExpr) {
   } else {
     throw new Error(`Unhandled expression kind: ${expr.constructor.name}`);
@@ -9364,10 +9372,11 @@ function createElementStartOp(tag, xref, namespace, i18nPlaceholder, sourceSpan)
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createTemplateOp(xref, tag, functionNameSuffix, namespace, i18nPlaceholder, sourceSpan) {
+function createTemplateOp(xref, templateKind, tag, functionNameSuffix, namespace, i18nPlaceholder, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Template,
     xref,
+    templateKind,
     attributes: null,
     tag,
     handle: new SlotHandle(),
@@ -9468,14 +9477,15 @@ function createProjectionDefOp(def) {
     def
   }, NEW_OP);
 }
-function createProjectionOp(xref, selector, sourceSpan) {
+function createProjectionOp(xref, selector, i18nPlaceholder, attributes, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Projection,
     xref,
     handle: new SlotHandle(),
     selector,
+    i18nPlaceholder,
     projectionSlotIndex: 0,
-    attributes: [],
+    attributes,
     localRefs: [],
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
@@ -10636,69 +10646,54 @@ function extractI18nMessages(job) {
   }
 }
 function createI18nMessage(job, context, messagePlaceholder) {
-  let [formattedParams, needsPostprocessing] = formatParams(context.params);
-  const [formattedPostprocessingParams] = formatParams(context.postprocessingParams);
-  needsPostprocessing || (needsPostprocessing = formattedPostprocessingParams.size > 0);
+  let formattedParams = formatParams(context.params);
+  const formattedPostprocessingParams = formatParams(context.postprocessingParams);
+  let needsPostprocessing = formattedPostprocessingParams.size > 0;
+  for (const values of context.params.values()) {
+    if (values.length > 1) {
+      needsPostprocessing = true;
+    }
+  }
   return createI18nMessageOp(job.allocateXrefId(), context.i18nBlock, context.message, messagePlaceholder != null ? messagePlaceholder : null, formattedParams, formattedPostprocessingParams, needsPostprocessing);
 }
 function formatParams(params) {
   const formattedParams = /* @__PURE__ */ new Map();
-  let needsPostprocessing = false;
   for (const [placeholder, placeholderValues] of params) {
-    const [serializedValues, paramNeedsPostprocessing] = formatParamValues(placeholderValues);
-    needsPostprocessing || (needsPostprocessing = paramNeedsPostprocessing);
+    const serializedValues = formatParamValues(placeholderValues);
     if (serializedValues !== null) {
       formattedParams.set(placeholder, literal(serializedValues));
     }
   }
-  return [formattedParams, needsPostprocessing];
+  return formattedParams;
 }
 function formatParamValues(values) {
   if (values.length === 0) {
-    return [null, false];
+    return null;
   }
-  collapseElementTemplatePairs(values);
   const serializedValues = values.map((value) => formatValue(value));
-  return serializedValues.length === 1 ? [serializedValues[0], false] : [`${LIST_START_MARKER}${serializedValues.join(LIST_DELIMITER)}${LIST_END_MARKER}`, true];
-}
-function collapseElementTemplatePairs(values) {
-  var _a2;
-  const valueIndiciesBySubTemplateIndex = /* @__PURE__ */ new Map();
-  for (let i = 0; i < values.length; i++) {
-    const value = values[i];
-    if (value.subTemplateIndex !== null && value.flags & (I18nParamValueFlags.ElementTag | I18nParamValueFlags.TemplateTag)) {
-      const valueIndicies = (_a2 = valueIndiciesBySubTemplateIndex.get(value.subTemplateIndex)) != null ? _a2 : [];
-      valueIndicies.push(i);
-      valueIndiciesBySubTemplateIndex.set(value.subTemplateIndex, valueIndicies);
-    }
-  }
-  for (const [subTemplateIndex, valueIndicies] of valueIndiciesBySubTemplateIndex) {
-    if (valueIndicies.length > 1) {
-      const elementIndex = valueIndicies.find((index) => values[index].flags & I18nParamValueFlags.ElementTag);
-      const templateIndex = valueIndicies.find((index) => values[index].flags & I18nParamValueFlags.TemplateTag);
-      if (elementIndex !== void 0 && templateIndex !== void 0) {
-        const elementValue = values[elementIndex];
-        const templateValue = values[templateIndex];
-        let compundValue;
-        if (elementValue.flags & I18nParamValueFlags.OpenTag && elementValue.flags & I18nParamValueFlags.CloseTag) {
-          compundValue = `${formatValue(templateValue)}${formatValue(elementValue)}${formatValue(templateValue)}`;
-        } else if (elementValue.flags & I18nParamValueFlags.OpenTag) {
-          compundValue = `${formatValue(templateValue)}${formatValue(elementValue)}`;
-        } else {
-          compundValue = `${formatValue(elementValue)}${formatValue(templateValue)}`;
-        }
-        values.splice(elementIndex, 1, { value: compundValue, subTemplateIndex, flags: I18nParamValueFlags.None });
-        values.splice(templateIndex, 1, null);
-      }
-    }
-  }
-  for (let i = values.length - 1; i >= 0; i--) {
-    if (values[i] === null) {
-      values.splice(i, 1);
-    }
-  }
+  return serializedValues.length === 1 ? serializedValues[0] : `${LIST_START_MARKER}${serializedValues.join(LIST_DELIMITER)}${LIST_END_MARKER}`;
 }
 function formatValue(value) {
+  if (value.flags & I18nParamValueFlags.ElementTag && value.flags & I18nParamValueFlags.TemplateTag) {
+    if (typeof value.value !== "object") {
+      throw Error("AssertionError: Expected i18n param value to have an element and template slot");
+    }
+    const elementValue = formatValue(__spreadProps(__spreadValues({}, value), {
+      value: value.value.element,
+      flags: value.flags & ~I18nParamValueFlags.TemplateTag
+    }));
+    const templateValue = formatValue(__spreadProps(__spreadValues({}, value), {
+      value: value.value.template,
+      flags: value.flags & ~I18nParamValueFlags.ElementTag
+    }));
+    if (value.flags & I18nParamValueFlags.OpenTag && value.flags & I18nParamValueFlags.CloseTag) {
+      return `${templateValue}${elementValue}${templateValue}`;
+    }
+    return value.flags & I18nParamValueFlags.CloseTag ? `${elementValue}${templateValue}` : `${templateValue}${elementValue}`;
+  }
+  if (value.flags & I18nParamValueFlags.OpenTag && value.flags & I18nParamValueFlags.CloseTag) {
+    return `${formatValue(__spreadProps(__spreadValues({}, value), { flags: value.flags & ~I18nParamValueFlags.CloseTag }))}${formatValue(__spreadProps(__spreadValues({}, value), { flags: value.flags & ~I18nParamValueFlags.OpenTag }))}`;
+  }
   if (value.flags === I18nParamValueFlags.None) {
     return `${value.value}`;
   }
@@ -10713,9 +10708,6 @@ function formatValue(value) {
     closeMarker = value.flags & I18nParamValueFlags.CloseTag ? TAG_CLOSE_MARKER : "";
   }
   const context = value.subTemplateIndex === null ? "" : `${CONTEXT_MARKER}${value.subTemplateIndex}`;
-  if (value.flags & I18nParamValueFlags.OpenTag && value.flags & I18nParamValueFlags.CloseTag) {
-    return `${ESCAPE}${tagMarker}${value.value}${context}${ESCAPE}${ESCAPE}${closeMarker}${tagMarker}${value.value}${context}${ESCAPE}`;
-  }
   return `${ESCAPE}${closeMarker}${tagMarker}${value.value}${context}${ESCAPE}`;
 }
 
@@ -17465,17 +17457,27 @@ function parseExtractedStyles(job) {
 function removeContentSelectors(job) {
   for (const unit of job.units) {
     const elements = createOpXrefMap(unit);
-    for (const op of unit.update) {
+    for (const op of unit.ops()) {
       switch (op.kind) {
         case OpKind.Binding:
           const target = lookupInXrefMap(elements, op.target);
-          if (op.name.toLowerCase() === "select" && target.kind === OpKind.Projection) {
+          if (isSelectAttribute(op.name) && target.kind === OpKind.Projection) {
             OpList.remove(op);
+          }
+          break;
+        case OpKind.Projection:
+          for (let i = op.attributes.length - 2; i >= 0; i -= 2) {
+            if (isSelectAttribute(op.attributes[i])) {
+              op.attributes.splice(i, 2);
+            }
           }
           break;
       }
     }
   }
+}
+function isSelectAttribute(name) {
+  return name.toLowerCase() === "select";
 }
 function lookupInXrefMap(map, xref) {
   const el = map.get(xref);
@@ -17563,6 +17565,9 @@ function propagateI18nBlocksToTemplates(unit, subTemplateIndex) {
         i18nBlock = op;
         break;
       case OpKind.I18nEnd:
+        if (i18nBlock.subTemplateIndex === null) {
+          subTemplateIndex = 0;
+        }
         i18nBlock = null;
         break;
       case OpKind.Template:
@@ -18666,8 +18671,9 @@ function resolveI18nElementPlaceholders(job) {
   }
   resolvePlaceholdersForView(job, job.root, i18nContexts, elements);
 }
-function resolvePlaceholdersForView(job, unit, i18nContexts, elements) {
+function resolvePlaceholdersForView(job, unit, i18nContexts, elements, pendingStructuralDirective) {
   let currentOps = null;
+  let pendingStructuralDirectiveCloses = /* @__PURE__ */ new Map();
   for (const op of unit.create) {
     switch (op.kind) {
       case OpKind.I18nStart:
@@ -18684,47 +18690,96 @@ function resolvePlaceholdersForView(job, unit, i18nContexts, elements) {
           if (currentOps === null) {
             throw Error("i18n tag placeholder should only occur inside an i18n block");
           }
-          const { startName, closeName } = op.i18nPlaceholder;
-          let flags = I18nParamValueFlags.ElementTag | I18nParamValueFlags.OpenTag;
-          if (closeName === "") {
-            flags |= I18nParamValueFlags.CloseTag;
+          recordElementStart(op, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+          if (pendingStructuralDirective && op.i18nPlaceholder.closeName) {
+            pendingStructuralDirectiveCloses.set(op.xref, pendingStructuralDirective);
           }
-          addParam(currentOps.i18nContext.params, startName, op.handle.slot, currentOps.i18nBlock.subTemplateIndex, flags);
+          pendingStructuralDirective = void 0;
         }
         break;
       case OpKind.ElementEnd:
         const startOp = elements.get(op.xref);
         if (startOp && startOp.i18nPlaceholder !== void 0) {
           if (currentOps === null) {
-            throw Error("i18n tag placeholder should only occur inside an i18n block");
+            throw Error("AssertionError: i18n tag placeholder should only occur inside an i18n block");
           }
-          const { closeName } = startOp.i18nPlaceholder;
-          if (closeName !== "") {
-            addParam(currentOps.i18nContext.params, closeName, startOp.handle.slot, currentOps.i18nBlock.subTemplateIndex, I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag);
-          }
+          recordElementClose(startOp, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirectiveCloses.get(op.xref));
+          pendingStructuralDirectiveCloses.delete(op.xref);
         }
         break;
-      case OpKind.Template:
+      case OpKind.Projection:
         if (op.i18nPlaceholder !== void 0) {
           if (currentOps === null) {
             throw Error("i18n tag placeholder should only occur inside an i18n block");
           }
-          let startFlags = I18nParamValueFlags.TemplateTag | I18nParamValueFlags.OpenTag;
-          const subTemplateIndex = getSubTemplateIndexForTemplateTag(job, currentOps.i18nBlock, op);
-          const { startName, closeName } = op.i18nPlaceholder;
-          const isSelfClosing = closeName === "";
-          if (isSelfClosing) {
-            startFlags |= I18nParamValueFlags.CloseTag;
-          }
-          addParam(currentOps.i18nContext.params, startName, op.handle.slot, subTemplateIndex, startFlags);
-          resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements);
-          if (!isSelfClosing) {
-            addParam(currentOps.i18nContext.params, closeName, op.handle.slot, subTemplateIndex, I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag);
-          }
-        } else {
-          resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements);
+          recordElementStart(op, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+          recordElementClose(op, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+          pendingStructuralDirective = void 0;
         }
         break;
+      case OpKind.Template:
+        if (op.i18nPlaceholder === void 0) {
+          resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements);
+        } else {
+          if (currentOps === null) {
+            throw Error("i18n tag placeholder should only occur inside an i18n block");
+          }
+          if (op.templateKind === TemplateKind.Structural) {
+            resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements, op);
+          } else {
+            recordTemplateStart(job, op, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+            resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements);
+            recordTemplateClose(job, op, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+            pendingStructuralDirective = void 0;
+          }
+        }
+        break;
+    }
+  }
+}
+function recordElementStart(op, i18nContext, i18nBlock, structuralDirective) {
+  const { startName, closeName } = op.i18nPlaceholder;
+  let flags = I18nParamValueFlags.ElementTag | I18nParamValueFlags.OpenTag;
+  let value = op.handle.slot;
+  if (structuralDirective !== void 0) {
+    flags |= I18nParamValueFlags.TemplateTag;
+    value = { element: value, template: structuralDirective.handle.slot };
+  }
+  if (!closeName) {
+    flags |= I18nParamValueFlags.CloseTag;
+  }
+  addParam(i18nContext.params, startName, value, i18nBlock.subTemplateIndex, flags);
+}
+function recordElementClose(op, i18nContext, i18nBlock, structuralDirective) {
+  const { closeName } = op.i18nPlaceholder;
+  if (closeName) {
+    let flags = I18nParamValueFlags.ElementTag | I18nParamValueFlags.CloseTag;
+    let value = op.handle.slot;
+    if (structuralDirective !== void 0) {
+      flags |= I18nParamValueFlags.TemplateTag;
+      value = { element: value, template: structuralDirective.handle.slot };
+    }
+    addParam(i18nContext.params, closeName, value, i18nBlock.subTemplateIndex, flags);
+  }
+}
+function recordTemplateStart(job, op, i18nContext, i18nBlock, structuralDirective) {
+  let { startName, closeName } = op.i18nPlaceholder;
+  let flags = I18nParamValueFlags.TemplateTag | I18nParamValueFlags.OpenTag;
+  if (!closeName) {
+    flags |= I18nParamValueFlags.CloseTag;
+  }
+  if (structuralDirective !== void 0) {
+    addParam(i18nContext.params, startName, structuralDirective.handle.slot, i18nBlock.subTemplateIndex, flags);
+  }
+  addParam(i18nContext.params, startName, op.handle.slot, getSubTemplateIndexForTemplateTag(job, i18nBlock, op), flags);
+}
+function recordTemplateClose(job, op, i18nContext, i18nBlock, structuralDirective) {
+  const { startName, closeName } = op.i18nPlaceholder;
+  const flags = I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag;
+  if (closeName) {
+    addParam(i18nContext.params, closeName, op.handle.slot, getSubTemplateIndexForTemplateTag(job, i18nBlock, op), flags);
+    if (structuralDirective !== void 0) {
+      addParam(i18nContext.params, closeName, structuralDirective.handle.slot, i18nBlock.subTemplateIndex, flags);
     }
   }
 }
@@ -19848,7 +19903,8 @@ function ingestTemplate(unit, tmpl) {
   const i18nPlaceholder = tmpl.i18n instanceof TagPlaceholder ? tmpl.i18n : void 0;
   const namespace = namespaceForKey(namespacePrefix);
   const functionNameSuffix = tagNameWithoutNamespace === null ? "" : prefixWithNamespace(tagNameWithoutNamespace, namespace);
-  const tplOp = createTemplateOp(childView.xref, tagNameWithoutNamespace, functionNameSuffix, namespace, i18nPlaceholder, tmpl.startSourceSpan);
+  const templateKind = isPlainTemplate(tmpl) ? TemplateKind.NgTemplate : TemplateKind.Structural;
+  const tplOp = createTemplateOp(childView.xref, templateKind, tagNameWithoutNamespace, functionNameSuffix, namespace, i18nPlaceholder, tmpl.startSourceSpan);
   unit.create.push(tplOp);
   ingestBindings(unit, tplOp, tmpl);
   ingestReferences(tplOp, tmpl);
@@ -19856,14 +19912,18 @@ function ingestTemplate(unit, tmpl) {
   for (const { name, value } of tmpl.variables) {
     childView.contextVariables.set(name, value !== "" ? value : "$implicit");
   }
-  if (isPlainTemplate(tmpl) && tmpl.i18n instanceof Message) {
+  if (templateKind === TemplateKind.NgTemplate && tmpl.i18n instanceof Message) {
     const id = unit.job.allocateXrefId();
     OpList.insertAfter(createI18nStartOp(id, tmpl.i18n), childView.create.head);
     OpList.insertBefore(createI18nEndOp(id), childView.create.tail);
   }
 }
 function ingestContent(unit, content) {
-  const op = createProjectionOp(unit.job.allocateXrefId(), content.selector, content.sourceSpan);
+  if (content.i18n !== void 0 && !(content.i18n instanceof TagPlaceholder)) {
+    throw Error(`Unhandled i18n metadata type for element: ${content.i18n.constructor.name}`);
+  }
+  const attrs = content.attributes.flatMap((a) => [a.name, a.value]);
+  const op = createProjectionOp(unit.job.allocateXrefId(), content.selector, content.i18n, attrs, content.sourceSpan);
   for (const attr of content.attributes) {
     ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue);
   }
@@ -19909,7 +19969,7 @@ function ingestIfBlock(unit, ifBlock) {
     if (ifCase.expressionAlias !== null) {
       cView.contextVariables.set(ifCase.expressionAlias.name, CTX_REF);
     }
-    const tmplOp = createTemplateOp(cView.xref, tagName, "Conditional", Namespace.HTML, void 0, ifCase.sourceSpan);
+    const tmplOp = createTemplateOp(cView.xref, TemplateKind.Block, tagName, "Conditional", Namespace.HTML, void 0, ifCase.sourceSpan);
     unit.create.push(tmplOp);
     if (firstXref === null) {
       firstXref = cView.xref;
@@ -19929,7 +19989,7 @@ function ingestSwitchBlock(unit, switchBlock) {
   let conditions = [];
   for (const switchCase of switchBlock.cases) {
     const cView = unit.job.allocateView(unit.xref);
-    const tmplOp = createTemplateOp(cView.xref, null, "Case", Namespace.HTML, void 0, switchCase.sourceSpan);
+    const tmplOp = createTemplateOp(cView.xref, TemplateKind.Block, null, "Case", Namespace.HTML, void 0, switchCase.sourceSpan);
     unit.create.push(tmplOp);
     if (firstXref === null) {
       firstXref = cView.xref;
@@ -19949,7 +20009,7 @@ function ingestDeferView(unit, suffix, children, sourceSpan) {
   }
   const secondaryView = unit.job.allocateView(unit.xref);
   ingestNodes(secondaryView, children);
-  const templateOp = createTemplateOp(secondaryView.xref, null, `Defer${suffix}`, Namespace.HTML, void 0, sourceSpan);
+  const templateOp = createTemplateOp(secondaryView.xref, TemplateKind.Block, null, `Defer${suffix}`, Namespace.HTML, void 0, sourceSpan);
   unit.create.push(templateOp);
   return templateOp;
 }
@@ -20161,6 +20221,8 @@ function convertAst(ast, job, baseSourceSpan) {
     return new SafeInvokeFunctionExpr(convertAst(ast.receiver, job, baseSourceSpan), ast.args.map((a) => convertAst(a, job, baseSourceSpan)));
   } else if (ast instanceof EmptyExpr) {
     return new EmptyExpr2(convertSourceSpan(ast.span, baseSourceSpan));
+  } else if (ast instanceof PrefixNot) {
+    return not(convertAst(ast.expression, job, baseSourceSpan), convertSourceSpan(ast.span, baseSourceSpan));
   } else {
     throw new Error(`Unhandled expression type "${ast.constructor.name}" in file "${baseSourceSpan == null ? void 0 : baseSourceSpan.start.file.url}"`);
   }
@@ -25836,7 +25898,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.2+sha-d4b4236");
+var VERSION2 = new Version("17.1.0-next.2+sha-12dfa9b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -26902,7 +26964,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-d4b4236"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-12dfa9b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -26973,7 +27035,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-d4b4236"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-12dfa9b"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27205,7 +27267,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-d4b4236"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-12dfa9b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27228,7 +27290,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-d4b4236"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-12dfa9b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27266,7 +27328,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-d4b4236"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-12dfa9b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27290,7 +27352,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-d4b4236"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-12dfa9b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27325,7 +27387,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-d4b4236"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-12dfa9b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27342,7 +27404,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.2+sha-d4b4236");
+var VERSION3 = new Version("17.1.0-next.2+sha-12dfa9b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
