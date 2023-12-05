@@ -25896,7 +25896,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.5+sha-dc27bea");
+var VERSION2 = new Version("17.0.5+sha-2d2eaec");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -26962,7 +26962,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.5+sha-dc27bea"));
+  definitionMap.set("version", literal("17.0.5+sha-2d2eaec"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27033,7 +27033,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.5+sha-dc27bea"));
+  definitionMap.set("version", literal("17.0.5+sha-2d2eaec"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27265,7 +27265,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.5+sha-dc27bea"));
+  definitionMap.set("version", literal("17.0.5+sha-2d2eaec"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27288,7 +27288,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.5+sha-dc27bea"));
+  definitionMap.set("version", literal("17.0.5+sha-2d2eaec"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27326,7 +27326,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.5+sha-dc27bea"));
+  definitionMap.set("version", literal("17.0.5+sha-2d2eaec"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27350,7 +27350,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.5+sha-dc27bea"));
+  definitionMap.set("version", literal("17.0.5+sha-2d2eaec"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27385,7 +27385,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.5+sha-dc27bea"));
+  definitionMap.set("version", literal("17.0.5+sha-2d2eaec"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27402,7 +27402,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.5+sha-dc27bea");
+var VERSION3 = new Version("17.0.5+sha-2d2eaec");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -42015,7 +42015,11 @@ var TcbForOfOp = class extends TcbOp {
   }
   execute() {
     const loopScope = Scope3.forNodes(this.tcb, this.scope, this.block, this.block.children, null);
-    const initializer = import_typescript89.default.factory.createVariableDeclarationList([import_typescript89.default.factory.createVariableDeclaration(this.block.item.name)], import_typescript89.default.NodeFlags.Const);
+    const initializerId = loopScope.resolve(this.block.item);
+    if (!import_typescript89.default.isIdentifier(initializerId)) {
+      throw new Error(`Could not resolve for loop variable ${this.block.item.name} to an identifier`);
+    }
+    const initializer = import_typescript89.default.factory.createVariableDeclarationList([import_typescript89.default.factory.createVariableDeclaration(initializerId)], import_typescript89.default.NodeFlags.Const);
     const expression = import_typescript89.default.factory.createNonNullExpression(tcbExpression(this.block.expression, this.tcb, loopScope));
     const trackTranslator = new TcbForLoopTrackTranslator(this.tcb, loopScope, this.block);
     const trackExpression = trackTranslator.translate(this.block.trackBy);
@@ -42085,7 +42089,9 @@ var _Scope = class {
         this.registerVariable(scope, expressionAlias, new TcbBlockVariableOp(tcb, scope, tcbExpression(expression, tcb, scope), expressionAlias));
       }
     } else if (scopedNode instanceof ForLoopBlock) {
-      this.registerVariable(scope, scopedNode.item, new TcbBlockVariableOp(tcb, scope, import_typescript89.default.factory.createIdentifier(scopedNode.item.name), scopedNode.item));
+      const loopInitializer = tcb.allocateId();
+      addParseSpanInfo(loopInitializer, scopedNode.item.sourceSpan);
+      scope.varMap.set(scopedNode.item, loopInitializer);
       for (const [name, variable2] of Object.entries(scopedNode.contextVariables)) {
         if (!this.forLoopContextVariableTypes.has(name)) {
           throw new Error(`Unrecognized for loop context variable ${name}`);
@@ -42150,7 +42156,8 @@ var _Scope = class {
     if (ref instanceof Reference && this.referenceOpMap.has(ref)) {
       return this.resolveOp(this.referenceOpMap.get(ref));
     } else if (ref instanceof Variable && this.varMap.has(ref)) {
-      return this.resolveOp(this.varMap.get(ref));
+      const opIndexOrNode = this.varMap.get(ref);
+      return typeof opIndexOrNode === "number" ? this.resolveOp(opIndexOrNode) : opIndexOrNode;
     } else if (ref instanceof Template && directive === void 0 && this.templateCtxOpMap.has(ref)) {
       return this.resolveOp(this.templateCtxOpMap.get(ref));
     } else if ((ref instanceof Element || ref instanceof Template) && directive !== void 0 && this.directiveOpMap.has(ref)) {
