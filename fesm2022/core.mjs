@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.2+sha-12dfa9b
+ * @license Angular v17.1.0-next.2+sha-1e3bcfe
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -200,7 +200,7 @@ function formatRuntimeError(code, message) {
     // We also prepend `0` to non-compile-time errors.
     const fullCode = `NG0${Math.abs(code)}`;
     let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
-    if (ngDevMode && code < 0) {
+    if (code < 0) {
         const addPeriodSeparator = !errorMessage.match(/[.,;!?\n]$/);
         const separator = addPeriodSeparator ? '.' : '';
         errorMessage =
@@ -8267,7 +8267,6 @@ function detachView(lContainer, removeIndex) {
 function destroyLView(tView, lView) {
     if (!(lView[FLAGS] & 256 /* LViewFlags.Destroyed */)) {
         const renderer = lView[RENDERER];
-        lView[REACTIVE_TEMPLATE_CONSUMER] && consumerDestroy$1(lView[REACTIVE_TEMPLATE_CONSUMER]);
         if (renderer.destroyNode) {
             applyView(tView, lView, renderer, 3 /* WalkTNodeTreeAction.Destroy */, null, null);
         }
@@ -8293,6 +8292,7 @@ function cleanUpView(tView, lView) {
         // This also aligns with the ViewEngine behavior. It also means that the onDestroy hook is
         // really more of an "afterDestroy" hook if you think about it.
         lView[FLAGS] |= 256 /* LViewFlags.Destroyed */;
+        lView[REACTIVE_TEMPLATE_CONSUMER] && consumerDestroy$1(lView[REACTIVE_TEMPLATE_CONSUMER]);
         executeOnDestroys(tView, lView);
         processCleanups(tView, lView);
         // For component views only, the local renderer is destroyed at clean up time.
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.2+sha-12dfa9b');
+const VERSION = new Version('17.1.0-next.2+sha-1e3bcfe');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19118,6 +19118,17 @@ function getNoOffsetIndex(tNode) {
     return tNode.index - HEADER_OFFSET;
 }
 /**
+ * Check whether a given node exists, but is disconnected from the DOM.
+ *
+ * Note: we leverage the fact that we have this information available in the DOM emulation
+ * layer (in Domino) for now. Longer-term solution should not rely on the DOM emulation and
+ * only use internal data structures and state to compute this information.
+ */
+function isDisconnectedNode(tNode, lView) {
+    return !(tNode.type & 16 /* TNodeType.Projection */) && !!lView[tNode.index] &&
+        !unwrapRNode(lView[tNode.index])?.isConnected;
+}
+/**
  * Locate a node in DOM tree that corresponds to a given TNode.
  *
  * @param hydrationInfo The hydration annotation data
@@ -19318,10 +19329,20 @@ function calcPathBetween(from, to, fromNodeName) {
  * instructions needs to be generated for a TNode.
  */
 function calcPathForNode(tNode, lView) {
-    const parentTNode = tNode.parent;
+    let parentTNode = tNode.parent;
     let parentIndex;
     let parentRNode;
     let referenceNodeName;
+    // Skip over all parent nodes that are disconnected from the DOM, such nodes
+    // can not be used as anchors.
+    //
+    // This might happen in certain content projection-based use-cases, where
+    // a content of an element is projected and used, when a parent element
+    // itself remains detached from DOM. In this scenario we try to find a parent
+    // element that is attached to DOM and can act as an anchor instead.
+    while (parentTNode !== null && isDisconnectedNode(parentTNode, lView)) {
+        parentTNode = parentTNode.parent;
+    }
     if (parentTNode === null || !(parentTNode.type & 3 /* TNodeType.AnyRNode */)) {
         // If there is no parent TNode or a parent TNode does not represent an RNode
         // (i.e. not a DOM node), use component host element as a reference node.
@@ -34506,17 +34527,6 @@ function isContentProjectedNode(tNode) {
         currentTNode = currentTNode.parent;
     }
     return false;
-}
-/**
- * Check whether a given node exists, but is disconnected from the DOM.
- *
- * Note: we leverage the fact that we have this information available in the DOM emulation
- * layer (in Domino) for now. Longer-term solution should not rely on the DOM emulation and
- * only use internal data structures and state to compute this information.
- */
-function isDisconnectedNode(tNode, lView) {
-    return !(tNode.type & 16 /* TNodeType.Projection */) && !!lView[tNode.index] &&
-        !unwrapRNode(lView[tNode.index])?.isConnected;
 }
 
 /**

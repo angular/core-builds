@@ -25006,7 +25006,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.2+sha-12dfa9b");
+var VERSION2 = new Version("17.1.0-next.2+sha-1e3bcfe");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25381,9 +25381,7 @@ function updateImportClause(clause, removeCommonModule) {
   return clause;
 }
 function updateClassImports(propAssignment, removeCommonModule) {
-  const printer = import_typescript5.default.createPrinter({
-    removeComments: true
-  });
+  const printer = import_typescript5.default.createPrinter();
   const importList = propAssignment.initializer;
   const removals = removeCommonModule ? importWithCommonRemovals : importRemovals;
   const elements = importList.elements.filter((el) => !removals.includes(el.getText()));
@@ -26013,6 +26011,9 @@ function migrateNgIf(etm, tmpl, offset) {
 function buildIfBlock(etm, tmpl, offset) {
   const aliasAttrs = etm.aliasAttrs;
   const aliases = [...aliasAttrs.aliases.keys()];
+  if (aliasAttrs.item) {
+    aliases.push(aliasAttrs.item);
+  }
   const lbString = etm.hasLineBreaks ? "\n" : "";
   let condition = etm.attr.value.replace(" as ", "; as ").replace(/;\s*let/g, "; as");
   if (aliases.length > 1 || aliases.length === 1 && condition.indexOf("; as") > -1) {
@@ -26038,6 +26039,9 @@ function buildStandardIfElseBlock(etm, tmpl, elseString, offset) {
 function buildBoundIfElseBlock(etm, tmpl, offset) {
   const aliasAttrs = etm.aliasAttrs;
   const aliases = [...aliasAttrs.aliases.keys()];
+  if (aliasAttrs.item) {
+    aliases.push(aliasAttrs.item);
+  }
   let condition = etm.attr.value.replace(" as ", "; as ");
   if (aliases.length > 1 || aliases.length === 1 && condition.indexOf("; as") > -1) {
     throw new Error("Found more than one alias on your ngIf. Remove one of them and re-run the migration.");
