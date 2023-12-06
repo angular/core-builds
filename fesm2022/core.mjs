@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.5+sha-7c863d7
+ * @license Angular v17.0.5+sha-d4fdba5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -200,7 +200,7 @@ function formatRuntimeError(code, message) {
     // We also prepend `0` to non-compile-time errors.
     const fullCode = `NG0${Math.abs(code)}`;
     let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
-    if (code < 0) {
+    if (ngDevMode && code < 0) {
         const addPeriodSeparator = !errorMessage.match(/[.,;!?\n]$/);
         const separator = addPeriodSeparator ? '.' : '';
         errorMessage =
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.5+sha-7c863d7');
+const VERSION = new Version('17.0.5+sha-d4fdba5');
 
 // This default value is when checking the hierarchy for a token.
 //
