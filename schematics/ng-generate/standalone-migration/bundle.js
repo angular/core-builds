@@ -8050,11 +8050,11 @@ var I18nParamResolutionTime;
   I18nParamResolutionTime2[I18nParamResolutionTime2["Creation"] = 0] = "Creation";
   I18nParamResolutionTime2[I18nParamResolutionTime2["Postproccessing"] = 1] = "Postproccessing";
 })(I18nParamResolutionTime || (I18nParamResolutionTime = {}));
-var I18nExpressionContext;
-(function(I18nExpressionContext2) {
-  I18nExpressionContext2[I18nExpressionContext2["Normal"] = 0] = "Normal";
-  I18nExpressionContext2[I18nExpressionContext2["Binding"] = 1] = "Binding";
-})(I18nExpressionContext || (I18nExpressionContext = {}));
+var I18nExpressionFor;
+(function(I18nExpressionFor2) {
+  I18nExpressionFor2[I18nExpressionFor2["I18nText"] = 0] = "I18nText";
+  I18nExpressionFor2[I18nExpressionFor2["I18nAttribute"] = 1] = "I18nAttribute";
+})(I18nExpressionFor || (I18nExpressionFor = {}));
 var I18nParamValueFlags;
 (function(I18nParamValueFlags2) {
   I18nParamValueFlags2[I18nParamValueFlags2["None"] = 0] = "None";
@@ -8287,11 +8287,12 @@ function createDeferWhenOp(target, expr, prefetch, sourceSpan) {
     sourceSpan
   }, NEW_OP), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
 }
-function createI18nExpressionOp(context, target, handle, expression, i18nPlaceholder, resolutionTime, usage, name, sourceSpan) {
+function createI18nExpressionOp(context, target, i18nOwner, handle, expression, i18nPlaceholder, resolutionTime, usage, name, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.I18nExpression,
     context,
     target,
+    i18nOwner,
     handle,
     expression,
     i18nPlaceholder,
@@ -8301,10 +8302,10 @@ function createI18nExpressionOp(context, target, handle, expression, i18nPlaceho
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_VARS), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
 }
-function createI18nApplyOp(target, handle, sourceSpan) {
+function createI18nApplyOp(owner, handle, sourceSpan) {
   return __spreadValues({
     kind: OpKind.I18nApply,
-    target,
+    owner,
     handle,
     sourceSpan
   }, NEW_OP);
@@ -9092,6 +9093,8 @@ function transformExpressionsInExpression(expr, transform2, flags) {
   } else if (expr instanceof BinaryOperatorExpr) {
     expr.lhs = transformExpressionsInExpression(expr.lhs, transform2, flags);
     expr.rhs = transformExpressionsInExpression(expr.rhs, transform2, flags);
+  } else if (expr instanceof UnaryOperatorExpr) {
+    expr.expr = transformExpressionsInExpression(expr.expr, transform2, flags);
   } else if (expr instanceof ReadPropExpr) {
     expr.receiver = transformExpressionsInExpression(expr.receiver, transform2, flags);
   } else if (expr instanceof ReadKeyExpr) {
@@ -9776,7 +9779,7 @@ function applyI18nExpressions(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression && needsApplication(i18nContexts, op)) {
-        OpList.insertAfter(createI18nApplyOp(op.target, op.handle, null), op);
+        OpList.insertAfter(createI18nApplyOp(op.i18nOwner, op.handle, null), op);
       }
     }
   }
@@ -9800,7 +9803,7 @@ function needsApplication(i18nContexts, op) {
     }
     return false;
   }
-  if (op.target !== op.next.target) {
+  if (op.i18nOwner !== op.next.i18nOwner) {
     return true;
   }
   return false;
@@ -9824,36 +9827,38 @@ function assignI18nSlotDependencies(job) {
           if (currentI18nOp === null) {
             throw new Error("AssertionError: Expected an active I18n block while calculating last slot consumers");
           }
+          if (lastSlotConsumer === null) {
+            throw new Error("AssertionError: Expected a last slot consumer while calculating last slot consumers");
+          }
           i18nLastSlotConsumers.set(currentI18nOp.xref, lastSlotConsumer);
           currentI18nOp = null;
           break;
       }
     }
-    let moveToTarget = null;
     let opsToMove = [];
+    let moveAfterTarget = null;
     let previousTarget = null;
-    let currentTarget = null;
     for (const op of unit.update) {
-      currentTarget = hasDependsOnSlotContextTrait(op) ? op.target : null;
-      if (op.kind === OpKind.I18nExpression) {
-        op.target = op.usage === I18nExpressionContext.Normal ? i18nLastSlotConsumers.get(op.target) : op.target;
-        if (op.target === void 0) {
-          throw new Error("AssertionError: Expected every I18nExpressionOp to have a valid reordering target");
+      if (hasDependsOnSlotContextTrait(op)) {
+        if (moveAfterTarget !== null && previousTarget === moveAfterTarget && op.target !== previousTarget) {
+          OpList.insertBefore(opsToMove, op);
+          moveAfterTarget = null;
+          opsToMove = [];
         }
-        moveToTarget = op.target;
+        previousTarget = op.target;
       }
-      if (op.kind === OpKind.I18nExpression || op.kind === OpKind.I18nApply) {
-        opsToMove.push(op);
+      if (op.kind === OpKind.I18nExpression && op.usage === I18nExpressionFor.I18nText) {
         OpList.remove(op);
-        currentTarget = moveToTarget;
+        opsToMove.push(op);
+        const target = i18nLastSlotConsumers.get(op.i18nOwner);
+        if (target === void 0) {
+          throw new Error("AssertionError: Expected to find a last slot consumer for an I18nExpressionOp");
+        }
+        op.target = target;
+        moveAfterTarget = op.target;
       }
-      if (moveToTarget !== null && previousTarget === moveToTarget && currentTarget !== previousTarget) {
-        OpList.insertBefore(opsToMove, op);
-        opsToMove = [];
-      }
-      previousTarget = currentTarget;
     }
-    if (opsToMove) {
+    if (moveAfterTarget !== null) {
       unit.update.push(opsToMove);
     }
   }
@@ -10327,7 +10332,7 @@ function convertI18nBindings(job) {
             if (op.expression.i18nPlaceholders.length !== op.expression.expressions.length) {
               throw new Error(`AssertionError: An i18n attribute binding instruction requires the same number of expressions and placeholders, but found ${op.expression.i18nPlaceholders.length} placeholders and ${op.expression.expressions.length} expressions`);
             }
-            ops.push(createI18nExpressionOp(op.i18nContext, i18nAttributesForElem.target, i18nAttributesForElem.handle, expr, op.expression.i18nPlaceholders[i], I18nParamResolutionTime.Creation, I18nExpressionContext.Binding, op.name, op.sourceSpan));
+            ops.push(createI18nExpressionOp(op.i18nContext, i18nAttributesForElem.target, i18nAttributesForElem.xref, i18nAttributesForElem.handle, expr, op.expression.i18nPlaceholders[i], I18nParamResolutionTime.Creation, I18nExpressionFor.I18nAttribute, op.name, op.sourceSpan));
           }
           OpList.replaceWithMany(op, ops);
           break;
@@ -10838,7 +10843,7 @@ function generateAdvance(job) {
       if (!hasDependsOnSlotContextTrait(op)) {
         continue;
       } else if (!slotMap.has(op.target)) {
-        throw new Error(`AssertionError: reference to unknown slot for var ${op.target}`);
+        throw new Error(`AssertionError: reference to unknown slot for target ${op.target}`);
       }
       const slot = slotMap.get(op.target);
       if (slotContext !== slot) {
@@ -16986,19 +16991,19 @@ function collectI18nConsts(job) {
   var _a2;
   const fileBasedI18nSuffix = job.relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_").toUpperCase() + "_";
   const extractedAttributesByI18nContext = /* @__PURE__ */ new Map();
-  const i18nAttributesByTarget = /* @__PURE__ */ new Map();
-  const i18nExpressionsByTarget = /* @__PURE__ */ new Map();
+  const i18nAttributesByElement = /* @__PURE__ */ new Map();
+  const i18nExpressionsByElement = /* @__PURE__ */ new Map();
   const messages = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.ops()) {
       if (op.kind === OpKind.ExtractedAttribute && op.i18nContext !== null) {
         extractedAttributesByI18nContext.set(op.i18nContext, op);
       } else if (op.kind === OpKind.I18nAttributes) {
-        i18nAttributesByTarget.set(op.target, op);
-      } else if (op.kind === OpKind.I18nExpression) {
-        const expressions = (_a2 = i18nExpressionsByTarget.get(op.target)) != null ? _a2 : [];
+        i18nAttributesByElement.set(op.target, op);
+      } else if (op.kind === OpKind.I18nExpression && op.usage === I18nExpressionFor.I18nAttribute) {
+        const expressions = (_a2 = i18nExpressionsByElement.get(op.target)) != null ? _a2 : [];
         expressions.push(op);
-        i18nExpressionsByTarget.set(op.target, expressions);
+        i18nExpressionsByElement.set(op.target, expressions);
       } else if (op.kind === OpKind.I18nMessage) {
         messages.set(op.xref, op);
       }
@@ -17030,11 +17035,11 @@ function collectI18nConsts(job) {
   for (const unit of job.units) {
     for (const elem of unit.create) {
       if (isElementOrContainerOp(elem)) {
-        const i18nAttributes2 = i18nAttributesByTarget.get(elem.xref);
+        const i18nAttributes2 = i18nAttributesByElement.get(elem.xref);
         if (i18nAttributes2 === void 0) {
           continue;
         }
-        let i18nExpressions = i18nExpressionsByTarget.get(elem.xref);
+        let i18nExpressions = i18nExpressionsByElement.get(elem.xref);
         if (i18nExpressions === void 0) {
           throw new Error("AssertionError: Could not find any i18n expressions associated with an I18nAttributes instruction");
         }
@@ -17185,7 +17190,7 @@ function convertI18nText(job) {
           const ops = [];
           for (let i = 0; i < op.interpolation.expressions.length; i++) {
             const expr = op.interpolation.expressions[i];
-            ops.push(createI18nExpressionOp(contextId, i18nOp.xref, i18nOp.handle, expr, op.interpolation.i18nPlaceholders[i], resolutionTime, I18nExpressionContext.Normal, "", (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
+            ops.push(createI18nExpressionOp(contextId, i18nOp.xref, i18nOp.xref, i18nOp.handle, expr, op.interpolation.i18nPlaceholders[i], resolutionTime, I18nExpressionFor.I18nText, "", (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
           }
           OpList.replaceWithMany(op, ops);
           break;
@@ -18741,17 +18746,17 @@ function removeI18nContexts(job) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/remove_unused_i18n_attrs.mjs
 function removeUnusedI18nAttributesOps(job) {
   for (const unit of job.units) {
-    const targetsWithI18nApply = /* @__PURE__ */ new Set();
+    const ownersWithI18nExpressions = /* @__PURE__ */ new Set();
     for (const op of unit.update) {
       switch (op.kind) {
-        case OpKind.I18nApply:
-          targetsWithI18nApply.add(op.target);
+        case OpKind.I18nExpression:
+          ownersWithI18nExpressions.add(op.i18nOwner);
       }
     }
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nAttributes:
-          if (targetsWithI18nApply.has(op.target)) {
+          if (ownersWithI18nExpressions.has(op.xref)) {
             continue;
           }
           OpList.remove(op);
@@ -19017,13 +19022,13 @@ function resolveI18nExpressionPlaceholders(job) {
     }
   }
   const expressionIndices = /* @__PURE__ */ new Map();
-  const referenceIndex = (op) => op.usage === I18nExpressionContext.Normal ? op.target : op.context;
+  const referenceIndex = (op) => op.usage === I18nExpressionFor.I18nText ? op.i18nOwner : op.context;
   for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
         const i18nContext = i18nContexts.get(op.context);
         const index = expressionIndices.get(referenceIndex(op)) || 0;
-        const subTemplateIndex = (_a2 = subTemplateIndicies.get(op.target)) != null ? _a2 : null;
+        const subTemplateIndex = (_a2 = subTemplateIndicies.get(op.i18nOwner)) != null ? _a2 : null;
         const params = op.resolutionTime === I18nParamResolutionTime.Creation ? i18nContext.params : i18nContext.postprocessingParams;
         const values = params.get(op.i18nPlaceholder) || [];
         values.push({
@@ -19844,6 +19849,8 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: configureDeferInstructions },
   { kind: CompilationJobKind.Tmpl, fn: convertI18nText },
   { kind: CompilationJobKind.Tmpl, fn: convertI18nBindings },
+  { kind: CompilationJobKind.Tmpl, fn: removeUnusedI18nAttributesOps },
+  { kind: CompilationJobKind.Tmpl, fn: assignI18nSlotDependencies },
   { kind: CompilationJobKind.Tmpl, fn: applyI18nExpressions },
   { kind: CompilationJobKind.Tmpl, fn: createVariadicPipes },
   { kind: CompilationJobKind.Both, fn: generatePureLiteralStructures },
@@ -19870,11 +19877,9 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nIcuPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackFns },
-  { kind: CompilationJobKind.Tmpl, fn: removeUnusedI18nAttributesOps },
   { kind: CompilationJobKind.Tmpl, fn: collectI18nConsts },
   { kind: CompilationJobKind.Tmpl, fn: collectConstExpressions },
   { kind: CompilationJobKind.Both, fn: collectElementConsts },
-  { kind: CompilationJobKind.Tmpl, fn: assignI18nSlotDependencies },
   { kind: CompilationJobKind.Tmpl, fn: removeI18nContexts },
   { kind: CompilationJobKind.Both, fn: countVariables },
   { kind: CompilationJobKind.Tmpl, fn: generateAdvance },
@@ -20110,10 +20115,10 @@ function ingestTemplate(unit, tmpl) {
   const namespace = namespaceForKey(namespacePrefix);
   const functionNameSuffix = tagNameWithoutNamespace === null ? "" : prefixWithNamespace(tagNameWithoutNamespace, namespace);
   const templateKind = isPlainTemplate(tmpl) ? TemplateKind.NgTemplate : TemplateKind.Structural;
-  const tplOp = createTemplateOp(childView.xref, templateKind, tagNameWithoutNamespace, functionNameSuffix, namespace, i18nPlaceholder, tmpl.startSourceSpan);
-  unit.create.push(tplOp);
-  ingestBindings(unit, tplOp, tmpl);
-  ingestReferences(tplOp, tmpl);
+  const templateOp = createTemplateOp(childView.xref, templateKind, tagNameWithoutNamespace, functionNameSuffix, namespace, i18nPlaceholder, tmpl.startSourceSpan);
+  unit.create.push(templateOp);
+  ingestBindings(unit, templateOp, tmpl);
+  ingestReferences(templateOp, tmpl);
   ingestNodes(childView, tmpl.children);
   for (const { name, value } of tmpl.variables) {
     childView.contextVariables.set(name, value !== "" ? value : "$implicit");
@@ -20162,6 +20167,7 @@ function ingestBoundText(unit, text2, i18nPlaceholders) {
   unit.update.push(createInterpolateTextOp(textXref, new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, unit.job, baseSourceSpan)), i18nPlaceholders), text2.sourceSpan));
 }
 function ingestIfBlock(unit, ifBlock) {
+  var _a2;
   let firstXref = null;
   let firstSlotHandle = null;
   let conditions = [];
@@ -20175,14 +20181,21 @@ function ingestIfBlock(unit, ifBlock) {
     if (ifCase.expressionAlias !== null) {
       cView.contextVariables.set(ifCase.expressionAlias.name, CTX_REF);
     }
-    const tmplOp = createTemplateOp(cView.xref, TemplateKind.Block, tagName, "Conditional", Namespace.HTML, void 0, ifCase.sourceSpan);
-    unit.create.push(tmplOp);
+    let ifCaseI18nMeta = void 0;
+    if (ifCase.i18n !== void 0) {
+      if (!(ifCase.i18n instanceof BlockPlaceholder)) {
+        throw Error(`Unhandled i18n metadata type for if block: ${(_a2 = ifCase.i18n) == null ? void 0 : _a2.constructor.name}`);
+      }
+      ifCaseI18nMeta = ifCase.i18n;
+    }
+    const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, tagName, "Conditional", Namespace.HTML, ifCaseI18nMeta, ifCase.sourceSpan);
+    unit.create.push(templateOp);
     if (firstXref === null) {
       firstXref = cView.xref;
-      firstSlotHandle = tmplOp.handle;
+      firstSlotHandle = templateOp.handle;
     }
     const caseExpr = ifCase.expression ? convertAst(ifCase.expression, unit.job, null) : null;
-    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, tmplOp.xref, tmplOp.handle, ifCase.expressionAlias);
+    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, templateOp.xref, templateOp.handle, ifCase.expressionAlias);
     conditions.push(conditionalCaseExpr);
     ingestNodes(cView, ifCase.children);
   }
@@ -20190,19 +20203,27 @@ function ingestIfBlock(unit, ifBlock) {
   unit.update.push(conditional2);
 }
 function ingestSwitchBlock(unit, switchBlock) {
+  var _a2;
   let firstXref = null;
   let firstSlotHandle = null;
   let conditions = [];
   for (const switchCase of switchBlock.cases) {
     const cView = unit.job.allocateView(unit.xref);
-    const tmplOp = createTemplateOp(cView.xref, TemplateKind.Block, null, "Case", Namespace.HTML, void 0, switchCase.sourceSpan);
-    unit.create.push(tmplOp);
+    let switchCaseI18nMeta = void 0;
+    if (switchCase.i18n !== void 0) {
+      if (!(switchCase.i18n instanceof BlockPlaceholder)) {
+        throw Error(`Unhandled i18n metadata type for switch block: ${(_a2 = switchCase.i18n) == null ? void 0 : _a2.constructor.name}`);
+      }
+      switchCaseI18nMeta = switchCase.i18n;
+    }
+    const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, null, "Case", Namespace.HTML, switchCaseI18nMeta, switchCase.sourceSpan);
+    unit.create.push(templateOp);
     if (firstXref === null) {
       firstXref = cView.xref;
-      firstSlotHandle = tmplOp.handle;
+      firstSlotHandle = templateOp.handle;
     }
     const caseExpr = switchCase.expression ? convertAst(switchCase.expression, unit.job, switchBlock.startSourceSpan) : null;
-    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, tmplOp.xref, tmplOp.handle);
+    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, templateOp.xref, templateOp.handle);
     conditions.push(conditionalCaseExpr);
     ingestNodes(cView, switchCase.children);
   }
@@ -20391,7 +20412,14 @@ function convertAst(ast, job, baseSourceSpan) {
   } else if (ast instanceof LiteralPrimitive) {
     return literal(ast.value, void 0, convertSourceSpan(ast.span, baseSourceSpan));
   } else if (ast instanceof Unary) {
-    throw new Error("TODO: Support unary operations, which extend binary ops");
+    switch (ast.operator) {
+      case "+":
+        return new UnaryOperatorExpr(UnaryOperator.Plus, convertAst(ast.expr, job, baseSourceSpan), void 0, convertSourceSpan(ast.span, baseSourceSpan));
+      case "-":
+        return new UnaryOperatorExpr(UnaryOperator.Minus, convertAst(ast.expr, job, baseSourceSpan), void 0, convertSourceSpan(ast.span, baseSourceSpan));
+      default:
+        throw new Error(`AssertionError: unknown unary operator ${ast.operator}`);
+    }
   } else if (ast instanceof Binary) {
     const operator = BINARY_OPERATORS.get(ast.operation);
     if (operator === void 0) {
@@ -26126,7 +26154,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.2+sha-580af8e");
+var VERSION2 = new Version("17.1.0-next.2+sha-a1e3485");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27192,7 +27220,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-580af8e"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-a1e3485"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27263,7 +27291,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-580af8e"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-a1e3485"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27495,7 +27523,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-580af8e"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-a1e3485"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27518,7 +27546,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-580af8e"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-a1e3485"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27556,7 +27584,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-580af8e"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-a1e3485"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27580,7 +27608,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-580af8e"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-a1e3485"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27615,7 +27643,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-580af8e"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-a1e3485"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27632,7 +27660,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.2+sha-580af8e");
+var VERSION3 = new Version("17.1.0-next.2+sha-a1e3485");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
