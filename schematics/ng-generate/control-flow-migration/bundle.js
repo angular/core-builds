@@ -25234,7 +25234,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.2+sha-05f9c7b");
+var VERSION2 = new Version("17.1.0-next.2+sha-e620b3a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25739,7 +25739,7 @@ function getTemplates(template2) {
     visitAll2(visitor, parsed.rootNodes);
     for (let [key, tmpl] of visitor.templates) {
       const escapeKey = escapeRegExp(key.slice(1));
-      const regex = new RegExp(`[^a-zA-Z0-9-<']${escapeKey}\\W`, "gm");
+      const regex = new RegExp(`[^a-zA-Z0-9-<(']${escapeKey}\\W`, "gm");
       const matches = template2.match(regex);
       tmpl.count = (_a2 = matches == null ? void 0 : matches.length) != null ? _a2 : 0;
       tmpl.generateContents(template2);
@@ -25747,6 +25747,13 @@ function getTemplates(template2) {
     return visitor.templates;
   }
   return /* @__PURE__ */ new Map();
+}
+function updateTemplates(template2, templates) {
+  const updatedTemplates = getTemplates(template2);
+  for (let [key, tmpl] of updatedTemplates) {
+    templates.set(key, tmpl);
+  }
+  return templates;
 }
 function wrapIntoI18nContainer(i18nAttr, content) {
   const { start, middle, end } = generatei18nContainer(i18nAttr, content);
@@ -25784,12 +25791,25 @@ function processNgTemplates(template2) {
         if (t.count === matches.length + 1 && safeToRemove) {
           template2 = template2.replace(t.contents, "");
         }
+        updateTemplates(template2, templates);
       }
     }
+    template2 = replaceRemainingPlaceholders(template2);
     return { migrated: template2, err: void 0 };
   } catch (err) {
     return { migrated: template2, err };
   }
+}
+function replaceRemainingPlaceholders(template2) {
+  const replaceRegex = new RegExp(`#\\w*\\|`, "g");
+  const placeholders = [...template2.matchAll(replaceRegex)];
+  let migrated = template2;
+  for (let ph of placeholders) {
+    const placeholder = ph[0];
+    const name = placeholder.slice(1, placeholder.length - 1);
+    migrated = template2.replace(placeholder, `<ng-template [ngTemplateOutlet]="${name}"></ng-template>`);
+  }
+  return migrated;
 }
 function canRemoveCommonModule(template2) {
   const parsed = parseTemplate2(template2);

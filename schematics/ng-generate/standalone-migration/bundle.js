@@ -26126,7 +26126,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.2+sha-05f9c7b");
+var VERSION2 = new Version("17.1.0-next.2+sha-e620b3a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27192,7 +27192,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-05f9c7b"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-e620b3a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27263,7 +27263,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-05f9c7b"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-e620b3a"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27495,7 +27495,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-05f9c7b"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-e620b3a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27518,7 +27518,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-05f9c7b"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-e620b3a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27556,7 +27556,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-05f9c7b"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-e620b3a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27580,7 +27580,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-05f9c7b"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-e620b3a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27615,7 +27615,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.2+sha-05f9c7b"));
+  definitionMap.set("version", literal("17.1.0-next.2+sha-e620b3a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27632,7 +27632,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.2+sha-05f9c7b");
+var VERSION3 = new Version("17.1.0-next.2+sha-e620b3a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -27930,6 +27930,7 @@ var ExtendedTemplateDiagnosticName;
   ExtendedTemplateDiagnosticName2["SUFFIX_NOT_SUPPORTED"] = "suffixNotSupported";
   ExtendedTemplateDiagnosticName2["SKIP_HYDRATION_NOT_STATIC"] = "skipHydrationNotStatic";
   ExtendedTemplateDiagnosticName2["INTERPOLATED_SIGNAL_NOT_INVOKED"] = "interpolatedSignalNotInvoked";
+  ExtendedTemplateDiagnosticName2["CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION"] = "controlFlowPreventingContentProjection";
 })(ExtendedTemplateDiagnosticName || (ExtendedTemplateDiagnosticName = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/common/src/util.mjs
@@ -41063,7 +41064,7 @@ Deferred blocks can only access triggers in same view, a parent embedded view or
     }
     this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), trigger.sourceSpan, import_typescript86.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.INACCESSIBLE_DEFERRED_TRIGGER_ELEMENT), message));
   }
-  controlFlowPreventingContentProjection(templateId, projectionNode, componentName, slotSelector, controlFlowNode, preservesWhitespaces) {
+  controlFlowPreventingContentProjection(templateId, category, projectionNode, componentName, slotSelector, controlFlowNode, preservesWhitespaces) {
     const blockName = controlFlowNode instanceof IfBlockBranch ? "@if" : "@for";
     const lines = [
       `Node matches the "${slotSelector}" slot of the "${componentName}" component, but will not be projected into the specific slot because the surrounding ${blockName} has more than one node at its root. To project the node in the right slot, you can:
@@ -41073,9 +41074,10 @@ Deferred blocks can only access triggers in same view, a parent embedded view or
       `3. Remove all content from the ${blockName} block, except for the node being projected.`
     ];
     if (preservesWhitespaces) {
-      lines.push(`Note: the host component has \`preserveWhitespaces: true\` which may cause whitespace to affect content projection.`);
+      lines.push("Note: the host component has `preserveWhitespaces: true` which may cause whitespace to affect content projection.");
     }
-    this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), projectionNode.startSourceSpan, import_typescript86.default.DiagnosticCategory.Warning, ngErrorCode(ErrorCode.CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION), lines.join("\n")));
+    lines.push("", 'This check can be disabled using the `extendedDiagnostics.checks.controlFlowPreventingContentProjection = "suppress" compiler option.`');
+    this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), projectionNode.startSourceSpan, category, ngErrorCode(ErrorCode.CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION), lines.join("\n")));
   }
 };
 function makeInlineDiagnostic(templateId, code, node, messageText, relatedInformation) {
@@ -41978,6 +41980,7 @@ var TcbControlFlowContentProjectionOp = class extends TcbOp {
     this.ngContentSelectors = ngContentSelectors;
     this.componentName = componentName;
     this.optional = false;
+    this.category = tcb.env.config.controlFlowPreventingContentProjection === "error" ? import_typescript90.default.DiagnosticCategory.Error : import_typescript90.default.DiagnosticCategory.Warning;
   }
   execute() {
     const controlFlowToCheck = this.findPotentialControlFlowNodes();
@@ -41992,7 +41995,7 @@ var TcbControlFlowContentProjectionOp = class extends TcbOp {
         for (const child of root.children) {
           if (child instanceof Element || child instanceof Template) {
             matcher.match(createCssSelectorFromNode(child), (_, originalSelector) => {
-              this.tcb.oobRecorder.controlFlowPreventingContentProjection(this.tcb.id, child, this.componentName, originalSelector, root, this.tcb.hostPreserveWhitespaces);
+              this.tcb.oobRecorder.controlFlowPreventingContentProjection(this.tcb.id, this.category, child, this.componentName, originalSelector, root, this.tcb.hostPreserveWhitespaces);
             });
           }
         }
@@ -42527,7 +42530,9 @@ var _Scope = class {
     if (node instanceof Element) {
       const opIndex = this.opQueue.push(new TcbElementOp(this.tcb, this, node)) - 1;
       this.elementOpMap.set(node, opIndex);
-      this.appendContentProjectionCheckOp(node);
+      if (this.tcb.env.config.controlFlowPreventingContentProjection !== "suppress") {
+        this.appendContentProjectionCheckOp(node);
+      }
       this.appendDirectivesAndInputsOfNode(node);
       this.appendOutputsOfNode(node);
       this.appendChildren(node);
@@ -44988,6 +44993,10 @@ var ALL_DIAGNOSTIC_FACTORIES = [
   factory7,
   factory
 ];
+var SUPPORTED_DIAGNOSTIC_NAMES = /* @__PURE__ */ new Set([
+  ExtendedTemplateDiagnosticName.CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION,
+  ...ALL_DIAGNOSTIC_FACTORIES.map((factory9) => factory9.name)
+]);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/core/src/compiler.mjs
 var CompilationTicketKind;
@@ -45307,6 +45316,7 @@ var NgCompiler = class {
     return strictTemplates || !!this.options.fullTemplateTypeCheck;
   }
   getTypeCheckingConfig() {
+    var _a2, _b2, _c2, _d2;
     const strictTemplates = !!this.options.strictTemplates;
     const useInlineTypeConstructors = this.programDriver.supportsInlineOperations;
     let typeCheckingConfig;
@@ -45332,7 +45342,8 @@ var NgCompiler = class {
         strictLiteralTypes: true,
         enableTemplateTypeChecker: this.enableTemplateTypeChecker,
         useInlineTypeConstructors,
-        suggestionsForSuboptimalTypeInference: this.enableTemplateTypeChecker && !strictTemplates
+        suggestionsForSuboptimalTypeInference: this.enableTemplateTypeChecker && !strictTemplates,
+        controlFlowPreventingContentProjection: ((_a2 = this.options.extendedDiagnostics) == null ? void 0 : _a2.defaultCategory) || DiagnosticCategoryLabel.Warning
       };
     } else {
       typeCheckingConfig = {
@@ -45356,7 +45367,8 @@ var NgCompiler = class {
         strictLiteralTypes: false,
         enableTemplateTypeChecker: this.enableTemplateTypeChecker,
         useInlineTypeConstructors,
-        suggestionsForSuboptimalTypeInference: false
+        suggestionsForSuboptimalTypeInference: false,
+        controlFlowPreventingContentProjection: ((_b2 = this.options.extendedDiagnostics) == null ? void 0 : _b2.defaultCategory) || DiagnosticCategoryLabel.Warning
       };
     }
     if (this.options.strictInputTypes !== void 0) {
@@ -45390,6 +45402,9 @@ var NgCompiler = class {
     }
     if (this.options.strictLiteralTypes !== void 0) {
       typeCheckingConfig.strictLiteralTypes = this.options.strictLiteralTypes;
+    }
+    if (((_d2 = (_c2 = this.options.extendedDiagnostics) == null ? void 0 : _c2.checks) == null ? void 0 : _d2.controlFlowPreventingContentProjection) !== void 0) {
+      typeCheckingConfig.controlFlowPreventingContentProjection = this.options.extendedDiagnostics.checks.controlFlowPreventingContentProjection;
     }
     return typeCheckingConfig;
   }
@@ -45649,9 +45664,8 @@ ${allowedCategoryLabels.join("\n")}
       `.trim()
     });
   }
-  const allExtendedDiagnosticNames = ALL_DIAGNOSTIC_FACTORIES.map((factory9) => factory9.name);
   for (const [checkName, category] of Object.entries((_c2 = (_b2 = options.extendedDiagnostics) == null ? void 0 : _b2.checks) != null ? _c2 : {})) {
-    if (!allExtendedDiagnosticNames.includes(checkName)) {
+    if (!SUPPORTED_DIAGNOSTIC_NAMES.has(checkName)) {
       yield makeConfigDiagnostic({
         category: import_typescript99.default.DiagnosticCategory.Error,
         code: ErrorCode.CONFIG_EXTENDED_DIAGNOSTICS_UNKNOWN_CHECK,
@@ -45659,7 +45673,7 @@ ${allowedCategoryLabels.join("\n")}
 Angular compiler option "extendedDiagnostics.checks" has an unknown check: "${checkName}".
 
 Allowed check names are:
-${allExtendedDiagnosticNames.join("\n")}
+${Array.from(SUPPORTED_DIAGNOSTIC_NAMES).join("\n")}
         `.trim()
       });
     }
