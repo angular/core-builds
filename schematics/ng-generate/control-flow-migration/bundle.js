@@ -6990,6 +6990,7 @@ var OpKind;
   OpKind2[OpKind2["IcuStart"] = 41] = "IcuStart";
   OpKind2[OpKind2["IcuEnd"] = 42] = "IcuEnd";
   OpKind2[OpKind2["I18nContext"] = 43] = "I18nContext";
+  OpKind2[OpKind2["I18nAttributes"] = 44] = "I18nAttributes";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -7066,6 +7067,11 @@ var I18nParamResolutionTime;
   I18nParamResolutionTime2[I18nParamResolutionTime2["Creation"] = 0] = "Creation";
   I18nParamResolutionTime2[I18nParamResolutionTime2["Postproccessing"] = 1] = "Postproccessing";
 })(I18nParamResolutionTime || (I18nParamResolutionTime = {}));
+var I18nExpressionContext;
+(function(I18nExpressionContext2) {
+  I18nExpressionContext2[I18nExpressionContext2["Normal"] = 0] = "Normal";
+  I18nExpressionContext2[I18nExpressionContext2["Binding"] = 1] = "Binding";
+})(I18nExpressionContext || (I18nExpressionContext = {}));
 var I18nParamValueFlags;
 (function(I18nParamValueFlags2) {
   I18nParamValueFlags2[I18nParamValueFlags2["None"] = 0] = "None";
@@ -7101,6 +7107,7 @@ var I18nContextKind;
 (function(I18nContextKind2) {
   I18nContextKind2[I18nContextKind2["RootI18n"] = 0] = "RootI18n";
   I18nContextKind2[I18nContextKind2["Icu"] = 1] = "Icu";
+  I18nContextKind2[I18nContextKind2["Attr"] = 2] = "Attr";
 })(I18nContextKind || (I18nContextKind = {}));
 var TemplateKind;
 (function(TemplateKind2) {
@@ -7164,22 +7171,25 @@ var NEW_OP = {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/update.mjs
-function createInterpolateTextOp(xref, interpolation, i18nPlaceholders, sourceSpan) {
+function createInterpolateTextOp(xref, interpolation, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.InterpolateText,
     target: xref,
     interpolation,
-    i18nPlaceholders,
     sourceSpan
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
 var Interpolation2 = class {
-  constructor(strings, expressions) {
+  constructor(strings, expressions, i18nPlaceholders) {
     this.strings = strings;
     this.expressions = expressions;
+    this.i18nPlaceholders = i18nPlaceholders;
+    if (i18nPlaceholders.length !== 0 && i18nPlaceholders.length !== expressions.length) {
+      throw new Error(`Expected ${expressions.length} placeholders to match interpolation expression count, but got ${i18nPlaceholders.length}`);
+    }
   }
 };
-function createBindingOp(target, kind, name, expression, unit, securityContext, isTextAttribute, isTemplate, sourceSpan) {
+function createBindingOp(target, kind, name, expression, unit, securityContext, isTextAttribute, isStructuralTemplate, i18nContext, sourceSpan) {
   return __spreadValues({
     kind: OpKind.Binding,
     bindingKind: kind,
@@ -7189,11 +7199,12 @@ function createBindingOp(target, kind, name, expression, unit, securityContext, 
     unit,
     securityContext,
     isTextAttribute,
-    isTemplate,
+    isStructuralTemplate,
+    i18nContext,
     sourceSpan
   }, NEW_OP);
 }
-function createPropertyOp(target, name, expression, isAnimationTrigger, securityContext, isTemplate, sourceSpan) {
+function createPropertyOp(target, name, expression, isAnimationTrigger, securityContext, isStructuralTemplate, i18nContext, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.Property,
     target,
@@ -7202,7 +7213,8 @@ function createPropertyOp(target, name, expression, isAnimationTrigger, security
     isAnimationTrigger,
     securityContext,
     sanitizer: null,
-    isTemplate,
+    isStructuralTemplate,
+    i18nContext,
     sourceSpan
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
@@ -7241,7 +7253,7 @@ function createClassMapOp(xref, expression, sourceSpan) {
     sourceSpan
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
-function createAttributeOp(target, name, expression, securityContext, isTextAttribute, isTemplate, sourceSpan) {
+function createAttributeOp(target, name, expression, securityContext, isTextAttribute, isStructuralTemplate, i18nContext, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.Attribute,
     target,
@@ -7250,7 +7262,8 @@ function createAttributeOp(target, name, expression, securityContext, isTextAttr
     securityContext,
     sanitizer: null,
     isTextAttribute,
-    isTemplate,
+    isStructuralTemplate,
+    i18nContext,
     sourceSpan
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
@@ -7291,7 +7304,7 @@ function createDeferWhenOp(target, expr, prefetch, sourceSpan) {
     sourceSpan
   }, NEW_OP), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
 }
-function createI18nExpressionOp(context, target, handle, expression, i18nPlaceholder, resolutionTime, sourceSpan) {
+function createI18nExpressionOp(context, target, handle, expression, i18nPlaceholder, resolutionTime, usage, name, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.I18nExpression,
     context,
@@ -7300,6 +7313,8 @@ function createI18nExpressionOp(context, target, handle, expression, i18nPlaceho
     expression,
     i18nPlaceholder,
     resolutionTime,
+    usage,
+    name,
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_VARS), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
 }
@@ -8082,6 +8097,7 @@ function transformExpressionsInOp(op, transform2, flags) {
     case OpKind.ProjectionDef:
     case OpKind.Template:
     case OpKind.Text:
+    case OpKind.I18nAttributes:
       break;
     default:
       throw new Error(`AssertionError: transformExpressionsInOp doesn't handle ${OpKind[op.kind]}`);
@@ -8507,13 +8523,14 @@ function createProjectionOp(xref, selector, i18nPlaceholder, attributes, sourceS
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
-function createExtractedAttributeOp(target, bindingKind, name, expression) {
+function createExtractedAttributeOp(target, bindingKind, name, expression, i18nContext) {
   return __spreadValues({
     kind: OpKind.ExtractedAttribute,
     target,
     bindingKind,
     name,
-    expression
+    expression,
+    i18nContext
   }, NEW_OP);
 }
 function createDeferOp(xref, main, mainSlot, metadata, sourceSpan) {
@@ -8550,10 +8567,11 @@ function createDeferOnOp(defer2, trigger, prefetch, sourceSpan) {
     sourceSpan
   }, NEW_OP);
 }
-function createI18nMessageOp(xref, i18nBlock, message, messagePlaceholder, params, postprocessingParams, needsPostprocessing) {
+function createI18nMessageOp(xref, i18nContext, i18nBlock, message, messagePlaceholder, params, postprocessingParams, needsPostprocessing) {
   return __spreadValues({
     kind: OpKind.I18nMessage,
     xref,
+    i18nContext,
     i18nBlock,
     message,
     messagePlaceholder,
@@ -8598,6 +8616,9 @@ function createIcuEndOp(xref) {
   }, NEW_OP);
 }
 function createI18nContextOp(contextKind, xref, i18nBlock, message, sourceSpan) {
+  if (i18nBlock === null && contextKind !== I18nContextKind.Attr) {
+    throw new Error("AssertionError: i18nBlock must be provided for non-attribute contexts.");
+  }
   return __spreadValues({
     kind: OpKind.I18nContext,
     contextKind,
@@ -8609,14 +8630,24 @@ function createI18nContextOp(contextKind, xref, i18nBlock, message, sourceSpan) 
     postprocessingParams: /* @__PURE__ */ new Map()
   }, NEW_OP);
 }
+function createI18nAttributesOp(xref, handle, target) {
+  return __spreadValues(__spreadValues({
+    kind: OpKind.I18nAttributes,
+    xref,
+    handle,
+    target,
+    i18nAttributesConfig: null
+  }, NEW_OP), TRAIT_CONSUMES_SLOT);
+}
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/host.mjs
-function createHostPropertyOp(name, expression, isAnimationTrigger, sourceSpan) {
+function createHostPropertyOp(name, expression, isAnimationTrigger, i18nContext, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.HostProperty,
     name,
     expression,
     isAnimationTrigger,
+    i18nContext,
     sourceSpan
   }, TRAIT_CONSUMES_VARS), NEW_OP);
 }
@@ -8774,7 +8805,19 @@ function needsApplication(i18nContexts, op) {
   }
   const context = i18nContexts.get(op.context);
   const nextContext2 = i18nContexts.get(op.next.context);
-  if (context.i18nBlock !== nextContext2.i18nBlock) {
+  if (context === void 0) {
+    throw new Error("AssertionError: expected an I18nContextOp to exist for the I18nExpressionOp's context");
+  }
+  if (nextContext2 === void 0) {
+    throw new Error("AssertionError: expected an I18nContextOp to exist for the next I18nExpressionOp's context");
+  }
+  if (context.i18nBlock !== null) {
+    if (context.i18nBlock !== nextContext2.i18nBlock) {
+      return true;
+    }
+    return false;
+  }
+  if (op.target !== op.next.target) {
     return true;
   }
   return false;
@@ -8795,6 +8838,9 @@ function assignI18nSlotDependencies(job) {
           currentI18nOp = op;
           break;
         case OpKind.I18nEnd:
+          if (currentI18nOp === null) {
+            throw new Error("AssertionError: Expected an active I18n block while calculating last slot consumers");
+          }
           i18nLastSlotConsumers.set(currentI18nOp.xref, lastSlotConsumer);
           currentI18nOp = null;
           break;
@@ -8807,7 +8853,10 @@ function assignI18nSlotDependencies(job) {
     for (const op of unit.update) {
       currentTarget = hasDependsOnSlotContextTrait(op) ? op.target : null;
       if (op.kind === OpKind.I18nExpression) {
-        op.target = i18nLastSlotConsumers.get(op.target);
+        op.target = op.usage === I18nExpressionContext.Normal ? i18nLastSlotConsumers.get(op.target) : op.target;
+        if (op.target === void 0) {
+          throw new Error("AssertionError: Expected every I18nExpressionOp to have a valid reordering target");
+        }
         moveToTarget = op.target;
       }
       if (op.kind === OpKind.I18nExpression || op.kind === OpKind.I18nApply) {
@@ -8850,18 +8899,26 @@ function extractAttributes(job) {
           break;
         case OpKind.Property:
           if (!op.isAnimationTrigger) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, op.isTemplate ? BindingKind.Template : BindingKind.Property, op.name, null), lookupElement(elements, op.target));
+            let bindingKind;
+            if (op.i18nContext !== null) {
+              bindingKind = BindingKind.I18n;
+            } else if (op.isStructuralTemplate) {
+              bindingKind = BindingKind.Template;
+            } else {
+              bindingKind = BindingKind.Property;
+            }
+            OpList.insertBefore(createExtractedAttributeOp(op.target, bindingKind, op.name, null, null), lookupElement(elements, op.target));
           }
           break;
         case OpKind.StyleProp:
         case OpKind.ClassProp:
           if (unit.job.compatibility === CompatibilityMode.TemplateDefinitionBuilder && op.expression instanceof EmptyExpr2) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.Property, op.name, null), lookupElement(elements, op.target));
+            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.Property, op.name, null, null), lookupElement(elements, op.target));
           }
           break;
         case OpKind.Listener:
           if (!op.isAnimationListener) {
-            const extractedAttributeOp = createExtractedAttributeOp(op.target, BindingKind.Property, op.name, null);
+            const extractedAttributeOp = createExtractedAttributeOp(op.target, BindingKind.Property, op.name, null, null);
             if (job.kind === CompilationJobKind.Host) {
               unit.create.push(extractedAttributeOp);
             } else {
@@ -8895,7 +8952,7 @@ function extractAttributeOp(unit, op, elements) {
     }
   }
   if (extractable) {
-    const extractedAttributeOp = createExtractedAttributeOp(op.target, op.isTemplate ? BindingKind.Template : BindingKind.Attribute, op.name, op.expression);
+    const extractedAttributeOp = createExtractedAttributeOp(op.target, op.isStructuralTemplate ? BindingKind.Template : BindingKind.Attribute, op.name, op.expression, op.i18nContext);
     if (unit.job.kind === CompilationJobKind.Host) {
       unit.create.push(extractedAttributeOp);
     } else {
@@ -8936,15 +8993,15 @@ function specializeBindings(job) {
             const target = lookupElement2(elements, op.target);
             target.nonBindable = true;
           } else {
-            OpList.replace(op, createAttributeOp(op.target, op.name, op.expression, op.securityContext, op.isTextAttribute, op.isTemplate, op.sourceSpan));
+            OpList.replace(op, createAttributeOp(op.target, op.name, op.expression, op.securityContext, op.isTextAttribute, op.isStructuralTemplate, op.i18nContext, op.sourceSpan));
           }
           break;
         case BindingKind.Property:
         case BindingKind.Animation:
           if (job.kind === CompilationJobKind.Host) {
-            OpList.replace(op, createHostPropertyOp(op.name, op.expression, op.bindingKind === BindingKind.Animation, op.sourceSpan));
+            OpList.replace(op, createHostPropertyOp(op.name, op.expression, op.bindingKind === BindingKind.Animation, op.i18nContext, op.sourceSpan));
           } else {
-            OpList.replace(op, createPropertyOp(op.target, op.name, op.expression, op.bindingKind === BindingKind.Animation, op.securityContext, op.isTemplate, op.sourceSpan));
+            OpList.replace(op, createPropertyOp(op.target, op.name, op.expression, op.bindingKind === BindingKind.Animation, op.securityContext, op.isStructuralTemplate, op.i18nContext, op.sourceSpan));
           }
           break;
         case BindingKind.I18n:
@@ -9240,7 +9297,7 @@ var ElementAttributes = class {
     array.push(...getAttributeNameLiterals(name));
     if (kind === BindingKind.Attribute || kind === BindingKind.StyleProperty) {
       if (value === null) {
-        throw Error("Attribute & style element attributes must have a value");
+        throw Error("Attribute, i18n attribute, & style element attributes must have a value");
       }
       array.push(value);
     }
@@ -9286,6 +9343,47 @@ function serializeAttributes({ attributes, bindings, classes, i18n: i18n2, proje
     attrArray.push(literal(6), ...i18n2);
   }
   return literalArr(attrArray);
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/convert_i18n_bindings.mjs
+function convertI18nBindings(job) {
+  const i18nAttributesByElem = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind === OpKind.I18nAttributes) {
+        i18nAttributesByElem.set(op.target, op);
+      }
+    }
+    for (const op of unit.update) {
+      switch (op.kind) {
+        case OpKind.Property:
+        case OpKind.Attribute:
+          if (op.i18nContext === null) {
+            continue;
+          }
+          if (!(op.expression instanceof Interpolation2)) {
+            continue;
+          }
+          const i18nAttributesForElem = i18nAttributesByElem.get(op.target);
+          if (i18nAttributesForElem === void 0) {
+            throw new Error("AssertionError: An i18n attribute binding instruction requires the owning element to have an I18nAttributes create instruction");
+          }
+          if (i18nAttributesForElem.target !== op.target) {
+            throw new Error("AssertionError: Expected i18nAttributes target element to match binding target element");
+          }
+          const ops = [];
+          for (let i = 0; i < op.expression.expressions.length; i++) {
+            const expr = op.expression.expressions[i];
+            if (op.expression.i18nPlaceholders.length !== op.expression.expressions.length) {
+              throw new Error(`AssertionError: An i18n attribute binding instruction requires the same number of expressions and placeholders, but found ${op.expression.i18nPlaceholders.length} placeholders and ${op.expression.expressions.length} expressions`);
+            }
+            ops.push(createI18nExpressionOp(op.i18nContext, i18nAttributesForElem.target, i18nAttributesForElem.handle, expr, op.expression.i18nPlaceholders[i], I18nParamResolutionTime.Creation, I18nExpressionContext.Binding, op.name, op.sourceSpan));
+          }
+          OpList.replaceWithMany(op, ops);
+          break;
+      }
+    }
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/create_defer_deps_fns.mjs
@@ -9658,6 +9756,15 @@ function extractI18nMessages(job) {
       }
     }
   }
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (op.kind !== OpKind.I18nContext || op.contextKind !== I18nContextKind.Attr) {
+        continue;
+      }
+      const i18nMessageOp = createI18nMessage(job, op);
+      unit.create.push(i18nMessageOp);
+    }
+  }
   const i18nBlockMessages = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
@@ -9680,6 +9787,9 @@ function extractI18nMessages(job) {
           }
           const i18nContext = i18nContexts.get(op.context);
           if (i18nContext.contextKind === I18nContextKind.Icu) {
+            if (i18nContext.i18nBlock === null) {
+              throw Error("ICU context should have its i18n block set.");
+            }
             const subMessage = createI18nMessage(job, i18nContext, op.messagePlaceholder);
             unit.create.push(subMessage);
             const rootI18nId = i18nBlocks.get(i18nContext.i18nBlock).root;
@@ -9704,7 +9814,7 @@ function createI18nMessage(job, context, messagePlaceholder) {
       needsPostprocessing = true;
     }
   }
-  return createI18nMessageOp(job.allocateXrefId(), context.i18nBlock, context.message, messagePlaceholder != null ? messagePlaceholder : null, formattedParams, formattedPostprocessingParams, needsPostprocessing);
+  return createI18nMessageOp(job.allocateXrefId(), context.xref, context.i18nBlock, context.message, messagePlaceholder != null ? messagePlaceholder : null, formattedParams, formattedPostprocessingParams, needsPostprocessing);
 }
 function formatParams(params) {
   const formattedParams = /* @__PURE__ */ new Map();
@@ -15964,27 +16074,86 @@ var TRANSLATION_VAR_PREFIX2 = "i18n_";
 var I18N_ICU_MAPPING_PREFIX2 = "I18N_EXP_";
 var ESCAPE2 = "\uFFFD";
 function collectI18nConsts(job) {
+  var _a2;
   const fileBasedI18nSuffix = job.relativeContextFilePath.replace(/[^A-Za-z0-9]/g, "_").toUpperCase() + "_";
-  const messageConstIndices = /* @__PURE__ */ new Map();
+  const extractedAttributesByI18nContext = /* @__PURE__ */ new Map();
+  const i18nAttributesByTarget = /* @__PURE__ */ new Map();
+  const i18nExpressionsByTarget = /* @__PURE__ */ new Map();
   const messages = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.ops()) {
+      if (op.kind === OpKind.ExtractedAttribute && op.i18nContext !== null) {
+        extractedAttributesByI18nContext.set(op.i18nContext, op);
+      } else if (op.kind === OpKind.I18nAttributes) {
+        i18nAttributesByTarget.set(op.target, op);
+      } else if (op.kind === OpKind.I18nExpression) {
+        const expressions = (_a2 = i18nExpressionsByTarget.get(op.target)) != null ? _a2 : [];
+        expressions.push(op);
+        i18nExpressionsByTarget.set(op.target, expressions);
+      } else if (op.kind === OpKind.I18nMessage) {
+        messages.set(op.xref, op);
+      }
+    }
+  }
+  const i18nValuesByContext = /* @__PURE__ */ new Map();
+  const messageConstIndices = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.I18nMessage) {
-        messages.set(op.xref, op);
+        if (op.messagePlaceholder === null) {
+          const { mainVar, statements } = collectMessage(job, fileBasedI18nSuffix, messages, op);
+          if (op.i18nBlock !== null) {
+            const i18nConst = job.addConst(mainVar, statements);
+            messageConstIndices.set(op.i18nBlock, i18nConst);
+          } else {
+            job.constsInitializers.push(...statements);
+            i18nValuesByContext.set(op.i18nContext, mainVar);
+            const attributeForMessage = extractedAttributesByI18nContext.get(op.i18nContext);
+            if (attributeForMessage !== void 0) {
+              attributeForMessage.expression = mainVar;
+            }
+          }
+        }
         OpList.remove(op);
       }
     }
   }
-  for (const op of messages.values()) {
-    if (op.kind === OpKind.I18nMessage && op.messagePlaceholder === null) {
-      const { mainVar, statements } = collectMessage(job, fileBasedI18nSuffix, messages, op);
-      messageConstIndices.set(op.i18nBlock, job.addConst(mainVar, statements));
+  for (const unit of job.units) {
+    for (const elem of unit.create) {
+      if (isElementOrContainerOp(elem)) {
+        const i18nAttributes2 = i18nAttributesByTarget.get(elem.xref);
+        if (i18nAttributes2 === void 0) {
+          continue;
+        }
+        let i18nExpressions = i18nExpressionsByTarget.get(elem.xref);
+        if (i18nExpressions === void 0) {
+          throw new Error("AssertionError: Could not find any i18n expressions associated with an I18nAttributes instruction");
+        }
+        const seenPropertyNames = /* @__PURE__ */ new Set();
+        i18nExpressions = i18nExpressions.filter((i18nExpr) => {
+          const seen = seenPropertyNames.has(i18nExpr.name);
+          seenPropertyNames.add(i18nExpr.name);
+          return !seen;
+        });
+        const i18nAttributeConfig = i18nExpressions.flatMap((i18nExpr) => {
+          const i18nExprValue = i18nValuesByContext.get(i18nExpr.context);
+          if (i18nExprValue === void 0) {
+            throw new Error("AssertionError: Could not find i18n expression's value");
+          }
+          return [literal(i18nExpr.name), i18nExprValue];
+        });
+        i18nAttributes2.i18nAttributesConfig = job.addConst(new LiteralArrayExpr(i18nAttributeConfig));
+      }
     }
   }
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.I18nStart) {
-        op.messageIndex = messageConstIndices.get(op.root);
+        const msgIndex = messageConstIndices.get(op.root);
+        if (msgIndex === void 0) {
+          throw new Error("AssertionError: Could not find corresponding i18n block index for an i18n message op; was an i18n message incorrectly assumed to correspond to an attribute?");
+        }
+        op.messageIndex = msgIndex;
       }
     }
   }
@@ -16058,7 +16227,7 @@ function i18nGenerateClosureVar(pool, messageId, fileBasedI18nSuffix, useExterna
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_text_extraction.mjs
-function extractI18nText(job) {
+function convertI18nText(job) {
   var _a2;
   for (const unit of job.units) {
     let currentI18n = null;
@@ -16107,7 +16276,7 @@ function extractI18nText(job) {
           const ops = [];
           for (let i = 0; i < op.interpolation.expressions.length; i++) {
             const expr = op.interpolation.expressions[i];
-            ops.push(createI18nExpressionOp(contextId, i18nOp.xref, i18nOp.handle, expr, op.i18nPlaceholders[i], resolutionTime, (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
+            ops.push(createI18nExpressionOp(contextId, i18nOp.xref, i18nOp.handle, expr, op.interpolation.i18nPlaceholders[i], resolutionTime, I18nExpressionContext.Normal, "", (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
           }
           OpList.replaceWithMany(op, ops);
           break;
@@ -16529,13 +16698,13 @@ function parseExtractedStyles(job) {
         if (op.name === "style") {
           const parsedStyles = parse(op.expression.value);
           for (let i = 0; i < parsedStyles.length - 1; i += 2) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, parsedStyles[i], literal(parsedStyles[i + 1])), op);
+            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, parsedStyles[i], literal(parsedStyles[i + 1]), null), op);
           }
           OpList.remove(op);
         } else if (op.name === "class") {
           const parsedClasses = op.expression.value.trim().split(/\s+/g);
           for (const parsedClass of parsedClasses) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.ClassName, parsedClass, null), op);
+            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.ClassName, parsedClass, null, null), op);
           }
           OpList.remove(op);
         }
@@ -16988,6 +17157,10 @@ function i18n(slot, constIndex, subTemplateIndex) {
 function i18nEnd() {
   return call(Identifiers.i18nEnd, [], null);
 }
+function i18nAttributes(slot, i18nAttributesConfig) {
+  const args = [literal(slot), literal(i18nAttributesConfig)];
+  return call(Identifiers.i18nAttributes, args, null);
+}
 function property(name, expression, sanitizer, sourceSpan) {
   const args = [literal(name), expression];
   if (sanitizer !== null) {
@@ -17334,6 +17507,12 @@ function reifyCreateOperations(unit, ops) {
       case OpKind.I18n:
         OpList.replace(op, i18n(op.handle.slot, op.messageIndex, op.subTemplateIndex));
         break;
+      case OpKind.I18nAttributes:
+        if (op.i18nAttributesConfig === null) {
+          throw new Error(`AssertionError: i18nAttributesConfig was not set`);
+        }
+        OpList.replace(op, i18nAttributes(op.handle.slot, op.i18nAttributesConfig));
+        break;
       case OpKind.Template:
         if (!(unit instanceof ViewCompilationUnit)) {
           throw new Error(`AssertionError: must be compiling a component`);
@@ -17650,6 +17829,28 @@ function removeI18nContexts(job) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/remove_unused_i18n_attrs.mjs
+function removeUnusedI18nAttributesOps(job) {
+  for (const unit of job.units) {
+    const targetsWithI18nApply = /* @__PURE__ */ new Set();
+    for (const op of unit.update) {
+      switch (op.kind) {
+        case OpKind.I18nApply:
+          targetsWithI18nApply.add(op.target);
+      }
+    }
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.I18nAttributes:
+          if (targetsWithI18nApply.has(op.target)) {
+            continue;
+          }
+          OpList.remove(op);
+      }
+    }
+  }
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/repeater_derived_vars.mjs
 function generateRepeaterDerivedVars(job) {
   const repeaters = /* @__PURE__ */ new Map();
@@ -17891,6 +18092,7 @@ function addParam(params, placeholder, value, subTemplateIndex, flags) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_expression_placeholders.mjs
 function resolveI18nExpressionPlaceholders(job) {
+  var _a2;
   const subTemplateIndicies = /* @__PURE__ */ new Map();
   const i18nContexts = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
@@ -17906,12 +18108,13 @@ function resolveI18nExpressionPlaceholders(job) {
     }
   }
   const expressionIndices = /* @__PURE__ */ new Map();
+  const referenceIndex = (op) => op.usage === I18nExpressionContext.Normal ? op.target : op.context;
   for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
         const i18nContext = i18nContexts.get(op.context);
-        const index = expressionIndices.get(op.target) || 0;
-        const subTemplateIndex = subTemplateIndicies.get(op.target);
+        const index = expressionIndices.get(referenceIndex(op)) || 0;
+        const subTemplateIndex = (_a2 = subTemplateIndicies.get(op.target)) != null ? _a2 : null;
         const params = op.resolutionTime === I18nParamResolutionTime.Creation ? i18nContext.params : i18nContext.postprocessingParams;
         const values = params.get(op.i18nPlaceholder) || [];
         values.push({
@@ -17920,7 +18123,7 @@ function resolveI18nExpressionPlaceholders(job) {
           flags: I18nParamValueFlags.ExpressionIndex
         });
         params.set(op.i18nPlaceholder, values);
-        expressionIndices.set(op.target, index + 1);
+        expressionIndices.set(referenceIndex(op), index + 1);
       }
     }
   }
@@ -18717,11 +18920,11 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: removeContentSelectors },
   { kind: CompilationJobKind.Host, fn: parseHostStyleProperties },
   { kind: CompilationJobKind.Tmpl, fn: emitNamespaceChanges },
-  { kind: CompilationJobKind.Both, fn: specializeStyleBindings },
-  { kind: CompilationJobKind.Both, fn: specializeBindings },
   { kind: CompilationJobKind.Tmpl, fn: propagateI18nBlocks },
   { kind: CompilationJobKind.Tmpl, fn: wrapI18nIcus },
   { kind: CompilationJobKind.Tmpl, fn: createI18nContexts },
+  { kind: CompilationJobKind.Both, fn: specializeStyleBindings },
+  { kind: CompilationJobKind.Both, fn: specializeBindings },
   { kind: CompilationJobKind.Both, fn: extractAttributes },
   { kind: CompilationJobKind.Both, fn: parseExtractedStyles },
   { kind: CompilationJobKind.Tmpl, fn: removeEmptyBindings },
@@ -18730,7 +18933,8 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: generateConditionalExpressions },
   { kind: CompilationJobKind.Tmpl, fn: createPipes },
   { kind: CompilationJobKind.Tmpl, fn: configureDeferInstructions },
-  { kind: CompilationJobKind.Tmpl, fn: extractI18nText },
+  { kind: CompilationJobKind.Tmpl, fn: convertI18nText },
+  { kind: CompilationJobKind.Tmpl, fn: convertI18nBindings },
   { kind: CompilationJobKind.Tmpl, fn: applyI18nExpressions },
   { kind: CompilationJobKind.Tmpl, fn: createVariadicPipes },
   { kind: CompilationJobKind.Both, fn: generatePureLiteralStructures },
@@ -18757,6 +18961,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nIcuPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackFns },
+  { kind: CompilationJobKind.Tmpl, fn: removeUnusedI18nAttributesOps },
   { kind: CompilationJobKind.Tmpl, fn: collectI18nConsts },
   { kind: CompilationJobKind.Tmpl, fn: collectConstExpressions },
   { kind: CompilationJobKind.Both, fn: collectElementConsts },
@@ -18901,7 +19106,7 @@ function ingestHostProperty(job, property2, isTextAttribute) {
   let expression;
   const ast = property2.expression.ast;
   if (ast instanceof Interpolation) {
-    expression = new Interpolation2(ast.strings, ast.expressions.map((expr) => convertAst(expr, job, property2.sourceSpan)));
+    expression = new Interpolation2(ast.strings, ast.expressions.map((expr) => convertAst(expr, job, property2.sourceSpan)), []);
   } else {
     expression = convertAst(ast, job, property2.sourceSpan);
   }
@@ -18913,7 +19118,7 @@ function ingestHostProperty(job, property2, isTextAttribute) {
   if (property2.isAnimation) {
     bindingKind = BindingKind.Animation;
   }
-  job.root.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, SecurityContext.NONE, isTextAttribute, false, property2.sourceSpan));
+  job.root.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, SecurityContext.NONE, isTextAttribute, false, null, property2.sourceSpan));
 }
 function ingestHostAttribute(job, name, value) {
   const attrBinding = createBindingOp(
@@ -18925,6 +19130,7 @@ function ingestHostAttribute(job, name, value) {
     SecurityContext.NONE,
     true,
     false,
+    null,
     null
   );
   job.root.update.push(attrBinding);
@@ -19016,7 +19222,7 @@ function ingestContent(unit, content) {
   const attrs = content.attributes.flatMap((a) => [a.name, a.value]);
   const op = createProjectionOp(unit.job.allocateXrefId(), content.selector, content.i18n, attrs, content.sourceSpan);
   for (const attr of content.attributes) {
-    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue);
+    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue, attr.i18n);
   }
   unit.create.push(op);
 }
@@ -19044,7 +19250,7 @@ function ingestBoundText(unit, text2, i18nPlaceholders) {
   const textXref = unit.job.allocateXrefId();
   unit.create.push(createTextOp(textXref, "", text2.sourceSpan));
   const baseSourceSpan = unit.job.compatibility ? null : text2.sourceSpan;
-  unit.update.push(createInterpolateTextOp(textXref, new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, unit.job, baseSourceSpan))), i18nPlaceholders, text2.sourceSpan));
+  unit.update.push(createInterpolateTextOp(textXref, new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, unit.job, baseSourceSpan)), i18nPlaceholders), text2.sourceSpan));
 }
 function ingestIfBlock(unit, ifBlock) {
   let firstXref = null;
@@ -19275,6 +19481,8 @@ function convertAst(ast, job, baseSourceSpan) {
     }
   } else if (ast instanceof LiteralPrimitive) {
     return literal(ast.value, void 0, convertSourceSpan(ast.span, baseSourceSpan));
+  } else if (ast instanceof Unary) {
+    throw new Error("TODO: Support unary operations, which extend binary ops");
   } else if (ast instanceof Binary) {
     const operator = BINARY_OPERATORS.get(ast.operation);
     if (operator === void 0) {
@@ -19324,6 +19532,7 @@ function isPlainTemplate(tmpl) {
 }
 function ingestBindings(unit, op, element2) {
   let flags = BindingFlags.None;
+  let hasI18nAttributes = false;
   if (element2 instanceof Template) {
     flags |= BindingFlags.OnNgTemplateElement;
     if (element2 instanceof Template && isPlainTemplate(element2)) {
@@ -19332,17 +19541,21 @@ function ingestBindings(unit, op, element2) {
     const templateAttrFlags = flags | BindingFlags.BindingTargetsTemplate | BindingFlags.IsStructuralTemplateAttribute;
     for (const attr of element2.templateAttrs) {
       if (attr instanceof TextAttribute) {
-        ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, templateAttrFlags | BindingFlags.TextValue);
+        ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, templateAttrFlags | BindingFlags.TextValue, attr.i18n);
+        hasI18nAttributes || (hasI18nAttributes = attr.i18n !== void 0);
       } else {
-        ingestBinding(unit, op.xref, attr.name, attr.value, attr.type, attr.unit, attr.securityContext, attr.sourceSpan, templateAttrFlags);
+        ingestBinding(unit, op.xref, attr.name, attr.value, attr.type, attr.unit, attr.securityContext, attr.sourceSpan, templateAttrFlags, attr.i18n);
+        hasI18nAttributes || (hasI18nAttributes = attr.i18n !== void 0);
       }
     }
   }
   for (const attr of element2.attributes) {
-    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, flags | BindingFlags.TextValue);
+    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, flags | BindingFlags.TextValue, attr.i18n);
+    hasI18nAttributes || (hasI18nAttributes = attr.i18n !== void 0);
   }
   for (const input of element2.inputs) {
-    ingestBinding(unit, op.xref, input.name, input.value, input.type, input.unit, input.securityContext, input.sourceSpan, flags);
+    ingestBinding(unit, op.xref, input.name, input.value, input.type, input.unit, input.securityContext, input.sourceSpan, flags, input.i18n);
+    hasI18nAttributes || (hasI18nAttributes = input.i18n !== void 0);
   }
   for (const output of element2.outputs) {
     let listenerOp;
@@ -19352,7 +19565,7 @@ function ingestBindings(unit, op, element2) {
       }
     }
     if (element2 instanceof Template && !isPlainTemplate(element2)) {
-      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null));
+      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null, null));
       continue;
     }
     listenerOp = createListenerOp(op.xref, op.handle, output.name, op.tag, output.phase, false, output.sourceSpan);
@@ -19378,6 +19591,9 @@ function ingestBindings(unit, op, element2) {
     listenerOp.handlerOps.push(createStatementOp(new ReturnStatement(returnExpr, returnExpr.sourceSpan)));
     unit.create.push(listenerOp);
   }
+  if (hasI18nAttributes) {
+    unit.create.push(createI18nAttributesOp(unit.job.allocateXrefId(), new SlotHandle(), op.xref));
+  }
 }
 var BINDING_KINDS = /* @__PURE__ */ new Map([
   [0, BindingKind.Property],
@@ -19394,24 +19610,36 @@ var BindingFlags;
   BindingFlags2[BindingFlags2["IsStructuralTemplateAttribute"] = 4] = "IsStructuralTemplateAttribute";
   BindingFlags2[BindingFlags2["OnNgTemplateElement"] = 8] = "OnNgTemplateElement";
 })(BindingFlags || (BindingFlags = {}));
-function ingestBinding(view, xref, name, value, type, unit, securityContext, sourceSpan, flags) {
+function ingestBinding(view, xref, name, value, type, unit, securityContext, sourceSpan, flags, i18nMeta) {
   if (value instanceof ASTWithSource) {
     value = value.ast;
   }
+  let i18nContext = null;
+  if (i18nMeta !== void 0) {
+    if (!(i18nMeta instanceof Message)) {
+      throw Error(`Unhandled i18n metadata type for binding: ${i18nMeta.constructor.name}`);
+    }
+    i18nContext = view.job.allocateXrefId();
+    view.create.push(createI18nContextOp(I18nContextKind.Attr, i18nContext, null, i18nMeta, null));
+  }
   if (flags & BindingFlags.OnNgTemplateElement && !(flags & BindingFlags.BindingTargetsTemplate) && type === 0) {
-    view.create.push(createExtractedAttributeOp(xref, BindingKind.Property, name, null));
+    view.create.push(createExtractedAttributeOp(xref, BindingKind.Property, name, null, i18nContext));
     return;
   }
   let expression;
   if (value instanceof Interpolation) {
-    expression = new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, view.job, null)));
+    let i18nPlaceholders = [];
+    if (i18nMeta !== void 0) {
+      i18nPlaceholders = Object.keys(i18nMeta.placeholders);
+    }
+    expression = new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, view.job, null)), i18nPlaceholders);
   } else if (value instanceof AST) {
     expression = convertAst(value, view.job, null);
   } else {
     expression = value;
   }
   const kind = BINDING_KINDS.get(type);
-  view.update.push(createBindingOp(xref, kind, name, expression, unit, securityContext, !!(flags & BindingFlags.TextValue), !!(flags & BindingFlags.IsStructuralTemplateAttribute), sourceSpan));
+  view.update.push(createBindingOp(xref, kind, name, expression, unit, securityContext, !!(flags & BindingFlags.TextValue), !!(flags & BindingFlags.IsStructuralTemplateAttribute), i18nContext, sourceSpan));
 }
 function ingestReferences(op, element2) {
   assertIsArray(op.localRefs);
@@ -19451,7 +19679,7 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
   }
   if (root !== null) {
     for (const attr of root.attributes) {
-      ingestBinding(unit, xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue);
+      ingestBinding(unit, xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue, attr.i18n);
     }
     const tagName = root instanceof Element ? root.name : root.tagName;
     return tagName === "ng-template" ? null : tagName;
@@ -25004,7 +25232,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.5+sha-20ea149");
+var VERSION2 = new Version("17.0.5+sha-7c863d7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25509,7 +25737,7 @@ function getTemplates(template2) {
     visitAll2(visitor, parsed.rootNodes);
     for (let [key, tmpl] of visitor.templates) {
       const escapeKey = escapeRegExp(key.slice(1));
-      const regex = new RegExp(`[^a-zA-Z0-9-<']${escapeKey}\\W`, "gm");
+      const regex = new RegExp(`[^a-zA-Z0-9-<(']${escapeKey}\\W`, "gm");
       const matches = template2.match(regex);
       tmpl.count = (_a2 = matches == null ? void 0 : matches.length) != null ? _a2 : 0;
       tmpl.generateContents(template2);
@@ -25517,6 +25745,13 @@ function getTemplates(template2) {
     return visitor.templates;
   }
   return /* @__PURE__ */ new Map();
+}
+function updateTemplates(template2, templates) {
+  const updatedTemplates = getTemplates(template2);
+  for (let [key, tmpl] of updatedTemplates) {
+    templates.set(key, tmpl);
+  }
+  return templates;
 }
 function wrapIntoI18nContainer(i18nAttr, content) {
   const { start, middle, end } = generatei18nContainer(i18nAttr, content);
@@ -25554,12 +25789,25 @@ function processNgTemplates(template2) {
         if (t.count === matches.length + 1 && safeToRemove) {
           template2 = template2.replace(t.contents, "");
         }
+        updateTemplates(template2, templates);
       }
     }
+    template2 = replaceRemainingPlaceholders(template2);
     return { migrated: template2, err: void 0 };
   } catch (err) {
     return { migrated: template2, err };
   }
+}
+function replaceRemainingPlaceholders(template2) {
+  const replaceRegex = new RegExp(`#\\w*\\|`, "g");
+  const placeholders = [...template2.matchAll(replaceRegex)];
+  let migrated = template2;
+  for (let ph of placeholders) {
+    const placeholder = ph[0];
+    const name = placeholder.slice(1, placeholder.length - 1);
+    migrated = template2.replace(placeholder, `<ng-template [ngTemplateOutlet]="${name}"></ng-template>`);
+  }
+  return migrated;
 }
 function canRemoveCommonModule(template2) {
   const parsed = parseTemplate2(template2);
