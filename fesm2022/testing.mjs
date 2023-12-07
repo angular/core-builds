@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.1.0-next.3+sha-5f73608
+ * @license Angular v17.1.0-next.3+sha-1f5c8bf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, getDebugNode, RendererFactory2, InjectionToken, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵDeferBlockBehavior, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, NgZone, ɵZoneAwareQueueingScheduler, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, InjectionToken, inject as inject$1, NgZone, ɵZoneAwareQueueingScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵDeferBlockBehavior, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { ResourceLoader } from '@angular/compiler';
 
@@ -130,6 +130,30 @@ function getDeferBlockStateNameFromEnum(state) {
     }
 }
 
+/** Whether test modules should be torn down by default. */
+const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
+/** Whether unknown elements in templates should throw by default. */
+const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
+/** Whether unknown properties in templates should throw by default. */
+const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
+/**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @publicApi
+ */
+class TestComponentRenderer {
+    insertRootElement(rootElementId) { }
+    removeAllRootElements() { }
+}
+/**
+ * @publicApi
+ */
+const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
+/**
+ * @publicApi
+ */
+const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
+
 /**
  * Fixture for debugging and testing a component.
  *
@@ -137,11 +161,8 @@ function getDeferBlockStateNameFromEnum(state) {
  */
 class ComponentFixture {
     /** @nodoc */
-    constructor(componentRef, ngZone, effectRunner, _autoDetect) {
+    constructor(componentRef) {
         this.componentRef = componentRef;
-        this.ngZone = ngZone;
-        this.effectRunner = effectRunner;
-        this._autoDetect = _autoDetect;
         this._isStable = true;
         this._isDestroyed = false;
         this._resolve = null;
@@ -150,13 +171,16 @@ class ComponentFixture {
         this._onStableSubscription = null;
         this._onMicrotaskEmptySubscription = null;
         this._onErrorSubscription = null;
+        this.ngZone = inject$1(ComponentFixtureNoNgZone, { optional: true }) ? null : inject$1(NgZone, { optional: true });
+        this._autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? false;
+        this.effectRunner = inject$1(ɵZoneAwareQueueingScheduler, { optional: true });
         this.changeDetectorRef = componentRef.changeDetectorRef;
         this.elementRef = componentRef.location;
         this.debugElement = getDebugNode(this.elementRef.nativeElement);
         this.componentInstance = componentRef.instance;
         this.nativeElement = this.elementRef.nativeElement;
         this.componentRef = componentRef;
-        this.ngZone = ngZone;
+        const ngZone = this.ngZone;
         if (ngZone) {
             // Create subscriptions outside the NgZone so that the callbacks run oustide
             // of NgZone.
@@ -488,30 +512,6 @@ function flushMicrotasks() {
     }
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
 }
-
-/** Whether test modules should be torn down by default. */
-const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
-/** Whether unknown elements in templates should throw by default. */
-const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
-/** Whether unknown properties in templates should throw by default. */
-const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
-/**
- * An abstract class for inserting the root test component element in a platform independent way.
- *
- * @publicApi
- */
-class TestComponentRenderer {
-    insertRootElement(rootElementId) { }
-    removeAllRootElements() { }
-}
-/**
- * @publicApi
- */
-const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
-/**
- * @publicApi
- */
-const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
 let _nextReferenceId = 0;
 class MetadataOverrider {
@@ -1915,14 +1915,13 @@ class TestBedImpl {
         if (!componentDef) {
             throw new Error(`It looks like '${ɵstringify(type)}' has not been compiled.`);
         }
-        const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
-        const autoDetect = this.inject(ComponentFixtureAutoDetect, false);
-        const ngZone = noNgZone ? null : this.inject(NgZone, null);
         const componentFactory = new ɵRender3ComponentFactory(componentDef);
         const initComponent = () => {
             const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this.testModuleRef);
-            return new ComponentFixture(componentRef, ngZone, this.inject(ɵZoneAwareQueueingScheduler, null), autoDetect);
+            return this.runInInjectionContext(() => new ComponentFixture(componentRef));
         };
+        const noNgZone = this.inject(ComponentFixtureNoNgZone, false);
+        const ngZone = noNgZone ? null : this.inject(NgZone, null);
         const fixture = ngZone ? ngZone.run(initComponent) : initComponent();
         this._activeFixtures.push(fixture);
         return fixture;

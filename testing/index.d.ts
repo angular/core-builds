@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.3+sha-5f73608
+ * @license Angular v17.1.0-next.3+sha-1f5c8bf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24,7 +24,6 @@ import { ProviderToken } from '@angular/core';
 import { SchemaMetadata } from '@angular/core';
 import { Type } from '@angular/core';
 import { ɵDeferBlockDetails } from '@angular/core';
-import { ɵFlushableEffectRunner } from '@angular/core';
 
 /**
  * This API should be removed. But doing so seems to break `google3` and so it requires a bit of
@@ -50,9 +49,6 @@ export declare function async(fn: Function): (done: any) => any;
  */
 export declare class ComponentFixture<T> {
     componentRef: ComponentRef<T>;
-    ngZone: NgZone | null;
-    private effectRunner;
-    private _autoDetect;
     /**
      * The DebugElement associated with the root element of this component.
      */
@@ -82,8 +78,11 @@ export declare class ComponentFixture<T> {
     private _onStableSubscription;
     private _onMicrotaskEmptySubscription;
     private _onErrorSubscription;
+    ngZone: NgZone | null;
+    private _autoDetect;
+    private effectRunner;
     /** @nodoc */
-    constructor(componentRef: ComponentRef<T>, ngZone: NgZone | null, effectRunner: ɵFlushableEffectRunner | null, _autoDetect: boolean);
+    constructor(componentRef: ComponentRef<T>);
     private _tick;
     /**
      * Trigger a change detection cycle for the component.
