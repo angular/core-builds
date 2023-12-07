@@ -25262,7 +25262,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.6+sha-049e4ab");
+var VERSION2 = new Version("17.0.6+sha-543df3d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25835,13 +25835,12 @@ function processNgTemplates(template2) {
 function replaceRemainingPlaceholders(template2) {
   const replaceRegex = new RegExp(`\u03B8.*\u03B4`, "g");
   const placeholders = [...template2.matchAll(replaceRegex)];
-  let migrated = template2;
   for (let ph of placeholders) {
     const placeholder = ph[0];
     const name = placeholder.slice(1, placeholder.length - 1);
-    migrated = template2.replace(placeholder, `<ng-template [ngTemplateOutlet]="${name}"></ng-template>`);
+    template2 = template2.replace(placeholder, `<ng-template [ngTemplateOutlet]="${name}"></ng-template>`);
   }
-  return migrated;
+  return template2;
 }
 function canRemoveCommonModule(template2) {
   const parsed = parseTemplate2(template2);
