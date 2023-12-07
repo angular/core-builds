@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.6+sha-543df3d
+ * @license Angular v17.0.6+sha-58ed76b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.6+sha-543df3d');
+const VERSION = new Version('17.0.6+sha-58ed76b');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -13306,9 +13306,6 @@ function detectChangesInternal(lView, notifyErrorHandler = true) {
         afterRenderEventManager?.begin();
     }
     try {
-        const tView = lView[TVIEW];
-        const context = lView[CONTEXT];
-        refreshView(tView, lView, tView.template, context);
         detectChangesInViewWhileDirty(lView);
     }
     catch (error) {
@@ -13329,6 +13326,7 @@ function detectChangesInternal(lView, notifyErrorHandler = true) {
     }
 }
 function detectChangesInViewWhileDirty(lView) {
+    detectChangesInView(lView, 0 /* ChangeDetectionMode.Global */);
     let retries = 0;
     // If after running change detection, this view still needs to be refreshed or there are
     // descendants views that need to be refreshed due to re-dirtying during the change detection
@@ -13900,6 +13898,12 @@ class ViewRef$1 {
      * See {@link ChangeDetectorRef#detach} for more information.
      */
     detectChanges() {
+        // Add `RefreshView` flag to ensure this view is refreshed if not already dirty.
+        // `RefreshView` flag is used intentionally over `Dirty` because it gets cleared before
+        // executing any of the actual refresh code while the `Dirty` flag doesn't get cleared
+        // until the end of the refresh. Using `RefreshView` prevents creating a potential difference
+        // in the state of the LViewFlags during template execution.
+        this._lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
         detectChangesInternal(this._lView, this.notifyErrorHandler);
     }
     /**
@@ -30864,6 +30868,7 @@ function applyChanges(component) {
  */
 function detectChanges(component) {
     const view = getComponentViewByInstance(component);
+    view[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
     detectChangesInternal(view);
 }
 
