@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.3+sha-44c2c26
+ * @license Angular v17.1.0-next.3+sha-f2245d1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -74,13 +74,10 @@ export declare class ComponentFixture<T> {
     private _isDestroyed;
     private _resolve;
     private _promise;
-    private _onUnstableSubscription;
-    private _onStableSubscription;
-    private _onMicrotaskEmptySubscription;
-    private _onErrorSubscription;
     ngZone: NgZone | null;
     private _autoDetect;
     private effectRunner;
+    private _subscriptions;
     /** @nodoc */
     constructor(componentRef: ComponentRef<T>);
     private _tick;

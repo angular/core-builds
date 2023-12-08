@@ -1,11 +1,12 @@
 /**
- * @license Angular v17.1.0-next.3+sha-44c2c26
+ * @license Angular v17.1.0-next.3+sha-f2245d1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, InjectionToken, inject as inject$1, NgZone, ɵZoneAwareQueueingScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵDeferBlockBehavior, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -167,13 +168,10 @@ class ComponentFixture {
         this._isDestroyed = false;
         this._resolve = null;
         this._promise = null;
-        this._onUnstableSubscription = null;
-        this._onStableSubscription = null;
-        this._onMicrotaskEmptySubscription = null;
-        this._onErrorSubscription = null;
         this.ngZone = inject$1(ComponentFixtureNoNgZone, { optional: true }) ? null : inject$1(NgZone, { optional: true });
         this._autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? false;
         this.effectRunner = inject$1(ɵZoneAwareQueueingScheduler, { optional: true });
+        this._subscriptions = new Subscription();
         this.changeDetectorRef = componentRef.changeDetectorRef;
         this.elementRef = componentRef.location;
         this.debugElement = getDebugNode(this.elementRef.nativeElement);
@@ -185,12 +183,12 @@ class ComponentFixture {
             // Create subscriptions outside the NgZone so that the callbacks run oustide
             // of NgZone.
             ngZone.runOutsideAngular(() => {
-                this._onUnstableSubscription = ngZone.onUnstable.subscribe({
+                this._subscriptions.add(ngZone.onUnstable.subscribe({
                     next: () => {
                         this._isStable = false;
                     }
-                });
-                this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
+                }));
+                this._subscriptions.add(ngZone.onMicrotaskEmpty.subscribe({
                     next: () => {
                         if (this._autoDetect) {
                             // Do a change detection run with checkNoChanges set to true to check
@@ -198,8 +196,8 @@ class ComponentFixture {
                             this.detectChanges(true);
                         }
                     }
-                });
-                this._onStableSubscription = ngZone.onStable.subscribe({
+                }));
+                this._subscriptions.add(ngZone.onStable.subscribe({
                     next: () => {
                         this._isStable = true;
                         // Check whether there is a pending whenStable() completer to resolve.
@@ -218,12 +216,12 @@ class ComponentFixture {
                             });
                         }
                     }
-                });
-                this._onErrorSubscription = ngZone.onError.subscribe({
+                }));
+                this._subscriptions.add(ngZone.onError.subscribe({
                     next: (error) => {
                         throw error;
                     }
-                });
+                }));
             });
         }
     }
@@ -276,7 +274,7 @@ class ComponentFixture {
      * yet.
      */
     isStable() {
-        return this._isStable && !this.ngZone.hasPendingMacrotasks;
+        return this._isStable && !this.ngZone?.hasPendingMacrotasks;
     }
     /**
      * Get a promise that resolves when the fixture is stable.
@@ -335,22 +333,7 @@ class ComponentFixture {
     destroy() {
         if (!this._isDestroyed) {
             this.componentRef.destroy();
-            if (this._onUnstableSubscription != null) {
-                this._onUnstableSubscription.unsubscribe();
-                this._onUnstableSubscription = null;
-            }
-            if (this._onStableSubscription != null) {
-                this._onStableSubscription.unsubscribe();
-                this._onStableSubscription = null;
-            }
-            if (this._onMicrotaskEmptySubscription != null) {
-                this._onMicrotaskEmptySubscription.unsubscribe();
-                this._onMicrotaskEmptySubscription = null;
-            }
-            if (this._onErrorSubscription != null) {
-                this._onErrorSubscription.unsubscribe();
-                this._onErrorSubscription = null;
-            }
+            this._subscriptions.unsubscribe();
             this._isDestroyed = true;
         }
     }
