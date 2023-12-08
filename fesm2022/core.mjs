@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.3+sha-f2245d1
+ * @license Angular v17.1.0-next.3+sha-e3a6bf9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.3+sha-f2245d1');
+const VERSION = new Version('17.1.0-next.3+sha-e3a6bf9');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -19612,7 +19612,7 @@ function reconcile(liveCollection, newCollection, trackByFn) {
             }
             // Fallback to the slow path: we need to learn more about the content of the live and new
             // collections.
-            detachedItems ??= new MultiMap();
+            detachedItems ??= new UniqueValueMultiKeyMap();
             liveKeysInTheFuture ??=
                 initLiveItemsInTheFuture(liveCollection, liveStartIdx, liveEndIdx, trackByFn);
             // Check if I'm inserting a previously detached item: if so, attach it here
@@ -19660,7 +19660,7 @@ function reconcile(liveCollection, newCollection, trackByFn) {
                 newIterationResult = newCollectionIterator.next();
             }
             else {
-                detachedItems ??= new MultiMap();
+                detachedItems ??= new UniqueValueMultiKeyMap();
                 liveKeysInTheFuture ??=
                     initLiveItemsInTheFuture(liveCollection, liveStartIdx, liveEndIdx, trackByFn);
                 // Check if I'm inserting a previously detached item: if so, attach it here
@@ -19726,40 +19726,73 @@ function initLiveItemsInTheFuture(liveCollection, start, end, trackByFn) {
     }
     return keys;
 }
-class MultiMap {
+/**
+ * A specific, partial implementation of the Map interface with the following characteristics:
+ * - allows multiple values for a given key;
+ * - maintain FIFO order for multiple values corresponding to a given key;
+ * - assumes that all values are unique.
+ *
+ * The implementation aims at having the minimal overhead for cases where keys are _not_ duplicated
+ * (the most common case in the list reconciliation algorithm). To achieve this, the first value for
+ * a given key is stored in a regular map. Then, when more values are set for a given key, we
+ * maintain a form of linked list in a separate map. To maintain this linked list we assume that all
+ * values (in the entire collection) are unique.
+ */
+class UniqueValueMultiKeyMap {
     constructor() {
-        this.map = new Map();
+        // A map from a key to the first value corresponding to this key.
+        this.kvMap = new Map();
+        // A map that acts as a linked list of values - each value maps to the next value in this "linked
+        // list" (this only works if values are unique). Allocated lazily to avoid memory consumption when
+        // there are no duplicated values.
+        this._vMap = undefined;
     }
     has(key) {
-        const listOfKeys = this.map.get(key);
-        return listOfKeys !== undefined && listOfKeys.length > 0;
+        return this.kvMap.has(key);
     }
     delete(key) {
-        const listOfKeys = this.map.get(key);
-        if (listOfKeys !== undefined) {
-            listOfKeys.shift();
-            return true;
+        if (!this.has(key))
+            return false;
+        const value = this.kvMap.get(key);
+        if (this._vMap !== undefined && this._vMap.has(value)) {
+            this.kvMap.set(key, this._vMap.get(value));
+            this._vMap.delete(value);
         }
-        return false;
+        else {
+            this.kvMap.delete(key);
+        }
+        return true;
     }
     get(key) {
-        const listOfKeys = this.map.get(key);
-        return listOfKeys !== undefined && listOfKeys.length > 0 ? listOfKeys[0] : undefined;
+        return this.kvMap.get(key);
     }
     set(key, value) {
-        // if value is array, they we always store it as [value].
-        if (!this.map.has(key)) {
-            this.map.set(key, [value]);
-            return;
+        if (this.kvMap.has(key)) {
+            let prevValue = this.kvMap.get(key);
+            ngDevMode &&
+                assertNotSame(prevValue, value, `Detected a duplicated value ${value} for the key ${key}`);
+            if (this._vMap === undefined) {
+                this._vMap = new Map();
+            }
+            const vMap = this._vMap;
+            while (vMap.has(prevValue)) {
+                prevValue = vMap.get(prevValue);
+            }
+            vMap.set(prevValue, value);
         }
-        // THINK: this allows duplicate values, but I guess this is fine?
-        // Is the existing key an array or not?
-        this.map.get(key)?.push(value);
+        else {
+            this.kvMap.set(key, value);
+        }
     }
     forEach(cb) {
-        for (const [key, values] of this.map) {
-            for (const value of values) {
-                cb(value, key);
+        for (let [key, value] of this.kvMap) {
+            cb(value, key);
+            if (this._vMap !== undefined) {
+                const vMap = this._vMap;
+                while (vMap.has(value)) {
+                    value = vMap.get(value);
+                    cb(value, key);
+                }
             }
         }
     }
