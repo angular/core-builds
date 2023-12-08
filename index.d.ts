@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.6+sha-a398c55
+ * @license Angular v17.0.6+sha-f88b77b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3614,7 +3614,6 @@ export declare abstract class EnvironmentInjector implements Injector {
 export declare type EnvironmentProviders = {
     ɵbrand: 'EnvironmentProviders';
 };
-
 
 /**
  * Provides a hook for centralized exception handling.

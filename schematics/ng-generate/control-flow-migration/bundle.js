@@ -8482,7 +8482,7 @@ function createTemplateOp(xref, templateKind, tag, functionNameSuffix, namespace
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, sourceSpan) {
+function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, sourceSpan) {
   return __spreadProps(__spreadValues(__spreadValues({
     kind: OpKind.RepeaterCreate,
     attributes: null,
@@ -8500,6 +8500,8 @@ function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, so
     vars: null,
     varNames,
     usesComponentInstance: false,
+    i18nPlaceholder,
+    emptyI18nPlaceholder,
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP), {
     numSlotsUsed: emptyView === null ? 2 : 3
@@ -9977,8 +9979,13 @@ function recursivelyProcessView(view, parentScope) {
   for (const op of view.create) {
     switch (op.kind) {
       case OpKind.Template:
+        recursivelyProcessView(view.job.views.get(op.xref), scope);
+        break;
       case OpKind.RepeaterCreate:
         recursivelyProcessView(view.job.views.get(op.xref), scope);
+        if (op.emptyView) {
+          recursivelyProcessView(view.job.views.get(op.emptyView), scope);
+        }
         break;
       case OpKind.Listener:
         op.handlerOps.prepend(generateVariablesInScopeForView(view, scope));
@@ -16876,18 +16883,28 @@ function propagateI18nBlocksToTemplates(unit, subTemplateIndex) {
         i18nBlock = null;
         break;
       case OpKind.Template:
-        const templateView = unit.job.views.get(op.xref);
-        if (op.i18nPlaceholder !== void 0) {
-          if (i18nBlock === null) {
-            throw Error("Expected template with i18n placeholder to be in an i18n block.");
-          }
-          subTemplateIndex++;
-          wrapTemplateWithI18n(templateView, i18nBlock);
+        subTemplateIndex = propagateI18nBlocksForView(unit.job.views.get(op.xref), i18nBlock, op.i18nPlaceholder, subTemplateIndex);
+        break;
+      case OpKind.RepeaterCreate:
+        const forView = unit.job.views.get(op.xref);
+        subTemplateIndex = propagateI18nBlocksForView(unit.job.views.get(op.xref), i18nBlock, op.i18nPlaceholder, subTemplateIndex);
+        if (op.emptyView !== null) {
+          subTemplateIndex = propagateI18nBlocksForView(unit.job.views.get(op.emptyView), i18nBlock, op.emptyI18nPlaceholder, subTemplateIndex);
         }
-        subTemplateIndex = propagateI18nBlocksToTemplates(templateView, subTemplateIndex);
+        break;
     }
   }
   return subTemplateIndex;
+}
+function propagateI18nBlocksForView(view, i18nBlock, i18nPlaceholder, subTemplateIndex) {
+  if (i18nPlaceholder !== void 0) {
+    if (i18nBlock === null) {
+      throw Error("Expected template with i18n placeholder to be in an i18n block.");
+    }
+    subTemplateIndex++;
+    wrapTemplateWithI18n(view, i18nBlock);
+  }
+  return propagateI18nBlocksToTemplates(view, subTemplateIndex);
 }
 function wrapTemplateWithI18n(unit, parentI18n) {
   var _a2;
@@ -18055,18 +18072,52 @@ function resolvePlaceholdersForView(job, unit, i18nContexts, elements, pendingSt
         }
         break;
       case OpKind.Template:
+        const view = job.views.get(op.xref);
         if (op.i18nPlaceholder === void 0) {
-          resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements);
+          resolvePlaceholdersForView(job, view, i18nContexts, elements);
         } else {
           if (currentOps === null) {
             throw Error("i18n tag placeholder should only occur inside an i18n block");
           }
           if (op.templateKind === TemplateKind.Structural) {
-            resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements, op);
+            resolvePlaceholdersForView(job, view, i18nContexts, elements, op);
           } else {
-            recordTemplateStart(job, op, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
-            resolvePlaceholdersForView(job, job.views.get(op.xref), i18nContexts, elements);
-            recordTemplateClose(job, op, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+            recordTemplateStart(job, view, op.handle.slot, op.i18nPlaceholder, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+            resolvePlaceholdersForView(job, view, i18nContexts, elements);
+            recordTemplateClose(job, view, op.handle.slot, op.i18nPlaceholder, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+            pendingStructuralDirective = void 0;
+          }
+        }
+        break;
+      case OpKind.RepeaterCreate:
+        if (pendingStructuralDirective !== void 0) {
+          throw Error("AssertionError: Unexpected structural directive associated with @for block");
+        }
+        const forSlot = op.handle.slot + 1;
+        const forView = job.views.get(op.xref);
+        if (op.i18nPlaceholder === void 0) {
+          resolvePlaceholdersForView(job, forView, i18nContexts, elements);
+        } else {
+          if (currentOps === null) {
+            throw Error("i18n tag placeholder should only occur inside an i18n block");
+          }
+          recordTemplateStart(job, forView, forSlot, op.i18nPlaceholder, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+          resolvePlaceholdersForView(job, forView, i18nContexts, elements);
+          recordTemplateClose(job, forView, forSlot, op.i18nPlaceholder, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+          pendingStructuralDirective = void 0;
+        }
+        if (op.emptyView !== null) {
+          const emptySlot = op.handle.slot + 2;
+          const emptyView = job.views.get(op.emptyView);
+          if (op.emptyI18nPlaceholder === void 0) {
+            resolvePlaceholdersForView(job, emptyView, i18nContexts, elements);
+          } else {
+            if (currentOps === null) {
+              throw Error("i18n tag placeholder should only occur inside an i18n block");
+            }
+            recordTemplateStart(job, emptyView, emptySlot, op.emptyI18nPlaceholder, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
+            resolvePlaceholdersForView(job, emptyView, i18nContexts, elements);
+            recordTemplateClose(job, emptyView, emptySlot, op.emptyI18nPlaceholder, currentOps.i18nContext, currentOps.i18nBlock, pendingStructuralDirective);
             pendingStructuralDirective = void 0;
           }
         }
@@ -18099,8 +18150,8 @@ function recordElementClose(op, i18nContext, i18nBlock, structuralDirective) {
     addParam(i18nContext.params, closeName, value, i18nBlock.subTemplateIndex, flags);
   }
 }
-function recordTemplateStart(job, op, i18nContext, i18nBlock, structuralDirective) {
-  let { startName, closeName } = op.i18nPlaceholder;
+function recordTemplateStart(job, view, slot, i18nPlaceholder, i18nContext, i18nBlock, structuralDirective) {
+  let { startName, closeName } = i18nPlaceholder;
   let flags = I18nParamValueFlags.TemplateTag | I18nParamValueFlags.OpenTag;
   if (!closeName) {
     flags |= I18nParamValueFlags.CloseTag;
@@ -18108,20 +18159,20 @@ function recordTemplateStart(job, op, i18nContext, i18nBlock, structuralDirectiv
   if (structuralDirective !== void 0) {
     addParam(i18nContext.params, startName, structuralDirective.handle.slot, i18nBlock.subTemplateIndex, flags);
   }
-  addParam(i18nContext.params, startName, op.handle.slot, getSubTemplateIndexForTemplateTag(job, i18nBlock, op), flags);
+  addParam(i18nContext.params, startName, slot, getSubTemplateIndexForTemplateTag(job, i18nBlock, view), flags);
 }
-function recordTemplateClose(job, op, i18nContext, i18nBlock, structuralDirective) {
-  const { startName, closeName } = op.i18nPlaceholder;
+function recordTemplateClose(job, view, slot, i18nPlaceholder, i18nContext, i18nBlock, structuralDirective) {
+  const { startName, closeName } = i18nPlaceholder;
   const flags = I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag;
   if (closeName) {
-    addParam(i18nContext.params, closeName, op.handle.slot, getSubTemplateIndexForTemplateTag(job, i18nBlock, op), flags);
+    addParam(i18nContext.params, closeName, slot, getSubTemplateIndexForTemplateTag(job, i18nBlock, view), flags);
     if (structuralDirective !== void 0) {
       addParam(i18nContext.params, closeName, structuralDirective.handle.slot, i18nBlock.subTemplateIndex, flags);
     }
   }
 }
-function getSubTemplateIndexForTemplateTag(job, i18nOp, op) {
-  for (const childOp of job.views.get(op.xref).create) {
+function getSubTemplateIndexForTemplateTag(job, i18nOp, view) {
+  for (const childOp of view.create) {
     if (childOp.kind === OpKind.I18nStart) {
       return childOp.subTemplateIndex;
     }
@@ -19365,35 +19416,38 @@ function ingestSwitchBlock(unit, switchBlock) {
   const conditional2 = createConditionalOp(firstXref, firstSlotHandle, convertAst(switchBlock.expression, unit.job, null), conditions, switchBlock.sourceSpan);
   unit.update.push(conditional2);
 }
-function ingestDeferView(unit, suffix, children, sourceSpan) {
+function ingestDeferView(unit, suffix, i18nMeta, children, sourceSpan) {
+  if (i18nMeta !== void 0 && !(i18nMeta instanceof BlockPlaceholder)) {
+    throw Error("Unhandled i18n metadata type for defer block");
+  }
   if (children === void 0) {
     return null;
   }
   const secondaryView = unit.job.allocateView(unit.xref);
   ingestNodes(secondaryView, children);
-  const templateOp = createTemplateOp(secondaryView.xref, TemplateKind.Block, null, `Defer${suffix}`, Namespace.HTML, void 0, sourceSpan);
+  const templateOp = createTemplateOp(secondaryView.xref, TemplateKind.Block, null, `Defer${suffix}`, Namespace.HTML, i18nMeta, sourceSpan);
   unit.create.push(templateOp);
   return templateOp;
 }
 function ingestDeferBlock(unit, deferBlock) {
-  var _a2, _b2, _c2, _d2, _e2, _f2, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
+  var _a2, _b2, _c2, _d2, _e2, _f2, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s;
   const blockMeta = unit.job.deferBlocksMeta.get(deferBlock);
   if (blockMeta === void 0) {
     throw new Error(`AssertionError: unable to find metadata for deferred block`);
   }
-  const main = ingestDeferView(unit, "", deferBlock.children, deferBlock.sourceSpan);
-  const loading = ingestDeferView(unit, "Loading", (_a2 = deferBlock.loading) == null ? void 0 : _a2.children, (_b2 = deferBlock.loading) == null ? void 0 : _b2.sourceSpan);
-  const placeholder = ingestDeferView(unit, "Placeholder", (_c2 = deferBlock.placeholder) == null ? void 0 : _c2.children, (_d2 = deferBlock.placeholder) == null ? void 0 : _d2.sourceSpan);
-  const error2 = ingestDeferView(unit, "Error", (_e2 = deferBlock.error) == null ? void 0 : _e2.children, (_f2 = deferBlock.error) == null ? void 0 : _f2.sourceSpan);
+  const main = ingestDeferView(unit, "", deferBlock.i18n, deferBlock.children, deferBlock.sourceSpan);
+  const loading = ingestDeferView(unit, "Loading", (_a2 = deferBlock.loading) == null ? void 0 : _a2.i18n, (_b2 = deferBlock.loading) == null ? void 0 : _b2.children, (_c2 = deferBlock.loading) == null ? void 0 : _c2.sourceSpan);
+  const placeholder = ingestDeferView(unit, "Placeholder", (_d2 = deferBlock.placeholder) == null ? void 0 : _d2.i18n, (_e2 = deferBlock.placeholder) == null ? void 0 : _e2.children, (_f2 = deferBlock.placeholder) == null ? void 0 : _f2.sourceSpan);
+  const error2 = ingestDeferView(unit, "Error", (_g = deferBlock.error) == null ? void 0 : _g.i18n, (_h = deferBlock.error) == null ? void 0 : _h.children, (_i = deferBlock.error) == null ? void 0 : _i.sourceSpan);
   const deferXref = unit.job.allocateXrefId();
   const deferOp = createDeferOp(deferXref, main.xref, main.handle, blockMeta, deferBlock.sourceSpan);
-  deferOp.placeholderView = (_g = placeholder == null ? void 0 : placeholder.xref) != null ? _g : null;
-  deferOp.placeholderSlot = (_h = placeholder == null ? void 0 : placeholder.handle) != null ? _h : null;
-  deferOp.loadingSlot = (_i = loading == null ? void 0 : loading.handle) != null ? _i : null;
-  deferOp.errorSlot = (_j = error2 == null ? void 0 : error2.handle) != null ? _j : null;
-  deferOp.placeholderMinimumTime = (_l = (_k = deferBlock.placeholder) == null ? void 0 : _k.minimumTime) != null ? _l : null;
-  deferOp.loadingMinimumTime = (_n = (_m = deferBlock.loading) == null ? void 0 : _m.minimumTime) != null ? _n : null;
-  deferOp.loadingAfterTime = (_p = (_o = deferBlock.loading) == null ? void 0 : _o.afterTime) != null ? _p : null;
+  deferOp.placeholderView = (_j = placeholder == null ? void 0 : placeholder.xref) != null ? _j : null;
+  deferOp.placeholderSlot = (_k = placeholder == null ? void 0 : placeholder.handle) != null ? _k : null;
+  deferOp.loadingSlot = (_l = loading == null ? void 0 : loading.handle) != null ? _l : null;
+  deferOp.errorSlot = (_m = error2 == null ? void 0 : error2.handle) != null ? _m : null;
+  deferOp.placeholderMinimumTime = (_o = (_n = deferBlock.placeholder) == null ? void 0 : _n.minimumTime) != null ? _o : null;
+  deferOp.loadingMinimumTime = (_q = (_p = deferBlock.loading) == null ? void 0 : _p.minimumTime) != null ? _q : null;
+  deferOp.loadingAfterTime = (_s = (_r = deferBlock.loading) == null ? void 0 : _r.afterTime) != null ? _s : null;
   unit.create.push(deferOp);
   let prefetch = false;
   let deferOnOps = [];
@@ -19475,7 +19529,7 @@ function ingestIcu(unit, icu) {
   }
 }
 function ingestForBlock(unit, forBlock) {
-  var _a2;
+  var _a2, _b2, _c2;
   const repeaterView = unit.job.allocateView(unit.xref);
   const createRepeaterAlias = (ident, repeaterVar) => {
     repeaterView.aliases.add({
@@ -19509,8 +19563,16 @@ function ingestForBlock(unit, forBlock) {
     $odd: forBlock.contextVariables.$odd.name,
     $implicit: forBlock.item.name
   };
+  if (forBlock.i18n !== void 0 && !(forBlock.i18n instanceof BlockPlaceholder)) {
+    throw Error("AssertionError: Unhandled i18n metadata type or @for");
+  }
+  if (((_a2 = forBlock.empty) == null ? void 0 : _a2.i18n) !== void 0 && !(forBlock.empty.i18n instanceof BlockPlaceholder)) {
+    throw Error("AssertionError: Unhandled i18n metadata type or @empty");
+  }
+  const i18nPlaceholder = forBlock.i18n;
+  const emptyI18nPlaceholder = (_b2 = forBlock.empty) == null ? void 0 : _b2.i18n;
   const tagName = ingestControlFlowInsertionPoint(unit, repeaterView.xref, forBlock);
-  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_a2 = emptyView == null ? void 0 : emptyView.xref) != null ? _a2 : null, tagName, track, varNames, forBlock.sourceSpan);
+  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_c2 = emptyView == null ? void 0 : emptyView.xref) != null ? _c2 : null, tagName, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, forBlock.sourceSpan);
   unit.create.push(repeaterCreate2);
   const expression = convertAst(forBlock.expression, unit.job, convertSourceSpan(forBlock.expression.span, forBlock.sourceSpan));
   const repeater2 = createRepeaterOp(repeaterCreate2.xref, repeaterCreate2.handle, expression, forBlock.sourceSpan);
@@ -25287,7 +25349,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.6+sha-a398c55");
+var VERSION2 = new Version("17.0.6+sha-f88b77b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26352,9 +26414,9 @@ function buildBoundIfElseBlock(etm, tmpl, offset) {
   } else if (aliases.length === 1) {
     condition += `; as ${aliases[0]}`;
   }
-  const elsePlaceholder = `\u03B8${etm.elseAttr.value}\u03B4`;
+  const elsePlaceholder = `\u03B8${etm.elseAttr.value.trim()}\u03B4`;
   if (etm.thenAttr !== void 0) {
-    const thenPlaceholder = `\u03B8${etm.thenAttr.value}\u03B4`;
+    const thenPlaceholder = `\u03B8${etm.thenAttr.value.trim()}\u03B4`;
     return buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset);
   }
   return buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset);

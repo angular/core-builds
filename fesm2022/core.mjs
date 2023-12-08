@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.6+sha-a398c55
+ * @license Angular v17.0.6+sha-f88b77b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.6+sha-a398c55');
+const VERSION = new Version('17.0.6+sha-f88b77b');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -11762,6 +11762,19 @@ class ErrorHandler {
         return e || null;
     }
 }
+/**
+ * `InjectionToken` used to configure how to call the `ErrorHandler`.
+ *
+ * `NgZone` is provided by default today so the default (and only) implementation for this
+ * is calling `ErrorHandler.handleError` outside of the Angular zone.
+ */
+const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken((typeof ngDevMode === 'undefined' || ngDevMode) ? 'internal error handler' : '', {
+    providedIn: 'root',
+    factory: () => {
+        const userErrorHandler = inject(ErrorHandler);
+        return userErrorHandler.handleError.bind(undefined);
+    }
+});
 
 /**
  * Internal token that specifies whether DOM reuse logic
@@ -14843,6 +14856,15 @@ function shouldBeIgnoredByZone(applyArgs) {
     }
     // Prevent triggering change detection when the __ignore_ng_zone__ flag is detected.
     return applyArgs[0].data?.['__ignore_ng_zone__'] === true;
+}
+function getNgZone(ngZoneToUse = 'zone.js', options) {
+    if (ngZoneToUse === 'noop') {
+        return new NoopNgZone();
+    }
+    if (ngZoneToUse === 'zone.js') {
+        return new NgZone(options);
+    }
+    return ngZoneToUse;
 }
 
 // Public API for Zone
@@ -29932,190 +29954,6 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
  */
 const ITS_JUST_ANGULAR = true;
 
-/**
- * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
- * one or more initialization functions.
- *
- * The provided functions are injected at application startup and executed during
- * app initialization. If any of these functions returns a Promise or an Observable, initialization
- * does not complete until the Promise is resolved or the Observable is completed.
- *
- * You can, for example, create a factory function that loads language data
- * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
- * The function is executed during the application bootstrap process,
- * and the needed data is available on startup.
- *
- * @see {@link ApplicationInitStatus}
- *
- * @usageNotes
- *
- * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
- * and a function returning a promise.
- * ### Example with NgModule-based application
- * ```
- *  function initializeApp(): Promise<any> {
- *    return new Promise((resolve, reject) => {
- *      // Do some asynchronous stuff
- *      resolve();
- *    });
- *  }
- *
- *  @NgModule({
- *   imports: [BrowserModule],
- *   declarations: [AppComponent],
- *   bootstrap: [AppComponent],
- *   providers: [{
- *     provide: APP_INITIALIZER,
- *     useFactory: () => initializeApp,
- *     multi: true
- *    }]
- *   })
- *  export class AppModule {}
- * ```
- *
- * ### Example with standalone application
- * ```
- * export function initializeApp(http: HttpClient) {
- *   return (): Promise<any> =>
- *     firstValueFrom(
- *       http
- *         .get("https://someUrl.com/api/user")
- *         .pipe(tap(user => { ... }))
- *     );
- * }
- *
- * bootstrapApplication(App, {
- *   providers: [
- *     provideHttpClient(),
- *     {
- *       provide: APP_INITIALIZER,
- *       useFactory: initializeApp,
- *       multi: true,
- *       deps: [HttpClient],
- *     },
- *   ],
- * });
-
- * ```
- *
- *
- * It's also possible to configure a multi-provider using `APP_INITIALIZER` token and a function
- * returning an observable, see an example below. Note: the `HttpClient` in this example is used for
- * demo purposes to illustrate how the factory function can work with other providers available
- * through DI.
- *
- * ### Example with NgModule-based application
- * ```
- *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
- *   return () => httpClient.get("https://someUrl.com/api/user")
- *     .pipe(
- *        tap(user => { ... })
- *     );
- *  }
- *
- *  @NgModule({
- *    imports: [BrowserModule, HttpClientModule],
- *    declarations: [AppComponent],
- *    bootstrap: [AppComponent],
- *    providers: [{
- *      provide: APP_INITIALIZER,
- *      useFactory: initializeAppFactory,
- *      deps: [HttpClient],
- *      multi: true
- *    }]
- *  })
- *  export class AppModule {}
- * ```
- *
- * ### Example with standalone application
- * ```
- *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
- *   return () => httpClient.get("https://someUrl.com/api/user")
- *     .pipe(
- *        tap(user => { ... })
- *     );
- *  }
- *
- * bootstrapApplication(App, {
- *   providers: [
- *     provideHttpClient(),
- *     {
- *       provide: APP_INITIALIZER,
- *       useFactory: initializeAppFactory,
- *       multi: true,
- *       deps: [HttpClient],
- *     },
- *   ],
- * });
- * ```
- *
- * @publicApi
- */
-const APP_INITIALIZER = new InjectionToken('Application Initializer');
-/**
- * A class that reflects the state of running {@link APP_INITIALIZER} functions.
- *
- * @publicApi
- */
-class ApplicationInitStatus {
-    constructor() {
-        this.initialized = false;
-        this.done = false;
-        this.donePromise = new Promise((res, rej) => {
-            this.resolve = res;
-            this.reject = rej;
-        });
-        this.appInits = inject(APP_INITIALIZER, { optional: true }) ?? [];
-        if ((typeof ngDevMode === 'undefined' || ngDevMode) && !Array.isArray(this.appInits)) {
-            throw new RuntimeError(-209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `APP_INITIALIZER` token value ' +
-                `(expected an array, but got ${typeof this.appInits}). ` +
-                'Please check that the `APP_INITIALIZER` token is configured as a ' +
-                '`multi: true` provider.');
-        }
-    }
-    /** @internal */
-    runInitializers() {
-        if (this.initialized) {
-            return;
-        }
-        const asyncInitPromises = [];
-        for (const appInits of this.appInits) {
-            const initResult = appInits();
-            if (isPromise(initResult)) {
-                asyncInitPromises.push(initResult);
-            }
-            else if (isSubscribable(initResult)) {
-                const observableAsPromise = new Promise((resolve, reject) => {
-                    initResult.subscribe({ complete: resolve, error: reject });
-                });
-                asyncInitPromises.push(observableAsPromise);
-            }
-        }
-        const complete = () => {
-            // @ts-expect-error overwriting a readonly
-            this.done = true;
-            this.resolve();
-        };
-        Promise.all(asyncInitPromises)
-            .then(() => {
-            complete();
-        })
-            .catch(e => {
-            this.reject(e);
-        });
-        if (asyncInitPromises.length === 0) {
-            complete();
-        }
-        this.initialized = true;
-    }
-    static { this.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac, providedIn: 'root' }); }
-}
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
-        type: Injectable,
-        args: [{ providedIn: 'root' }]
-    }], () => [], null); })();
-
 class Console {
     log(message) {
         // tslint:disable-next-line:no-console
@@ -30133,335 +29971,6 @@ class Console {
         type: Injectable,
         args: [{ providedIn: 'platform' }]
     }], null, null); })();
-
-/**
- * Work out the locale from the potential global properties.
- *
- * * Closure Compiler: use `goog.LOCALE`.
- * * Ivy enabled: use `$localize.locale`
- */
-function getGlobalLocale() {
-    if (typeof ngI18nClosureMode !== 'undefined' && ngI18nClosureMode &&
-        typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
-        // * The default `goog.LOCALE` value is `en`, while Angular used `en-US`.
-        // * In order to preserve backwards compatibility, we use Angular default value over
-        //   Closure Compiler's one.
-        return goog.LOCALE;
-    }
-    else {
-        // KEEP `typeof $localize !== 'undefined' && $localize.locale` IN SYNC WITH THE LOCALIZE
-        // COMPILE-TIME INLINER.
-        //
-        // * During compile time inlining of translations the expression will be replaced
-        //   with a string literal that is the current locale. Other forms of this expression are not
-        //   guaranteed to be replaced.
-        //
-        // * During runtime translation evaluation, the developer is required to set `$localize.locale`
-        //   if required, or just to provide their own `LOCALE_ID` provider.
-        return (typeof $localize !== 'undefined' && $localize.locale) || DEFAULT_LOCALE_ID;
-    }
-}
-/**
- * Provide this token to set the locale of your application.
- * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
- * DecimalPipe and PercentPipe) and by ICU expressions.
- *
- * See the [i18n guide](guide/i18n-common-locale-id) for more information.
- *
- * @usageNotes
- * ### Example
- *
- * ```typescript
- * import { LOCALE_ID } from '@angular/core';
- * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
- * });
- * ```
- *
- * @publicApi
- */
-const LOCALE_ID = new InjectionToken('LocaleId', {
-    providedIn: 'root',
-    factory: () => inject(LOCALE_ID, InjectFlags.Optional | InjectFlags.SkipSelf) || getGlobalLocale(),
-});
-/**
- * Provide this token to set the default currency code your application uses for
- * CurrencyPipe when there is no currency code passed into it. This is only used by
- * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
- *
- * See the [i18n guide](guide/i18n-common-locale-id) for more information.
- *
- * <div class="alert is-helpful">
- *
- * **Deprecation notice:**
- *
- * The default currency code is currently always `USD` but this is deprecated from v9.
- *
- * **In v10 the default currency code will be taken from the current locale.**
- *
- * If you need the previous behavior then set it by creating a `DEFAULT_CURRENCY_CODE` provider in
- * your application `NgModule`:
- *
- * ```ts
- * {provide: DEFAULT_CURRENCY_CODE, useValue: 'USD'}
- * ```
- *
- * </div>
- *
- * @usageNotes
- * ### Example
- *
- * ```typescript
- * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }]
- * });
- * ```
- *
- * @publicApi
- */
-const DEFAULT_CURRENCY_CODE = new InjectionToken('DefaultCurrencyCode', {
-    providedIn: 'root',
-    factory: () => USD_CURRENCY_CODE,
-});
-/**
- * Use this token at bootstrap to provide the content of your translation file (`xtb`,
- * `xlf` or `xlf2`) when you want to translate your application in another language.
- *
- * See the [i18n guide](guide/i18n-common-merge) for more information.
- *
- * @usageNotes
- * ### Example
- *
- * ```typescript
- * import { TRANSLATIONS } from '@angular/core';
- * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * // content of your translation file
- * const translations = '....';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: TRANSLATIONS, useValue: translations }]
- * });
- * ```
- *
- * @publicApi
- */
-const TRANSLATIONS = new InjectionToken('Translations');
-/**
- * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
- * `xlf` or `xlf2`.
- *
- * See the [i18n guide](guide/i18n-common-merge) for more information.
- *
- * @usageNotes
- * ### Example
- *
- * ```typescript
- * import { TRANSLATIONS_FORMAT } from '@angular/core';
- * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
- * });
- * ```
- *
- * @publicApi
- */
-const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
-/**
- * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
- * that the compiler should use in case of missing translations:
- * - Error: throw if you have missing translations.
- * - Warning (default): show a warning in the console and/or shell.
- * - Ignore: do nothing.
- *
- * See the [i18n guide](guide/i18n-common-merge#report-missing-translations) for more information.
- *
- * @usageNotes
- * ### Example
- * ```typescript
- * import { MissingTranslationStrategy } from '@angular/core';
- * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
- * import { AppModule } from './app/app.module';
- *
- * platformBrowserDynamic().bootstrapModule(AppModule, {
- *   missingTranslation: MissingTranslationStrategy.Error
- * });
- * ```
- *
- * @publicApi
- */
-var MissingTranslationStrategy;
-(function (MissingTranslationStrategy) {
-    MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";
-    MissingTranslationStrategy[MissingTranslationStrategy["Warning"] = 1] = "Warning";
-    MissingTranslationStrategy[MissingTranslationStrategy["Ignore"] = 2] = "Ignore";
-})(MissingTranslationStrategy || (MissingTranslationStrategy = {}));
-
-// A delay in milliseconds before the scan is run after onLoad, to avoid any
-// potential race conditions with other LCP-related functions. This delay
-// happens outside of the main JavaScript execution and will only effect the timing
-// on when the warning becomes visible in the console.
-const SCAN_DELAY = 200;
-const OVERSIZED_IMAGE_TOLERANCE = 1200;
-class ImagePerformanceWarning {
-    constructor() {
-        // Map of full image URLs -> original `ngSrc` values.
-        this.window = null;
-        this.observer = null;
-        this.options = inject(IMAGE_CONFIG);
-        this.ngZone = inject(NgZone);
-    }
-    start() {
-        if (typeof PerformanceObserver === 'undefined' ||
-            (this.options?.disableImageSizeWarning && this.options?.disableImageLazyLoadWarning)) {
-            return;
-        }
-        this.observer = this.initPerformanceObserver();
-        const doc = getDocument();
-        const win = doc.defaultView;
-        if (typeof win !== 'undefined') {
-            this.window = win;
-            // Wait to avoid race conditions where LCP image triggers
-            // load event before it's recorded by the performance observer
-            const waitToScan = () => {
-                setTimeout(this.scanImages.bind(this), SCAN_DELAY);
-            };
-            // Angular doesn't have to run change detection whenever any asynchronous tasks are invoked in
-            // the scope of this functionality.
-            this.ngZone.runOutsideAngular(() => {
-                // Consider the case when the application is created and destroyed multiple times.
-                // Typically, applications are created instantly once the page is loaded, and the
-                // `window.load` listener is always triggered. However, the `window.load` event will never
-                // be fired if the page is loaded, and the application is created later. Checking for
-                // `readyState` is the easiest way to determine whether the page has been loaded or not.
-                if (doc.readyState === 'complete') {
-                    waitToScan();
-                }
-                else {
-                    this.window?.addEventListener('load', waitToScan, { once: true });
-                }
-            });
-        }
-    }
-    ngOnDestroy() {
-        this.observer?.disconnect();
-    }
-    initPerformanceObserver() {
-        if (typeof PerformanceObserver === 'undefined') {
-            return null;
-        }
-        const observer = new PerformanceObserver((entryList) => {
-            const entries = entryList.getEntries();
-            if (entries.length === 0)
-                return;
-            // We use the latest entry produced by the `PerformanceObserver` as the best
-            // signal on which element is actually an LCP one. As an example, the first image to load on
-            // a page, by virtue of being the only thing on the page so far, is often a LCP candidate
-            // and gets reported by PerformanceObserver, but isn't necessarily the LCP element.
-            const lcpElement = entries[entries.length - 1];
-            // Cast to `any` due to missing `element` on the `LargestContentfulPaint` type of entry.
-            // See https://developer.mozilla.org/en-US/docs/Web/API/LargestContentfulPaint
-            const imgSrc = lcpElement.element?.src ?? '';
-            // Exclude `data:` and `blob:` URLs, since they are fetched resources.
-            if (imgSrc.startsWith('data:') || imgSrc.startsWith('blob:'))
-                return;
-            this.lcpImageUrl = imgSrc;
-        });
-        observer.observe({ type: 'largest-contentful-paint', buffered: true });
-        return observer;
-    }
-    scanImages() {
-        const images = getDocument().querySelectorAll('img');
-        let lcpElementFound, lcpElementLoadedCorrectly = false;
-        images.forEach(image => {
-            if (!this.options?.disableImageSizeWarning) {
-                for (const image of images) {
-                    // Image elements using the NgOptimizedImage directive are excluded,
-                    // as that directive has its own version of this check.
-                    if (!image.getAttribute('ng-img') && this.isOversized(image)) {
-                        logOversizedImageWarning(image.src);
-                    }
-                }
-            }
-            if (!this.options?.disableImageLazyLoadWarning && this.lcpImageUrl) {
-                if (image.src === this.lcpImageUrl) {
-                    lcpElementFound = true;
-                    if (image.loading !== 'lazy' || image.getAttribute('ng-img')) {
-                        // This variable is set to true and never goes back to false to account
-                        // for the case where multiple images have the same src url, and some
-                        // have lazy loading while others don't.
-                        // Also ignore NgOptimizedImage because there's a different warning for that.
-                        lcpElementLoadedCorrectly = true;
-                    }
-                }
-            }
-        });
-        if (lcpElementFound && !lcpElementLoadedCorrectly && this.lcpImageUrl &&
-            !this.options?.disableImageLazyLoadWarning) {
-            logLazyLCPWarning(this.lcpImageUrl);
-        }
-    }
-    isOversized(image) {
-        if (!this.window) {
-            return false;
-        }
-        const computedStyle = this.window.getComputedStyle(image);
-        let renderedWidth = parseFloat(computedStyle.getPropertyValue('width'));
-        let renderedHeight = parseFloat(computedStyle.getPropertyValue('height'));
-        const boxSizing = computedStyle.getPropertyValue('box-sizing');
-        const objectFit = computedStyle.getPropertyValue('object-fit');
-        if (objectFit === `cover`) {
-            // Object fit cover may indicate a use case such as a sprite sheet where
-            // this warning does not apply.
-            return false;
-        }
-        if (boxSizing === 'border-box') {
-            const paddingTop = computedStyle.getPropertyValue('padding-top');
-            const paddingRight = computedStyle.getPropertyValue('padding-right');
-            const paddingBottom = computedStyle.getPropertyValue('padding-bottom');
-            const paddingLeft = computedStyle.getPropertyValue('padding-left');
-            renderedWidth -= parseFloat(paddingRight) + parseFloat(paddingLeft);
-            renderedHeight -= parseFloat(paddingTop) + parseFloat(paddingBottom);
-        }
-        const intrinsicWidth = image.naturalWidth;
-        const intrinsicHeight = image.naturalHeight;
-        const recommendedWidth = this.window.devicePixelRatio * renderedWidth;
-        const recommendedHeight = this.window.devicePixelRatio * renderedHeight;
-        const oversizedWidth = (intrinsicWidth - recommendedWidth) >= OVERSIZED_IMAGE_TOLERANCE;
-        const oversizedHeight = (intrinsicHeight - recommendedHeight) >= OVERSIZED_IMAGE_TOLERANCE;
-        return oversizedWidth || oversizedHeight;
-    }
-    static { this.ɵfac = function ImagePerformanceWarning_Factory(t) { return new (t || ImagePerformanceWarning)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ImagePerformanceWarning, factory: ImagePerformanceWarning.ɵfac, providedIn: 'root' }); }
-}
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ImagePerformanceWarning, [{
-        type: Injectable,
-        args: [{ providedIn: 'root' }]
-    }], null, null); })();
-function logLazyLCPWarning(src) {
-    console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} is the Largest Contentful Paint (LCP) element ` +
-        `but was given a "loading" value of "lazy", which can negatively impact ` +
-        `application loading performance. This warning can be addressed by ` +
-        `changing the loading value of the LCP image to "eager", or by using the ` +
-        `NgOptimizedImage directive's prioritization utilities. For more ` +
-        `information about addressing or disabling this warning, see ` +
-        `https://angular.io/errors/NG0913`));
-}
-function logOversizedImageWarning(src) {
-    console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} has intrinsic file dimensions much larger than its ` +
-        `rendered size. This can negatively impact application loading performance. ` +
-        `For more information about addressing or disabling this warning, see ` +
-        `https://angular.io/errors/NG0913`));
-}
 
 /**
  * *Internal* service that keeps track of pending tasks happening in the system
@@ -31764,19 +31273,190 @@ function setTestabilityGetter(getter) {
 }
 let _testabilityGetter;
 
-let _platformInjector = null;
 /**
- * Internal token to indicate whether having multiple bootstrapped platform should be allowed (only
- * one bootstrapped platform is allowed by default). This token helps to support SSR scenarios.
+ * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
+ * one or more initialization functions.
+ *
+ * The provided functions are injected at application startup and executed during
+ * app initialization. If any of these functions returns a Promise or an Observable, initialization
+ * does not complete until the Promise is resolved or the Observable is completed.
+ *
+ * You can, for example, create a factory function that loads language data
+ * or an external configuration, and provide that function to the `APP_INITIALIZER` token.
+ * The function is executed during the application bootstrap process,
+ * and the needed data is available on startup.
+ *
+ * @see {@link ApplicationInitStatus}
+ *
+ * @usageNotes
+ *
+ * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
+ * and a function returning a promise.
+ * ### Example with NgModule-based application
+ * ```
+ *  function initializeApp(): Promise<any> {
+ *    return new Promise((resolve, reject) => {
+ *      // Do some asynchronous stuff
+ *      resolve();
+ *    });
+ *  }
+ *
+ *  @NgModule({
+ *   imports: [BrowserModule],
+ *   declarations: [AppComponent],
+ *   bootstrap: [AppComponent],
+ *   providers: [{
+ *     provide: APP_INITIALIZER,
+ *     useFactory: () => initializeApp,
+ *     multi: true
+ *    }]
+ *   })
+ *  export class AppModule {}
+ * ```
+ *
+ * ### Example with standalone application
+ * ```
+ * export function initializeApp(http: HttpClient) {
+ *   return (): Promise<any> =>
+ *     firstValueFrom(
+ *       http
+ *         .get("https://someUrl.com/api/user")
+ *         .pipe(tap(user => { ... }))
+ *     );
+ * }
+ *
+ * bootstrapApplication(App, {
+ *   providers: [
+ *     provideHttpClient(),
+ *     {
+ *       provide: APP_INITIALIZER,
+ *       useFactory: initializeApp,
+ *       multi: true,
+ *       deps: [HttpClient],
+ *     },
+ *   ],
+ * });
+
+ * ```
+ *
+ *
+ * It's also possible to configure a multi-provider using `APP_INITIALIZER` token and a function
+ * returning an observable, see an example below. Note: the `HttpClient` in this example is used for
+ * demo purposes to illustrate how the factory function can work with other providers available
+ * through DI.
+ *
+ * ### Example with NgModule-based application
+ * ```
+ *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
+ *   return () => httpClient.get("https://someUrl.com/api/user")
+ *     .pipe(
+ *        tap(user => { ... })
+ *     );
+ *  }
+ *
+ *  @NgModule({
+ *    imports: [BrowserModule, HttpClientModule],
+ *    declarations: [AppComponent],
+ *    bootstrap: [AppComponent],
+ *    providers: [{
+ *      provide: APP_INITIALIZER,
+ *      useFactory: initializeAppFactory,
+ *      deps: [HttpClient],
+ *      multi: true
+ *    }]
+ *  })
+ *  export class AppModule {}
+ * ```
+ *
+ * ### Example with standalone application
+ * ```
+ *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
+ *   return () => httpClient.get("https://someUrl.com/api/user")
+ *     .pipe(
+ *        tap(user => { ... })
+ *     );
+ *  }
+ *
+ * bootstrapApplication(App, {
+ *   providers: [
+ *     provideHttpClient(),
+ *     {
+ *       provide: APP_INITIALIZER,
+ *       useFactory: initializeAppFactory,
+ *       multi: true,
+ *       deps: [HttpClient],
+ *     },
+ *   ],
+ * });
+ * ```
+ *
+ * @publicApi
  */
-const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
+const APP_INITIALIZER = new InjectionToken('Application Initializer');
 /**
- * Internal token that allows to register extra callbacks that should be invoked during the
- * `PlatformRef.destroy` operation. This token is needed to avoid a direct reference to the
- * `PlatformRef` class (i.e. register the callback via `PlatformRef.onDestroy`), thus making the
- * entire class tree-shakeable.
+ * A class that reflects the state of running {@link APP_INITIALIZER} functions.
+ *
+ * @publicApi
  */
-const PLATFORM_DESTROY_LISTENERS = new InjectionToken('PlatformDestroyListeners');
+class ApplicationInitStatus {
+    constructor() {
+        this.initialized = false;
+        this.done = false;
+        this.donePromise = new Promise((res, rej) => {
+            this.resolve = res;
+            this.reject = rej;
+        });
+        this.appInits = inject(APP_INITIALIZER, { optional: true }) ?? [];
+        if ((typeof ngDevMode === 'undefined' || ngDevMode) && !Array.isArray(this.appInits)) {
+            throw new RuntimeError(-209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `APP_INITIALIZER` token value ' +
+                `(expected an array, but got ${typeof this.appInits}). ` +
+                'Please check that the `APP_INITIALIZER` token is configured as a ' +
+                '`multi: true` provider.');
+        }
+    }
+    /** @internal */
+    runInitializers() {
+        if (this.initialized) {
+            return;
+        }
+        const asyncInitPromises = [];
+        for (const appInits of this.appInits) {
+            const initResult = appInits();
+            if (isPromise(initResult)) {
+                asyncInitPromises.push(initResult);
+            }
+            else if (isSubscribable(initResult)) {
+                const observableAsPromise = new Promise((resolve, reject) => {
+                    initResult.subscribe({ complete: resolve, error: reject });
+                });
+                asyncInitPromises.push(observableAsPromise);
+            }
+        }
+        const complete = () => {
+            // @ts-expect-error overwriting a readonly
+            this.done = true;
+            this.resolve();
+        };
+        Promise.all(asyncInitPromises)
+            .then(() => {
+            complete();
+        })
+            .catch(e => {
+            this.reject(e);
+        });
+        if (asyncInitPromises.length === 0) {
+            complete();
+        }
+        this.initialized = true;
+    }
+    static { this.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(); }; }
+    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac, providedIn: 'root' }); }
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
+        type: Injectable,
+        args: [{ providedIn: 'root' }]
+    }], () => [], null); })();
+
 /**
  * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
  * be called for every component that is bootstrapped.
@@ -31853,374 +31533,6 @@ class NgProbeToken {
         this.name = name;
         this.token = token;
     }
-}
-/**
- * Creates a platform.
- * Platforms must be created on launch using this function.
- *
- * @publicApi
- */
-function createPlatform(injector) {
-    if (_platformInjector && !_platformInjector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
-        throw new RuntimeError(400 /* RuntimeErrorCode.MULTIPLE_PLATFORMS */, ngDevMode &&
-            'There can be only one platform. Destroy the previous one to create a new one.');
-    }
-    publishDefaultGlobalUtils();
-    publishSignalConfiguration();
-    _platformInjector = injector;
-    const platform = injector.get(PlatformRef);
-    runPlatformInitializers(injector);
-    return platform;
-}
-/**
- * The goal of this function is to bootstrap a platform injector,
- * but avoid referencing `PlatformRef` class.
- * This function is needed for bootstrapping a Standalone Component.
- */
-function createOrReusePlatformInjector(providers = []) {
-    // If a platform injector already exists, it means that the platform
-    // is already bootstrapped and no additional actions are required.
-    if (_platformInjector)
-        return _platformInjector;
-    publishDefaultGlobalUtils();
-    // Otherwise, setup a new platform injector and run platform initializers.
-    const injector = createPlatformInjector(providers);
-    _platformInjector = injector;
-    publishSignalConfiguration();
-    runPlatformInitializers(injector);
-    return injector;
-}
-function runPlatformInitializers(injector) {
-    const inits = injector.get(PLATFORM_INITIALIZER, null);
-    inits?.forEach((init) => init());
-}
-/**
- * Internal create application API that implements the core application creation logic and optional
- * bootstrap logic.
- *
- * Platforms (such as `platform-browser`) may require different set of application and platform
- * providers for an application to function correctly. As a result, platforms may use this function
- * internally and supply the necessary providers during the bootstrap, while exposing
- * platform-specific APIs as a part of their public API.
- *
- * @returns A promise that returns an `ApplicationRef` instance once resolved.
- */
-function internalCreateApplication(config) {
-    try {
-        const { rootComponent, appProviders, platformProviders } = config;
-        if ((typeof ngDevMode === 'undefined' || ngDevMode) && rootComponent !== undefined) {
-            assertStandaloneComponentType(rootComponent);
-        }
-        const platformInjector = createOrReusePlatformInjector(platformProviders);
-        // Create root application injector based on a set of providers configured at the platform
-        // bootstrap level as well as providers passed to the bootstrap call by a user.
-        const allAppProviders = [
-            provideZoneChangeDetection(),
-            ...(appProviders || []),
-        ];
-        const adapter = new EnvironmentNgModuleRefAdapter({
-            providers: allAppProviders,
-            parent: platformInjector,
-            debugName: (typeof ngDevMode === 'undefined' || ngDevMode) ? 'Environment Injector' : '',
-            // We skip environment initializers because we need to run them inside the NgZone, which
-            // happens after we get the NgZone instance from the Injector.
-            runEnvironmentInitializers: false,
-        });
-        const envInjector = adapter.injector;
-        const ngZone = envInjector.get(NgZone);
-        return ngZone.run(() => {
-            envInjector.resolveInjectorInitializers();
-            const exceptionHandler = envInjector.get(ErrorHandler, null);
-            if ((typeof ngDevMode === 'undefined' || ngDevMode) && !exceptionHandler) {
-                throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No `ErrorHandler` found in the Dependency Injection tree.');
-            }
-            let onErrorSubscription;
-            ngZone.runOutsideAngular(() => {
-                onErrorSubscription = ngZone.onError.subscribe({
-                    next: (error) => {
-                        exceptionHandler.handleError(error);
-                    }
-                });
-            });
-            // If the whole platform is destroyed, invoke the `destroy` method
-            // for all bootstrapped applications as well.
-            const destroyListener = () => envInjector.destroy();
-            const onPlatformDestroyListeners = platformInjector.get(PLATFORM_DESTROY_LISTENERS);
-            onPlatformDestroyListeners.add(destroyListener);
-            envInjector.onDestroy(() => {
-                onErrorSubscription.unsubscribe();
-                onPlatformDestroyListeners.delete(destroyListener);
-            });
-            return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
-                const initStatus = envInjector.get(ApplicationInitStatus);
-                initStatus.runInitializers();
-                return initStatus.donePromise.then(() => {
-                    const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
-                    setLocaleId(localeId || DEFAULT_LOCALE_ID);
-                    const appRef = envInjector.get(ApplicationRef);
-                    if (rootComponent !== undefined) {
-                        appRef.bootstrap(rootComponent);
-                    }
-                    if (typeof ngDevMode === 'undefined' || ngDevMode) {
-                        const imagePerformanceService = envInjector.get(ImagePerformanceWarning);
-                        imagePerformanceService.start();
-                    }
-                    return appRef;
-                });
-            });
-        });
-    }
-    catch (e) {
-        return Promise.reject(e);
-    }
-}
-/**
- * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
- * your application's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
- * @param parentPlatformFactory Another platform factory to modify. Allows you to compose factories
- * to build up configurations that might be required by different libraries or parts of the
- * application.
- * @param name Identifies the new platform factory.
- * @param providers A set of dependency providers for platforms created with the new factory.
- *
- * @publicApi
- */
-function createPlatformFactory(parentPlatformFactory, name, providers = []) {
-    const desc = `Platform: ${name}`;
-    const marker = new InjectionToken(desc);
-    return (extraProviders = []) => {
-        let platform = getPlatform();
-        if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
-            const platformProviders = [
-                ...providers,
-                ...extraProviders,
-                { provide: marker, useValue: true }
-            ];
-            if (parentPlatformFactory) {
-                parentPlatformFactory(platformProviders);
-            }
-            else {
-                createPlatform(createPlatformInjector(platformProviders, desc));
-            }
-        }
-        return assertPlatform(marker);
-    };
-}
-/**
- * Checks that there is currently a platform that contains the given token as a provider.
- *
- * @publicApi
- */
-function assertPlatform(requiredToken) {
-    const platform = getPlatform();
-    if (!platform) {
-        throw new RuntimeError(401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, ngDevMode && 'No platform exists!');
-    }
-    if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
-        !platform.injector.get(requiredToken, null)) {
-        throw new RuntimeError(400 /* RuntimeErrorCode.MULTIPLE_PLATFORMS */, 'A platform with a different configuration has been created. Please destroy it first.');
-    }
-    return platform;
-}
-/**
- * Helper function to create an instance of a platform injector (that maintains the 'platform'
- * scope).
- */
-function createPlatformInjector(providers = [], name) {
-    return Injector.create({
-        name,
-        providers: [
-            { provide: INJECTOR_SCOPE, useValue: 'platform' },
-            { provide: PLATFORM_DESTROY_LISTENERS, useValue: new Set([() => _platformInjector = null]) },
-            ...providers
-        ],
-    });
-}
-/**
- * Destroys the current Angular platform and all Angular applications on the page.
- * Destroys all modules and listeners registered with the platform.
- *
- * @publicApi
- */
-function destroyPlatform() {
-    getPlatform()?.destroy();
-}
-/**
- * Returns the current platform.
- *
- * @publicApi
- */
-function getPlatform() {
-    return _platformInjector?.get(PlatformRef) ?? null;
-}
-/**
- * The Angular platform is the entry point for Angular on a web page.
- * Each page has exactly one platform. Services (such as reflection) which are common
- * to every Angular application running on the page are bound in its scope.
- * A page's platform is initialized implicitly when a platform is created using a platform
- * factory such as `PlatformBrowser`, or explicitly by calling the `createPlatform()` function.
- *
- * @publicApi
- */
-class PlatformRef {
-    /** @internal */
-    constructor(_injector) {
-        this._injector = _injector;
-        this._modules = [];
-        this._destroyListeners = [];
-        this._destroyed = false;
-    }
-    /**
-     * Creates an instance of an `@NgModule` for the given platform.
-     *
-     * @deprecated Passing NgModule factories as the `PlatformRef.bootstrapModuleFactory` function
-     *     argument is deprecated. Use the `PlatformRef.bootstrapModule` API instead.
-     */
-    bootstrapModuleFactory(moduleFactory, options) {
-        // Note: We need to create the NgZone _before_ we instantiate the module,
-        // as instantiating the module creates some providers eagerly.
-        // So we create a mini parent injector that just contains the new NgZone and
-        // pass that as parent to the NgModuleFactory.
-        const ngZone = getNgZone(options?.ngZone, getNgZoneOptions({
-            eventCoalescing: options?.ngZoneEventCoalescing,
-            runCoalescing: options?.ngZoneRunCoalescing
-        }));
-        // Note: Create ngZoneInjector within ngZone.run so that all of the instantiated services are
-        // created within the Angular zone
-        // Do not try to replace ngZone.run with ApplicationRef#run because ApplicationRef would then be
-        // created outside of the Angular zone.
-        return ngZone.run(() => {
-            const moduleRef = createNgModuleRefWithProviders(moduleFactory.moduleType, this.injector, internalProvideZoneChangeDetection(() => ngZone));
-            if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
-                moduleRef.injector.get(PROVIDED_NG_ZONE, null) !== null) {
-                throw new RuntimeError(207 /* RuntimeErrorCode.PROVIDER_IN_WRONG_CONTEXT */, '`bootstrapModule` does not support `provideZoneChangeDetection`. Use `BootstrapOptions` instead.');
-            }
-            const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
-            if ((typeof ngDevMode === 'undefined' || ngDevMode) && exceptionHandler === null) {
-                throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No ErrorHandler. Is platform module (BrowserModule) included?');
-            }
-            ngZone.runOutsideAngular(() => {
-                const subscription = ngZone.onError.subscribe({
-                    next: (error) => {
-                        exceptionHandler.handleError(error);
-                    }
-                });
-                moduleRef.onDestroy(() => {
-                    remove(this._modules, moduleRef);
-                    subscription.unsubscribe();
-                });
-            });
-            return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
-                const initStatus = moduleRef.injector.get(ApplicationInitStatus);
-                initStatus.runInitializers();
-                return initStatus.donePromise.then(() => {
-                    // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
-                    const localeId = moduleRef.injector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
-                    setLocaleId(localeId || DEFAULT_LOCALE_ID);
-                    this._moduleDoBootstrap(moduleRef);
-                    return moduleRef;
-                });
-            });
-        });
-    }
-    /**
-     * Creates an instance of an `@NgModule` for a given platform.
-     *
-     * @usageNotes
-     * ### Simple Example
-     *
-     * ```typescript
-     * @NgModule({
-     *   imports: [BrowserModule]
-     * })
-     * class MyModule {}
-     *
-     * let moduleRef = platformBrowser().bootstrapModule(MyModule);
-     * ```
-     *
-     */
-    bootstrapModule(moduleType, compilerOptions = []) {
-        const options = optionsReducer({}, compilerOptions);
-        return compileNgModuleFactory(this.injector, options, moduleType)
-            .then(moduleFactory => this.bootstrapModuleFactory(moduleFactory, options));
-    }
-    _moduleDoBootstrap(moduleRef) {
-        const appRef = moduleRef.injector.get(ApplicationRef);
-        if (moduleRef._bootstrapComponents.length > 0) {
-            moduleRef._bootstrapComponents.forEach(f => appRef.bootstrap(f));
-        }
-        else if (moduleRef.instance.ngDoBootstrap) {
-            moduleRef.instance.ngDoBootstrap(appRef);
-        }
-        else {
-            throw new RuntimeError(-403 /* RuntimeErrorCode.BOOTSTRAP_COMPONENTS_NOT_FOUND */, ngDevMode &&
-                `The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, ` +
-                    `but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
-                    `Please define one of these.`);
-        }
-        this._modules.push(moduleRef);
-    }
-    /**
-     * Registers a listener to be called when the platform is destroyed.
-     */
-    onDestroy(callback) {
-        this._destroyListeners.push(callback);
-    }
-    /**
-     * Retrieves the platform {@link Injector}, which is the parent injector for
-     * every Angular application on the page and provides singleton providers.
-     */
-    get injector() {
-        return this._injector;
-    }
-    /**
-     * Destroys the current Angular platform and all Angular applications on the page.
-     * Destroys all modules and listeners registered with the platform.
-     */
-    destroy() {
-        if (this._destroyed) {
-            throw new RuntimeError(404 /* RuntimeErrorCode.PLATFORM_ALREADY_DESTROYED */, ngDevMode && 'The platform has already been destroyed!');
-        }
-        this._modules.slice().forEach(module => module.destroy());
-        this._destroyListeners.forEach(listener => listener());
-        const destroyListeners = this._injector.get(PLATFORM_DESTROY_LISTENERS, null);
-        if (destroyListeners) {
-            destroyListeners.forEach(listener => listener());
-            destroyListeners.clear();
-        }
-        this._destroyed = true;
-    }
-    /**
-     * Indicates whether this instance was destroyed.
-     */
-    get destroyed() {
-        return this._destroyed;
-    }
-    static { this.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: 'platform' }); }
-}
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PlatformRef, [{
-        type: Injectable,
-        args: [{ providedIn: 'platform' }]
-    }], () => [{ type: Injector }], null); })();
-// Transforms a set of `BootstrapOptions` (supported by the NgModule-based bootstrap APIs) ->
-// `NgZoneOptions` that are recognized by the NgZone constructor. Passing no options will result in
-// a set of default options returned.
-function getNgZoneOptions(options) {
-    return {
-        enableLongStackTrace: typeof ngDevMode === 'undefined' ? false : !!ngDevMode,
-        shouldCoalesceEventChangeDetection: options?.eventCoalescing ?? false,
-        shouldCoalesceRunChangeDetection: options?.runCoalescing ?? false,
-    };
-}
-function getNgZone(ngZoneToUse = 'zone.js', options) {
-    if (ngZoneToUse === 'noop') {
-        return new NoopNgZone();
-    }
-    if (ngZoneToUse === 'zone.js') {
-        return new NgZone(options);
-    }
-    return ngZoneToUse;
 }
 function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
     try {
@@ -32600,24 +31912,24 @@ function _lastDefined(args) {
     }
     return undefined;
 }
+let whenStableStore;
 /**
- * `InjectionToken` used to configure how to call the `ErrorHandler`.
- *
- * `NgZone` is provided by default today so the default (and only) implementation for this
- * is calling `ErrorHandler.handleError` outside of the Angular zone.
+ * Returns a Promise that resolves when the application becomes stable after this method is called
+ * the first time.
  */
-const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken((typeof ngDevMode === 'undefined' || ngDevMode) ? 'internal error handler' : '', {
-    providedIn: 'root',
-    factory: () => {
-        const userErrorHandler = inject(ErrorHandler);
-        return userErrorHandler.handleError.bind(undefined);
+function whenStable(applicationRef) {
+    whenStableStore ??= new WeakMap();
+    const cachedWhenStable = whenStableStore.get(applicationRef);
+    if (cachedWhenStable) {
+        return cachedWhenStable;
     }
-});
-function ngZoneApplicationErrorHandlerFactory() {
-    const zone = inject(NgZone);
-    const userErrorHandler = inject(ErrorHandler);
-    return (e) => zone.runOutsideAngular(() => userErrorHandler.handleError(e));
+    const whenStablePromise = applicationRef.isStable.pipe(first((isStable) => isStable)).toPromise().then(() => void 0);
+    whenStableStore.set(applicationRef, whenStablePromise);
+    // Be a good citizen and clean the store `onDestroy` even though we are using `WeakMap`.
+    applicationRef.onDestroy(() => whenStableStore?.delete(applicationRef));
+    return whenStablePromise;
 }
+
 class NgZoneChangeDetectionScheduler {
     constructor() {
         this.zone = inject(NgZone);
@@ -32670,6 +31982,11 @@ function internalProvideZoneChangeDetection(ngZoneFactory) {
         { provide: ZONE_IS_STABLE_OBSERVABLE, useFactory: isStableFactory },
     ];
 }
+function ngZoneApplicationErrorHandlerFactory() {
+    const zone = inject(NgZone);
+    const userErrorHandler = inject(ErrorHandler);
+    return (e) => zone.runOutsideAngular(() => userErrorHandler.handleError(e));
+}
 /**
  * Provides `NgZone`-based change detection for the application bootstrapped using
  * `bootstrapApplication`.
@@ -32698,22 +32015,467 @@ function provideZoneChangeDetection(options) {
         zoneProviders,
     ]);
 }
-let whenStableStore;
+// Transforms a set of `BootstrapOptions` (supported by the NgModule-based bootstrap APIs) ->
+// `NgZoneOptions` that are recognized by the NgZone constructor. Passing no options will result in
+// a set of default options returned.
+function getNgZoneOptions(options) {
+    return {
+        enableLongStackTrace: typeof ngDevMode === 'undefined' ? false : !!ngDevMode,
+        shouldCoalesceEventChangeDetection: options?.eventCoalescing ?? false,
+        shouldCoalesceRunChangeDetection: options?.runCoalescing ?? false,
+    };
+}
+
 /**
- * Returns a Promise that resolves when the application becomes stable after this method is called
- * the first time.
+ * Work out the locale from the potential global properties.
+ *
+ * * Closure Compiler: use `goog.LOCALE`.
+ * * Ivy enabled: use `$localize.locale`
  */
-function whenStable(applicationRef) {
-    whenStableStore ??= new WeakMap();
-    const cachedWhenStable = whenStableStore.get(applicationRef);
-    if (cachedWhenStable) {
-        return cachedWhenStable;
+function getGlobalLocale() {
+    if (typeof ngI18nClosureMode !== 'undefined' && ngI18nClosureMode &&
+        typeof goog !== 'undefined' && goog.LOCALE !== 'en') {
+        // * The default `goog.LOCALE` value is `en`, while Angular used `en-US`.
+        // * In order to preserve backwards compatibility, we use Angular default value over
+        //   Closure Compiler's one.
+        return goog.LOCALE;
     }
-    const whenStablePromise = applicationRef.isStable.pipe(first((isStable) => isStable)).toPromise().then(() => void 0);
-    whenStableStore.set(applicationRef, whenStablePromise);
-    // Be a good citizen and clean the store `onDestroy` even though we are using `WeakMap`.
-    applicationRef.onDestroy(() => whenStableStore?.delete(applicationRef));
-    return whenStablePromise;
+    else {
+        // KEEP `typeof $localize !== 'undefined' && $localize.locale` IN SYNC WITH THE LOCALIZE
+        // COMPILE-TIME INLINER.
+        //
+        // * During compile time inlining of translations the expression will be replaced
+        //   with a string literal that is the current locale. Other forms of this expression are not
+        //   guaranteed to be replaced.
+        //
+        // * During runtime translation evaluation, the developer is required to set `$localize.locale`
+        //   if required, or just to provide their own `LOCALE_ID` provider.
+        return (typeof $localize !== 'undefined' && $localize.locale) || DEFAULT_LOCALE_ID;
+    }
+}
+/**
+ * Provide this token to set the locale of your application.
+ * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
+ * DecimalPipe and PercentPipe) and by ICU expressions.
+ *
+ * See the [i18n guide](guide/i18n-common-locale-id) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { LOCALE_ID } from '@angular/core';
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: LOCALE_ID, useValue: 'en-US' }]
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+const LOCALE_ID = new InjectionToken('LocaleId', {
+    providedIn: 'root',
+    factory: () => inject(LOCALE_ID, InjectFlags.Optional | InjectFlags.SkipSelf) || getGlobalLocale(),
+});
+/**
+ * Provide this token to set the default currency code your application uses for
+ * CurrencyPipe when there is no currency code passed into it. This is only used by
+ * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
+ *
+ * See the [i18n guide](guide/i18n-common-locale-id) for more information.
+ *
+ * <div class="alert is-helpful">
+ *
+ * **Deprecation notice:**
+ *
+ * The default currency code is currently always `USD` but this is deprecated from v9.
+ *
+ * **In v10 the default currency code will be taken from the current locale.**
+ *
+ * If you need the previous behavior then set it by creating a `DEFAULT_CURRENCY_CODE` provider in
+ * your application `NgModule`:
+ *
+ * ```ts
+ * {provide: DEFAULT_CURRENCY_CODE, useValue: 'USD'}
+ * ```
+ *
+ * </div>
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }]
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+const DEFAULT_CURRENCY_CODE = new InjectionToken('DefaultCurrencyCode', {
+    providedIn: 'root',
+    factory: () => USD_CURRENCY_CODE,
+});
+/**
+ * Use this token at bootstrap to provide the content of your translation file (`xtb`,
+ * `xlf` or `xlf2`) when you want to translate your application in another language.
+ *
+ * See the [i18n guide](guide/i18n-common-merge) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { TRANSLATIONS } from '@angular/core';
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * // content of your translation file
+ * const translations = '....';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: TRANSLATIONS, useValue: translations }]
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+const TRANSLATIONS = new InjectionToken('Translations');
+/**
+ * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
+ * `xlf` or `xlf2`.
+ *
+ * See the [i18n guide](guide/i18n-common-merge) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```typescript
+ * import { TRANSLATIONS_FORMAT } from '@angular/core';
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   providers: [{provide: TRANSLATIONS_FORMAT, useValue: 'xlf' }]
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
+/**
+ * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
+ * that the compiler should use in case of missing translations:
+ * - Error: throw if you have missing translations.
+ * - Warning (default): show a warning in the console and/or shell.
+ * - Ignore: do nothing.
+ *
+ * See the [i18n guide](guide/i18n-common-merge#report-missing-translations) for more information.
+ *
+ * @usageNotes
+ * ### Example
+ * ```typescript
+ * import { MissingTranslationStrategy } from '@angular/core';
+ * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+ * import { AppModule } from './app/app.module';
+ *
+ * platformBrowserDynamic().bootstrapModule(AppModule, {
+ *   missingTranslation: MissingTranslationStrategy.Error
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+var MissingTranslationStrategy;
+(function (MissingTranslationStrategy) {
+    MissingTranslationStrategy[MissingTranslationStrategy["Error"] = 0] = "Error";
+    MissingTranslationStrategy[MissingTranslationStrategy["Warning"] = 1] = "Warning";
+    MissingTranslationStrategy[MissingTranslationStrategy["Ignore"] = 2] = "Ignore";
+})(MissingTranslationStrategy || (MissingTranslationStrategy = {}));
+
+/**
+ * Internal token that allows to register extra callbacks that should be invoked during the
+ * `PlatformRef.destroy` operation. This token is needed to avoid a direct reference to the
+ * `PlatformRef` class (i.e. register the callback via `PlatformRef.onDestroy`), thus making the
+ * entire class tree-shakeable.
+ */
+const PLATFORM_DESTROY_LISTENERS = new InjectionToken('PlatformDestroyListeners');
+/**
+ * The Angular platform is the entry point for Angular on a web page.
+ * Each page has exactly one platform. Services (such as reflection) which are common
+ * to every Angular application running on the page are bound in its scope.
+ * A page's platform is initialized implicitly when a platform is created using a platform
+ * factory such as `PlatformBrowser`, or explicitly by calling the `createPlatform()` function.
+ *
+ * @publicApi
+ */
+class PlatformRef {
+    /** @internal */
+    constructor(_injector) {
+        this._injector = _injector;
+        this._modules = [];
+        this._destroyListeners = [];
+        this._destroyed = false;
+    }
+    /**
+     * Creates an instance of an `@NgModule` for the given platform.
+     *
+     * @deprecated Passing NgModule factories as the `PlatformRef.bootstrapModuleFactory` function
+     *     argument is deprecated. Use the `PlatformRef.bootstrapModule` API instead.
+     */
+    bootstrapModuleFactory(moduleFactory, options) {
+        // Note: We need to create the NgZone _before_ we instantiate the module,
+        // as instantiating the module creates some providers eagerly.
+        // So we create a mini parent injector that just contains the new NgZone and
+        // pass that as parent to the NgModuleFactory.
+        const ngZone = getNgZone(options?.ngZone, getNgZoneOptions({
+            eventCoalescing: options?.ngZoneEventCoalescing,
+            runCoalescing: options?.ngZoneRunCoalescing
+        }));
+        // Note: Create ngZoneInjector within ngZone.run so that all of the instantiated services are
+        // created within the Angular zone
+        // Do not try to replace ngZone.run with ApplicationRef#run because ApplicationRef would then be
+        // created outside of the Angular zone.
+        return ngZone.run(() => {
+            const moduleRef = createNgModuleRefWithProviders(moduleFactory.moduleType, this.injector, internalProvideZoneChangeDetection(() => ngZone));
+            if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
+                moduleRef.injector.get(PROVIDED_NG_ZONE, null) !== null) {
+                throw new RuntimeError(207 /* RuntimeErrorCode.PROVIDER_IN_WRONG_CONTEXT */, '`bootstrapModule` does not support `provideZoneChangeDetection`. Use `BootstrapOptions` instead.');
+            }
+            const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
+            if ((typeof ngDevMode === 'undefined' || ngDevMode) && exceptionHandler === null) {
+                throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No ErrorHandler. Is platform module (BrowserModule) included?');
+            }
+            ngZone.runOutsideAngular(() => {
+                const subscription = ngZone.onError.subscribe({
+                    next: (error) => {
+                        exceptionHandler.handleError(error);
+                    }
+                });
+                moduleRef.onDestroy(() => {
+                    remove(this._modules, moduleRef);
+                    subscription.unsubscribe();
+                });
+            });
+            return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
+                const initStatus = moduleRef.injector.get(ApplicationInitStatus);
+                initStatus.runInitializers();
+                return initStatus.donePromise.then(() => {
+                    // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
+                    const localeId = moduleRef.injector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
+                    setLocaleId(localeId || DEFAULT_LOCALE_ID);
+                    this._moduleDoBootstrap(moduleRef);
+                    return moduleRef;
+                });
+            });
+        });
+    }
+    /**
+     * Creates an instance of an `@NgModule` for a given platform.
+     *
+     * @usageNotes
+     * ### Simple Example
+     *
+     * ```typescript
+     * @NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * let moduleRef = platformBrowser().bootstrapModule(MyModule);
+     * ```
+     *
+     */
+    bootstrapModule(moduleType, compilerOptions = []) {
+        const options = optionsReducer({}, compilerOptions);
+        return compileNgModuleFactory(this.injector, options, moduleType)
+            .then(moduleFactory => this.bootstrapModuleFactory(moduleFactory, options));
+    }
+    _moduleDoBootstrap(moduleRef) {
+        const appRef = moduleRef.injector.get(ApplicationRef);
+        if (moduleRef._bootstrapComponents.length > 0) {
+            moduleRef._bootstrapComponents.forEach(f => appRef.bootstrap(f));
+        }
+        else if (moduleRef.instance.ngDoBootstrap) {
+            moduleRef.instance.ngDoBootstrap(appRef);
+        }
+        else {
+            throw new RuntimeError(-403 /* RuntimeErrorCode.BOOTSTRAP_COMPONENTS_NOT_FOUND */, ngDevMode &&
+                `The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, ` +
+                    `but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
+                    `Please define one of these.`);
+        }
+        this._modules.push(moduleRef);
+    }
+    /**
+     * Registers a listener to be called when the platform is destroyed.
+     */
+    onDestroy(callback) {
+        this._destroyListeners.push(callback);
+    }
+    /**
+     * Retrieves the platform {@link Injector}, which is the parent injector for
+     * every Angular application on the page and provides singleton providers.
+     */
+    get injector() {
+        return this._injector;
+    }
+    /**
+     * Destroys the current Angular platform and all Angular applications on the page.
+     * Destroys all modules and listeners registered with the platform.
+     */
+    destroy() {
+        if (this._destroyed) {
+            throw new RuntimeError(404 /* RuntimeErrorCode.PLATFORM_ALREADY_DESTROYED */, ngDevMode && 'The platform has already been destroyed!');
+        }
+        this._modules.slice().forEach(module => module.destroy());
+        this._destroyListeners.forEach(listener => listener());
+        const destroyListeners = this._injector.get(PLATFORM_DESTROY_LISTENERS, null);
+        if (destroyListeners) {
+            destroyListeners.forEach(listener => listener());
+            destroyListeners.clear();
+        }
+        this._destroyed = true;
+    }
+    /**
+     * Indicates whether this instance was destroyed.
+     */
+    get destroyed() {
+        return this._destroyed;
+    }
+    static { this.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); }; }
+    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: 'platform' }); }
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PlatformRef, [{
+        type: Injectable,
+        args: [{ providedIn: 'platform' }]
+    }], () => [{ type: Injector }], null); })();
+
+let _platformInjector = null;
+/**
+ * Internal token to indicate whether having multiple bootstrapped platform should be allowed (only
+ * one bootstrapped platform is allowed by default). This token helps to support SSR scenarios.
+ */
+const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
+/**
+ * Creates a platform.
+ * Platforms must be created on launch using this function.
+ *
+ * @publicApi
+ */
+function createPlatform(injector) {
+    if (_platformInjector && !_platformInjector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
+        throw new RuntimeError(400 /* RuntimeErrorCode.MULTIPLE_PLATFORMS */, ngDevMode &&
+            'There can be only one platform. Destroy the previous one to create a new one.');
+    }
+    publishDefaultGlobalUtils();
+    publishSignalConfiguration();
+    _platformInjector = injector;
+    const platform = injector.get(PlatformRef);
+    runPlatformInitializers(injector);
+    return platform;
+}
+/**
+ * Creates a factory for a platform. Can be used to provide or override `Providers` specific to
+ * your application's runtime needs, such as `PLATFORM_INITIALIZER` and `PLATFORM_ID`.
+ * @param parentPlatformFactory Another platform factory to modify. Allows you to compose factories
+ * to build up configurations that might be required by different libraries or parts of the
+ * application.
+ * @param name Identifies the new platform factory.
+ * @param providers A set of dependency providers for platforms created with the new factory.
+ *
+ * @publicApi
+ */
+function createPlatformFactory(parentPlatformFactory, name, providers = []) {
+    const desc = `Platform: ${name}`;
+    const marker = new InjectionToken(desc);
+    return (extraProviders = []) => {
+        let platform = getPlatform();
+        if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
+            const platformProviders = [...providers, ...extraProviders, { provide: marker, useValue: true }];
+            if (parentPlatformFactory) {
+                parentPlatformFactory(platformProviders);
+            }
+            else {
+                createPlatform(createPlatformInjector(platformProviders, desc));
+            }
+        }
+        return assertPlatform(marker);
+    };
+}
+/**
+ * Helper function to create an instance of a platform injector (that maintains the 'platform'
+ * scope).
+ */
+function createPlatformInjector(providers = [], name) {
+    return Injector.create({
+        name,
+        providers: [
+            { provide: INJECTOR_SCOPE, useValue: 'platform' },
+            { provide: PLATFORM_DESTROY_LISTENERS, useValue: new Set([() => _platformInjector = null]) },
+            ...providers
+        ],
+    });
+}
+/**
+ * Checks that there is currently a platform that contains the given token as a provider.
+ *
+ * @publicApi
+ */
+function assertPlatform(requiredToken) {
+    const platform = getPlatform();
+    if (!platform) {
+        throw new RuntimeError(401 /* RuntimeErrorCode.PLATFORM_NOT_FOUND */, ngDevMode && 'No platform exists!');
+    }
+    if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
+        !platform.injector.get(requiredToken, null)) {
+        throw new RuntimeError(400 /* RuntimeErrorCode.MULTIPLE_PLATFORMS */, 'A platform with a different configuration has been created. Please destroy it first.');
+    }
+    return platform;
+}
+/**
+ * Returns the current platform.
+ *
+ * @publicApi
+ */
+function getPlatform() {
+    return _platformInjector?.get(PlatformRef) ?? null;
+}
+/**
+ * Destroys the current Angular platform and all Angular applications on the page.
+ * Destroys all modules and listeners registered with the platform.
+ *
+ * @publicApi
+ */
+function destroyPlatform() {
+    getPlatform()?.destroy();
+}
+/**
+ * The goal of this function is to bootstrap a platform injector,
+ * but avoid referencing `PlatformRef` class.
+ * This function is needed for bootstrapping a Standalone Component.
+ */
+function createOrReusePlatformInjector(providers = []) {
+    // If a platform injector already exists, it means that the platform
+    // is already bootstrapped and no additional actions are required.
+    if (_platformInjector)
+        return _platformInjector;
+    publishDefaultGlobalUtils();
+    // Otherwise, setup a new platform injector and run platform initializers.
+    const injector = createPlatformInjector(providers);
+    _platformInjector = injector;
+    publishSignalConfiguration();
+    runPlatformInitializers(injector);
+    return injector;
+}
+function runPlatformInitializers(injector) {
+    const inits = injector.get(PLATFORM_INITIALIZER, null);
+    inits?.forEach((init) => init());
 }
 
 /**
@@ -33985,6 +33747,244 @@ const WATCH_NODE = /* @__PURE__ */ (() => {
 
 function setAlternateWeakRefImpl(impl) {
     // TODO: remove this function
+}
+
+// A delay in milliseconds before the scan is run after onLoad, to avoid any
+// potential race conditions with other LCP-related functions. This delay
+// happens outside of the main JavaScript execution and will only effect the timing
+// on when the warning becomes visible in the console.
+const SCAN_DELAY = 200;
+const OVERSIZED_IMAGE_TOLERANCE = 1200;
+class ImagePerformanceWarning {
+    constructor() {
+        // Map of full image URLs -> original `ngSrc` values.
+        this.window = null;
+        this.observer = null;
+        this.options = inject(IMAGE_CONFIG);
+        this.ngZone = inject(NgZone);
+    }
+    start() {
+        if (typeof PerformanceObserver === 'undefined' ||
+            (this.options?.disableImageSizeWarning && this.options?.disableImageLazyLoadWarning)) {
+            return;
+        }
+        this.observer = this.initPerformanceObserver();
+        const doc = getDocument();
+        const win = doc.defaultView;
+        if (typeof win !== 'undefined') {
+            this.window = win;
+            // Wait to avoid race conditions where LCP image triggers
+            // load event before it's recorded by the performance observer
+            const waitToScan = () => {
+                setTimeout(this.scanImages.bind(this), SCAN_DELAY);
+            };
+            // Angular doesn't have to run change detection whenever any asynchronous tasks are invoked in
+            // the scope of this functionality.
+            this.ngZone.runOutsideAngular(() => {
+                // Consider the case when the application is created and destroyed multiple times.
+                // Typically, applications are created instantly once the page is loaded, and the
+                // `window.load` listener is always triggered. However, the `window.load` event will never
+                // be fired if the page is loaded, and the application is created later. Checking for
+                // `readyState` is the easiest way to determine whether the page has been loaded or not.
+                if (doc.readyState === 'complete') {
+                    waitToScan();
+                }
+                else {
+                    this.window?.addEventListener('load', waitToScan, { once: true });
+                }
+            });
+        }
+    }
+    ngOnDestroy() {
+        this.observer?.disconnect();
+    }
+    initPerformanceObserver() {
+        if (typeof PerformanceObserver === 'undefined') {
+            return null;
+        }
+        const observer = new PerformanceObserver((entryList) => {
+            const entries = entryList.getEntries();
+            if (entries.length === 0)
+                return;
+            // We use the latest entry produced by the `PerformanceObserver` as the best
+            // signal on which element is actually an LCP one. As an example, the first image to load on
+            // a page, by virtue of being the only thing on the page so far, is often a LCP candidate
+            // and gets reported by PerformanceObserver, but isn't necessarily the LCP element.
+            const lcpElement = entries[entries.length - 1];
+            // Cast to `any` due to missing `element` on the `LargestContentfulPaint` type of entry.
+            // See https://developer.mozilla.org/en-US/docs/Web/API/LargestContentfulPaint
+            const imgSrc = lcpElement.element?.src ?? '';
+            // Exclude `data:` and `blob:` URLs, since they are fetched resources.
+            if (imgSrc.startsWith('data:') || imgSrc.startsWith('blob:'))
+                return;
+            this.lcpImageUrl = imgSrc;
+        });
+        observer.observe({ type: 'largest-contentful-paint', buffered: true });
+        return observer;
+    }
+    scanImages() {
+        const images = getDocument().querySelectorAll('img');
+        let lcpElementFound, lcpElementLoadedCorrectly = false;
+        images.forEach(image => {
+            if (!this.options?.disableImageSizeWarning) {
+                for (const image of images) {
+                    // Image elements using the NgOptimizedImage directive are excluded,
+                    // as that directive has its own version of this check.
+                    if (!image.getAttribute('ng-img') && this.isOversized(image)) {
+                        logOversizedImageWarning(image.src);
+                    }
+                }
+            }
+            if (!this.options?.disableImageLazyLoadWarning && this.lcpImageUrl) {
+                if (image.src === this.lcpImageUrl) {
+                    lcpElementFound = true;
+                    if (image.loading !== 'lazy' || image.getAttribute('ng-img')) {
+                        // This variable is set to true and never goes back to false to account
+                        // for the case where multiple images have the same src url, and some
+                        // have lazy loading while others don't.
+                        // Also ignore NgOptimizedImage because there's a different warning for that.
+                        lcpElementLoadedCorrectly = true;
+                    }
+                }
+            }
+        });
+        if (lcpElementFound && !lcpElementLoadedCorrectly && this.lcpImageUrl &&
+            !this.options?.disableImageLazyLoadWarning) {
+            logLazyLCPWarning(this.lcpImageUrl);
+        }
+    }
+    isOversized(image) {
+        if (!this.window) {
+            return false;
+        }
+        const computedStyle = this.window.getComputedStyle(image);
+        let renderedWidth = parseFloat(computedStyle.getPropertyValue('width'));
+        let renderedHeight = parseFloat(computedStyle.getPropertyValue('height'));
+        const boxSizing = computedStyle.getPropertyValue('box-sizing');
+        const objectFit = computedStyle.getPropertyValue('object-fit');
+        if (objectFit === `cover`) {
+            // Object fit cover may indicate a use case such as a sprite sheet where
+            // this warning does not apply.
+            return false;
+        }
+        if (boxSizing === 'border-box') {
+            const paddingTop = computedStyle.getPropertyValue('padding-top');
+            const paddingRight = computedStyle.getPropertyValue('padding-right');
+            const paddingBottom = computedStyle.getPropertyValue('padding-bottom');
+            const paddingLeft = computedStyle.getPropertyValue('padding-left');
+            renderedWidth -= parseFloat(paddingRight) + parseFloat(paddingLeft);
+            renderedHeight -= parseFloat(paddingTop) + parseFloat(paddingBottom);
+        }
+        const intrinsicWidth = image.naturalWidth;
+        const intrinsicHeight = image.naturalHeight;
+        const recommendedWidth = this.window.devicePixelRatio * renderedWidth;
+        const recommendedHeight = this.window.devicePixelRatio * renderedHeight;
+        const oversizedWidth = (intrinsicWidth - recommendedWidth) >= OVERSIZED_IMAGE_TOLERANCE;
+        const oversizedHeight = (intrinsicHeight - recommendedHeight) >= OVERSIZED_IMAGE_TOLERANCE;
+        return oversizedWidth || oversizedHeight;
+    }
+    static { this.ɵfac = function ImagePerformanceWarning_Factory(t) { return new (t || ImagePerformanceWarning)(); }; }
+    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ImagePerformanceWarning, factory: ImagePerformanceWarning.ɵfac, providedIn: 'root' }); }
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ImagePerformanceWarning, [{
+        type: Injectable,
+        args: [{ providedIn: 'root' }]
+    }], null, null); })();
+function logLazyLCPWarning(src) {
+    console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} is the Largest Contentful Paint (LCP) element ` +
+        `but was given a "loading" value of "lazy", which can negatively impact ` +
+        `application loading performance. This warning can be addressed by ` +
+        `changing the loading value of the LCP image to "eager", or by using the ` +
+        `NgOptimizedImage directive's prioritization utilities. For more ` +
+        `information about addressing or disabling this warning, see ` +
+        `https://angular.io/errors/NG0913`));
+}
+function logOversizedImageWarning(src) {
+    console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} has intrinsic file dimensions much larger than its ` +
+        `rendered size. This can negatively impact application loading performance. ` +
+        `For more information about addressing or disabling this warning, see ` +
+        `https://angular.io/errors/NG0913`));
+}
+
+/**
+ * Internal create application API that implements the core application creation logic and optional
+ * bootstrap logic.
+ *
+ * Platforms (such as `platform-browser`) may require different set of application and platform
+ * providers for an application to function correctly. As a result, platforms may use this function
+ * internally and supply the necessary providers during the bootstrap, while exposing
+ * platform-specific APIs as a part of their public API.
+ *
+ * @returns A promise that returns an `ApplicationRef` instance once resolved.
+ */
+function internalCreateApplication(config) {
+    try {
+        const { rootComponent, appProviders, platformProviders } = config;
+        if ((typeof ngDevMode === 'undefined' || ngDevMode) && rootComponent !== undefined) {
+            assertStandaloneComponentType(rootComponent);
+        }
+        const platformInjector = createOrReusePlatformInjector(platformProviders);
+        // Create root application injector based on a set of providers configured at the platform
+        // bootstrap level as well as providers passed to the bootstrap call by a user.
+        const allAppProviders = [
+            provideZoneChangeDetection(),
+            ...(appProviders || []),
+        ];
+        const adapter = new EnvironmentNgModuleRefAdapter({
+            providers: allAppProviders,
+            parent: platformInjector,
+            debugName: (typeof ngDevMode === 'undefined' || ngDevMode) ? 'Environment Injector' : '',
+            // We skip environment initializers because we need to run them inside the NgZone, which
+            // happens after we get the NgZone instance from the Injector.
+            runEnvironmentInitializers: false,
+        });
+        const envInjector = adapter.injector;
+        const ngZone = envInjector.get(NgZone);
+        return ngZone.run(() => {
+            envInjector.resolveInjectorInitializers();
+            const exceptionHandler = envInjector.get(ErrorHandler, null);
+            if ((typeof ngDevMode === 'undefined' || ngDevMode) && !exceptionHandler) {
+                throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No `ErrorHandler` found in the Dependency Injection tree.');
+            }
+            let onErrorSubscription;
+            ngZone.runOutsideAngular(() => {
+                onErrorSubscription = ngZone.onError.subscribe({
+                    next: (error) => {
+                        exceptionHandler.handleError(error);
+                    }
+                });
+            });
+            // If the whole platform is destroyed, invoke the `destroy` method
+            // for all bootstrapped applications as well.
+            const destroyListener = () => envInjector.destroy();
+            const onPlatformDestroyListeners = platformInjector.get(PLATFORM_DESTROY_LISTENERS);
+            onPlatformDestroyListeners.add(destroyListener);
+            envInjector.onDestroy(() => {
+                onErrorSubscription.unsubscribe();
+                onPlatformDestroyListeners.delete(destroyListener);
+            });
+            return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
+                const initStatus = envInjector.get(ApplicationInitStatus);
+                initStatus.runInitializers();
+                return initStatus.donePromise.then(() => {
+                    const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
+                    setLocaleId(localeId || DEFAULT_LOCALE_ID);
+                    const appRef = envInjector.get(ApplicationRef);
+                    if (rootComponent !== undefined) {
+                        appRef.bootstrap(rootComponent);
+                    }
+                    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+                        const imagePerformanceService = envInjector.get(ImagePerformanceWarning);
+                        imagePerformanceService.start();
+                    }
+                    return appRef;
+                });
+            });
+        });
+    }
+    catch (e) {
+        return Promise.reject(e);
+    }
 }
 
 /**
