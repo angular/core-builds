@@ -8535,7 +8535,9 @@ function createTextOp(xref, initialValue, sourceSpan) {
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createListenerOp(target, targetSlot, name, tag, animationPhase, hostListener, sourceSpan) {
+function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPhase, hostListener, sourceSpan) {
+  const handlerList = new OpList();
+  handlerList.push(handlerOps);
   return __spreadValues({
     kind: OpKind.Listener,
     target,
@@ -8543,7 +8545,7 @@ function createListenerOp(target, targetSlot, name, tag, animationPhase, hostLis
     tag,
     hostListener,
     name,
-    handlerOps: new OpList(),
+    handlerOps: handlerList,
     handlerFnName: null,
     consumesDollarEvent: false,
     isAnimationListener: animationPhase !== null,
@@ -19233,7 +19235,7 @@ function ingestHostAttribute(job, name, value) {
   job.root.update.push(attrBinding);
 }
 function ingestHostEvent(job, event) {
-  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, event.targetOrPhase, true, event.sourceSpan);
+  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, [], event.targetOrPhase, true, event.sourceSpan);
   eventBinding.handlerOps.push(createStatementOp(new ReturnStatement(convertAst(event.handler.ast, job, event.sourceSpan), event.handlerSpan)));
   job.root.create.push(eventBinding);
 }
@@ -19273,7 +19275,7 @@ function ingestElement(unit, element2) {
   const [namespaceKey, elementName] = splitNsName(element2.name);
   const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element2.i18n instanceof TagPlaceholder ? element2.i18n : void 0, element2.startSourceSpan);
   unit.create.push(startOp);
-  ingestBindings(unit, startOp, element2, null);
+  ingestElementBindings(unit, startOp, element2);
   ingestReferences(startOp, element2);
   let i18nBlockId = null;
   if (element2.i18n instanceof Message) {
@@ -19303,7 +19305,7 @@ function ingestTemplate(unit, tmpl) {
   const templateKind = isPlainTemplate(tmpl) ? TemplateKind.NgTemplate : TemplateKind.Structural;
   const templateOp = createTemplateOp(childView.xref, templateKind, tagNameWithoutNamespace, functionNameSuffix, namespace, i18nPlaceholder, tmpl.startSourceSpan);
   unit.create.push(templateOp);
-  ingestBindings(unit, templateOp, tmpl, templateKind);
+  ingestTemplateBindings(unit, templateOp, tmpl, templateKind);
   ingestReferences(templateOp, tmpl);
   ingestNodes(childView, tmpl.children);
   for (const { name, value } of tmpl.variables) {
@@ -19322,7 +19324,7 @@ function ingestContent(unit, content) {
   const attrs = content.attributes.flatMap((a) => [a.name, a.value]);
   const op = createProjectionOp(unit.job.allocateXrefId(), content.selector, content.i18n, attrs, content.sourceSpan);
   for (const attr of content.attributes) {
-    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue, null, attr.i18n);
+    unit.update.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, literal(attr.value), null, SecurityContext.NONE, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
   }
   unit.create.push(op);
 }
@@ -19660,74 +19662,17 @@ function convertAst(ast, job, baseSourceSpan) {
     throw new Error(`Unhandled expression type "${ast.constructor.name}" in file "${baseSourceSpan == null ? void 0 : baseSourceSpan.start.file.url}"`);
   }
 }
-function isPlainTemplate(tmpl) {
-  var _a2;
-  return splitNsName((_a2 = tmpl.tagName) != null ? _a2 : "")[1] === "ng-template";
-}
-function ingestBindings(unit, op, element2, templateKind) {
-  let flags = BindingFlags.None;
-  let hasI18nAttributes = false;
-  if (element2 instanceof Template) {
-    flags |= BindingFlags.OnNgTemplateElement;
-    if (isPlainTemplate(element2)) {
-      flags |= BindingFlags.BindingTargetsTemplate;
-    }
-    const templateAttrFlags = flags | BindingFlags.BindingTargetsTemplate | BindingFlags.IsStructuralTemplateAttribute;
-    for (const attr of element2.templateAttrs) {
-      if (attr instanceof TextAttribute) {
-        ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, templateAttrFlags | BindingFlags.TextValue, templateKind, attr.i18n);
-        hasI18nAttributes || (hasI18nAttributes = attr.i18n !== void 0);
-      } else {
-        ingestBinding(unit, op.xref, attr.name, attr.value, attr.type, attr.unit, attr.securityContext, attr.sourceSpan, templateAttrFlags, templateKind, attr.i18n);
-        hasI18nAttributes || (hasI18nAttributes = attr.i18n !== void 0);
-      }
-    }
+function convertAstWithInterpolation(job, value, i18nMeta) {
+  var _a2, _b2;
+  let expression;
+  if (value instanceof Interpolation) {
+    expression = new Interpolation2(value.strings, value.expressions.map((e) => convertAst(e, job, null)), Object.keys((_b2 = (_a2 = asMessage(i18nMeta)) == null ? void 0 : _a2.placeholders) != null ? _b2 : {}));
+  } else if (value instanceof AST) {
+    expression = convertAst(value, job, null);
+  } else {
+    expression = literal(value);
   }
-  for (const attr of element2.attributes) {
-    ingestBinding(unit, op.xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, flags | BindingFlags.TextValue, templateKind, attr.i18n);
-    hasI18nAttributes || (hasI18nAttributes = attr.i18n !== void 0);
-  }
-  for (const input of element2.inputs) {
-    ingestBinding(unit, op.xref, input.name, input.value, input.type, input.unit, input.securityContext, input.sourceSpan, flags, templateKind, input.i18n);
-    hasI18nAttributes || (hasI18nAttributes = input.i18n !== void 0);
-  }
-  for (const output of element2.outputs) {
-    let listenerOp;
-    if (output.type === 1) {
-      if (output.phase === null) {
-        throw Error("Animation listener should have a phase");
-      }
-    }
-    if (element2 instanceof Template && !isPlainTemplate(element2)) {
-      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null, null, null));
-      continue;
-    }
-    listenerOp = createListenerOp(op.xref, op.handle, output.name, op.tag, output.phase, false, output.sourceSpan);
-    let handlerExprs;
-    let handler = output.handler;
-    if (handler instanceof ASTWithSource) {
-      handler = handler.ast;
-    }
-    if (handler instanceof Chain) {
-      handlerExprs = handler.expressions;
-    } else {
-      handlerExprs = [handler];
-    }
-    if (handlerExprs.length === 0) {
-      throw new Error("Expected listener to have non-empty expression list.");
-    }
-    const expressions = handlerExprs.map((expr) => convertAst(expr, unit.job, output.handlerSpan));
-    const returnExpr = expressions.pop();
-    for (const expr of expressions) {
-      const stmtOp = createStatementOp(new ExpressionStatement(expr, expr.sourceSpan));
-      listenerOp.handlerOps.push(stmtOp);
-    }
-    listenerOp.handlerOps.push(createStatementOp(new ReturnStatement(returnExpr, returnExpr.sourceSpan)));
-    unit.create.push(listenerOp);
-  }
-  if (hasI18nAttributes) {
-    unit.create.push(createI18nAttributesOp(unit.job.allocateXrefId(), new SlotHandle(), op.xref));
-  }
+  return expression;
 }
 var BINDING_KINDS = /* @__PURE__ */ new Map([
   [0, BindingKind.Property],
@@ -19736,42 +19681,105 @@ var BINDING_KINDS = /* @__PURE__ */ new Map([
   [3, BindingKind.StyleProperty],
   [4, BindingKind.Animation]
 ]);
-var BindingFlags;
-(function(BindingFlags2) {
-  BindingFlags2[BindingFlags2["None"] = 0] = "None";
-  BindingFlags2[BindingFlags2["TextValue"] = 1] = "TextValue";
-  BindingFlags2[BindingFlags2["BindingTargetsTemplate"] = 2] = "BindingTargetsTemplate";
-  BindingFlags2[BindingFlags2["IsStructuralTemplateAttribute"] = 4] = "IsStructuralTemplateAttribute";
-  BindingFlags2[BindingFlags2["OnNgTemplateElement"] = 8] = "OnNgTemplateElement";
-})(BindingFlags || (BindingFlags = {}));
-function ingestBinding(view, xref, name, value, type, unit, securityContext, sourceSpan, flags, templateKind, i18nMeta) {
-  if (value instanceof ASTWithSource) {
-    value = value.ast;
+function isPlainTemplate(tmpl) {
+  var _a2;
+  return splitNsName((_a2 = tmpl.tagName) != null ? _a2 : "")[1] === "ng-template";
+}
+function asMessage(i18nMeta) {
+  if (i18nMeta == null) {
+    return null;
   }
-  if (i18nMeta !== void 0 && !(i18nMeta instanceof Message)) {
-    throw Error(`Unhandled i18n metadata type for binding: ${i18nMeta.constructor.name}`);
+  if (!(i18nMeta instanceof Message)) {
+    throw Error(`Expected i18n meta to be a Message, but got: ${i18nMeta.constructor.name}`);
   }
-  if (flags & BindingFlags.OnNgTemplateElement && !(flags & BindingFlags.BindingTargetsTemplate) && type === 0) {
-    view.create.push(createExtractedAttributeOp(xref, BindingKind.Property, name, null, null, i18nMeta != null ? i18nMeta : null));
-    return;
+  return i18nMeta;
+}
+function ingestElementBindings(unit, op, element2) {
+  var _a2;
+  let bindings = new Array();
+  for (const attr of element2.attributes) {
+    bindings.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, convertAstWithInterpolation(unit.job, attr.value, attr.i18n), null, SecurityContext.NONE, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
   }
-  let expression;
-  if (value instanceof Interpolation) {
-    let i18nPlaceholders = [];
-    if (i18nMeta !== void 0) {
-      i18nPlaceholders = Object.keys(i18nMeta.placeholders);
+  for (const input of element2.inputs) {
+    bindings.push(createBindingOp(op.xref, BINDING_KINDS.get(input.type), input.name, convertAstWithInterpolation(unit.job, astOf(input.value), input.i18n), input.unit, input.securityContext, false, false, null, (_a2 = asMessage(input.i18n)) != null ? _a2 : null, input.sourceSpan));
+  }
+  unit.create.push(bindings.filter((b) => (b == null ? void 0 : b.kind) === OpKind.ExtractedAttribute));
+  unit.update.push(bindings.filter((b) => (b == null ? void 0 : b.kind) === OpKind.Binding));
+  for (const output of element2.outputs) {
+    if (output.type === 1 && output.phase === null) {
+      throw Error("Animation listener should have a phase");
     }
-    expression = new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, view.job, null)), i18nPlaceholders);
-  } else if (value instanceof AST) {
-    expression = convertAst(value, view.job, null);
-  } else {
-    expression = value;
+    unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
   }
-  if (type === 1 && !(flags & BindingFlags.TextValue) && templateKind === TemplateKind.Structural) {
-    return;
+  if (bindings.some((b) => b == null ? void 0 : b.i18nMessage) !== null) {
+    unit.create.push(createI18nAttributesOp(unit.job.allocateXrefId(), new SlotHandle(), op.xref));
   }
-  const kind = BINDING_KINDS.get(type);
-  view.update.push(createBindingOp(xref, kind, name, expression, unit, securityContext, !!(flags & BindingFlags.TextValue), !!(flags & BindingFlags.IsStructuralTemplateAttribute), templateKind, i18nMeta != null ? i18nMeta : null, sourceSpan));
+}
+function ingestTemplateBindings(unit, op, template2, templateKind) {
+  let bindings = new Array();
+  for (const attr of template2.templateAttrs) {
+    if (attr instanceof TextAttribute) {
+      bindings.push(createTemplateBinding(unit, op.xref, 1, attr.name, attr.value, null, SecurityContext.NONE, true, templateKind, asMessage(attr.i18n), attr.sourceSpan));
+    } else {
+      bindings.push(createTemplateBinding(unit, op.xref, attr.type, attr.name, astOf(attr.value), attr.unit, attr.securityContext, true, templateKind, asMessage(attr.i18n), attr.sourceSpan));
+    }
+  }
+  for (const attr of template2.attributes) {
+    bindings.push(createTemplateBinding(unit, op.xref, 1, attr.name, attr.value, null, SecurityContext.NONE, false, templateKind, asMessage(attr.i18n), attr.sourceSpan));
+  }
+  for (const input of template2.inputs) {
+    bindings.push(createTemplateBinding(unit, op.xref, input.type, input.name, astOf(input.value), input.unit, input.securityContext, false, templateKind, asMessage(input.i18n), input.sourceSpan));
+  }
+  unit.create.push(bindings.filter((b) => (b == null ? void 0 : b.kind) === OpKind.ExtractedAttribute));
+  unit.update.push(bindings.filter((b) => (b == null ? void 0 : b.kind) === OpKind.Binding));
+  for (const output of template2.outputs) {
+    if (output.type === 1 && output.phase === null) {
+      throw Error("Animation listener should have a phase");
+    }
+    if (templateKind === TemplateKind.NgTemplate) {
+      unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
+    }
+    if (templateKind === TemplateKind.Structural && output.type !== 1) {
+      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null, null, null));
+    }
+  }
+  if (bindings.some((b) => b == null ? void 0 : b.i18nMessage) !== null) {
+    unit.create.push(createI18nAttributesOp(unit.job.allocateXrefId(), new SlotHandle(), op.xref));
+  }
+}
+function createTemplateBinding(view, xref, type, name, value, unit, securityContext, isStructuralTemplateAttribute, templateKind, i18nMessage, sourceSpan) {
+  const isTextBinding = typeof value === "string";
+  if (templateKind === TemplateKind.Structural) {
+    if (!isStructuralTemplateAttribute && (type === 0 || type === 2 || type === 3)) {
+      return createExtractedAttributeOp(xref, BindingKind.Property, name, null, null, i18nMessage);
+    }
+    if (!isTextBinding && (type === 1 || type === 4)) {
+      return null;
+    }
+  }
+  let bindingType = BINDING_KINDS.get(type);
+  if (templateKind === TemplateKind.NgTemplate) {
+    if (type === 2 || type === 3 || type === 1 && !isTextBinding) {
+      bindingType = BindingKind.Property;
+    }
+  }
+  return createBindingOp(xref, bindingType, name, convertAstWithInterpolation(view.job, value, i18nMessage), unit, securityContext, isTextBinding, isStructuralTemplateAttribute, templateKind, i18nMessage, sourceSpan);
+}
+function makeListenerHandlerOps(unit, handler, handlerSpan) {
+  handler = astOf(handler);
+  const handlerOps = new Array();
+  let handlerExprs = handler instanceof Chain ? handler.expressions : [handler];
+  if (handlerExprs.length === 0) {
+    throw new Error("Expected listener to have non-empty expression list.");
+  }
+  const expressions = handlerExprs.map((expr) => convertAst(expr, unit.job, handlerSpan));
+  const returnExpr = expressions.pop();
+  handlerOps.push(...expressions.map((e) => createStatementOp(new ExpressionStatement(e, e.sourceSpan))));
+  handlerOps.push(createStatementOp(new ReturnStatement(returnExpr, returnExpr.sourceSpan)));
+  return handlerOps;
+}
+function astOf(ast) {
+  return ast instanceof ASTWithSource ? ast.ast : ast;
 }
 function ingestReferences(op, element2) {
   assertIsArray(op.localRefs);
@@ -19811,7 +19819,7 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
   }
   if (root !== null) {
     for (const attr of root.attributes) {
-      ingestBinding(unit, xref, attr.name, literal(attr.value), 1, null, SecurityContext.NONE, attr.sourceSpan, BindingFlags.TextValue, TemplateKind.Block, attr.i18n);
+      unit.update.push(createBindingOp(xref, BindingKind.Attribute, attr.name, literal(attr.value), null, SecurityContext.NONE, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
     }
     const tagName = root instanceof Element ? root.name : root.tagName;
     return tagName === "ng-template" ? null : tagName;
@@ -25349,7 +25357,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.3+sha-cc75fab");
+var VERSION2 = new Version("17.1.0-next.3+sha-f9731ee");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
