@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.3+sha-f9731ee
+ * @license Angular v17.1.0-next.3+sha-44f9f01
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.3+sha-f9731ee');
+const VERSION = new Version('17.1.0-next.3+sha-44f9f01');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -27934,7 +27934,7 @@ class QueryList {
      * Returns `Observable` of `QueryList` notifying the subscriber of changes.
      */
     get changes() {
-        return this._changes || (this._changes = new EventEmitter());
+        return this._changes ??= new EventEmitter();
     }
     /**
      * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
@@ -27946,7 +27946,7 @@ class QueryList {
         this.dirty = true;
         this._results = [];
         this._changesDetected = false;
-        this._changes = null;
+        this._changes = undefined;
         this.length = 0;
         this.first = undefined;
         this.last = undefined;
@@ -28037,7 +28037,7 @@ class QueryList {
      * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
      */
     notifyOnChanges() {
-        if (this._changes && (this._changesDetected || !this._emitDistinctChangesOnly))
+        if (this._changes !== undefined && (this._changesDetected || !this._emitDistinctChangesOnly))
             this._changes.emit(this);
     }
     /** internal */
@@ -28046,8 +28046,10 @@ class QueryList {
     }
     /** internal */
     destroy() {
-        this.changes.complete();
-        this.changes.unsubscribe();
+        if (this._changes !== undefined) {
+            this._changes.complete();
+            this._changes.unsubscribe();
+        }
     }
 }
 

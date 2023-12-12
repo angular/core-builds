@@ -7998,10 +7998,11 @@ var ExpressionKind;
   ExpressionKind2[ExpressionKind2["AssignTemporaryExpr"] = 18] = "AssignTemporaryExpr";
   ExpressionKind2[ExpressionKind2["ReadTemporaryExpr"] = 19] = "ReadTemporaryExpr";
   ExpressionKind2[ExpressionKind2["SanitizerExpr"] = 20] = "SanitizerExpr";
-  ExpressionKind2[ExpressionKind2["SlotLiteralExpr"] = 21] = "SlotLiteralExpr";
-  ExpressionKind2[ExpressionKind2["ConditionalCase"] = 22] = "ConditionalCase";
-  ExpressionKind2[ExpressionKind2["DerivedRepeaterVar"] = 23] = "DerivedRepeaterVar";
-  ExpressionKind2[ExpressionKind2["ConstCollected"] = 24] = "ConstCollected";
+  ExpressionKind2[ExpressionKind2["TrustedValueFnExpr"] = 21] = "TrustedValueFnExpr";
+  ExpressionKind2[ExpressionKind2["SlotLiteralExpr"] = 22] = "SlotLiteralExpr";
+  ExpressionKind2[ExpressionKind2["ConditionalCase"] = 23] = "ConditionalCase";
+  ExpressionKind2[ExpressionKind2["DerivedRepeaterVar"] = 24] = "DerivedRepeaterVar";
+  ExpressionKind2[ExpressionKind2["ConstCollected"] = 25] = "ConstCollected";
 })(ExpressionKind || (ExpressionKind = {}));
 var VariableFlags;
 (function(VariableFlags2) {
@@ -8020,15 +8021,6 @@ var CompatibilityMode;
   CompatibilityMode2[CompatibilityMode2["Normal"] = 0] = "Normal";
   CompatibilityMode2[CompatibilityMode2["TemplateDefinitionBuilder"] = 1] = "TemplateDefinitionBuilder";
 })(CompatibilityMode || (CompatibilityMode = {}));
-var SanitizerFn;
-(function(SanitizerFn2) {
-  SanitizerFn2[SanitizerFn2["Html"] = 0] = "Html";
-  SanitizerFn2[SanitizerFn2["Script"] = 1] = "Script";
-  SanitizerFn2[SanitizerFn2["Style"] = 2] = "Style";
-  SanitizerFn2[SanitizerFn2["Url"] = 3] = "Url";
-  SanitizerFn2[SanitizerFn2["ResourceUrl"] = 4] = "ResourceUrl";
-  SanitizerFn2[SanitizerFn2["IframeAttribute"] = 5] = "IframeAttribute";
-})(SanitizerFn || (SanitizerFn = {}));
 var DeferSecondaryKind;
 (function(DeferSecondaryKind2) {
   DeferSecondaryKind2[DeferSecondaryKind2["Loading"] = 0] = "Loading";
@@ -8848,26 +8840,6 @@ var ReadTemporaryExpr = class extends ExpressionBase {
     return r;
   }
 };
-var SanitizerExpr = class extends ExpressionBase {
-  constructor(fn2) {
-    super();
-    this.fn = fn2;
-    this.kind = ExpressionKind.SanitizerExpr;
-  }
-  visitExpression(visitor, context) {
-  }
-  isEquivalent(e) {
-    return e instanceof SanitizerExpr && e.fn === this.fn;
-  }
-  isConstant() {
-    return true;
-  }
-  clone() {
-    return new SanitizerExpr(this.fn);
-  }
-  transformInternalExpressions() {
-  }
-};
 var SlotLiteralExpr = class extends ExpressionBase {
   constructor(slot) {
     super();
@@ -9035,6 +9007,7 @@ function transformExpressionsInOp(op, transform2, flags) {
       break;
     case OpKind.ExtractedAttribute:
       op.expression = op.expression && transformExpressionsInExpression(op.expression, transform2, flags);
+      op.trustedValueFn = op.trustedValueFn && transformExpressionsInExpression(op.trustedValueFn, transform2, flags);
       break;
     case OpKind.RepeaterCreate:
       op.track = transformExpressionsInExpression(op.track, transform2, flags);
@@ -9142,6 +9115,9 @@ function transformExpressionsInExpression(expr, transform2, flags) {
     }
   } else if (expr instanceof NotExpr) {
     expr.condition = transformExpressionsInExpression(expr.condition, transform2, flags);
+  } else if (expr instanceof TaggedTemplateExpr) {
+    expr.tag = transformExpressionsInExpression(expr.tag, transform2, flags);
+    expr.template.expressions = expr.template.expressions.map((e) => transformExpressionsInExpression(e, transform2, flags));
   } else if (expr instanceof ReadVarExpr || expr instanceof ExternalExpr || expr instanceof LiteralExpr) {
   } else {
     throw new Error(`Unhandled expression kind: ${expr.constructor.name}`);
@@ -9519,7 +9495,7 @@ function createProjectionOp(xref, selector, i18nPlaceholder, attributes, sourceS
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
-function createExtractedAttributeOp(target, bindingKind, name, expression, i18nContext, i18nMessage) {
+function createExtractedAttributeOp(target, bindingKind, name, expression, i18nContext, i18nMessage, securityContext) {
   return __spreadValues({
     kind: OpKind.ExtractedAttribute,
     target,
@@ -9527,7 +9503,9 @@ function createExtractedAttributeOp(target, bindingKind, name, expression, i18nC
     name,
     expression,
     i18nContext,
-    i18nMessage
+    i18nMessage,
+    securityContext,
+    trustedValueFn: null
   }, NEW_OP);
 }
 function createDeferOp(xref, main, mainSlot, metadata, sourceSpan) {
@@ -9897,7 +9875,15 @@ function extractAttributes(job) {
               bindingKind = BindingKind.Property;
             }
             OpList.insertBefore(
-              createExtractedAttributeOp(op.target, bindingKind, op.name, null, null, null),
+              createExtractedAttributeOp(
+                op.target,
+                bindingKind,
+                op.name,
+                null,
+                null,
+                null,
+                op.securityContext
+              ),
               lookupElement(elements, op.target)
             );
           }
@@ -9905,12 +9891,28 @@ function extractAttributes(job) {
         case OpKind.StyleProp:
         case OpKind.ClassProp:
           if (unit.job.compatibility === CompatibilityMode.TemplateDefinitionBuilder && op.expression instanceof EmptyExpr2) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.Property, op.name, null, null, null), lookupElement(elements, op.target));
+            OpList.insertBefore(createExtractedAttributeOp(
+              op.target,
+              BindingKind.Property,
+              op.name,
+              null,
+              null,
+              null,
+              SecurityContext.STYLE
+            ), lookupElement(elements, op.target));
           }
           break;
         case OpKind.Listener:
           if (!op.isAnimationListener) {
-            const extractedAttributeOp = createExtractedAttributeOp(op.target, BindingKind.Property, op.name, null, null, null);
+            const extractedAttributeOp = createExtractedAttributeOp(
+              op.target,
+              BindingKind.Property,
+              op.name,
+              null,
+              null,
+              null,
+              SecurityContext.NONE
+            );
             if (job.kind === CompilationJobKind.Host) {
               unit.create.push(extractedAttributeOp);
             } else {
@@ -9944,7 +9946,7 @@ function extractAttributeOp(unit, op, elements) {
     }
   }
   if (extractable) {
-    const extractedAttributeOp = createExtractedAttributeOp(op.target, op.isStructuralTemplateAttribute ? BindingKind.Template : BindingKind.Attribute, op.name, op.expression, op.i18nContext, op.i18nMessage);
+    const extractedAttributeOp = createExtractedAttributeOp(op.target, op.isStructuralTemplateAttribute ? BindingKind.Template : BindingKind.Attribute, op.name, op.expression, op.i18nContext, op.i18nMessage, op.securityContext);
     if (unit.job.kind === CompilationJobKind.Host) {
       unit.create.push(extractedAttributeOp);
     } else {
@@ -10178,7 +10180,7 @@ function collectElementConsts(job) {
       if (op.kind === OpKind.ExtractedAttribute) {
         const attributes = allElementAttributes.get(op.target) || new ElementAttributes();
         allElementAttributes.set(op.target, attributes);
-        attributes.add(op.bindingKind, op.name, op.expression);
+        attributes.add(op.bindingKind, op.name, op.expression, op.trustedValueFn);
         OpList.remove(op);
       }
     }
@@ -10240,7 +10242,7 @@ var ElementAttributes = class {
     var _a2;
     return (_a2 = this.byKind.get(BindingKind.I18n)) != null ? _a2 : FLYWEIGHT_ARRAY;
   }
-  add(kind, name, value) {
+  add(kind, name, value, trustedValueFn) {
     var _a2;
     if (this.known.has(name)) {
       return;
@@ -10258,7 +10260,14 @@ var ElementAttributes = class {
       if (value === null) {
         throw Error("Attribute, i18n attribute, & style element attributes must have a value");
       }
-      array.push(value);
+      if (trustedValueFn !== null) {
+        if (!isStringLiteral(value)) {
+          throw Error("AssertionError: extracted attribute value should be string literal");
+        }
+        array.push(taggedTemplate(trustedValueFn, new TemplateLiteral([new TemplateLiteralElement(value.value)], []), void 0, value.sourceSpan));
+      } else {
+        array.push(value);
+      }
     }
   }
   arrayFor(kind) {
@@ -17644,13 +17653,13 @@ function parseExtractedStyles(job) {
         if (op.name === "style") {
           const parsedStyles = parse(op.expression.value);
           for (let i = 0; i < parsedStyles.length - 1; i += 2) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, parsedStyles[i], literal(parsedStyles[i + 1]), null, null), op);
+            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, parsedStyles[i], literal(parsedStyles[i + 1]), null, null, SecurityContext.STYLE), op);
           }
           OpList.remove(op);
         } else if (op.name === "class") {
           const parsedClasses = op.expression.value.trim().split(/\s+/g);
           for (const parsedClass of parsedClasses) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.ClassName, parsedClass, null, null, null), op);
+            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.ClassName, parsedClass, null, null, null, SecurityContext.NONE), op);
           }
           OpList.remove(op);
         }
@@ -18414,14 +18423,6 @@ function callVariadicInstruction(config, baseArgs, interpolationArgs, extraArgs,
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/reify.mjs
-var sanitizerIdentifierMap = /* @__PURE__ */ new Map([
-  [SanitizerFn.Html, Identifiers.sanitizeHtml],
-  [SanitizerFn.IframeAttribute, Identifiers.validateIframeAttribute],
-  [SanitizerFn.ResourceUrl, Identifiers.sanitizeResourceUrl],
-  [SanitizerFn.Script, Identifiers.sanitizeScript],
-  [SanitizerFn.Style, Identifiers.sanitizeStyle],
-  [SanitizerFn.Url, Identifiers.sanitizeUrl]
-]);
 function reify(job) {
   for (const unit of job.units) {
     reifyCreateOperations(unit, unit.create);
@@ -18724,8 +18725,6 @@ function reifyIrExpression(expr) {
       return pipeBind(expr.targetSlot.slot, expr.varOffset, expr.args);
     case ExpressionKind.PipeBindingVariadic:
       return pipeBindV(expr.targetSlot.slot, expr.varOffset, expr.args);
-    case ExpressionKind.SanitizerExpr:
-      return importExpr(sanitizerIdentifierMap.get(expr.fn));
     case ExpressionKind.SlotLiteralExpr:
       return literal(expr.slot.slot);
     default:
@@ -19228,30 +19227,40 @@ function processLexicalScope2(unit, ops, savedView) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_sanitizers.mjs
-var sanitizers = /* @__PURE__ */ new Map([
-  [SecurityContext.HTML, SanitizerFn.Html],
-  [SecurityContext.SCRIPT, SanitizerFn.Script],
-  [SecurityContext.STYLE, SanitizerFn.Style],
-  [SecurityContext.URL, SanitizerFn.Url],
-  [SecurityContext.RESOURCE_URL, SanitizerFn.ResourceUrl]
+var sanitizerFns = /* @__PURE__ */ new Map([
+  [SecurityContext.HTML, Identifiers.sanitizeHtml],
+  [SecurityContext.RESOURCE_URL, Identifiers.sanitizeResourceUrl],
+  [SecurityContext.SCRIPT, Identifiers.sanitizeScript],
+  [SecurityContext.STYLE, Identifiers.sanitizeStyle],
+  [SecurityContext.URL, Identifiers.sanitizeUrl]
+]);
+var trustedValueFns = /* @__PURE__ */ new Map([
+  [SecurityContext.HTML, Identifiers.trustConstantHtml],
+  [SecurityContext.RESOURCE_URL, Identifiers.trustConstantResourceUrl]
 ]);
 function resolveSanitizers(job) {
+  var _a2, _b2;
   for (const unit of job.units) {
     const elements = createOpXrefMap(unit);
-    let sanitizerFn;
+    for (const op of unit.create) {
+      if (op.kind === OpKind.ExtractedAttribute) {
+        const trustedValueFn = (_a2 = trustedValueFns.get(op.securityContext)) != null ? _a2 : null;
+        op.trustedValueFn = trustedValueFn !== null ? importExpr(trustedValueFn) : null;
+      }
+    }
     for (const op of unit.update) {
       switch (op.kind) {
         case OpKind.Property:
         case OpKind.Attribute:
-          sanitizerFn = sanitizers.get(op.securityContext) || null;
-          op.sanitizer = sanitizerFn ? new SanitizerExpr(sanitizerFn) : null;
+          const sanitizerFn = (_b2 = sanitizerFns.get(op.securityContext)) != null ? _b2 : null;
+          op.sanitizer = sanitizerFn !== null ? importExpr(sanitizerFn) : null;
           if (op.sanitizer === null) {
             const ownerOp = elements.get(op.target);
             if (ownerOp === void 0 || !isElementOrContainerOp(ownerOp)) {
               throw Error("Property should have an element-like owner");
             }
             if (isIframeElement(ownerOp) && isIframeSecuritySensitiveAttr(op.name)) {
-              op.sanitizer = new SanitizerExpr(SanitizerFn.IframeAttribute);
+              op.sanitizer = importExpr(Identifiers.validateIframeAttribute);
             }
           }
           break;
@@ -20073,12 +20082,14 @@ function emitHostBindingFunction(job) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/ingest.mjs
 var compatibilityMode = CompatibilityMode.TemplateDefinitionBuilder;
+var domSchema = new DomElementSchemaRegistry();
+var NG_TEMPLATE_TAG_NAME = "ng-template";
 function ingestComponent(componentName, template2, constantPool, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta) {
   const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta);
   ingestNodes(job.root, template2);
   return job;
 }
-function ingestHostBinding(input, bindingParser, constantPool) {
+function ingestHostBinding(input, constantPool) {
   var _a2, _b2, _c2;
   const job = new HostBindingCompilationJob(input.componentName, constantPool, compatibilityMode);
   for (const property2 of (_a2 = input.properties) != null ? _a2 : []) {
@@ -20216,7 +20227,8 @@ function ingestContent(unit, content) {
   const attrs = content.attributes.flatMap((a) => [a.name, a.value]);
   const op = createProjectionOp(unit.job.allocateXrefId(), content.selector, content.i18n, attrs, content.sourceSpan);
   for (const attr of content.attributes) {
-    unit.update.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, literal(attr.value), null, SecurityContext.NONE, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
+    const securityContext = domSchema.securityContext(content.name, attr.name, true);
+    unit.update.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
   }
   unit.create.push(op);
 }
@@ -20575,7 +20587,7 @@ var BINDING_KINDS = /* @__PURE__ */ new Map([
 ]);
 function isPlainTemplate(tmpl) {
   var _a2;
-  return splitNsName((_a2 = tmpl.tagName) != null ? _a2 : "")[1] === "ng-template";
+  return splitNsName((_a2 = tmpl.tagName) != null ? _a2 : "")[1] === NG_TEMPLATE_TAG_NAME;
 }
 function asMessage(i18nMeta) {
   if (i18nMeta == null) {
@@ -20590,7 +20602,8 @@ function ingestElementBindings(unit, op, element2) {
   var _a2;
   let bindings = new Array();
   for (const attr of element2.attributes) {
-    bindings.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, convertAstWithInterpolation(unit.job, attr.value, attr.i18n), null, SecurityContext.NONE, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
+    const securityContext = domSchema.securityContext(element2.name, attr.name, true);
+    bindings.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, convertAstWithInterpolation(unit.job, attr.value, attr.i18n), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
   }
   for (const input of element2.inputs) {
     bindings.push(createBindingOp(op.xref, BINDING_KINDS.get(input.type), input.name, convertAstWithInterpolation(unit.job, astOf(input.value), input.i18n), input.unit, input.securityContext, false, false, null, (_a2 = asMessage(input.i18n)) != null ? _a2 : null, input.sourceSpan));
@@ -20611,13 +20624,15 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
   let bindings = new Array();
   for (const attr of template2.templateAttrs) {
     if (attr instanceof TextAttribute) {
-      bindings.push(createTemplateBinding(unit, op.xref, 1, attr.name, attr.value, null, SecurityContext.NONE, true, templateKind, asMessage(attr.i18n), attr.sourceSpan));
+      const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
+      bindings.push(createTemplateBinding(unit, op.xref, 1, attr.name, attr.value, null, securityContext, true, templateKind, asMessage(attr.i18n), attr.sourceSpan));
     } else {
       bindings.push(createTemplateBinding(unit, op.xref, attr.type, attr.name, astOf(attr.value), attr.unit, attr.securityContext, true, templateKind, asMessage(attr.i18n), attr.sourceSpan));
     }
   }
   for (const attr of template2.attributes) {
-    bindings.push(createTemplateBinding(unit, op.xref, 1, attr.name, attr.value, null, SecurityContext.NONE, false, templateKind, asMessage(attr.i18n), attr.sourceSpan));
+    const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
+    bindings.push(createTemplateBinding(unit, op.xref, 1, attr.name, attr.value, null, securityContext, false, templateKind, asMessage(attr.i18n), attr.sourceSpan));
   }
   for (const input of template2.inputs) {
     bindings.push(createTemplateBinding(unit, op.xref, input.type, input.name, astOf(input.value), input.unit, input.securityContext, false, templateKind, asMessage(input.i18n), input.sourceSpan));
@@ -20632,7 +20647,8 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
       unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
     }
     if (templateKind === TemplateKind.Structural && output.type !== 1) {
-      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null, null, null));
+      const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, output.name, true);
+      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null, null, null, securityContext));
     }
   }
   if (bindings.some((b) => b == null ? void 0 : b.i18nMessage) !== null) {
@@ -20643,7 +20659,7 @@ function createTemplateBinding(view, xref, type, name, value, unit, securityCont
   const isTextBinding = typeof value === "string";
   if (templateKind === TemplateKind.Structural) {
     if (!isStructuralTemplateAttribute && (type === 0 || type === 2 || type === 3)) {
-      return createExtractedAttributeOp(xref, BindingKind.Property, name, null, null, i18nMessage);
+      return createExtractedAttributeOp(xref, BindingKind.Property, name, null, null, i18nMessage, securityContext);
     }
     if (!isTextBinding && (type === 1 || type === 4)) {
       return null;
@@ -20711,10 +20727,11 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
   }
   if (root !== null) {
     for (const attr of root.attributes) {
-      unit.update.push(createBindingOp(xref, BindingKind.Attribute, attr.name, literal(attr.value), null, SecurityContext.NONE, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
+      const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
+      unit.update.push(createBindingOp(xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
     }
     const tagName = root instanceof Element ? root.name : root.tagName;
-    return tagName === "ng-template" ? null : tagName;
+    return tagName === NG_TEMPLATE_TAG_NAME ? null : tagName;
   }
   return null;
 }
@@ -22800,7 +22817,7 @@ function serializePlaceholderValue(value) {
 var NG_CONTENT_SELECT_ATTR2 = "select";
 var NG_PROJECT_AS_ATTR_NAME = "ngProjectAs";
 var EVENT_BINDING_SCOPE_GLOBALS = /* @__PURE__ */ new Set(["$event"]);
-var NG_TEMPLATE_TAG_NAME = "ng-template";
+var NG_TEMPLATE_TAG_NAME2 = "ng-template";
 var GLOBAL_TARGET_RESOLVERS = /* @__PURE__ */ new Map([["window", Identifiers.resolveWindow], ["document", Identifiers.resolveDocument], ["body", Identifiers.resolveBody]]);
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function renderFlagCheckIfStmt(flags, statements) {
@@ -23389,10 +23406,10 @@ var TemplateDefinitionBuilder = class {
     var _a2;
     const tagNameWithoutNamespace = template2.tagName ? splitNsName(template2.tagName)[1] : template2.tagName;
     const contextNameSuffix = template2.tagName ? "_" + sanitizeIdentifier(template2.tagName) : "";
-    const attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, template2.attributes, template2.inputs, template2.outputs, void 0, template2.templateAttrs);
+    const attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME2, template2.attributes, template2.inputs, template2.outputs, void 0, template2.templateAttrs);
     const templateIndex = this.createEmbeddedTemplateFn(tagNameWithoutNamespace, template2.children, contextNameSuffix, template2.sourceSpan, template2.variables, attrsExprs, template2.references, template2.i18n);
     this.templatePropertyBindings(templateIndex, template2.templateAttrs);
-    if (tagNameWithoutNamespace === NG_TEMPLATE_TAG_NAME) {
+    if (tagNameWithoutNamespace === NG_TEMPLATE_TAG_NAME2) {
       const [i18nInputs, inputs] = partitionArray(template2.inputs, hasI18nMeta);
       if (i18nInputs.length > 0) {
         this.i18nAttributesInstruction(templateIndex, i18nInputs, (_a2 = template2.startSourceSpan) != null ? _a2 : template2.sourceSpan);
@@ -23633,8 +23650,8 @@ var TemplateDefinitionBuilder = class {
     }
     if (root !== null) {
       const name = root instanceof Element ? root.name : root.tagName;
-      tagName = name === NG_TEMPLATE_TAG_NAME ? null : name;
-      attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME, root.attributes, root.inputs, []);
+      tagName = name === NG_TEMPLATE_TAG_NAME2 ? null : name;
+      attrsExprs = this.getAttributeExpressions(NG_TEMPLATE_TAG_NAME2, root.attributes, root.inputs, []);
     }
     return { tagName, attrsExprs };
   }
@@ -24797,7 +24814,7 @@ function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindin
       properties: bindings,
       events: eventBindings,
       attributes: hostBindingsMetadata.attributes
-    }, bindingParser, constantPool);
+    }, constantPool);
     transform(hostJob, CompilationJobKind.Host);
     definitionMap.set("hostAttrs", hostJob.root.attributes);
     const varCount = hostJob.root.vars;
@@ -26249,7 +26266,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.3+sha-f9731ee");
+var VERSION2 = new Version("17.1.0-next.3+sha-44f9f01");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27315,7 +27332,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.3+sha-f9731ee"));
+  definitionMap.set("version", literal("17.1.0-next.3+sha-44f9f01"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27386,7 +27403,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.3+sha-f9731ee"));
+  definitionMap.set("version", literal("17.1.0-next.3+sha-44f9f01"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27618,7 +27635,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.3+sha-f9731ee"));
+  definitionMap.set("version", literal("17.1.0-next.3+sha-44f9f01"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27641,7 +27658,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.3+sha-f9731ee"));
+  definitionMap.set("version", literal("17.1.0-next.3+sha-44f9f01"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27679,7 +27696,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.3+sha-f9731ee"));
+  definitionMap.set("version", literal("17.1.0-next.3+sha-44f9f01"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27703,7 +27720,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.3+sha-f9731ee"));
+  definitionMap.set("version", literal("17.1.0-next.3+sha-44f9f01"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27738,7 +27755,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.1.0-next.3+sha-f9731ee"));
+  definitionMap.set("version", literal("17.1.0-next.3+sha-44f9f01"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27755,7 +27772,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.3+sha-f9731ee");
+var VERSION3 = new Version("17.1.0-next.3+sha-44f9f01");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -46532,7 +46549,7 @@ function normalizePath(path4) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/project_tsconfig_paths.mjs
-var import_core16 = require("@angular-devkit/core");
+var import_core18 = require("@angular-devkit/core");
 function getProjectTsConfigPaths(tree) {
   return __async(this, null, function* () {
     const buildPaths = /* @__PURE__ */ new Set();
@@ -46549,9 +46566,9 @@ function getProjectTsConfigPaths(tree) {
             continue;
           }
           if (name === "build") {
-            buildPaths.add((0, import_core16.normalize)(tsConfig));
+            buildPaths.add((0, import_core18.normalize)(tsConfig));
           } else {
-            testPaths.add((0, import_core16.normalize)(tsConfig));
+            testPaths.add((0, import_core18.normalize)(tsConfig));
           }
         }
       }
@@ -46583,7 +46600,7 @@ function createHost(tree) {
         if (!data) {
           throw new Error("File not found.");
         }
-        return import_core16.virtualFs.fileBufferToString(data);
+        return import_core18.virtualFs.fileBufferToString(data);
       });
     },
     writeFile(path4, data) {
@@ -46606,7 +46623,7 @@ function createHost(tree) {
 function getWorkspace(tree) {
   return __async(this, null, function* () {
     const host = createHost(tree);
-    const { workspace } = yield import_core16.workspaces.readWorkspace("/", host);
+    const { workspace } = yield import_core18.workspaces.readWorkspace("/", host);
     return workspace;
   });
 }
