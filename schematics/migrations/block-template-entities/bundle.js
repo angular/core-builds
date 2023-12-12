@@ -8094,7 +8094,6 @@ function transformExpressionsInOp(op, transform2, flags) {
     case OpKind.ClassProp:
     case OpKind.ClassMap:
     case OpKind.Binding:
-    case OpKind.HostProperty:
       if (op.expression instanceof Interpolation2) {
         transformExpressionsInInterpolation(op.expression, transform2, flags);
       } else {
@@ -8102,6 +8101,7 @@ function transformExpressionsInOp(op, transform2, flags) {
       }
       break;
     case OpKind.Property:
+    case OpKind.HostProperty:
     case OpKind.Attribute:
       if (op.expression instanceof Interpolation2) {
         transformExpressionsInInterpolation(op.expression, transform2, flags);
@@ -8752,13 +8752,15 @@ function createI18nAttributesOp(xref, handle, target) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/ir/src/ops/host.mjs
-function createHostPropertyOp(name, expression, isAnimationTrigger, i18nContext, sourceSpan) {
+function createHostPropertyOp(name, expression, isAnimationTrigger, i18nContext, securityContext, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.HostProperty,
     name,
     expression,
     isAnimationTrigger,
     i18nContext,
+    securityContext,
+    sanitizer: null,
     sourceSpan
   }, TRAIT_CONSUMES_VARS), NEW_OP);
 }
@@ -9129,7 +9131,7 @@ function specializeBindings(job) {
         case BindingKind.Property:
         case BindingKind.Animation:
           if (job.kind === CompilationJobKind.Host) {
-            OpList.replace(op, createHostPropertyOp(op.name, op.expression, op.bindingKind === BindingKind.Animation, op.i18nContext, op.sourceSpan));
+            OpList.replace(op, createHostPropertyOp(op.name, op.expression, op.bindingKind === BindingKind.Animation, op.i18nContext, op.securityContext, op.sourceSpan));
           } else {
             OpList.replace(op, createPropertyOp(op.target, op.name, op.expression, op.bindingKind === BindingKind.Animation, op.securityContext, op.isStructuralTemplateAttribute, op.templateKind, op.i18nContext, op.i18nMessage, op.sourceSpan));
           }
@@ -17411,8 +17413,12 @@ function classMapInterpolate(strings, expressions, sourceSpan) {
   const interpolationArgs = collateInterpolationArgs(strings, expressions);
   return callVariadicInstruction(CLASS_MAP_INTERPOLATE_CONFIG, [], interpolationArgs, [], sourceSpan);
 }
-function hostProperty(name, expression, sourceSpan) {
-  return call(Identifiers.hostProperty, [literal(name), expression], sourceSpan);
+function hostProperty(name, expression, sanitizer, sourceSpan) {
+  const args = [literal(name), expression];
+  if (sanitizer !== null) {
+    args.push(sanitizer);
+  }
+  return call(Identifiers.hostProperty, args, sourceSpan);
 }
 function syntheticHostProperty(name, expression, sourceSpan) {
   return call(Identifiers.syntheticHostProperty, [literal(name), expression], sourceSpan);
@@ -17824,7 +17830,7 @@ function reifyUpdateOperations(_unit, ops) {
           if (op.isAnimationTrigger) {
             OpList.replace(op, syntheticHostProperty(op.name, op.expression, op.sourceSpan));
           } else {
-            OpList.replace(op, hostProperty(op.name, op.expression, op.sourceSpan));
+            OpList.replace(op, hostProperty(op.name, op.expression, op.sanitizer, op.sourceSpan));
           }
         }
         break;
@@ -18419,24 +18425,38 @@ function resolveSanitizers(job) {
   var _a2, _b2;
   for (const unit of job.units) {
     const elements = createOpXrefMap(unit);
-    for (const op of unit.create) {
-      if (op.kind === OpKind.ExtractedAttribute) {
-        const trustedValueFn = (_a2 = trustedValueFns.get(op.securityContext)) != null ? _a2 : null;
-        op.trustedValueFn = trustedValueFn !== null ? importExpr(trustedValueFn) : null;
+    if (job.kind !== CompilationJobKind.Host) {
+      for (const op of unit.create) {
+        if (op.kind === OpKind.ExtractedAttribute) {
+          const trustedValueFn = (_a2 = trustedValueFns.get(getOnlySecurityContext(op.securityContext))) != null ? _a2 : null;
+          op.trustedValueFn = trustedValueFn !== null ? importExpr(trustedValueFn) : null;
+        }
       }
     }
     for (const op of unit.update) {
       switch (op.kind) {
         case OpKind.Property:
         case OpKind.Attribute:
-          const sanitizerFn = (_b2 = sanitizerFns.get(op.securityContext)) != null ? _b2 : null;
+        case OpKind.HostProperty:
+          let sanitizerFn = null;
+          if (Array.isArray(op.securityContext) && op.securityContext.length === 2 && op.securityContext.indexOf(SecurityContext.URL) > -1 && op.securityContext.indexOf(SecurityContext.RESOURCE_URL) > -1) {
+            sanitizerFn = Identifiers.sanitizeUrlOrResourceUrl;
+          } else {
+            sanitizerFn = (_b2 = sanitizerFns.get(getOnlySecurityContext(op.securityContext))) != null ? _b2 : null;
+          }
           op.sanitizer = sanitizerFn !== null ? importExpr(sanitizerFn) : null;
           if (op.sanitizer === null) {
-            const ownerOp = elements.get(op.target);
-            if (ownerOp === void 0 || !isElementOrContainerOp(ownerOp)) {
-              throw Error("Property should have an element-like owner");
+            let isIframe = false;
+            if (job.kind === CompilationJobKind.Host || op.kind === OpKind.HostProperty) {
+              isIframe = true;
+            } else {
+              const ownerOp = elements.get(op.target);
+              if (ownerOp === void 0 || !isElementOrContainerOp(ownerOp)) {
+                throw Error("Property should have an element-like owner");
+              }
+              isIframe = isIframeElement(ownerOp);
             }
-            if (isIframeElement(ownerOp) && isIframeSecuritySensitiveAttr(op.name)) {
+            if (isIframe && isIframeSecuritySensitiveAttr(op.name)) {
               op.sanitizer = importExpr(Identifiers.validateIframeAttribute);
             }
           }
@@ -18448,6 +18468,15 @@ function resolveSanitizers(job) {
 function isIframeElement(op) {
   var _a2;
   return op.kind === OpKind.ElementStart && ((_a2 = op.tag) == null ? void 0 : _a2.toLowerCase()) === "iframe";
+}
+function getOnlySecurityContext(securityContext) {
+  if (Array.isArray(securityContext)) {
+    if (securityContext.length > 1) {
+      throw Error(`AssertionError: Ambiguous security context`);
+    }
+    return securityContext[0] || SecurityContext.NONE;
+  }
+  return securityContext;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/save_restore_view.mjs
@@ -19127,7 +19156,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: resolveDeferTargetNames },
   { kind: CompilationJobKind.Tmpl, fn: optimizeTrackFns },
   { kind: CompilationJobKind.Both, fn: resolveContexts },
-  { kind: CompilationJobKind.Tmpl, fn: resolveSanitizers },
+  { kind: CompilationJobKind.Both, fn: resolveSanitizers },
   { kind: CompilationJobKind.Tmpl, fn: liftLocalRefs },
   { kind: CompilationJobKind.Both, fn: generateNullishCoalesceExpressions },
   { kind: CompilationJobKind.Both, fn: expandSafeReads },
@@ -19266,21 +19295,31 @@ function ingestComponent(componentName, template2, constantPool, relativeContext
   ingestNodes(job.root, template2);
   return job;
 }
-function ingestHostBinding(input, constantPool) {
+function ingestHostBinding(input, bindingParser, constantPool) {
   var _a2, _b2, _c2;
   const job = new HostBindingCompilationJob(input.componentName, constantPool, compatibilityMode);
   for (const property2 of (_a2 = input.properties) != null ? _a2 : []) {
-    ingestHostProperty(job, property2, false);
+    let bindingKind = BindingKind.Property;
+    if (property2.name.startsWith("attr.")) {
+      property2.name = property2.name.substring("attr.".length);
+      bindingKind = BindingKind.Attribute;
+    }
+    if (property2.isAnimation) {
+      bindingKind = BindingKind.Animation;
+    }
+    const securityContexts = bindingParser.calcPossibleSecurityContexts(input.componentSelector, property2.name, bindingKind === BindingKind.Attribute).filter((context) => context !== SecurityContext.NONE);
+    ingestHostProperty(job, property2, bindingKind, false, securityContexts);
   }
   for (const [name, expr] of (_b2 = Object.entries(input.attributes)) != null ? _b2 : []) {
-    ingestHostAttribute(job, name, expr);
+    const securityContexts = bindingParser.calcPossibleSecurityContexts(input.componentSelector, name, true).filter((context) => context !== SecurityContext.NONE);
+    ingestHostAttribute(job, name, expr, securityContexts);
   }
   for (const event of (_c2 = input.events) != null ? _c2 : []) {
     ingestHostEvent(job, event);
   }
   return job;
 }
-function ingestHostProperty(job, property2, isTextAttribute) {
+function ingestHostProperty(job, property2, bindingKind, isTextAttribute, securityContexts) {
   let expression;
   const ast = property2.expression.ast;
   if (ast instanceof Interpolation) {
@@ -19288,24 +19327,16 @@ function ingestHostProperty(job, property2, isTextAttribute) {
   } else {
     expression = convertAst(ast, job, property2.sourceSpan);
   }
-  let bindingKind = BindingKind.Property;
-  if (property2.name.startsWith("attr.")) {
-    property2.name = property2.name.substring("attr.".length);
-    bindingKind = BindingKind.Attribute;
-  }
-  if (property2.isAnimation) {
-    bindingKind = BindingKind.Animation;
-  }
-  job.root.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, SecurityContext.NONE, isTextAttribute, false, null, null, property2.sourceSpan));
+  job.root.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, securityContexts, isTextAttribute, false, null, null, property2.sourceSpan));
 }
-function ingestHostAttribute(job, name, value) {
+function ingestHostAttribute(job, name, value, securityContexts) {
   const attrBinding = createBindingOp(
     job.root.xref,
     BindingKind.Attribute,
     name,
     value,
     null,
-    SecurityContext.NONE,
+    securityContexts,
     true,
     false,
     null,
@@ -19824,7 +19855,7 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
       unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
     }
     if (templateKind === TemplateKind.Structural && output.type !== 1) {
-      const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, output.name, true);
+      const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, output.name, false);
       unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null, null, null, securityContext));
     }
   }
@@ -23988,10 +24019,11 @@ function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindin
     }
     const hostJob = ingestHostBinding({
       componentName: name,
+      componentSelector: selector,
       properties: bindings,
       events: eventBindings,
       attributes: hostBindingsMetadata.attributes
-    }, constantPool);
+    }, bindingParser, constantPool);
     transform(hostJob, CompilationJobKind.Host);
     definitionMap.set("hostAttrs", hostJob.root.attributes);
     const varCount = hostJob.root.vars;
@@ -25443,7 +25475,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.3+sha-44f9f01");
+var VERSION2 = new Version("17.1.0-next.3+sha-63fd649");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
