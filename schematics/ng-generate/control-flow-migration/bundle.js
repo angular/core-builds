@@ -25413,7 +25413,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.3+sha-fdb9cb7");
+var VERSION2 = new Version("17.1.0-next.3+sha-5fa76c3");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25465,6 +25465,8 @@ var boundngifthen = "[ngIfThen]";
 var nakedngfor = "ngFor";
 var startMarker = "\u25EC";
 var endMarker = "\u2722";
+var startI18nMarker = "\u2688";
+var endI18nMarker = "\u2689";
 function allFormsOf(selector) {
   return [
     selector,
@@ -25665,6 +25667,18 @@ var CommonCollector = class extends RecursiveVisitor {
     return commonModulePipes.some((regexp) => regexp.test(input));
   }
 };
+var i18nCollector = class extends RecursiveVisitor {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "elements", []);
+  }
+  visitElement(el) {
+    if (el.attrs.find((a) => a.name === "i18n") !== void 0) {
+      this.elements.push(el);
+    }
+    super.visitElement(el, null);
+  }
+};
 var ElementCollector = class extends RecursiveVisitor {
   constructor(_attributes = []) {
     super();
@@ -25760,6 +25774,8 @@ var importRemovals = [
 var importWithCommonRemovals = [...importRemovals, "CommonModule"];
 var startMarkerRegex = new RegExp(startMarker, "gm");
 var endMarkerRegex = new RegExp(endMarker, "gm");
+var startI18nMarkerRegex = new RegExp(startI18nMarker, "gm");
+var endI18nMarkerRegex = new RegExp(endI18nMarker, "gm");
 var replaceMarkerRegex = new RegExp(`${startMarker}|${endMarker}`, "gm");
 function analyze(sourceFile, analyzedFiles) {
   forEachClass(sourceFile, (node) => {
@@ -26094,9 +26110,29 @@ function getMainBlock(etm, tmpl, offset) {
   }
   return { start, middle, end };
 }
+function generateI18nMarkers(tmpl) {
+  let parsed = parseTemplate2(tmpl);
+  if (parsed.tree !== void 0) {
+    const visitor = new i18nCollector();
+    visitAll2(visitor, parsed.tree.rootNodes);
+    for (const [ix, el] of visitor.elements.entries()) {
+      const offset = ix * 2;
+      if (el.children.length > 0) {
+        tmpl = addI18nMarkers(tmpl, el, offset);
+      }
+    }
+  }
+  return tmpl;
+}
+function addI18nMarkers(tmpl, el, offset) {
+  const startPos = el.children[0].sourceSpan.start.offset + offset;
+  const endPos = el.children[el.children.length - 1].sourceSpan.end.offset + offset;
+  return tmpl.slice(0, startPos) + startI18nMarker + tmpl.slice(startPos, endPos) + endI18nMarker + tmpl.slice(endPos);
+}
 var selfClosingList = "input|br|img|base|wbr|area|col|embed|hr|link|meta|param|source|track";
 function formatTemplate(tmpl, templateType) {
   if (tmpl.indexOf("\n") > -1) {
+    tmpl = generateI18nMarkers(tmpl);
     let openSelfClosingEl = false;
     const openBlockRegex = /^\s*\@(if|switch|case|default|for)|^\s*\}\s\@else/;
     const openElRegex = /^\s*<([a-z0-9]+)(?![^>]*\/>)[^>]*>?/;
@@ -26112,10 +26148,13 @@ function formatTemplate(tmpl, templateType) {
     let indent = "";
     let mindent = "";
     let depth = 0;
+    let i18nDepth = 0;
     let inMigratedBlock = false;
+    let inI18nBlock = false;
     for (let [index, line] of lines.entries()) {
       depth += [...line.matchAll(startMarkerRegex)].length - [...line.matchAll(endMarkerRegex)].length;
       inMigratedBlock = depth > 0;
+      i18nDepth += [...line.matchAll(startI18nMarkerRegex)].length - [...line.matchAll(endI18nMarkerRegex)].length;
       let lineWasMigrated = false;
       if (line.match(replaceMarkerRegex)) {
         line = line.replace(replaceMarkerRegex, "");
@@ -26131,7 +26170,8 @@ function formatTemplate(tmpl, templateType) {
       if ((closeBlockRegex.test(line) || closeElRegex.test(line) && (!singleLineElRegex.test(line) && !closeMultiLineElRegex.test(line))) && indent !== "") {
         indent = indent.slice(2);
       }
-      formatted.push(mindent + (line.trim() !== "" ? indent : "") + line.trim());
+      const newLine = inI18nBlock ? line : mindent + (line.trim() !== "" ? indent : "") + line.trim();
+      formatted.push(newLine);
       if (closeMultiLineElRegex.test(line)) {
         indent = indent.slice(2);
         if (openSelfClosingEl) {
@@ -26149,6 +26189,7 @@ function formatTemplate(tmpl, templateType) {
         openSelfClosingEl = true;
         indent += "  ";
       }
+      inI18nBlock = i18nDepth > 0;
     }
     tmpl = formatted.join("\n");
   }
@@ -26667,7 +26708,7 @@ function migrateTemplate(template2, templateType, node, file, format = true, ana
     if (format && changed) {
       migrated = formatTemplate(migrated, templateType);
     }
-    const markerRegex = new RegExp(`${startMarker}|${endMarker}`, "gm");
+    const markerRegex = new RegExp(`${startMarker}|${endMarker}|${startI18nMarker}|${endI18nMarker}`, "gm");
     migrated = migrated.replace(markerRegex, "");
     file.removeCommonModule = canRemoveCommonModule(template2);
     file.canRemoveImports = true;
