@@ -2517,6 +2517,12 @@ var Identifiers = _Identifiers;
 (() => {
   _Identifiers.validateIframeAttribute = { name: "\u0275\u0275validateIframeAttribute", moduleName: CORE };
 })();
+(() => {
+  _Identifiers.InputSignalBrandWriteType = { name: "\u0275INPUT_SIGNAL_BRAND_WRITE_TYPE", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.UnwrapDirectiveSignalInputs = { name: "\u0275UnwrapDirectiveSignalInputs", moduleName: CORE };
+})();
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/util.mjs
 var DASH_CASE_REGEXP = /-+([a-z0-9])/g;
@@ -23906,14 +23912,14 @@ function createBaseDirectiveTypeParams(meta) {
 function getInputsTypeExpression(meta) {
   return literalMap(Object.keys(meta.inputs).map((key) => {
     const value = meta.inputs[key];
-    return {
-      key,
-      value: literalMap([
-        { key: "alias", value: literal(value.bindingPropertyName), quoted: true },
-        { key: "required", value: literal(value.required), quoted: true }
-      ]),
-      quoted: true
-    };
+    const values = [
+      { key: "alias", value: literal(value.bindingPropertyName), quoted: true },
+      { key: "required", value: literal(value.required), quoted: true }
+    ];
+    if (value.isSignal) {
+      values.push({ key: "isSignal", value: literal(value.isSignal), quoted: true });
+    }
+    return { key, value: literalMap(values), quoted: true };
   }));
 }
 function createDirectiveType(meta) {
@@ -25076,6 +25082,7 @@ function convertDirectiveFacadeToMetadata(facade) {
             bindingPropertyName: ann.alias || field,
             classPropertyName: field,
             required: ann.required || false,
+            isSignal: false,
             transformFunction: ann.transform != null ? new WrappedNodeExpr(ann.transform) : null
           };
         } else if (isOutput(ann)) {
@@ -25106,7 +25113,7 @@ function convertDeclareDirectiveFacadeToMetadata(declaration, typeSourceSpan) {
     type: wrapReference(declaration.type),
     typeSourceSpan,
     selector: (_a2 = declaration.selector) != null ? _a2 : null,
-    inputs: declaration.inputs ? inputsMappingToInputMetadata(declaration.inputs) : {},
+    inputs: declaration.inputs ? inputsPartialMetadataToInputMetadata(declaration.inputs) : {},
     outputs: (_b2 = declaration.outputs) != null ? _b2 : {},
     host: convertHostDeclarationToMetadata(declaration.host),
     queries: ((_c2 = declaration.queries) != null ? _c2 : []).map(convertQueryDeclarationToMetadata),
@@ -25334,26 +25341,40 @@ function isInput(value) {
 function isOutput(value) {
   return value.ngMetadataName === "Output";
 }
-function inputsMappingToInputMetadata(inputs) {
-  return Object.keys(inputs).reduce((result, key) => {
-    const value = inputs[key];
-    if (typeof value === "string") {
-      result[key] = {
-        bindingPropertyName: value,
-        classPropertyName: value,
-        transformFunction: null,
-        required: false
-      };
+function inputsPartialMetadataToInputMetadata(inputs) {
+  return Object.keys(inputs).reduce((result, minifiedClassName) => {
+    const value = inputs[minifiedClassName];
+    if (typeof value === "string" || Array.isArray(value)) {
+      result[minifiedClassName] = parseLegacyInputPartialOutput(value);
     } else {
-      result[key] = {
-        bindingPropertyName: value[0],
-        classPropertyName: value[1],
-        transformFunction: value[2] ? new WrappedNodeExpr(value[2]) : null,
-        required: false
+      result[minifiedClassName] = {
+        bindingPropertyName: value.publicName,
+        classPropertyName: minifiedClassName,
+        transformFunction: value.transformFunction !== null ? new WrappedNodeExpr(value.transformFunction) : null,
+        required: value.isRequired,
+        isSignal: value.isSignal
       };
     }
     return result;
   }, {});
+}
+function parseLegacyInputPartialOutput(value) {
+  if (typeof value === "string") {
+    return {
+      bindingPropertyName: value,
+      classPropertyName: value,
+      transformFunction: null,
+      required: false,
+      isSignal: false
+    };
+  }
+  return {
+    bindingPropertyName: value[0],
+    classPropertyName: value[1],
+    transformFunction: value[2] ? new WrappedNodeExpr(value[2]) : null,
+    required: false,
+    isSignal: false
+  };
 }
 function parseInputsArray(values) {
   return values.reduce((results, value) => {
@@ -25363,6 +25384,7 @@ function parseInputsArray(values) {
         bindingPropertyName,
         classPropertyName,
         required: false,
+        isSignal: false,
         transformFunction: null
       };
     } else {
@@ -25370,6 +25392,7 @@ function parseInputsArray(values) {
         bindingPropertyName: value.alias || value.name,
         classPropertyName: value.name,
         required: value.required || false,
+        isSignal: false,
         transformFunction: value.transform != null ? new WrappedNodeExpr(value.transform) : null
       };
     }
@@ -25413,7 +25436,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.3+sha-629343f");
+var VERSION2 = new Version("17.1.0-next.3+sha-4866fce");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.3+sha-629343f
+ * @license Angular v17.1.0-next.3+sha-4866fce
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5147,10 +5147,20 @@ export declare interface InputDecorator {
     new (arg?: string | Input): any;
 }
 
+/**
+ * `InputSignal` is represents a special `Signal` for a directive/component input.
+ *
+ * An input signal is similar to a non-writable signal except that it also
+ * carries additional type-information for transforms, and that Angular internally
+ * updates the signal whenever a new value is bound.
+ */
+export declare type InputSignal<ReadT, WriteT = ReadT> = Signal<ReadT> & {
+    [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: ReadT;
+    [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: WriteT;
+};
+
 /** Function that can be used to transform incoming input values. */
 declare type InputTransformFunction = (value: any) => any;
-
-declare type InputTransformFunction_2 = any;
 
 /**
  * See `TNode.insertBeforeIndex`
@@ -5569,6 +5579,8 @@ declare enum LContainerFlags {
      */
     HasChildViewsToRefresh = 4
 }
+
+declare type LegacyInputPartialMapping = string | [bindingPropertyName: string, classPropertyName: string, transformFunction?: Function];
 
 /**
  * Provide this token to set the locale of your application.
@@ -7358,11 +7370,13 @@ declare interface R3DeclareDirectiveFacade {
     selector?: string;
     type: Type_2;
     inputs?: {
-        [classPropertyName: string]: string | [
-        bindingPropertyName: string,
-        classPropertyName: string,
-        transformFunction?: InputTransformFunction_2
-        ];
+        [fieldName: string]: {
+            classPropertyName: string;
+            publicName: string;
+            isSignal: boolean;
+            isRequired: boolean;
+            transformFunction: Function | null;
+        } | LegacyInputPartialMapping;
     };
     outputs?: {
         [classPropertyName: string]: string;
@@ -11180,6 +11194,9 @@ export declare interface ɵDirectiveDef<T> {
      * A dictionary mapping the private names of inputs to their transformation functions.
      * Note: the private names are used for the keys, rather than the public ones, because public
      * names can be re-aliased in host directives which would invalidate the lookup.
+     *
+     * Note: Signal inputs will not have transforms captured here. This is because their
+     * transform function is already integrated into the `InputSignal`.
      */
     readonly inputTransforms: {
         [classPropertyName: string]: InputTransformFunction;
@@ -11561,6 +11578,116 @@ export declare interface ɵInjectorProfilerContext {
      */
     token: Type<unknown> | null;
 }
+
+/**
+ * Initializes an input with an initial value. If no explicit value
+ * is specified, Angular will use `undefined`.
+ *
+ * Consider using `input.required` for inputs that don't need an
+ * initial value.
+ *
+ * @usageNotes
+ * Initialize an input in your directive or component by declaring a
+ * class field and initializing it with the `input()` function.
+ *
+ * ```ts
+ * @Directive({..})
+ * export class MyDir {
+ *   firstName = input<string>();            // string|undefined
+ *   lastName = input.required<string>();    // string
+ *   age = input(0);                         // number
+ * }
+ * ```
+ */
+export declare const ɵinput: ɵInputFunction;
+
+declare const ɵINPUT_SIGNAL_BRAND_READ_TYPE: unique symbol;
+
+export declare const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE: unique symbol;
+
+/**
+ * Type of the `input` function.
+ *
+ * The input function is a special function that also provides access to
+ * required inputs via the `.required` property.
+ */
+export declare type ɵInputFunction = typeof ɵinputFunctionForApiGuard & {
+    required: typeof ɵinputFunctionRequiredForApiGuard;
+};
+
+/**
+ * Initializes an input with an initial value. If no explicit value
+ * is specified, Angular will use `undefined`.
+ *
+ * Consider using `input.required` for inputs that don't need an
+ * initial value.
+ *
+ * @usageNotes
+ * Initialize an input in your directive or component by declaring a
+ * class field and initializing it with the `input()` function.
+ *
+ * ```ts
+ * @Directive({..})
+ * export class MyDir {
+ *   firstName = input<string>();            // string|undefined
+ *   lastName = input.required<string>();    // string
+ *   age = input(0);                         // number
+ * }
+ * ```
+ */
+export declare function ɵinputFunctionForApiGuard<ReadT>(): InputSignal<ReadT | undefined>;
+
+export declare function ɵinputFunctionForApiGuard<ReadT>(initialValue: ReadT, opts?: ɵInputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
+
+export declare function ɵinputFunctionForApiGuard<ReadT, WriteT>(initialValue: ReadT, opts: ɵInputOptionsWithTransform<ReadT, WriteT>): InputSignal<ReadT, WriteT>;
+
+/**
+ * Initializes a required input. Users of your directive/component,
+ * need to bind to this input, otherwise they will see errors.
+ * *
+ * @usageNotes
+ * Initialize an input in your directive or component by declaring a
+ * class field and initializing it with the `input()` function.
+ *
+ * ```ts
+ * @Directive({..})
+ * export class MyDir {
+ *   firstName = input<string>();            // string|undefined
+ *   lastName = input.required<string>();    // string
+ *   age = input(0);                         // number
+ * }
+ * ```
+ */
+export declare function ɵinputFunctionRequiredForApiGuard<ReadT>(opts?: ɵInputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
+
+export declare function ɵinputFunctionRequiredForApiGuard<ReadT, WriteT>(opts: ɵInputOptionsWithTransform<ReadT, WriteT>): InputSignal<ReadT, WriteT>;
+
+/**
+ * Options for signal inputs.
+ */
+export declare interface ɵInputOptions<ReadT, WriteT> {
+    /** Optional public name for the input. By default, the class field name is used. */
+    alias?: string;
+    /**
+     * Optional transform that runs whenever a new value is bound. Can be used to
+     * transform the input value before the input is updated.
+     *
+     * The transform function can widen the type of the input. For example, consider
+     * an input for `disabled`. In practice, as the component author, you want to only
+     * deal with a boolean, but users may want to bind a string if they just use the
+     * attribute form to bind to the input via `<my-dir input>`. A transform can then
+     * handle such string values and convert them to `boolean`. See: {@link booleanAttribute}.
+     */
+    transform?: (v: WriteT) => ReadT;
+}
+
+/** Signal input options without the transform option. */
+export declare type ɵInputOptionsWithoutTransform<ReadT> = Omit<ɵInputOptions<ReadT, ReadT>, 'transform'> & {
+    transform?: undefined;
+};
+
+/** Signal input options with the transform option required. */
+export declare type ɵInputOptionsWithTransform<ReadT, WriteT> = Required<Pick<ɵInputOptions<ReadT, WriteT>, 'transform'>> & ɵInputOptions<ReadT, WriteT>;
 
 /**
  * Register a callback to run once before any userspace `afterRender` or
@@ -12441,6 +12568,14 @@ export declare function ɵtruncateMiddle(str: string, maxLength?: number): strin
  * Helper function to remove all the locale data from `LOCALE_DATA`.
  */
 export declare function ɵunregisterLocaleData(): void;
+
+/** Unwraps all `InputSignal` class fields of the given directive. */
+export declare type ɵUnwrapDirectiveSignalInputs<Dir, Fields extends keyof Dir> = {
+    [P in Fields]: ɵUnwrapInputSignalWriteType<Dir[P]>;
+};
+
+/** Retrieves the `WriteT` of an `InputSignal`. */
+declare type ɵUnwrapInputSignalWriteType<Field> = Field extends InputSignal<unknown, infer WriteT> ? WriteT : never;
 
 export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
 
@@ -13727,6 +13862,7 @@ export declare type ɵɵDirectiveDeclaration<T, Selector extends string, ExportA
     [key: string]: string | {
         alias: string | null;
         required: boolean;
+        isSignal?: boolean;
     };
 }, OutputMap extends {
     [key: string]: string;
