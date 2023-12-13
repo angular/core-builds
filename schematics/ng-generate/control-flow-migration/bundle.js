@@ -8185,6 +8185,7 @@ function transformExpressionsInExpression(expr, transform2, flags) {
   } else if (expr instanceof TaggedTemplateExpr) {
     expr.tag = transformExpressionsInExpression(expr.tag, transform2, flags);
     expr.template.expressions = expr.template.expressions.map((e) => transformExpressionsInExpression(e, transform2, flags));
+  } else if (expr instanceof WrappedNodeExpr) {
   } else if (expr instanceof ReadVarExpr || expr instanceof ExternalExpr || expr instanceof LiteralExpr) {
   } else {
     throw new Error(`Unhandled expression kind: ${expr.constructor.name}`);
@@ -8511,7 +8512,7 @@ function createTextOp(xref, initialValue, sourceSpan) {
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPhase, hostListener, sourceSpan) {
+function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPhase, eventTarget, hostListener, sourceSpan) {
   const handlerList = new OpList();
   handlerList.push(handlerOps);
   return __spreadValues({
@@ -8526,6 +8527,7 @@ function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPh
     consumesDollarEvent: false,
     isAnimationListener: animationPhase !== null,
     animationPhase,
+    eventTarget,
     sourceSpan
   }, NEW_OP);
 }
@@ -17075,17 +17077,13 @@ function disableBindings2() {
 function enableBindings() {
   return call(Identifiers.enableBindings, [], null);
 }
-function listener(name, handlerFn, sourceSpan) {
-  return call(Identifiers.listener, [
-    literal(name),
-    handlerFn
-  ], sourceSpan);
-}
-function syntheticHostListener(name, handlerFn, sourceSpan) {
-  return call(Identifiers.syntheticHostListener, [
-    literal(name),
-    handlerFn
-  ], sourceSpan);
+function listener(name, handlerFn, eventTargetResolver, syntheticHost, sourceSpan) {
+  const args = [literal(name), handlerFn];
+  if (eventTargetResolver !== null) {
+    args.push(literal(false));
+    args.push(importExpr(eventTargetResolver));
+  }
+  return call(syntheticHost ? Identifiers.syntheticHostListener : Identifiers.listener, args, sourceSpan);
 }
 function pipe(slot, name) {
   return call(Identifiers.pipe, [
@@ -17537,6 +17535,11 @@ function callVariadicInstruction(config, baseArgs, interpolationArgs, extraArgs,
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/reify.mjs
+var GLOBAL_TARGET_RESOLVERS = /* @__PURE__ */ new Map([
+  ["window", Identifiers.resolveWindow],
+  ["document", Identifiers.resolveDocument],
+  ["body", Identifiers.resolveBody]
+]);
 function reify(job) {
   for (const unit of job.units) {
     reifyCreateOperations(unit, unit.create);
@@ -17605,8 +17608,11 @@ function reifyCreateOperations(unit, ops) {
         break;
       case OpKind.Listener:
         const listenerFn = reifyListenerHandler(unit, op.handlerFnName, op.handlerOps, op.consumesDollarEvent);
-        const reified = op.hostListener && op.isAnimationListener ? syntheticHostListener(op.name, listenerFn, op.sourceSpan) : listener(op.name, listenerFn, op.sourceSpan);
-        OpList.replace(op, reified);
+        const eventTargetResolver = op.eventTarget ? GLOBAL_TARGET_RESOLVERS.get(op.eventTarget) : null;
+        if (eventTargetResolver === void 0) {
+          throw new Error(`AssertionError: unknown event target ${op.eventTarget}`);
+        }
+        OpList.replace(op, listener(op.name, listenerFn, eventTargetResolver, op.hostListener && op.isAnimationListener, op.sourceSpan));
         break;
       case OpKind.Variable:
         if (op.variable.name === null) {
@@ -19079,7 +19085,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: generateProjectionDefs },
   { kind: CompilationJobKind.Tmpl, fn: generateVariables },
   { kind: CompilationJobKind.Tmpl, fn: saveAndRestoreView },
-  { kind: CompilationJobKind.Tmpl, fn: deleteAnyCasts },
+  { kind: CompilationJobKind.Both, fn: deleteAnyCasts },
   { kind: CompilationJobKind.Both, fn: resolveDollarEvent },
   { kind: CompilationJobKind.Tmpl, fn: generateRepeaterDerivedVars },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackVariables },
@@ -19277,7 +19283,8 @@ function ingestHostAttribute(job, name, value, securityContexts) {
   job.root.update.push(attrBinding);
 }
 function ingestHostEvent(job, event) {
-  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, [], event.targetOrPhase, true, event.sourceSpan);
+  const [phase, target] = event.type === 0 ? [null, event.targetOrPhase] : [event.targetOrPhase, null];
+  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, [], phase, target, true, event.sourceSpan);
   eventBinding.handlerOps.push(createStatementOp(new ReturnStatement(convertAst(event.handler.ast, job, event.sourceSpan), event.handlerSpan)));
   job.root.create.push(eventBinding);
 }
@@ -19753,7 +19760,7 @@ function ingestElementBindings(unit, op, element2) {
     if (output.type === 1 && output.phase === null) {
       throw Error("Animation listener should have a phase");
     }
-    unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
+    unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, output.target, false, output.sourceSpan));
   }
   if (bindings.some((b) => b == null ? void 0 : b.i18nMessage) !== null) {
     unit.create.push(createI18nAttributesOp(unit.job.allocateXrefId(), new SlotHandle(), op.xref));
@@ -19783,7 +19790,7 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
       throw Error("Animation listener should have a phase");
     }
     if (templateKind === TemplateKind.NgTemplate) {
-      unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
+      unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, output.target, false, output.sourceSpan));
     }
     if (templateKind === TemplateKind.Structural && output.type !== 1) {
       const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, output.name, false);
@@ -21957,16 +21964,16 @@ var NG_CONTENT_SELECT_ATTR2 = "select";
 var NG_PROJECT_AS_ATTR_NAME = "ngProjectAs";
 var EVENT_BINDING_SCOPE_GLOBALS = /* @__PURE__ */ new Set(["$event"]);
 var NG_TEMPLATE_TAG_NAME2 = "ng-template";
-var GLOBAL_TARGET_RESOLVERS = /* @__PURE__ */ new Map([["window", Identifiers.resolveWindow], ["document", Identifiers.resolveDocument], ["body", Identifiers.resolveBody]]);
+var GLOBAL_TARGET_RESOLVERS2 = /* @__PURE__ */ new Map([["window", Identifiers.resolveWindow], ["document", Identifiers.resolveDocument], ["body", Identifiers.resolveBody]]);
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function renderFlagCheckIfStmt(flags, statements) {
   return ifStmt(variable(RENDER_FLAGS).bitwiseAnd(literal(flags), null, false), statements);
 }
 function prepareEventListenerParameters(eventAst, handlerName = null, scope = null) {
   const { type, name, target, phase, handler } = eventAst;
-  if (target && !GLOBAL_TARGET_RESOLVERS.has(target)) {
+  if (target && !GLOBAL_TARGET_RESOLVERS2.has(target)) {
     throw new Error(`Unexpected global target '${target}' defined for '${name}' event.
-        Supported list of global targets: ${Array.from(GLOBAL_TARGET_RESOLVERS.keys())}.`);
+        Supported list of global targets: ${Array.from(GLOBAL_TARGET_RESOLVERS2.keys())}.`);
   }
   const eventArgumentName = "$event";
   const implicitReceiverAccesses = /* @__PURE__ */ new Set();
@@ -21999,7 +22006,7 @@ function prepareEventListenerParameters(eventAst, handlerName = null, scope = nu
   if (target) {
     params.push(
       literal(false),
-      importExpr(GLOBAL_TARGET_RESOLVERS.get(target))
+      importExpr(GLOBAL_TARGET_RESOLVERS2.get(target))
     );
   }
   return params;
@@ -25406,7 +25413,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.3+sha-d9348be");
+var VERSION2 = new Version("17.1.0-next.3+sha-fdb9cb7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25874,12 +25881,13 @@ function parseTemplate2(template2) {
       preserveLineEndings: true
     });
     if (parsed.errors && parsed.errors.length > 0) {
-      return null;
+      const errors = parsed.errors.map((e) => ({ type: "parse", error: e }));
+      return { tree: void 0, errors };
     }
   } catch (e) {
-    return null;
+    return { tree: void 0, errors: [{ type: "parse", error: e }] };
   }
-  return parsed;
+  return { tree: parsed, errors: [] };
 }
 function calculateNesting(visitor, hasLineBreaks2) {
   let nestedQueue = [];
@@ -25916,9 +25924,9 @@ function reduceNestingOffset(el, nestLevel, offset, postOffsets) {
 function getTemplates(template2) {
   var _a2;
   const parsed = parseTemplate2(template2);
-  if (parsed !== null) {
+  if (parsed.tree !== void 0) {
     const visitor = new TemplateCollector();
-    visitAll2(visitor, parsed.rootNodes);
+    visitAll2(visitor, parsed.tree.rootNodes);
     for (let [key, tmpl] of visitor.templates) {
       const escapeKey = escapeRegExp(key.slice(1));
       const regex = new RegExp(`[^a-zA-Z0-9-<(']${escapeKey}\\W`, "gm");
@@ -25995,9 +26003,9 @@ function replaceRemainingPlaceholders(template2) {
 function canRemoveCommonModule(template2) {
   const parsed = parseTemplate2(template2);
   let removeCommonModule = false;
-  if (parsed !== null) {
+  if (parsed.tree !== void 0) {
     const visitor = new CommonCollector();
-    visitAll2(visitor, parsed.rootNodes);
+    visitAll2(visitor, parsed.tree.rootNodes);
     removeCommonModule = visitor.count === 0;
   }
   return removeCommonModule;
@@ -26018,10 +26026,21 @@ function getOriginals(etm, tmpl, offset) {
     const start2 = tmpl.slice(etm.el.sourceSpan.start.offset - offset, etm.el.children[0].sourceSpan.start.offset - offset);
     const end = tmpl.slice(etm.el.children[etm.el.children.length - 1].sourceSpan.end.offset - offset, etm.el.sourceSpan.end.offset - offset);
     const childLength = childEnd - childStart;
-    return { start: start2, end, childLength };
+    return {
+      start: start2,
+      end,
+      childLength,
+      children: getOriginalChildren(etm.el.children, tmpl, offset),
+      childNodes: etm.el.children
+    };
   }
   const start = tmpl.slice(etm.el.sourceSpan.start.offset - offset, etm.el.sourceSpan.end.offset - offset);
-  return { start, end: "", childLength: 0 };
+  return { start, end: "", childLength: 0, children: [], childNodes: [] };
+}
+function getOriginalChildren(children, tmpl, offset) {
+  return children.map((child) => {
+    return tmpl.slice(child.sourceSpan.start.offset - offset, child.sourceSpan.end.offset - offset);
+  });
 }
 function isI18nTemplate(etm, i18nAttr) {
   let attrCount = countAttributes(etm);
@@ -26160,12 +26179,12 @@ var cases = [
 function migrateCase(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
-  if (parsed === null) {
+  if (parsed.tree === void 0) {
     return { migrated: template2, errors, changed: false };
   }
   let result = template2;
   const visitor = new ElementCollector(cases);
-  visitAll2(visitor, parsed.rootNodes);
+  visitAll2(visitor, parsed.tree.rootNodes);
   calculateNesting(visitor, hasLineBreaks(template2));
   let offset = 0;
   let nestLevel = -1;
@@ -26241,12 +26260,12 @@ var stringPairs = /* @__PURE__ */ new Map([
 function migrateFor(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
-  if (parsed === null) {
+  if (parsed.tree === void 0) {
     return { migrated: template2, errors, changed: false };
   }
   let result = template2;
   const visitor = new ElementCollector(fors);
-  visitAll2(visitor, parsed.rootNodes);
+  visitAll2(visitor, parsed.tree.rootNodes);
   calculateNesting(visitor, hasLineBreaks(template2));
   let offset = 0;
   let nestLevel = -1;
@@ -26408,12 +26427,12 @@ var ifs = [
 function migrateIf(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
-  if (parsed === null) {
+  if (parsed.tree === void 0) {
     return { migrated: template2, errors, changed: false };
   }
   let result = template2;
   const visitor = new ElementCollector(ifs);
-  visitAll2(visitor, parsed.rootNodes);
+  visitAll2(visitor, parsed.tree.rootNodes);
   calculateNesting(visitor, hasLineBreaks(template2));
   let offset = 0;
   let nestLevel = -1;
@@ -26557,12 +26576,12 @@ var switches = [
 function migrateSwitch(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
-  if (parsed === null) {
+  if (parsed.tree === void 0) {
     return { migrated: template2, errors, changed: false };
   }
   let result = template2;
   const visitor = new ElementCollector(switches);
-  visitAll2(visitor, parsed.rootNodes);
+  visitAll2(visitor, parsed.tree.rootNodes);
   calculateNesting(visitor, hasLineBreaks(template2));
   let offset = 0;
   let nestLevel = -1;
@@ -26585,10 +26604,28 @@ function migrateSwitch(template2) {
   const changed = visitor.elements.length > 0;
   return { migrated: result, errors, changed };
 }
+function assertValidSwitchStructure(children) {
+  for (const child of children) {
+    if (child instanceof Text4 && child.value.trim() !== "") {
+      throw new Error(`Text node: "${child.value}" would result in invalid migrated @switch block structure. @switch can only have @case or @default as children.`);
+    } else if (child instanceof Element2) {
+      let hasCase = false;
+      for (const attr of child.attrs) {
+        if (cases.includes(attr.name)) {
+          hasCase = true;
+        }
+      }
+      if (!hasCase) {
+        throw new Error(`Element node: "${child.name}" would result in invalid migrated @switch block structure. @switch can only have @case or @default as children.`);
+      }
+    }
+  }
+}
 function migrateNgSwitch(etm, tmpl, offset) {
   const lbString = etm.hasLineBreaks ? "\n" : "";
   const condition = etm.attr.value;
   const originals = getOriginals(etm, tmpl, offset);
+  assertValidSwitchStructure(originals.childNodes);
   const { start, middle, end } = getMainBlock(etm, tmpl, offset);
   const startBlock = `${startMarker}${start}${lbString}@switch (${condition}) {`;
   const endBlock = `}${lbString}${end}${endMarker}`;
@@ -26607,6 +26644,9 @@ function migrateTemplate(template2, templateType, node, file, format = true, ana
     const ifResult = migrateIf(template2);
     const forResult = migrateFor(ifResult.migrated);
     const switchResult = migrateSwitch(forResult.migrated);
+    if (switchResult.errors.length > 0) {
+      return { migrated: template2, errors: switchResult.errors };
+    }
     const caseResult = migrateCase(switchResult.migrated);
     const templateResult = processNgTemplates(caseResult.migrated);
     if (templateResult.err !== void 0) {
@@ -26614,6 +26654,16 @@ function migrateTemplate(template2, templateType, node, file, format = true, ana
     }
     migrated = templateResult.migrated;
     const changed = ifResult.changed || forResult.changed || switchResult.changed || caseResult.changed;
+    if (changed) {
+      const parsed = parseTemplate2(migrated);
+      if (parsed.errors.length > 0) {
+        const parsingError = {
+          type: "parse",
+          error: new Error(`The migration resulted in invalid HTML for ${file.sourceFilePath}. Please check the template for valid HTML structures and run the migration again.`)
+        };
+        return { migrated: template2, errors: [parsingError] };
+      }
+    }
     if (format && changed) {
       migrated = formatTemplate(migrated, templateType);
     }

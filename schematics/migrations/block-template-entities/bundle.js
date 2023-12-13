@@ -8254,6 +8254,7 @@ function transformExpressionsInExpression(expr, transform2, flags) {
   } else if (expr instanceof TaggedTemplateExpr) {
     expr.tag = transformExpressionsInExpression(expr.tag, transform2, flags);
     expr.template.expressions = expr.template.expressions.map((e) => transformExpressionsInExpression(e, transform2, flags));
+  } else if (expr instanceof WrappedNodeExpr) {
   } else if (expr instanceof ReadVarExpr || expr instanceof ExternalExpr || expr instanceof LiteralExpr) {
   } else {
     throw new Error(`Unhandled expression kind: ${expr.constructor.name}`);
@@ -8580,7 +8581,7 @@ function createTextOp(xref, initialValue, sourceSpan) {
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPhase, hostListener, sourceSpan) {
+function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPhase, eventTarget, hostListener, sourceSpan) {
   const handlerList = new OpList();
   handlerList.push(handlerOps);
   return __spreadValues({
@@ -8595,6 +8596,7 @@ function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPh
     consumesDollarEvent: false,
     isAnimationListener: animationPhase !== null,
     animationPhase,
+    eventTarget,
     sourceSpan
   }, NEW_OP);
 }
@@ -17144,17 +17146,13 @@ function disableBindings2() {
 function enableBindings() {
   return call(Identifiers.enableBindings, [], null);
 }
-function listener(name, handlerFn, sourceSpan) {
-  return call(Identifiers.listener, [
-    literal(name),
-    handlerFn
-  ], sourceSpan);
-}
-function syntheticHostListener(name, handlerFn, sourceSpan) {
-  return call(Identifiers.syntheticHostListener, [
-    literal(name),
-    handlerFn
-  ], sourceSpan);
+function listener(name, handlerFn, eventTargetResolver, syntheticHost, sourceSpan) {
+  const args = [literal(name), handlerFn];
+  if (eventTargetResolver !== null) {
+    args.push(literal(false));
+    args.push(importExpr(eventTargetResolver));
+  }
+  return call(syntheticHost ? Identifiers.syntheticHostListener : Identifiers.listener, args, sourceSpan);
 }
 function pipe(slot, name) {
   return call(Identifiers.pipe, [
@@ -17606,6 +17604,11 @@ function callVariadicInstruction(config, baseArgs, interpolationArgs, extraArgs,
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/reify.mjs
+var GLOBAL_TARGET_RESOLVERS = /* @__PURE__ */ new Map([
+  ["window", Identifiers.resolveWindow],
+  ["document", Identifiers.resolveDocument],
+  ["body", Identifiers.resolveBody]
+]);
 function reify(job) {
   for (const unit of job.units) {
     reifyCreateOperations(unit, unit.create);
@@ -17674,8 +17677,11 @@ function reifyCreateOperations(unit, ops) {
         break;
       case OpKind.Listener:
         const listenerFn = reifyListenerHandler(unit, op.handlerFnName, op.handlerOps, op.consumesDollarEvent);
-        const reified = op.hostListener && op.isAnimationListener ? syntheticHostListener(op.name, listenerFn, op.sourceSpan) : listener(op.name, listenerFn, op.sourceSpan);
-        OpList.replace(op, reified);
+        const eventTargetResolver = op.eventTarget ? GLOBAL_TARGET_RESOLVERS.get(op.eventTarget) : null;
+        if (eventTargetResolver === void 0) {
+          throw new Error(`AssertionError: unknown event target ${op.eventTarget}`);
+        }
+        OpList.replace(op, listener(op.name, listenerFn, eventTargetResolver, op.hostListener && op.isAnimationListener, op.sourceSpan));
         break;
       case OpKind.Variable:
         if (op.variable.name === null) {
@@ -19148,7 +19154,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: generateProjectionDefs },
   { kind: CompilationJobKind.Tmpl, fn: generateVariables },
   { kind: CompilationJobKind.Tmpl, fn: saveAndRestoreView },
-  { kind: CompilationJobKind.Tmpl, fn: deleteAnyCasts },
+  { kind: CompilationJobKind.Both, fn: deleteAnyCasts },
   { kind: CompilationJobKind.Both, fn: resolveDollarEvent },
   { kind: CompilationJobKind.Tmpl, fn: generateRepeaterDerivedVars },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackVariables },
@@ -19346,7 +19352,8 @@ function ingestHostAttribute(job, name, value, securityContexts) {
   job.root.update.push(attrBinding);
 }
 function ingestHostEvent(job, event) {
-  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, [], event.targetOrPhase, true, event.sourceSpan);
+  const [phase, target] = event.type === 0 ? [null, event.targetOrPhase] : [event.targetOrPhase, null];
+  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, [], phase, target, true, event.sourceSpan);
   eventBinding.handlerOps.push(createStatementOp(new ReturnStatement(convertAst(event.handler.ast, job, event.sourceSpan), event.handlerSpan)));
   job.root.create.push(eventBinding);
 }
@@ -19822,7 +19829,7 @@ function ingestElementBindings(unit, op, element2) {
     if (output.type === 1 && output.phase === null) {
       throw Error("Animation listener should have a phase");
     }
-    unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
+    unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, output.target, false, output.sourceSpan));
   }
   if (bindings.some((b) => b == null ? void 0 : b.i18nMessage) !== null) {
     unit.create.push(createI18nAttributesOp(unit.job.allocateXrefId(), new SlotHandle(), op.xref));
@@ -19852,7 +19859,7 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
       throw Error("Animation listener should have a phase");
     }
     if (templateKind === TemplateKind.NgTemplate) {
-      unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
+      unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, output.target, false, output.sourceSpan));
     }
     if (templateKind === TemplateKind.Structural && output.type !== 1) {
       const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, output.name, false);
@@ -22026,16 +22033,16 @@ var NG_CONTENT_SELECT_ATTR2 = "select";
 var NG_PROJECT_AS_ATTR_NAME = "ngProjectAs";
 var EVENT_BINDING_SCOPE_GLOBALS = /* @__PURE__ */ new Set(["$event"]);
 var NG_TEMPLATE_TAG_NAME2 = "ng-template";
-var GLOBAL_TARGET_RESOLVERS = /* @__PURE__ */ new Map([["window", Identifiers.resolveWindow], ["document", Identifiers.resolveDocument], ["body", Identifiers.resolveBody]]);
+var GLOBAL_TARGET_RESOLVERS2 = /* @__PURE__ */ new Map([["window", Identifiers.resolveWindow], ["document", Identifiers.resolveDocument], ["body", Identifiers.resolveBody]]);
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function renderFlagCheckIfStmt(flags, statements) {
   return ifStmt(variable(RENDER_FLAGS).bitwiseAnd(literal(flags), null, false), statements);
 }
 function prepareEventListenerParameters(eventAst, handlerName = null, scope = null) {
   const { type, name, target, phase, handler } = eventAst;
-  if (target && !GLOBAL_TARGET_RESOLVERS.has(target)) {
+  if (target && !GLOBAL_TARGET_RESOLVERS2.has(target)) {
     throw new Error(`Unexpected global target '${target}' defined for '${name}' event.
-        Supported list of global targets: ${Array.from(GLOBAL_TARGET_RESOLVERS.keys())}.`);
+        Supported list of global targets: ${Array.from(GLOBAL_TARGET_RESOLVERS2.keys())}.`);
   }
   const eventArgumentName = "$event";
   const implicitReceiverAccesses = /* @__PURE__ */ new Set();
@@ -22068,7 +22075,7 @@ function prepareEventListenerParameters(eventAst, handlerName = null, scope = nu
   if (target) {
     params.push(
       literal(false),
-      importExpr(GLOBAL_TARGET_RESOLVERS.get(target))
+      importExpr(GLOBAL_TARGET_RESOLVERS2.get(target))
     );
   }
   return params;
@@ -25475,7 +25482,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.3+sha-d9348be");
+var VERSION2 = new Version("17.1.0-next.3+sha-fdb9cb7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

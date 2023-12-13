@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.3+sha-d9348be
+ * @license Angular v17.1.0-next.3+sha-fdb9cb7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3848,6 +3848,16 @@ export declare interface FactorySansProvider {
 declare const FLAGS = 2;
 
 /**
+ * Interface to an `EffectScheduler` capable of running scheduled effects synchronously.
+ */
+declare interface FlushableEffectRunner {
+    /**
+     * Run any scheduled effects.
+     */
+    flush(): void;
+}
+
+/**
  * Allows to refer to references which are not yet defined.
  *
  * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
@@ -5911,7 +5921,7 @@ declare interface LViewEnvironment {
     /** An optional custom sanitizer. */
     sanitizer: Sanitizer | null;
     /** Container for reactivity system `effect`s. */
-    inlineEffectRunner: ɵFlushableEffectRunner | null;
+    inlineEffectRunner: FlushableEffectRunner | null;
     /** Container for after render hooks */
     afterRenderEventManager: ɵAfterRenderEventManager | null;
 }
@@ -11337,16 +11347,6 @@ export declare const enum ɵExtraLocaleDataIndex {
 export declare function ɵfindLocaleData(locale: string): any;
 
 /**
- * Interface to an `EffectScheduler` capable of running scheduled effects synchronously.
- */
-export declare interface ɵFlushableEffectRunner {
-    /**
-     * Run any scheduled effects.
-     */
-    flush(): void;
-}
-
-/**
  * Loops over queued module definitions, if a given module definition has all of its
  * declarations resolved, it dequeues that module definition and sets the scope on
  * its declarations.
@@ -12730,7 +12730,7 @@ export declare const ɵXSS_SECURITY_URL = "https://g.co/ng/security#xss";
  * An `EffectScheduler` which is capable of queueing scheduled effects per-zone, and flushing them
  * as an explicit operation.
  */
-export declare class ɵZoneAwareQueueingScheduler implements ɵEffectScheduler, ɵFlushableEffectRunner {
+export declare class ɵZoneAwareQueueingScheduler implements ɵEffectScheduler, FlushableEffectRunner {
     private queuedEffectCount;
     private queues;
     scheduleEffect(handle: SchedulableEffect): void;
