@@ -9118,6 +9118,7 @@ function transformExpressionsInExpression(expr, transform2, flags) {
   } else if (expr instanceof TaggedTemplateExpr) {
     expr.tag = transformExpressionsInExpression(expr.tag, transform2, flags);
     expr.template.expressions = expr.template.expressions.map((e) => transformExpressionsInExpression(e, transform2, flags));
+  } else if (expr instanceof WrappedNodeExpr) {
   } else if (expr instanceof ReadVarExpr || expr instanceof ExternalExpr || expr instanceof LiteralExpr) {
   } else {
     throw new Error(`Unhandled expression kind: ${expr.constructor.name}`);
@@ -9444,7 +9445,7 @@ function createTextOp(xref, initialValue, sourceSpan) {
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPhase, hostListener, sourceSpan) {
+function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPhase, eventTarget, hostListener, sourceSpan) {
   const handlerList = new OpList();
   handlerList.push(handlerOps);
   return __spreadValues({
@@ -9459,6 +9460,7 @@ function createListenerOp(target, targetSlot, name, tag, handlerOps, animationPh
     consumesDollarEvent: false,
     isAnimationListener: animationPhase !== null,
     animationPhase,
+    eventTarget,
     sourceSpan
   }, NEW_OP);
 }
@@ -17967,17 +17969,13 @@ function disableBindings2() {
 function enableBindings() {
   return call(Identifiers.enableBindings, [], null);
 }
-function listener(name, handlerFn, sourceSpan) {
-  return call(Identifiers.listener, [
-    literal(name),
-    handlerFn
-  ], sourceSpan);
-}
-function syntheticHostListener(name, handlerFn, sourceSpan) {
-  return call(Identifiers.syntheticHostListener, [
-    literal(name),
-    handlerFn
-  ], sourceSpan);
+function listener(name, handlerFn, eventTargetResolver, syntheticHost, sourceSpan) {
+  const args = [literal(name), handlerFn];
+  if (eventTargetResolver !== null) {
+    args.push(literal(false));
+    args.push(importExpr(eventTargetResolver));
+  }
+  return call(syntheticHost ? Identifiers.syntheticHostListener : Identifiers.listener, args, sourceSpan);
 }
 function pipe(slot, name) {
   return call(Identifiers.pipe, [
@@ -18429,6 +18427,11 @@ function callVariadicInstruction(config, baseArgs, interpolationArgs, extraArgs,
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/reify.mjs
+var GLOBAL_TARGET_RESOLVERS = /* @__PURE__ */ new Map([
+  ["window", Identifiers.resolveWindow],
+  ["document", Identifiers.resolveDocument],
+  ["body", Identifiers.resolveBody]
+]);
 function reify(job) {
   for (const unit of job.units) {
     reifyCreateOperations(unit, unit.create);
@@ -18497,8 +18500,11 @@ function reifyCreateOperations(unit, ops) {
         break;
       case OpKind.Listener:
         const listenerFn = reifyListenerHandler(unit, op.handlerFnName, op.handlerOps, op.consumesDollarEvent);
-        const reified = op.hostListener && op.isAnimationListener ? syntheticHostListener(op.name, listenerFn, op.sourceSpan) : listener(op.name, listenerFn, op.sourceSpan);
-        OpList.replace(op, reified);
+        const eventTargetResolver = op.eventTarget ? GLOBAL_TARGET_RESOLVERS.get(op.eventTarget) : null;
+        if (eventTargetResolver === void 0) {
+          throw new Error(`AssertionError: unknown event target ${op.eventTarget}`);
+        }
+        OpList.replace(op, listener(op.name, listenerFn, eventTargetResolver, op.hostListener && op.isAnimationListener, op.sourceSpan));
         break;
       case OpKind.Variable:
         if (op.variable.name === null) {
@@ -19971,7 +19977,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: generateProjectionDefs },
   { kind: CompilationJobKind.Tmpl, fn: generateVariables },
   { kind: CompilationJobKind.Tmpl, fn: saveAndRestoreView },
-  { kind: CompilationJobKind.Tmpl, fn: deleteAnyCasts },
+  { kind: CompilationJobKind.Both, fn: deleteAnyCasts },
   { kind: CompilationJobKind.Both, fn: resolveDollarEvent },
   { kind: CompilationJobKind.Tmpl, fn: generateRepeaterDerivedVars },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackVariables },
@@ -20169,7 +20175,8 @@ function ingestHostAttribute(job, name, value, securityContexts) {
   job.root.update.push(attrBinding);
 }
 function ingestHostEvent(job, event) {
-  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, [], event.targetOrPhase, true, event.sourceSpan);
+  const [phase, target] = event.type === 0 ? [null, event.targetOrPhase] : [event.targetOrPhase, null];
+  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, [], phase, target, true, event.sourceSpan);
   eventBinding.handlerOps.push(createStatementOp(new ReturnStatement(convertAst(event.handler.ast, job, event.sourceSpan), event.handlerSpan)));
   job.root.create.push(eventBinding);
 }
@@ -20645,7 +20652,7 @@ function ingestElementBindings(unit, op, element2) {
     if (output.type === 1 && output.phase === null) {
       throw Error("Animation listener should have a phase");
     }
-    unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
+    unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, output.target, false, output.sourceSpan));
   }
   if (bindings.some((b) => b == null ? void 0 : b.i18nMessage) !== null) {
     unit.create.push(createI18nAttributesOp(unit.job.allocateXrefId(), new SlotHandle(), op.xref));
@@ -20675,7 +20682,7 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
       throw Error("Animation listener should have a phase");
     }
     if (templateKind === TemplateKind.NgTemplate) {
-      unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, false, output.sourceSpan));
+      unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, output.target, false, output.sourceSpan));
     }
     if (templateKind === TemplateKind.Structural && output.type !== 1) {
       const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, output.name, false);
@@ -22849,16 +22856,16 @@ var NG_CONTENT_SELECT_ATTR2 = "select";
 var NG_PROJECT_AS_ATTR_NAME = "ngProjectAs";
 var EVENT_BINDING_SCOPE_GLOBALS = /* @__PURE__ */ new Set(["$event"]);
 var NG_TEMPLATE_TAG_NAME2 = "ng-template";
-var GLOBAL_TARGET_RESOLVERS = /* @__PURE__ */ new Map([["window", Identifiers.resolveWindow], ["document", Identifiers.resolveDocument], ["body", Identifiers.resolveBody]]);
+var GLOBAL_TARGET_RESOLVERS2 = /* @__PURE__ */ new Map([["window", Identifiers.resolveWindow], ["document", Identifiers.resolveDocument], ["body", Identifiers.resolveBody]]);
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function renderFlagCheckIfStmt(flags, statements) {
   return ifStmt(variable(RENDER_FLAGS).bitwiseAnd(literal(flags), null, false), statements);
 }
 function prepareEventListenerParameters(eventAst, handlerName = null, scope = null) {
   const { type, name, target, phase, handler } = eventAst;
-  if (target && !GLOBAL_TARGET_RESOLVERS.has(target)) {
+  if (target && !GLOBAL_TARGET_RESOLVERS2.has(target)) {
     throw new Error(`Unexpected global target '${target}' defined for '${name}' event.
-        Supported list of global targets: ${Array.from(GLOBAL_TARGET_RESOLVERS.keys())}.`);
+        Supported list of global targets: ${Array.from(GLOBAL_TARGET_RESOLVERS2.keys())}.`);
   }
   const eventArgumentName = "$event";
   const implicitReceiverAccesses = /* @__PURE__ */ new Set();
@@ -22891,7 +22898,7 @@ function prepareEventListenerParameters(eventAst, handlerName = null, scope = nu
   if (target) {
     params.push(
       literal(false),
-      importExpr(GLOBAL_TARGET_RESOLVERS.get(target))
+      importExpr(GLOBAL_TARGET_RESOLVERS2.get(target))
     );
   }
   return params;
@@ -26298,7 +26305,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.6+sha-57ac806");
+var VERSION2 = new Version("17.0.6+sha-1c55c49");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27364,7 +27371,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.6+sha-57ac806"));
+  definitionMap.set("version", literal("17.0.6+sha-1c55c49"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27435,7 +27442,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.6+sha-57ac806"));
+  definitionMap.set("version", literal("17.0.6+sha-1c55c49"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27667,7 +27674,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.6+sha-57ac806"));
+  definitionMap.set("version", literal("17.0.6+sha-1c55c49"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27690,7 +27697,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.6+sha-57ac806"));
+  definitionMap.set("version", literal("17.0.6+sha-1c55c49"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27728,7 +27735,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.6+sha-57ac806"));
+  definitionMap.set("version", literal("17.0.6+sha-1c55c49"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27752,7 +27759,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.6+sha-57ac806"));
+  definitionMap.set("version", literal("17.0.6+sha-1c55c49"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27787,7 +27794,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.6+sha-57ac806"));
+  definitionMap.set("version", literal("17.0.6+sha-1c55c49"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27804,7 +27811,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.6+sha-57ac806");
+var VERSION3 = new Version("17.0.6+sha-1c55c49");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -28346,6 +28353,7 @@ var ClassMemberKind;
   ClassMemberKind2[ClassMemberKind2["Property"] = 3] = "Property";
   ClassMemberKind2[ClassMemberKind2["Method"] = 4] = "Method";
 })(ClassMemberKind || (ClassMemberKind = {}));
+var AmbientImport = {};
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/reflection/src/type_to_value.mjs
 var import_typescript7 = __toESM(require("typescript"), 1);
@@ -28734,19 +28742,18 @@ var TypeScriptReflectionHost = class {
       return this.getDeclarationOfSymbol(targetSymbol, originalId);
     }
     const importInfo = originalId && this.getImportOfIdentifier(originalId);
-    const viaModule = importInfo !== null && importInfo.from !== null && !importInfo.from.startsWith(".") ? importInfo.from : null;
     while (symbol.flags & import_typescript9.default.SymbolFlags.Alias) {
       symbol = this.checker.getAliasedSymbol(symbol);
     }
     if (symbol.valueDeclaration !== void 0) {
       return {
         node: symbol.valueDeclaration,
-        viaModule
+        viaModule: this._viaModule(symbol.valueDeclaration, originalId, importInfo)
       };
     } else if (symbol.declarations !== void 0 && symbol.declarations.length > 0) {
       return {
         node: symbol.declarations[0],
-        viaModule
+        viaModule: this._viaModule(symbol.declarations[0], originalId, importInfo)
       };
     } else {
       return null;
@@ -28841,6 +28848,12 @@ var TypeScriptReflectionHost = class {
       item = iter.next();
     }
     return exportSet;
+  }
+  _viaModule(declaration, originalId, importInfo) {
+    if (importInfo === null && originalId !== null && declaration.getSourceFile() !== originalId.getSourceFile()) {
+      return AmbientImport;
+    }
+    return importInfo !== null && importInfo.from !== null && !importInfo.from.startsWith(".") ? importInfo.from : null;
   }
 };
 function reflectTypeEntityToDeclaration(type, checker) {
@@ -29615,6 +29628,7 @@ var ImportFlags;
   ImportFlags2[ImportFlags2["NoAliasing"] = 2] = "NoAliasing";
   ImportFlags2[ImportFlags2["AllowTypeImports"] = 4] = "AllowTypeImports";
   ImportFlags2[ImportFlags2["AllowRelativeDtsImports"] = 8] = "AllowRelativeDtsImports";
+  ImportFlags2[ImportFlags2["AllowAmbientReferences"] = 16] = "AllowAmbientReferences";
 })(ImportFlags || (ImportFlags = {}));
 function assertSuccessfulReferenceEmit(result, origin, typeKind) {
   if (result.kind === 0) {
@@ -29654,6 +29668,18 @@ var LocalIdentifierStrategy = class {
         expression: new WrappedNodeExpr(ref.node),
         importedFile: null
       };
+    }
+    if (ref.isAmbient && importFlags & ImportFlags.AllowAmbientReferences) {
+      const identifier2 = identifierOfNode(ref.node);
+      if (identifier2 !== null) {
+        return {
+          kind: 0,
+          expression: new WrappedNodeExpr(identifier2),
+          importedFile: null
+        };
+      } else {
+        return null;
+      }
     }
     const identifier = ref.getIdentityIn(context);
     if (identifier !== null) {
@@ -30139,7 +30165,13 @@ var Reference2 = class {
     this.identifiers = [];
     this.synthetic = false;
     this._alias = null;
-    this.bestGuessOwningModule = bestGuessOwningModule;
+    if (bestGuessOwningModule === AmbientImport) {
+      this.isAmbient = true;
+      this.bestGuessOwningModule = null;
+    } else {
+      this.isAmbient = false;
+      this.bestGuessOwningModule = bestGuessOwningModule;
+    }
     const id = identifierOfNode(node);
     if (id !== null) {
       this.identifiers.push(id);
@@ -30182,13 +30214,13 @@ var Reference2 = class {
     return id !== null ? id : fallback;
   }
   cloneWithAlias(alias) {
-    const ref = new Reference2(this.node, this.bestGuessOwningModule);
+    const ref = new Reference2(this.node, this.isAmbient ? AmbientImport : this.bestGuessOwningModule);
     ref.identifiers = [...this.identifiers];
     ref._alias = alias;
     return ref;
   }
   cloneWithNoIdentifiers() {
-    const ref = new Reference2(this.node, this.bestGuessOwningModule);
+    const ref = new Reference2(this.node, this.isAmbient ? AmbientImport : this.bestGuessOwningModule);
     ref._alias = this._alias;
     ref.identifiers = [];
     return ref;
@@ -30757,14 +30789,14 @@ var TypeTranslatorVisitor = class {
       throw new Error(`Unable to statically determine the declaration file of type node ${target.text}`);
     }
     let owningModule2 = viaModule;
-    if (declaration.viaModule !== null) {
+    if (typeof declaration.viaModule === "string") {
       owningModule2 = {
         specifier: declaration.viaModule,
         resolutionContext: type.getSourceFile().fileName
       };
     }
-    const reference2 = new Reference2(declaration.node, owningModule2);
-    const emittedType = this.refEmitter.emit(reference2, this.contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports);
+    const reference2 = new Reference2(declaration.node, declaration.viaModule === AmbientImport ? AmbientImport : owningModule2);
+    const emittedType = this.refEmitter.emit(reference2, this.contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowAmbientReferences);
     assertSuccessfulReferenceEmit(emittedType, target, "type");
     const typeNode = this.translateExpression(emittedType.expression, context);
     if (!import_typescript25.default.isTypeReferenceNode(typeNode)) {
@@ -33463,7 +33495,7 @@ function isVariableDeclarationDeclared(node) {
 }
 var EMPTY = {};
 function joinModuleContext(existing, node, decl) {
-  if (decl.viaModule !== null && decl.viaModule !== existing.absoluteModuleName) {
+  if (typeof decl.viaModule === "string" && decl.viaModule !== existing.absoluteModuleName) {
     return {
       absoluteModuleName: decl.viaModule,
       resolutionContext: node.getSourceFile().fileName
@@ -35224,7 +35256,7 @@ function assertEmittableInputType(type, contextFile, reflector, refEmitter) {
       const declaration = reflector.getDeclarationOfIdentifier(node.typeName);
       if (declaration !== null) {
         if (declaration.node.getSourceFile() !== contextFile) {
-          const emittedType = refEmitter.emit(new Reference2(declaration.node), contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports);
+          const emittedType = refEmitter.emit(new Reference2(declaration.node, declaration.viaModule === AmbientImport ? AmbientImport : null), contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports | ImportFlags.AllowAmbientReferences);
           assertSuccessfulReferenceEmit(emittedType, node, "type");
         } else if (!reflector.isStaticallyExported(declaration.node)) {
           throw new FatalDiagnosticError(ErrorCode.SYMBOL_NOT_EXPORTED, type, `Symbol must be exported in order to be used as the type of an Input transform function`, [makeRelatedInformation(declaration.node, `The symbol is declared here.`)]);
@@ -40755,13 +40787,13 @@ var TypeParameterEmitter = class {
       return type;
     }
     let owningModule2 = null;
-    if (declaration.viaModule !== null) {
+    if (typeof declaration.viaModule === "string") {
       owningModule2 = {
         specifier: declaration.viaModule,
         resolutionContext: type.getSourceFile().fileName
       };
     }
-    return new Reference2(declaration.node, owningModule2);
+    return new Reference2(declaration.node, declaration.viaModule === AmbientImport ? AmbientImport : owningModule2);
   }
   translateTypeReference(type, emitReference) {
     const reference2 = this.resolveTypeReference(type);
@@ -41039,12 +41071,12 @@ var Environment = class {
     assertSuccessfulReferenceEmit(ngExpr, this.contextFile, "class");
     return translateExpression(ngExpr.expression, this.importManager);
   }
-  canReferenceType(ref) {
-    const result = this.refEmitter.emit(ref, this.contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports);
+  canReferenceType(ref, flags = ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports) {
+    const result = this.refEmitter.emit(ref, this.contextFile, flags);
     return result.kind === 0;
   }
-  referenceType(ref) {
-    const ngExpr = this.refEmitter.emit(ref, this.contextFile, ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports);
+  referenceType(ref, flags = ImportFlags.NoAliasing | ImportFlags.AllowTypeImports | ImportFlags.AllowRelativeDtsImports) {
+    const ngExpr = this.refEmitter.emit(ref, this.contextFile, flags);
     assertSuccessfulReferenceEmit(ngExpr, this.contextFile, "symbol");
     return translateType(new ExpressionType(ngExpr.expression), this.contextFile, this.reflector, this.refEmitter, this.importManager);
   }
