@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.6+sha-1c55c49
+ * @license Angular v17.0.6+sha-c16b5e8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10427,7 +10427,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.6+sha-1c55c49');
+const VERSION = new Version('17.0.6+sha-c16b5e8');
 
 // This default value is when checking the hierarchy for a token.
 //
@@ -31709,7 +31709,7 @@ class ApplicationRef {
          * Returns an Observable that indicates when the application is stable or unstable.
          */
         this.isStable = inject(InitialRenderPendingTasks)
-            .hasPendingTasks.pipe(switchMap(hasPendingTasks => hasPendingTasks ? of(false) : this.zoneIsStable), distinctUntilChanged(), share());
+            .hasPendingTasks.pipe(switchMap(hasPendingTasks => hasPendingTasks ? of(false) : this.zoneIsStable), distinctUntilChanged());
         this._injector = inject(EnvironmentInjector);
     }
     /**
