@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.4+sha-be7beca
+ * @license Angular v17.1.0-next.4+sha-606de51
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11420,6 +11420,9 @@ export declare function ɵgetDeferBlocks(lView: LView, deferBlocks: ɵDeferBlock
  */
 export declare function ɵgetDirectives(node: Node): {}[];
 
+
+export declare function ɵgetEnsureDirtyViewsAreAlwaysReachable(): boolean;
+
 /**
  * Retrieves the host element of a component or directive instance.
  * The host element is the DOM element that matched the selector of the directive.
@@ -12487,6 +12490,8 @@ export declare function ɵsetCurrentInjector(injector: Injector | null | undefin
  * @param document The object representing the global `document` in this environment.
  */
 export declare function ɵsetDocument(document: Document | undefined): void;
+
+export declare function ɵsetEnsureDirtyViewsAreAlwaysReachable(v: boolean): void;
 
 export declare function ɵsetInjectorProfilerContext(context: ɵInjectorProfilerContext): ɵInjectorProfilerContext;
 
