@@ -10394,54 +10394,38 @@ function createDeferDepsFns(job) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/create_i18n_contexts.mjs
 function createI18nContexts(job) {
-  const rootContexts = /* @__PURE__ */ new Map();
-  let currentI18nOp = null;
-  let xref;
-  const messageToContext = /* @__PURE__ */ new Map();
+  const attrContextByMessage = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
-    for (const op of unit.create) {
-      switch (op.kind) {
-        case OpKind.I18nStart:
-          currentI18nOp = op;
-          if (op.xref === op.root) {
-            xref = job.allocateXrefId();
-            unit.create.push(createI18nContextOp(I18nContextKind.RootI18n, xref, op.xref, op.message, null));
-            op.context = xref;
-            rootContexts.set(op.xref, xref);
-          }
-          break;
-        case OpKind.I18nEnd:
-          currentI18nOp = null;
-          break;
-        case OpKind.IcuStart:
-          if (currentI18nOp === null) {
-            throw Error("Unexpected ICU outside of an i18n block.");
-          }
-          if (op.message.id !== currentI18nOp.message.id) {
-            xref = job.allocateXrefId();
-            unit.create.push(createI18nContextOp(I18nContextKind.Icu, xref, currentI18nOp.xref, op.message, null));
-            op.context = xref;
-          } else {
-            op.context = currentI18nOp.context;
-          }
-          break;
-      }
-    }
     for (const op of unit.ops()) {
       switch (op.kind) {
         case OpKind.Binding:
         case OpKind.Property:
         case OpKind.Attribute:
         case OpKind.ExtractedAttribute:
-          if (!op.i18nMessage) {
+          if (op.i18nMessage === null) {
             continue;
           }
-          if (!messageToContext.has(op.i18nMessage)) {
-            const i18nContext = job.allocateXrefId();
-            unit.create.push(createI18nContextOp(I18nContextKind.Attr, i18nContext, null, op.i18nMessage, null));
-            messageToContext.set(op.i18nMessage, i18nContext);
+          if (!attrContextByMessage.has(op.i18nMessage)) {
+            const i18nContext = createI18nContextOp(I18nContextKind.Attr, job.allocateXrefId(), null, op.i18nMessage, null);
+            unit.create.push(i18nContext);
+            attrContextByMessage.set(op.i18nMessage, i18nContext.xref);
           }
-          op.i18nContext = messageToContext.get(op.i18nMessage);
+          op.i18nContext = attrContextByMessage.get(op.i18nMessage);
+          break;
+      }
+    }
+  }
+  const blockContextByI18nBlock = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.I18nStart:
+          if (op.xref === op.root) {
+            const contextOp = createI18nContextOp(I18nContextKind.RootI18n, job.allocateXrefId(), op.xref, op.message, null);
+            unit.create.push(contextOp);
+            op.context = contextOp.xref;
+            blockContextByI18nBlock.set(op.xref, contextOp);
+          }
           break;
       }
     }
@@ -10449,7 +10433,38 @@ function createI18nContexts(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.I18nStart && op.xref !== op.root) {
-        op.context = rootContexts.get(op.root);
+        const rootContext = blockContextByI18nBlock.get(op.root);
+        if (rootContext === void 0) {
+          throw Error("AssertionError: Root i18n block i18n context should have been created.");
+        }
+        op.context = rootContext.xref;
+        blockContextByI18nBlock.set(op.xref, rootContext);
+      }
+    }
+  }
+  let currentI18nOp = null;
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      switch (op.kind) {
+        case OpKind.I18nStart:
+          currentI18nOp = op;
+          break;
+        case OpKind.I18nEnd:
+          currentI18nOp = null;
+          break;
+        case OpKind.IcuStart:
+          if (currentI18nOp === null) {
+            throw Error("AssertionError: Unexpected ICU outside of an i18n block.");
+          }
+          if (op.message.id !== currentI18nOp.message.id) {
+            const contextOp = createI18nContextOp(I18nContextKind.Icu, job.allocateXrefId(), currentI18nOp.xref, op.message, null);
+            unit.create.push(contextOp);
+            op.context = contextOp.xref;
+          } else {
+            op.context = currentI18nOp.context;
+            blockContextByI18nBlock.get(currentI18nOp.xref).contextKind = I18nContextKind.Icu;
+          }
+          break;
       }
     }
   }
@@ -10739,12 +10754,16 @@ var LIST_START_MARKER = "[";
 var LIST_END_MARKER = "]";
 var LIST_DELIMITER = "|";
 function extractI18nMessages(job) {
-  const i18nContexts = /* @__PURE__ */ new Map();
+  const i18nMessagesByContext = /* @__PURE__ */ new Map();
   const i18nBlocks = /* @__PURE__ */ new Map();
+  const i18nContexts = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nContext:
+          const i18nMessageOp = createI18nMessage(job, op);
+          unit.create.push(i18nMessageOp);
+          i18nMessagesByContext.set(op.xref, i18nMessageOp);
           i18nContexts.set(op.xref, op);
           break;
         case OpKind.I18nStart:
@@ -10755,45 +10774,25 @@ function extractI18nMessages(job) {
   }
   for (const unit of job.units) {
     for (const op of unit.create) {
-      if (op.kind !== OpKind.I18nContext || op.contextKind !== I18nContextKind.Attr) {
-        continue;
-      }
-      const i18nMessageOp = createI18nMessage(job, op);
-      unit.create.push(i18nMessageOp);
-    }
-  }
-  const i18nBlockMessages = /* @__PURE__ */ new Map();
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.I18nStart && op.xref === op.root) {
-        if (!op.context) {
-          throw Error("I18n start op should have its context set.");
-        }
-        const i18nMessageOp = createI18nMessage(job, i18nContexts.get(op.context));
-        i18nBlockMessages.set(op.xref, i18nMessageOp);
-        unit.create.push(i18nMessageOp);
-      }
-    }
-  }
-  for (const unit of job.units) {
-    for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.IcuStart:
-          if (!op.context) {
-            throw Error("ICU op should have its context set.");
-          }
-          const i18nContext = i18nContexts.get(op.context);
-          if (i18nContext.contextKind === I18nContextKind.Icu) {
-            if (i18nContext.i18nBlock === null) {
-              throw Error("ICU context should have its i18n block set.");
-            }
-            const subMessage = createI18nMessage(job, i18nContext, op.messagePlaceholder);
-            unit.create.push(subMessage);
-            const rootI18nId = i18nBlocks.get(i18nContext.i18nBlock).root;
-            const parentMessage = i18nBlockMessages.get(rootI18nId);
-            parentMessage == null ? void 0 : parentMessage.subMessages.push(subMessage.xref);
-          }
           OpList.remove(op);
+          const icuContext = i18nContexts.get(op.context);
+          if (icuContext.contextKind !== I18nContextKind.Icu) {
+            continue;
+          }
+          const i18nBlock = i18nBlocks.get(icuContext.i18nBlock);
+          if (i18nBlock.context === icuContext.xref) {
+            continue;
+          }
+          const rootI18nBlock = i18nBlocks.get(i18nBlock.root);
+          const rootMessage = i18nMessagesByContext.get(rootI18nBlock.context);
+          if (rootMessage === void 0) {
+            throw Error("AssertionError: ICU sub-message should belong to a root message.");
+          }
+          const subMessage = i18nMessagesByContext.get(icuContext.xref);
+          subMessage.messagePlaceholder = op.messagePlaceholder;
+          rootMessage.subMessages.push(subMessage.xref);
           break;
         case OpKind.IcuEnd:
           OpList.remove(op);
@@ -26328,7 +26327,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-606de51");
+var VERSION2 = new Version("17.1.0-next.4+sha-e8f0042");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27394,7 +27393,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-606de51"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-e8f0042"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27463,7 +27462,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-606de51"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-e8f0042"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27756,7 +27755,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-606de51"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-e8f0042"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27779,7 +27778,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-606de51"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-e8f0042"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27817,7 +27816,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-606de51"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-e8f0042"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27841,7 +27840,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-606de51"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-e8f0042"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27876,7 +27875,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-606de51"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-e8f0042"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27893,7 +27892,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.4+sha-606de51");
+var VERSION3 = new Version("17.1.0-next.4+sha-e8f0042");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
