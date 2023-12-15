@@ -25476,7 +25476,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-7bb312f");
+var VERSION2 = new Version("17.1.0-next.4+sha-1892904");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25519,6 +25519,20 @@ var FactoryTarget2;
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/compiler.mjs
 publishFacade(_global);
+
+// bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/identifier-lookup.mjs
+var import_typescript5 = __toESM(require("typescript"), 1);
+function lookupIdentifiersInSourceFile(sourceFile, name) {
+  const results = /* @__PURE__ */ new Set();
+  const visit = (node) => {
+    if (import_typescript5.default.isIdentifier(node) && node.text === name) {
+      results.add(node);
+    }
+    import_typescript5.default.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return results;
+}
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/types.mjs
 var ngtemplate = "ng-template";
@@ -25679,27 +25693,50 @@ var Template2 = class {
   }
 };
 var AnalyzedFile = class {
-  constructor() {
+  constructor(sourceFile) {
     __publicField(this, "ranges", []);
     __publicField(this, "removeCommonModule", false);
     __publicField(this, "canRemoveImports", false);
-    __publicField(this, "sourceFilePath", "");
+    __publicField(this, "sourceFile");
+    __publicField(this, "importRanges", []);
+    __publicField(this, "templateRanges", []);
+    this.sourceFile = sourceFile;
   }
   getSortedRanges() {
-    const templateRanges = this.ranges.slice().filter((x) => x.type !== "import").sort((aStart, bStart) => bStart.start - aStart.start);
-    const importRanges = this.ranges.slice().filter((x) => x.type === "import").sort((aStart, bStart) => bStart.start - aStart.start);
-    return [...templateRanges, ...importRanges];
+    this.templateRanges = this.ranges.slice().filter((x) => x.type === "template" || x.type === "templateUrl").sort((aStart, bStart) => bStart.start - aStart.start);
+    this.importRanges = this.ranges.slice().filter((x) => x.type === "importDecorator" || x.type === "importDeclaration").sort((aStart, bStart) => bStart.start - aStart.start);
+    return [...this.templateRanges, ...this.importRanges];
   }
-  static addRange(path2, sourceFilePath, analyzedFiles, range) {
+  static addRange(path2, sourceFile, analyzedFiles, range) {
     let analysis = analyzedFiles.get(path2);
     if (!analysis) {
-      analysis = new AnalyzedFile();
-      analysis.sourceFilePath = sourceFilePath;
+      analysis = new AnalyzedFile(sourceFile);
       analyzedFiles.set(path2, analysis);
     }
     const duplicate = analysis.ranges.find((current) => current.start === range.start && current.end === range.end);
     if (!duplicate) {
       analysis.ranges.push(range);
+    }
+  }
+  verifyCanRemoveImports() {
+    if (this.removeCommonModule) {
+      const importDeclaration = this.importRanges.find((r) => r.type === "importDeclaration");
+      const instances = lookupIdentifiersInSourceFile(this.sourceFile, "CommonModule");
+      let foundImportDeclaration = false;
+      let count = 0;
+      for (let range of this.importRanges) {
+        for (let instance of instances) {
+          if (instance.getStart() >= range.start && instance.getEnd() <= range.end) {
+            if (range === importDeclaration) {
+              foundImportDeclaration = true;
+            }
+            count++;
+          }
+        }
+      }
+      if (instances.size !== count && importDeclaration !== void 0 && foundImportDeclaration) {
+        importDeclaration.remove = false;
+      }
     }
   }
 };
@@ -25822,7 +25859,7 @@ var TemplateCollector = class extends RecursiveVisitor {
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
 var import_path2 = require("path");
-var import_typescript5 = __toESM(require("typescript"), 1);
+var import_typescript6 = __toESM(require("typescript"), 1);
 var importRemovals = [
   "NgIf",
   "NgIfElse",
@@ -25842,16 +25879,20 @@ var endI18nMarkerRegex = new RegExp(endI18nMarker, "gm");
 var replaceMarkerRegex = new RegExp(`${startMarker}|${endMarker}`, "gm");
 function analyze(sourceFile, analyzedFiles) {
   forEachClass(sourceFile, (node) => {
-    if (import_typescript5.default.isClassDeclaration(node)) {
+    if (import_typescript6.default.isClassDeclaration(node)) {
       analyzeDecorators(node, sourceFile, analyzedFiles);
     } else {
       analyzeImportDeclarations(node, sourceFile, analyzedFiles);
     }
   });
 }
-function checkIfShouldChange(decl, removeCommonModule) {
+function checkIfShouldChange(decl, file) {
+  const range = file.importRanges.find((r) => r.type === "importDeclaration");
+  if (range === void 0 || !range.remove) {
+    return false;
+  }
   const clause = decl.getChildAt(1);
-  return !(!removeCommonModule && clause.namedBindings && import_typescript5.default.isNamedImports(clause.namedBindings) && clause.namedBindings.elements.length === 1 && clause.namedBindings.elements[0].getText() === "CommonModule");
+  return !(!file.removeCommonModule && clause.namedBindings && import_typescript6.default.isNamedImports(clause.namedBindings) && clause.namedBindings.elements.length === 1 && clause.namedBindings.elements[0].getText() === "CommonModule");
 }
 function updateImportDeclaration(decl, removeCommonModule) {
   const clause = decl.getChildAt(1);
@@ -25859,81 +25900,89 @@ function updateImportDeclaration(decl, removeCommonModule) {
   if (updatedClause === null) {
     return "";
   }
-  const printer = import_typescript5.default.createPrinter({
+  const printer = import_typescript6.default.createPrinter({
     removeComments: true
   });
-  const updated = import_typescript5.default.factory.updateImportDeclaration(decl, decl.modifiers, updatedClause, decl.moduleSpecifier, void 0);
-  return printer.printNode(import_typescript5.default.EmitHint.Unspecified, updated, clause.getSourceFile());
+  const updated = import_typescript6.default.factory.updateImportDeclaration(decl, decl.modifiers, updatedClause, decl.moduleSpecifier, void 0);
+  return printer.printNode(import_typescript6.default.EmitHint.Unspecified, updated, clause.getSourceFile());
 }
 function updateImportClause(clause, removeCommonModule) {
-  if (clause.namedBindings && import_typescript5.default.isNamedImports(clause.namedBindings)) {
+  if (clause.namedBindings && import_typescript6.default.isNamedImports(clause.namedBindings)) {
     const removals = removeCommonModule ? importWithCommonRemovals : importRemovals;
     const elements = clause.namedBindings.elements.filter((el) => !removals.includes(el.getText()));
     if (elements.length === 0) {
       return null;
     }
-    clause = import_typescript5.default.factory.updateImportClause(clause, clause.isTypeOnly, clause.name, import_typescript5.default.factory.createNamedImports(elements));
+    clause = import_typescript6.default.factory.updateImportClause(clause, clause.isTypeOnly, clause.name, import_typescript6.default.factory.createNamedImports(elements));
   }
   return clause;
 }
 function updateClassImports(propAssignment, removeCommonModule) {
-  const printer = import_typescript5.default.createPrinter();
+  const printer = import_typescript6.default.createPrinter();
   const importList = propAssignment.initializer;
   const removals = removeCommonModule ? importWithCommonRemovals : importRemovals;
   const elements = importList.elements.filter((el) => !removals.includes(el.getText()));
   if (elements.length === importList.elements.length) {
     return null;
   }
-  const updatedElements = import_typescript5.default.factory.updateArrayLiteralExpression(importList, elements);
-  const updatedAssignment = import_typescript5.default.factory.updatePropertyAssignment(propAssignment, propAssignment.name, updatedElements);
-  return printer.printNode(import_typescript5.default.EmitHint.Unspecified, updatedAssignment, updatedAssignment.getSourceFile());
+  const updatedElements = import_typescript6.default.factory.updateArrayLiteralExpression(importList, elements);
+  const updatedAssignment = import_typescript6.default.factory.updatePropertyAssignment(propAssignment, propAssignment.name, updatedElements);
+  return printer.printNode(import_typescript6.default.EmitHint.Unspecified, updatedAssignment, updatedAssignment.getSourceFile());
 }
 function analyzeImportDeclarations(node, sourceFile, analyzedFiles) {
   if (node.getText().indexOf("@angular/common") === -1) {
     return;
   }
   const clause = node.getChildAt(1);
-  if (clause.namedBindings && import_typescript5.default.isNamedImports(clause.namedBindings)) {
+  if (clause.namedBindings && import_typescript6.default.isNamedImports(clause.namedBindings)) {
     const elements = clause.namedBindings.elements.filter((el) => importWithCommonRemovals.includes(el.getText()));
     if (elements.length > 0) {
-      AnalyzedFile.addRange(sourceFile.fileName, sourceFile.fileName, analyzedFiles, { start: node.getStart(), end: node.getEnd(), node, type: "import" });
+      AnalyzedFile.addRange(sourceFile.fileName, sourceFile, analyzedFiles, {
+        start: node.getStart(),
+        end: node.getEnd(),
+        node,
+        type: "importDeclaration",
+        remove: true
+      });
     }
   }
 }
 function analyzeDecorators(node, sourceFile, analyzedFiles) {
   var _a2;
-  const decorator = (_a2 = import_typescript5.default.getDecorators(node)) == null ? void 0 : _a2.find((dec) => {
-    return import_typescript5.default.isCallExpression(dec.expression) && import_typescript5.default.isIdentifier(dec.expression.expression) && dec.expression.expression.text === "Component";
+  const decorator = (_a2 = import_typescript6.default.getDecorators(node)) == null ? void 0 : _a2.find((dec) => {
+    return import_typescript6.default.isCallExpression(dec.expression) && import_typescript6.default.isIdentifier(dec.expression.expression) && dec.expression.expression.text === "Component";
   });
-  const metadata = decorator && decorator.expression.arguments.length > 0 && import_typescript5.default.isObjectLiteralExpression(decorator.expression.arguments[0]) ? decorator.expression.arguments[0] : null;
+  const metadata = decorator && decorator.expression.arguments.length > 0 && import_typescript6.default.isObjectLiteralExpression(decorator.expression.arguments[0]) ? decorator.expression.arguments[0] : null;
   if (!metadata) {
     return;
   }
   for (const prop of metadata.properties) {
-    if (!import_typescript5.default.isPropertyAssignment(prop) || !import_typescript5.default.isIdentifier(prop.name) && !import_typescript5.default.isStringLiteralLike(prop.name)) {
+    if (!import_typescript6.default.isPropertyAssignment(prop) || !import_typescript6.default.isIdentifier(prop.name) && !import_typescript6.default.isStringLiteralLike(prop.name)) {
       continue;
     }
     switch (prop.name.text) {
       case "template":
-        AnalyzedFile.addRange(sourceFile.fileName, sourceFile.fileName, analyzedFiles, {
+        AnalyzedFile.addRange(sourceFile.fileName, sourceFile, analyzedFiles, {
           start: prop.initializer.getStart() + 1,
           end: prop.initializer.getEnd() - 1,
           node: prop,
-          type: "template"
+          type: "template",
+          remove: true
         });
         break;
       case "imports":
-        AnalyzedFile.addRange(sourceFile.fileName, sourceFile.fileName, analyzedFiles, {
+        AnalyzedFile.addRange(sourceFile.fileName, sourceFile, analyzedFiles, {
           start: prop.name.getStart(),
           end: prop.initializer.getEnd(),
           node: prop,
-          type: "import"
+          type: "importDecorator",
+          remove: true
         });
         break;
       case "templateUrl":
-        if (import_typescript5.default.isStringLiteralLike(prop.initializer)) {
+        if (import_typescript6.default.isStringLiteralLike(prop.initializer)) {
           const path2 = (0, import_path2.join)((0, import_path2.dirname)(sourceFile.fileName), prop.initializer.text);
-          AnalyzedFile.addRange(path2, sourceFile.fileName, analyzedFiles, { start: 0, node: prop, type: "templateUrl" });
+          AnalyzedFile.addRange(path2, sourceFile, analyzedFiles, { start: 0, node: prop, type: "templateUrl", remove: true });
         }
         break;
     }
@@ -26089,12 +26138,12 @@ function canRemoveCommonModule(template2) {
   }
   return removeCommonModule;
 }
-function removeImports(template2, node, removeCommonModule) {
-  if (template2.startsWith("imports") && import_typescript5.default.isPropertyAssignment(node)) {
-    const updatedImport = updateClassImports(node, removeCommonModule);
+function removeImports(template2, node, file) {
+  if (template2.startsWith("imports") && import_typescript6.default.isPropertyAssignment(node)) {
+    const updatedImport = updateClassImports(node, file.removeCommonModule);
     return updatedImport != null ? updatedImport : template2;
-  } else if (import_typescript5.default.isImportDeclaration(node) && checkIfShouldChange(node, removeCommonModule)) {
-    return updateImportDeclaration(node, removeCommonModule);
+  } else if (import_typescript6.default.isImportDeclaration(node) && checkIfShouldChange(node, file)) {
+    return updateImportDeclaration(node, file.removeCommonModule);
   }
   return template2;
 }
@@ -26260,7 +26309,7 @@ function formatTemplate(tmpl, templateType) {
 }
 function forEachClass(sourceFile, callback) {
   sourceFile.forEachChild(function walk(node) {
-    if (import_typescript5.default.isClassDeclaration(node) || import_typescript5.default.isImportDeclaration(node)) {
+    if (import_typescript6.default.isClassDeclaration(node) || import_typescript6.default.isImportDeclaration(node)) {
       callback(node);
     }
     node.forEachChild(walk);
@@ -26763,7 +26812,7 @@ function migrateTemplate(template2, templateType, node, file, format = true, ana
       if (parsed.errors.length > 0) {
         const parsingError = {
           type: "parse",
-          error: new Error(`The migration resulted in invalid HTML for ${file.sourceFilePath}. Please check the template for valid HTML structures and run the migration again.`)
+          error: new Error(`The migration resulted in invalid HTML for ${file.sourceFile.fileName}. Please check the template for valid HTML structures and run the migration again.`)
         };
         return { migrated: template2, errors: [parsingError] };
       }
@@ -26775,10 +26824,12 @@ function migrateTemplate(template2, templateType, node, file, format = true, ana
     migrated = migrated.replace(markerRegex, "");
     file.removeCommonModule = canRemoveCommonModule(template2);
     file.canRemoveImports = true;
-    if (templateType === "templateUrl" && analyzedFiles !== null && analyzedFiles.has(file.sourceFilePath)) {
-      const componentFile = analyzedFiles.get(file.sourceFilePath);
+    if (templateType === "templateUrl" && analyzedFiles !== null && analyzedFiles.has(file.sourceFile.fileName)) {
+      const componentFile = analyzedFiles.get(file.sourceFile.fileName);
+      componentFile.getSortedRanges();
       componentFile.removeCommonModule = file.removeCommonModule;
       componentFile.canRemoveImports = file.canRemoveImports;
+      componentFile.verifyCanRemoveImports();
     }
     errors = [
       ...ifResult.errors,
@@ -26787,7 +26838,7 @@ function migrateTemplate(template2, templateType, node, file, format = true, ana
       ...caseResult.errors
     ];
   } else if (file.canRemoveImports) {
-    migrated = removeImports(template2, node, file.removeCommonModule);
+    migrated = removeImports(template2, node, file);
   }
   return { migrated, errors };
 }
