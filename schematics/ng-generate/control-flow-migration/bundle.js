@@ -1805,7 +1805,7 @@ var ConstantPool = class {
       }))));
     }
   }
-  getSharedFunctionReference(fn2, prefix) {
+  getSharedFunctionReference(fn2, prefix, useUniqueName = true) {
     var _a2;
     const isArrow = fn2 instanceof ArrowFunctionExpr;
     for (const current of this.statements) {
@@ -1816,7 +1816,7 @@ var ConstantPool = class {
         return variable(current.name);
       }
     }
-    const name = this.uniqueName(prefix);
+    const name = useUniqueName ? this.uniqueName(prefix) : prefix;
     this.statements.push(fn2.toDeclStmt(name, StmtModifier.Final));
     return variable(name);
   }
@@ -3443,13 +3443,17 @@ var TagContentType;
   TagContentType2[TagContentType2["ESCAPABLE_RAW_TEXT"] = 1] = "ESCAPABLE_RAW_TEXT";
   TagContentType2[TagContentType2["PARSABLE_DATA"] = 2] = "PARSABLE_DATA";
 })(TagContentType || (TagContentType = {}));
-function splitNsName(elementName) {
+function splitNsName(elementName, fatal = true) {
   if (elementName[0] != ":") {
     return [null, elementName];
   }
   const colonIndex = elementName.indexOf(":", 1);
   if (colonIndex === -1) {
-    throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
+    if (fatal) {
+      throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
+    } else {
+      return [null, elementName];
+    }
   }
   return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
 }
@@ -7350,13 +7354,13 @@ function createRepeaterOp(repeaterCreate2, targetSlot, collection, sourceSpan) {
   }, NEW_OP), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
 }
 function createDeferWhenOp(target, expr, prefetch, sourceSpan) {
-  return __spreadValues(__spreadValues({
+  return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.DeferWhen,
     target,
     expr,
     prefetch,
     sourceSpan
-  }, NEW_OP), TRAIT_DEPENDS_ON_SLOT_CONTEXT);
+  }, NEW_OP), TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS);
 }
 function createI18nExpressionOp(context, target, i18nOwner, handle, expression, i18nPlaceholder, resolutionTime, usage, name, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
@@ -8098,6 +8102,9 @@ function transformExpressionsInOp(op, transform2, flags) {
       if (op.placeholderConfig !== null) {
         op.placeholderConfig = transformExpressionsInExpression(op.placeholderConfig, transform2, flags);
       }
+      if (op.resolverFn !== null) {
+        op.resolverFn = transformExpressionsInExpression(op.resolverFn, transform2, flags);
+      }
       break;
     case OpKind.I18nMessage:
       for (const [placeholder, expr] of op.params) {
@@ -8433,7 +8440,7 @@ var elementContainerOpKinds = /* @__PURE__ */ new Set([
 function isElementOrContainerOp(op) {
   return elementContainerOpKinds.has(op.kind);
 }
-function createElementStartOp(tag, xref, namespace, i18nPlaceholder, sourceSpan) {
+function createElementStartOp(tag, xref, namespace, i18nPlaceholder, startSourceSpan, wholeSourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.ElementStart,
     xref,
@@ -8444,10 +8451,11 @@ function createElementStartOp(tag, xref, namespace, i18nPlaceholder, sourceSpan)
     nonBindable: false,
     namespace,
     i18nPlaceholder,
-    sourceSpan
+    startSourceSpan,
+    wholeSourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createTemplateOp(xref, templateKind, tag, functionNameSuffix, namespace, i18nPlaceholder, sourceSpan) {
+function createTemplateOp(xref, templateKind, tag, functionNameSuffix, namespace, i18nPlaceholder, startSourceSpan, wholeSourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Template,
     xref,
@@ -8462,11 +8470,12 @@ function createTemplateOp(xref, templateKind, tag, functionNameSuffix, namespace
     nonBindable: false,
     namespace,
     i18nPlaceholder,
-    sourceSpan
+    startSourceSpan,
+    wholeSourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, sourceSpan) {
-  return __spreadProps(__spreadValues(__spreadValues({
+function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, startSourceSpan, wholeSourceSpan) {
+  return __spreadProps(__spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.RepeaterCreate,
     attributes: null,
     xref: primaryView,
@@ -8485,8 +8494,9 @@ function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, i1
     usesComponentInstance: false,
     i18nPlaceholder,
     emptyI18nPlaceholder,
-    sourceSpan
-  }, TRAIT_CONSUMES_SLOT), NEW_OP), {
+    startSourceSpan,
+    wholeSourceSpan
+  }, TRAIT_CONSUMES_SLOT), NEW_OP), TRAIT_CONSUMES_VARS), {
     numSlotsUsed: emptyView === null ? 2 : 3
   });
 }
@@ -9012,9 +9022,9 @@ function extractAttributeOp(unit, op, elements) {
   if (op.expression instanceof Interpolation2) {
     return;
   }
-  let extractable = op.expression.isConstant();
+  let extractable = op.isTextAttribute || op.expression.isConstant();
   if (unit.job.compatibility === CompatibilityMode.TemplateDefinitionBuilder) {
-    extractable = isStringLiteral(op.expression);
+    extractable = op.isTextAttribute || isStringLiteral(op.expression);
     if (op.name === "style" || op.name === "class") {
       extractable && (extractable = op.isTextAttribute);
     }
@@ -9291,7 +9301,7 @@ function collectElementConsts(job) {
 var FLYWEIGHT_ARRAY = Object.freeze([]);
 var ElementAttributes = class {
   constructor() {
-    this.known = /* @__PURE__ */ new Set();
+    this.known = /* @__PURE__ */ new Map();
     this.byKind = /* @__PURE__ */ new Map();
     this.projectAs = null;
   }
@@ -9319,12 +9329,21 @@ var ElementAttributes = class {
     var _a2;
     return (_a2 = this.byKind.get(BindingKind.I18n)) != null ? _a2 : FLYWEIGHT_ARRAY;
   }
+  isKnown(kind, name, value) {
+    var _a2;
+    const nameToValue = (_a2 = this.known.get(kind)) != null ? _a2 : /* @__PURE__ */ new Set();
+    this.known.set(kind, nameToValue);
+    if (nameToValue.has(name)) {
+      return true;
+    }
+    nameToValue.add(name);
+    return false;
+  }
   add(kind, name, value, trustedValueFn) {
     var _a2;
-    if (this.known.has(name)) {
+    if (this.isKnown(kind, name, value)) {
       return;
     }
-    this.known.add(name);
     if (name === "ngProjectAs") {
       if (value === null || !(value instanceof LiteralExpr) || value.value == null || typeof ((_a2 = value.value) == null ? void 0 : _a2.toString()) !== "string") {
         throw Error("ngProjectAs must have a string literal value");
@@ -9355,7 +9374,7 @@ var ElementAttributes = class {
   }
 };
 function getAttributeNameLiterals(name) {
-  const [attributeNamespace, attributeName] = splitNsName(name);
+  const [attributeNamespace, attributeName] = splitNsName(name, false);
   const nameLiteral = literal(attributeName);
   if (attributeNamespace) {
     return [
@@ -9453,7 +9472,11 @@ function createDeferDepsFns(job) {
         if (op.handle.slot === null) {
           throw new Error("AssertionError: slot must be assigned bfore extracting defer deps functions");
         }
-        op.resolverFn = job.pool.getSharedFunctionReference(depsFnExpr, `${job.componentName}_Defer_${op.handle.slot}_DepsFn`);
+        op.resolverFn = job.pool.getSharedFunctionReference(
+          depsFnExpr,
+          `${job.componentName}_Defer_${op.handle.slot}_DepsFn`,
+          false
+        );
       }
     }
   }
@@ -16764,9 +16787,21 @@ function keepLast(ops) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/parse_extracted_styles.mjs
 function parseExtractedStyles(job) {
+  const elements = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.create) {
+      if (isElementOrContainerOp(op)) {
+        elements.set(op.xref, op);
+      }
+    }
+  }
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.ExtractedAttribute && op.bindingKind === BindingKind.Attribute && isStringLiteral(op.expression)) {
+        const target = elements.get(op.target);
+        if (target !== void 0 && target.kind === OpKind.Template && target.templateKind === TemplateKind.Structural) {
+          continue;
+        }
         if (op.name === "style") {
           const parsedStyles = parse(op.expression.value);
           for (let i = 0; i < parsedStyles.length - 1; i += 2) {
@@ -17560,19 +17595,19 @@ function reifyCreateOperations(unit, ops) {
         OpList.replace(op, text(op.handle.slot, op.initialValue, op.sourceSpan));
         break;
       case OpKind.ElementStart:
-        OpList.replace(op, elementStart(op.handle.slot, op.tag, op.attributes, op.localRefs, op.sourceSpan));
+        OpList.replace(op, elementStart(op.handle.slot, op.tag, op.attributes, op.localRefs, op.startSourceSpan));
         break;
       case OpKind.Element:
-        OpList.replace(op, element(op.handle.slot, op.tag, op.attributes, op.localRefs, op.sourceSpan));
+        OpList.replace(op, element(op.handle.slot, op.tag, op.attributes, op.localRefs, op.wholeSourceSpan));
         break;
       case OpKind.ElementEnd:
         OpList.replace(op, elementEnd(op.sourceSpan));
         break;
       case OpKind.ContainerStart:
-        OpList.replace(op, elementContainerStart(op.handle.slot, op.attributes, op.localRefs, op.sourceSpan));
+        OpList.replace(op, elementContainerStart(op.handle.slot, op.attributes, op.localRefs, op.startSourceSpan));
         break;
       case OpKind.Container:
-        OpList.replace(op, elementContainer(op.handle.slot, op.attributes, op.localRefs, op.sourceSpan));
+        OpList.replace(op, elementContainer(op.handle.slot, op.attributes, op.localRefs, op.wholeSourceSpan));
         break;
       case OpKind.ContainerEnd:
         OpList.replace(op, elementContainerEnd());
@@ -17600,7 +17635,7 @@ function reifyCreateOperations(unit, ops) {
           throw new Error(`AssertionError: local refs array should have been extracted into a constant`);
         }
         const childView = unit.job.views.get(op.xref);
-        OpList.replace(op, template(op.handle.slot, variable(childView.fnName), childView.decls, childView.vars, op.tag, op.attributes, op.localRefs, op.sourceSpan));
+        OpList.replace(op, template(op.handle.slot, variable(childView.fnName), childView.decls, childView.vars, op.tag, op.attributes, op.localRefs, op.startSourceSpan));
         break;
       case OpKind.DisableBindings:
         OpList.replace(op, disableBindings2());
@@ -17615,7 +17650,7 @@ function reifyCreateOperations(unit, ops) {
         const listenerFn = reifyListenerHandler(unit, op.handlerFnName, op.handlerOps, op.consumesDollarEvent);
         const eventTargetResolver = op.eventTarget ? GLOBAL_TARGET_RESOLVERS.get(op.eventTarget) : null;
         if (eventTargetResolver === void 0) {
-          throw new Error(`AssertionError: unknown event target ${op.eventTarget}`);
+          throw new Error(`Unexpected global target '${op.eventTarget}' defined for '${op.name}' event. Supported list of global targets: window,document,body.`);
         }
         OpList.replace(op, listener(op.name, listenerFn, eventTargetResolver, op.hostListener && op.isAnimationListener, op.sourceSpan));
         break;
@@ -17702,7 +17737,7 @@ function reifyCreateOperations(unit, ops) {
           emptyDecls = emptyView.decls;
           emptyVars = emptyView.vars;
         }
-        OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.sourceSpan));
+        OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.wholeSourceSpan));
         break;
       case OpKind.Statement:
         break;
@@ -18755,7 +18790,10 @@ function varsUsedByOp(op) {
       return op.interpolation.expressions.length;
     case OpKind.I18nExpression:
     case OpKind.Conditional:
+    case OpKind.DeferWhen:
       return 1;
+    case OpKind.RepeaterCreate:
+      return op.emptyView ? 1 : 0;
     default:
       throw new Error(`Unhandled op: ${OpKind[op.kind]}`);
   }
@@ -19250,7 +19288,7 @@ function ingestHostBinding(input, bindingParser, constantPool) {
       bindingKind = BindingKind.Animation;
     }
     const securityContexts = bindingParser.calcPossibleSecurityContexts(input.componentSelector, property2.name, bindingKind === BindingKind.Attribute).filter((context) => context !== SecurityContext.NONE);
-    ingestHostProperty(job, property2, bindingKind, false, securityContexts);
+    ingestHostProperty(job, property2, bindingKind, securityContexts);
   }
   for (const [name, expr] of (_b2 = Object.entries(input.attributes)) != null ? _b2 : []) {
     const securityContexts = bindingParser.calcPossibleSecurityContexts(input.componentSelector, name, true).filter((context) => context !== SecurityContext.NONE);
@@ -19261,7 +19299,7 @@ function ingestHostBinding(input, bindingParser, constantPool) {
   }
   return job;
 }
-function ingestHostProperty(job, property2, bindingKind, isTextAttribute, securityContexts) {
+function ingestHostProperty(job, property2, bindingKind, securityContexts) {
   let expression;
   const ast = property2.expression.ast;
   if (ast instanceof Interpolation) {
@@ -19269,7 +19307,7 @@ function ingestHostProperty(job, property2, bindingKind, isTextAttribute, securi
   } else {
     expression = convertAst(ast, job, property2.sourceSpan);
   }
-  job.root.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, securityContexts, isTextAttribute, false, null, null, property2.sourceSpan));
+  job.root.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, securityContexts, false, false, null, null, property2.sourceSpan));
 }
 function ingestHostAttribute(job, name, value, securityContexts) {
   const attrBinding = createBindingOp(
@@ -19283,7 +19321,7 @@ function ingestHostAttribute(job, name, value, securityContexts) {
     false,
     null,
     null,
-    null
+    value.sourceSpan
   );
   job.root.update.push(attrBinding);
 }
@@ -19327,7 +19365,7 @@ function ingestElement(unit, element2) {
   }
   const id = unit.job.allocateXrefId();
   const [namespaceKey, elementName] = splitNsName(element2.name);
-  const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element2.i18n instanceof TagPlaceholder ? element2.i18n : void 0, element2.startSourceSpan);
+  const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element2.i18n instanceof TagPlaceholder ? element2.i18n : void 0, element2.startSourceSpan, element2.sourceSpan);
   unit.create.push(startOp);
   ingestElementBindings(unit, startOp, element2);
   ingestReferences(startOp, element2);
@@ -19357,7 +19395,7 @@ function ingestTemplate(unit, tmpl) {
   const namespace = namespaceForKey(namespacePrefix);
   const functionNameSuffix = tagNameWithoutNamespace === null ? "" : prefixWithNamespace(tagNameWithoutNamespace, namespace);
   const templateKind = isPlainTemplate(tmpl) ? TemplateKind.NgTemplate : TemplateKind.Structural;
-  const templateOp = createTemplateOp(childView.xref, templateKind, tagNameWithoutNamespace, functionNameSuffix, namespace, i18nPlaceholder, tmpl.startSourceSpan);
+  const templateOp = createTemplateOp(childView.xref, templateKind, tagNameWithoutNamespace, functionNameSuffix, namespace, i18nPlaceholder, tmpl.startSourceSpan, tmpl.sourceSpan);
   unit.create.push(templateOp);
   ingestTemplateBindings(unit, templateOp, tmpl, templateKind);
   ingestReferences(templateOp, tmpl);
@@ -19431,7 +19469,7 @@ function ingestIfBlock(unit, ifBlock) {
       }
       ifCaseI18nMeta = ifCase.i18n;
     }
-    const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, tagName, "Conditional", Namespace.HTML, ifCaseI18nMeta, ifCase.sourceSpan);
+    const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, tagName, "Conditional", Namespace.HTML, ifCaseI18nMeta, ifCase.startSourceSpan, ifCase.sourceSpan);
     unit.create.push(templateOp);
     if (firstXref === null) {
       firstXref = cView.xref;
@@ -19459,7 +19497,7 @@ function ingestSwitchBlock(unit, switchBlock) {
       }
       switchCaseI18nMeta = switchCase.i18n;
     }
-    const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, null, "Case", Namespace.HTML, switchCaseI18nMeta, switchCase.sourceSpan);
+    const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, null, "Case", Namespace.HTML, switchCaseI18nMeta, switchCase.startSourceSpan, switchCase.sourceSpan);
     unit.create.push(templateOp);
     if (firstXref === null) {
       firstXref = cView.xref;
@@ -19482,7 +19520,7 @@ function ingestDeferView(unit, suffix, i18nMeta, children, sourceSpan) {
   }
   const secondaryView = unit.job.allocateView(unit.xref);
   ingestNodes(secondaryView, children);
-  const templateOp = createTemplateOp(secondaryView.xref, TemplateKind.Block, null, `Defer${suffix}`, Namespace.HTML, i18nMeta, sourceSpan);
+  const templateOp = createTemplateOp(secondaryView.xref, TemplateKind.Block, null, `Defer${suffix}`, Namespace.HTML, i18nMeta, sourceSpan, sourceSpan);
   unit.create.push(templateOp);
   return templateOp;
 }
@@ -19556,6 +19594,9 @@ function ingestDeferBlock(unit, deferBlock) {
       deferOnOps.push(deferOnOp);
     }
     if (triggers.when !== void 0) {
+      if (triggers.when.value instanceof Interpolation) {
+        throw new Error(`Unexpected interpolation in defer block when trigger`);
+      }
       const deferOnOp = createDeferWhenOp(deferXref, convertAst(triggers.when.value, unit.job, triggers.when.sourceSpan), prefetch, triggers.when.sourceSpan);
       deferWhenOps.push(deferOnOp);
     }
@@ -19629,7 +19670,7 @@ function ingestForBlock(unit, forBlock) {
   const i18nPlaceholder = forBlock.i18n;
   const emptyI18nPlaceholder = (_b2 = forBlock.empty) == null ? void 0 : _b2.i18n;
   const tagName = ingestControlFlowInsertionPoint(unit, repeaterView.xref, forBlock);
-  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_c2 = emptyView == null ? void 0 : emptyView.xref) != null ? _c2 : null, tagName, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, forBlock.sourceSpan);
+  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_c2 = emptyView == null ? void 0 : emptyView.xref) != null ? _c2 : null, tagName, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, forBlock.startSourceSpan, forBlock.sourceSpan);
   unit.create.push(repeaterCreate2);
   const expression = convertAst(forBlock.expression, unit.job, convertSourceSpan(forBlock.expression.span, forBlock.sourceSpan));
   const repeater2 = createRepeaterOp(repeaterCreate2.xref, repeaterCreate2.handle, expression, forBlock.sourceSpan);
@@ -19717,13 +19758,13 @@ function convertAst(ast, job, baseSourceSpan) {
     throw new Error(`Unhandled expression type "${ast.constructor.name}" in file "${baseSourceSpan == null ? void 0 : baseSourceSpan.start.file.url}"`);
   }
 }
-function convertAstWithInterpolation(job, value, i18nMeta) {
+function convertAstWithInterpolation(job, value, i18nMeta, sourceSpan) {
   var _a2, _b2;
   let expression;
   if (value instanceof Interpolation) {
-    expression = new Interpolation2(value.strings, value.expressions.map((e) => convertAst(e, job, null)), Object.keys((_b2 = (_a2 = asMessage(i18nMeta)) == null ? void 0 : _a2.placeholders) != null ? _b2 : {}));
+    expression = new Interpolation2(value.strings, value.expressions.map((e) => convertAst(e, job, sourceSpan != null ? sourceSpan : null)), Object.keys((_b2 = (_a2 = asMessage(i18nMeta)) == null ? void 0 : _a2.placeholders) != null ? _b2 : {}));
   } else if (value instanceof AST) {
-    expression = convertAst(value, job, null);
+    expression = convertAst(value, job, sourceSpan != null ? sourceSpan : null);
   } else {
     expression = literal(value);
   }
@@ -25435,7 +25476,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-d7e7409");
+var VERSION2 = new Version("17.1.0-next.4+sha-7bb312f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26182,7 +26223,7 @@ function formatTemplate(tmpl, templateType) {
         line = line.replace(replaceMarkerRegex, "");
         lineWasMigrated = true;
       }
-      if (line.trim() === "" && index !== 0 && index !== lines.length - 1 && (inMigratedBlock || lineWasMigrated)) {
+      if (line.trim() === "" && index !== 0 && index !== lines.length - 1 && (inMigratedBlock || lineWasMigrated) && !inI18nBlock) {
         continue;
       }
       if (templateType === "template" && index <= 1) {
