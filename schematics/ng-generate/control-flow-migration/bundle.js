@@ -25494,7 +25494,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-b40bb22");
+var VERSION2 = new Version("17.1.0-next.4+sha-8bf7525");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26266,6 +26266,10 @@ function formatTemplate(tmpl, templateType) {
     let openSelfClosingEl = false;
     const openBlockRegex = /^\s*\@(if|switch|case|default|for)|^\s*\}\s\@else/;
     const openElRegex = /^\s*<([a-z0-9]+)(?![^>]*\/>)[^>]*>?/;
+    const openAttrDoubleRegex = /="([^"]|\\")*$/;
+    const openAttrSingleRegex = /='([^']|\\')*$/;
+    const closeAttrDoubleRegex = /^\s*([^><]|\\")*"/;
+    const closeAttrSingleRegex = /^\s*([^><]|\\')*'/;
     const selfClosingRegex = new RegExp(`^\\s*<(${selfClosingList}).+\\/?>`);
     const openSelfClosingRegex = new RegExp(`^\\s*<(${selfClosingList})(?![^>]*\\/>)[^>]*$`);
     const closeBlockRegex = /^\s*\}\s*$|^\s*\}\s\@else/;
@@ -26281,6 +26285,8 @@ function formatTemplate(tmpl, templateType) {
     let i18nDepth = 0;
     let inMigratedBlock = false;
     let inI18nBlock = false;
+    let inAttribute = false;
+    let isDoubleQuotes = false;
     for (let [index, line] of lines.entries()) {
       depth += [...line.matchAll(startMarkerRegex)].length - [...line.matchAll(endMarkerRegex)].length;
       inMigratedBlock = depth > 0;
@@ -26290,7 +26296,7 @@ function formatTemplate(tmpl, templateType) {
         line = line.replace(replaceMarkerRegex, "");
         lineWasMigrated = true;
       }
-      if (line.trim() === "" && index !== 0 && index !== lines.length - 1 && (inMigratedBlock || lineWasMigrated) && !inI18nBlock) {
+      if (line.trim() === "" && index !== 0 && index !== lines.length - 1 && (inMigratedBlock || lineWasMigrated) && !inI18nBlock && !inAttribute) {
         continue;
       }
       if (templateType === "template" && index <= 1) {
@@ -26300,8 +26306,18 @@ function formatTemplate(tmpl, templateType) {
       if ((closeBlockRegex.test(line) || closeElRegex.test(line) && (!singleLineElRegex.test(line) && !closeMultiLineElRegex.test(line))) && indent !== "") {
         indent = indent.slice(2);
       }
-      const newLine = inI18nBlock ? line : mindent + (line.trim() !== "" ? indent : "") + line.trim();
+      if (!inAttribute && openAttrDoubleRegex.test(line)) {
+        inAttribute = true;
+        isDoubleQuotes = true;
+      } else if (!inAttribute && openAttrSingleRegex.test(line)) {
+        inAttribute = true;
+        isDoubleQuotes = false;
+      }
+      const newLine = inI18nBlock || inAttribute ? line : mindent + (line.trim() !== "" ? indent : "") + line.trim();
       formatted.push(newLine);
+      if (inAttribute && isDoubleQuotes && closeAttrDoubleRegex.test(line) || inAttribute && !isDoubleQuotes && closeAttrSingleRegex.test(line)) {
+        inAttribute = false;
+      }
       if (closeMultiLineElRegex.test(line)) {
         indent = indent.slice(2);
         if (openSelfClosingEl) {
