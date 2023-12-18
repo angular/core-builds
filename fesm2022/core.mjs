@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.7+sha-de5c9ca
+ * @license Angular v17.0.7+sha-b394125
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14286,7 +14286,6 @@ function performanceMarkFeature(feature) {
     performance?.mark?.('mark_feature_usage', { detail: { feature } });
 }
 
-/// <reference types="rxjs" />
 class EventEmitter_ extends Subject {
     constructor(isAsync = false) {
         super();
@@ -15711,7 +15710,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.0.7+sha-de5c9ca']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.0.7+sha-b394125']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29985,7 +29984,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.7+sha-de5c9ca');
+const VERSION = new Version('17.0.7+sha-b394125');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
