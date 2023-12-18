@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.7+sha-4a892a3
+ * @license Angular v17.0.7+sha-de5c9ca
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10425,24 +10425,6 @@ class Sanitizer {
     }); }
 }
 
-/**
- * @description Represents the version of Angular
- *
- * @publicApi
- */
-class Version {
-    constructor(full) {
-        this.full = full;
-        this.major = full.split('.')[0];
-        this.minor = full.split('.')[1];
-        this.patch = full.split('.').slice(2).join('.');
-    }
-}
-/**
- * @publicApi
- */
-const VERSION = new Version('17.0.7+sha-4a892a3');
-
 // This default value is when checking the hierarchy for a token.
 //
 // It means both:
@@ -15728,7 +15710,8 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 /** Sets the static attributes on a root component. */
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', VERSION.full]);
+        // The placeholder will be replaced with the actual version at build time.
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.0.7+sha-de5c9ca']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29984,6 +29967,25 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
  * This indirection is needed to free up Component, etc symbols in the public API
  * to be used by the decorator versions of these annotations.
  */
+
+/**
+ * @description Represents the version of Angular
+ *
+ * @publicApi
+ */
+class Version {
+    constructor(full) {
+        this.full = full;
+        const parts = full.split('.');
+        this.major = parts[0];
+        this.minor = parts[1];
+        this.patch = parts.slice(2).join('.');
+    }
+}
+/**
+ * @publicApi
+ */
+const VERSION = new Version('17.0.7+sha-de5c9ca');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
