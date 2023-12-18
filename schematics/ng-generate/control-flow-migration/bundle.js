@@ -9024,13 +9024,7 @@ function extractAttributeOp(unit, op, elements) {
   }
   let extractable = op.isTextAttribute || op.expression.isConstant();
   if (unit.job.compatibility === CompatibilityMode.TemplateDefinitionBuilder) {
-    extractable = op.isTextAttribute || isStringLiteral(op.expression);
-    if (op.name === "style" || op.name === "class") {
-      extractable && (extractable = op.isTextAttribute);
-    }
-    if (unit.job.kind === CompilationJobKind.Host) {
-      extractable && (extractable = op.isTextAttribute);
-    }
+    extractable && (extractable = op.isTextAttribute);
   }
   if (extractable) {
     const extractedAttributeOp = createExtractedAttributeOp(op.target, op.isStructuralTemplateAttribute ? BindingKind.Template : BindingKind.Attribute, op.name, op.expression, op.i18nContext, op.i18nMessage, op.securityContext);
@@ -23442,21 +23436,21 @@ var BindingScope = class {
   }
 };
 var TrackByBindingScope = class extends BindingScope {
-  constructor(parentScope, globalAliases) {
+  constructor(parentScope, globalOverrides) {
     super(parentScope.bindingLevel + 1, parentScope);
-    this.globalAliases = globalAliases;
+    this.globalOverrides = globalOverrides;
     this.componentAccessCount = 0;
   }
   get(name) {
+    if (this.globalOverrides.hasOwnProperty(name)) {
+      return variable(this.globalOverrides[name]);
+    }
     let current = this.parent;
     while (current) {
       if (current.hasLocal(name)) {
         return null;
       }
       current = current.parent;
-    }
-    if (this.globalAliases[name]) {
-      return variable(this.globalAliases[name]);
     }
     this.componentAccessCount++;
     return variable("this").prop(name);
@@ -25476,7 +25470,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-b06b24b");
+var VERSION2 = new Version("17.1.0-next.4+sha-3a689c2");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
