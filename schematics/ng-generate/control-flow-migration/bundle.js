@@ -9253,7 +9253,7 @@ function collectElementConsts(job) {
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.ExtractedAttribute) {
-        const attributes = allElementAttributes.get(op.target) || new ElementAttributes();
+        const attributes = allElementAttributes.get(op.target) || new ElementAttributes(job.compatibility);
         allElementAttributes.set(op.target, attributes);
         attributes.add(op.bindingKind, op.name, op.expression, op.trustedValueFn);
         OpList.remove(op);
@@ -9288,11 +9288,6 @@ function collectElementConsts(job) {
 }
 var FLYWEIGHT_ARRAY = Object.freeze([]);
 var ElementAttributes = class {
-  constructor() {
-    this.known = /* @__PURE__ */ new Map();
-    this.byKind = /* @__PURE__ */ new Map();
-    this.projectAs = null;
-  }
   get attributes() {
     var _a2;
     return (_a2 = this.byKind.get(BindingKind.Attribute)) != null ? _a2 : FLYWEIGHT_ARRAY;
@@ -9317,6 +9312,12 @@ var ElementAttributes = class {
     var _a2;
     return (_a2 = this.byKind.get(BindingKind.I18n)) != null ? _a2 : FLYWEIGHT_ARRAY;
   }
+  constructor(compatibility) {
+    this.compatibility = compatibility;
+    this.known = /* @__PURE__ */ new Map();
+    this.byKind = /* @__PURE__ */ new Map();
+    this.projectAs = null;
+  }
   isKnown(kind, name, value) {
     var _a2;
     const nameToValue = (_a2 = this.known.get(kind)) != null ? _a2 : /* @__PURE__ */ new Set();
@@ -9329,7 +9330,8 @@ var ElementAttributes = class {
   }
   add(kind, name, value, trustedValueFn) {
     var _a2;
-    if (this.isKnown(kind, name, value)) {
+    const allowDuplicates = this.compatibility === CompatibilityMode.TemplateDefinitionBuilder && (kind === BindingKind.Attribute || kind === BindingKind.ClassName || kind === BindingKind.StyleProperty);
+    if (!allowDuplicates && this.isKnown(kind, name, value)) {
       return;
     }
     if (name === "ngProjectAs") {
@@ -9543,6 +9545,28 @@ function createI18nContexts(job) {
             blockContextByI18nBlock.get(currentI18nOp.xref).contextKind = I18nContextKind.Icu;
           }
           break;
+      }
+    }
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/deduplicate_text_bindings.mjs
+function deduplicateTextBindings(job) {
+  const seen = /* @__PURE__ */ new Map();
+  for (const unit of job.units) {
+    for (const op of unit.update.reversed()) {
+      if (op.kind === OpKind.Binding && op.isTextAttribute) {
+        const seenForElement = seen.get(op.target) || /* @__PURE__ */ new Set();
+        if (seenForElement.has(op.name)) {
+          if (job.compatibility === CompatibilityMode.TemplateDefinitionBuilder) {
+            if (op.name === "style" || op.name === "class") {
+              OpList.remove(op);
+            }
+          } else {
+          }
+        }
+        seenForElement.add(op.name);
+        seen.set(op.target, seenForElement);
       }
     }
   }
@@ -10116,7 +10140,7 @@ var CLASS_BANG = "class!";
 var BANG_IMPORTANT = "!important";
 function parseHostStyleProperties(job) {
   for (const op of job.root.update) {
-    if (op.kind !== OpKind.Binding) {
+    if (!(op.kind === OpKind.Binding && op.bindingKind === BindingKind.Property)) {
       continue;
     }
     if (op.name.endsWith(BANG_IMPORTANT)) {
@@ -19095,6 +19119,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: emitNamespaceChanges },
   { kind: CompilationJobKind.Tmpl, fn: propagateI18nBlocks },
   { kind: CompilationJobKind.Tmpl, fn: wrapI18nIcus },
+  { kind: CompilationJobKind.Both, fn: deduplicateTextBindings },
   { kind: CompilationJobKind.Both, fn: specializeStyleBindings },
   { kind: CompilationJobKind.Both, fn: specializeBindings },
   { kind: CompilationJobKind.Both, fn: extractAttributes },
@@ -19315,8 +19340,7 @@ function ingestHostAttribute(job, name, value, securityContexts) {
 }
 function ingestHostEvent(job, event) {
   const [phase, target] = event.type === 0 ? [null, event.targetOrPhase] : [event.targetOrPhase, null];
-  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, [], phase, target, true, event.sourceSpan);
-  eventBinding.handlerOps.push(createStatementOp(new ReturnStatement(convertAst(event.handler.ast, job, event.sourceSpan), event.handlerSpan)));
+  const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, makeListenerHandlerOps(job.root, event.handler, event.handlerSpan), phase, target, true, event.sourceSpan);
   job.root.create.push(eventBinding);
 }
 function ingestNodes(unit, template2) {
@@ -25447,7 +25471,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.7+sha-b394125");
+var VERSION2 = new Version("17.0.7+sha-7ac60ba");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -25493,10 +25517,10 @@ publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/identifier-lookup.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
-function lookupIdentifiersInSourceFile(sourceFile, name) {
+function lookupIdentifiersInSourceFile(sourceFile, names) {
   const results = /* @__PURE__ */ new Set();
   const visit = (node) => {
-    if (import_typescript5.default.isIdentifier(node) && node.text === name) {
+    if (import_typescript5.default.isIdentifier(node) && names.includes(node.text)) {
       results.add(node);
     }
     import_typescript5.default.forEachChild(node, visit);
@@ -25515,6 +25539,18 @@ var startMarker = "\u25EC";
 var endMarker = "\u2722";
 var startI18nMarker = "\u2688";
 var endI18nMarker = "\u2689";
+var importRemovals = [
+  "NgIf",
+  "NgIfElse",
+  "NgIfThenElse",
+  "NgFor",
+  "NgForOf",
+  "NgForTrackBy",
+  "NgSwitch",
+  "NgSwitchCase",
+  "NgSwitchDefault"
+];
+var importWithCommonRemovals = [...importRemovals, "CommonModule"];
 function allFormsOf(selector) {
   return [
     selector,
@@ -25692,7 +25728,7 @@ var AnalyzedFile = class {
   verifyCanRemoveImports() {
     if (this.removeCommonModule) {
       const importDeclaration = this.importRanges.find((r) => r.type === "importDeclaration");
-      const instances = lookupIdentifiersInSourceFile(this.sourceFile, "CommonModule");
+      const instances = lookupIdentifiersInSourceFile(this.sourceFile, importWithCommonRemovals);
       let foundImportDeclaration = false;
       let count = 0;
       for (let range of this.importRanges) {
@@ -25831,18 +25867,6 @@ var TemplateCollector = class extends RecursiveVisitor {
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/util.mjs
 var import_path2 = require("path");
 var import_typescript6 = __toESM(require("typescript"), 1);
-var importRemovals = [
-  "NgIf",
-  "NgIfElse",
-  "NgIfThenElse",
-  "NgFor",
-  "NgForOf",
-  "NgForTrackBy",
-  "NgSwitch",
-  "NgSwitchCase",
-  "NgSwitchDefault"
-];
-var importWithCommonRemovals = [...importRemovals, "CommonModule"];
 var startMarkerRegex = new RegExp(startMarker, "gm");
 var endMarkerRegex = new RegExp(endMarker, "gm");
 var startI18nMarkerRegex = new RegExp(startI18nMarker, "gm");
@@ -26802,6 +26826,7 @@ function migrateTemplate(template2, templateType, node, file, format = true, ana
       componentFile.canRemoveImports = file.canRemoveImports;
       componentFile.verifyCanRemoveImports();
     }
+    file.verifyCanRemoveImports();
     errors = [
       ...ifResult.errors,
       ...forResult.errors,
