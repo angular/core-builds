@@ -9407,7 +9407,7 @@ function createTemplateOp(xref, templateKind, tag, functionNameSuffix, namespace
     wholeSourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, startSourceSpan, wholeSourceSpan) {
+function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, emptyTag, i18nPlaceholder, emptyI18nPlaceholder, startSourceSpan, wholeSourceSpan) {
   return __spreadProps(__spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.RepeaterCreate,
     attributes: null,
@@ -9417,6 +9417,8 @@ function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, i1
     track,
     trackByFn: null,
     tag,
+    emptyTag,
+    emptyAttributes: null,
     functionNameSuffix: "For",
     namespace: Namespace.HTML,
     nonBindable: false,
@@ -9871,6 +9873,9 @@ function createOpXrefMap(unit) {
       continue;
     }
     map.set(op.xref, op);
+    if (op.kind === OpKind.RepeaterCreate && op.emptyView !== null) {
+      map.set(op.emptyView, op);
+    }
   }
   return map;
 }
@@ -10203,12 +10208,9 @@ function collectElementConsts(job) {
     for (const unit of job.units) {
       for (const op of unit.create) {
         if (isElementOrContainerOp(op)) {
-          const attributes = allElementAttributes.get(op.xref);
-          if (attributes !== void 0) {
-            const attrArray = serializeAttributes(attributes);
-            if (attrArray.entries.length > 0) {
-              op.attributes = job.addConst(attrArray);
-            }
+          op.attributes = getConstIndex(job, allElementAttributes, op.xref);
+          if (op.kind === OpKind.RepeaterCreate && op.emptyView !== null) {
+            op.emptyAttributes = getConstIndex(job, allElementAttributes, op.emptyView);
           }
         }
       }
@@ -10224,6 +10226,16 @@ function collectElementConsts(job) {
       }
     }
   }
+}
+function getConstIndex(job, allElementAttributes, xref) {
+  const attributes = allElementAttributes.get(xref);
+  if (attributes !== void 0) {
+    const attrArray = serializeAttributes(attributes);
+    if (attrArray.entries.length > 0) {
+      return job.addConst(attrArray);
+    }
+  }
+  return null;
 }
 var FLYWEIGHT_ARRAY = Object.freeze([]);
 var ElementAttributes = class {
@@ -18146,7 +18158,7 @@ function i18nStart(slot, constIndex, subTemplateIndex) {
   }
   return call(Identifiers.i18nStart, args, null);
 }
-function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, sourceSpan) {
+function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, emptyTag, emptyConstIndex, sourceSpan) {
   const args = [
     literal(slot),
     variable(viewFnName),
@@ -18160,6 +18172,12 @@ function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByF
     args.push(literal(trackByUsesComponentInstance));
     if (emptyViewFnName !== null) {
       args.push(variable(emptyViewFnName), literal(emptyDecls), literal(emptyVars));
+      if (emptyTag !== null || emptyConstIndex !== null) {
+        args.push(literal(emptyTag));
+      }
+      if (emptyConstIndex !== null) {
+        args.push(literal(emptyConstIndex));
+      }
     }
   }
   return call(Identifiers.repeaterCreate, args, sourceSpan);
@@ -18647,7 +18665,7 @@ function reifyCreateOperations(unit, ops) {
           emptyDecls = emptyView.decls;
           emptyVars = emptyView.vars;
         }
-        OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.wholeSourceSpan));
+        OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.emptyTag, op.emptyAttributes, op.wholeSourceSpan));
         break;
       case OpKind.Statement:
         break;
@@ -20558,9 +20576,11 @@ function ingestForBlock(unit, forBlock) {
   const track = convertAst(forBlock.trackBy, unit.job, sourceSpan);
   ingestNodes(repeaterView, forBlock.children);
   let emptyView = null;
+  let emptyTagName = null;
   if (forBlock.empty !== null) {
     emptyView = unit.job.allocateView(unit.xref);
     ingestNodes(emptyView, forBlock.empty.children);
+    emptyTagName = ingestControlFlowInsertionPoint(unit, emptyView.xref, forBlock.empty);
   }
   const varNames = {
     $index: forBlock.contextVariables.$index.name,
@@ -20580,7 +20600,7 @@ function ingestForBlock(unit, forBlock) {
   const i18nPlaceholder = forBlock.i18n;
   const emptyI18nPlaceholder = (_b2 = forBlock.empty) == null ? void 0 : _b2.i18n;
   const tagName = ingestControlFlowInsertionPoint(unit, repeaterView.xref, forBlock);
-  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_c2 = emptyView == null ? void 0 : emptyView.xref) != null ? _c2 : null, tagName, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, forBlock.startSourceSpan, forBlock.sourceSpan);
+  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_c2 = emptyView == null ? void 0 : emptyView.xref) != null ? _c2 : null, tagName, track, varNames, emptyTagName, i18nPlaceholder, emptyI18nPlaceholder, forBlock.startSourceSpan, forBlock.sourceSpan);
   unit.create.push(repeaterCreate2);
   const expression = convertAst(forBlock.expression, unit.job, convertSourceSpan(forBlock.expression.span, forBlock.sourceSpan));
   const repeater2 = createRepeaterOp(repeaterCreate2.xref, repeaterCreate2.handle, expression, forBlock.sourceSpan);
@@ -23769,7 +23789,12 @@ var TemplateDefinitionBuilder = class {
     });
     const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
     let emptyData = null;
+    let emptyTagName = null;
+    let emptyAttrsExprs;
     if (block.empty !== null) {
+      const emptyInferred = this.inferProjectionDataFromInsertionPoint(block.empty);
+      emptyTagName = emptyInferred.tagName;
+      emptyAttrsExprs = emptyInferred.attrsExprs;
       emptyData = this.prepareEmbeddedTemplateFn(block.empty.children, "_ForEmpty", void 0, block.empty.i18n);
       this.allocateBindingSlots(null);
     }
@@ -23785,11 +23810,11 @@ var TemplateDefinitionBuilder = class {
         trackByExpression
       ];
       if (emptyData !== null) {
-        params.push(literal(trackByUsesComponentInstance), variable(emptyData.name), literal(emptyData.getConstCount()), literal(emptyData.getVarCount()));
+        params.push(literal(trackByUsesComponentInstance), variable(emptyData.name), literal(emptyData.getConstCount()), literal(emptyData.getVarCount()), literal(emptyTagName), this.addAttrsToConsts(emptyAttrsExprs || null));
       } else if (trackByUsesComponentInstance) {
         params.push(literal(trackByUsesComponentInstance));
       }
-      return params;
+      return trimTrailingNulls(params);
     });
     const value = block.expression.visit(this._valueConverter);
     this.updateInstructionWithAdvance(blockIndex, block.sourceSpan, Identifiers.repeater, () => [this.convertPropertyBinding(value)]);
@@ -26386,7 +26411,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-8bf7525");
+var VERSION2 = new Version("17.1.0-next.4+sha-00cbdc9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27452,7 +27477,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-8bf7525"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-00cbdc9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27521,7 +27546,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-8bf7525"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-00cbdc9"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27814,7 +27839,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-8bf7525"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-00cbdc9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27837,7 +27862,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-8bf7525"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-00cbdc9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27875,7 +27900,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-8bf7525"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-00cbdc9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27899,7 +27924,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-8bf7525"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-00cbdc9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27934,7 +27959,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-8bf7525"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-00cbdc9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27951,7 +27976,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.4+sha-8bf7525");
+var VERSION3 = new Version("17.1.0-next.4+sha-00cbdc9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -41563,7 +41588,14 @@ Deferred blocks can only access triggers in same view, a parent embedded view or
     this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), trigger.sourceSpan, import_typescript87.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.INACCESSIBLE_DEFERRED_TRIGGER_ELEMENT), message));
   }
   controlFlowPreventingContentProjection(templateId, category, projectionNode, componentName, slotSelector, controlFlowNode, preservesWhitespaces) {
-    const blockName = controlFlowNode instanceof IfBlockBranch ? "@if" : "@for";
+    let blockName;
+    if (controlFlowNode instanceof ForLoopBlockEmpty) {
+      blockName = "@empty";
+    } else if (controlFlowNode instanceof ForLoopBlock) {
+      blockName = "@for";
+    } else {
+      blockName = "@if";
+    }
     const lines = [
       `Node matches the "${slotSelector}" slot of the "${componentName}" component, but will not be projected into the specific slot because the surrounding ${blockName} has more than one node at its root. To project the node in the right slot, you can:
 `,
@@ -42518,7 +42550,12 @@ var TcbControlFlowContentProjectionOp = class extends TcbOp {
     for (const child of this.element.children) {
       let eligibleNode = null;
       if (child instanceof ForLoopBlock) {
-        eligibleNode = child;
+        if (this.shouldCheck(child)) {
+          result.push(child);
+        }
+        if (child.empty !== null && this.shouldCheck(child.empty)) {
+          result.push(child.empty);
+        }
       } else if (child instanceof IfBlock) {
         eligibleNode = child.branches[0];
       }
@@ -42536,6 +42573,18 @@ var TcbControlFlowContentProjectionOp = class extends TcbOp {
       }
     }
     return result;
+  }
+  shouldCheck(node) {
+    if (node.children.length < 2) {
+      return false;
+    }
+    const rootNodeCount = node.children.reduce((count, node2) => {
+      if (!(node2 instanceof Text) || this.tcb.hostPreserveWhitespaces || node2.value.trim().length > 0) {
+        count++;
+      }
+      return count;
+    }, 0);
+    return rootNodeCount > 1;
   }
 };
 var ATTR_TO_PROP = new Map(Object.entries({

@@ -8474,7 +8474,7 @@ function createTemplateOp(xref, templateKind, tag, functionNameSuffix, namespace
     wholeSourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
-function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, startSourceSpan, wholeSourceSpan) {
+function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, emptyTag, i18nPlaceholder, emptyI18nPlaceholder, startSourceSpan, wholeSourceSpan) {
   return __spreadProps(__spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.RepeaterCreate,
     attributes: null,
@@ -8484,6 +8484,8 @@ function createRepeaterCreateOp(primaryView, emptyView, tag, track, varNames, i1
     track,
     trackByFn: null,
     tag,
+    emptyTag,
+    emptyAttributes: null,
     functionNameSuffix: "For",
     namespace: Namespace.HTML,
     nonBindable: false,
@@ -8938,6 +8940,9 @@ function createOpXrefMap(unit) {
       continue;
     }
     map.set(op.xref, op);
+    if (op.kind === OpKind.RepeaterCreate && op.emptyView !== null) {
+      map.set(op.emptyView, op);
+    }
   }
   return map;
 }
@@ -9270,12 +9275,9 @@ function collectElementConsts(job) {
     for (const unit of job.units) {
       for (const op of unit.create) {
         if (isElementOrContainerOp(op)) {
-          const attributes = allElementAttributes.get(op.xref);
-          if (attributes !== void 0) {
-            const attrArray = serializeAttributes(attributes);
-            if (attrArray.entries.length > 0) {
-              op.attributes = job.addConst(attrArray);
-            }
+          op.attributes = getConstIndex(job, allElementAttributes, op.xref);
+          if (op.kind === OpKind.RepeaterCreate && op.emptyView !== null) {
+            op.emptyAttributes = getConstIndex(job, allElementAttributes, op.emptyView);
           }
         }
       }
@@ -9291,6 +9293,16 @@ function collectElementConsts(job) {
       }
     }
   }
+}
+function getConstIndex(job, allElementAttributes, xref) {
+  const attributes = allElementAttributes.get(xref);
+  if (attributes !== void 0) {
+    const attrArray = serializeAttributes(attributes);
+    if (attrArray.entries.length > 0) {
+      return job.addConst(attrArray);
+    }
+  }
+  return null;
 }
 var FLYWEIGHT_ARRAY = Object.freeze([]);
 var ElementAttributes = class {
@@ -17254,7 +17266,7 @@ function i18nStart(slot, constIndex, subTemplateIndex) {
   }
   return call(Identifiers.i18nStart, args, null);
 }
-function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, sourceSpan) {
+function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, emptyTag, emptyConstIndex, sourceSpan) {
   const args = [
     literal(slot),
     variable(viewFnName),
@@ -17268,6 +17280,12 @@ function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByF
     args.push(literal(trackByUsesComponentInstance));
     if (emptyViewFnName !== null) {
       args.push(variable(emptyViewFnName), literal(emptyDecls), literal(emptyVars));
+      if (emptyTag !== null || emptyConstIndex !== null) {
+        args.push(literal(emptyTag));
+      }
+      if (emptyConstIndex !== null) {
+        args.push(literal(emptyConstIndex));
+      }
     }
   }
   return call(Identifiers.repeaterCreate, args, sourceSpan);
@@ -17755,7 +17773,7 @@ function reifyCreateOperations(unit, ops) {
           emptyDecls = emptyView.decls;
           emptyVars = emptyView.vars;
         }
-        OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.wholeSourceSpan));
+        OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.emptyTag, op.emptyAttributes, op.wholeSourceSpan));
         break;
       case OpKind.Statement:
         break;
@@ -19666,9 +19684,11 @@ function ingestForBlock(unit, forBlock) {
   const track = convertAst(forBlock.trackBy, unit.job, sourceSpan);
   ingestNodes(repeaterView, forBlock.children);
   let emptyView = null;
+  let emptyTagName = null;
   if (forBlock.empty !== null) {
     emptyView = unit.job.allocateView(unit.xref);
     ingestNodes(emptyView, forBlock.empty.children);
+    emptyTagName = ingestControlFlowInsertionPoint(unit, emptyView.xref, forBlock.empty);
   }
   const varNames = {
     $index: forBlock.contextVariables.$index.name,
@@ -19688,7 +19708,7 @@ function ingestForBlock(unit, forBlock) {
   const i18nPlaceholder = forBlock.i18n;
   const emptyI18nPlaceholder = (_b2 = forBlock.empty) == null ? void 0 : _b2.i18n;
   const tagName = ingestControlFlowInsertionPoint(unit, repeaterView.xref, forBlock);
-  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_c2 = emptyView == null ? void 0 : emptyView.xref) != null ? _c2 : null, tagName, track, varNames, i18nPlaceholder, emptyI18nPlaceholder, forBlock.startSourceSpan, forBlock.sourceSpan);
+  const repeaterCreate2 = createRepeaterCreateOp(repeaterView.xref, (_c2 = emptyView == null ? void 0 : emptyView.xref) != null ? _c2 : null, tagName, track, varNames, emptyTagName, i18nPlaceholder, emptyI18nPlaceholder, forBlock.startSourceSpan, forBlock.sourceSpan);
   unit.create.push(repeaterCreate2);
   const expression = convertAst(forBlock.expression, unit.job, convertSourceSpan(forBlock.expression.span, forBlock.sourceSpan));
   const repeater2 = createRepeaterOp(repeaterCreate2.xref, repeaterCreate2.handle, expression, forBlock.sourceSpan);
@@ -22877,7 +22897,12 @@ var TemplateDefinitionBuilder = class {
     });
     const { expression: trackByExpression, usesComponentInstance: trackByUsesComponentInstance } = this.createTrackByFunction(block);
     let emptyData = null;
+    let emptyTagName = null;
+    let emptyAttrsExprs;
     if (block.empty !== null) {
+      const emptyInferred = this.inferProjectionDataFromInsertionPoint(block.empty);
+      emptyTagName = emptyInferred.tagName;
+      emptyAttrsExprs = emptyInferred.attrsExprs;
       emptyData = this.prepareEmbeddedTemplateFn(block.empty.children, "_ForEmpty", void 0, block.empty.i18n);
       this.allocateBindingSlots(null);
     }
@@ -22893,11 +22918,11 @@ var TemplateDefinitionBuilder = class {
         trackByExpression
       ];
       if (emptyData !== null) {
-        params.push(literal(trackByUsesComponentInstance), variable(emptyData.name), literal(emptyData.getConstCount()), literal(emptyData.getVarCount()));
+        params.push(literal(trackByUsesComponentInstance), variable(emptyData.name), literal(emptyData.getConstCount()), literal(emptyData.getVarCount()), literal(emptyTagName), this.addAttrsToConsts(emptyAttrsExprs || null));
       } else if (trackByUsesComponentInstance) {
         params.push(literal(trackByUsesComponentInstance));
       }
-      return params;
+      return trimTrailingNulls(params);
     });
     const value = block.expression.visit(this._valueConverter);
     this.updateInstructionWithAdvance(blockIndex, block.sourceSpan, Identifiers.repeater, () => [this.convertPropertyBinding(value)]);
@@ -25494,7 +25519,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-8bf7525");
+var VERSION2 = new Version("17.1.0-next.4+sha-00cbdc9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
