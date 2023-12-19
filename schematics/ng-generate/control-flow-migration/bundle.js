@@ -25519,7 +25519,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-22b95de");
+var VERSION2 = new Version("17.1.0-next.4+sha-fb7c58c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26057,6 +26057,41 @@ function parseTemplate2(template2) {
     return { tree: void 0, errors: [{ type: "parse", error: e }] };
   }
   return { tree: parsed, errors: [] };
+}
+function validateMigratedTemplate(migrated, fileName) {
+  const parsed = parseTemplate2(migrated);
+  let errors = [];
+  if (parsed.errors.length > 0) {
+    errors.push({
+      type: "parse",
+      error: new Error(`The migration resulted in invalid HTML for ${fileName}. Please check the template for valid HTML structures and run the migration again.`)
+    });
+  }
+  if (parsed.tree) {
+    const i18nError = validateI18nStructure(parsed.tree, fileName);
+    if (i18nError !== null) {
+      errors.push({ type: "i18n", error: i18nError });
+    }
+  }
+  return errors;
+}
+function validateI18nStructure(parsed, fileName) {
+  const visitor = new i18nCollector();
+  visitAll2(visitor, parsed.rootNodes);
+  const parents = visitor.elements.filter((el) => el.children.length > 0);
+  for (const p of parents) {
+    for (const el of visitor.elements) {
+      if (el === p)
+        continue;
+      if (isChildOf(p, el)) {
+        return new Error(`i18n Nesting error: The migration would result in invalid i18n nesting for ${fileName}. Element with i18n attribute "${p.name}" would result having a child of element with i18n attribute "${el.name}". Please fix and re-run the migration.`);
+      }
+    }
+  }
+  return null;
+}
+function isChildOf(parent, el) {
+  return parent.sourceSpan.start.offset < el.sourceSpan.start.offset && parent.sourceSpan.end.offset > el.sourceSpan.end.offset;
 }
 function calculateNesting(visitor, hasLineBreaks2) {
   let nestedQueue = [];
@@ -26867,13 +26902,9 @@ function migrateTemplate(template2, templateType, node, file, format = true, ana
     migrated = templateResult.migrated;
     const changed = ifResult.changed || forResult.changed || switchResult.changed || caseResult.changed;
     if (changed) {
-      const parsed = parseTemplate2(migrated);
-      if (parsed.errors.length > 0) {
-        const parsingError = {
-          type: "parse",
-          error: new Error(`The migration resulted in invalid HTML for ${file.sourceFile.fileName}. Please check the template for valid HTML structures and run the migration again.`)
-        };
-        return { migrated: template2, errors: [parsingError] };
+      const errors2 = validateMigratedTemplate(migrated, file.sourceFile.fileName);
+      if (errors2.length > 0) {
+        return { migrated: template2, errors: errors2 };
       }
     }
     if (format && changed) {
