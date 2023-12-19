@@ -1,11 +1,11 @@
 /**
- * @license Angular v17.0.7+sha-0696ab6
+ * @license Angular v17.0.7+sha-c99491e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
-import { Subject, Subscription, Observable, merge as merge$1, BehaviorSubject, combineLatest } from 'rxjs';
+import { Subject, Subscription, Observable, merge as merge$1, BehaviorSubject, of, combineLatest } from 'rxjs';
 import { share, map, distinctUntilChanged, first } from 'rxjs/operators';
 
 function getClosureSafeProperty(objWithPropertyToExtract) {
@@ -14786,18 +14786,8 @@ class NoopNgZone {
 }
 /**
  * Token used to drive ApplicationRef.isStable
- *
- * TODO: This should be moved entirely to NgZone (as a breaking change) so it can be tree-shakeable
- * for `NoopNgZone` which is always just an `Observable` of `true`. Additionally, we should consider
- * whether the property on `NgZone` should be `Observable` or `Signal`.
  */
-const ZONE_IS_STABLE_OBSERVABLE = new InjectionToken(ngDevMode ? 'isStable Observable' : '', {
-    providedIn: 'root',
-    // TODO(atscott): Replace this with a suitable default like `new
-    // BehaviorSubject(true).asObservable`. Again, long term this won't exist on ApplicationRef at
-    // all but until we can remove it, we need a default value zoneless.
-    factory: isStableFactory,
-});
+const ZONE_IS_STABLE_OBSERVABLE = new InjectionToken(ngDevMode ? 'zone isStable Observable' : '');
 function isStableFactory() {
     const zone = inject(NgZone);
     let _stable = true;
@@ -15710,7 +15700,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.0.7+sha-0696ab6']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.0.7+sha-c99491e']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29984,7 +29974,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.7+sha-0696ab6');
+const VERSION = new Version('17.0.7+sha-c99491e');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -31713,7 +31703,7 @@ class ApplicationRef {
         /** @internal */
         this._views = [];
         this.internalErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
-        this.zoneIsStable = inject(ZONE_IS_STABLE_OBSERVABLE);
+        this.zoneIsStable = inject(ZONE_IS_STABLE_OBSERVABLE, { optional: true }) ?? of(true);
         this.noPendingTasks = inject(PendingTasks).hasPendingTasks.pipe(map(pending => !pending));
         /**
          * Get a list of component types registered to this application.
