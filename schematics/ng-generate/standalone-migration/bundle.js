@@ -9131,6 +9131,14 @@ function transformExpressionsInExpression(expr, transform2, flags) {
   } else if (expr instanceof TaggedTemplateExpr) {
     expr.tag = transformExpressionsInExpression(expr.tag, transform2, flags);
     expr.template.expressions = expr.template.expressions.map((e) => transformExpressionsInExpression(e, transform2, flags));
+  } else if (expr instanceof ArrowFunctionExpr) {
+    if (Array.isArray(expr.body)) {
+      for (let i = 0; i < expr.body.length; i++) {
+        transformExpressionsInStatement(expr.body[i], transform2, flags);
+      }
+    } else {
+      expr.body = transformExpressionsInExpression(expr.body, transform2, flags);
+    }
   } else if (expr instanceof WrappedNodeExpr) {
   } else if (expr instanceof ReadVarExpr || expr instanceof ExternalExpr || expr instanceof LiteralExpr) {
   } else {
@@ -9502,7 +9510,7 @@ function createProjectionDefOp(def) {
     def
   }, NEW_OP);
 }
-function createProjectionOp(xref, selector, i18nPlaceholder, attributes, sourceSpan) {
+function createProjectionOp(xref, selector, i18nPlaceholder, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Projection,
     xref,
@@ -9510,7 +9518,7 @@ function createProjectionOp(xref, selector, i18nPlaceholder, attributes, sourceS
     selector,
     i18nPlaceholder,
     projectionSlotIndex: 0,
-    attributes,
+    attributes: null,
     localRefs: [],
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
@@ -9576,7 +9584,7 @@ function createI18nMessageOp(xref, i18nContext, i18nBlock, message, messagePlace
     subMessages: []
   }, NEW_OP);
 }
-function createI18nStartOp(xref, message, root) {
+function createI18nStartOp(xref, message, root, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.I18nStart,
     xref,
@@ -9585,13 +9593,15 @@ function createI18nStartOp(xref, message, root) {
     message,
     messageIndex: null,
     subTemplateIndex: null,
-    context: null
+    context: null,
+    sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
-function createI18nEndOp(xref) {
+function createI18nEndOp(xref, sourceSpan) {
   return __spreadValues({
     kind: OpKind.I18nEnd,
-    xref
+    xref,
+    sourceSpan
   }, NEW_OP);
 }
 function createIcuStartOp(xref, message, messagePlaceholder, sourceSpan) {
@@ -9939,6 +9949,9 @@ function extractAttributes(job) {
               SecurityContext.NONE
             );
             if (job.kind === CompilationJobKind.Host) {
+              if (job.compatibility) {
+                break;
+              }
               unit.create.push(extractedAttributeOp);
             } else {
               OpList.insertBefore(extractedAttributeOp, lookupElement(elements, op.target));
@@ -10207,7 +10220,15 @@ function collectElementConsts(job) {
   if (job instanceof ComponentCompilationJob) {
     for (const unit of job.units) {
       for (const op of unit.create) {
-        if (isElementOrContainerOp(op)) {
+        if (op.kind == OpKind.Projection) {
+          const attributes = allElementAttributes.get(op.xref);
+          if (attributes !== void 0) {
+            const attrArray = serializeAttributes(attributes);
+            if (attrArray.entries.length > 0) {
+              op.attributes = attrArray;
+            }
+          }
+        } else if (isElementOrContainerOp(op)) {
           op.attributes = getConstIndex(job, allElementAttributes, op.xref);
           if (op.kind === OpKind.RepeaterCreate && op.emptyView !== null) {
             op.emptyAttributes = getConstIndex(job, allElementAttributes, op.emptyView);
@@ -17446,7 +17467,7 @@ function addNamesToView(unit, baseName, state, compatibility) {
         op.handlerFnName = sanitizeIdentifier(op.handlerFnName);
         break;
       case OpKind.Variable:
-        varNames.set(op.xref, getVariableName(op.variable, state));
+        varNames.set(op.xref, getVariableName(unit, op.variable, state));
         break;
       case OpKind.RepeaterCreate:
         if (!(unit instanceof ViewCompilationUnit)) {
@@ -17497,14 +17518,19 @@ function addNamesToView(unit, baseName, state, compatibility) {
     });
   }
 }
-function getVariableName(variable2, state) {
+function getVariableName(unit, variable2, state) {
   if (variable2.name === null) {
     switch (variable2.kind) {
       case SemanticVariableKind.Context:
         variable2.name = `ctx_r${state.index++}`;
         break;
       case SemanticVariableKind.Identifier:
-        variable2.name = `${variable2.identifier}_r${++state.index}`;
+        if (unit.job.compatibility === CompatibilityMode.TemplateDefinitionBuilder) {
+          const compatPrefix = variable2.identifier === "ctx" ? "i" : "";
+          variable2.name = `${variable2.identifier}_${compatPrefix}r${++state.index}`;
+        } else {
+          variable2.name = `${variable2.identifier}_i${state.index++}`;
+        }
         break;
       default:
         variable2.name = `_r${++state.index}`;
@@ -17647,16 +17673,23 @@ var CREATE_ORDERING = [
   { test: (op) => op.kind === OpKind.Listener && !(op.hostListener && op.isAnimationListener) }
 ];
 var UPDATE_ORDERING = [
-  { test: kindWithInterpolationTest(OpKind.HostProperty, true) },
-  { test: kindWithInterpolationTest(OpKind.HostProperty, false) },
   { test: kindTest(OpKind.StyleMap), transform: keepLast },
   { test: kindTest(OpKind.ClassMap), transform: keepLast },
   { test: kindTest(OpKind.StyleProp) },
   { test: kindTest(OpKind.ClassProp) },
-  { test: kindWithInterpolationTest(OpKind.Property, true) },
   { test: kindWithInterpolationTest(OpKind.Attribute, true) },
+  { test: kindWithInterpolationTest(OpKind.Property, true) },
   { test: kindWithInterpolationTest(OpKind.Property, false) },
   { test: kindWithInterpolationTest(OpKind.Attribute, false) }
+];
+var UPDATE_HOST_ORDERING = [
+  { test: kindWithInterpolationTest(OpKind.HostProperty, true) },
+  { test: kindWithInterpolationTest(OpKind.HostProperty, false) },
+  { test: kindTest(OpKind.Attribute) },
+  { test: kindTest(OpKind.StyleMap), transform: keepLast },
+  { test: kindTest(OpKind.ClassMap), transform: keepLast },
+  { test: kindTest(OpKind.StyleProp) },
+  { test: kindTest(OpKind.ClassProp) }
 ];
 var handledOpKinds = /* @__PURE__ */ new Set([
   OpKind.Listener,
@@ -17671,7 +17704,8 @@ var handledOpKinds = /* @__PURE__ */ new Set([
 function orderOps(job) {
   for (const unit of job.units) {
     orderWithin(unit.create, CREATE_ORDERING);
-    orderWithin(unit.update, UPDATE_ORDERING);
+    const ordering = unit.job.kind === CompilationJobKind.Host ? UPDATE_HOST_ORDERING : UPDATE_ORDERING;
+    orderWithin(unit.update, ordering);
   }
 }
 function orderWithin(opList, ordering) {
@@ -17752,13 +17786,6 @@ function removeContentSelectors(job) {
           const target = lookupInXrefMap(elements, op.target);
           if (isSelectAttribute(op.name) && target.kind === OpKind.Projection) {
             OpList.remove(op);
-          }
-          break;
-        case OpKind.Projection:
-          for (let i = op.attributes.length - 2; i >= 0; i -= 2) {
-            if (isSelectAttribute(op.attributes[i])) {
-              op.attributes.splice(i, 2);
-            }
           }
           break;
       }
@@ -17887,8 +17914,11 @@ function wrapTemplateWithI18n(unit, parentI18n) {
   var _a2;
   if (((_a2 = unit.create.head.next) == null ? void 0 : _a2.kind) !== OpKind.I18nStart) {
     const id = unit.job.allocateXrefId();
-    OpList.insertAfter(createI18nStartOp(id, parentI18n.message, parentI18n.root), unit.create.head);
-    OpList.insertBefore(createI18nEndOp(id), unit.create.tail);
+    OpList.insertAfter(
+      createI18nStartOp(id, parentI18n.message, parentI18n.root, null),
+      unit.create.head
+    );
+    OpList.insertBefore(createI18nEndOp(id, null), unit.create.tail);
   }
 }
 
@@ -18143,20 +18173,20 @@ function projectionDef(def) {
 }
 function projection(slot, projectionSlotIndex, attributes, sourceSpan) {
   const args = [literal(slot)];
-  if (projectionSlotIndex !== 0 || attributes.length > 0) {
+  if (projectionSlotIndex !== 0 || attributes !== null) {
     args.push(literal(projectionSlotIndex));
-    if (attributes.length > 0) {
-      args.push(literalArr(attributes.map((attr) => literal(attr))));
+    if (attributes !== null) {
+      args.push(attributes);
     }
   }
   return call(Identifiers.projection, args, sourceSpan);
 }
-function i18nStart(slot, constIndex, subTemplateIndex) {
+function i18nStart(slot, constIndex, subTemplateIndex, sourceSpan) {
   const args = [literal(slot), literal(constIndex)];
   if (subTemplateIndex !== null) {
     args.push(literal(subTemplateIndex));
   }
-  return call(Identifiers.i18nStart, args, null);
+  return call(Identifiers.i18nStart, args, sourceSpan);
 }
 function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByFn, trackByUsesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, emptyTag, emptyConstIndex, sourceSpan) {
   const args = [
@@ -18188,15 +18218,15 @@ function repeater(collection, sourceSpan) {
 function deferWhen(prefetch, expr, sourceSpan) {
   return call(prefetch ? Identifiers.deferPrefetchWhen : Identifiers.deferWhen, [expr], sourceSpan);
 }
-function i18n(slot, constIndex, subTemplateIndex) {
+function i18n(slot, constIndex, subTemplateIndex, sourceSpan) {
   const args = [literal(slot), literal(constIndex)];
   if (subTemplateIndex) {
     args.push(literal(subTemplateIndex));
   }
-  return call(Identifiers.i18n, args, null);
+  return call(Identifiers.i18n, args, sourceSpan);
 }
-function i18nEnd() {
-  return call(Identifiers.i18nEnd, [], null);
+function i18nEnd(endSourceSpan) {
+  return call(Identifiers.i18nEnd, [], endSourceSpan);
 }
 function i18nAttributes(slot, i18nAttributesConfig) {
   const args = [literal(slot), literal(i18nAttributesConfig)];
@@ -18541,13 +18571,13 @@ function reifyCreateOperations(unit, ops) {
         OpList.replace(op, elementContainerEnd());
         break;
       case OpKind.I18nStart:
-        OpList.replace(op, i18nStart(op.handle.slot, op.messageIndex, op.subTemplateIndex));
+        OpList.replace(op, i18nStart(op.handle.slot, op.messageIndex, op.subTemplateIndex, op.sourceSpan));
         break;
       case OpKind.I18nEnd:
-        OpList.replace(op, i18nEnd());
+        OpList.replace(op, i18nEnd(op.sourceSpan));
         break;
       case OpKind.I18n:
-        OpList.replace(op, i18n(op.handle.slot, op.messageIndex, op.subTemplateIndex));
+        OpList.replace(op, i18n(op.handle.slot, op.messageIndex, op.subTemplateIndex, op.sourceSpan));
         break;
       case OpKind.I18nAttributes:
         if (op.i18nAttributesConfig === null) {
@@ -19554,6 +19584,9 @@ function generateTrackFns(job) {
       }
       let usesComponentContext = false;
       op.track = transformExpressionsInExpression(op.track, (expr) => {
+        if (expr instanceof PipeBindingExpr || expr instanceof PipeBindingVariadicExpr) {
+          throw new Error(`Illegal State: Pipes are not allowed in this context`);
+        }
         if (expr instanceof TrackContextExpr) {
           usesComponentContext = true;
           return variable("this");
@@ -20014,12 +20047,12 @@ function wrapI18nIcus(job) {
         case OpKind.IcuStart:
           if (currentI18nOp === null) {
             addedI18nId = job.allocateXrefId();
-            OpList.insertBefore(createI18nStartOp(addedI18nId, op.message), op);
+            OpList.insertBefore(createI18nStartOp(addedI18nId, op.message, void 0, null), op);
           }
           break;
         case OpKind.IcuEnd:
           if (addedI18nId !== null) {
-            OpList.insertAfter(createI18nEndOp(addedI18nId), op);
+            OpList.insertAfter(createI18nEndOp(addedI18nId, null), op);
             addedI18nId = null;
           }
           break;
@@ -20287,7 +20320,7 @@ function ingestNodes(unit, template2) {
   }
 }
 function ingestElement(unit, element2) {
-  var _a2;
+  var _a2, _b2;
   if (element2.i18n !== void 0 && !(element2.i18n instanceof Message || element2.i18n instanceof TagPlaceholder)) {
     throw Error(`Unhandled i18n metadata type for element: ${element2.i18n.constructor.name}`);
   }
@@ -20300,16 +20333,17 @@ function ingestElement(unit, element2) {
   let i18nBlockId = null;
   if (element2.i18n instanceof Message) {
     i18nBlockId = unit.job.allocateXrefId();
-    unit.create.push(createI18nStartOp(i18nBlockId, element2.i18n));
+    unit.create.push(createI18nStartOp(i18nBlockId, element2.i18n, void 0, element2.startSourceSpan));
   }
   ingestNodes(unit, element2.children);
   const endOp = createElementEndOp(id, (_a2 = element2.endSourceSpan) != null ? _a2 : element2.startSourceSpan);
   unit.create.push(endOp);
   if (i18nBlockId !== null) {
-    OpList.insertBefore(createI18nEndOp(i18nBlockId), endOp);
+    OpList.insertBefore(createI18nEndOp(i18nBlockId, (_b2 = element2.endSourceSpan) != null ? _b2 : element2.startSourceSpan), endOp);
   }
 }
 function ingestTemplate(unit, tmpl) {
+  var _a2;
   if (tmpl.i18n !== void 0 && !(tmpl.i18n instanceof Message || tmpl.i18n instanceof TagPlaceholder)) {
     throw Error(`Unhandled i18n metadata type for template: ${tmpl.i18n.constructor.name}`);
   }
@@ -20333,16 +20367,15 @@ function ingestTemplate(unit, tmpl) {
   }
   if (templateKind === TemplateKind.NgTemplate && tmpl.i18n instanceof Message) {
     const id = unit.job.allocateXrefId();
-    OpList.insertAfter(createI18nStartOp(id, tmpl.i18n), childView.create.head);
-    OpList.insertBefore(createI18nEndOp(id), childView.create.tail);
+    OpList.insertAfter(createI18nStartOp(id, tmpl.i18n, void 0, tmpl.startSourceSpan), childView.create.head);
+    OpList.insertBefore(createI18nEndOp(id, (_a2 = tmpl.endSourceSpan) != null ? _a2 : tmpl.startSourceSpan), childView.create.tail);
   }
 }
 function ingestContent(unit, content) {
   if (content.i18n !== void 0 && !(content.i18n instanceof TagPlaceholder)) {
     throw Error(`Unhandled i18n metadata type for element: ${content.i18n.constructor.name}`);
   }
-  const attrs = content.attributes.flatMap((a) => [a.name, a.value]);
-  const op = createProjectionOp(unit.job.allocateXrefId(), content.selector, content.i18n, attrs, content.sourceSpan);
+  const op = createProjectionOp(unit.job.allocateXrefId(), content.selector, content.i18n, content.sourceSpan);
   for (const attr of content.attributes) {
     const securityContext = domSchema.securityContext(content.name, attr.name, true);
     unit.update.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
@@ -20610,7 +20643,10 @@ function convertAst(ast, job, baseSourceSpan) {
   if (ast instanceof ASTWithSource) {
     return convertAst(ast.ast, job, baseSourceSpan);
   } else if (ast instanceof PropertyRead) {
-    if (ast.receiver instanceof ImplicitReceiver && !(ast.receiver instanceof ThisReceiver)) {
+    const isThisReceiver = ast.receiver instanceof ThisReceiver;
+    const isImplicitReceiver = ast.receiver instanceof ImplicitReceiver && !(ast.receiver instanceof ThisReceiver);
+    const isSpecialNode = ast.name === "$any" || ast.name === "$event";
+    if (isImplicitReceiver || isThisReceiver && !isSpecialNode) {
       return new LexicalReadExpr(ast.name);
     } else {
       return new ReadPropExpr(convertAst(ast.receiver, job, baseSourceSpan), ast.name, null, convertSourceSpan(ast.span, baseSourceSpan));
@@ -26411,7 +26447,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-12181b9");
+var VERSION2 = new Version("17.1.0-next.4+sha-cafc3b0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27477,7 +27513,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-12181b9"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27546,7 +27582,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-12181b9"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27839,7 +27875,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-12181b9"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27862,7 +27898,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-12181b9"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27900,7 +27936,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-12181b9"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27924,7 +27960,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-12181b9"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27959,7 +27995,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-12181b9"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27976,7 +28012,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.4+sha-12181b9");
+var VERSION3 = new Version("17.1.0-next.4+sha-cafc3b0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
