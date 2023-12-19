@@ -1,12 +1,12 @@
 /**
- * @license Angular v17.1.0-next.4+sha-d49333e
+ * @license Angular v17.1.0-next.4+sha-12181b9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
-import { Subject, Subscription, Observable, merge as merge$1, BehaviorSubject, of, combineLatest } from 'rxjs';
-import { share, map, distinctUntilChanged, first } from 'rxjs/operators';
+import { Subject, Subscription, BehaviorSubject } from 'rxjs';
+import { map, first } from 'rxjs/operators';
 
 function inputFunction(_initialValue, _opts) {
     throw new Error('TODO');
@@ -14823,53 +14823,6 @@ class NoopNgZone {
         return fn.apply(applyThis, applyArgs);
     }
 }
-/**
- * Token used to drive ApplicationRef.isStable
- */
-const ZONE_IS_STABLE_OBSERVABLE = new InjectionToken(ngDevMode ? 'zone isStable Observable' : '');
-function isStableFactory() {
-    const zone = inject(NgZone);
-    let _stable = true;
-    const isCurrentlyStable = new Observable((observer) => {
-        _stable = zone.isStable && !zone.hasPendingMacrotasks && !zone.hasPendingMicrotasks;
-        zone.runOutsideAngular(() => {
-            observer.next(_stable);
-            observer.complete();
-        });
-    });
-    const isStable = new Observable((observer) => {
-        // Create the subscription to onStable outside the Angular Zone so that
-        // the callback is run outside the Angular Zone.
-        let stableSub;
-        zone.runOutsideAngular(() => {
-            stableSub = zone.onStable.subscribe(() => {
-                NgZone.assertNotInAngularZone();
-                // Check whether there are no pending macro/micro tasks in the next tick
-                // to allow for NgZone to update the state.
-                queueMicrotask(() => {
-                    if (!_stable && !zone.hasPendingMacrotasks && !zone.hasPendingMicrotasks) {
-                        _stable = true;
-                        observer.next(true);
-                    }
-                });
-            });
-        });
-        const unstableSub = zone.onUnstable.subscribe(() => {
-            NgZone.assertInAngularZone();
-            if (_stable) {
-                _stable = false;
-                zone.runOutsideAngular(() => {
-                    observer.next(false);
-                });
-            }
-        });
-        return () => {
-            stableSub.unsubscribe();
-            unstableSub.unsubscribe();
-        };
-    });
-    return merge$1(isCurrentlyStable, isStable.pipe(share()));
-}
 function shouldBeIgnoredByZone(applyArgs) {
     if (!Array.isArray(applyArgs)) {
         return false;
@@ -14891,8 +14844,6 @@ function getNgZone(ngZoneToUse = 'zone.js', options) {
     }
     return ngZoneToUse;
 }
-
-// Public API for Zone
 
 /**
  * The phase to run an `afterRender` or `afterNextRender` callback in.
@@ -15739,7 +15690,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.4+sha-d49333e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.4+sha-12181b9']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -20795,6 +20746,8 @@ function invokeAllTriggerCleanupFns(lDetails) {
     invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
     invokeTriggerCleanupFns(0 /* TriggerType.Regular */, lDetails);
 }
+
+// Public API for Zone
 
 /**
  * Calculates a data slot index for defer block info (either static or
@@ -30015,7 +29968,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.4+sha-d49333e');
+const VERSION = new Version('17.1.0-next.4+sha-12181b9');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -30177,21 +30130,28 @@ class PendingTasks {
         this.pendingTasks = new Set();
         this.hasPendingTasks = new BehaviorSubject(false);
     }
+    get _hasPendingTasks() {
+        return this.hasPendingTasks.value;
+    }
     add() {
-        this.hasPendingTasks.next(true);
+        if (!this._hasPendingTasks) {
+            this.hasPendingTasks.next(true);
+        }
         const taskId = this.taskId++;
         this.pendingTasks.add(taskId);
         return taskId;
     }
     remove(taskId) {
         this.pendingTasks.delete(taskId);
-        if (this.pendingTasks.size === 0) {
+        if (this.pendingTasks.size === 0 && this._hasPendingTasks) {
             this.hasPendingTasks.next(false);
         }
     }
     ngOnDestroy() {
         this.pendingTasks.clear();
-        this.hasPendingTasks.next(false);
+        if (this._hasPendingTasks) {
+            this.hasPendingTasks.next(false);
+        }
     }
     static { this.ɵfac = function PendingTasks_Factory(t) { return new (t || PendingTasks)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PendingTasks, factory: PendingTasks.ɵfac, providedIn: 'root' }); }
@@ -31744,8 +31704,6 @@ class ApplicationRef {
         /** @internal */
         this._views = [];
         this.internalErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
-        this.zoneIsStable = inject(ZONE_IS_STABLE_OBSERVABLE, { optional: true }) ?? of(true);
-        this.noPendingTasks = inject(PendingTasks).hasPendingTasks.pipe(map(pending => !pending));
         /**
          * Get a list of component types registered to this application.
          * This list is populated even before the component is created.
@@ -31758,8 +31716,7 @@ class ApplicationRef {
         /**
          * Returns an Observable that indicates when the application is stable or unstable.
          */
-        this.isStable = combineLatest([this.zoneIsStable, this.noPendingTasks])
-            .pipe(map(indicators => indicators.every(stable => stable)), distinctUntilChanged());
+        this.isStable = inject(PendingTasks).hasPendingTasks.pipe(map(pending => !pending));
         this._injector = inject(EnvironmentInjector);
     }
     /**
@@ -32063,8 +32020,17 @@ function internalProvideZoneChangeDetection(ngZoneFactory) {
                 return () => ngZoneChangeDetectionScheduler.initialize();
             },
         },
+        {
+            provide: ENVIRONMENT_INITIALIZER,
+            multi: true,
+            useFactory: () => {
+                const service = inject(ZoneStablePendingTask);
+                return () => {
+                    service.initialize();
+                };
+            }
+        },
         { provide: INTERNAL_APPLICATION_ERROR_HANDLER, useFactory: ngZoneApplicationErrorHandlerFactory },
-        { provide: ZONE_IS_STABLE_OBSERVABLE, useFactory: isStableFactory },
     ];
 }
 function ngZoneApplicationErrorHandlerFactory() {
@@ -32110,6 +32076,50 @@ function getNgZoneOptions(options) {
         shouldCoalesceRunChangeDetection: options?.runCoalescing ?? false,
     };
 }
+class ZoneStablePendingTask {
+    constructor() {
+        this.subscription = new Subscription();
+        this.initialized = false;
+        this.zone = inject(NgZone);
+        this.pendingTasks = inject(PendingTasks);
+    }
+    initialize() {
+        if (this.initialized) {
+            return;
+        }
+        this.initialized = true;
+        let task = null;
+        if (!this.zone.isStable && !this.zone.hasPendingMacrotasks && !this.zone.hasPendingMicrotasks) {
+            task = this.pendingTasks.add();
+        }
+        this.zone.runOutsideAngular(() => {
+            this.subscription.add(this.zone.onStable.subscribe(() => {
+                NgZone.assertNotInAngularZone();
+                // Check whether there are no pending macro/micro tasks in the next tick
+                // to allow for NgZone to update the state.
+                queueMicrotask(() => {
+                    if (task !== null && !this.zone.hasPendingMacrotasks && !this.zone.hasPendingMicrotasks) {
+                        this.pendingTasks.remove(task);
+                        task = null;
+                    }
+                });
+            }));
+        });
+        this.subscription.add(this.zone.onUnstable.subscribe(() => {
+            NgZone.assertInAngularZone();
+            task ??= this.pendingTasks.add();
+        }));
+    }
+    ngOnDestroy() {
+        this.subscription.unsubscribe();
+    }
+    static { this.ɵfac = function ZoneStablePendingTask_Factory(t) { return new (t || ZoneStablePendingTask)(); }; }
+    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ZoneStablePendingTask, factory: ZoneStablePendingTask.ɵfac, providedIn: 'root' }); }
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ZoneStablePendingTask, [{
+        type: Injectable,
+        args: [{ providedIn: 'root' }]
+    }], null, null); })();
 
 /**
  * Work out the locale from the potential global properties.
