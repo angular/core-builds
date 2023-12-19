@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.7+sha-c3f85e5
+ * @license Angular v17.0.7+sha-b131c3b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -643,6 +643,7 @@ export declare class ApplicationRef {
     private _destroyListeners;
     private readonly internalErrorHandler;
     private readonly zoneIsStable;
+    private readonly noPendingTasks;
     /**
      * Indicates whether this instance was destroyed.
      */
@@ -11517,26 +11518,6 @@ export declare type ɵImageConfig = {
     disableImageLazyLoadWarning?: boolean;
 };
 
-/**
- * *Internal* service that keeps track of pending tasks happening in the system
- * during the initial rendering. No tasks are tracked after an initial
- * rendering.
- *
- * This information is needed to make sure that the serialization on the server
- * is delayed until all tasks in the queue (such as an initial navigation or a
- * pending HTTP request) are completed.
- */
-export declare class ɵInitialRenderPendingTasks implements OnDestroy {
-    private taskId;
-    private pendingTasks;
-    hasPendingTasks: BehaviorSubject<boolean>;
-    add(): number;
-    remove(taskId: number): void;
-    ngOnDestroy(): void;
-    static ɵfac: i0.ɵɵFactoryDeclaration<ɵInitialRenderPendingTasks, never>;
-    static ɵprov: i0.ɵɵInjectableDeclaration<ɵInitialRenderPendingTasks>;
-}
-
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
 export declare function ɵinjectChangeDetectorRef(flags: InjectFlags): ChangeDetectorRef;
 
@@ -11872,6 +11853,27 @@ export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
  * a given module.
  */
 export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
+
+/**
+ * *Internal* service that keeps track of pending tasks happening in the system.
+ *
+ * This information is needed to make sure that the serialization on the server
+ * is delayed until all tasks in the queue (such as an initial navigation or a
+ * pending HTTP request) are completed.
+ *
+ * Pending tasks continue to contribute to the stableness of `ApplicationRef`
+ * throughout the lifetime of the application.
+ */
+export declare class ɵPendingTasks implements OnDestroy {
+    private taskId;
+    private pendingTasks;
+    hasPendingTasks: BehaviorSubject<boolean>;
+    add(): number;
+    remove(taskId: number): void;
+    ngOnDestroy(): void;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ɵPendingTasks, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<ɵPendingTasks>;
+}
 
 
 /**
