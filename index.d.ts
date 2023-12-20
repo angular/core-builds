@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.7+sha-ed936ba
+ * @license Angular v17.0.7+sha-c3250b0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -642,8 +642,6 @@ export declare class ApplicationRef {
     private _destroyed;
     private _destroyListeners;
     private readonly internalErrorHandler;
-    private readonly zoneIsStable;
-    private readonly noPendingTasks;
     /**
      * Indicates whether this instance was destroyed.
      */
@@ -11867,6 +11865,7 @@ export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponen
 export declare class ɵPendingTasks implements OnDestroy {
     private taskId;
     private pendingTasks;
+    private get _hasPendingTasks();
     hasPendingTasks: BehaviorSubject<boolean>;
     add(): number;
     remove(taskId: number): void;
