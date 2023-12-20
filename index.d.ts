@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.4+sha-cc74ebf
+ * @license Angular v17.1.0-next.4+sha-8d58595
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5935,6 +5935,8 @@ declare interface LViewEnvironment {
     inlineEffectRunner: FlushableEffectRunner | null;
     /** Container for after render hooks */
     afterRenderEventManager: ɵAfterRenderEventManager | null;
+    /** Scheduler for change detection to notify when application state changes. */
+    changeDetectionScheduler: ɵChangeDetectionScheduler | null;
 }
 
 /** Flags associated with an LView (saved in LView[FLAGS]) */
@@ -10864,6 +10866,14 @@ export declare const enum ɵBypassType {
     ResourceUrl = "ResourceURL",
     Script = "Script",
     Style = "Style"
+}
+
+
+/**
+ * Injectable that is notified when an `LView` is made aware of changes to application state.
+ */
+export declare abstract class ɵChangeDetectionScheduler {
+    abstract notify(): void;
 }
 
 export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
