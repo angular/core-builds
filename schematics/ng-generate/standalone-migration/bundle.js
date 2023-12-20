@@ -7982,8 +7982,9 @@ var OpKind;
   OpKind2[OpKind2["I18nApply"] = 40] = "I18nApply";
   OpKind2[OpKind2["IcuStart"] = 41] = "IcuStart";
   OpKind2[OpKind2["IcuEnd"] = 42] = "IcuEnd";
-  OpKind2[OpKind2["I18nContext"] = 43] = "I18nContext";
-  OpKind2[OpKind2["I18nAttributes"] = 44] = "I18nAttributes";
+  OpKind2[OpKind2["IcuPlaceholder"] = 43] = "IcuPlaceholder";
+  OpKind2[OpKind2["I18nContext"] = 44] = "I18nContext";
+  OpKind2[OpKind2["I18nAttributes"] = 45] = "I18nAttributes";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function(ExpressionKind2) {
@@ -8295,7 +8296,7 @@ function createDeferWhenOp(target, expr, prefetch, sourceSpan) {
     sourceSpan
   }, NEW_OP), TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS);
 }
-function createI18nExpressionOp(context, target, i18nOwner, handle, expression, i18nPlaceholder, resolutionTime, usage, name, sourceSpan) {
+function createI18nExpressionOp(context, target, i18nOwner, handle, expression, icuPlaceholder, i18nPlaceholder, resolutionTime, usage, name, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.I18nExpression,
     context,
@@ -8303,6 +8304,7 @@ function createI18nExpressionOp(context, target, i18nOwner, handle, expression, 
     i18nOwner,
     handle,
     expression,
+    icuPlaceholder,
     i18nPlaceholder,
     resolutionTime,
     usage,
@@ -9074,6 +9076,7 @@ function transformExpressionsInOp(op, transform2, flags) {
     case OpKind.Template:
     case OpKind.Text:
     case OpKind.I18nAttributes:
+    case OpKind.IcuPlaceholder:
       break;
     default:
       throw new Error(`AssertionError: transformExpressionsInOp doesn't handle ${OpKind[op.kind]}`);
@@ -9462,12 +9465,13 @@ function createEnableBindingsOp(xref) {
     xref
   }, NEW_OP);
 }
-function createTextOp(xref, initialValue, sourceSpan) {
+function createTextOp(xref, initialValue, icuPlaceholder, sourceSpan) {
   return __spreadValues(__spreadValues({
     kind: OpKind.Text,
     xref,
     handle: new SlotHandle(),
     initialValue,
+    icuPlaceholder,
     sourceSpan
   }, TRAIT_CONSUMES_SLOT), NEW_OP);
 }
@@ -9618,6 +9622,15 @@ function createIcuEndOp(xref) {
   return __spreadValues({
     kind: OpKind.IcuEnd,
     xref
+  }, NEW_OP);
+}
+function createIcuPlaceholderOp(xref, name, strings) {
+  return __spreadValues({
+    kind: OpKind.IcuPlaceholder,
+    xref,
+    name,
+    strings,
+    expressionPlaceholders: []
   }, NEW_OP);
 }
 function createI18nContextOp(contextKind, xref, i18nBlock, message, sourceSpan) {
@@ -10403,7 +10416,7 @@ function convertI18nBindings(job) {
             if (op.expression.i18nPlaceholders.length !== op.expression.expressions.length) {
               throw new Error(`AssertionError: An i18n attribute binding instruction requires the same number of expressions and placeholders, but found ${op.expression.i18nPlaceholders.length} placeholders and ${op.expression.expressions.length} expressions`);
             }
-            ops.push(createI18nExpressionOp(op.i18nContext, i18nAttributesForElem.target, i18nAttributesForElem.xref, i18nAttributesForElem.handle, expr, op.expression.i18nPlaceholders[i], I18nParamResolutionTime.Creation, I18nExpressionFor.I18nAttribute, op.name, op.sourceSpan));
+            ops.push(createI18nExpressionOp(op.i18nContext, i18nAttributesForElem.target, i18nAttributesForElem.xref, i18nAttributesForElem.handle, expr, null, op.expression.i18nPlaceholders[i], I18nParamResolutionTime.Creation, I18nExpressionFor.I18nAttribute, op.name, op.sourceSpan));
           }
           OpList.replaceWithMany(op, ops);
           break;
@@ -10846,10 +10859,12 @@ function extractI18nMessages(job) {
       }
     }
   }
+  let currentIcu = null;
   for (const unit of job.units) {
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.IcuStart:
+          currentIcu = op;
           OpList.remove(op);
           const icuContext = i18nContexts.get(op.context);
           if (icuContext.contextKind !== I18nContextKind.Icu) {
@@ -10869,6 +10884,15 @@ function extractI18nMessages(job) {
           rootMessage.subMessages.push(subMessage.xref);
           break;
         case OpKind.IcuEnd:
+          currentIcu = null;
+          OpList.remove(op);
+          break;
+        case OpKind.IcuPlaceholder:
+          if (currentIcu === null || currentIcu.context == null) {
+            throw Error("AssertionError: Unexpected ICU placeholder outside of i18n context");
+          }
+          const msg = i18nMessagesByContext.get(currentIcu.context);
+          msg.postprocessingParams.set(op.name, literal(formatIcuPlaceholder(op)));
           OpList.remove(op);
           break;
       }
@@ -10878,13 +10902,15 @@ function extractI18nMessages(job) {
 function createI18nMessage(job, context, messagePlaceholder) {
   let formattedParams = formatParams(context.params);
   const formattedPostprocessingParams = formatParams(context.postprocessingParams);
-  let needsPostprocessing = formattedPostprocessingParams.size > 0;
-  for (const values of context.params.values()) {
-    if (values.length > 1) {
-      needsPostprocessing = true;
-    }
-  }
+  let needsPostprocessing = [...context.params.values()].some((v) => v.length > 1);
   return createI18nMessageOp(job.allocateXrefId(), context.xref, context.i18nBlock, context.message, messagePlaceholder != null ? messagePlaceholder : null, formattedParams, formattedPostprocessingParams, needsPostprocessing);
+}
+function formatIcuPlaceholder(op) {
+  if (op.strings.length !== op.expressionPlaceholders.length + 1) {
+    throw Error(`AsserionError: Invalid ICU placeholder with ${op.strings.length} strings and ${op.expressionPlaceholders.length} expressions`);
+  }
+  const values = op.expressionPlaceholders.map(formatValue);
+  return op.strings.flatMap((str, i) => [str, values[i] || ""]).join("");
 }
 function formatParams(params) {
   const formattedParams = /* @__PURE__ */ new Map();
@@ -17213,7 +17239,7 @@ function collectMessage(job, fileBasedI18nSuffix, messages, messageOp) {
   const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX2));
   const closureVar = i18nGenerateClosureVar(job.pool, messageOp.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
   let transformFn = void 0;
-  if (messageOp.needsPostprocessing) {
+  if (messageOp.needsPostprocessing || messageOp.postprocessingParams.size > 0) {
     const postprocessingParams = Object.fromEntries([...messageOp.postprocessingParams.entries()].sort());
     const formattedPostprocessingParams = formatI18nPlaceholderNamesInMap(postprocessingParams, false);
     const extraTransformFnParams = [];
@@ -17232,7 +17258,6 @@ function addSubMessageParams(messageOp, subMessagePlaceholders) {
     } else {
       messageOp.params.set(placeholder, literal(`${ESCAPE2}${I18N_ICU_MAPPING_PREFIX2}${placeholder}${ESCAPE2}`));
       messageOp.postprocessingParams.set(placeholder, literalArr(subMessages));
-      messageOp.needsPostprocessing = true;
     }
   }
 }
@@ -17266,12 +17291,13 @@ function i18nGenerateClosureVar(pool, messageId, fileBasedI18nSuffix, useExterna
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/i18n_text_extraction.mjs
 function convertI18nText(job) {
-  var _a2;
+  var _a2, _b2, _c2;
   for (const unit of job.units) {
     let currentI18n = null;
     let currentIcu = null;
     const textNodeI18nBlocks = /* @__PURE__ */ new Map();
     const textNodeIcus = /* @__PURE__ */ new Map();
+    const icuPlaceholderByText = /* @__PURE__ */ new Map();
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
@@ -17296,7 +17322,13 @@ function convertI18nText(job) {
           if (currentI18n !== null) {
             textNodeI18nBlocks.set(op.xref, currentI18n);
             textNodeIcus.set(op.xref, currentIcu);
-            OpList.remove(op);
+            if (op.icuPlaceholder !== null) {
+              const icuPlaceholderOp = createIcuPlaceholderOp(job.allocateXrefId(), op.icuPlaceholder, [op.initialValue]);
+              OpList.replace(op, icuPlaceholderOp);
+              icuPlaceholderByText.set(op.xref, icuPlaceholderOp);
+            } else {
+              OpList.remove(op);
+            }
           }
           break;
       }
@@ -17309,14 +17341,18 @@ function convertI18nText(job) {
           }
           const i18nOp = textNodeI18nBlocks.get(op.target);
           const icuOp = textNodeIcus.get(op.target);
+          const icuPlaceholder = icuPlaceholderByText.get(op.target);
           const contextId = icuOp ? icuOp.context : i18nOp.context;
           const resolutionTime = icuOp ? I18nParamResolutionTime.Postproccessing : I18nParamResolutionTime.Creation;
           const ops = [];
           for (let i = 0; i < op.interpolation.expressions.length; i++) {
             const expr = op.interpolation.expressions[i];
-            ops.push(createI18nExpressionOp(contextId, i18nOp.xref, i18nOp.xref, i18nOp.handle, expr, op.interpolation.i18nPlaceholders[i], resolutionTime, I18nExpressionFor.I18nText, "", (_a2 = expr.sourceSpan) != null ? _a2 : op.sourceSpan));
+            ops.push(createI18nExpressionOp(contextId, i18nOp.xref, i18nOp.xref, i18nOp.handle, expr, (_a2 = icuPlaceholder == null ? void 0 : icuPlaceholder.xref) != null ? _a2 : null, (_b2 = op.interpolation.i18nPlaceholders[i]) != null ? _b2 : null, resolutionTime, I18nExpressionFor.I18nText, "", (_c2 = expr.sourceSpan) != null ? _c2 : op.sourceSpan));
           }
           OpList.replaceWithMany(op, ops);
+          if (icuPlaceholder !== void 0) {
+            icuPlaceholder.strings = op.interpolation.strings;
+          }
           break;
       }
     }
@@ -19202,6 +19238,7 @@ function resolveI18nExpressionPlaceholders(job) {
   var _a2;
   const subTemplateIndicies = /* @__PURE__ */ new Map();
   const i18nContexts = /* @__PURE__ */ new Map();
+  const icuPlaceholders = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
       switch (op.kind) {
@@ -19211,6 +19248,9 @@ function resolveI18nExpressionPlaceholders(job) {
         case OpKind.I18nContext:
           i18nContexts.set(op.xref, op);
           break;
+        case OpKind.IcuPlaceholder:
+          icuPlaceholders.set(op.xref, op);
+          break;
       }
     }
   }
@@ -19219,66 +19259,32 @@ function resolveI18nExpressionPlaceholders(job) {
   for (const unit of job.units) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
-        const i18nContext = i18nContexts.get(op.context);
         const index = expressionIndices.get(referenceIndex(op)) || 0;
         const subTemplateIndex = (_a2 = subTemplateIndicies.get(op.i18nOwner)) != null ? _a2 : null;
-        const params = op.resolutionTime === I18nParamResolutionTime.Creation ? i18nContext.params : i18nContext.postprocessingParams;
-        const values = params.get(op.i18nPlaceholder) || [];
-        values.push({
+        const value = {
           value: index,
           subTemplateIndex,
           flags: I18nParamValueFlags.ExpressionIndex
-        });
-        params.set(op.i18nPlaceholder, values);
+        };
+        updatePlaceholder(op, value, i18nContexts, icuPlaceholders);
         expressionIndices.set(referenceIndex(op), index + 1);
       }
     }
   }
 }
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_icu_placeholders.mjs
-function resolveI18nIcuPlaceholders(job) {
-  for (const unit of job.units) {
-    for (const op of unit.create) {
-      if (op.kind === OpKind.I18nContext && op.contextKind === I18nContextKind.Icu) {
-        for (const node of op.message.nodes) {
-          node.visit(new ResolveIcuPlaceholdersVisitor(op.postprocessingParams));
-        }
-      }
-    }
+function updatePlaceholder(op, value, i18nContexts, icuPlaceholders) {
+  if (op.i18nPlaceholder !== null) {
+    const i18nContext = i18nContexts.get(op.context);
+    const params = op.resolutionTime === I18nParamResolutionTime.Creation ? i18nContext.params : i18nContext.postprocessingParams;
+    const values = params.get(op.i18nPlaceholder) || [];
+    values.push(value);
+    params.set(op.i18nPlaceholder, values);
+  }
+  if (op.icuPlaceholder !== null) {
+    const icuPlaceholderOp = icuPlaceholders.get(op.icuPlaceholder);
+    icuPlaceholderOp == null ? void 0 : icuPlaceholderOp.expressionPlaceholders.push(value);
   }
 }
-var ResolveIcuPlaceholdersVisitor = class extends RecurseVisitor {
-  constructor(params) {
-    super();
-    this.params = params;
-  }
-  visitContainerPlaceholder(placeholder) {
-    var _a2, _b2;
-    if (placeholder.startName && placeholder.startSourceSpan && !this.params.has(placeholder.startName)) {
-      this.params.set(placeholder.startName, [{
-        value: (_a2 = placeholder.startSourceSpan) == null ? void 0 : _a2.toString(),
-        subTemplateIndex: null,
-        flags: I18nParamValueFlags.None
-      }]);
-    }
-    if (placeholder.closeName && placeholder.endSourceSpan && !this.params.has(placeholder.closeName)) {
-      this.params.set(placeholder.closeName, [{
-        value: (_b2 = placeholder.endSourceSpan) == null ? void 0 : _b2.toString(),
-        subTemplateIndex: null,
-        flags: I18nParamValueFlags.None
-      }]);
-    }
-  }
-  visitTagPlaceholder(placeholder) {
-    super.visitTagPlaceholder(placeholder);
-    this.visitContainerPlaceholder(placeholder);
-  }
-  visitBlockPlaceholder(placeholder) {
-    super.visitBlockPlaceholder(placeholder);
-    this.visitContainerPlaceholder(placeholder);
-  }
-};
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_names.mjs
 function resolveNames(job) {
@@ -20107,7 +20113,6 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: createDeferDepsFns },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
-  { kind: CompilationJobKind.Tmpl, fn: resolveI18nIcuPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackFns },
   { kind: CompilationJobKind.Tmpl, fn: collectI18nConsts },
@@ -20301,9 +20306,9 @@ function ingestNodes(unit, template2) {
     } else if (node instanceof Content) {
       ingestContent(unit, node);
     } else if (node instanceof Text) {
-      ingestText(unit, node);
+      ingestText(unit, node, null);
     } else if (node instanceof BoundText) {
-      ingestBoundText(unit, node);
+      ingestBoundText(unit, node, null);
     } else if (node instanceof IfBlock) {
       ingestIfBlock(unit, node);
     } else if (node instanceof SwitchBlock) {
@@ -20382,10 +20387,10 @@ function ingestContent(unit, content) {
   }
   unit.create.push(op);
 }
-function ingestText(unit, text2) {
-  unit.create.push(createTextOp(unit.job.allocateXrefId(), text2.value, text2.sourceSpan));
+function ingestText(unit, text2, icuPlaceholder) {
+  unit.create.push(createTextOp(unit.job.allocateXrefId(), text2.value, icuPlaceholder, text2.sourceSpan));
 }
-function ingestBoundText(unit, text2, i18nPlaceholders) {
+function ingestBoundText(unit, text2, icuPlaceholder) {
   var _a2;
   let value = text2.value;
   if (value instanceof ASTWithSource) {
@@ -20397,14 +20402,12 @@ function ingestBoundText(unit, text2, i18nPlaceholders) {
   if (text2.i18n !== void 0 && !(text2.i18n instanceof Container)) {
     throw Error(`Unhandled i18n metadata type for text interpolation: ${(_a2 = text2.i18n) == null ? void 0 : _a2.constructor.name}`);
   }
-  if (i18nPlaceholders === void 0) {
-    i18nPlaceholders = text2.i18n instanceof Container ? text2.i18n.children.filter((node) => node instanceof Placeholder).map((placeholder) => placeholder.name) : [];
-  }
+  const i18nPlaceholders = text2.i18n instanceof Container ? text2.i18n.children.filter((node) => node instanceof Placeholder).map((placeholder) => placeholder.name) : [];
   if (i18nPlaceholders.length > 0 && i18nPlaceholders.length !== value.expressions.length) {
     throw Error(`Unexpected number of i18n placeholders (${value.expressions.length}) for BoundText with ${value.expressions.length} expressions`);
   }
   const textXref = unit.job.allocateXrefId();
-  unit.create.push(createTextOp(textXref, "", text2.sourceSpan));
+  unit.create.push(createTextOp(textXref, "", icuPlaceholder, text2.sourceSpan));
   const baseSourceSpan = unit.job.compatibility ? null : text2.sourceSpan;
   unit.update.push(createInterpolateTextOp(textXref, new Interpolation2(value.strings, value.expressions.map((expr) => convertAst(expr, unit.job, baseSourceSpan)), i18nPlaceholders), text2.sourceSpan));
 }
@@ -20577,9 +20580,9 @@ function ingestIcu(unit, icu) {
     unit.create.push(createIcuStartOp(xref, icu.i18n, icuFromI18nMessage(icu.i18n).name, null));
     for (const [placeholder, text2] of Object.entries(__spreadValues(__spreadValues({}, icu.vars), icu.placeholders))) {
       if (text2 instanceof BoundText) {
-        ingestBoundText(unit, text2, [placeholder]);
+        ingestBoundText(unit, text2, placeholder);
       } else {
-        ingestText(unit, text2);
+        ingestText(unit, text2, placeholder);
       }
     }
     unit.create.push(createIcuEndOp(xref));
@@ -26447,7 +26450,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.4+sha-cafc3b0");
+var VERSION2 = new Version("17.1.0-next.4+sha-cc74ebf");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27513,7 +27516,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cc74ebf"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27582,7 +27585,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cc74ebf"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27875,7 +27878,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cc74ebf"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27898,7 +27901,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cc74ebf"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27936,7 +27939,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cc74ebf"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27960,7 +27963,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cc74ebf"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27995,7 +27998,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.4+sha-cafc3b0"));
+  definitionMap.set("version", literal("17.1.0-next.4+sha-cc74ebf"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28012,7 +28015,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.4+sha-cafc3b0");
+var VERSION3 = new Version("17.1.0-next.4+sha-cc74ebf");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
