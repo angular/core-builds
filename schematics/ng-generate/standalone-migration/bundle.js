@@ -26460,7 +26460,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.5+sha-33b5707");
+var VERSION2 = new Version("17.1.0-next.5+sha-fed831f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27526,7 +27526,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-33b5707"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-fed831f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27595,7 +27595,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-33b5707"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-fed831f"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27888,7 +27888,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-33b5707"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-fed831f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27911,7 +27911,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-33b5707"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-fed831f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27949,7 +27949,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-33b5707"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-fed831f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27973,7 +27973,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-33b5707"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-fed831f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28008,7 +28008,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-33b5707"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-fed831f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28025,7 +28025,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.5+sha-33b5707");
+var VERSION3 = new Version("17.1.0-next.5+sha-fed831f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35084,8 +35084,8 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
   const members = reflector.getMembersOfClass(clazz);
   const decoratedElements = members.filter((member) => !member.isStatic && member.decorators !== null);
   const coreModule = isCore ? void 0 : "@angular/core";
-  const inputsFromMeta = parseInputsArray2(clazz, directive, evaluator, reflector, refEmitter);
-  const inputsFromFields = parseInputFields(clazz, members, evaluator, reflector, refEmitter, coreModule);
+  const inputsFromMeta = parseInputsArray2(clazz, directive, evaluator, reflector, refEmitter, compilationMode);
+  const inputsFromFields = parseInputFields(clazz, members, evaluator, reflector, refEmitter, coreModule, compilationMode);
   const inputs = ClassPropertyMapping.fromMappedObject(__spreadValues(__spreadValues({}, inputsFromMeta), inputsFromFields));
   const outputsFromMeta = parseOutputsArray(directive, evaluator);
   const outputsFromFields = parseOutputFields(filterToMembersWithDecorator(decoratedElements, "Output", coreModule), evaluator);
@@ -35422,7 +35422,7 @@ function parseDecoratedFields(fields, evaluator, callback) {
     }
   }
 }
-function parseInputsArray2(clazz, decoratorMetadata, evaluator, reflector, refEmitter) {
+function parseInputsArray2(clazz, decoratorMetadata, evaluator, reflector, refEmitter, compilationMode) {
   const inputsField = decoratorMetadata.get("inputs");
   if (inputsField === void 0) {
     return {};
@@ -35456,7 +35456,7 @@ function parseInputsArray2(clazz, decoratorMetadata, evaluator, reflector, refEm
         if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference2)) {
           throw createValueHasWrongTypeError(inputsField, transformValue, `Transform of value at position ${i} of @Directive.inputs array must be a function`);
         }
-        transform2 = parseDecoratorInputTransformFunction(clazz, name, transformValue, reflector, refEmitter);
+        transform2 = parseDecoratorInputTransformFunction(clazz, name, transformValue, reflector, refEmitter, compilationMode);
       }
       inputs[name] = {
         classPropertyName: name,
@@ -35486,7 +35486,7 @@ function tryGetDecoratorOnMember(member, decoratorName, coreModule) {
   }
   return null;
 }
-function tryParseInputFieldMapping(clazz, member, evaluator, reflector, coreModule, refEmitter) {
+function tryParseInputFieldMapping(clazz, member, evaluator, reflector, coreModule, refEmitter, compilationMode) {
   const classPropertyName = member.name;
   const decorator = tryGetDecoratorOnMember(member, "Input", coreModule);
   if (decorator !== null) {
@@ -35512,7 +35512,7 @@ function tryParseInputFieldMapping(clazz, member, evaluator, reflector, coreModu
       if (!(transformValue instanceof DynamicValue) && !(transformValue instanceof Reference2)) {
         throw createValueHasWrongTypeError(optionsNode, transformValue, `Input transform must be a function`);
       }
-      transform2 = parseDecoratorInputTransformFunction(clazz, classPropertyName, transformValue, reflector, refEmitter);
+      transform2 = parseDecoratorInputTransformFunction(clazz, classPropertyName, transformValue, reflector, refEmitter, compilationMode);
     }
     return {
       isSignal: false,
@@ -35540,22 +35540,32 @@ function tryParseInputFieldMapping(clazz, member, evaluator, reflector, coreModu
   }
   return null;
 }
-function parseInputFields(clazz, members, evaluator, reflector, refEmitter, coreModule) {
+function parseInputFields(clazz, members, evaluator, reflector, refEmitter, coreModule, compilationMode) {
   const inputs = {};
   for (const member of members) {
     if (member.isStatic) {
       continue;
     }
     const classPropertyName = member.name;
-    const inputMapping = tryParseInputFieldMapping(clazz, member, evaluator, reflector, coreModule, refEmitter);
+    const inputMapping = tryParseInputFieldMapping(clazz, member, evaluator, reflector, coreModule, refEmitter, compilationMode);
     if (inputMapping !== null) {
       inputs[classPropertyName] = inputMapping;
     }
   }
   return inputs;
 }
-function parseDecoratorInputTransformFunction(clazz, classPropertyName, value, reflector, refEmitter) {
+function parseDecoratorInputTransformFunction(clazz, classPropertyName, value, reflector, refEmitter, compilationMode) {
   var _a2;
+  if (compilationMode === CompilationMode.LOCAL) {
+    const node2 = value instanceof Reference2 ? value.getIdentityIn(clazz.getSourceFile()) : value.node;
+    if (node2 === null) {
+      throw createValueHasWrongTypeError(value.node, value, "Input transform function could not be referenced");
+    }
+    return {
+      node: node2,
+      type: new Reference2(import_typescript51.default.factory.createKeywordTypeNode(import_typescript51.default.SyntaxKind.UnknownKeyword))
+    };
+  }
   const definition = reflector.getDefinitionOfFunction(value.node);
   if (definition === null) {
     throw createValueHasWrongTypeError(value.node, value, "Input transform must be a function");

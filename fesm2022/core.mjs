@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-33b5707
+ * @license Angular v17.1.0-next.5+sha-fed831f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -352,8 +352,9 @@ function throwInvalidProviderError(ngModuleType, providers, provider) {
 }
 /** Throws an error when a token is not found in DI. */
 function throwProviderNotFoundError(token, injectorName) {
-    const injectorDetails = injectorName ? ` in ${injectorName}` : '';
-    throw new RuntimeError(-201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */, ngDevMode && `No provider for ${stringifyForError(token)} found${injectorDetails}`);
+    const errorMessage = ngDevMode &&
+        `No provider for ${stringifyForError(token)} found${injectorName ? ` in ${injectorName}` : ''}`;
+    throw new RuntimeError(-201 /* RuntimeErrorCode.PROVIDER_NOT_FOUND */, errorMessage);
 }
 
 // The functions in this file verify that the assumptions we are making
@@ -624,7 +625,7 @@ function injectRootLimpMode(token, notFoundValue, flags) {
         return null;
     if (notFoundValue !== undefined)
         return notFoundValue;
-    throwProviderNotFoundError(stringify(token), 'Injector');
+    throwProviderNotFoundError(token, 'Injector');
 }
 /**
  * Assert that `_injectImplementation` is not `fn`.
@@ -3839,11 +3840,12 @@ function hasParentInjector(parentLocation) {
     return parentLocation !== NO_PARENT_INJECTOR;
 }
 function getParentInjectorIndex(parentLocation) {
-    ngDevMode && assertNumber(parentLocation, 'Number expected');
-    ngDevMode && assertNotEqual(parentLocation, -1, 'Not a valid state.');
-    const parentInjectorIndex = parentLocation & 32767 /* RelativeInjectorLocationFlags.InjectorIndexMask */;
-    ngDevMode &&
+    if (ngDevMode) {
+        assertNumber(parentLocation, 'Number expected');
+        assertNotEqual(parentLocation, -1, 'Not a valid state.');
+        const parentInjectorIndex = parentLocation & 32767 /* RelativeInjectorLocationFlags.InjectorIndexMask */;
         assertGreaterThan(parentInjectorIndex, HEADER_OFFSET, 'Parent injector must be pointing past HEADER_OFFSET.');
+    }
     return parentLocation & 32767 /* RelativeInjectorLocationFlags.InjectorIndexMask */;
 }
 function getParentInjectorViewOffset(parentLocation) {
@@ -6210,9 +6212,11 @@ class R3Injector extends EnvironmentInjector {
             multiRecord.multi.push(provider);
         }
         else {
-            const existing = this.records.get(token);
-            if (ngDevMode && existing && existing.multi !== undefined) {
-                throwMixedMultiProviderError();
+            if (ngDevMode) {
+                const existing = this.records.get(token);
+                if (existing && existing.multi !== undefined) {
+                    throwMixedMultiProviderError();
+                }
             }
         }
         this.records.set(token, record);
@@ -6280,8 +6284,8 @@ function getUndecoratedInjectableFactory(token) {
     // If the token has parameters then it has dependencies that we cannot resolve implicitly.
     const paramLength = token.length;
     if (paramLength > 0) {
-        const args = newArray(paramLength, '?');
-        throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode && `Can't resolve all parameters for ${stringify(token)}: (${args.join(', ')}).`);
+        throw new RuntimeError(204 /* RuntimeErrorCode.INVALID_INJECTION_TOKEN */, ngDevMode &&
+            `Can't resolve all parameters for ${stringify(token)}: (${newArray(paramLength, '?').join(', ')}).`);
     }
     // The constructor function appears to have no parameters.
     // This might be because it inherits from a super-class. In which case, use an injectable
@@ -8276,8 +8280,7 @@ function detachMovedView(declarationContainer, lView) {
         assertDefined(declarationContainer[MOVED_VIEWS], 'A projected view should belong to a non-empty projected views collection');
     const movedViews = declarationContainer[MOVED_VIEWS];
     const declarationViewIndex = movedViews.indexOf(lView);
-    const insertionLContainer = lView[PARENT];
-    ngDevMode && assertLContainer(insertionLContainer);
+    ngDevMode && assertLContainer(lView[PARENT]);
     movedViews.splice(declarationViewIndex, 1);
 }
 /**
@@ -10087,7 +10090,7 @@ const SSR_CONTENT_INTEGRITY_MARKER = 'nghm';
  * @param injector Injector that this component has access to.
  * @param isRootView Specifies whether we trying to read hydration info for the root view.
  */
-let _retrieveHydrationInfoImpl = (rNode, injector, isRootView) => null;
+let _retrieveHydrationInfoImpl = () => null;
 function retrieveHydrationInfoImpl(rNode, injector, isRootView = false) {
     let nghAttrValue = rNode.getAttribute(NGH_ATTR_NAME);
     if (nghAttrValue == null)
@@ -12402,7 +12405,7 @@ function applyRootElementTransform(rootElement) {
  *
  * @param rootElement the app root HTML Element
  */
-let _applyRootElementTransformImpl = (rootElement) => null;
+let _applyRootElementTransformImpl = () => null;
 /**
  * Processes text node markers before hydration begins. This replaces any special comment
  * nodes that were added prior to serialization are swapped out to restore proper text
@@ -15709,7 +15712,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-33b5707']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-fed831f']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17061,8 +17064,8 @@ function insertTStylingBinding(tData, tNode, tStylingKeyWithStatic, index, isHos
     if (isKeyDuplicateOfStatic) {
         tData[index + 1] = setTStylingRangePrevDuplicate(tData[index + 1]);
     }
-    markDuplicates(tData, tStylingKey, index, true, isClassBinding);
-    markDuplicates(tData, tStylingKey, index, false, isClassBinding);
+    markDuplicates(tData, tStylingKey, index, true);
+    markDuplicates(tData, tStylingKey, index, false);
     markDuplicateOfResidualStyling(tNode, tStylingKey, tData, index, isClassBinding);
     tBindings = toTStylingRange(tmplHead, tmplTail);
     if (isClassBinding) {
@@ -17146,7 +17149,7 @@ function markDuplicateOfResidualStyling(tNode, tStylingKey, tData, index, isClas
  *        - `true` for previous (lower priority);
  *        - `false` for next (higher priority).
  */
-function markDuplicates(tData, tStylingKey, index, isPrevDir, isClassBinding) {
+function markDuplicates(tData, tStylingKey, index, isPrevDir) {
     const tStylingAtIndex = tData[index + 1];
     const isMap = tStylingKey === null;
     let cursor = isPrevDir ? getTStylingRangePrev(tStylingAtIndex) : getTStylingRangeNext(tStylingAtIndex);
@@ -19448,7 +19451,7 @@ function locateDehydratedViewsInContainer(currentRNode, serializedViews) {
  * stored on a given lContainer.
  * Returns `null` by default, when hydration is not enabled.
  */
-let _findMatchingDehydratedViewImpl = (lContainer, template) => null;
+let _findMatchingDehydratedViewImpl = () => null;
 /**
  * Retrieves the next dehydrated view from the LContainer and verifies that
  * it matches a given template id (from the TView that was used to create this
@@ -20188,7 +20191,7 @@ function insertAnchorNode(hostLView, hostTNode) {
     return commentNode;
 }
 let _locateOrCreateAnchorNode = createAnchorNode;
-let _populateDehydratedViewsInLContainer = (lContainer, tNode, hostLView) => false; // noop by default
+let _populateDehydratedViewsInLContainer = () => false; // noop by default
 /**
  * Looks up dehydrated views that belong to a given LContainer and populates
  * this information into the `LContainer[DEHYDRATED_VIEWS]` slot. When running
@@ -29987,7 +29990,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.5+sha-33b5707');
+const VERSION = new Version('17.1.0-next.5+sha-fed831f');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -31793,10 +31796,12 @@ class ApplicationRef {
         const initStatus = this._injector.get(ApplicationInitStatus);
         if (!initStatus.done) {
             const standalone = !isComponentFactory && isStandalone(componentOrFactory);
-            const errorMessage = 'Cannot bootstrap as there are still asynchronous initializers running.' +
-                (standalone ? '' :
-                    ' Bootstrap components in the `ngDoBootstrap` method of the root module.');
-            throw new RuntimeError(405 /* RuntimeErrorCode.ASYNC_INITIALIZERS_STILL_RUNNING */, (typeof ngDevMode === 'undefined' || ngDevMode) && errorMessage);
+            const errorMessage = (typeof ngDevMode === 'undefined' || ngDevMode) &&
+                'Cannot bootstrap as there are still asynchronous initializers running.' +
+                    (standalone ?
+                        '' :
+                        ' Bootstrap components in the `ngDoBootstrap` method of the root module.');
+            throw new RuntimeError(405 /* RuntimeErrorCode.ASYNC_INITIALIZERS_STILL_RUNNING */, errorMessage);
         }
         let componentFactory;
         if (isComponentFactory) {
