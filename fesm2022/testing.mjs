@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.1.0-next.5+sha-fed831f
+ * @license Angular v17.1.0-next.5+sha-c59a4dc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, InjectionToken, inject as inject$1, NgZone, ɵZoneAwareQueueingScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵDeferBlockBehavior, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, InjectionToken, inject as inject$1, ɵNoopNgZone, NgZone, ɵZoneAwareQueueingScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵDeferBlockBehavior, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ResourceLoader } from '@angular/compiler';
@@ -168,62 +168,65 @@ class ComponentFixture {
         this._isDestroyed = false;
         this._resolve = null;
         this._promise = null;
-        this.ngZone = inject$1(ComponentFixtureNoNgZone, { optional: true }) ? null : inject$1(NgZone, { optional: true });
+        this.noZoneOptionIsSet = inject$1(ComponentFixtureNoNgZone, { optional: true });
+        this._ngZone = this.noZoneOptionIsSet ? new ɵNoopNgZone() : inject$1(NgZone);
         this._autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? false;
         this.effectRunner = inject$1(ɵZoneAwareQueueingScheduler, { optional: true });
         this._subscriptions = new Subscription();
+        // TODO(atscott): Remove this from public API
+        this.ngZone = this.noZoneOptionIsSet ? null : this._ngZone;
         this.changeDetectorRef = componentRef.changeDetectorRef;
         this.elementRef = componentRef.location;
         this.debugElement = getDebugNode(this.elementRef.nativeElement);
         this.componentInstance = componentRef.instance;
         this.nativeElement = this.elementRef.nativeElement;
         this.componentRef = componentRef;
-        const ngZone = this.ngZone;
-        if (ngZone) {
-            // Create subscriptions outside the NgZone so that the callbacks run oustide
-            // of NgZone.
-            ngZone.runOutsideAngular(() => {
-                this._subscriptions.add(ngZone.onUnstable.subscribe({
-                    next: () => {
-                        this._isStable = false;
+        this.setupNgZone();
+    }
+    setupNgZone() {
+        // Create subscriptions outside the NgZone so that the callbacks run outside
+        // of NgZone.
+        this._ngZone.runOutsideAngular(() => {
+            this._subscriptions.add(this._ngZone.onUnstable.subscribe({
+                next: () => {
+                    this._isStable = false;
+                }
+            }));
+            this._subscriptions.add(this._ngZone.onMicrotaskEmpty.subscribe({
+                next: () => {
+                    if (this._autoDetect) {
+                        // Do a change detection run with checkNoChanges set to true to check
+                        // there are no changes on the second run.
+                        this.detectChanges(true);
                     }
-                }));
-                this._subscriptions.add(ngZone.onMicrotaskEmpty.subscribe({
-                    next: () => {
-                        if (this._autoDetect) {
-                            // Do a change detection run with checkNoChanges set to true to check
-                            // there are no changes on the second run.
-                            this.detectChanges(true);
-                        }
-                    }
-                }));
-                this._subscriptions.add(ngZone.onStable.subscribe({
-                    next: () => {
-                        this._isStable = true;
-                        // Check whether there is a pending whenStable() completer to resolve.
-                        if (this._promise !== null) {
-                            // If so check whether there are no pending macrotasks before resolving.
-                            // Do this check in the next tick so that ngZone gets a chance to update the state of
-                            // pending macrotasks.
-                            queueMicrotask(() => {
-                                if (!ngZone.hasPendingMacrotasks) {
-                                    if (this._promise !== null) {
-                                        this._resolve(true);
-                                        this._resolve = null;
-                                        this._promise = null;
-                                    }
+                }
+            }));
+            this._subscriptions.add(this._ngZone.onStable.subscribe({
+                next: () => {
+                    this._isStable = true;
+                    // Check whether there is a pending whenStable() completer to resolve.
+                    if (this._promise !== null) {
+                        // If so check whether there are no pending macrotasks before resolving.
+                        // Do this check in the next tick so that ngZone gets a chance to update the state of
+                        // pending macrotasks.
+                        queueMicrotask(() => {
+                            if (!this._ngZone.hasPendingMacrotasks) {
+                                if (this._promise !== null) {
+                                    this._resolve(true);
+                                    this._resolve = null;
+                                    this._promise = null;
                                 }
-                            });
-                        }
+                            }
+                        });
                     }
-                }));
-                this._subscriptions.add(ngZone.onError.subscribe({
-                    next: (error) => {
-                        throw error;
-                    }
-                }));
-            });
-        }
+                }
+            }));
+            this._subscriptions.add(this._ngZone.onError.subscribe({
+                next: (error) => {
+                    throw error;
+                }
+            }));
+        });
     }
     _tick(checkNoChanges) {
         this.changeDetectorRef.detectChanges();
@@ -236,17 +239,11 @@ class ComponentFixture {
      */
     detectChanges(checkNoChanges = true) {
         this.effectRunner?.flush();
-        if (this.ngZone != null) {
-            // Run the change detection inside the NgZone so that any async tasks as part of the change
-            // detection are captured by the zone and can be waited for in isStable.
-            this.ngZone.run(() => {
-                this._tick(checkNoChanges);
-            });
-        }
-        else {
-            // Running without zone. Just do the change detection.
+        // Run the change detection inside the NgZone so that any async tasks as part of the change
+        // detection are captured by the zone and can be waited for in isStable.
+        this._ngZone.run(() => {
             this._tick(checkNoChanges);
-        }
+        });
         // Run any effects that were created/dirtied during change detection. Such effects might become
         // dirty in response to input signals changing.
         this.effectRunner?.flush();
@@ -263,7 +260,7 @@ class ComponentFixture {
      * Also runs detectChanges once so that any existing change is detected.
      */
     autoDetectChanges(autoDetect = true) {
-        if (this.ngZone == null) {
+        if (this.noZoneOptionIsSet) {
             throw new Error('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set');
         }
         this._autoDetect = autoDetect;
@@ -274,7 +271,7 @@ class ComponentFixture {
      * yet.
      */
     isStable() {
-        return this._isStable && !this.ngZone?.hasPendingMacrotasks;
+        return this._isStable && !this._ngZone.hasPendingMacrotasks;
     }
     /**
      * Get a promise that resolves when the fixture is stable.
