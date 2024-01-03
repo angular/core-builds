@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.8+sha-7bf11ea
+ * @license Angular v17.0.8+sha-5fb199b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5561,12 +5561,7 @@ declare enum LContainerFlags {
      *
      * This flag, once set, is never unset for the `LContainer`.
      */
-    HasTransplantedViews = 2,
-    /**
-     * Indicates that this LContainer has a view underneath it that needs to be refreshed during
-     * change detection.
-     */
-    HasChildViewsToRefresh = 4
+    HasTransplantedViews = 2
 }
 
 /**
