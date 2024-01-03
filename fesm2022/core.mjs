@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-c59a4dc
+ * @license Angular v17.1.0-next.5+sha-58f2b74
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2287,11 +2287,6 @@ var LContainerFlags;
      * This flag, once set, is never unset for the `LContainer`.
      */
     LContainerFlags[LContainerFlags["HasTransplantedViews"] = 2] = "HasTransplantedViews";
-    /**
-     * Indicates that this LContainer has a view underneath it that needs to be refreshed during
-     * change detection.
-     */
-    LContainerFlags[LContainerFlags["HasChildViewsToRefresh"] = 4] = "HasChildViewsToRefresh";
 })(LContainerFlags || (LContainerFlags = {}));
 
 /**
@@ -2805,24 +2800,18 @@ function updateAncestorTraversalFlagsOnAttach(lView) {
  */
 function markAncestorsForTraversal(lView) {
     lView[ENVIRONMENT].changeDetectionScheduler?.notify();
-    let parent = lView[PARENT];
+    let parent = getLViewParent(lView);
     while (parent !== null) {
         // We stop adding markers to the ancestors once we reach one that already has the marker. This
         // is to avoid needlessly traversing all the way to the root when the marker already exists.
-        if ((isLContainer(parent) && (parent[FLAGS] & LContainerFlags.HasChildViewsToRefresh) ||
-            (isLView(parent) && parent[FLAGS] & 8192 /* LViewFlags.HasChildViewsToRefresh */))) {
+        if (parent[FLAGS] & 8192 /* LViewFlags.HasChildViewsToRefresh */) {
             break;
         }
-        if (isLContainer(parent)) {
-            parent[FLAGS] |= LContainerFlags.HasChildViewsToRefresh;
+        parent[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
+        if (!viewAttachedToChangeDetector(parent)) {
+            break;
         }
-        else {
-            parent[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
-            if (!viewAttachedToChangeDetector(parent)) {
-                break;
-            }
-        }
-        parent = parent[PARENT];
+        parent = getLViewParent(parent);
     }
 }
 /**
@@ -2847,6 +2836,16 @@ function removeLViewOnDestroy(lView, onDestroyCallback) {
     if (destroyCBIdx !== -1) {
         lView[ON_DESTROY_HOOKS].splice(destroyCBIdx, 1);
     }
+}
+/**
+ * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
+ * that LContainer, which is an LView
+ * @param lView the lView whose parent to get
+ */
+function getLViewParent(lView) {
+    ngDevMode && assertLView(lView);
+    const parent = lView[PARENT];
+    return isLContainer(parent) ? parent[PARENT] : parent;
 }
 
 const instructionState = {
@@ -7980,63 +7979,6 @@ function ensureIcuContainerVisitorLoaded(loader) {
 }
 
 /**
- * Gets the parent LView of the passed LView, if the PARENT is an LContainer, will get the parent of
- * that LContainer, which is an LView
- * @param lView the lView whose parent to get
- */
-function getLViewParent(lView) {
-    ngDevMode && assertLView(lView);
-    const parent = lView[PARENT];
-    return isLContainer(parent) ? parent[PARENT] : parent;
-}
-/**
- * Retrieve the root view from any component or `LView` by walking the parent `LView` until
- * reaching the root `LView`.
- *
- * @param componentOrLView any component or `LView`
- */
-function getRootView(componentOrLView) {
-    ngDevMode && assertDefined(componentOrLView, 'component');
-    let lView = isLView(componentOrLView) ? componentOrLView : readPatchedLView(componentOrLView);
-    while (lView && !(lView[FLAGS] & 512 /* LViewFlags.IsRoot */)) {
-        lView = getLViewParent(lView);
-    }
-    ngDevMode && assertLView(lView);
-    return lView;
-}
-/**
- * Returns the context information associated with the application where the target is situated. It
- * does this by walking the parent views until it gets to the root view, then getting the context
- * off of that.
- *
- * @param viewOrComponent the `LView` or component to get the root context for.
- */
-function getRootContext(viewOrComponent) {
-    const rootView = getRootView(viewOrComponent);
-    ngDevMode &&
-        assertDefined(rootView[CONTEXT], 'Root view has no context. Perhaps it is disconnected?');
-    return rootView[CONTEXT];
-}
-/**
- * Gets the first `LContainer` in the LView or `null` if none exists.
- */
-function getFirstLContainer(lView) {
-    return getNearestLContainer(lView[CHILD_HEAD]);
-}
-/**
- * Gets the next `LContainer` that is a sibling of the given container.
- */
-function getNextLContainer(container) {
-    return getNearestLContainer(container[NEXT]);
-}
-function getNearestLContainer(viewOrContainer) {
-    while (viewOrContainer !== null && !isLContainer(viewOrContainer)) {
-        viewOrContainer = viewOrContainer[NEXT];
-    }
-    return viewOrContainer;
-}
-
-/**
  * NOTE: for performance reasons, the possible actions are inlined within the function instead of
  * being passed as an argument.
  */
@@ -11754,6 +11696,53 @@ const REACTIVE_LVIEW_CONSUMER_NODE = {
     },
 };
 
+/**
+ * Retrieve the root view from any component or `LView` by walking the parent `LView` until
+ * reaching the root `LView`.
+ *
+ * @param componentOrLView any component or `LView`
+ */
+function getRootView(componentOrLView) {
+    ngDevMode && assertDefined(componentOrLView, 'component');
+    let lView = isLView(componentOrLView) ? componentOrLView : readPatchedLView(componentOrLView);
+    while (lView && !(lView[FLAGS] & 512 /* LViewFlags.IsRoot */)) {
+        lView = getLViewParent(lView);
+    }
+    ngDevMode && assertLView(lView);
+    return lView;
+}
+/**
+ * Returns the context information associated with the application where the target is situated. It
+ * does this by walking the parent views until it gets to the root view, then getting the context
+ * off of that.
+ *
+ * @param viewOrComponent the `LView` or component to get the root context for.
+ */
+function getRootContext(viewOrComponent) {
+    const rootView = getRootView(viewOrComponent);
+    ngDevMode &&
+        assertDefined(rootView[CONTEXT], 'Root view has no context. Perhaps it is disconnected?');
+    return rootView[CONTEXT];
+}
+/**
+ * Gets the first `LContainer` in the LView or `null` if none exists.
+ */
+function getFirstLContainer(lView) {
+    return getNearestLContainer(lView[CHILD_HEAD]);
+}
+/**
+ * Gets the next `LContainer` that is a sibling of the given container.
+ */
+function getNextLContainer(container) {
+    return getNearestLContainer(container[NEXT]);
+}
+function getNearestLContainer(viewOrContainer) {
+    while (viewOrContainer !== null && !isLContainer(viewOrContainer)) {
+        viewOrContainer = viewOrContainer[NEXT];
+    }
+    return viewOrContainer;
+}
+
 const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 function wrappedError(message, originalError) {
     const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
@@ -13592,7 +13581,6 @@ function viewShouldHaveReactiveConsumer(tView) {
  */
 function detectChangesInEmbeddedViews(lView, mode) {
     for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
-        lContainer[FLAGS] &= ~LContainerFlags.HasChildViewsToRefresh;
         for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
             const embeddedLView = lContainer[i];
             detectChangesInViewIfAttached(embeddedLView, mode);
@@ -15712,7 +15700,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-c59a4dc']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-58f2b74']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29990,7 +29978,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.5+sha-c59a4dc');
+const VERSION = new Version('17.1.0-next.5+sha-58f2b74');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

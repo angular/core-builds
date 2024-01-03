@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-c59a4dc
+ * @license Angular v17.1.0-next.5+sha-58f2b74
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5571,12 +5571,7 @@ declare enum LContainerFlags {
      *
      * This flag, once set, is never unset for the `LContainer`.
      */
-    HasTransplantedViews = 2,
-    /**
-     * Indicates that this LContainer has a view underneath it that needs to be refreshed during
-     * change detection.
-     */
-    HasChildViewsToRefresh = 4
+    HasTransplantedViews = 2
 }
 
 declare type LegacyInputPartialMapping = string | [bindingPropertyName: string, classPropertyName: string, transformFunction?: Function];
