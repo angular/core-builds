@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.8+sha-7c19dc2
+ * @license Angular v17.0.8+sha-7bf11ea
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -74,12 +74,15 @@ export declare class ComponentFixture<T> {
     private _isDestroyed;
     private _resolve;
     private _promise;
-    ngZone: NgZone | null;
+    private readonly noZoneOptionIsSet;
+    private _ngZone;
     private _autoDetect;
     private effectRunner;
     private _subscriptions;
+    ngZone: NgZone | null;
     /** @nodoc */
     constructor(componentRef: ComponentRef<T>);
+    private setupNgZone;
     private _tick;
     /**
      * Trigger a change detection cycle for the component.

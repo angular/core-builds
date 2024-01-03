@@ -8076,13 +8076,6 @@ var DeferTriggerKind;
   DeferTriggerKind2[DeferTriggerKind2["Interaction"] = 4] = "Interaction";
   DeferTriggerKind2[DeferTriggerKind2["Viewport"] = 5] = "Viewport";
 })(DeferTriggerKind || (DeferTriggerKind = {}));
-var DerivedRepeaterVarIdentity;
-(function(DerivedRepeaterVarIdentity2) {
-  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["First"] = 0] = "First";
-  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Last"] = 1] = "Last";
-  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Even"] = 2] = "Even";
-  DerivedRepeaterVarIdentity2[DerivedRepeaterVarIdentity2["Odd"] = 3] = "Odd";
-})(DerivedRepeaterVarIdentity || (DerivedRepeaterVarIdentity = {}));
 var I18nContextKind;
 (function(I18nContextKind2) {
   I18nContextKind2[I18nContextKind2["RootI18n"] = 0] = "RootI18n";
@@ -8894,27 +8887,6 @@ var ConditionalCaseExpr = class extends ExpressionBase {
     if (this.expr !== null) {
       this.expr = transformExpressionsInExpression(this.expr, transform2, flags);
     }
-  }
-};
-var DerivedRepeaterVarExpr = class extends ExpressionBase {
-  constructor(xref, identity) {
-    super();
-    this.xref = xref;
-    this.identity = identity;
-    this.kind = ExpressionKind.DerivedRepeaterVar;
-  }
-  transformInternalExpressions(transform2, flags) {
-  }
-  visitExpression(visitor, context) {
-  }
-  isEquivalent(e) {
-    return e instanceof DerivedRepeaterVarExpr && e.identity === this.identity && e.xref === this.xref;
-  }
-  isConstant() {
-    return false;
-  }
-  clone() {
-    return new DerivedRepeaterVarExpr(this.xref, this.identity);
   }
 };
 var ConstCollectedExpr = class extends ExpressionBase {
@@ -11109,7 +11081,7 @@ function parseHostStyleProperties(job) {
     if (op.name.startsWith(STYLE_DOT)) {
       op.bindingKind = BindingKind.StyleProperty;
       op.name = op.name.substring(STYLE_DOT.length);
-      if (isCssCustomProperty(op.name)) {
+      if (!isCssCustomProperty(op.name)) {
         op.name = hyphenate(op.name);
       }
       const { property: property2, suffix } = parseProperty(op.name);
@@ -18910,38 +18882,6 @@ function removeUnusedI18nAttributesOps(job) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/repeater_derived_vars.mjs
-function generateRepeaterDerivedVars(job) {
-  const repeaters = /* @__PURE__ */ new Map();
-  for (const unit of job.units) {
-    for (const op of unit.ops()) {
-      if (op.kind === OpKind.RepeaterCreate) {
-        repeaters.set(op.xref, op);
-      }
-    }
-  }
-  for (const unit of job.units) {
-    for (const op of unit.ops()) {
-      transformExpressionsInOp(op, (expr) => {
-        if (!(expr instanceof DerivedRepeaterVarExpr)) {
-          return expr;
-        }
-        const repeaterOp = repeaters.get(expr.xref);
-        switch (expr.identity) {
-          case DerivedRepeaterVarIdentity.First:
-            return new BinaryOperatorExpr(BinaryOperator.Identical, new LexicalReadExpr(repeaterOp.varNames.$index), literal(0));
-          case DerivedRepeaterVarIdentity.Last:
-            return new BinaryOperatorExpr(BinaryOperator.Identical, new LexicalReadExpr(repeaterOp.varNames.$index), new BinaryOperatorExpr(BinaryOperator.Minus, new LexicalReadExpr(repeaterOp.varNames.$count), literal(1)));
-          case DerivedRepeaterVarIdentity.Even:
-            return new BinaryOperatorExpr(BinaryOperator.Identical, new BinaryOperatorExpr(BinaryOperator.Modulo, new LexicalReadExpr(repeaterOp.varNames.$index), literal(2)), literal(0));
-          case DerivedRepeaterVarIdentity.Odd:
-            return new BinaryOperatorExpr(BinaryOperator.NotIdentical, new BinaryOperatorExpr(BinaryOperator.Modulo, new LexicalReadExpr(repeaterOp.varNames.$index), literal(2)), literal(0));
-        }
-      }, VisitorContextFlag.None);
-    }
-  }
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_contexts.mjs
 function resolveContexts(job) {
   for (const unit of job.units) {
@@ -20045,7 +19985,6 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: saveAndRestoreView },
   { kind: CompilationJobKind.Both, fn: deleteAnyCasts },
   { kind: CompilationJobKind.Both, fn: resolveDollarEvent },
-  { kind: CompilationJobKind.Tmpl, fn: generateRepeaterDerivedVars },
   { kind: CompilationJobKind.Tmpl, fn: generateTrackVariables },
   { kind: CompilationJobKind.Both, fn: resolveNames },
   { kind: CompilationJobKind.Tmpl, fn: resolveDeferTargetNames },
@@ -20543,21 +20482,37 @@ function ingestIcu(unit, icu) {
 function ingestForBlock(unit, forBlock) {
   var _a2, _b2, _c2;
   const repeaterView = unit.job.allocateView(unit.xref);
-  const createRepeaterAlias = (ident, repeaterVar) => {
-    repeaterView.aliases.add({
-      kind: SemanticVariableKind.Alias,
-      name: null,
-      identifier: ident,
-      expression: new DerivedRepeaterVarExpr(repeaterView.xref, repeaterVar)
-    });
-  };
   repeaterView.contextVariables.set(forBlock.item.name, forBlock.item.value);
   repeaterView.contextVariables.set(forBlock.contextVariables.$index.name, forBlock.contextVariables.$index.value);
   repeaterView.contextVariables.set(forBlock.contextVariables.$count.name, forBlock.contextVariables.$count.value);
-  createRepeaterAlias(forBlock.contextVariables.$first.name, DerivedRepeaterVarIdentity.First);
-  createRepeaterAlias(forBlock.contextVariables.$last.name, DerivedRepeaterVarIdentity.Last);
-  createRepeaterAlias(forBlock.contextVariables.$even.name, DerivedRepeaterVarIdentity.Even);
-  createRepeaterAlias(forBlock.contextVariables.$odd.name, DerivedRepeaterVarIdentity.Odd);
+  const indexName = `\u0275${forBlock.contextVariables.$index.name}_${repeaterView.xref}`;
+  const countName = `\u0275${forBlock.contextVariables.$count.name}_${repeaterView.xref}`;
+  repeaterView.contextVariables.set(indexName, forBlock.contextVariables.$index.value);
+  repeaterView.contextVariables.set(countName, forBlock.contextVariables.$count.value);
+  repeaterView.aliases.add({
+    kind: SemanticVariableKind.Alias,
+    name: null,
+    identifier: forBlock.contextVariables.$first.name,
+    expression: new LexicalReadExpr(indexName).identical(literal(0))
+  });
+  repeaterView.aliases.add({
+    kind: SemanticVariableKind.Alias,
+    name: null,
+    identifier: forBlock.contextVariables.$last.name,
+    expression: new LexicalReadExpr(indexName).identical(new LexicalReadExpr(countName).minus(literal(1)))
+  });
+  repeaterView.aliases.add({
+    kind: SemanticVariableKind.Alias,
+    name: null,
+    identifier: forBlock.contextVariables.$even.name,
+    expression: new LexicalReadExpr(indexName).modulo(literal(2)).identical(literal(0))
+  });
+  repeaterView.aliases.add({
+    kind: SemanticVariableKind.Alias,
+    name: null,
+    identifier: forBlock.contextVariables.$odd.name,
+    expression: new LexicalReadExpr(indexName).modulo(literal(2)).notIdentical(literal(0))
+  });
   const sourceSpan = convertSourceSpan(forBlock.trackBy.span, forBlock.sourceSpan);
   const track = convertAst(forBlock.trackBy, unit.job, sourceSpan);
   ingestNodes(repeaterView, forBlock.children);
@@ -26376,7 +26331,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.8+sha-7c19dc2");
+var VERSION2 = new Version("17.0.8+sha-7bf11ea");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27442,7 +27397,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.0.8+sha-7c19dc2"));
+  definitionMap.set("version", literal("17.0.8+sha-7bf11ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27513,7 +27468,7 @@ function createDirectiveDefinitionMap(meta) {
   const hasTransformFunctions = Object.values(meta.inputs).some((input) => input.transformFunction !== null);
   const minVersion = hasTransformFunctions ? MINIMUM_PARTIAL_LINKER_VERSION2 : "14.0.0";
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.0.8+sha-7c19dc2"));
+  definitionMap.set("version", literal("17.0.8+sha-7bf11ea"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27745,7 +27700,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION3 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.0.8+sha-7c19dc2"));
+  definitionMap.set("version", literal("17.0.8+sha-7bf11ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27768,7 +27723,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.0.8+sha-7c19dc2"));
+  definitionMap.set("version", literal("17.0.8+sha-7bf11ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27806,7 +27761,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.0.8+sha-7c19dc2"));
+  definitionMap.set("version", literal("17.0.8+sha-7bf11ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27830,7 +27785,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.0.8+sha-7c19dc2"));
+  definitionMap.set("version", literal("17.0.8+sha-7bf11ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27865,7 +27820,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION7));
-  definitionMap.set("version", literal("17.0.8+sha-7c19dc2"));
+  definitionMap.set("version", literal("17.0.8+sha-7bf11ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27882,7 +27837,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.0.8+sha-7c19dc2");
+var VERSION3 = new Version("17.0.8+sha-7bf11ea");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
