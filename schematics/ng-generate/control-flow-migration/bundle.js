@@ -7288,10 +7288,11 @@ function createClassMapOp(xref, expression, sourceSpan) {
     sourceSpan
   }, TRAIT_DEPENDS_ON_SLOT_CONTEXT), TRAIT_CONSUMES_VARS), NEW_OP);
 }
-function createAttributeOp(target, name, expression, securityContext, isTextAttribute, isStructuralTemplateAttribute, templateKind, i18nMessage, sourceSpan) {
+function createAttributeOp(target, namespace, name, expression, securityContext, isTextAttribute, isStructuralTemplateAttribute, templateKind, i18nMessage, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.Attribute,
     target,
+    namespace,
     name,
     expression,
     securityContext,
@@ -8572,11 +8573,12 @@ function createProjectionOp(xref, selector, i18nPlaceholder, sourceSpan) {
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT);
 }
-function createExtractedAttributeOp(target, bindingKind, name, expression, i18nContext, i18nMessage, securityContext) {
+function createExtractedAttributeOp(target, bindingKind, namespace, name, expression, i18nContext, i18nMessage, securityContext) {
   return __spreadValues({
     kind: OpKind.ExtractedAttribute,
     target,
     bindingKind,
+    namespace,
     name,
     expression,
     i18nContext,
@@ -8971,6 +8973,7 @@ function extractAttributes(job) {
               createExtractedAttributeOp(
                 op.target,
                 bindingKind,
+                null,
                 op.name,
                 null,
                 null,
@@ -8987,6 +8990,7 @@ function extractAttributes(job) {
             OpList.insertBefore(createExtractedAttributeOp(
               op.target,
               BindingKind.Property,
+              null,
               op.name,
               null,
               null,
@@ -9000,6 +9004,7 @@ function extractAttributes(job) {
             const extractedAttributeOp = createExtractedAttributeOp(
               op.target,
               BindingKind.Property,
+              null,
               op.name,
               null,
               null,
@@ -9036,7 +9041,7 @@ function extractAttributeOp(unit, op, elements) {
     extractable && (extractable = op.isTextAttribute);
   }
   if (extractable) {
-    const extractedAttributeOp = createExtractedAttributeOp(op.target, op.isStructuralTemplateAttribute ? BindingKind.Template : BindingKind.Attribute, op.name, op.expression, op.i18nContext, op.i18nMessage, op.securityContext);
+    const extractedAttributeOp = createExtractedAttributeOp(op.target, op.isStructuralTemplateAttribute ? BindingKind.Template : BindingKind.Attribute, op.namespace, op.name, op.expression, op.i18nContext, op.i18nMessage, op.securityContext);
     if (unit.job.kind === CompilationJobKind.Host) {
       unit.create.push(extractedAttributeOp);
     } else {
@@ -9077,7 +9082,8 @@ function specializeBindings(job) {
             const target = lookupElement2(elements, op.target);
             target.nonBindable = true;
           } else {
-            OpList.replace(op, createAttributeOp(op.target, op.name, op.expression, op.securityContext, op.isTextAttribute, op.isStructuralTemplateAttribute, op.templateKind, op.i18nMessage, op.sourceSpan));
+            const [namespace, name] = splitNsName(op.name);
+            OpList.replace(op, createAttributeOp(op.target, namespace, name, op.expression, op.securityContext, op.isTextAttribute, op.isStructuralTemplateAttribute, op.templateKind, op.i18nMessage, op.sourceSpan));
           }
           break;
         case BindingKind.Property:
@@ -9270,7 +9276,7 @@ function collectElementConsts(job) {
       if (op.kind === OpKind.ExtractedAttribute) {
         const attributes = allElementAttributes.get(op.target) || new ElementAttributes(job.compatibility);
         allElementAttributes.set(op.target, attributes);
-        attributes.add(op.bindingKind, op.name, op.expression, op.trustedValueFn);
+        attributes.add(op.bindingKind, op.name, op.expression, op.namespace, op.trustedValueFn);
         OpList.remove(op);
       }
     }
@@ -9358,7 +9364,7 @@ var ElementAttributes = class {
     nameToValue.add(name);
     return false;
   }
-  add(kind, name, value, trustedValueFn) {
+  add(kind, name, value, namespace, trustedValueFn) {
     var _a2;
     const allowDuplicates = this.compatibility === CompatibilityMode.TemplateDefinitionBuilder && (kind === BindingKind.Attribute || kind === BindingKind.ClassName || kind === BindingKind.StyleProperty);
     if (!allowDuplicates && this.isKnown(kind, name, value)) {
@@ -9371,7 +9377,7 @@ var ElementAttributes = class {
       this.projectAs = value.value.toString();
     }
     const array = this.arrayFor(kind);
-    array.push(...getAttributeNameLiterals(name));
+    array.push(...getAttributeNameLiterals(namespace, name));
     if (kind === BindingKind.Attribute || kind === BindingKind.StyleProperty) {
       if (value === null) {
         throw Error("Attribute, i18n attribute, & style element attributes must have a value");
@@ -9393,15 +9399,10 @@ var ElementAttributes = class {
     return this.byKind.get(kind);
   }
 };
-function getAttributeNameLiterals(name) {
-  const [attributeNamespace, attributeName] = splitNsName(name, false);
-  const nameLiteral = literal(attributeName);
-  if (attributeNamespace) {
-    return [
-      literal(0),
-      literal(attributeNamespace),
-      nameLiteral
-    ];
+function getAttributeNameLiterals(namespace, name) {
+  const nameLiteral = literal(name);
+  if (namespace) {
+    return [literal(0), literal(namespace), nameLiteral];
   }
   return [nameLiteral];
 }
@@ -16883,13 +16884,13 @@ function parseExtractedStyles(job) {
         if (op.name === "style") {
           const parsedStyles = parse(op.expression.value);
           for (let i = 0; i < parsedStyles.length - 1; i += 2) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, parsedStyles[i], literal(parsedStyles[i + 1]), null, null, SecurityContext.STYLE), op);
+            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.StyleProperty, null, parsedStyles[i], literal(parsedStyles[i + 1]), null, null, SecurityContext.STYLE), op);
           }
           OpList.remove(op);
         } else if (op.name === "class") {
           const parsedClasses = op.expression.value.trim().split(/\s+/g);
           for (const parsedClass of parsedClasses) {
-            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.ClassName, parsedClass, null, null, null, SecurityContext.NONE), op);
+            OpList.insertBefore(createExtractedAttributeOp(op.target, BindingKind.ClassName, null, parsedClass, null, null, null, SecurityContext.NONE), op);
           }
           OpList.remove(op);
         }
@@ -17361,10 +17362,13 @@ function property(name, expression, sanitizer, sourceSpan) {
   }
   return call(Identifiers.property, args, sourceSpan);
 }
-function attribute(name, expression, sanitizer) {
+function attribute(name, expression, sanitizer, namespace) {
   const args = [literal(name), expression];
-  if (sanitizer !== null) {
-    args.push(sanitizer);
+  if (sanitizer !== null || namespace !== null) {
+    args.push(sanitizer != null ? sanitizer : literal(null));
+  }
+  if (namespace !== null) {
+    args.push(literal(namespace));
   }
   return call(Identifiers.attribute, args, null);
 }
@@ -17877,7 +17881,7 @@ function reifyUpdateOperations(_unit, ops) {
         if (op.expression instanceof Interpolation2) {
           OpList.replace(op, attributeInterpolate(op.name, op.expression.strings, op.expression.expressions, op.sanitizer, op.sourceSpan));
         } else {
-          OpList.replace(op, attribute(op.name, op.expression, op.sanitizer));
+          OpList.replace(op, attribute(op.name, op.expression, op.sanitizer, op.namespace));
         }
         break;
       case OpKind.HostProperty:
@@ -19535,6 +19539,9 @@ function ingestIfBlock(unit, ifBlock) {
 }
 function ingestSwitchBlock(unit, switchBlock) {
   var _a2;
+  if (switchBlock.cases.length === 0) {
+    return;
+  }
   let firstXref = null;
   let firstSlotHandle = null;
   let conditions = [];
@@ -19895,7 +19902,7 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
     }
     if (templateKind === TemplateKind.Structural && output.type !== 1) {
       const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, output.name, false);
-      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, output.name, null, null, null, securityContext));
+      unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, null, output.name, null, null, null, securityContext));
     }
   }
   if (bindings.some((b) => b == null ? void 0 : b.i18nMessage) !== null) {
@@ -19906,7 +19913,7 @@ function createTemplateBinding(view, xref, type, name, value, unit, securityCont
   const isTextBinding = typeof value === "string";
   if (templateKind === TemplateKind.Structural) {
     if (!isStructuralTemplateAttribute && (type === 0 || type === 2 || type === 3)) {
-      return createExtractedAttributeOp(xref, BindingKind.Property, name, null, null, i18nMessage, securityContext);
+      return createExtractedAttributeOp(xref, BindingKind.Property, null, name, null, null, i18nMessage, securityContext);
     }
     if (!isTextBinding && (type === 1 || type === 4)) {
       return null;
@@ -22765,6 +22772,9 @@ var TemplateDefinitionBuilder = class {
     this.updateInstructionWithAdvance(containerIndex, block.branches[0].sourceSpan, Identifiers.conditional, paramsCallback);
   }
   visitSwitchBlock(block) {
+    if (block.cases.length === 0) {
+      return;
+    }
     const caseData = block.cases.map((currentCase) => {
       const index = this.createEmbeddedTemplateFn(null, currentCase.children, "_Case", currentCase.sourceSpan, void 0, void 0, void 0, currentCase.i18n);
       const expression = currentCase.expression === null ? null : currentCase.expression.visit(this._valueConverter);
@@ -25536,7 +25546,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.5+sha-d315e2c");
+var VERSION2 = new Version("17.1.0-next.5+sha-33b5707");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

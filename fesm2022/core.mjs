@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-d315e2c
+ * @license Angular v17.1.0-next.5+sha-33b5707
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14255,11 +14255,11 @@ class ZoneAwareMicrotaskScheduler {
  * available/requested.
  */
 class EffectHandle {
-    constructor(scheduler, effectFn, creationZone, destroyRef, errorHandler, allowSignalWrites) {
+    constructor(scheduler, effectFn, creationZone, destroyRef, injector, allowSignalWrites) {
         this.scheduler = scheduler;
         this.effectFn = effectFn;
         this.creationZone = creationZone;
-        this.errorHandler = errorHandler;
+        this.injector = injector;
         this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
         this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
     }
@@ -14268,7 +14268,10 @@ class EffectHandle {
             this.effectFn(onCleanup);
         }
         catch (err) {
-            this.errorHandler?.handleError(err);
+            // Inject the `ErrorHandler` here in order to avoid circular DI error
+            // if the effect is used inside of a custom `ErrorHandler`.
+            const errorHandler = this.injector.get(ErrorHandler, null, { optional: true });
+            errorHandler?.handleError(err);
         }
     }
     run() {
@@ -14295,9 +14298,8 @@ function effect(effectFn, options) {
             'effect inside the component constructor.');
     !options?.injector && assertInInjectionContext(effect);
     const injector = options?.injector ?? inject(Injector);
-    const errorHandler = injector.get(ErrorHandler, null, { optional: true });
     const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, errorHandler, options?.allowSignalWrites ?? false);
+    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, injector, options?.allowSignalWrites ?? false);
     // Effects need to be marked dirty manually to trigger their initial run. The timing of this
     // marking matters, because the effects may read signals that track component inputs, which are
     // only available after those components have had their first update pass.
@@ -15707,7 +15709,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-d315e2c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-33b5707']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29985,7 +29987,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.5+sha-d315e2c');
+const VERSION = new Version('17.1.0-next.5+sha-33b5707');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
