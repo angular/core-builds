@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-1c63edd
+ * @license Angular v17.1.0-next.5+sha-36318db
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -222,6 +222,8 @@ export declare function setThrowInvalidWriteToSignalError(fn: () => never): void
  */
 export declare const SIGNAL: unique symbol;
 
+export declare const SIGNAL_NODE: SignalNode<unknown>;
+
 declare type SignalBaseGetter<T> = (() => T) & {
     readonly [SIGNAL]: unknown;
 };
@@ -235,7 +237,6 @@ export declare function signalMutateFn<T>(node: SignalNode<T>, mutator: (value: 
 export declare interface SignalNode<T> extends ReactiveNode {
     value: T;
     equal: ValueEqualityFn<T>;
-    readonly [SIGNAL]: SignalNode<T>;
 }
 
 export declare function signalSetFn<T>(node: SignalNode<T>, newValue: T): void;

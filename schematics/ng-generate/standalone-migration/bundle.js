@@ -694,6 +694,12 @@ var ChangeDetectionStrategy;
   ChangeDetectionStrategy2[ChangeDetectionStrategy2["OnPush"] = 0] = "OnPush";
   ChangeDetectionStrategy2[ChangeDetectionStrategy2["Default"] = 1] = "Default";
 })(ChangeDetectionStrategy || (ChangeDetectionStrategy = {}));
+var InputFlags;
+(function(InputFlags2) {
+  InputFlags2[InputFlags2["None"] = 0] = "None";
+  InputFlags2[InputFlags2["SignalBased"] = 1] = "SignalBased";
+  InputFlags2[InputFlags2["HasTransform"] = 2] = "HasTransform";
+})(InputFlags || (InputFlags = {}));
 var CUSTOM_ELEMENTS_SCHEMA = {
   name: "custom-elements"
 };
@@ -3055,6 +3061,12 @@ var Identifiers = _Identifiers;
   };
 })();
 (() => {
+  _Identifiers.InputFlags = {
+    name: "\u0275\u0275InputFlags",
+    moduleName: CORE
+  };
+})();
+(() => {
   _Identifiers.sanitizeHtml = { name: "\u0275\u0275sanitizeHtml", moduleName: CORE };
 })();
 (() => {
@@ -5170,7 +5182,7 @@ function asLiteral(value) {
   }
   return literal(value, INFERRED_TYPE);
 }
-function conditionallyCreateDirectiveBindingLiteral(map, keepDeclared) {
+function conditionallyCreateDirectiveBindingLiteral(map, forInputs) {
   const keys = Object.getOwnPropertyNames(map);
   if (keys.length === 0) {
     return null;
@@ -5190,12 +5202,25 @@ function conditionallyCreateDirectiveBindingLiteral(map, keepDeclared) {
       minifiedName = key;
       declaredName = value.classPropertyName;
       publicName = value.bindingPropertyName;
-      if (keepDeclared && (publicName !== declaredName || value.transformFunction != null)) {
-        const expressionKeys = [asLiteral(publicName), asLiteral(declaredName)];
-        if (value.transformFunction != null) {
-          expressionKeys.push(value.transformFunction);
+      const differentDeclaringName = publicName !== declaredName;
+      const hasTransform = value.transformFunction !== null;
+      let flags = null;
+      if (value.isSignal) {
+        flags = bitwiseAndInputFlagsExpr(InputFlags.SignalBased, flags);
+      }
+      if (value.transformFunction !== null) {
+        flags = bitwiseAndInputFlagsExpr(InputFlags.HasTransform, flags);
+      }
+      if (forInputs && (differentDeclaringName || hasTransform || flags !== null)) {
+        const flagsExpr = flags != null ? flags : importExpr(Identifiers.InputFlags).prop(InputFlags[InputFlags.None]);
+        const result = [flagsExpr, asLiteral(publicName)];
+        if (differentDeclaringName || hasTransform) {
+          result.push(asLiteral(declaredName));
+          if (hasTransform) {
+            result.push(value.transformFunction);
+          }
         }
-        expressionValue = literalArr(expressionKeys);
+        expressionValue = literalArr(result);
       } else {
         expressionValue = asLiteral(publicName);
       }
@@ -5206,6 +5231,15 @@ function conditionallyCreateDirectiveBindingLiteral(map, keepDeclared) {
       value: expressionValue
     };
   }));
+}
+function getInputFlagExpr(flag) {
+  return importExpr(Identifiers.InputFlags).prop(InputFlags[flag]);
+}
+function bitwiseAndInputFlagsExpr(flag, expr) {
+  if (expr === null) {
+    return getInputFlagExpr(flag);
+  }
+  return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, expr, getInputFlagExpr(flag));
 }
 function trimTrailingNulls(parameters) {
   while (isNull(parameters[parameters.length - 1])) {
@@ -26415,7 +26449,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.5+sha-1c63edd");
+var VERSION2 = new Version("17.1.0-next.5+sha-36318db");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27481,7 +27515,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-1c63edd"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-36318db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27550,7 +27584,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-1c63edd"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-36318db"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27843,7 +27877,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-1c63edd"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-36318db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27866,7 +27900,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-1c63edd"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-36318db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27904,7 +27938,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-1c63edd"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-36318db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27928,7 +27962,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-1c63edd"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-36318db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27963,7 +27997,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-1c63edd"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-36318db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27980,7 +28014,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.5+sha-1c63edd");
+var VERSION3 = new Version("17.1.0-next.5+sha-36318db");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -46986,7 +47020,7 @@ function normalizePath(path4) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/project_tsconfig_paths.mjs
-var import_core18 = require("@angular-devkit/core");
+var import_core19 = require("@angular-devkit/core");
 function getProjectTsConfigPaths(tree) {
   return __async(this, null, function* () {
     const buildPaths = /* @__PURE__ */ new Set();
@@ -47003,9 +47037,9 @@ function getProjectTsConfigPaths(tree) {
             continue;
           }
           if (name === "build") {
-            buildPaths.add((0, import_core18.normalize)(tsConfig));
+            buildPaths.add((0, import_core19.normalize)(tsConfig));
           } else {
-            testPaths.add((0, import_core18.normalize)(tsConfig));
+            testPaths.add((0, import_core19.normalize)(tsConfig));
           }
         }
       }
@@ -47037,7 +47071,7 @@ function createHost(tree) {
         if (!data) {
           throw new Error("File not found.");
         }
-        return import_core18.virtualFs.fileBufferToString(data);
+        return import_core19.virtualFs.fileBufferToString(data);
       });
     },
     writeFile(path4, data) {
@@ -47060,7 +47094,7 @@ function createHost(tree) {
 function getWorkspace(tree) {
   return __async(this, null, function* () {
     const host = createHost(tree);
-    const { workspace } = yield import_core18.workspaces.readWorkspace("/", host);
+    const { workspace } = yield import_core19.workspaces.readWorkspace("/", host);
     return workspace;
   });
 }

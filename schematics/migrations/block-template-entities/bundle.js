@@ -526,6 +526,12 @@ var ChangeDetectionStrategy;
   ChangeDetectionStrategy2[ChangeDetectionStrategy2["OnPush"] = 0] = "OnPush";
   ChangeDetectionStrategy2[ChangeDetectionStrategy2["Default"] = 1] = "Default";
 })(ChangeDetectionStrategy || (ChangeDetectionStrategy = {}));
+var InputFlags;
+(function(InputFlags2) {
+  InputFlags2[InputFlags2["None"] = 0] = "None";
+  InputFlags2[InputFlags2["SignalBased"] = 1] = "SignalBased";
+  InputFlags2[InputFlags2["HasTransform"] = 2] = "HasTransform";
+})(InputFlags || (InputFlags = {}));
 var CUSTOM_ELEMENTS_SCHEMA = {
   name: "custom-elements"
 };
@@ -2560,6 +2566,12 @@ var Identifiers = _Identifiers;
   };
 })();
 (() => {
+  _Identifiers.InputFlags = {
+    name: "\u0275\u0275InputFlags",
+    moduleName: CORE
+  };
+})();
+(() => {
   _Identifiers.sanitizeHtml = { name: "\u0275\u0275sanitizeHtml", moduleName: CORE };
 })();
 (() => {
@@ -4284,7 +4296,7 @@ function asLiteral(value) {
   }
   return literal(value, INFERRED_TYPE);
 }
-function conditionallyCreateDirectiveBindingLiteral(map, keepDeclared) {
+function conditionallyCreateDirectiveBindingLiteral(map, forInputs) {
   const keys = Object.getOwnPropertyNames(map);
   if (keys.length === 0) {
     return null;
@@ -4304,12 +4316,25 @@ function conditionallyCreateDirectiveBindingLiteral(map, keepDeclared) {
       minifiedName = key;
       declaredName = value.classPropertyName;
       publicName = value.bindingPropertyName;
-      if (keepDeclared && (publicName !== declaredName || value.transformFunction != null)) {
-        const expressionKeys = [asLiteral(publicName), asLiteral(declaredName)];
-        if (value.transformFunction != null) {
-          expressionKeys.push(value.transformFunction);
+      const differentDeclaringName = publicName !== declaredName;
+      const hasTransform = value.transformFunction !== null;
+      let flags = null;
+      if (value.isSignal) {
+        flags = bitwiseAndInputFlagsExpr(InputFlags.SignalBased, flags);
+      }
+      if (value.transformFunction !== null) {
+        flags = bitwiseAndInputFlagsExpr(InputFlags.HasTransform, flags);
+      }
+      if (forInputs && (differentDeclaringName || hasTransform || flags !== null)) {
+        const flagsExpr = flags != null ? flags : importExpr(Identifiers.InputFlags).prop(InputFlags[InputFlags.None]);
+        const result = [flagsExpr, asLiteral(publicName)];
+        if (differentDeclaringName || hasTransform) {
+          result.push(asLiteral(declaredName));
+          if (hasTransform) {
+            result.push(value.transformFunction);
+          }
         }
-        expressionValue = literalArr(expressionKeys);
+        expressionValue = literalArr(result);
       } else {
         expressionValue = asLiteral(publicName);
       }
@@ -4320,6 +4345,15 @@ function conditionallyCreateDirectiveBindingLiteral(map, keepDeclared) {
       value: expressionValue
     };
   }));
+}
+function getInputFlagExpr(flag) {
+  return importExpr(Identifiers.InputFlags).prop(InputFlags[flag]);
+}
+function bitwiseAndInputFlagsExpr(flag, expr) {
+  if (expr === null) {
+    return getInputFlagExpr(flag);
+  }
+  return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, expr, getInputFlagExpr(flag));
 }
 function trimTrailingNulls(parameters) {
   while (isNull(parameters[parameters.length - 1])) {
@@ -25570,7 +25604,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.5+sha-1c63edd");
+var VERSION2 = new Version("17.1.0-next.5+sha-36318db");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

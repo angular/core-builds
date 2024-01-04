@@ -1,18 +1,60 @@
 /**
- * @license Angular v17.1.0-next.5+sha-1c63edd
+ * @license Angular v17.1.0-next.5+sha-36318db
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, SIGNAL as SIGNAL$1, createComputed as createComputed$1, createSignal as createSignal$1, signalSetFn as signalSetFn$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, createComputed as createComputed$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
 
-function inputFunction(_initialValue, _opts) {
-    throw new Error('TODO');
+const REQUIRED_UNSET_VALUE = /* @__PURE__ */ Symbol('InputSignalNode#UNSET');
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const INPUT_SIGNAL_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...SIGNAL_NODE$1,
+        transformFn: undefined,
+        applyValueToInputSignal(node, value) {
+            signalSetFn$1(node, value);
+        }
+    };
+})();
+
+const ɵINPUT_SIGNAL_BRAND_READ_TYPE = /* @__PURE__ */ Symbol();
+const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE = /* @__PURE__ */ Symbol();
+/**
+ * Creates an input signal.
+ *
+ * @param initialValue The initial value.
+ *   Can be set to {@link REQUIRED_UNSET_VALUE} for required inputs.
+ * @param options Additional options for the input. e.g. a transform, or an alias.
+ */
+function createInputSignal(initialValue, options) {
+    const node = Object.create(INPUT_SIGNAL_NODE);
+    node.value = initialValue;
+    // Perf note: Always set `transformFn` here to ensure that `node` always
+    // has the same v8 class shape, allowing monomorphic reads on input signals.
+    node.transformFn = options?.transform;
+    function inputValueFn() {
+        // Record that someone looked at this signal.
+        producerAccessed$1(node);
+        if (node.value === REQUIRED_UNSET_VALUE) {
+            // TODO: Use a runtime error w/ error guide.
+            throw new Error('Input is required, but no value set yet.');
+        }
+        return node.value;
+    }
+    inputValueFn[SIGNAL$1] = node;
+    return inputValueFn;
 }
-function inputRequiredFunction(_opts) {
-    throw new Error('TODO');
+
+function inputFunction(initialValue, opts) {
+    return createInputSignal(initialValue, opts);
+}
+function inputRequiredFunction(opts) {
+    return createInputSignal(REQUIRED_UNSET_VALUE, opts);
 }
 /**
  * Initializes an input with an initial value. If no explicit value
@@ -41,9 +83,6 @@ const input = (() => {
     inputFunction.required = inputRequiredFunction;
     return inputFunction;
 })();
-
-const ɵINPUT_SIGNAL_BRAND_READ_TYPE = /* @__PURE__ */ Symbol();
-const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE = /* @__PURE__ */ Symbol();
 
 // Note: `input` is exported in `core.ts` due to:
 
@@ -1235,6 +1274,14 @@ if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
     Object.freeze(EMPTY_ARRAY);
 }
 
+/** Flags describing an input for a directive. */
+var InputFlags;
+(function (InputFlags) {
+    InputFlags[InputFlags["None"] = 0] = "None";
+    InputFlags[InputFlags["SignalBased"] = 1] = "SignalBased";
+    InputFlags[InputFlags["HasTransform"] = 2] = "HasTransform";
+})(InputFlags || (InputFlags = {}));
+
 /**
  * Returns an index of `classToSearch` in `className` taking token boundaries into account.
  *
@@ -1956,76 +2003,34 @@ function ɵɵdefineNgModule(def) {
         return res;
     });
 }
-/**
- * Inverts an inputs or outputs lookup such that the keys, which were the
- * minified keys, are part of the values, and the values are parsed so that
- * the publicName of the property is the new key
- *
- * e.g. for
- *
- * ```
- * class Comp {
- *   @Input()
- *   propName1: string;
- *
- *   @Input('publicName2')
- *   declaredPropName2: number;
- * }
- * ```
- *
- * will be serialized as
- *
- * ```
- * {
- *   propName1: 'propName1',
- *   declaredPropName2: ['publicName2', 'declaredPropName2'],
- * }
- * ```
- *
- * which is than translated by the minifier as:
- *
- * ```
- * {
- *   minifiedPropName1: 'propName1',
- *   minifiedPropName2: ['publicName2', 'declaredPropName2'],
- * }
- * ```
- *
- * becomes: (public name => minifiedName)
- *
- * ```
- * {
- *  'propName1': 'minifiedPropName1',
- *  'publicName2': 'minifiedPropName2',
- * }
- * ```
- *
- * Optionally the function can take `secondary` which will result in: (public name => declared name)
- *
- * ```
- * {
- *  'propName1': 'propName1',
- *  'publicName2': 'declaredPropName2',
- * }
- * ```
- *
-
- */
-function invertObject(obj, secondary) {
+function parseAndConvertBindingsForDefinition(obj, declaredInputs) {
     if (obj == null)
         return EMPTY_OBJ;
     const newLookup = {};
     for (const minifiedKey in obj) {
         if (obj.hasOwnProperty(minifiedKey)) {
-            let publicName = obj[minifiedKey];
-            let declaredName = publicName;
-            if (Array.isArray(publicName)) {
-                declaredName = publicName[1];
-                publicName = publicName[0];
+            const value = obj[minifiedKey];
+            let publicName;
+            let declaredName;
+            let inputFlags = InputFlags.None;
+            if (Array.isArray(value)) {
+                inputFlags = value[0];
+                publicName = value[1];
+                declaredName = value[2] ?? publicName; // declared name might not be set to save bytes.
             }
-            newLookup[publicName] = minifiedKey;
-            if (secondary) {
-                (secondary[publicName] = declaredName);
+            else {
+                publicName = value;
+                declaredName = value;
+            }
+            // For inputs, capture the declared name, or if some flags are set.
+            if (declaredInputs) {
+                // Perf note: An array is only allocated for the input if there are flags.
+                newLookup[publicName] =
+                    inputFlags !== InputFlags.None ? [minifiedKey, inputFlags] : minifiedKey;
+                declaredInputs[publicName] = declaredName;
+            }
+            else {
+                newLookup[publicName] = minifiedKey;
             }
         }
     }
@@ -2123,7 +2128,7 @@ function getNgDirectiveDef(directiveDefinition) {
         hostVars: directiveDefinition.hostVars || 0,
         hostAttrs: directiveDefinition.hostAttrs || null,
         contentQueries: directiveDefinition.contentQueries || null,
-        declaredInputs,
+        declaredInputs: declaredInputs,
         inputTransforms: null,
         inputConfig: directiveDefinition.inputs || EMPTY_OBJ,
         exportAs: directiveDefinition.exportAs || null,
@@ -2135,8 +2140,8 @@ function getNgDirectiveDef(directiveDefinition) {
         setInput: null,
         findHostDirectiveDefs: null,
         hostDirectives: null,
-        inputs: invertObject(directiveDefinition.inputs, declaredInputs),
-        outputs: invertObject(directiveDefinition.outputs),
+        inputs: parseAndConvertBindingsForDefinition(directiveDefinition.inputs, declaredInputs),
+        outputs: parseAndConvertBindingsForDefinition(directiveDefinition.outputs),
         debugInfo: null,
     };
 }
@@ -2484,6 +2489,15 @@ class SimpleChange {
     }
 }
 
+function applyValueToInputField(instance, inputSignalNode, privateName, value) {
+    if (inputSignalNode !== null) {
+        inputSignalNode.applyValueToInputSignal(inputSignalNode, value);
+    }
+    else {
+        instance[privateName] = value;
+    }
+}
+
 /**
  * The NgOnChangesFeature decorates a component with support for the ngOnChanges
  * lifecycle hook, so it should be included in any component that implements
@@ -2549,7 +2563,7 @@ function rememberChangeHistoryAndInvokeOnChangesHook() {
         this.ngOnChanges(current);
     }
 }
-function ngOnChangesSetInput(instance, value, publicName, privateName) {
+function ngOnChangesSetInput(instance, inputSignalNode, value, publicName, privateName) {
     const declaredName = this.declaredInputs[publicName];
     ngDevMode && assertString(declaredName, 'Name of input in ngOnChanges has to be a string');
     const simpleChangesStore = getSimpleChangesStore(instance) ||
@@ -2558,7 +2572,7 @@ function ngOnChangesSetInput(instance, value, publicName, privateName) {
     const previous = simpleChangesStore.previous;
     const previousChange = previous[declaredName];
     current[declaredName] = new SimpleChange(previousChange && previousChange.currentValue, value, previous === EMPTY_OBJ);
-    instance[privateName] = value;
+    applyValueToInputField(instance, inputSignalNode, privateName, value);
 }
 const SIMPLE_CHANGES_STORE = '__ngSimpleChanges__';
 function getSimpleChangesStore(instance) {
@@ -12045,6 +12059,38 @@ function ɵɵinvalidFactory() {
     throw new Error(msg);
 }
 
+function writeToDirectiveInput(def, instance, publicName, privateName, flags, value) {
+    const prevConsumer = setActiveConsumer$1(null);
+    try {
+        // If we know we are dealing with a signal input, we cache its reference
+        // in a tree-shakable way. The input signal node can then be used for
+        // value transform execution or actual value updates without introducing
+        // additional megamorphic accesses for accessing the instance field.
+        let inputSignalNode = null;
+        if ((flags & InputFlags.SignalBased) !== 0) {
+            const field = instance[privateName];
+            inputSignalNode = field[SIGNAL$1];
+        }
+        if ((flags & InputFlags.HasTransform) !== 0) {
+            if (inputSignalNode !== null) {
+                value = inputSignalNode.transformFn(value);
+            }
+            else {
+                value = def.inputTransforms[privateName].call(instance, value);
+            }
+        }
+        if (def.setInput !== null) {
+            def.setInput(instance, inputSignalNode, value, publicName, privateName);
+        }
+        else {
+            applyValueToInputField(instance, inputSignalNode, privateName, value);
+        }
+    }
+    finally {
+        setActiveConsumer$1(prevConsumer);
+    }
+}
+
 /**
  * Invoke `HostBindingsFunction`s for view.
  *
@@ -12501,42 +12547,61 @@ function createTNode(tView, tParent, type, index, value, attrs) {
     }
     return tNode;
 }
-/**
- * Generates the `PropertyAliases` data structure from the provided input/output mapping.
- * @param aliasMap Input/output mapping from the directive definition.
- * @param directiveIndex Index of the directive.
- * @param propertyAliases Object in which to store the results.
- * @param hostDirectiveAliasMap Object used to alias or filter out properties for host directives.
- * If the mapping is provided, it'll act as an allowlist, as well as a mapping of what public
- * name inputs/outputs should be exposed under.
- */
-function generatePropertyAliases(aliasMap, directiveIndex, propertyAliases, hostDirectiveAliasMap) {
+function captureNodeBindings(mode, aliasMap, directiveIndex, bindingsResult, hostDirectiveAliasMap) {
     for (let publicName in aliasMap) {
-        if (aliasMap.hasOwnProperty(publicName)) {
-            propertyAliases = propertyAliases === null ? {} : propertyAliases;
-            const internalName = aliasMap[publicName];
-            // If there are no host directive mappings, we want to remap using the alias map from the
-            // definition itself. If there is an alias map, it has two functions:
-            // 1. It serves as an allowlist of bindings that are exposed by the host directives. Only the
-            // ones inside the host directive map will be exposed on the host.
-            // 2. The public name of the property is aliased using the host directive alias map, rather
-            // than the alias map from the definition.
-            if (hostDirectiveAliasMap === null) {
-                addPropertyAlias(propertyAliases, directiveIndex, publicName, internalName);
+        if (!aliasMap.hasOwnProperty(publicName)) {
+            continue;
+        }
+        const value = aliasMap[publicName];
+        if (value === undefined) {
+            continue;
+        }
+        bindingsResult ??= {};
+        let internalName;
+        let inputFlags = InputFlags.None;
+        // For inputs, the value might be an array capturing additional
+        // input flags.
+        if (Array.isArray(value)) {
+            internalName = value[0];
+            inputFlags = value[1];
+        }
+        else {
+            internalName = value;
+        }
+        // If there are no host directive mappings, we want to remap using the alias map from the
+        // definition itself. If there is an alias map, it has two functions:
+        // 1. It serves as an allowlist of bindings that are exposed by the host directives. Only the
+        // ones inside the host directive map will be exposed on the host.
+        // 2. The public name of the property is aliased using the host directive alias map, rather
+        // than the alias map from the definition.
+        let finalPublicName = publicName;
+        if (hostDirectiveAliasMap !== null) {
+            // If there is no mapping, it's not part of the allowlist and this input/output
+            // is not captured and should be ignored.
+            if (!hostDirectiveAliasMap.hasOwnProperty(publicName)) {
+                continue;
             }
-            else if (hostDirectiveAliasMap.hasOwnProperty(publicName)) {
-                addPropertyAlias(propertyAliases, directiveIndex, hostDirectiveAliasMap[publicName], internalName);
-            }
+            finalPublicName = hostDirectiveAliasMap[publicName];
+        }
+        if (mode === 0 /* CaptureNodeBindingMode.Inputs */) {
+            addPropertyBinding(bindingsResult, directiveIndex, finalPublicName, internalName, inputFlags);
+        }
+        else {
+            addPropertyBinding(bindingsResult, directiveIndex, finalPublicName, internalName);
         }
     }
-    return propertyAliases;
+    return bindingsResult;
 }
-function addPropertyAlias(propertyAliases, directiveIndex, publicName, internalName) {
-    if (propertyAliases.hasOwnProperty(publicName)) {
-        propertyAliases[publicName].push(directiveIndex, internalName);
+function addPropertyBinding(bindings, directiveIndex, publicName, internalName, inputFlags) {
+    let values;
+    if (bindings.hasOwnProperty(publicName)) {
+        (values = bindings[publicName]).push(directiveIndex, internalName);
     }
     else {
-        propertyAliases[publicName] = [directiveIndex, internalName];
+        values = bindings[publicName] = [directiveIndex, internalName];
+    }
+    if (inputFlags !== undefined) {
+        values.push(inputFlags);
     }
 }
 /**
@@ -12557,10 +12622,8 @@ function initializeInputAndOutputAliases(tView, tNode, hostDirectiveDefinitionMa
         const aliasData = hostDirectiveDefinitionMap ? hostDirectiveDefinitionMap.get(directiveDef) : null;
         const aliasedInputs = aliasData ? aliasData.inputs : null;
         const aliasedOutputs = aliasData ? aliasData.outputs : null;
-        inputsStore =
-            generatePropertyAliases(directiveDef.inputs, directiveIndex, inputsStore, aliasedInputs);
-        outputsStore =
-            generatePropertyAliases(directiveDef.outputs, directiveIndex, outputsStore, aliasedOutputs);
+        inputsStore = captureNodeBindings(0 /* CaptureNodeBindingMode.Inputs */, directiveDef.inputs, directiveIndex, inputsStore, aliasedInputs);
+        outputsStore = captureNodeBindings(1 /* CaptureNodeBindingMode.Outputs */, directiveDef.outputs, directiveIndex, outputsStore, aliasedOutputs);
         // Do not use unbound attributes as inputs to structural directives, since structural
         // directive inputs can only be set using microsyntax (e.g. `<div *dir="exp">`).
         // TODO(FW-1930): microsyntax expressions may also contain unbound/static attributes, which
@@ -12677,7 +12740,7 @@ function setNgReflectProperties(lView, element, type, dataValue, value) {
          * e.g. [0, 'change', 'change-minified']
          * we want to set the reflected property with the privateName: dataValue[i+1]
          */
-        for (let i = 0; i < dataValue.length; i += 2) {
+        for (let i = 0; i < dataValue.length; i += 3) {
             setNgReflectProperty(lView, element, type, dataValue[i + 1], value);
         }
     }
@@ -13069,31 +13132,14 @@ function setInputsFromAttrs(lView, directiveIndex, instance, def, tNode, initial
         for (let i = 0; i < initialInputs.length;) {
             const publicName = initialInputs[i++];
             const privateName = initialInputs[i++];
+            const flags = initialInputs[i++];
             const value = initialInputs[i++];
-            writeToDirectiveInput(def, instance, publicName, privateName, value);
+            writeToDirectiveInput(def, instance, publicName, privateName, flags, value);
             if (ngDevMode) {
                 const nativeElement = getNativeByTNode(tNode, lView);
                 setNgReflectProperty(lView, nativeElement, tNode.type, privateName, value);
             }
         }
-    }
-}
-function writeToDirectiveInput(def, instance, publicName, privateName, value) {
-    const prevConsumer = setActiveConsumer$1(null);
-    try {
-        const inputTransforms = def.inputTransforms;
-        if (inputTransforms !== null && inputTransforms.hasOwnProperty(privateName)) {
-            value = inputTransforms[privateName].call(instance, value);
-        }
-        if (def.setInput !== null) {
-            def.setInput(instance, value, publicName, privateName);
-        }
-        else {
-            instance[privateName] = value;
-        }
-    }
-    finally {
-        setActiveConsumer$1(prevConsumer);
     }
 }
 /**
@@ -13136,9 +13182,9 @@ function generateInitialInputs(inputs, directiveIndex, attrs) {
             // through the directive def, but we want to do it using the inputs store so that it can
             // account for host directive aliases.
             const inputConfig = inputs[attrName];
-            for (let j = 0; j < inputConfig.length; j += 2) {
+            for (let j = 0; j < inputConfig.length; j += 3) {
                 if (inputConfig[j] === directiveIndex) {
-                    inputsToStore.push(attrName, inputConfig[j + 1], attrs[i + 1]);
+                    inputsToStore.push(attrName, inputConfig[j + 1], inputConfig[j + 2], attrs[i + 1]);
                     // A directive can't have multiple inputs with the same name so we can break here.
                     break;
                 }
@@ -13325,10 +13371,11 @@ function setInputsForProperty(tView, lView, inputs, publicName, value) {
     for (let i = 0; i < inputs.length;) {
         const index = inputs[i++];
         const privateName = inputs[i++];
+        const flags = inputs[i++];
         const instance = lView[index];
         ngDevMode && assertIndexInRange(lView, index);
         const def = tView.data[index];
-        writeToDirectiveInput(def, instance, publicName, privateName, value);
+        writeToDirectiveInput(def, instance, publicName, privateName, flags, value);
     }
 }
 /**
@@ -15374,11 +15421,18 @@ class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
 }
 function toRefArray(map) {
     const array = [];
-    for (let nonMinified in map) {
-        if (map.hasOwnProperty(nonMinified)) {
-            const minified = map[nonMinified];
-            array.push({ propName: minified, templateName: nonMinified });
+    for (const publicName in map) {
+        if (!map.hasOwnProperty(publicName)) {
+            continue;
         }
+        const value = map[publicName];
+        if (value === undefined) {
+            continue;
+        }
+        array.push({
+            propName: Array.isArray(value) ? value[0] : value,
+            templateName: publicName,
+        });
     }
     return array;
 }
@@ -15700,7 +15754,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-1c63edd']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-36318db']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -15793,15 +15847,8 @@ function ɵɵInheritDefinitionFeature(definition) {
                 superViewQuery && inheritViewQuery(definition, superViewQuery);
                 superContentQueries && inheritContentQueries(definition, superContentQueries);
                 // Merge inputs and outputs
-                fillProperties(definition.inputs, superDef.inputs);
-                fillProperties(definition.declaredInputs, superDef.declaredInputs);
+                mergeInputsWithTransforms(definition, superDef);
                 fillProperties(definition.outputs, superDef.outputs);
-                if (superDef.inputTransforms !== null) {
-                    if (writeableDef.inputTransforms === null) {
-                        writeableDef.inputTransforms = {};
-                    }
-                    fillProperties(writeableDef.inputTransforms, superDef.inputTransforms);
-                }
                 // Merge animations metadata.
                 // If `superDef` is a Component, the `data` field is present (defaults to an empty object).
                 if (isComponentDef(superDef) && superDef.data.animation) {
@@ -15835,6 +15882,35 @@ function ɵɵInheritDefinitionFeature(definition) {
         superType = Object.getPrototypeOf(superType);
     }
     mergeHostAttrsAcrossInheritance(inheritanceChain);
+}
+function mergeInputsWithTransforms(target, source) {
+    for (const key in source.inputs) {
+        if (!source.inputs.hasOwnProperty(key)) {
+            continue;
+        }
+        if (target.inputs.hasOwnProperty(key)) {
+            continue;
+        }
+        const value = source.inputs[key];
+        if (value === undefined) {
+            continue;
+        }
+        target.inputs[key] = value;
+        target.declaredInputs[key] = source.declaredInputs[key];
+        // If the input is inherited, and we have a transform for it, we also inherit it.
+        // Note that transforms should not be inherited if the input has its own metadata
+        // in the `source` directive itself already (i.e. the input is re-declared/overridden).
+        if (source.inputTransforms !== null) {
+            // Note: transforms are stored with their minified names.
+            // Perf: only access the minified name when there are source transforms.
+            const minifiedName = Array.isArray(value) ? value[0] : value;
+            if (!source.inputTransforms.hasOwnProperty(minifiedName)) {
+                continue;
+            }
+            target.inputTransforms ??= {};
+            target.inputTransforms[minifiedName] = source.inputTransforms[minifiedName];
+        }
+    }
 }
 /**
  * Merge the `hostAttrs` and `hostVars` from the inherited parent to the base class.
@@ -16121,8 +16197,7 @@ function validateMappings(bindingType, def, hostDirectiveBindings) {
                 throw new RuntimeError(311 /* RuntimeErrorCode.HOST_DIRECTIVE_UNDEFINED_BINDING */, `Directive ${className} does not have an ${bindingType} with a public name of ${publicName}.`);
             }
             const remappedPublicName = hostDirectiveBindings[publicName];
-            if (bindings.hasOwnProperty(remappedPublicName) && remappedPublicName !== publicName &&
-                bindings[remappedPublicName] !== publicName) {
+            if (bindings.hasOwnProperty(remappedPublicName) && remappedPublicName !== publicName) {
                 throw new RuntimeError(312 /* RuntimeErrorCode.HOST_DIRECTIVE_CONFLICTING_ALIAS */, `Cannot alias ${bindingType} ${publicName} of host directive ${className} to ${remappedPublicName}, because it already has a different ${bindingType} with the same public name.`);
             }
         }
@@ -16145,13 +16220,12 @@ function ɵɵInputTransformsFeature(definition) {
             // Note: the private names are used for the keys, rather than the public ones, because public
             // names can be re-aliased in host directives which would invalidate the lookup.
             const value = inputs[minifiedKey];
-            if (Array.isArray(value) && value[2]) {
-                inputTransforms[minifiedKey] = value[2];
+            if (Array.isArray(value) && value[3]) {
+                inputTransforms[minifiedKey] = value[3];
             }
         }
     }
-    definition.inputTransforms =
-        inputTransforms;
+    definition.inputTransforms = inputTransforms;
 }
 
 // TODO(misko): consider inlining
@@ -27087,8 +27161,9 @@ function getDirectiveMetadata$1(directiveOrComponentInstance) {
     // To ensure we don't get the metadata of the directive, we want to call `getComponentDef` first.
     const componentDef = getComponentDef(constructor);
     if (componentDef) {
+        const inputs = extractInputDebugMetadata(componentDef.inputs);
         return {
-            inputs: componentDef.inputs,
+            inputs,
             outputs: componentDef.outputs,
             encapsulation: componentDef.encapsulation,
             changeDetection: componentDef.onPush ? ChangeDetectionStrategy.OnPush :
@@ -27097,7 +27172,8 @@ function getDirectiveMetadata$1(directiveOrComponentInstance) {
     }
     const directiveDef = getDirectiveDef(constructor);
     if (directiveDef) {
-        return { inputs: directiveDef.inputs, outputs: directiveDef.outputs };
+        const inputs = extractInputDebugMetadata(directiveDef.inputs);
+        return { inputs, outputs: directiveDef.outputs };
     }
     return null;
 }
@@ -27250,6 +27326,36 @@ function assertDomElement(value) {
     if (typeof Element !== 'undefined' && !(value instanceof Element)) {
         throw new Error('Expecting instance of DOM Element');
     }
+}
+/**
+ * A directive definition holds additional metadata using bitwise flags to indicate
+ * for example whether it is signal based.
+ *
+ * This information needs to be separate from the `publicName -> minifiedName`
+ * mappings for backwards compatibility.
+ */
+function extractInputDebugMetadata(inputs) {
+    const res = {};
+    for (const key in inputs) {
+        if (!inputs.hasOwnProperty(key)) {
+            continue;
+        }
+        const value = inputs[key];
+        if (value === undefined) {
+            continue;
+        }
+        let minifiedName;
+        if (Array.isArray(value)) {
+            minifiedName = value[0];
+            // flags are not used for now.
+            // TODO: Consider exposing flag information in discovery.
+        }
+        else {
+            minifiedName = value;
+        }
+        res[key] = minifiedName;
+    }
+    return res;
 }
 
 /**
@@ -28795,6 +28901,7 @@ const angularCoreEnv = (() => ({
     'ɵɵvalidateIframeAttribute': ɵɵvalidateIframeAttribute,
     'forwardRef': forwardRef,
     'resolveForwardRef': resolveForwardRef,
+    'ɵɵInputFlags': InputFlags,
 }))();
 
 let jitOptions = null;
@@ -29978,7 +30085,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.5+sha-1c63edd');
+const VERSION = new Version('17.1.0-next.5+sha-36318db');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -35146,5 +35253,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, numberAttribute, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PendingTasks as ɵPendingTasks, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZoneAwareQueueingScheduler as ɵZoneAwareQueueingScheduler, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getEnsureDirtyViewsAreAlwaysReachable as ɵgetEnsureDirtyViewsAreAlwaysReachable, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, input as ɵinput, inputFunction as ɵinputFunctionForApiGuard, inputRequiredFunction as ɵinputFunctionRequiredForApiGuard, internalAfterNextRender as ɵinternalAfterNextRender, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setEnsureDirtyViewsAreAlwaysReachable as ɵsetEnsureDirtyViewsAreAlwaysReachable, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, numberAttribute, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PendingTasks as ɵPendingTasks, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZoneAwareQueueingScheduler as ɵZoneAwareQueueingScheduler, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getEnsureDirtyViewsAreAlwaysReachable as ɵgetEnsureDirtyViewsAreAlwaysReachable, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, input as ɵinput, inputFunction as ɵinputFunctionForApiGuard, inputRequiredFunction as ɵinputFunctionRequiredForApiGuard, internalAfterNextRender as ɵinternalAfterNextRender, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishDefaultGlobalUtils$1 as ɵpublishDefaultGlobalUtils, publishGlobalUtil as ɵpublishGlobalUtil, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setEnsureDirtyViewsAreAlwaysReachable as ɵsetEnsureDirtyViewsAreAlwaysReachable, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, InputFlags as ɵɵInputFlags, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵvalidateIframeAttribute, ɵɵviewQuery };
 //# sourceMappingURL=core.mjs.map

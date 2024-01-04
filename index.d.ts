@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-1c63edd
+ * @license Angular v17.1.0-next.5+sha-36318db
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Observable } from 'rxjs';
 import { ReactiveNode } from '@angular/core/primitives/signals';
 import { SIGNAL } from '@angular/core/primitives/signals';
+import { SignalNode } from '@angular/core/primitives/signals';
 import { Subject } from 'rxjs';
 import { Subscribable } from 'rxjs';
 import { Subscription } from 'rxjs';
@@ -3151,63 +3152,8 @@ declare interface DirectiveDefinition<T> {
     selectors?: ɵCssSelectorList;
     /**
      * A map of input names.
-     *
-     * The format is in: `{[actualPropertyName: string]:(string|[string, string, Function])}`.
-     *
-     * Given:
-     * ```
-     * class MyComponent {
-     *   @Input()
-     *   publicInput1: string;
-     *
-     *   @Input('publicInput2')
-     *   declaredInput2: string;
-     *
-     *   @Input({transform: (value: boolean) => value ? 1 : 0})
-     *   transformedInput3: number;
-     * }
-     * ```
-     *
-     * is described as:
-     * ```
-     * {
-     *   publicInput1: 'publicInput1',
-     *   declaredInput2: ['declaredInput2', 'publicInput2'],
-     *   transformedInput3: [
-     *     'transformedInput3',
-     *     'transformedInput3',
-     *     (value: boolean) => value ? 1 : 0
-     *   ]
-     * }
-     * ```
-     *
-     * Which the minifier may translate to:
-     * ```
-     * {
-     *   minifiedPublicInput1: 'publicInput1',
-     *   minifiedDeclaredInput2: [ 'publicInput2', 'declaredInput2'],
-     *   minifiedTransformedInput3: [
-     *     'transformedInput3',
-     *     'transformedInput3',
-     *     (value: boolean) => value ? 1 : 0
-     *   ]
-     * }
-     * ```
-     *
-     * This allows the render to re-construct the minified, public, and declared names
-     * of properties.
-     *
-     * NOTE:
-     *  - Because declared and public name are usually same we only generate the array
-     *    `['declared', 'public']` format when they differ.
-     *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
-     *    inconsistent behavior in that it uses declared names rather than minified or public. For
-     *    this reason `NgOnChanges` will be deprecated and removed in future version and this
-     *    API will be simplified to be consistent with `output`.
      */
-    inputs?: {
-        [P in keyof T]?: string | [string, string, InputTransformFunction?];
-    };
+    inputs?: DirectiveInputs<T>;
     /**
      * A map of output names.
      *
@@ -3302,6 +3248,75 @@ declare type DirectiveDefList = (ɵDirectiveDef<any> | ɵComponentDef<any>)[];
  * The function is necessary to be able to support forward declarations.
  */
 declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
+
+/**
+ * Map of inputs for a given directive/component.
+ *
+ * Given:
+ * ```
+ * class MyComponent {
+ *   @Input()
+ *   publicInput1: string;
+ *
+ *   @Input('publicInput2')
+ *   declaredInput2: string;
+ *
+ *   @Input({transform: (value: boolean) => value ? 1 : 0})
+ *   transformedInput3: number;
+ *
+ *   signalInput = input(3);
+ * }
+ * ```
+ *
+ * is described as:
+ * ```
+ * {
+ *   publicInput1: 'publicInput1',
+ *   declaredInput2: [InputFlags.None, 'declaredInput2', 'publicInput2'],
+ *   transformedInput3: [
+ *     InputFlags.None,
+ *     'transformedInput3',
+ *     'transformedInput3',
+ *     (value: boolean) => value ? 1 : 0
+ *   ],
+ *   signalInput: [InputFlags.SignalBased, "signalInput"],
+ * }
+ * ```
+ *
+ * Which the minifier may translate to:
+ * ```
+ * {
+ *   minifiedPublicInput1: 'publicInput1',
+ *   minifiedDeclaredInput2: [InputFlags.None, 'publicInput2', 'declaredInput2'],
+ *   minifiedTransformedInput3: [
+ *     InputFlags.None,
+ *     'transformedInput3',
+ *     'transformedInput3',
+ *     (value: boolean) => value ? 1 : 0
+ *   ],
+ *   minifiedSignalInput: [InputFlags.SignalBased, "signalInput"],
+ * }
+ * ```
+ *
+ * This allows the render to re-construct the minified, public, and declared names
+ * of properties.
+ *
+ * NOTE:
+ *  - Because declared and public name are usually same we only generate the array
+ *    `['declared', 'public']` format when they differ, or there is a transform.
+ *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
+ *    inconsistent behavior in that it uses declared names rather than minified or public. For
+ *    this reason `NgOnChanges` will be deprecated and removed in future version and this
+ *    API will be simplified to be consistent with `output`.
+ */
+declare type DirectiveInputs<T> = {
+    [P in keyof T]?: string | [
+    flags: ɵɵInputFlags,
+    publicName: string,
+    declaredName?: string,
+    transform?: InputTransformFunction
+    ];
+};
 
 declare const DISCONNECTED_NODES = "d";
 
@@ -4621,11 +4636,12 @@ declare type InitialInputData = (InitialInputs | null)[];
  *
  * i+0: attribute name
  * i+1: minified/internal input name
- * i+2: initial value
+ * i+2: input flags
+ * i+3: initial value
  *
  * e.g. ['role-min', 'minified-input', 'button']
  */
-declare type InitialInputs = string[];
+declare type InitialInputs = (string | ɵɵInputFlags)[];
 
 /**
  * Type of the Inject metadata.
@@ -5153,10 +5169,32 @@ export declare interface InputDecorator {
  * carries additional type-information for transforms, and that Angular internally
  * updates the signal whenever a new value is bound.
  */
-export declare type InputSignal<ReadT, WriteT = ReadT> = Signal<ReadT> & {
+export declare interface InputSignal<ReadT, WriteT = ReadT> extends Signal<ReadT> {
     [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: ReadT;
     [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: WriteT;
-};
+    [SIGNAL]: InputSignalNode<ReadT, WriteT>;
+}
+
+/**
+ * Reactive node type for an input signal. An input signal extends a signal.
+ * There are special properties to enable transforms and required inputs.
+ */
+declare interface InputSignalNode<ReadT, WriteT> extends SignalNode<ReadT | typeof REQUIRED_UNSET_VALUE> {
+    /**
+     * User-configured transform that will run whenever a new value is applied
+     * to the input signal node.
+     */
+    transformFn: ((value: WriteT) => ReadT) | undefined;
+    /**
+     * Applies a new value to the input signal. Expects transforms to be run
+     * manually before.
+     *
+     * This function is called by the framework runtime code whenever a binding
+     * changes. The value can in practice be anything at runtime, but for typing
+     * purposes we assume it's a valid `ReadT` value. Type-checking will enforce that.
+     */
+    applyValueToInputSignal<ReadT, WriteT>(node: InputSignalNode<ReadT, WriteT>, value: ReadT): void;
+}
 
 /** Function that can be used to transform incoming input values. */
 declare type InputTransformFunction = (value: any) => any;
@@ -6620,6 +6658,39 @@ export declare interface NgZoneOptions {
  */
 export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
 
+/**
+ * Store the runtime input for all directives applied to a node.
+ *
+ * This allows efficiently setting the same input on a directive that
+ * might apply to multiple directives.
+ *
+ * i+0: directive instance index
+ * i+1: privateName
+ * i+2: input flags
+ *
+ * e.g.
+ * ```
+ * {
+ *   "publicName": [0, 'change-minified', <bit-input-flags>]
+ * }
+ * ```
+ */
+declare type NodeInputBindings = Record<string, (number | string | ɵɵInputFlags)[]>;
+
+/**
+ * Store the runtime output names for all the directives.
+ *
+ * i+0: directive instance index
+ * i+1: privateName
+ *
+ * e.g.
+ * ```
+ * {
+ *   "publicName": [0, 'change-minified']
+ * }
+ */
+declare type NodeOutputBindings = Record<string, (number | string)[]>;
+
 declare const NODES = "n";
 
 declare const NUM_ROOT_NODES = "r";
@@ -7081,30 +7152,6 @@ declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
  * wildcard selector will retrieve all projectable nodes which do not match any selector.
  */
 declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
-
-/**
- * This mapping is necessary so we can set input properties and output listeners
- * properly at runtime when property names are minified or aliased.
- *
- * Key: unminified / public input or output name
- * Value: array containing minified / internal name and related directive index
- *
- * The value must be an array to support inputs and outputs with the same name
- * on the same node.
- */
-declare type PropertyAliases = {
-    [key: string]: PropertyAliasValue;
-};
-
-/**
- * Store the runtime input or output names for all the directives.
- *
- * i+0: directive instance index
- * i+1: privateName
- *
- * e.g. [0, 'change-minified']
- */
-declare type PropertyAliasValue = (number | string)[];
 
 /**
  * Describes how the `Injector` should be configured.
@@ -7897,6 +7944,8 @@ export declare interface RendererType2 {
         [kind: string]: any;
     };
 }
+
+declare const REQUIRED_UNSET_VALUE: unique symbol;
 
 /**
  * Lazily retrieves the reference value from a forwardRef.
@@ -8968,12 +9017,12 @@ declare interface TNode {
      * Input data for all directives on this node. `null` means that there are no directives with
      * inputs on this node.
      */
-    inputs: PropertyAliases | null;
+    inputs: NodeInputBindings | null;
     /**
      * Output data for all directives on this node. `null` means that there are no directives with
      * outputs on this node.
      */
-    outputs: PropertyAliases | null;
+    outputs: NodeOutputBindings | null;
     /**
      * The TView attached to this node.
      *
@@ -11187,12 +11236,11 @@ export declare function ɵdevModeEqual(a: any, b: any): boolean;
  */
 export declare interface ɵDirectiveDef<T> {
     /**
-     * A dictionary mapping the inputs' minified property names to their public API names, which
-     * are their aliases if any, or their original unminified property names
-     * (as in `@Input('alias') propertyName: any;`).
+     * A dictionary mapping the inputs' public name to their minified property names
+     * (along with flags if there are any).
      */
     readonly inputs: {
-        [P in keyof T]: string;
+        [P in keyof T]?: string | [minifiedName: string, flags: ɵɵInputFlags];
     };
     /**
      * A dictionary mapping the private names of inputs to their transformation functions.
@@ -11210,22 +11258,20 @@ export declare interface ɵDirectiveDef<T> {
      * used to do further processing after the `inputs` have been inverted.
      */
     readonly inputConfig: {
-        [classPropertyName: string]: string | [string, string, InputTransformFunction?];
+        [P in keyof T]?: string | [ɵɵInputFlags, string, string?, InputTransformFunction?];
     };
     /**
      * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
      * public or minified name.
      */
-    readonly declaredInputs: {
-        [P in keyof T]: string;
-    };
+    readonly declaredInputs: Record<string, string>;
     /**
      * A dictionary mapping the outputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names
      * (as in `@Output('alias') propertyName: any;`).
      */
     readonly outputs: {
-        [P in keyof T]: string;
+        [P in keyof T]?: string;
     };
     /**
      * Function to create and refresh content queries associated with a given directive.
@@ -11323,7 +11369,7 @@ export declare interface ɵDirectiveDef<T> {
     findHostDirectiveDefs: ((currentDef: ɵDirectiveDef<unknown>, matchedDefs: ɵDirectiveDef<unknown>[], hostDirectiveDefs: HostDirectiveDefs) => void) | null;
     /** Additional directives to be applied whenever the directive has been matched. */
     hostDirectives: HostDirectiveDef[] | null;
-    setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, value: any, publicName: string, privateName: string) => void) | null;
+    setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, inputSignalNode: null | InputSignalNode<unknown, unknown>, value: any, publicName: string, privateName: string) => void) | null;
 }
 
 /**
@@ -14306,6 +14352,13 @@ export declare interface ɵɵInjectorDef<T> {
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
 
+/** Flags describing an input for a directive. */
+export declare enum ɵɵInputFlags {
+    None = 0,
+    SignalBased = 1,
+    HasTransform = 2
+}
+
 /**
  * Decorates the directive definition with support for input transform functions.
  *
@@ -14314,7 +14367,7 @@ export declare interface ɵɵInjectorDef<T> {
  *
  * @codeGenApi
  */
-export declare function ɵɵInputTransformsFeature(definition: ɵDirectiveDef<unknown>): void;
+export declare function ɵɵInputTransformsFeature<T>(definition: ɵDirectiveDef<T>): void;
 
 /**
  * Throws an error indicating that a factory function could not be generated by the compiler for a
