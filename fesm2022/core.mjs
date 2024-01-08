@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-a5a9b40
+ * @license Angular v17.1.0-next.5+sha-f7c02e1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13397,14 +13397,12 @@ const MAXIMUM_REFRESH_RERUNS = 100;
 function detectChangesInternal(lView, notifyErrorHandler = true) {
     const environment = lView[ENVIRONMENT];
     const rendererFactory = environment.rendererFactory;
-    const afterRenderEventManager = environment.afterRenderEventManager;
     // Check no changes mode is a dev only mode used to verify that bindings have not changed
     // since they were assigned. We do not want to invoke renderer factory functions in that mode
     // to avoid any possible side-effects.
     const checkNoChangesMode = !!ngDevMode && isInCheckNoChangesMode();
     if (!checkNoChangesMode) {
         rendererFactory.begin?.();
-        afterRenderEventManager?.begin();
     }
     try {
         detectChangesInViewWhileDirty(lView);
@@ -13421,8 +13419,6 @@ function detectChangesInternal(lView, notifyErrorHandler = true) {
             // One final flush of the effects queue to catch any effects created in `ngAfterViewInit` or
             // other post-order hooks.
             environment.inlineEffectRunner?.flush();
-            // Invoke all callbacks registered via `after*Render`, if needed.
-            afterRenderEventManager?.end();
         }
     }
 }
@@ -15168,13 +15164,6 @@ class AfterRenderCallbackHandlerImpl {
         };
         this.deferredCallbacks = new Set();
     }
-    validateBegin() {
-        if (this.executingCallbacks) {
-            throw new RuntimeError(102 /* RuntimeErrorCode.RECURSIVE_APPLICATION_RENDER */, ngDevMode &&
-                'A new render operation began before the previous operation ended. ' +
-                    'Did you trigger change detection from afterRender or afterNextRender?');
-        }
-    }
     register(callback) {
         // If we're currently running callbacks, new callbacks should be deferred
         // until the next render operation.
@@ -15186,9 +15175,11 @@ class AfterRenderCallbackHandlerImpl {
         this.deferredCallbacks.delete(callback);
     }
     execute() {
+        let callbacksExecuted = false;
         this.executingCallbacks = true;
         for (const bucket of Object.values(this.buckets)) {
             for (const callback of bucket) {
+                callbacksExecuted = true;
                 callback.invoke();
             }
         }
@@ -15197,6 +15188,7 @@ class AfterRenderCallbackHandlerImpl {
             this.buckets[callback.phase].add(callback);
         }
         this.deferredCallbacks.clear();
+        return callbacksExecuted;
     }
     destroy() {
         for (const bucket of Object.values(this.buckets)) {
@@ -15211,37 +15203,25 @@ class AfterRenderCallbackHandlerImpl {
  */
 class AfterRenderEventManager {
     constructor() {
-        this.renderDepth = 0;
         /* @internal */
         this.handler = null;
         /* @internal */
         this.internalCallbacks = [];
     }
     /**
-     * Mark the beginning of a render operation (i.e. CD cycle).
-     * Throws if called while executing callbacks.
+     * Executes callbacks. Returns `true` if any callbacks executed.
      */
-    begin() {
-        this.handler?.validateBegin();
-        this.renderDepth++;
-    }
-    /**
-     * Mark the end of a render operation. Callbacks will be
-     * executed if there are no more pending operations.
-     */
-    end() {
-        ngDevMode && assertGreaterThan(this.renderDepth, 0, 'renderDepth must be greater than 0');
-        this.renderDepth--;
-        if (this.renderDepth === 0) {
-            // Note: internal callbacks power `internalAfterNextRender`. Since internal callbacks
-            // are fairly trivial, they are kept separate so that `AfterRenderCallbackHandlerImpl`
-            // can still be tree-shaken unless used by the application.
-            for (const callback of this.internalCallbacks) {
-                callback();
-            }
-            this.internalCallbacks.length = 0;
-            this.handler?.execute();
+    execute() {
+        // Note: internal callbacks power `internalAfterNextRender`. Since internal callbacks
+        // are fairly trivial, they are kept separate so that `AfterRenderCallbackHandlerImpl`
+        // can still be tree-shaken unless used by the application.
+        const callbacks = [...this.internalCallbacks];
+        this.internalCallbacks.length = 0;
+        for (const callback of callbacks) {
+            callback();
         }
+        const handlerCallbacksExecuted = this.handler?.execute();
+        return !!handlerCallbacksExecuted || callbacks.length > 0;
     }
     ngOnDestroy() {
         this.handler?.destroy();
@@ -15754,7 +15734,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-a5a9b40']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-f7c02e1']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -21002,8 +20982,6 @@ function onInteraction(trigger, callback) {
         // are referencing it.
         entry = new DeferEventEntry();
         interactionTriggers.set(trigger, entry);
-        // Ensure that the handler runs in the NgZone
-        ngDevMode && NgZone.assertInAngularZone();
         for (const name of interactionEventNames) {
             trigger.addEventListener(name, entry.listener, eventListenerOptions);
         }
@@ -21031,8 +21009,6 @@ function onHover(trigger, callback) {
     if (!entry) {
         entry = new DeferEventEntry();
         hoverTriggers.set(trigger, entry);
-        // Ensure that the handler runs in the NgZone
-        ngDevMode && NgZone.assertInAngularZone();
         for (const name of hoverEventNames) {
             trigger.addEventListener(name, entry.listener, eventListenerOptions);
         }
@@ -30085,7 +30061,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.5+sha-a5a9b40');
+const VERSION = new Version('17.1.0-next.5+sha-f7c02e1');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -31821,6 +31797,7 @@ class ApplicationRef {
         /** @internal */
         this._views = [];
         this.internalErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
+        this.afterRenderEffectManager = inject(AfterRenderEventManager);
         /**
          * Get a list of component types registered to this application.
          * This list is populated even before the component is created.
@@ -31957,6 +31934,18 @@ class ApplicationRef {
             this.internalErrorHandler(e);
         }
         finally {
+            // Catch any `ExpressionChanged...` errors and report them to error handler like above
+            try {
+                const callbacksExecuted = this.afterRenderEffectManager.execute();
+                if ((typeof ngDevMode === 'undefined' || ngDevMode) && callbacksExecuted) {
+                    for (let view of this._views) {
+                        view.checkNoChanges();
+                    }
+                }
+            }
+            catch (e) {
+                this.internalErrorHandler(e);
+            }
             this._runningTick = false;
         }
     }

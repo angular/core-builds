@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-a5a9b40
+ * @license Angular v17.1.0-next.5+sha-f7c02e1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -643,6 +643,7 @@ export declare class ApplicationRef {
     private _destroyed;
     private _destroyListeners;
     private readonly internalErrorHandler;
+    private readonly afterRenderEffectManager;
     /**
      * Indicates whether this instance was destroyed.
      */
@@ -10666,17 +10667,10 @@ export declare function ɵ_sanitizeUrl(url: string): string;
  * Delegates to an optional `AfterRenderCallbackHandler` for implementation.
  */
 export declare class ɵAfterRenderEventManager {
-    private renderDepth;
     /**
-     * Mark the beginning of a render operation (i.e. CD cycle).
-     * Throws if called while executing callbacks.
+     * Executes callbacks. Returns `true` if any callbacks executed.
      */
-    begin(): void;
-    /**
-     * Mark the end of a render operation. Callbacks will be
-     * executed if there are no more pending operations.
-     */
-    end(): void;
+    execute(): boolean;
     ngOnDestroy(): void;
     /** @nocollapse */
     static ɵprov: unknown;
@@ -12374,7 +12368,6 @@ export declare class ɵRuntimeError<T extends number = ɵRuntimeErrorCode> exten
 export declare const enum ɵRuntimeErrorCode {
     EXPRESSION_CHANGED_AFTER_CHECKED = -100,
     RECURSIVE_APPLICATION_REF_TICK = 101,
-    RECURSIVE_APPLICATION_RENDER = 102,
     INFINITE_CHANGE_DETECTION = 103,
     CYCLIC_DI_DEPENDENCY = -200,
     PROVIDER_NOT_FOUND = -201,
