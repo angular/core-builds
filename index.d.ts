@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-a468a5e
+ * @license Angular v17.1.0-next.5+sha-2d7d4e2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -788,6 +788,18 @@ export declare class ApplicationRef {
     static ɵfac: i0.ɵɵFactoryDeclaration<ApplicationRef, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<ApplicationRef>;
 }
+
+
+/**
+ * Marks a component for check (in case of OnPush components) and synchronously
+ * performs change detection on the application this component belongs to.
+ *
+ * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+declare function applyChanges(component: {}): void;
 
 /**
  * @publicApi
@@ -3043,6 +3055,18 @@ export declare interface Directive {
 export declare const Directive: DirectiveDecorator;
 
 /**
+ * Partial metadata for a given directive instance.
+ * This information might be useful for debugging purposes or tooling.
+ * Currently only `inputs` and `outputs` metadata is available.
+ *
+ * @publicApi
+ */
+declare interface DirectiveDebugMetadata {
+    inputs: Record<string, string>;
+    outputs: Record<string, string>;
+}
+
+/**
  * Type of the Directive decorator / constructor function.
  * @publicApi
  */
@@ -3927,11 +3951,163 @@ export declare interface ForwardRefFn {
 }
 
 /**
+ * Retrieves the component instance associated with a given DOM element.
+ *
+ * @usageNotes
+ * Given the following DOM structure:
+ *
+ * ```html
+ * <app-root>
+ *   <div>
+ *     <child-comp></child-comp>
+ *   </div>
+ * </app-root>
+ * ```
+ *
+ * Calling `getComponent` on `<child-comp>` will return the instance of `ChildComponent`
+ * associated with this DOM element.
+ *
+ * Calling the function on `<app-root>` will return the `MyApp` instance.
+ *
+ *
+ * @param element DOM element from which the component should be retrieved.
+ * @returns Component instance associated with the element or `null` if there
+ *    is no component associated with it.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+declare function getComponent<T>(element: Element): T | null;
+
+/**
+ * If inside an embedded view (e.g. `*ngIf` or `*ngFor`), retrieves the context of the embedded
+ * view that the element is part of. Otherwise retrieves the instance of the component whose view
+ * owns the element (in this case, the result is the same as calling `getOwningComponent`).
+ *
+ * @param element Element for which to get the surrounding component instance.
+ * @returns Instance of the component that is around the element or null if the element isn't
+ *    inside any component.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+declare function getContext<T extends {}>(element: Element): T | null;
+
+/**
  * @publicApi
  */
 declare function getDebugNode(nativeNode: any): DebugNode | null;
 export { getDebugNode }
 export { getDebugNode as ɵgetDebugNode }
+
+/**
+ * Discovers the dependencies of an injectable instance. Provides DI information about each
+ * dependency that the injectable was instantiated with, including where they were provided from.
+ *
+ * @param injector An injector instance
+ * @param token a DI token that was constructed by the given injector instance
+ * @returns an object that contains the created instance of token as well as all of the dependencies
+ * that it was instantiated with OR undefined if the token was not created within the given
+ * injector.
+ */
+declare function getDependenciesFromInjectable<T>(injector: Injector, token: Type<T> | InjectionToken<T>): {
+    instance: T;
+    dependencies: Omit<InjectedService, 'injectedIn'>[];
+} | undefined;
+
+/**
+ * Returns the debug (partial) metadata for a particular directive or component instance.
+ * The function accepts an instance of a directive or component and returns the corresponding
+ * metadata.
+ *
+ * @param directiveOrComponentInstance Instance of a directive or component
+ * @returns metadata of the passed directive or component
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+declare function getDirectiveMetadata(directiveOrComponentInstance: any): ɵComponentDebugMetadata | DirectiveDebugMetadata | null;
+
+/**
+ * Retrieves an `Injector` associated with an element, component or directive instance.
+ *
+ * @param elementOrDir DOM element, component or directive instance for which to
+ *    retrieve the injector.
+ * @returns Injector associated with the element, component or directive instance.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+declare function getInjector(elementOrDir: Element | {}): Injector;
+
+/**
+ *
+ * Given an injector, this function will return
+ * an object containing the type and source of the injector.
+ *
+ * |              | type        | source                                                      |
+ * |--------------|-------------|-------------------------------------------------------------|
+ * | NodeInjector | element     | DOM element that created this injector                      |
+ * | R3Injector   | environment | `injector.source`                                           |
+ * | NullInjector | null        | null                                                        |
+ *
+ * @param injector the Injector to get metadata for
+ * @returns an object containing the type and source of the given injector. If the injector metadata
+ *     cannot be determined, returns null.
+ */
+declare function getInjectorMetadata(injector: Injector): {
+    type: 'element';
+    source: RElement;
+} | {
+    type: 'environment';
+    source: string | null;
+} | {
+    type: 'null';
+    source: null;
+} | null;
+
+/**
+ * Gets the providers configured on an injector.
+ *
+ * @param injector the injector to lookup the providers of
+ * @returns ProviderRecord[] an array of objects representing the providers of the given injector
+ */
+declare function getInjectorProviders(injector: Injector): ɵProviderRecord[];
+
+declare function getInjectorResolutionPath(injector: Injector): Injector[];
+
+/**
+ * Retrieves a list of event listeners associated with a DOM element. The list does include host
+ * listeners, but it does not include event listeners defined outside of the Angular context
+ * (e.g. through `addEventListener`).
+ *
+ * @usageNotes
+ * Given the following DOM structure:
+ *
+ * ```html
+ * <app-root>
+ *   <div (click)="doSomething()"></div>
+ * </app-root>
+ * ```
+ *
+ * Calling `getListeners` on `<div>` will return an object that looks as follows:
+ *
+ * ```ts
+ * {
+ *   name: 'click',
+ *   element: <div>,
+ *   callback: () => doSomething(),
+ *   useCapture: false
+ * }
+ * ```
+ *
+ * @param element Element for which the DOM listeners should be retrieved.
+ * @returns Array of event listeners on the DOM element.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+declare function getListeners(element: Element): Listener[];
 
 /**
  * Returns the NgModuleFactory with the given id (specified using [@NgModule.id
@@ -3951,11 +4127,41 @@ export declare function getModuleFactory(id: string): NgModuleFactory<any>;
 export declare function getNgModuleById<T>(id: string): Type<T>;
 
 /**
+ * Retrieves the component instance whose view contains the DOM element.
+ *
+ * For example, if `<child-comp>` is used in the template of `<app-comp>`
+ * (i.e. a `ViewChild` of `<app-comp>`), calling `getOwningComponent` on `<child-comp>`
+ * would return `<app-comp>`.
+ *
+ * @param elementOrDir DOM element, component or directive instance
+ *    for which to retrieve the root components.
+ * @returns Component instance whose view owns the DOM element or null if the element is not
+ *    part of a component view.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+declare function getOwningComponent<T>(elementOrDir: Element | {}): T | null;
+
+/**
  * Returns the current platform.
  *
  * @publicApi
  */
 export declare function getPlatform(): PlatformRef | null;
+
+/**
+ * Retrieves all root components associated with a DOM element, directive or component instance.
+ * Root components are those which have been bootstrapped by Angular.
+ *
+ * @param elementOrDir DOM element, component or directive instance
+ *    for which to retrieve the root components.
+ * @returns Root components associated with the target object.
+ *
+ * @publicApi
+ * @globalApi ng
+ */
+declare function getRootComponents(elementOrDir: Element | {}): {}[];
 
 /**
  * Adapter interface for retrieving the `Testability` service associated for a
@@ -3969,6 +4175,12 @@ export declare interface GetTestability {
 }
 
 /**
+ * This value reflects the property on the window where the dev
+ * tools are patched (window.ng).
+ * */
+declare const GLOBAL_PUBLISH_EXPANDO_KEY = "ng";
+
+/**
  * The goal here is to make sure that the browser DOM API is the Renderer.
  * We do this by defining a subset of DOM API to be the renderer and then
  * use that at runtime for rendering.
@@ -3979,6 +4191,29 @@ export declare interface GetTestability {
 declare type GlobalTargetName = 'document' | 'window' | 'body';
 
 declare type GlobalTargetResolver = (element: any) => EventTarget;
+
+declare const globalUtilsFunctions: {
+    /**
+     * Warning: functions that start with `ɵ` are considered *INTERNAL* and should not be relied upon
+     * in application's code. The contract of those functions might be changed in any release and/or a
+     * function can be removed completely.
+     */
+    ɵgetDependenciesFromInjectable: typeof getDependenciesFromInjectable;
+    ɵgetInjectorProviders: typeof getInjectorProviders;
+    ɵgetInjectorResolutionPath: typeof getInjectorResolutionPath;
+    ɵgetInjectorMetadata: typeof getInjectorMetadata;
+    ɵsetProfiler: (profiler: ɵProfiler | null) => void;
+    getDirectiveMetadata: typeof getDirectiveMetadata;
+    getComponent: typeof getComponent;
+    getContext: typeof getContext;
+    getListeners: typeof getListeners;
+    getOwningComponent: typeof getOwningComponent;
+    getHostElement: typeof ɵgetHostElement;
+    getInjector: typeof getInjector;
+    getRootComponents: typeof getRootComponents;
+    getDirectives: typeof ɵgetDirectives;
+    applyChanges: typeof applyChanges;
+};
 
 /**
  * Array of hooks that should be executed for a view and their directive indices.
@@ -4834,6 +5069,36 @@ export declare interface InjectDecorator {
 }
 
 /**
+ * An object that contains information a service that has been injected within an
+ * InjectorProfilerContext
+ */
+declare interface InjectedService {
+    /**
+     * DI token of the Service that is injected
+     */
+    token?: Type<unknown> | InjectionToken<unknown>;
+    /**
+     * Value of the injected service
+     */
+    value: unknown;
+    /**
+     * Flags that this service was injected with
+     */
+    flags?: InternalInjectFlags | InjectFlags | InjectOptions;
+    /**
+     * Injector that this service was provided in.
+     */
+    providedIn?: Injector;
+    /**
+     * In NodeInjectors, the LView and TNode that serviced this injection.
+     */
+    injectedIn?: {
+        lView: LView;
+        tNode: TNode;
+    };
+}
+
+/**
  * Injection flags for DI.
  *
  * @publicApi
@@ -5215,6 +5480,37 @@ declare interface InternalAfterNextRenderOptions {
      * If this is not provided, the current injection context will be used instead (via `inject`).
      */
     injector?: Injector;
+}
+
+/**
+ * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a
+ * const enum, so actual enum values would be inlined in generated code. The `InjectFlags` enum can
+ * be turned into a const enum when ViewEngine is removed (see TODO at the `InjectFlags` enum
+ * above). The benefit of inlining is that we can use these flags at the top level without affecting
+ * tree-shaking (see "no-toplevel-property-access" tslint rule for more info).
+ * Keep this enum in sync with `InjectFlags` enum above.
+ */
+declare const enum InternalInjectFlags {
+    /** Check self and check parent injector if needed */
+    Default = 0,
+    /**
+     * Specifies that an injector should retrieve a dependency from any injector until reaching the
+     * host element of the current component. (Only used with Element Injector)
+     */
+    Host = 1,
+    /** Don't ascend to ancestors of the node requesting injection. */
+    Self = 2,
+    /** Skip the node that is requesting injection. */
+    SkipSelf = 4,
+    /** Inject `defaultValue` instead if token not found. */
+    Optional = 8,
+    /**
+     * This token is being injected into a pipe.
+     *
+     * This flag is intentionally not in the public facing `InjectFlags` because it is only added by
+     * the compiler and is not a developer applicable flag.
+     */
+    ForPipe = 16
 }
 
 declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
@@ -5614,6 +5910,25 @@ declare enum LContainerFlags {
 }
 
 declare type LegacyInputPartialMapping = string | [bindingPropertyName: string, classPropertyName: string, transformFunction?: Function];
+
+/**
+ * Event listener configuration returned from `getListeners`.
+ * @publicApi
+ */
+declare interface Listener {
+    /** Name of the event listener. */
+    name: string;
+    /** Element that the listener is bound to. */
+    element: Element;
+    /** Callback that is invoked when the event is triggered. */
+    callback: (value: any) => any;
+    /** Whether the listener is using event capturing. */
+    useCapture: boolean;
+    /**
+     * Type of the listener (e.g. a native DOM event or a custom @Output).
+     */
+    type: 'dom' | 'output';
+}
 
 /**
  * Provide this token to set the locale of your application.
@@ -8295,6 +8610,11 @@ export declare interface SimpleChanges {
 }
 
 /**
+ * Internal type for a single provider in a deep provider array.
+ */
+declare type SingleProvider = TypeProvider | ValueProvider | ClassProvider | ConstructorProvider | ExistingProvider | FactoryProvider | StaticClassProvider;
+
+/**
  * Type of the `SkipSelf` metadata.
  *
  * @publicApi
@@ -10956,6 +11276,22 @@ export declare function ɵcompileNgModuleFactory<M>(injector: Injector, options:
 export declare function ɵcompilePipe(type: Type<any>, meta: Pipe): void;
 
 /**
+ * Partial metadata for a given component instance.
+ * This information might be useful for debugging purposes or tooling.
+ * Currently the following fields are available:
+ *  - inputs
+ *  - outputs
+ *  - encapsulation
+ *  - changeDetection
+ *
+ * @publicApi
+ */
+export declare interface ɵComponentDebugMetadata extends DirectiveDebugMetadata {
+    encapsulation: ViewEncapsulation;
+    changeDetection: ChangeDetectionStrategy;
+}
+
+/**
  * Runtime link information for Components.
  *
  * This is an internal data structure used by the render to link
@@ -11545,6 +11881,13 @@ export declare function ɵgetUnknownPropertyStrictMode(): boolean;
 
 
 export declare const ɵglobal: any;
+
+/**
+ * Default debug tools available under `window.ng`.
+ */
+export declare type ɵGlobalDevModeUtils = {
+    [GLOBAL_PUBLISH_EXPANDO_KEY]: typeof globalUtilsFunctions;
+};
 
 /**
  * Injection token that configures the image optimized image functionality.
@@ -12152,18 +12495,28 @@ export declare const enum ɵProfilerEvent {
 }
 
 /**
- * Publishes a collection of default debug tools onto`window.ng`.
+ * An object that contains information about a provider that has been configured
  *
- * These functions are available globally when Angular is in development
- * mode and are automatically stripped away from prod mode is on.
+ * TODO: rename to indicate that it is a debug structure eg. ProviderDebugInfo.
  */
-export declare function ɵpublishDefaultGlobalUtils(): void;
-
-/**
- * Publishes the given function to `window.ng` so that it can be
- * used from the browser console when an application is not in production.
- */
-export declare function ɵpublishGlobalUtil(name: string, fn: Function): void;
+export declare interface ɵProviderRecord {
+    /**
+     * DI token that this provider is configuring
+     */
+    token: Type<unknown> | InjectionToken<unknown>;
+    /**
+     * Determines if provider is configured as view provider.
+     */
+    isViewProvider: boolean;
+    /**
+     * The raw provider associated with this ProviderRecord.
+     */
+    provider: SingleProvider;
+    /**
+     * The path of DI containers that were followed to import this provider
+     */
+    importPath?: Type<unknown>[];
+}
 
 export declare class ɵReflectionCapabilities implements PlatformReflectionCapabilities {
     private _reflect;

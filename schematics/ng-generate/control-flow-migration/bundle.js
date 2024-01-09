@@ -25535,7 +25535,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.5+sha-a468a5e");
+var VERSION2 = new Version("17.1.0-next.5+sha-2d7d4e2");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26295,7 +26295,7 @@ function getMainBlock(etm, tmpl, offset) {
       const { childStart: childStart2, childEnd: childEnd2 } = etm.getChildSpan(offset);
       middle2 = tmpl.slice(childStart2, childEnd2);
     } else {
-      middle2 = startMarker + endMarker;
+      middle2 = "";
     }
     return { start: "", middle: middle2, end: "" };
   } else if (isI18nTemplate(etm, i18nAttr)) {
