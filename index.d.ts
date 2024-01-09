@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-2d7d4e2
+ * @license Angular v17.1.0-next.5+sha-2dedc4a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13307,7 +13307,7 @@ export declare class ɵZoneAwareQueueingScheduler implements ɵEffectScheduler, 
  *
  * @codeGenApi
  */
-export declare function ɵɵadvance(delta: number): void;
+export declare function ɵɵadvance(delta?: number): void;
 
 /**
  * Updates the value of or removes a bound attribute on an Element.

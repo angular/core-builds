@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-2d7d4e2
+ * @license Angular v17.1.0-next.5+sha-2dedc4a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -454,14 +454,6 @@ function signalUpdateFn(node, updater) {
     }
     signalSetFn(node, updater(node.value));
 }
-function signalMutateFn(node, mutator) {
-    if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError();
-    }
-    // Mutate bypasses equality checks as it's by definition changing the value.
-    mutator(node.value);
-    signalValueChanged(node);
-}
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
 // a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
 // TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
@@ -557,5 +549,5 @@ function setAlternateWeakRefImpl(impl) {
     // TODO: remove this function
 }
 
-export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerPollProducersForChange, createComputed, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalMutateFn, signalSetFn, signalUpdateFn };
+export { REACTIVE_NODE, SIGNAL, SIGNAL_NODE, consumerAfterComputation, consumerBeforeComputation, consumerDestroy, consumerPollProducersForChange, createComputed, createSignal, createWatch, defaultEquals, getActiveConsumer, isInNotificationPhase, isReactive, producerAccessed, producerNotifyConsumers, producerUpdateValueVersion, producerUpdatesAllowed, setActiveConsumer, setAlternateWeakRefImpl, setPostSignalSetFn, setThrowInvalidWriteToSignalError, signalSetFn, signalUpdateFn };
 //# sourceMappingURL=signals.mjs.map

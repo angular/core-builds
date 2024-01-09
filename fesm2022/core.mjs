@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-2d7d4e2
+ * @license Angular v17.1.0-next.5+sha-2dedc4a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12000,7 +12000,7 @@ const NO_CHANGE = (typeof ngDevMode === 'undefined' || ngDevMode) ? { __brand__:
  *
  * @codeGenApi
  */
-function ɵɵadvance(delta) {
+function ɵɵadvance(delta = 1) {
     ngDevMode && assertGreaterThan(delta, 0, 'Can only advance forward');
     selectIndexInternal(getTView(), getLView(), getSelectedIndex() + delta, !!ngDevMode && isInCheckNoChangesMode());
 }
@@ -15736,7 +15736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-2d7d4e2']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-2dedc4a']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30063,7 +30063,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.5+sha-2d7d4e2');
+const VERSION = new Version('17.1.0-next.5+sha-2dedc4a');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33850,14 +33850,6 @@ function signalUpdateFn(node, updater) {
         throwInvalidWriteToSignalError();
     }
     signalSetFn(node, updater(node.value));
-}
-function signalMutateFn(node, mutator) {
-    if (!producerUpdatesAllowed()) {
-        throwInvalidWriteToSignalError();
-    }
-    // Mutate bypasses equality checks as it's by definition changing the value.
-    mutator(node.value);
-    signalValueChanged(node);
 }
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
 // a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
