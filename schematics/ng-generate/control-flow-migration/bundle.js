@@ -17140,9 +17140,7 @@ function namespaceMath() {
   return call(Identifiers.namespaceMathML, [], null);
 }
 function advance(delta, sourceSpan) {
-  return call(Identifiers.advance, [
-    literal(delta)
-  ], sourceSpan);
+  return call(Identifiers.advance, delta > 1 ? [literal(delta)] : [], sourceSpan);
 }
 function reference(slot) {
   return importExpr(Identifiers.reference).callFn([
@@ -22990,7 +22988,7 @@ var TemplateDefinitionBuilder = class {
       if (delta < 1) {
         throw new Error("advance instruction can only go forwards");
       }
-      this.instructionFn(this._updateCodeFns, span, Identifiers.advance, [literal(delta)]);
+      this.instructionFn(this._updateCodeFns, span, Identifiers.advance, delta > 1 ? [literal(delta)] : []);
       this._currentIndex = nodeIndex;
     }
   }
@@ -25417,7 +25415,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.0.8+sha-c4b266c");
+var VERSION2 = new Version("17.0.8+sha-92fd6cc");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
