@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-5996d3f
+ * @license Angular v17.1.0-next.5+sha-c2dd703
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15736,7 +15736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-5996d3f']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-c2dd703']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30063,7 +30063,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.5+sha-5996d3f');
+const VERSION = new Version('17.1.0-next.5+sha-c2dd703');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -31156,13 +31156,6 @@ class Testability {
         this.registry = registry;
         this._pendingCount = 0;
         this._isZoneStable = true;
-        /**
-         * Whether any work was done since the last 'whenStable' callback. This is
-         * useful to detect if this could have potentially destabilized another
-         * component while it is stabilizing.
-         * @internal
-         */
-        this._didWork = false;
         this._callbacks = [];
         this.taskTrackingZone = null;
         // If there was no Testability logic registered in the global scope
@@ -31180,7 +31173,6 @@ class Testability {
     _watchAngularEvents() {
         this._ngZone.onUnstable.subscribe({
             next: () => {
-                this._didWork = true;
                 this._isZoneStable = false;
             }
         });
@@ -31202,7 +31194,6 @@ class Testability {
      */
     increasePendingRequestCount() {
         this._pendingCount += 1;
-        this._didWork = true;
         return this._pendingCount;
     }
     /**
@@ -31230,9 +31221,8 @@ class Testability {
                 while (this._callbacks.length !== 0) {
                     let cb = this._callbacks.pop();
                     clearTimeout(cb.timeoutId);
-                    cb.doneCb(this._didWork);
+                    cb.doneCb();
                 }
-                this._didWork = false;
             });
         }
         else {
@@ -31245,7 +31235,6 @@ class Testability {
                 }
                 return true;
             });
-            this._didWork = true;
         }
     }
     getPendingTasks() {
@@ -31268,7 +31257,7 @@ class Testability {
         if (timeout && timeout > 0) {
             timeoutId = setTimeout(() => {
                 this._callbacks = this._callbacks.filter((cb) => cb.timeoutId !== timeoutId);
-                cb(this._didWork, this.getPendingTasks());
+                cb();
             }, timeout);
         }
         this._callbacks.push({ doneCb: cb, timeoutId: timeoutId, updateCb: updateCb });
@@ -31290,7 +31279,6 @@ class Testability {
             throw new Error('Task tracking zone is required when passing an update callback to ' +
                 'whenStable(). Is "zone.js/plugins/task-tracking" loaded?');
         }
-        // These arguments are 'Function' above to keep the public API simple.
         this.addCallback(doneCb, timeout, updateCb);
         this._runCallbacksIfReady();
     }
