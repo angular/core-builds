@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-c2dd703
+ * @license Angular v17.1.0-next.5+sha-5978b3d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12517,6 +12517,8 @@ export declare interface ɵProviderRecord {
      */
     importPath?: Type<unknown>[];
 }
+
+export declare function ɵprovideZonelessChangeDetection(): EnvironmentProviders;
 
 export declare class ɵReflectionCapabilities implements PlatformReflectionCapabilities {
     private _reflect;
