@@ -530,7 +530,7 @@ var InputFlags;
 (function(InputFlags2) {
   InputFlags2[InputFlags2["None"] = 0] = "None";
   InputFlags2[InputFlags2["SignalBased"] = 1] = "SignalBased";
-  InputFlags2[InputFlags2["HasTransform"] = 2] = "HasTransform";
+  InputFlags2[InputFlags2["HasDecoratorInputTransform"] = 2] = "HasDecoratorInputTransform";
 })(InputFlags || (InputFlags = {}));
 var CUSTOM_ELEMENTS_SCHEMA = {
   name: "custom-elements"
@@ -892,12 +892,13 @@ var BinaryOperator;
   BinaryOperator2[BinaryOperator2["Modulo"] = 8] = "Modulo";
   BinaryOperator2[BinaryOperator2["And"] = 9] = "And";
   BinaryOperator2[BinaryOperator2["Or"] = 10] = "Or";
-  BinaryOperator2[BinaryOperator2["BitwiseAnd"] = 11] = "BitwiseAnd";
-  BinaryOperator2[BinaryOperator2["Lower"] = 12] = "Lower";
-  BinaryOperator2[BinaryOperator2["LowerEquals"] = 13] = "LowerEquals";
-  BinaryOperator2[BinaryOperator2["Bigger"] = 14] = "Bigger";
-  BinaryOperator2[BinaryOperator2["BiggerEquals"] = 15] = "BiggerEquals";
-  BinaryOperator2[BinaryOperator2["NullishCoalesce"] = 16] = "NullishCoalesce";
+  BinaryOperator2[BinaryOperator2["BitwiseOr"] = 11] = "BitwiseOr";
+  BinaryOperator2[BinaryOperator2["BitwiseAnd"] = 12] = "BitwiseAnd";
+  BinaryOperator2[BinaryOperator2["Lower"] = 13] = "Lower";
+  BinaryOperator2[BinaryOperator2["LowerEquals"] = 14] = "LowerEquals";
+  BinaryOperator2[BinaryOperator2["Bigger"] = 15] = "Bigger";
+  BinaryOperator2[BinaryOperator2["BiggerEquals"] = 16] = "BiggerEquals";
+  BinaryOperator2[BinaryOperator2["NullishCoalesce"] = 17] = "NullishCoalesce";
 })(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
   if (base == null || other == null) {
@@ -969,6 +970,9 @@ var Expression = class {
   }
   and(rhs, sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.And, this, rhs, null, sourceSpan);
+  }
+  bitwiseOr(rhs, sourceSpan, parens = true) {
+    return new BinaryOperatorExpr(BinaryOperator.BitwiseOr, this, rhs, null, sourceSpan, parens);
   }
   bitwiseAnd(rhs, sourceSpan, parens = true) {
     return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, this, rhs, null, sourceSpan, parens);
@@ -3170,6 +3174,9 @@ var AbstractEmitterVisitor = class {
       case BinaryOperator.And:
         opStr = "&&";
         break;
+      case BinaryOperator.BitwiseOr:
+        opStr = "|";
+        break;
       case BinaryOperator.BitwiseAnd:
         opStr = "&";
         break;
@@ -4317,20 +4324,20 @@ function conditionallyCreateDirectiveBindingLiteral(map, forInputs) {
       declaredName = value.classPropertyName;
       publicName = value.bindingPropertyName;
       const differentDeclaringName = publicName !== declaredName;
-      const hasTransform = value.transformFunction !== null;
+      const hasDecoratorInputTransform = value.transformFunction !== null;
       let flags = null;
       if (value.isSignal) {
-        flags = bitwiseAndInputFlagsExpr(InputFlags.SignalBased, flags);
+        flags = bitwiseOrInputFlagsExpr(InputFlags.SignalBased, flags);
       }
-      if (value.transformFunction !== null) {
-        flags = bitwiseAndInputFlagsExpr(InputFlags.HasTransform, flags);
+      if (hasDecoratorInputTransform) {
+        flags = bitwiseOrInputFlagsExpr(InputFlags.HasDecoratorInputTransform, flags);
       }
-      if (forInputs && (differentDeclaringName || hasTransform || flags !== null)) {
+      if (forInputs && (differentDeclaringName || hasDecoratorInputTransform || flags !== null)) {
         const flagsExpr = flags != null ? flags : importExpr(Identifiers.InputFlags).prop(InputFlags[InputFlags.None]);
         const result = [flagsExpr, asLiteral(publicName)];
-        if (differentDeclaringName || hasTransform) {
+        if (differentDeclaringName || hasDecoratorInputTransform) {
           result.push(asLiteral(declaredName));
-          if (hasTransform) {
+          if (hasDecoratorInputTransform) {
             result.push(value.transformFunction);
           }
         }
@@ -4349,11 +4356,11 @@ function conditionallyCreateDirectiveBindingLiteral(map, forInputs) {
 function getInputFlagExpr(flag) {
   return importExpr(Identifiers.InputFlags).prop(InputFlags[flag]);
 }
-function bitwiseAndInputFlagsExpr(flag, expr) {
+function bitwiseOrInputFlagsExpr(flag, expr) {
   if (expr === null) {
     return getInputFlagExpr(flag);
   }
-  return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, expr, getInputFlagExpr(flag));
+  return getInputFlagExpr(flag).bitwiseOr(expr);
 }
 function trimTrailingNulls(parameters) {
   while (isNull(parameters[parameters.length - 1])) {
@@ -9298,6 +9305,7 @@ var BINARY_OPERATORS = /* @__PURE__ */ new Map([
   ["&&", BinaryOperator.And],
   [">", BinaryOperator.Bigger],
   [">=", BinaryOperator.BiggerEquals],
+  ["|", BinaryOperator.BitwiseOr],
   ["&", BinaryOperator.BitwiseAnd],
   ["/", BinaryOperator.Divide],
   ["==", BinaryOperator.Equals],
@@ -25248,7 +25256,7 @@ function convertDirectiveFacadeToMetadata(facade) {
             bindingPropertyName: ann.alias || field,
             classPropertyName: field,
             required: ann.required || false,
-            isSignal: false,
+            isSignal: !!ann.isSignal,
             transformFunction: ann.transform != null ? new WrappedNodeExpr(ann.transform) : null
           };
         } else if (isOutput(ann)) {
@@ -25602,7 +25610,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.5+sha-5978b3d");
+var VERSION2 = new Version("17.1.0-next.5+sha-7862686");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

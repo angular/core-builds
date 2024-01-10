@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-5978b3d
+ * @license Angular v17.1.0-next.5+sha-7862686
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,6 +7,60 @@
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, createComputed as createComputed$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
+
+/**
+ * Base URL for the error details page.
+ *
+ * Keep this constant in sync across:
+ *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
+ *  - packages/core/src/error_details_base_url.ts
+ */
+const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
+/**
+ * URL for the XSS security documentation.
+ */
+const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
+
+/**
+ * Class that represents a runtime error.
+ * Formats and outputs the error message in a consistent way.
+ *
+ * Example:
+ * ```
+ *  throw new RuntimeError(
+ *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
+ *    ngDevMode && 'Injector has already been destroyed.');
+ * ```
+ *
+ * Note: the `message` argument contains a descriptive error message as a string in development
+ * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
+ * `message` argument becomes `false`, thus we account for it in the typings and the runtime
+ * logic.
+ */
+class RuntimeError extends Error {
+    constructor(code, message) {
+        super(formatRuntimeError(code, message));
+        this.code = code;
+    }
+}
+/**
+ * Called to format a runtime error.
+ * See additional info on the `message` argument type in the `RuntimeError` class description.
+ */
+function formatRuntimeError(code, message) {
+    // Error code might be a negative number, which is a special marker that instructs the logic to
+    // generate a link to the error details page on angular.io.
+    // We also prepend `0` to non-compile-time errors.
+    const fullCode = `NG0${Math.abs(code)}`;
+    let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
+    if (ngDevMode && code < 0) {
+        const addPeriodSeparator = !errorMessage.match(/[.,;!?\n]$/);
+        const separator = addPeriodSeparator ? '.' : '';
+        errorMessage =
+            `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
+    }
+    return errorMessage;
+}
 
 const REQUIRED_UNSET_VALUE = /* @__PURE__ */ Symbol('InputSignalNode#UNSET');
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
@@ -41,8 +95,7 @@ function createInputSignal(initialValue, options) {
         // Record that someone looked at this signal.
         producerAccessed$1(node);
         if (node.value === REQUIRED_UNSET_VALUE) {
-            // TODO: Use a runtime error w/ error guide.
-            throw new Error('Input is required, but no value set yet.');
+            throw new RuntimeError(-950 /* RuntimeErrorCode.REQUIRED_INPUT_NO_VALUE */, ngDevMode && 'Input is required but no value is available yet.');
         }
         return node.value;
     }
@@ -231,60 +284,6 @@ function isForwardRef(fn) {
 
 function isEnvironmentProviders(value) {
     return value && !!value.ɵproviders;
-}
-
-/**
- * Base URL for the error details page.
- *
- * Keep this constant in sync across:
- *  - packages/compiler-cli/src/ngtsc/diagnostics/src/error_details_base_url.ts
- *  - packages/core/src/error_details_base_url.ts
- */
-const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
-/**
- * URL for the XSS security documentation.
- */
-const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
-
-/**
- * Class that represents a runtime error.
- * Formats and outputs the error message in a consistent way.
- *
- * Example:
- * ```
- *  throw new RuntimeError(
- *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
- *    ngDevMode && 'Injector has already been destroyed.');
- * ```
- *
- * Note: the `message` argument contains a descriptive error message as a string in development
- * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
- * `message` argument becomes `false`, thus we account for it in the typings and the runtime
- * logic.
- */
-class RuntimeError extends Error {
-    constructor(code, message) {
-        super(formatRuntimeError(code, message));
-        this.code = code;
-    }
-}
-/**
- * Called to format a runtime error.
- * See additional info on the `message` argument type in the `RuntimeError` class description.
- */
-function formatRuntimeError(code, message) {
-    // Error code might be a negative number, which is a special marker that instructs the logic to
-    // generate a link to the error details page on angular.io.
-    // We also prepend `0` to non-compile-time errors.
-    const fullCode = `NG0${Math.abs(code)}`;
-    let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
-    if (ngDevMode && code < 0) {
-        const addPeriodSeparator = !errorMessage.match(/[.,;!?\n]$/);
-        const separator = addPeriodSeparator ? '.' : '';
-        errorMessage =
-            `${errorMessage}${separator} Find more at ${ERROR_DETAILS_PAGE_BASE_URL}/${fullCode}`;
-    }
-    return errorMessage;
 }
 
 const NG_COMP_DEF = getClosureSafeProperty({ ɵcmp: getClosureSafeProperty });
@@ -1279,7 +1278,7 @@ var InputFlags;
 (function (InputFlags) {
     InputFlags[InputFlags["None"] = 0] = "None";
     InputFlags[InputFlags["SignalBased"] = 1] = "SignalBased";
-    InputFlags[InputFlags["HasTransform"] = 2] = "HasTransform";
+    InputFlags[InputFlags["HasDecoratorInputTransform"] = 2] = "HasDecoratorInputTransform";
 })(InputFlags || (InputFlags = {}));
 
 /**
@@ -12073,13 +12072,14 @@ function writeToDirectiveInput(def, instance, publicName, privateName, flags, va
             const field = instance[privateName];
             inputSignalNode = field[SIGNAL$1];
         }
-        if ((flags & InputFlags.HasTransform) !== 0) {
-            if (inputSignalNode !== null) {
-                value = inputSignalNode.transformFn(value);
-            }
-            else {
-                value = def.inputTransforms[privateName].call(instance, value);
-            }
+        // If there is a signal node and a transform, run it before potentially
+        // delegating to features like `NgOnChanges`.
+        if (inputSignalNode !== null && inputSignalNode.transformFn !== undefined) {
+            value = inputSignalNode.transformFn(value);
+        }
+        // If there is a decorator input transform, run it.
+        if ((flags & InputFlags.HasDecoratorInputTransform) !== 0) {
+            value = def.inputTransforms[privateName].call(instance, value);
         }
         if (def.setInput !== null) {
             def.setInput(instance, inputSignalNode, value, publicName, privateName);
@@ -15736,7 +15736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-5978b3d']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.0-next.5+sha-7862686']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30063,7 +30063,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.0-next.5+sha-5978b3d');
+const VERSION = new Version('17.1.0-next.5+sha-7862686');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

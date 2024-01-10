@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-5978b3d
+ * @license Angular v17.1.0-next.5+sha-7862686
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12785,6 +12785,7 @@ export declare const enum ɵRuntimeErrorCode {
     VIEW_ALREADY_DESTROYED = 911,
     COMPONENT_ID_COLLISION = -912,
     IMAGE_PERFORMANCE_WARNING = -913,
+    REQUIRED_INPUT_NO_VALUE = -950,
     RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,
     RUNTIME_DEPS_ORPHAN_COMPONENT = 1001
 }
@@ -14704,7 +14705,7 @@ export declare interface ɵɵInjectorDef<T> {
 export declare enum ɵɵInputFlags {
     None = 0,
     SignalBased = 1,
-    HasTransform = 2
+    HasDecoratorInputTransform = 2
 }
 
 /**
