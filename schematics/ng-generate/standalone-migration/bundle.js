@@ -26455,7 +26455,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-next.5+sha-f6a32c0");
+var VERSION2 = new Version("17.1.0-next.5+sha-863be4b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27521,7 +27521,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-f6a32c0"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-863be4b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27590,7 +27590,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-f6a32c0"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-863be4b"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27883,7 +27883,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-f6a32c0"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-863be4b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27906,7 +27906,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-f6a32c0"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-863be4b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27944,7 +27944,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-f6a32c0"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-863be4b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27968,7 +27968,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-f6a32c0"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-863be4b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28003,7 +28003,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-next.5+sha-f6a32c0"));
+  definitionMap.set("version", literal("17.1.0-next.5+sha-863be4b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28020,7 +28020,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-next.5+sha-f6a32c0");
+var VERSION3 = new Version("17.1.0-next.5+sha-863be4b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35017,7 +35017,7 @@ function tryParseInputInitializerAndOptions(member, reflector, coreModule) {
   if (target === null) {
     return null;
   }
-  if (target.text === "input" || target.text === "\u0275input") {
+  if (target.text === "input") {
     if (!isReferenceToInputFunction(target, coreModule, reflector)) {
       return null;
     }
@@ -35055,24 +35055,36 @@ function isReferenceToInputFunction(target, coreModule, reflector) {
     }
     targetImport = { name: target.text };
   }
-  return targetImport.name === "input" || targetImport.name === "\u0275input";
+  return targetImport.name === "input";
 }
-function tryParseSignalInputMapping(member, reflector, evaluator, coreModule) {
+function parseAndValidateOptions(optionsNode) {
+  if (!import_typescript50.default.isObjectLiteralExpression(optionsNode)) {
+    throw new FatalDiagnosticError(ErrorCode.VALUE_HAS_WRONG_TYPE, optionsNode, "Argument needs to be an object literal that is statically analyzable.");
+  }
+  const options = reflectObjectLiteral(optionsNode);
+  let alias = void 0;
+  if (options.has("alias")) {
+    const aliasExpr = options.get("alias");
+    if (!import_typescript50.default.isStringLiteralLike(aliasExpr)) {
+      throw new FatalDiagnosticError(ErrorCode.VALUE_HAS_WRONG_TYPE, aliasExpr, "Alias needs to be a string that is statically analyzable.");
+    }
+    alias = aliasExpr.text;
+  }
+  return { alias };
+}
+function tryParseSignalInputMapping(member, reflector, coreModule) {
+  var _a2;
   const signalInput = tryParseInputInitializerAndOptions(member, reflector, coreModule);
   if (signalInput === null) {
     return null;
   }
   const optionsNode = signalInput.optionsNode;
-  const options = optionsNode !== void 0 ? evaluator.evaluate(optionsNode) : null;
+  const options = optionsNode !== void 0 ? parseAndValidateOptions(optionsNode) : null;
   const classPropertyName = member.name;
-  let bindingPropertyName = classPropertyName;
-  if (options instanceof Map && typeof options.get("alias") === "string") {
-    bindingPropertyName = options.get("alias");
-  }
   return {
     isSignal: true,
     classPropertyName,
-    bindingPropertyName,
+    bindingPropertyName: (_a2 = options == null ? void 0 : options.alias) != null ? _a2 : classPropertyName,
     required: signalInput.isRequired,
     transform: null
   };
@@ -35510,7 +35522,7 @@ function tryGetDecoratorOnMember(member, decoratorName, coreModule) {
 function tryParseInputFieldMapping(clazz, member, evaluator, reflector, coreModule, refEmitter, compilationMode) {
   const classPropertyName = member.name;
   const decorator = tryGetDecoratorOnMember(member, "Input", coreModule);
-  const signalInputMapping = tryParseSignalInputMapping(member, reflector, evaluator, coreModule);
+  const signalInputMapping = tryParseSignalInputMapping(member, reflector, coreModule);
   if (decorator !== null && signalInputMapping !== null) {
     throw new FatalDiagnosticError(ErrorCode.SIGNAL_INPUT_AND_DISALLOWED_DECORATOR, decorator.node, `Using @Input with a signal input is not allowed.`);
   }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-next.5+sha-f6a32c0
+ * @license Angular v17.1.0-next.5+sha-863be4b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5370,6 +5370,33 @@ export declare interface Input {
 export declare const Input: InputDecorator;
 
 /**
+ * The `input` function allows declaration of inputs in directives and
+ * components.
+ *
+ * Initializes an input with an initial value. If no explicit value
+ * is specified, Angular will use `undefined`.
+ *
+ * Consider using `input.required` for inputs that don't need an
+ * initial value.
+ *
+ * @usageNotes
+ * Initialize an input in your directive or component by declaring a
+ * class field and initializing it with the `input()` function.
+ *
+ * ```ts
+ * @Directive({..})
+ * export class MyDir {
+ *   firstName = input<string>();            // string|undefined
+ *   lastName = input.required<string>();    // string
+ *   age = input(0);                         // number
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+export declare const input: InputFunction;
+
+/**
  * @publicApi
  */
 export declare interface InputDecorator {
@@ -5429,16 +5456,105 @@ export declare interface InputDecorator {
 }
 
 /**
+ * The `input` function allows declaration of inputs in directives and
+ * components.
+ *
+ * The function exposes an API for also declaring required inputs via the
+ * `input.required` function.
+ *
+ * @usageNotes
+ * Initialize an input in your directive or component by declaring a
+ * class field and initializing it with the `input()` or `input.required()`
+ * function.
+ *
+ * ```ts
+ * @Directive({..})
+ * export class MyDir {
+ *   firstName = input<string>();            // string|undefined
+ *   lastName = input.required<string>();    // string
+ *   age = input(0);                         // number
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+export declare interface InputFunction {
+    /**
+     * Initializes an input with an initial value. If no explicit value
+     * is specified, Angular will use `undefined`.
+     *
+     * Consider using `input.required` for inputs that don't need an
+     * initial value.
+     *
+     * @developerPreview
+     */
+    <ReadT>(): InputSignal<ReadT | undefined>;
+    <ReadT>(initialValue: ReadT, opts?: InputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
+    <ReadT, WriteT>(initialValue: ReadT, opts: InputOptionsWithTransform<ReadT, WriteT>): InputSignal<ReadT, WriteT>;
+    /**
+     * Initializes a required input.
+     *
+     * Users of your directive/component need to bind to this
+     * input. If unset, a compile time error will be reported.
+     *
+     * @developerPreview
+     */
+    required: {
+        <ReadT>(opts?: InputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
+        <ReadT, WriteT>(opts: InputOptionsWithTransform<ReadT, WriteT>): InputSignal<ReadT, WriteT>;
+    };
+}
+
+/**
+ * @developerPreview
+ *
+ * Options for signal inputs.
+ */
+export declare interface InputOptions<ReadT, WriteT> {
+    /** Optional public name for the input. By default, the class field name is used. */
+    alias?: string;
+    /**
+     * Optional transform that runs whenever a new value is bound. Can be used to
+     * transform the input value before the input is updated.
+     *
+     * The transform function can widen the type of the input. For example, consider
+     * an input for `disabled`. In practice, as the component author, you want to only
+     * deal with a boolean, but users may want to bind a string if they just use the
+     * attribute form to bind to the input via `<my-dir input>`. A transform can then
+     * handle such string values and convert them to `boolean`. See: {@link booleanAttribute}.
+     */
+    transform?: (v: WriteT) => ReadT;
+}
+
+/**
+ * Signal input options without the transform option.
+ *
+ * @developerPreview
+ */
+export declare type InputOptionsWithoutTransform<ReadT> = Omit<InputOptions<ReadT, ReadT>, 'transform'> & {
+    transform?: undefined;
+};
+
+/**
+ * Signal input options with the transform option required.
+ *
+ * @developerPreview
+ */
+export declare type InputOptionsWithTransform<ReadT, WriteT> = Required<Pick<InputOptions<ReadT, WriteT>, 'transform'>> & InputOptions<ReadT, WriteT>;
+
+/**
  * `InputSignal` is represents a special `Signal` for a directive/component input.
  *
  * An input signal is similar to a non-writable signal except that it also
  * carries additional type-information for transforms, and that Angular internally
  * updates the signal whenever a new value is bound.
+ *
+ * @developerPreview
  */
 export declare interface InputSignal<ReadT, WriteT = ReadT> extends Signal<ReadT> {
+    [SIGNAL]: InputSignalNode<ReadT, WriteT>;
     [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: ReadT;
     [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: WriteT;
-    [SIGNAL]: InputSignalNode<ReadT, WriteT>;
 }
 
 /**
@@ -11949,115 +12065,9 @@ export declare interface ɵInjectorProfilerContext {
     token: Type<unknown> | null;
 }
 
-/**
- * Initializes an input with an initial value. If no explicit value
- * is specified, Angular will use `undefined`.
- *
- * Consider using `input.required` for inputs that don't need an
- * initial value.
- *
- * @usageNotes
- * Initialize an input in your directive or component by declaring a
- * class field and initializing it with the `input()` function.
- *
- * ```ts
- * @Directive({..})
- * export class MyDir {
- *   firstName = input<string>();            // string|undefined
- *   lastName = input.required<string>();    // string
- *   age = input(0);                         // number
- * }
- * ```
- */
-export declare const ɵinput: ɵInputFunction;
-
 declare const ɵINPUT_SIGNAL_BRAND_READ_TYPE: unique symbol;
 
 export declare const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE: unique symbol;
-
-/**
- * Type of the `input` function.
- *
- * The input function is a special function that also provides access to
- * required inputs via the `.required` property.
- */
-export declare type ɵInputFunction = typeof ɵinputFunctionForApiGuard & {
-    required: typeof ɵinputFunctionRequiredForApiGuard;
-};
-
-/**
- * Initializes an input with an initial value. If no explicit value
- * is specified, Angular will use `undefined`.
- *
- * Consider using `input.required` for inputs that don't need an
- * initial value.
- *
- * @usageNotes
- * Initialize an input in your directive or component by declaring a
- * class field and initializing it with the `input()` function.
- *
- * ```ts
- * @Directive({..})
- * export class MyDir {
- *   firstName = input<string>();            // string|undefined
- *   lastName = input.required<string>();    // string
- *   age = input(0);                         // number
- * }
- * ```
- */
-export declare function ɵinputFunctionForApiGuard<ReadT>(): InputSignal<ReadT | undefined>;
-
-export declare function ɵinputFunctionForApiGuard<ReadT>(initialValue: ReadT, opts?: ɵInputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
-
-export declare function ɵinputFunctionForApiGuard<ReadT, WriteT>(initialValue: ReadT, opts: ɵInputOptionsWithTransform<ReadT, WriteT>): InputSignal<ReadT, WriteT>;
-
-/**
- * Initializes a required input. Users of your directive/component,
- * need to bind to this input, otherwise they will see errors.
- * *
- * @usageNotes
- * Initialize an input in your directive or component by declaring a
- * class field and initializing it with the `input()` function.
- *
- * ```ts
- * @Directive({..})
- * export class MyDir {
- *   firstName = input<string>();            // string|undefined
- *   lastName = input.required<string>();    // string
- *   age = input(0);                         // number
- * }
- * ```
- */
-export declare function ɵinputFunctionRequiredForApiGuard<ReadT>(opts?: ɵInputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
-
-export declare function ɵinputFunctionRequiredForApiGuard<ReadT, WriteT>(opts: ɵInputOptionsWithTransform<ReadT, WriteT>): InputSignal<ReadT, WriteT>;
-
-/**
- * Options for signal inputs.
- */
-export declare interface ɵInputOptions<ReadT, WriteT> {
-    /** Optional public name for the input. By default, the class field name is used. */
-    alias?: string;
-    /**
-     * Optional transform that runs whenever a new value is bound. Can be used to
-     * transform the input value before the input is updated.
-     *
-     * The transform function can widen the type of the input. For example, consider
-     * an input for `disabled`. In practice, as the component author, you want to only
-     * deal with a boolean, but users may want to bind a string if they just use the
-     * attribute form to bind to the input via `<my-dir input>`. A transform can then
-     * handle such string values and convert them to `boolean`. See: {@link booleanAttribute}.
-     */
-    transform?: (v: WriteT) => ReadT;
-}
-
-/** Signal input options without the transform option. */
-export declare type ɵInputOptionsWithoutTransform<ReadT> = Omit<ɵInputOptions<ReadT, ReadT>, 'transform'> & {
-    transform?: undefined;
-};
-
-/** Signal input options with the transform option required. */
-export declare type ɵInputOptionsWithTransform<ReadT, WriteT> = Required<Pick<ɵInputOptions<ReadT, WriteT>, 'transform'>> & ɵInputOptions<ReadT, WriteT>;
 
 /**
  * Register a callback to run once before any userspace `afterRender` or
