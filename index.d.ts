@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-79fbc4e
+ * @license Angular v17.2.0-next.0+sha-1f8c53c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3887,16 +3887,6 @@ export declare interface FactorySansProvider {
 declare const FLAGS = 2;
 
 /**
- * Interface to an `EffectScheduler` capable of running scheduled effects synchronously.
- */
-declare interface FlushableEffectRunner {
-    /**
-     * Run any scheduled effects.
-     */
-    flush(): void;
-}
-
-/**
  * Allows to refer to references which are not yet defined.
  *
  * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
@@ -6397,7 +6387,7 @@ declare interface LViewEnvironment {
     /** An optional custom sanitizer. */
     sanitizer: Sanitizer | null;
     /** Container for reactivity system `effect`s. */
-    inlineEffectRunner: FlushableEffectRunner | null;
+    inlineEffectRunner: ɵEffectScheduler | null;
     /** Container for after render hooks */
     afterRenderEventManager: ɵAfterRenderEventManager | null;
     /** Scheduler for change detection to notify when application state changes. */
@@ -11837,6 +11827,10 @@ export declare abstract class ɵEffectScheduler {
      * It is an error to attempt to execute any effects synchronously during a scheduling operation.
      */
     abstract scheduleEffect(e: SchedulableEffect): void;
+    /**
+     * Run any scheduled effects.
+     */
+    abstract flush(): void;
     /** @nocollapse */
     static ɵprov: unknown;
 }
@@ -13276,26 +13270,6 @@ export declare type ɵWritable<T> = {
  * URL for the XSS security documentation.
  */
 export declare const ɵXSS_SECURITY_URL = "https://g.co/ng/security#xss";
-
-/**
- * An `EffectScheduler` which is capable of queueing scheduled effects per-zone, and flushing them
- * as an explicit operation.
- */
-export declare class ɵZoneAwareQueueingScheduler implements ɵEffectScheduler, FlushableEffectRunner {
-    private queuedEffectCount;
-    private queues;
-    scheduleEffect(handle: SchedulableEffect): void;
-    /**
-     * Run all scheduled effects.
-     *
-     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
-     * ordering guarantee between effects scheduled in different zones.
-     */
-    flush(): void;
-    private flushQueue;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
 
 /**
  * Advances to an element for later binding instructions.
