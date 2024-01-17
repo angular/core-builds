@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-rc.0+sha-6616019
+ * @license Angular v17.1.0-rc.0+sha-79e8539
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11589,11 +11589,12 @@ export declare const ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR: InjectionToken<ɵDefe
 export declare enum ɵDeferBlockBehavior {
     /**
      * Manual triggering mode for defer blocks. Provides control over when defer blocks render
-     * and which state they render. This is the default behavior in test environments.
+     * and which state they render.
      */
     Manual = 0,
     /**
      * Playthrough mode for defer blocks. This mode behaves like defer blocks would in a browser.
+     * This is the default behavior in test environments.
      */
     Playthrough = 1
 }

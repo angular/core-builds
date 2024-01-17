@@ -24769,7 +24769,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
   const templateName = templateTypeName ? `${templateTypeName}_Template` : null;
   if (!USE_TEMPLATE_PIPELINE) {
     let allDeferrableDepsFn = null;
-    if (meta.deferBlocks.size > 0 && meta.deferrableTypes.size > 0) {
+    if (meta.deferBlocks.size > 0 && meta.deferrableTypes.size > 0 && meta.deferBlockDepsEmitMode === 1) {
       const fnName = `${templateTypeName}_DeferFn`;
       allDeferrableDepsFn = createDeferredDepsFunction(constantPool, fnName, meta.deferrableTypes);
     }
@@ -26040,6 +26040,7 @@ var CompilerFacadeImpl = class {
       deferBlocks,
       deferrableTypes: /* @__PURE__ */ new Map(),
       deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
+      deferBlockDepsEmitMode: 0,
       styles: [...facade.styles, ...template2.styles],
       encapsulation: facade.encapsulation,
       interpolation,
@@ -26248,6 +26249,7 @@ function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMap
     deferBlocks,
     deferrableTypes: /* @__PURE__ */ new Map(),
     deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
+    deferBlockDepsEmitMode: 0,
     changeDetection: (_c2 = decl.changeDetection) != null ? _c2 : ChangeDetectionStrategy.Default,
     encapsulation: (_d2 = decl.encapsulation) != null ? _d2 : ViewEncapsulation.Emulated,
     interpolation,
@@ -26487,7 +26489,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.0-rc.0+sha-6616019");
+var VERSION2 = new Version("17.1.0-rc.0+sha-79e8539");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27500,7 +27502,7 @@ function compileClassMetadata(metadata) {
 }
 function compileComponentClassMetadata(metadata, deferrableTypes) {
   var _a2, _b2;
-  if (deferrableTypes.size === 0) {
+  if (deferrableTypes === null || deferrableTypes.size === 0) {
     return compileClassMetadata(metadata);
   }
   const dynamicImports = [];
@@ -27553,7 +27555,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.0-rc.0+sha-6616019"));
+  definitionMap.set("version", literal("17.1.0-rc.0+sha-79e8539"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27622,7 +27624,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.0-rc.0+sha-6616019"));
+  definitionMap.set("version", literal("17.1.0-rc.0+sha-79e8539"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27915,7 +27917,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.0-rc.0+sha-6616019"));
+  definitionMap.set("version", literal("17.1.0-rc.0+sha-79e8539"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27938,7 +27940,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.0-rc.0+sha-6616019"));
+  definitionMap.set("version", literal("17.1.0-rc.0+sha-79e8539"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27976,7 +27978,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.0-rc.0+sha-6616019"));
+  definitionMap.set("version", literal("17.1.0-rc.0+sha-79e8539"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -28000,7 +28002,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.0-rc.0+sha-6616019"));
+  definitionMap.set("version", literal("17.1.0-rc.0+sha-79e8539"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28035,7 +28037,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.0-rc.0+sha-6616019"));
+  definitionMap.set("version", literal("17.1.0-rc.0+sha-79e8539"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28052,7 +28054,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.0-rc.0+sha-6616019");
+var VERSION3 = new Version("17.1.0-rc.0+sha-79e8539");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -29572,12 +29574,12 @@ var LocalExportedDeclarations = Symbol("LocalExportedDeclarations");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/deferred_symbol_tracker.mjs
 var AssumeEager = "AssumeEager";
-var ExplicitlyDeferred = "ExplicitlyDeferred";
 var DeferredSymbolTracker = class {
   constructor(typeChecker, onlyExplicitDeferDependencyImports) {
     this.typeChecker = typeChecker;
     this.onlyExplicitDeferDependencyImports = onlyExplicitDeferDependencyImports;
     this.imports = /* @__PURE__ */ new Map();
+    this.explicitlyDeferredImports = /* @__PURE__ */ new Map();
   }
   extractImportedSymbols(importDecl) {
     const symbolMap = /* @__PURE__ */ new Map();
@@ -29605,17 +29607,29 @@ var DeferredSymbolTracker = class {
     }
     return symbolMap;
   }
-  markAsExplicitlyDeferred(importDecl) {
-    this.imports.set(importDecl, ExplicitlyDeferred);
+  getNonRemovableDeferredImports(sourceFile, classDecl) {
+    var _a2;
+    const affectedImports = [];
+    const importDecls = (_a2 = this.explicitlyDeferredImports.get(classDecl)) != null ? _a2 : [];
+    for (const importDecl of importDecls) {
+      if (importDecl.getSourceFile() === sourceFile && !this.canDefer(importDecl)) {
+        affectedImports.push(importDecl);
+      }
+    }
+    return affectedImports;
   }
-  markAsDeferrableCandidate(identifier, importDecl) {
-    if (this.onlyExplicitDeferDependencyImports) {
+  markAsDeferrableCandidate(identifier, importDecl, componentClassDecl, isExplicitlyDeferred) {
+    if (this.onlyExplicitDeferDependencyImports && !isExplicitlyDeferred) {
       return;
+    }
+    if (isExplicitlyDeferred) {
+      if (this.explicitlyDeferredImports.has(componentClassDecl)) {
+        this.explicitlyDeferredImports.get(componentClassDecl).push(importDecl);
+      } else {
+        this.explicitlyDeferredImports.set(componentClassDecl, [importDecl]);
+      }
     }
     let symbolMap = this.imports.get(importDecl);
-    if (symbolMap === ExplicitlyDeferred) {
-      return;
-    }
     if (!symbolMap) {
       symbolMap = this.extractImportedSymbols(importDecl);
       this.imports.set(importDecl, symbolMap);
@@ -29634,9 +29648,6 @@ var DeferredSymbolTracker = class {
       return false;
     }
     const symbolsMap = this.imports.get(importDecl);
-    if (symbolsMap === ExplicitlyDeferred) {
-      return true;
-    }
     for (const [symbol, refs] of symbolsMap) {
       if (refs === AssumeEager || refs.size > 0) {
         return false;
@@ -37479,6 +37490,15 @@ var ComponentDecoratorHandler = class {
     if (template2.styles.length > 0) {
       styles.push(...template2.styles);
     }
+    let explicitlyDeferredTypes = null;
+    if (metadata.isStandalone && rawDeferredImports !== null) {
+      const deferredTypes = this.collectExplicitlyDeferredSymbols(rawDeferredImports);
+      for (const [deferredType, importDetails] of deferredTypes) {
+        explicitlyDeferredTypes != null ? explicitlyDeferredTypes : explicitlyDeferredTypes = /* @__PURE__ */ new Map();
+        explicitlyDeferredTypes.set(importDetails.name, importDetails.from);
+        this.deferredSymbolTracker.markAsDeferrableCandidate(deferredType, importDetails.node, node, true);
+      }
+    }
     const output = {
       analysis: {
         baseClass: readBaseClass(node, this.reflector, this.evaluator),
@@ -37521,6 +37541,7 @@ var ComponentDecoratorHandler = class {
         resolvedImports,
         rawDeferredImports,
         resolvedDeferredImports,
+        explicitlyDeferredTypes,
         schemas,
         decorator: (_e2 = decorator == null ? void 0 : decorator.node) != null ? _e2 : null
       },
@@ -37621,8 +37642,28 @@ var ComponentDecoratorHandler = class {
     return extendedTemplateChecker.getDiagnosticsForComponent(component);
   }
   resolve(node, analysis, symbol) {
+    const metadata = analysis.meta;
+    const diagnostics = [];
+    const context = getSourceFile(node);
+    const nonRemovableImports = this.deferredSymbolTracker.getNonRemovableDeferredImports(context, node);
+    if (nonRemovableImports.length > 0) {
+      for (const importDecl of nonRemovableImports) {
+        const diagnostic = makeDiagnostic(ErrorCode.DEFERRED_DEPENDENCY_IMPORTED_EAGERLY, importDecl, `This import contains symbols used in the \`@Component.deferredImports\` array of the \`${node.name.getText()}\` component, but also some other symbols that are not in any \`@Component.deferredImports\` array. This renders all these defer imports useless as this import remains and its module is eagerly loaded. To fix this, make sure that this import contains *only* symbols that are used within \`@Component.deferredImports\` arrays.`);
+        diagnostics.push(diagnostic);
+      }
+      return { diagnostics };
+    }
     if (this.compilationMode === CompilationMode.LOCAL) {
-      return {};
+      return {
+        data: {
+          declarationListEmitMode: !analysis.meta.isStandalone || analysis.rawImports !== null ? 3 : 0,
+          declarations: EMPTY_ARRAY2,
+          deferBlocks: this.locateDeferBlocksWithoutScope(analysis.template),
+          deferBlockDepsEmitMode: 1,
+          deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
+          deferrableTypes: /* @__PURE__ */ new Map()
+        }
+      };
     }
     if (this.semanticDepGraphUpdater !== null && analysis.baseClass instanceof Reference2) {
       symbol.baseClass = this.semanticDepGraphUpdater.getSymbol(analysis.baseClass.node);
@@ -37630,16 +37671,14 @@ var ComponentDecoratorHandler = class {
     if (analysis.isPoisoned && !this.usePoisonedData) {
       return {};
     }
-    const context = getSourceFile(node);
-    const metadata = analysis.meta;
     const data = {
       declarations: EMPTY_ARRAY2,
       declarationListEmitMode: 0,
       deferBlocks: /* @__PURE__ */ new Map(),
+      deferBlockDepsEmitMode: 0,
       deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
       deferrableTypes: /* @__PURE__ */ new Map()
     };
-    const diagnostics = [];
     const scope = this.scopeReader.getScopeForComponent(node);
     if (scope !== null) {
       const isModuleScope = scope.kind === ComponentScopeKind.NgModule;
@@ -37741,7 +37780,7 @@ var ComponentDecoratorHandler = class {
         symbol.usedPipes = Array.from(declarations.values()).filter(isUsedPipe).map(getSemanticReference);
       }
       const eagerDeclarations = Array.from(declarations.values()).filter((decl) => decl.kind === R3TemplateDependencyKind.NgModule || eagerlyUsed.has(decl.ref.node));
-      this.resolveDeferBlocks(deferBlocks, declarations, data, analysis, eagerlyUsed, bound);
+      this.resolveDeferBlocks(node, deferBlocks, declarations, data, analysis, eagerlyUsed, bound);
       const cyclesFromDirectives = /* @__PURE__ */ new Map();
       const cyclesFromPipes = /* @__PURE__ */ new Map();
       if (!metadata.isStandalone) {
@@ -37858,9 +37897,10 @@ var ComponentDecoratorHandler = class {
     if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
       return [];
     }
-    this.collectExplicitlyDeferredSymbols(analysis);
     const deferrableTypes = this.collectDeferredSymbols(resolution);
-    const meta = __spreadValues(__spreadValues({}, analysis.meta), resolution);
+    const meta = __spreadProps(__spreadValues(__spreadValues({}, analysis.meta), resolution), {
+      deferrableTypes
+    });
     const fac = compileNgFactoryDefField(toFactoryMetadata(meta, FactoryTarget.Component));
     removeDeferrableTypesFromComponentDecorator(analysis, deferrableTypes);
     const def = compileComponentFromMetadata(meta, pool, makeBindingParser());
@@ -37891,15 +37931,13 @@ var ComponentDecoratorHandler = class {
     if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
       return [];
     }
-    const deferrableTypes = this.collectExplicitlyDeferredSymbols(analysis);
-    const meta = __spreadProps(__spreadValues({}, analysis.meta), {
-      declarationListEmitMode: !analysis.meta.isStandalone || analysis.rawImports !== null ? 3 : 0,
-      declarations: EMPTY_ARRAY2,
-      deferBlocks: this.locateDeferBlocksWithoutScope(analysis.template),
-      deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
-      deferrableTypes
+    const deferrableTypes = analysis.explicitlyDeferredTypes;
+    const meta = __spreadProps(__spreadValues(__spreadValues({}, analysis.meta), resolution), {
+      deferrableTypes: deferrableTypes != null ? deferrableTypes : /* @__PURE__ */ new Map()
     });
-    removeDeferrableTypesFromComponentDecorator(analysis, deferrableTypes);
+    if (analysis.explicitlyDeferredTypes !== null) {
+      removeDeferrableTypesFromComponentDecorator(analysis, analysis.explicitlyDeferredTypes);
+    }
     const fac = compileNgFactoryDefField(toFactoryMetadata(meta, FactoryTarget.Component));
     const def = compileComponentFromMetadata(meta, pool, makeBindingParser());
     const inputTransformFields = compileInputTransformFields(analysis.inputs);
@@ -37938,22 +37976,22 @@ var ComponentDecoratorHandler = class {
     }
     return deferrableTypes;
   }
-  collectExplicitlyDeferredSymbols(analysis) {
-    const deferrableTypes = /* @__PURE__ */ new Map();
-    if (!analysis.meta.isStandalone || analysis.rawDeferredImports === null || !import_typescript56.default.isArrayLiteralExpression(analysis.rawDeferredImports))
-      return deferrableTypes;
-    for (const element2 of analysis.rawDeferredImports.elements) {
+  collectExplicitlyDeferredSymbols(rawDeferredImports) {
+    const deferredTypes = /* @__PURE__ */ new Map();
+    if (!import_typescript56.default.isArrayLiteralExpression(rawDeferredImports)) {
+      return deferredTypes;
+    }
+    for (const element2 of rawDeferredImports.elements) {
       const node = tryUnwrapForwardRef(element2, this.reflector) || element2;
       if (!import_typescript56.default.isIdentifier(node)) {
         continue;
       }
       const imp = this.reflector.getImportOfIdentifier(node);
       if (imp !== null) {
-        deferrableTypes.set(imp.name, imp.from);
-        this.deferredSymbolTracker.markAsExplicitlyDeferred(imp.node);
+        deferredTypes.set(node, imp);
       }
     }
-    return deferrableTypes;
+    return deferredTypes;
   }
   _checkForCyclicImport(importedFile, expr, origin) {
     const imported = resolveImportedFile(this.moduleResolver, importedFile, expr, origin);
@@ -37969,7 +38007,7 @@ var ComponentDecoratorHandler = class {
     }
     this.cycleAnalyzer.recordSyntheticImport(origin, imported);
   }
-  resolveDeferBlocks(deferBlocks, deferrableDecls, resolutionData, analysisData, eagerlyUsedDecls, componentBoundTarget) {
+  resolveDeferBlocks(componentClassDecl, deferBlocks, deferrableDecls, resolutionData, analysisData, eagerlyUsedDecls, componentBoundTarget) {
     const allDeferredDecls = /* @__PURE__ */ new Set();
     for (const [deferBlock, bound] of deferBlocks) {
       const usedDirectives = new Set(bound.getEagerlyUsedDirectives().map((d) => d.ref.node));
@@ -38001,14 +38039,14 @@ var ComponentDecoratorHandler = class {
     }
     if (analysisData.meta.isStandalone) {
       if (analysisData.rawImports !== null) {
-        this.registerDeferrableCandidates(analysisData.rawImports, false, allDeferredDecls, eagerlyUsedDecls, resolutionData);
+        this.registerDeferrableCandidates(componentClassDecl, analysisData.rawImports, false, allDeferredDecls, eagerlyUsedDecls, resolutionData);
       }
       if (analysisData.rawDeferredImports !== null) {
-        this.registerDeferrableCandidates(analysisData.rawDeferredImports, true, allDeferredDecls, eagerlyUsedDecls, resolutionData);
+        this.registerDeferrableCandidates(componentClassDecl, analysisData.rawDeferredImports, true, allDeferredDecls, eagerlyUsedDecls, resolutionData);
       }
     }
   }
-  registerDeferrableCandidates(importsExpr, isDeferredImport, allDeferredDecls, eagerlyUsedDecls, resolutionData) {
+  registerDeferrableCandidates(componentClassDecl, importsExpr, isDeferredImport, allDeferredDecls, eagerlyUsedDecls, resolutionData) {
     if (!import_typescript56.default.isArrayLiteralExpression(importsExpr)) {
       return;
     }
@@ -38046,11 +38084,7 @@ var ComponentDecoratorHandler = class {
         continue;
       }
       resolutionData.deferrableDeclToImportDecl.set(decl.node, imp.node);
-      if (isDeferredImport) {
-        this.deferredSymbolTracker.markAsExplicitlyDeferred(imp.node);
-      } else {
-        this.deferredSymbolTracker.markAsDeferrableCandidate(node, imp.node);
-      }
+      this.deferredSymbolTracker.markAsDeferrableCandidate(node, imp.node, componentClassDecl, isDeferredImport);
     }
   }
   resolveDeferTriggers(block, triggers, componentBoundTarget, triggerElements) {
