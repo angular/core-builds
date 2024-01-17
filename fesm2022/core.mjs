@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.0.9+sha-f843b78
+ * @license Angular v17.0.9+sha-14bbd88
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15621,7 +15621,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.0.9+sha-f843b78']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.0.9+sha-14bbd88']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -16075,6 +16075,1359 @@ function ɵɵInputTransformsFeature(definition) {
         inputTransforms;
 }
 
+const AT_THIS_LOCATION = '<-- AT THIS LOCATION';
+/**
+ * Retrieves a user friendly string for a given TNodeType for use in
+ * friendly error messages
+ *
+ * @param tNodeType
+ * @returns
+ */
+function getFriendlyStringFromTNodeType(tNodeType) {
+    switch (tNodeType) {
+        case 4 /* TNodeType.Container */:
+            return 'view container';
+        case 2 /* TNodeType.Element */:
+            return 'element';
+        case 8 /* TNodeType.ElementContainer */:
+            return 'ng-container';
+        case 32 /* TNodeType.Icu */:
+            return 'icu';
+        case 64 /* TNodeType.Placeholder */:
+            return 'i18n';
+        case 16 /* TNodeType.Projection */:
+            return 'projection';
+        case 1 /* TNodeType.Text */:
+            return 'text';
+        default:
+            // This should not happen as we cover all possible TNode types above.
+            return '<unknown>';
+    }
+}
+/**
+ * Validates that provided nodes match during the hydration process.
+ */
+function validateMatchingNode(node, nodeType, tagName, lView, tNode, isViewContainerAnchor = false) {
+    if (!node ||
+        (node.nodeType !== nodeType ||
+            (node.nodeType === Node.ELEMENT_NODE &&
+                node.tagName.toLowerCase() !== tagName?.toLowerCase()))) {
+        const expectedNode = shortRNodeDescription(nodeType, tagName, null);
+        let header = `During hydration Angular expected ${expectedNode} but `;
+        const hostComponentDef = getDeclarationComponentDef(lView);
+        const componentClassName = hostComponentDef?.type?.name;
+        const expected = `Angular expected this DOM:\n\n${describeExpectedDom(lView, tNode, isViewContainerAnchor)}\n\n`;
+        let actual = '';
+        if (!node) {
+            // No node found during hydration.
+            header += `the node was not found.\n\n`;
+        }
+        else {
+            const actualNode = shortRNodeDescription(node.nodeType, node.tagName ?? null, node.textContent ?? null);
+            header += `found ${actualNode}.\n\n`;
+            actual = `Actual DOM is:\n\n${describeDomFromNode(node)}\n\n`;
+        }
+        const footer = getHydrationErrorFooter(componentClassName);
+        const message = header + expected + actual + getHydrationAttributeNote() + footer;
+        throw new RuntimeError(-500 /* RuntimeErrorCode.HYDRATION_NODE_MISMATCH */, message);
+    }
+}
+/**
+ * Validates that a given node has sibling nodes
+ */
+function validateSiblingNodeExists(node) {
+    validateNodeExists(node);
+    if (!node.nextSibling) {
+        const header = 'During hydration Angular expected more sibling nodes to be present.\n\n';
+        const actual = `Actual DOM is:\n\n${describeDomFromNode(node)}\n\n`;
+        const footer = getHydrationErrorFooter();
+        const message = header + actual + footer;
+        throw new RuntimeError(-501 /* RuntimeErrorCode.HYDRATION_MISSING_SIBLINGS */, message);
+    }
+}
+/**
+ * Validates that a node exists or throws
+ */
+function validateNodeExists(node, lView = null, tNode = null) {
+    if (!node) {
+        const header = 'During hydration, Angular expected an element to be present at this location.\n\n';
+        let expected = '';
+        let footer = '';
+        if (lView !== null && tNode !== null) {
+            expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
+            footer = getHydrationErrorFooter();
+        }
+        throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
+    }
+}
+/**
+ * Builds the hydration error message when a node is not found
+ *
+ * @param lView the LView where the node exists
+ * @param tNode the TNode
+ */
+function nodeNotFoundError(lView, tNode) {
+    const header = 'During serialization, Angular was unable to find an element in the DOM:\n\n';
+    const expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
+    const footer = getHydrationErrorFooter();
+    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
+}
+/**
+ * Builds a hydration error message when a node is not found at a path location
+ *
+ * @param host the Host Node
+ * @param path the path to the node
+ */
+function nodeNotFoundAtPathError(host, path) {
+    const header = `During hydration Angular was unable to locate a node ` +
+        `using the "${path}" path, starting from the ${describeRNode(host)} node.\n\n`;
+    const footer = getHydrationErrorFooter();
+    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + footer);
+}
+/**
+ * Builds the hydration error message in the case that dom nodes are created outside of
+ * the Angular context and are being used as projected nodes
+ *
+ * @param lView the LView
+ * @param tNode the TNode
+ * @returns an error
+ */
+function unsupportedProjectionOfDomNodes(rNode) {
+    const header = 'During serialization, Angular detected DOM nodes ' +
+        'that were created outside of Angular context and provided as projectable nodes ' +
+        '(likely via `ViewContainerRef.createComponent` or `createComponent` APIs). ' +
+        'Hydration is not supported for such cases, consider refactoring the code to avoid ' +
+        'this pattern or using `ngSkipHydration` on the host element of the component.\n\n';
+    const actual = `${describeDomFromNode(rNode)}\n\n`;
+    const message = header + actual + getHydrationAttributeNote();
+    return new RuntimeError(-503 /* RuntimeErrorCode.UNSUPPORTED_PROJECTION_DOM_NODES */, message);
+}
+/**
+ * Builds the hydration error message in the case that ngSkipHydration was used on a
+ * node that is not a component host element or host binding
+ *
+ * @param rNode the HTML Element
+ * @returns an error
+ */
+function invalidSkipHydrationHost(rNode) {
+    const header = 'The `ngSkipHydration` flag is applied on a node ' +
+        'that doesn\'t act as a component host. Hydration can be ' +
+        'skipped only on per-component basis.\n\n';
+    const actual = `${describeDomFromNode(rNode)}\n\n`;
+    const footer = 'Please move the `ngSkipHydration` attribute to the component host element.\n\n';
+    const message = header + actual + footer;
+    return new RuntimeError(-504 /* RuntimeErrorCode.INVALID_SKIP_HYDRATION_HOST */, message);
+}
+// Stringification methods
+/**
+ * Stringifies a given TNode's attributes
+ *
+ * @param tNode a provided TNode
+ * @returns string
+ */
+function stringifyTNodeAttrs(tNode) {
+    const results = [];
+    if (tNode.attrs) {
+        for (let i = 0; i < tNode.attrs.length;) {
+            const attrName = tNode.attrs[i++];
+            // Once we reach the first flag, we know that the list of
+            // attributes is over.
+            if (typeof attrName == 'number') {
+                break;
+            }
+            const attrValue = tNode.attrs[i++];
+            results.push(`${attrName}="${shorten(attrValue)}"`);
+        }
+    }
+    return results.join(' ');
+}
+/**
+ * The list of internal attributes that should be filtered out while
+ * producing an error message.
+ */
+const internalAttrs = new Set(['ngh', 'ng-version', 'ng-server-context']);
+/**
+ * Stringifies an HTML Element's attributes
+ *
+ * @param rNode an HTML Element
+ * @returns string
+ */
+function stringifyRNodeAttrs(rNode) {
+    const results = [];
+    for (let i = 0; i < rNode.attributes.length; i++) {
+        const attr = rNode.attributes[i];
+        if (internalAttrs.has(attr.name))
+            continue;
+        results.push(`${attr.name}="${shorten(attr.value)}"`);
+    }
+    return results.join(' ');
+}
+// Methods for Describing the DOM
+/**
+ * Converts a tNode to a helpful readable string value for use in error messages
+ *
+ * @param tNode a given TNode
+ * @param innerContent the content of the node
+ * @returns string
+ */
+function describeTNode(tNode, innerContent = '…') {
+    switch (tNode.type) {
+        case 1 /* TNodeType.Text */:
+            const content = tNode.value ? `(${tNode.value})` : '';
+            return `#text${content}`;
+        case 2 /* TNodeType.Element */:
+            const attrs = stringifyTNodeAttrs(tNode);
+            const tag = tNode.value.toLowerCase();
+            return `<${tag}${attrs ? ' ' + attrs : ''}>${innerContent}</${tag}>`;
+        case 8 /* TNodeType.ElementContainer */:
+            return '<!-- ng-container -->';
+        case 4 /* TNodeType.Container */:
+            return '<!-- container -->';
+        default:
+            const typeAsString = getFriendlyStringFromTNodeType(tNode.type);
+            return `#node(${typeAsString})`;
+    }
+}
+/**
+ * Converts an RNode to a helpful readable string value for use in error messages
+ *
+ * @param rNode a given RNode
+ * @param innerContent the content of the node
+ * @returns string
+ */
+function describeRNode(rNode, innerContent = '…') {
+    const node = rNode;
+    switch (node.nodeType) {
+        case Node.ELEMENT_NODE:
+            const tag = node.tagName.toLowerCase();
+            const attrs = stringifyRNodeAttrs(node);
+            return `<${tag}${attrs ? ' ' + attrs : ''}>${innerContent}</${tag}>`;
+        case Node.TEXT_NODE:
+            const content = node.textContent ? shorten(node.textContent) : '';
+            return `#text${content ? `(${content})` : ''}`;
+        case Node.COMMENT_NODE:
+            return `<!-- ${shorten(node.textContent ?? '')} -->`;
+        default:
+            return `#node(${node.nodeType})`;
+    }
+}
+/**
+ * Builds the string containing the expected DOM present given the LView and TNode
+ * values for a readable error message
+ *
+ * @param lView the lView containing the DOM
+ * @param tNode the tNode
+ * @param isViewContainerAnchor boolean
+ * @returns string
+ */
+function describeExpectedDom(lView, tNode, isViewContainerAnchor) {
+    const spacer = '  ';
+    let content = '';
+    if (tNode.prev) {
+        content += spacer + '…\n';
+        content += spacer + describeTNode(tNode.prev) + '\n';
+    }
+    else if (tNode.type && tNode.type & 12 /* TNodeType.AnyContainer */) {
+        content += spacer + '…\n';
+    }
+    if (isViewContainerAnchor) {
+        content += spacer + describeTNode(tNode) + '\n';
+        content += spacer + `<!-- container -->  ${AT_THIS_LOCATION}\n`;
+    }
+    else {
+        content += spacer + describeTNode(tNode) + `  ${AT_THIS_LOCATION}\n`;
+    }
+    content += spacer + '…\n';
+    const parentRNode = tNode.type ? getParentRElement(lView[TVIEW], tNode, lView) : null;
+    if (parentRNode) {
+        content = describeRNode(parentRNode, '\n' + content);
+    }
+    return content;
+}
+/**
+ * Builds the string containing the DOM present around a given RNode for a
+ * readable error message
+ *
+ * @param node the RNode
+ * @returns string
+ */
+function describeDomFromNode(node) {
+    const spacer = '  ';
+    let content = '';
+    const currentNode = node;
+    if (currentNode.previousSibling) {
+        content += spacer + '…\n';
+        content += spacer + describeRNode(currentNode.previousSibling) + '\n';
+    }
+    content += spacer + describeRNode(currentNode) + `  ${AT_THIS_LOCATION}\n`;
+    if (node.nextSibling) {
+        content += spacer + '…\n';
+    }
+    if (node.parentNode) {
+        content = describeRNode(currentNode.parentNode, '\n' + content);
+    }
+    return content;
+}
+/**
+ * Shortens the description of a given RNode by its type for readability
+ *
+ * @param nodeType the type of node
+ * @param tagName the node tag name
+ * @param textContent the text content in the node
+ * @returns string
+ */
+function shortRNodeDescription(nodeType, tagName, textContent) {
+    switch (nodeType) {
+        case Node.ELEMENT_NODE:
+            return `<${tagName.toLowerCase()}>`;
+        case Node.TEXT_NODE:
+            const content = textContent ? ` (with the "${shorten(textContent)}" content)` : '';
+            return `a text node${content}`;
+        case Node.COMMENT_NODE:
+            return 'a comment node';
+        default:
+            return `#node(nodeType=${nodeType})`;
+    }
+}
+/**
+ * Builds the footer hydration error message
+ *
+ * @param componentClassName the name of the component class
+ * @returns string
+ */
+function getHydrationErrorFooter(componentClassName) {
+    const componentInfo = componentClassName ? `the "${componentClassName}"` : 'corresponding';
+    return `To fix this problem:\n` +
+        `  * check ${componentInfo} component for hydration-related issues\n` +
+        `  * check to see if your template has valid HTML structure\n` +
+        `  * or skip hydration by adding the \`ngSkipHydration\` attribute ` +
+        `to its host node in a template\n\n`;
+}
+/**
+ * An attribute related note for hydration errors
+ */
+function getHydrationAttributeNote() {
+    return 'Note: attributes are only displayed to better represent the DOM' +
+        ' but have no effect on hydration mismatches.\n\n';
+}
+// Node string utility functions
+/**
+ * Strips all newlines out of a given string
+ *
+ * @param input a string to be cleared of new line characters
+ * @returns
+ */
+function stripNewlines(input) {
+    return input.replace(/\s+/gm, '');
+}
+/**
+ * Reduces a string down to a maximum length of characters with ellipsis for readability
+ *
+ * @param input a string input
+ * @param maxLength a maximum length in characters
+ * @returns string
+ */
+function shorten(input, maxLength = 50) {
+    if (!input) {
+        return '';
+    }
+    input = stripNewlines(input);
+    return input.length > maxLength ? `${input.substring(0, maxLength - 1)}…` : input;
+}
+
+/**
+ * Removes all dehydrated views from a given LContainer:
+ * both in internal data structure, as well as removing
+ * corresponding DOM nodes that belong to that dehydrated view.
+ */
+function removeDehydratedViews(lContainer) {
+    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
+    const parentLView = lContainer[PARENT];
+    const renderer = parentLView[RENDERER];
+    for (const view of views) {
+        removeDehydratedView(view, renderer);
+        ngDevMode && ngDevMode.dehydratedViewsRemoved++;
+    }
+    // Reset the value to an empty array to indicate that no
+    // further processing of dehydrated views is needed for
+    // this view container (i.e. do not trigger the lookup process
+    // once again in case a `ViewContainerRef` is created later).
+    lContainer[DEHYDRATED_VIEWS] = EMPTY_ARRAY;
+}
+/**
+ * Helper function to remove all nodes from a dehydrated view.
+ */
+function removeDehydratedView(dehydratedView, renderer) {
+    let nodesRemoved = 0;
+    let currentRNode = dehydratedView.firstChild;
+    if (currentRNode) {
+        const numNodes = dehydratedView.data[NUM_ROOT_NODES];
+        while (nodesRemoved < numNodes) {
+            ngDevMode && validateSiblingNodeExists(currentRNode);
+            const nextSibling = currentRNode.nextSibling;
+            nativeRemoveNode(renderer, currentRNode, false);
+            currentRNode = nextSibling;
+            nodesRemoved++;
+        }
+    }
+}
+/**
+ * Walks over all views within this LContainer invokes dehydrated views
+ * cleanup function for each one.
+ */
+function cleanupLContainer(lContainer) {
+    removeDehydratedViews(lContainer);
+    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        cleanupLView(lContainer[i]);
+    }
+}
+/**
+ * Walks over `LContainer`s and components registered within
+ * this LView and invokes dehydrated views cleanup function for each one.
+ */
+function cleanupLView(lView) {
+    const tView = lView[TVIEW];
+    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
+        if (isLContainer(lView[i])) {
+            const lContainer = lView[i];
+            cleanupLContainer(lContainer);
+        }
+        else if (isLView(lView[i])) {
+            // This is a component, enter the `cleanupLView` recursively.
+            cleanupLView(lView[i]);
+        }
+    }
+}
+/**
+ * Walks over all views registered within the ApplicationRef and removes
+ * all dehydrated views from all `LContainer`s along the way.
+ */
+function cleanupDehydratedViews(appRef) {
+    const viewRefs = appRef._views;
+    for (const viewRef of viewRefs) {
+        const lNode = getLNodeForHydration(viewRef);
+        // An `lView` might be `null` if a `ViewRef` represents
+        // an embedded view (not a component view).
+        if (lNode !== null && lNode[HOST] !== null) {
+            if (isLView(lNode)) {
+                cleanupLView(lNode);
+            }
+            else {
+                // Cleanup in the root component view
+                const componentLView = lNode[HOST];
+                cleanupLView(componentLView);
+                // Cleanup in all views within this view container
+                cleanupLContainer(lNode);
+            }
+            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
+        }
+    }
+}
+
+/**
+ * Regexp that extracts a reference node information from the compressed node location.
+ * The reference node is represented as either:
+ *  - a number which points to an LView slot
+ *  - the `b` char which indicates that the lookup should start from the `document.body`
+ *  - the `h` char to start lookup from the component host node (`lView[HOST]`)
+ */
+const REF_EXTRACTOR_REGEXP = new RegExp(`^(\\d+)*(${REFERENCE_NODE_BODY}|${REFERENCE_NODE_HOST})*(.*)`);
+/**
+ * Helper function that takes a reference node location and a set of navigation steps
+ * (from the reference node) to a target node and outputs a string that represents
+ * a location.
+ *
+ * For example, given: referenceNode = 'b' (body) and path = ['firstChild', 'firstChild',
+ * 'nextSibling'], the function returns: `bf2n`.
+ */
+function compressNodeLocation(referenceNode, path) {
+    const result = [referenceNode];
+    for (const segment of path) {
+        const lastIdx = result.length - 1;
+        if (lastIdx > 0 && result[lastIdx - 1] === segment) {
+            // An empty string in a count slot represents 1 occurrence of an instruction.
+            const value = (result[lastIdx] || 1);
+            result[lastIdx] = value + 1;
+        }
+        else {
+            // Adding a new segment to the path.
+            // Using an empty string in a counter field to avoid encoding `1`s
+            // into the path, since they are implicit (e.g. `f1n1` vs `fn`), so
+            // it's enough to have a single char in this case.
+            result.push(segment, '');
+        }
+    }
+    return result.join('');
+}
+/**
+ * Helper function that reverts the `compressNodeLocation` and transforms a given
+ * string into an array where at 0th position there is a reference node info and
+ * after that it contains information (in pairs) about a navigation step and the
+ * number of repetitions.
+ *
+ * For example, the path like 'bf2n' will be transformed to:
+ * ['b', 'firstChild', 2, 'nextSibling', 1].
+ *
+ * This information is later consumed by the code that navigates the DOM to find
+ * a given node by its location.
+ */
+function decompressNodeLocation(path) {
+    const matches = path.match(REF_EXTRACTOR_REGEXP);
+    const [_, refNodeId, refNodeName, rest] = matches;
+    // If a reference node is represented by an index, transform it to a number.
+    const ref = refNodeId ? parseInt(refNodeId, 10) : refNodeName;
+    const steps = [];
+    // Match all segments in a path.
+    for (const [_, step, count] of rest.matchAll(/(f|n)(\d*)/g)) {
+        const repeat = parseInt(count, 10) || 1;
+        steps.push(step, repeat);
+    }
+    return [ref, ...steps];
+}
+
+/** Whether current TNode is a first node in an <ng-container>. */
+function isFirstElementInNgContainer(tNode) {
+    return !tNode.prev && tNode.parent?.type === 8 /* TNodeType.ElementContainer */;
+}
+/** Returns an instruction index (subtracting HEADER_OFFSET). */
+function getNoOffsetIndex(tNode) {
+    return tNode.index - HEADER_OFFSET;
+}
+/**
+ * Check whether a given node exists, but is disconnected from the DOM.
+ *
+ * Note: we leverage the fact that we have this information available in the DOM emulation
+ * layer (in Domino) for now. Longer-term solution should not rely on the DOM emulation and
+ * only use internal data structures and state to compute this information.
+ */
+function isDisconnectedNode(tNode, lView) {
+    return !(tNode.type & 16 /* TNodeType.Projection */) && !!lView[tNode.index] &&
+        !unwrapRNode(lView[tNode.index])?.isConnected;
+}
+/**
+ * Locate a node in DOM tree that corresponds to a given TNode.
+ *
+ * @param hydrationInfo The hydration annotation data
+ * @param tView the current tView
+ * @param lView the current lView
+ * @param tNode the current tNode
+ * @returns an RNode that represents a given tNode
+ */
+function locateNextRNode(hydrationInfo, tView, lView, tNode) {
+    let native = null;
+    const noOffsetIndex = getNoOffsetIndex(tNode);
+    const nodes = hydrationInfo.data[NODES];
+    if (nodes?.[noOffsetIndex]) {
+        // We know the exact location of the node.
+        native = locateRNodeByPath(nodes[noOffsetIndex], lView);
+    }
+    else if (tView.firstChild === tNode) {
+        // We create a first node in this view, so we use a reference
+        // to the first child in this DOM segment.
+        native = hydrationInfo.firstChild;
+    }
+    else {
+        // Locate a node based on a previous sibling or a parent node.
+        const previousTNodeParent = tNode.prev === null;
+        const previousTNode = (tNode.prev ?? tNode.parent);
+        ngDevMode &&
+            assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
+                'to the previous node or a parent node.');
+        if (isFirstElementInNgContainer(tNode)) {
+            const noOffsetParentIndex = getNoOffsetIndex(tNode.parent);
+            native = getSegmentHead(hydrationInfo, noOffsetParentIndex);
+        }
+        else {
+            let previousRElement = getNativeByTNode(previousTNode, lView);
+            if (previousTNodeParent) {
+                native = previousRElement.firstChild;
+            }
+            else {
+                // If the previous node is an element, but it also has container info,
+                // this means that we are processing a node like `<div #vcrTarget>`, which is
+                // represented in the DOM as `<div></div>...<!--container-->`.
+                // In this case, there are nodes *after* this element and we need to skip
+                // all of them to reach an element that we are looking for.
+                const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
+                const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
+                if (previousTNode.type === 2 /* TNodeType.Element */ && segmentHead) {
+                    const numRootNodesToSkip = calcSerializedContainerSize(hydrationInfo, noOffsetPrevSiblingIndex);
+                    // `+1` stands for an anchor comment node after all the views in this container.
+                    const nodesToSkip = numRootNodesToSkip + 1;
+                    // First node after this segment.
+                    native = siblingAfter(nodesToSkip, segmentHead);
+                }
+                else {
+                    native = previousRElement.nextSibling;
+                }
+            }
+        }
+    }
+    return native;
+}
+/**
+ * Skips over a specified number of nodes and returns the next sibling node after that.
+ */
+function siblingAfter(skip, from) {
+    let currentNode = from;
+    for (let i = 0; i < skip; i++) {
+        ngDevMode && validateSiblingNodeExists(currentNode);
+        currentNode = currentNode.nextSibling;
+    }
+    return currentNode;
+}
+/**
+ * Helper function to produce a string representation of the navigation steps
+ * (in terms of `nextSibling` and `firstChild` navigations). Used in error
+ * messages in dev mode.
+ */
+function stringifyNavigationInstructions(instructions) {
+    const container = [];
+    for (let i = 0; i < instructions.length; i += 2) {
+        const step = instructions[i];
+        const repeat = instructions[i + 1];
+        for (let r = 0; r < repeat; r++) {
+            container.push(step === NodeNavigationStep.FirstChild ? 'firstChild' : 'nextSibling');
+        }
+    }
+    return container.join('.');
+}
+/**
+ * Helper function that navigates from a starting point node (the `from` node)
+ * using provided set of navigation instructions (within `path` argument).
+ */
+function navigateToNode(from, instructions) {
+    let node = from;
+    for (let i = 0; i < instructions.length; i += 2) {
+        const step = instructions[i];
+        const repeat = instructions[i + 1];
+        for (let r = 0; r < repeat; r++) {
+            if (ngDevMode && !node) {
+                throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
+            }
+            switch (step) {
+                case NodeNavigationStep.FirstChild:
+                    node = node.firstChild;
+                    break;
+                case NodeNavigationStep.NextSibling:
+                    node = node.nextSibling;
+                    break;
+            }
+        }
+    }
+    if (ngDevMode && !node) {
+        throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
+    }
+    return node;
+}
+/**
+ * Locates an RNode given a set of navigation instructions (which also contains
+ * a starting point node info).
+ */
+function locateRNodeByPath(path, lView) {
+    const [referenceNode, ...navigationInstructions] = decompressNodeLocation(path);
+    let ref;
+    if (referenceNode === REFERENCE_NODE_HOST) {
+        ref = lView[DECLARATION_COMPONENT_VIEW][HOST];
+    }
+    else if (referenceNode === REFERENCE_NODE_BODY) {
+        ref = ɵɵresolveBody(lView[DECLARATION_COMPONENT_VIEW][HOST]);
+    }
+    else {
+        const parentElementId = Number(referenceNode);
+        ref = unwrapRNode(lView[parentElementId + HEADER_OFFSET]);
+    }
+    return navigateToNode(ref, navigationInstructions);
+}
+/**
+ * Generate a list of DOM navigation operations to get from node `start` to node `finish`.
+ *
+ * Note: assumes that node `start` occurs before node `finish` in an in-order traversal of the DOM
+ * tree. That is, we should be able to get from `start` to `finish` purely by using `.firstChild`
+ * and `.nextSibling` operations.
+ */
+function navigateBetween(start, finish) {
+    if (start === finish) {
+        return [];
+    }
+    else if (start.parentElement == null || finish.parentElement == null) {
+        return null;
+    }
+    else if (start.parentElement === finish.parentElement) {
+        return navigateBetweenSiblings(start, finish);
+    }
+    else {
+        // `finish` is a child of its parent, so the parent will always have a child.
+        const parent = finish.parentElement;
+        const parentPath = navigateBetween(start, parent);
+        const childPath = navigateBetween(parent.firstChild, finish);
+        if (!parentPath || !childPath)
+            return null;
+        return [
+            // First navigate to `finish`'s parent
+            ...parentPath,
+            // Then to its first child.
+            NodeNavigationStep.FirstChild,
+            // And finally from that node to `finish` (maybe a no-op if we're already there).
+            ...childPath,
+        ];
+    }
+}
+/**
+ * Calculates a path between 2 sibling nodes (generates a number of `NextSibling` navigations).
+ * Returns `null` if no such path exists between the given nodes.
+ */
+function navigateBetweenSiblings(start, finish) {
+    const nav = [];
+    let node = null;
+    for (node = start; node != null && node !== finish; node = node.nextSibling) {
+        nav.push(NodeNavigationStep.NextSibling);
+    }
+    // If the `node` becomes `null` or `undefined` at the end, that means that we
+    // didn't find the `end` node, thus return `null` (which would trigger serialization
+    // error to be produced).
+    return node == null ? null : nav;
+}
+/**
+ * Calculates a path between 2 nodes in terms of `nextSibling` and `firstChild`
+ * navigations:
+ * - the `from` node is a known node, used as an starting point for the lookup
+ *   (the `fromNodeName` argument is a string representation of the node).
+ * - the `to` node is a node that the runtime logic would be looking up,
+ *   using the path generated by this function.
+ */
+function calcPathBetween(from, to, fromNodeName) {
+    const path = navigateBetween(from, to);
+    return path === null ? null : compressNodeLocation(fromNodeName, path);
+}
+/**
+ * Invoked at serialization time (on the server) when a set of navigation
+ * instructions needs to be generated for a TNode.
+ */
+function calcPathForNode(tNode, lView) {
+    let parentTNode = tNode.parent;
+    let parentIndex;
+    let parentRNode;
+    let referenceNodeName;
+    // Skip over all parent nodes that are disconnected from the DOM, such nodes
+    // can not be used as anchors.
+    //
+    // This might happen in certain content projection-based use-cases, where
+    // a content of an element is projected and used, when a parent element
+    // itself remains detached from DOM. In this scenario we try to find a parent
+    // element that is attached to DOM and can act as an anchor instead.
+    while (parentTNode !== null && isDisconnectedNode(parentTNode, lView)) {
+        parentTNode = parentTNode.parent;
+    }
+    if (parentTNode === null || !(parentTNode.type & 3 /* TNodeType.AnyRNode */)) {
+        // If there is no parent TNode or a parent TNode does not represent an RNode
+        // (i.e. not a DOM node), use component host element as a reference node.
+        parentIndex = referenceNodeName = REFERENCE_NODE_HOST;
+        parentRNode = lView[DECLARATION_COMPONENT_VIEW][HOST];
+    }
+    else {
+        // Use parent TNode as a reference node.
+        parentIndex = parentTNode.index;
+        parentRNode = unwrapRNode(lView[parentIndex]);
+        referenceNodeName = renderStringify(parentIndex - HEADER_OFFSET);
+    }
+    let rNode = unwrapRNode(lView[tNode.index]);
+    if (tNode.type & 12 /* TNodeType.AnyContainer */) {
+        // For <ng-container> nodes, instead of serializing a reference
+        // to the anchor comment node, serialize a location of the first
+        // DOM element. Paired with the container size (serialized as a part
+        // of `ngh.containers`), it should give enough information for runtime
+        // to hydrate nodes in this container.
+        const firstRNode = getFirstNativeNode(lView, tNode);
+        // If container is not empty, use a reference to the first element,
+        // otherwise, rNode would point to an anchor comment node.
+        if (firstRNode) {
+            rNode = firstRNode;
+        }
+    }
+    let path = calcPathBetween(parentRNode, rNode, referenceNodeName);
+    if (path === null && parentRNode !== rNode) {
+        // Searching for a path between elements within a host node failed.
+        // Trying to find a path to an element starting from the `document.body` instead.
+        //
+        // Important note: this type of reference is relatively unstable, since Angular
+        // may not be able to control parts of the page that the runtime logic navigates
+        // through. This is mostly needed to cover "portals" use-case (like menus, dialog boxes,
+        // etc), where nodes are content-projected (including direct DOM manipulations) outside
+        // of the host node. The better solution is to provide APIs to work with "portals",
+        // at which point this code path would not be needed.
+        const body = parentRNode.ownerDocument.body;
+        path = calcPathBetween(body, rNode, REFERENCE_NODE_BODY);
+        if (path === null) {
+            // If the path is still empty, it's likely that this node is detached and
+            // won't be found during hydration.
+            throw nodeNotFoundError(lView, tNode);
+        }
+    }
+    return path;
+}
+
+/**
+ * Given a current DOM node and a serialized information about the views
+ * in a container, walks over the DOM structure, collecting the list of
+ * dehydrated views.
+ */
+function locateDehydratedViewsInContainer(currentRNode, serializedViews) {
+    const dehydratedViews = [];
+    for (const serializedView of serializedViews) {
+        // Repeats a view multiple times as needed, based on the serialized information
+        // (for example, for *ngFor-produced views).
+        for (let i = 0; i < (serializedView[MULTIPLIER] ?? 1); i++) {
+            const view = {
+                data: serializedView,
+                firstChild: null,
+            };
+            if (serializedView[NUM_ROOT_NODES] > 0) {
+                // Keep reference to the first node in this view,
+                // so it can be accessed while invoking template instructions.
+                view.firstChild = currentRNode;
+                // Move over to the next node after this view, which can
+                // either be a first node of the next view or an anchor comment
+                // node after the last view in a container.
+                currentRNode = siblingAfter(serializedView[NUM_ROOT_NODES], currentRNode);
+            }
+            dehydratedViews.push(view);
+        }
+    }
+    return [currentRNode, dehydratedViews];
+}
+/**
+ * Reference to a function that searches for a matching dehydrated views
+ * stored on a given lContainer.
+ * Returns `null` by default, when hydration is not enabled.
+ */
+let _findMatchingDehydratedViewImpl = () => null;
+/**
+ * Retrieves the next dehydrated view from the LContainer and verifies that
+ * it matches a given template id (from the TView that was used to create this
+ * instance of a view). If the id doesn't match, that means that we are in an
+ * unexpected state and can not complete the reconciliation process. Thus,
+ * all dehydrated views from this LContainer are removed (including corresponding
+ * DOM nodes) and the rendering is performed as if there were no dehydrated views
+ * in this container.
+ */
+function findMatchingDehydratedViewImpl(lContainer, template) {
+    const views = lContainer[DEHYDRATED_VIEWS];
+    if (!template || views === null || views.length === 0) {
+        return null;
+    }
+    const view = views[0];
+    // Verify whether the first dehydrated view in the container matches
+    // the template id passed to this function (that originated from a TView
+    // that was used to create an instance of an embedded or component views.
+    if (view.data[TEMPLATE_ID] === template) {
+        // If the template id matches - extract the first view and return it.
+        return views.shift();
+    }
+    else {
+        // Otherwise, we are at the state when reconciliation can not be completed,
+        // thus we remove all dehydrated views within this container (remove them
+        // from internal data structures as well as delete associated elements from
+        // the DOM tree).
+        removeDehydratedViews(lContainer);
+        return null;
+    }
+}
+function enableFindMatchingDehydratedViewImpl() {
+    _findMatchingDehydratedViewImpl = findMatchingDehydratedViewImpl;
+}
+function findMatchingDehydratedView(lContainer, template) {
+    return _findMatchingDehydratedViewImpl(lContainer, template);
+}
+
+function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
+    const embeddedTView = templateTNode.tView;
+    ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
+    ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
+    // Embedded views follow the change detection strategy of the view they're declared in.
+    const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
+    const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
+    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.dehydratedView ?? null);
+    const declarationLContainer = declarationLView[templateTNode.index];
+    ngDevMode && assertLContainer(declarationLContainer);
+    embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
+    const declarationViewLQueries = declarationLView[QUERIES];
+    if (declarationViewLQueries !== null) {
+        embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
+    }
+    // execute creation mode of a view
+    renderView(embeddedTView, embeddedLView, context);
+    return embeddedLView;
+}
+function getLViewFromLContainer(lContainer, index) {
+    const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
+    // avoid reading past the array boundaries
+    if (adjustedIndex < lContainer.length) {
+        const lView = lContainer[adjustedIndex];
+        ngDevMode && assertLView(lView);
+        return lView;
+    }
+    return undefined;
+}
+/**
+ * Returns whether an elements that belong to a view should be
+ * inserted into the DOM. For client-only cases, DOM elements are
+ * always inserted. For hydration cases, we check whether serialized
+ * info is available for a view and the view is not in a "skip hydration"
+ * block (in which case view contents was re-created, thus needing insertion).
+ */
+function shouldAddViewToDom(tNode, dehydratedView) {
+    return !dehydratedView || dehydratedView.firstChild === null ||
+        hasInSkipHydrationBlockFlag(tNode);
+}
+function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
+    const tView = lView[TVIEW];
+    // Insert into the view tree so the new view can be change-detected
+    insertView(tView, lView, lContainer, index);
+    // Insert elements that belong to this view into the DOM tree
+    if (addToDOM) {
+        const beforeNode = getBeforeNodeForView(index, lContainer);
+        const renderer = lView[RENDERER];
+        const parentRNode = nativeParentNode(renderer, lContainer[NATIVE]);
+        if (parentRNode !== null) {
+            addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
+        }
+    }
+    // When in hydration mode, reset the pointer to the first child in
+    // the dehydrated view. This indicates that the view was hydrated and
+    // further attaching/detaching should work with this view as normal.
+    const hydrationInfo = lView[HYDRATION];
+    if (hydrationInfo !== null && hydrationInfo.firstChild !== null) {
+        hydrationInfo.firstChild = null;
+    }
+}
+function removeLViewFromLContainer(lContainer, index) {
+    const lView = detachView(lContainer, index);
+    if (lView !== undefined) {
+        destroyLView(lView[TVIEW], lView);
+    }
+    return lView;
+}
+
+/**
+ * Represents a container where one or more views can be attached to a component.
+ *
+ * Can contain *host views* (created by instantiating a
+ * component with the `createComponent()` method), and *embedded views*
+ * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
+ *
+ * A view container instance can contain other view containers,
+ * creating a [view hierarchy](guide/glossary#view-hierarchy).
+ *
+ * @usageNotes
+ *
+ * The example below demonstrates how the `createComponent` function can be used
+ * to create an instance of a ComponentRef dynamically and attach it to an ApplicationRef,
+ * so that it gets included into change detection cycles.
+ *
+ * Note: the example uses standalone components, but the function can also be used for
+ * non-standalone components (declared in an NgModule) as well.
+ *
+ * ```typescript
+ * @Component({
+ *   standalone: true,
+ *   selector: 'dynamic',
+ *   template: `<span>This is a content of a dynamic component.</span>`,
+ * })
+ * class DynamicComponent {
+ *   vcr = inject(ViewContainerRef);
+ * }
+ *
+ * @Component({
+ *   standalone: true,
+ *   selector: 'app',
+ *   template: `<main>Hi! This is the main content.</main>`,
+ * })
+ * class AppComponent {
+ *   vcr = inject(ViewContainerRef);
+ *
+ *   ngAfterViewInit() {
+ *     const compRef = this.vcr.createComponent(DynamicComponent);
+ *     compRef.changeDetectorRef.detectChanges();
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link ComponentRef}
+ * @see {@link EmbeddedViewRef}
+ *
+ * @publicApi
+ */
+class ViewContainerRef {
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ELEMENT_ID__ = injectViewContainerRef; }
+}
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @returns The ViewContainerRef instance to use
+ */
+function injectViewContainerRef() {
+    const previousTNode = getCurrentTNode();
+    return createContainerRef(previousTNode, getLView());
+}
+const VE_ViewContainerRef = ViewContainerRef;
+// TODO(alxhub): cleaning up this indirection triggers a subtle bug in Closure in g3. Once the fix
+// for that lands, this can be cleaned up.
+const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
+    constructor(_lContainer, _hostTNode, _hostLView) {
+        super();
+        this._lContainer = _lContainer;
+        this._hostTNode = _hostTNode;
+        this._hostLView = _hostLView;
+    }
+    get element() {
+        return createElementRef(this._hostTNode, this._hostLView);
+    }
+    get injector() {
+        return new NodeInjector(this._hostTNode, this._hostLView);
+    }
+    /** @deprecated No replacement */
+    get parentInjector() {
+        const parentLocation = getParentInjectorLocation(this._hostTNode, this._hostLView);
+        if (hasParentInjector(parentLocation)) {
+            const parentView = getParentInjectorView(parentLocation, this._hostLView);
+            const injectorIndex = getParentInjectorIndex(parentLocation);
+            ngDevMode && assertNodeInjector(parentView, injectorIndex);
+            const parentTNode = parentView[TVIEW].data[injectorIndex + 8 /* NodeInjectorOffset.TNODE */];
+            return new NodeInjector(parentTNode, parentView);
+        }
+        else {
+            return new NodeInjector(null, this._hostLView);
+        }
+    }
+    clear() {
+        while (this.length > 0) {
+            this.remove(this.length - 1);
+        }
+    }
+    get(index) {
+        const viewRefs = getViewRefs(this._lContainer);
+        return viewRefs !== null && viewRefs[index] || null;
+    }
+    get length() {
+        return this._lContainer.length - CONTAINER_HEADER_OFFSET;
+    }
+    createEmbeddedView(templateRef, context, indexOrOptions) {
+        let index;
+        let injector;
+        if (typeof indexOrOptions === 'number') {
+            index = indexOrOptions;
+        }
+        else if (indexOrOptions != null) {
+            index = indexOrOptions.index;
+            injector = indexOrOptions.injector;
+        }
+        const dehydratedView = findMatchingDehydratedView(this._lContainer, templateRef.ssrId);
+        const viewRef = templateRef.createEmbeddedViewImpl(context || {}, injector, dehydratedView);
+        this.insertImpl(viewRef, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
+        return viewRef;
+    }
+    createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, environmentInjector) {
+        const isComponentFactory = componentFactoryOrType && !isType(componentFactoryOrType);
+        let index;
+        // This function supports 2 signatures and we need to handle options correctly for both:
+        //   1. When first argument is a Component type. This signature also requires extra
+        //      options to be provided as object (more ergonomic option).
+        //   2. First argument is a Component factory. In this case extra options are represented as
+        //      positional arguments. This signature is less ergonomic and will be deprecated.
+        if (isComponentFactory) {
+            if (ngDevMode) {
+                assertEqual(typeof indexOrOptions !== 'object', true, 'It looks like Component factory was provided as the first argument ' +
+                    'and an options object as the second argument. This combination of arguments ' +
+                    'is incompatible. You can either change the first argument to provide Component ' +
+                    'type or change the second argument to be a number (representing an index at ' +
+                    'which to insert the new component\'s host view into this container)');
+            }
+            index = indexOrOptions;
+        }
+        else {
+            if (ngDevMode) {
+                assertDefined(getComponentDef(componentFactoryOrType), `Provided Component class doesn't contain Component definition. ` +
+                    `Please check whether provided class has @Component decorator.`);
+                assertEqual(typeof indexOrOptions !== 'number', true, 'It looks like Component type was provided as the first argument ' +
+                    'and a number (representing an index at which to insert the new component\'s ' +
+                    'host view into this container as the second argument. This combination of arguments ' +
+                    'is incompatible. Please use an object as the second argument instead.');
+            }
+            const options = (indexOrOptions || {});
+            if (ngDevMode && options.environmentInjector && options.ngModuleRef) {
+                throwError(`Cannot pass both environmentInjector and ngModuleRef options to createComponent().`);
+            }
+            index = options.index;
+            injector = options.injector;
+            projectableNodes = options.projectableNodes;
+            environmentInjector = options.environmentInjector || options.ngModuleRef;
+        }
+        const componentFactory = isComponentFactory ?
+            componentFactoryOrType :
+            new ComponentFactory(getComponentDef(componentFactoryOrType));
+        const contextInjector = injector || this.parentInjector;
+        // If an `NgModuleRef` is not provided explicitly, try retrieving it from the DI tree.
+        if (!environmentInjector && componentFactory.ngModule == null) {
+            // For the `ComponentFactory` case, entering this logic is very unlikely, since we expect that
+            // an instance of a `ComponentFactory`, resolved via `ComponentFactoryResolver` would have an
+            // `ngModule` field. This is possible in some test scenarios and potentially in some JIT-based
+            // use-cases. For the `ComponentFactory` case we preserve backwards-compatibility and try
+            // using a provided injector first, then fall back to the parent injector of this
+            // `ViewContainerRef` instance.
+            //
+            // For the factory-less case, it's critical to establish a connection with the module
+            // injector tree (by retrieving an instance of an `NgModuleRef` and accessing its injector),
+            // so that a component can use DI tokens provided in MgModules. For this reason, we can not
+            // rely on the provided injector, since it might be detached from the DI tree (for example, if
+            // it was created via `Injector.create` without specifying a parent injector, or if an
+            // injector is retrieved from an `NgModuleRef` created via `createNgModule` using an
+            // NgModule outside of a module tree). Instead, we always use `ViewContainerRef`'s parent
+            // injector, which is normally connected to the DI tree, which includes module injector
+            // subtree.
+            const _injector = isComponentFactory ? contextInjector : this.parentInjector;
+            // DO NOT REFACTOR. The code here used to have a `injector.get(NgModuleRef, null) ||
+            // undefined` expression which seems to cause internal google apps to fail. This is documented
+            // in the following internal bug issue: go/b/142967802
+            const result = _injector.get(EnvironmentInjector, null);
+            if (result) {
+                environmentInjector = result;
+            }
+        }
+        const componentDef = getComponentDef(componentFactory.componentType ?? {});
+        const dehydratedView = findMatchingDehydratedView(this._lContainer, componentDef?.id ?? null);
+        const rNode = dehydratedView?.firstChild ?? null;
+        const componentRef = componentFactory.create(contextInjector, projectableNodes, rNode, environmentInjector);
+        this.insertImpl(componentRef.hostView, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
+        return componentRef;
+    }
+    insert(viewRef, index) {
+        return this.insertImpl(viewRef, index, true);
+    }
+    insertImpl(viewRef, index, addToDOM) {
+        const lView = viewRef._lView;
+        if (ngDevMode && viewRef.destroyed) {
+            throw new Error('Cannot insert a destroyed View in a ViewContainer!');
+        }
+        if (viewAttachedToContainer(lView)) {
+            // If view is already attached, detach it first so we clean up references appropriately.
+            const prevIdx = this.indexOf(viewRef);
+            // A view might be attached either to this or a different container. The `prevIdx` for
+            // those cases will be:
+            // equal to -1 for views attached to this ViewContainerRef
+            // >= 0 for views attached to a different ViewContainerRef
+            if (prevIdx !== -1) {
+                this.detach(prevIdx);
+            }
+            else {
+                const prevLContainer = lView[PARENT];
+                ngDevMode &&
+                    assertEqual(isLContainer(prevLContainer), true, 'An attached view should have its PARENT point to a container.');
+                // We need to re-create a R3ViewContainerRef instance since those are not stored on
+                // LView (nor anywhere else).
+                const prevVCRef = new R3ViewContainerRef(prevLContainer, prevLContainer[T_HOST], prevLContainer[PARENT]);
+                prevVCRef.detach(prevVCRef.indexOf(viewRef));
+            }
+        }
+        // Logical operation of adding `LView` to `LContainer`
+        const adjustedIdx = this._adjustIndex(index);
+        const lContainer = this._lContainer;
+        addLViewToLContainer(lContainer, lView, adjustedIdx, addToDOM);
+        viewRef.attachToViewContainerRef();
+        addToArray(getOrCreateViewRefs(lContainer), adjustedIdx, viewRef);
+        return viewRef;
+    }
+    move(viewRef, newIndex) {
+        if (ngDevMode && viewRef.destroyed) {
+            throw new Error('Cannot move a destroyed View in a ViewContainer!');
+        }
+        return this.insert(viewRef, newIndex);
+    }
+    indexOf(viewRef) {
+        const viewRefsArr = getViewRefs(this._lContainer);
+        return viewRefsArr !== null ? viewRefsArr.indexOf(viewRef) : -1;
+    }
+    remove(index) {
+        const adjustedIdx = this._adjustIndex(index, -1);
+        const detachedView = detachView(this._lContainer, adjustedIdx);
+        if (detachedView) {
+            // Before destroying the view, remove it from the container's array of `ViewRef`s.
+            // This ensures the view container length is updated before calling
+            // `destroyLView`, which could recursively call view container methods that
+            // rely on an accurate container length.
+            // (e.g. a method on this view container being called by a child directive's OnDestroy
+            // lifecycle hook)
+            removeFromArray(getOrCreateViewRefs(this._lContainer), adjustedIdx);
+            destroyLView(detachedView[TVIEW], detachedView);
+        }
+    }
+    detach(index) {
+        const adjustedIdx = this._adjustIndex(index, -1);
+        const view = detachView(this._lContainer, adjustedIdx);
+        const wasDetached = view && removeFromArray(getOrCreateViewRefs(this._lContainer), adjustedIdx) != null;
+        return wasDetached ? new ViewRef$1(view) : null;
+    }
+    _adjustIndex(index, shift = 0) {
+        if (index == null) {
+            return this.length + shift;
+        }
+        if (ngDevMode) {
+            assertGreaterThan(index, -1, `ViewRef index must be positive, got ${index}`);
+            // +1 because it's legal to insert at the end.
+            assertLessThan(index, this.length + 1 + shift, 'index');
+        }
+        return index;
+    }
+};
+function getViewRefs(lContainer) {
+    return lContainer[VIEW_REFS];
+}
+function getOrCreateViewRefs(lContainer) {
+    return (lContainer[VIEW_REFS] || (lContainer[VIEW_REFS] = []));
+}
+/**
+ * Creates a ViewContainerRef and stores it on the injector.
+ *
+ * @param hostTNode The node that is requesting a ViewContainerRef
+ * @param hostLView The view to which the node belongs
+ * @returns The ViewContainerRef instance to use
+ */
+function createContainerRef(hostTNode, hostLView) {
+    ngDevMode && assertTNodeType(hostTNode, 12 /* TNodeType.AnyContainer */ | 3 /* TNodeType.AnyRNode */);
+    let lContainer;
+    const slotValue = hostLView[hostTNode.index];
+    if (isLContainer(slotValue)) {
+        // If the host is a container, we don't need to create a new LContainer
+        lContainer = slotValue;
+    }
+    else {
+        // An LContainer anchor can not be `null`, but we set it here temporarily
+        // and update to the actual value later in this function (see
+        // `_locateOrCreateAnchorNode`).
+        lContainer = createLContainer(slotValue, hostLView, null, hostTNode);
+        hostLView[hostTNode.index] = lContainer;
+        addToViewTree(hostLView, lContainer);
+    }
+    _locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue);
+    return new R3ViewContainerRef(lContainer, hostTNode, hostLView);
+}
+/**
+ * Creates and inserts a comment node that acts as an anchor for a view container.
+ *
+ * If the host is a regular element, we have to insert a comment node manually which will
+ * be used as an anchor when inserting elements. In this specific case we use low-level DOM
+ * manipulation to insert it.
+ */
+function insertAnchorNode(hostLView, hostTNode) {
+    const renderer = hostLView[RENDERER];
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    const commentNode = renderer.createComment(ngDevMode ? 'container' : '');
+    const hostNative = getNativeByTNode(hostTNode, hostLView);
+    const parentOfHostNative = nativeParentNode(renderer, hostNative);
+    nativeInsertBefore(renderer, parentOfHostNative, commentNode, nativeNextSibling(renderer, hostNative), false);
+    return commentNode;
+}
+let _locateOrCreateAnchorNode = createAnchorNode;
+let _populateDehydratedViewsInLContainer = () => false; // noop by default
+/**
+ * Looks up dehydrated views that belong to a given LContainer and populates
+ * this information into the `LContainer[DEHYDRATED_VIEWS]` slot. When running
+ * in client-only mode, this function is a noop.
+ *
+ * @param lContainer LContainer that should be populated.
+ * @param tNode Corresponding TNode.
+ * @param hostLView LView that hosts LContainer.
+ * @returns a boolean flag that indicates whether a populating operation
+ *   was successful. The operation might be unsuccessful in case is has completed
+ *   previously, we are rendering in client-only mode or this content is located
+ *   in a skip hydration section.
+ */
+function populateDehydratedViewsInLContainer(lContainer, tNode, hostLView) {
+    return _populateDehydratedViewsInLContainer(lContainer, tNode, hostLView);
+}
+/**
+ * Regular creation mode: an anchor is created and
+ * assigned to the `lContainer[NATIVE]` slot.
+ */
+function createAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
+    // We already have a native element (anchor) set, return.
+    if (lContainer[NATIVE])
+        return;
+    let commentNode;
+    // If the host is an element container, the native host element is guaranteed to be a
+    // comment and we can reuse that comment as anchor element for the new LContainer.
+    // The comment node in question is already part of the DOM structure so we don't need to append
+    // it again.
+    if (hostTNode.type & 8 /* TNodeType.ElementContainer */) {
+        commentNode = unwrapRNode(slotValue);
+    }
+    else {
+        commentNode = insertAnchorNode(hostLView, hostTNode);
+    }
+    lContainer[NATIVE] = commentNode;
+}
+/**
+ * Hydration logic that looks up all dehydrated views in this container
+ * and puts them into `lContainer[DEHYDRATED_VIEWS]` slot.
+ *
+ * @returns a boolean flag that indicates whether a populating operation
+ *   was successful. The operation might be unsuccessful in case is has completed
+ *   previously, we are rendering in client-only mode or this content is located
+ *   in a skip hydration section.
+ */
+function populateDehydratedViewsInLContainerImpl(lContainer, tNode, hostLView) {
+    // We already have a native element (anchor) set and the process
+    // of finding dehydrated views happened (so the `lContainer[DEHYDRATED_VIEWS]`
+    // is not null), exit early.
+    if (lContainer[NATIVE] && lContainer[DEHYDRATED_VIEWS]) {
+        return true;
+    }
+    const hydrationInfo = hostLView[HYDRATION];
+    const noOffsetIndex = tNode.index - HEADER_OFFSET;
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock(tNode) ||
+        isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return false;
+    }
+    // Hydration mode, looking up an anchor node and dehydrated views in DOM.
+    const currentRNode = getSegmentHead(hydrationInfo, noOffsetIndex);
+    const serializedViews = hydrationInfo.data[CONTAINERS]?.[noOffsetIndex];
+    ngDevMode &&
+        assertDefined(serializedViews, 'Unexpected state: no hydration info available for a given TNode, ' +
+            'which represents a view container.');
+    const [commentNode, dehydratedViews] = locateDehydratedViewsInContainer(currentRNode, serializedViews);
+    if (ngDevMode) {
+        validateMatchingNode(commentNode, Node.COMMENT_NODE, null, hostLView, tNode, true);
+        // Do not throw in case this node is already claimed (thus `false` as a second
+        // argument). If this container is created based on an `<ng-template>`, the comment
+        // node would be already claimed from the `template` instruction. If an element acts
+        // as an anchor (e.g. <div #vcRef>), a separate comment node would be created/located,
+        // so we need to claim it here.
+        markRNodeAsClaimedByHydration(commentNode, false);
+    }
+    lContainer[NATIVE] = commentNode;
+    lContainer[DEHYDRATED_VIEWS] = dehydratedViews;
+    return true;
+}
+function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
+    if (!_populateDehydratedViewsInLContainer(lContainer, hostTNode, hostLView)) {
+        // Populating dehydrated views operation returned `false`, which indicates
+        // that the logic was running in client-only mode, this an anchor comment
+        // node should be created for this container.
+        createAnchorNode(lContainer, hostLView, hostTNode, slotValue);
+    }
+}
+function enableLocateOrCreateContainerRefImpl() {
+    _locateOrCreateAnchorNode = locateOrCreateAnchorNode;
+    _populateDehydratedViewsInLContainer = populateDehydratedViewsInLContainerImpl;
+}
+
 // TODO(misko): consider inlining
 /** Updates binding and returns the value. */
 function updateBinding(lView, bindingIndex, value) {
@@ -16141,6 +17494,1525 @@ function bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) {
 function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
     const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
     return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
+}
+
+function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
+    ngDevMode && assertFirstCreatePass(tView);
+    ngDevMode && ngDevMode.firstCreatePass++;
+    const tViewConsts = tView.consts;
+    // TODO(pk): refactor getOrCreateTNode to have the "create" only version
+    const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
+    resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
+    registerPostOrderHooks(tView, tNode);
+    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts, null /* ssrId */);
+    if (tView.queries !== null) {
+        tView.queries.template(tView, tNode);
+        embeddedTView.queries = tView.queries.embeddedTView(tNode);
+    }
+    return tNode;
+}
+/**
+ * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
+ *
+ * <ng-template #foo>
+ *    <div></div>
+ * </ng-template>
+ *
+ * @param index The index of the container in the data array
+ * @param templateFn Inline template
+ * @param decls The number of nodes, local refs, and pipes for this template
+ * @param vars The number of bindings for this template
+ * @param tagName The name of the container element, if applicable
+ * @param attrsIndex Index of template attributes in the `consts` array.
+ * @param localRefs Index of the local references in the `consts` array.
+ * @param localRefExtractor A function which extracts local-refs values from the template.
+ *        Defaults to the current element associated with the local-ref.
+ *
+ * @codeGenApi
+ */
+function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex, localRefExtractor) {
+    const lView = getLView();
+    const tView = getTView();
+    const adjustedIndex = index + HEADER_OFFSET;
+    const tNode = tView.firstCreatePass ? templateFirstCreatePass(adjustedIndex, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
+        tView.data[adjustedIndex];
+    setCurrentTNode(tNode, false);
+    const comment = _locateOrCreateContainerAnchor(tView, lView, tNode, index);
+    if (wasLastNodeCreated()) {
+        appendChild(tView, lView, comment, tNode);
+    }
+    attachPatchData(comment, lView);
+    const lContainer = createLContainer(comment, lView, comment, tNode);
+    lView[adjustedIndex] = lContainer;
+    addToViewTree(lView, lContainer);
+    // If hydration is enabled, looks up dehydrated views in the DOM
+    // using hydration annotation info and stores those views on LContainer.
+    // In client-only mode, this function is a noop.
+    populateDehydratedViewsInLContainer(lContainer, tNode, lView);
+    if (isDirectiveHost(tNode)) {
+        createDirectivesInstances(tView, lView, tNode);
+    }
+    if (localRefsIndex != null) {
+        saveResolvedLocalsInData(lView, tNode, localRefExtractor);
+    }
+    return ɵɵtemplate;
+}
+let _locateOrCreateContainerAnchor = createContainerAnchorImpl;
+/**
+ * Regular creation mode for LContainers and their anchor (comment) nodes.
+ */
+function createContainerAnchorImpl(tView, lView, tNode, index) {
+    lastNodeWasCreated(true);
+    return lView[RENDERER].createComment(ngDevMode ? 'container' : '');
+}
+/**
+ * Enables hydration code path (to lookup existing elements in DOM)
+ * in addition to the regular creation mode for LContainers and their
+ * anchor (comment) nodes.
+ */
+function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
+    const hydrationInfo = lView[HYDRATION];
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    lastNodeWasCreated(isNodeCreationMode);
+    // Regular creation mode.
+    if (isNodeCreationMode) {
+        return createContainerAnchorImpl(tView, lView, tNode, index);
+    }
+    const ssrId = hydrationInfo.data[TEMPLATES]?.[index] ?? null;
+    // Apply `ssrId` value to the underlying TView if it was not previously set.
+    //
+    // There might be situations when the same component is present in a template
+    // multiple times and some instances are opted-out of using hydration via
+    // `ngSkipHydration` attribute. In this scenario, at the time a TView is created,
+    // the `ssrId` might be `null` (if the first component is opted-out of hydration).
+    // The code below makes sure that the `ssrId` is applied to the TView if it's still
+    // `null` and verifies we never try to override it with a different value.
+    if (ssrId !== null && tNode.tView !== null) {
+        if (tNode.tView.ssrId === null) {
+            tNode.tView.ssrId = ssrId;
+        }
+        else {
+            ngDevMode &&
+                assertEqual(tNode.tView.ssrId, ssrId, 'Unexpected value of the `ssrId` for this TView');
+        }
+    }
+    // Hydration mode, looking up existing elements in DOM.
+    const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
+    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
+    setSegmentHead(hydrationInfo, index, currentRNode);
+    const viewContainerSize = calcSerializedContainerSize(hydrationInfo, index);
+    const comment = siblingAfter(viewContainerSize, currentRNode);
+    if (ngDevMode) {
+        validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
+        markRNodeAsClaimedByHydration(comment);
+    }
+    return comment;
+}
+function enableLocateOrCreateContainerAnchorImpl() {
+    _locateOrCreateContainerAnchor = locateOrCreateContainerAnchorImpl;
+}
+
+/**
+ * Describes the state of defer block dependency loading.
+ */
+var DeferDependenciesLoadingState;
+(function (DeferDependenciesLoadingState) {
+    /** Initial state, dependency loading is not yet triggered */
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["NOT_STARTED"] = 0] = "NOT_STARTED";
+    /** Dependency loading is in progress */
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["IN_PROGRESS"] = 1] = "IN_PROGRESS";
+    /** Dependency loading has completed successfully */
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["COMPLETE"] = 2] = "COMPLETE";
+    /** Dependency loading has failed */
+    DeferDependenciesLoadingState[DeferDependenciesLoadingState["FAILED"] = 3] = "FAILED";
+})(DeferDependenciesLoadingState || (DeferDependenciesLoadingState = {}));
+/** Slot index where `minimum` parameter value is stored. */
+const MINIMUM_SLOT = 0;
+/** Slot index where `after` parameter value is stored. */
+const LOADING_AFTER_SLOT = 1;
+/**
+ * Describes the current state of this defer block instance.
+ *
+ * @publicApi
+ * @developerPreview
+ */
+var DeferBlockState;
+(function (DeferBlockState) {
+    /** The placeholder block content is rendered */
+    DeferBlockState[DeferBlockState["Placeholder"] = 0] = "Placeholder";
+    /** The loading block content is rendered */
+    DeferBlockState[DeferBlockState["Loading"] = 1] = "Loading";
+    /** The main content block content is rendered */
+    DeferBlockState[DeferBlockState["Complete"] = 2] = "Complete";
+    /** The error block content is rendered */
+    DeferBlockState[DeferBlockState["Error"] = 3] = "Error";
+})(DeferBlockState || (DeferBlockState = {}));
+/**
+ * Describes the initial state of this defer block instance.
+ *
+ * Note: this state is internal only and *must* be represented
+ * with a number lower than any value in the `DeferBlockState` enum.
+ */
+var DeferBlockInternalState;
+(function (DeferBlockInternalState) {
+    /** Initial state. Nothing is rendered yet. */
+    DeferBlockInternalState[DeferBlockInternalState["Initial"] = -1] = "Initial";
+})(DeferBlockInternalState || (DeferBlockInternalState = {}));
+const NEXT_DEFER_BLOCK_STATE = 0;
+// Note: it's *important* to keep the state in this slot, because this slot
+// is used by runtime logic to differentiate between LViews, LContainers and
+// other types (see `isLView` and `isLContainer` functions). In case of defer
+// blocks, this slot would always be a number.
+const DEFER_BLOCK_STATE = 1;
+const STATE_IS_FROZEN_UNTIL = 2;
+const LOADING_AFTER_CLEANUP_FN = 3;
+const TRIGGER_CLEANUP_FNS = 4;
+const PREFETCH_TRIGGER_CLEANUP_FNS = 5;
+/**
+ * Options for configuring defer blocks behavior.
+ * @publicApi
+ * @developerPreview
+ */
+var DeferBlockBehavior;
+(function (DeferBlockBehavior) {
+    /**
+     * Manual triggering mode for defer blocks. Provides control over when defer blocks render
+     * and which state they render. This is the default behavior in test environments.
+     */
+    DeferBlockBehavior[DeferBlockBehavior["Manual"] = 0] = "Manual";
+    /**
+     * Playthrough mode for defer blocks. This mode behaves like defer blocks would in a browser.
+     */
+    DeferBlockBehavior[DeferBlockBehavior["Playthrough"] = 1] = "Playthrough";
+})(DeferBlockBehavior || (DeferBlockBehavior = {}));
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Registers a cleanup function associated with a prefetching trigger
+ * or a regular trigger of a defer block.
+ */
+function storeTriggerCleanupFn(type, lDetails, cleanupFn) {
+    const key = type === 1 /* TriggerType.Prefetch */ ? PREFETCH_TRIGGER_CLEANUP_FNS : TRIGGER_CLEANUP_FNS;
+    if (lDetails[key] === null) {
+        lDetails[key] = [];
+    }
+    lDetails[key].push(cleanupFn);
+}
+/**
+ * Invokes registered cleanup functions either for prefetch or for regular triggers.
+ */
+function invokeTriggerCleanupFns(type, lDetails) {
+    const key = type === 1 /* TriggerType.Prefetch */ ? PREFETCH_TRIGGER_CLEANUP_FNS : TRIGGER_CLEANUP_FNS;
+    const cleanupFns = lDetails[key];
+    if (cleanupFns !== null) {
+        for (const cleanupFn of cleanupFns) {
+            cleanupFn();
+        }
+        lDetails[key] = null;
+    }
+}
+/**
+ * Invokes registered cleanup functions for both prefetch and regular triggers.
+ */
+function invokeAllTriggerCleanupFns(lDetails) {
+    invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
+    invokeTriggerCleanupFns(0 /* TriggerType.Regular */, lDetails);
+}
+
+// Public API for Zone
+
+/**
+ * Calculates a data slot index for defer block info (either static or
+ * instance-specific), given an index of a defer instruction.
+ */
+function getDeferBlockDataIndex(deferBlockIndex) {
+    // Instance state is located at the *next* position
+    // after the defer block slot in an LView or TView.data.
+    return deferBlockIndex + 1;
+}
+/** Retrieves a defer block state from an LView, given a TNode that represents a block. */
+function getLDeferBlockDetails(lView, tNode) {
+    const tView = lView[TVIEW];
+    const slotIndex = getDeferBlockDataIndex(tNode.index);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    return lView[slotIndex];
+}
+/** Stores a defer block instance state in LView. */
+function setLDeferBlockDetails(lView, deferBlockIndex, lDetails) {
+    const tView = lView[TVIEW];
+    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    lView[slotIndex] = lDetails;
+}
+/** Retrieves static info about a defer block, given a TView and a TNode that represents a block. */
+function getTDeferBlockDetails(tView, tNode) {
+    const slotIndex = getDeferBlockDataIndex(tNode.index);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    return tView.data[slotIndex];
+}
+/** Stores a defer block static info in `TView.data`. */
+function setTDeferBlockDetails(tView, deferBlockIndex, deferBlockConfig) {
+    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
+    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
+    tView.data[slotIndex] = deferBlockConfig;
+}
+function getTemplateIndexForState(newState, hostLView, tNode) {
+    const tView = hostLView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    switch (newState) {
+        case DeferBlockState.Complete:
+            return tDetails.primaryTmplIndex;
+        case DeferBlockState.Loading:
+            return tDetails.loadingTmplIndex;
+        case DeferBlockState.Error:
+            return tDetails.errorTmplIndex;
+        case DeferBlockState.Placeholder:
+            return tDetails.placeholderTmplIndex;
+        default:
+            ngDevMode && throwError(`Unexpected defer block state: ${newState}`);
+            return null;
+    }
+}
+/**
+ * Returns a minimum amount of time that a given state should be rendered for,
+ * taking into account `minimum` parameter value. If the `minimum` value is
+ * not specified - returns `null`.
+ */
+function getMinimumDurationForState(tDetails, currentState) {
+    if (currentState === DeferBlockState.Placeholder) {
+        return tDetails.placeholderBlockConfig?.[MINIMUM_SLOT] ?? null;
+    }
+    else if (currentState === DeferBlockState.Loading) {
+        return tDetails.loadingBlockConfig?.[MINIMUM_SLOT] ?? null;
+    }
+    return null;
+}
+/** Retrieves the value of the `after` parameter on the @loading block. */
+function getLoadingBlockAfter(tDetails) {
+    return tDetails.loadingBlockConfig?.[LOADING_AFTER_SLOT] ?? null;
+}
+/**
+ * Adds downloaded dependencies into a directive or a pipe registry,
+ * making sure that a dependency doesn't yet exist in the registry.
+ */
+function addDepsToRegistry(currentDeps, newDeps) {
+    if (!currentDeps || currentDeps.length === 0) {
+        return newDeps;
+    }
+    const currentDepSet = new Set(currentDeps);
+    for (const dep of newDeps) {
+        currentDepSet.add(dep);
+    }
+    // If `currentDeps` is the same length, there were no new deps and can
+    // return the original array.
+    return (currentDeps.length === currentDepSet.size) ? currentDeps : Array.from(currentDepSet);
+}
+/** Retrieves a TNode that represents main content of a defer block. */
+function getPrimaryBlockTNode(tView, tDetails) {
+    const adjustedIndex = tDetails.primaryTmplIndex + HEADER_OFFSET;
+    return getTNode(tView, adjustedIndex);
+}
+/**
+ * Asserts whether all dependencies for a defer block are loaded.
+ * Always run this function (in dev mode) before rendering a defer
+ * block in completed state.
+ */
+function assertDeferredDependenciesLoaded(tDetails) {
+    assertEqual(tDetails.loadingState, DeferDependenciesLoadingState.COMPLETE, 'Expecting all deferred dependencies to be loaded.');
+}
+/**
+ * Determines if a given value matches the expected structure of a defer block
+ *
+ * We can safely rely on the primaryTmplIndex because every defer block requires
+ * that a primary template exists. All the other template options are optional.
+ */
+function isTDeferBlockDetails(value) {
+    return value !== null && (typeof value === 'object') &&
+        (typeof value.primaryTmplIndex === 'number');
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** Configuration object used to register passive and capturing events. */
+const eventListenerOptions = {
+    passive: true,
+    capture: true
+};
+/** Keeps track of the currently-registered `on hover` triggers. */
+const hoverTriggers = new WeakMap();
+/** Keeps track of the currently-registered `on interaction` triggers. */
+const interactionTriggers = new WeakMap();
+/** Currently-registered `viewport` triggers. */
+const viewportTriggers = new WeakMap();
+/** Names of the events considered as interaction events. */
+const interactionEventNames = ['click', 'keydown'];
+/** Names of the events considered as hover events. */
+const hoverEventNames = ['mouseenter', 'focusin'];
+/** `IntersectionObserver` used to observe `viewport` triggers. */
+let intersectionObserver = null;
+/** Number of elements currently observed with `viewport` triggers. */
+let observedViewportElements = 0;
+/** Object keeping track of registered callbacks for a deferred block trigger. */
+class DeferEventEntry {
+    constructor() {
+        this.callbacks = new Set();
+        this.listener = () => {
+            for (const callback of this.callbacks) {
+                callback();
+            }
+        };
+    }
+}
+/**
+ * Registers an interaction trigger.
+ * @param trigger Element that is the trigger.
+ * @param callback Callback to be invoked when the trigger is interacted with.
+ */
+function onInteraction(trigger, callback) {
+    let entry = interactionTriggers.get(trigger);
+    // If this is the first entry for this element, add the listeners.
+    if (!entry) {
+        // Note that managing events centrally like this lends itself well to using global
+        // event delegation. It currently does delegation at the element level, rather than the
+        // document level, because:
+        // 1. Global delegation is the most effective when there are a lot of events being registered
+        // at the same time. Deferred blocks are unlikely to be used in such a way.
+        // 2. Matching events to their target isn't free. For each `click` and `keydown` event we
+        // would have look through all the triggers and check if the target either is the element
+        // itself or it's contained within the element. Given that `click` and `keydown` are some
+        // of the most common events, this may end up introducing a lot of runtime overhead.
+        // 3. We're still registering only two events per element, no matter how many deferred blocks
+        // are referencing it.
+        entry = new DeferEventEntry();
+        interactionTriggers.set(trigger, entry);
+        for (const name of interactionEventNames) {
+            trigger.addEventListener(name, entry.listener, eventListenerOptions);
+        }
+    }
+    entry.callbacks.add(callback);
+    return () => {
+        const { callbacks, listener } = entry;
+        callbacks.delete(callback);
+        if (callbacks.size === 0) {
+            interactionTriggers.delete(trigger);
+            for (const name of interactionEventNames) {
+                trigger.removeEventListener(name, listener, eventListenerOptions);
+            }
+        }
+    };
+}
+/**
+ * Registers a hover trigger.
+ * @param trigger Element that is the trigger.
+ * @param callback Callback to be invoked when the trigger is hovered over.
+ */
+function onHover(trigger, callback) {
+    let entry = hoverTriggers.get(trigger);
+    // If this is the first entry for this element, add the listener.
+    if (!entry) {
+        entry = new DeferEventEntry();
+        hoverTriggers.set(trigger, entry);
+        for (const name of hoverEventNames) {
+            trigger.addEventListener(name, entry.listener, eventListenerOptions);
+        }
+    }
+    entry.callbacks.add(callback);
+    return () => {
+        const { callbacks, listener } = entry;
+        callbacks.delete(callback);
+        if (callbacks.size === 0) {
+            for (const name of hoverEventNames) {
+                trigger.removeEventListener(name, listener, eventListenerOptions);
+            }
+            hoverTriggers.delete(trigger);
+        }
+    };
+}
+/**
+ * Registers a viewport trigger.
+ * @param trigger Element that is the trigger.
+ * @param callback Callback to be invoked when the trigger comes into the viewport.
+ * @param injector Injector that can be used by the trigger to resolve DI tokens.
+ */
+function onViewport(trigger, callback, injector) {
+    const ngZone = injector.get(NgZone);
+    let entry = viewportTriggers.get(trigger);
+    intersectionObserver = intersectionObserver || ngZone.runOutsideAngular(() => {
+        return new IntersectionObserver(entries => {
+            for (const current of entries) {
+                // Only invoke the callbacks if the specific element is intersecting.
+                if (current.isIntersecting && viewportTriggers.has(current.target)) {
+                    ngZone.run(viewportTriggers.get(current.target).listener);
+                }
+            }
+        });
+    });
+    if (!entry) {
+        entry = new DeferEventEntry();
+        ngZone.runOutsideAngular(() => intersectionObserver.observe(trigger));
+        viewportTriggers.set(trigger, entry);
+        observedViewportElements++;
+    }
+    entry.callbacks.add(callback);
+    return () => {
+        // It's possible that a different cleanup callback fully removed this element already.
+        if (!viewportTriggers.has(trigger)) {
+            return;
+        }
+        entry.callbacks.delete(callback);
+        if (entry.callbacks.size === 0) {
+            intersectionObserver?.unobserve(trigger);
+            viewportTriggers.delete(trigger);
+            observedViewportElements--;
+        }
+        if (observedViewportElements === 0) {
+            intersectionObserver?.disconnect();
+            intersectionObserver = null;
+        }
+    };
+}
+/**
+ * Helper function to get the LView in which a deferred block's trigger is rendered.
+ * @param deferredHostLView LView in which the deferred block is defined.
+ * @param deferredTNode TNode defining the deferred block.
+ * @param walkUpTimes Number of times to go up in the view hierarchy to find the trigger's view.
+ *   A negative value means that the trigger is inside the block's placeholder, while an undefined
+ *   value means that the trigger is in the same LView as the deferred block.
+ */
+function getTriggerLView(deferredHostLView, deferredTNode, walkUpTimes) {
+    // The trigger is in the same view, we don't need to traverse.
+    if (walkUpTimes == null) {
+        return deferredHostLView;
+    }
+    // A positive value or zero means that the trigger is in a parent view.
+    if (walkUpTimes >= 0) {
+        return walkUpViews(walkUpTimes, deferredHostLView);
+    }
+    // If the value is negative, it means that the trigger is inside the placeholder.
+    const deferredContainer = deferredHostLView[deferredTNode.index];
+    ngDevMode && assertLContainer(deferredContainer);
+    const triggerLView = deferredContainer[CONTAINER_HEADER_OFFSET] ?? null;
+    // We need to null check, because the placeholder might not have been rendered yet.
+    if (ngDevMode && triggerLView !== null) {
+        const lDetails = getLDeferBlockDetails(deferredHostLView, deferredTNode);
+        const renderedState = lDetails[DEFER_BLOCK_STATE];
+        assertEqual(renderedState, DeferBlockState.Placeholder, 'Expected a placeholder to be rendered in this defer block.');
+        assertLView(triggerLView);
+    }
+    return triggerLView;
+}
+/**
+ * Gets the element that a deferred block's trigger is pointing to.
+ * @param triggerLView LView in which the trigger is defined.
+ * @param triggerIndex Index at which the trigger element should've been rendered.
+ */
+function getTriggerElement(triggerLView, triggerIndex) {
+    const element = getNativeByIndex(HEADER_OFFSET + triggerIndex, triggerLView);
+    ngDevMode && assertElement(element);
+    return element;
+}
+/**
+ * Registers a DOM-node based trigger.
+ * @param initialLView LView in which the defer block is rendered.
+ * @param tNode TNode representing the defer block.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to go up/down in the view hierarchy to find the trigger.
+ * @param registerFn Function that will register the DOM events.
+ * @param callback Callback to be invoked when the trigger receives the event that should render
+ *     the deferred block.
+ * @param type Trigger type to distinguish between regular and prefetch triggers.
+ */
+function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback, type) {
+    const injector = initialLView[INJECTOR$1];
+    function pollDomTrigger() {
+        // If the initial view was destroyed, we don't need to do anything.
+        if (isDestroyed(initialLView)) {
+            return;
+        }
+        const lDetails = getLDeferBlockDetails(initialLView, tNode);
+        const renderedState = lDetails[DEFER_BLOCK_STATE];
+        // If the block was loaded before the trigger was resolved, we don't need to do anything.
+        if (renderedState !== DeferBlockInternalState.Initial &&
+            renderedState !== DeferBlockState.Placeholder) {
+            return;
+        }
+        const triggerLView = getTriggerLView(initialLView, tNode, walkUpTimes);
+        // Keep polling until we resolve the trigger's LView.
+        if (!triggerLView) {
+            internalAfterNextRender(pollDomTrigger, { injector });
+            return;
+        }
+        // It's possible that the trigger's view was destroyed before we resolved the trigger element.
+        if (isDestroyed(triggerLView)) {
+            return;
+        }
+        const element = getTriggerElement(triggerLView, triggerIndex);
+        const cleanup = registerFn(element, () => {
+            if (initialLView !== triggerLView) {
+                removeLViewOnDestroy(triggerLView, cleanup);
+            }
+            callback();
+        }, injector);
+        // The trigger and deferred block might be in different LViews.
+        // For the main LView the cleanup would happen as a part of
+        // `storeTriggerCleanupFn` logic. For trigger LView we register
+        // a cleanup function there to remove event handlers in case an
+        // LView gets destroyed before a trigger is invoked.
+        if (initialLView !== triggerLView) {
+            storeLViewOnDestroy(triggerLView, cleanup);
+        }
+        storeTriggerCleanupFn(type, lDetails, cleanup);
+    }
+    // Begin polling for the trigger.
+    internalAfterNextRender(pollDomTrigger, { injector });
+}
+
+/**
+ * Helper function to schedule a callback to be invoked when a browser becomes idle.
+ *
+ * @param callback A function to be invoked when a browser becomes idle.
+ * @param lView LView that hosts an instance of a defer block.
+ */
+function onIdle(callback, lView) {
+    const injector = lView[INJECTOR$1];
+    const scheduler = injector.get(IdleScheduler);
+    const cleanupFn = () => scheduler.remove(callback);
+    scheduler.add(callback);
+    return cleanupFn;
+}
+/**
+ * Use shims for the `requestIdleCallback` and `cancelIdleCallback` functions for
+ * environments where those functions are not available (e.g. Node.js and Safari).
+ *
+ * Note: we wrap the `requestIdleCallback` call into a function, so that it can be
+ * overridden/mocked in test environment and picked up by the runtime code.
+ */
+const _requestIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : setTimeout;
+const _cancelIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
+/**
+ * Helper service to schedule `requestIdleCallback`s for batches of defer blocks,
+ * to avoid calling `requestIdleCallback` for each defer block (e.g. if
+ * defer blocks are defined inside a for loop).
+ */
+class IdleScheduler {
+    constructor() {
+        // Indicates whether current callbacks are being invoked.
+        this.executingCallbacks = false;
+        // Currently scheduled idle callback id.
+        this.idleId = null;
+        // Set of callbacks to be invoked next.
+        this.current = new Set();
+        // Set of callbacks collected while invoking current set of callbacks.
+        // Those callbacks are scheduled for the next idle period.
+        this.deferred = new Set();
+        this.ngZone = inject(NgZone);
+        this.requestIdleCallbackFn = _requestIdleCallback().bind(globalThis);
+        this.cancelIdleCallbackFn = _cancelIdleCallback().bind(globalThis);
+    }
+    add(callback) {
+        const target = this.executingCallbacks ? this.deferred : this.current;
+        target.add(callback);
+        if (this.idleId === null) {
+            this.scheduleIdleCallback();
+        }
+    }
+    remove(callback) {
+        const { current, deferred } = this;
+        current.delete(callback);
+        deferred.delete(callback);
+        // If the last callback was removed and there is a pending
+        // idle callback - cancel it.
+        if (current.size === 0 && deferred.size === 0) {
+            this.cancelIdleCallback();
+        }
+    }
+    scheduleIdleCallback() {
+        const callback = () => {
+            this.cancelIdleCallback();
+            this.executingCallbacks = true;
+            for (const callback of this.current) {
+                callback();
+            }
+            this.current.clear();
+            this.executingCallbacks = false;
+            // If there are any callbacks added during an invocation
+            // of the current ones - make them "current" and schedule
+            // a new idle callback.
+            if (this.deferred.size > 0) {
+                for (const callback of this.deferred) {
+                    this.current.add(callback);
+                }
+                this.deferred.clear();
+                this.scheduleIdleCallback();
+            }
+        };
+        // Ensure that the callback runs in the NgZone since
+        // the `requestIdleCallback` is not currently patched by Zone.js.
+        this.idleId = this.requestIdleCallbackFn(() => this.ngZone.run(callback));
+    }
+    cancelIdleCallback() {
+        if (this.idleId !== null) {
+            this.cancelIdleCallbackFn(this.idleId);
+            this.idleId = null;
+        }
+    }
+    ngOnDestroy() {
+        this.cancelIdleCallback();
+        this.current.clear();
+        this.deferred.clear();
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: IdleScheduler,
+        providedIn: 'root',
+        factory: () => new IdleScheduler(),
+    }); }
+}
+
+/**
+ * Returns a function that captures a provided delay.
+ * Invoking the returned function schedules a trigger.
+ */
+function onTimer(delay) {
+    return (callback, lView) => scheduleTimerTrigger(delay, callback, lView);
+}
+/**
+ * Schedules a callback to be invoked after a given timeout.
+ *
+ * @param delay A number of ms to wait until firing a callback.
+ * @param callback A function to be invoked after a timeout.
+ * @param lView LView that hosts an instance of a defer block.
+ */
+function scheduleTimerTrigger(delay, callback, lView) {
+    const injector = lView[INJECTOR$1];
+    const scheduler = injector.get(TimerScheduler);
+    const cleanupFn = () => scheduler.remove(callback);
+    scheduler.add(delay, callback);
+    return cleanupFn;
+}
+/**
+ * Helper service to schedule `setTimeout`s for batches of defer blocks,
+ * to avoid calling `setTimeout` for each defer block (e.g. if defer blocks
+ * are created inside a for loop).
+ */
+class TimerScheduler {
+    constructor() {
+        // Indicates whether current callbacks are being invoked.
+        this.executingCallbacks = false;
+        // Currently scheduled `setTimeout` id.
+        this.timeoutId = null;
+        // When currently scheduled timer would fire.
+        this.invokeTimerAt = null;
+        // List of callbacks to be invoked.
+        // For each callback we also store a timestamp on when the callback
+        // should be invoked. We store timestamps and callback functions
+        // in a flat array to avoid creating new objects for each entry.
+        // [timestamp1, callback1, timestamp2, callback2, ...]
+        this.current = [];
+        // List of callbacks collected while invoking current set of callbacks.
+        // Those callbacks are added to the "current" queue at the end of
+        // the current callback invocation. The shape of this list is the same
+        // as the shape of the `current` list.
+        this.deferred = [];
+    }
+    add(delay, callback) {
+        const target = this.executingCallbacks ? this.deferred : this.current;
+        this.addToQueue(target, Date.now() + delay, callback);
+        this.scheduleTimer();
+    }
+    remove(callback) {
+        const { current, deferred } = this;
+        const callbackIndex = this.removeFromQueue(current, callback);
+        if (callbackIndex === -1) {
+            // Try cleaning up deferred queue only in case
+            // we didn't find a callback in the "current" queue.
+            this.removeFromQueue(deferred, callback);
+        }
+        // If the last callback was removed and there is a pending timeout - cancel it.
+        if (current.length === 0 && deferred.length === 0) {
+            this.clearTimeout();
+        }
+    }
+    addToQueue(target, invokeAt, callback) {
+        let insertAtIndex = target.length;
+        for (let i = 0; i < target.length; i += 2) {
+            const invokeQueuedCallbackAt = target[i];
+            if (invokeQueuedCallbackAt > invokeAt) {
+                // We've reached a first timer that is scheduled
+                // for a later time than what we are trying to insert.
+                // This is the location at which we need to insert,
+                // no need to iterate further.
+                insertAtIndex = i;
+                break;
+            }
+        }
+        arrayInsert2(target, insertAtIndex, invokeAt, callback);
+    }
+    removeFromQueue(target, callback) {
+        let index = -1;
+        for (let i = 0; i < target.length; i += 2) {
+            const queuedCallback = target[i + 1];
+            if (queuedCallback === callback) {
+                index = i;
+                break;
+            }
+        }
+        if (index > -1) {
+            // Remove 2 elements: a timestamp slot and
+            // the following slot with a callback function.
+            arraySplice(target, index, 2);
+        }
+        return index;
+    }
+    scheduleTimer() {
+        const callback = () => {
+            this.clearTimeout();
+            this.executingCallbacks = true;
+            // Clone the current state of the queue, since it might be altered
+            // as we invoke callbacks.
+            const current = [...this.current];
+            // Invoke callbacks that were scheduled to run before the current time.
+            const now = Date.now();
+            for (let i = 0; i < current.length; i += 2) {
+                const invokeAt = current[i];
+                const callback = current[i + 1];
+                if (invokeAt <= now) {
+                    callback();
+                }
+                else {
+                    // We've reached a timer that should not be invoked yet.
+                    break;
+                }
+            }
+            // The state of the queue might've changed after callbacks invocation,
+            // run the cleanup logic based on the *current* state of the queue.
+            let lastCallbackIndex = -1;
+            for (let i = 0; i < this.current.length; i += 2) {
+                const invokeAt = this.current[i];
+                if (invokeAt <= now) {
+                    // Add +1 to account for a callback function that
+                    // goes after the timestamp in events array.
+                    lastCallbackIndex = i + 1;
+                }
+                else {
+                    // We've reached a timer that should not be invoked yet.
+                    break;
+                }
+            }
+            if (lastCallbackIndex >= 0) {
+                arraySplice(this.current, 0, lastCallbackIndex + 1);
+            }
+            this.executingCallbacks = false;
+            // If there are any callbacks added during an invocation
+            // of the current ones - move them over to the "current"
+            // queue.
+            if (this.deferred.length > 0) {
+                for (let i = 0; i < this.deferred.length; i += 2) {
+                    const invokeAt = this.deferred[i];
+                    const callback = this.deferred[i + 1];
+                    this.addToQueue(this.current, invokeAt, callback);
+                }
+                this.deferred.length = 0;
+            }
+            this.scheduleTimer();
+        };
+        // Avoid running timer callbacks more than once per
+        // average frame duration. This is needed for better
+        // batching and to avoid kicking off excessive change
+        // detection cycles.
+        const FRAME_DURATION_MS = 16; // 1000ms / 60fps
+        if (this.current.length > 0) {
+            const now = Date.now();
+            // First element in the queue points at the timestamp
+            // of the first (earliest) event.
+            const invokeAt = this.current[0];
+            if (this.timeoutId === null ||
+                // Reschedule a timer in case a queue contains an item with
+                // an earlier timestamp and the delta is more than an average
+                // frame duration.
+                (this.invokeTimerAt && (this.invokeTimerAt - invokeAt > FRAME_DURATION_MS))) {
+                // There was a timeout already, but an earlier event was added
+                // into the queue. In this case we drop an old timer and setup
+                // a new one with an updated (smaller) timeout.
+                this.clearTimeout();
+                const timeout = Math.max(invokeAt - now, FRAME_DURATION_MS);
+                this.invokeTimerAt = invokeAt;
+                this.timeoutId = setTimeout(callback, timeout);
+            }
+        }
+    }
+    clearTimeout() {
+        if (this.timeoutId !== null) {
+            clearTimeout(this.timeoutId);
+            this.timeoutId = null;
+        }
+    }
+    ngOnDestroy() {
+        this.clearTimeout();
+        this.current.length = 0;
+        this.deferred.length = 0;
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: TimerScheduler,
+        providedIn: 'root',
+        factory: () => new TimerScheduler(),
+    }); }
+}
+
+/**
+ * **INTERNAL**, avoid referencing it in application code.
+ *
+ * Injector token that allows to provide `DeferBlockDependencyInterceptor` class
+ * implementation.
+ */
+const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = new InjectionToken('DEFER_BLOCK_DEPENDENCY_INTERCEPTOR');
+/**
+ * **INTERNAL**, token used for configuring defer block behavior.
+ */
+const DEFER_BLOCK_CONFIG = new InjectionToken(ngDevMode ? 'DEFER_BLOCK_CONFIG' : '');
+/**
+ * Returns whether defer blocks should be triggered.
+ *
+ * Currently, defer blocks are not triggered on the server,
+ * only placeholder content is rendered (if provided).
+ */
+function shouldTriggerDeferBlock(injector) {
+    const config = injector.get(DEFER_BLOCK_CONFIG, null, { optional: true });
+    if (config?.behavior === DeferBlockBehavior.Manual) {
+        return false;
+    }
+    return isPlatformBrowser(injector);
+}
+/**
+ * Reference to the timer-based scheduler implementation of defer block state
+ * rendering method. It's used to make timer-based scheduling tree-shakable.
+ * If `minimum` or `after` parameters are used, compiler generates an extra
+ * argument for the `ɵɵdefer` instruction, which references a timer-based
+ * implementation.
+ */
+let applyDeferBlockStateWithSchedulingImpl = null;
+/**
+ * Enables timer-related scheduling if `after` or `minimum` parameters are setup
+ * on the `@loading` or `@placeholder` blocks.
+ */
+function ɵɵdeferEnableTimerScheduling(tView, tDetails, placeholderConfigIndex, loadingConfigIndex) {
+    const tViewConsts = tView.consts;
+    if (placeholderConfigIndex != null) {
+        tDetails.placeholderBlockConfig =
+            getConstant(tViewConsts, placeholderConfigIndex);
+    }
+    if (loadingConfigIndex != null) {
+        tDetails.loadingBlockConfig =
+            getConstant(tViewConsts, loadingConfigIndex);
+    }
+    // Enable implementation that supports timer-based scheduling.
+    if (applyDeferBlockStateWithSchedulingImpl === null) {
+        applyDeferBlockStateWithSchedulingImpl = applyDeferBlockStateWithScheduling;
+    }
+}
+/**
+ * Creates runtime data structures for defer blocks.
+ *
+ * @param index Index of the `defer` instruction.
+ * @param primaryTmplIndex Index of the template with the primary block content.
+ * @param dependencyResolverFn Function that contains dependencies for this defer block.
+ * @param loadingTmplIndex Index of the template with the loading block content.
+ * @param placeholderTmplIndex Index of the template with the placeholder block content.
+ * @param errorTmplIndex Index of the template with the error block content.
+ * @param loadingConfigIndex Index in the constants array of the configuration of the loading.
+ *     block.
+ * @param placeholderConfigIndex Index in the constants array of the configuration of the
+ *     placeholder block.
+ * @param enableTimerScheduling Function that enables timer-related scheduling if `after`
+ *     or `minimum` parameters are setup on the `@loading` or `@placeholder` blocks.
+ *
+ * @codeGenApi
+ */
+function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplIndex, placeholderTmplIndex, errorTmplIndex, loadingConfigIndex, placeholderConfigIndex, enableTimerScheduling) {
+    const lView = getLView();
+    const tView = getTView();
+    const adjustedIndex = index + HEADER_OFFSET;
+    ɵɵtemplate(index, null, 0, 0);
+    if (tView.firstCreatePass) {
+        performanceMarkFeature('NgDefer');
+        const tDetails = {
+            primaryTmplIndex,
+            loadingTmplIndex: loadingTmplIndex ?? null,
+            placeholderTmplIndex: placeholderTmplIndex ?? null,
+            errorTmplIndex: errorTmplIndex ?? null,
+            placeholderBlockConfig: null,
+            loadingBlockConfig: null,
+            dependencyResolverFn: dependencyResolverFn ?? null,
+            loadingState: DeferDependenciesLoadingState.NOT_STARTED,
+            loadingPromise: null,
+        };
+        enableTimerScheduling?.(tView, tDetails, placeholderConfigIndex, loadingConfigIndex);
+        setTDeferBlockDetails(tView, adjustedIndex, tDetails);
+    }
+    const tNode = getCurrentTNode();
+    const lContainer = lView[adjustedIndex];
+    // If hydration is enabled, looks up dehydrated views in the DOM
+    // using hydration annotation info and stores those views on LContainer.
+    // In client-only mode, this function is a noop.
+    populateDehydratedViewsInLContainer(lContainer, tNode, lView);
+    // Init instance-specific defer details and store it.
+    const lDetails = [
+        null,
+        DeferBlockInternalState.Initial,
+        null,
+        null,
+        null,
+        null // PREFETCH_TRIGGER_CLEANUP_FNS
+    ];
+    setLDeferBlockDetails(lView, adjustedIndex, lDetails);
+    const cleanupTriggersFn = () => invokeAllTriggerCleanupFns(lDetails);
+    // When defer block is triggered - unsubscribe from LView destroy cleanup.
+    storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, () => removeLViewOnDestroy(lView, cleanupTriggersFn));
+    storeLViewOnDestroy(lView, cleanupTriggersFn);
+}
+/**
+ * Loads defer block dependencies when a trigger value becomes truthy.
+ * @codeGenApi
+ */
+function ɵɵdeferWhen(rawValue) {
+    const lView = getLView();
+    const bindingIndex = nextBindingIndex();
+    if (bindingUpdated(lView, bindingIndex, rawValue)) {
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            const value = Boolean(rawValue); // handle truthy or falsy values
+            const tNode = getSelectedTNode();
+            const lDetails = getLDeferBlockDetails(lView, tNode);
+            const renderedState = lDetails[DEFER_BLOCK_STATE];
+            if (value === false && renderedState === DeferBlockInternalState.Initial) {
+                // If nothing is rendered yet, render a placeholder (if defined).
+                renderPlaceholder(lView, tNode);
+            }
+            else if (value === true &&
+                (renderedState === DeferBlockInternalState.Initial ||
+                    renderedState === DeferBlockState.Placeholder)) {
+                // The `when` condition has changed to `true`, trigger defer block loading
+                // if the block is either in initial (nothing is rendered) or a placeholder
+                // state.
+                triggerDeferBlock(lView, tNode);
+            }
+        }
+        finally {
+            setActiveConsumer$1(prevConsumer);
+        }
+    }
+}
+/**
+ * Prefetches the deferred content when a value becomes truthy.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchWhen(rawValue) {
+    const lView = getLView();
+    const bindingIndex = nextBindingIndex();
+    if (bindingUpdated(lView, bindingIndex, rawValue)) {
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            const value = Boolean(rawValue); // handle truthy or falsy values
+            const tView = lView[TVIEW];
+            const tNode = getSelectedTNode();
+            const tDetails = getTDeferBlockDetails(tView, tNode);
+            if (value === true && tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+                // If loading has not been started yet, trigger it now.
+                triggerPrefetching(tDetails, lView, tNode);
+            }
+        }
+        finally {
+            setActiveConsumer$1(prevConsumer);
+        }
+    }
+}
+/**
+ * Sets up logic to handle the `on idle` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnIdle() {
+    scheduleDelayedTrigger(onIdle);
+}
+/**
+ * Sets up logic to handle the `prefetch on idle` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnIdle() {
+    scheduleDelayedPrefetching(onIdle);
+}
+/**
+ * Sets up logic to handle the `on immediate` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnImmediate() {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    // Render placeholder block only if loading template is not present
+    // to avoid content flickering, since it would be immediately replaced
+    // by the loading block.
+    if (tDetails.loadingTmplIndex === null) {
+        renderPlaceholder(lView, tNode);
+    }
+    triggerDeferBlock(lView, tNode);
+}
+/**
+ * Sets up logic to handle the `prefetch on immediate` deferred trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnImmediate() {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        triggerResourceLoading(tDetails, lView, tNode);
+    }
+}
+/**
+ * Creates runtime data structures for the `on timer` deferred trigger.
+ * @param delay Amount of time to wait before loading the content.
+ * @codeGenApi
+ */
+function ɵɵdeferOnTimer(delay) {
+    scheduleDelayedTrigger(onTimer(delay));
+}
+/**
+ * Creates runtime data structures for the `prefetch on timer` deferred trigger.
+ * @param delay Amount of time to wait before prefetching the content.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnTimer(delay) {
+    scheduleDelayedPrefetching(onTimer(delay));
+}
+/**
+ * Creates runtime data structures for the `on hover` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnHover(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    renderPlaceholder(lView, tNode);
+    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerDeferBlock(lView, tNode), 0 /* TriggerType.Regular */);
+}
+/**
+ * Creates runtime data structures for the `prefetch on hover` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnHover(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
+    }
+}
+/**
+ * Creates runtime data structures for the `on interaction` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnInteraction(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    renderPlaceholder(lView, tNode);
+    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerDeferBlock(lView, tNode), 0 /* TriggerType.Regular */);
+}
+/**
+ * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnInteraction(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
+    }
+}
+/**
+ * Creates runtime data structures for the `on viewport` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferOnViewport(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    renderPlaceholder(lView, tNode);
+    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerDeferBlock(lView, tNode), 0 /* TriggerType.Regular */);
+}
+/**
+ * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
+ * @param triggerIndex Index at which to find the trigger element.
+ * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
+ * @codeGenApi
+ */
+function ɵɵdeferPrefetchOnViewport(triggerIndex, walkUpTimes) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
+    }
+}
+/********** Helper functions **********/
+/**
+ * Schedules triggering of a defer block for `on idle` and `on timer` conditions.
+ */
+function scheduleDelayedTrigger(scheduleFn) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    renderPlaceholder(lView, tNode);
+    const cleanupFn = scheduleFn(() => triggerDeferBlock(lView, tNode), lView);
+    const lDetails = getLDeferBlockDetails(lView, tNode);
+    storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, cleanupFn);
+}
+/**
+ * Schedules prefetching for `on idle` and `on timer` triggers.
+ *
+ * @param scheduleFn A function that does the scheduling.
+ */
+function scheduleDelayedPrefetching(scheduleFn) {
+    const lView = getLView();
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        const lDetails = getLDeferBlockDetails(lView, tNode);
+        const prefetch = () => triggerPrefetching(tDetails, lView, tNode);
+        const cleanupFn = scheduleFn(prefetch, lView);
+        storeTriggerCleanupFn(1 /* TriggerType.Prefetch */, lDetails, cleanupFn);
+    }
+}
+/**
+ * Transitions a defer block to the new state. Updates the  necessary
+ * data structures and renders corresponding block.
+ *
+ * @param newState New state that should be applied to the defer block.
+ * @param tNode TNode that represents a defer block.
+ * @param lContainer Represents an instance of a defer block.
+ * @param skipTimerScheduling Indicates that `@loading` and `@placeholder` block
+ *   should be rendered immediately, even if they have `after` or `minimum` config
+ *   options setup. This flag to needed for testing APIs to transition defer block
+ *   between states via `DeferFixture.render` method.
+ */
+function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling = false) {
+    const hostLView = lContainer[PARENT];
+    const hostTView = hostLView[TVIEW];
+    // Check if this view is not destroyed. Since the loading process was async,
+    // the view might end up being destroyed by the time rendering happens.
+    if (isDestroyed(hostLView))
+        return;
+    // Make sure this TNode belongs to TView that represents host LView.
+    ngDevMode && assertTNodeForLView(tNode, hostLView);
+    const lDetails = getLDeferBlockDetails(hostLView, tNode);
+    ngDevMode && assertDefined(lDetails, 'Expected a defer block state defined');
+    const currentState = lDetails[DEFER_BLOCK_STATE];
+    if (isValidStateChange(currentState, newState) &&
+        isValidStateChange(lDetails[NEXT_DEFER_BLOCK_STATE] ?? -1, newState)) {
+        const tDetails = getTDeferBlockDetails(hostTView, tNode);
+        const needsScheduling = !skipTimerScheduling &&
+            (getLoadingBlockAfter(tDetails) !== null ||
+                getMinimumDurationForState(tDetails, DeferBlockState.Loading) !== null ||
+                getMinimumDurationForState(tDetails, DeferBlockState.Placeholder));
+        if (ngDevMode && needsScheduling) {
+            assertDefined(applyDeferBlockStateWithSchedulingImpl, 'Expected scheduling function to be defined');
+        }
+        const applyStateFn = needsScheduling ? applyDeferBlockStateWithSchedulingImpl : applyDeferBlockState;
+        try {
+            applyStateFn(newState, lDetails, lContainer, tNode, hostLView);
+        }
+        catch (error) {
+            handleError(hostLView, error);
+        }
+    }
+}
+/**
+ * Applies changes to the DOM to reflect a given state.
+ */
+function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) {
+    const stateTmplIndex = getTemplateIndexForState(newState, hostLView, tNode);
+    if (stateTmplIndex !== null) {
+        lDetails[DEFER_BLOCK_STATE] = newState;
+        const hostTView = hostLView[TVIEW];
+        const adjustedIndex = stateTmplIndex + HEADER_OFFSET;
+        const tNode = getTNode(hostTView, adjustedIndex);
+        // There is only 1 view that can be present in an LContainer that
+        // represents a defer block, so always refer to the first one.
+        const viewIndex = 0;
+        removeLViewFromLContainer(lContainer, viewIndex);
+        const dehydratedView = findMatchingDehydratedView(lContainer, tNode.tView.ssrId);
+        const embeddedLView = createAndRenderEmbeddedLView(hostLView, tNode, null, { dehydratedView });
+        addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(tNode, dehydratedView));
+        markViewDirty(embeddedLView);
+    }
+}
+/**
+ * Extends the `applyDeferBlockState` with timer-based scheduling.
+ * This function becomes available on a page if there are defer blocks
+ * that use `after` or `minimum` parameters in the `@loading` or
+ * `@placeholder` blocks.
+ */
+function applyDeferBlockStateWithScheduling(newState, lDetails, lContainer, tNode, hostLView) {
+    const now = Date.now();
+    const hostTView = hostLView[TVIEW];
+    const tDetails = getTDeferBlockDetails(hostTView, tNode);
+    if (lDetails[STATE_IS_FROZEN_UNTIL] === null || lDetails[STATE_IS_FROZEN_UNTIL] <= now) {
+        lDetails[STATE_IS_FROZEN_UNTIL] = null;
+        const loadingAfter = getLoadingBlockAfter(tDetails);
+        const inLoadingAfterPhase = lDetails[LOADING_AFTER_CLEANUP_FN] !== null;
+        if (newState === DeferBlockState.Loading && loadingAfter !== null && !inLoadingAfterPhase) {
+            // Trying to render loading, but it has an `after` config,
+            // so schedule an update action after a timeout.
+            lDetails[NEXT_DEFER_BLOCK_STATE] = newState;
+            const cleanupFn = scheduleDeferBlockUpdate(loadingAfter, lDetails, tNode, lContainer, hostLView);
+            lDetails[LOADING_AFTER_CLEANUP_FN] = cleanupFn;
+        }
+        else {
+            // If we transition to a complete or an error state and there is a pending
+            // operation to render loading after a timeout - invoke a cleanup operation,
+            // which stops the timer.
+            if (newState > DeferBlockState.Loading && inLoadingAfterPhase) {
+                lDetails[LOADING_AFTER_CLEANUP_FN]();
+                lDetails[LOADING_AFTER_CLEANUP_FN] = null;
+                lDetails[NEXT_DEFER_BLOCK_STATE] = null;
+            }
+            applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView);
+            const duration = getMinimumDurationForState(tDetails, newState);
+            if (duration !== null) {
+                lDetails[STATE_IS_FROZEN_UNTIL] = now + duration;
+                scheduleDeferBlockUpdate(duration, lDetails, tNode, lContainer, hostLView);
+            }
+        }
+    }
+    else {
+        // We are still rendering the previous state.
+        // Update the `NEXT_DEFER_BLOCK_STATE`, which would be
+        // picked up once it's time to transition to the next state.
+        lDetails[NEXT_DEFER_BLOCK_STATE] = newState;
+    }
+}
+/**
+ * Schedules an update operation after a specified timeout.
+ */
+function scheduleDeferBlockUpdate(timeout, lDetails, tNode, lContainer, hostLView) {
+    const callback = () => {
+        const nextState = lDetails[NEXT_DEFER_BLOCK_STATE];
+        lDetails[STATE_IS_FROZEN_UNTIL] = null;
+        lDetails[NEXT_DEFER_BLOCK_STATE] = null;
+        if (nextState !== null) {
+            renderDeferBlockState(nextState, tNode, lContainer);
+        }
+    };
+    return scheduleTimerTrigger(timeout, callback, hostLView);
+}
+/**
+ * Checks whether we can transition to the next state.
+ *
+ * We transition to the next state if the previous state was represented
+ * with a number that is less than the next state. For example, if the current
+ * state is "loading" (represented as `1`), we should not show a placeholder
+ * (represented as `0`), but we can show a completed state (represented as `2`)
+ * or an error state (represented as `3`).
+ */
+function isValidStateChange(currentState, newState) {
+    return currentState < newState;
+}
+/**
+ * Trigger prefetching of dependencies for a defer block.
+ *
+ * @param tDetails Static information about this defer block.
+ * @param lView LView of a host view.
+ */
+function triggerPrefetching(tDetails, lView, tNode) {
+    if (lView[INJECTOR$1] && shouldTriggerDeferBlock(lView[INJECTOR$1])) {
+        triggerResourceLoading(tDetails, lView, tNode);
+    }
+}
+/**
+ * Trigger loading of defer block dependencies if the process hasn't started yet.
+ *
+ * @param tDetails Static information about this defer block.
+ * @param lView LView of a host view.
+ */
+function triggerResourceLoading(tDetails, lView, tNode) {
+    const injector = lView[INJECTOR$1];
+    const tView = lView[TVIEW];
+    if (tDetails.loadingState !== DeferDependenciesLoadingState.NOT_STARTED) {
+        // If the loading status is different from initial one, it means that
+        // the loading of dependencies is in progress and there is nothing to do
+        // in this function. All details can be obtained from the `tDetails` object.
+        return;
+    }
+    const lDetails = getLDeferBlockDetails(lView, tNode);
+    const primaryBlockTNode = getPrimaryBlockTNode(tView, tDetails);
+    // Switch from NOT_STARTED -> IN_PROGRESS state.
+    tDetails.loadingState = DeferDependenciesLoadingState.IN_PROGRESS;
+    // Prefetching is triggered, cleanup all registered prefetch triggers.
+    invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
+    let dependenciesFn = tDetails.dependencyResolverFn;
+    if (ngDevMode) {
+        // Check if dependency function interceptor is configured.
+        const deferDependencyInterceptor = injector.get(DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, null, { optional: true });
+        if (deferDependencyInterceptor) {
+            dependenciesFn = deferDependencyInterceptor.intercept(dependenciesFn);
+        }
+    }
+    // The `dependenciesFn` might be `null` when all dependencies within
+    // a given defer block were eagerly referenced elsewhere in a file,
+    // thus no dynamic `import()`s were produced.
+    if (!dependenciesFn) {
+        tDetails.loadingPromise = Promise.resolve().then(() => {
+            tDetails.loadingPromise = null;
+            tDetails.loadingState = DeferDependenciesLoadingState.COMPLETE;
+        });
+        return;
+    }
+    // Start downloading of defer block dependencies.
+    tDetails.loadingPromise = Promise.allSettled(dependenciesFn()).then(results => {
+        let failed = false;
+        const directiveDefs = [];
+        const pipeDefs = [];
+        for (const result of results) {
+            if (result.status === 'fulfilled') {
+                const dependency = result.value;
+                const directiveDef = getComponentDef(dependency) || getDirectiveDef(dependency);
+                if (directiveDef) {
+                    directiveDefs.push(directiveDef);
+                }
+                else {
+                    const pipeDef = getPipeDef$1(dependency);
+                    if (pipeDef) {
+                        pipeDefs.push(pipeDef);
+                    }
+                }
+            }
+            else {
+                failed = true;
+                break;
+            }
+        }
+        // Loading is completed, we no longer need this Promise.
+        tDetails.loadingPromise = null;
+        if (failed) {
+            tDetails.loadingState = DeferDependenciesLoadingState.FAILED;
+            if (tDetails.errorTmplIndex === null) {
+                const templateLocation = getTemplateLocationDetails(lView);
+                const error = new RuntimeError(750 /* RuntimeErrorCode.DEFER_LOADING_FAILED */, ngDevMode &&
+                    'Loading dependencies for `@defer` block failed, ' +
+                        `but no \`@error\` block was configured${templateLocation}. ` +
+                        'Consider using the `@error` block to render an error state.');
+                handleError(lView, error);
+            }
+        }
+        else {
+            tDetails.loadingState = DeferDependenciesLoadingState.COMPLETE;
+            // Update directive and pipe registries to add newly downloaded dependencies.
+            const primaryBlockTView = primaryBlockTNode.tView;
+            if (directiveDefs.length > 0) {
+                primaryBlockTView.directiveRegistry =
+                    addDepsToRegistry(primaryBlockTView.directiveRegistry, directiveDefs);
+            }
+            if (pipeDefs.length > 0) {
+                primaryBlockTView.pipeRegistry =
+                    addDepsToRegistry(primaryBlockTView.pipeRegistry, pipeDefs);
+            }
+        }
+    });
+}
+/** Utility function to render placeholder content (if present) */
+function renderPlaceholder(lView, tNode) {
+    const lContainer = lView[tNode.index];
+    ngDevMode && assertLContainer(lContainer);
+    renderDeferBlockState(DeferBlockState.Placeholder, tNode, lContainer);
+}
+/**
+ * Subscribes to the "loading" Promise and renders corresponding defer sub-block,
+ * based on the loading results.
+ *
+ * @param lContainer Represents an instance of a defer block.
+ * @param tNode Represents defer block info shared across all instances.
+ */
+function renderDeferStateAfterResourceLoading(tDetails, tNode, lContainer) {
+    ngDevMode &&
+        assertDefined(tDetails.loadingPromise, 'Expected loading Promise to exist on this defer block');
+    tDetails.loadingPromise.then(() => {
+        if (tDetails.loadingState === DeferDependenciesLoadingState.COMPLETE) {
+            ngDevMode && assertDeferredDependenciesLoaded(tDetails);
+            // Everything is loaded, show the primary block content
+            renderDeferBlockState(DeferBlockState.Complete, tNode, lContainer);
+        }
+        else if (tDetails.loadingState === DeferDependenciesLoadingState.FAILED) {
+            renderDeferBlockState(DeferBlockState.Error, tNode, lContainer);
+        }
+    });
+}
+/**
+ * Attempts to trigger loading of defer block dependencies.
+ * If the block is already in a loading, completed or an error state -
+ * no additional actions are taken.
+ */
+function triggerDeferBlock(lView, tNode) {
+    const tView = lView[TVIEW];
+    const lContainer = lView[tNode.index];
+    const injector = lView[INJECTOR$1];
+    ngDevMode && assertLContainer(lContainer);
+    if (!shouldTriggerDeferBlock(injector))
+        return;
+    const lDetails = getLDeferBlockDetails(lView, tNode);
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    // Defer block is triggered, cleanup all registered trigger functions.
+    invokeAllTriggerCleanupFns(lDetails);
+    switch (tDetails.loadingState) {
+        case DeferDependenciesLoadingState.NOT_STARTED:
+            renderDeferBlockState(DeferBlockState.Loading, tNode, lContainer);
+            triggerResourceLoading(tDetails, lView, tNode);
+            // The `loadingState` might have changed to "loading".
+            if (tDetails.loadingState ===
+                DeferDependenciesLoadingState.IN_PROGRESS) {
+                renderDeferStateAfterResourceLoading(tDetails, tNode, lContainer);
+            }
+            break;
+        case DeferDependenciesLoadingState.IN_PROGRESS:
+            renderDeferBlockState(DeferBlockState.Loading, tNode, lContainer);
+            renderDeferStateAfterResourceLoading(tDetails, tNode, lContainer);
+            break;
+        case DeferDependenciesLoadingState.COMPLETE:
+            ngDevMode && assertDeferredDependenciesLoaded(tDetails);
+            renderDeferBlockState(DeferBlockState.Complete, tNode, lContainer);
+            break;
+        case DeferDependenciesLoadingState.FAILED:
+            renderDeferBlockState(DeferBlockState.Error, tNode, lContainer);
+            break;
+        default:
+            if (ngDevMode) {
+                throwError('Unknown defer block state');
+            }
+    }
 }
 
 /**
@@ -18534,871 +21406,6 @@ function ɵɵcomponentInstance() {
     return instance;
 }
 
-const AT_THIS_LOCATION = '<-- AT THIS LOCATION';
-/**
- * Retrieves a user friendly string for a given TNodeType for use in
- * friendly error messages
- *
- * @param tNodeType
- * @returns
- */
-function getFriendlyStringFromTNodeType(tNodeType) {
-    switch (tNodeType) {
-        case 4 /* TNodeType.Container */:
-            return 'view container';
-        case 2 /* TNodeType.Element */:
-            return 'element';
-        case 8 /* TNodeType.ElementContainer */:
-            return 'ng-container';
-        case 32 /* TNodeType.Icu */:
-            return 'icu';
-        case 64 /* TNodeType.Placeholder */:
-            return 'i18n';
-        case 16 /* TNodeType.Projection */:
-            return 'projection';
-        case 1 /* TNodeType.Text */:
-            return 'text';
-        default:
-            // This should not happen as we cover all possible TNode types above.
-            return '<unknown>';
-    }
-}
-/**
- * Validates that provided nodes match during the hydration process.
- */
-function validateMatchingNode(node, nodeType, tagName, lView, tNode, isViewContainerAnchor = false) {
-    if (!node ||
-        (node.nodeType !== nodeType ||
-            (node.nodeType === Node.ELEMENT_NODE &&
-                node.tagName.toLowerCase() !== tagName?.toLowerCase()))) {
-        const expectedNode = shortRNodeDescription(nodeType, tagName, null);
-        let header = `During hydration Angular expected ${expectedNode} but `;
-        const hostComponentDef = getDeclarationComponentDef(lView);
-        const componentClassName = hostComponentDef?.type?.name;
-        const expected = `Angular expected this DOM:\n\n${describeExpectedDom(lView, tNode, isViewContainerAnchor)}\n\n`;
-        let actual = '';
-        if (!node) {
-            // No node found during hydration.
-            header += `the node was not found.\n\n`;
-        }
-        else {
-            const actualNode = shortRNodeDescription(node.nodeType, node.tagName ?? null, node.textContent ?? null);
-            header += `found ${actualNode}.\n\n`;
-            actual = `Actual DOM is:\n\n${describeDomFromNode(node)}\n\n`;
-        }
-        const footer = getHydrationErrorFooter(componentClassName);
-        const message = header + expected + actual + getHydrationAttributeNote() + footer;
-        throw new RuntimeError(-500 /* RuntimeErrorCode.HYDRATION_NODE_MISMATCH */, message);
-    }
-}
-/**
- * Validates that a given node has sibling nodes
- */
-function validateSiblingNodeExists(node) {
-    validateNodeExists(node);
-    if (!node.nextSibling) {
-        const header = 'During hydration Angular expected more sibling nodes to be present.\n\n';
-        const actual = `Actual DOM is:\n\n${describeDomFromNode(node)}\n\n`;
-        const footer = getHydrationErrorFooter();
-        const message = header + actual + footer;
-        throw new RuntimeError(-501 /* RuntimeErrorCode.HYDRATION_MISSING_SIBLINGS */, message);
-    }
-}
-/**
- * Validates that a node exists or throws
- */
-function validateNodeExists(node, lView = null, tNode = null) {
-    if (!node) {
-        const header = 'During hydration, Angular expected an element to be present at this location.\n\n';
-        let expected = '';
-        let footer = '';
-        if (lView !== null && tNode !== null) {
-            expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
-            footer = getHydrationErrorFooter();
-        }
-        throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
-    }
-}
-/**
- * Builds the hydration error message when a node is not found
- *
- * @param lView the LView where the node exists
- * @param tNode the TNode
- */
-function nodeNotFoundError(lView, tNode) {
-    const header = 'During serialization, Angular was unable to find an element in the DOM:\n\n';
-    const expected = `${describeExpectedDom(lView, tNode, false)}\n\n`;
-    const footer = getHydrationErrorFooter();
-    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + expected + footer);
-}
-/**
- * Builds a hydration error message when a node is not found at a path location
- *
- * @param host the Host Node
- * @param path the path to the node
- */
-function nodeNotFoundAtPathError(host, path) {
-    const header = `During hydration Angular was unable to locate a node ` +
-        `using the "${path}" path, starting from the ${describeRNode(host)} node.\n\n`;
-    const footer = getHydrationErrorFooter();
-    throw new RuntimeError(-502 /* RuntimeErrorCode.HYDRATION_MISSING_NODE */, header + footer);
-}
-/**
- * Builds the hydration error message in the case that dom nodes are created outside of
- * the Angular context and are being used as projected nodes
- *
- * @param lView the LView
- * @param tNode the TNode
- * @returns an error
- */
-function unsupportedProjectionOfDomNodes(rNode) {
-    const header = 'During serialization, Angular detected DOM nodes ' +
-        'that were created outside of Angular context and provided as projectable nodes ' +
-        '(likely via `ViewContainerRef.createComponent` or `createComponent` APIs). ' +
-        'Hydration is not supported for such cases, consider refactoring the code to avoid ' +
-        'this pattern or using `ngSkipHydration` on the host element of the component.\n\n';
-    const actual = `${describeDomFromNode(rNode)}\n\n`;
-    const message = header + actual + getHydrationAttributeNote();
-    return new RuntimeError(-503 /* RuntimeErrorCode.UNSUPPORTED_PROJECTION_DOM_NODES */, message);
-}
-/**
- * Builds the hydration error message in the case that ngSkipHydration was used on a
- * node that is not a component host element or host binding
- *
- * @param rNode the HTML Element
- * @returns an error
- */
-function invalidSkipHydrationHost(rNode) {
-    const header = 'The `ngSkipHydration` flag is applied on a node ' +
-        'that doesn\'t act as a component host. Hydration can be ' +
-        'skipped only on per-component basis.\n\n';
-    const actual = `${describeDomFromNode(rNode)}\n\n`;
-    const footer = 'Please move the `ngSkipHydration` attribute to the component host element.\n\n';
-    const message = header + actual + footer;
-    return new RuntimeError(-504 /* RuntimeErrorCode.INVALID_SKIP_HYDRATION_HOST */, message);
-}
-// Stringification methods
-/**
- * Stringifies a given TNode's attributes
- *
- * @param tNode a provided TNode
- * @returns string
- */
-function stringifyTNodeAttrs(tNode) {
-    const results = [];
-    if (tNode.attrs) {
-        for (let i = 0; i < tNode.attrs.length;) {
-            const attrName = tNode.attrs[i++];
-            // Once we reach the first flag, we know that the list of
-            // attributes is over.
-            if (typeof attrName == 'number') {
-                break;
-            }
-            const attrValue = tNode.attrs[i++];
-            results.push(`${attrName}="${shorten(attrValue)}"`);
-        }
-    }
-    return results.join(' ');
-}
-/**
- * The list of internal attributes that should be filtered out while
- * producing an error message.
- */
-const internalAttrs = new Set(['ngh', 'ng-version', 'ng-server-context']);
-/**
- * Stringifies an HTML Element's attributes
- *
- * @param rNode an HTML Element
- * @returns string
- */
-function stringifyRNodeAttrs(rNode) {
-    const results = [];
-    for (let i = 0; i < rNode.attributes.length; i++) {
-        const attr = rNode.attributes[i];
-        if (internalAttrs.has(attr.name))
-            continue;
-        results.push(`${attr.name}="${shorten(attr.value)}"`);
-    }
-    return results.join(' ');
-}
-// Methods for Describing the DOM
-/**
- * Converts a tNode to a helpful readable string value for use in error messages
- *
- * @param tNode a given TNode
- * @param innerContent the content of the node
- * @returns string
- */
-function describeTNode(tNode, innerContent = '…') {
-    switch (tNode.type) {
-        case 1 /* TNodeType.Text */:
-            const content = tNode.value ? `(${tNode.value})` : '';
-            return `#text${content}`;
-        case 2 /* TNodeType.Element */:
-            const attrs = stringifyTNodeAttrs(tNode);
-            const tag = tNode.value.toLowerCase();
-            return `<${tag}${attrs ? ' ' + attrs : ''}>${innerContent}</${tag}>`;
-        case 8 /* TNodeType.ElementContainer */:
-            return '<!-- ng-container -->';
-        case 4 /* TNodeType.Container */:
-            return '<!-- container -->';
-        default:
-            const typeAsString = getFriendlyStringFromTNodeType(tNode.type);
-            return `#node(${typeAsString})`;
-    }
-}
-/**
- * Converts an RNode to a helpful readable string value for use in error messages
- *
- * @param rNode a given RNode
- * @param innerContent the content of the node
- * @returns string
- */
-function describeRNode(rNode, innerContent = '…') {
-    const node = rNode;
-    switch (node.nodeType) {
-        case Node.ELEMENT_NODE:
-            const tag = node.tagName.toLowerCase();
-            const attrs = stringifyRNodeAttrs(node);
-            return `<${tag}${attrs ? ' ' + attrs : ''}>${innerContent}</${tag}>`;
-        case Node.TEXT_NODE:
-            const content = node.textContent ? shorten(node.textContent) : '';
-            return `#text${content ? `(${content})` : ''}`;
-        case Node.COMMENT_NODE:
-            return `<!-- ${shorten(node.textContent ?? '')} -->`;
-        default:
-            return `#node(${node.nodeType})`;
-    }
-}
-/**
- * Builds the string containing the expected DOM present given the LView and TNode
- * values for a readable error message
- *
- * @param lView the lView containing the DOM
- * @param tNode the tNode
- * @param isViewContainerAnchor boolean
- * @returns string
- */
-function describeExpectedDom(lView, tNode, isViewContainerAnchor) {
-    const spacer = '  ';
-    let content = '';
-    if (tNode.prev) {
-        content += spacer + '…\n';
-        content += spacer + describeTNode(tNode.prev) + '\n';
-    }
-    else if (tNode.type && tNode.type & 12 /* TNodeType.AnyContainer */) {
-        content += spacer + '…\n';
-    }
-    if (isViewContainerAnchor) {
-        content += spacer + describeTNode(tNode) + '\n';
-        content += spacer + `<!-- container -->  ${AT_THIS_LOCATION}\n`;
-    }
-    else {
-        content += spacer + describeTNode(tNode) + `  ${AT_THIS_LOCATION}\n`;
-    }
-    content += spacer + '…\n';
-    const parentRNode = tNode.type ? getParentRElement(lView[TVIEW], tNode, lView) : null;
-    if (parentRNode) {
-        content = describeRNode(parentRNode, '\n' + content);
-    }
-    return content;
-}
-/**
- * Builds the string containing the DOM present around a given RNode for a
- * readable error message
- *
- * @param node the RNode
- * @returns string
- */
-function describeDomFromNode(node) {
-    const spacer = '  ';
-    let content = '';
-    const currentNode = node;
-    if (currentNode.previousSibling) {
-        content += spacer + '…\n';
-        content += spacer + describeRNode(currentNode.previousSibling) + '\n';
-    }
-    content += spacer + describeRNode(currentNode) + `  ${AT_THIS_LOCATION}\n`;
-    if (node.nextSibling) {
-        content += spacer + '…\n';
-    }
-    if (node.parentNode) {
-        content = describeRNode(currentNode.parentNode, '\n' + content);
-    }
-    return content;
-}
-/**
- * Shortens the description of a given RNode by its type for readability
- *
- * @param nodeType the type of node
- * @param tagName the node tag name
- * @param textContent the text content in the node
- * @returns string
- */
-function shortRNodeDescription(nodeType, tagName, textContent) {
-    switch (nodeType) {
-        case Node.ELEMENT_NODE:
-            return `<${tagName.toLowerCase()}>`;
-        case Node.TEXT_NODE:
-            const content = textContent ? ` (with the "${shorten(textContent)}" content)` : '';
-            return `a text node${content}`;
-        case Node.COMMENT_NODE:
-            return 'a comment node';
-        default:
-            return `#node(nodeType=${nodeType})`;
-    }
-}
-/**
- * Builds the footer hydration error message
- *
- * @param componentClassName the name of the component class
- * @returns string
- */
-function getHydrationErrorFooter(componentClassName) {
-    const componentInfo = componentClassName ? `the "${componentClassName}"` : 'corresponding';
-    return `To fix this problem:\n` +
-        `  * check ${componentInfo} component for hydration-related issues\n` +
-        `  * check to see if your template has valid HTML structure\n` +
-        `  * or skip hydration by adding the \`ngSkipHydration\` attribute ` +
-        `to its host node in a template\n\n`;
-}
-/**
- * An attribute related note for hydration errors
- */
-function getHydrationAttributeNote() {
-    return 'Note: attributes are only displayed to better represent the DOM' +
-        ' but have no effect on hydration mismatches.\n\n';
-}
-// Node string utility functions
-/**
- * Strips all newlines out of a given string
- *
- * @param input a string to be cleared of new line characters
- * @returns
- */
-function stripNewlines(input) {
-    return input.replace(/\s+/gm, '');
-}
-/**
- * Reduces a string down to a maximum length of characters with ellipsis for readability
- *
- * @param input a string input
- * @param maxLength a maximum length in characters
- * @returns string
- */
-function shorten(input, maxLength = 50) {
-    if (!input) {
-        return '';
-    }
-    input = stripNewlines(input);
-    return input.length > maxLength ? `${input.substring(0, maxLength - 1)}…` : input;
-}
-
-/**
- * Removes all dehydrated views from a given LContainer:
- * both in internal data structure, as well as removing
- * corresponding DOM nodes that belong to that dehydrated view.
- */
-function removeDehydratedViews(lContainer) {
-    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
-    const parentLView = lContainer[PARENT];
-    const renderer = parentLView[RENDERER];
-    for (const view of views) {
-        removeDehydratedView(view, renderer);
-        ngDevMode && ngDevMode.dehydratedViewsRemoved++;
-    }
-    // Reset the value to an empty array to indicate that no
-    // further processing of dehydrated views is needed for
-    // this view container (i.e. do not trigger the lookup process
-    // once again in case a `ViewContainerRef` is created later).
-    lContainer[DEHYDRATED_VIEWS] = EMPTY_ARRAY;
-}
-/**
- * Helper function to remove all nodes from a dehydrated view.
- */
-function removeDehydratedView(dehydratedView, renderer) {
-    let nodesRemoved = 0;
-    let currentRNode = dehydratedView.firstChild;
-    if (currentRNode) {
-        const numNodes = dehydratedView.data[NUM_ROOT_NODES];
-        while (nodesRemoved < numNodes) {
-            ngDevMode && validateSiblingNodeExists(currentRNode);
-            const nextSibling = currentRNode.nextSibling;
-            nativeRemoveNode(renderer, currentRNode, false);
-            currentRNode = nextSibling;
-            nodesRemoved++;
-        }
-    }
-}
-/**
- * Walks over all views within this LContainer invokes dehydrated views
- * cleanup function for each one.
- */
-function cleanupLContainer(lContainer) {
-    removeDehydratedViews(lContainer);
-    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-        cleanupLView(lContainer[i]);
-    }
-}
-/**
- * Walks over `LContainer`s and components registered within
- * this LView and invokes dehydrated views cleanup function for each one.
- */
-function cleanupLView(lView) {
-    const tView = lView[TVIEW];
-    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
-        if (isLContainer(lView[i])) {
-            const lContainer = lView[i];
-            cleanupLContainer(lContainer);
-        }
-        else if (isLView(lView[i])) {
-            // This is a component, enter the `cleanupLView` recursively.
-            cleanupLView(lView[i]);
-        }
-    }
-}
-/**
- * Walks over all views registered within the ApplicationRef and removes
- * all dehydrated views from all `LContainer`s along the way.
- */
-function cleanupDehydratedViews(appRef) {
-    const viewRefs = appRef._views;
-    for (const viewRef of viewRefs) {
-        const lNode = getLNodeForHydration(viewRef);
-        // An `lView` might be `null` if a `ViewRef` represents
-        // an embedded view (not a component view).
-        if (lNode !== null && lNode[HOST] !== null) {
-            if (isLView(lNode)) {
-                cleanupLView(lNode);
-            }
-            else {
-                // Cleanup in the root component view
-                const componentLView = lNode[HOST];
-                cleanupLView(componentLView);
-                // Cleanup in all views within this view container
-                cleanupLContainer(lNode);
-            }
-            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
-        }
-    }
-}
-
-/**
- * Regexp that extracts a reference node information from the compressed node location.
- * The reference node is represented as either:
- *  - a number which points to an LView slot
- *  - the `b` char which indicates that the lookup should start from the `document.body`
- *  - the `h` char to start lookup from the component host node (`lView[HOST]`)
- */
-const REF_EXTRACTOR_REGEXP = new RegExp(`^(\\d+)*(${REFERENCE_NODE_BODY}|${REFERENCE_NODE_HOST})*(.*)`);
-/**
- * Helper function that takes a reference node location and a set of navigation steps
- * (from the reference node) to a target node and outputs a string that represents
- * a location.
- *
- * For example, given: referenceNode = 'b' (body) and path = ['firstChild', 'firstChild',
- * 'nextSibling'], the function returns: `bf2n`.
- */
-function compressNodeLocation(referenceNode, path) {
-    const result = [referenceNode];
-    for (const segment of path) {
-        const lastIdx = result.length - 1;
-        if (lastIdx > 0 && result[lastIdx - 1] === segment) {
-            // An empty string in a count slot represents 1 occurrence of an instruction.
-            const value = (result[lastIdx] || 1);
-            result[lastIdx] = value + 1;
-        }
-        else {
-            // Adding a new segment to the path.
-            // Using an empty string in a counter field to avoid encoding `1`s
-            // into the path, since they are implicit (e.g. `f1n1` vs `fn`), so
-            // it's enough to have a single char in this case.
-            result.push(segment, '');
-        }
-    }
-    return result.join('');
-}
-/**
- * Helper function that reverts the `compressNodeLocation` and transforms a given
- * string into an array where at 0th position there is a reference node info and
- * after that it contains information (in pairs) about a navigation step and the
- * number of repetitions.
- *
- * For example, the path like 'bf2n' will be transformed to:
- * ['b', 'firstChild', 2, 'nextSibling', 1].
- *
- * This information is later consumed by the code that navigates the DOM to find
- * a given node by its location.
- */
-function decompressNodeLocation(path) {
-    const matches = path.match(REF_EXTRACTOR_REGEXP);
-    const [_, refNodeId, refNodeName, rest] = matches;
-    // If a reference node is represented by an index, transform it to a number.
-    const ref = refNodeId ? parseInt(refNodeId, 10) : refNodeName;
-    const steps = [];
-    // Match all segments in a path.
-    for (const [_, step, count] of rest.matchAll(/(f|n)(\d*)/g)) {
-        const repeat = parseInt(count, 10) || 1;
-        steps.push(step, repeat);
-    }
-    return [ref, ...steps];
-}
-
-/** Whether current TNode is a first node in an <ng-container>. */
-function isFirstElementInNgContainer(tNode) {
-    return !tNode.prev && tNode.parent?.type === 8 /* TNodeType.ElementContainer */;
-}
-/** Returns an instruction index (subtracting HEADER_OFFSET). */
-function getNoOffsetIndex(tNode) {
-    return tNode.index - HEADER_OFFSET;
-}
-/**
- * Check whether a given node exists, but is disconnected from the DOM.
- *
- * Note: we leverage the fact that we have this information available in the DOM emulation
- * layer (in Domino) for now. Longer-term solution should not rely on the DOM emulation and
- * only use internal data structures and state to compute this information.
- */
-function isDisconnectedNode(tNode, lView) {
-    return !(tNode.type & 16 /* TNodeType.Projection */) && !!lView[tNode.index] &&
-        !unwrapRNode(lView[tNode.index])?.isConnected;
-}
-/**
- * Locate a node in DOM tree that corresponds to a given TNode.
- *
- * @param hydrationInfo The hydration annotation data
- * @param tView the current tView
- * @param lView the current lView
- * @param tNode the current tNode
- * @returns an RNode that represents a given tNode
- */
-function locateNextRNode(hydrationInfo, tView, lView, tNode) {
-    let native = null;
-    const noOffsetIndex = getNoOffsetIndex(tNode);
-    const nodes = hydrationInfo.data[NODES];
-    if (nodes?.[noOffsetIndex]) {
-        // We know the exact location of the node.
-        native = locateRNodeByPath(nodes[noOffsetIndex], lView);
-    }
-    else if (tView.firstChild === tNode) {
-        // We create a first node in this view, so we use a reference
-        // to the first child in this DOM segment.
-        native = hydrationInfo.firstChild;
-    }
-    else {
-        // Locate a node based on a previous sibling or a parent node.
-        const previousTNodeParent = tNode.prev === null;
-        const previousTNode = (tNode.prev ?? tNode.parent);
-        ngDevMode &&
-            assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
-                'to the previous node or a parent node.');
-        if (isFirstElementInNgContainer(tNode)) {
-            const noOffsetParentIndex = getNoOffsetIndex(tNode.parent);
-            native = getSegmentHead(hydrationInfo, noOffsetParentIndex);
-        }
-        else {
-            let previousRElement = getNativeByTNode(previousTNode, lView);
-            if (previousTNodeParent) {
-                native = previousRElement.firstChild;
-            }
-            else {
-                // If the previous node is an element, but it also has container info,
-                // this means that we are processing a node like `<div #vcrTarget>`, which is
-                // represented in the DOM as `<div></div>...<!--container-->`.
-                // In this case, there are nodes *after* this element and we need to skip
-                // all of them to reach an element that we are looking for.
-                const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
-                const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
-                if (previousTNode.type === 2 /* TNodeType.Element */ && segmentHead) {
-                    const numRootNodesToSkip = calcSerializedContainerSize(hydrationInfo, noOffsetPrevSiblingIndex);
-                    // `+1` stands for an anchor comment node after all the views in this container.
-                    const nodesToSkip = numRootNodesToSkip + 1;
-                    // First node after this segment.
-                    native = siblingAfter(nodesToSkip, segmentHead);
-                }
-                else {
-                    native = previousRElement.nextSibling;
-                }
-            }
-        }
-    }
-    return native;
-}
-/**
- * Skips over a specified number of nodes and returns the next sibling node after that.
- */
-function siblingAfter(skip, from) {
-    let currentNode = from;
-    for (let i = 0; i < skip; i++) {
-        ngDevMode && validateSiblingNodeExists(currentNode);
-        currentNode = currentNode.nextSibling;
-    }
-    return currentNode;
-}
-/**
- * Helper function to produce a string representation of the navigation steps
- * (in terms of `nextSibling` and `firstChild` navigations). Used in error
- * messages in dev mode.
- */
-function stringifyNavigationInstructions(instructions) {
-    const container = [];
-    for (let i = 0; i < instructions.length; i += 2) {
-        const step = instructions[i];
-        const repeat = instructions[i + 1];
-        for (let r = 0; r < repeat; r++) {
-            container.push(step === NodeNavigationStep.FirstChild ? 'firstChild' : 'nextSibling');
-        }
-    }
-    return container.join('.');
-}
-/**
- * Helper function that navigates from a starting point node (the `from` node)
- * using provided set of navigation instructions (within `path` argument).
- */
-function navigateToNode(from, instructions) {
-    let node = from;
-    for (let i = 0; i < instructions.length; i += 2) {
-        const step = instructions[i];
-        const repeat = instructions[i + 1];
-        for (let r = 0; r < repeat; r++) {
-            if (ngDevMode && !node) {
-                throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
-            }
-            switch (step) {
-                case NodeNavigationStep.FirstChild:
-                    node = node.firstChild;
-                    break;
-                case NodeNavigationStep.NextSibling:
-                    node = node.nextSibling;
-                    break;
-            }
-        }
-    }
-    if (ngDevMode && !node) {
-        throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
-    }
-    return node;
-}
-/**
- * Locates an RNode given a set of navigation instructions (which also contains
- * a starting point node info).
- */
-function locateRNodeByPath(path, lView) {
-    const [referenceNode, ...navigationInstructions] = decompressNodeLocation(path);
-    let ref;
-    if (referenceNode === REFERENCE_NODE_HOST) {
-        ref = lView[DECLARATION_COMPONENT_VIEW][HOST];
-    }
-    else if (referenceNode === REFERENCE_NODE_BODY) {
-        ref = ɵɵresolveBody(lView[DECLARATION_COMPONENT_VIEW][HOST]);
-    }
-    else {
-        const parentElementId = Number(referenceNode);
-        ref = unwrapRNode(lView[parentElementId + HEADER_OFFSET]);
-    }
-    return navigateToNode(ref, navigationInstructions);
-}
-/**
- * Generate a list of DOM navigation operations to get from node `start` to node `finish`.
- *
- * Note: assumes that node `start` occurs before node `finish` in an in-order traversal of the DOM
- * tree. That is, we should be able to get from `start` to `finish` purely by using `.firstChild`
- * and `.nextSibling` operations.
- */
-function navigateBetween(start, finish) {
-    if (start === finish) {
-        return [];
-    }
-    else if (start.parentElement == null || finish.parentElement == null) {
-        return null;
-    }
-    else if (start.parentElement === finish.parentElement) {
-        return navigateBetweenSiblings(start, finish);
-    }
-    else {
-        // `finish` is a child of its parent, so the parent will always have a child.
-        const parent = finish.parentElement;
-        const parentPath = navigateBetween(start, parent);
-        const childPath = navigateBetween(parent.firstChild, finish);
-        if (!parentPath || !childPath)
-            return null;
-        return [
-            // First navigate to `finish`'s parent
-            ...parentPath,
-            // Then to its first child.
-            NodeNavigationStep.FirstChild,
-            // And finally from that node to `finish` (maybe a no-op if we're already there).
-            ...childPath,
-        ];
-    }
-}
-/**
- * Calculates a path between 2 sibling nodes (generates a number of `NextSibling` navigations).
- * Returns `null` if no such path exists between the given nodes.
- */
-function navigateBetweenSiblings(start, finish) {
-    const nav = [];
-    let node = null;
-    for (node = start; node != null && node !== finish; node = node.nextSibling) {
-        nav.push(NodeNavigationStep.NextSibling);
-    }
-    // If the `node` becomes `null` or `undefined` at the end, that means that we
-    // didn't find the `end` node, thus return `null` (which would trigger serialization
-    // error to be produced).
-    return node == null ? null : nav;
-}
-/**
- * Calculates a path between 2 nodes in terms of `nextSibling` and `firstChild`
- * navigations:
- * - the `from` node is a known node, used as an starting point for the lookup
- *   (the `fromNodeName` argument is a string representation of the node).
- * - the `to` node is a node that the runtime logic would be looking up,
- *   using the path generated by this function.
- */
-function calcPathBetween(from, to, fromNodeName) {
-    const path = navigateBetween(from, to);
-    return path === null ? null : compressNodeLocation(fromNodeName, path);
-}
-/**
- * Invoked at serialization time (on the server) when a set of navigation
- * instructions needs to be generated for a TNode.
- */
-function calcPathForNode(tNode, lView) {
-    let parentTNode = tNode.parent;
-    let parentIndex;
-    let parentRNode;
-    let referenceNodeName;
-    // Skip over all parent nodes that are disconnected from the DOM, such nodes
-    // can not be used as anchors.
-    //
-    // This might happen in certain content projection-based use-cases, where
-    // a content of an element is projected and used, when a parent element
-    // itself remains detached from DOM. In this scenario we try to find a parent
-    // element that is attached to DOM and can act as an anchor instead.
-    while (parentTNode !== null && isDisconnectedNode(parentTNode, lView)) {
-        parentTNode = parentTNode.parent;
-    }
-    if (parentTNode === null || !(parentTNode.type & 3 /* TNodeType.AnyRNode */)) {
-        // If there is no parent TNode or a parent TNode does not represent an RNode
-        // (i.e. not a DOM node), use component host element as a reference node.
-        parentIndex = referenceNodeName = REFERENCE_NODE_HOST;
-        parentRNode = lView[DECLARATION_COMPONENT_VIEW][HOST];
-    }
-    else {
-        // Use parent TNode as a reference node.
-        parentIndex = parentTNode.index;
-        parentRNode = unwrapRNode(lView[parentIndex]);
-        referenceNodeName = renderStringify(parentIndex - HEADER_OFFSET);
-    }
-    let rNode = unwrapRNode(lView[tNode.index]);
-    if (tNode.type & 12 /* TNodeType.AnyContainer */) {
-        // For <ng-container> nodes, instead of serializing a reference
-        // to the anchor comment node, serialize a location of the first
-        // DOM element. Paired with the container size (serialized as a part
-        // of `ngh.containers`), it should give enough information for runtime
-        // to hydrate nodes in this container.
-        const firstRNode = getFirstNativeNode(lView, tNode);
-        // If container is not empty, use a reference to the first element,
-        // otherwise, rNode would point to an anchor comment node.
-        if (firstRNode) {
-            rNode = firstRNode;
-        }
-    }
-    let path = calcPathBetween(parentRNode, rNode, referenceNodeName);
-    if (path === null && parentRNode !== rNode) {
-        // Searching for a path between elements within a host node failed.
-        // Trying to find a path to an element starting from the `document.body` instead.
-        //
-        // Important note: this type of reference is relatively unstable, since Angular
-        // may not be able to control parts of the page that the runtime logic navigates
-        // through. This is mostly needed to cover "portals" use-case (like menus, dialog boxes,
-        // etc), where nodes are content-projected (including direct DOM manipulations) outside
-        // of the host node. The better solution is to provide APIs to work with "portals",
-        // at which point this code path would not be needed.
-        const body = parentRNode.ownerDocument.body;
-        path = calcPathBetween(body, rNode, REFERENCE_NODE_BODY);
-        if (path === null) {
-            // If the path is still empty, it's likely that this node is detached and
-            // won't be found during hydration.
-            throw nodeNotFoundError(lView, tNode);
-        }
-    }
-    return path;
-}
-
-/**
- * Given a current DOM node and a serialized information about the views
- * in a container, walks over the DOM structure, collecting the list of
- * dehydrated views.
- */
-function locateDehydratedViewsInContainer(currentRNode, serializedViews) {
-    const dehydratedViews = [];
-    for (const serializedView of serializedViews) {
-        // Repeats a view multiple times as needed, based on the serialized information
-        // (for example, for *ngFor-produced views).
-        for (let i = 0; i < (serializedView[MULTIPLIER] ?? 1); i++) {
-            const view = {
-                data: serializedView,
-                firstChild: null,
-            };
-            if (serializedView[NUM_ROOT_NODES] > 0) {
-                // Keep reference to the first node in this view,
-                // so it can be accessed while invoking template instructions.
-                view.firstChild = currentRNode;
-                // Move over to the next node after this view, which can
-                // either be a first node of the next view or an anchor comment
-                // node after the last view in a container.
-                currentRNode = siblingAfter(serializedView[NUM_ROOT_NODES], currentRNode);
-            }
-            dehydratedViews.push(view);
-        }
-    }
-    return [currentRNode, dehydratedViews];
-}
-/**
- * Reference to a function that searches for a matching dehydrated views
- * stored on a given lContainer.
- * Returns `null` by default, when hydration is not enabled.
- */
-let _findMatchingDehydratedViewImpl = () => null;
-/**
- * Retrieves the next dehydrated view from the LContainer and verifies that
- * it matches a given template id (from the TView that was used to create this
- * instance of a view). If the id doesn't match, that means that we are in an
- * unexpected state and can not complete the reconciliation process. Thus,
- * all dehydrated views from this LContainer are removed (including corresponding
- * DOM nodes) and the rendering is performed as if there were no dehydrated views
- * in this container.
- */
-function findMatchingDehydratedViewImpl(lContainer, template) {
-    const views = lContainer[DEHYDRATED_VIEWS];
-    if (!template || views === null || views.length === 0) {
-        return null;
-    }
-    const view = views[0];
-    // Verify whether the first dehydrated view in the container matches
-    // the template id passed to this function (that originated from a TView
-    // that was used to create an instance of an embedded or component views.
-    if (view.data[TEMPLATE_ID] === template) {
-        // If the template id matches - extract the first view and return it.
-        return views.shift();
-    }
-    else {
-        // Otherwise, we are at the state when reconciliation can not be completed,
-        // thus we remove all dehydrated views within this container (remove them
-        // from internal data structures as well as delete associated elements from
-        // the DOM tree).
-        removeDehydratedViews(lContainer);
-        return null;
-    }
-}
-function enableFindMatchingDehydratedViewImpl() {
-    _findMatchingDehydratedViewImpl = findMatchingDehydratedViewImpl;
-}
-function findMatchingDehydratedView(lContainer, template) {
-    return _findMatchingDehydratedViewImpl(lContainer, template);
-}
-
 /**
  * A type representing the live collection to be reconciled with any new (incoming) collection. This
  * is an adapter class that makes it possible to work with different internal data structures,
@@ -19707,610 +21714,6 @@ class UniqueValueMultiKeyMap {
     }
 }
 
-function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
-    const embeddedTView = templateTNode.tView;
-    ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
-    ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
-    // Embedded views follow the change detection strategy of the view they're declared in.
-    const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
-    const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
-    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.dehydratedView ?? null);
-    const declarationLContainer = declarationLView[templateTNode.index];
-    ngDevMode && assertLContainer(declarationLContainer);
-    embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
-    const declarationViewLQueries = declarationLView[QUERIES];
-    if (declarationViewLQueries !== null) {
-        embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
-    }
-    // execute creation mode of a view
-    renderView(embeddedTView, embeddedLView, context);
-    return embeddedLView;
-}
-function getLViewFromLContainer(lContainer, index) {
-    const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
-    // avoid reading past the array boundaries
-    if (adjustedIndex < lContainer.length) {
-        const lView = lContainer[adjustedIndex];
-        ngDevMode && assertLView(lView);
-        return lView;
-    }
-    return undefined;
-}
-/**
- * Returns whether an elements that belong to a view should be
- * inserted into the DOM. For client-only cases, DOM elements are
- * always inserted. For hydration cases, we check whether serialized
- * info is available for a view and the view is not in a "skip hydration"
- * block (in which case view contents was re-created, thus needing insertion).
- */
-function shouldAddViewToDom(tNode, dehydratedView) {
-    return !dehydratedView || dehydratedView.firstChild === null ||
-        hasInSkipHydrationBlockFlag(tNode);
-}
-function addLViewToLContainer(lContainer, lView, index, addToDOM = true) {
-    const tView = lView[TVIEW];
-    // Insert into the view tree so the new view can be change-detected
-    insertView(tView, lView, lContainer, index);
-    // Insert elements that belong to this view into the DOM tree
-    if (addToDOM) {
-        const beforeNode = getBeforeNodeForView(index, lContainer);
-        const renderer = lView[RENDERER];
-        const parentRNode = nativeParentNode(renderer, lContainer[NATIVE]);
-        if (parentRNode !== null) {
-            addViewToDOM(tView, lContainer[T_HOST], renderer, lView, parentRNode, beforeNode);
-        }
-    }
-    // When in hydration mode, reset the pointer to the first child in
-    // the dehydrated view. This indicates that the view was hydrated and
-    // further attaching/detaching should work with this view as normal.
-    const hydrationInfo = lView[HYDRATION];
-    if (hydrationInfo !== null && hydrationInfo.firstChild !== null) {
-        hydrationInfo.firstChild = null;
-    }
-}
-function removeLViewFromLContainer(lContainer, index) {
-    const lView = detachView(lContainer, index);
-    if (lView !== undefined) {
-        destroyLView(lView[TVIEW], lView);
-    }
-    return lView;
-}
-
-/**
- * Represents a container where one or more views can be attached to a component.
- *
- * Can contain *host views* (created by instantiating a
- * component with the `createComponent()` method), and *embedded views*
- * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
- *
- * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-hierarchy).
- *
- * @usageNotes
- *
- * The example below demonstrates how the `createComponent` function can be used
- * to create an instance of a ComponentRef dynamically and attach it to an ApplicationRef,
- * so that it gets included into change detection cycles.
- *
- * Note: the example uses standalone components, but the function can also be used for
- * non-standalone components (declared in an NgModule) as well.
- *
- * ```typescript
- * @Component({
- *   standalone: true,
- *   selector: 'dynamic',
- *   template: `<span>This is a content of a dynamic component.</span>`,
- * })
- * class DynamicComponent {
- *   vcr = inject(ViewContainerRef);
- * }
- *
- * @Component({
- *   standalone: true,
- *   selector: 'app',
- *   template: `<main>Hi! This is the main content.</main>`,
- * })
- * class AppComponent {
- *   vcr = inject(ViewContainerRef);
- *
- *   ngAfterViewInit() {
- *     const compRef = this.vcr.createComponent(DynamicComponent);
- *     compRef.changeDetectorRef.detectChanges();
- *   }
- * }
- * ```
- *
- * @see {@link ComponentRef}
- * @see {@link EmbeddedViewRef}
- *
- * @publicApi
- */
-class ViewContainerRef {
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static { this.__NG_ELEMENT_ID__ = injectViewContainerRef; }
-}
-/**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
- *
- * @returns The ViewContainerRef instance to use
- */
-function injectViewContainerRef() {
-    const previousTNode = getCurrentTNode();
-    return createContainerRef(previousTNode, getLView());
-}
-const VE_ViewContainerRef = ViewContainerRef;
-// TODO(alxhub): cleaning up this indirection triggers a subtle bug in Closure in g3. Once the fix
-// for that lands, this can be cleaned up.
-const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
-    constructor(_lContainer, _hostTNode, _hostLView) {
-        super();
-        this._lContainer = _lContainer;
-        this._hostTNode = _hostTNode;
-        this._hostLView = _hostLView;
-    }
-    get element() {
-        return createElementRef(this._hostTNode, this._hostLView);
-    }
-    get injector() {
-        return new NodeInjector(this._hostTNode, this._hostLView);
-    }
-    /** @deprecated No replacement */
-    get parentInjector() {
-        const parentLocation = getParentInjectorLocation(this._hostTNode, this._hostLView);
-        if (hasParentInjector(parentLocation)) {
-            const parentView = getParentInjectorView(parentLocation, this._hostLView);
-            const injectorIndex = getParentInjectorIndex(parentLocation);
-            ngDevMode && assertNodeInjector(parentView, injectorIndex);
-            const parentTNode = parentView[TVIEW].data[injectorIndex + 8 /* NodeInjectorOffset.TNODE */];
-            return new NodeInjector(parentTNode, parentView);
-        }
-        else {
-            return new NodeInjector(null, this._hostLView);
-        }
-    }
-    clear() {
-        while (this.length > 0) {
-            this.remove(this.length - 1);
-        }
-    }
-    get(index) {
-        const viewRefs = getViewRefs(this._lContainer);
-        return viewRefs !== null && viewRefs[index] || null;
-    }
-    get length() {
-        return this._lContainer.length - CONTAINER_HEADER_OFFSET;
-    }
-    createEmbeddedView(templateRef, context, indexOrOptions) {
-        let index;
-        let injector;
-        if (typeof indexOrOptions === 'number') {
-            index = indexOrOptions;
-        }
-        else if (indexOrOptions != null) {
-            index = indexOrOptions.index;
-            injector = indexOrOptions.injector;
-        }
-        const dehydratedView = findMatchingDehydratedView(this._lContainer, templateRef.ssrId);
-        const viewRef = templateRef.createEmbeddedViewImpl(context || {}, injector, dehydratedView);
-        this.insertImpl(viewRef, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
-        return viewRef;
-    }
-    createComponent(componentFactoryOrType, indexOrOptions, injector, projectableNodes, environmentInjector) {
-        const isComponentFactory = componentFactoryOrType && !isType(componentFactoryOrType);
-        let index;
-        // This function supports 2 signatures and we need to handle options correctly for both:
-        //   1. When first argument is a Component type. This signature also requires extra
-        //      options to be provided as object (more ergonomic option).
-        //   2. First argument is a Component factory. In this case extra options are represented as
-        //      positional arguments. This signature is less ergonomic and will be deprecated.
-        if (isComponentFactory) {
-            if (ngDevMode) {
-                assertEqual(typeof indexOrOptions !== 'object', true, 'It looks like Component factory was provided as the first argument ' +
-                    'and an options object as the second argument. This combination of arguments ' +
-                    'is incompatible. You can either change the first argument to provide Component ' +
-                    'type or change the second argument to be a number (representing an index at ' +
-                    'which to insert the new component\'s host view into this container)');
-            }
-            index = indexOrOptions;
-        }
-        else {
-            if (ngDevMode) {
-                assertDefined(getComponentDef(componentFactoryOrType), `Provided Component class doesn't contain Component definition. ` +
-                    `Please check whether provided class has @Component decorator.`);
-                assertEqual(typeof indexOrOptions !== 'number', true, 'It looks like Component type was provided as the first argument ' +
-                    'and a number (representing an index at which to insert the new component\'s ' +
-                    'host view into this container as the second argument. This combination of arguments ' +
-                    'is incompatible. Please use an object as the second argument instead.');
-            }
-            const options = (indexOrOptions || {});
-            if (ngDevMode && options.environmentInjector && options.ngModuleRef) {
-                throwError(`Cannot pass both environmentInjector and ngModuleRef options to createComponent().`);
-            }
-            index = options.index;
-            injector = options.injector;
-            projectableNodes = options.projectableNodes;
-            environmentInjector = options.environmentInjector || options.ngModuleRef;
-        }
-        const componentFactory = isComponentFactory ?
-            componentFactoryOrType :
-            new ComponentFactory(getComponentDef(componentFactoryOrType));
-        const contextInjector = injector || this.parentInjector;
-        // If an `NgModuleRef` is not provided explicitly, try retrieving it from the DI tree.
-        if (!environmentInjector && componentFactory.ngModule == null) {
-            // For the `ComponentFactory` case, entering this logic is very unlikely, since we expect that
-            // an instance of a `ComponentFactory`, resolved via `ComponentFactoryResolver` would have an
-            // `ngModule` field. This is possible in some test scenarios and potentially in some JIT-based
-            // use-cases. For the `ComponentFactory` case we preserve backwards-compatibility and try
-            // using a provided injector first, then fall back to the parent injector of this
-            // `ViewContainerRef` instance.
-            //
-            // For the factory-less case, it's critical to establish a connection with the module
-            // injector tree (by retrieving an instance of an `NgModuleRef` and accessing its injector),
-            // so that a component can use DI tokens provided in MgModules. For this reason, we can not
-            // rely on the provided injector, since it might be detached from the DI tree (for example, if
-            // it was created via `Injector.create` without specifying a parent injector, or if an
-            // injector is retrieved from an `NgModuleRef` created via `createNgModule` using an
-            // NgModule outside of a module tree). Instead, we always use `ViewContainerRef`'s parent
-            // injector, which is normally connected to the DI tree, which includes module injector
-            // subtree.
-            const _injector = isComponentFactory ? contextInjector : this.parentInjector;
-            // DO NOT REFACTOR. The code here used to have a `injector.get(NgModuleRef, null) ||
-            // undefined` expression which seems to cause internal google apps to fail. This is documented
-            // in the following internal bug issue: go/b/142967802
-            const result = _injector.get(EnvironmentInjector, null);
-            if (result) {
-                environmentInjector = result;
-            }
-        }
-        const componentDef = getComponentDef(componentFactory.componentType ?? {});
-        const dehydratedView = findMatchingDehydratedView(this._lContainer, componentDef?.id ?? null);
-        const rNode = dehydratedView?.firstChild ?? null;
-        const componentRef = componentFactory.create(contextInjector, projectableNodes, rNode, environmentInjector);
-        this.insertImpl(componentRef.hostView, index, shouldAddViewToDom(this._hostTNode, dehydratedView));
-        return componentRef;
-    }
-    insert(viewRef, index) {
-        return this.insertImpl(viewRef, index, true);
-    }
-    insertImpl(viewRef, index, addToDOM) {
-        const lView = viewRef._lView;
-        if (ngDevMode && viewRef.destroyed) {
-            throw new Error('Cannot insert a destroyed View in a ViewContainer!');
-        }
-        if (viewAttachedToContainer(lView)) {
-            // If view is already attached, detach it first so we clean up references appropriately.
-            const prevIdx = this.indexOf(viewRef);
-            // A view might be attached either to this or a different container. The `prevIdx` for
-            // those cases will be:
-            // equal to -1 for views attached to this ViewContainerRef
-            // >= 0 for views attached to a different ViewContainerRef
-            if (prevIdx !== -1) {
-                this.detach(prevIdx);
-            }
-            else {
-                const prevLContainer = lView[PARENT];
-                ngDevMode &&
-                    assertEqual(isLContainer(prevLContainer), true, 'An attached view should have its PARENT point to a container.');
-                // We need to re-create a R3ViewContainerRef instance since those are not stored on
-                // LView (nor anywhere else).
-                const prevVCRef = new R3ViewContainerRef(prevLContainer, prevLContainer[T_HOST], prevLContainer[PARENT]);
-                prevVCRef.detach(prevVCRef.indexOf(viewRef));
-            }
-        }
-        // Logical operation of adding `LView` to `LContainer`
-        const adjustedIdx = this._adjustIndex(index);
-        const lContainer = this._lContainer;
-        addLViewToLContainer(lContainer, lView, adjustedIdx, addToDOM);
-        viewRef.attachToViewContainerRef();
-        addToArray(getOrCreateViewRefs(lContainer), adjustedIdx, viewRef);
-        return viewRef;
-    }
-    move(viewRef, newIndex) {
-        if (ngDevMode && viewRef.destroyed) {
-            throw new Error('Cannot move a destroyed View in a ViewContainer!');
-        }
-        return this.insert(viewRef, newIndex);
-    }
-    indexOf(viewRef) {
-        const viewRefsArr = getViewRefs(this._lContainer);
-        return viewRefsArr !== null ? viewRefsArr.indexOf(viewRef) : -1;
-    }
-    remove(index) {
-        const adjustedIdx = this._adjustIndex(index, -1);
-        const detachedView = detachView(this._lContainer, adjustedIdx);
-        if (detachedView) {
-            // Before destroying the view, remove it from the container's array of `ViewRef`s.
-            // This ensures the view container length is updated before calling
-            // `destroyLView`, which could recursively call view container methods that
-            // rely on an accurate container length.
-            // (e.g. a method on this view container being called by a child directive's OnDestroy
-            // lifecycle hook)
-            removeFromArray(getOrCreateViewRefs(this._lContainer), adjustedIdx);
-            destroyLView(detachedView[TVIEW], detachedView);
-        }
-    }
-    detach(index) {
-        const adjustedIdx = this._adjustIndex(index, -1);
-        const view = detachView(this._lContainer, adjustedIdx);
-        const wasDetached = view && removeFromArray(getOrCreateViewRefs(this._lContainer), adjustedIdx) != null;
-        return wasDetached ? new ViewRef$1(view) : null;
-    }
-    _adjustIndex(index, shift = 0) {
-        if (index == null) {
-            return this.length + shift;
-        }
-        if (ngDevMode) {
-            assertGreaterThan(index, -1, `ViewRef index must be positive, got ${index}`);
-            // +1 because it's legal to insert at the end.
-            assertLessThan(index, this.length + 1 + shift, 'index');
-        }
-        return index;
-    }
-};
-function getViewRefs(lContainer) {
-    return lContainer[VIEW_REFS];
-}
-function getOrCreateViewRefs(lContainer) {
-    return (lContainer[VIEW_REFS] || (lContainer[VIEW_REFS] = []));
-}
-/**
- * Creates a ViewContainerRef and stores it on the injector.
- *
- * @param hostTNode The node that is requesting a ViewContainerRef
- * @param hostLView The view to which the node belongs
- * @returns The ViewContainerRef instance to use
- */
-function createContainerRef(hostTNode, hostLView) {
-    ngDevMode && assertTNodeType(hostTNode, 12 /* TNodeType.AnyContainer */ | 3 /* TNodeType.AnyRNode */);
-    let lContainer;
-    const slotValue = hostLView[hostTNode.index];
-    if (isLContainer(slotValue)) {
-        // If the host is a container, we don't need to create a new LContainer
-        lContainer = slotValue;
-    }
-    else {
-        // An LContainer anchor can not be `null`, but we set it here temporarily
-        // and update to the actual value later in this function (see
-        // `_locateOrCreateAnchorNode`).
-        lContainer = createLContainer(slotValue, hostLView, null, hostTNode);
-        hostLView[hostTNode.index] = lContainer;
-        addToViewTree(hostLView, lContainer);
-    }
-    _locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue);
-    return new R3ViewContainerRef(lContainer, hostTNode, hostLView);
-}
-/**
- * Creates and inserts a comment node that acts as an anchor for a view container.
- *
- * If the host is a regular element, we have to insert a comment node manually which will
- * be used as an anchor when inserting elements. In this specific case we use low-level DOM
- * manipulation to insert it.
- */
-function insertAnchorNode(hostLView, hostTNode) {
-    const renderer = hostLView[RENDERER];
-    ngDevMode && ngDevMode.rendererCreateComment++;
-    const commentNode = renderer.createComment(ngDevMode ? 'container' : '');
-    const hostNative = getNativeByTNode(hostTNode, hostLView);
-    const parentOfHostNative = nativeParentNode(renderer, hostNative);
-    nativeInsertBefore(renderer, parentOfHostNative, commentNode, nativeNextSibling(renderer, hostNative), false);
-    return commentNode;
-}
-let _locateOrCreateAnchorNode = createAnchorNode;
-let _populateDehydratedViewsInLContainer = () => false; // noop by default
-/**
- * Looks up dehydrated views that belong to a given LContainer and populates
- * this information into the `LContainer[DEHYDRATED_VIEWS]` slot. When running
- * in client-only mode, this function is a noop.
- *
- * @param lContainer LContainer that should be populated.
- * @param tNode Corresponding TNode.
- * @param hostLView LView that hosts LContainer.
- * @returns a boolean flag that indicates whether a populating operation
- *   was successful. The operation might be unsuccessful in case is has completed
- *   previously, we are rendering in client-only mode or this content is located
- *   in a skip hydration section.
- */
-function populateDehydratedViewsInLContainer(lContainer, tNode, hostLView) {
-    return _populateDehydratedViewsInLContainer(lContainer, tNode, hostLView);
-}
-/**
- * Regular creation mode: an anchor is created and
- * assigned to the `lContainer[NATIVE]` slot.
- */
-function createAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
-    // We already have a native element (anchor) set, return.
-    if (lContainer[NATIVE])
-        return;
-    let commentNode;
-    // If the host is an element container, the native host element is guaranteed to be a
-    // comment and we can reuse that comment as anchor element for the new LContainer.
-    // The comment node in question is already part of the DOM structure so we don't need to append
-    // it again.
-    if (hostTNode.type & 8 /* TNodeType.ElementContainer */) {
-        commentNode = unwrapRNode(slotValue);
-    }
-    else {
-        commentNode = insertAnchorNode(hostLView, hostTNode);
-    }
-    lContainer[NATIVE] = commentNode;
-}
-/**
- * Hydration logic that looks up all dehydrated views in this container
- * and puts them into `lContainer[DEHYDRATED_VIEWS]` slot.
- *
- * @returns a boolean flag that indicates whether a populating operation
- *   was successful. The operation might be unsuccessful in case is has completed
- *   previously, we are rendering in client-only mode or this content is located
- *   in a skip hydration section.
- */
-function populateDehydratedViewsInLContainerImpl(lContainer, tNode, hostLView) {
-    // We already have a native element (anchor) set and the process
-    // of finding dehydrated views happened (so the `lContainer[DEHYDRATED_VIEWS]`
-    // is not null), exit early.
-    if (lContainer[NATIVE] && lContainer[DEHYDRATED_VIEWS]) {
-        return true;
-    }
-    const hydrationInfo = hostLView[HYDRATION];
-    const noOffsetIndex = tNode.index - HEADER_OFFSET;
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock(tNode) ||
-        isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
-    // Regular creation mode.
-    if (isNodeCreationMode) {
-        return false;
-    }
-    // Hydration mode, looking up an anchor node and dehydrated views in DOM.
-    const currentRNode = getSegmentHead(hydrationInfo, noOffsetIndex);
-    const serializedViews = hydrationInfo.data[CONTAINERS]?.[noOffsetIndex];
-    ngDevMode &&
-        assertDefined(serializedViews, 'Unexpected state: no hydration info available for a given TNode, ' +
-            'which represents a view container.');
-    const [commentNode, dehydratedViews] = locateDehydratedViewsInContainer(currentRNode, serializedViews);
-    if (ngDevMode) {
-        validateMatchingNode(commentNode, Node.COMMENT_NODE, null, hostLView, tNode, true);
-        // Do not throw in case this node is already claimed (thus `false` as a second
-        // argument). If this container is created based on an `<ng-template>`, the comment
-        // node would be already claimed from the `template` instruction. If an element acts
-        // as an anchor (e.g. <div #vcRef>), a separate comment node would be created/located,
-        // so we need to claim it here.
-        markRNodeAsClaimedByHydration(commentNode, false);
-    }
-    lContainer[NATIVE] = commentNode;
-    lContainer[DEHYDRATED_VIEWS] = dehydratedViews;
-    return true;
-}
-function locateOrCreateAnchorNode(lContainer, hostLView, hostTNode, slotValue) {
-    if (!_populateDehydratedViewsInLContainer(lContainer, hostTNode, hostLView)) {
-        // Populating dehydrated views operation returned `false`, which indicates
-        // that the logic was running in client-only mode, this an anchor comment
-        // node should be created for this container.
-        createAnchorNode(lContainer, hostLView, hostTNode, slotValue);
-    }
-}
-function enableLocateOrCreateContainerRefImpl() {
-    _locateOrCreateAnchorNode = locateOrCreateAnchorNode;
-    _populateDehydratedViewsInLContainer = populateDehydratedViewsInLContainerImpl;
-}
-
-function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
-    ngDevMode && assertFirstCreatePass(tView);
-    ngDevMode && ngDevMode.firstCreatePass++;
-    const tViewConsts = tView.consts;
-    // TODO(pk): refactor getOrCreateTNode to have the "create" only version
-    const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
-    resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
-    registerPostOrderHooks(tView, tNode);
-    const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts, null /* ssrId */);
-    if (tView.queries !== null) {
-        tView.queries.template(tView, tNode);
-        embeddedTView.queries = tView.queries.embeddedTView(tNode);
-    }
-    return tNode;
-}
-/**
- * Creates an LContainer for an ng-template (dynamically-inserted view), e.g.
- *
- * <ng-template #foo>
- *    <div></div>
- * </ng-template>
- *
- * @param index The index of the container in the data array
- * @param templateFn Inline template
- * @param decls The number of nodes, local refs, and pipes for this template
- * @param vars The number of bindings for this template
- * @param tagName The name of the container element, if applicable
- * @param attrsIndex Index of template attributes in the `consts` array.
- * @param localRefs Index of the local references in the `consts` array.
- * @param localRefExtractor A function which extracts local-refs values from the template.
- *        Defaults to the current element associated with the local-ref.
- *
- * @codeGenApi
- */
-function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex, localRefExtractor) {
-    const lView = getLView();
-    const tView = getTView();
-    const adjustedIndex = index + HEADER_OFFSET;
-    const tNode = tView.firstCreatePass ? templateFirstCreatePass(adjustedIndex, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
-        tView.data[adjustedIndex];
-    setCurrentTNode(tNode, false);
-    const comment = _locateOrCreateContainerAnchor(tView, lView, tNode, index);
-    if (wasLastNodeCreated()) {
-        appendChild(tView, lView, comment, tNode);
-    }
-    attachPatchData(comment, lView);
-    const lContainer = createLContainer(comment, lView, comment, tNode);
-    lView[adjustedIndex] = lContainer;
-    addToViewTree(lView, lContainer);
-    // If hydration is enabled, looks up dehydrated views in the DOM
-    // using hydration annotation info and stores those views on LContainer.
-    // In client-only mode, this function is a noop.
-    populateDehydratedViewsInLContainer(lContainer, tNode, lView);
-    if (isDirectiveHost(tNode)) {
-        createDirectivesInstances(tView, lView, tNode);
-    }
-    if (localRefsIndex != null) {
-        saveResolvedLocalsInData(lView, tNode, localRefExtractor);
-    }
-    return ɵɵtemplate;
-}
-let _locateOrCreateContainerAnchor = createContainerAnchorImpl;
-/**
- * Regular creation mode for LContainers and their anchor (comment) nodes.
- */
-function createContainerAnchorImpl(tView, lView, tNode, index) {
-    lastNodeWasCreated(true);
-    return lView[RENDERER].createComment(ngDevMode ? 'container' : '');
-}
-/**
- * Enables hydration code path (to lookup existing elements in DOM)
- * in addition to the regular creation mode for LContainers and their
- * anchor (comment) nodes.
- */
-function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
-    const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
-    lastNodeWasCreated(isNodeCreationMode);
-    // Regular creation mode.
-    if (isNodeCreationMode) {
-        return createContainerAnchorImpl(tView, lView, tNode, index);
-    }
-    const ssrId = hydrationInfo.data[TEMPLATES]?.[index] ?? null;
-    // Apply `ssrId` value to the underlying TView if it was not previously set.
-    //
-    // There might be situations when the same component is present in a template
-    // multiple times and some instances are opted-out of using hydration via
-    // `ngSkipHydration` attribute. In this scenario, at the time a TView is created,
-    // the `ssrId` might be `null` (if the first component is opted-out of hydration).
-    // The code below makes sure that the `ssrId` is applied to the TView if it's still
-    // `null` and verifies we never try to override it with a different value.
-    if (ssrId !== null && tNode.tView !== null) {
-        if (tNode.tView.ssrId === null) {
-            tNode.tView.ssrId = ssrId;
-        }
-        else {
-            ngDevMode &&
-                assertEqual(tNode.tView.ssrId, ssrId, 'Unexpected value of the `ssrId` for this TView');
-        }
-    }
-    // Hydration mode, looking up existing elements in DOM.
-    const currentRNode = locateNextRNode(hydrationInfo, tView, lView, tNode);
-    ngDevMode && validateNodeExists(currentRNode, lView, tNode);
-    setSegmentHead(hydrationInfo, index, currentRNode);
-    const viewContainerSize = calcSerializedContainerSize(hydrationInfo, index);
-    const comment = siblingAfter(viewContainerSize, currentRNode);
-    if (ngDevMode) {
-        validateMatchingNode(comment, Node.COMMENT_NODE, null, lView, tNode);
-        markRNodeAsClaimedByHydration(comment);
-    }
-    return comment;
-}
-function enableLocateOrCreateContainerAnchorImpl() {
-    _locateOrCreateContainerAnchor = locateOrCreateContainerAnchorImpl;
-}
-
 /**
  * The conditional instruction represents the basic building block on the runtime side to support
  * built-in "if" and "switch". On the high level this instruction is responsible for adding and
@@ -20561,1409 +21964,6 @@ function getExistingTNode(tView, index) {
     const tNode = getTNode(tView, index);
     ngDevMode && assertTNode(tNode);
     return tNode;
-}
-
-/**
- * Describes the state of defer block dependency loading.
- */
-var DeferDependenciesLoadingState;
-(function (DeferDependenciesLoadingState) {
-    /** Initial state, dependency loading is not yet triggered */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["NOT_STARTED"] = 0] = "NOT_STARTED";
-    /** Dependency loading is in progress */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["IN_PROGRESS"] = 1] = "IN_PROGRESS";
-    /** Dependency loading has completed successfully */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["COMPLETE"] = 2] = "COMPLETE";
-    /** Dependency loading has failed */
-    DeferDependenciesLoadingState[DeferDependenciesLoadingState["FAILED"] = 3] = "FAILED";
-})(DeferDependenciesLoadingState || (DeferDependenciesLoadingState = {}));
-/** Slot index where `minimum` parameter value is stored. */
-const MINIMUM_SLOT = 0;
-/** Slot index where `after` parameter value is stored. */
-const LOADING_AFTER_SLOT = 1;
-/**
- * Describes the current state of this defer block instance.
- *
- * @publicApi
- * @developerPreview
- */
-var DeferBlockState;
-(function (DeferBlockState) {
-    /** The placeholder block content is rendered */
-    DeferBlockState[DeferBlockState["Placeholder"] = 0] = "Placeholder";
-    /** The loading block content is rendered */
-    DeferBlockState[DeferBlockState["Loading"] = 1] = "Loading";
-    /** The main content block content is rendered */
-    DeferBlockState[DeferBlockState["Complete"] = 2] = "Complete";
-    /** The error block content is rendered */
-    DeferBlockState[DeferBlockState["Error"] = 3] = "Error";
-})(DeferBlockState || (DeferBlockState = {}));
-/**
- * Describes the initial state of this defer block instance.
- *
- * Note: this state is internal only and *must* be represented
- * with a number lower than any value in the `DeferBlockState` enum.
- */
-var DeferBlockInternalState;
-(function (DeferBlockInternalState) {
-    /** Initial state. Nothing is rendered yet. */
-    DeferBlockInternalState[DeferBlockInternalState["Initial"] = -1] = "Initial";
-})(DeferBlockInternalState || (DeferBlockInternalState = {}));
-const NEXT_DEFER_BLOCK_STATE = 0;
-// Note: it's *important* to keep the state in this slot, because this slot
-// is used by runtime logic to differentiate between LViews, LContainers and
-// other types (see `isLView` and `isLContainer` functions). In case of defer
-// blocks, this slot would always be a number.
-const DEFER_BLOCK_STATE = 1;
-const STATE_IS_FROZEN_UNTIL = 2;
-const LOADING_AFTER_CLEANUP_FN = 3;
-const TRIGGER_CLEANUP_FNS = 4;
-const PREFETCH_TRIGGER_CLEANUP_FNS = 5;
-/**
- * Options for configuring defer blocks behavior.
- * @publicApi
- * @developerPreview
- */
-var DeferBlockBehavior;
-(function (DeferBlockBehavior) {
-    /**
-     * Manual triggering mode for defer blocks. Provides control over when defer blocks render
-     * and which state they render. This is the default behavior in test environments.
-     */
-    DeferBlockBehavior[DeferBlockBehavior["Manual"] = 0] = "Manual";
-    /**
-     * Playthrough mode for defer blocks. This mode behaves like defer blocks would in a browser.
-     */
-    DeferBlockBehavior[DeferBlockBehavior["Playthrough"] = 1] = "Playthrough";
-})(DeferBlockBehavior || (DeferBlockBehavior = {}));
-
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Registers a cleanup function associated with a prefetching trigger
- * or a regular trigger of a defer block.
- */
-function storeTriggerCleanupFn(type, lDetails, cleanupFn) {
-    const key = type === 1 /* TriggerType.Prefetch */ ? PREFETCH_TRIGGER_CLEANUP_FNS : TRIGGER_CLEANUP_FNS;
-    if (lDetails[key] === null) {
-        lDetails[key] = [];
-    }
-    lDetails[key].push(cleanupFn);
-}
-/**
- * Invokes registered cleanup functions either for prefetch or for regular triggers.
- */
-function invokeTriggerCleanupFns(type, lDetails) {
-    const key = type === 1 /* TriggerType.Prefetch */ ? PREFETCH_TRIGGER_CLEANUP_FNS : TRIGGER_CLEANUP_FNS;
-    const cleanupFns = lDetails[key];
-    if (cleanupFns !== null) {
-        for (const cleanupFn of cleanupFns) {
-            cleanupFn();
-        }
-        lDetails[key] = null;
-    }
-}
-/**
- * Invokes registered cleanup functions for both prefetch and regular triggers.
- */
-function invokeAllTriggerCleanupFns(lDetails) {
-    invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
-    invokeTriggerCleanupFns(0 /* TriggerType.Regular */, lDetails);
-}
-
-// Public API for Zone
-
-/**
- * Calculates a data slot index for defer block info (either static or
- * instance-specific), given an index of a defer instruction.
- */
-function getDeferBlockDataIndex(deferBlockIndex) {
-    // Instance state is located at the *next* position
-    // after the defer block slot in an LView or TView.data.
-    return deferBlockIndex + 1;
-}
-/** Retrieves a defer block state from an LView, given a TNode that represents a block. */
-function getLDeferBlockDetails(lView, tNode) {
-    const tView = lView[TVIEW];
-    const slotIndex = getDeferBlockDataIndex(tNode.index);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    return lView[slotIndex];
-}
-/** Stores a defer block instance state in LView. */
-function setLDeferBlockDetails(lView, deferBlockIndex, lDetails) {
-    const tView = lView[TVIEW];
-    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    lView[slotIndex] = lDetails;
-}
-/** Retrieves static info about a defer block, given a TView and a TNode that represents a block. */
-function getTDeferBlockDetails(tView, tNode) {
-    const slotIndex = getDeferBlockDataIndex(tNode.index);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    return tView.data[slotIndex];
-}
-/** Stores a defer block static info in `TView.data`. */
-function setTDeferBlockDetails(tView, deferBlockIndex, deferBlockConfig) {
-    const slotIndex = getDeferBlockDataIndex(deferBlockIndex);
-    ngDevMode && assertIndexInDeclRange(tView, slotIndex);
-    tView.data[slotIndex] = deferBlockConfig;
-}
-function getTemplateIndexForState(newState, hostLView, tNode) {
-    const tView = hostLView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    switch (newState) {
-        case DeferBlockState.Complete:
-            return tDetails.primaryTmplIndex;
-        case DeferBlockState.Loading:
-            return tDetails.loadingTmplIndex;
-        case DeferBlockState.Error:
-            return tDetails.errorTmplIndex;
-        case DeferBlockState.Placeholder:
-            return tDetails.placeholderTmplIndex;
-        default:
-            ngDevMode && throwError(`Unexpected defer block state: ${newState}`);
-            return null;
-    }
-}
-/**
- * Returns a minimum amount of time that a given state should be rendered for,
- * taking into account `minimum` parameter value. If the `minimum` value is
- * not specified - returns `null`.
- */
-function getMinimumDurationForState(tDetails, currentState) {
-    if (currentState === DeferBlockState.Placeholder) {
-        return tDetails.placeholderBlockConfig?.[MINIMUM_SLOT] ?? null;
-    }
-    else if (currentState === DeferBlockState.Loading) {
-        return tDetails.loadingBlockConfig?.[MINIMUM_SLOT] ?? null;
-    }
-    return null;
-}
-/** Retrieves the value of the `after` parameter on the @loading block. */
-function getLoadingBlockAfter(tDetails) {
-    return tDetails.loadingBlockConfig?.[LOADING_AFTER_SLOT] ?? null;
-}
-/**
- * Adds downloaded dependencies into a directive or a pipe registry,
- * making sure that a dependency doesn't yet exist in the registry.
- */
-function addDepsToRegistry(currentDeps, newDeps) {
-    if (!currentDeps || currentDeps.length === 0) {
-        return newDeps;
-    }
-    const currentDepSet = new Set(currentDeps);
-    for (const dep of newDeps) {
-        currentDepSet.add(dep);
-    }
-    // If `currentDeps` is the same length, there were no new deps and can
-    // return the original array.
-    return (currentDeps.length === currentDepSet.size) ? currentDeps : Array.from(currentDepSet);
-}
-/** Retrieves a TNode that represents main content of a defer block. */
-function getPrimaryBlockTNode(tView, tDetails) {
-    const adjustedIndex = tDetails.primaryTmplIndex + HEADER_OFFSET;
-    return getTNode(tView, adjustedIndex);
-}
-/**
- * Asserts whether all dependencies for a defer block are loaded.
- * Always run this function (in dev mode) before rendering a defer
- * block in completed state.
- */
-function assertDeferredDependenciesLoaded(tDetails) {
-    assertEqual(tDetails.loadingState, DeferDependenciesLoadingState.COMPLETE, 'Expecting all deferred dependencies to be loaded.');
-}
-/**
- * Determines if a given value matches the expected structure of a defer block
- *
- * We can safely rely on the primaryTmplIndex because every defer block requires
- * that a primary template exists. All the other template options are optional.
- */
-function isTDeferBlockDetails(value) {
-    return value !== null && (typeof value === 'object') &&
-        (typeof value.primaryTmplIndex === 'number');
-}
-
-/*!
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** Configuration object used to register passive and capturing events. */
-const eventListenerOptions = {
-    passive: true,
-    capture: true
-};
-/** Keeps track of the currently-registered `on hover` triggers. */
-const hoverTriggers = new WeakMap();
-/** Keeps track of the currently-registered `on interaction` triggers. */
-const interactionTriggers = new WeakMap();
-/** Currently-registered `viewport` triggers. */
-const viewportTriggers = new WeakMap();
-/** Names of the events considered as interaction events. */
-const interactionEventNames = ['click', 'keydown'];
-/** Names of the events considered as hover events. */
-const hoverEventNames = ['mouseenter', 'focusin'];
-/** `IntersectionObserver` used to observe `viewport` triggers. */
-let intersectionObserver = null;
-/** Number of elements currently observed with `viewport` triggers. */
-let observedViewportElements = 0;
-/** Object keeping track of registered callbacks for a deferred block trigger. */
-class DeferEventEntry {
-    constructor() {
-        this.callbacks = new Set();
-        this.listener = () => {
-            for (const callback of this.callbacks) {
-                callback();
-            }
-        };
-    }
-}
-/**
- * Registers an interaction trigger.
- * @param trigger Element that is the trigger.
- * @param callback Callback to be invoked when the trigger is interacted with.
- */
-function onInteraction(trigger, callback) {
-    let entry = interactionTriggers.get(trigger);
-    // If this is the first entry for this element, add the listeners.
-    if (!entry) {
-        // Note that managing events centrally like this lends itself well to using global
-        // event delegation. It currently does delegation at the element level, rather than the
-        // document level, because:
-        // 1. Global delegation is the most effective when there are a lot of events being registered
-        // at the same time. Deferred blocks are unlikely to be used in such a way.
-        // 2. Matching events to their target isn't free. For each `click` and `keydown` event we
-        // would have look through all the triggers and check if the target either is the element
-        // itself or it's contained within the element. Given that `click` and `keydown` are some
-        // of the most common events, this may end up introducing a lot of runtime overhead.
-        // 3. We're still registering only two events per element, no matter how many deferred blocks
-        // are referencing it.
-        entry = new DeferEventEntry();
-        interactionTriggers.set(trigger, entry);
-        for (const name of interactionEventNames) {
-            trigger.addEventListener(name, entry.listener, eventListenerOptions);
-        }
-    }
-    entry.callbacks.add(callback);
-    return () => {
-        const { callbacks, listener } = entry;
-        callbacks.delete(callback);
-        if (callbacks.size === 0) {
-            interactionTriggers.delete(trigger);
-            for (const name of interactionEventNames) {
-                trigger.removeEventListener(name, listener, eventListenerOptions);
-            }
-        }
-    };
-}
-/**
- * Registers a hover trigger.
- * @param trigger Element that is the trigger.
- * @param callback Callback to be invoked when the trigger is hovered over.
- */
-function onHover(trigger, callback) {
-    let entry = hoverTriggers.get(trigger);
-    // If this is the first entry for this element, add the listener.
-    if (!entry) {
-        entry = new DeferEventEntry();
-        hoverTriggers.set(trigger, entry);
-        for (const name of hoverEventNames) {
-            trigger.addEventListener(name, entry.listener, eventListenerOptions);
-        }
-    }
-    entry.callbacks.add(callback);
-    return () => {
-        const { callbacks, listener } = entry;
-        callbacks.delete(callback);
-        if (callbacks.size === 0) {
-            for (const name of hoverEventNames) {
-                trigger.removeEventListener(name, listener, eventListenerOptions);
-            }
-            hoverTriggers.delete(trigger);
-        }
-    };
-}
-/**
- * Registers a viewport trigger.
- * @param trigger Element that is the trigger.
- * @param callback Callback to be invoked when the trigger comes into the viewport.
- * @param injector Injector that can be used by the trigger to resolve DI tokens.
- */
-function onViewport(trigger, callback, injector) {
-    const ngZone = injector.get(NgZone);
-    let entry = viewportTriggers.get(trigger);
-    intersectionObserver = intersectionObserver || ngZone.runOutsideAngular(() => {
-        return new IntersectionObserver(entries => {
-            for (const current of entries) {
-                // Only invoke the callbacks if the specific element is intersecting.
-                if (current.isIntersecting && viewportTriggers.has(current.target)) {
-                    ngZone.run(viewportTriggers.get(current.target).listener);
-                }
-            }
-        });
-    });
-    if (!entry) {
-        entry = new DeferEventEntry();
-        ngZone.runOutsideAngular(() => intersectionObserver.observe(trigger));
-        viewportTriggers.set(trigger, entry);
-        observedViewportElements++;
-    }
-    entry.callbacks.add(callback);
-    return () => {
-        // It's possible that a different cleanup callback fully removed this element already.
-        if (!viewportTriggers.has(trigger)) {
-            return;
-        }
-        entry.callbacks.delete(callback);
-        if (entry.callbacks.size === 0) {
-            intersectionObserver?.unobserve(trigger);
-            viewportTriggers.delete(trigger);
-            observedViewportElements--;
-        }
-        if (observedViewportElements === 0) {
-            intersectionObserver?.disconnect();
-            intersectionObserver = null;
-        }
-    };
-}
-/**
- * Helper function to get the LView in which a deferred block's trigger is rendered.
- * @param deferredHostLView LView in which the deferred block is defined.
- * @param deferredTNode TNode defining the deferred block.
- * @param walkUpTimes Number of times to go up in the view hierarchy to find the trigger's view.
- *   A negative value means that the trigger is inside the block's placeholder, while an undefined
- *   value means that the trigger is in the same LView as the deferred block.
- */
-function getTriggerLView(deferredHostLView, deferredTNode, walkUpTimes) {
-    // The trigger is in the same view, we don't need to traverse.
-    if (walkUpTimes == null) {
-        return deferredHostLView;
-    }
-    // A positive value or zero means that the trigger is in a parent view.
-    if (walkUpTimes >= 0) {
-        return walkUpViews(walkUpTimes, deferredHostLView);
-    }
-    // If the value is negative, it means that the trigger is inside the placeholder.
-    const deferredContainer = deferredHostLView[deferredTNode.index];
-    ngDevMode && assertLContainer(deferredContainer);
-    const triggerLView = deferredContainer[CONTAINER_HEADER_OFFSET] ?? null;
-    // We need to null check, because the placeholder might not have been rendered yet.
-    if (ngDevMode && triggerLView !== null) {
-        const lDetails = getLDeferBlockDetails(deferredHostLView, deferredTNode);
-        const renderedState = lDetails[DEFER_BLOCK_STATE];
-        assertEqual(renderedState, DeferBlockState.Placeholder, 'Expected a placeholder to be rendered in this defer block.');
-        assertLView(triggerLView);
-    }
-    return triggerLView;
-}
-/**
- * Gets the element that a deferred block's trigger is pointing to.
- * @param triggerLView LView in which the trigger is defined.
- * @param triggerIndex Index at which the trigger element should've been rendered.
- */
-function getTriggerElement(triggerLView, triggerIndex) {
-    const element = getNativeByIndex(HEADER_OFFSET + triggerIndex, triggerLView);
-    ngDevMode && assertElement(element);
-    return element;
-}
-/**
- * Registers a DOM-node based trigger.
- * @param initialLView LView in which the defer block is rendered.
- * @param tNode TNode representing the defer block.
- * @param triggerIndex Index at which to find the trigger element.
- * @param walkUpTimes Number of times to go up/down in the view hierarchy to find the trigger.
- * @param registerFn Function that will register the DOM events.
- * @param callback Callback to be invoked when the trigger receives the event that should render
- *     the deferred block.
- * @param type Trigger type to distinguish between regular and prefetch triggers.
- */
-function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, registerFn, callback, type) {
-    const injector = initialLView[INJECTOR$1];
-    function pollDomTrigger() {
-        // If the initial view was destroyed, we don't need to do anything.
-        if (isDestroyed(initialLView)) {
-            return;
-        }
-        const lDetails = getLDeferBlockDetails(initialLView, tNode);
-        const renderedState = lDetails[DEFER_BLOCK_STATE];
-        // If the block was loaded before the trigger was resolved, we don't need to do anything.
-        if (renderedState !== DeferBlockInternalState.Initial &&
-            renderedState !== DeferBlockState.Placeholder) {
-            return;
-        }
-        const triggerLView = getTriggerLView(initialLView, tNode, walkUpTimes);
-        // Keep polling until we resolve the trigger's LView.
-        if (!triggerLView) {
-            internalAfterNextRender(pollDomTrigger, { injector });
-            return;
-        }
-        // It's possible that the trigger's view was destroyed before we resolved the trigger element.
-        if (isDestroyed(triggerLView)) {
-            return;
-        }
-        const element = getTriggerElement(triggerLView, triggerIndex);
-        const cleanup = registerFn(element, () => {
-            if (initialLView !== triggerLView) {
-                removeLViewOnDestroy(triggerLView, cleanup);
-            }
-            callback();
-        }, injector);
-        // The trigger and deferred block might be in different LViews.
-        // For the main LView the cleanup would happen as a part of
-        // `storeTriggerCleanupFn` logic. For trigger LView we register
-        // a cleanup function there to remove event handlers in case an
-        // LView gets destroyed before a trigger is invoked.
-        if (initialLView !== triggerLView) {
-            storeLViewOnDestroy(triggerLView, cleanup);
-        }
-        storeTriggerCleanupFn(type, lDetails, cleanup);
-    }
-    // Begin polling for the trigger.
-    internalAfterNextRender(pollDomTrigger, { injector });
-}
-
-/**
- * Helper function to schedule a callback to be invoked when a browser becomes idle.
- *
- * @param callback A function to be invoked when a browser becomes idle.
- * @param lView LView that hosts an instance of a defer block.
- */
-function onIdle(callback, lView) {
-    const injector = lView[INJECTOR$1];
-    const scheduler = injector.get(IdleScheduler);
-    const cleanupFn = () => scheduler.remove(callback);
-    scheduler.add(callback);
-    return cleanupFn;
-}
-/**
- * Use shims for the `requestIdleCallback` and `cancelIdleCallback` functions for
- * environments where those functions are not available (e.g. Node.js and Safari).
- *
- * Note: we wrap the `requestIdleCallback` call into a function, so that it can be
- * overridden/mocked in test environment and picked up by the runtime code.
- */
-const _requestIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : setTimeout;
-const _cancelIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
-/**
- * Helper service to schedule `requestIdleCallback`s for batches of defer blocks,
- * to avoid calling `requestIdleCallback` for each defer block (e.g. if
- * defer blocks are defined inside a for loop).
- */
-class IdleScheduler {
-    constructor() {
-        // Indicates whether current callbacks are being invoked.
-        this.executingCallbacks = false;
-        // Currently scheduled idle callback id.
-        this.idleId = null;
-        // Set of callbacks to be invoked next.
-        this.current = new Set();
-        // Set of callbacks collected while invoking current set of callbacks.
-        // Those callbacks are scheduled for the next idle period.
-        this.deferred = new Set();
-        this.ngZone = inject(NgZone);
-        this.requestIdleCallbackFn = _requestIdleCallback().bind(globalThis);
-        this.cancelIdleCallbackFn = _cancelIdleCallback().bind(globalThis);
-    }
-    add(callback) {
-        const target = this.executingCallbacks ? this.deferred : this.current;
-        target.add(callback);
-        if (this.idleId === null) {
-            this.scheduleIdleCallback();
-        }
-    }
-    remove(callback) {
-        const { current, deferred } = this;
-        current.delete(callback);
-        deferred.delete(callback);
-        // If the last callback was removed and there is a pending
-        // idle callback - cancel it.
-        if (current.size === 0 && deferred.size === 0) {
-            this.cancelIdleCallback();
-        }
-    }
-    scheduleIdleCallback() {
-        const callback = () => {
-            this.cancelIdleCallback();
-            this.executingCallbacks = true;
-            for (const callback of this.current) {
-                callback();
-            }
-            this.current.clear();
-            this.executingCallbacks = false;
-            // If there are any callbacks added during an invocation
-            // of the current ones - make them "current" and schedule
-            // a new idle callback.
-            if (this.deferred.size > 0) {
-                for (const callback of this.deferred) {
-                    this.current.add(callback);
-                }
-                this.deferred.clear();
-                this.scheduleIdleCallback();
-            }
-        };
-        // Ensure that the callback runs in the NgZone since
-        // the `requestIdleCallback` is not currently patched by Zone.js.
-        this.idleId = this.requestIdleCallbackFn(() => this.ngZone.run(callback));
-    }
-    cancelIdleCallback() {
-        if (this.idleId !== null) {
-            this.cancelIdleCallbackFn(this.idleId);
-            this.idleId = null;
-        }
-    }
-    ngOnDestroy() {
-        this.cancelIdleCallback();
-        this.current.clear();
-        this.deferred.clear();
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: IdleScheduler,
-        providedIn: 'root',
-        factory: () => new IdleScheduler(),
-    }); }
-}
-
-/**
- * Returns a function that captures a provided delay.
- * Invoking the returned function schedules a trigger.
- */
-function onTimer(delay) {
-    return (callback, lView) => scheduleTimerTrigger(delay, callback, lView);
-}
-/**
- * Schedules a callback to be invoked after a given timeout.
- *
- * @param delay A number of ms to wait until firing a callback.
- * @param callback A function to be invoked after a timeout.
- * @param lView LView that hosts an instance of a defer block.
- */
-function scheduleTimerTrigger(delay, callback, lView) {
-    const injector = lView[INJECTOR$1];
-    const scheduler = injector.get(TimerScheduler);
-    const cleanupFn = () => scheduler.remove(callback);
-    scheduler.add(delay, callback);
-    return cleanupFn;
-}
-/**
- * Helper service to schedule `setTimeout`s for batches of defer blocks,
- * to avoid calling `setTimeout` for each defer block (e.g. if defer blocks
- * are created inside a for loop).
- */
-class TimerScheduler {
-    constructor() {
-        // Indicates whether current callbacks are being invoked.
-        this.executingCallbacks = false;
-        // Currently scheduled `setTimeout` id.
-        this.timeoutId = null;
-        // When currently scheduled timer would fire.
-        this.invokeTimerAt = null;
-        // List of callbacks to be invoked.
-        // For each callback we also store a timestamp on when the callback
-        // should be invoked. We store timestamps and callback functions
-        // in a flat array to avoid creating new objects for each entry.
-        // [timestamp1, callback1, timestamp2, callback2, ...]
-        this.current = [];
-        // List of callbacks collected while invoking current set of callbacks.
-        // Those callbacks are added to the "current" queue at the end of
-        // the current callback invocation. The shape of this list is the same
-        // as the shape of the `current` list.
-        this.deferred = [];
-    }
-    add(delay, callback) {
-        const target = this.executingCallbacks ? this.deferred : this.current;
-        this.addToQueue(target, Date.now() + delay, callback);
-        this.scheduleTimer();
-    }
-    remove(callback) {
-        const { current, deferred } = this;
-        const callbackIndex = this.removeFromQueue(current, callback);
-        if (callbackIndex === -1) {
-            // Try cleaning up deferred queue only in case
-            // we didn't find a callback in the "current" queue.
-            this.removeFromQueue(deferred, callback);
-        }
-        // If the last callback was removed and there is a pending timeout - cancel it.
-        if (current.length === 0 && deferred.length === 0) {
-            this.clearTimeout();
-        }
-    }
-    addToQueue(target, invokeAt, callback) {
-        let insertAtIndex = target.length;
-        for (let i = 0; i < target.length; i += 2) {
-            const invokeQueuedCallbackAt = target[i];
-            if (invokeQueuedCallbackAt > invokeAt) {
-                // We've reached a first timer that is scheduled
-                // for a later time than what we are trying to insert.
-                // This is the location at which we need to insert,
-                // no need to iterate further.
-                insertAtIndex = i;
-                break;
-            }
-        }
-        arrayInsert2(target, insertAtIndex, invokeAt, callback);
-    }
-    removeFromQueue(target, callback) {
-        let index = -1;
-        for (let i = 0; i < target.length; i += 2) {
-            const queuedCallback = target[i + 1];
-            if (queuedCallback === callback) {
-                index = i;
-                break;
-            }
-        }
-        if (index > -1) {
-            // Remove 2 elements: a timestamp slot and
-            // the following slot with a callback function.
-            arraySplice(target, index, 2);
-        }
-        return index;
-    }
-    scheduleTimer() {
-        const callback = () => {
-            this.clearTimeout();
-            this.executingCallbacks = true;
-            // Clone the current state of the queue, since it might be altered
-            // as we invoke callbacks.
-            const current = [...this.current];
-            // Invoke callbacks that were scheduled to run before the current time.
-            const now = Date.now();
-            for (let i = 0; i < current.length; i += 2) {
-                const invokeAt = current[i];
-                const callback = current[i + 1];
-                if (invokeAt <= now) {
-                    callback();
-                }
-                else {
-                    // We've reached a timer that should not be invoked yet.
-                    break;
-                }
-            }
-            // The state of the queue might've changed after callbacks invocation,
-            // run the cleanup logic based on the *current* state of the queue.
-            let lastCallbackIndex = -1;
-            for (let i = 0; i < this.current.length; i += 2) {
-                const invokeAt = this.current[i];
-                if (invokeAt <= now) {
-                    // Add +1 to account for a callback function that
-                    // goes after the timestamp in events array.
-                    lastCallbackIndex = i + 1;
-                }
-                else {
-                    // We've reached a timer that should not be invoked yet.
-                    break;
-                }
-            }
-            if (lastCallbackIndex >= 0) {
-                arraySplice(this.current, 0, lastCallbackIndex + 1);
-            }
-            this.executingCallbacks = false;
-            // If there are any callbacks added during an invocation
-            // of the current ones - move them over to the "current"
-            // queue.
-            if (this.deferred.length > 0) {
-                for (let i = 0; i < this.deferred.length; i += 2) {
-                    const invokeAt = this.deferred[i];
-                    const callback = this.deferred[i + 1];
-                    this.addToQueue(this.current, invokeAt, callback);
-                }
-                this.deferred.length = 0;
-            }
-            this.scheduleTimer();
-        };
-        // Avoid running timer callbacks more than once per
-        // average frame duration. This is needed for better
-        // batching and to avoid kicking off excessive change
-        // detection cycles.
-        const FRAME_DURATION_MS = 16; // 1000ms / 60fps
-        if (this.current.length > 0) {
-            const now = Date.now();
-            // First element in the queue points at the timestamp
-            // of the first (earliest) event.
-            const invokeAt = this.current[0];
-            if (this.timeoutId === null ||
-                // Reschedule a timer in case a queue contains an item with
-                // an earlier timestamp and the delta is more than an average
-                // frame duration.
-                (this.invokeTimerAt && (this.invokeTimerAt - invokeAt > FRAME_DURATION_MS))) {
-                // There was a timeout already, but an earlier event was added
-                // into the queue. In this case we drop an old timer and setup
-                // a new one with an updated (smaller) timeout.
-                this.clearTimeout();
-                const timeout = Math.max(invokeAt - now, FRAME_DURATION_MS);
-                this.invokeTimerAt = invokeAt;
-                this.timeoutId = setTimeout(callback, timeout);
-            }
-        }
-    }
-    clearTimeout() {
-        if (this.timeoutId !== null) {
-            clearTimeout(this.timeoutId);
-            this.timeoutId = null;
-        }
-    }
-    ngOnDestroy() {
-        this.clearTimeout();
-        this.current.length = 0;
-        this.deferred.length = 0;
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: TimerScheduler,
-        providedIn: 'root',
-        factory: () => new TimerScheduler(),
-    }); }
-}
-
-/**
- * **INTERNAL**, avoid referencing it in application code.
- *
- * Injector token that allows to provide `DeferBlockDependencyInterceptor` class
- * implementation.
- */
-const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = new InjectionToken('DEFER_BLOCK_DEPENDENCY_INTERCEPTOR');
-/**
- * **INTERNAL**, token used for configuring defer block behavior.
- */
-const DEFER_BLOCK_CONFIG = new InjectionToken(ngDevMode ? 'DEFER_BLOCK_CONFIG' : '');
-/**
- * Returns whether defer blocks should be triggered.
- *
- * Currently, defer blocks are not triggered on the server,
- * only placeholder content is rendered (if provided).
- */
-function shouldTriggerDeferBlock(injector) {
-    const config = injector.get(DEFER_BLOCK_CONFIG, null, { optional: true });
-    if (config?.behavior === DeferBlockBehavior.Manual) {
-        return false;
-    }
-    return isPlatformBrowser(injector);
-}
-/**
- * Reference to the timer-based scheduler implementation of defer block state
- * rendering method. It's used to make timer-based scheduling tree-shakable.
- * If `minimum` or `after` parameters are used, compiler generates an extra
- * argument for the `ɵɵdefer` instruction, which references a timer-based
- * implementation.
- */
-let applyDeferBlockStateWithSchedulingImpl = null;
-/**
- * Enables timer-related scheduling if `after` or `minimum` parameters are setup
- * on the `@loading` or `@placeholder` blocks.
- */
-function ɵɵdeferEnableTimerScheduling(tView, tDetails, placeholderConfigIndex, loadingConfigIndex) {
-    const tViewConsts = tView.consts;
-    if (placeholderConfigIndex != null) {
-        tDetails.placeholderBlockConfig =
-            getConstant(tViewConsts, placeholderConfigIndex);
-    }
-    if (loadingConfigIndex != null) {
-        tDetails.loadingBlockConfig =
-            getConstant(tViewConsts, loadingConfigIndex);
-    }
-    // Enable implementation that supports timer-based scheduling.
-    if (applyDeferBlockStateWithSchedulingImpl === null) {
-        applyDeferBlockStateWithSchedulingImpl = applyDeferBlockStateWithScheduling;
-    }
-}
-/**
- * Creates runtime data structures for defer blocks.
- *
- * @param index Index of the `defer` instruction.
- * @param primaryTmplIndex Index of the template with the primary block content.
- * @param dependencyResolverFn Function that contains dependencies for this defer block.
- * @param loadingTmplIndex Index of the template with the loading block content.
- * @param placeholderTmplIndex Index of the template with the placeholder block content.
- * @param errorTmplIndex Index of the template with the error block content.
- * @param loadingConfigIndex Index in the constants array of the configuration of the loading.
- *     block.
- * @param placeholderConfigIndex Index in the constants array of the configuration of the
- *     placeholder block.
- * @param enableTimerScheduling Function that enables timer-related scheduling if `after`
- *     or `minimum` parameters are setup on the `@loading` or `@placeholder` blocks.
- *
- * @codeGenApi
- */
-function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplIndex, placeholderTmplIndex, errorTmplIndex, loadingConfigIndex, placeholderConfigIndex, enableTimerScheduling) {
-    const lView = getLView();
-    const tView = getTView();
-    const adjustedIndex = index + HEADER_OFFSET;
-    ɵɵtemplate(index, null, 0, 0);
-    if (tView.firstCreatePass) {
-        performanceMarkFeature('NgDefer');
-        const tDetails = {
-            primaryTmplIndex,
-            loadingTmplIndex: loadingTmplIndex ?? null,
-            placeholderTmplIndex: placeholderTmplIndex ?? null,
-            errorTmplIndex: errorTmplIndex ?? null,
-            placeholderBlockConfig: null,
-            loadingBlockConfig: null,
-            dependencyResolverFn: dependencyResolverFn ?? null,
-            loadingState: DeferDependenciesLoadingState.NOT_STARTED,
-            loadingPromise: null,
-        };
-        enableTimerScheduling?.(tView, tDetails, placeholderConfigIndex, loadingConfigIndex);
-        setTDeferBlockDetails(tView, adjustedIndex, tDetails);
-    }
-    const tNode = getCurrentTNode();
-    const lContainer = lView[adjustedIndex];
-    // If hydration is enabled, looks up dehydrated views in the DOM
-    // using hydration annotation info and stores those views on LContainer.
-    // In client-only mode, this function is a noop.
-    populateDehydratedViewsInLContainer(lContainer, tNode, lView);
-    // Init instance-specific defer details and store it.
-    const lDetails = [
-        null,
-        DeferBlockInternalState.Initial,
-        null,
-        null,
-        null,
-        null // PREFETCH_TRIGGER_CLEANUP_FNS
-    ];
-    setLDeferBlockDetails(lView, adjustedIndex, lDetails);
-    const cleanupTriggersFn = () => invokeAllTriggerCleanupFns(lDetails);
-    // When defer block is triggered - unsubscribe from LView destroy cleanup.
-    storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, () => removeLViewOnDestroy(lView, cleanupTriggersFn));
-    storeLViewOnDestroy(lView, cleanupTriggersFn);
-}
-/**
- * Loads defer block dependencies when a trigger value becomes truthy.
- * @codeGenApi
- */
-function ɵɵdeferWhen(rawValue) {
-    const lView = getLView();
-    const bindingIndex = nextBindingIndex();
-    if (bindingUpdated(lView, bindingIndex, rawValue)) {
-        const prevConsumer = setActiveConsumer$1(null);
-        try {
-            const value = Boolean(rawValue); // handle truthy or falsy values
-            const tNode = getSelectedTNode();
-            const lDetails = getLDeferBlockDetails(lView, tNode);
-            const renderedState = lDetails[DEFER_BLOCK_STATE];
-            if (value === false && renderedState === DeferBlockInternalState.Initial) {
-                // If nothing is rendered yet, render a placeholder (if defined).
-                renderPlaceholder(lView, tNode);
-            }
-            else if (value === true &&
-                (renderedState === DeferBlockInternalState.Initial ||
-                    renderedState === DeferBlockState.Placeholder)) {
-                // The `when` condition has changed to `true`, trigger defer block loading
-                // if the block is either in initial (nothing is rendered) or a placeholder
-                // state.
-                triggerDeferBlock(lView, tNode);
-            }
-        }
-        finally {
-            setActiveConsumer$1(prevConsumer);
-        }
-    }
-}
-/**
- * Prefetches the deferred content when a value becomes truthy.
- * @codeGenApi
- */
-function ɵɵdeferPrefetchWhen(rawValue) {
-    const lView = getLView();
-    const bindingIndex = nextBindingIndex();
-    if (bindingUpdated(lView, bindingIndex, rawValue)) {
-        const prevConsumer = setActiveConsumer$1(null);
-        try {
-            const value = Boolean(rawValue); // handle truthy or falsy values
-            const tView = lView[TVIEW];
-            const tNode = getSelectedTNode();
-            const tDetails = getTDeferBlockDetails(tView, tNode);
-            if (value === true && tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-                // If loading has not been started yet, trigger it now.
-                triggerPrefetching(tDetails, lView, tNode);
-            }
-        }
-        finally {
-            setActiveConsumer$1(prevConsumer);
-        }
-    }
-}
-/**
- * Sets up logic to handle the `on idle` deferred trigger.
- * @codeGenApi
- */
-function ɵɵdeferOnIdle() {
-    scheduleDelayedTrigger(onIdle);
-}
-/**
- * Sets up logic to handle the `prefetch on idle` deferred trigger.
- * @codeGenApi
- */
-function ɵɵdeferPrefetchOnIdle() {
-    scheduleDelayedPrefetching(onIdle);
-}
-/**
- * Sets up logic to handle the `on immediate` deferred trigger.
- * @codeGenApi
- */
-function ɵɵdeferOnImmediate() {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    const tView = lView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    // Render placeholder block only if loading template is not present
-    // to avoid content flickering, since it would be immediately replaced
-    // by the loading block.
-    if (tDetails.loadingTmplIndex === null) {
-        renderPlaceholder(lView, tNode);
-    }
-    triggerDeferBlock(lView, tNode);
-}
-/**
- * Sets up logic to handle the `prefetch on immediate` deferred trigger.
- * @codeGenApi
- */
-function ɵɵdeferPrefetchOnImmediate() {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    const tView = lView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        triggerResourceLoading(tDetails, lView, tNode);
-    }
-}
-/**
- * Creates runtime data structures for the `on timer` deferred trigger.
- * @param delay Amount of time to wait before loading the content.
- * @codeGenApi
- */
-function ɵɵdeferOnTimer(delay) {
-    scheduleDelayedTrigger(onTimer(delay));
-}
-/**
- * Creates runtime data structures for the `prefetch on timer` deferred trigger.
- * @param delay Amount of time to wait before prefetching the content.
- * @codeGenApi
- */
-function ɵɵdeferPrefetchOnTimer(delay) {
-    scheduleDelayedPrefetching(onTimer(delay));
-}
-/**
- * Creates runtime data structures for the `on hover` deferred trigger.
- * @param triggerIndex Index at which to find the trigger element.
- * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
- * @codeGenApi
- */
-function ɵɵdeferOnHover(triggerIndex, walkUpTimes) {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    renderPlaceholder(lView, tNode);
-    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerDeferBlock(lView, tNode), 0 /* TriggerType.Regular */);
-}
-/**
- * Creates runtime data structures for the `prefetch on hover` deferred trigger.
- * @param triggerIndex Index at which to find the trigger element.
- * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
- * @codeGenApi
- */
-function ɵɵdeferPrefetchOnHover(triggerIndex, walkUpTimes) {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    const tView = lView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onHover, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
-    }
-}
-/**
- * Creates runtime data structures for the `on interaction` deferred trigger.
- * @param triggerIndex Index at which to find the trigger element.
- * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
- * @codeGenApi
- */
-function ɵɵdeferOnInteraction(triggerIndex, walkUpTimes) {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    renderPlaceholder(lView, tNode);
-    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerDeferBlock(lView, tNode), 0 /* TriggerType.Regular */);
-}
-/**
- * Creates runtime data structures for the `prefetch on interaction` deferred trigger.
- * @param triggerIndex Index at which to find the trigger element.
- * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
- * @codeGenApi
- */
-function ɵɵdeferPrefetchOnInteraction(triggerIndex, walkUpTimes) {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    const tView = lView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onInteraction, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
-    }
-}
-/**
- * Creates runtime data structures for the `on viewport` deferred trigger.
- * @param triggerIndex Index at which to find the trigger element.
- * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
- * @codeGenApi
- */
-function ɵɵdeferOnViewport(triggerIndex, walkUpTimes) {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    renderPlaceholder(lView, tNode);
-    registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerDeferBlock(lView, tNode), 0 /* TriggerType.Regular */);
-}
-/**
- * Creates runtime data structures for the `prefetch on viewport` deferred trigger.
- * @param triggerIndex Index at which to find the trigger element.
- * @param walkUpTimes Number of times to walk up/down the tree hierarchy to find the trigger.
- * @codeGenApi
- */
-function ɵɵdeferPrefetchOnViewport(triggerIndex, walkUpTimes) {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    const tView = lView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        registerDomTrigger(lView, tNode, triggerIndex, walkUpTimes, onViewport, () => triggerPrefetching(tDetails, lView, tNode), 1 /* TriggerType.Prefetch */);
-    }
-}
-/********** Helper functions **********/
-/**
- * Schedules triggering of a defer block for `on idle` and `on timer` conditions.
- */
-function scheduleDelayedTrigger(scheduleFn) {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    renderPlaceholder(lView, tNode);
-    const cleanupFn = scheduleFn(() => triggerDeferBlock(lView, tNode), lView);
-    const lDetails = getLDeferBlockDetails(lView, tNode);
-    storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, cleanupFn);
-}
-/**
- * Schedules prefetching for `on idle` and `on timer` triggers.
- *
- * @param scheduleFn A function that does the scheduling.
- */
-function scheduleDelayedPrefetching(scheduleFn) {
-    const lView = getLView();
-    const tNode = getCurrentTNode();
-    const tView = lView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        const lDetails = getLDeferBlockDetails(lView, tNode);
-        const prefetch = () => triggerPrefetching(tDetails, lView, tNode);
-        const cleanupFn = scheduleFn(prefetch, lView);
-        storeTriggerCleanupFn(1 /* TriggerType.Prefetch */, lDetails, cleanupFn);
-    }
-}
-/**
- * Transitions a defer block to the new state. Updates the  necessary
- * data structures and renders corresponding block.
- *
- * @param newState New state that should be applied to the defer block.
- * @param tNode TNode that represents a defer block.
- * @param lContainer Represents an instance of a defer block.
- * @param skipTimerScheduling Indicates that `@loading` and `@placeholder` block
- *   should be rendered immediately, even if they have `after` or `minimum` config
- *   options setup. This flag to needed for testing APIs to transition defer block
- *   between states via `DeferFixture.render` method.
- */
-function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling = false) {
-    const hostLView = lContainer[PARENT];
-    const hostTView = hostLView[TVIEW];
-    // Check if this view is not destroyed. Since the loading process was async,
-    // the view might end up being destroyed by the time rendering happens.
-    if (isDestroyed(hostLView))
-        return;
-    // Make sure this TNode belongs to TView that represents host LView.
-    ngDevMode && assertTNodeForLView(tNode, hostLView);
-    const lDetails = getLDeferBlockDetails(hostLView, tNode);
-    ngDevMode && assertDefined(lDetails, 'Expected a defer block state defined');
-    const currentState = lDetails[DEFER_BLOCK_STATE];
-    if (isValidStateChange(currentState, newState) &&
-        isValidStateChange(lDetails[NEXT_DEFER_BLOCK_STATE] ?? -1, newState)) {
-        const tDetails = getTDeferBlockDetails(hostTView, tNode);
-        const needsScheduling = !skipTimerScheduling &&
-            (getLoadingBlockAfter(tDetails) !== null ||
-                getMinimumDurationForState(tDetails, DeferBlockState.Loading) !== null ||
-                getMinimumDurationForState(tDetails, DeferBlockState.Placeholder));
-        if (ngDevMode && needsScheduling) {
-            assertDefined(applyDeferBlockStateWithSchedulingImpl, 'Expected scheduling function to be defined');
-        }
-        const applyStateFn = needsScheduling ? applyDeferBlockStateWithSchedulingImpl : applyDeferBlockState;
-        try {
-            applyStateFn(newState, lDetails, lContainer, tNode, hostLView);
-        }
-        catch (error) {
-            handleError(hostLView, error);
-        }
-    }
-}
-/**
- * Applies changes to the DOM to reflect a given state.
- */
-function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) {
-    const stateTmplIndex = getTemplateIndexForState(newState, hostLView, tNode);
-    if (stateTmplIndex !== null) {
-        lDetails[DEFER_BLOCK_STATE] = newState;
-        const hostTView = hostLView[TVIEW];
-        const adjustedIndex = stateTmplIndex + HEADER_OFFSET;
-        const tNode = getTNode(hostTView, adjustedIndex);
-        // There is only 1 view that can be present in an LContainer that
-        // represents a defer block, so always refer to the first one.
-        const viewIndex = 0;
-        removeLViewFromLContainer(lContainer, viewIndex);
-        const dehydratedView = findMatchingDehydratedView(lContainer, tNode.tView.ssrId);
-        const embeddedLView = createAndRenderEmbeddedLView(hostLView, tNode, null, { dehydratedView });
-        addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(tNode, dehydratedView));
-        markViewDirty(embeddedLView);
-    }
-}
-/**
- * Extends the `applyDeferBlockState` with timer-based scheduling.
- * This function becomes available on a page if there are defer blocks
- * that use `after` or `minimum` parameters in the `@loading` or
- * `@placeholder` blocks.
- */
-function applyDeferBlockStateWithScheduling(newState, lDetails, lContainer, tNode, hostLView) {
-    const now = Date.now();
-    const hostTView = hostLView[TVIEW];
-    const tDetails = getTDeferBlockDetails(hostTView, tNode);
-    if (lDetails[STATE_IS_FROZEN_UNTIL] === null || lDetails[STATE_IS_FROZEN_UNTIL] <= now) {
-        lDetails[STATE_IS_FROZEN_UNTIL] = null;
-        const loadingAfter = getLoadingBlockAfter(tDetails);
-        const inLoadingAfterPhase = lDetails[LOADING_AFTER_CLEANUP_FN] !== null;
-        if (newState === DeferBlockState.Loading && loadingAfter !== null && !inLoadingAfterPhase) {
-            // Trying to render loading, but it has an `after` config,
-            // so schedule an update action after a timeout.
-            lDetails[NEXT_DEFER_BLOCK_STATE] = newState;
-            const cleanupFn = scheduleDeferBlockUpdate(loadingAfter, lDetails, tNode, lContainer, hostLView);
-            lDetails[LOADING_AFTER_CLEANUP_FN] = cleanupFn;
-        }
-        else {
-            // If we transition to a complete or an error state and there is a pending
-            // operation to render loading after a timeout - invoke a cleanup operation,
-            // which stops the timer.
-            if (newState > DeferBlockState.Loading && inLoadingAfterPhase) {
-                lDetails[LOADING_AFTER_CLEANUP_FN]();
-                lDetails[LOADING_AFTER_CLEANUP_FN] = null;
-                lDetails[NEXT_DEFER_BLOCK_STATE] = null;
-            }
-            applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView);
-            const duration = getMinimumDurationForState(tDetails, newState);
-            if (duration !== null) {
-                lDetails[STATE_IS_FROZEN_UNTIL] = now + duration;
-                scheduleDeferBlockUpdate(duration, lDetails, tNode, lContainer, hostLView);
-            }
-        }
-    }
-    else {
-        // We are still rendering the previous state.
-        // Update the `NEXT_DEFER_BLOCK_STATE`, which would be
-        // picked up once it's time to transition to the next state.
-        lDetails[NEXT_DEFER_BLOCK_STATE] = newState;
-    }
-}
-/**
- * Schedules an update operation after a specified timeout.
- */
-function scheduleDeferBlockUpdate(timeout, lDetails, tNode, lContainer, hostLView) {
-    const callback = () => {
-        const nextState = lDetails[NEXT_DEFER_BLOCK_STATE];
-        lDetails[STATE_IS_FROZEN_UNTIL] = null;
-        lDetails[NEXT_DEFER_BLOCK_STATE] = null;
-        if (nextState !== null) {
-            renderDeferBlockState(nextState, tNode, lContainer);
-        }
-    };
-    return scheduleTimerTrigger(timeout, callback, hostLView);
-}
-/**
- * Checks whether we can transition to the next state.
- *
- * We transition to the next state if the previous state was represented
- * with a number that is less than the next state. For example, if the current
- * state is "loading" (represented as `1`), we should not show a placeholder
- * (represented as `0`), but we can show a completed state (represented as `2`)
- * or an error state (represented as `3`).
- */
-function isValidStateChange(currentState, newState) {
-    return currentState < newState;
-}
-/**
- * Trigger prefetching of dependencies for a defer block.
- *
- * @param tDetails Static information about this defer block.
- * @param lView LView of a host view.
- */
-function triggerPrefetching(tDetails, lView, tNode) {
-    if (lView[INJECTOR$1] && shouldTriggerDeferBlock(lView[INJECTOR$1])) {
-        triggerResourceLoading(tDetails, lView, tNode);
-    }
-}
-/**
- * Trigger loading of defer block dependencies if the process hasn't started yet.
- *
- * @param tDetails Static information about this defer block.
- * @param lView LView of a host view.
- */
-function triggerResourceLoading(tDetails, lView, tNode) {
-    const injector = lView[INJECTOR$1];
-    const tView = lView[TVIEW];
-    if (tDetails.loadingState !== DeferDependenciesLoadingState.NOT_STARTED) {
-        // If the loading status is different from initial one, it means that
-        // the loading of dependencies is in progress and there is nothing to do
-        // in this function. All details can be obtained from the `tDetails` object.
-        return;
-    }
-    const lDetails = getLDeferBlockDetails(lView, tNode);
-    const primaryBlockTNode = getPrimaryBlockTNode(tView, tDetails);
-    // Switch from NOT_STARTED -> IN_PROGRESS state.
-    tDetails.loadingState = DeferDependenciesLoadingState.IN_PROGRESS;
-    // Prefetching is triggered, cleanup all registered prefetch triggers.
-    invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
-    let dependenciesFn = tDetails.dependencyResolverFn;
-    if (ngDevMode) {
-        // Check if dependency function interceptor is configured.
-        const deferDependencyInterceptor = injector.get(DEFER_BLOCK_DEPENDENCY_INTERCEPTOR, null, { optional: true });
-        if (deferDependencyInterceptor) {
-            dependenciesFn = deferDependencyInterceptor.intercept(dependenciesFn);
-        }
-    }
-    // The `dependenciesFn` might be `null` when all dependencies within
-    // a given defer block were eagerly referenced elsewhere in a file,
-    // thus no dynamic `import()`s were produced.
-    if (!dependenciesFn) {
-        tDetails.loadingPromise = Promise.resolve().then(() => {
-            tDetails.loadingPromise = null;
-            tDetails.loadingState = DeferDependenciesLoadingState.COMPLETE;
-        });
-        return;
-    }
-    // Start downloading of defer block dependencies.
-    tDetails.loadingPromise = Promise.allSettled(dependenciesFn()).then(results => {
-        let failed = false;
-        const directiveDefs = [];
-        const pipeDefs = [];
-        for (const result of results) {
-            if (result.status === 'fulfilled') {
-                const dependency = result.value;
-                const directiveDef = getComponentDef(dependency) || getDirectiveDef(dependency);
-                if (directiveDef) {
-                    directiveDefs.push(directiveDef);
-                }
-                else {
-                    const pipeDef = getPipeDef$1(dependency);
-                    if (pipeDef) {
-                        pipeDefs.push(pipeDef);
-                    }
-                }
-            }
-            else {
-                failed = true;
-                break;
-            }
-        }
-        // Loading is completed, we no longer need this Promise.
-        tDetails.loadingPromise = null;
-        if (failed) {
-            tDetails.loadingState = DeferDependenciesLoadingState.FAILED;
-            if (tDetails.errorTmplIndex === null) {
-                const templateLocation = getTemplateLocationDetails(lView);
-                const error = new RuntimeError(750 /* RuntimeErrorCode.DEFER_LOADING_FAILED */, ngDevMode &&
-                    'Loading dependencies for `@defer` block failed, ' +
-                        `but no \`@error\` block was configured${templateLocation}. ` +
-                        'Consider using the `@error` block to render an error state.');
-                handleError(lView, error);
-            }
-        }
-        else {
-            tDetails.loadingState = DeferDependenciesLoadingState.COMPLETE;
-            // Update directive and pipe registries to add newly downloaded dependencies.
-            const primaryBlockTView = primaryBlockTNode.tView;
-            if (directiveDefs.length > 0) {
-                primaryBlockTView.directiveRegistry =
-                    addDepsToRegistry(primaryBlockTView.directiveRegistry, directiveDefs);
-            }
-            if (pipeDefs.length > 0) {
-                primaryBlockTView.pipeRegistry =
-                    addDepsToRegistry(primaryBlockTView.pipeRegistry, pipeDefs);
-            }
-        }
-    });
-}
-/** Utility function to render placeholder content (if present) */
-function renderPlaceholder(lView, tNode) {
-    const lContainer = lView[tNode.index];
-    ngDevMode && assertLContainer(lContainer);
-    renderDeferBlockState(DeferBlockState.Placeholder, tNode, lContainer);
-}
-/**
- * Subscribes to the "loading" Promise and renders corresponding defer sub-block,
- * based on the loading results.
- *
- * @param lContainer Represents an instance of a defer block.
- * @param tNode Represents defer block info shared across all instances.
- */
-function renderDeferStateAfterResourceLoading(tDetails, tNode, lContainer) {
-    ngDevMode &&
-        assertDefined(tDetails.loadingPromise, 'Expected loading Promise to exist on this defer block');
-    tDetails.loadingPromise.then(() => {
-        if (tDetails.loadingState === DeferDependenciesLoadingState.COMPLETE) {
-            ngDevMode && assertDeferredDependenciesLoaded(tDetails);
-            // Everything is loaded, show the primary block content
-            renderDeferBlockState(DeferBlockState.Complete, tNode, lContainer);
-        }
-        else if (tDetails.loadingState === DeferDependenciesLoadingState.FAILED) {
-            renderDeferBlockState(DeferBlockState.Error, tNode, lContainer);
-        }
-    });
-}
-/**
- * Attempts to trigger loading of defer block dependencies.
- * If the block is already in a loading, completed or an error state -
- * no additional actions are taken.
- */
-function triggerDeferBlock(lView, tNode) {
-    const tView = lView[TVIEW];
-    const lContainer = lView[tNode.index];
-    const injector = lView[INJECTOR$1];
-    ngDevMode && assertLContainer(lContainer);
-    if (!shouldTriggerDeferBlock(injector))
-        return;
-    const lDetails = getLDeferBlockDetails(lView, tNode);
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    // Defer block is triggered, cleanup all registered trigger functions.
-    invokeAllTriggerCleanupFns(lDetails);
-    switch (tDetails.loadingState) {
-        case DeferDependenciesLoadingState.NOT_STARTED:
-            renderDeferBlockState(DeferBlockState.Loading, tNode, lContainer);
-            triggerResourceLoading(tDetails, lView, tNode);
-            // The `loadingState` might have changed to "loading".
-            if (tDetails.loadingState ===
-                DeferDependenciesLoadingState.IN_PROGRESS) {
-                renderDeferStateAfterResourceLoading(tDetails, tNode, lContainer);
-            }
-            break;
-        case DeferDependenciesLoadingState.IN_PROGRESS:
-            renderDeferBlockState(DeferBlockState.Loading, tNode, lContainer);
-            renderDeferStateAfterResourceLoading(tDetails, tNode, lContainer);
-            break;
-        case DeferDependenciesLoadingState.COMPLETE:
-            ngDevMode && assertDeferredDependenciesLoaded(tDetails);
-            renderDeferBlockState(DeferBlockState.Complete, tNode, lContainer);
-            break;
-        case DeferDependenciesLoadingState.FAILED:
-            renderDeferBlockState(DeferBlockState.Error, tNode, lContainer);
-            break;
-        default:
-            if (ngDevMode) {
-                throwError('Unknown defer block state');
-            }
-    }
 }
 
 function elementStartFirstCreatePass(index, tView, lView, name, attrsIndex, localRefsIndex) {
@@ -25214,6 +25214,697 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
     return ɵɵpropertyInterpolateV;
 }
 
+function symbolIterator() {
+    // @ts-expect-error accessing a private member
+    return this._results[Symbol.iterator]();
+}
+/**
+ * An unmodifiable list of items that Angular keeps up to date when the state
+ * of the application changes.
+ *
+ * The type of object that {@link ViewChildren}, {@link ContentChildren}, and {@link QueryList}
+ * provide.
+ *
+ * Implements an iterable interface, therefore it can be used in both ES6
+ * javascript `for (var i of items)` loops as well as in Angular templates with
+ * `*ngFor="let i of myList"`.
+ *
+ * Changes can be observed by subscribing to the changes `Observable`.
+ *
+ * NOTE: In the future this class will implement an `Observable` interface.
+ *
+ * @usageNotes
+ * ### Example
+ * ```typescript
+ * @Component({...})
+ * class Container {
+ *   @ViewChildren(Item) items:QueryList<Item>;
+ * }
+ * ```
+ *
+ * @publicApi
+ */
+class QueryList {
+    static { Symbol.iterator; }
+    /**
+     * Returns `Observable` of `QueryList` notifying the subscriber of changes.
+     */
+    get changes() {
+        return this._changes ??= new EventEmitter();
+    }
+    /**
+     * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
+     *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
+     *     the same result)
+     */
+    constructor(_emitDistinctChangesOnly = false) {
+        this._emitDistinctChangesOnly = _emitDistinctChangesOnly;
+        this.dirty = true;
+        this._results = [];
+        this._changesDetected = false;
+        this._changes = undefined;
+        this.length = 0;
+        this.first = undefined;
+        this.last = undefined;
+        // This function should be declared on the prototype, but doing so there will cause the class
+        // declaration to have side-effects and become not tree-shakable. For this reason we do it in
+        // the constructor.
+        // [Symbol.iterator](): Iterator<T> { ... }
+        const proto = QueryList.prototype;
+        if (!proto[Symbol.iterator])
+            proto[Symbol.iterator] = symbolIterator;
+    }
+    /**
+     * Returns the QueryList entry at `index`.
+     */
+    get(index) {
+        return this._results[index];
+    }
+    /**
+     * See
+     * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+     */
+    map(fn) {
+        return this._results.map(fn);
+    }
+    filter(fn) {
+        return this._results.filter(fn);
+    }
+    /**
+     * See
+     * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
+     */
+    find(fn) {
+        return this._results.find(fn);
+    }
+    /**
+     * See
+     * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+     */
+    reduce(fn, init) {
+        return this._results.reduce(fn, init);
+    }
+    /**
+     * See
+     * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
+     */
+    forEach(fn) {
+        this._results.forEach(fn);
+    }
+    /**
+     * See
+     * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+     */
+    some(fn) {
+        return this._results.some(fn);
+    }
+    /**
+     * Returns a copy of the internal results list as an Array.
+     */
+    toArray() {
+        return this._results.slice();
+    }
+    toString() {
+        return this._results.toString();
+    }
+    /**
+     * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
+     * on change detection, it will not notify of changes to the queries, unless a new change
+     * occurs.
+     *
+     * @param resultsTree The query results to store
+     * @param identityAccessor Optional function for extracting stable object identity from a value
+     *    in the array. This function is executed for each element of the query result list while
+     *    comparing current query list with the new one (provided as a first argument of the `reset`
+     *    function) to detect if the lists are different. If the function is not provided, elements
+     *    are compared as is (without any pre-processing).
+     */
+    reset(resultsTree, identityAccessor) {
+        this.dirty = false;
+        const newResultFlat = flatten(resultsTree);
+        if (this._changesDetected = !arrayEquals(this._results, newResultFlat, identityAccessor)) {
+            this._results = newResultFlat;
+            this.length = newResultFlat.length;
+            this.last = newResultFlat[this.length - 1];
+            this.first = newResultFlat[0];
+        }
+    }
+    /**
+     * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
+     */
+    notifyOnChanges() {
+        if (this._changes !== undefined && (this._changesDetected || !this._emitDistinctChangesOnly))
+            this._changes.emit(this);
+    }
+    /** internal */
+    setDirty() {
+        this.dirty = true;
+    }
+    /** internal */
+    destroy() {
+        if (this._changes !== undefined) {
+            this._changes.complete();
+            this._changes.unsubscribe();
+        }
+    }
+}
+
+/**
+ * Represents an embedded template that can be used to instantiate embedded views.
+ * To instantiate embedded views based on a template, use the `ViewContainerRef`
+ * method `createEmbeddedView()`.
+ *
+ * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
+ * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
+ * is injected into the constructor of the directive,
+ * using the `TemplateRef` token.
+ *
+ * You can also use a `Query` to find a `TemplateRef` associated with
+ * a component or a directive.
+ *
+ * @see {@link ViewContainerRef}
+ * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
+ *
+ * @publicApi
+ */
+class TemplateRef {
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ELEMENT_ID__ = injectTemplateRef; }
+}
+const ViewEngineTemplateRef = TemplateRef;
+// TODO(alxhub): combine interface and implementation. Currently this is challenging since something
+// in g3 depends on them being separate.
+const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
+    constructor(_declarationLView, _declarationTContainer, elementRef) {
+        super();
+        this._declarationLView = _declarationLView;
+        this._declarationTContainer = _declarationTContainer;
+        this.elementRef = elementRef;
+    }
+    /**
+     * Returns an `ssrId` associated with a TView, which was used to
+     * create this instance of the `TemplateRef`.
+     *
+     * @internal
+     */
+    get ssrId() {
+        return this._declarationTContainer.tView?.ssrId || null;
+    }
+    createEmbeddedView(context, injector) {
+        return this.createEmbeddedViewImpl(context, injector);
+    }
+    /**
+     * @internal
+     */
+    createEmbeddedViewImpl(context, injector, dehydratedView) {
+        const embeddedLView = createAndRenderEmbeddedLView(this._declarationLView, this._declarationTContainer, context, { injector, dehydratedView });
+        return new ViewRef$1(embeddedLView);
+    }
+};
+/**
+ * Creates a TemplateRef given a node.
+ *
+ * @returns The TemplateRef instance to use
+ */
+function injectTemplateRef() {
+    return createTemplateRef(getCurrentTNode(), getLView());
+}
+/**
+ * Creates a TemplateRef and stores it on the injector.
+ *
+ * @param hostTNode The node on which a TemplateRef is requested
+ * @param hostLView The `LView` to which the node belongs
+ * @returns The TemplateRef instance or null if we can't create a TemplateRef on a given node type
+ */
+function createTemplateRef(hostTNode, hostLView) {
+    if (hostTNode.type & 4 /* TNodeType.Container */) {
+        ngDevMode && assertDefined(hostTNode.tView, 'TView must be allocated');
+        return new R3TemplateRef(hostLView, hostTNode, createElementRef(hostTNode, hostLView));
+    }
+    return null;
+}
+
+class LQuery_ {
+    constructor(queryList) {
+        this.queryList = queryList;
+        this.matches = null;
+    }
+    clone() {
+        return new LQuery_(this.queryList);
+    }
+    setDirty() {
+        this.queryList.setDirty();
+    }
+}
+class LQueries_ {
+    constructor(queries = []) {
+        this.queries = queries;
+    }
+    createEmbeddedView(tView) {
+        const tQueries = tView.queries;
+        if (tQueries !== null) {
+            const noOfInheritedQueries = tView.contentQueries !== null ? tView.contentQueries[0] : tQueries.length;
+            const viewLQueries = [];
+            // An embedded view has queries propagated from a declaration view at the beginning of the
+            // TQueries collection and up until a first content query declared in the embedded view. Only
+            // propagated LQueries are created at this point (LQuery corresponding to declared content
+            // queries will be instantiated from the content query instructions for each directive).
+            for (let i = 0; i < noOfInheritedQueries; i++) {
+                const tQuery = tQueries.getByIndex(i);
+                const parentLQuery = this.queries[tQuery.indexInDeclarationView];
+                viewLQueries.push(parentLQuery.clone());
+            }
+            return new LQueries_(viewLQueries);
+        }
+        return null;
+    }
+    insertView(tView) {
+        this.dirtyQueriesWithMatches(tView);
+    }
+    detachView(tView) {
+        this.dirtyQueriesWithMatches(tView);
+    }
+    dirtyQueriesWithMatches(tView) {
+        for (let i = 0; i < this.queries.length; i++) {
+            if (getTQuery(tView, i).matches !== null) {
+                this.queries[i].setDirty();
+            }
+        }
+    }
+}
+class TQueryMetadata_ {
+    constructor(predicate, flags, read = null) {
+        this.predicate = predicate;
+        this.flags = flags;
+        this.read = read;
+    }
+}
+class TQueries_ {
+    constructor(queries = []) {
+        this.queries = queries;
+    }
+    elementStart(tView, tNode) {
+        ngDevMode &&
+            assertFirstCreatePass(tView, 'Queries should collect results on the first template pass only');
+        for (let i = 0; i < this.queries.length; i++) {
+            this.queries[i].elementStart(tView, tNode);
+        }
+    }
+    elementEnd(tNode) {
+        for (let i = 0; i < this.queries.length; i++) {
+            this.queries[i].elementEnd(tNode);
+        }
+    }
+    embeddedTView(tNode) {
+        let queriesForTemplateRef = null;
+        for (let i = 0; i < this.length; i++) {
+            const childQueryIndex = queriesForTemplateRef !== null ? queriesForTemplateRef.length : 0;
+            const tqueryClone = this.getByIndex(i).embeddedTView(tNode, childQueryIndex);
+            if (tqueryClone) {
+                tqueryClone.indexInDeclarationView = i;
+                if (queriesForTemplateRef !== null) {
+                    queriesForTemplateRef.push(tqueryClone);
+                }
+                else {
+                    queriesForTemplateRef = [tqueryClone];
+                }
+            }
+        }
+        return queriesForTemplateRef !== null ? new TQueries_(queriesForTemplateRef) : null;
+    }
+    template(tView, tNode) {
+        ngDevMode &&
+            assertFirstCreatePass(tView, 'Queries should collect results on the first template pass only');
+        for (let i = 0; i < this.queries.length; i++) {
+            this.queries[i].template(tView, tNode);
+        }
+    }
+    getByIndex(index) {
+        ngDevMode && assertIndexInRange(this.queries, index);
+        return this.queries[index];
+    }
+    get length() {
+        return this.queries.length;
+    }
+    track(tquery) {
+        this.queries.push(tquery);
+    }
+}
+class TQuery_ {
+    constructor(metadata, nodeIndex = -1) {
+        this.metadata = metadata;
+        this.matches = null;
+        this.indexInDeclarationView = -1;
+        this.crossesNgTemplate = false;
+        /**
+         * A flag indicating if a given query still applies to nodes it is crossing. We use this flag
+         * (alongside with _declarationNodeIndex) to know when to stop applying content queries to
+         * elements in a template.
+         */
+        this._appliesToNextNode = true;
+        this._declarationNodeIndex = nodeIndex;
+    }
+    elementStart(tView, tNode) {
+        if (this.isApplyingToNode(tNode)) {
+            this.matchTNode(tView, tNode);
+        }
+    }
+    elementEnd(tNode) {
+        if (this._declarationNodeIndex === tNode.index) {
+            this._appliesToNextNode = false;
+        }
+    }
+    template(tView, tNode) {
+        this.elementStart(tView, tNode);
+    }
+    embeddedTView(tNode, childQueryIndex) {
+        if (this.isApplyingToNode(tNode)) {
+            this.crossesNgTemplate = true;
+            // A marker indicating a `<ng-template>` element (a placeholder for query results from
+            // embedded views created based on this `<ng-template>`).
+            this.addMatch(-tNode.index, childQueryIndex);
+            return new TQuery_(this.metadata);
+        }
+        return null;
+    }
+    isApplyingToNode(tNode) {
+        if (this._appliesToNextNode &&
+            (this.metadata.flags & 1 /* QueryFlags.descendants */) !== 1 /* QueryFlags.descendants */) {
+            const declarationNodeIdx = this._declarationNodeIndex;
+            let parent = tNode.parent;
+            // Determine if a given TNode is a "direct" child of a node on which a content query was
+            // declared (only direct children of query's host node can match with the descendants: false
+            // option). There are 3 main use-case / conditions to consider here:
+            // - <needs-target><i #target></i></needs-target>: here <i #target> parent node is a query
+            // host node;
+            // - <needs-target><ng-template [ngIf]="true"><i #target></i></ng-template></needs-target>:
+            // here <i #target> parent node is null;
+            // - <needs-target><ng-container><i #target></i></ng-container></needs-target>: here we need
+            // to go past `<ng-container>` to determine <i #target> parent node (but we shouldn't traverse
+            // up past the query's host node!).
+            while (parent !== null && (parent.type & 8 /* TNodeType.ElementContainer */) &&
+                parent.index !== declarationNodeIdx) {
+                parent = parent.parent;
+            }
+            return declarationNodeIdx === (parent !== null ? parent.index : -1);
+        }
+        return this._appliesToNextNode;
+    }
+    matchTNode(tView, tNode) {
+        const predicate = this.metadata.predicate;
+        if (Array.isArray(predicate)) {
+            for (let i = 0; i < predicate.length; i++) {
+                const name = predicate[i];
+                this.matchTNodeWithReadOption(tView, tNode, getIdxOfMatchingSelector(tNode, name));
+                // Also try matching the name to a provider since strings can be used as DI tokens too.
+                this.matchTNodeWithReadOption(tView, tNode, locateDirectiveOrProvider(tNode, tView, name, false, false));
+            }
+        }
+        else {
+            if (predicate === TemplateRef) {
+                if (tNode.type & 4 /* TNodeType.Container */) {
+                    this.matchTNodeWithReadOption(tView, tNode, -1);
+                }
+            }
+            else {
+                this.matchTNodeWithReadOption(tView, tNode, locateDirectiveOrProvider(tNode, tView, predicate, false, false));
+            }
+        }
+    }
+    matchTNodeWithReadOption(tView, tNode, nodeMatchIdx) {
+        if (nodeMatchIdx !== null) {
+            const read = this.metadata.read;
+            if (read !== null) {
+                if (read === ElementRef || read === ViewContainerRef ||
+                    read === TemplateRef && (tNode.type & 4 /* TNodeType.Container */)) {
+                    this.addMatch(tNode.index, -2);
+                }
+                else {
+                    const directiveOrProviderIdx = locateDirectiveOrProvider(tNode, tView, read, false, false);
+                    if (directiveOrProviderIdx !== null) {
+                        this.addMatch(tNode.index, directiveOrProviderIdx);
+                    }
+                }
+            }
+            else {
+                this.addMatch(tNode.index, nodeMatchIdx);
+            }
+        }
+    }
+    addMatch(tNodeIdx, matchIdx) {
+        if (this.matches === null) {
+            this.matches = [tNodeIdx, matchIdx];
+        }
+        else {
+            this.matches.push(tNodeIdx, matchIdx);
+        }
+    }
+}
+/**
+ * Iterates over local names for a given node and returns directive index
+ * (or -1 if a local name points to an element).
+ *
+ * @param tNode static data of a node to check
+ * @param selector selector to match
+ * @returns directive index, -1 or null if a selector didn't match any of the local names
+ */
+function getIdxOfMatchingSelector(tNode, selector) {
+    const localNames = tNode.localNames;
+    if (localNames !== null) {
+        for (let i = 0; i < localNames.length; i += 2) {
+            if (localNames[i] === selector) {
+                return localNames[i + 1];
+            }
+        }
+    }
+    return null;
+}
+function createResultByTNodeType(tNode, currentView) {
+    if (tNode.type & (3 /* TNodeType.AnyRNode */ | 8 /* TNodeType.ElementContainer */)) {
+        return createElementRef(tNode, currentView);
+    }
+    else if (tNode.type & 4 /* TNodeType.Container */) {
+        return createTemplateRef(tNode, currentView);
+    }
+    return null;
+}
+function createResultForNode(lView, tNode, matchingIdx, read) {
+    if (matchingIdx === -1) {
+        // if read token and / or strategy is not specified, detect it using appropriate tNode type
+        return createResultByTNodeType(tNode, lView);
+    }
+    else if (matchingIdx === -2) {
+        // read a special token from a node injector
+        return createSpecialToken(lView, tNode, read);
+    }
+    else {
+        // read a token
+        return getNodeInjectable(lView, lView[TVIEW], matchingIdx, tNode);
+    }
+}
+function createSpecialToken(lView, tNode, read) {
+    if (read === ElementRef) {
+        return createElementRef(tNode, lView);
+    }
+    else if (read === TemplateRef) {
+        return createTemplateRef(tNode, lView);
+    }
+    else if (read === ViewContainerRef) {
+        ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
+        return createContainerRef(tNode, lView);
+    }
+    else {
+        ngDevMode &&
+            throwError(`Special token to read should be one of ElementRef, TemplateRef or ViewContainerRef but got ${stringify(read)}.`);
+    }
+}
+/**
+ * A helper function that creates query results for a given view. This function is meant to do the
+ * processing once and only once for a given view instance (a set of results for a given view
+ * doesn't change).
+ */
+function materializeViewResults(tView, lView, tQuery, queryIndex) {
+    const lQuery = lView[QUERIES].queries[queryIndex];
+    if (lQuery.matches === null) {
+        const tViewData = tView.data;
+        const tQueryMatches = tQuery.matches;
+        const result = [];
+        for (let i = 0; i < tQueryMatches.length; i += 2) {
+            const matchedNodeIdx = tQueryMatches[i];
+            if (matchedNodeIdx < 0) {
+                // we at the <ng-template> marker which might have results in views created based on this
+                // <ng-template> - those results will be in separate views though, so here we just leave
+                // null as a placeholder
+                result.push(null);
+            }
+            else {
+                ngDevMode && assertIndexInRange(tViewData, matchedNodeIdx);
+                const tNode = tViewData[matchedNodeIdx];
+                result.push(createResultForNode(lView, tNode, tQueryMatches[i + 1], tQuery.metadata.read));
+            }
+        }
+        lQuery.matches = result;
+    }
+    return lQuery.matches;
+}
+/**
+ * A helper function that collects (already materialized) query results from a tree of views,
+ * starting with a provided LView.
+ */
+function collectQueryResults(tView, lView, queryIndex, result) {
+    const tQuery = tView.queries.getByIndex(queryIndex);
+    const tQueryMatches = tQuery.matches;
+    if (tQueryMatches !== null) {
+        const lViewResults = materializeViewResults(tView, lView, tQuery, queryIndex);
+        for (let i = 0; i < tQueryMatches.length; i += 2) {
+            const tNodeIdx = tQueryMatches[i];
+            if (tNodeIdx > 0) {
+                result.push(lViewResults[i / 2]);
+            }
+            else {
+                const childQueryIndex = tQueryMatches[i + 1];
+                const declarationLContainer = lView[-tNodeIdx];
+                ngDevMode && assertLContainer(declarationLContainer);
+                // collect matches for views inserted in this container
+                for (let i = CONTAINER_HEADER_OFFSET; i < declarationLContainer.length; i++) {
+                    const embeddedLView = declarationLContainer[i];
+                    if (embeddedLView[DECLARATION_LCONTAINER] === embeddedLView[PARENT]) {
+                        collectQueryResults(embeddedLView[TVIEW], embeddedLView, childQueryIndex, result);
+                    }
+                }
+                // collect matches for views created from this declaration container and inserted into
+                // different containers
+                if (declarationLContainer[MOVED_VIEWS] !== null) {
+                    const embeddedLViews = declarationLContainer[MOVED_VIEWS];
+                    for (let i = 0; i < embeddedLViews.length; i++) {
+                        const embeddedLView = embeddedLViews[i];
+                        collectQueryResults(embeddedLView[TVIEW], embeddedLView, childQueryIndex, result);
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+function loadQueryInternal(lView, queryIndex) {
+    ngDevMode &&
+        assertDefined(lView[QUERIES], 'LQueries should be defined when trying to load a query');
+    ngDevMode && assertIndexInRange(lView[QUERIES].queries, queryIndex);
+    return lView[QUERIES].queries[queryIndex].queryList;
+}
+function createLQuery(tView, lView, flags) {
+    const queryList = new QueryList((flags & 4 /* QueryFlags.emitDistinctChangesOnly */) === 4 /* QueryFlags.emitDistinctChangesOnly */);
+    storeCleanupWithContext(tView, lView, queryList, queryList.destroy);
+    if (lView[QUERIES] === null)
+        lView[QUERIES] = new LQueries_();
+    lView[QUERIES].queries.push(new LQuery_(queryList));
+}
+function createTQuery(tView, metadata, nodeIndex) {
+    if (tView.queries === null)
+        tView.queries = new TQueries_();
+    tView.queries.track(new TQuery_(metadata, nodeIndex));
+}
+function saveContentQueryAndDirectiveIndex(tView, directiveIndex) {
+    const tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
+    const lastSavedDirectiveIndex = tViewContentQueries.length ? tViewContentQueries[tViewContentQueries.length - 1] : -1;
+    if (directiveIndex !== lastSavedDirectiveIndex) {
+        tViewContentQueries.push(tView.queries.length - 1, directiveIndex);
+    }
+}
+function getTQuery(tView, index) {
+    ngDevMode && assertDefined(tView.queries, 'TQueries must be defined to retrieve a TQuery');
+    return tView.queries.getByIndex(index);
+}
+
+/**
+ * Registers a QueryList, associated with a content query, for later refresh (part of a view
+ * refresh).
+ *
+ * @param directiveIndex Current directive index
+ * @param predicate The type for which the query will search
+ * @param flags Flags associated with the query
+ * @param read What to save in the query
+ * @returns QueryList<T>
+ *
+ * @codeGenApi
+ */
+function ɵɵcontentQuery(directiveIndex, predicate, flags, read) {
+    ngDevMode && assertNumber(flags, 'Expecting flags');
+    const tView = getTView();
+    if (tView.firstCreatePass) {
+        const tNode = getCurrentTNode();
+        createTQuery(tView, new TQueryMetadata_(predicate, flags, read), tNode.index);
+        saveContentQueryAndDirectiveIndex(tView, directiveIndex);
+        if ((flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */) {
+            tView.staticContentQueries = true;
+        }
+    }
+    createLQuery(tView, getLView(), flags);
+}
+/**
+ * Creates new QueryList, stores the reference in LView and returns QueryList.
+ *
+ * @param predicate The type for which the query will search
+ * @param flags Flags associated with the query
+ * @param read What to save in the query
+ *
+ * @codeGenApi
+ */
+function ɵɵviewQuery(predicate, flags, read) {
+    ngDevMode && assertNumber(flags, 'Expecting flags');
+    const tView = getTView();
+    if (tView.firstCreatePass) {
+        createTQuery(tView, new TQueryMetadata_(predicate, flags, read), -1);
+        if ((flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */) {
+            tView.staticViewQueries = true;
+        }
+    }
+    createLQuery(tView, getLView(), flags);
+}
+/**
+ * Refreshes a query by combining matches from all active views and removing matches from deleted
+ * views.
+ *
+ * @returns `true` if a query got dirty during change detection or if this is a static query
+ * resolving in creation mode, `false` otherwise.
+ *
+ * @codeGenApi
+ */
+function ɵɵqueryRefresh(queryList) {
+    const lView = getLView();
+    const tView = getTView();
+    const queryIndex = getCurrentQueryIndex();
+    setCurrentQueryIndex(queryIndex + 1);
+    const tQuery = getTQuery(tView, queryIndex);
+    if (queryList.dirty &&
+        (isCreationMode(lView) ===
+            ((tQuery.metadata.flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */))) {
+        if (tQuery.matches === null) {
+            queryList.reset([]);
+        }
+        else {
+            const result = tQuery.crossesNgTemplate ?
+                collectQueryResults(tView, lView, queryIndex, []) :
+                materializeViewResults(tView, lView, tQuery, queryIndex);
+            queryList.reset(result, unwrapElementRef);
+            queryList.notifyOnChanges();
+        }
+        return true;
+    }
+    return false;
+}
+/**
+ * Loads a QueryList corresponding to the current view or content query.
+ *
+ * @codeGenApi
+ */
+function ɵɵloadQuery() {
+    return loadQueryInternal(getLView(), getCurrentQueryIndex());
+}
+
 /** Store a value in the `data` at a given `index`. */
 function store(tView, lView, index, value) {
     // We don't store any static data for local variables, so the first time
@@ -27805,696 +28496,6 @@ function isPure(lView, index) {
     return lView[TVIEW].data[index].pure;
 }
 
-function symbolIterator() {
-    // @ts-expect-error accessing a private member
-    return this._results[Symbol.iterator]();
-}
-/**
- * An unmodifiable list of items that Angular keeps up to date when the state
- * of the application changes.
- *
- * The type of object that {@link ViewChildren}, {@link ContentChildren}, and {@link QueryList}
- * provide.
- *
- * Implements an iterable interface, therefore it can be used in both ES6
- * javascript `for (var i of items)` loops as well as in Angular templates with
- * `*ngFor="let i of myList"`.
- *
- * Changes can be observed by subscribing to the changes `Observable`.
- *
- * NOTE: In the future this class will implement an `Observable` interface.
- *
- * @usageNotes
- * ### Example
- * ```typescript
- * @Component({...})
- * class Container {
- *   @ViewChildren(Item) items:QueryList<Item>;
- * }
- * ```
- *
- * @publicApi
- */
-class QueryList {
-    static { Symbol.iterator; }
-    /**
-     * Returns `Observable` of `QueryList` notifying the subscriber of changes.
-     */
-    get changes() {
-        return this._changes ??= new EventEmitter();
-    }
-    /**
-     * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
-     *     has occurred. Or if it should fire when query is recomputed. (recomputing could resolve in
-     *     the same result)
-     */
-    constructor(_emitDistinctChangesOnly = false) {
-        this._emitDistinctChangesOnly = _emitDistinctChangesOnly;
-        this.dirty = true;
-        this._results = [];
-        this._changesDetected = false;
-        this._changes = undefined;
-        this.length = 0;
-        this.first = undefined;
-        this.last = undefined;
-        // This function should be declared on the prototype, but doing so there will cause the class
-        // declaration to have side-effects and become not tree-shakable. For this reason we do it in
-        // the constructor.
-        // [Symbol.iterator](): Iterator<T> { ... }
-        const proto = QueryList.prototype;
-        if (!proto[Symbol.iterator])
-            proto[Symbol.iterator] = symbolIterator;
-    }
-    /**
-     * Returns the QueryList entry at `index`.
-     */
-    get(index) {
-        return this._results[index];
-    }
-    /**
-     * See
-     * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
-     */
-    map(fn) {
-        return this._results.map(fn);
-    }
-    filter(fn) {
-        return this._results.filter(fn);
-    }
-    /**
-     * See
-     * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
-     */
-    find(fn) {
-        return this._results.find(fn);
-    }
-    /**
-     * See
-     * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
-     */
-    reduce(fn, init) {
-        return this._results.reduce(fn, init);
-    }
-    /**
-     * See
-     * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
-     */
-    forEach(fn) {
-        this._results.forEach(fn);
-    }
-    /**
-     * See
-     * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
-     */
-    some(fn) {
-        return this._results.some(fn);
-    }
-    /**
-     * Returns a copy of the internal results list as an Array.
-     */
-    toArray() {
-        return this._results.slice();
-    }
-    toString() {
-        return this._results.toString();
-    }
-    /**
-     * Updates the stored data of the query list, and resets the `dirty` flag to `false`, so that
-     * on change detection, it will not notify of changes to the queries, unless a new change
-     * occurs.
-     *
-     * @param resultsTree The query results to store
-     * @param identityAccessor Optional function for extracting stable object identity from a value
-     *    in the array. This function is executed for each element of the query result list while
-     *    comparing current query list with the new one (provided as a first argument of the `reset`
-     *    function) to detect if the lists are different. If the function is not provided, elements
-     *    are compared as is (without any pre-processing).
-     */
-    reset(resultsTree, identityAccessor) {
-        this.dirty = false;
-        const newResultFlat = flatten(resultsTree);
-        if (this._changesDetected = !arrayEquals(this._results, newResultFlat, identityAccessor)) {
-            this._results = newResultFlat;
-            this.length = newResultFlat.length;
-            this.last = newResultFlat[this.length - 1];
-            this.first = newResultFlat[0];
-        }
-    }
-    /**
-     * Triggers a change event by emitting on the `changes` {@link EventEmitter}.
-     */
-    notifyOnChanges() {
-        if (this._changes !== undefined && (this._changesDetected || !this._emitDistinctChangesOnly))
-            this._changes.emit(this);
-    }
-    /** internal */
-    setDirty() {
-        this.dirty = true;
-    }
-    /** internal */
-    destroy() {
-        if (this._changes !== undefined) {
-            this._changes.complete();
-            this._changes.unsubscribe();
-        }
-    }
-}
-
-/**
- * Represents an embedded template that can be used to instantiate embedded views.
- * To instantiate embedded views based on a template, use the `ViewContainerRef`
- * method `createEmbeddedView()`.
- *
- * Access a `TemplateRef` instance by placing a directive on an `<ng-template>`
- * element (or directive prefixed with `*`). The `TemplateRef` for the embedded view
- * is injected into the constructor of the directive,
- * using the `TemplateRef` token.
- *
- * You can also use a `Query` to find a `TemplateRef` associated with
- * a component or a directive.
- *
- * @see {@link ViewContainerRef}
- * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
- *
- * @publicApi
- */
-class TemplateRef {
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static { this.__NG_ELEMENT_ID__ = injectTemplateRef; }
-}
-const ViewEngineTemplateRef = TemplateRef;
-// TODO(alxhub): combine interface and implementation. Currently this is challenging since something
-// in g3 depends on them being separate.
-const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
-    constructor(_declarationLView, _declarationTContainer, elementRef) {
-        super();
-        this._declarationLView = _declarationLView;
-        this._declarationTContainer = _declarationTContainer;
-        this.elementRef = elementRef;
-    }
-    /**
-     * Returns an `ssrId` associated with a TView, which was used to
-     * create this instance of the `TemplateRef`.
-     *
-     * @internal
-     */
-    get ssrId() {
-        return this._declarationTContainer.tView?.ssrId || null;
-    }
-    createEmbeddedView(context, injector) {
-        return this.createEmbeddedViewImpl(context, injector);
-    }
-    /**
-     * @internal
-     */
-    createEmbeddedViewImpl(context, injector, dehydratedView) {
-        const embeddedLView = createAndRenderEmbeddedLView(this._declarationLView, this._declarationTContainer, context, { injector, dehydratedView });
-        return new ViewRef$1(embeddedLView);
-    }
-};
-/**
- * Creates a TemplateRef given a node.
- *
- * @returns The TemplateRef instance to use
- */
-function injectTemplateRef() {
-    return createTemplateRef(getCurrentTNode(), getLView());
-}
-/**
- * Creates a TemplateRef and stores it on the injector.
- *
- * @param hostTNode The node on which a TemplateRef is requested
- * @param hostLView The `LView` to which the node belongs
- * @returns The TemplateRef instance or null if we can't create a TemplateRef on a given node type
- */
-function createTemplateRef(hostTNode, hostLView) {
-    if (hostTNode.type & 4 /* TNodeType.Container */) {
-        ngDevMode && assertDefined(hostTNode.tView, 'TView must be allocated');
-        return new R3TemplateRef(hostLView, hostTNode, createElementRef(hostTNode, hostLView));
-    }
-    return null;
-}
-
-class LQuery_ {
-    constructor(queryList) {
-        this.queryList = queryList;
-        this.matches = null;
-    }
-    clone() {
-        return new LQuery_(this.queryList);
-    }
-    setDirty() {
-        this.queryList.setDirty();
-    }
-}
-class LQueries_ {
-    constructor(queries = []) {
-        this.queries = queries;
-    }
-    createEmbeddedView(tView) {
-        const tQueries = tView.queries;
-        if (tQueries !== null) {
-            const noOfInheritedQueries = tView.contentQueries !== null ? tView.contentQueries[0] : tQueries.length;
-            const viewLQueries = [];
-            // An embedded view has queries propagated from a declaration view at the beginning of the
-            // TQueries collection and up until a first content query declared in the embedded view. Only
-            // propagated LQueries are created at this point (LQuery corresponding to declared content
-            // queries will be instantiated from the content query instructions for each directive).
-            for (let i = 0; i < noOfInheritedQueries; i++) {
-                const tQuery = tQueries.getByIndex(i);
-                const parentLQuery = this.queries[tQuery.indexInDeclarationView];
-                viewLQueries.push(parentLQuery.clone());
-            }
-            return new LQueries_(viewLQueries);
-        }
-        return null;
-    }
-    insertView(tView) {
-        this.dirtyQueriesWithMatches(tView);
-    }
-    detachView(tView) {
-        this.dirtyQueriesWithMatches(tView);
-    }
-    dirtyQueriesWithMatches(tView) {
-        for (let i = 0; i < this.queries.length; i++) {
-            if (getTQuery(tView, i).matches !== null) {
-                this.queries[i].setDirty();
-            }
-        }
-    }
-}
-class TQueryMetadata_ {
-    constructor(predicate, flags, read = null) {
-        this.predicate = predicate;
-        this.flags = flags;
-        this.read = read;
-    }
-}
-class TQueries_ {
-    constructor(queries = []) {
-        this.queries = queries;
-    }
-    elementStart(tView, tNode) {
-        ngDevMode &&
-            assertFirstCreatePass(tView, 'Queries should collect results on the first template pass only');
-        for (let i = 0; i < this.queries.length; i++) {
-            this.queries[i].elementStart(tView, tNode);
-        }
-    }
-    elementEnd(tNode) {
-        for (let i = 0; i < this.queries.length; i++) {
-            this.queries[i].elementEnd(tNode);
-        }
-    }
-    embeddedTView(tNode) {
-        let queriesForTemplateRef = null;
-        for (let i = 0; i < this.length; i++) {
-            const childQueryIndex = queriesForTemplateRef !== null ? queriesForTemplateRef.length : 0;
-            const tqueryClone = this.getByIndex(i).embeddedTView(tNode, childQueryIndex);
-            if (tqueryClone) {
-                tqueryClone.indexInDeclarationView = i;
-                if (queriesForTemplateRef !== null) {
-                    queriesForTemplateRef.push(tqueryClone);
-                }
-                else {
-                    queriesForTemplateRef = [tqueryClone];
-                }
-            }
-        }
-        return queriesForTemplateRef !== null ? new TQueries_(queriesForTemplateRef) : null;
-    }
-    template(tView, tNode) {
-        ngDevMode &&
-            assertFirstCreatePass(tView, 'Queries should collect results on the first template pass only');
-        for (let i = 0; i < this.queries.length; i++) {
-            this.queries[i].template(tView, tNode);
-        }
-    }
-    getByIndex(index) {
-        ngDevMode && assertIndexInRange(this.queries, index);
-        return this.queries[index];
-    }
-    get length() {
-        return this.queries.length;
-    }
-    track(tquery) {
-        this.queries.push(tquery);
-    }
-}
-class TQuery_ {
-    constructor(metadata, nodeIndex = -1) {
-        this.metadata = metadata;
-        this.matches = null;
-        this.indexInDeclarationView = -1;
-        this.crossesNgTemplate = false;
-        /**
-         * A flag indicating if a given query still applies to nodes it is crossing. We use this flag
-         * (alongside with _declarationNodeIndex) to know when to stop applying content queries to
-         * elements in a template.
-         */
-        this._appliesToNextNode = true;
-        this._declarationNodeIndex = nodeIndex;
-    }
-    elementStart(tView, tNode) {
-        if (this.isApplyingToNode(tNode)) {
-            this.matchTNode(tView, tNode);
-        }
-    }
-    elementEnd(tNode) {
-        if (this._declarationNodeIndex === tNode.index) {
-            this._appliesToNextNode = false;
-        }
-    }
-    template(tView, tNode) {
-        this.elementStart(tView, tNode);
-    }
-    embeddedTView(tNode, childQueryIndex) {
-        if (this.isApplyingToNode(tNode)) {
-            this.crossesNgTemplate = true;
-            // A marker indicating a `<ng-template>` element (a placeholder for query results from
-            // embedded views created based on this `<ng-template>`).
-            this.addMatch(-tNode.index, childQueryIndex);
-            return new TQuery_(this.metadata);
-        }
-        return null;
-    }
-    isApplyingToNode(tNode) {
-        if (this._appliesToNextNode &&
-            (this.metadata.flags & 1 /* QueryFlags.descendants */) !== 1 /* QueryFlags.descendants */) {
-            const declarationNodeIdx = this._declarationNodeIndex;
-            let parent = tNode.parent;
-            // Determine if a given TNode is a "direct" child of a node on which a content query was
-            // declared (only direct children of query's host node can match with the descendants: false
-            // option). There are 3 main use-case / conditions to consider here:
-            // - <needs-target><i #target></i></needs-target>: here <i #target> parent node is a query
-            // host node;
-            // - <needs-target><ng-template [ngIf]="true"><i #target></i></ng-template></needs-target>:
-            // here <i #target> parent node is null;
-            // - <needs-target><ng-container><i #target></i></ng-container></needs-target>: here we need
-            // to go past `<ng-container>` to determine <i #target> parent node (but we shouldn't traverse
-            // up past the query's host node!).
-            while (parent !== null && (parent.type & 8 /* TNodeType.ElementContainer */) &&
-                parent.index !== declarationNodeIdx) {
-                parent = parent.parent;
-            }
-            return declarationNodeIdx === (parent !== null ? parent.index : -1);
-        }
-        return this._appliesToNextNode;
-    }
-    matchTNode(tView, tNode) {
-        const predicate = this.metadata.predicate;
-        if (Array.isArray(predicate)) {
-            for (let i = 0; i < predicate.length; i++) {
-                const name = predicate[i];
-                this.matchTNodeWithReadOption(tView, tNode, getIdxOfMatchingSelector(tNode, name));
-                // Also try matching the name to a provider since strings can be used as DI tokens too.
-                this.matchTNodeWithReadOption(tView, tNode, locateDirectiveOrProvider(tNode, tView, name, false, false));
-            }
-        }
-        else {
-            if (predicate === TemplateRef) {
-                if (tNode.type & 4 /* TNodeType.Container */) {
-                    this.matchTNodeWithReadOption(tView, tNode, -1);
-                }
-            }
-            else {
-                this.matchTNodeWithReadOption(tView, tNode, locateDirectiveOrProvider(tNode, tView, predicate, false, false));
-            }
-        }
-    }
-    matchTNodeWithReadOption(tView, tNode, nodeMatchIdx) {
-        if (nodeMatchIdx !== null) {
-            const read = this.metadata.read;
-            if (read !== null) {
-                if (read === ElementRef || read === ViewContainerRef ||
-                    read === TemplateRef && (tNode.type & 4 /* TNodeType.Container */)) {
-                    this.addMatch(tNode.index, -2);
-                }
-                else {
-                    const directiveOrProviderIdx = locateDirectiveOrProvider(tNode, tView, read, false, false);
-                    if (directiveOrProviderIdx !== null) {
-                        this.addMatch(tNode.index, directiveOrProviderIdx);
-                    }
-                }
-            }
-            else {
-                this.addMatch(tNode.index, nodeMatchIdx);
-            }
-        }
-    }
-    addMatch(tNodeIdx, matchIdx) {
-        if (this.matches === null) {
-            this.matches = [tNodeIdx, matchIdx];
-        }
-        else {
-            this.matches.push(tNodeIdx, matchIdx);
-        }
-    }
-}
-/**
- * Iterates over local names for a given node and returns directive index
- * (or -1 if a local name points to an element).
- *
- * @param tNode static data of a node to check
- * @param selector selector to match
- * @returns directive index, -1 or null if a selector didn't match any of the local names
- */
-function getIdxOfMatchingSelector(tNode, selector) {
-    const localNames = tNode.localNames;
-    if (localNames !== null) {
-        for (let i = 0; i < localNames.length; i += 2) {
-            if (localNames[i] === selector) {
-                return localNames[i + 1];
-            }
-        }
-    }
-    return null;
-}
-function createResultByTNodeType(tNode, currentView) {
-    if (tNode.type & (3 /* TNodeType.AnyRNode */ | 8 /* TNodeType.ElementContainer */)) {
-        return createElementRef(tNode, currentView);
-    }
-    else if (tNode.type & 4 /* TNodeType.Container */) {
-        return createTemplateRef(tNode, currentView);
-    }
-    return null;
-}
-function createResultForNode(lView, tNode, matchingIdx, read) {
-    if (matchingIdx === -1) {
-        // if read token and / or strategy is not specified, detect it using appropriate tNode type
-        return createResultByTNodeType(tNode, lView);
-    }
-    else if (matchingIdx === -2) {
-        // read a special token from a node injector
-        return createSpecialToken(lView, tNode, read);
-    }
-    else {
-        // read a token
-        return getNodeInjectable(lView, lView[TVIEW], matchingIdx, tNode);
-    }
-}
-function createSpecialToken(lView, tNode, read) {
-    if (read === ElementRef) {
-        return createElementRef(tNode, lView);
-    }
-    else if (read === TemplateRef) {
-        return createTemplateRef(tNode, lView);
-    }
-    else if (read === ViewContainerRef) {
-        ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
-        return createContainerRef(tNode, lView);
-    }
-    else {
-        ngDevMode &&
-            throwError(`Special token to read should be one of ElementRef, TemplateRef or ViewContainerRef but got ${stringify(read)}.`);
-    }
-}
-/**
- * A helper function that creates query results for a given view. This function is meant to do the
- * processing once and only once for a given view instance (a set of results for a given view
- * doesn't change).
- */
-function materializeViewResults(tView, lView, tQuery, queryIndex) {
-    const lQuery = lView[QUERIES].queries[queryIndex];
-    if (lQuery.matches === null) {
-        const tViewData = tView.data;
-        const tQueryMatches = tQuery.matches;
-        const result = [];
-        for (let i = 0; i < tQueryMatches.length; i += 2) {
-            const matchedNodeIdx = tQueryMatches[i];
-            if (matchedNodeIdx < 0) {
-                // we at the <ng-template> marker which might have results in views created based on this
-                // <ng-template> - those results will be in separate views though, so here we just leave
-                // null as a placeholder
-                result.push(null);
-            }
-            else {
-                ngDevMode && assertIndexInRange(tViewData, matchedNodeIdx);
-                const tNode = tViewData[matchedNodeIdx];
-                result.push(createResultForNode(lView, tNode, tQueryMatches[i + 1], tQuery.metadata.read));
-            }
-        }
-        lQuery.matches = result;
-    }
-    return lQuery.matches;
-}
-/**
- * A helper function that collects (already materialized) query results from a tree of views,
- * starting with a provided LView.
- */
-function collectQueryResults(tView, lView, queryIndex, result) {
-    const tQuery = tView.queries.getByIndex(queryIndex);
-    const tQueryMatches = tQuery.matches;
-    if (tQueryMatches !== null) {
-        const lViewResults = materializeViewResults(tView, lView, tQuery, queryIndex);
-        for (let i = 0; i < tQueryMatches.length; i += 2) {
-            const tNodeIdx = tQueryMatches[i];
-            if (tNodeIdx > 0) {
-                result.push(lViewResults[i / 2]);
-            }
-            else {
-                const childQueryIndex = tQueryMatches[i + 1];
-                const declarationLContainer = lView[-tNodeIdx];
-                ngDevMode && assertLContainer(declarationLContainer);
-                // collect matches for views inserted in this container
-                for (let i = CONTAINER_HEADER_OFFSET; i < declarationLContainer.length; i++) {
-                    const embeddedLView = declarationLContainer[i];
-                    if (embeddedLView[DECLARATION_LCONTAINER] === embeddedLView[PARENT]) {
-                        collectQueryResults(embeddedLView[TVIEW], embeddedLView, childQueryIndex, result);
-                    }
-                }
-                // collect matches for views created from this declaration container and inserted into
-                // different containers
-                if (declarationLContainer[MOVED_VIEWS] !== null) {
-                    const embeddedLViews = declarationLContainer[MOVED_VIEWS];
-                    for (let i = 0; i < embeddedLViews.length; i++) {
-                        const embeddedLView = embeddedLViews[i];
-                        collectQueryResults(embeddedLView[TVIEW], embeddedLView, childQueryIndex, result);
-                    }
-                }
-            }
-        }
-    }
-    return result;
-}
-/**
- * Refreshes a query by combining matches from all active views and removing matches from deleted
- * views.
- *
- * @returns `true` if a query got dirty during change detection or if this is a static query
- * resolving in creation mode, `false` otherwise.
- *
- * @codeGenApi
- */
-function ɵɵqueryRefresh(queryList) {
-    const lView = getLView();
-    const tView = getTView();
-    const queryIndex = getCurrentQueryIndex();
-    setCurrentQueryIndex(queryIndex + 1);
-    const tQuery = getTQuery(tView, queryIndex);
-    if (queryList.dirty &&
-        (isCreationMode(lView) ===
-            ((tQuery.metadata.flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */))) {
-        if (tQuery.matches === null) {
-            queryList.reset([]);
-        }
-        else {
-            const result = tQuery.crossesNgTemplate ?
-                collectQueryResults(tView, lView, queryIndex, []) :
-                materializeViewResults(tView, lView, tQuery, queryIndex);
-            queryList.reset(result, unwrapElementRef);
-            queryList.notifyOnChanges();
-        }
-        return true;
-    }
-    return false;
-}
-/**
- * Creates new QueryList, stores the reference in LView and returns QueryList.
- *
- * @param predicate The type for which the query will search
- * @param flags Flags associated with the query
- * @param read What to save in the query
- *
- * @codeGenApi
- */
-function ɵɵviewQuery(predicate, flags, read) {
-    ngDevMode && assertNumber(flags, 'Expecting flags');
-    const tView = getTView();
-    if (tView.firstCreatePass) {
-        createTQuery(tView, new TQueryMetadata_(predicate, flags, read), -1);
-        if ((flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */) {
-            tView.staticViewQueries = true;
-        }
-    }
-    createLQuery(tView, getLView(), flags);
-}
-/**
- * Registers a QueryList, associated with a content query, for later refresh (part of a view
- * refresh).
- *
- * @param directiveIndex Current directive index
- * @param predicate The type for which the query will search
- * @param flags Flags associated with the query
- * @param read What to save in the query
- * @returns QueryList<T>
- *
- * @codeGenApi
- */
-function ɵɵcontentQuery(directiveIndex, predicate, flags, read) {
-    ngDevMode && assertNumber(flags, 'Expecting flags');
-    const tView = getTView();
-    if (tView.firstCreatePass) {
-        const tNode = getCurrentTNode();
-        createTQuery(tView, new TQueryMetadata_(predicate, flags, read), tNode.index);
-        saveContentQueryAndDirectiveIndex(tView, directiveIndex);
-        if ((flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */) {
-            tView.staticContentQueries = true;
-        }
-    }
-    createLQuery(tView, getLView(), flags);
-}
-/**
- * Loads a QueryList corresponding to the current view or content query.
- *
- * @codeGenApi
- */
-function ɵɵloadQuery() {
-    return loadQueryInternal(getLView(), getCurrentQueryIndex());
-}
-function loadQueryInternal(lView, queryIndex) {
-    ngDevMode &&
-        assertDefined(lView[QUERIES], 'LQueries should be defined when trying to load a query');
-    ngDevMode && assertIndexInRange(lView[QUERIES].queries, queryIndex);
-    return lView[QUERIES].queries[queryIndex].queryList;
-}
-function createLQuery(tView, lView, flags) {
-    const queryList = new QueryList((flags & 4 /* QueryFlags.emitDistinctChangesOnly */) === 4 /* QueryFlags.emitDistinctChangesOnly */);
-    storeCleanupWithContext(tView, lView, queryList, queryList.destroy);
-    if (lView[QUERIES] === null)
-        lView[QUERIES] = new LQueries_();
-    lView[QUERIES].queries.push(new LQuery_(queryList));
-}
-function createTQuery(tView, metadata, nodeIndex) {
-    if (tView.queries === null)
-        tView.queries = new TQueries_();
-    tView.queries.track(new TQuery_(metadata, nodeIndex));
-}
-function saveContentQueryAndDirectiveIndex(tView, directiveIndex) {
-    const tViewContentQueries = tView.contentQueries || (tView.contentQueries = []);
-    const lastSavedDirectiveIndex = tViewContentQueries.length ? tViewContentQueries[tViewContentQueries.length - 1] : -1;
-    if (directiveIndex !== lastSavedDirectiveIndex) {
-        tViewContentQueries.push(tView.queries.length - 1, directiveIndex);
-    }
-}
-function getTQuery(tView, index) {
-    ngDevMode && assertDefined(tView.queries, 'TQueries must be defined to retrieve a TQuery');
-    return tView.queries.getByIndex(index);
-}
-
 /**
  * Retrieves `TemplateRef` instance from `Injector` when a local reference is placed on the
  * `<ng-template>` element.
@@ -29893,7 +29894,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.0.9+sha-f843b78');
+const VERSION = new Version('17.0.9+sha-14bbd88');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
