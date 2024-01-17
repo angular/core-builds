@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.0-rc.0+sha-18fa6d7
+ * @license Angular v17.1.0-rc.0+sha-be882c3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3925,8 +3925,7 @@ declare const FLAGS = 2;
  *
  * @publicApi
  */
-export declare function forwardRef<T>(forwardRefFn: ForwardRefFn<T>): T;
-
+export declare function forwardRef(forwardRefFn: ForwardRefFn): Type<any>;
 
 /**
  * An interface that a function passed into {@link forwardRef} has to implement.
@@ -3937,8 +3936,8 @@ export declare function forwardRef<T>(forwardRefFn: ForwardRefFn<T>): T;
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref_fn'}
  * @publicApi
  */
-export declare interface ForwardRefFn<T> {
-    (): T;
+export declare interface ForwardRefFn {
+    (): any;
 }
 
 /**
