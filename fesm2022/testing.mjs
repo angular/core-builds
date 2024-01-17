@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-f9781f9
+ * @license Angular v17.2.0-next.0+sha-b0e0f00
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1581,6 +1581,7 @@ class R3TestCompiler {
 }
 
 // The formatter and CI disagree on how this import statement should be formatted. Both try to keep
+const DEFER_BLOCK_DEFAULT_BEHAVIOR = ɵDeferBlockBehavior.Playthrough;
 let _nextRootElementId = 0;
 /**
  * Returns a singleton of the `TestBed` class.
@@ -1603,7 +1604,7 @@ class TestBedImpl {
          * Defer block behavior option that specifies whether defer blocks will be triggered manually
          * or set to play through.
          */
-        this._instanceDeferBlockBehavior = ɵDeferBlockBehavior.Manual;
+        this._instanceDeferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
         // Properties
         this.platform = null;
         this.ngModule = null;
@@ -1795,7 +1796,7 @@ class TestBedImpl {
                 this._instanceTeardownOptions = undefined;
                 this._instanceErrorOnUnknownElementsOption = undefined;
                 this._instanceErrorOnUnknownPropertiesOption = undefined;
-                this._instanceDeferBlockBehavior = ɵDeferBlockBehavior.Manual;
+                this._instanceDeferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
             }
         }
         return this;
@@ -1821,7 +1822,7 @@ class TestBedImpl {
         this._instanceTeardownOptions = moduleDef.teardown;
         this._instanceErrorOnUnknownElementsOption = moduleDef.errorOnUnknownElements;
         this._instanceErrorOnUnknownPropertiesOption = moduleDef.errorOnUnknownProperties;
-        this._instanceDeferBlockBehavior = moduleDef.deferBlockBehavior ?? ɵDeferBlockBehavior.Manual;
+        this._instanceDeferBlockBehavior = moduleDef.deferBlockBehavior ?? DEFER_BLOCK_DEFAULT_BEHAVIOR;
         // Store the current value of the strict mode option,
         // so we can restore it later
         this._previousErrorOnUnknownElementsOption = ɵgetUnknownElementStrictMode();

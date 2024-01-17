@@ -23856,7 +23856,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
   const templateName = templateTypeName ? `${templateTypeName}_Template` : null;
   if (!USE_TEMPLATE_PIPELINE) {
     let allDeferrableDepsFn = null;
-    if (meta.deferBlocks.size > 0 && meta.deferrableTypes.size > 0) {
+    if (meta.deferBlocks.size > 0 && meta.deferrableTypes.size > 0 && meta.deferBlockDepsEmitMode === 1) {
       const fnName = `${templateTypeName}_DeferFn`;
       allDeferrableDepsFn = createDeferredDepsFunction(constantPool, fnName, meta.deferrableTypes);
     }
@@ -25127,6 +25127,7 @@ var CompilerFacadeImpl = class {
       deferBlocks,
       deferrableTypes: /* @__PURE__ */ new Map(),
       deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
+      deferBlockDepsEmitMode: 0,
       styles: [...facade.styles, ...template2.styles],
       encapsulation: facade.encapsulation,
       interpolation,
@@ -25335,6 +25336,7 @@ function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMap
     deferBlocks,
     deferrableTypes: /* @__PURE__ */ new Map(),
     deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
+    deferBlockDepsEmitMode: 0,
     changeDetection: (_c2 = decl.changeDetection) != null ? _c2 : ChangeDetectionStrategy.Default,
     encapsulation: (_d2 = decl.encapsulation) != null ? _d2 : ViewEncapsulation.Emulated,
     interpolation,
@@ -25574,7 +25576,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.0+sha-f9781f9");
+var VERSION2 = new Version("17.2.0-next.0+sha-b0e0f00");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

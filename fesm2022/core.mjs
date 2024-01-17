@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-f9781f9
+ * @license Angular v17.2.0-next.0+sha-b0e0f00
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15717,7 +15717,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-f9781f9']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-b0e0f00']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17793,11 +17793,12 @@ var DeferBlockBehavior;
 (function (DeferBlockBehavior) {
     /**
      * Manual triggering mode for defer blocks. Provides control over when defer blocks render
-     * and which state they render. This is the default behavior in test environments.
+     * and which state they render.
      */
     DeferBlockBehavior[DeferBlockBehavior["Manual"] = 0] = "Manual";
     /**
      * Playthrough mode for defer blocks. This mode behaves like defer blocks would in a browser.
+     * This is the default behavior in test environments.
      */
     DeferBlockBehavior[DeferBlockBehavior["Playthrough"] = 1] = "Playthrough";
 })(DeferBlockBehavior || (DeferBlockBehavior = {}));
@@ -30045,7 +30046,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.0+sha-f9781f9');
+const VERSION = new Version('17.2.0-next.0+sha-b0e0f00');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
