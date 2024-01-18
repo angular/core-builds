@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-b4c7167
+ * @license Angular v17.2.0-next.0+sha-e227275
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1220,9 +1220,6 @@ export declare abstract class CompilerFactory {
 
 /**
  * Options for creating a compiler.
- *
- * Note: the `useJit` and `missingTranslation` config options are not used in Ivy, passing them has
- * no effect. Those config options are deprecated since v13.
  *
  * @publicApi
  */
@@ -4203,6 +4200,7 @@ declare const globalUtilsFunctions: {
     getRootComponents: typeof getRootComponents;
     getDirectives: typeof ɵgetDirectives;
     applyChanges: typeof applyChanges;
+    isSignal: typeof isSignal;
 };
 
 /**

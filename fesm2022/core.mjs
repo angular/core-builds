@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-b4c7167
+ * @license Angular v17.2.0-next.0+sha-e227275
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15717,7 +15717,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-b4c7167']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-e227275']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30046,7 +30046,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.0+sha-b4c7167');
+const VERSION = new Version('17.2.0-next.0+sha-e227275');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -31065,6 +31065,7 @@ const globalUtilsFunctions = {
     'getRootComponents': getRootComponents,
     'getDirectives': getDirectives,
     'applyChanges': applyChanges,
+    'isSignal': isSignal,
 };
 let _published = false;
 /**
