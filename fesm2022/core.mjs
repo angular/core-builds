@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-cc34e5f
+ * @license Angular v17.2.0-next.0+sha-5ae85e4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8106,9 +8106,6 @@ function addViewToDOM(tView, parentTNode, renderer, lView, parentNativeNode, bef
  * @param lView the `LView` to be detached.
  */
 function detachViewFromDOM(tView, lView) {
-    // The scheduler must be notified because the animation engine is what actually does the DOM
-    // removal and only runs at the end of change detection.
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify();
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
 /**
@@ -15717,7 +15714,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-cc34e5f']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-5ae85e4']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30046,7 +30043,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.0+sha-cc34e5f');
+const VERSION = new Version('17.2.0-next.0+sha-5ae85e4');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
