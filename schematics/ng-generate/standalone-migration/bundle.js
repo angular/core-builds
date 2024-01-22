@@ -26490,7 +26490,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.0+sha-b774e22");
+var VERSION2 = new Version("17.2.0-next.0+sha-3e13840");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27556,7 +27556,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-b774e22"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-3e13840"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27625,7 +27625,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-b774e22"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-3e13840"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27918,7 +27918,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-b774e22"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-3e13840"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27941,7 +27941,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-b774e22"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-3e13840"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27979,7 +27979,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-b774e22"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-3e13840"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -28003,7 +28003,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-b774e22"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-3e13840"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28038,7 +28038,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-b774e22"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-3e13840"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28055,7 +28055,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.2.0-next.0+sha-b774e22");
+var VERSION3 = new Version("17.2.0-next.0+sha-3e13840");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -28267,6 +28267,7 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["SUGGEST_SUBOPTIMAL_TYPE_INFERENCE"] = 10002] = "SUGGEST_SUBOPTIMAL_TYPE_INFERENCE";
   ErrorCode2[ErrorCode2["LOCAL_COMPILATION_IMPORTED_TEMPLATE_STRING"] = 11001] = "LOCAL_COMPILATION_IMPORTED_TEMPLATE_STRING";
   ErrorCode2[ErrorCode2["LOCAL_COMPILATION_IMPORTED_STYLES_STRING"] = 11002] = "LOCAL_COMPILATION_IMPORTED_STYLES_STRING";
+  ErrorCode2[ErrorCode2["LOCAL_COMPILATION_HOST_DIRECTIVE_INVALID"] = 11003] = "LOCAL_COMPILATION_HOST_DIRECTIVE_INVALID";
 })(ErrorCode || (ErrorCode = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/diagnostics/src/docs.mjs
@@ -30452,6 +30453,9 @@ function hasInjectableFields(clazz, host) {
   const members = host.getMembersOfClass(clazz);
   return members.some(({ isStatic, name }) => isStatic && (name === "\u0275prov" || name === "\u0275fac"));
 }
+function isHostDirectiveMetaForGlobalMode(hostDirectiveMeta) {
+  return hostDirectiveMeta.directive instanceof Reference2;
+}
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/metadata/src/dts.mjs
 var DtsMetadataReader = class {
@@ -30882,6 +30886,9 @@ var HostDirectivesResolver = class {
   }
   walkHostDirectives(directives, results) {
     for (const current of directives) {
+      if (!isHostDirectiveMetaForGlobalMode(current)) {
+        throw new Error("Impossible state: resolving code path in local compilation mode");
+      }
       const hostMeta = flattenInheritedDirectiveMetadata(this.metaReader, current.directive);
       if (hostMeta === null) {
         continue;
@@ -31913,6 +31920,9 @@ function getDirectiveDiagnostics(node, injectableRegistry, evaluator, reflector,
 function validateHostDirectives(origin, hostDirectives, metaReader) {
   const diagnostics = [];
   for (const current of hostDirectives) {
+    if (!isHostDirectiveMetaForGlobalMode(current)) {
+      throw new Error("Impossible state: diagnostics code path for local compilation");
+    }
     const hostMeta = flattenInheritedDirectiveMetadata(metaReader, current.directive);
     if (hostMeta === null) {
       diagnostics.push(makeDiagnostic(ErrorCode.HOST_DIRECTIVE_INVALID, current.directive.getOriginForDiagnostics(origin), `${current.directive.debugName} must be a standalone directive to be used as a host directive`));
@@ -31931,6 +31941,9 @@ function validateHostDirectives(origin, hostDirectives, metaReader) {
   return diagnostics;
 }
 function validateHostDirectiveMappings(bindingType, hostDirectiveMeta, meta, origin, diagnostics, requiredBindings) {
+  if (!isHostDirectiveMetaForGlobalMode(hostDirectiveMeta)) {
+    throw new Error("Impossible state: diagnostics code path for local compilation");
+  }
   const className = meta.name;
   const hostDirectiveMappings = bindingType === "input" ? hostDirectiveMeta.inputs : hostDirectiveMeta.outputs;
   const existingBindings = bindingType === "input" ? meta.inputs : meta.outputs;
@@ -35254,9 +35267,14 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
   const sourceFile = clazz.getSourceFile();
   const type = wrapTypeReference(reflector, clazz);
   const rawHostDirectives = directive.get("hostDirectives") || null;
-  const hostDirectives = rawHostDirectives === null ? null : extractHostDirectives(rawHostDirectives, evaluator);
-  if (hostDirectives !== null) {
-    referencesRegistry.add(clazz, ...hostDirectives.map((hostDir) => hostDir.directive));
+  const hostDirectives = rawHostDirectives === null ? null : extractHostDirectives(rawHostDirectives, evaluator, compilationMode);
+  if (compilationMode !== CompilationMode.LOCAL && hostDirectives !== null) {
+    referencesRegistry.add(clazz, ...hostDirectives.map((hostDir) => {
+      if (!isHostDirectiveMetaForGlobalMode(hostDir)) {
+        throw new Error("Impossible state");
+      }
+      return hostDir.directive;
+    }));
   }
   const metadata = {
     name: clazz.name.text,
@@ -35766,31 +35784,45 @@ function evaluateHostExpressionBindings(hostExpr, evaluator) {
   }
   return bindings;
 }
-function extractHostDirectives(rawHostDirectives, evaluator) {
+function extractHostDirectives(rawHostDirectives, evaluator, compilationMode) {
   const resolved = evaluator.evaluate(rawHostDirectives, forwardRefResolver);
   if (!Array.isArray(resolved)) {
     throw createValueHasWrongTypeError(rawHostDirectives, resolved, "hostDirectives must be an array");
   }
   return resolved.map((value) => {
     const hostReference = value instanceof Map ? value.get("directive") : value;
-    if (!(hostReference instanceof Reference2)) {
-      throw createValueHasWrongTypeError(rawHostDirectives, hostReference, "Host directive must be a reference");
+    if (compilationMode !== CompilationMode.LOCAL) {
+      if (!(hostReference instanceof Reference2)) {
+        throw createValueHasWrongTypeError(rawHostDirectives, hostReference, "Host directive must be a reference");
+      }
+      if (!isNamedClassDeclaration(hostReference.node)) {
+        throw createValueHasWrongTypeError(rawHostDirectives, hostReference, "Host directive reference must be a class");
+      }
     }
-    if (!isNamedClassDeclaration(hostReference.node)) {
-      throw createValueHasWrongTypeError(rawHostDirectives, hostReference, "Host directive reference must be a class");
+    let directive;
+    let nameForErrors = (fieldName) => "@Directive.hostDirectives";
+    if (compilationMode === CompilationMode.LOCAL && hostReference instanceof DynamicValue) {
+      if (!import_typescript51.default.isIdentifier(hostReference.node) && !import_typescript51.default.isPropertyAccessExpression(hostReference.node)) {
+        throw new FatalDiagnosticError(ErrorCode.LOCAL_COMPILATION_HOST_DIRECTIVE_INVALID, hostReference.node, `In local compilation mode, host directive cannot be an expression`);
+      }
+      directive = new WrappedNodeExpr(hostReference.node);
+    } else if (hostReference instanceof Reference2) {
+      directive = hostReference;
+      nameForErrors = (fieldName) => `@Directive.hostDirectives.${directive.node.name.text}.${fieldName}`;
+    } else {
+      throw new Error("Impossible state");
     }
     const meta = {
-      directive: hostReference,
-      isForwardReference: hostReference.synthetic,
-      inputs: parseHostDirectivesMapping("inputs", value, hostReference.node, rawHostDirectives),
-      outputs: parseHostDirectivesMapping("outputs", value, hostReference.node, rawHostDirectives)
+      directive,
+      isForwardReference: hostReference instanceof Reference2 && hostReference.synthetic,
+      inputs: parseHostDirectivesMapping("inputs", value, nameForErrors("input"), rawHostDirectives),
+      outputs: parseHostDirectivesMapping("outputs", value, nameForErrors("output"), rawHostDirectives)
     };
     return meta;
   });
 }
-function parseHostDirectivesMapping(field, resolvedValue, classReference, sourceExpression) {
+function parseHostDirectivesMapping(field, resolvedValue, nameForErrors, sourceExpression) {
   if (resolvedValue instanceof Map && resolvedValue.has(field)) {
-    const nameForErrors = `@Directive.hostDirectives.${classReference.name.text}.${field}`;
     const rawInputs = resolvedValue.get(field);
     if (isStringArrayOrDie(rawInputs, nameForErrors, sourceExpression)) {
       return parseMappingStringArray2(rawInputs);
@@ -35799,8 +35831,17 @@ function parseHostDirectivesMapping(field, resolvedValue, classReference, source
   return null;
 }
 function toHostDirectiveMetadata(hostDirective, context, refEmitter) {
+  let directive;
+  if (hostDirective.directive instanceof Reference2) {
+    directive = toR3Reference(hostDirective.directive.node, hostDirective.directive, context, refEmitter);
+  } else {
+    directive = {
+      value: hostDirective.directive,
+      type: hostDirective.directive
+    };
+  }
   return {
-    directive: toR3Reference(hostDirective.directive.node, hostDirective.directive, context, refEmitter),
+    directive,
     isForwardReference: hostDirective.isForwardReference,
     inputs: hostDirective.inputs || null,
     outputs: hostDirective.outputs || null
@@ -44378,6 +44419,9 @@ var SymbolBuilder = class {
   }
   addHostDirectiveSymbols(host, hostDirectives, symbols) {
     for (const current of hostDirectives) {
+      if (!isHostDirectiveMetaForGlobalMode(current)) {
+        throw new Error("Impossible state: typecheck code path in local compilation mode.");
+      }
       if (!import_typescript94.default.isClassDeclaration(current.directive.node)) {
         continue;
       }
