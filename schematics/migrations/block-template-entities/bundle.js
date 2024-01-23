@@ -9643,7 +9643,7 @@ function createI18nContexts(job) {
             throw Error("AssertionError: Unexpected ICU outside of an i18n block.");
           }
           if (op.message.id !== currentI18nOp.message.id) {
-            const contextOp = createI18nContextOp(I18nContextKind.Icu, job.allocateXrefId(), currentI18nOp.xref, op.message, null);
+            const contextOp = createI18nContextOp(I18nContextKind.Icu, job.allocateXrefId(), currentI18nOp.root, op.message, null);
             unit.create.push(contextOp);
             op.context = contextOp.xref;
           } else {
@@ -25682,7 +25682,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.0+sha-f81a436");
+var VERSION2 = new Version("17.2.0-next.0+sha-d99bc8a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
