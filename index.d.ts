@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-9384537
+ * @license Angular v17.2.0-next.0+sha-f81a436
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7926,6 +7926,7 @@ declare interface R3DeclareQueryMetadataFacade {
     read?: OpaqueValue;
     static?: boolean;
     emitDistinctChangesOnly?: boolean;
+    isSignal?: boolean;
 }
 
 declare type R3DeclareTemplateDependencyFacade = {
@@ -13965,7 +13966,9 @@ export declare function ɵɵconditional<T>(containerIndex: number, matchingTempl
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
+export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: ProviderToken<unknown> | string | string[], flags: QueryFlags, read?: any): void;
+
+export declare function ɵɵcontentQuerySignal(): void;
 
 /**
  * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
@@ -15617,6 +15620,8 @@ export declare function ɵɵpureFunction8(slotOffset: number, pureFn: (v1: any, 
  */
 export declare function ɵɵpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
 
+export declare function ɵɵqueryAdvance(): void;
+
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
@@ -16879,6 +16884,8 @@ export declare function ɵɵvalidateIframeAttribute(attrValue: any, tagName: str
  *
  * @codeGenApi
  */
-export declare function ɵɵviewQuery<T>(predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
+export declare function ɵɵviewQuery<T>(predicate: ProviderToken<unknown> | string | string[], flags: QueryFlags, read?: any): void;
+
+export declare function ɵɵviewQuerySignal(): void;
 
 export { }

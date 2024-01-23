@@ -2471,6 +2471,15 @@ var Identifiers = _Identifiers;
   _Identifiers.contentQuery = { name: "\u0275\u0275contentQuery", moduleName: CORE };
 })();
 (() => {
+  _Identifiers.viewQuerySignal = { name: "\u0275\u0275viewQuerySignal", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.contentQuerySignal = { name: "\u0275\u0275contentQuerySignal", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.queryAdvance = { name: "\u0275\u0275queryAdvance", moduleName: CORE };
+})();
+(() => {
   _Identifiers.NgOnChangesFeature = { name: "\u0275\u0275NgOnChangesFeature", moduleName: CORE };
 })();
 (() => {
@@ -4298,24 +4307,6 @@ function trimTrailingNulls(parameters) {
     parameters.pop();
   }
   return parameters;
-}
-function getQueryPredicate(query, constantPool) {
-  if (Array.isArray(query.predicate)) {
-    let predicate = [];
-    query.predicate.forEach((selector) => {
-      const selectors = selector.split(",").map((token) => literal(token.trim()));
-      predicate.push(...selectors);
-    });
-    return constantPool.getConstLiteral(literalArr(predicate), true);
-  } else {
-    switch (query.predicate.forwardRef) {
-      case 0:
-      case 2:
-        return query.predicate.expression;
-      case 1:
-        return importExpr(Identifiers.resolveForwardRef).callFn([query.predicate.expression]);
-    }
-  }
 }
 var DefinitionMap = class {
   constructor() {
@@ -19989,6 +19980,44 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/switch/index.mjs
 var USE_TEMPLATE_PIPELINE = false;
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/query_generation.mjs
+function toQueryFlags(query) {
+  return (query.descendants ? 1 : 0) | (query.static ? 2 : 0) | (query.emitDistinctChangesOnly ? 4 : 0);
+}
+function getQueryPredicate(query, constantPool) {
+  if (Array.isArray(query.predicate)) {
+    let predicate = [];
+    query.predicate.forEach((selector) => {
+      const selectors = selector.split(",").map((token) => literal(token.trim()));
+      predicate.push(...selectors);
+    });
+    return constantPool.getConstLiteral(literalArr(predicate), true);
+  } else {
+    switch (query.predicate.forwardRef) {
+      case 0:
+      case 2:
+        return query.predicate.expression;
+      case 1:
+        return importExpr(Identifiers.resolveForwardRef).callFn([query.predicate.expression]);
+    }
+  }
+}
+function createQueryCreateCall(query, constantPool, queryTypeFns, prependParams) {
+  const parameters = [];
+  if (prependParams !== void 0) {
+    parameters.push(...prependParams);
+  }
+  if (query.isSignal) {
+    parameters.push(new ReadPropExpr(variable(CONTEXT_NAME), query.propertyName));
+  }
+  parameters.push(getQueryPredicate(query, constantPool), literal(toQueryFlags(query)));
+  if (query.read) {
+    parameters.push(query.read);
+  }
+  const queryCreateFn = query.isSignal ? queryTypeFns.signalBased : queryTypeFns.nonSignal;
+  return importExpr(queryCreateFn).callFn(parameters);
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/styling_builder.mjs
 var IMPORTANT_FLAG = "!important";
 var MIN_STYLING_BINDING_SLOTS_REQUIRED = 2;
@@ -23965,16 +23994,6 @@ function compileDeclarationList(list, mode) {
       throw new Error(`Unsupported with an array of pre-resolved dependencies`);
   }
 }
-function prepareQueryParams(query, constantPool) {
-  const parameters = [getQueryPredicate(query, constantPool), literal(toQueryFlags(query))];
-  if (query.read) {
-    parameters.push(query.read);
-  }
-  return parameters;
-}
-function toQueryFlags(query) {
-  return (query.descendants ? 1 : 0) | (query.static ? 2 : 0) | (query.emitDistinctChangesOnly ? 4 : 0);
-}
 function convertAttributesToExpressions(attributes) {
   const values = [];
   for (let key of Object.getOwnPropertyNames(attributes)) {
@@ -23988,7 +24007,16 @@ function createContentQueriesFunction(queries, constantPool, name) {
   const updateStatements = [];
   const tempAllocator = temporaryAllocator(updateStatements, TEMPORARY_NAME);
   for (const query of queries) {
-    createStatements.push(importExpr(Identifiers.contentQuery).callFn([variable("dirIndex"), ...prepareQueryParams(query, constantPool)]).toStmt());
+    createStatements.push(createQueryCreateCall(
+      query,
+      constantPool,
+      { nonSignal: Identifiers.contentQuery, signalBased: Identifiers.contentQuerySignal },
+      [variable("dirIndex")]
+    ).toStmt());
+    if (query.isSignal) {
+      updateStatements.push(importExpr(Identifiers.queryAdvance).callFn([]).toStmt());
+      continue;
+    }
     const temporary = tempAllocator();
     const getQueryList = importExpr(Identifiers.loadQuery).callFn([]);
     const refresh = importExpr(Identifiers.queryRefresh).callFn([temporary.set(getQueryList)]);
@@ -24061,8 +24089,15 @@ function createViewQueriesFunction(viewQueries, constantPool, name) {
   const updateStatements = [];
   const tempAllocator = temporaryAllocator(updateStatements, TEMPORARY_NAME);
   viewQueries.forEach((query) => {
-    const queryDefinition = importExpr(Identifiers.viewQuery).callFn(prepareQueryParams(query, constantPool));
-    createStatements.push(queryDefinition.toStmt());
+    const queryDefinitionCall = createQueryCreateCall(query, constantPool, {
+      signalBased: Identifiers.viewQuerySignal,
+      nonSignal: Identifiers.viewQuery
+    });
+    createStatements.push(queryDefinitionCall.toStmt());
+    if (query.isSignal) {
+      updateStatements.push(importExpr(Identifiers.queryAdvance).callFn([]).toStmt());
+      return;
+    }
     const temporary = tempAllocator();
     const getQueryList = importExpr(Identifiers.loadQuery).callFn([]);
     const refresh = importExpr(Identifiers.queryRefresh).callFn([temporary.set(getQueryList)]);
@@ -25185,6 +25220,7 @@ var CompilerFacadeImpl = class {
 };
 function convertToR3QueryMetadata(facade) {
   return __spreadProps(__spreadValues({}, facade), {
+    isSignal: false,
     predicate: convertQueryPredicate(facade.predicate),
     read: facade.read ? new WrappedNodeExpr(facade.read) : null,
     static: facade.static,
@@ -25200,7 +25236,8 @@ function convertQueryDeclarationToMetadata(declaration) {
     descendants: (_b2 = declaration.descendants) != null ? _b2 : false,
     read: declaration.read ? new WrappedNodeExpr(declaration.read) : null,
     static: (_c2 = declaration.static) != null ? _c2 : false,
-    emitDistinctChangesOnly: (_d2 = declaration.emitDistinctChangesOnly) != null ? _d2 : true
+    emitDistinctChangesOnly: (_d2 = declaration.emitDistinctChangesOnly) != null ? _d2 : true,
+    isSignal: !!declaration.isSignal
   };
 }
 function convertQueryPredicate(predicate) {
@@ -25576,7 +25613,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.0+sha-9384537");
+var VERSION2 = new Version("17.2.0-next.0+sha-f81a436");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
