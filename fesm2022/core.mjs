@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-09f9423
+ * @license Angular v17.2.0-next.0+sha-7751645
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4802,13 +4802,13 @@ class Query {
  * @Annotation
  * @publicApi
  */
-const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {}) => ({
+const ContentChildren = makePropDecorator('ContentChildren', (selector, opts = {}) => ({
     selector,
     first: false,
     isViewQuery: false,
     descendants: false,
     emitDistinctChangesOnly: emitDistinctChangesOnlyDefaultValue,
-    ...data
+    ...opts
 }), Query);
 /**
  * ContentChild decorator and metadata.
@@ -4818,20 +4818,20 @@ const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {
  *
  * @publicApi
  */
-const ContentChild = makePropDecorator('ContentChild', (selector, data = {}) => ({ selector, first: true, isViewQuery: false, descendants: true, ...data }), Query);
+const ContentChild = makePropDecorator('ContentChild', (selector, opts = {}) => ({ selector, first: true, isViewQuery: false, descendants: true, ...opts }), Query);
 /**
  * ViewChildren decorator and metadata.
  *
  * @Annotation
  * @publicApi
  */
-const ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => ({
+const ViewChildren = makePropDecorator('ViewChildren', (selector, opts = {}) => ({
     selector,
     first: false,
     isViewQuery: true,
     descendants: true,
     emitDistinctChangesOnly: emitDistinctChangesOnlyDefaultValue,
-    ...data
+    ...opts
 }), Query);
 /**
  * ViewChild decorator and metadata.
@@ -4839,7 +4839,7 @@ const ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => 
  * @Annotation
  * @publicApi
  */
-const ViewChild = makePropDecorator('ViewChild', (selector, data) => ({ selector, first: true, isViewQuery: true, descendants: true, ...data }), Query);
+const ViewChild = makePropDecorator('ViewChild', (selector, opts) => ({ selector, first: true, isViewQuery: true, descendants: true, ...opts }), Query);
 
 var FactoryTarget;
 (function (FactoryTarget) {
@@ -15714,7 +15714,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-09f9423']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-7751645']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -26034,7 +26034,7 @@ function ɵɵloadQuery() {
 }
 function ɵɵviewQuerySignal() { }
 function ɵɵcontentQuerySignal() { }
-function ɵɵqueryAdvance() { }
+function ɵɵqueryAdvance(_count = 1) { }
 
 /** Store a value in the `data` at a given `index`. */
 function store(tView, lView, index, value) {
@@ -29807,6 +29807,7 @@ function convertToR3QueryMetadata(propertyName, ann) {
         read: ann.read ? ann.read : null,
         static: !!ann.static,
         emitDistinctChangesOnly: !!ann.emitDistinctChangesOnly,
+        isSignal: !!ann.isSignal,
     };
 }
 function extractQueriesMetadata(type, propMetadata, isQueryAnn) {
@@ -30061,7 +30062,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.0+sha-09f9423');
+const VERSION = new Version('17.2.0-next.0+sha-7751645');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-09f9423
+ * @license Angular v17.2.0-next.0+sha-7751645
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15620,7 +15620,7 @@ export declare function ɵɵpureFunction8(slotOffset: number, pureFn: (v1: any, 
  */
 export declare function ɵɵpureFunctionV(slotOffset: number, pureFn: (...v: any[]) => any, exps: any[], thisArg?: any): any;
 
-export declare function ɵɵqueryAdvance(): void;
+export declare function ɵɵqueryAdvance(_count?: number): void;
 
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted

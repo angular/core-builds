@@ -4293,11 +4293,11 @@ var CHAINABLE_INSTRUCTIONS = /* @__PURE__ */ new Set([
 function invokeInstruction(span, reference2, params) {
   return importExpr(reference2, null, span).callFn(params, span);
 }
-function temporaryAllocator(statements, name) {
+function temporaryAllocator(pushStatement, name) {
   let temp = null;
   return () => {
     if (!temp) {
-      statements.push(new DeclareVarStmt(TEMPORARY_NAME, void 0, DYNAMIC_TYPE));
+      pushStatement(new DeclareVarStmt(TEMPORARY_NAME, void 0, DYNAMIC_TYPE));
       temp = variable(name);
     }
     return temp;
@@ -20049,377 +20049,6 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/switch/index.mjs
 var USE_TEMPLATE_PIPELINE = false;
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/query_generation.mjs
-function toQueryFlags(query) {
-  return (query.descendants ? 1 : 0) | (query.static ? 2 : 0) | (query.emitDistinctChangesOnly ? 4 : 0);
-}
-function getQueryPredicate(query, constantPool) {
-  if (Array.isArray(query.predicate)) {
-    let predicate = [];
-    query.predicate.forEach((selector) => {
-      const selectors = selector.split(",").map((token) => literal(token.trim()));
-      predicate.push(...selectors);
-    });
-    return constantPool.getConstLiteral(literalArr(predicate), true);
-  } else {
-    switch (query.predicate.forwardRef) {
-      case 0:
-      case 2:
-        return query.predicate.expression;
-      case 1:
-        return importExpr(Identifiers.resolveForwardRef).callFn([query.predicate.expression]);
-    }
-  }
-}
-function createQueryCreateCall(query, constantPool, queryTypeFns, prependParams) {
-  const parameters = [];
-  if (prependParams !== void 0) {
-    parameters.push(...prependParams);
-  }
-  if (query.isSignal) {
-    parameters.push(new ReadPropExpr(variable(CONTEXT_NAME), query.propertyName));
-  }
-  parameters.push(getQueryPredicate(query, constantPool), literal(toQueryFlags(query)));
-  if (query.read) {
-    parameters.push(query.read);
-  }
-  const queryCreateFn = query.isSignal ? queryTypeFns.signalBased : queryTypeFns.nonSignal;
-  return importExpr(queryCreateFn).callFn(parameters);
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/styling_builder.mjs
-var IMPORTANT_FLAG = "!important";
-var MIN_STYLING_BINDING_SLOTS_REQUIRED = 2;
-var StylingBuilder = class {
-  constructor(_directiveExpr) {
-    this._directiveExpr = _directiveExpr;
-    this._hasInitialValues = false;
-    this.hasBindings = false;
-    this.hasBindingsWithPipes = false;
-    this._classMapInput = null;
-    this._styleMapInput = null;
-    this._singleStyleInputs = null;
-    this._singleClassInputs = null;
-    this._lastStylingInput = null;
-    this._firstStylingInput = null;
-    this._stylesIndex = /* @__PURE__ */ new Map();
-    this._classesIndex = /* @__PURE__ */ new Map();
-    this._initialStyleValues = [];
-    this._initialClassValues = [];
-  }
-  registerBoundInput(input) {
-    let binding = null;
-    let name = input.name;
-    switch (input.type) {
-      case 0:
-        binding = this.registerInputBasedOnName(name, input.value, input.sourceSpan);
-        break;
-      case 3:
-        binding = this.registerStyleInput(name, false, input.value, input.sourceSpan, input.unit);
-        break;
-      case 2:
-        binding = this.registerClassInput(name, false, input.value, input.sourceSpan);
-        break;
-    }
-    return binding ? true : false;
-  }
-  registerInputBasedOnName(name, expression, sourceSpan) {
-    let binding = null;
-    const prefix = name.substring(0, 6);
-    const isStyle = name === "style" || prefix === "style." || prefix === "style!";
-    const isClass = !isStyle && (name === "class" || prefix === "class." || prefix === "class!");
-    if (isStyle || isClass) {
-      const isMapBased = name.charAt(5) !== ".";
-      const property2 = name.slice(isMapBased ? 5 : 6);
-      if (isStyle) {
-        binding = this.registerStyleInput(property2, isMapBased, expression, sourceSpan);
-      } else {
-        binding = this.registerClassInput(property2, isMapBased, expression, sourceSpan);
-      }
-    }
-    return binding;
-  }
-  registerStyleInput(name, isMapBased, value, sourceSpan, suffix) {
-    if (isEmptyExpression(value)) {
-      return null;
-    }
-    if (!isCssCustomProperty2(name)) {
-      name = hyphenate2(name);
-    }
-    const { property: property2, hasOverrideFlag, suffix: bindingSuffix } = parseProperty2(name);
-    suffix = typeof suffix === "string" && suffix.length !== 0 ? suffix : bindingSuffix;
-    const entry = { name: property2, suffix, value, sourceSpan, hasOverrideFlag };
-    if (isMapBased) {
-      this._styleMapInput = entry;
-    } else {
-      (this._singleStyleInputs = this._singleStyleInputs || []).push(entry);
-      registerIntoMap(this._stylesIndex, property2);
-    }
-    this._lastStylingInput = entry;
-    this._firstStylingInput = this._firstStylingInput || entry;
-    this._checkForPipes(value);
-    this.hasBindings = true;
-    return entry;
-  }
-  registerClassInput(name, isMapBased, value, sourceSpan) {
-    if (isEmptyExpression(value)) {
-      return null;
-    }
-    const { property: property2, hasOverrideFlag } = parseProperty2(name);
-    const entry = { name: property2, value, sourceSpan, hasOverrideFlag, suffix: null };
-    if (isMapBased) {
-      this._classMapInput = entry;
-    } else {
-      (this._singleClassInputs = this._singleClassInputs || []).push(entry);
-      registerIntoMap(this._classesIndex, property2);
-    }
-    this._lastStylingInput = entry;
-    this._firstStylingInput = this._firstStylingInput || entry;
-    this._checkForPipes(value);
-    this.hasBindings = true;
-    return entry;
-  }
-  _checkForPipes(value) {
-    if (value instanceof ASTWithSource && value.ast instanceof BindingPipe) {
-      this.hasBindingsWithPipes = true;
-    }
-  }
-  registerStyleAttr(value) {
-    this._initialStyleValues = parse(value);
-    this._hasInitialValues = true;
-  }
-  registerClassAttr(value) {
-    this._initialClassValues = value.trim().split(/\s+/g);
-    this._hasInitialValues = true;
-  }
-  populateInitialStylingAttrs(attrs) {
-    if (this._initialClassValues.length) {
-      attrs.push(literal(1));
-      for (let i = 0; i < this._initialClassValues.length; i++) {
-        attrs.push(literal(this._initialClassValues[i]));
-      }
-    }
-    if (this._initialStyleValues.length) {
-      attrs.push(literal(2));
-      for (let i = 0; i < this._initialStyleValues.length; i += 2) {
-        attrs.push(literal(this._initialStyleValues[i]), literal(this._initialStyleValues[i + 1]));
-      }
-    }
-  }
-  assignHostAttrs(attrs, definitionMap) {
-    if (this._directiveExpr && (attrs.length || this._hasInitialValues)) {
-      this.populateInitialStylingAttrs(attrs);
-      definitionMap.set("hostAttrs", literalArr(attrs));
-    }
-  }
-  buildClassMapInstruction(valueConverter) {
-    if (this._classMapInput) {
-      return this._buildMapBasedInstruction(valueConverter, true, this._classMapInput);
-    }
-    return null;
-  }
-  buildStyleMapInstruction(valueConverter) {
-    if (this._styleMapInput) {
-      return this._buildMapBasedInstruction(valueConverter, false, this._styleMapInput);
-    }
-    return null;
-  }
-  _buildMapBasedInstruction(valueConverter, isClassBased, stylingInput) {
-    let totalBindingSlotsRequired = MIN_STYLING_BINDING_SLOTS_REQUIRED;
-    const mapValue = stylingInput.value.visit(valueConverter);
-    let reference2;
-    if (mapValue instanceof Interpolation) {
-      totalBindingSlotsRequired += mapValue.expressions.length;
-      reference2 = isClassBased ? getClassMapInterpolationExpression(mapValue) : getStyleMapInterpolationExpression(mapValue);
-    } else {
-      reference2 = isClassBased ? Identifiers.classMap : Identifiers.styleMap;
-    }
-    return {
-      reference: reference2,
-      calls: [{
-        supportsInterpolation: true,
-        sourceSpan: stylingInput.sourceSpan,
-        allocateBindingSlots: totalBindingSlotsRequired,
-        params: (convertFn) => {
-          const convertResult = convertFn(mapValue);
-          const params = Array.isArray(convertResult) ? convertResult : [convertResult];
-          return params;
-        }
-      }]
-    };
-  }
-  _buildSingleInputs(reference2, inputs, valueConverter, getInterpolationExpressionFn, isClassBased) {
-    const instructions = [];
-    inputs.forEach((input) => {
-      const previousInstruction = instructions[instructions.length - 1];
-      const value = input.value.visit(valueConverter);
-      let referenceForCall = reference2;
-      let totalBindingSlotsRequired = MIN_STYLING_BINDING_SLOTS_REQUIRED;
-      if (value instanceof Interpolation) {
-        totalBindingSlotsRequired += value.expressions.length;
-        if (getInterpolationExpressionFn) {
-          referenceForCall = getInterpolationExpressionFn(value);
-        }
-      }
-      const call2 = {
-        sourceSpan: input.sourceSpan,
-        allocateBindingSlots: totalBindingSlotsRequired,
-        supportsInterpolation: !!getInterpolationExpressionFn,
-        params: (convertFn) => {
-          const params = [];
-          params.push(literal(input.name));
-          const convertResult = convertFn(value);
-          if (Array.isArray(convertResult)) {
-            params.push(...convertResult);
-          } else {
-            params.push(convertResult);
-          }
-          if (!isClassBased && input.suffix !== null) {
-            params.push(literal(input.suffix));
-          }
-          return params;
-        }
-      };
-      if (previousInstruction && previousInstruction.reference === referenceForCall) {
-        previousInstruction.calls.push(call2);
-      } else {
-        instructions.push({ reference: referenceForCall, calls: [call2] });
-      }
-    });
-    return instructions;
-  }
-  _buildClassInputs(valueConverter) {
-    if (this._singleClassInputs) {
-      return this._buildSingleInputs(Identifiers.classProp, this._singleClassInputs, valueConverter, null, true);
-    }
-    return [];
-  }
-  _buildStyleInputs(valueConverter) {
-    if (this._singleStyleInputs) {
-      return this._buildSingleInputs(Identifiers.styleProp, this._singleStyleInputs, valueConverter, getStylePropInterpolationExpression, false);
-    }
-    return [];
-  }
-  buildUpdateLevelInstructions(valueConverter) {
-    const instructions = [];
-    if (this.hasBindings) {
-      const styleMapInstruction = this.buildStyleMapInstruction(valueConverter);
-      if (styleMapInstruction) {
-        instructions.push(styleMapInstruction);
-      }
-      const classMapInstruction = this.buildClassMapInstruction(valueConverter);
-      if (classMapInstruction) {
-        instructions.push(classMapInstruction);
-      }
-      instructions.push(...this._buildStyleInputs(valueConverter));
-      instructions.push(...this._buildClassInputs(valueConverter));
-    }
-    return instructions;
-  }
-};
-function registerIntoMap(map, key) {
-  if (!map.has(key)) {
-    map.set(key, map.size);
-  }
-}
-function parseProperty2(name) {
-  let hasOverrideFlag = false;
-  const overrideIndex = name.indexOf(IMPORTANT_FLAG);
-  if (overrideIndex !== -1) {
-    name = overrideIndex > 0 ? name.substring(0, overrideIndex) : "";
-    hasOverrideFlag = true;
-  }
-  let suffix = null;
-  let property2 = name;
-  const unitIndex = name.lastIndexOf(".");
-  if (unitIndex > 0) {
-    suffix = name.slice(unitIndex + 1);
-    property2 = name.substring(0, unitIndex);
-  }
-  return { property: property2, suffix, hasOverrideFlag };
-}
-function getClassMapInterpolationExpression(interpolation) {
-  switch (getInterpolationArgsLength(interpolation)) {
-    case 1:
-      return Identifiers.classMap;
-    case 3:
-      return Identifiers.classMapInterpolate1;
-    case 5:
-      return Identifiers.classMapInterpolate2;
-    case 7:
-      return Identifiers.classMapInterpolate3;
-    case 9:
-      return Identifiers.classMapInterpolate4;
-    case 11:
-      return Identifiers.classMapInterpolate5;
-    case 13:
-      return Identifiers.classMapInterpolate6;
-    case 15:
-      return Identifiers.classMapInterpolate7;
-    case 17:
-      return Identifiers.classMapInterpolate8;
-    default:
-      return Identifiers.classMapInterpolateV;
-  }
-}
-function getStyleMapInterpolationExpression(interpolation) {
-  switch (getInterpolationArgsLength(interpolation)) {
-    case 1:
-      return Identifiers.styleMap;
-    case 3:
-      return Identifiers.styleMapInterpolate1;
-    case 5:
-      return Identifiers.styleMapInterpolate2;
-    case 7:
-      return Identifiers.styleMapInterpolate3;
-    case 9:
-      return Identifiers.styleMapInterpolate4;
-    case 11:
-      return Identifiers.styleMapInterpolate5;
-    case 13:
-      return Identifiers.styleMapInterpolate6;
-    case 15:
-      return Identifiers.styleMapInterpolate7;
-    case 17:
-      return Identifiers.styleMapInterpolate8;
-    default:
-      return Identifiers.styleMapInterpolateV;
-  }
-}
-function getStylePropInterpolationExpression(interpolation) {
-  switch (getInterpolationArgsLength(interpolation)) {
-    case 1:
-      return Identifiers.styleProp;
-    case 3:
-      return Identifiers.stylePropInterpolate1;
-    case 5:
-      return Identifiers.stylePropInterpolate2;
-    case 7:
-      return Identifiers.stylePropInterpolate3;
-    case 9:
-      return Identifiers.stylePropInterpolate4;
-    case 11:
-      return Identifiers.stylePropInterpolate5;
-    case 13:
-      return Identifiers.stylePropInterpolate6;
-    case 15:
-      return Identifiers.stylePropInterpolate7;
-    case 17:
-      return Identifiers.stylePropInterpolate8;
-    default:
-      return Identifiers.stylePropInterpolateV;
-  }
-}
-function isCssCustomProperty2(name) {
-  return name.startsWith("--");
-}
-function isEmptyExpression(ast) {
-  if (ast instanceof ASTWithSource) {
-    ast = ast.ast;
-  }
-  return ast instanceof EmptyExpr;
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/html_parser.mjs
 var HtmlParser = class extends Parser2 {
   constructor() {
@@ -22161,6 +21790,339 @@ function serializePlaceholderValue(value) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/styling_builder.mjs
+var IMPORTANT_FLAG = "!important";
+var MIN_STYLING_BINDING_SLOTS_REQUIRED = 2;
+var StylingBuilder = class {
+  constructor(_directiveExpr) {
+    this._directiveExpr = _directiveExpr;
+    this._hasInitialValues = false;
+    this.hasBindings = false;
+    this.hasBindingsWithPipes = false;
+    this._classMapInput = null;
+    this._styleMapInput = null;
+    this._singleStyleInputs = null;
+    this._singleClassInputs = null;
+    this._lastStylingInput = null;
+    this._firstStylingInput = null;
+    this._stylesIndex = /* @__PURE__ */ new Map();
+    this._classesIndex = /* @__PURE__ */ new Map();
+    this._initialStyleValues = [];
+    this._initialClassValues = [];
+  }
+  registerBoundInput(input) {
+    let binding = null;
+    let name = input.name;
+    switch (input.type) {
+      case 0:
+        binding = this.registerInputBasedOnName(name, input.value, input.sourceSpan);
+        break;
+      case 3:
+        binding = this.registerStyleInput(name, false, input.value, input.sourceSpan, input.unit);
+        break;
+      case 2:
+        binding = this.registerClassInput(name, false, input.value, input.sourceSpan);
+        break;
+    }
+    return binding ? true : false;
+  }
+  registerInputBasedOnName(name, expression, sourceSpan) {
+    let binding = null;
+    const prefix = name.substring(0, 6);
+    const isStyle = name === "style" || prefix === "style." || prefix === "style!";
+    const isClass = !isStyle && (name === "class" || prefix === "class." || prefix === "class!");
+    if (isStyle || isClass) {
+      const isMapBased = name.charAt(5) !== ".";
+      const property2 = name.slice(isMapBased ? 5 : 6);
+      if (isStyle) {
+        binding = this.registerStyleInput(property2, isMapBased, expression, sourceSpan);
+      } else {
+        binding = this.registerClassInput(property2, isMapBased, expression, sourceSpan);
+      }
+    }
+    return binding;
+  }
+  registerStyleInput(name, isMapBased, value, sourceSpan, suffix) {
+    if (isEmptyExpression(value)) {
+      return null;
+    }
+    if (!isCssCustomProperty2(name)) {
+      name = hyphenate2(name);
+    }
+    const { property: property2, hasOverrideFlag, suffix: bindingSuffix } = parseProperty2(name);
+    suffix = typeof suffix === "string" && suffix.length !== 0 ? suffix : bindingSuffix;
+    const entry = { name: property2, suffix, value, sourceSpan, hasOverrideFlag };
+    if (isMapBased) {
+      this._styleMapInput = entry;
+    } else {
+      (this._singleStyleInputs = this._singleStyleInputs || []).push(entry);
+      registerIntoMap(this._stylesIndex, property2);
+    }
+    this._lastStylingInput = entry;
+    this._firstStylingInput = this._firstStylingInput || entry;
+    this._checkForPipes(value);
+    this.hasBindings = true;
+    return entry;
+  }
+  registerClassInput(name, isMapBased, value, sourceSpan) {
+    if (isEmptyExpression(value)) {
+      return null;
+    }
+    const { property: property2, hasOverrideFlag } = parseProperty2(name);
+    const entry = { name: property2, value, sourceSpan, hasOverrideFlag, suffix: null };
+    if (isMapBased) {
+      this._classMapInput = entry;
+    } else {
+      (this._singleClassInputs = this._singleClassInputs || []).push(entry);
+      registerIntoMap(this._classesIndex, property2);
+    }
+    this._lastStylingInput = entry;
+    this._firstStylingInput = this._firstStylingInput || entry;
+    this._checkForPipes(value);
+    this.hasBindings = true;
+    return entry;
+  }
+  _checkForPipes(value) {
+    if (value instanceof ASTWithSource && value.ast instanceof BindingPipe) {
+      this.hasBindingsWithPipes = true;
+    }
+  }
+  registerStyleAttr(value) {
+    this._initialStyleValues = parse(value);
+    this._hasInitialValues = true;
+  }
+  registerClassAttr(value) {
+    this._initialClassValues = value.trim().split(/\s+/g);
+    this._hasInitialValues = true;
+  }
+  populateInitialStylingAttrs(attrs) {
+    if (this._initialClassValues.length) {
+      attrs.push(literal(1));
+      for (let i = 0; i < this._initialClassValues.length; i++) {
+        attrs.push(literal(this._initialClassValues[i]));
+      }
+    }
+    if (this._initialStyleValues.length) {
+      attrs.push(literal(2));
+      for (let i = 0; i < this._initialStyleValues.length; i += 2) {
+        attrs.push(literal(this._initialStyleValues[i]), literal(this._initialStyleValues[i + 1]));
+      }
+    }
+  }
+  assignHostAttrs(attrs, definitionMap) {
+    if (this._directiveExpr && (attrs.length || this._hasInitialValues)) {
+      this.populateInitialStylingAttrs(attrs);
+      definitionMap.set("hostAttrs", literalArr(attrs));
+    }
+  }
+  buildClassMapInstruction(valueConverter) {
+    if (this._classMapInput) {
+      return this._buildMapBasedInstruction(valueConverter, true, this._classMapInput);
+    }
+    return null;
+  }
+  buildStyleMapInstruction(valueConverter) {
+    if (this._styleMapInput) {
+      return this._buildMapBasedInstruction(valueConverter, false, this._styleMapInput);
+    }
+    return null;
+  }
+  _buildMapBasedInstruction(valueConverter, isClassBased, stylingInput) {
+    let totalBindingSlotsRequired = MIN_STYLING_BINDING_SLOTS_REQUIRED;
+    const mapValue = stylingInput.value.visit(valueConverter);
+    let reference2;
+    if (mapValue instanceof Interpolation) {
+      totalBindingSlotsRequired += mapValue.expressions.length;
+      reference2 = isClassBased ? getClassMapInterpolationExpression(mapValue) : getStyleMapInterpolationExpression(mapValue);
+    } else {
+      reference2 = isClassBased ? Identifiers.classMap : Identifiers.styleMap;
+    }
+    return {
+      reference: reference2,
+      calls: [{
+        supportsInterpolation: true,
+        sourceSpan: stylingInput.sourceSpan,
+        allocateBindingSlots: totalBindingSlotsRequired,
+        params: (convertFn) => {
+          const convertResult = convertFn(mapValue);
+          const params = Array.isArray(convertResult) ? convertResult : [convertResult];
+          return params;
+        }
+      }]
+    };
+  }
+  _buildSingleInputs(reference2, inputs, valueConverter, getInterpolationExpressionFn, isClassBased) {
+    const instructions = [];
+    inputs.forEach((input) => {
+      const previousInstruction = instructions[instructions.length - 1];
+      const value = input.value.visit(valueConverter);
+      let referenceForCall = reference2;
+      let totalBindingSlotsRequired = MIN_STYLING_BINDING_SLOTS_REQUIRED;
+      if (value instanceof Interpolation) {
+        totalBindingSlotsRequired += value.expressions.length;
+        if (getInterpolationExpressionFn) {
+          referenceForCall = getInterpolationExpressionFn(value);
+        }
+      }
+      const call2 = {
+        sourceSpan: input.sourceSpan,
+        allocateBindingSlots: totalBindingSlotsRequired,
+        supportsInterpolation: !!getInterpolationExpressionFn,
+        params: (convertFn) => {
+          const params = [];
+          params.push(literal(input.name));
+          const convertResult = convertFn(value);
+          if (Array.isArray(convertResult)) {
+            params.push(...convertResult);
+          } else {
+            params.push(convertResult);
+          }
+          if (!isClassBased && input.suffix !== null) {
+            params.push(literal(input.suffix));
+          }
+          return params;
+        }
+      };
+      if (previousInstruction && previousInstruction.reference === referenceForCall) {
+        previousInstruction.calls.push(call2);
+      } else {
+        instructions.push({ reference: referenceForCall, calls: [call2] });
+      }
+    });
+    return instructions;
+  }
+  _buildClassInputs(valueConverter) {
+    if (this._singleClassInputs) {
+      return this._buildSingleInputs(Identifiers.classProp, this._singleClassInputs, valueConverter, null, true);
+    }
+    return [];
+  }
+  _buildStyleInputs(valueConverter) {
+    if (this._singleStyleInputs) {
+      return this._buildSingleInputs(Identifiers.styleProp, this._singleStyleInputs, valueConverter, getStylePropInterpolationExpression, false);
+    }
+    return [];
+  }
+  buildUpdateLevelInstructions(valueConverter) {
+    const instructions = [];
+    if (this.hasBindings) {
+      const styleMapInstruction = this.buildStyleMapInstruction(valueConverter);
+      if (styleMapInstruction) {
+        instructions.push(styleMapInstruction);
+      }
+      const classMapInstruction = this.buildClassMapInstruction(valueConverter);
+      if (classMapInstruction) {
+        instructions.push(classMapInstruction);
+      }
+      instructions.push(...this._buildStyleInputs(valueConverter));
+      instructions.push(...this._buildClassInputs(valueConverter));
+    }
+    return instructions;
+  }
+};
+function registerIntoMap(map, key) {
+  if (!map.has(key)) {
+    map.set(key, map.size);
+  }
+}
+function parseProperty2(name) {
+  let hasOverrideFlag = false;
+  const overrideIndex = name.indexOf(IMPORTANT_FLAG);
+  if (overrideIndex !== -1) {
+    name = overrideIndex > 0 ? name.substring(0, overrideIndex) : "";
+    hasOverrideFlag = true;
+  }
+  let suffix = null;
+  let property2 = name;
+  const unitIndex = name.lastIndexOf(".");
+  if (unitIndex > 0) {
+    suffix = name.slice(unitIndex + 1);
+    property2 = name.substring(0, unitIndex);
+  }
+  return { property: property2, suffix, hasOverrideFlag };
+}
+function getClassMapInterpolationExpression(interpolation) {
+  switch (getInterpolationArgsLength(interpolation)) {
+    case 1:
+      return Identifiers.classMap;
+    case 3:
+      return Identifiers.classMapInterpolate1;
+    case 5:
+      return Identifiers.classMapInterpolate2;
+    case 7:
+      return Identifiers.classMapInterpolate3;
+    case 9:
+      return Identifiers.classMapInterpolate4;
+    case 11:
+      return Identifiers.classMapInterpolate5;
+    case 13:
+      return Identifiers.classMapInterpolate6;
+    case 15:
+      return Identifiers.classMapInterpolate7;
+    case 17:
+      return Identifiers.classMapInterpolate8;
+    default:
+      return Identifiers.classMapInterpolateV;
+  }
+}
+function getStyleMapInterpolationExpression(interpolation) {
+  switch (getInterpolationArgsLength(interpolation)) {
+    case 1:
+      return Identifiers.styleMap;
+    case 3:
+      return Identifiers.styleMapInterpolate1;
+    case 5:
+      return Identifiers.styleMapInterpolate2;
+    case 7:
+      return Identifiers.styleMapInterpolate3;
+    case 9:
+      return Identifiers.styleMapInterpolate4;
+    case 11:
+      return Identifiers.styleMapInterpolate5;
+    case 13:
+      return Identifiers.styleMapInterpolate6;
+    case 15:
+      return Identifiers.styleMapInterpolate7;
+    case 17:
+      return Identifiers.styleMapInterpolate8;
+    default:
+      return Identifiers.styleMapInterpolateV;
+  }
+}
+function getStylePropInterpolationExpression(interpolation) {
+  switch (getInterpolationArgsLength(interpolation)) {
+    case 1:
+      return Identifiers.styleProp;
+    case 3:
+      return Identifiers.stylePropInterpolate1;
+    case 5:
+      return Identifiers.stylePropInterpolate2;
+    case 7:
+      return Identifiers.stylePropInterpolate3;
+    case 9:
+      return Identifiers.stylePropInterpolate4;
+    case 11:
+      return Identifiers.stylePropInterpolate5;
+    case 13:
+      return Identifiers.stylePropInterpolate6;
+    case 15:
+      return Identifiers.stylePropInterpolate7;
+    case 17:
+      return Identifiers.stylePropInterpolate8;
+    default:
+      return Identifiers.stylePropInterpolateV;
+  }
+}
+function isCssCustomProperty2(name) {
+  return name.startsWith("--");
+}
+function isEmptyExpression(ast) {
+  if (ast instanceof ASTWithSource) {
+    ast = ast.ast;
+  }
+  return ast instanceof EmptyExpr;
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/template.mjs
 var NG_CONTENT_SELECT_ATTR2 = "select";
 var NG_PROJECT_AS_ATTR_NAME = "ngProjectAs";
@@ -23848,6 +23810,123 @@ function createClosureModeGuard2() {
   return typeofExpr(variable(NG_I18N_CLOSURE_MODE2)).notIdentical(literal("undefined", STRING_TYPE)).and(variable(NG_I18N_CLOSURE_MODE2));
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/query_generation.mjs
+function toQueryFlags(query) {
+  return (query.descendants ? 1 : 0) | (query.static ? 2 : 0) | (query.emitDistinctChangesOnly ? 4 : 0);
+}
+function getQueryPredicate(query, constantPool) {
+  if (Array.isArray(query.predicate)) {
+    let predicate = [];
+    query.predicate.forEach((selector) => {
+      const selectors = selector.split(",").map((token) => literal(token.trim()));
+      predicate.push(...selectors);
+    });
+    return constantPool.getConstLiteral(literalArr(predicate), true);
+  } else {
+    switch (query.predicate.forwardRef) {
+      case 0:
+      case 2:
+        return query.predicate.expression;
+      case 1:
+        return importExpr(Identifiers.resolveForwardRef).callFn([query.predicate.expression]);
+    }
+  }
+}
+function createQueryCreateCall(query, constantPool, queryTypeFns, prependParams) {
+  const parameters = [];
+  if (prependParams !== void 0) {
+    parameters.push(...prependParams);
+  }
+  if (query.isSignal) {
+    parameters.push(new ReadPropExpr(variable(CONTEXT_NAME), query.propertyName));
+  }
+  parameters.push(getQueryPredicate(query, constantPool), literal(toQueryFlags(query)));
+  if (query.read) {
+    parameters.push(query.read);
+  }
+  const queryCreateFn = query.isSignal ? queryTypeFns.signalBased : queryTypeFns.nonSignal;
+  return importExpr(queryCreateFn).callFn(parameters);
+}
+var queryAdvancePlaceholder = Symbol("queryAdvancePlaceholder");
+function collapseAdvanceStatements(statements) {
+  const result = [];
+  let advanceCollapseCount = 0;
+  const flushAdvanceCount = () => {
+    if (advanceCollapseCount > 0) {
+      result.unshift(importExpr(Identifiers.queryAdvance).callFn(advanceCollapseCount === 1 ? [] : [literal(advanceCollapseCount)]).toStmt());
+      advanceCollapseCount = 0;
+    }
+  };
+  for (let i = statements.length - 1; i >= 0; i--) {
+    const st = statements[i];
+    if (st === queryAdvancePlaceholder) {
+      advanceCollapseCount++;
+    } else {
+      flushAdvanceCount();
+      result.unshift(st);
+    }
+  }
+  flushAdvanceCount();
+  return result;
+}
+function createViewQueriesFunction(viewQueries, constantPool, name) {
+  const createStatements = [];
+  const updateStatements = [];
+  const tempAllocator = temporaryAllocator((st) => updateStatements.push(st), TEMPORARY_NAME);
+  viewQueries.forEach((query) => {
+    const queryDefinitionCall = createQueryCreateCall(query, constantPool, {
+      signalBased: Identifiers.viewQuerySignal,
+      nonSignal: Identifiers.viewQuery
+    });
+    createStatements.push(queryDefinitionCall.toStmt());
+    if (query.isSignal) {
+      updateStatements.push(queryAdvancePlaceholder);
+      return;
+    }
+    const temporary = tempAllocator();
+    const getQueryList = importExpr(Identifiers.loadQuery).callFn([]);
+    const refresh = importExpr(Identifiers.queryRefresh).callFn([temporary.set(getQueryList)]);
+    const updateDirective = variable(CONTEXT_NAME).prop(query.propertyName).set(query.first ? temporary.prop("first") : temporary);
+    updateStatements.push(refresh.and(updateDirective).toStmt());
+  });
+  const viewQueryFnName = name ? `${name}_Query` : null;
+  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, null)], [
+    renderFlagCheckIfStmt(1, createStatements),
+    renderFlagCheckIfStmt(2, collapseAdvanceStatements(updateStatements))
+  ], INFERRED_TYPE, null, viewQueryFnName);
+}
+function createContentQueriesFunction(queries, constantPool, name) {
+  const createStatements = [];
+  const updateStatements = [];
+  const tempAllocator = temporaryAllocator((st) => updateStatements.push(st), TEMPORARY_NAME);
+  for (const query of queries) {
+    createStatements.push(createQueryCreateCall(
+      query,
+      constantPool,
+      { nonSignal: Identifiers.contentQuery, signalBased: Identifiers.contentQuerySignal },
+      [variable("dirIndex")]
+    ).toStmt());
+    if (query.isSignal) {
+      updateStatements.push(queryAdvancePlaceholder);
+      continue;
+    }
+    const temporary = tempAllocator();
+    const getQueryList = importExpr(Identifiers.loadQuery).callFn([]);
+    const refresh = importExpr(Identifiers.queryRefresh).callFn([temporary.set(getQueryList)]);
+    const updateDirective = variable(CONTEXT_NAME).prop(query.propertyName).set(query.first ? temporary.prop("first") : temporary);
+    updateStatements.push(refresh.and(updateDirective).toStmt());
+  }
+  const contentQueriesFnName = name ? `${name}_ContentQueries` : null;
+  return fn([
+    new FnParam(RENDER_FLAGS, NUMBER_TYPE),
+    new FnParam(CONTEXT_NAME, null),
+    new FnParam("dirIndex", null)
+  ], [
+    renderFlagCheckIfStmt(1, createStatements),
+    renderFlagCheckIfStmt(2, collapseAdvanceStatements(updateStatements))
+  ], INFERRED_TYPE, null, contentQueriesFnName);
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/compiler.mjs
 var ATTR_REGEX = /attr\.([^\]]+)/;
 var COMPONENT_VARIABLE = "%COMP%";
@@ -24071,37 +24150,6 @@ function convertAttributesToExpressions(attributes) {
   }
   return values;
 }
-function createContentQueriesFunction(queries, constantPool, name) {
-  const createStatements = [];
-  const updateStatements = [];
-  const tempAllocator = temporaryAllocator(updateStatements, TEMPORARY_NAME);
-  for (const query of queries) {
-    createStatements.push(createQueryCreateCall(
-      query,
-      constantPool,
-      { nonSignal: Identifiers.contentQuery, signalBased: Identifiers.contentQuerySignal },
-      [variable("dirIndex")]
-    ).toStmt());
-    if (query.isSignal) {
-      updateStatements.push(importExpr(Identifiers.queryAdvance).callFn([]).toStmt());
-      continue;
-    }
-    const temporary = tempAllocator();
-    const getQueryList = importExpr(Identifiers.loadQuery).callFn([]);
-    const refresh = importExpr(Identifiers.queryRefresh).callFn([temporary.set(getQueryList)]);
-    const updateDirective = variable(CONTEXT_NAME).prop(query.propertyName).set(query.first ? temporary.prop("first") : temporary);
-    updateStatements.push(refresh.and(updateDirective).toStmt());
-  }
-  const contentQueriesFnName = name ? `${name}_ContentQueries` : null;
-  return fn([
-    new FnParam(RENDER_FLAGS, NUMBER_TYPE),
-    new FnParam(CONTEXT_NAME, null),
-    new FnParam("dirIndex", null)
-  ], [
-    renderFlagCheckIfStmt(1, createStatements),
-    renderFlagCheckIfStmt(2, updateStatements)
-  ], INFERRED_TYPE, null, contentQueriesFnName);
-}
 function stringAsType(str) {
   return expressionType(literal(str));
 }
@@ -24152,32 +24200,6 @@ function createDirectiveType(meta) {
     typeParams.push(expressionType(literal(meta.isSignal)));
   }
   return expressionType(importExpr(Identifiers.DirectiveDeclaration, typeParams));
-}
-function createViewQueriesFunction(viewQueries, constantPool, name) {
-  const createStatements = [];
-  const updateStatements = [];
-  const tempAllocator = temporaryAllocator(updateStatements, TEMPORARY_NAME);
-  viewQueries.forEach((query) => {
-    const queryDefinitionCall = createQueryCreateCall(query, constantPool, {
-      signalBased: Identifiers.viewQuerySignal,
-      nonSignal: Identifiers.viewQuery
-    });
-    createStatements.push(queryDefinitionCall.toStmt());
-    if (query.isSignal) {
-      updateStatements.push(importExpr(Identifiers.queryAdvance).callFn([]).toStmt());
-      return;
-    }
-    const temporary = tempAllocator();
-    const getQueryList = importExpr(Identifiers.loadQuery).callFn([]);
-    const refresh = importExpr(Identifiers.queryRefresh).callFn([temporary.set(getQueryList)]);
-    const updateDirective = variable(CONTEXT_NAME).prop(query.propertyName).set(query.first ? temporary.prop("first") : temporary);
-    updateStatements.push(refresh.and(updateDirective).toStmt());
-  });
-  const viewQueryFnName = name ? `${name}_Query` : null;
-  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, null)], [
-    renderFlagCheckIfStmt(1, createStatements),
-    renderFlagCheckIfStmt(2, updateStatements)
-  ], INFERRED_TYPE, null, viewQueryFnName);
 }
 function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindingParser, constantPool, selector, name, definitionMap) {
   const bindings = bindingParser.createBoundHostProperties(hostBindingsMetadata.properties, typeSourceSpan);
@@ -25289,7 +25311,7 @@ var CompilerFacadeImpl = class {
 };
 function convertToR3QueryMetadata(facade) {
   return __spreadProps(__spreadValues({}, facade), {
-    isSignal: false,
+    isSignal: facade.isSignal,
     predicate: convertQueryPredicate(facade.predicate),
     read: facade.read ? new WrappedNodeExpr(facade.read) : null,
     static: facade.static,
@@ -25682,7 +25704,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.0+sha-09f9423");
+var VERSION2 = new Version("17.2.0-next.0+sha-7751645");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
