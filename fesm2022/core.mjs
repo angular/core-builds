@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.1+sha-a4f024f
+ * @license Angular v17.1.1+sha-854b839
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -716,7 +716,15 @@ function ngDevModeResetPerfCounters() {
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
     const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
-    _global['ngDevMode'] = allowNgDevModeTrue && newCounters;
+    if (!allowNgDevModeTrue) {
+        _global['ngDevMode'] = false;
+    }
+    else {
+        if (typeof _global['ngDevMode'] !== 'object') {
+            _global['ngDevMode'] = {};
+        }
+        Object.assign(_global['ngDevMode'], newCounters);
+    }
     return newCounters;
 }
 /**
@@ -746,7 +754,7 @@ function initNgDevMode() {
     // If the `ngDevMode` is not an object, then it means we have not created the perf counters
     // yet.
     if (typeof ngDevMode === 'undefined' || ngDevMode) {
-        if (typeof ngDevMode !== 'object') {
+        if (typeof ngDevMode !== 'object' || Object.keys(ngDevMode).length === 0) {
             ngDevModeResetPerfCounters();
         }
         return typeof ngDevMode !== 'undefined' && !!ngDevMode;
@@ -15714,7 +15722,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.1+sha-a4f024f']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.1+sha-854b839']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30043,7 +30051,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.1+sha-a4f024f');
+const VERSION = new Version('17.1.1+sha-854b839');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -34163,24 +34171,56 @@ class ChangeDetectionSchedulerImpl {
         if (this.pendingRenderTaskId !== null)
             return;
         this.pendingRenderTaskId = this.taskService.add();
-        setTimeout(() => {
-            try {
-                if (!this.appRef.destroyed) {
-                    this.appRef.tick();
-                }
+        this.raceTimeoutAndRequestAnimationFrame();
+    }
+    /**
+     * Run change detection after the first of setTimeout and requestAnimationFrame resolves.
+     *
+     * - `requestAnimationFrame` ensures that change detection runs ahead of a browser repaint.
+     * This ensures that the create and update passes of a change detection always happen
+     * in the same frame.
+     * - When the browser is resource-starved, `rAF` can execute _before_ a `setTimeout` because
+     * rendering is a very high priority process. This means that `setTimeout` cannot guarantee
+     * same-frame create and update pass, when `setTimeout` is used to schedule the update phase.
+     * - While `rAF` gives us the desirable same-frame updates, it has two limitations that
+     * prevent it from being used alone. First, it does not run in background tabs, which would
+     * prevent Angular from initializing an application when opened in a new tab (for example).
+     * Second, repeated calls to requestAnimationFrame will execute at the refresh rate of the
+     * hardware (~16ms for a 60Hz display). This would cause significant slowdown of tests that
+     * are written with several updates and asserts in the form of "update; await stable; assert;".
+     * - Both `setTimeout` and `rAF` are able to "coalesce" several events from a single user
+     * interaction into a single change detection. Importantly, this reduces view tree traversals when
+     * compared to an alternative timing mechanism like `queueMicrotask`, where change detection would
+     * then be interleaves between each event.
+     *
+     * By running change detection after the first of `setTimeout` and `rAF` to execute, we get the
+     * best of both worlds.
+     */
+    async raceTimeoutAndRequestAnimationFrame() {
+        const timeout = new Promise(resolve => setTimeout(resolve));
+        const rAF = typeof _global['requestAnimationFrame'] === 'function' ?
+            new Promise(resolve => requestAnimationFrame(() => resolve())) :
+            null;
+        await Promise.race([timeout, rAF]);
+        this.tick();
+    }
+    tick() {
+        try {
+            if (!this.appRef.destroyed) {
+                this.appRef.tick();
             }
-            finally {
-                // If this is the last task, the service will synchronously emit a stable notification. If
-                // there is a subscriber that then acts in a way that tries to notify the scheduler again,
-                // we need to be able to respond to schedule a new change detection. Therefore, we should
-                // clear the task ID before removing it from the pending tasks (or the tasks service should
-                // not synchronously emit stable, similar to how Zone stableness only happens if it's still
-                // stable after a microtask).
-                const taskId = this.pendingRenderTaskId;
-                this.pendingRenderTaskId = null;
-                this.taskService.remove(taskId);
-            }
-        });
+        }
+        finally {
+            // If this is the last task, the service will synchronously emit a stable notification. If
+            // there is a subscriber that then acts in a way that tries to notify the scheduler again,
+            // we need to be able to respond to schedule a new change detection. Therefore, we should
+            // clear the task ID before removing it from the pending tasks (or the tasks service should
+            // not synchronously emit stable, similar to how Zone stableness only happens if it's still
+            // stable after a microtask).
+            const taskId = this.pendingRenderTaskId;
+            this.pendingRenderTaskId = null;
+            this.taskService.remove(taskId);
+        }
     }
     static { this.ɵfac = function ChangeDetectionSchedulerImpl_Factory(t) { return new (t || ChangeDetectionSchedulerImpl)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ChangeDetectionSchedulerImpl, factory: ChangeDetectionSchedulerImpl.ɵfac, providedIn: 'root' }); }

@@ -8669,7 +8669,7 @@ function createExtractedAttributeOp(target, bindingKind, namespace, name, expres
     trustedValueFn: null
   }, NEW_OP);
 }
-function createDeferOp(xref, main, mainSlot, metadata, sourceSpan) {
+function createDeferOp(xref, main, mainSlot, metadata, resolverFn, sourceSpan) {
   return __spreadProps(__spreadValues(__spreadValues({
     kind: OpKind.Defer,
     xref,
@@ -8688,7 +8688,7 @@ function createDeferOp(xref, main, mainSlot, metadata, sourceSpan) {
     errorView: null,
     errorSlot: null,
     metadata,
-    resolverFn: null,
+    resolverFn,
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT), {
     numSlotsUsed: 2
@@ -8824,11 +8824,12 @@ var CompilationJob = class {
   }
 };
 var ComponentCompilationJob = class extends CompilationJob {
-  constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta) {
+  constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta, allDeferrableDepsFn) {
     super(componentName, pool, compatibility);
     this.relativeContextFilePath = relativeContextFilePath;
     this.i18nUseExternalIds = i18nUseExternalIds;
     this.deferBlocksMeta = deferBlocksMeta;
+    this.allDeferrableDepsFn = allDeferrableDepsFn;
     this.kind = CompilationJobKind.Tmpl;
     this.fnSuffix = "Template";
     this.views = /* @__PURE__ */ new Map();
@@ -9560,6 +9561,9 @@ function createDeferDepsFns(job) {
     for (const op of unit.create) {
       if (op.kind === OpKind.Defer) {
         if (op.metadata.deps.length === 0) {
+          continue;
+        }
+        if (op.resolverFn !== null) {
           continue;
         }
         const dependencies = [];
@@ -19375,8 +19379,8 @@ function emitHostBindingFunction(job) {
 var compatibilityMode = CompatibilityMode.TemplateDefinitionBuilder;
 var domSchema = new DomElementSchemaRegistry();
 var NG_TEMPLATE_TAG_NAME = "ng-template";
-function ingestComponent(componentName, template2, constantPool, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta) {
-  const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta);
+function ingestComponent(componentName, template2, constantPool, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta, allDeferrableDepsFn) {
+  const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta, allDeferrableDepsFn);
   ingestNodes(job.root, template2);
   return job;
 }
@@ -19640,7 +19644,7 @@ function ingestDeferBlock(unit, deferBlock) {
   const placeholder = ingestDeferView(unit, "Placeholder", (_d2 = deferBlock.placeholder) == null ? void 0 : _d2.i18n, (_e2 = deferBlock.placeholder) == null ? void 0 : _e2.children, (_f2 = deferBlock.placeholder) == null ? void 0 : _f2.sourceSpan);
   const error2 = ingestDeferView(unit, "Error", (_g = deferBlock.error) == null ? void 0 : _g.i18n, (_h = deferBlock.error) == null ? void 0 : _h.children, (_i = deferBlock.error) == null ? void 0 : _i.sourceSpan);
   const deferXref = unit.job.allocateXrefId();
-  const deferOp = createDeferOp(deferXref, main.xref, main.handle, blockMeta, deferBlock.sourceSpan);
+  const deferOp = createDeferOp(deferXref, main.xref, main.handle, blockMeta, unit.job.allDeferrableDepsFn, deferBlock.sourceSpan);
   deferOp.placeholderView = (_j = placeholder == null ? void 0 : placeholder.xref) != null ? _j : null;
   deferOp.placeholderSlot = (_k = placeholder == null ? void 0 : placeholder.handle) != null ? _k : null;
   deferOp.loadingSlot = (_l = loading == null ? void 0 : loading.handle) != null ? _l : null;
@@ -20868,9 +20872,10 @@ function normalizeNgContentSelect(selectAttr) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_control_flow.mjs
 var FOR_LOOP_EXPRESSION_PATTERN = /^\s*([0-9A-Za-z_$]*)\s+of\s+([\S\s]*)/;
 var FOR_LOOP_TRACK_PATTERN = /^track\s+([\S\s]*)/;
-var CONDITIONAL_ALIAS_PATTERN = /^as\s+(.*)/;
+var CONDITIONAL_ALIAS_PATTERN = /^(as\s)+(.*)/;
 var ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
 var FOR_LOOP_LET_PATTERN = /^let\s+([\S\s]*)/;
+var CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN = /(\s*)(\S+)(\s*)/;
 var ALLOWED_FOR_LOOP_LET_VARIABLES = /* @__PURE__ */ new Set(["$index", "$first", "$last", "$even", "$odd", "$count"]);
 function isConnectedForLoopBlock(name) {
   return name === "empty";
@@ -20982,8 +20987,10 @@ function parseForLoopParameters(block, errors, bindingParser) {
     return null;
   }
   const [, itemName, rawExpression] = match;
+  const variableName = expressionParam.expression.split(" ")[0];
+  const variableSpan = new ParseSourceSpan(expressionParam.sourceSpan.start, expressionParam.sourceSpan.start.moveBy(variableName.length));
   const result = {
-    itemName: new Variable(itemName, "$implicit", expressionParam.sourceSpan, expressionParam.sourceSpan),
+    itemName: new Variable(itemName, "$implicit", variableSpan, variableSpan),
     trackBy: null,
     expression: parseBlockParameterToBinding(expressionParam, bindingParser, rawExpression),
     context: {}
@@ -20991,7 +20998,8 @@ function parseForLoopParameters(block, errors, bindingParser) {
   for (const param of secondaryParams) {
     const letMatch = param.expression.match(FOR_LOOP_LET_PATTERN);
     if (letMatch !== null) {
-      parseLetParameter(param.sourceSpan, letMatch[1], param.sourceSpan, result.context, errors);
+      const variablesSpan = new ParseSourceSpan(param.sourceSpan.start.moveBy(letMatch[0].length - letMatch[1].length), param.sourceSpan.end);
+      parseLetParameter(param.sourceSpan, letMatch[1], variablesSpan, result.context, errors);
       continue;
     }
     const trackMatch = param.expression.match(FOR_LOOP_TRACK_PATTERN);
@@ -21007,16 +21015,18 @@ function parseForLoopParameters(block, errors, bindingParser) {
     }
     errors.push(new ParseError(param.sourceSpan, `Unrecognized @for loop paramater "${param.expression}"`));
   }
-  for (const variableName of ALLOWED_FOR_LOOP_LET_VARIABLES) {
-    if (!result.context.hasOwnProperty(variableName)) {
+  for (const variableName2 of ALLOWED_FOR_LOOP_LET_VARIABLES) {
+    if (!result.context.hasOwnProperty(variableName2)) {
       const emptySpanAfterForBlockStart = new ParseSourceSpan(block.startSourceSpan.end, block.startSourceSpan.end);
-      result.context[variableName] = new Variable(variableName, variableName, emptySpanAfterForBlockStart, emptySpanAfterForBlockStart);
+      result.context[variableName2] = new Variable(variableName2, variableName2, emptySpanAfterForBlockStart, emptySpanAfterForBlockStart);
     }
   }
   return result;
 }
 function parseLetParameter(sourceSpan, expression, span, context, errors) {
+  var _a2, _b2, _c2;
   const parts = expression.split(",");
+  let startSpan = span.start;
   for (const part of parts) {
     const expressionParts = part.split("=");
     const name = expressionParts.length === 2 ? expressionParts[0].trim() : "";
@@ -21028,8 +21038,20 @@ function parseLetParameter(sourceSpan, expression, span, context, errors) {
     } else if (context.hasOwnProperty(variableName)) {
       errors.push(new ParseError(sourceSpan, `Duplicate "let" parameter variable "${variableName}"`));
     } else {
-      context[variableName] = new Variable(name, variableName, span, span);
+      const [, keyLeadingWhitespace, keyName] = (_a2 = expressionParts[0].match(CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN)) != null ? _a2 : [];
+      const keySpan = keyLeadingWhitespace !== void 0 && expressionParts.length === 2 ? new ParseSourceSpan(
+        startSpan.moveBy(keyLeadingWhitespace.length),
+        startSpan.moveBy(keyLeadingWhitespace.length + keyName.length)
+      ) : span;
+      let valueSpan = void 0;
+      if (expressionParts.length === 2) {
+        const [, valueLeadingWhitespace, implicit] = (_b2 = expressionParts[1].match(CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN)) != null ? _b2 : [];
+        valueSpan = valueLeadingWhitespace !== void 0 ? new ParseSourceSpan(startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length), startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length + implicit.length)) : void 0;
+      }
+      const sourceSpan2 = new ParseSourceSpan(keySpan.start, (_c2 = valueSpan == null ? void 0 : valueSpan.end) != null ? _c2 : keySpan.end);
+      context[variableName] = new Variable(name, variableName, sourceSpan2, keySpan, valueSpan);
     }
+    startSpan = startSpan.moveBy(part.length + 1);
   }
 }
 function validateIfConnectedBlocks(connectedBlocks) {
@@ -21109,8 +21131,10 @@ function parseConditionalBlockParameters(block, errors, bindingParser) {
     } else if (expressionAlias !== null) {
       errors.push(new ParseError(param.sourceSpan, 'Conditional can only have one "as" expression'));
     } else {
-      const name = aliasMatch[1].trim();
-      expressionAlias = new Variable(name, name, param.sourceSpan, param.sourceSpan);
+      const name = aliasMatch[2].trim();
+      const variableStart = param.sourceSpan.start.moveBy(aliasMatch[1].length);
+      const variableSpan = new ParseSourceSpan(variableStart, variableStart.moveBy(name.length));
+      expressionAlias = new Variable(name, name, variableSpan, variableSpan);
     }
   }
   return { expression, expressionAlias };
@@ -23922,12 +23946,12 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
   }
   const templateTypeName = meta.name;
   const templateName = templateTypeName ? `${templateTypeName}_Template` : null;
+  let allDeferrableDepsFn = null;
+  if (meta.deferBlocks.size > 0 && meta.deferrableTypes.size > 0 && meta.deferBlockDepsEmitMode === 1) {
+    const fnName = `${templateTypeName}_DeferFn`;
+    allDeferrableDepsFn = createDeferredDepsFunction(constantPool, fnName, meta.deferrableTypes);
+  }
   if (!USE_TEMPLATE_PIPELINE) {
-    let allDeferrableDepsFn = null;
-    if (meta.deferBlocks.size > 0 && meta.deferrableTypes.size > 0 && meta.deferBlockDepsEmitMode === 1) {
-      const fnName = `${templateTypeName}_DeferFn`;
-      allDeferrableDepsFn = createDeferredDepsFunction(constantPool, fnName, meta.deferrableTypes);
-    }
     const template2 = meta.template;
     const templateBuilder = new TemplateDefinitionBuilder(constantPool, BindingScope.createRootScope(), 0, templateTypeName, null, null, templateName, Identifiers.namespaceHTML, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.deferBlocks, /* @__PURE__ */ new Map(), allDeferrableDepsFn);
     const templateFunctionExpression = templateBuilder.buildTemplateFunction(template2.nodes, []);
@@ -23947,7 +23971,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     }
     definitionMap.set("template", templateFunctionExpression);
   } else {
-    const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.deferBlocks);
+    const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.deferBlocks, allDeferrableDepsFn);
     transform(tpl, CompilationJobKind.Tmpl);
     const templateFn = emitTemplateFn(tpl, constantPool);
     if (tpl.contentSelectors !== null) {
@@ -25644,7 +25668,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.1+sha-a4f024f");
+var VERSION2 = new Version("17.1.1+sha-854b839");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
