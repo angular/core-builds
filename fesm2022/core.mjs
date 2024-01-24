@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.2.0-next.0+sha-fad1354
+ * @license Angular v17.2.0-next.0+sha-c043128
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, createComputed as createComputed$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, createComputed as createComputed$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, producerUpdateValueVersion as producerUpdateValueVersion$1, consumerMarkDirty as consumerMarkDirty$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
 
@@ -716,7 +716,15 @@ function ngDevModeResetPerfCounters() {
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
     const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
-    _global['ngDevMode'] = allowNgDevModeTrue && newCounters;
+    if (!allowNgDevModeTrue) {
+        _global['ngDevMode'] = false;
+    }
+    else {
+        if (typeof _global['ngDevMode'] !== 'object') {
+            _global['ngDevMode'] = {};
+        }
+        Object.assign(_global['ngDevMode'], newCounters);
+    }
     return newCounters;
 }
 /**
@@ -746,7 +754,7 @@ function initNgDevMode() {
     // If the `ngDevMode` is not an object, then it means we have not created the perf counters
     // yet.
     if (typeof ngDevMode === 'undefined' || ngDevMode) {
-        if (typeof ngDevMode !== 'object') {
+        if (typeof ngDevMode !== 'object' || Object.keys(ngDevMode).length === 0) {
             ngDevModeResetPerfCounters();
         }
         return typeof ngDevMode !== 'undefined' && !!ngDevMode;
@@ -15714,7 +15722,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-fad1354']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-c043128']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -25376,6 +25384,7 @@ class QueryList {
     constructor(_emitDistinctChangesOnly = false) {
         this._emitDistinctChangesOnly = _emitDistinctChangesOnly;
         this.dirty = true;
+        this._onDirty = undefined;
         this._results = [];
         this._changesDetected = false;
         this._changes = undefined;
@@ -25472,9 +25481,14 @@ class QueryList {
         if (this._changes !== undefined && (this._changesDetected || !this._emitDistinctChangesOnly))
             this._changes.emit(this);
     }
+    /** @internal */
+    onDirty(cb) {
+        this._onDirty = cb;
+    }
     /** internal */
     setDirty() {
         this.dirty = true;
+        this._onDirty?.();
     }
     /** internal */
     destroy() {
@@ -25613,9 +25627,15 @@ class LQueries_ {
 }
 class TQueryMetadata_ {
     constructor(predicate, flags, read = null) {
-        this.predicate = predicate;
         this.flags = flags;
         this.read = read;
+        // Compiler might not be able to pre-optimize and split multiple selectors.
+        if (typeof predicate === 'string') {
+            this.predicate = splitQueryMultiSelectors(predicate);
+        }
+        else {
+            this.predicate = predicate;
+        }
     }
 }
 class TQueries_ {
@@ -25911,12 +25931,44 @@ function loadQueryInternal(lView, queryIndex) {
     ngDevMode && assertIndexInRange(lView[QUERIES].queries, queryIndex);
     return lView[QUERIES].queries[queryIndex].queryList;
 }
+/**
+ * Creates a new instance of LQuery and returns its index in the collection of LQuery objects.
+ *
+ * @returns index in the collection of LQuery objects
+ */
 function createLQuery(tView, lView, flags) {
     const queryList = new QueryList((flags & 4 /* QueryFlags.emitDistinctChangesOnly */) === 4 /* QueryFlags.emitDistinctChangesOnly */);
     storeCleanupWithContext(tView, lView, queryList, queryList.destroy);
-    if (lView[QUERIES] === null)
-        lView[QUERIES] = new LQueries_();
-    lView[QUERIES].queries.push(new LQuery_(queryList));
+    const lQueries = (lView[QUERIES] ??= new LQueries_()).queries;
+    return lQueries.push(new LQuery_(queryList)) - 1;
+}
+function createViewQuery(predicate, flags, read) {
+    ngDevMode && assertNumber(flags, 'Expecting flags');
+    const tView = getTView();
+    if (tView.firstCreatePass) {
+        createTQuery(tView, new TQueryMetadata_(predicate, flags, read), -1);
+        if ((flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */) {
+            tView.staticViewQueries = true;
+        }
+    }
+    return createLQuery(tView, getLView(), flags);
+}
+function createContentQuery(directiveIndex, predicate, flags, read) {
+    ngDevMode && assertNumber(flags, 'Expecting flags');
+    const tView = getTView();
+    if (tView.firstCreatePass) {
+        const tNode = getCurrentTNode();
+        createTQuery(tView, new TQueryMetadata_(predicate, flags, read), tNode.index);
+        saveContentQueryAndDirectiveIndex(tView, directiveIndex);
+        if ((flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */) {
+            tView.staticContentQueries = true;
+        }
+    }
+    return createLQuery(tView, getLView(), flags);
+}
+/** Splits multiple selectors in the locator. */
+function splitQueryMultiSelectors(locator) {
+    return locator.split(',').map(s => s.trim());
 }
 function createTQuery(tView, metadata, nodeIndex) {
     if (tView.queries === null)
@@ -25948,24 +26000,10 @@ function getTQuery(tView, index) {
  * @codeGenApi
  */
 function ɵɵcontentQuery(directiveIndex, predicate, flags, read) {
-    ngDevMode && assertNumber(flags, 'Expecting flags');
-    const tView = getTView();
-    if (tView.firstCreatePass) {
-        // Compiler might not be able to pre-optimize and split multiple selectors.
-        if (typeof predicate === 'string') {
-            predicate = splitQueryMultiSelectors(predicate);
-        }
-        const tNode = getCurrentTNode();
-        createTQuery(tView, new TQueryMetadata_(predicate, flags, read), tNode.index);
-        saveContentQueryAndDirectiveIndex(tView, directiveIndex);
-        if ((flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */) {
-            tView.staticContentQueries = true;
-        }
-    }
-    createLQuery(tView, getLView(), flags);
+    createContentQuery(directiveIndex, predicate, flags, read);
 }
 /**
- * Creates new QueryList, stores the reference in LView and returns QueryList.
+ * Creates a new view query by initializing internal data structures.
  *
  * @param predicate The type for which the query will search
  * @param flags Flags associated with the query
@@ -25974,19 +26012,7 @@ function ɵɵcontentQuery(directiveIndex, predicate, flags, read) {
  * @codeGenApi
  */
 function ɵɵviewQuery(predicate, flags, read) {
-    ngDevMode && assertNumber(flags, 'Expecting flags');
-    const tView = getTView();
-    if (tView.firstCreatePass) {
-        // Compiler might not be able to pre-optimize and split multiple selectors.
-        if (typeof predicate === 'string') {
-            predicate = splitQueryMultiSelectors(predicate);
-        }
-        createTQuery(tView, new TQueryMetadata_(predicate, flags, read), -1);
-        if ((flags & 2 /* QueryFlags.isStatic */) === 2 /* QueryFlags.isStatic */) {
-            tView.staticViewQueries = true;
-        }
-    }
-    createLQuery(tView, getLView(), flags);
+    createViewQuery(predicate, flags, read);
 }
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
@@ -26020,10 +26046,6 @@ function ɵɵqueryRefresh(queryList) {
     }
     return false;
 }
-/** Splits multiple selectors in the locator. */
-function splitQueryMultiSelectors(locator) {
-    return locator.split(',').map(s => s.trim());
-}
 /**
  * Loads a QueryList corresponding to the current view or content query.
  *
@@ -26032,9 +26054,144 @@ function splitQueryMultiSelectors(locator) {
 function ɵɵloadQuery() {
     return loadQueryInternal(getLView(), getCurrentQueryIndex());
 }
-function ɵɵviewQuerySignal() { }
-function ɵɵcontentQuerySignal() { }
-function ɵɵqueryAdvance(_count = 1) { }
+
+function createQuerySignalFn(firstOnly, required) {
+    const node = Object.create(QUERY_SIGNAL_NODE);
+    function signalFn() {
+        // Check if the value needs updating before returning it.
+        producerUpdateValueVersion$1(node);
+        // Mark this producer as accessed.
+        producerAccessed$1(node);
+        if (firstOnly) {
+            const firstValue = node._queryList?.first;
+            if (firstValue === undefined && required) {
+                // TODO: add error code
+                // TODO: add proper message
+                throw new RuntimeError(0, 'no query results yet!');
+            }
+            return firstValue;
+        }
+        else {
+            // TODO(perf): make sure that I'm not creating new arrays when returning results. The other
+            // consideration here is the referential stability of results.
+            return node._queryList?.toArray() ?? EMPTY_ARRAY;
+        }
+    }
+    signalFn[SIGNAL$1] = node;
+    return signalFn;
+}
+function createSingleResultOptionalQuerySignalFn() {
+    return createQuerySignalFn(/* firstOnly */ true, /* required */ false);
+}
+function createSingleResultRequiredQuerySignalFn() {
+    return createQuerySignalFn(/* firstOnly */ true, /* required */ true);
+}
+function createMultiResultQuerySignalFn() {
+    return createQuerySignalFn(/* firstOnly */ false, /* required */ false);
+}
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const QUERY_SIGNAL_NODE = /* @__PURE__ */ (() => {
+    return {
+        ...REACTIVE_NODE$1,
+        // Base reactive node.overrides
+        producerMustRecompute: (node) => {
+            return !!node._queryList?.dirty;
+        },
+        producerRecomputeValue: (node) => {
+            // The current value is stale. Check whether we need to produce a new one.
+            // TODO: assert: I've got both the lView and queryIndex stored
+            // TODO(perf): I'm assuming that the signal value changes when the list of matches changes.
+            // But this is not correct for the single-element queries since we should also compare (===)
+            // the value of the first element.
+            // TODO: error handling - should we guard against exceptions thrown from refreshSignalQuery -
+            // normally it should never
+            if (refreshSignalQuery(node._lView, node._queryIndex)) {
+                node.version++;
+            }
+        }
+    };
+})();
+function bindQueryToSignal(target, queryIndex) {
+    const node = target[SIGNAL$1];
+    node._lView = getLView();
+    node._queryIndex = queryIndex;
+    node._queryList = loadQueryInternal(node._lView, queryIndex);
+    node._queryList.onDirty(() => {
+        // Mark this producer as dirty and notify live consumer about the potential change. Note
+        // that the onDirty callback will fire only on the initial dirty marking (that is,
+        // subsequent dirty notifications are not fired- until the QueryList becomes clean again).
+        consumerMarkDirty$1(node);
+    });
+}
+// TODO(refactor): some code duplication with queryRefresh
+function refreshSignalQuery(lView, queryIndex) {
+    const queryList = loadQueryInternal(lView, queryIndex);
+    const tView = lView[TVIEW];
+    const tQuery = getTQuery(tView, queryIndex);
+    // TODO(test): operation of refreshing a signal query could be invoked during the first
+    // creation pass, while results are still being collected; we should NOT mark such query as
+    // "clean" as we might not have any view add / remove operations that would make it dirty again.
+    // Leaning towards exiting early for calls to refreshSignalQuery before the first creation pass
+    // finished
+    if (queryList.dirty && tQuery.matches !== null) {
+        const result = tQuery.crossesNgTemplate ?
+            collectQueryResults(tView, lView, queryIndex, []) :
+            materializeViewResults(tView, lView, tQuery, queryIndex);
+        queryList.reset(result, unwrapElementRef);
+        // TODO(test): don't mark signal as dirty when a query was marked as dirty but there
+        // was no actual change
+        // TODO: change the reset logic so it returns the value
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Registers a QueryList, associated with a content query, for later refresh (part of a view
+ * refresh).
+ *
+ * @param directiveIndex Current directive index
+ * @param predicate The type for which the query will search
+ * @param flags Flags associated with the query
+ * @param read What to save in the query
+ * @returns QueryList<T>
+ *
+ * @codeGenApi
+ */
+function ɵɵcontentQuerySignal(target, directiveIndex, predicate, flags, read) {
+    bindQueryToSignal(target, createContentQuery(directiveIndex, predicate, flags, read));
+}
+/**
+ * Creates a new view query by initializing internal data structures and binding a new query to the
+ * target signal.
+ *
+ * @param target The target signal to assign the query results to.
+ * @param predicate The type or label that should match a given query
+ * @param flags Flags associated with the query
+ * @param read What to save in the query
+ *
+ * @codeGenApi
+ */
+function ɵɵviewQuerySignal(target, predicate, flags, read) {
+    bindQueryToSignal(target, createViewQuery(predicate, flags, read));
+}
+/**
+ * Advances the current query index by a specified offset.
+ *
+ * Adjusting the current query index is necessary in cases where a given directive has a mix of
+ * zone-based and signal-based queries. The signal-based queries don't require tracking of the
+ * current index (those are refreshed on demand and not during change detection) so this instruction
+ * is only necessary for backward-compatibility.
+ *
+ * @param index offset to apply to the current query index (defaults to 1)
+ *
+ * @codeGenApi
+ */
+function ɵɵqueryAdvance(indexOffset = 1) {
+    setCurrentQueryIndex(getCurrentQueryIndex() + indexOffset);
+}
 
 /** Store a value in the `data` at a given `index`. */
 function store(tView, lView, index, value) {
@@ -30062,7 +30219,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.0+sha-fad1354');
+const VERSION = new Version('17.2.0-next.0+sha-c043128');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -34182,24 +34339,56 @@ class ChangeDetectionSchedulerImpl {
         if (this.pendingRenderTaskId !== null)
             return;
         this.pendingRenderTaskId = this.taskService.add();
-        setTimeout(() => {
-            try {
-                if (!this.appRef.destroyed) {
-                    this.appRef.tick();
-                }
+        this.raceTimeoutAndRequestAnimationFrame();
+    }
+    /**
+     * Run change detection after the first of setTimeout and requestAnimationFrame resolves.
+     *
+     * - `requestAnimationFrame` ensures that change detection runs ahead of a browser repaint.
+     * This ensures that the create and update passes of a change detection always happen
+     * in the same frame.
+     * - When the browser is resource-starved, `rAF` can execute _before_ a `setTimeout` because
+     * rendering is a very high priority process. This means that `setTimeout` cannot guarantee
+     * same-frame create and update pass, when `setTimeout` is used to schedule the update phase.
+     * - While `rAF` gives us the desirable same-frame updates, it has two limitations that
+     * prevent it from being used alone. First, it does not run in background tabs, which would
+     * prevent Angular from initializing an application when opened in a new tab (for example).
+     * Second, repeated calls to requestAnimationFrame will execute at the refresh rate of the
+     * hardware (~16ms for a 60Hz display). This would cause significant slowdown of tests that
+     * are written with several updates and asserts in the form of "update; await stable; assert;".
+     * - Both `setTimeout` and `rAF` are able to "coalesce" several events from a single user
+     * interaction into a single change detection. Importantly, this reduces view tree traversals when
+     * compared to an alternative timing mechanism like `queueMicrotask`, where change detection would
+     * then be interleaves between each event.
+     *
+     * By running change detection after the first of `setTimeout` and `rAF` to execute, we get the
+     * best of both worlds.
+     */
+    async raceTimeoutAndRequestAnimationFrame() {
+        const timeout = new Promise(resolve => setTimeout(resolve));
+        const rAF = typeof _global['requestAnimationFrame'] === 'function' ?
+            new Promise(resolve => requestAnimationFrame(() => resolve())) :
+            null;
+        await Promise.race([timeout, rAF]);
+        this.tick();
+    }
+    tick() {
+        try {
+            if (!this.appRef.destroyed) {
+                this.appRef.tick();
             }
-            finally {
-                // If this is the last task, the service will synchronously emit a stable notification. If
-                // there is a subscriber that then acts in a way that tries to notify the scheduler again,
-                // we need to be able to respond to schedule a new change detection. Therefore, we should
-                // clear the task ID before removing it from the pending tasks (or the tasks service should
-                // not synchronously emit stable, similar to how Zone stableness only happens if it's still
-                // stable after a microtask).
-                const taskId = this.pendingRenderTaskId;
-                this.pendingRenderTaskId = null;
-                this.taskService.remove(taskId);
-            }
-        });
+        }
+        finally {
+            // If this is the last task, the service will synchronously emit a stable notification. If
+            // there is a subscriber that then acts in a way that tries to notify the scheduler again,
+            // we need to be able to respond to schedule a new change detection. Therefore, we should
+            // clear the task ID before removing it from the pending tasks (or the tasks service should
+            // not synchronously emit stable, similar to how Zone stableness only happens if it's still
+            // stable after a microtask).
+            const taskId = this.pendingRenderTaskId;
+            this.pendingRenderTaskId = null;
+            this.taskService.remove(taskId);
+        }
     }
     static { this.ɵfac = function ChangeDetectionSchedulerImpl_Factory(t) { return new (t || ChangeDetectionSchedulerImpl)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ChangeDetectionSchedulerImpl, factory: ChangeDetectionSchedulerImpl.ɵfac, providedIn: 'root' }); }

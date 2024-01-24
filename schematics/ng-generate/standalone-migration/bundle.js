@@ -9547,7 +9547,7 @@ function createExtractedAttributeOp(target, bindingKind, namespace, name, expres
     trustedValueFn: null
   }, NEW_OP);
 }
-function createDeferOp(xref, main, mainSlot, metadata, sourceSpan) {
+function createDeferOp(xref, main, mainSlot, metadata, resolverFn, sourceSpan) {
   return __spreadProps(__spreadValues(__spreadValues({
     kind: OpKind.Defer,
     xref,
@@ -9566,7 +9566,7 @@ function createDeferOp(xref, main, mainSlot, metadata, sourceSpan) {
     errorView: null,
     errorSlot: null,
     metadata,
-    resolverFn: null,
+    resolverFn,
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT), {
     numSlotsUsed: 2
@@ -9702,11 +9702,12 @@ var CompilationJob = class {
   }
 };
 var ComponentCompilationJob = class extends CompilationJob {
-  constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta) {
+  constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta, allDeferrableDepsFn) {
     super(componentName, pool, compatibility);
     this.relativeContextFilePath = relativeContextFilePath;
     this.i18nUseExternalIds = i18nUseExternalIds;
     this.deferBlocksMeta = deferBlocksMeta;
+    this.allDeferrableDepsFn = allDeferrableDepsFn;
     this.kind = CompilationJobKind.Tmpl;
     this.fnSuffix = "Template";
     this.views = /* @__PURE__ */ new Map();
@@ -10438,6 +10439,9 @@ function createDeferDepsFns(job) {
     for (const op of unit.create) {
       if (op.kind === OpKind.Defer) {
         if (op.metadata.deps.length === 0) {
+          continue;
+        }
+        if (op.resolverFn !== null) {
           continue;
         }
         const dependencies = [];
@@ -20212,8 +20216,8 @@ function emitHostBindingFunction(job) {
 var compatibilityMode = CompatibilityMode.TemplateDefinitionBuilder;
 var domSchema = new DomElementSchemaRegistry();
 var NG_TEMPLATE_TAG_NAME = "ng-template";
-function ingestComponent(componentName, template2, constantPool, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta) {
-  const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta);
+function ingestComponent(componentName, template2, constantPool, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta, allDeferrableDepsFn) {
+  const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta, allDeferrableDepsFn);
   ingestNodes(job.root, template2);
   return job;
 }
@@ -20477,7 +20481,7 @@ function ingestDeferBlock(unit, deferBlock) {
   const placeholder = ingestDeferView(unit, "Placeholder", (_d2 = deferBlock.placeholder) == null ? void 0 : _d2.i18n, (_e2 = deferBlock.placeholder) == null ? void 0 : _e2.children, (_f2 = deferBlock.placeholder) == null ? void 0 : _f2.sourceSpan);
   const error2 = ingestDeferView(unit, "Error", (_g = deferBlock.error) == null ? void 0 : _g.i18n, (_h = deferBlock.error) == null ? void 0 : _h.children, (_i = deferBlock.error) == null ? void 0 : _i.sourceSpan);
   const deferXref = unit.job.allocateXrefId();
-  const deferOp = createDeferOp(deferXref, main.xref, main.handle, blockMeta, deferBlock.sourceSpan);
+  const deferOp = createDeferOp(deferXref, main.xref, main.handle, blockMeta, unit.job.allDeferrableDepsFn, deferBlock.sourceSpan);
   deferOp.placeholderView = (_j = placeholder == null ? void 0 : placeholder.xref) != null ? _j : null;
   deferOp.placeholderSlot = (_k = placeholder == null ? void 0 : placeholder.handle) != null ? _k : null;
   deferOp.loadingSlot = (_l = loading == null ? void 0 : loading.handle) != null ? _l : null;
@@ -21372,9 +21376,10 @@ function normalizeNgContentSelect(selectAttr) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/r3_control_flow.mjs
 var FOR_LOOP_EXPRESSION_PATTERN = /^\s*([0-9A-Za-z_$]*)\s+of\s+([\S\s]*)/;
 var FOR_LOOP_TRACK_PATTERN = /^track\s+([\S\s]*)/;
-var CONDITIONAL_ALIAS_PATTERN = /^as\s+(.*)/;
+var CONDITIONAL_ALIAS_PATTERN = /^(as\s)+(.*)/;
 var ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
 var FOR_LOOP_LET_PATTERN = /^let\s+([\S\s]*)/;
+var CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN = /(\s*)(\S+)(\s*)/;
 var ALLOWED_FOR_LOOP_LET_VARIABLES = /* @__PURE__ */ new Set(["$index", "$first", "$last", "$even", "$odd", "$count"]);
 function isConnectedForLoopBlock(name) {
   return name === "empty";
@@ -21486,8 +21491,10 @@ function parseForLoopParameters(block, errors, bindingParser) {
     return null;
   }
   const [, itemName, rawExpression] = match;
+  const variableName = expressionParam.expression.split(" ")[0];
+  const variableSpan = new ParseSourceSpan(expressionParam.sourceSpan.start, expressionParam.sourceSpan.start.moveBy(variableName.length));
   const result = {
-    itemName: new Variable(itemName, "$implicit", expressionParam.sourceSpan, expressionParam.sourceSpan),
+    itemName: new Variable(itemName, "$implicit", variableSpan, variableSpan),
     trackBy: null,
     expression: parseBlockParameterToBinding(expressionParam, bindingParser, rawExpression),
     context: {}
@@ -21495,7 +21502,8 @@ function parseForLoopParameters(block, errors, bindingParser) {
   for (const param of secondaryParams) {
     const letMatch = param.expression.match(FOR_LOOP_LET_PATTERN);
     if (letMatch !== null) {
-      parseLetParameter(param.sourceSpan, letMatch[1], param.sourceSpan, result.context, errors);
+      const variablesSpan = new ParseSourceSpan(param.sourceSpan.start.moveBy(letMatch[0].length - letMatch[1].length), param.sourceSpan.end);
+      parseLetParameter(param.sourceSpan, letMatch[1], variablesSpan, result.context, errors);
       continue;
     }
     const trackMatch = param.expression.match(FOR_LOOP_TRACK_PATTERN);
@@ -21511,16 +21519,18 @@ function parseForLoopParameters(block, errors, bindingParser) {
     }
     errors.push(new ParseError(param.sourceSpan, `Unrecognized @for loop paramater "${param.expression}"`));
   }
-  for (const variableName of ALLOWED_FOR_LOOP_LET_VARIABLES) {
-    if (!result.context.hasOwnProperty(variableName)) {
+  for (const variableName2 of ALLOWED_FOR_LOOP_LET_VARIABLES) {
+    if (!result.context.hasOwnProperty(variableName2)) {
       const emptySpanAfterForBlockStart = new ParseSourceSpan(block.startSourceSpan.end, block.startSourceSpan.end);
-      result.context[variableName] = new Variable(variableName, variableName, emptySpanAfterForBlockStart, emptySpanAfterForBlockStart);
+      result.context[variableName2] = new Variable(variableName2, variableName2, emptySpanAfterForBlockStart, emptySpanAfterForBlockStart);
     }
   }
   return result;
 }
 function parseLetParameter(sourceSpan, expression, span, context, errors) {
+  var _a2, _b2, _c2;
   const parts = expression.split(",");
+  let startSpan = span.start;
   for (const part of parts) {
     const expressionParts = part.split("=");
     const name = expressionParts.length === 2 ? expressionParts[0].trim() : "";
@@ -21532,8 +21542,20 @@ function parseLetParameter(sourceSpan, expression, span, context, errors) {
     } else if (context.hasOwnProperty(variableName)) {
       errors.push(new ParseError(sourceSpan, `Duplicate "let" parameter variable "${variableName}"`));
     } else {
-      context[variableName] = new Variable(name, variableName, span, span);
+      const [, keyLeadingWhitespace, keyName] = (_a2 = expressionParts[0].match(CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN)) != null ? _a2 : [];
+      const keySpan = keyLeadingWhitespace !== void 0 && expressionParts.length === 2 ? new ParseSourceSpan(
+        startSpan.moveBy(keyLeadingWhitespace.length),
+        startSpan.moveBy(keyLeadingWhitespace.length + keyName.length)
+      ) : span;
+      let valueSpan = void 0;
+      if (expressionParts.length === 2) {
+        const [, valueLeadingWhitespace, implicit] = (_b2 = expressionParts[1].match(CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN)) != null ? _b2 : [];
+        valueSpan = valueLeadingWhitespace !== void 0 ? new ParseSourceSpan(startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length), startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length + implicit.length)) : void 0;
+      }
+      const sourceSpan2 = new ParseSourceSpan(keySpan.start, (_c2 = valueSpan == null ? void 0 : valueSpan.end) != null ? _c2 : keySpan.end);
+      context[variableName] = new Variable(name, variableName, sourceSpan2, keySpan, valueSpan);
     }
+    startSpan = startSpan.moveBy(part.length + 1);
   }
 }
 function validateIfConnectedBlocks(connectedBlocks) {
@@ -21613,8 +21635,10 @@ function parseConditionalBlockParameters(block, errors, bindingParser) {
     } else if (expressionAlias !== null) {
       errors.push(new ParseError(param.sourceSpan, 'Conditional can only have one "as" expression'));
     } else {
-      const name = aliasMatch[1].trim();
-      expressionAlias = new Variable(name, name, param.sourceSpan, param.sourceSpan);
+      const name = aliasMatch[2].trim();
+      const variableStart = param.sourceSpan.start.moveBy(aliasMatch[1].length);
+      const variableSpan = new ParseSourceSpan(variableStart, variableStart.moveBy(name.length));
+      expressionAlias = new Variable(name, name, variableSpan, variableSpan);
     }
   }
   return { expression, expressionAlias };
@@ -24876,12 +24900,12 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
   }
   const templateTypeName = meta.name;
   const templateName = templateTypeName ? `${templateTypeName}_Template` : null;
-  if (!USE_TEMPLATE_PIPELINE) {
-    let allDeferrableDepsFn = null;
-    if (meta.deferBlocks.size > 0 && meta.deferrableTypes.size > 0 && meta.deferBlockDepsEmitMode === 1) {
-      const fnName = `${templateTypeName}_DeferFn`;
-      allDeferrableDepsFn = createDeferredDepsFunction(constantPool, fnName, meta.deferrableTypes);
-    }
+  let allDeferrableDepsFn = null;
+  if (meta.deferBlocks.size > 0 && meta.deferrableTypes.size > 0 && meta.deferBlockDepsEmitMode === 1) {
+    const fnName = `${templateTypeName}_DeferFn`;
+    allDeferrableDepsFn = createDeferredDepsFunction(constantPool, fnName, meta.deferrableTypes);
+  }
+  if (!USE_TEMPLATE_PIPELINE && !meta.useTemplatePipeline) {
     const template2 = meta.template;
     const templateBuilder = new TemplateDefinitionBuilder(constantPool, BindingScope.createRootScope(), 0, templateTypeName, null, null, templateName, Identifiers.namespaceHTML, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.deferBlocks, /* @__PURE__ */ new Map(), allDeferrableDepsFn);
     const templateFunctionExpression = templateBuilder.buildTemplateFunction(template2.nodes, []);
@@ -24901,7 +24925,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     }
     definitionMap.set("template", templateFunctionExpression);
   } else {
-    const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.deferBlocks);
+    const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.deferBlocks, allDeferrableDepsFn);
     transform(tpl, CompilationJobKind.Tmpl);
     const templateFn = emitTemplateFn(tpl, constantPool);
     if (tpl.contentSelectors !== null) {
@@ -25049,7 +25073,7 @@ function createDirectiveType(meta) {
 function createHostBindingsFunction(hostBindingsMetadata, typeSourceSpan, bindingParser, constantPool, selector, name, definitionMap) {
   const bindings = bindingParser.createBoundHostProperties(hostBindingsMetadata.properties, typeSourceSpan);
   const eventBindings = bindingParser.createDirectiveHostEventAsts(hostBindingsMetadata.listeners, typeSourceSpan);
-  if (USE_TEMPLATE_PIPELINE) {
+  if (USE_TEMPLATE_PIPELINE || hostBindingsMetadata.useTemplatePipeline) {
     if (hostBindingsMetadata.specialAttributes.styleAttr) {
       hostBindingsMetadata.attributes["style"] = literal(hostBindingsMetadata.specialAttributes.styleAttr);
     }
@@ -25974,6 +25998,7 @@ var ResourceLoader = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/jit_compiler_facade.mjs
+var SHOULD_USE_TEMPLATE_PIPELINE_FOR_JIT = false;
 var CompilerFacadeImpl = class {
   constructor(jitEvaluator = new JitEvaluator()) {
     this.jitEvaluator = jitEvaluator;
@@ -26106,7 +26131,8 @@ var CompilerFacadeImpl = class {
       animations: facade.animations != null ? new WrappedNodeExpr(facade.animations) : null,
       viewProviders: facade.viewProviders != null ? new WrappedNodeExpr(facade.viewProviders) : null,
       relativeContextFilePath: "",
-      i18nUseExternalIds: true
+      i18nUseExternalIds: true,
+      useTemplatePipeline: SHOULD_USE_TEMPLATE_PIPELINE_FOR_JIT
     });
     const jitExpressionSourceMap = `ng:///${facade.name}.js`;
     return this.compileComponentFromMeta(angularCoreEnv, jitExpressionSourceMap, meta);
@@ -26207,7 +26233,9 @@ function convertDirectiveFacadeToMetadata(facade) {
     typeSourceSpan: facade.typeSourceSpan,
     type: wrapReference(facade.type),
     deps: null,
-    host: extractHostBindings(facade.propMetadata, facade.typeSourceSpan, facade.host),
+    host: __spreadProps(__spreadValues({}, extractHostBindings(facade.propMetadata, facade.typeSourceSpan, facade.host)), {
+      useTemplatePipeline: SHOULD_USE_TEMPLATE_PIPELINE_FOR_JIT
+    }),
     inputs: __spreadValues(__spreadValues({}, inputsFromMetadata), inputsFromType),
     outputs: __spreadValues(__spreadValues({}, outputsFromMetadata), outputsFromType),
     queries: facade.queries.map(convertToR3QueryMetadata),
@@ -26250,7 +26278,8 @@ function convertHostDeclarationToMetadata(host = {}) {
     specialAttributes: {
       classAttr: host.classAttribute,
       styleAttr: host.styleAttribute
-    }
+    },
+    useTemplatePipeline: SHOULD_USE_TEMPLATE_PIPELINE_FOR_JIT
   };
 }
 function convertHostDirectivesToMetadata(metadata) {
@@ -26315,7 +26344,8 @@ function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMap
     interpolation,
     declarationListEmitMode: 2,
     relativeContextFilePath: "",
-    i18nUseExternalIds: true
+    i18nUseExternalIds: true,
+    useTemplatePipeline: SHOULD_USE_TEMPLATE_PIPELINE_FOR_JIT
   });
 }
 function convertDeclarationFacadeToMetadata(declaration) {
@@ -26549,7 +26579,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.0+sha-fad1354");
+var VERSION2 = new Version("17.2.0-next.0+sha-c043128");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27615,7 +27645,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-fad1354"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-c043128"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27684,7 +27714,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-fad1354"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-c043128"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27983,7 +28013,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-fad1354"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-c043128"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -28006,7 +28036,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-fad1354"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-c043128"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -28044,7 +28074,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-fad1354"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-c043128"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -28068,7 +28098,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-fad1354"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-c043128"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28103,7 +28133,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.2.0-next.0+sha-fad1354"));
+  definitionMap.set("version", literal("17.2.0-next.0+sha-c043128"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28120,7 +28150,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.2.0-next.0+sha-fad1354");
+var VERSION3 = new Version("17.2.0-next.0+sha-c043128");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -35320,7 +35350,7 @@ function parseDescendantsOption(value) {
 var EMPTY_OBJECT = {};
 var queryDecoratorNames = ["ViewChild", "ViewChildren", "ContentChild", "ContentChildren"];
 var QUERY_TYPES = new Set(queryDecoratorNames);
-function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmitter, referencesRegistry, isCore, annotateForClosureCompiler, compilationMode, defaultSelector = null) {
+function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmitter, referencesRegistry, isCore, annotateForClosureCompiler, compilationMode, defaultSelector, useTemplatePipeline) {
   let directive;
   if (decorator.args === null || decorator.args.length === 0) {
     directive = /* @__PURE__ */ new Map();
@@ -35419,7 +35449,9 @@ function extractDirectiveMetadata(clazz, decorator, reflector, evaluator, refEmi
   const metadata = {
     name: clazz.name.text,
     deps: ctorDeps,
-    host,
+    host: __spreadProps(__spreadValues({}, host), {
+      useTemplatePipeline
+    }),
     lifecycle: {
       usesOnChanges
     },
@@ -36161,7 +36193,7 @@ var LIFECYCLE_HOOKS = /* @__PURE__ */ new Set([
   "ngAfterContentChecked"
 ]);
 var DirectiveDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, perf, includeClassMetadata, compilationMode) {
+  constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, perf, includeClassMetadata, compilationMode, useTemplatePipeline) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -36177,6 +36209,7 @@ var DirectiveDecoratorHandler = class {
     this.perf = perf;
     this.includeClassMetadata = includeClassMetadata;
     this.compilationMode = compilationMode;
+    this.useTemplatePipeline = useTemplatePipeline;
     this.precedence = HandlerPrecedence.PRIMARY;
     this.name = "DirectiveDecoratorHandler";
   }
@@ -36198,7 +36231,19 @@ var DirectiveDecoratorHandler = class {
       return { diagnostics: [getUndecoratedClassWithAngularFeaturesDiagnostic(node)] };
     }
     this.perf.eventCount(PerfEvent.AnalyzeDirective);
-    const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode);
+    const directiveResult = extractDirectiveMetadata(
+      node,
+      decorator,
+      this.reflector,
+      this.evaluator,
+      this.refEmitter,
+      this.referencesRegistry,
+      this.isCore,
+      this.annotateForClosureCompiler,
+      this.compilationMode,
+      null,
+      this.useTemplatePipeline
+    );
     if (directiveResult === void 0) {
       return {};
     }
@@ -37457,7 +37502,7 @@ var EMPTY_ARRAY2 = [];
 var isUsedDirective = (decl) => decl.kind === R3TemplateDependencyKind.Directive;
 var isUsedPipe = (decl) => decl.kind === R3TemplateDependencyKind.Pipe;
 var ComponentDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax) {
+  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, useTemplatePipeline) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -37492,6 +37537,7 @@ var ComponentDecoratorHandler = class {
     this.deferredSymbolTracker = deferredSymbolTracker;
     this.forbidOrphanRendering = forbidOrphanRendering;
     this.enableBlockSyntax = enableBlockSyntax;
+    this.useTemplatePipeline = useTemplatePipeline;
     this.literalCache = /* @__PURE__ */ new Map();
     this.elementSchemaRegistry = new DomElementSchemaRegistry();
     this.preanalyzeTemplateCache = /* @__PURE__ */ new Map();
@@ -37568,7 +37614,7 @@ var ComponentDecoratorHandler = class {
     this.literalCache.delete(decorator);
     let diagnostics;
     let isPoisoned = false;
-    const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, this.elementSchemaRegistry.getDefaultComponentElementName());
+    const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, this.elementSchemaRegistry.getDefaultComponentElementName(), this.useTemplatePipeline);
     if (directiveResult === void 0) {
       return {};
     }
@@ -37760,7 +37806,8 @@ var ComponentDecoratorHandler = class {
           viewProviders: wrappedViewProviders,
           i18nUseExternalIds: this.i18nUseExternalIds,
           relativeContextFilePath,
-          rawImports: rawImports !== null ? new WrappedNodeExpr(rawImports) : void 0
+          rawImports: rawImports !== null ? new WrappedNodeExpr(rawImports) : void 0,
+          useTemplatePipeline: this.useTemplatePipeline
         }),
         typeCheckMeta: extractDirectiveTypeCheckMeta(node, inputs, this.reflector),
         classMetadata: this.includeClassMetadata ? extractClassMetadata(node, this.reflector, this.isCore, this.annotateForClosureCompiler, (dec) => transformDecoratorResources(dec, component, styles, template2)) : null,
@@ -41231,6 +41278,7 @@ var ExpressionIdentifier;
   ExpressionIdentifier2["DIRECTIVE"] = "DIR";
   ExpressionIdentifier2["COMPONENT_COMPLETION"] = "COMPCOMP";
   ExpressionIdentifier2["EVENT_PARAMETER"] = "EP";
+  ExpressionIdentifier2["VARIABLE_AS_EXPRESSION"] = "VAE";
 })(ExpressionIdentifier || (ExpressionIdentifier = {}));
 function addExpressionIdentifier(node, identifier) {
   import_typescript80.default.addSyntheticTrailingComment(
@@ -41615,14 +41663,12 @@ function tsCreateElement(tagName) {
   );
 }
 function tsDeclareVariable(id, type) {
-  let initializer = import_typescript83.default.factory.createNonNullExpression(import_typescript83.default.factory.createNull());
-  if (type.kind === import_typescript83.default.SyntaxKind.BooleanKeyword) {
-    initializer = import_typescript83.default.factory.createAsExpression(initializer, import_typescript83.default.factory.createKeywordTypeNode(import_typescript83.default.SyntaxKind.BooleanKeyword));
-  }
+  addExpressionIdentifier(type, ExpressionIdentifier.VARIABLE_AS_EXPRESSION);
+  const initializer = import_typescript83.default.factory.createAsExpression(import_typescript83.default.factory.createNonNullExpression(import_typescript83.default.factory.createNull()), type);
   const decl = import_typescript83.default.factory.createVariableDeclaration(
     id,
     void 0,
-    type,
+    void 0,
     initializer
   );
   return import_typescript83.default.factory.createVariableStatement(
@@ -42880,8 +42926,8 @@ var TcbDirectiveTypeOpBase = class extends TcbOp {
       type = import_typescript93.default.factory.createTypeReferenceNode(rawType.typeName, typeArguments);
     }
     const id = this.tcb.allocateId();
-    addExpressionIdentifier(type, ExpressionIdentifier.DIRECTIVE);
-    addParseSpanInfo(type, this.node.startSourceSpan || this.node.sourceSpan);
+    addExpressionIdentifier(id, ExpressionIdentifier.DIRECTIVE);
+    addParseSpanInfo(id, this.node.startSourceSpan || this.node.sourceSpan);
     this.scope.addStatement(tsDeclareVariable(id, type));
     return id;
   }
@@ -43374,7 +43420,9 @@ var TcbBlockVariableOp = class extends TcbOp {
   execute() {
     const id = this.tcb.allocateId();
     addParseSpanInfo(id, this.variable.keySpan);
-    this.scope.addStatement(tsCreateVariable(id, this.initializer));
+    const variable2 = tsCreateVariable(id, wrapForTypeChecker(this.initializer));
+    addParseSpanInfo(variable2.declarationList.declarations[0], this.variable.sourceSpan);
+    this.scope.addStatement(variable2);
     return id;
   }
 };
@@ -43390,7 +43438,9 @@ var TcbBlockImplicitVariableOp = class extends TcbOp {
   execute() {
     const id = this.tcb.allocateId();
     addParseSpanInfo(id, this.variable.keySpan);
-    this.scope.addStatement(tsDeclareVariable(id, this.type));
+    const variable2 = tsDeclareVariable(id, this.type);
+    addParseSpanInfo(variable2.declarationList.declarations[0], this.variable.sourceSpan);
+    this.scope.addStatement(variable2);
     return id;
   }
 };
@@ -43526,6 +43576,7 @@ var TcbForOfOp = class extends TcbOp {
       throw new Error(`Could not resolve for loop variable ${this.block.item.name} to an identifier`);
     }
     const initializer = import_typescript93.default.factory.createVariableDeclarationList([import_typescript93.default.factory.createVariableDeclaration(initializerId)], import_typescript93.default.NodeFlags.Const);
+    addParseSpanInfo(initializer, this.block.item.keySpan);
     const expression = import_typescript93.default.factory.createNonNullExpression(tcbExpression(this.block.expression, this.tcb, loopScope));
     const trackTranslator = new TcbForLoopTrackTranslator(this.tcb, loopScope, this.block);
     const trackExpression = trackTranslator.translate(this.block.trackBy);
@@ -44830,17 +44881,22 @@ var SymbolBuilder = class {
   }
   getSymbolOfVariable(variable2) {
     const node = findFirstMatchingNode(this.typeCheckBlock, { withSpan: variable2.sourceSpan, filter: import_typescript96.default.isVariableDeclaration });
-    if (node === null || node.initializer === void 0) {
+    if (node === null) {
       return null;
     }
-    const expressionSymbol = this.getSymbolOfTsNode(node.initializer);
-    if (expressionSymbol === null) {
+    let nodeValueSymbol = null;
+    if (import_typescript96.default.isForOfStatement(node.parent.parent)) {
+      nodeValueSymbol = this.getSymbolOfTsNode(node);
+    } else if (node.initializer !== void 0) {
+      nodeValueSymbol = this.getSymbolOfTsNode(node.initializer);
+    }
+    if (nodeValueSymbol === null) {
       return null;
     }
     return {
-      tsType: expressionSymbol.tsType,
-      tsSymbol: expressionSymbol.tsSymbol,
-      initializerLocation: expressionSymbol.tcbLocation,
+      tsType: nodeValueSymbol.tsType,
+      tsSymbol: nodeValueSymbol.tsSymbol,
+      initializerLocation: nodeValueSymbol.tcbLocation,
       kind: SymbolKind.Variable,
       declaration: variable2,
       localVarLocation: {
@@ -46192,6 +46248,7 @@ var SUPPORTED_DIAGNOSTIC_NAMES = /* @__PURE__ */ new Set([
 ]);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/core/src/compiler.mjs
+var SHOULD_USE_TEMPLATE_PIPELINE = false;
 var CompilationTicketKind;
 (function(CompilationTicketKind2) {
   CompilationTicketKind2[CompilationTicketKind2["Fresh"] = 0] = "Fresh";
@@ -46666,7 +46723,7 @@ var NgCompiler = class {
     return diagnostics;
   }
   makeCompilation() {
-    var _a2, _b2, _c2, _d2;
+    var _a2, _b2, _c2, _d2, _e2, _f2;
     const isCore = isAngularCorePackage(this.inputProgram);
     let compilationMode = CompilationMode.FULL;
     if (!isCore) {
@@ -46752,11 +46809,11 @@ var NgCompiler = class {
       throw new Error('JIT mode support ("supportJitMode" option) cannot be disabled when forbidOrphanComponents is set to true');
     }
     const handlers = [
-      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax),
-      new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, supportTestBed, compilationMode),
+      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, (_d2 = this.options.useTemplatePipeline) != null ? _d2 : SHOULD_USE_TEMPLATE_PIPELINE),
+      new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, supportTestBed, compilationMode, (_e2 = this.options.useTemplatePipeline) != null ? _e2 : SHOULD_USE_TEMPLATE_PIPELINE),
       new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder, supportTestBed, compilationMode),
       new InjectableDecoratorHandler(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, compilationMode),
-      new NgModuleDecoratorHandler(reflector, evaluator, metaReader, metaRegistry, ngModuleScopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, this.closureCompilerEnabled, (_d2 = this.options.onlyPublishPublicTypingsForNgModules) != null ? _d2 : false, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, supportJitMode, compilationMode)
+      new NgModuleDecoratorHandler(reflector, evaluator, metaReader, metaRegistry, ngModuleScopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, this.closureCompilerEnabled, (_f2 = this.options.onlyPublishPublicTypingsForNgModules) != null ? _f2 : false, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, supportJitMode, compilationMode)
     ];
     const traitCompiler = new TraitCompiler(handlers, reflector, this.delegatingPerfRecorder, this.incrementalCompilation, this.options.compileNonExportedClasses !== false, compilationMode, dtsTransforms, semanticDepGraphUpdater, this.adapter);
     const notifyingDriver = new NotifyingProgramDriverWrapper(this.programDriver, (program) => {
