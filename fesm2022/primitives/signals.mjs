@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-75aeae4
+ * @license Angular v17.2.0-next.0+sha-656bc28
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -316,6 +316,8 @@ function assertProducerNode(node) {
     node.liveConsumerIndexOfThis ??= [];
 }
 
+/** Function used as the `toString` implementation of computed. */
+const computedToString = () => '[COMPUTED]';
 /**
  * Create a computed signal which derives a reactive value from an expression.
  */
@@ -333,6 +335,7 @@ function createComputed(computation) {
         return node.value;
     };
     computed[SIGNAL] = node;
+    computed.toString = computedToString;
     return computed;
 }
 /**
@@ -417,6 +420,8 @@ function setThrowInvalidWriteToSignalError(fn) {
  * of setting a signal.
  */
 let postSignalSetFn = null;
+/** Function used as the `toString` implementation of signals. */
+const signalToString = () => '[SIGNAL]';
 /**
  * Create a `Signal` that can be set or updated directly.
  */
@@ -428,6 +433,7 @@ function createSignal(initialValue) {
         return node.value;
     });
     getter[SIGNAL] = node;
+    getter.toString = signalToString;
     return getter;
 }
 function setPostSignalSetFn(fn) {
