@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-9bb1884
+ * @license Angular v17.2.0-next.0+sha-9f18227
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6584,10 +6584,10 @@ function createInjectorWithoutInjectorInstances(defType, parent = null, addition
 
 /**
  * Concrete injectors implement this interface. Injectors are configured
- * with [providers](guide/glossary#provider) that associate
- * dependencies of various types with [injection tokens](guide/glossary#di-token).
+ * with [providers](guide/dependency-injection-providers) that associate
+ * dependencies of various types with [injection tokens](guide/dependency-injection-providers).
  *
- * @see ["DI Providers"](guide/dependency-injection-providers).
+ * @see [DI Providers](guide/dependency-injection-providers).
  * @see {@link StaticProvider}
  *
  * @usageNotes
@@ -15731,7 +15731,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-9bb1884']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-9f18227']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30231,7 +30231,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.0+sha-9bb1884');
+const VERSION = new Version('17.2.0-next.0+sha-9f18227');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

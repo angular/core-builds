@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-9bb1884
+ * @license Angular v17.2.0-next.0+sha-9f18227
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5211,10 +5211,10 @@ export declare const INJECTOR: InjectionToken<Injector>;
 
 /**
  * Concrete injectors implement this interface. Injectors are configured
- * with [providers](guide/glossary#provider) that associate
- * dependencies of various types with [injection tokens](guide/glossary#di-token).
+ * with [providers](guide/dependency-injection-providers) that associate
+ * dependencies of various types with [injection tokens](guide/dependency-injection-providers).
  *
- * @see ["DI Providers"](guide/dependency-injection-providers).
+ * @see [DI Providers](guide/dependency-injection-providers).
  * @see {@link StaticProvider}
  *
  * @usageNotes
