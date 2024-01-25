@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.1+sha-8dca5a1
+ * @license Angular v17.1.1+sha-293dc3b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3925,7 +3925,7 @@ declare const FLAGS = 2;
 export declare function forwardRef(forwardRefFn: ForwardRefFn): Type<any>;
 
 /**
- * An interface that a function passed into {@link forwardRef} has to implement.
+ * An interface that a function passed into `forwardRef` has to implement.
  *
  * @usageNotes
  * ### Example
