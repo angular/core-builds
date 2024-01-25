@@ -4354,7 +4354,7 @@ function getAttrsForDirectiveMatching(elOrTpl) {
       }
     });
     elOrTpl.inputs.forEach((i) => {
-      if (i.type === 0) {
+      if (i.type === 0 || i.type === 5) {
         attributesMap[i.name] = "";
       }
     });
@@ -5809,6 +5809,7 @@ var ParsedPropertyType;
   ParsedPropertyType2[ParsedPropertyType2["DEFAULT"] = 0] = "DEFAULT";
   ParsedPropertyType2[ParsedPropertyType2["LITERAL_ATTR"] = 1] = "LITERAL_ATTR";
   ParsedPropertyType2[ParsedPropertyType2["ANIMATION"] = 2] = "ANIMATION";
+  ParsedPropertyType2[ParsedPropertyType2["TWO_WAY"] = 3] = "TWO_WAY";
 })(ParsedPropertyType || (ParsedPropertyType = {}));
 var ParsedEvent = class {
   constructor(name, targetOrPhase, type, handler, sourceSpan, handlerSpan, keySpan) {
@@ -9480,6 +9481,7 @@ function convertI18nBindings(job) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/create_defer_deps_fns.mjs
 function createDeferDepsFns(job) {
+  var _a2;
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.Defer) {
@@ -9503,9 +9505,10 @@ function createDeferDepsFns(job) {
         if (op.handle.slot === null) {
           throw new Error("AssertionError: slot must be assigned bfore extracting defer deps functions");
         }
+        const fullPathName = (_a2 = unit.fnName) == null ? void 0 : _a2.replace(`_Template`, ``);
         op.resolverFn = job.pool.getSharedFunctionReference(
           depsFnExpr,
-          `${job.componentName}_Defer_${op.handle.slot}_DepsFn`,
+          `${fullPathName}_Defer_${op.handle.slot}_DepsFn`,
           false
         );
       }
@@ -19175,7 +19178,6 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: expandSafeReads },
   { kind: CompilationJobKind.Both, fn: generateTemporaryVariables },
   { kind: CompilationJobKind.Tmpl, fn: allocateSlots },
-  { kind: CompilationJobKind.Tmpl, fn: createDeferDepsFns },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: extractI18nMessages },
@@ -19188,6 +19190,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: generateAdvance },
   { kind: CompilationJobKind.Both, fn: optimizeVariables },
   { kind: CompilationJobKind.Both, fn: nameFunctionsAndVariables },
+  { kind: CompilationJobKind.Tmpl, fn: createDeferDepsFns },
   { kind: CompilationJobKind.Tmpl, fn: mergeNextContextExpressions },
   { kind: CompilationJobKind.Tmpl, fn: generateNgContainerOps },
   { kind: CompilationJobKind.Tmpl, fn: collapseEmptyInstructions },
@@ -19358,7 +19361,7 @@ function ingestHostAttribute(job, name, value, securityContexts) {
   job.root.update.push(attrBinding);
 }
 function ingestHostEvent(job, event) {
-  const [phase, target] = event.type === 0 ? [null, event.targetOrPhase] : [event.targetOrPhase, null];
+  const [phase, target] = event.type !== 1 ? [null, event.targetOrPhase] : [event.targetOrPhase, null];
   const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, makeListenerHandlerOps(job.root, event.handler, event.handlerSpan), phase, target, true, event.sourceSpan);
   job.root.create.push(eventBinding);
 }
@@ -19825,6 +19828,7 @@ function convertAstWithInterpolation(job, value, i18nMeta, sourceSpan) {
 }
 var BINDING_KINDS = /* @__PURE__ */ new Map([
   [0, BindingKind.Property],
+  [5, BindingKind.Property],
   [1, BindingKind.Attribute],
   [2, BindingKind.ClassName],
   [3, BindingKind.StyleProperty],
@@ -19903,7 +19907,7 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
 function createTemplateBinding(view, xref, type, name, value, unit, securityContext, isStructuralTemplateAttribute, templateKind, i18nMessage, sourceSpan) {
   const isTextBinding = typeof value === "string";
   if (templateKind === TemplateKind.Structural) {
-    if (!isStructuralTemplateAttribute && (type === 0 || type === 2 || type === 3)) {
+    if (!isStructuralTemplateAttribute && (type === 0 || type === 5 || type === 2 || type === 3)) {
       return createExtractedAttributeOp(xref, BindingKind.Property, null, name, null, null, i18nMessage, securityContext);
     }
     if (!isTextBinding && (type === 1 || type === 4)) {
@@ -20086,6 +20090,7 @@ var BindingParser = class {
           propName,
           expression,
           true,
+          false,
           sourceSpan,
           sourceSpan.start.offset,
           void 0,
@@ -20151,7 +20156,7 @@ var BindingParser = class {
       } else if (binding.value) {
         const srcSpan = isIvyAst ? bindingSpan : sourceSpan;
         const valueSpan = moveParseSourceSpan(sourceSpan, binding.value.ast.sourceSpan);
-        this._parsePropertyAst(key, binding.value, srcSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+        this._parsePropertyAst(key, binding.value, false, srcSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
       } else {
         targetMatchableAttrs.push([key, ""]);
         this.parseLiteralAttr(key, null, keySpan, absoluteValueOffset, void 0, targetMatchableAttrs, targetProps, keySpan);
@@ -20186,7 +20191,7 @@ var BindingParser = class {
       targetProps.push(new ParsedProperty(name, this._exprParser.wrapLiteralPrimitive(value, "", absoluteOffset), ParsedPropertyType.LITERAL_ATTR, sourceSpan, keySpan, valueSpan));
     }
   }
-  parsePropertyBinding(name, expression, isHost, sourceSpan, absoluteOffset, valueSpan, targetMatchableAttrs, targetProps, keySpan) {
+  parsePropertyBinding(name, expression, isHost, isPartOfAssignmentBinding, sourceSpan, absoluteOffset, valueSpan, targetMatchableAttrs, targetProps, keySpan) {
     if (name.length === 0) {
       this._reportError(`Property name is missing in binding`, sourceSpan);
     }
@@ -20207,20 +20212,20 @@ var BindingParser = class {
     if (isAnimationProp) {
       this._parseAnimation(name, expression, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
     } else {
-      this._parsePropertyAst(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+      this._parsePropertyAst(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), isPartOfAssignmentBinding, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
     }
   }
   parsePropertyInterpolation(name, value, sourceSpan, valueSpan, targetMatchableAttrs, targetProps, keySpan, interpolatedTokens) {
     const expr = this.parseInterpolation(value, valueSpan || sourceSpan, interpolatedTokens);
     if (expr) {
-      this._parsePropertyAst(name, expr, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+      this._parsePropertyAst(name, expr, false, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
       return true;
     }
     return false;
   }
-  _parsePropertyAst(name, ast, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps) {
+  _parsePropertyAst(name, ast, isPartOfAssignmentBinding, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps) {
     targetMatchableAttrs.push([name, ast.source]);
-    targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.DEFAULT, sourceSpan, keySpan, valueSpan));
+    targetProps.push(new ParsedProperty(name, ast, isPartOfAssignmentBinding ? ParsedPropertyType.TWO_WAY : ParsedPropertyType.DEFAULT, sourceSpan, keySpan, valueSpan));
   }
   _parseAnimation(name, expression, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps) {
     if (name.length === 0) {
@@ -20280,7 +20285,7 @@ var BindingParser = class {
       const mappedPropName = this._schemaRegistry.getMappedPropName(boundProp.name);
       boundPropertyName = mapPropertyName ? mappedPropName : boundProp.name;
       securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, mappedPropName, false);
-      bindingType = 0;
+      bindingType = boundProp.type === ParsedPropertyType.TWO_WAY ? 5 : 0;
       if (!skipValidation) {
         this._validatePropertyOrAttributeName(mappedPropName, boundProp.sourceSpan, false);
       }
@@ -20326,7 +20331,7 @@ var BindingParser = class {
     const [target, eventName] = splitAtColon(name, [null, name]);
     const ast = this._parseAction(expression, isAssignmentEvent, handlerSpan);
     targetMatchableAttrs.push([name, ast.source]);
-    targetEvents.push(new ParsedEvent(eventName, target, 0, ast, sourceSpan, handlerSpan, keySpan));
+    targetEvents.push(new ParsedEvent(eventName, target, isAssignmentEvent ? 2 : 0, ast, sourceSpan, handlerSpan, keySpan));
   }
   _parseAction(value, isAssignmentEvent, sourceSpan) {
     const sourceInfo = (sourceSpan && sourceSpan.start || "(unknown").toString();
@@ -21442,7 +21447,7 @@ var HtmlAstToIvyAst = class {
       if (bindParts[KW_BIND_IDX] != null) {
         const identifier = bindParts[IDENT_KW_IDX];
         const keySpan2 = createKeySpan(srcSpan, bindParts[KW_BIND_IDX], identifier);
-        this.bindingParser.parsePropertyBinding(identifier, value, false, srcSpan, absoluteOffset, attribute2.valueSpan, matchableAttributes, parsedProperties, keySpan2);
+        this.bindingParser.parsePropertyBinding(identifier, value, false, false, srcSpan, absoluteOffset, attribute2.valueSpan, matchableAttributes, parsedProperties, keySpan2);
       } else if (bindParts[KW_LET_IDX]) {
         if (isTemplateElement) {
           const identifier = bindParts[IDENT_KW_IDX];
@@ -21464,7 +21469,7 @@ var HtmlAstToIvyAst = class {
       } else if (bindParts[KW_BINDON_IDX]) {
         const identifier = bindParts[IDENT_KW_IDX];
         const keySpan2 = createKeySpan(srcSpan, bindParts[KW_BINDON_IDX], identifier);
-        this.bindingParser.parsePropertyBinding(identifier, value, false, srcSpan, absoluteOffset, attribute2.valueSpan, matchableAttributes, parsedProperties, keySpan2);
+        this.bindingParser.parsePropertyBinding(identifier, value, false, true, srcSpan, absoluteOffset, attribute2.valueSpan, matchableAttributes, parsedProperties, keySpan2);
         this.parseAssignmentEvent(identifier, value, srcSpan, attribute2.valueSpan, matchableAttributes, boundEvents, keySpan2);
       } else if (bindParts[KW_AT_IDX]) {
         const keySpan2 = createKeySpan(srcSpan, "", name);
@@ -21484,10 +21489,10 @@ var HtmlAstToIvyAst = class {
       const identifier = name.substring(delims.start.length, name.length - delims.end.length);
       const keySpan2 = createKeySpan(srcSpan, delims.start, identifier);
       if (delims.start === BINDING_DELIMS.BANANA_BOX.start) {
-        this.bindingParser.parsePropertyBinding(identifier, value, false, srcSpan, absoluteOffset, attribute2.valueSpan, matchableAttributes, parsedProperties, keySpan2);
+        this.bindingParser.parsePropertyBinding(identifier, value, false, true, srcSpan, absoluteOffset, attribute2.valueSpan, matchableAttributes, parsedProperties, keySpan2);
         this.parseAssignmentEvent(identifier, value, srcSpan, attribute2.valueSpan, matchableAttributes, boundEvents, keySpan2);
       } else if (delims.start === BINDING_DELIMS.PROPERTY.start) {
-        this.bindingParser.parsePropertyBinding(identifier, value, false, srcSpan, absoluteOffset, attribute2.valueSpan, matchableAttributes, parsedProperties, keySpan2);
+        this.bindingParser.parsePropertyBinding(identifier, value, false, false, srcSpan, absoluteOffset, attribute2.valueSpan, matchableAttributes, parsedProperties, keySpan2);
       } else {
         const events = [];
         this.bindingParser.parseEvent(identifier, value, false, srcSpan, attribute2.valueSpan || srcSpan, matchableAttributes, events, keySpan2);
@@ -22489,7 +22494,7 @@ var TemplateDefinitionBuilder = class {
     element2.inputs.forEach((input) => {
       const stylingInputWasSet = stylingBuilder.registerBoundInput(input);
       if (!stylingInputWasSet) {
-        if (input.type === 0 && input.i18n) {
+        if ((input.type === 0 || input.type === 5) && input.i18n) {
           boundI18nAttrs.push(input);
         } else {
           allOtherInputs.push(input);
@@ -22575,7 +22580,7 @@ var TemplateDefinitionBuilder = class {
             }
           }
           this.allocateBindingSlots(value);
-          if (inputType === 0) {
+          if (inputType === 0 || inputType === 5) {
             if (value instanceof Interpolation) {
               this.interpolatedUpdateInstruction(getPropertyInterpolationExpression(value), elementIndex, attrName, input, value, params);
             } else {
@@ -25665,7 +25670,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.0+sha-bd9c2c5");
+var VERSION2 = new Version("17.2.0-next.0+sha-75aeae4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
