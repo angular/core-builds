@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-a6dad59
+ * @license Angular v17.2.0-next.0+sha-35ec260
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -78,8 +78,6 @@ const INPUT_SIGNAL_NODE = /* @__PURE__ */ (() => {
 
 const ɵINPUT_SIGNAL_BRAND_READ_TYPE = /* @__PURE__ */ Symbol();
 const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE = /* @__PURE__ */ Symbol();
-/** Function used as the `toString` implementation of input signals. */
-const signalInputToString = () => '[INPUT_SIGNAL]';
 /**
  * Creates an input signal.
  *
@@ -102,7 +100,9 @@ function createInputSignal(initialValue, options) {
         return node.value;
     }
     inputValueFn[SIGNAL$1] = node;
-    inputValueFn.toString = signalInputToString;
+    if (ngDevMode) {
+        inputValueFn.toString = () => `[Input Signal: ${inputValueFn()}]`;
+    }
     return inputValueFn;
 }
 
@@ -10482,6 +10482,9 @@ function computed(computation, options) {
     if (options?.equal) {
         getter[SIGNAL$1].equal = options.equal;
     }
+    if (ngDevMode) {
+        getter.toString = () => `[Computed: ${getter()}]`;
+    }
     return getter;
 }
 
@@ -10497,6 +10500,9 @@ function signal(initialValue, options) {
     signalFn.set = (newValue) => signalSetFn$1(node, newValue);
     signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
     signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
+    if (ngDevMode) {
+        signalFn.toString = () => `[Signal: ${signalFn()}]`;
+    }
     return signalFn;
 }
 function signalAsReadonlyFn() {
@@ -15725,7 +15731,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-a6dad59']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-35ec260']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -26058,8 +26064,6 @@ function ɵɵloadQuery() {
     return loadQueryInternal(getLView(), getCurrentQueryIndex());
 }
 
-/** Function used as the `toString` implementation of query signals. */
-const querySignalToString = () => '[QUERY_SIGNAL]';
 function createQuerySignalFn(firstOnly, required) {
     const node = Object.create(QUERY_SIGNAL_NODE);
     function signalFn() {
@@ -26083,7 +26087,9 @@ function createQuerySignalFn(firstOnly, required) {
         }
     }
     signalFn[SIGNAL$1] = node;
-    signalFn.toString = querySignalToString;
+    if (ngDevMode) {
+        signalFn.toString = () => `[Query Signal]`;
+    }
     return signalFn;
 }
 function createSingleResultOptionalQuerySignalFn() {
@@ -30225,7 +30231,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.0+sha-a6dad59');
+const VERSION = new Version('17.2.0-next.0+sha-35ec260');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33864,8 +33870,6 @@ function assertProducerNode(node) {
     node.liveConsumerIndexOfThis ??= [];
 }
 
-/** Function used as the `toString` implementation of computed. */
-const computedToString = () => '[COMPUTED]';
 /**
  * Create a computed signal which derives a reactive value from an expression.
  */
@@ -33883,7 +33887,6 @@ function createComputed(computation) {
         return node.value;
     };
     computed[SIGNAL] = node;
-    computed.toString = computedToString;
     return computed;
 }
 /**
@@ -33968,8 +33971,6 @@ function setThrowInvalidWriteToSignalError(fn) {
  * of setting a signal.
  */
 let postSignalSetFn = null;
-/** Function used as the `toString` implementation of signals. */
-const signalToString = () => '[SIGNAL]';
 /**
  * Create a `Signal` that can be set or updated directly.
  */
@@ -33981,7 +33982,6 @@ function createSignal(initialValue) {
         return node.value;
     });
     getter[SIGNAL] = node;
-    getter.toString = signalToString;
     return getter;
 }
 function setPostSignalSetFn(fn) {
