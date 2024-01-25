@@ -25604,7 +25604,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.1+sha-ccddacf");
+var VERSION2 = new Version("17.1.1+sha-8dca5a1");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -27038,7 +27038,7 @@ function control_flow_migration_default(options) {
       errors = [...errors, ...migrateErrors];
     }
     if (errors.length > 0) {
-      context.logger.warn(`WARNING: ${errors.length} errors occured during your migration:
+      context.logger.warn(`WARNING: ${errors.length} errors occurred during your migration:
 `);
       errors.forEach((err) => {
         context.logger.warn(err);
