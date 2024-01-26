@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.1+sha-ecd0daf
+ * @license Angular v17.1.1+sha-0172477
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6811,7 +6811,7 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
 // about which animations module is loaded (e.g. the CDK) can retrieve it without having to
 // include extra dependencies. See #44970 for more context.
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") that indicates which animations
+ * A [DI token](api/core/InjectionToken) that indicates which animations
  * module has been loaded.
  * @publicApi
  */
@@ -15722,7 +15722,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.1+sha-ecd0daf']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.1+sha-0172477']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30051,7 +30051,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.1+sha-ecd0daf');
+const VERSION = new Version('17.1.1+sha-0172477');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
