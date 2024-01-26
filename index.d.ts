@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-c3b0095
+ * @license Angular v17.2.0-next.0+sha-1c49160
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -332,7 +332,7 @@ export declare interface AfterViewInit {
 }
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") that indicates which animations
+ * A [DI token](api/core/InjectionToken) that indicates which animations
  * module has been loaded.
  * @publicApi
  */
