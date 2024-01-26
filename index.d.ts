@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.1+sha-4a5f37d
+ * @license Angular v17.1.1+sha-9f9dd90
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11572,9 +11572,11 @@ export declare const ɵDEFER_BLOCK_CONFIG: InjectionToken<ɵDeferBlockConfig>;
 
 /**
  * **INTERNAL**, avoid referencing it in application code.
- *
+ * *
  * Injector token that allows to provide `DeferBlockDependencyInterceptor` class
  * implementation.
+ *
+ * This token is only injected in devMode
  */
 export declare const ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR: InjectionToken<ɵDeferBlockDependencyInterceptor>;
 
