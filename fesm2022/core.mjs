@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-16fbe85
+ * @license Angular v17.2.0-next.0+sha-b0632bd
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5670,7 +5670,7 @@ function componentDefResolved(type) {
  *
  * @publicApi
  */
-const ENVIRONMENT_INITIALIZER = new InjectionToken('ENVIRONMENT_INITIALIZER');
+const ENVIRONMENT_INITIALIZER = new InjectionToken(ngDevMode ? 'ENVIRONMENT_INITIALIZER' : '');
 
 /**
  * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
@@ -5680,12 +5680,12 @@ const ENVIRONMENT_INITIALIZER = new InjectionToken('ENVIRONMENT_INITIALIZER');
  *
  * @publicApi
  */
-const INJECTOR = new InjectionToken('INJECTOR', 
+const INJECTOR = new InjectionToken(ngDevMode ? 'INJECTOR' : '', 
 // Disable tslint because this is const enum which gets inlined not top level prop access.
 // tslint:disable-next-line: no-toplevel-property-access
 -1 /* InjectorMarkers.Injector */);
 
-const INJECTOR_DEF_TYPES = new InjectionToken('INJECTOR_DEF_TYPES');
+const INJECTOR_DEF_TYPES = new InjectionToken(ngDevMode ? 'INJECTOR_DEF_TYPES' : '');
 
 class NullInjector {
     get(token, notFoundValue = THROW_IF_NOT_FOUND) {
@@ -5961,7 +5961,7 @@ function isClassProvider(value) {
  * as a root scoped injector when processing requests for unknown tokens which may indicate
  * they are provided in the root scope.
  */
-const INJECTOR_SCOPE = new InjectionToken('Set Injector scope.');
+const INJECTOR_SCOPE = new InjectionToken(ngDevMode ? 'Set Injector scope.' : '');
 
 /**
  * Marker which indicates that a value has not yet been created from the factory function.
@@ -6784,7 +6784,7 @@ function getDocument() {
  *
  * @publicApi
  */
-const APP_ID = new InjectionToken('AppId', {
+const APP_ID = new InjectionToken(ngDevMode ? 'AppId' : '', {
     providedIn: 'root',
     factory: () => DEFAULT_APP_ID,
 });
@@ -6794,12 +6794,12 @@ const DEFAULT_APP_ID = 'ng';
  * A function that is executed when a platform is initialized.
  * @publicApi
  */
-const PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
+const PLATFORM_INITIALIZER = new InjectionToken(ngDevMode ? 'Platform Initializer' : '');
 /**
  * A token that indicates an opaque platform ID.
  * @publicApi
  */
-const PLATFORM_ID = new InjectionToken('Platform ID', {
+const PLATFORM_ID = new InjectionToken(ngDevMode ? 'Platform ID' : '', {
     providedIn: 'platform',
     factory: () => 'unknown', // set a default platform name, when none set explicitly
 });
@@ -6809,7 +6809,7 @@ const PLATFORM_ID = new InjectionToken('Platform ID', {
  * @publicApi
  * @deprecated
  */
-const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
+const PACKAGE_ROOT_URL = new InjectionToken(ngDevMode ? 'Application Packages Root URL' : '');
 // We keep this token here, rather than the animations package, so that modules that only care
 // about which animations module is loaded (e.g. the CDK) can retrieve it without having to
 // include extra dependencies. See #44970 for more context.
@@ -6818,7 +6818,7 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
  * module has been loaded.
  * @publicApi
  */
-const ANIMATION_MODULE_TYPE = new InjectionToken('AnimationModuleType');
+const ANIMATION_MODULE_TYPE = new InjectionToken(ngDevMode ? 'AnimationModuleType' : '');
 // TODO(crisbeto): link to CSP guide here.
 /**
  * Token used to configure the [Content Security Policy](https://web.dev/strict-csp/) nonce that
@@ -6827,7 +6827,7 @@ const ANIMATION_MODULE_TYPE = new InjectionToken('AnimationModuleType');
  *
  * @publicApi
  */
-const CSP_NONCE = new InjectionToken('CSP nonce', {
+const CSP_NONCE = new InjectionToken(ngDevMode ? 'CSP nonce' : '', {
     providedIn: 'root',
     factory: () => {
         // Ideally we wouldn't have to use `querySelector` here since we know that the nonce will be on
@@ -6864,7 +6864,7 @@ const IMAGE_CONFIG_DEFAULTS = {
  * @see {@link ImageConfig}
  * @publicApi
  */
-const IMAGE_CONFIG = new InjectionToken('ImageConfig', { providedIn: 'root', factory: () => IMAGE_CONFIG_DEFAULTS });
+const IMAGE_CONFIG = new InjectionToken(ngDevMode ? 'ImageConfig' : '', { providedIn: 'root', factory: () => IMAGE_CONFIG_DEFAULTS });
 
 /**
  *
@@ -15731,7 +15731,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-16fbe85']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-b0632bd']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18504,9 +18504,11 @@ class TimerScheduler {
 
 /**
  * **INTERNAL**, avoid referencing it in application code.
- *
+ * *
  * Injector token that allows to provide `DeferBlockDependencyInterceptor` class
  * implementation.
+ *
+ * This token is only injected in devMode
  */
 const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = new InjectionToken('DEFER_BLOCK_DEPENDENCY_INTERCEPTOR');
 /**
@@ -30231,7 +30233,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.0+sha-16fbe85');
+const VERSION = new Version('17.2.0-next.0+sha-b0632bd');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -30363,7 +30365,7 @@ class Compiler {
  *
  * @publicApi
  */
-const COMPILER_OPTIONS = new InjectionToken('compilerOptions');
+const COMPILER_OPTIONS = new InjectionToken(ngDevMode ? 'compilerOptions' : '');
 /**
  * A factory for creating a Compiler
  *
@@ -31688,7 +31690,7 @@ let _testabilityGetter;
  *
  * @publicApi
  */
-const APP_INITIALIZER = new InjectionToken('Application Initializer');
+const APP_INITIALIZER = new InjectionToken(ngDevMode ? 'Application Initializer' : '');
 /**
  * A class that reflects the state of running {@link APP_INITIALIZER} functions.
  *
@@ -31763,7 +31765,7 @@ class ApplicationInitStatus {
  *
  * @publicApi
  */
-const APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
+const APP_BOOTSTRAP_LISTENER = new InjectionToken(ngDevMode ? 'appBootstrapListener' : '');
 function compileNgModuleFactory(injector, options, moduleType) {
     ngDevMode && assertNgModuleType(moduleType);
     const moduleFactory = new NgModuleFactory(moduleType);
@@ -32437,7 +32439,7 @@ function getGlobalLocale() {
  *
  * @publicApi
  */
-const LOCALE_ID = new InjectionToken('LocaleId', {
+const LOCALE_ID = new InjectionToken(ngDevMode ? 'LocaleId' : '', {
     providedIn: 'root',
     factory: () => inject(LOCALE_ID, InjectFlags.Optional | InjectFlags.SkipSelf) || getGlobalLocale(),
 });
@@ -32479,7 +32481,7 @@ const LOCALE_ID = new InjectionToken('LocaleId', {
  *
  * @publicApi
  */
-const DEFAULT_CURRENCY_CODE = new InjectionToken('DefaultCurrencyCode', {
+const DEFAULT_CURRENCY_CODE = new InjectionToken(ngDevMode ? 'DefaultCurrencyCode' : '', {
     providedIn: 'root',
     factory: () => USD_CURRENCY_CODE,
 });
@@ -32507,7 +32509,7 @@ const DEFAULT_CURRENCY_CODE = new InjectionToken('DefaultCurrencyCode', {
  *
  * @publicApi
  */
-const TRANSLATIONS = new InjectionToken('Translations');
+const TRANSLATIONS = new InjectionToken(ngDevMode ? 'Translations' : '');
 /**
  * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
  * `xlf` or `xlf2`.
@@ -32529,7 +32531,7 @@ const TRANSLATIONS = new InjectionToken('Translations');
  *
  * @publicApi
  */
-const TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
+const TRANSLATIONS_FORMAT = new InjectionToken(ngDevMode ? 'TranslationsFormat' : '');
 /**
  * Use this enum at bootstrap as an option of `bootstrapModule` to define the strategy
  * that the compiler should use in case of missing translations:
@@ -32566,7 +32568,7 @@ var MissingTranslationStrategy;
  * `PlatformRef` class (i.e. register the callback via `PlatformRef.onDestroy`), thus making the
  * entire class tree-shakeable.
  */
-const PLATFORM_DESTROY_LISTENERS = new InjectionToken('PlatformDestroyListeners');
+const PLATFORM_DESTROY_LISTENERS = new InjectionToken(ngDevMode ? 'PlatformDestroyListeners' : '');
 /**
  * The Angular platform is the entry point for Angular on a web page.
  * Each page has exactly one platform. Services (such as reflection) which are common
@@ -32723,7 +32725,7 @@ let _platformInjector = null;
  * Internal token to indicate whether having multiple bootstrapped platform should be allowed (only
  * one bootstrapped platform is allowed by default). This token helps to support SSR scenarios.
  */
-const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
+const ALLOW_MULTIPLE_PLATFORMS = new InjectionToken(ngDevMode ? 'AllowMultipleToken' : '');
 /**
  * Creates a platform.
  * Platforms must be created on launch using this function.
