@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-45288f7
+ * @license Angular v17.2.0-next.0+sha-f5c520b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6852,6 +6852,7 @@ const CSP_NONCE = new InjectionToken(ngDevMode ? 'CSP nonce' : '', {
 });
 const IMAGE_CONFIG_DEFAULTS = {
     breakpoints: [16, 32, 48, 64, 96, 128, 256, 384, 640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    placeholderResolution: 30,
     disableImageSizeWarning: false,
     disableImageLazyLoadWarning: false,
 };
@@ -15731,7 +15732,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-45288f7']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.0+sha-f5c520b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30233,7 +30234,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.0+sha-45288f7');
+const VERSION = new Version('17.2.0-next.0+sha-f5c520b');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
