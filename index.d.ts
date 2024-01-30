@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.1+sha-8d85de7
+ * @license Angular v17.1.1+sha-7001b5d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4544,6 +4544,18 @@ export declare interface HostListenerDecorator {
 }
 
 declare const HYDRATION = 6;
+
+declare const HYDRATION_INFO_KEY = "__ngDebugHydrationInfo__";
+
+/**
+ * Internal type that represents a claimed node.
+ * Only used in dev mode.
+ */
+declare enum HydrationStatus {
+    Hydrated = "hydrated",
+    Skipped = "skipped",
+    Mismatched = "mismatched"
+}
 
 declare namespace i0 {
     export {
@@ -12000,6 +12012,18 @@ export declare type ɵGlobalDevModeUtils = {
     [GLOBAL_PUBLISH_EXPANDO_KEY]: typeof globalUtilsFunctions;
 };
 
+export declare type ɵHydratedNode = {
+    [HYDRATION_INFO_KEY]?: ɵHydrationInfo;
+};
+
+export declare type ɵHydrationInfo = {
+    status: HydrationStatus.Hydrated | HydrationStatus.Skipped;
+} | {
+    status: HydrationStatus.Mismatched;
+    actualNodeDetails: string | null;
+    expectedNodeDetails: string | null;
+};
+
 /**
  * Injection token that configures the image optimized image functionality.
  * See {@link ImageConfig} for additional information about parameters that
@@ -12524,6 +12548,8 @@ export declare interface ɵProviderRecord {
 }
 
 export declare function ɵprovideZonelessChangeDetection(): EnvironmentProviders;
+
+export declare function ɵreadHydrationInfo(node: RNode): ɵHydrationInfo | null;
 
 export declare class ɵReflectionCapabilities implements PlatformReflectionCapabilities {
     private _reflect;
