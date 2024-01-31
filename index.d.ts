@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.0+sha-4a44f73
+ * @license Angular v17.2.0-next.0+sha-d8f417b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10714,6 +10714,8 @@ export declare interface ViewChildDecorator {
      * changes to `ngIf` and `ngFor` blocks. |
      *
      * @usageNotes
+     *
+     * ### Example 1
      *
      * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
      *
