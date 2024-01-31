@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.1+sha-989d496
+ * @license Angular v17.2.0-next.1+sha-432afd1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -756,6 +756,8 @@ export declare class ApplicationRef {
      * detection pass during which all change detection must complete.
      */
     tick(): void;
+    private detectChangesInAttachedViews;
+    private detectChangesInView;
     /**
      * Attaches a view so that it will be dirty checked.
      * The view will be automatically detached when it is destroyed.
@@ -11139,7 +11141,7 @@ export declare class ɵAfterRenderEventManager {
     /**
      * Executes callbacks. Returns `true` if any callbacks executed.
      */
-    execute(): boolean;
+    execute(): void;
     ngOnDestroy(): void;
     /** @nocollapse */
     static ɵprov: unknown;
@@ -13072,7 +13074,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
     private _cdRefInjectingView?;
-    private readonly notifyErrorHandler;
+    readonly notifyErrorHandler: boolean;
     private _appRef;
     private _attachedToViewContainer;
     get rootNodes(): any[];
