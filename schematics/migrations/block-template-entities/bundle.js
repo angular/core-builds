@@ -9729,7 +9729,10 @@ function createDeferDepsFns(job) {
         const dependencies = [];
         for (const dep of op.metadata.deps) {
           if (dep.isDeferrable) {
-            const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(dep.symbolName));
+            const innerFn = arrowFn(
+              [new FnParam("m", DYNAMIC_TYPE)],
+              variable("m").prop(dep.isDefaultImport ? "default" : dep.symbolName)
+            );
             const importExpr2 = new DynamicImportExpr(dep.importPath).prop("then").callFn([innerFn]);
             dependencies.push(importExpr2);
           } else {
@@ -23222,7 +23225,10 @@ var TemplateDefinitionBuilder = class {
     const dependencyExp = [];
     for (const deferredDep of metadata.deps) {
       if (deferredDep.isDeferrable) {
-        const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(deferredDep.symbolName));
+        const innerFn = arrowFn(
+          [new FnParam("m", DYNAMIC_TYPE)],
+          variable("m").prop(deferredDep.isDefaultImport ? "default" : deferredDep.symbolName)
+        );
         const importExpr2 = new DynamicImportExpr(deferredDep.importPath).prop("then").callFn([innerFn]);
         dependencyExp.push(importExpr2);
       } else {
@@ -24336,8 +24342,8 @@ function compileDirectiveFromMetadata(meta, constantPool, bindingParser) {
 }
 function createDeferredDepsFunction(constantPool, name, deps) {
   const dependencyExp = [];
-  for (const [symbolName, importPath] of deps) {
-    const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(symbolName));
+  for (const [symbolName, { importPath, isDefaultImport }] of deps) {
+    const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(isDefaultImport ? "default" : symbolName));
     const importExpr2 = new DynamicImportExpr(importPath).prop("then").callFn([innerFn]);
     dependencyExp.push(importExpr2);
   }
@@ -26040,7 +26046,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.1+sha-3b892e9");
+var VERSION2 = new Version("17.2.0-next.1+sha-36a9bf3");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
