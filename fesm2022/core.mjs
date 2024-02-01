@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.1+sha-bc81440
+ * @license Angular v17.2.0-next.1+sha-de777af
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -372,7 +372,7 @@ function stringifyTypeFromDebugInfo(debugInfo) {
 /** Called when directives inject each other (creating a circular dependency) */
 function throwCyclicDependencyError(token, path) {
     const depPath = path ? `. Dependency path: ${path.join(' > ')} > ${token}` : '';
-    throw new RuntimeError(-200 /* RuntimeErrorCode.CYCLIC_DI_DEPENDENCY */, `Circular dependency in DI detected for ${token}${depPath}`);
+    throw new RuntimeError(-200 /* RuntimeErrorCode.CYCLIC_DI_DEPENDENCY */, ngDevMode ? `Circular dependency in DI detected for ${token}${depPath}` : token);
 }
 function throwMixedMultiProviderError() {
     throw new Error(`Cannot mix multi providers and regular providers`);
@@ -15774,7 +15774,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.1+sha-bc81440']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.1+sha-de777af']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -22765,7 +22765,7 @@ let LOCALE_ID$1 = DEFAULT_LOCALE_ID;
  * @param localeId
  */
 function setLocaleId(localeId) {
-    assertDefined(localeId, `Expected localeId to be defined`);
+    ngDevMode && assertDefined(localeId, `Expected localeId to be defined`);
     if (typeof localeId === 'string') {
         LOCALE_ID$1 = localeId.toLowerCase().replace(/_/g, '-');
     }
@@ -30338,7 +30338,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.1+sha-bc81440');
+const VERSION = new Version('17.2.0-next.1+sha-de777af');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
