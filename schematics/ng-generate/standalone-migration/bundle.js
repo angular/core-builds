@@ -10457,7 +10457,10 @@ function createDeferDepsFns(job) {
         const dependencies = [];
         for (const dep of op.metadata.deps) {
           if (dep.isDeferrable) {
-            const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(dep.symbolName));
+            const innerFn = arrowFn(
+              [new FnParam("m", DYNAMIC_TYPE)],
+              variable("m").prop(dep.isDefaultImport ? "default" : dep.symbolName)
+            );
             const importExpr2 = new DynamicImportExpr(dep.importPath).prop("then").callFn([innerFn]);
             dependencies.push(importExpr2);
           } else {
@@ -23774,7 +23777,10 @@ var TemplateDefinitionBuilder = class {
     const dependencyExp = [];
     for (const deferredDep of metadata.deps) {
       if (deferredDep.isDeferrable) {
-        const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(deferredDep.symbolName));
+        const innerFn = arrowFn(
+          [new FnParam("m", DYNAMIC_TYPE)],
+          variable("m").prop(deferredDep.isDefaultImport ? "default" : deferredDep.symbolName)
+        );
         const importExpr2 = new DynamicImportExpr(deferredDep.importPath).prop("then").callFn([innerFn]);
         dependencyExp.push(importExpr2);
       } else {
@@ -24771,8 +24777,8 @@ function compileDirectiveFromMetadata(meta, constantPool, bindingParser) {
 }
 function createDeferredDepsFunction(constantPool, name, deps) {
   const dependencyExp = [];
-  for (const [symbolName, importPath] of deps) {
-    const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(symbolName));
+  for (const [symbolName, { importPath, isDefaultImport: isDefaultImport2 }] of deps) {
+    const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(isDefaultImport2 ? "default" : symbolName));
     const importExpr2 = new DynamicImportExpr(importPath).prop("then").callFn([innerFn]);
     dependencyExp.push(importExpr2);
   }
@@ -26518,7 +26524,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.2+sha-924a276");
+var VERSION2 = new Version("17.1.2+sha-9e3d54c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27536,8 +27542,8 @@ function compileComponentClassMetadata(metadata, deferrableTypes) {
   }
   const dynamicImports = [];
   const importedSymbols = [];
-  for (const [symbolName, importPath] of deferrableTypes) {
-    const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(symbolName));
+  for (const [symbolName, { importPath, isDefaultImport: isDefaultImport2 }] of deferrableTypes) {
+    const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(isDefaultImport2 ? "default" : symbolName));
     const importExpr2 = new DynamicImportExpr(importPath).prop("then").callFn([innerFn]);
     dynamicImports.push(importExpr2);
     importedSymbols.push(new FnParam(symbolName, DYNAMIC_TYPE));
@@ -27584,7 +27590,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.2+sha-924a276"));
+  definitionMap.set("version", literal("17.1.2+sha-9e3d54c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27653,7 +27659,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.2+sha-924a276"));
+  definitionMap.set("version", literal("17.1.2+sha-9e3d54c"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27946,7 +27952,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.2+sha-924a276"));
+  definitionMap.set("version", literal("17.1.2+sha-9e3d54c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27969,7 +27975,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.2+sha-924a276"));
+  definitionMap.set("version", literal("17.1.2+sha-9e3d54c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -28007,7 +28013,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.2+sha-924a276"));
+  definitionMap.set("version", literal("17.1.2+sha-9e3d54c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -28031,7 +28037,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.2+sha-924a276"));
+  definitionMap.set("version", literal("17.1.2+sha-9e3d54c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28066,7 +28072,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.2+sha-924a276"));
+  definitionMap.set("version", literal("17.1.2+sha-9e3d54c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28083,7 +28089,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.2+sha-924a276");
+var VERSION3 = new Version("17.1.2+sha-9e3d54c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -29594,7 +29600,14 @@ function getFarLeftIdentifier(propertyAccess) {
   return import_typescript14.default.isIdentifier(propertyAccess.expression) ? propertyAccess.expression : null;
 }
 function getContainingImportDeclaration(node) {
-  return import_typescript14.default.isImportSpecifier(node) ? node.parent.parent.parent : import_typescript14.default.isNamespaceImport(node) ? node.parent.parent : null;
+  let parent = node.parent;
+  while (parent && !import_typescript14.default.isSourceFile(parent)) {
+    if (import_typescript14.default.isImportDeclaration(parent)) {
+      return parent;
+    }
+    parent = parent.parent;
+  }
+  return null;
 }
 function getExportedName(decl, originalId) {
   return import_typescript14.default.isImportSpecifier(decl) ? (decl.propertyName !== void 0 ? decl.propertyName : decl.name).text : originalId.text;
@@ -37524,7 +37537,10 @@ var ComponentDecoratorHandler = class {
       const deferredTypes = this.collectExplicitlyDeferredSymbols(rawDeferredImports);
       for (const [deferredType, importDetails] of deferredTypes) {
         explicitlyDeferredTypes != null ? explicitlyDeferredTypes : explicitlyDeferredTypes = /* @__PURE__ */ new Map();
-        explicitlyDeferredTypes.set(importDetails.name, importDetails.from);
+        explicitlyDeferredTypes.set(importDetails.name, {
+          importPath: importDetails.from,
+          isDefaultImport: isDefaultImport(importDetails.node)
+        });
         this.deferredSymbolTracker.markAsDeferrableCandidate(deferredType, importDetails.node, node, true);
       }
     }
@@ -37999,7 +38015,10 @@ var ComponentDecoratorHandler = class {
         if (importDecl !== null && this.deferredSymbolTracker.canDefer(importDecl)) {
           deferBlockDep.isDeferrable = true;
           deferBlockDep.importPath = importDecl.moduleSpecifier.text;
-          deferrableTypes.set(deferBlockDep.symbolName, deferBlockDep.importPath);
+          deferrableTypes.set(deferBlockDep.symbolName, {
+            importPath: deferBlockDep.importPath,
+            isDefaultImport: isDefaultImport(importDecl)
+          });
         }
       }
     }
@@ -38058,6 +38077,7 @@ var ComponentDecoratorHandler = class {
           symbolName: decl.ref.node.name.escapedText,
           isDeferrable: false,
           importPath: null,
+          isDefaultImport: false,
           classDeclaration: decl.ref.node
         });
         allDeferredDecls.add(decl.ref.node);
@@ -38191,6 +38211,9 @@ function validateStandaloneImports(importRefs, importExpr2, metaReader, scopeRea
     diagnostics.push(error2);
   }
   return diagnostics;
+}
+function isDefaultImport(node) {
+  return node.importClause !== void 0 && node.importClause.namedBindings === void 0;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/src/injectable.mjs
