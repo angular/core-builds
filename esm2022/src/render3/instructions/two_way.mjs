@@ -1,0 +1,52 @@
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { ɵɵlistener } from './listener';
+import { ɵɵproperty } from './property';
+/**
+ * Update a two-way bound property on a selected element.
+ *
+ * Operates on the element selected by index via the {@link select} instruction.
+ *
+ * @param propName Name of property.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `twoWayProperty('name', ctx.name)('title', ctx.title)`)
+ *
+ * @codeGenApi
+ */
+export function ɵɵtwoWayProperty(propName, value, sanitizer) {
+    // TODO(crisbeto): implement two-way specific logic.
+    ɵɵproperty(propName, value, sanitizer);
+    return ɵɵtwoWayProperty;
+}
+/**
+ * Function used inside two-way listeners to conditionally set the value of the bound expression.
+ *
+ * @param target Field on which to set the value.
+ * @param value Value to be set to the field.
+ *
+ * @codeGenApi
+ */
+export function ɵɵtwoWayBindingSet(target, value) {
+    // TODO(crisbeto): implement this fully.
+    return false;
+}
+/**
+ * Adds an event listener that updates a two-way binding to the current node.
+ *
+ * @param eventName Name of the event.
+ * @param listenerFn The function to be called when event emits.
+ *
+ * @codeGenApi
+ */
+export function ɵɵtwoWayListener(eventName, listenerFn) {
+    ɵɵlistener(eventName, listenerFn);
+    return ɵɵtwoWayListener;
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHdvX3dheS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uLy4uLy4uLy4uL3BhY2thZ2VzL2NvcmUvc3JjL3JlbmRlcjMvaW5zdHJ1Y3Rpb25zL3R3b193YXkudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7OztHQU1HO0FBSUgsT0FBTyxFQUFDLFVBQVUsRUFBQyxNQUFNLFlBQVksQ0FBQztBQUN0QyxPQUFPLEVBQUMsVUFBVSxFQUFDLE1BQU0sWUFBWSxDQUFDO0FBR3RDOzs7Ozs7Ozs7Ozs7R0FZRztBQUNILE1BQU0sVUFBVSxnQkFBZ0IsQ0FDNUIsUUFBZ0IsRUFBRSxLQUFRLEVBQUUsU0FBNEI7SUFDMUQsb0RBQW9EO0lBQ3BELFVBQVUsQ0FBQyxRQUFRLEVBQUUsS0FBSyxFQUFFLFNBQVMsQ0FBQyxDQUFDO0lBQ3ZDLE9BQU8sZ0JBQWdCLENBQUM7QUFDMUIsQ0FBQztBQUVEOzs7Ozs7O0dBT0c7QUFDSCxNQUFNLFVBQVUsa0JBQWtCLENBQUksTUFBZSxFQUFFLEtBQVE7SUFDN0Qsd0NBQXdDO0lBQ3hDLE9BQU8sS0FBSyxDQUFDO0FBQ2YsQ0FBQztBQUVEOzs7Ozs7O0dBT0c7QUFDSCxNQUFNLFVBQVUsZ0JBQWdCLENBQzVCLFNBQWlCLEVBQUUsVUFBNEI7SUFDakQsVUFBVSxDQUFDLFNBQVMsRUFBRSxVQUFVLENBQUMsQ0FBQztJQUNsQyxPQUFPLGdCQUFnQixDQUFDO0FBQzFCLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKiFcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIExMQyBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuaW1wb3J0IHtTYW5pdGl6ZXJGbn0gZnJvbSAnLi4vaW50ZXJmYWNlcy9zYW5pdGl6YXRpb24nO1xuXG5pbXBvcnQge8m1ybVsaXN0ZW5lcn0gZnJvbSAnLi9saXN0ZW5lcic7XG5pbXBvcnQge8m1ybVwcm9wZXJ0eX0gZnJvbSAnLi9wcm9wZXJ0eSc7XG5cblxuLyoqXG4gKiBVcGRhdGUgYSB0d28td2F5IGJvdW5kIHByb3BlcnR5IG9uIGEgc2VsZWN0ZWQgZWxlbWVudC5cbiAqXG4gKiBPcGVyYXRlcyBvbiB0aGUgZWxlbWVudCBzZWxlY3RlZCBieSBpbmRleCB2aWEgdGhlIHtAbGluayBzZWxlY3R9IGluc3RydWN0aW9uLlxuICpcbiAqIEBwYXJhbSBwcm9wTmFtZSBOYW1lIG9mIHByb3BlcnR5LlxuICogQHBhcmFtIHZhbHVlIE5ldyB2YWx1ZSB0byB3cml0ZS5cbiAqIEBwYXJhbSBzYW5pdGl6ZXIgQW4gb3B0aW9uYWwgZnVuY3Rpb24gdXNlZCB0byBzYW5pdGl6ZSB0aGUgdmFsdWUuXG4gKiBAcmV0dXJucyBUaGlzIGZ1bmN0aW9uIHJldHVybnMgaXRzZWxmIHNvIHRoYXQgaXQgbWF5IGJlIGNoYWluZWRcbiAqIChlLmcuIGB0d29XYXlQcm9wZXJ0eSgnbmFtZScsIGN0eC5uYW1lKSgndGl0bGUnLCBjdHgudGl0bGUpYClcbiAqXG4gKiBAY29kZUdlbkFwaVxuICovXG5leHBvcnQgZnVuY3Rpb24gybXJtXR3b1dheVByb3BlcnR5PFQ+KFxuICAgIHByb3BOYW1lOiBzdHJpbmcsIHZhbHVlOiBULCBzYW5pdGl6ZXI/OiBTYW5pdGl6ZXJGbnxudWxsKTogdHlwZW9mIMm1ybV0d29XYXlQcm9wZXJ0eSB7XG4gIC8vIFRPRE8oY3Jpc2JldG8pOiBpbXBsZW1lbnQgdHdvLXdheSBzcGVjaWZpYyBsb2dpYy5cbiAgybXJtXByb3BlcnR5KHByb3BOYW1lLCB2YWx1ZSwgc2FuaXRpemVyKTtcbiAgcmV0dXJuIMm1ybV0d29XYXlQcm9wZXJ0eTtcbn1cblxuLyoqXG4gKiBGdW5jdGlvbiB1c2VkIGluc2lkZSB0d28td2F5IGxpc3RlbmVycyB0byBjb25kaXRpb25hbGx5IHNldCB0aGUgdmFsdWUgb2YgdGhlIGJvdW5kIGV4cHJlc3Npb24uXG4gKlxuICogQHBhcmFtIHRhcmdldCBGaWVsZCBvbiB3aGljaCB0byBzZXQgdGhlIHZhbHVlLlxuICogQHBhcmFtIHZhbHVlIFZhbHVlIHRvIGJlIHNldCB0byB0aGUgZmllbGQuXG4gKlxuICogQGNvZGVHZW5BcGlcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIMm1ybV0d29XYXlCaW5kaW5nU2V0PFQ+KHRhcmdldDogdW5rbm93biwgdmFsdWU6IFQpOiBib29sZWFuIHtcbiAgLy8gVE9ETyhjcmlzYmV0byk6IGltcGxlbWVudCB0aGlzIGZ1bGx5LlxuICByZXR1cm4gZmFsc2U7XG59XG5cbi8qKlxuICogQWRkcyBhbiBldmVudCBsaXN0ZW5lciB0aGF0IHVwZGF0ZXMgYSB0d28td2F5IGJpbmRpbmcgdG8gdGhlIGN1cnJlbnQgbm9kZS5cbiAqXG4gKiBAcGFyYW0gZXZlbnROYW1lIE5hbWUgb2YgdGhlIGV2ZW50LlxuICogQHBhcmFtIGxpc3RlbmVyRm4gVGhlIGZ1bmN0aW9uIHRvIGJlIGNhbGxlZCB3aGVuIGV2ZW50IGVtaXRzLlxuICpcbiAqIEBjb2RlR2VuQXBpXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiDJtcm1dHdvV2F5TGlzdGVuZXIoXG4gICAgZXZlbnROYW1lOiBzdHJpbmcsIGxpc3RlbmVyRm46IChlPzogYW55KSA9PiBhbnkpOiB0eXBlb2YgybXJtXR3b1dheUxpc3RlbmVyIHtcbiAgybXJtWxpc3RlbmVyKGV2ZW50TmFtZSwgbGlzdGVuZXJGbik7XG4gIHJldHVybiDJtcm1dHdvV2F5TGlzdGVuZXI7XG59XG4iXX0=

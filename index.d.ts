@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.1+sha-70d0fb0
+ * @license Angular v17.2.0-next.1+sha-3b892e9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16952,6 +16952,41 @@ export declare function ɵɵtrustConstantHtml(html: TemplateStringsArray): Trust
  * @codeGenApi
  */
 export declare function ɵɵtrustConstantResourceUrl(url: TemplateStringsArray): TrustedScriptURL | string;
+
+/**
+ * Function used inside two-way listeners to conditionally set the value of the bound expression.
+ *
+ * @param target Field on which to set the value.
+ * @param value Value to be set to the field.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtwoWayBindingSet<T>(target: unknown, value: T): boolean;
+
+/**
+ * Adds an event listener that updates a two-way binding to the current node.
+ *
+ * @param eventName Name of the event.
+ * @param listenerFn The function to be called when event emits.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtwoWayListener(eventName: string, listenerFn: (e?: any) => any): typeof ɵɵtwoWayListener;
+
+/**
+ * Update a two-way bound property on a selected element.
+ *
+ * Operates on the element selected by index via the {@link select} instruction.
+ *
+ * @param propName Name of property.
+ * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
+ * @returns This function returns itself so that it may be chained
+ * (e.g. `twoWayProperty('name', ctx.name)('title', ctx.title)`)
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵtwoWayProperty<T>(propName: string, value: T, sanitizer?: SanitizerFn | null): typeof ɵɵtwoWayProperty;
 
 
 /**
