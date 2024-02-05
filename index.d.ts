@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.1+sha-2ab536e
+ * @license Angular v17.2.0-next.1+sha-1090570
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3329,9 +3329,7 @@ declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDef
  *  - Because declared and public name are usually same we only generate the array
  *    `['declared', 'public']` format when they differ, or there is a transform.
  *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
- *    inconsistent behavior in that it uses declared names rather than minified or public. For
- *    this reason `NgOnChanges` will be deprecated and removed in future version and this
- *    API will be simplified to be consistent with `output`.
+ *    inconsistent behavior in that it uses declared names rather than minified or public.
  */
 declare type DirectiveInputs<T> = {
     [P in keyof T]?: string | [
@@ -12427,6 +12425,56 @@ export declare function ɵnoSideEffects<T>(fn: () => T): T;
 export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
 
 /**
+ * The `outputs` function allows declaration of outputs in directives and
+ * components.
+ *
+ * Initializes an output that can emit values to consumers of your
+ * directive/component.
+ *
+ * @usageNotes
+ * Initialize an output in your directive by declaring a
+ * class field and initializing it with the `output()` function.
+ *
+ * ```ts
+ * @Directive({..})
+ * export class MyDir {
+ *   nameChange = output<string>();     // OutputEmitter<string>
+ *   onClick = output();                // OutputEmitter<void>
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+export declare function ɵoutput<T = void>(opts?: ɵOutputOptions): ɵOutputEmitter<T>;
+
+
+/**
+ * An `OutputEmitter` is created by the `output()` function and can be
+ * used to emit values to consumers of your directive or component.
+ *
+ * Consumers of your directive/component can bind to the output and
+ * subscribe to changes via the bound event syntax. For example:
+ *
+ * ```html
+ * <my-comp (valueChange)="processNewValue($event)" />
+ * ```
+ *
+ * @developerPreview
+ */
+export declare interface ɵOutputEmitter<T> {
+    emit(value: T): void;
+}
+
+/**
+ * Options for declaring an output.
+ *
+ * @developerPreview
+ */
+export declare interface ɵOutputOptions {
+    alias?: string;
+}
+
+/**
  * Patch the definition of a component with directives and pipes from the compilation scope of
  * a given module.
  */
@@ -13033,7 +13081,7 @@ export declare function ɵtriggerResourceLoading(tDetails: TDeferBlockDetails, l
  *
  * @param string
  * @param maxLength of the output string
- * @returns elispsed string with ... in the middle
+ * @returns ellipsed string with ... in the middle
  */
 export declare function ɵtruncateMiddle(str: string, maxLength?: number): string;
 
