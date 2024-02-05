@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.2+sha-47c712e
+ * @license Angular v17.1.2+sha-fc4d8bb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3329,9 +3329,7 @@ declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDef
  *  - Because declared and public name are usually same we only generate the array
  *    `['declared', 'public']` format when they differ, or there is a transform.
  *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
- *    inconsistent behavior in that it uses declared names rather than minified or public. For
- *    this reason `NgOnChanges` will be deprecated and removed in future version and this
- *    API will be simplified to be consistent with `output`.
+ *    inconsistent behavior in that it uses declared names rather than minified or public.
  */
 declare type DirectiveInputs<T> = {
     [P in keyof T]?: string | [
@@ -5492,7 +5490,7 @@ export declare interface InputFunction {
      */
     <ReadT>(): InputSignal<ReadT | undefined>;
     <ReadT>(initialValue: ReadT, opts?: InputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
-    <ReadT, WriteT>(initialValue: ReadT, opts: InputOptionsWithTransform<ReadT, WriteT>): InputSignal<ReadT, WriteT>;
+    <ReadT, WriteT>(initialValue: ReadT, opts: InputOptionsWithTransform<ReadT, WriteT>): InputSignalWithTransform<ReadT, WriteT>;
     /**
      * Initializes a required input.
      *
@@ -5503,7 +5501,7 @@ export declare interface InputFunction {
      */
     required: {
         <ReadT>(opts?: InputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
-        <ReadT, WriteT>(opts: InputOptionsWithTransform<ReadT, WriteT>): InputSignal<ReadT, WriteT>;
+        <ReadT, WriteT>(opts: InputOptionsWithTransform<ReadT, WriteT>): InputSignalWithTransform<ReadT, WriteT>;
     };
 }
 
@@ -5545,18 +5543,17 @@ export declare type InputOptionsWithoutTransform<ReadT> = Omit<InputOptions<Read
 export declare type InputOptionsWithTransform<ReadT, WriteT> = Required<Pick<InputOptions<ReadT, WriteT>, 'transform'>> & InputOptions<ReadT, WriteT>;
 
 /**
- * `InputSignal` is represents a special `Signal` for a directive/component input.
+ * `InputSignal` represents a special `Signal` for a directive/component input.
  *
  * An input signal is similar to a non-writable signal except that it also
  * carries additional type-information for transforms, and that Angular internally
  * updates the signal whenever a new value is bound.
  *
+ * @see {@link InputOptionsWithTransform} for inputs with transforms.
+ *
  * @developerPreview
  */
-export declare interface InputSignal<ReadT, WriteT = ReadT> extends Signal<ReadT> {
-    [SIGNAL]: InputSignalNode<ReadT, WriteT>;
-    [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: ReadT;
-    [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: WriteT;
+export declare interface InputSignal<ReadT> extends InputSignalWithTransform<ReadT, ReadT> {
 }
 
 /**
@@ -5578,6 +5575,36 @@ declare interface InputSignalNode<ReadT, WriteT> extends SignalNode<ReadT | type
      * purposes we assume it's a valid `ReadT` value. Type-checking will enforce that.
      */
     applyValueToInputSignal<ReadT, WriteT>(node: InputSignalNode<ReadT, WriteT>, value: ReadT): void;
+}
+
+/**
+ * `InputSignalWithTransform` represents a special `Signal` for a
+ * directive/component input with a `transform` function.
+ *
+ * Signal inputs with transforms capture an extra generic for their transform write
+ * type. Transforms can expand the accepted bound values for an input while ensuring
+ * value retrievals of the signal input are still matching the generic input type.
+ *
+ * ```ts
+ * class MyDir {
+ *   disabled = input(false, {
+ *     transform: (v: string|boolean) => convertToBoolean(v),
+ *   }); // InputSignalWithTransform<boolean, string|boolean>
+ *
+ *   click() {
+ *     this.disabled() // always returns a `boolean`.
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link InputSignal} for additional information.
+ *
+ * @developerPreview
+ */
+export declare interface InputSignalWithTransform<ReadT, WriteT> extends Signal<ReadT> {
+    [SIGNAL]: InputSignalNode<ReadT, WriteT>;
+    [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: ReadT;
+    [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: WriteT;
 }
 
 /** Function that can be used to transform incoming input values. */
@@ -13001,7 +13028,7 @@ export declare function ɵtriggerResourceLoading(tDetails: TDeferBlockDetails, l
  *
  * @param string
  * @param maxLength of the output string
- * @returns elispsed string with ... in the middle
+ * @returns ellipsed string with ... in the middle
  */
 export declare function ɵtruncateMiddle(str: string, maxLength?: number): string;
 
@@ -13010,13 +13037,16 @@ export declare function ɵtruncateMiddle(str: string, maxLength?: number): strin
  */
 export declare function ɵunregisterLocaleData(): void;
 
-/** Unwraps all `InputSignal` class fields of the given directive. */
+/**
+ * Unwraps all `InputSignal`/`InputSignalWithTransform` class fields of
+ * the given directive.
+ */
 export declare type ɵUnwrapDirectiveSignalInputs<Dir, Fields extends keyof Dir> = {
     [P in Fields]: ɵUnwrapInputSignalWriteType<Dir[P]>;
 };
 
-/** Retrieves the `WriteT` of an `InputSignal`. */
-declare type ɵUnwrapInputSignalWriteType<Field> = Field extends InputSignal<unknown, infer WriteT> ? WriteT : never;
+/** Retrieves the `WriteT` of an `InputSignal` and `InputSignalWithTransform`. */
+declare type ɵUnwrapInputSignalWriteType<Field> = Field extends InputSignalWithTransform<unknown, infer WriteT> ? WriteT : never;
 
 export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
 

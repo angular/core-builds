@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.2+sha-47c712e
+ * @license Angular v17.1.2+sha-fc4d8bb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -205,7 +205,7 @@ function concatStringsWithSpace(before, after) {
  *
  * @param string
  * @param maxLength of the output string
- * @returns elispsed string with ... in the middle
+ * @returns ellipsed string with ... in the middle
  */
 function truncateMiddle(str, maxLength = 100) {
     if (!str || maxLength < 1 || str.length <= maxLength)
@@ -15764,7 +15764,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.2+sha-47c712e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.2+sha-fc4d8bb']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17600,6 +17600,288 @@ function enableLocateOrCreateContainerRefImpl() {
     _populateDehydratedViewsInLContainer = populateDehydratedViewsInLContainerImpl;
 }
 
+/**
+ * The name of a field that Angular monkey-patches onto a component
+ * class to store a function that loads defer-loadable dependencies
+ * and applies metadata to a class.
+ */
+const ASYNC_COMPONENT_METADATA_FN = '__ngAsyncComponentMetadataFn__';
+/**
+ * If a given component has unresolved async metadata - returns a reference
+ * to a function that applies component metadata after resolving defer-loadable
+ * dependencies. Otherwise - this function returns `null`.
+ */
+function getAsyncClassMetadataFn(type) {
+    const componentClass = type; // cast to `any`, so that we can read a monkey-patched field
+    return componentClass[ASYNC_COMPONENT_METADATA_FN] ?? null;
+}
+/**
+ * Handles the process of applying metadata info to a component class in case
+ * component template has defer blocks (thus some dependencies became deferrable).
+ *
+ * @param type Component class where metadata should be added
+ * @param dependencyLoaderFn Function that loads dependencies
+ * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
+ */
+function setClassMetadataAsync(type, dependencyLoaderFn, metadataSetterFn) {
+    const componentClass = type; // cast to `any`, so that we can monkey-patch it
+    componentClass[ASYNC_COMPONENT_METADATA_FN] = () => Promise.all(dependencyLoaderFn()).then(dependencies => {
+        metadataSetterFn(...dependencies);
+        // Metadata is now set, reset field value to indicate that this component
+        // can by used/compiled synchronously.
+        componentClass[ASYNC_COMPONENT_METADATA_FN] = null;
+        return dependencies;
+    });
+    return componentClass[ASYNC_COMPONENT_METADATA_FN];
+}
+/**
+ * Adds decorator, constructor, and property metadata to a given type via static metadata fields
+ * on the type.
+ *
+ * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
+ *
+ * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
+ * being tree-shaken away during production builds.
+ */
+function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
+    return noSideEffects(() => {
+        const clazz = type;
+        if (decorators !== null) {
+            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
+                clazz.decorators.push(...decorators);
+            }
+            else {
+                clazz.decorators = decorators;
+            }
+        }
+        if (ctorParameters !== null) {
+            // Rather than merging, clobber the existing parameters. If other projects exist which
+            // use tsickle-style annotations and reflect over them in the same way, this could
+            // cause issues, but that is vanishingly unlikely.
+            clazz.ctorParameters = ctorParameters;
+        }
+        if (propDecorators !== null) {
+            // The property decorator objects are merged as it is possible different fields have
+            // different decorator types. Decorators on individual fields are not merged, as it's
+            // also incredibly unlikely that a field will be decorated both with an Angular
+            // decorator and a non-Angular decorator that's also been downleveled.
+            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
+                clazz.propDecorators = { ...clazz.propDecorators, ...propDecorators };
+            }
+            else {
+                clazz.propDecorators = propDecorators;
+            }
+        }
+    });
+}
+
+/**
+ * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+ * Provides access to the `NgModule` instance and related objects.
+ *
+ * @publicApi
+ */
+class NgModuleRef$1 {
+}
+/**
+ * @publicApi
+ *
+ * @deprecated
+ * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
+ * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
+ * for additional context. Angular provides APIs that accept NgModule classes directly (such as
+ * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
+ * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
+ * using factory-based ones.
+ */
+class NgModuleFactory$1 {
+}
+
+/**
+ * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
+ *
+ * @param ngModule NgModule class.
+ * @param parentInjector Optional injector instance to use as a parent for the module injector. If
+ *     not provided, `NullInjector` will be used instead.
+ * @returns NgModuleRef that represents an NgModule instance.
+ *
+ * @publicApi
+ */
+function createNgModule(ngModule, parentInjector) {
+    return new NgModuleRef(ngModule, parentInjector ?? null, []);
+}
+/**
+ * The `createNgModule` function alias for backwards-compatibility.
+ * Please avoid using it directly and use `createNgModule` instead.
+ *
+ * @deprecated Use `createNgModule` instead.
+ */
+const createNgModuleRef = createNgModule;
+class NgModuleRef extends NgModuleRef$1 {
+    constructor(ngModuleType, _parent, additionalProviders) {
+        super();
+        this._parent = _parent;
+        // tslint:disable-next-line:require-internal-with-underscore
+        this._bootstrapComponents = [];
+        this.destroyCbs = [];
+        // When bootstrapping a module we have a dependency graph that looks like this:
+        // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
+        // module being resolved tries to inject the ComponentFactoryResolver, it'll create a
+        // circular dependency which will result in a runtime error, because the injector doesn't
+        // exist yet. We work around the issue by creating the ComponentFactoryResolver ourselves
+        // and providing it, rather than letting the injector resolve it.
+        this.componentFactoryResolver = new ComponentFactoryResolver(this);
+        const ngModuleDef = getNgModuleDef(ngModuleType);
+        ngDevMode &&
+            assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
+        this._bootstrapComponents = maybeUnwrapFn(ngModuleDef.bootstrap);
+        this._r3Injector = createInjectorWithoutInjectorInstances(ngModuleType, _parent, [
+            { provide: NgModuleRef$1, useValue: this }, {
+                provide: ComponentFactoryResolver$1,
+                useValue: this.componentFactoryResolver
+            },
+            ...additionalProviders
+        ], stringify(ngModuleType), new Set(['environment']));
+        // We need to resolve the injector types separately from the injector creation, because
+        // the module might be trying to use this ref in its constructor for DI which will cause a
+        // circular error that will eventually error out, because the injector isn't created yet.
+        this._r3Injector.resolveInjectorInitializers();
+        this.instance = this._r3Injector.get(ngModuleType);
+    }
+    get injector() {
+        return this._r3Injector;
+    }
+    destroy() {
+        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+        const injector = this._r3Injector;
+        !injector.destroyed && injector.destroy();
+        this.destroyCbs.forEach(fn => fn());
+        this.destroyCbs = null;
+    }
+    onDestroy(callback) {
+        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+        this.destroyCbs.push(callback);
+    }
+}
+class NgModuleFactory extends NgModuleFactory$1 {
+    constructor(moduleType) {
+        super();
+        this.moduleType = moduleType;
+    }
+    create(parentInjector) {
+        return new NgModuleRef(this.moduleType, parentInjector, []);
+    }
+}
+function createNgModuleRefWithProviders(moduleType, parentInjector, additionalProviders) {
+    return new NgModuleRef(moduleType, parentInjector, additionalProviders);
+}
+class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
+    constructor(config) {
+        super();
+        this.componentFactoryResolver = new ComponentFactoryResolver(this);
+        this.instance = null;
+        const injector = new R3Injector([
+            ...config.providers,
+            { provide: NgModuleRef$1, useValue: this },
+            { provide: ComponentFactoryResolver$1, useValue: this.componentFactoryResolver },
+        ], config.parent || getNullInjector(), config.debugName, new Set(['environment']));
+        this.injector = injector;
+        if (config.runEnvironmentInitializers) {
+            injector.resolveInjectorInitializers();
+        }
+    }
+    destroy() {
+        this.injector.destroy();
+    }
+    onDestroy(callback) {
+        this.injector.onDestroy(callback);
+    }
+}
+/**
+ * Create a new environment injector.
+ *
+ * Learn more about environment injectors in
+ * [this guide](guide/standalone-components#environment-injectors).
+ *
+ * @param providers An array of providers.
+ * @param parent A parent environment injector.
+ * @param debugName An optional name for this injector instance, which will be used in error
+ *     messages.
+ *
+ * @publicApi
+ */
+function createEnvironmentInjector(providers, parent, debugName = null) {
+    const adapter = new EnvironmentNgModuleRefAdapter({ providers, parent, debugName, runEnvironmentInitializers: true });
+    return adapter.injector;
+}
+
+/*
+ * This file exists to support compilation of @angular/core in Ivy mode.
+ *
+ * When the Angular compiler processes a compilation unit, it normally writes imports to
+ * @angular/core. When compiling the core package itself this strategy isn't usable. Instead, the
+ * compiler writes imports to this file.
+ *
+ * Only a subset of such imports are supported - core is not allowed to declare components or pipes.
+ * A check in ngtsc's `R3SymbolsImportRewriter` validates this condition. The rewriter is only used
+ * when compiling @angular/core and is responsible for translating an external name (prefixed with
+ * ɵ) to the internal symbol name as exported below.
+ *
+ * The below symbols are used for @Injectable and @NgModule compilation.
+ */
+/**
+ * The existence of this constant (in this particular file) informs the Angular compiler that the
+ * current program is actually @angular/core, which needs to be compiled specially.
+ */
+const ITS_JUST_ANGULAR = true;
+
+/**
+ * *Internal* service that keeps track of pending tasks happening in the system.
+ *
+ * This information is needed to make sure that the serialization on the server
+ * is delayed until all tasks in the queue (such as an initial navigation or a
+ * pending HTTP request) are completed.
+ *
+ * Pending tasks continue to contribute to the stableness of `ApplicationRef`
+ * throughout the lifetime of the application.
+ */
+class PendingTasks {
+    constructor() {
+        this.taskId = 0;
+        this.pendingTasks = new Set();
+        this.hasPendingTasks = new BehaviorSubject(false);
+    }
+    get _hasPendingTasks() {
+        return this.hasPendingTasks.value;
+    }
+    add() {
+        if (!this._hasPendingTasks) {
+            this.hasPendingTasks.next(true);
+        }
+        const taskId = this.taskId++;
+        this.pendingTasks.add(taskId);
+        return taskId;
+    }
+    remove(taskId) {
+        this.pendingTasks.delete(taskId);
+        if (this.pendingTasks.size === 0 && this._hasPendingTasks) {
+            this.hasPendingTasks.next(false);
+        }
+    }
+    ngOnDestroy() {
+        this.pendingTasks.clear();
+        if (this._hasPendingTasks) {
+            this.hasPendingTasks.next(false);
+        }
+    }
+    static { this.ɵfac = function PendingTasks_Factory(t) { return new (t || PendingTasks)(); }; }
+    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PendingTasks, factory: PendingTasks.ɵfac, providedIn: 'root' }); }
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PendingTasks, [{
+        type: Injectable,
+        args: [{ providedIn: 'root' }]
+    }], null, null); })();
+
 // TODO(misko): consider inlining
 /** Updates binding and returns the value. */
 function updateBinding(lView, bindingIndex, value) {
@@ -18935,14 +19217,14 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
         lDetails[DEFER_BLOCK_STATE] = newState;
         const hostTView = hostLView[TVIEW];
         const adjustedIndex = stateTmplIndex + HEADER_OFFSET;
-        const tNode = getTNode(hostTView, adjustedIndex);
+        const activeBlockTNode = getTNode(hostTView, adjustedIndex);
         // There is only 1 view that can be present in an LContainer that
         // represents a defer block, so always refer to the first one.
         const viewIndex = 0;
         removeLViewFromLContainer(lContainer, viewIndex);
-        const dehydratedView = findMatchingDehydratedView(lContainer, tNode.tView.ssrId);
-        const embeddedLView = createAndRenderEmbeddedLView(hostLView, tNode, null, { dehydratedView });
-        addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(tNode, dehydratedView));
+        const dehydratedView = findMatchingDehydratedView(lContainer, activeBlockTNode.tView.ssrId);
+        const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, { dehydratedView });
+        addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(activeBlockTNode, dehydratedView));
         markViewDirty(embeddedLView);
     }
 }
@@ -19057,6 +19339,9 @@ function triggerResourceLoading(tDetails, lView, tNode) {
             dependenciesFn = deferDependencyInterceptor.intercept(dependenciesFn);
         }
     }
+    // Indicate that an application is not stable and has a pending task.
+    const pendingTasks = injector.get(PendingTasks);
+    const taskId = pendingTasks.add();
     // The `dependenciesFn` might be `null` when all dependencies within
     // a given defer block were eagerly referenced elsewhere in a file,
     // thus no dynamic `import()`s were produced.
@@ -19064,6 +19349,7 @@ function triggerResourceLoading(tDetails, lView, tNode) {
         tDetails.loadingPromise = Promise.resolve().then(() => {
             tDetails.loadingPromise = null;
             tDetails.loadingState = DeferDependenciesLoadingState.COMPLETE;
+            pendingTasks.remove(taskId);
         });
         return;
     }
@@ -19091,8 +19377,10 @@ function triggerResourceLoading(tDetails, lView, tNode) {
                 break;
             }
         }
-        // Loading is completed, we no longer need this Promise.
+        // Loading is completed, we no longer need the loading Promise
+        // and a pending task should also be removed.
         tDetails.loadingPromise = null;
+        pendingTasks.remove(taskId);
         if (failed) {
             tDetails.loadingState = DeferDependenciesLoadingState.FAILED;
             if (tDetails.errorTmplIndex === null) {
@@ -27406,146 +27694,6 @@ function ɵɵProvidersFeature(providers, viewProviders = []) {
 }
 
 /**
- * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
- * Provides access to the `NgModule` instance and related objects.
- *
- * @publicApi
- */
-class NgModuleRef$1 {
-}
-/**
- * @publicApi
- *
- * @deprecated
- * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
- * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
- * for additional context. Angular provides APIs that accept NgModule classes directly (such as
- * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
- * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
- * using factory-based ones.
- */
-class NgModuleFactory$1 {
-}
-
-/**
- * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
- *
- * @param ngModule NgModule class.
- * @param parentInjector Optional injector instance to use as a parent for the module injector. If
- *     not provided, `NullInjector` will be used instead.
- * @returns NgModuleRef that represents an NgModule instance.
- *
- * @publicApi
- */
-function createNgModule(ngModule, parentInjector) {
-    return new NgModuleRef(ngModule, parentInjector ?? null, []);
-}
-/**
- * The `createNgModule` function alias for backwards-compatibility.
- * Please avoid using it directly and use `createNgModule` instead.
- *
- * @deprecated Use `createNgModule` instead.
- */
-const createNgModuleRef = createNgModule;
-class NgModuleRef extends NgModuleRef$1 {
-    constructor(ngModuleType, _parent, additionalProviders) {
-        super();
-        this._parent = _parent;
-        // tslint:disable-next-line:require-internal-with-underscore
-        this._bootstrapComponents = [];
-        this.destroyCbs = [];
-        // When bootstrapping a module we have a dependency graph that looks like this:
-        // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
-        // module being resolved tries to inject the ComponentFactoryResolver, it'll create a
-        // circular dependency which will result in a runtime error, because the injector doesn't
-        // exist yet. We work around the issue by creating the ComponentFactoryResolver ourselves
-        // and providing it, rather than letting the injector resolve it.
-        this.componentFactoryResolver = new ComponentFactoryResolver(this);
-        const ngModuleDef = getNgModuleDef(ngModuleType);
-        ngDevMode &&
-            assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
-        this._bootstrapComponents = maybeUnwrapFn(ngModuleDef.bootstrap);
-        this._r3Injector = createInjectorWithoutInjectorInstances(ngModuleType, _parent, [
-            { provide: NgModuleRef$1, useValue: this }, {
-                provide: ComponentFactoryResolver$1,
-                useValue: this.componentFactoryResolver
-            },
-            ...additionalProviders
-        ], stringify(ngModuleType), new Set(['environment']));
-        // We need to resolve the injector types separately from the injector creation, because
-        // the module might be trying to use this ref in its constructor for DI which will cause a
-        // circular error that will eventually error out, because the injector isn't created yet.
-        this._r3Injector.resolveInjectorInitializers();
-        this.instance = this._r3Injector.get(ngModuleType);
-    }
-    get injector() {
-        return this._r3Injector;
-    }
-    destroy() {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        const injector = this._r3Injector;
-        !injector.destroyed && injector.destroy();
-        this.destroyCbs.forEach(fn => fn());
-        this.destroyCbs = null;
-    }
-    onDestroy(callback) {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        this.destroyCbs.push(callback);
-    }
-}
-class NgModuleFactory extends NgModuleFactory$1 {
-    constructor(moduleType) {
-        super();
-        this.moduleType = moduleType;
-    }
-    create(parentInjector) {
-        return new NgModuleRef(this.moduleType, parentInjector, []);
-    }
-}
-function createNgModuleRefWithProviders(moduleType, parentInjector, additionalProviders) {
-    return new NgModuleRef(moduleType, parentInjector, additionalProviders);
-}
-class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
-    constructor(config) {
-        super();
-        this.componentFactoryResolver = new ComponentFactoryResolver(this);
-        this.instance = null;
-        const injector = new R3Injector([
-            ...config.providers,
-            { provide: NgModuleRef$1, useValue: this },
-            { provide: ComponentFactoryResolver$1, useValue: this.componentFactoryResolver },
-        ], config.parent || getNullInjector(), config.debugName, new Set(['environment']));
-        this.injector = injector;
-        if (config.runEnvironmentInitializers) {
-            injector.resolveInjectorInitializers();
-        }
-    }
-    destroy() {
-        this.injector.destroy();
-    }
-    onDestroy(callback) {
-        this.injector.onDestroy(callback);
-    }
-}
-/**
- * Create a new environment injector.
- *
- * Learn more about environment injectors in
- * [this guide](guide/standalone-components#environment-injectors).
- *
- * @param providers An array of providers.
- * @param parent A parent environment injector.
- * @param debugName An optional name for this injector instance, which will be used in error
- *     messages.
- *
- * @publicApi
- */
-function createEnvironmentInjector(providers, parent, debugName = null) {
-    const adapter = new EnvironmentNgModuleRefAdapter({ providers, parent, debugName, runEnvironmentInitializers: true });
-    return adapter.injector;
-}
-
-/**
  * A service used by the framework to create instances of standalone injectors. Those injectors are
  * created on demand in case of dynamic component instantiation and contain ambient providers
  * collected from the imports graph rooted at a given standalone component.
@@ -28065,81 +28213,6 @@ function extractInputDebugMetadata(inputs) {
         res[key] = minifiedName;
     }
     return res;
-}
-
-/**
- * The name of a field that Angular monkey-patches onto a component
- * class to store a function that loads defer-loadable dependencies
- * and applies metadata to a class.
- */
-const ASYNC_COMPONENT_METADATA_FN = '__ngAsyncComponentMetadataFn__';
-/**
- * If a given component has unresolved async metadata - returns a reference
- * to a function that applies component metadata after resolving defer-loadable
- * dependencies. Otherwise - this function returns `null`.
- */
-function getAsyncClassMetadataFn(type) {
-    const componentClass = type; // cast to `any`, so that we can read a monkey-patched field
-    return componentClass[ASYNC_COMPONENT_METADATA_FN] ?? null;
-}
-/**
- * Handles the process of applying metadata info to a component class in case
- * component template has defer blocks (thus some dependencies became deferrable).
- *
- * @param type Component class where metadata should be added
- * @param dependencyLoaderFn Function that loads dependencies
- * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
- */
-function setClassMetadataAsync(type, dependencyLoaderFn, metadataSetterFn) {
-    const componentClass = type; // cast to `any`, so that we can monkey-patch it
-    componentClass[ASYNC_COMPONENT_METADATA_FN] = () => Promise.all(dependencyLoaderFn()).then(dependencies => {
-        metadataSetterFn(...dependencies);
-        // Metadata is now set, reset field value to indicate that this component
-        // can by used/compiled synchronously.
-        componentClass[ASYNC_COMPONENT_METADATA_FN] = null;
-        return dependencies;
-    });
-    return componentClass[ASYNC_COMPONENT_METADATA_FN];
-}
-/**
- * Adds decorator, constructor, and property metadata to a given type via static metadata fields
- * on the type.
- *
- * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
- *
- * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
- * being tree-shaken away during production builds.
- */
-function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
-    return noSideEffects(() => {
-        const clazz = type;
-        if (decorators !== null) {
-            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
-                clazz.decorators.push(...decorators);
-            }
-            else {
-                clazz.decorators = decorators;
-            }
-        }
-        if (ctorParameters !== null) {
-            // Rather than merging, clobber the existing parameters. If other projects exist which
-            // use tsickle-style annotations and reflect over them in the same way, this could
-            // cause issues, but that is vanishingly unlikely.
-            clazz.ctorParameters = ctorParameters;
-        }
-        if (propDecorators !== null) {
-            // The property decorator objects are merged as it is possible different fields have
-            // different decorator types. Decorators on individual fields are not merged, as it's
-            // also incredibly unlikely that a field will be decorated both with an Angular
-            // decorator and a non-Angular decorator that's also been downleveled.
-            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
-                clazz.propDecorators = { ...clazz.propDecorators, ...propDecorators };
-            }
-            else {
-                clazz.propDecorators = propDecorators;
-            }
-        }
-    });
 }
 
 /**
@@ -30104,27 +30177,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.2+sha-47c712e');
-
-/*
- * This file exists to support compilation of @angular/core in Ivy mode.
- *
- * When the Angular compiler processes a compilation unit, it normally writes imports to
- * @angular/core. When compiling the core package itself this strategy isn't usable. Instead, the
- * compiler writes imports to this file.
- *
- * Only a subset of such imports are supported - core is not allowed to declare components or pipes.
- * A check in ngtsc's `R3SymbolsImportRewriter` validates this condition. The rewriter is only used
- * when compiling @angular/core and is responsible for translating an external name (prefixed with
- * ɵ) to the internal symbol name as exported below.
- *
- * The below symbols are used for @Injectable and @NgModule compilation.
- */
-/**
- * The existence of this constant (in this particular file) informs the Angular compiler that the
- * current program is actually @angular/core, which needs to be compiled specially.
- */
-const ITS_JUST_ANGULAR = true;
+const VERSION = new Version('17.1.2+sha-fc4d8bb');
 
 class Console {
     log(message) {
@@ -30249,53 +30302,6 @@ const COMPILER_OPTIONS = new InjectionToken(ngDevMode ? 'compilerOptions' : '');
  */
 class CompilerFactory {
 }
-
-/**
- * *Internal* service that keeps track of pending tasks happening in the system.
- *
- * This information is needed to make sure that the serialization on the server
- * is delayed until all tasks in the queue (such as an initial navigation or a
- * pending HTTP request) are completed.
- *
- * Pending tasks continue to contribute to the stableness of `ApplicationRef`
- * throughout the lifetime of the application.
- */
-class PendingTasks {
-    constructor() {
-        this.taskId = 0;
-        this.pendingTasks = new Set();
-        this.hasPendingTasks = new BehaviorSubject(false);
-    }
-    get _hasPendingTasks() {
-        return this.hasPendingTasks.value;
-    }
-    add() {
-        if (!this._hasPendingTasks) {
-            this.hasPendingTasks.next(true);
-        }
-        const taskId = this.taskId++;
-        this.pendingTasks.add(taskId);
-        return taskId;
-    }
-    remove(taskId) {
-        this.pendingTasks.delete(taskId);
-        if (this.pendingTasks.size === 0 && this._hasPendingTasks) {
-            this.hasPendingTasks.next(false);
-        }
-    }
-    ngOnDestroy() {
-        this.pendingTasks.clear();
-        if (this._hasPendingTasks) {
-            this.hasPendingTasks.next(false);
-        }
-    }
-    static { this.ɵfac = function PendingTasks_Factory(t) { return new (t || PendingTasks)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PendingTasks, factory: PendingTasks.ɵfac, providedIn: 'root' }); }
-}
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PendingTasks, [{
-        type: Injectable,
-        args: [{ providedIn: 'root' }]
-    }], null, null); })();
 
 /**
  * These are the data structures that our framework injector profiler will fill with data in order

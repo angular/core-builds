@@ -26531,7 +26531,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.1.2+sha-47c712e");
+var VERSION2 = new Version("17.1.2+sha-fc4d8bb");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27597,7 +27597,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.1.2+sha-47c712e"));
+  definitionMap.set("version", literal("17.1.2+sha-fc4d8bb"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27666,7 +27666,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.1.2+sha-47c712e"));
+  definitionMap.set("version", literal("17.1.2+sha-fc4d8bb"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27959,7 +27959,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.1.2+sha-47c712e"));
+  definitionMap.set("version", literal("17.1.2+sha-fc4d8bb"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27982,7 +27982,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.1.2+sha-47c712e"));
+  definitionMap.set("version", literal("17.1.2+sha-fc4d8bb"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -28020,7 +28020,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.1.2+sha-47c712e"));
+  definitionMap.set("version", literal("17.1.2+sha-fc4d8bb"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -28044,7 +28044,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.1.2+sha-47c712e"));
+  definitionMap.set("version", literal("17.1.2+sha-fc4d8bb"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28079,7 +28079,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.1.2+sha-47c712e"));
+  definitionMap.set("version", literal("17.1.2+sha-fc4d8bb"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28096,7 +28096,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.1.2+sha-47c712e");
+var VERSION3 = new Version("17.1.2+sha-fc4d8bb");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -38898,7 +38898,8 @@ function extractResolvedTypeString(node, checker) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/function_extractor.mjs
 var FunctionExtractor = class {
-  constructor(declaration, typeChecker) {
+  constructor(name, declaration, typeChecker) {
+    this.name = name;
     this.declaration = declaration;
     this.typeChecker = typeChecker;
   }
@@ -38907,7 +38908,8 @@ var FunctionExtractor = class {
     const returnType = signature ? this.typeChecker.typeToString(this.typeChecker.getReturnTypeOfSignature(signature)) : "unknown";
     return {
       params: this.extractAllParams(this.declaration.parameters),
-      name: this.declaration.name.getText(),
+      name: this.name,
+      isNewType: import_typescript62.default.isConstructSignatureDeclaration(this.declaration),
       returnType,
       entryType: EntryType.Function,
       generics: extractGenerics(this.declaration),
@@ -38961,7 +38963,7 @@ var ClassExtractor = class {
       name: this.declaration.name.text,
       isAbstract: this.isAbstract(),
       entryType: import_typescript63.default.isInterfaceDeclaration(this.declaration) ? EntryType.Interface : EntryType.UndecoratedClass,
-      members: this.extractAllClassMembers(),
+      members: this.extractSignatures().concat(this.extractAllClassMembers()),
       generics: extractGenerics(this.declaration),
       description: extractJsDocDescription(this.declaration),
       jsdocTags: extractJsDocTags(this.declaration),
@@ -38990,11 +38992,21 @@ var ClassExtractor = class {
     }
     return void 0;
   }
+  extractSignatures() {
+    return this.computeAllSignatureDeclarations().map((s) => this.extractSignature(s));
+  }
   extractMethod(methodDeclaration) {
-    const functionExtractor = new FunctionExtractor(methodDeclaration, this.typeChecker);
+    const functionExtractor = new FunctionExtractor(methodDeclaration.name.getText(), methodDeclaration, this.typeChecker);
     return __spreadProps(__spreadValues({}, functionExtractor.extract()), {
       memberType: MemberType.Method,
       memberTags: this.getMemberTags(methodDeclaration)
+    });
+  }
+  extractSignature(signature) {
+    const functionExtractor = new FunctionExtractor(import_typescript63.default.isConstructSignatureDeclaration(signature) ? "new" : "", signature, this.typeChecker);
+    return __spreadProps(__spreadValues({}, functionExtractor.extract()), {
+      memberType: MemberType.Method,
+      memberTags: []
     });
   }
   extractClassProperty(propertyDeclaration) {
@@ -39022,6 +39034,21 @@ var ClassExtractor = class {
       tags.push(MemberTags.Inherited);
     }
     return tags;
+  }
+  computeAllSignatureDeclarations() {
+    const type = this.typeChecker.getTypeAtLocation(this.declaration);
+    const signatures = [
+      ...type.getCallSignatures(),
+      ...type.getConstructSignatures()
+    ];
+    const result = [];
+    for (const signature of signatures) {
+      const decl = signature.getDeclaration();
+      if (this.isDocumentableSignature(decl) && this.isDocumentableMember(decl)) {
+        result.push(decl);
+      }
+    }
+    return result;
   }
   getMemberDeclarations() {
     var _a2;
@@ -39075,6 +39102,9 @@ var ClassExtractor = class {
   }
   isMethod(member) {
     return import_typescript63.default.isMethodDeclaration(member) || import_typescript63.default.isMethodSignature(member);
+  }
+  isDocumentableSignature(signature) {
+    return import_typescript63.default.isConstructSignatureDeclaration(signature) || import_typescript63.default.isCallSignatureDeclaration(signature);
   }
   isAbstract() {
     var _a2;
@@ -39338,7 +39368,7 @@ var DocsExtractor = class {
       return extractInterface(node, this.typeChecker);
     }
     if (import_typescript66.default.isFunctionDeclaration(node)) {
-      const functionExtractor = new FunctionExtractor(node, this.typeChecker);
+      const functionExtractor = new FunctionExtractor(node.name.getText(), node, this.typeChecker);
       return functionExtractor.extract();
     }
     if (import_typescript66.default.isVariableDeclaration(node) && !isSyntheticAngularConstant(node)) {
@@ -39361,7 +39391,7 @@ var DocsExtractor = class {
     for (let i = 0; i < declarationCount; i++) {
       const [exportName, declaration] = exportedDeclarations[i];
       if (import_typescript66.default.isFunctionDeclaration(declaration)) {
-        const extractor = new FunctionExtractor(declaration, this.typeChecker);
+        const extractor = new FunctionExtractor(exportName, declaration, this.typeChecker);
         const overloads = extractor.getOverloads().map((overload) => [exportName, overload]);
         exportedDeclarations.push(...overloads);
       }
@@ -44577,6 +44607,7 @@ var SymbolBuilder = class {
     return { kind: SymbolKind.Output, bindings };
   }
   getSymbolOfInputBinding(binding) {
+    var _a2;
     const consumer = this.templateData.boundTarget.getConsumerOfBinding(binding);
     if (consumer === null) {
       return null;
@@ -44591,11 +44622,23 @@ var SymbolBuilder = class {
       if (!isAccessExpression2(node.left)) {
         continue;
       }
-      const symbolInfo = this.getSymbolOfTsNode(node.left);
+      const signalInputAssignment = unwrapSignalInputWriteTAccessor(node.left);
+      let symbolInfo = null;
+      if (signalInputAssignment !== null) {
+        const fieldSymbol = this.getSymbolOfTsNode(signalInputAssignment.fieldExpr);
+        const typeSymbol = this.getSymbolOfTsNode(signalInputAssignment.typeExpr);
+        symbolInfo = fieldSymbol === null || typeSymbol === null ? null : {
+          tcbLocation: fieldSymbol.tcbLocation,
+          tsSymbol: fieldSymbol.tsSymbol,
+          tsType: typeSymbol.tsType
+        };
+      } else {
+        symbolInfo = this.getSymbolOfTsNode(node.left);
+      }
       if (symbolInfo === null || symbolInfo.tsSymbol === null) {
         continue;
       }
-      const target = this.getDirectiveSymbolForAccessExpression(node.left, consumer);
+      const target = this.getDirectiveSymbolForAccessExpression((_a2 = signalInputAssignment == null ? void 0 : signalInputAssignment.fieldExpr) != null ? _a2 : node.left, consumer);
       if (target === null) {
         continue;
       }
@@ -44610,9 +44653,9 @@ var SymbolBuilder = class {
     }
     return { kind: SymbolKind.Input, bindings };
   }
-  getDirectiveSymbolForAccessExpression(node, { isComponent, selector, isStructural }) {
+  getDirectiveSymbolForAccessExpression(fieldAccessExpr, { isComponent, selector, isStructural }) {
     var _a2;
-    const tsSymbol = this.getTypeChecker().getSymbolAtLocation(node.expression);
+    const tsSymbol = this.getTypeChecker().getSymbolAtLocation(fieldAccessExpr.expression);
     if ((tsSymbol == null ? void 0 : tsSymbol.declarations) === void 0 || tsSymbol.declarations.length === 0 || selector === null) {
       return null;
     }
@@ -44788,8 +44831,6 @@ var SymbolBuilder = class {
     let tsSymbol;
     if (import_typescript94.default.isPropertyAccessExpression(node)) {
       tsSymbol = this.getTypeChecker().getSymbolAtLocation(node.name);
-    } else if (import_typescript94.default.isElementAccessExpression(node)) {
-      tsSymbol = this.getTypeChecker().getSymbolAtLocation(node.argumentExpression);
     } else {
       tsSymbol = this.getTypeChecker().getSymbolAtLocation(node);
     }
@@ -44824,6 +44865,21 @@ function anyNodeFilter(n) {
 }
 function sourceSpanEqual(a, b) {
   return a.start.offset === b.start.offset && a.end.offset === b.end.offset;
+}
+function unwrapSignalInputWriteTAccessor(expr) {
+  if (!import_typescript94.default.isElementAccessExpression(expr) || !import_typescript94.default.isPropertyAccessExpression(expr.argumentExpression)) {
+    return null;
+  }
+  if (!import_typescript94.default.isIdentifier(expr.argumentExpression.name) || expr.argumentExpression.name.text !== Identifiers.InputSignalBrandWriteType.name) {
+    return null;
+  }
+  if (!import_typescript94.default.isPropertyAccessExpression(expr.expression) && !import_typescript94.default.isElementAccessExpression(expr.expression)) {
+    throw new Error("Unexpected expression for signal input write type.");
+  }
+  return {
+    fieldExpr: expr.expression,
+    typeExpr: expr
+  };
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/checker.mjs
@@ -45664,7 +45720,7 @@ var InterpolatedSignalCheck = class extends TemplateCheckWithVisitor {
   }
 };
 function isSignal(symbol) {
-  return ((symbol == null ? void 0 : symbol.escapedName) === "WritableSignal" || (symbol == null ? void 0 : symbol.escapedName) === "Signal" || (symbol == null ? void 0 : symbol.escapedName) === "InputSignal") && symbol.parent.escapedName.includes("@angular/core");
+  return ((symbol == null ? void 0 : symbol.escapedName) === "WritableSignal" || (symbol == null ? void 0 : symbol.escapedName) === "Signal" || (symbol == null ? void 0 : symbol.escapedName) === "InputSignal" || (symbol == null ? void 0 : symbol.escapedName) === "InputSignalWithTransform") && symbol.parent.escapedName.includes("@angular/core");
 }
 function buildDiagnosticForSignal(ctx, node, component) {
   const symbol = ctx.templateTypeChecker.getSymbolOfNode(node, component);
