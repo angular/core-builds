@@ -26898,7 +26898,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.1+sha-d339941");
+var VERSION2 = new Version("17.2.0-next.1+sha-e46c081");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27964,7 +27964,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-d339941"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-e46c081"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -28033,7 +28033,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-d339941"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-e46c081"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -28332,7 +28332,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-d339941"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-e46c081"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -28355,7 +28355,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-d339941"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-e46c081"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -28393,7 +28393,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-d339941"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-e46c081"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -28417,7 +28417,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-d339941"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-e46c081"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28452,7 +28452,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-d339941"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-e46c081"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28469,7 +28469,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.2.0-next.1+sha-d339941");
+var VERSION3 = new Version("17.2.0-next.1+sha-e46c081");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/partial_evaluator/src/diagnostics.mjs
 var import_typescript20 = __toESM(require("typescript"), 1);
@@ -33740,7 +33740,7 @@ var TraitImpl = class {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/src/compilation.mjs
 var TraitCompiler = class {
-  constructor(handlers, reflector, perf, incrementalBuild, compileNonExportedClasses, compilationMode, dtsTransforms, semanticDepGraphUpdater, sourceFileTypeIdentifier, isCore, forbidOrphanComponents) {
+  constructor(handlers, reflector, perf, incrementalBuild, compileNonExportedClasses, compilationMode, dtsTransforms, semanticDepGraphUpdater, sourceFileTypeIdentifier) {
     this.handlers = handlers;
     this.reflector = reflector;
     this.perf = perf;
@@ -33750,8 +33750,6 @@ var TraitCompiler = class {
     this.dtsTransforms = dtsTransforms;
     this.semanticDepGraphUpdater = semanticDepGraphUpdater;
     this.sourceFileTypeIdentifier = sourceFileTypeIdentifier;
-    this.isCore = isCore;
-    this.forbidOrphanComponents = forbidOrphanComponents;
     this.classes = /* @__PURE__ */ new Map();
     this.fileToClasses = /* @__PURE__ */ new Map();
     this.filesWithoutTraits = /* @__PURE__ */ new Set();
@@ -33861,14 +33859,14 @@ var TraitCompiler = class {
   detectTraits(clazz, decorators) {
     let record = this.recordFor(clazz);
     let foundTraits = [];
-    const detectedDecorators = this.compilationMode === CompilationMode.LOCAL || this.forbidOrphanComponents ? /* @__PURE__ */ new Set() : null;
+    const nonNgDecoratorsInLocalMode = this.compilationMode === CompilationMode.LOCAL ? new Set(decorators) : null;
     for (const handler of this.handlers) {
       const result = handler.detect(clazz, decorators);
       if (result === void 0) {
         continue;
       }
-      if (detectedDecorators !== null && result.decorator !== null) {
-        detectedDecorators.add(result.decorator);
+      if (nonNgDecoratorsInLocalMode !== null && result.decorator !== null) {
+        nonNgDecoratorsInLocalMode.delete(result.decorator);
       }
       const isPrimaryHandler = handler.precedence === HandlerPrecedence.PRIMARY;
       const isWeakHandler = handler.precedence === HandlerPrecedence.WEAK;
@@ -33911,22 +33909,14 @@ var TraitCompiler = class {
         record.hasPrimaryHandler = record.hasPrimaryHandler || isPrimaryHandler;
       }
     }
-    if (decorators !== null && detectedDecorators !== null && detectedDecorators.size < decorators.length && record !== null && record.metaDiagnostics === null && hasDepsTrackerAffectingScopeDecorator(detectedDecorators, this.isCore)) {
-      let messageText;
-      if (this.compilationMode === CompilationMode.LOCAL) {
-        messageText = "In local compilation mode, Angular does not support custom decorators or duplicate Angular decorators (except for `@Injectable` classes). Ensure all class decorators are from Angular and each decorator is used at most once for each class.";
-      } else if (this.forbidOrphanComponents) {
-        messageText = 'When the Angular compiler option "forbidOrphanComponents" is set, Angular does not support custom decorators or duplicate Angular decorators (except for `@Injectable` classes). Ensure all class decorators are from Angular and each decorator is used at most once for each class.';
-      } else {
-        throw new Error("Impossible state!");
-      }
-      record.metaDiagnostics = decorators.filter((decorator) => !detectedDecorators.has(decorator)).map((decorator) => ({
+    if (nonNgDecoratorsInLocalMode !== null && nonNgDecoratorsInLocalMode.size > 0 && record !== null && record.metaDiagnostics === null) {
+      record.metaDiagnostics = [...nonNgDecoratorsInLocalMode].map((decorator) => ({
         category: import_typescript40.default.DiagnosticCategory.Error,
         code: Number("-99" + ErrorCode.DECORATOR_UNEXPECTED),
         file: getSourceFile(clazz),
         start: decorator.node.getStart(),
         length: decorator.node.getWidth(),
-        messageText
+        messageText: "In local compilation mode, Angular does not support custom decorators. Ensure all class decorators are from Angular."
       }));
       record.traits = foundTraits = [];
     }
@@ -34203,22 +34193,6 @@ var TraitCompiler = class {
 };
 function containsErrors(diagnostics) {
   return diagnostics !== null && diagnostics.some((diag) => diag.category === import_typescript40.default.DiagnosticCategory.Error);
-}
-function isInjectableDecorator(decorator, isCore) {
-  if (isCore) {
-    return decorator.name === "Injectable";
-  } else if (decorator.import !== null && decorator.import.from === "@angular/core") {
-    return decorator.import.name === "Injectable";
-  }
-  return false;
-}
-function hasDepsTrackerAffectingScopeDecorator(decoratorSet, isCore) {
-  for (const decorator of decoratorSet) {
-    if (!isInjectableDecorator(decorator, isCore)) {
-      return true;
-    }
-  }
-  return false;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/src/declaration.mjs
@@ -47439,7 +47413,7 @@ var NgCompiler = class {
       new InjectableDecoratorHandler(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, compilationMode),
       new NgModuleDecoratorHandler(reflector, evaluator, metaReader, metaRegistry, ngModuleScopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, this.closureCompilerEnabled, (_f2 = this.options.onlyPublishPublicTypingsForNgModules) != null ? _f2 : false, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, supportJitMode, compilationMode, localCompilationExtraImportsTracker)
     ];
-    const traitCompiler = new TraitCompiler(handlers, reflector, this.delegatingPerfRecorder, this.incrementalCompilation, this.options.compileNonExportedClasses !== false, compilationMode, dtsTransforms, semanticDepGraphUpdater, this.adapter, isCore, !!this.options.forbidOrphanComponents);
+    const traitCompiler = new TraitCompiler(handlers, reflector, this.delegatingPerfRecorder, this.incrementalCompilation, this.options.compileNonExportedClasses !== false, compilationMode, dtsTransforms, semanticDepGraphUpdater, this.adapter);
     const notifyingDriver = new NotifyingProgramDriverWrapper(this.programDriver, (program) => {
       this.incrementalStrategy.setIncrementalState(this.incrementalCompilation.state, program);
       this.currentProgram = program;
