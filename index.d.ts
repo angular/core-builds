@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.1+sha-e46c081
+ * @license Angular v17.2.0-next.1+sha-99bfbab
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6133,6 +6133,14 @@ declare interface LQueries {
      * @param tView
      */
     detachView(tView: TView): void;
+    /**
+     * A method called when a view finishes its creation pass. As a result all impacted
+     * `LQuery` objects (and associated `QueryList`) are marked as dirty. This additional dirty
+     * marking gives us a precise point in time where we can collect results for a given view in an
+     * atomic way.
+     * @param tView
+     */
+    finishViewCreation(tView: TView): void;
 }
 
 /**
@@ -11183,6 +11191,7 @@ export declare const enum ɵAnimationRendererType {
  */
 export declare function ɵannotateForHydration(appRef: ApplicationRef, doc: Document): void;
 
+
 /**
  * A set of marker values to be used in the attributes arrays. These markers indicate that some
  * items are not regular attributes and the processing should be adapted accordingly.
@@ -12901,6 +12910,7 @@ export declare const enum ɵRuntimeErrorCode {
     COMPONENT_ID_COLLISION = -912,
     IMAGE_PERFORMANCE_WARNING = -913,
     REQUIRED_INPUT_NO_VALUE = -950,
+    REQUIRED_QUERY_NO_VALUE = -951,
     RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,
     RUNTIME_DEPS_ORPHAN_COMPONENT = 1001
 }
@@ -14083,18 +14093,17 @@ export declare function ɵɵconditional<T>(containerIndex: number, matchingTempl
 export declare function ɵɵcontentQuery<T>(directiveIndex: number, predicate: ProviderToken<unknown> | string | string[], flags: QueryFlags, read?: any): void;
 
 /**
- * Registers a QueryList, associated with a content query, for later refresh (part of a view
- * refresh).
+ * Creates a new content query and binds it to a signal created by an authoring function.
  *
  * @param directiveIndex Current directive index
+ * @param target The target signal to which the query should be bound
  * @param predicate The type for which the query will search
  * @param flags Flags associated with the query
  * @param read What to save in the query
- * @returns QueryList<T>
  *
  * @codeGenApi
  */
-export declare function ɵɵcontentQuerySignal<T>(target: Signal<T>, directiveIndex: number, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
+export declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target: Signal<T>, predicate: ProviderToken<unknown> | string[], flags: QueryFlags, read?: any): void;
 
 /**
  * Copies the fields not handled by the `ɵɵInheritDefinitionFeature` from the supertype of a
@@ -14812,6 +14821,7 @@ export declare interface ɵɵInjectorDef<T> {
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | EnvironmentProviders | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
+
 
 /** Flags describing an input for a directive. */
 export declare enum ɵɵInputFlags {

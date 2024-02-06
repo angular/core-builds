@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.1+sha-e46c081
+ * @license Angular v17.2.0-next.1+sha-99bfbab
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,7 +14,7 @@ declare type ComputedGetter<T> = (() => T) & {
  *
  * `Computed`s are both producers and consumers of reactivity.
  */
-declare interface ComputedNode<T> extends ReactiveNode {
+export declare interface ComputedNode<T> extends ReactiveNode {
     /**
      * Current value of the computation, or one of the sentinel values above (`UNSET`, `COMPUTING`,
      * `ERROR`).

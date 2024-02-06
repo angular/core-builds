@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.2.0-next.1+sha-e46c081
+ * @license Angular v17.2.0-next.1+sha-99bfbab
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, createComputed as createComputed$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, producerUpdateValueVersion as producerUpdateValueVersion$1, consumerMarkDirty as consumerMarkDirty$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, createComputed as createComputed$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
 
@@ -15374,6 +15374,9 @@ function renderView(tView, lView, context) {
         if (tView.firstCreatePass) {
             tView.firstCreatePass = false;
         }
+        // Mark all queries active in this view as dirty. This is necessary for signal-based queries to
+        // have a clear marking point where we can read query results atomically (for a given view).
+        lView[QUERIES]?.finishViewCreation(tView);
         // We resolve content queries specifically marked as `static` in creation mode. Dynamic
         // content queries are resolved during change detection (i.e. update mode), after embedded
         // views are refreshed (see block above).
@@ -15799,7 +15802,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.1+sha-e46c081']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.1+sha-99bfbab']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -25988,6 +25991,9 @@ class LQueries_ {
     detachView(tView) {
         this.dirtyQueriesWithMatches(tView);
     }
+    finishViewCreation(tView) {
+        this.dirtyQueriesWithMatches(tView);
+    }
     dirtyQueriesWithMatches(tView) {
         for (let i = 0; i < this.queries.length; i++) {
             if (getTQuery(tView, i).matches !== null) {
@@ -26426,29 +26432,33 @@ function ɵɵloadQuery() {
     return loadQueryInternal(getLView(), getCurrentQueryIndex());
 }
 
+/**
+ * Query-as signal factory function in charge of creating a new computed signal capturing query
+ * results. This centralized creation function is used by all types of queries (child / children,
+ * required / optional).
+ *
+ * @param firstOnly indicates if all or only the first result should be returned
+ * @param required indicates if at least one result is required
+ * @returns a read-only signal with query results
+ */
 function createQuerySignalFn(firstOnly, required) {
-    const node = Object.create(QUERY_SIGNAL_NODE);
-    function signalFn() {
-        // Check if the value needs updating before returning it.
-        producerUpdateValueVersion$1(node);
-        // Mark this producer as accessed.
-        producerAccessed$1(node);
-        if (firstOnly) {
-            const firstValue = node._queryList?.first;
-            if (firstValue === undefined && required) {
-                // TODO: add error code
-                // TODO: add proper message
-                throw new RuntimeError(0, 'no query results yet!');
-            }
-            return firstValue;
+    let node;
+    const signalFn = createComputed$1(() => {
+        // A dedicated signal that increments its value every time a query changes its dirty status. By
+        // using this signal we can implement a query as computed and avoid creation of a specialized
+        // reactive node type. Please note that a query gets marked dirty under the following
+        // circumstances:
+        // - a view (where a query is active) finished its first creation pass;
+        // - a new view is inserted / deleted and it impacts query results.
+        node._dirtyCounter();
+        const value = refreshSignalQuery(node, firstOnly);
+        if (required && value === undefined) {
+            throw new RuntimeError(-951 /* RuntimeErrorCode.REQUIRED_QUERY_NO_VALUE */, ngDevMode && 'Child query result is required but no value is available.');
         }
-        else {
-            // TODO(perf): make sure that I'm not creating new arrays when returning results. The other
-            // consideration here is the referential stability of results.
-            return node._queryList?.toArray() ?? EMPTY_ARRAY;
-        }
-    }
-    signalFn[SIGNAL$1] = node;
+        return value;
+    });
+    node = signalFn[SIGNAL$1];
+    node._dirtyCounter = signal(0);
     if (ngDevMode) {
         signalFn.toString = () => `[Query Signal]`;
     }
@@ -26463,78 +26473,53 @@ function createSingleResultRequiredQuerySignalFn() {
 function createMultiResultQuerySignalFn() {
     return createQuerySignalFn(/* firstOnly */ false, /* required */ false);
 }
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const QUERY_SIGNAL_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE$1,
-        // Base reactive node.overrides
-        producerMustRecompute: (node) => {
-            return !!node._queryList?.dirty;
-        },
-        producerRecomputeValue: (node) => {
-            // The current value is stale. Check whether we need to produce a new one.
-            // TODO: assert: I've got both the lView and queryIndex stored
-            // TODO(perf): I'm assuming that the signal value changes when the list of matches changes.
-            // But this is not correct for the single-element queries since we should also compare (===)
-            // the value of the first element.
-            // TODO: error handling - should we guard against exceptions thrown from refreshSignalQuery -
-            // normally it should never
-            if (refreshSignalQuery(node._lView, node._queryIndex)) {
-                node.version++;
-            }
-        }
-    };
-})();
 function bindQueryToSignal(target, queryIndex) {
     const node = target[SIGNAL$1];
     node._lView = getLView();
     node._queryIndex = queryIndex;
     node._queryList = loadQueryInternal(node._lView, queryIndex);
-    node._queryList.onDirty(() => {
-        // Mark this producer as dirty and notify live consumer about the potential change. Note
-        // that the onDirty callback will fire only on the initial dirty marking (that is,
-        // subsequent dirty notifications are not fired- until the QueryList becomes clean again).
-        consumerMarkDirty$1(node);
-    });
+    node._queryList.onDirty(() => node._dirtyCounter.update(v => v + 1));
 }
-// TODO(refactor): some code duplication with queryRefresh
-function refreshSignalQuery(lView, queryIndex) {
+function refreshSignalQuery(node, firstOnly) {
+    const lView = node._lView;
+    const queryIndex = node._queryIndex;
+    // There are 2 conditions under which we want to return "empty" results instead of the ones
+    // collected by a query:
+    //
+    // 1) a given query wasn't created yet (this is a period of time between the directive creation
+    // and execution of the query creation function) - in this case a query doesn't exist yet and we
+    // don't have any results to return.
+    //
+    // 2) we are in the process of constructing a view (the first
+    // creation pass didn't finish) and a query might have partial results, but we don't want to
+    // return those - instead we do delay results collection until all nodes had a chance of matching
+    // and we can present consistent, "atomic" (on a view level) results.
+    if (lView === undefined || queryIndex === undefined || (lView[FLAGS] & 4 /* LViewFlags.CreationMode */)) {
+        return (firstOnly ? undefined : EMPTY_ARRAY);
+    }
     const queryList = loadQueryInternal(lView, queryIndex);
     const tView = lView[TVIEW];
     const tQuery = getTQuery(tView, queryIndex);
-    // TODO(test): operation of refreshing a signal query could be invoked during the first
-    // creation pass, while results are still being collected; we should NOT mark such query as
-    // "clean" as we might not have any view add / remove operations that would make it dirty again.
-    // Leaning towards exiting early for calls to refreshSignalQuery before the first creation pass
-    // finished
-    if (queryList.dirty && tQuery.matches !== null) {
-        const result = tQuery.crossesNgTemplate ?
-            collectQueryResults(tView, lView, queryIndex, []) :
-            materializeViewResults(tView, lView, tQuery, queryIndex);
-        queryList.reset(result, unwrapElementRef);
-        // TODO(test): don't mark signal as dirty when a query was marked as dirty but there
-        // was no actual change
-        // TODO: change the reset logic so it returns the value
-        return true;
-    }
-    return false;
+    // TODO(refactor): add an utility method for the following logic
+    const result = tQuery.crossesNgTemplate ?
+        collectQueryResults(tView, lView, queryIndex, []) :
+        materializeViewResults(tView, lView, tQuery, queryIndex);
+    queryList.reset(result, unwrapElementRef);
+    return firstOnly ? queryList.first : queryList.toArray();
 }
 
 /**
- * Registers a QueryList, associated with a content query, for later refresh (part of a view
- * refresh).
+ * Creates a new content query and binds it to a signal created by an authoring function.
  *
  * @param directiveIndex Current directive index
+ * @param target The target signal to which the query should be bound
  * @param predicate The type for which the query will search
  * @param flags Flags associated with the query
  * @param read What to save in the query
- * @returns QueryList<T>
  *
  * @codeGenApi
  */
-function ɵɵcontentQuerySignal(target, directiveIndex, predicate, flags, read) {
+function ɵɵcontentQuerySignal(directiveIndex, target, predicate, flags, read) {
     bindQueryToSignal(target, createContentQuery(directiveIndex, predicate, flags, read));
 }
 /**
@@ -30431,7 +30416,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.1+sha-e46c081');
+const VERSION = new Version('17.2.0-next.1+sha-99bfbab');
 
 class Console {
     log(message) {
@@ -30450,112 +30435,6 @@ class Console {
         type: Injectable,
         args: [{ providedIn: 'platform' }]
     }], null, null); })();
-
-/**
- * Combination of NgModuleFactory and ComponentFactories.
- *
- * @publicApi
- *
- * @deprecated
- * Ivy JIT mode doesn't require accessing this symbol.
- * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
- * additional context.
- */
-class ModuleWithComponentFactories {
-    constructor(ngModuleFactory, componentFactories) {
-        this.ngModuleFactory = ngModuleFactory;
-        this.componentFactories = componentFactories;
-    }
-}
-/**
- * Low-level service for running the angular compiler during runtime
- * to create {@link ComponentFactory}s, which
- * can later be used to create and render a Component instance.
- *
- * Each `@NgModule` provides an own `Compiler` to its injector,
- * that will use the directives/pipes of the ng module for compilation
- * of components.
- *
- * @publicApi
- *
- * @deprecated
- * Ivy JIT mode doesn't require accessing this symbol.
- * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
- * additional context.
- */
-class Compiler {
-    /**
-     * Compiles the given NgModule and all of its components. All templates of the components
-     * have to be inlined.
-     */
-    compileModuleSync(moduleType) {
-        return new NgModuleFactory(moduleType);
-    }
-    /**
-     * Compiles the given NgModule and all of its components
-     */
-    compileModuleAsync(moduleType) {
-        return Promise.resolve(this.compileModuleSync(moduleType));
-    }
-    /**
-     * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
-     */
-    compileModuleAndAllComponentsSync(moduleType) {
-        const ngModuleFactory = this.compileModuleSync(moduleType);
-        const moduleDef = getNgModuleDef(moduleType);
-        const componentFactories = maybeUnwrapFn(moduleDef.declarations)
-            .reduce((factories, declaration) => {
-            const componentDef = getComponentDef(declaration);
-            componentDef && factories.push(new ComponentFactory(componentDef));
-            return factories;
-        }, []);
-        return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
-    }
-    /**
-     * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
-     */
-    compileModuleAndAllComponentsAsync(moduleType) {
-        return Promise.resolve(this.compileModuleAndAllComponentsSync(moduleType));
-    }
-    /**
-     * Clears all caches.
-     */
-    clearCache() { }
-    /**
-     * Clears the cache for the given component/ngModule.
-     */
-    clearCacheFor(type) { }
-    /**
-     * Returns the id for a given NgModule, if one is defined and known to the compiler.
-     */
-    getModuleId(moduleType) {
-        return undefined;
-    }
-    static { this.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: 'root' }); }
-}
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Compiler, [{
-        type: Injectable,
-        args: [{ providedIn: 'root' }]
-    }], null, null); })();
-/**
- * Token to provide CompilerOptions in the platform injector.
- *
- * @publicApi
- */
-const COMPILER_OPTIONS = new InjectionToken(ngDevMode ? 'compilerOptions' : '');
-/**
- * A factory for creating a Compiler
- *
- * @publicApi
- *
- * @deprecated
- * Ivy JIT mode doesn't require accessing this symbol.
- * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
- * additional context.
- */
-class CompilerFactory {
-}
 
 /**
  * These are the data structures that our framework injector profiler will fill with data in order
@@ -31912,44 +31791,6 @@ class ApplicationInitStatus {
  * @publicApi
  */
 const APP_BOOTSTRAP_LISTENER = new InjectionToken(ngDevMode ? 'appBootstrapListener' : '');
-function compileNgModuleFactory(injector, options, moduleType) {
-    ngDevMode && assertNgModuleType(moduleType);
-    const moduleFactory = new NgModuleFactory(moduleType);
-    // All of the logic below is irrelevant for AOT-compiled code.
-    if (typeof ngJitMode !== 'undefined' && !ngJitMode) {
-        return Promise.resolve(moduleFactory);
-    }
-    const compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
-    // Configure the compiler to use the provided options. This call may fail when multiple modules
-    // are bootstrapped with incompatible options, as a component can only be compiled according to
-    // a single set of options.
-    setJitOptions({
-        defaultEncapsulation: _lastDefined(compilerOptions.map(opts => opts.defaultEncapsulation)),
-        preserveWhitespaces: _lastDefined(compilerOptions.map(opts => opts.preserveWhitespaces)),
-    });
-    if (isComponentResourceResolutionQueueEmpty()) {
-        return Promise.resolve(moduleFactory);
-    }
-    const compilerProviders = compilerOptions.flatMap((option) => option.providers ?? []);
-    // In case there are no compiler providers, we just return the module factory as
-    // there won't be any resource loader. This can happen with Ivy, because AOT compiled
-    // modules can be still passed through "bootstrapModule". In that case we shouldn't
-    // unnecessarily require the JIT compiler.
-    if (compilerProviders.length === 0) {
-        return Promise.resolve(moduleFactory);
-    }
-    const compiler = getCompilerFacade({
-        usage: 0 /* JitCompilerUsage.Decorator */,
-        kind: 'NgModule',
-        type: moduleType,
-    });
-    const compilerInjector = Injector.create({ providers: compilerProviders });
-    const resourceLoader = compilerInjector.get(compiler.ResourceLoader);
-    // The resource loader can also return a string while the "resolveComponentResources"
-    // always expects a promise. Therefore we need to wrap the returned value in a promise.
-    return resolveComponentResources(url => Promise.resolve(resourceLoader.get(url)))
-        .then(() => moduleFactory);
-}
 function publishDefaultGlobalUtils() {
     ngDevMode && publishDefaultGlobalUtils$1();
 }
@@ -32390,14 +32231,6 @@ function remove(list, el) {
         list.splice(index, 1);
     }
 }
-function _lastDefined(args) {
-    for (let i = args.length - 1; i >= 0; i--) {
-        if (args[i] !== undefined) {
-            return args[i];
-        }
-    }
-    return undefined;
-}
 let whenStableStore;
 /**
  * Returns a Promise that resolves when the application becomes stable after this method is called
@@ -32417,6 +32250,159 @@ function whenStable(applicationRef) {
 }
 function shouldRecheckView(view) {
     return requiresRefreshOrTraversal(view) || !!(view[FLAGS] & 64 /* LViewFlags.Dirty */);
+}
+
+/**
+ * Combination of NgModuleFactory and ComponentFactories.
+ *
+ * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
+ */
+class ModuleWithComponentFactories {
+    constructor(ngModuleFactory, componentFactories) {
+        this.ngModuleFactory = ngModuleFactory;
+        this.componentFactories = componentFactories;
+    }
+}
+/**
+ * Low-level service for running the angular compiler during runtime
+ * to create {@link ComponentFactory}s, which
+ * can later be used to create and render a Component instance.
+ *
+ * Each `@NgModule` provides an own `Compiler` to its injector,
+ * that will use the directives/pipes of the ng module for compilation
+ * of components.
+ *
+ * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
+ */
+class Compiler {
+    /**
+     * Compiles the given NgModule and all of its components. All templates of the components
+     * have to be inlined.
+     */
+    compileModuleSync(moduleType) {
+        return new NgModuleFactory(moduleType);
+    }
+    /**
+     * Compiles the given NgModule and all of its components
+     */
+    compileModuleAsync(moduleType) {
+        return Promise.resolve(this.compileModuleSync(moduleType));
+    }
+    /**
+     * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
+     */
+    compileModuleAndAllComponentsSync(moduleType) {
+        const ngModuleFactory = this.compileModuleSync(moduleType);
+        const moduleDef = getNgModuleDef(moduleType);
+        const componentFactories = maybeUnwrapFn(moduleDef.declarations)
+            .reduce((factories, declaration) => {
+            const componentDef = getComponentDef(declaration);
+            componentDef && factories.push(new ComponentFactory(componentDef));
+            return factories;
+        }, []);
+        return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
+    }
+    /**
+     * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
+     */
+    compileModuleAndAllComponentsAsync(moduleType) {
+        return Promise.resolve(this.compileModuleAndAllComponentsSync(moduleType));
+    }
+    /**
+     * Clears all caches.
+     */
+    clearCache() { }
+    /**
+     * Clears the cache for the given component/ngModule.
+     */
+    clearCacheFor(type) { }
+    /**
+     * Returns the id for a given NgModule, if one is defined and known to the compiler.
+     */
+    getModuleId(moduleType) {
+        return undefined;
+    }
+    static { this.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); }; }
+    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: 'root' }); }
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Compiler, [{
+        type: Injectable,
+        args: [{ providedIn: 'root' }]
+    }], null, null); })();
+/**
+ * Token to provide CompilerOptions in the platform injector.
+ *
+ * @publicApi
+ */
+const COMPILER_OPTIONS = new InjectionToken(ngDevMode ? 'compilerOptions' : '');
+/**
+ * A factory for creating a Compiler
+ *
+ * @publicApi
+ *
+ * @deprecated
+ * Ivy JIT mode doesn't require accessing this symbol.
+ * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
+ * additional context.
+ */
+class CompilerFactory {
+}
+
+function compileNgModuleFactory(injector, options, moduleType) {
+    ngDevMode && assertNgModuleType(moduleType);
+    const moduleFactory = new NgModuleFactory(moduleType);
+    // All of the logic below is irrelevant for AOT-compiled code.
+    if (typeof ngJitMode !== 'undefined' && !ngJitMode) {
+        return Promise.resolve(moduleFactory);
+    }
+    const compilerOptions = injector.get(COMPILER_OPTIONS, []).concat(options);
+    // Configure the compiler to use the provided options. This call may fail when multiple modules
+    // are bootstrapped with incompatible options, as a component can only be compiled according to
+    // a single set of options.
+    setJitOptions({
+        defaultEncapsulation: _lastDefined(compilerOptions.map(opts => opts.defaultEncapsulation)),
+        preserveWhitespaces: _lastDefined(compilerOptions.map(opts => opts.preserveWhitespaces)),
+    });
+    if (isComponentResourceResolutionQueueEmpty()) {
+        return Promise.resolve(moduleFactory);
+    }
+    const compilerProviders = compilerOptions.flatMap((option) => option.providers ?? []);
+    // In case there are no compiler providers, we just return the module factory as
+    // there won't be any resource loader. This can happen with Ivy, because AOT compiled
+    // modules can be still passed through "bootstrapModule". In that case we shouldn't
+    // unnecessarily require the JIT compiler.
+    if (compilerProviders.length === 0) {
+        return Promise.resolve(moduleFactory);
+    }
+    const compiler = getCompilerFacade({
+        usage: 0 /* JitCompilerUsage.Decorator */,
+        kind: 'NgModule',
+        type: moduleType,
+    });
+    const compilerInjector = Injector.create({ providers: compilerProviders });
+    const resourceLoader = compilerInjector.get(compiler.ResourceLoader);
+    // The resource loader can also return a string while the "resolveComponentResources"
+    // always expects a promise. Therefore we need to wrap the returned value in a promise.
+    return resolveComponentResources(url => Promise.resolve(resourceLoader.get(url)))
+        .then(() => moduleFactory);
+}
+function _lastDefined(args) {
+    for (let i = args.length - 1; i >= 0; i--) {
+        if (args[i] !== undefined) {
+            return args[i];
+        }
+    }
+    return undefined;
 }
 
 class NgZoneChangeDetectionScheduler {
