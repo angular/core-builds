@@ -1752,6 +1752,7 @@ var ConstantPool = class {
     this.literals = /* @__PURE__ */ new Map();
     this.literalFactories = /* @__PURE__ */ new Map();
     this.sharedConstants = /* @__PURE__ */ new Map();
+    this._claimedNames = /* @__PURE__ */ new Map();
     this.nextNameIndex = 0;
   }
   getConstLiteral(literal2, forceShared) {
@@ -1844,8 +1845,12 @@ var ConstantPool = class {
     }
     return { literalFactory, literalFactoryArguments };
   }
-  uniqueName(prefix) {
-    return `${prefix}${this.nextNameIndex++}`;
+  uniqueName(name, alwaysIncludeSuffix = true) {
+    var _a2;
+    const count = (_a2 = this._claimedNames.get(name)) != null ? _a2 : 0;
+    const result = count === 0 && !alwaysIncludeSuffix ? `${name}` : `${name}${count}`;
+    this._claimedNames.set(name, count + 1);
+    return result;
   }
   freshName() {
     return this.uniqueName(CONSTANT_PREFIX);
@@ -16730,7 +16735,7 @@ function nameFunctionsAndVariables(job) {
 }
 function addNamesToView(unit, baseName, state, compatibility) {
   if (unit.fnName === null) {
-    unit.fnName = sanitizeIdentifier(`${baseName}_${unit.job.fnSuffix}`);
+    unit.fnName = unit.job.pool.uniqueName(sanitizeIdentifier(`${baseName}_${unit.job.fnSuffix}`), false);
   }
   const varNames = /* @__PURE__ */ new Map();
   for (const op of unit.ops()) {
@@ -22954,7 +22959,7 @@ var TemplateDefinitionBuilder = class {
       }
     }
     const contextName = `${this.contextName}${contextNameSuffix}_${index}`;
-    const name = `${contextName}_Template`;
+    const name = this.constantPool.uniqueName(`${contextName}_Template`, false);
     const visitor = new TemplateDefinitionBuilder(this.constantPool, this._bindingScope, this.level + 1, contextName, this.i18n, index, name, this._namespace, this.fileBasedI18nSuffix, this.i18nUseExternalIds, this.deferBlocks, this.elementLocations, this.allDeferrableDepsFn, this._constants);
     this._nestedTemplateFns.push(() => {
       const templateFunctionExpr = visitor.buildTemplateFunction(children, variables, this._ngContentReservedSlots.length + this._ngContentSelectorsOffset, i18nMeta, variableAliases);
@@ -25984,7 +25989,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.1+sha-19fae76");
+var VERSION2 = new Version("17.2.0-next.1+sha-bfbb306");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
