@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.1+sha-4d29174
+ * @license Angular v17.2.0-next.1+sha-c8a973e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1882,6 +1882,26 @@ export declare type ContentChild = Query;
 export declare const ContentChild: ContentChildDecorator;
 
 /**
+ * Initializes a content child query. Consider using `contentChild.required` for queries that should
+ * always match.
+ *
+ * @usageNotes
+ * Create a child query in your component by declaring a
+ * class field and initializing it with the `contentChild()` function.
+ *
+ * ```ts
+ * @Component({...})
+ * export class TestComponent {
+ *   headerEl = contentChild<ElementRef>('h');                    // Signal<ElementRef|undefined>
+ *   headerElElRequired = contentChild.required<ElementRef>('h'); // Signal<ElementRef>
+ *   header = contentChild(MyHeader);                             // Signal<MyHeader|undefined>
+ *   headerRequired = contentChild.required(MyHeader);            // Signal<MyHeader>
+ * }
+ * ```
+ */
+export declare const contentChild: ContentChildFunction;
+
+/**
  * Type of the ContentChild decorator / constructor function.
  *
  * @publicApi
@@ -1959,6 +1979,44 @@ export declare interface ContentChildDecorator {
 }
 
 /**
+ * Type of the `contentChild` function.
+ *
+ * The contentChild function creates a singular content query. It is a special function that also
+ * provides access to required query results via the `.required` property.
+ *
+ * @developerPreview
+ */
+export declare interface ContentChildFunction {
+    /**
+     * Initializes a content child query.
+     *
+     * Consider using `contentChild.required` for queries that should always match.
+     * @developerPreview
+     */
+    <LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
+        descendants?: boolean;
+    }): Signal<LocatorT | undefined>;
+    <LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
+        descendants?: boolean;
+        read: ProviderToken<ReadT>;
+    }): Signal<ReadT | undefined>;
+    /**
+     * Initializes a content child query that is always expected to match.
+     *
+     * @developerPreview
+     */
+    required: {
+        <LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
+            descendants?: boolean;
+        }): Signal<LocatorT>;
+        <LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
+            descendants?: boolean;
+            read: ProviderToken<ReadT>;
+        }): Signal<ReadT>;
+    };
+}
+
+/**
  * Type of the ContentChildren metadata.
  *
  *
@@ -1975,6 +2033,15 @@ export declare type ContentChildren = Query;
  * @publicApi
  */
 export declare const ContentChildren: ContentChildrenDecorator;
+
+export declare function contentChildren<LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
+    descendants?: boolean;
+}): Signal<ReadonlyArray<LocatorT>>;
+
+export declare function contentChildren<LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
+    descendants?: boolean;
+    read: ProviderToken<ReadT>;
+}): Signal<ReadonlyArray<ReadT>>;
 
 /**
  * Type of the ContentChildren decorator / constructor function.
@@ -10671,6 +10738,29 @@ export declare type ViewChild = Query;
 export declare const ViewChild: ViewChildDecorator;
 
 /**
+ * Initializes a view child query.
+ *
+ * Consider using `viewChild.required` for queries that should always match.
+ *
+ * @usageNotes
+ * Create a child query in your component by declaring a
+ * class field and initializing it with the `viewChild()` function.
+ *
+ * ```ts
+ * @Component({template: '<div #el></div><my-component #cmp />'})
+ * export class TestComponent {
+ *   divEl = viewChild<ElementRef>('el');                   // Signal<ElementRef|undefined>
+ *   divElRequired = viewChild.required<ElementRef>('el');  // Signal<ElementRef>
+ *   cmp = viewChild(MyComponent);                          // Signal<MyComponent|undefined>
+ *   cmpRequired = viewChild.required(MyComponent);         // Signal<MyComponent>
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+export declare const viewChild: ViewChildFunction;
+
+/**
  * Type of the ViewChild decorator / constructor function.
  *
  * @see {@link ViewChild}
@@ -10744,6 +10834,38 @@ export declare interface ViewChildDecorator {
 }
 
 /**
+ * Type of the `viewChild` function. The viewChild function creates a singular view query.
+ *
+ * It is a special function that also provides access to required query results via the `.required`
+ * property.
+ *
+ * @developerPreview
+ */
+export declare interface ViewChildFunction {
+    /**
+     * Initializes a view child query. Consider using `viewChild.required` for queries that should
+     * always match.
+     *
+     * @developerPreview
+     */
+    <LocatorT>(locator: ProviderToken<LocatorT> | string): Signal<LocatorT | undefined>;
+    <LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
+        read: ProviderToken<ReadT>;
+    }): Signal<ReadT | undefined>;
+    /**
+     * Initializes a view child query that is expected to always match an element.
+     *
+     * @developerPreview
+     */
+    required: {
+        <LocatorT>(locator: ProviderToken<LocatorT> | string): Signal<LocatorT>;
+        <LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
+            read: ProviderToken<ReadT>;
+        }): Signal<ReadT>;
+    };
+}
+
+/**
  * Type of the ViewChildren metadata.
  *
  * @publicApi
@@ -10757,6 +10879,12 @@ export declare type ViewChildren = Query;
  * @publicApi
  */
 export declare const ViewChildren: ViewChildrenDecorator;
+
+export declare function viewChildren<LocatorT>(locator: ProviderToken<LocatorT> | string): Signal<ReadonlyArray<LocatorT>>;
+
+export declare function viewChildren<LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
+    read: ProviderToken<ReadT>;
+}): Signal<ReadonlyArray<ReadT>>;
 
 /**
  * Type of the ViewChildren decorator / constructor function.
