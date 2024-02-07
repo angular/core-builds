@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-next.1+sha-38c0084
+ * @license Angular v17.2.0-next.1+sha-ca239e8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16740,7 +16740,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.1+sha-38c0084']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-next.1+sha-ca239e8']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17618,9 +17618,20 @@ function getTQuery(tView, index) {
     ngDevMode && assertDefined(tView.queries, 'TQueries must be defined to retrieve a TQuery');
     return tView.queries.getByIndex(index);
 }
+/**
+ * A helper function collecting results from all the views where a given query was active.
+ * @param lView
+ * @param queryIndex
+ */
+function getQueryResults(lView, queryIndex) {
+    const tView = lView[TVIEW];
+    const tQuery = getTQuery(tView, queryIndex);
+    return tQuery.crossesNgTemplate ? collectQueryResults(tView, lView, queryIndex, []) :
+        materializeViewResults(tView, lView, tQuery, queryIndex);
+}
 
 /**
- * Query-as signal factory function in charge of creating a new computed signal capturing query
+ * A signal factory function in charge of creating a new computed signal capturing query
  * results. This centralized creation function is used by all types of queries (child / children,
  * required / optional).
  *
@@ -17685,13 +17696,8 @@ function refreshSignalQuery(node, firstOnly) {
         return (firstOnly ? undefined : EMPTY_ARRAY);
     }
     const queryList = loadQueryInternal(lView, queryIndex);
-    const tView = lView[TVIEW];
-    const tQuery = getTQuery(tView, queryIndex);
-    // TODO(refactor): add an utility method for the following logic
-    const result = tQuery.crossesNgTemplate ?
-        collectQueryResults(tView, lView, queryIndex, []) :
-        materializeViewResults(tView, lView, tQuery, queryIndex);
-    queryList.reset(result, unwrapElementRef);
+    const results = getQueryResults(lView, queryIndex);
+    queryList.reset(results, unwrapElementRef);
     return firstOnly ? queryList.first : queryList.toArray();
 }
 
@@ -26725,9 +26731,7 @@ function ɵɵqueryRefresh(queryList) {
             queryList.reset([]);
         }
         else {
-            const result = tQuery.crossesNgTemplate ?
-                collectQueryResults(tView, lView, queryIndex, []) :
-                materializeViewResults(tView, lView, tQuery, queryIndex);
+            const result = getQueryResults(lView, queryIndex);
             queryList.reset(result, unwrapElementRef);
             queryList.notifyOnChanges();
         }
@@ -30666,7 +30670,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-next.1+sha-38c0084');
+const VERSION = new Version('17.2.0-next.1+sha-ca239e8');
 
 class Console {
     log(message) {
