@@ -2562,6 +2562,9 @@ var Identifiers = _Identifiers;
 (() => {
   _Identifiers.UnwrapDirectiveSignalInputs = { name: "\u0275UnwrapDirectiveSignalInputs", moduleName: CORE };
 })();
+(() => {
+  _Identifiers.unwrapWritableSignal = { name: "\u0275unwrapWritableSignal", moduleName: CORE };
+})();
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/util.mjs
 var DASH_CASE_REGEXP = /-+([a-z0-9])/g;
@@ -25989,7 +25992,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.1+sha-0dfbde9");
+var VERSION2 = new Version("17.2.0-next.1+sha-a08863e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
