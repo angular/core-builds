@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-d02fcb1
+ * @license Angular v17.3.0-next.0+sha-153fc61
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13765,8 +13765,7 @@ const WRITABLE_SIGNAL = /* @__PURE__ */ Symbol('WRITABLE_SIGNAL');
  * @codeGenApi
  */
 function ɵunwrapWritableSignal(value) {
-    // Note: needs to be kept in sync with the copies in `fake_core/index.ts` and
-    // `ngtsc/typecheck/testing/index.ts` to ensure consistent tests.
+    // Note: needs to be kept in sync with the copy in `fake_core/index.ts`.
     // Note: the function uses `WRITABLE_SIGNAL` as a brand instead of `WritableSignal<T>`,
     // because the latter incorrectly unwraps non-signal getter functions.
     return null;
@@ -16740,7 +16739,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-d02fcb1']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-153fc61']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30670,7 +30669,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.0+sha-d02fcb1');
+const VERSION = new Version('17.3.0-next.0+sha-153fc61');
 
 class Console {
     log(message) {
