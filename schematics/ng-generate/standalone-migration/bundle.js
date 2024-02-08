@@ -267,7 +267,7 @@ function isWithinBasePath(base, path4) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/file_system/src/node_js_file_system.mjs
 var import_fs = __toESM(require("fs"), 1);
-var import_module = __toESM(require("module"), 1);
+var import_module = require("module");
 var p = __toESM(require("path"), 1);
 var import_url = require("url");
 var import_meta = {};
@@ -342,7 +342,7 @@ var NodeJSReadonlyFileSystem = class extends NodeJSPathManipulation {
     return this.resolve(import_fs.default.realpathSync(path4));
   }
   getDefaultLibLocation() {
-    const requireFn = isCommonJS ? require : import_module.default.createRequire(currentFileUrl);
+    const requireFn = isCommonJS ? require : (0, import_module.createRequire)(currentFileUrl);
     return this.resolve(requireFn.resolve("typescript"), "..");
   }
 };
@@ -26906,7 +26906,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.2.0-next.1+sha-ca239e8");
+var VERSION2 = new Version("17.2.0-next.1+sha-9c2bad9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27972,7 +27972,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-ca239e8"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-9c2bad9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -28041,7 +28041,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-ca239e8"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-9c2bad9"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -28340,7 +28340,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-ca239e8"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-9c2bad9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -28363,7 +28363,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-ca239e8"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-9c2bad9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -28401,7 +28401,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-ca239e8"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-9c2bad9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -28425,7 +28425,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-ca239e8"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-9c2bad9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28460,7 +28460,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.2.0-next.1+sha-ca239e8"));
+  definitionMap.set("version", literal("17.2.0-next.1+sha-9c2bad9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28477,7 +28477,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.2.0-next.1+sha-ca239e8");
+var VERSION3 = new Version("17.2.0-next.1+sha-9c2bad9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/partial_evaluator/src/diagnostics.mjs
 var import_typescript20 = __toESM(require("typescript"), 1);
@@ -28600,6 +28600,7 @@ var FatalDiagnosticError = class extends Error {
     this.relatedInformation = relatedInformation;
     this.message = null;
     this._isFatalDiagnosticError = true;
+    Object.setPrototypeOf(this, new.target.prototype);
   }
   toDiagnostic() {
     return makeDiagnostic(this.code, this.node, this.diagnosticMessage, this.relatedInformation);
@@ -29801,16 +29802,16 @@ function reflectTypeEntityToDeclaration(type, checker) {
     return { node, from: null };
   }
 }
-function filterToMembersWithDecorator(members, name, module3) {
+function filterToMembersWithDecorator(members, name, module2) {
   return members.filter((member) => !member.isStatic).map((member) => {
     if (member.decorators === null) {
       return null;
     }
     const decorators = member.decorators.filter((dec) => {
       if (dec.import !== null) {
-        return dec.import.name === name && (module3 === void 0 || dec.import.from === module3);
+        return dec.import.name === name && (module2 === void 0 || dec.import.from === module2);
       } else {
-        return dec.name === name && module3 === void 0;
+        return dec.name === name && module2 === void 0;
       }
     });
     if (decorators.length === 0) {
@@ -30733,16 +30734,16 @@ var StaticInterpreter = class {
     } else if (lhs instanceof Reference2) {
       const ref = lhs.node;
       if (this.host.isClass(ref)) {
-        const module3 = owningModule(context, lhs.bestGuessOwningModule);
+        const module2 = owningModule(context, lhs.bestGuessOwningModule);
         let value = void 0;
         const member = this.host.getMembersOfClass(ref).find((member2) => member2.isStatic && member2.name === strIndex);
         if (member !== void 0) {
           if (member.value !== null) {
             value = this.visitExpression(member.value, context);
           } else if (member.implementation !== null) {
-            value = new Reference2(member.implementation, module3);
+            value = new Reference2(member.implementation, module2);
           } else if (member.node) {
-            value = new Reference2(member.node, module3);
+            value = new Reference2(member.node, module2);
           }
         }
         return value;
@@ -35408,10 +35409,10 @@ function invalidReexport(decl, rawExpr, isStandalone) {
   }
   return makeDiagnostic(ErrorCode.NGMODULE_INVALID_REEXPORT, getDiagnosticNode(decl, rawExpr), message);
 }
-function reexportCollision(module3, refA, refB) {
-  const childMessageText = `This directive/pipe is part of the exports of '${module3.name.text}' and shares the same name as another exported directive/pipe.`;
-  return makeDiagnostic(ErrorCode.NGMODULE_REEXPORT_NAME_COLLISION, module3.name, `
-    There was a name collision between two classes named '${refA.node.name.text}', which are both part of the exports of '${module3.name.text}'.
+function reexportCollision(module2, refA, refB) {
+  const childMessageText = `This directive/pipe is part of the exports of '${module2.name.text}' and shares the same name as another exported directive/pipe.`;
+  return makeDiagnostic(ErrorCode.NGMODULE_REEXPORT_NAME_COLLISION, module2.name, `
+    There was a name collision between two classes named '${refA.node.name.text}', which are both part of the exports of '${module2.name.text}'.
 
     Angular generates re-exports of an NgModule's exported directives/pipes from the module's source file in certain cases, using the declared name of the class. If two classes of the same name are exported, this automatic naming does not work.
 
@@ -46136,11 +46137,11 @@ var TemplateTypeCheckerImpl = class {
     }
     return this.typeCheckScopeRegistry.getTypeCheckDirectiveMetadata(new Reference2(dir));
   }
-  getNgModuleMetadata(module3) {
-    if (!isNamedClassDeclaration(module3)) {
+  getNgModuleMetadata(module2) {
+    if (!isNamedClassDeclaration(module2)) {
       return null;
     }
-    return this.metaReader.getNgModuleMetadata(new Reference2(module3));
+    return this.metaReader.getNgModuleMetadata(new Reference2(module2));
   }
   getPipeMetadata(pipe2) {
     if (!isNamedClassDeclaration(pipe2)) {
@@ -47805,8 +47806,8 @@ var NgCompilerHost = class extends DelegatingCompilerHost2 {
     const moduleResolutionCache = import_typescript110.default.createModuleResolutionCache(this.getCurrentDirectory(), this.getCanonicalFileName.bind(this));
     return (moduleNames, containingFile, reusedNames, redirectedReference, options) => {
       return moduleNames.map((moduleName) => {
-        const module3 = import_typescript110.default.resolveModuleName(moduleName, containingFile, options, this, moduleResolutionCache, redirectedReference);
-        return module3.resolvedModule;
+        const module2 = import_typescript110.default.resolveModuleName(moduleName, containingFile, options, this, moduleResolutionCache, redirectedReference);
+        return module2.resolvedModule;
       });
     };
   }
@@ -48952,11 +48953,11 @@ function toStandalone(sourceFiles, program, printer, fileImportRemapper, compone
   for (const sourceFile of sourceFiles) {
     const modules = findNgModuleClassesToMigrate(sourceFile, typeChecker);
     const testObjects = findTestObjectsToMigrate(sourceFile, typeChecker);
-    for (const module3 of modules) {
-      const allModuleDeclarations = extractDeclarationsFromModule(module3, templateTypeChecker);
-      const unbootstrappedDeclarations = filterNonBootstrappedDeclarations(allModuleDeclarations, module3, templateTypeChecker, typeChecker);
+    for (const module2 of modules) {
+      const allModuleDeclarations = extractDeclarationsFromModule(module2, templateTypeChecker);
+      const unbootstrappedDeclarations = filterNonBootstrappedDeclarations(allModuleDeclarations, module2, templateTypeChecker, typeChecker);
       if (unbootstrappedDeclarations.length > 0) {
-        modulesToMigrate.add(module3);
+        modulesToMigrate.add(module2);
         unbootstrappedDeclarations.forEach((decl) => declarations.add(decl));
       }
     }
