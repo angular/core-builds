@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.2+sha-63a9027
+ * @license Angular v17.1.2+sha-744e206
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15764,7 +15764,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.2+sha-63a9027']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.2+sha-744e206']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30177,7 +30177,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.2+sha-63a9027');
+const VERSION = new Version('17.1.2+sha-744e206');
 
 class Console {
     log(message) {
@@ -32147,7 +32147,10 @@ function whenStable(applicationRef) {
     return whenStablePromise;
 }
 function shouldRecheckView(view) {
-    return requiresRefreshOrTraversal(view) || !!(view[FLAGS] & 64 /* LViewFlags.Dirty */);
+    return requiresRefreshOrTraversal(view);
+    // TODO(atscott): We need to support rechecking views marked dirty again in afterRender hooks
+    // in order to support the transition to zoneless. b/308152025
+    /* || !!(view[FLAGS] & LViewFlags.Dirty); */
 }
 
 class NgZoneChangeDetectionScheduler {
