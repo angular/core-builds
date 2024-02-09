@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-153fc61
+ * @license Angular v17.3.0-next.0+sha-dab5fc3
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6735,6 +6735,10 @@ export declare interface ModelSignal<T> extends WritableSignal<T> {
     [SIGNAL]: ModelSignalNode<T>;
     [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: T;
     [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: T;
+    /** @deprecated Do not use, will be removed. */
+    subscribe(callback: (value: T) => void): {
+        unsubscribe: () => void;
+    };
 }
 
 /**
