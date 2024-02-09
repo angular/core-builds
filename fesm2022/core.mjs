@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-rc.1+sha-7aa92fa
+ * @license Angular v17.2.0-rc.1+sha-62b87b4
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16740,7 +16740,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-rc.1+sha-7aa92fa']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-rc.1+sha-62b87b4']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17500,7 +17500,7 @@ function materializeViewResults(tView, lView, tQuery, queryIndex) {
         const tViewData = tView.data;
         const tQueryMatches = tQuery.matches;
         const result = [];
-        for (let i = 0; i < tQueryMatches.length; i += 2) {
+        for (let i = 0; tQueryMatches !== null && i < tQueryMatches.length; i += 2) {
             const matchedNodeIdx = tQueryMatches[i];
             if (matchedNodeIdx < 0) {
                 // we at the <ng-template> marker which might have results in views created based on this
@@ -30670,7 +30670,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-rc.1+sha-7aa92fa');
+const VERSION = new Version('17.2.0-rc.1+sha-62b87b4');
 
 class Console {
     log(message) {
