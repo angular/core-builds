@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-rc.1+sha-4d722a2
+ * @license Angular v17.2.0-rc.1+sha-6d00115
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -62,7 +62,7 @@ function formatRuntimeError(code, message) {
     return errorMessage;
 }
 
-const REQUIRED_UNSET_VALUE$1 = /* @__PURE__ */ Symbol('InputSignalNode#UNSET');
+const REQUIRED_UNSET_VALUE = /* @__PURE__ */ Symbol('InputSignalNode#UNSET');
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
 // a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
 // TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
@@ -94,7 +94,7 @@ function createInputSignal(initialValue, options) {
     function inputValueFn() {
         // Record that someone looked at this signal.
         producerAccessed$1(node);
-        if (node.value === REQUIRED_UNSET_VALUE$1) {
+        if (node.value === REQUIRED_UNSET_VALUE) {
             throw new RuntimeError(-950 /* RuntimeErrorCode.REQUIRED_INPUT_NO_VALUE */, ngDevMode && 'Input is required but no value is available yet.');
         }
         return node.value;
@@ -179,7 +179,7 @@ function inputFunction(initialValue, opts) {
     return createInputSignal(initialValue, opts);
 }
 function inputRequiredFunction(opts) {
-    return createInputSignal(REQUIRED_UNSET_VALUE$1, opts);
+    return createInputSignal(REQUIRED_UNSET_VALUE, opts);
 }
 /**
  * The `input` function allows declaration of inputs in directives and
@@ -9672,7 +9672,7 @@ function processCleanups(tView, lView) {
                 const targetIdx = tCleanup[i + 3];
                 ngDevMode && assertNumber(targetIdx, 'cleanup target must be a number');
                 if (targetIdx >= 0) {
-                    // unregister
+                    // Destroy anything whose teardown is a function call (e.g. QueryList, ModelSignal).
                     lCleanup[targetIdx]();
                 }
                 else {
@@ -16740,7 +16740,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-rc.1+sha-4d722a2']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-rc.1+sha-6d00115']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17819,19 +17819,6 @@ function contentChildren(locator, opts) {
     return createMultiResultQuerySignalFn();
 }
 
-const REQUIRED_UNSET_VALUE = /* @__PURE__ */ Symbol('ModelSignalNode#UNSET');
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const MODEL_SIGNAL_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...SIGNAL_NODE$1,
-        // TODO(crisbeto): figure out how to avoid this.
-        // Maybe set an input flag that the value is writeable?
-        applyValueToInputSignal: (node, value) => signalSetFn$1(node, value)
-    };
-})();
-
 /**
  * Creates a model signal.
  *
@@ -17841,7 +17828,7 @@ const MODEL_SIGNAL_NODE = /* @__PURE__ */ (() => {
  */
 function createModelSignal(initialValue) {
     const subscriptions = [];
-    const node = Object.create(MODEL_SIGNAL_NODE);
+    const node = Object.create(INPUT_SIGNAL_NODE);
     node.value = initialValue;
     function getter() {
         producerAccessed$1(node);
@@ -17867,13 +17854,10 @@ function createModelSignal(initialValue) {
     };
     getter.subscribe = (callback) => {
         subscriptions.push(callback);
-        // TODO(crisbeto): figure out if we can get rid of the object literal.
-        return {
-            unsubscribe: () => {
-                const index = subscriptions.indexOf(callback);
-                if (index > -1) {
-                    subscriptions.splice(index, 1);
-                }
+        return () => {
+            const index = subscriptions.indexOf(callback);
+            if (index > -1) {
+                subscriptions.splice(index, 1);
             }
         };
     };
@@ -20037,11 +20021,12 @@ function ɵɵdeferOnImmediate() {
     const lView = getLView();
     const tNode = getCurrentTNode();
     const tView = lView[TVIEW];
+    const injector = lView[INJECTOR$1];
     const tDetails = getTDeferBlockDetails(tView, tNode);
-    // Render placeholder block only if loading template is not present
-    // to avoid content flickering, since it would be immediately replaced
+    // Render placeholder block only if loading template is not present and we're on
+    // the client to avoid content flickering, since it would be immediately replaced
     // by the loading block.
-    if (tDetails.loadingTmplIndex === null) {
+    if (!shouldTriggerDeferBlock(injector) || tDetails.loadingTmplIndex === null) {
         renderPlaceholder(lView, tNode);
     }
     triggerDeferBlock(lView, tNode);
@@ -26036,10 +26021,15 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
                 if (ngDevMode && !isOutputSubscribable(output)) {
                     throw new Error(`@Output ${minifiedName} not initialized in '${directiveInstance.constructor.name}'.`);
                 }
-                const subscription = output.subscribe(listenerFn);
+                const subscriptionOrCallback = output.subscribe(listenerFn);
                 const idx = lCleanup.length;
-                lCleanup.push(listenerFn, subscription);
-                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+                lCleanup.push(listenerFn, subscriptionOrCallback);
+                if (tCleanup) {
+                    // The cleanup function expects negative indexes to be
+                    // of type Subscription while positive are cleanup functions.
+                    const cleanupIdx = typeof subscriptionOrCallback === 'function' ? idx + 1 : -(idx + 1);
+                    tCleanup.push(eventName, tNode.index, idx, cleanupIdx);
+                }
             }
         }
     }
@@ -30682,7 +30672,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-rc.1+sha-4d722a2');
+const VERSION = new Version('17.2.0-rc.1+sha-6d00115');
 
 class Console {
     log(message) {
