@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-1c990cd
+ * @license Angular v17.3.0-next.0+sha-383e093
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5630,7 +5630,7 @@ export declare interface InputSignal<ReadT> extends InputSignalWithTransform<Rea
  * Reactive node type for an input signal. An input signal extends a signal.
  * There are special properties to enable transforms and required inputs.
  */
-declare interface InputSignalNode<ReadT, WriteT> extends SignalNode<ReadT | typeof REQUIRED_UNSET_VALUE> {
+declare interface InputSignalNode<ReadT, WriteT> extends SignalNode<ReadT> {
     /**
      * User-configured transform that will run whenever a new value is applied
      * to the input signal node.
@@ -6732,22 +6732,11 @@ export declare interface ModelOptions {
  * @developerPreview
  */
 export declare interface ModelSignal<T> extends WritableSignal<T> {
-    [SIGNAL]: ModelSignalNode<T>;
+    [SIGNAL]: InputSignalNode<T, T>;
     [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: T;
     [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: T;
     /** @deprecated Do not use, will be removed. */
-    subscribe(callback: (value: T) => void): {
-        unsubscribe: () => void;
-    };
-}
-
-/**
- * Reactive node type for a model signal. Model signals extend
- * signals by adding the ability to track subscriptions and to be required.
- */
-declare interface ModelSignalNode<T> extends SignalNode<T> {
-    /** Used by the runtime to write a value to the signal input. */
-    applyValueToInputSignal: (node: ModelSignalNode<T>, value: T) => void;
+    subscribe(callback: (value: T) => void): () => void;
 }
 
 /**
@@ -8601,8 +8590,6 @@ export declare interface RendererType2 {
         [kind: string]: any;
     };
 }
-
-declare const REQUIRED_UNSET_VALUE: unique symbol;
 
 /**
  * Lazily retrieves the reference value from a forwardRef.
