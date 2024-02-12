@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.0-rc.1+sha-deb9ea0
+ * @license Angular v17.2.0-rc.1+sha-4d722a2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16740,7 +16740,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-rc.1+sha-deb9ea0']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.0-rc.1+sha-4d722a2']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17657,6 +17657,7 @@ function createQuerySignalFn(firstOnly, required) {
     });
     node = signalFn[SIGNAL$1];
     node._dirtyCounter = signal(0);
+    node._flatValue = undefined;
     if (ngDevMode) {
         signalFn.toString = () => `[Query Signal]`;
     }
@@ -17698,7 +17699,18 @@ function refreshSignalQuery(node, firstOnly) {
     const queryList = loadQueryInternal(lView, queryIndex);
     const results = getQueryResults(lView, queryIndex);
     queryList.reset(results, unwrapElementRef);
-    return firstOnly ? queryList.first : queryList.toArray();
+    if (firstOnly) {
+        return queryList.first;
+    }
+    else {
+        // TODO: remove access to the private _changesDetected field by abstracting / removing usage of
+        // QueryList in the signal-based queries (perf follow-up)
+        const resultChanged = queryList._changesDetected;
+        if (resultChanged || node._flatValue === undefined) {
+            return node._flatValue = queryList.toArray();
+        }
+        return node._flatValue;
+    }
 }
 
 function viewChildFn(locator, opts) {
@@ -30670,7 +30682,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.0-rc.1+sha-deb9ea0');
+const VERSION = new Version('17.2.0-rc.1+sha-4d722a2');
 
 class Console {
     log(message) {
