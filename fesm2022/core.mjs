@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.1.3+sha-017825b
+ * @license Angular v17.1.3+sha-da93046
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15764,7 +15764,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.3+sha-017825b']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.1.3+sha-da93046']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19017,11 +19017,12 @@ function ɵɵdeferOnImmediate() {
     const lView = getLView();
     const tNode = getCurrentTNode();
     const tView = lView[TVIEW];
+    const injector = lView[INJECTOR$1];
     const tDetails = getTDeferBlockDetails(tView, tNode);
-    // Render placeholder block only if loading template is not present
-    // to avoid content flickering, since it would be immediately replaced
+    // Render placeholder block only if loading template is not present and we're on
+    // the client to avoid content flickering, since it would be immediately replaced
     // by the loading block.
-    if (tDetails.loadingTmplIndex === null) {
+    if (!shouldTriggerDeferBlock(injector) || tDetails.loadingTmplIndex === null) {
         renderPlaceholder(lView, tNode);
     }
     triggerDeferBlock(lView, tNode);
@@ -30177,7 +30178,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.1.3+sha-017825b');
+const VERSION = new Version('17.1.3+sha-da93046');
 
 class Console {
     log(message) {
