@@ -26906,7 +26906,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.0-next.0+sha-9bc386e");
+var VERSION2 = new Version("17.3.0-next.0+sha-1c990cd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27972,7 +27972,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.3.0-next.0+sha-9bc386e"));
+  definitionMap.set("version", literal("17.3.0-next.0+sha-1c990cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -28041,7 +28041,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.3.0-next.0+sha-9bc386e"));
+  definitionMap.set("version", literal("17.3.0-next.0+sha-1c990cd"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -28340,7 +28340,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.3.0-next.0+sha-9bc386e"));
+  definitionMap.set("version", literal("17.3.0-next.0+sha-1c990cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -28363,7 +28363,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.3.0-next.0+sha-9bc386e"));
+  definitionMap.set("version", literal("17.3.0-next.0+sha-1c990cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -28401,7 +28401,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.3.0-next.0+sha-9bc386e"));
+  definitionMap.set("version", literal("17.3.0-next.0+sha-1c990cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -28425,7 +28425,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.3.0-next.0+sha-9bc386e"));
+  definitionMap.set("version", literal("17.3.0-next.0+sha-1c990cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -28460,7 +28460,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.3.0-next.0+sha-9bc386e"));
+  definitionMap.set("version", literal("17.3.0-next.0+sha-1c990cd"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -28477,7 +28477,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.3.0-next.0+sha-9bc386e");
+var VERSION3 = new Version("17.3.0-next.0+sha-1c990cd");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/partial_evaluator/src/diagnostics.mjs
 var import_typescript20 = __toESM(require("typescript"), 1);
@@ -28567,7 +28567,7 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["SUGGEST_STRICT_TEMPLATES"] = 10001] = "SUGGEST_STRICT_TEMPLATES";
   ErrorCode2[ErrorCode2["SUGGEST_SUBOPTIMAL_TYPE_INFERENCE"] = 10002] = "SUGGEST_SUBOPTIMAL_TYPE_INFERENCE";
   ErrorCode2[ErrorCode2["LOCAL_COMPILATION_UNRESOLVED_CONST"] = 11001] = "LOCAL_COMPILATION_UNRESOLVED_CONST";
-  ErrorCode2[ErrorCode2["LOCAL_COMPILATION_EXPRESSION_FOR_HOST_DIRECTIVE"] = 11003] = "LOCAL_COMPILATION_EXPRESSION_FOR_HOST_DIRECTIVE";
+  ErrorCode2[ErrorCode2["LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION"] = 11003] = "LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION";
 })(ErrorCode || (ErrorCode = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/diagnostics/src/docs.mjs
@@ -36448,7 +36448,7 @@ function extractHostDirectives(rawHostDirectives, evaluator, compilationMode) {
     let nameForErrors = (fieldName) => "@Directive.hostDirectives";
     if (compilationMode === CompilationMode.LOCAL && hostReference instanceof DynamicValue) {
       if (!import_typescript54.default.isIdentifier(hostReference.node) && !import_typescript54.default.isPropertyAccessExpression(hostReference.node)) {
-        throw new FatalDiagnosticError(ErrorCode.LOCAL_COMPILATION_EXPRESSION_FOR_HOST_DIRECTIVE, hostReference.node, `In local compilation mode, host directive cannot be an expression. Use an identifier instead`);
+        throw new FatalDiagnosticError(ErrorCode.LOCAL_COMPILATION_UNSUPPORTED_EXPRESSION, hostReference.node, `In local compilation mode, host directive cannot be an expression. Use an identifier instead`);
       }
       directive = new WrappedNodeExpr(hostReference.node);
     } else if (hostReference instanceof Reference2) {

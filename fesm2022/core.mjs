@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-9bc386e
+ * @license Angular v17.3.0-next.0+sha-1c990cd
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16739,7 +16739,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-9bc386e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-1c990cd']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17656,6 +17656,7 @@ function createQuerySignalFn(firstOnly, required) {
     });
     node = signalFn[SIGNAL$1];
     node._dirtyCounter = signal(0);
+    node._flatValue = undefined;
     if (ngDevMode) {
         signalFn.toString = () => `[Query Signal]`;
     }
@@ -17697,7 +17698,18 @@ function refreshSignalQuery(node, firstOnly) {
     const queryList = loadQueryInternal(lView, queryIndex);
     const results = getQueryResults(lView, queryIndex);
     queryList.reset(results, unwrapElementRef);
-    return firstOnly ? queryList.first : queryList.toArray();
+    if (firstOnly) {
+        return queryList.first;
+    }
+    else {
+        // TODO: remove access to the private _changesDetected field by abstracting / removing usage of
+        // QueryList in the signal-based queries (perf follow-up)
+        const resultChanged = queryList._changesDetected;
+        if (resultChanged || node._flatValue === undefined) {
+            return node._flatValue = queryList.toArray();
+        }
+        return node._flatValue;
+    }
 }
 
 function viewChildFn(locator, opts) {
@@ -30669,7 +30681,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.0+sha-9bc386e');
+const VERSION = new Version('17.3.0-next.0+sha-1c990cd');
 
 class Console {
     log(message) {
