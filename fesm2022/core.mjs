@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-d181a36
+ * @license Angular v17.3.0-next.0+sha-d9a1a7d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10554,7 +10554,10 @@ function executeContentQueries(tView, tNode, lView) {
             for (let directiveIndex = start; directiveIndex < end; directiveIndex++) {
                 const def = tView.data[directiveIndex];
                 if (def.contentQueries) {
-                    def.contentQueries(1 /* RenderFlags.Create */, lView[directiveIndex], directiveIndex);
+                    const directiveInstance = lView[directiveIndex];
+                    ngDevMode &&
+                        assertDefined(directiveIndex, 'Incorrect reference to a directive defining a content query');
+                    def.contentQueries(1 /* RenderFlags.Create */, directiveInstance, directiveIndex);
                 }
             }
         }
@@ -16732,14 +16735,14 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
     }
     // We want to generate an empty QueryList for root content queries for backwards
     // compatibility with ViewEngine.
-    executeContentQueries(tView, rootTNode, componentView);
+    executeContentQueries(tView, rootTNode, rootLView);
     return component;
 }
 /** Sets the static attributes on a root component. */
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-d181a36']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-d9a1a7d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30671,7 +30674,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.0+sha-d181a36');
+const VERSION = new Version('17.3.0-next.0+sha-d9a1a7d');
 
 class Console {
     log(message) {
