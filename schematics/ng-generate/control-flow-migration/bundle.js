@@ -26001,7 +26001,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.0-next.0+sha-1a6beae");
+var VERSION2 = new Version("17.3.0-next.0+sha-4efcc74");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26813,10 +26813,10 @@ function formatTemplate(tmpl, templateType) {
     const selfClosingRegex = new RegExp(`^\\s*<(${selfClosingList}).+\\/?>`);
     const openSelfClosingRegex = new RegExp(`^\\s*<(${selfClosingList})(?![^>]*\\/>)[^>]*$`);
     const closeBlockRegex = /^\s*\}\s*$|^\s*\}\s\@else/;
-    const closeElRegex = /\s*<\/([a-zA-Z0-9\-_]+)*>/;
+    const closeElRegex = /\s*<\/([a-zA-Z0-9\-_]+)\s*>/m;
     const closeMultiLineElRegex = /^\s*([a-zA-Z0-9\-_\[\]]+)?=?"?([^”<]+)?"?\s?\/>$/;
     const closeSelfClosingMultiLineRegex = /^\s*([a-zA-Z0-9\-_\[\]]+)?=?"?([^”\/<]+)?"?\s?>$/;
-    const singleLineElRegex = /\s*<([a-zA-Z0-9]+)(?![^>]*\/>)[^>]*>.*<\/([a-zA-Z0-9\-_]+)*>/;
+    const singleLineElRegex = /\s*<([a-zA-Z0-9]+)(?![^>]*\/>)[^>]*>.*<\/([a-zA-Z0-9\-_]+)\s*>/;
     const lines = tmpl.split("\n");
     const formatted = [];
     let indent = "";
