@@ -1,0 +1,15 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used to patch behavior that needs to _temporarily_ be different between g3 and external.
+ *
+ * For example, make breaking changes ahead of the main branch targeting a major version.
+ * Permanent differences between g3 and external should be configured by individual patches.
+ */
+export const isG3 = false;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaXNfaW50ZXJuYWwuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9pc19pbnRlcm5hbC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7O0dBTUc7QUFFSDs7Ozs7R0FLRztBQUNILE1BQU0sQ0FBQyxNQUFNLElBQUksR0FBRyxLQUFLLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIExMQyBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuLyoqXG4gKiBVc2VkIHRvIHBhdGNoIGJlaGF2aW9yIHRoYXQgbmVlZHMgdG8gX3RlbXBvcmFyaWx5XyBiZSBkaWZmZXJlbnQgYmV0d2VlbiBnMyBhbmQgZXh0ZXJuYWwuXG4gKlxuICogRm9yIGV4YW1wbGUsIG1ha2UgYnJlYWtpbmcgY2hhbmdlcyBhaGVhZCBvZiB0aGUgbWFpbiBicmFuY2ggdGFyZ2V0aW5nIGEgbWFqb3IgdmVyc2lvbi5cbiAqIFBlcm1hbmVudCBkaWZmZXJlbmNlcyBiZXR3ZWVuIGczIGFuZCBleHRlcm5hbCBzaG91bGQgYmUgY29uZmlndXJlZCBieSBpbmRpdmlkdWFsIHBhdGNoZXMuXG4gKi9cbmV4cG9ydCBjb25zdCBpc0czID0gZmFsc2U7XG4iXX0=

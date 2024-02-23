@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-707bfc9
+ * @license Angular v17.3.0-next.0+sha-3f95829
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16742,7 +16742,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-707bfc9']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-3f95829']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30674,7 +30674,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.0+sha-707bfc9');
+const VERSION = new Version('17.3.0-next.0+sha-3f95829');
 
 class Console {
     log(message) {
@@ -30693,6 +30693,14 @@ class Console {
         type: Injectable,
         args: [{ providedIn: 'platform' }]
     }], null, null); })();
+
+/**
+ * Used to patch behavior that needs to _temporarily_ be different between g3 and external.
+ *
+ * For example, make breaking changes ahead of the main branch targeting a major version.
+ * Permanent differences between g3 and external should be configured by individual patches.
+ */
+const isG3 = false;
 
 /**
  * These are the data structures that our framework injector profiler will fill with data in order
@@ -32507,10 +32515,9 @@ function whenStable(applicationRef) {
     return whenStablePromise;
 }
 function shouldRecheckView(view) {
-    return requiresRefreshOrTraversal(view);
-    // TODO(atscott): We need to support rechecking views marked dirty again in afterRender hooks
-    // in order to support the transition to zoneless. b/308152025
-    /* || !!(view[FLAGS] & LViewFlags.Dirty); */
+    return requiresRefreshOrTraversal(view) ||
+        // TODO(atscott): Remove isG3 check and make this a breaking change for v18
+        (isG3 && !!(view[FLAGS] & 64 /* LViewFlags.Dirty */));
 }
 
 /**
