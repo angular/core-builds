@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-4efcc74
+ * @license Angular v17.3.0-next.0+sha-0d95ae5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13747,10 +13747,28 @@ function isSignal(value) {
     return typeof value === 'function' && value[SIGNAL$1] !== undefined;
 }
 
+const markedFeatures = new Set();
+// tslint:disable:ban
+/**
+ * A guarded `performance.mark` for feature marking.
+ *
+ * This method exists because while all supported browser and node.js version supported by Angular
+ * support performance.mark API. This is not the case for other environments such as JSDOM and
+ * Cloudflare workers.
+ */
+function performanceMarkFeature(feature) {
+    if (markedFeatures.has(feature)) {
+        return;
+    }
+    markedFeatures.add(feature);
+    performance?.mark?.('mark_feature_usage', { detail: { feature } });
+}
+
 /**
  * Create a computed `Signal` which derives a reactive value from an expression.
  */
 function computed(computation, options) {
+    performanceMarkFeature('NgSignals');
     const getter = createComputed$1(computation);
     if (options?.equal) {
         getter[SIGNAL$1].equal = options.equal;
@@ -13777,6 +13795,7 @@ function ɵunwrapWritableSignal(value) {
  * Create a `Signal` that can be set or updated directly.
  */
 function signal(initialValue, options) {
+    performanceMarkFeature('NgSignals');
     const signalFn = createSignal$1(initialValue);
     const node = signalFn[SIGNAL$1];
     if (options?.equal) {
@@ -15189,6 +15208,7 @@ class EffectHandle {
  * @developerPreview
  */
 function effect(effectFn, options) {
+    performanceMarkFeature('NgSignals');
     ngDevMode &&
         assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
             'effect inside the component constructor.');
@@ -15220,23 +15240,6 @@ function effect(effectFn, options) {
 
 // clang-format off
 // clang-format on
-
-const markedFeatures = new Set();
-// tslint:disable:ban
-/**
- * A guarded `performance.mark` for feature marking.
- *
- * This method exists because while all supported browser and node.js version supported by Angular
- * support performance.mark API. This is not the case for other environments such as JSDOM and
- * Cloudflare workers.
- */
-function performanceMarkFeature(feature) {
-    if (markedFeatures.has(feature)) {
-        return;
-    }
-    markedFeatures.add(feature);
-    performance?.mark?.('mark_feature_usage', { detail: { feature } });
-}
 
 function noop(...args) {
     // Do nothing.
@@ -16742,7 +16745,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-4efcc74']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-0d95ae5']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30674,7 +30677,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.0+sha-4efcc74');
+const VERSION = new Version('17.3.0-next.0+sha-0d95ae5');
 
 class Console {
     log(message) {
