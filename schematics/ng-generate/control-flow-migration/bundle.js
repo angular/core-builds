@@ -25420,7 +25420,7 @@ var ResourceLoader = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/jit_compiler_facade.mjs
-var SHOULD_USE_TEMPLATE_PIPELINE_FOR_JIT = false;
+var SHOULD_USE_TEMPLATE_PIPELINE_FOR_JIT = true;
 var CompilerFacadeImpl = class {
   constructor(jitEvaluator = new JitEvaluator()) {
     this.jitEvaluator = jitEvaluator;
@@ -26001,7 +26001,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.0-next.0+sha-812a972");
+var VERSION2 = new Version("17.3.0-next.0+sha-1a6beae");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
