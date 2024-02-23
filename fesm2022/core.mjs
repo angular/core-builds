@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-0d95ae5
+ * @license Angular v17.3.0-next.0+sha-dcb9deb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16745,7 +16745,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-0d95ae5']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.0+sha-dcb9deb']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18610,81 +18610,6 @@ function ɵɵInputTransformsFeature(definition) {
 }
 
 /**
- * The name of a field that Angular monkey-patches onto a component
- * class to store a function that loads defer-loadable dependencies
- * and applies metadata to a class.
- */
-const ASYNC_COMPONENT_METADATA_FN = '__ngAsyncComponentMetadataFn__';
-/**
- * If a given component has unresolved async metadata - returns a reference
- * to a function that applies component metadata after resolving defer-loadable
- * dependencies. Otherwise - this function returns `null`.
- */
-function getAsyncClassMetadataFn(type) {
-    const componentClass = type; // cast to `any`, so that we can read a monkey-patched field
-    return componentClass[ASYNC_COMPONENT_METADATA_FN] ?? null;
-}
-/**
- * Handles the process of applying metadata info to a component class in case
- * component template has defer blocks (thus some dependencies became deferrable).
- *
- * @param type Component class where metadata should be added
- * @param dependencyLoaderFn Function that loads dependencies
- * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
- */
-function setClassMetadataAsync(type, dependencyLoaderFn, metadataSetterFn) {
-    const componentClass = type; // cast to `any`, so that we can monkey-patch it
-    componentClass[ASYNC_COMPONENT_METADATA_FN] = () => Promise.all(dependencyLoaderFn()).then(dependencies => {
-        metadataSetterFn(...dependencies);
-        // Metadata is now set, reset field value to indicate that this component
-        // can by used/compiled synchronously.
-        componentClass[ASYNC_COMPONENT_METADATA_FN] = null;
-        return dependencies;
-    });
-    return componentClass[ASYNC_COMPONENT_METADATA_FN];
-}
-/**
- * Adds decorator, constructor, and property metadata to a given type via static metadata fields
- * on the type.
- *
- * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
- *
- * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
- * being tree-shaken away during production builds.
- */
-function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
-    return noSideEffects(() => {
-        const clazz = type;
-        if (decorators !== null) {
-            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
-                clazz.decorators.push(...decorators);
-            }
-            else {
-                clazz.decorators = decorators;
-            }
-        }
-        if (ctorParameters !== null) {
-            // Rather than merging, clobber the existing parameters. If other projects exist which
-            // use tsickle-style annotations and reflect over them in the same way, this could
-            // cause issues, but that is vanishingly unlikely.
-            clazz.ctorParameters = ctorParameters;
-        }
-        if (propDecorators !== null) {
-            // The property decorator objects are merged as it is possible different fields have
-            // different decorator types. Decorators on individual fields are not merged, as it's
-            // also incredibly unlikely that a field will be decorated both with an Angular
-            // decorator and a non-Angular decorator that's also been downleveled.
-            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
-                clazz.propDecorators = { ...clazz.propDecorators, ...propDecorators };
-            }
-            else {
-                clazz.propDecorators = propDecorators;
-            }
-        }
-    });
-}
-
-/**
  * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
  * Provides access to the `NgModule` instance and related objects.
  *
@@ -18822,6 +18747,121 @@ class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
 function createEnvironmentInjector(providers, parent, debugName = null) {
     const adapter = new EnvironmentNgModuleRefAdapter({ providers, parent, debugName, runEnvironmentInitializers: true });
     return adapter.injector;
+}
+
+/**
+ * A service used by the framework to create and cache injector instances.
+ *
+ * This service is used to create a single injector instance for each defer
+ * block definition, to avoid creating an injector for each defer block instance
+ * of a certain type.
+ */
+class CachedInjectorService {
+    constructor() {
+        this.cachedInjectors = new Map();
+    }
+    getOrCreateInjector(key, parentInjector, providers, debugName) {
+        if (!this.cachedInjectors.has(key)) {
+            const injector = providers.length > 0 ?
+                createEnvironmentInjector(providers, parentInjector, debugName) :
+                null;
+            this.cachedInjectors.set(key, injector);
+        }
+        return this.cachedInjectors.get(key);
+    }
+    ngOnDestroy() {
+        try {
+            for (const injector of this.cachedInjectors.values()) {
+                if (injector !== null) {
+                    injector.destroy();
+                }
+            }
+        }
+        finally {
+            this.cachedInjectors.clear();
+        }
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: CachedInjectorService,
+        providedIn: 'environment',
+        factory: () => new CachedInjectorService(),
+    }); }
+}
+
+/**
+ * The name of a field that Angular monkey-patches onto a component
+ * class to store a function that loads defer-loadable dependencies
+ * and applies metadata to a class.
+ */
+const ASYNC_COMPONENT_METADATA_FN = '__ngAsyncComponentMetadataFn__';
+/**
+ * If a given component has unresolved async metadata - returns a reference
+ * to a function that applies component metadata after resolving defer-loadable
+ * dependencies. Otherwise - this function returns `null`.
+ */
+function getAsyncClassMetadataFn(type) {
+    const componentClass = type; // cast to `any`, so that we can read a monkey-patched field
+    return componentClass[ASYNC_COMPONENT_METADATA_FN] ?? null;
+}
+/**
+ * Handles the process of applying metadata info to a component class in case
+ * component template has defer blocks (thus some dependencies became deferrable).
+ *
+ * @param type Component class where metadata should be added
+ * @param dependencyLoaderFn Function that loads dependencies
+ * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
+ */
+function setClassMetadataAsync(type, dependencyLoaderFn, metadataSetterFn) {
+    const componentClass = type; // cast to `any`, so that we can monkey-patch it
+    componentClass[ASYNC_COMPONENT_METADATA_FN] = () => Promise.all(dependencyLoaderFn()).then(dependencies => {
+        metadataSetterFn(...dependencies);
+        // Metadata is now set, reset field value to indicate that this component
+        // can by used/compiled synchronously.
+        componentClass[ASYNC_COMPONENT_METADATA_FN] = null;
+        return dependencies;
+    });
+    return componentClass[ASYNC_COMPONENT_METADATA_FN];
+}
+/**
+ * Adds decorator, constructor, and property metadata to a given type via static metadata fields
+ * on the type.
+ *
+ * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
+ *
+ * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
+ * being tree-shaken away during production builds.
+ */
+function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
+    return noSideEffects(() => {
+        const clazz = type;
+        if (decorators !== null) {
+            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
+                clazz.decorators.push(...decorators);
+            }
+            else {
+                clazz.decorators = decorators;
+            }
+        }
+        if (ctorParameters !== null) {
+            // Rather than merging, clobber the existing parameters. If other projects exist which
+            // use tsickle-style annotations and reflect over them in the same way, this could
+            // cause issues, but that is vanishingly unlikely.
+            clazz.ctorParameters = ctorParameters;
+        }
+        if (propDecorators !== null) {
+            // The property decorator objects are merged as it is possible different fields have
+            // different decorator types. Decorators on individual fields are not merged, as it's
+            // also incredibly unlikely that a field will be decorated both with an Angular
+            // decorator and a non-Angular decorator that's also been downleveled.
+            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
+                clazz.propDecorators = { ...clazz.propDecorators, ...propDecorators };
+            }
+            else {
+                clazz.propDecorators = propDecorators;
+            }
+        }
+    });
 }
 
 /*
@@ -19923,6 +19963,7 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
             dependencyResolverFn: dependencyResolverFn ?? null,
             loadingState: DeferDependenciesLoadingState.NOT_STARTED,
             loadingPromise: null,
+            providers: null,
         };
         enableTimerScheduling?.(tView, tDetails, placeholderConfigIndex, loadingConfigIndex);
         setTDeferBlockDetails(tView, adjustedIndex, tDetails);
@@ -20232,8 +20273,26 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
         // represents a defer block, so always refer to the first one.
         const viewIndex = 0;
         removeLViewFromLContainer(lContainer, viewIndex);
+        let injector;
+        if (newState === DeferBlockState.Complete) {
+            // When we render a defer block in completed state, there might be
+            // newly loaded standalone components used within the block, which may
+            // import NgModules with providers. In order to make those providers
+            // available for components declared in that NgModule, we create an instance
+            // of environment injector to host those providers and pass this injector
+            // to the logic that creates a view.
+            const tDetails = getTDeferBlockDetails(hostTView, tNode);
+            const providers = tDetails.providers;
+            if (providers && providers.length > 0) {
+                const parentInjector = hostLView[INJECTOR$1];
+                const parentEnvInjector = parentInjector.get(EnvironmentInjector);
+                injector =
+                    parentEnvInjector.get(CachedInjectorService)
+                        .getOrCreateInjector(tDetails, parentEnvInjector, providers, ngDevMode ? 'DeferBlock Injector' : '');
+            }
+        }
         const dehydratedView = findMatchingDehydratedView(lContainer, activeBlockTNode.tView.ssrId);
-        const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, { dehydratedView });
+        const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, { dehydratedView, injector });
         addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(activeBlockTNode, dehydratedView));
         markViewDirty(embeddedLView);
     }
@@ -20409,6 +20468,11 @@ function triggerResourceLoading(tDetails, lView, tNode) {
             if (directiveDefs.length > 0) {
                 primaryBlockTView.directiveRegistry =
                     addDepsToRegistry(primaryBlockTView.directiveRegistry, directiveDefs);
+                // Extract providers from all NgModules imported by standalone components
+                // used within this defer block.
+                const directiveTypes = directiveDefs.map(def => def.type);
+                const providers = internalImportProvidersFrom(false, ...directiveTypes);
+                tDetails.providers = providers;
             }
             if (pipeDefs.length > 0) {
                 primaryBlockTView.pipeRegistry =
@@ -30677,7 +30741,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.0+sha-0d95ae5');
+const VERSION = new Version('17.3.0-next.0+sha-dcb9deb');
 
 class Console {
     log(message) {

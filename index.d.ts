@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-0d95ae5
+ * @license Angular v17.3.0-next.0+sha-dcb9deb
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9208,6 +9208,11 @@ declare interface TDeferBlockDetails {
      * which all await the same set of dependencies.
      */
     loadingPromise: Promise<unknown> | null;
+    /**
+     * List of providers collected from all NgModules that were imported by
+     * standalone components used within this defer block.
+     */
+    providers: Provider[] | null;
 }
 
 /** Static data for an <ng-container> */
