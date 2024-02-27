@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.0+sha-6470e33
+ * @license Angular v17.3.0-next.0+sha-df0e69b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4315,6 +4315,33 @@ export declare interface Host {
 export declare const Host: HostDecorator;
 
 /**
+ * Creates a token that can be used to inject static attributes of the host node.
+ *
+ * @usageNotes
+ * ### Injecting an attribute that is known to exist
+ * ```typescript
+ * @Directive()
+ * class MyDir {
+ *   attr: string = inject(new HostAttributeToken('some-attr'));
+ * }
+ * ```
+ *
+ * ### Optionally injecting an attribute
+ * ```typescript
+ * @Directive()
+ * class MyDir {
+ *   attr: string | null = inject(new HostAttributeToken('some-attr'), {optional: true});
+ * }
+ * ```
+ * @publicApi
+ */
+export declare class HostAttributeToken {
+    private attributeName;
+    constructor(attributeName: string);
+    toString(): string;
+}
+
+/**
  * Type of the HostBinding metadata.
  *
  * @publicApi
@@ -5017,6 +5044,37 @@ export declare function inject<T>(token: ProviderToken<T>, options: InjectOption
  * @publicApi
  */
 export declare function inject<T>(token: ProviderToken<T>, options: InjectOptions): T | null;
+
+/**
+ * @param token A token that represents a static attribute on the host node that should be injected.
+ * @returns Value of the attribute if it exists.
+ * @throws If called outside of a supported context or the attribute does not exist.
+ *
+ * @publicApi
+ */
+export declare function inject(token: HostAttributeToken): string;
+
+/**
+ * @param token A token that represents a static attribute on the host node that should be injected.
+ * @returns Value of the attribute if it exists, otherwise `null`.
+ * @throws If called outside of a supported context.
+ *
+ * @publicApi
+ */
+export declare function inject(token: HostAttributeToken, options: {
+    optional: true;
+}): string | null;
+
+/**
+ * @param token A token that represents a static attribute on the host node that should be injected.
+ * @returns Value of the attribute if it exists.
+ * @throws If called outside of a supported context or the attribute does not exist.
+ *
+ * @publicApi
+ */
+export declare function inject(token: HostAttributeToken, options: {
+    optional: false;
+}): string;
 
 /**
  * Type of the Injectable metadata.
@@ -15025,6 +15083,12 @@ export declare function ɵɵInheritDefinitionFeature(definition: ɵDirectiveDef<
 export declare function ɵɵinject<T>(token: ProviderToken<T>): T;
 
 export declare function ɵɵinject<T>(token: ProviderToken<T>, flags?: InjectFlags): T | null;
+
+export declare function ɵɵinject(token: HostAttributeToken): string;
+
+export declare function ɵɵinject(token: HostAttributeToken, flags?: InjectFlags): string | null;
+
+export declare function ɵɵinject<T>(token: ProviderToken<T> | HostAttributeToken, flags?: InjectFlags): string | null;
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
