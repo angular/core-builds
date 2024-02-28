@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.1+sha-06ffe9a
+ * @license Angular v17.3.0-next.1+sha-d7c6865
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16789,7 +16789,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.1+sha-06ffe9a']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.1+sha-d7c6865']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30785,7 +30785,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.1+sha-06ffe9a');
+const VERSION = new Version('17.3.0-next.1+sha-d7c6865');
 
 class Console {
     log(message) {
@@ -35553,7 +35553,7 @@ let isHydrationSupportEnabled = false;
  * Defines a period of time that Angular waits for the `ApplicationRef.isStable` to emit `true`.
  * If there was no event with the `true` value during this time, Angular reports a warning.
  */
-const APPLICATION_IS_STABLE_TIMEOUT = 10000;
+const APPLICATION_IS_STABLE_TIMEOUT = 10_000;
 /**
  * Brings the necessary hydration code in tree-shakable manner.
  * The code is only present when the `provideClientHydration` is
