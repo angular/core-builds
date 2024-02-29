@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.3.0-next.1+sha-9a8a544
+ * @license Angular v17.3.0-next.1+sha-ffad7b8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createComputed as createComputed$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, getActiveConsumer as getActiveConsumer$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, getActiveConsumer as getActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createComputed as createComputed$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
 
@@ -112,7 +112,13 @@ class EventEmitter_ extends Subject {
         this.__isAsync = isAsync;
     }
     emit(value) {
-        super.next(value);
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            super.next(value);
+        }
+        finally {
+            setActiveConsumer$1(prevConsumer);
+        }
     }
     subscribe(observerOrNext, error, complete) {
         let nextFn = observerOrNext;
@@ -387,6 +393,11 @@ function assertOneOf(value, ...validValues) {
     if (validValues.indexOf(value) !== -1)
         return true;
     throwError(`Expected value to be one of ${JSON.stringify(validValues)} but was ${JSON.stringify(value)}.`);
+}
+function assertNotReactive(fn) {
+    if (getActiveConsumer$1() !== null) {
+        throwError(`${fn}() should never be called in a reactive context.`);
+    }
 }
 
 /**
@@ -5024,6 +5035,7 @@ class R3Injector extends EnvironmentInjector {
         this.assertNotDestroyed();
         // Set destroyed = true first, in case lifecycle hooks re-enter destroy().
         this._destroyed = true;
+        const prevConsumer = setActiveConsumer$1(null);
         try {
             // Call all the lifecycle hooks.
             for (const service of this._ngOnDestroyHooks) {
@@ -5042,6 +5054,7 @@ class R3Injector extends EnvironmentInjector {
             this.records.clear();
             this._ngOnDestroyHooks.clear();
             this.injectorDefTypes.clear();
+            setActiveConsumer$1(prevConsumer);
         }
     }
     onDestroy(callback) {
@@ -5144,6 +5157,7 @@ class R3Injector extends EnvironmentInjector {
     }
     /** @internal */
     resolveInjectorInitializers() {
+        const prevConsumer = setActiveConsumer$1(null);
         const previousInjector = setCurrentInjector(this);
         const previousInjectImplementation = setInjectImplementation(undefined);
         let prevInjectContext;
@@ -5166,6 +5180,7 @@ class R3Injector extends EnvironmentInjector {
             setCurrentInjector(previousInjector);
             setInjectImplementation(previousInjectImplementation);
             ngDevMode && setInjectorProfilerContext(prevInjectContext);
+            setActiveConsumer$1(prevConsumer);
         }
     }
     toString() {
@@ -5231,25 +5246,31 @@ class R3Injector extends EnvironmentInjector {
         this.records.set(token, record);
     }
     hydrate(token, record) {
-        if (ngDevMode && record.value === CIRCULAR) {
-            throwCyclicDependencyError(stringify(token));
-        }
-        else if (record.value === NOT_YET) {
-            record.value = CIRCULAR;
-            if (ngDevMode) {
-                runInInjectorProfilerContext(this, token, () => {
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            if (ngDevMode && record.value === CIRCULAR) {
+                throwCyclicDependencyError(stringify(token));
+            }
+            else if (record.value === NOT_YET) {
+                record.value = CIRCULAR;
+                if (ngDevMode) {
+                    runInInjectorProfilerContext(this, token, () => {
+                        record.value = record.factory();
+                        emitInstanceCreatedByInjectorEvent(record.value);
+                    });
+                }
+                else {
                     record.value = record.factory();
-                    emitInstanceCreatedByInjectorEvent(record.value);
-                });
+                }
             }
-            else {
-                record.value = record.factory();
+            if (typeof record.value === 'object' && record.value && hasOnDestroy(record.value)) {
+                this._ngOnDestroyHooks.add(record.value);
             }
+            return record.value;
         }
-        if (typeof record.value === 'object' && record.value && hasOnDestroy(record.value)) {
-            this._ngOnDestroyHooks.add(record.value);
+        finally {
+            setActiveConsumer$1(prevConsumer);
         }
-        return record.value;
     }
     injectableDefInScope(def) {
         if (!def.providedIn) {
@@ -9666,7 +9687,11 @@ function destroyLView(tView, lView) {
  * @param lView The LView to clean up
  */
 function cleanUpView(tView, lView) {
-    if (!(lView[FLAGS] & 256 /* LViewFlags.Destroyed */)) {
+    if (lView[FLAGS] & 256 /* LViewFlags.Destroyed */) {
+        return;
+    }
+    const prevConsumer = setActiveConsumer$1(null);
+    try {
         // Usually the Attached flag is removed when the view is detached from its parent, however
         // if it's a root view, the flag won't be unset hence why we're also removing on destroy.
         lView[FLAGS] &= ~128 /* LViewFlags.Attached */;
@@ -9700,9 +9725,13 @@ function cleanUpView(tView, lView) {
         // Unregister the view once everything else has been cleaned up.
         unregisterLView(lView);
     }
+    finally {
+        setActiveConsumer$1(prevConsumer);
+    }
 }
 /** Removes listeners and unsubscribes from output subscriptions */
 function processCleanups(tView, lView) {
+    ngDevMode && assertNotReactive(processCleanups.name);
     const tCleanup = tView.cleanup;
     const lCleanup = lView[CLEANUP];
     if (tCleanup !== null) {
@@ -9746,6 +9775,7 @@ function processCleanups(tView, lView) {
 }
 /** Calls onDestroy hooks for this view */
 function executeOnDestroys(tView, lView) {
+    ngDevMode && assertNotReactive(executeOnDestroys.name);
     let destroyHooks;
     if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
         for (let i = 0; i < destroyHooks.length; i += 2) {
@@ -11766,6 +11796,7 @@ function syncViewWithBlueprint(tView, lView) {
  */
 function renderView(tView, lView, context) {
     ngDevMode && assertEqual(isCreationMode(lView), true, 'Should be run in creation mode');
+    ngDevMode && assertNotReactive(renderView.name);
     enterView(lView);
     try {
         const viewQuery = tView.viewQuery;
@@ -11829,23 +11860,29 @@ function renderChildComponents(hostLView, components) {
 }
 
 function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
-    const embeddedTView = templateTNode.tView;
-    ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
-    ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
-    // Embedded views follow the change detection strategy of the view they're declared in.
-    const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
-    const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
-    const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.dehydratedView ?? null);
-    const declarationLContainer = declarationLView[templateTNode.index];
-    ngDevMode && assertLContainer(declarationLContainer);
-    embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
-    const declarationViewLQueries = declarationLView[QUERIES];
-    if (declarationViewLQueries !== null) {
-        embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
+    const prevConsumer = setActiveConsumer$1(null);
+    try {
+        const embeddedTView = templateTNode.tView;
+        ngDevMode && assertDefined(embeddedTView, 'TView must be defined for a template node.');
+        ngDevMode && assertTNodeForLView(templateTNode, declarationLView);
+        // Embedded views follow the change detection strategy of the view they're declared in.
+        const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
+        const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
+        const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.dehydratedView ?? null);
+        const declarationLContainer = declarationLView[templateTNode.index];
+        ngDevMode && assertLContainer(declarationLContainer);
+        embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
+        const declarationViewLQueries = declarationLView[QUERIES];
+        if (declarationViewLQueries !== null) {
+            embeddedLView[QUERIES] = declarationViewLQueries.createEmbeddedView(embeddedTView);
+        }
+        // execute creation mode of a view
+        renderView(embeddedTView, embeddedLView, context);
+        return embeddedLView;
     }
-    // execute creation mode of a view
-    renderView(embeddedTView, embeddedLView, context);
-    return embeddedLView;
+    finally {
+        setActiveConsumer$1(prevConsumer);
+    }
 }
 function getLViewFromLContainer(lContainer, index) {
     const adjustedIndex = CONTAINER_HEADER_OFFSET + index;
@@ -16534,105 +16571,114 @@ class ComponentFactory extends ComponentFactory$1 {
         this.isBoundToModule = !!ngModule;
     }
     create(injector, projectableNodes, rootSelectorOrNode, environmentInjector) {
-        // Check if the component is orphan
-        if (ngDevMode && (typeof ngJitMode === 'undefined' || ngJitMode) &&
-            this.componentDef.debugInfo?.forbidOrphanRendering) {
-            if (depsTracker.isOrphanComponent(this.componentType)) {
-                throw new RuntimeError(1001 /* RuntimeErrorCode.RUNTIME_DEPS_ORPHAN_COMPONENT */, `Orphan component found! Trying to render the component ${debugStringifyTypeForError(this.componentType)} without first loading the NgModule that declares it. It is recommended to make this component standalone in order to avoid this error. If this is not possible now, import the component's NgModule in the appropriate NgModule, or the standalone component in which you are trying to render this component. If this is a lazy import, load the NgModule lazily as well and use its module injector.`);
-            }
-        }
-        environmentInjector = environmentInjector || this.ngModule;
-        let realEnvironmentInjector = environmentInjector instanceof EnvironmentInjector ?
-            environmentInjector :
-            environmentInjector?.injector;
-        if (realEnvironmentInjector && this.componentDef.getStandaloneInjector !== null) {
-            realEnvironmentInjector = this.componentDef.getStandaloneInjector(realEnvironmentInjector) ||
-                realEnvironmentInjector;
-        }
-        const rootViewInjector = realEnvironmentInjector ? new ChainedInjector(injector, realEnvironmentInjector) : injector;
-        const rendererFactory = rootViewInjector.get(RendererFactory2, null);
-        if (rendererFactory === null) {
-            throw new RuntimeError(407 /* RuntimeErrorCode.RENDERER_NOT_FOUND */, ngDevMode &&
-                'Angular was not able to inject a renderer (RendererFactory2). ' +
-                    'Likely this is due to a broken DI hierarchy. ' +
-                    'Make sure that any injector used to create this component has a correct parent.');
-        }
-        const sanitizer = rootViewInjector.get(Sanitizer, null);
-        const afterRenderEventManager = rootViewInjector.get(AfterRenderEventManager, null);
-        const changeDetectionScheduler = rootViewInjector.get(ChangeDetectionScheduler, null);
-        const environment = {
-            rendererFactory,
-            sanitizer,
-            // We don't use inline effects (yet).
-            inlineEffectRunner: null,
-            afterRenderEventManager,
-            changeDetectionScheduler,
-        };
-        const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
-        // Determine a tag name used for creating host elements when this component is created
-        // dynamically. Default to 'div' if this component did not specify any tag name in its selector.
-        const elementName = this.componentDef.selectors[0][0] || 'div';
-        const hostRNode = rootSelectorOrNode ?
-            locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation, rootViewInjector) :
-            createElementNode(hostRenderer, elementName, getNamespace(elementName));
-        let rootFlags = 512 /* LViewFlags.IsRoot */;
-        if (this.componentDef.signals) {
-            rootFlags |= 4096 /* LViewFlags.SignalView */;
-        }
-        else if (!this.componentDef.onPush) {
-            rootFlags |= 16 /* LViewFlags.CheckAlways */;
-        }
-        let hydrationInfo = null;
-        if (hostRNode !== null) {
-            hydrationInfo = retrieveHydrationInfo(hostRNode, rootViewInjector, true /* isRootView */);
-        }
-        // Create the root view. Uses empty TView and ContentTemplate.
-        const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null, null);
-        const rootLView = createLView(null, rootTView, null, rootFlags, null, null, environment, hostRenderer, rootViewInjector, null, hydrationInfo);
-        // rootView is the parent when bootstrapping
-        // TODO(misko): it looks like we are entering view here but we don't really need to as
-        // `renderView` does that. However as the code is written it is needed because
-        // `createRootComponentView` and `createRootComponent` both read global state. Fixing those
-        // issues would allow us to drop this.
-        enterView(rootLView);
-        let component;
-        let tElementNode;
+        const prevConsumer = setActiveConsumer$1(null);
         try {
-            const rootComponentDef = this.componentDef;
-            let rootDirectives;
-            let hostDirectiveDefs = null;
-            if (rootComponentDef.findHostDirectiveDefs) {
-                rootDirectives = [];
-                hostDirectiveDefs = new Map();
-                rootComponentDef.findHostDirectiveDefs(rootComponentDef, rootDirectives, hostDirectiveDefs);
-                rootDirectives.push(rootComponentDef);
-                ngDevMode && assertNoDuplicateDirectives(rootDirectives);
+            // Check if the component is orphan
+            if (ngDevMode && (typeof ngJitMode === 'undefined' || ngJitMode) &&
+                this.componentDef.debugInfo?.forbidOrphanRendering) {
+                if (depsTracker.isOrphanComponent(this.componentType)) {
+                    throw new RuntimeError(1001 /* RuntimeErrorCode.RUNTIME_DEPS_ORPHAN_COMPONENT */, `Orphan component found! Trying to render the component ${debugStringifyTypeForError(this.componentType)} without first loading the NgModule that declares it. It is recommended to make this component standalone in order to avoid this error. If this is not possible now, import the component's NgModule in the appropriate NgModule, or the standalone component in which you are trying to render this component. If this is a lazy import, load the NgModule lazily as well and use its module injector.`);
+                }
             }
-            else {
-                rootDirectives = [rootComponentDef];
+            environmentInjector = environmentInjector || this.ngModule;
+            let realEnvironmentInjector = environmentInjector instanceof EnvironmentInjector ?
+                environmentInjector :
+                environmentInjector?.injector;
+            if (realEnvironmentInjector && this.componentDef.getStandaloneInjector !== null) {
+                realEnvironmentInjector =
+                    this.componentDef.getStandaloneInjector(realEnvironmentInjector) ||
+                        realEnvironmentInjector;
             }
-            const hostTNode = createRootComponentTNode(rootLView, hostRNode);
-            const componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, environment, hostRenderer);
-            tElementNode = getTNode(rootTView, HEADER_OFFSET);
-            // TODO(crisbeto): in practice `hostRNode` should always be defined, but there are some tests
-            // where the renderer is mocked out and `undefined` is returned. We should update the tests so
-            // that this check can be removed.
-            if (hostRNode) {
-                setRootNodeAttributes(hostRenderer, rootComponentDef, hostRNode, rootSelectorOrNode);
+            const rootViewInjector = realEnvironmentInjector ?
+                new ChainedInjector(injector, realEnvironmentInjector) :
+                injector;
+            const rendererFactory = rootViewInjector.get(RendererFactory2, null);
+            if (rendererFactory === null) {
+                throw new RuntimeError(407 /* RuntimeErrorCode.RENDERER_NOT_FOUND */, ngDevMode &&
+                    'Angular was not able to inject a renderer (RendererFactory2). ' +
+                        'Likely this is due to a broken DI hierarchy. ' +
+                        'Make sure that any injector used to create this component has a correct parent.');
             }
-            if (projectableNodes !== undefined) {
-                projectNodes(tElementNode, this.ngContentSelectors, projectableNodes);
+            const sanitizer = rootViewInjector.get(Sanitizer, null);
+            const afterRenderEventManager = rootViewInjector.get(AfterRenderEventManager, null);
+            const changeDetectionScheduler = rootViewInjector.get(ChangeDetectionScheduler, null);
+            const environment = {
+                rendererFactory,
+                sanitizer,
+                // We don't use inline effects (yet).
+                inlineEffectRunner: null,
+                afterRenderEventManager,
+                changeDetectionScheduler,
+            };
+            const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
+            // Determine a tag name used for creating host elements when this component is created
+            // dynamically. Default to 'div' if this component did not specify any tag name in its
+            // selector.
+            const elementName = this.componentDef.selectors[0][0] || 'div';
+            const hostRNode = rootSelectorOrNode ?
+                locateHostElement(hostRenderer, rootSelectorOrNode, this.componentDef.encapsulation, rootViewInjector) :
+                createElementNode(hostRenderer, elementName, getNamespace(elementName));
+            let rootFlags = 512 /* LViewFlags.IsRoot */;
+            if (this.componentDef.signals) {
+                rootFlags |= 4096 /* LViewFlags.SignalView */;
             }
-            // TODO: should LifecycleHooksFeature and other host features be generated by the compiler and
-            // executed here?
-            // Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
-            component = createRootComponent(componentView, rootComponentDef, rootDirectives, hostDirectiveDefs, rootLView, [LifecycleHooksFeature]);
-            renderView(rootTView, rootLView, null);
+            else if (!this.componentDef.onPush) {
+                rootFlags |= 16 /* LViewFlags.CheckAlways */;
+            }
+            let hydrationInfo = null;
+            if (hostRNode !== null) {
+                hydrationInfo = retrieveHydrationInfo(hostRNode, rootViewInjector, true /* isRootView */);
+            }
+            // Create the root view. Uses empty TView and ContentTemplate.
+            const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null, null);
+            const rootLView = createLView(null, rootTView, null, rootFlags, null, null, environment, hostRenderer, rootViewInjector, null, hydrationInfo);
+            // rootView is the parent when bootstrapping
+            // TODO(misko): it looks like we are entering view here but we don't really need to as
+            // `renderView` does that. However as the code is written it is needed because
+            // `createRootComponentView` and `createRootComponent` both read global state. Fixing those
+            // issues would allow us to drop this.
+            enterView(rootLView);
+            let component;
+            let tElementNode;
+            try {
+                const rootComponentDef = this.componentDef;
+                let rootDirectives;
+                let hostDirectiveDefs = null;
+                if (rootComponentDef.findHostDirectiveDefs) {
+                    rootDirectives = [];
+                    hostDirectiveDefs = new Map();
+                    rootComponentDef.findHostDirectiveDefs(rootComponentDef, rootDirectives, hostDirectiveDefs);
+                    rootDirectives.push(rootComponentDef);
+                    ngDevMode && assertNoDuplicateDirectives(rootDirectives);
+                }
+                else {
+                    rootDirectives = [rootComponentDef];
+                }
+                const hostTNode = createRootComponentTNode(rootLView, hostRNode);
+                const componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, environment, hostRenderer);
+                tElementNode = getTNode(rootTView, HEADER_OFFSET);
+                // TODO(crisbeto): in practice `hostRNode` should always be defined, but there are some
+                // tests where the renderer is mocked out and `undefined` is returned. We should update the
+                // tests so that this check can be removed.
+                if (hostRNode) {
+                    setRootNodeAttributes(hostRenderer, rootComponentDef, hostRNode, rootSelectorOrNode);
+                }
+                if (projectableNodes !== undefined) {
+                    projectNodes(tElementNode, this.ngContentSelectors, projectableNodes);
+                }
+                // TODO: should LifecycleHooksFeature and other host features be generated by the compiler
+                // and executed here? Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
+                component = createRootComponent(componentView, rootComponentDef, rootDirectives, hostDirectiveDefs, rootLView, [LifecycleHooksFeature]);
+                renderView(rootTView, rootLView, null);
+            }
+            finally {
+                leaveView();
+            }
+            return new ComponentRef(this.componentType, component, createElementRef(tElementNode, rootLView), rootLView, tElementNode);
         }
         finally {
-            leaveView();
+            setActiveConsumer$1(prevConsumer);
         }
-        return new ComponentRef(this.componentType, component, createElementRef(tElementNode, rootLView), rootLView, tElementNode);
     }
 }
 /**
@@ -16789,7 +16835,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.1+sha-9a8a544']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.1+sha-ffad7b8']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -26148,6 +26194,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     }
 }
 function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
+    const prevConsumer = setActiveConsumer$1(null);
     try {
         profiler(6 /* ProfilerEvent.OutputStart */, context, listenerFn);
         // Only explicitly returning false from a listener should preventDefault
@@ -26159,6 +26206,7 @@ function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
     }
     finally {
         profiler(7 /* ProfilerEvent.OutputEnd */, context, listenerFn);
+        setActiveConsumer$1(prevConsumer);
     }
 }
 /**
@@ -30785,7 +30833,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.1+sha-9a8a544');
+const VERSION = new Version('17.3.0-next.1+sha-ffad7b8');
 
 class Console {
     log(message) {
@@ -32443,6 +32491,7 @@ class ApplicationRef {
         if (this._runningTick) {
             throw new RuntimeError(101 /* RuntimeErrorCode.RECURSIVE_APPLICATION_REF_TICK */, ngDevMode && 'ApplicationRef.tick is called recursively');
         }
+        const prevConsumer = setActiveConsumer$1(null);
         try {
             this._runningTick = true;
             this.detectChangesInAttachedViews();
@@ -32458,6 +32507,7 @@ class ApplicationRef {
         }
         finally {
             this._runningTick = false;
+            setActiveConsumer$1(prevConsumer);
         }
     }
     detectChangesInAttachedViews() {
