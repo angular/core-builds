@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.1+sha-b322079
+ * @license Angular v17.3.0-next.1+sha-66d78a7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -644,6 +644,9 @@ export declare class ApplicationRef {
     private _destroyListeners;
     private readonly internalErrorHandler;
     private readonly afterRenderEffectManager;
+    private externalTestViews;
+    private beforeRender;
+    private afterTick;
     /**
      * Indicates whether this instance was destroyed.
      */
@@ -757,7 +760,6 @@ export declare class ApplicationRef {
      */
     tick(): void;
     private detectChangesInAttachedViews;
-    private detectChangesInView;
     /**
      * Attaches a view so that it will be dirty checked.
      * The view will be automatically detached when it is destroyed.
@@ -12014,6 +12016,8 @@ export declare enum ɵDeferBlockState {
 /** The deps tracker to be used in the current Angular app in dev mode. */
 export declare const ɵdepsTracker: DepsTracker;
 
+export declare function ɵdetectChangesInViewIfRequired(lView: LView, isFirstPass: boolean, notifyErrorHandler: boolean): void;
+
 
 export declare function ɵdevModeEqual(a: any, b: any): boolean;
 
@@ -12492,6 +12496,14 @@ export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 export declare function ɵisComponentDefPendingResolution(type: Type<any>): boolean;
 
 export declare function ɵisEnvironmentProviders(value: Provider | EnvironmentProviders | ɵInternalEnvironmentProviders): value is ɵInternalEnvironmentProviders;
+
+/**
+ * Used to patch behavior that needs to _temporarily_ be different between g3 and external.
+ *
+ * For example, make breaking changes ahead of the main branch targeting a major version.
+ * Permanent differences between g3 and external should be configured by individual patches.
+ */
+export declare const ɵisG3 = false;
 
 export declare function ɵisInjectable(type: any): boolean;
 

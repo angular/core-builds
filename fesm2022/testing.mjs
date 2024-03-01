@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.3.0-next.1+sha-b322079
+ * @license Angular v17.3.0-next.1+sha-66d78a7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, ɵNoopNgZone, NgZone, ɵEffectScheduler, ApplicationRef, getDebugNode, RendererFactory2, ɵPendingTasks, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵChangeDetectionScheduler, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, ɵNoopNgZone, NgZone, ɵEffectScheduler, ApplicationRef, getDebugNode, RendererFactory2, ɵPendingTasks, ɵisG3, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵChangeDetectionScheduler, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -187,6 +187,8 @@ class ComponentFixture {
         // behavior.
         /** @internal */
         this._appRef = inject$1(ApplicationRef);
+        /** @internal */
+        this._testAppRef = this._appRef;
         // TODO(atscott): Remove this from public API
         this.ngZone = this._noZoneOptionIsSet ? null : this._ngZone;
         this.changeDetectorRef = componentRef.changeDetectorRef;
@@ -278,7 +280,7 @@ class ScheduledComponentFixture extends ComponentFixture {
         if (this.isStable()) {
             return Promise.resolve(false);
         }
-        return this._appRef.isStable.pipe(first(stable => stable)).toPromise().then(() => true);
+        return this._appRef.isStable.pipe(first((stable) => stable)).toPromise().then(() => true);
     }
     autoDetectChanges(autoDetect) {
         throw new Error('Cannot call autoDetectChanges when using change detection scheduling.');
@@ -295,33 +297,44 @@ class PseudoApplicationComponentFixture extends ComponentFixture {
         this._isStable = true;
         this._promise = null;
         this._resolve = null;
+        this.afterTickSubscription = undefined;
+        this.beforeRenderSubscription = undefined;
     }
     initialize() {
+        if (this._autoDetect) {
+            this.subscribeToAppRefEvents();
+        }
+        this.componentRef.hostView.onDestroy(() => {
+            this.unsubscribeFromAppRefEvents();
+        });
         // Create subscriptions outside the NgZone so that the callbacks run outside
         // of NgZone.
         this._ngZone.runOutsideAngular(() => {
             this._subscriptions.add(this._ngZone.onUnstable.subscribe({
                 next: () => {
                     this._isStable = false;
-                }
+                },
             }));
-            this._subscriptions.add(this._ngZone.onMicrotaskEmpty.subscribe({
-                next: () => {
-                    if (this._autoDetect) {
-                        // Do a change detection run with checkNoChanges set to true to check
-                        // there are no changes on the second run.
-                        this.detectChanges(true);
-                    }
-                }
-            }));
+            // TODO(atscott): Remove and make this a breaking change externally in v18
+            if (!ɵisG3) {
+                this._subscriptions.add(this._ngZone.onMicrotaskEmpty.subscribe({
+                    next: () => {
+                        if (this._autoDetect) {
+                            // Do a change detection run with checkNoChanges set to true to check
+                            // there are no changes on the second run.
+                            this.detectChanges(true);
+                        }
+                    },
+                }));
+            }
             this._subscriptions.add(this._ngZone.onStable.subscribe({
                 next: () => {
                     this._isStable = true;
                     // Check whether there is a pending whenStable() completer to resolve.
                     if (this._promise !== null) {
                         // If so check whether there are no pending macrotasks before resolving.
-                        // Do this check in the next tick so that ngZone gets a chance to update the state of
-                        // pending macrotasks.
+                        // Do this check in the next tick so that ngZone gets a chance to update the state
+                        // of pending macrotasks.
                         queueMicrotask(() => {
                             if (!this._ngZone.hasPendingMacrotasks) {
                                 if (this._promise !== null) {
@@ -332,12 +345,12 @@ class PseudoApplicationComponentFixture extends ComponentFixture {
                             }
                         });
                     }
-                }
+                },
             }));
             this._subscriptions.add(this._ngZone.onError.subscribe({
                 next: (error) => {
                     throw error;
-                }
+                },
             }));
         });
     }
@@ -366,7 +379,7 @@ class PseudoApplicationComponentFixture extends ComponentFixture {
             return this._promise;
         }
         else {
-            this._promise = new Promise(res => {
+            this._promise = new Promise((res) => {
                 this._resolve = res;
             });
             return this._promise;
@@ -376,10 +389,56 @@ class PseudoApplicationComponentFixture extends ComponentFixture {
         if (this._noZoneOptionIsSet) {
             throw new Error('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set.');
         }
+        if (autoDetect !== this._autoDetect) {
+            if (autoDetect) {
+                this.subscribeToAppRefEvents();
+            }
+            else {
+                this.unsubscribeFromAppRefEvents();
+            }
+        }
         this._autoDetect = autoDetect;
         this.detectChanges();
     }
+    subscribeToAppRefEvents() {
+        // TODO(atscott): Remove and make this a breaking change externally in v18
+        if (!ɵisG3) {
+            return;
+        }
+        this._ngZone.runOutsideAngular(() => {
+            this.afterTickSubscription = this._testAppRef.afterTick.subscribe(() => {
+                this.checkNoChanges();
+            });
+            this.beforeRenderSubscription = this._testAppRef.beforeRender.subscribe((isFirstPass) => {
+                try {
+                    ɵdetectChangesInViewIfRequired(this.componentRef.hostView._lView, isFirstPass, this.componentRef.hostView.notifyErrorHandler);
+                }
+                catch (e) {
+                    // If an error ocurred during change detection, remove the test view from the application
+                    // ref tracking. Note that this isn't exactly desirable but done this way because of how
+                    // things used to work with `autoDetect` and uncaught errors. Ideally we would surface
+                    // this error to the error handler instead and continue refreshing the view like
+                    // what would happen in the application.
+                    this.unsubscribeFromAppRefEvents();
+                    throw e;
+                }
+            });
+            this._testAppRef.externalTestViews.add(this.componentRef.hostView);
+        });
+    }
+    unsubscribeFromAppRefEvents() {
+        // TODO(atscott): Remove and make this a breaking change externally in v18
+        if (!ɵisG3) {
+            return;
+        }
+        this.afterTickSubscription?.unsubscribe();
+        this.beforeRenderSubscription?.unsubscribe();
+        this.afterTickSubscription = undefined;
+        this.beforeRenderSubscription = undefined;
+        this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
+    }
     destroy() {
+        this.unsubscribeFromAppRefEvents();
         this._subscriptions.unsubscribe();
         super.destroy();
     }
