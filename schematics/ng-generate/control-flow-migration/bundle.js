@@ -7158,13 +7158,10 @@ var ExpressionKind;
   ExpressionKind2[ExpressionKind2["EmptyExpr"] = 17] = "EmptyExpr";
   ExpressionKind2[ExpressionKind2["AssignTemporaryExpr"] = 18] = "AssignTemporaryExpr";
   ExpressionKind2[ExpressionKind2["ReadTemporaryExpr"] = 19] = "ReadTemporaryExpr";
-  ExpressionKind2[ExpressionKind2["SanitizerExpr"] = 20] = "SanitizerExpr";
-  ExpressionKind2[ExpressionKind2["TrustedValueFnExpr"] = 21] = "TrustedValueFnExpr";
-  ExpressionKind2[ExpressionKind2["SlotLiteralExpr"] = 22] = "SlotLiteralExpr";
-  ExpressionKind2[ExpressionKind2["ConditionalCase"] = 23] = "ConditionalCase";
-  ExpressionKind2[ExpressionKind2["DerivedRepeaterVar"] = 24] = "DerivedRepeaterVar";
-  ExpressionKind2[ExpressionKind2["ConstCollected"] = 25] = "ConstCollected";
-  ExpressionKind2[ExpressionKind2["TwoWayBindingSet"] = 26] = "TwoWayBindingSet";
+  ExpressionKind2[ExpressionKind2["SlotLiteralExpr"] = 20] = "SlotLiteralExpr";
+  ExpressionKind2[ExpressionKind2["ConditionalCase"] = 21] = "ConditionalCase";
+  ExpressionKind2[ExpressionKind2["ConstCollected"] = 22] = "ConstCollected";
+  ExpressionKind2[ExpressionKind2["TwoWayBindingSet"] = 23] = "TwoWayBindingSet";
 })(ExpressionKind || (ExpressionKind = {}));
 var VariableFlags;
 (function(VariableFlags2) {
@@ -7183,12 +7180,6 @@ var CompatibilityMode;
   CompatibilityMode2[CompatibilityMode2["Normal"] = 0] = "Normal";
   CompatibilityMode2[CompatibilityMode2["TemplateDefinitionBuilder"] = 1] = "TemplateDefinitionBuilder";
 })(CompatibilityMode || (CompatibilityMode = {}));
-var DeferSecondaryKind;
-(function(DeferSecondaryKind2) {
-  DeferSecondaryKind2[DeferSecondaryKind2["Loading"] = 0] = "Loading";
-  DeferSecondaryKind2[DeferSecondaryKind2["Placeholder"] = 1] = "Placeholder";
-  DeferSecondaryKind2[DeferSecondaryKind2["Error"] = 2] = "Error";
-})(DeferSecondaryKind || (DeferSecondaryKind = {}));
 var BindingKind;
 (function(BindingKind2) {
   BindingKind2[BindingKind2["Attribute"] = 0] = "Attribute";
@@ -7261,10 +7252,6 @@ var TRAIT_DEPENDS_ON_SLOT_CONTEXT = {
 };
 var TRAIT_CONSUMES_VARS = {
   [ConsumesVarsTrait]: true
-};
-var TRAIT_USES_VAR_OFFSET = {
-  [UsesVarOffset]: true,
-  varOffset: null
 };
 function hasConsumesSlotTrait(op) {
   return op[ConsumesSlot] === true;
@@ -9530,7 +9517,7 @@ var ElementAttributes = class {
     this.propertyBindings = null;
     this.projectAs = null;
   }
-  isKnown(kind, name, value) {
+  isKnown(kind, name) {
     var _a2;
     const nameToValue = (_a2 = this.known.get(kind)) != null ? _a2 : /* @__PURE__ */ new Set();
     this.known.set(kind, nameToValue);
@@ -9543,7 +9530,7 @@ var ElementAttributes = class {
   add(kind, name, value, namespace, trustedValueFn) {
     var _a2;
     const allowDuplicates = this.compatibility === CompatibilityMode.TemplateDefinitionBuilder && (kind === BindingKind.Attribute || kind === BindingKind.ClassName || kind === BindingKind.StyleProperty);
-    if (!allowDuplicates && this.isKnown(kind, name, value)) {
+    if (!allowDuplicates && this.isKnown(kind, name)) {
       return;
     }
     if (name === "ngProjectAs") {
@@ -10143,7 +10130,7 @@ function createI18nMessage(job, context, messagePlaceholder) {
 }
 function formatIcuPlaceholder(op) {
   if (op.strings.length !== op.expressionPlaceholders.length + 1) {
-    throw Error(`AsserionError: Invalid ICU placeholder with ${op.strings.length} strings and ${op.expressionPlaceholders.length} expressions`);
+    throw Error(`AssertionError: Invalid ICU placeholder with ${op.strings.length} strings and ${op.expressionPlaceholders.length} expressions`);
   }
   const values = op.expressionPlaceholders.map(formatValue);
   return op.strings.flatMap((str, i) => [str, values[i] || ""]).join("");
@@ -16789,7 +16776,7 @@ function addNamesToView(unit, baseName, state, compatibility) {
         }
         if (op.emptyView !== null) {
           const emptyView = unit.job.views.get(op.emptyView);
-          addNamesToView(emptyView, `${baseName}_${`${op.functionNameSuffix}Empty`}_${op.handle.slot + 2}`, state, compatibility);
+          addNamesToView(emptyView, `${baseName}_${op.functionNameSuffix}Empty_${op.handle.slot + 2}`, state, compatibility);
         }
         addNamesToView(unit.job.views.get(op.xref), `${baseName}_${op.functionNameSuffix}_${op.handle.slot + 1}`, state, compatibility);
         break;
@@ -17210,7 +17197,7 @@ function propagateI18nBlocksToTemplates(unit, subTemplateIndex) {
         break;
       case OpKind.RepeaterCreate:
         const forView = unit.job.views.get(op.xref);
-        subTemplateIndex = propagateI18nBlocksForView(unit.job.views.get(op.xref), i18nBlock, op.i18nPlaceholder, subTemplateIndex);
+        subTemplateIndex = propagateI18nBlocksForView(forView, i18nBlock, op.i18nPlaceholder, subTemplateIndex);
         if (op.emptyView !== null) {
           subTemplateIndex = propagateI18nBlocksForView(unit.job.views.get(op.emptyView), i18nBlock, op.emptyI18nPlaceholder, subTemplateIndex);
         }
@@ -18310,11 +18297,11 @@ function processLexicalScope(view, ops) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_dollar_event.mjs
 function resolveDollarEvent(job) {
   for (const unit of job.units) {
-    transformDollarEvent(unit, unit.create);
-    transformDollarEvent(unit, unit.update);
+    transformDollarEvent(unit.create);
+    transformDollarEvent(unit.update);
   }
 }
-function transformDollarEvent(unit, ops) {
+function transformDollarEvent(ops) {
   for (const op of ops) {
     if (op.kind === OpKind.Listener || op.kind === OpKind.TwoWayListener) {
       transformExpressionsInOp(op, (expr) => {
@@ -18485,7 +18472,7 @@ function recordTemplateStart(job, view, slot, i18nPlaceholder, i18nContext, i18n
   addParam(i18nContext.params, startName, slot, getSubTemplateIndexForTemplateTag(job, i18nBlock, view), flags);
 }
 function recordTemplateClose(job, view, slot, i18nPlaceholder, i18nContext, i18nBlock, structuralDirective) {
-  const { startName, closeName } = i18nPlaceholder;
+  const { closeName } = i18nPlaceholder;
   const flags = I18nParamValueFlags.TemplateTag | I18nParamValueFlags.CloseTag;
   if (closeName) {
     addParam(i18nContext.params, closeName, slot, getSubTemplateIndexForTemplateTag(job, i18nBlock, view), flags);
@@ -18512,14 +18499,14 @@ function addParam(params, placeholder, value, subTemplateIndex, flags) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_i18n_expression_placeholders.mjs
 function resolveI18nExpressionPlaceholders(job) {
   var _a2;
-  const subTemplateIndicies = /* @__PURE__ */ new Map();
+  const subTemplateIndices = /* @__PURE__ */ new Map();
   const i18nContexts = /* @__PURE__ */ new Map();
   const icuPlaceholders = /* @__PURE__ */ new Map();
   for (const unit of job.units) {
     for (const op of unit.create) {
       switch (op.kind) {
         case OpKind.I18nStart:
-          subTemplateIndicies.set(op.xref, op.subTemplateIndex);
+          subTemplateIndices.set(op.xref, op.subTemplateIndex);
           break;
         case OpKind.I18nContext:
           i18nContexts.set(op.xref, op);
@@ -18536,7 +18523,7 @@ function resolveI18nExpressionPlaceholders(job) {
     for (const op of unit.update) {
       if (op.kind === OpKind.I18nExpression) {
         const index = expressionIndices.get(referenceIndex(op)) || 0;
-        const subTemplateIndex = (_a2 = subTemplateIndicies.get(op.i18nOwner)) != null ? _a2 : null;
+        const subTemplateIndex = (_a2 = subTemplateIndices.get(op.i18nOwner)) != null ? _a2 : null;
         const value = {
           value: index,
           subTemplateIndex,
@@ -18600,7 +18587,7 @@ function processLexicalScope2(unit, ops, savedView) {
     if (op.kind == OpKind.Listener || op.kind === OpKind.TwoWayListener) {
       continue;
     }
-    transformExpressionsInOp(op, (expr, flags) => {
+    transformExpressionsInOp(op, (expr) => {
       if (expr instanceof LexicalReadExpr) {
         if (scope.has(expr.name)) {
           return new ReadVariableExpr(scope.get(expr.name));
@@ -19202,7 +19189,6 @@ function optimizeVariablesInOpList(ops, compatibility) {
   const toInline = [];
   for (const [id, count] of varUsages) {
     const decl = varDecls.get(id);
-    const varInfo = opMap.get(decl);
     const isAlwaysInline = !!(decl.flags & VariableFlags.AlwaysInline);
     if (count !== 1 || isAlwaysInline) {
       continue;
@@ -19905,7 +19891,6 @@ function ingestIcu(unit, icu) {
   var _a2;
   if (icu.i18n instanceof Message && isSingleI18nIcu(icu.i18n)) {
     const xref = unit.job.allocateXrefId();
-    const icuNode = icu.i18n.nodes[0];
     unit.create.push(createIcuStartOp(xref, icu.i18n, icuFromI18nMessage(icu.i18n).name, null));
     for (const [placeholder, text2] of Object.entries(__spreadValues(__spreadValues({}, icu.vars), icu.placeholders))) {
       if (text2 instanceof BoundText) {
@@ -26001,7 +25986,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.0-next.1+sha-6531e4c");
+var VERSION2 = new Version("17.3.0-next.1+sha-5e32a77");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
