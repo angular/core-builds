@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.1+sha-5e32a77
+ * @license Angular v17.3.0-next.1+sha-78e6911
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13445,7 +13445,7 @@ export declare type ɵUnwrapDirectiveSignalInputs<Dir, Fields extends keyof Dir>
 };
 
 /** Retrieves the `WriteT` of an `InputSignal` and `InputSignalWithTransform`. */
-declare type ɵUnwrapInputSignalWriteType<Field> = Field extends InputSignalWithTransform<unknown, infer WriteT> ? WriteT : never;
+declare type ɵUnwrapInputSignalWriteType<Field> = Field extends InputSignalWithTransform<any, infer WriteT> ? WriteT : never;
 
 export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
 
