@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.3.0-next.1+sha-0d98972
+ * @license Angular v17.3.0-next.1+sha-07173fd
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, getActiveConsumer as getActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createComputed as createComputed$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createWatch as createWatch$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1 } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, setActiveConsumer as setActiveConsumer$1, getActiveConsumer as getActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
 
@@ -13819,1299 +13819,6 @@ class Sanitizer {
 const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
 
 /**
- * Checks if the given `value` is a reactive `Signal`.
- */
-function isSignal(value) {
-    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
-}
-
-const markedFeatures = new Set();
-// tslint:disable:ban
-/**
- * A guarded `performance.mark` for feature marking.
- *
- * This method exists because while all supported browser and node.js version supported by Angular
- * support performance.mark API. This is not the case for other environments such as JSDOM and
- * Cloudflare workers.
- */
-function performanceMarkFeature(feature) {
-    if (markedFeatures.has(feature)) {
-        return;
-    }
-    markedFeatures.add(feature);
-    performance?.mark?.('mark_feature_usage', { detail: { feature } });
-}
-
-/**
- * Create a computed `Signal` which derives a reactive value from an expression.
- */
-function computed(computation, options) {
-    performanceMarkFeature('NgSignals');
-    const getter = createComputed$1(computation);
-    if (options?.equal) {
-        getter[SIGNAL$1].equal = options.equal;
-    }
-    if (ngDevMode) {
-        getter.toString = () => `[Computed: ${getter()}]`;
-    }
-    return getter;
-}
-
-/** Symbol used distinguish `WritableSignal` from other non-writable signals and functions. */
-const WRITABLE_SIGNAL = /* @__PURE__ */ Symbol('WRITABLE_SIGNAL');
-/**
- * Utility function used during template type checking to extract the value from a `WritableSignal`.
- * @codeGenApi
- */
-function ɵunwrapWritableSignal(value) {
-    // Note: needs to be kept in sync with the copy in `fake_core/index.ts`.
-    // Note: the function uses `WRITABLE_SIGNAL` as a brand instead of `WritableSignal<T>`,
-    // because the latter incorrectly unwraps non-signal getter functions.
-    return null;
-}
-/**
- * Create a `Signal` that can be set or updated directly.
- */
-function signal(initialValue, options) {
-    performanceMarkFeature('NgSignals');
-    const signalFn = createSignal$1(initialValue);
-    const node = signalFn[SIGNAL$1];
-    if (options?.equal) {
-        node.equal = options.equal;
-    }
-    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
-    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
-    signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
-    if (ngDevMode) {
-        signalFn.toString = () => `[Signal: ${signalFn()}]`;
-    }
-    return signalFn;
-}
-function signalAsReadonlyFn() {
-    const node = this[SIGNAL$1];
-    if (node.readonlyFn === undefined) {
-        const readonlyFn = () => this();
-        readonlyFn[SIGNAL$1] = node;
-        node.readonlyFn = readonlyFn;
-    }
-    return node.readonlyFn;
-}
-/**
- * Checks if the given `value` is a writeable signal.
- */
-function isWritableSignal(value) {
-    return isSignal(value) && typeof value.set === 'function';
-}
-
-/**
- * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
- * can, optionally, return a value.
- */
-function untracked(nonReactiveReadsFn) {
-    const prevConsumer = setActiveConsumer$1(null);
-    // We are not trying to catch any particular errors here, just making sure that the consumers
-    // stack is restored in case of errors.
-    try {
-        return nonReactiveReadsFn();
-    }
-    finally {
-        setActiveConsumer$1(prevConsumer);
-    }
-}
-
-function isIterable(obj) {
-    return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
-}
-function isListLikeIterable(obj) {
-    if (!isJsObject(obj))
-        return false;
-    return Array.isArray(obj) ||
-        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
-            Symbol.iterator in obj); // JS Iterable have a Symbol.iterator prop
-}
-function areIterablesEqual(a, b, comparator) {
-    const iterator1 = a[Symbol.iterator]();
-    const iterator2 = b[Symbol.iterator]();
-    while (true) {
-        const item1 = iterator1.next();
-        const item2 = iterator2.next();
-        if (item1.done && item2.done)
-            return true;
-        if (item1.done || item2.done)
-            return false;
-        if (!comparator(item1.value, item2.value))
-            return false;
-    }
-}
-function iterateListLike(obj, fn) {
-    if (Array.isArray(obj)) {
-        for (let i = 0; i < obj.length; i++) {
-            fn(obj[i]);
-        }
-    }
-    else {
-        const iterator = obj[Symbol.iterator]();
-        let item;
-        while (!((item = iterator.next()).done)) {
-            fn(item.value);
-        }
-    }
-}
-function isJsObject(o) {
-    return o !== null && (typeof o === 'function' || typeof o === 'object');
-}
-
-class DefaultIterableDifferFactory {
-    constructor() { }
-    supports(obj) {
-        return isListLikeIterable(obj);
-    }
-    create(trackByFn) {
-        return new DefaultIterableDiffer(trackByFn);
-    }
-}
-const trackByIdentity = (index, item) => item;
-/**
- * @deprecated v4.0.0 - Should not be part of public API.
- * @publicApi
- */
-class DefaultIterableDiffer {
-    constructor(trackByFn) {
-        this.length = 0;
-        // Keeps track of the used records at any point in time (during & across `_check()` calls)
-        this._linkedRecords = null;
-        // Keeps track of the removed records at any point in time during `_check()` calls.
-        this._unlinkedRecords = null;
-        this._previousItHead = null;
-        this._itHead = null;
-        this._itTail = null;
-        this._additionsHead = null;
-        this._additionsTail = null;
-        this._movesHead = null;
-        this._movesTail = null;
-        this._removalsHead = null;
-        this._removalsTail = null;
-        // Keeps track of records where custom track by is the same, but item identity has changed
-        this._identityChangesHead = null;
-        this._identityChangesTail = null;
-        this._trackByFn = trackByFn || trackByIdentity;
-    }
-    forEachItem(fn) {
-        let record;
-        for (record = this._itHead; record !== null; record = record._next) {
-            fn(record);
-        }
-    }
-    forEachOperation(fn) {
-        let nextIt = this._itHead;
-        let nextRemove = this._removalsHead;
-        let addRemoveOffset = 0;
-        let moveOffsets = null;
-        while (nextIt || nextRemove) {
-            // Figure out which is the next record to process
-            // Order: remove, add, move
-            const record = !nextRemove ||
-                nextIt &&
-                    nextIt.currentIndex <
-                        getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
-                nextIt :
-                nextRemove;
-            const adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
-            const currentIndex = record.currentIndex;
-            // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
-            if (record === nextRemove) {
-                addRemoveOffset--;
-                nextRemove = nextRemove._nextRemoved;
-            }
-            else {
-                nextIt = nextIt._next;
-                if (record.previousIndex == null) {
-                    addRemoveOffset++;
-                }
-                else {
-                    // INVARIANT:  currentIndex < previousIndex
-                    if (!moveOffsets)
-                        moveOffsets = [];
-                    const localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
-                    const localCurrentIndex = currentIndex - addRemoveOffset;
-                    if (localMovePreviousIndex != localCurrentIndex) {
-                        for (let i = 0; i < localMovePreviousIndex; i++) {
-                            const offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
-                            const index = offset + i;
-                            if (localCurrentIndex <= index && index < localMovePreviousIndex) {
-                                moveOffsets[i] = offset + 1;
-                            }
-                        }
-                        const previousIndex = record.previousIndex;
-                        moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
-                    }
-                }
-            }
-            if (adjPreviousIndex !== currentIndex) {
-                fn(record, adjPreviousIndex, currentIndex);
-            }
-        }
-    }
-    forEachPreviousItem(fn) {
-        let record;
-        for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
-            fn(record);
-        }
-    }
-    forEachAddedItem(fn) {
-        let record;
-        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-            fn(record);
-        }
-    }
-    forEachMovedItem(fn) {
-        let record;
-        for (record = this._movesHead; record !== null; record = record._nextMoved) {
-            fn(record);
-        }
-    }
-    forEachRemovedItem(fn) {
-        let record;
-        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-            fn(record);
-        }
-    }
-    forEachIdentityChange(fn) {
-        let record;
-        for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
-            fn(record);
-        }
-    }
-    diff(collection) {
-        if (collection == null)
-            collection = [];
-        if (!isListLikeIterable(collection)) {
-            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
-                `Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed`);
-        }
-        if (this.check(collection)) {
-            return this;
-        }
-        else {
-            return null;
-        }
-    }
-    onDestroy() { }
-    check(collection) {
-        this._reset();
-        let record = this._itHead;
-        let mayBeDirty = false;
-        let index;
-        let item;
-        let itemTrackBy;
-        if (Array.isArray(collection)) {
-            this.length = collection.length;
-            for (let index = 0; index < this.length; index++) {
-                item = collection[index];
-                itemTrackBy = this._trackByFn(index, item);
-                if (record === null || !Object.is(record.trackById, itemTrackBy)) {
-                    record = this._mismatch(record, item, itemTrackBy, index);
-                    mayBeDirty = true;
-                }
-                else {
-                    if (mayBeDirty) {
-                        // TODO(misko): can we limit this to duplicates only?
-                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
-                    }
-                    if (!Object.is(record.item, item))
-                        this._addIdentityChange(record, item);
-                }
-                record = record._next;
-            }
-        }
-        else {
-            index = 0;
-            iterateListLike(collection, (item) => {
-                itemTrackBy = this._trackByFn(index, item);
-                if (record === null || !Object.is(record.trackById, itemTrackBy)) {
-                    record = this._mismatch(record, item, itemTrackBy, index);
-                    mayBeDirty = true;
-                }
-                else {
-                    if (mayBeDirty) {
-                        // TODO(misko): can we limit this to duplicates only?
-                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
-                    }
-                    if (!Object.is(record.item, item))
-                        this._addIdentityChange(record, item);
-                }
-                record = record._next;
-                index++;
-            });
-            this.length = index;
-        }
-        this._truncate(record);
-        this.collection = collection;
-        return this.isDirty;
-    }
-    /* CollectionChanges is considered dirty if it has any additions, moves, removals, or identity
-     * changes.
-     */
-    get isDirty() {
-        return this._additionsHead !== null || this._movesHead !== null ||
-            this._removalsHead !== null || this._identityChangesHead !== null;
-    }
-    /**
-     * Reset the state of the change objects to show no changes. This means set previousKey to
-     * currentKey, and clear all of the queues (additions, moves, removals).
-     * Set the previousIndexes of moved and added items to their currentIndexes
-     * Reset the list of additions, moves and removals
-     *
-     * @internal
-     */
-    _reset() {
-        if (this.isDirty) {
-            let record;
-            for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
-                record._nextPrevious = record._next;
-            }
-            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-                record.previousIndex = record.currentIndex;
-            }
-            this._additionsHead = this._additionsTail = null;
-            for (record = this._movesHead; record !== null; record = record._nextMoved) {
-                record.previousIndex = record.currentIndex;
-            }
-            this._movesHead = this._movesTail = null;
-            this._removalsHead = this._removalsTail = null;
-            this._identityChangesHead = this._identityChangesTail = null;
-            // TODO(vicb): when assert gets supported
-            // assert(!this.isDirty);
-        }
-    }
-    /**
-     * This is the core function which handles differences between collections.
-     *
-     * - `record` is the record which we saw at this position last time. If null then it is a new
-     *   item.
-     * - `item` is the current item in the collection
-     * - `index` is the position of the item in the collection
-     *
-     * @internal
-     */
-    _mismatch(record, item, itemTrackBy, index) {
-        // The previous record after which we will append the current one.
-        let previousRecord;
-        if (record === null) {
-            previousRecord = this._itTail;
-        }
-        else {
-            previousRecord = record._prev;
-            // Remove the record from the collection since we know it does not match the item.
-            this._remove(record);
-        }
-        // See if we have evicted the item, which used to be at some anterior position of _itHead list.
-        record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
-        if (record !== null) {
-            // It is an item which we have evicted earlier: reinsert it back into the list.
-            // But first we need to check if identity changed, so we can update in view if necessary.
-            if (!Object.is(record.item, item))
-                this._addIdentityChange(record, item);
-            this._reinsertAfter(record, previousRecord, index);
-        }
-        else {
-            // Attempt to see if the item is at some posterior position of _itHead list.
-            record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
-            if (record !== null) {
-                // We have the item in _itHead at/after `index` position. We need to move it forward in the
-                // collection.
-                // But first we need to check if identity changed, so we can update in view if necessary.
-                if (!Object.is(record.item, item))
-                    this._addIdentityChange(record, item);
-                this._moveAfter(record, previousRecord, index);
-            }
-            else {
-                // It is a new item: add it.
-                record =
-                    this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
-            }
-        }
-        return record;
-    }
-    /**
-     * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
-     *
-     * Use case: `[a, a]` => `[b, a, a]`
-     *
-     * If we did not have this check then the insertion of `b` would:
-     *   1) evict first `a`
-     *   2) insert `b` at `0` index.
-     *   3) leave `a` at index `1` as is. <-- this is wrong!
-     *   3) reinsert `a` at index 2. <-- this is wrong!
-     *
-     * The correct behavior is:
-     *   1) evict first `a`
-     *   2) insert `b` at `0` index.
-     *   3) reinsert `a` at index 1.
-     *   3) move `a` at from `1` to `2`.
-     *
-     *
-     * Double check that we have not evicted a duplicate item. We need to check if the item type may
-     * have already been removed:
-     * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
-     * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
-     * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
-     * at the end.
-     *
-     * @internal
-     */
-    _verifyReinsertion(record, item, itemTrackBy, index) {
-        let reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
-        if (reinsertRecord !== null) {
-            record = this._reinsertAfter(reinsertRecord, record._prev, index);
-        }
-        else if (record.currentIndex != index) {
-            record.currentIndex = index;
-            this._addToMoves(record, index);
-        }
-        return record;
-    }
-    /**
-     * Get rid of any excess {@link IterableChangeRecord_}s from the previous collection
-     *
-     * - `record` The first excess {@link IterableChangeRecord_}.
-     *
-     * @internal
-     */
-    _truncate(record) {
-        // Anything after that needs to be removed;
-        while (record !== null) {
-            const nextRecord = record._next;
-            this._addToRemovals(this._unlink(record));
-            record = nextRecord;
-        }
-        if (this._unlinkedRecords !== null) {
-            this._unlinkedRecords.clear();
-        }
-        if (this._additionsTail !== null) {
-            this._additionsTail._nextAdded = null;
-        }
-        if (this._movesTail !== null) {
-            this._movesTail._nextMoved = null;
-        }
-        if (this._itTail !== null) {
-            this._itTail._next = null;
-        }
-        if (this._removalsTail !== null) {
-            this._removalsTail._nextRemoved = null;
-        }
-        if (this._identityChangesTail !== null) {
-            this._identityChangesTail._nextIdentityChange = null;
-        }
-    }
-    /** @internal */
-    _reinsertAfter(record, prevRecord, index) {
-        if (this._unlinkedRecords !== null) {
-            this._unlinkedRecords.remove(record);
-        }
-        const prev = record._prevRemoved;
-        const next = record._nextRemoved;
-        if (prev === null) {
-            this._removalsHead = next;
-        }
-        else {
-            prev._nextRemoved = next;
-        }
-        if (next === null) {
-            this._removalsTail = prev;
-        }
-        else {
-            next._prevRemoved = prev;
-        }
-        this._insertAfter(record, prevRecord, index);
-        this._addToMoves(record, index);
-        return record;
-    }
-    /** @internal */
-    _moveAfter(record, prevRecord, index) {
-        this._unlink(record);
-        this._insertAfter(record, prevRecord, index);
-        this._addToMoves(record, index);
-        return record;
-    }
-    /** @internal */
-    _addAfter(record, prevRecord, index) {
-        this._insertAfter(record, prevRecord, index);
-        if (this._additionsTail === null) {
-            // TODO(vicb):
-            // assert(this._additionsHead === null);
-            this._additionsTail = this._additionsHead = record;
-        }
-        else {
-            // TODO(vicb):
-            // assert(_additionsTail._nextAdded === null);
-            // assert(record._nextAdded === null);
-            this._additionsTail = this._additionsTail._nextAdded = record;
-        }
-        return record;
-    }
-    /** @internal */
-    _insertAfter(record, prevRecord, index) {
-        // TODO(vicb):
-        // assert(record != prevRecord);
-        // assert(record._next === null);
-        // assert(record._prev === null);
-        const next = prevRecord === null ? this._itHead : prevRecord._next;
-        // TODO(vicb):
-        // assert(next != record);
-        // assert(prevRecord != record);
-        record._next = next;
-        record._prev = prevRecord;
-        if (next === null) {
-            this._itTail = record;
-        }
-        else {
-            next._prev = record;
-        }
-        if (prevRecord === null) {
-            this._itHead = record;
-        }
-        else {
-            prevRecord._next = record;
-        }
-        if (this._linkedRecords === null) {
-            this._linkedRecords = new _DuplicateMap();
-        }
-        this._linkedRecords.put(record);
-        record.currentIndex = index;
-        return record;
-    }
-    /** @internal */
-    _remove(record) {
-        return this._addToRemovals(this._unlink(record));
-    }
-    /** @internal */
-    _unlink(record) {
-        if (this._linkedRecords !== null) {
-            this._linkedRecords.remove(record);
-        }
-        const prev = record._prev;
-        const next = record._next;
-        // TODO(vicb):
-        // assert((record._prev = null) === null);
-        // assert((record._next = null) === null);
-        if (prev === null) {
-            this._itHead = next;
-        }
-        else {
-            prev._next = next;
-        }
-        if (next === null) {
-            this._itTail = prev;
-        }
-        else {
-            next._prev = prev;
-        }
-        return record;
-    }
-    /** @internal */
-    _addToMoves(record, toIndex) {
-        // TODO(vicb):
-        // assert(record._nextMoved === null);
-        if (record.previousIndex === toIndex) {
-            return record;
-        }
-        if (this._movesTail === null) {
-            // TODO(vicb):
-            // assert(_movesHead === null);
-            this._movesTail = this._movesHead = record;
-        }
-        else {
-            // TODO(vicb):
-            // assert(_movesTail._nextMoved === null);
-            this._movesTail = this._movesTail._nextMoved = record;
-        }
-        return record;
-    }
-    _addToRemovals(record) {
-        if (this._unlinkedRecords === null) {
-            this._unlinkedRecords = new _DuplicateMap();
-        }
-        this._unlinkedRecords.put(record);
-        record.currentIndex = null;
-        record._nextRemoved = null;
-        if (this._removalsTail === null) {
-            // TODO(vicb):
-            // assert(_removalsHead === null);
-            this._removalsTail = this._removalsHead = record;
-            record._prevRemoved = null;
-        }
-        else {
-            // TODO(vicb):
-            // assert(_removalsTail._nextRemoved === null);
-            // assert(record._nextRemoved === null);
-            record._prevRemoved = this._removalsTail;
-            this._removalsTail = this._removalsTail._nextRemoved = record;
-        }
-        return record;
-    }
-    /** @internal */
-    _addIdentityChange(record, item) {
-        record.item = item;
-        if (this._identityChangesTail === null) {
-            this._identityChangesTail = this._identityChangesHead = record;
-        }
-        else {
-            this._identityChangesTail = this._identityChangesTail._nextIdentityChange = record;
-        }
-        return record;
-    }
-}
-class IterableChangeRecord_ {
-    constructor(item, trackById) {
-        this.item = item;
-        this.trackById = trackById;
-        this.currentIndex = null;
-        this.previousIndex = null;
-        /** @internal */
-        this._nextPrevious = null;
-        /** @internal */
-        this._prev = null;
-        /** @internal */
-        this._next = null;
-        /** @internal */
-        this._prevDup = null;
-        /** @internal */
-        this._nextDup = null;
-        /** @internal */
-        this._prevRemoved = null;
-        /** @internal */
-        this._nextRemoved = null;
-        /** @internal */
-        this._nextAdded = null;
-        /** @internal */
-        this._nextMoved = null;
-        /** @internal */
-        this._nextIdentityChange = null;
-    }
-}
-// A linked list of IterableChangeRecords with the same IterableChangeRecord_.item
-class _DuplicateItemRecordList {
-    constructor() {
-        /** @internal */
-        this._head = null;
-        /** @internal */
-        this._tail = null;
-    }
-    /**
-     * Append the record to the list of duplicates.
-     *
-     * Note: by design all records in the list of duplicates hold the same value in record.item.
-     */
-    add(record) {
-        if (this._head === null) {
-            this._head = this._tail = record;
-            record._nextDup = null;
-            record._prevDup = null;
-        }
-        else {
-            // TODO(vicb):
-            // assert(record.item ==  _head.item ||
-            //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
-            this._tail._nextDup = record;
-            record._prevDup = this._tail;
-            record._nextDup = null;
-            this._tail = record;
-        }
-    }
-    // Returns a IterableChangeRecord_ having IterableChangeRecord_.trackById == trackById and
-    // IterableChangeRecord_.currentIndex >= atOrAfterIndex
-    get(trackById, atOrAfterIndex) {
-        let record;
-        for (record = this._head; record !== null; record = record._nextDup) {
-            if ((atOrAfterIndex === null || atOrAfterIndex <= record.currentIndex) &&
-                Object.is(record.trackById, trackById)) {
-                return record;
-            }
-        }
-        return null;
-    }
-    /**
-     * Remove one {@link IterableChangeRecord_} from the list of duplicates.
-     *
-     * Returns whether the list of duplicates is empty.
-     */
-    remove(record) {
-        // TODO(vicb):
-        // assert(() {
-        //  // verify that the record being removed is in the list.
-        //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
-        //    if (identical(cursor, record)) return true;
-        //  }
-        //  return false;
-        //});
-        const prev = record._prevDup;
-        const next = record._nextDup;
-        if (prev === null) {
-            this._head = next;
-        }
-        else {
-            prev._nextDup = next;
-        }
-        if (next === null) {
-            this._tail = prev;
-        }
-        else {
-            next._prevDup = prev;
-        }
-        return this._head === null;
-    }
-}
-class _DuplicateMap {
-    constructor() {
-        this.map = new Map();
-    }
-    put(record) {
-        const key = record.trackById;
-        let duplicates = this.map.get(key);
-        if (!duplicates) {
-            duplicates = new _DuplicateItemRecordList();
-            this.map.set(key, duplicates);
-        }
-        duplicates.add(record);
-    }
-    /**
-     * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
-     * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
-     *
-     * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
-     * have any more `a`s needs to return the second `a`.
-     */
-    get(trackById, atOrAfterIndex) {
-        const key = trackById;
-        const recordList = this.map.get(key);
-        return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
-    }
-    /**
-     * Removes a {@link IterableChangeRecord_} from the list of duplicates.
-     *
-     * The list of duplicates also is removed from the map if it gets empty.
-     */
-    remove(record) {
-        const key = record.trackById;
-        const recordList = this.map.get(key);
-        // Remove the list of duplicates when it gets empty
-        if (recordList.remove(record)) {
-            this.map.delete(key);
-        }
-        return record;
-    }
-    get isEmpty() {
-        return this.map.size === 0;
-    }
-    clear() {
-        this.map.clear();
-    }
-}
-function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
-    const previousIndex = item.previousIndex;
-    if (previousIndex === null)
-        return previousIndex;
-    let moveOffset = 0;
-    if (moveOffsets && previousIndex < moveOffsets.length) {
-        moveOffset = moveOffsets[previousIndex];
-    }
-    return previousIndex + addRemoveOffset + moveOffset;
-}
-
-class DefaultKeyValueDifferFactory {
-    constructor() { }
-    supports(obj) {
-        return obj instanceof Map || isJsObject(obj);
-    }
-    create() {
-        return new DefaultKeyValueDiffer();
-    }
-}
-class DefaultKeyValueDiffer {
-    constructor() {
-        this._records = new Map();
-        this._mapHead = null;
-        // _appendAfter is used in the check loop
-        this._appendAfter = null;
-        this._previousMapHead = null;
-        this._changesHead = null;
-        this._changesTail = null;
-        this._additionsHead = null;
-        this._additionsTail = null;
-        this._removalsHead = null;
-        this._removalsTail = null;
-    }
-    get isDirty() {
-        return this._additionsHead !== null || this._changesHead !== null ||
-            this._removalsHead !== null;
-    }
-    forEachItem(fn) {
-        let record;
-        for (record = this._mapHead; record !== null; record = record._next) {
-            fn(record);
-        }
-    }
-    forEachPreviousItem(fn) {
-        let record;
-        for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
-            fn(record);
-        }
-    }
-    forEachChangedItem(fn) {
-        let record;
-        for (record = this._changesHead; record !== null; record = record._nextChanged) {
-            fn(record);
-        }
-    }
-    forEachAddedItem(fn) {
-        let record;
-        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-            fn(record);
-        }
-    }
-    forEachRemovedItem(fn) {
-        let record;
-        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-            fn(record);
-        }
-    }
-    diff(map) {
-        if (!map) {
-            map = new Map();
-        }
-        else if (!(map instanceof Map || isJsObject(map))) {
-            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
-                `Error trying to diff '${stringify(map)}'. Only maps and objects are allowed`);
-        }
-        return this.check(map) ? this : null;
-    }
-    onDestroy() { }
-    /**
-     * Check the current state of the map vs the previous.
-     * The algorithm is optimised for when the keys do no change.
-     */
-    check(map) {
-        this._reset();
-        let insertBefore = this._mapHead;
-        this._appendAfter = null;
-        this._forEach(map, (value, key) => {
-            if (insertBefore && insertBefore.key === key) {
-                this._maybeAddToChanges(insertBefore, value);
-                this._appendAfter = insertBefore;
-                insertBefore = insertBefore._next;
-            }
-            else {
-                const record = this._getOrCreateRecordForKey(key, value);
-                insertBefore = this._insertBeforeOrAppend(insertBefore, record);
-            }
-        });
-        // Items remaining at the end of the list have been deleted
-        if (insertBefore) {
-            if (insertBefore._prev) {
-                insertBefore._prev._next = null;
-            }
-            this._removalsHead = insertBefore;
-            for (let record = insertBefore; record !== null; record = record._nextRemoved) {
-                if (record === this._mapHead) {
-                    this._mapHead = null;
-                }
-                this._records.delete(record.key);
-                record._nextRemoved = record._next;
-                record.previousValue = record.currentValue;
-                record.currentValue = null;
-                record._prev = null;
-                record._next = null;
-            }
-        }
-        // Make sure tails have no next records from previous runs
-        if (this._changesTail)
-            this._changesTail._nextChanged = null;
-        if (this._additionsTail)
-            this._additionsTail._nextAdded = null;
-        return this.isDirty;
-    }
-    /**
-     * Inserts a record before `before` or append at the end of the list when `before` is null.
-     *
-     * Notes:
-     * - This method appends at `this._appendAfter`,
-     * - This method updates `this._appendAfter`,
-     * - The return value is the new value for the insertion pointer.
-     */
-    _insertBeforeOrAppend(before, record) {
-        if (before) {
-            const prev = before._prev;
-            record._next = before;
-            record._prev = prev;
-            before._prev = record;
-            if (prev) {
-                prev._next = record;
-            }
-            if (before === this._mapHead) {
-                this._mapHead = record;
-            }
-            this._appendAfter = before;
-            return before;
-        }
-        if (this._appendAfter) {
-            this._appendAfter._next = record;
-            record._prev = this._appendAfter;
-        }
-        else {
-            this._mapHead = record;
-        }
-        this._appendAfter = record;
-        return null;
-    }
-    _getOrCreateRecordForKey(key, value) {
-        if (this._records.has(key)) {
-            const record = this._records.get(key);
-            this._maybeAddToChanges(record, value);
-            const prev = record._prev;
-            const next = record._next;
-            if (prev) {
-                prev._next = next;
-            }
-            if (next) {
-                next._prev = prev;
-            }
-            record._next = null;
-            record._prev = null;
-            return record;
-        }
-        const record = new KeyValueChangeRecord_(key);
-        this._records.set(key, record);
-        record.currentValue = value;
-        this._addToAdditions(record);
-        return record;
-    }
-    /** @internal */
-    _reset() {
-        if (this.isDirty) {
-            let record;
-            // let `_previousMapHead` contain the state of the map before the changes
-            this._previousMapHead = this._mapHead;
-            for (record = this._previousMapHead; record !== null; record = record._next) {
-                record._nextPrevious = record._next;
-            }
-            // Update `record.previousValue` with the value of the item before the changes
-            // We need to update all changed items (that's those which have been added and changed)
-            for (record = this._changesHead; record !== null; record = record._nextChanged) {
-                record.previousValue = record.currentValue;
-            }
-            for (record = this._additionsHead; record != null; record = record._nextAdded) {
-                record.previousValue = record.currentValue;
-            }
-            this._changesHead = this._changesTail = null;
-            this._additionsHead = this._additionsTail = null;
-            this._removalsHead = null;
-        }
-    }
-    // Add the record or a given key to the list of changes only when the value has actually changed
-    _maybeAddToChanges(record, newValue) {
-        if (!Object.is(newValue, record.currentValue)) {
-            record.previousValue = record.currentValue;
-            record.currentValue = newValue;
-            this._addToChanges(record);
-        }
-    }
-    _addToAdditions(record) {
-        if (this._additionsHead === null) {
-            this._additionsHead = this._additionsTail = record;
-        }
-        else {
-            this._additionsTail._nextAdded = record;
-            this._additionsTail = record;
-        }
-    }
-    _addToChanges(record) {
-        if (this._changesHead === null) {
-            this._changesHead = this._changesTail = record;
-        }
-        else {
-            this._changesTail._nextChanged = record;
-            this._changesTail = record;
-        }
-    }
-    /** @internal */
-    _forEach(obj, fn) {
-        if (obj instanceof Map) {
-            obj.forEach(fn);
-        }
-        else {
-            Object.keys(obj).forEach(k => fn(obj[k], k));
-        }
-    }
-}
-class KeyValueChangeRecord_ {
-    constructor(key) {
-        this.key = key;
-        this.previousValue = null;
-        this.currentValue = null;
-        /** @internal */
-        this._nextPrevious = null;
-        /** @internal */
-        this._next = null;
-        /** @internal */
-        this._prev = null;
-        /** @internal */
-        this._nextAdded = null;
-        /** @internal */
-        this._nextRemoved = null;
-        /** @internal */
-        this._nextChanged = null;
-    }
-}
-
-function defaultIterableDiffersFactory() {
-    return new IterableDiffers([new DefaultIterableDifferFactory()]);
-}
-/**
- * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- *
- * @publicApi
- */
-class IterableDiffers {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({ token: IterableDiffers, providedIn: 'root', factory: defaultIterableDiffersFactory }); }
-    constructor(factories) {
-        this.factories = factories;
-    }
-    static create(factories, parent) {
-        if (parent != null) {
-            const copied = parent.factories.slice();
-            factories = factories.concat(copied);
-        }
-        return new IterableDiffers(factories);
-    }
-    /**
-     * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
-     * inherited {@link IterableDiffers} instance with the provided factories and return a new
-     * {@link IterableDiffers} instance.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example shows how to extend an existing list of factories,
-     * which will only be applied to the injector for this component and its children.
-     * This step is all that's required to make a new {@link IterableDiffer} available.
-     *
-     * ```
-     * @Component({
-     *   viewProviders: [
-     *     IterableDiffers.extend([new ImmutableListDiffer()])
-     *   ]
-     * })
-     * ```
-     */
-    static extend(factories) {
-        return {
-            provide: IterableDiffers,
-            useFactory: (parent) => {
-                // if parent is null, it means that we are in the root injector and we have just overridden
-                // the default injection mechanism for IterableDiffers, in such a case just assume
-                // `defaultIterableDiffersFactory`.
-                return IterableDiffers.create(factories, parent || defaultIterableDiffersFactory());
-            },
-            // Dependency technically isn't optional, but we can provide a better error message this way.
-            deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
-        };
-    }
-    find(iterable) {
-        const factory = this.factories.find(f => f.supports(iterable));
-        if (factory != null) {
-            return factory;
-        }
-        else {
-            throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode &&
-                `Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
-        }
-    }
-}
-function getTypeNameForDebugging(type) {
-    return type['name'] || typeof type;
-}
-
-function defaultKeyValueDiffersFactory() {
-    return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]);
-}
-/**
- * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
- *
- * @publicApi
- */
-class KeyValueDiffers {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({ token: KeyValueDiffers, providedIn: 'root', factory: defaultKeyValueDiffersFactory }); }
-    constructor(factories) {
-        this.factories = factories;
-    }
-    static create(factories, parent) {
-        if (parent) {
-            const copied = parent.factories.slice();
-            factories = factories.concat(copied);
-        }
-        return new KeyValueDiffers(factories);
-    }
-    /**
-     * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
-     * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
-     * {@link KeyValueDiffers} instance.
-     *
-     * @usageNotes
-     * ### Example
-     *
-     * The following example shows how to extend an existing list of factories,
-     * which will only be applied to the injector for this component and its children.
-     * This step is all that's required to make a new {@link KeyValueDiffer} available.
-     *
-     * ```
-     * @Component({
-     *   viewProviders: [
-     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
-     *   ]
-     * })
-     * ```
-     */
-    static extend(factories) {
-        return {
-            provide: KeyValueDiffers,
-            useFactory: (parent) => {
-                // if parent is null, it means that we are in the root injector and we have just overridden
-                // the default injection mechanism for KeyValueDiffers, in such a case just assume
-                // `defaultKeyValueDiffersFactory`.
-                return KeyValueDiffers.create(factories, parent || defaultKeyValueDiffersFactory());
-            },
-            // Dependency technically isn't optional, but we can provide a better error message this way.
-            deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
-        };
-    }
-    find(kv) {
-        const factory = this.factories.find(f => f.supports(kv));
-        if (factory) {
-            return factory;
-        }
-        throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode && `Cannot find a differ supporting object '${kv}'`);
-    }
-}
-
-function devModeEqual(a, b) {
-    const isListLikeIterableA = isListLikeIterable(a);
-    const isListLikeIterableB = isListLikeIterable(b);
-    if (isListLikeIterableA && isListLikeIterableB) {
-        return areIterablesEqual(a, b, devModeEqual);
-    }
-    else {
-        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
-        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
-        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
-            return true;
-        }
-        else {
-            return Object.is(a, b);
-        }
-    }
-}
-
-/**
- * Base class that provides change detection functionality.
- * A change-detection tree collects all views that are to be checked for changes.
- * Use the methods to add and remove views from the tree, initiate change-detection,
- * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
- *
- * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
- * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
- *
- * @usageNotes
- *
- * The following examples demonstrate how to modify default change-detection behavior
- * to perform explicit detection when needed.
- *
- * ### Use `markForCheck()` with `CheckOnce` strategy
- *
- * The following example sets the `OnPush` change-detection strategy for a component
- * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
- * after an interval.
- *
- * <code-example path="core/ts/change_detect/change-detection.ts"
- * region="mark-for-check"></code-example>
- *
- * ### Detach change detector to limit how often check occurs
- *
- * The following example defines a component with a large list of read-only data
- * that is expected to change constantly, many times per second.
- * To improve performance, we want to check and update the list
- * less often than the changes actually occur. To do that, we detach
- * the component's change detector and perform an explicit local check every five seconds.
- *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
- *
- *
- * ### Reattaching a detached component
- *
- * The following example creates a component displaying live data.
- * The component detaches its change detector from the main change detector tree
- * when the `live` property is set to false, and reattaches it when the property
- * becomes true.
- *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
- *
- * @publicApi
- */
-class ChangeDetectorRef {
-    /**
-     * @internal
-     * @nocollapse
-     */
-    static { this.__NG_ELEMENT_ID__ = injectChangeDetectorRef; }
-}
-/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
-function injectChangeDetectorRef(flags) {
-    return createViewRef(getCurrentTNode(), getLView(), (flags & 16 /* InternalInjectFlags.ForPipe */) === 16 /* InternalInjectFlags.ForPipe */);
-}
-/**
- * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
- *
- * @param tNode The node that is requesting a ChangeDetectorRef
- * @param lView The view to which the node belongs
- * @param isPipe Whether the view is being injected into a pipe.
- * @returns The ChangeDetectorRef to use
- */
-function createViewRef(tNode, lView, isPipe) {
-    if (isComponentHost(tNode) && !isPipe) {
-        // The LView represents the location where the component is declared.
-        // Instead we want the LView for the component View and so we need to look it up.
-        const componentView = getComponentLViewByIndex(tNode.index, lView); // look down
-        return new ViewRef$1(componentView, componentView);
-    }
-    else if (tNode.type & (3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 32 /* TNodeType.Icu */)) {
-        // The LView represents the location where the injection is requested from.
-        // We need to locate the containing LView (in case where the `lView` is an embedded view)
-        const hostComponentView = lView[DECLARATION_COMPONENT_VIEW]; // look up
-        return new ViewRef$1(hostComponentView, lView);
-    }
-    return null;
-}
-
-/**
- * Structural diffing for `Object`s and `Map`s.
- */
-const keyValDiff = [new DefaultKeyValueDifferFactory()];
-/**
- * Structural diffing for `Iterable` types such as `Array`s.
- */
-const iterableDiff = [new DefaultIterableDifferFactory()];
-const defaultIterableDiffers = new IterableDiffers(iterableDiff);
-const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
-
-/**
- * @module
- * @description
- * Change detection enables data binding in Angular.
- */
-
-/**
  * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
  * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
  * is injected in a component or directive, the callbacks run when that component or
@@ -15162,162 +13869,22 @@ function assertNotInReactiveContext(debugFn, extraContext) {
     }
 }
 
+const markedFeatures = new Set();
+// tslint:disable:ban
 /**
- * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
- * injector.
- */
-const APP_EFFECT_SCHEDULER = new InjectionToken('', {
-    providedIn: 'root',
-    factory: () => inject(EffectScheduler),
-});
-/**
- * A scheduler which manages the execution of effects.
- */
-class EffectScheduler {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: EffectScheduler,
-        providedIn: 'root',
-        factory: () => new ZoneAwareEffectScheduler(),
-    }); }
-}
-/**
- * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
- * when.
- */
-class ZoneAwareEffectScheduler {
-    constructor() {
-        this.hasQueuedFlush = false;
-        this.queuedEffectCount = 0;
-        this.queues = new Map();
-    }
-    scheduleEffect(handle) {
-        this.enqueue(handle);
-        if (!this.hasQueuedFlush) {
-            queueMicrotask(() => this.flush());
-            // Leave `hasQueuedFlush` as `true` so we don't queue another microtask if more effects are
-            // scheduled during flushing. We are guaranteed to empty the whole queue during flush.
-            this.hasQueuedFlush = false;
-        }
-    }
-    enqueue(handle) {
-        const zone = handle.creationZone;
-        if (!this.queues.has(zone)) {
-            this.queues.set(zone, new Set());
-        }
-        const queue = this.queues.get(zone);
-        if (queue.has(handle)) {
-            return;
-        }
-        this.queuedEffectCount++;
-        queue.add(handle);
-    }
-    /**
-     * Run all scheduled effects.
-     *
-     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
-     * ordering guarantee between effects scheduled in different zones.
-     */
-    flush() {
-        while (this.queuedEffectCount > 0) {
-            for (const [zone, queue] of this.queues) {
-                // `zone` here must be defined.
-                if (zone === null) {
-                    this.flushQueue(queue);
-                }
-                else {
-                    zone.run(() => this.flushQueue(queue));
-                }
-            }
-        }
-    }
-    flushQueue(queue) {
-        for (const handle of queue) {
-            queue.delete(handle);
-            this.queuedEffectCount--;
-            // TODO: what happens if this throws an error?
-            handle.run();
-        }
-    }
-}
-/**
- * Core reactive node for an Angular effect.
+ * A guarded `performance.mark` for feature marking.
  *
- * `EffectHandle` combines the reactive graph's `Watch` base node for effects with the framework's
- * scheduling abstraction (`EffectScheduler`) as well as automatic cleanup via `DestroyRef` if
- * available/requested.
+ * This method exists because while all supported browser and node.js version supported by Angular
+ * support performance.mark API. This is not the case for other environments such as JSDOM and
+ * Cloudflare workers.
  */
-class EffectHandle {
-    constructor(scheduler, effectFn, creationZone, destroyRef, injector, allowSignalWrites) {
-        this.scheduler = scheduler;
-        this.effectFn = effectFn;
-        this.creationZone = creationZone;
-        this.injector = injector;
-        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
-        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
+function performanceMarkFeature(feature) {
+    if (markedFeatures.has(feature)) {
+        return;
     }
-    runEffect(onCleanup) {
-        try {
-            this.effectFn(onCleanup);
-        }
-        catch (err) {
-            // Inject the `ErrorHandler` here in order to avoid circular DI error
-            // if the effect is used inside of a custom `ErrorHandler`.
-            const errorHandler = this.injector.get(ErrorHandler, null, { optional: true });
-            errorHandler?.handleError(err);
-        }
-    }
-    run() {
-        this.watcher.run();
-    }
-    schedule() {
-        this.scheduler.scheduleEffect(this);
-    }
-    destroy() {
-        this.watcher.destroy();
-        this.unregisterOnDestroy?.();
-        // Note: if the effect is currently scheduled, it's not un-scheduled, and so the scheduler will
-        // retain a reference to it. Attempting to execute it will be a no-op.
-    }
+    markedFeatures.add(feature);
+    performance?.mark?.('mark_feature_usage', { detail: { feature } });
 }
-/**
- * Create a global `Effect` for the given reactive function.
- *
- * @developerPreview
- */
-function effect(effectFn, options) {
-    performanceMarkFeature('NgSignals');
-    ngDevMode &&
-        assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
-            'effect inside the component constructor.');
-    !options?.injector && assertInInjectionContext(effect);
-    const injector = options?.injector ?? inject(Injector);
-    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, injector, options?.allowSignalWrites ?? false);
-    // Effects need to be marked dirty manually to trigger their initial run. The timing of this
-    // marking matters, because the effects may read signals that track component inputs, which are
-    // only available after those components have had their first update pass.
-    //
-    // We inject `ChangeDetectorRef` optionally, to determine whether this effect is being created in
-    // the context of a component or not. If it is, then we check whether the component has already
-    // run its update pass, and defer the effect's initial scheduling until the update pass if it
-    // hasn't already run.
-    const cdr = injector.get(ChangeDetectorRef, null, { optional: true });
-    if (!cdr || !(cdr._lView[FLAGS] & 8 /* LViewFlags.FirstLViewPass */)) {
-        // This effect is either not running in a view injector, or the view has already
-        // undergone its first change detection pass, which is necessary for any required inputs to be
-        // set.
-        handle.watcher.notify();
-    }
-    else {
-        // Delay the initialization of the effect until the view is fully initialized.
-        (cdr._lView[EFFECTS_TO_SCHEDULE] ??= []).push(handle.watcher.notify);
-    }
-    return handle;
-}
-
-// clang-format off
-// clang-format on
 
 function noop(...args) {
     // Do nothing.
@@ -16835,7 +15402,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.1+sha-0d98972']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.1+sha-07173fd']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17723,6 +16290,59 @@ function getQueryResults(lView, queryIndex) {
     const tQuery = getTQuery(tView, queryIndex);
     return tQuery.crossesNgTemplate ? collectQueryResults(tView, lView, queryIndex, []) :
         materializeViewResults(tView, lView, tQuery, queryIndex);
+}
+
+/**
+ * Checks if the given `value` is a reactive `Signal`.
+ */
+function isSignal(value) {
+    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
+}
+
+/** Symbol used distinguish `WritableSignal` from other non-writable signals and functions. */
+const WRITABLE_SIGNAL = /* @__PURE__ */ Symbol('WRITABLE_SIGNAL');
+/**
+ * Utility function used during template type checking to extract the value from a `WritableSignal`.
+ * @codeGenApi
+ */
+function ɵunwrapWritableSignal(value) {
+    // Note: needs to be kept in sync with the copy in `fake_core/index.ts`.
+    // Note: the function uses `WRITABLE_SIGNAL` as a brand instead of `WritableSignal<T>`,
+    // because the latter incorrectly unwraps non-signal getter functions.
+    return null;
+}
+/**
+ * Create a `Signal` that can be set or updated directly.
+ */
+function signal(initialValue, options) {
+    performanceMarkFeature('NgSignals');
+    const signalFn = createSignal$1(initialValue);
+    const node = signalFn[SIGNAL$1];
+    if (options?.equal) {
+        node.equal = options.equal;
+    }
+    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
+    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
+    signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
+    if (ngDevMode) {
+        signalFn.toString = () => `[Signal: ${signalFn()}]`;
+    }
+    return signalFn;
+}
+function signalAsReadonlyFn() {
+    const node = this[SIGNAL$1];
+    if (node.readonlyFn === undefined) {
+        const readonlyFn = () => this();
+        readonlyFn[SIGNAL$1] = node;
+        node.readonlyFn = readonlyFn;
+    }
+    return node.readonlyFn;
+}
+/**
+ * Checks if the given `value` is a writeable signal.
+ */
+function isWritableSignal(value) {
+    return isSignal(value) && typeof value.set === 'function';
 }
 
 /**
@@ -19020,6 +17640,66 @@ class PendingTasks {
         type: Injectable,
         args: [{ providedIn: 'root' }]
     }], null, null); })();
+
+function isIterable(obj) {
+    return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
+}
+function isListLikeIterable(obj) {
+    if (!isJsObject(obj))
+        return false;
+    return Array.isArray(obj) ||
+        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
+            Symbol.iterator in obj); // JS Iterable have a Symbol.iterator prop
+}
+function areIterablesEqual(a, b, comparator) {
+    const iterator1 = a[Symbol.iterator]();
+    const iterator2 = b[Symbol.iterator]();
+    while (true) {
+        const item1 = iterator1.next();
+        const item2 = iterator2.next();
+        if (item1.done && item2.done)
+            return true;
+        if (item1.done || item2.done)
+            return false;
+        if (!comparator(item1.value, item2.value))
+            return false;
+    }
+}
+function iterateListLike(obj, fn) {
+    if (Array.isArray(obj)) {
+        for (let i = 0; i < obj.length; i++) {
+            fn(obj[i]);
+        }
+    }
+    else {
+        const iterator = obj[Symbol.iterator]();
+        let item;
+        while (!((item = iterator.next()).done)) {
+            fn(item.value);
+        }
+    }
+}
+function isJsObject(o) {
+    return o !== null && (typeof o === 'function' || typeof o === 'object');
+}
+
+function devModeEqual(a, b) {
+    const isListLikeIterableA = isListLikeIterable(a);
+    const isListLikeIterableB = isListLikeIterable(b);
+    if (isListLikeIterableA && isListLikeIterableB) {
+        return areIterablesEqual(a, b, devModeEqual);
+    }
+    else {
+        const isAObject = a && (typeof a === 'object' || typeof a === 'function');
+        const isBObject = b && (typeof b === 'object' || typeof b === 'function');
+        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
+            return true;
+        }
+        else {
+            return Object.is(a, b);
+        }
+    }
+}
 
 // TODO(misko): consider inlining
 /** Updates binding and returns the value. */
@@ -30833,7 +29513,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.1+sha-0d98972');
+const VERSION = new Version('17.3.0-next.1+sha-07173fd');
 
 class Console {
     log(message) {
@@ -33524,6 +32204,86 @@ function noModuleError(id) {
 }
 
 /**
+ * Base class that provides change detection functionality.
+ * A change-detection tree collects all views that are to be checked for changes.
+ * Use the methods to add and remove views from the tree, initiate change-detection,
+ * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
+ *
+ * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
+ * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
+ *
+ * @usageNotes
+ *
+ * The following examples demonstrate how to modify default change-detection behavior
+ * to perform explicit detection when needed.
+ *
+ * ### Use `markForCheck()` with `CheckOnce` strategy
+ *
+ * The following example sets the `OnPush` change-detection strategy for a component
+ * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
+ * after an interval.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts"
+ * region="mark-for-check"></code-example>
+ *
+ * ### Detach change detector to limit how often check occurs
+ *
+ * The following example defines a component with a large list of read-only data
+ * that is expected to change constantly, many times per second.
+ * To improve performance, we want to check and update the list
+ * less often than the changes actually occur. To do that, we detach
+ * the component's change detector and perform an explicit local check every five seconds.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+ *
+ *
+ * ### Reattaching a detached component
+ *
+ * The following example creates a component displaying live data.
+ * The component detaches its change detector from the main change detector tree
+ * when the `live` property is set to false, and reattaches it when the property
+ * becomes true.
+ *
+ * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
+ *
+ * @publicApi
+ */
+class ChangeDetectorRef {
+    /**
+     * @internal
+     * @nocollapse
+     */
+    static { this.__NG_ELEMENT_ID__ = injectChangeDetectorRef; }
+}
+/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
+function injectChangeDetectorRef(flags) {
+    return createViewRef(getCurrentTNode(), getLView(), (flags & 16 /* InternalInjectFlags.ForPipe */) === 16 /* InternalInjectFlags.ForPipe */);
+}
+/**
+ * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
+ *
+ * @param tNode The node that is requesting a ChangeDetectorRef
+ * @param lView The view to which the node belongs
+ * @param isPipe Whether the view is being injected into a pipe.
+ * @returns The ChangeDetectorRef to use
+ */
+function createViewRef(tNode, lView, isPipe) {
+    if (isComponentHost(tNode) && !isPipe) {
+        // The LView represents the location where the component is declared.
+        // Instead we want the LView for the component View and so we need to look it up.
+        const componentView = getComponentLViewByIndex(tNode.index, lView); // look down
+        return new ViewRef$1(componentView, componentView);
+    }
+    else if (tNode.type & (3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 32 /* TNodeType.Icu */)) {
+        // The LView represents the location where the injection is requested from.
+        // We need to locate the containing LView (in case where the `lView` is an embedded view)
+        const hostComponentView = lView[DECLARATION_COMPONENT_VIEW]; // look up
+        return new ViewRef$1(hostComponentView, lView);
+    }
+    return null;
+}
+
+/**
  * Represents an Angular [view](guide/glossary#view "Definition").
  *
  * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
@@ -34150,6 +32910,1058 @@ function indexDebugNode(node) {
 function removeDebugNodeFromIndex(node) {
     _nativeNodeToDebugNode.delete(node.nativeNode);
 }
+
+class DefaultIterableDifferFactory {
+    constructor() { }
+    supports(obj) {
+        return isListLikeIterable(obj);
+    }
+    create(trackByFn) {
+        return new DefaultIterableDiffer(trackByFn);
+    }
+}
+const trackByIdentity = (index, item) => item;
+/**
+ * @deprecated v4.0.0 - Should not be part of public API.
+ * @publicApi
+ */
+class DefaultIterableDiffer {
+    constructor(trackByFn) {
+        this.length = 0;
+        // Keeps track of the used records at any point in time (during & across `_check()` calls)
+        this._linkedRecords = null;
+        // Keeps track of the removed records at any point in time during `_check()` calls.
+        this._unlinkedRecords = null;
+        this._previousItHead = null;
+        this._itHead = null;
+        this._itTail = null;
+        this._additionsHead = null;
+        this._additionsTail = null;
+        this._movesHead = null;
+        this._movesTail = null;
+        this._removalsHead = null;
+        this._removalsTail = null;
+        // Keeps track of records where custom track by is the same, but item identity has changed
+        this._identityChangesHead = null;
+        this._identityChangesTail = null;
+        this._trackByFn = trackByFn || trackByIdentity;
+    }
+    forEachItem(fn) {
+        let record;
+        for (record = this._itHead; record !== null; record = record._next) {
+            fn(record);
+        }
+    }
+    forEachOperation(fn) {
+        let nextIt = this._itHead;
+        let nextRemove = this._removalsHead;
+        let addRemoveOffset = 0;
+        let moveOffsets = null;
+        while (nextIt || nextRemove) {
+            // Figure out which is the next record to process
+            // Order: remove, add, move
+            const record = !nextRemove ||
+                nextIt &&
+                    nextIt.currentIndex <
+                        getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
+                nextIt :
+                nextRemove;
+            const adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
+            const currentIndex = record.currentIndex;
+            // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
+            if (record === nextRemove) {
+                addRemoveOffset--;
+                nextRemove = nextRemove._nextRemoved;
+            }
+            else {
+                nextIt = nextIt._next;
+                if (record.previousIndex == null) {
+                    addRemoveOffset++;
+                }
+                else {
+                    // INVARIANT:  currentIndex < previousIndex
+                    if (!moveOffsets)
+                        moveOffsets = [];
+                    const localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
+                    const localCurrentIndex = currentIndex - addRemoveOffset;
+                    if (localMovePreviousIndex != localCurrentIndex) {
+                        for (let i = 0; i < localMovePreviousIndex; i++) {
+                            const offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
+                            const index = offset + i;
+                            if (localCurrentIndex <= index && index < localMovePreviousIndex) {
+                                moveOffsets[i] = offset + 1;
+                            }
+                        }
+                        const previousIndex = record.previousIndex;
+                        moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
+                    }
+                }
+            }
+            if (adjPreviousIndex !== currentIndex) {
+                fn(record, adjPreviousIndex, currentIndex);
+            }
+        }
+    }
+    forEachPreviousItem(fn) {
+        let record;
+        for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
+            fn(record);
+        }
+    }
+    forEachAddedItem(fn) {
+        let record;
+        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+            fn(record);
+        }
+    }
+    forEachMovedItem(fn) {
+        let record;
+        for (record = this._movesHead; record !== null; record = record._nextMoved) {
+            fn(record);
+        }
+    }
+    forEachRemovedItem(fn) {
+        let record;
+        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
+            fn(record);
+        }
+    }
+    forEachIdentityChange(fn) {
+        let record;
+        for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
+            fn(record);
+        }
+    }
+    diff(collection) {
+        if (collection == null)
+            collection = [];
+        if (!isListLikeIterable(collection)) {
+            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
+                `Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed`);
+        }
+        if (this.check(collection)) {
+            return this;
+        }
+        else {
+            return null;
+        }
+    }
+    onDestroy() { }
+    check(collection) {
+        this._reset();
+        let record = this._itHead;
+        let mayBeDirty = false;
+        let index;
+        let item;
+        let itemTrackBy;
+        if (Array.isArray(collection)) {
+            this.length = collection.length;
+            for (let index = 0; index < this.length; index++) {
+                item = collection[index];
+                itemTrackBy = this._trackByFn(index, item);
+                if (record === null || !Object.is(record.trackById, itemTrackBy)) {
+                    record = this._mismatch(record, item, itemTrackBy, index);
+                    mayBeDirty = true;
+                }
+                else {
+                    if (mayBeDirty) {
+                        // TODO(misko): can we limit this to duplicates only?
+                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
+                    }
+                    if (!Object.is(record.item, item))
+                        this._addIdentityChange(record, item);
+                }
+                record = record._next;
+            }
+        }
+        else {
+            index = 0;
+            iterateListLike(collection, (item) => {
+                itemTrackBy = this._trackByFn(index, item);
+                if (record === null || !Object.is(record.trackById, itemTrackBy)) {
+                    record = this._mismatch(record, item, itemTrackBy, index);
+                    mayBeDirty = true;
+                }
+                else {
+                    if (mayBeDirty) {
+                        // TODO(misko): can we limit this to duplicates only?
+                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
+                    }
+                    if (!Object.is(record.item, item))
+                        this._addIdentityChange(record, item);
+                }
+                record = record._next;
+                index++;
+            });
+            this.length = index;
+        }
+        this._truncate(record);
+        this.collection = collection;
+        return this.isDirty;
+    }
+    /* CollectionChanges is considered dirty if it has any additions, moves, removals, or identity
+     * changes.
+     */
+    get isDirty() {
+        return this._additionsHead !== null || this._movesHead !== null ||
+            this._removalsHead !== null || this._identityChangesHead !== null;
+    }
+    /**
+     * Reset the state of the change objects to show no changes. This means set previousKey to
+     * currentKey, and clear all of the queues (additions, moves, removals).
+     * Set the previousIndexes of moved and added items to their currentIndexes
+     * Reset the list of additions, moves and removals
+     *
+     * @internal
+     */
+    _reset() {
+        if (this.isDirty) {
+            let record;
+            for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
+                record._nextPrevious = record._next;
+            }
+            for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+                record.previousIndex = record.currentIndex;
+            }
+            this._additionsHead = this._additionsTail = null;
+            for (record = this._movesHead; record !== null; record = record._nextMoved) {
+                record.previousIndex = record.currentIndex;
+            }
+            this._movesHead = this._movesTail = null;
+            this._removalsHead = this._removalsTail = null;
+            this._identityChangesHead = this._identityChangesTail = null;
+            // TODO(vicb): when assert gets supported
+            // assert(!this.isDirty);
+        }
+    }
+    /**
+     * This is the core function which handles differences between collections.
+     *
+     * - `record` is the record which we saw at this position last time. If null then it is a new
+     *   item.
+     * - `item` is the current item in the collection
+     * - `index` is the position of the item in the collection
+     *
+     * @internal
+     */
+    _mismatch(record, item, itemTrackBy, index) {
+        // The previous record after which we will append the current one.
+        let previousRecord;
+        if (record === null) {
+            previousRecord = this._itTail;
+        }
+        else {
+            previousRecord = record._prev;
+            // Remove the record from the collection since we know it does not match the item.
+            this._remove(record);
+        }
+        // See if we have evicted the item, which used to be at some anterior position of _itHead list.
+        record = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
+        if (record !== null) {
+            // It is an item which we have evicted earlier: reinsert it back into the list.
+            // But first we need to check if identity changed, so we can update in view if necessary.
+            if (!Object.is(record.item, item))
+                this._addIdentityChange(record, item);
+            this._reinsertAfter(record, previousRecord, index);
+        }
+        else {
+            // Attempt to see if the item is at some posterior position of _itHead list.
+            record = this._linkedRecords === null ? null : this._linkedRecords.get(itemTrackBy, index);
+            if (record !== null) {
+                // We have the item in _itHead at/after `index` position. We need to move it forward in the
+                // collection.
+                // But first we need to check if identity changed, so we can update in view if necessary.
+                if (!Object.is(record.item, item))
+                    this._addIdentityChange(record, item);
+                this._moveAfter(record, previousRecord, index);
+            }
+            else {
+                // It is a new item: add it.
+                record =
+                    this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
+            }
+        }
+        return record;
+    }
+    /**
+     * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
+     *
+     * Use case: `[a, a]` => `[b, a, a]`
+     *
+     * If we did not have this check then the insertion of `b` would:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) leave `a` at index `1` as is. <-- this is wrong!
+     *   3) reinsert `a` at index 2. <-- this is wrong!
+     *
+     * The correct behavior is:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) reinsert `a` at index 1.
+     *   3) move `a` at from `1` to `2`.
+     *
+     *
+     * Double check that we have not evicted a duplicate item. We need to check if the item type may
+     * have already been removed:
+     * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
+     * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
+     * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
+     * at the end.
+     *
+     * @internal
+     */
+    _verifyReinsertion(record, item, itemTrackBy, index) {
+        let reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
+        if (reinsertRecord !== null) {
+            record = this._reinsertAfter(reinsertRecord, record._prev, index);
+        }
+        else if (record.currentIndex != index) {
+            record.currentIndex = index;
+            this._addToMoves(record, index);
+        }
+        return record;
+    }
+    /**
+     * Get rid of any excess {@link IterableChangeRecord_}s from the previous collection
+     *
+     * - `record` The first excess {@link IterableChangeRecord_}.
+     *
+     * @internal
+     */
+    _truncate(record) {
+        // Anything after that needs to be removed;
+        while (record !== null) {
+            const nextRecord = record._next;
+            this._addToRemovals(this._unlink(record));
+            record = nextRecord;
+        }
+        if (this._unlinkedRecords !== null) {
+            this._unlinkedRecords.clear();
+        }
+        if (this._additionsTail !== null) {
+            this._additionsTail._nextAdded = null;
+        }
+        if (this._movesTail !== null) {
+            this._movesTail._nextMoved = null;
+        }
+        if (this._itTail !== null) {
+            this._itTail._next = null;
+        }
+        if (this._removalsTail !== null) {
+            this._removalsTail._nextRemoved = null;
+        }
+        if (this._identityChangesTail !== null) {
+            this._identityChangesTail._nextIdentityChange = null;
+        }
+    }
+    /** @internal */
+    _reinsertAfter(record, prevRecord, index) {
+        if (this._unlinkedRecords !== null) {
+            this._unlinkedRecords.remove(record);
+        }
+        const prev = record._prevRemoved;
+        const next = record._nextRemoved;
+        if (prev === null) {
+            this._removalsHead = next;
+        }
+        else {
+            prev._nextRemoved = next;
+        }
+        if (next === null) {
+            this._removalsTail = prev;
+        }
+        else {
+            next._prevRemoved = prev;
+        }
+        this._insertAfter(record, prevRecord, index);
+        this._addToMoves(record, index);
+        return record;
+    }
+    /** @internal */
+    _moveAfter(record, prevRecord, index) {
+        this._unlink(record);
+        this._insertAfter(record, prevRecord, index);
+        this._addToMoves(record, index);
+        return record;
+    }
+    /** @internal */
+    _addAfter(record, prevRecord, index) {
+        this._insertAfter(record, prevRecord, index);
+        if (this._additionsTail === null) {
+            // TODO(vicb):
+            // assert(this._additionsHead === null);
+            this._additionsTail = this._additionsHead = record;
+        }
+        else {
+            // TODO(vicb):
+            // assert(_additionsTail._nextAdded === null);
+            // assert(record._nextAdded === null);
+            this._additionsTail = this._additionsTail._nextAdded = record;
+        }
+        return record;
+    }
+    /** @internal */
+    _insertAfter(record, prevRecord, index) {
+        // TODO(vicb):
+        // assert(record != prevRecord);
+        // assert(record._next === null);
+        // assert(record._prev === null);
+        const next = prevRecord === null ? this._itHead : prevRecord._next;
+        // TODO(vicb):
+        // assert(next != record);
+        // assert(prevRecord != record);
+        record._next = next;
+        record._prev = prevRecord;
+        if (next === null) {
+            this._itTail = record;
+        }
+        else {
+            next._prev = record;
+        }
+        if (prevRecord === null) {
+            this._itHead = record;
+        }
+        else {
+            prevRecord._next = record;
+        }
+        if (this._linkedRecords === null) {
+            this._linkedRecords = new _DuplicateMap();
+        }
+        this._linkedRecords.put(record);
+        record.currentIndex = index;
+        return record;
+    }
+    /** @internal */
+    _remove(record) {
+        return this._addToRemovals(this._unlink(record));
+    }
+    /** @internal */
+    _unlink(record) {
+        if (this._linkedRecords !== null) {
+            this._linkedRecords.remove(record);
+        }
+        const prev = record._prev;
+        const next = record._next;
+        // TODO(vicb):
+        // assert((record._prev = null) === null);
+        // assert((record._next = null) === null);
+        if (prev === null) {
+            this._itHead = next;
+        }
+        else {
+            prev._next = next;
+        }
+        if (next === null) {
+            this._itTail = prev;
+        }
+        else {
+            next._prev = prev;
+        }
+        return record;
+    }
+    /** @internal */
+    _addToMoves(record, toIndex) {
+        // TODO(vicb):
+        // assert(record._nextMoved === null);
+        if (record.previousIndex === toIndex) {
+            return record;
+        }
+        if (this._movesTail === null) {
+            // TODO(vicb):
+            // assert(_movesHead === null);
+            this._movesTail = this._movesHead = record;
+        }
+        else {
+            // TODO(vicb):
+            // assert(_movesTail._nextMoved === null);
+            this._movesTail = this._movesTail._nextMoved = record;
+        }
+        return record;
+    }
+    _addToRemovals(record) {
+        if (this._unlinkedRecords === null) {
+            this._unlinkedRecords = new _DuplicateMap();
+        }
+        this._unlinkedRecords.put(record);
+        record.currentIndex = null;
+        record._nextRemoved = null;
+        if (this._removalsTail === null) {
+            // TODO(vicb):
+            // assert(_removalsHead === null);
+            this._removalsTail = this._removalsHead = record;
+            record._prevRemoved = null;
+        }
+        else {
+            // TODO(vicb):
+            // assert(_removalsTail._nextRemoved === null);
+            // assert(record._nextRemoved === null);
+            record._prevRemoved = this._removalsTail;
+            this._removalsTail = this._removalsTail._nextRemoved = record;
+        }
+        return record;
+    }
+    /** @internal */
+    _addIdentityChange(record, item) {
+        record.item = item;
+        if (this._identityChangesTail === null) {
+            this._identityChangesTail = this._identityChangesHead = record;
+        }
+        else {
+            this._identityChangesTail = this._identityChangesTail._nextIdentityChange = record;
+        }
+        return record;
+    }
+}
+class IterableChangeRecord_ {
+    constructor(item, trackById) {
+        this.item = item;
+        this.trackById = trackById;
+        this.currentIndex = null;
+        this.previousIndex = null;
+        /** @internal */
+        this._nextPrevious = null;
+        /** @internal */
+        this._prev = null;
+        /** @internal */
+        this._next = null;
+        /** @internal */
+        this._prevDup = null;
+        /** @internal */
+        this._nextDup = null;
+        /** @internal */
+        this._prevRemoved = null;
+        /** @internal */
+        this._nextRemoved = null;
+        /** @internal */
+        this._nextAdded = null;
+        /** @internal */
+        this._nextMoved = null;
+        /** @internal */
+        this._nextIdentityChange = null;
+    }
+}
+// A linked list of IterableChangeRecords with the same IterableChangeRecord_.item
+class _DuplicateItemRecordList {
+    constructor() {
+        /** @internal */
+        this._head = null;
+        /** @internal */
+        this._tail = null;
+    }
+    /**
+     * Append the record to the list of duplicates.
+     *
+     * Note: by design all records in the list of duplicates hold the same value in record.item.
+     */
+    add(record) {
+        if (this._head === null) {
+            this._head = this._tail = record;
+            record._nextDup = null;
+            record._prevDup = null;
+        }
+        else {
+            // TODO(vicb):
+            // assert(record.item ==  _head.item ||
+            //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
+            this._tail._nextDup = record;
+            record._prevDup = this._tail;
+            record._nextDup = null;
+            this._tail = record;
+        }
+    }
+    // Returns a IterableChangeRecord_ having IterableChangeRecord_.trackById == trackById and
+    // IterableChangeRecord_.currentIndex >= atOrAfterIndex
+    get(trackById, atOrAfterIndex) {
+        let record;
+        for (record = this._head; record !== null; record = record._nextDup) {
+            if ((atOrAfterIndex === null || atOrAfterIndex <= record.currentIndex) &&
+                Object.is(record.trackById, trackById)) {
+                return record;
+            }
+        }
+        return null;
+    }
+    /**
+     * Remove one {@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * Returns whether the list of duplicates is empty.
+     */
+    remove(record) {
+        // TODO(vicb):
+        // assert(() {
+        //  // verify that the record being removed is in the list.
+        //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
+        //    if (identical(cursor, record)) return true;
+        //  }
+        //  return false;
+        //});
+        const prev = record._prevDup;
+        const next = record._nextDup;
+        if (prev === null) {
+            this._head = next;
+        }
+        else {
+            prev._nextDup = next;
+        }
+        if (next === null) {
+            this._tail = prev;
+        }
+        else {
+            next._prevDup = prev;
+        }
+        return this._head === null;
+    }
+}
+class _DuplicateMap {
+    constructor() {
+        this.map = new Map();
+    }
+    put(record) {
+        const key = record.trackById;
+        let duplicates = this.map.get(key);
+        if (!duplicates) {
+            duplicates = new _DuplicateItemRecordList();
+            this.map.set(key, duplicates);
+        }
+        duplicates.add(record);
+    }
+    /**
+     * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
+     * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
+     *
+     * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
+     * have any more `a`s needs to return the second `a`.
+     */
+    get(trackById, atOrAfterIndex) {
+        const key = trackById;
+        const recordList = this.map.get(key);
+        return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
+    }
+    /**
+     * Removes a {@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * The list of duplicates also is removed from the map if it gets empty.
+     */
+    remove(record) {
+        const key = record.trackById;
+        const recordList = this.map.get(key);
+        // Remove the list of duplicates when it gets empty
+        if (recordList.remove(record)) {
+            this.map.delete(key);
+        }
+        return record;
+    }
+    get isEmpty() {
+        return this.map.size === 0;
+    }
+    clear() {
+        this.map.clear();
+    }
+}
+function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
+    const previousIndex = item.previousIndex;
+    if (previousIndex === null)
+        return previousIndex;
+    let moveOffset = 0;
+    if (moveOffsets && previousIndex < moveOffsets.length) {
+        moveOffset = moveOffsets[previousIndex];
+    }
+    return previousIndex + addRemoveOffset + moveOffset;
+}
+
+class DefaultKeyValueDifferFactory {
+    constructor() { }
+    supports(obj) {
+        return obj instanceof Map || isJsObject(obj);
+    }
+    create() {
+        return new DefaultKeyValueDiffer();
+    }
+}
+class DefaultKeyValueDiffer {
+    constructor() {
+        this._records = new Map();
+        this._mapHead = null;
+        // _appendAfter is used in the check loop
+        this._appendAfter = null;
+        this._previousMapHead = null;
+        this._changesHead = null;
+        this._changesTail = null;
+        this._additionsHead = null;
+        this._additionsTail = null;
+        this._removalsHead = null;
+        this._removalsTail = null;
+    }
+    get isDirty() {
+        return this._additionsHead !== null || this._changesHead !== null ||
+            this._removalsHead !== null;
+    }
+    forEachItem(fn) {
+        let record;
+        for (record = this._mapHead; record !== null; record = record._next) {
+            fn(record);
+        }
+    }
+    forEachPreviousItem(fn) {
+        let record;
+        for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
+            fn(record);
+        }
+    }
+    forEachChangedItem(fn) {
+        let record;
+        for (record = this._changesHead; record !== null; record = record._nextChanged) {
+            fn(record);
+        }
+    }
+    forEachAddedItem(fn) {
+        let record;
+        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
+            fn(record);
+        }
+    }
+    forEachRemovedItem(fn) {
+        let record;
+        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
+            fn(record);
+        }
+    }
+    diff(map) {
+        if (!map) {
+            map = new Map();
+        }
+        else if (!(map instanceof Map || isJsObject(map))) {
+            throw new RuntimeError(900 /* RuntimeErrorCode.INVALID_DIFFER_INPUT */, ngDevMode &&
+                `Error trying to diff '${stringify(map)}'. Only maps and objects are allowed`);
+        }
+        return this.check(map) ? this : null;
+    }
+    onDestroy() { }
+    /**
+     * Check the current state of the map vs the previous.
+     * The algorithm is optimised for when the keys do no change.
+     */
+    check(map) {
+        this._reset();
+        let insertBefore = this._mapHead;
+        this._appendAfter = null;
+        this._forEach(map, (value, key) => {
+            if (insertBefore && insertBefore.key === key) {
+                this._maybeAddToChanges(insertBefore, value);
+                this._appendAfter = insertBefore;
+                insertBefore = insertBefore._next;
+            }
+            else {
+                const record = this._getOrCreateRecordForKey(key, value);
+                insertBefore = this._insertBeforeOrAppend(insertBefore, record);
+            }
+        });
+        // Items remaining at the end of the list have been deleted
+        if (insertBefore) {
+            if (insertBefore._prev) {
+                insertBefore._prev._next = null;
+            }
+            this._removalsHead = insertBefore;
+            for (let record = insertBefore; record !== null; record = record._nextRemoved) {
+                if (record === this._mapHead) {
+                    this._mapHead = null;
+                }
+                this._records.delete(record.key);
+                record._nextRemoved = record._next;
+                record.previousValue = record.currentValue;
+                record.currentValue = null;
+                record._prev = null;
+                record._next = null;
+            }
+        }
+        // Make sure tails have no next records from previous runs
+        if (this._changesTail)
+            this._changesTail._nextChanged = null;
+        if (this._additionsTail)
+            this._additionsTail._nextAdded = null;
+        return this.isDirty;
+    }
+    /**
+     * Inserts a record before `before` or append at the end of the list when `before` is null.
+     *
+     * Notes:
+     * - This method appends at `this._appendAfter`,
+     * - This method updates `this._appendAfter`,
+     * - The return value is the new value for the insertion pointer.
+     */
+    _insertBeforeOrAppend(before, record) {
+        if (before) {
+            const prev = before._prev;
+            record._next = before;
+            record._prev = prev;
+            before._prev = record;
+            if (prev) {
+                prev._next = record;
+            }
+            if (before === this._mapHead) {
+                this._mapHead = record;
+            }
+            this._appendAfter = before;
+            return before;
+        }
+        if (this._appendAfter) {
+            this._appendAfter._next = record;
+            record._prev = this._appendAfter;
+        }
+        else {
+            this._mapHead = record;
+        }
+        this._appendAfter = record;
+        return null;
+    }
+    _getOrCreateRecordForKey(key, value) {
+        if (this._records.has(key)) {
+            const record = this._records.get(key);
+            this._maybeAddToChanges(record, value);
+            const prev = record._prev;
+            const next = record._next;
+            if (prev) {
+                prev._next = next;
+            }
+            if (next) {
+                next._prev = prev;
+            }
+            record._next = null;
+            record._prev = null;
+            return record;
+        }
+        const record = new KeyValueChangeRecord_(key);
+        this._records.set(key, record);
+        record.currentValue = value;
+        this._addToAdditions(record);
+        return record;
+    }
+    /** @internal */
+    _reset() {
+        if (this.isDirty) {
+            let record;
+            // let `_previousMapHead` contain the state of the map before the changes
+            this._previousMapHead = this._mapHead;
+            for (record = this._previousMapHead; record !== null; record = record._next) {
+                record._nextPrevious = record._next;
+            }
+            // Update `record.previousValue` with the value of the item before the changes
+            // We need to update all changed items (that's those which have been added and changed)
+            for (record = this._changesHead; record !== null; record = record._nextChanged) {
+                record.previousValue = record.currentValue;
+            }
+            for (record = this._additionsHead; record != null; record = record._nextAdded) {
+                record.previousValue = record.currentValue;
+            }
+            this._changesHead = this._changesTail = null;
+            this._additionsHead = this._additionsTail = null;
+            this._removalsHead = null;
+        }
+    }
+    // Add the record or a given key to the list of changes only when the value has actually changed
+    _maybeAddToChanges(record, newValue) {
+        if (!Object.is(newValue, record.currentValue)) {
+            record.previousValue = record.currentValue;
+            record.currentValue = newValue;
+            this._addToChanges(record);
+        }
+    }
+    _addToAdditions(record) {
+        if (this._additionsHead === null) {
+            this._additionsHead = this._additionsTail = record;
+        }
+        else {
+            this._additionsTail._nextAdded = record;
+            this._additionsTail = record;
+        }
+    }
+    _addToChanges(record) {
+        if (this._changesHead === null) {
+            this._changesHead = this._changesTail = record;
+        }
+        else {
+            this._changesTail._nextChanged = record;
+            this._changesTail = record;
+        }
+    }
+    /** @internal */
+    _forEach(obj, fn) {
+        if (obj instanceof Map) {
+            obj.forEach(fn);
+        }
+        else {
+            Object.keys(obj).forEach(k => fn(obj[k], k));
+        }
+    }
+}
+class KeyValueChangeRecord_ {
+    constructor(key) {
+        this.key = key;
+        this.previousValue = null;
+        this.currentValue = null;
+        /** @internal */
+        this._nextPrevious = null;
+        /** @internal */
+        this._next = null;
+        /** @internal */
+        this._prev = null;
+        /** @internal */
+        this._nextAdded = null;
+        /** @internal */
+        this._nextRemoved = null;
+        /** @internal */
+        this._nextChanged = null;
+    }
+}
+
+function defaultIterableDiffersFactory() {
+    return new IterableDiffers([new DefaultIterableDifferFactory()]);
+}
+/**
+ * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
+ *
+ * @publicApi
+ */
+class IterableDiffers {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({ token: IterableDiffers, providedIn: 'root', factory: defaultIterableDiffersFactory }); }
+    constructor(factories) {
+        this.factories = factories;
+    }
+    static create(factories, parent) {
+        if (parent != null) {
+            const copied = parent.factories.slice();
+            factories = factories.concat(copied);
+        }
+        return new IterableDiffers(factories);
+    }
+    /**
+     * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
+     * inherited {@link IterableDiffers} instance with the provided factories and return a new
+     * {@link IterableDiffers} instance.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {@link IterableDiffer} available.
+     *
+     * ```
+     * @Component({
+     *   viewProviders: [
+     *     IterableDiffers.extend([new ImmutableListDiffer()])
+     *   ]
+     * })
+     * ```
+     */
+    static extend(factories) {
+        return {
+            provide: IterableDiffers,
+            useFactory: (parent) => {
+                // if parent is null, it means that we are in the root injector and we have just overridden
+                // the default injection mechanism for IterableDiffers, in such a case just assume
+                // `defaultIterableDiffersFactory`.
+                return IterableDiffers.create(factories, parent || defaultIterableDiffersFactory());
+            },
+            // Dependency technically isn't optional, but we can provide a better error message this way.
+            deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
+        };
+    }
+    find(iterable) {
+        const factory = this.factories.find(f => f.supports(iterable));
+        if (factory != null) {
+            return factory;
+        }
+        else {
+            throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode &&
+                `Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
+        }
+    }
+}
+function getTypeNameForDebugging(type) {
+    return type['name'] || typeof type;
+}
+
+function defaultKeyValueDiffersFactory() {
+    return new KeyValueDiffers([new DefaultKeyValueDifferFactory()]);
+}
+/**
+ * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
+ *
+ * @publicApi
+ */
+class KeyValueDiffers {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({ token: KeyValueDiffers, providedIn: 'root', factory: defaultKeyValueDiffersFactory }); }
+    constructor(factories) {
+        this.factories = factories;
+    }
+    static create(factories, parent) {
+        if (parent) {
+            const copied = parent.factories.slice();
+            factories = factories.concat(copied);
+        }
+        return new KeyValueDiffers(factories);
+    }
+    /**
+     * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
+     * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
+     * {@link KeyValueDiffers} instance.
+     *
+     * @usageNotes
+     * ### Example
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {@link KeyValueDiffer} available.
+     *
+     * ```
+     * @Component({
+     *   viewProviders: [
+     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+     *   ]
+     * })
+     * ```
+     */
+    static extend(factories) {
+        return {
+            provide: KeyValueDiffers,
+            useFactory: (parent) => {
+                // if parent is null, it means that we are in the root injector and we have just overridden
+                // the default injection mechanism for KeyValueDiffers, in such a case just assume
+                // `defaultKeyValueDiffersFactory`.
+                return KeyValueDiffers.create(factories, parent || defaultKeyValueDiffersFactory());
+            },
+            // Dependency technically isn't optional, but we can provide a better error message this way.
+            deps: [[KeyValueDiffers, new SkipSelf(), new Optional()]]
+        };
+    }
+    find(kv) {
+        const factory = this.factories.find(f => f.supports(kv));
+        if (factory) {
+            return factory;
+        }
+        throw new RuntimeError(901 /* RuntimeErrorCode.NO_SUPPORTING_DIFFER_FACTORY */, ngDevMode && `Cannot find a differ supporting object '${kv}'`);
+    }
+}
+
+/**
+ * Structural diffing for `Object`s and `Map`s.
+ */
+const keyValDiff = [new DefaultKeyValueDifferFactory()];
+/**
+ * Structural diffing for `Iterable` types such as `Array`s.
+ */
+const iterableDiff = [new DefaultIterableDifferFactory()];
+const defaultIterableDiffers = new IterableDiffers(iterableDiff);
+const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
+
+/**
+ * @module
+ * @description
+ * Change detection enables data binding in Angular.
+ */
 
 /**
  * This platform has to be included in any other platform
@@ -35924,6 +35736,197 @@ function ɵɵngDeclareNgModule(decl) {
 function ɵɵngDeclarePipe(decl) {
     const compiler = getCompilerFacade({ usage: 1 /* JitCompilerUsage.PartialDeclaration */, kind: 'pipe', type: decl.type });
     return compiler.compilePipeDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵpipe.js`, decl);
+}
+
+// clang-format off
+// clang-format on
+
+/**
+ * Create a computed `Signal` which derives a reactive value from an expression.
+ */
+function computed(computation, options) {
+    performanceMarkFeature('NgSignals');
+    const getter = createComputed$1(computation);
+    if (options?.equal) {
+        getter[SIGNAL$1].equal = options.equal;
+    }
+    if (ngDevMode) {
+        getter.toString = () => `[Computed: ${getter()}]`;
+    }
+    return getter;
+}
+
+/**
+ * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
+ * can, optionally, return a value.
+ */
+function untracked(nonReactiveReadsFn) {
+    const prevConsumer = setActiveConsumer$1(null);
+    // We are not trying to catch any particular errors here, just making sure that the consumers
+    // stack is restored in case of errors.
+    try {
+        return nonReactiveReadsFn();
+    }
+    finally {
+        setActiveConsumer$1(prevConsumer);
+    }
+}
+
+/**
+ * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
+ * injector.
+ */
+const APP_EFFECT_SCHEDULER = new InjectionToken('', {
+    providedIn: 'root',
+    factory: () => inject(EffectScheduler),
+});
+/**
+ * A scheduler which manages the execution of effects.
+ */
+class EffectScheduler {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: EffectScheduler,
+        providedIn: 'root',
+        factory: () => new ZoneAwareEffectScheduler(),
+    }); }
+}
+/**
+ * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
+ * when.
+ */
+class ZoneAwareEffectScheduler {
+    constructor() {
+        this.queuedEffectCount = 0;
+        this.queues = new Map();
+        this.pendingTasks = inject(PendingTasks);
+        this.taskId = null;
+    }
+    scheduleEffect(handle) {
+        this.enqueue(handle);
+        if (this.taskId === null) {
+            const taskId = this.taskId = this.pendingTasks.add();
+            queueMicrotask(() => {
+                this.flush();
+                this.pendingTasks.remove(taskId);
+                this.taskId = null;
+            });
+        }
+    }
+    enqueue(handle) {
+        const zone = handle.creationZone;
+        if (!this.queues.has(zone)) {
+            this.queues.set(zone, new Set());
+        }
+        const queue = this.queues.get(zone);
+        if (queue.has(handle)) {
+            return;
+        }
+        this.queuedEffectCount++;
+        queue.add(handle);
+    }
+    /**
+     * Run all scheduled effects.
+     *
+     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
+     * ordering guarantee between effects scheduled in different zones.
+     */
+    flush() {
+        while (this.queuedEffectCount > 0) {
+            for (const [zone, queue] of this.queues) {
+                // `zone` here must be defined.
+                if (zone === null) {
+                    this.flushQueue(queue);
+                }
+                else {
+                    zone.run(() => this.flushQueue(queue));
+                }
+            }
+        }
+    }
+    flushQueue(queue) {
+        for (const handle of queue) {
+            queue.delete(handle);
+            this.queuedEffectCount--;
+            // TODO: what happens if this throws an error?
+            handle.run();
+        }
+    }
+}
+/**
+ * Core reactive node for an Angular effect.
+ *
+ * `EffectHandle` combines the reactive graph's `Watch` base node for effects with the framework's
+ * scheduling abstraction (`EffectScheduler`) as well as automatic cleanup via `DestroyRef` if
+ * available/requested.
+ */
+class EffectHandle {
+    constructor(scheduler, effectFn, creationZone, destroyRef, injector, allowSignalWrites) {
+        this.scheduler = scheduler;
+        this.effectFn = effectFn;
+        this.creationZone = creationZone;
+        this.injector = injector;
+        this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
+        this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
+    }
+    runEffect(onCleanup) {
+        try {
+            this.effectFn(onCleanup);
+        }
+        catch (err) {
+            // Inject the `ErrorHandler` here in order to avoid circular DI error
+            // if the effect is used inside of a custom `ErrorHandler`.
+            const errorHandler = this.injector.get(ErrorHandler, null, { optional: true });
+            errorHandler?.handleError(err);
+        }
+    }
+    run() {
+        this.watcher.run();
+    }
+    schedule() {
+        this.scheduler.scheduleEffect(this);
+    }
+    destroy() {
+        this.watcher.destroy();
+        this.unregisterOnDestroy?.();
+        // Note: if the effect is currently scheduled, it's not un-scheduled, and so the scheduler will
+        // retain a reference to it. Attempting to execute it will be a no-op.
+    }
+}
+/**
+ * Create a global `Effect` for the given reactive function.
+ *
+ * @developerPreview
+ */
+function effect(effectFn, options) {
+    performanceMarkFeature('NgSignals');
+    ngDevMode &&
+        assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
+            'effect inside the component constructor.');
+    !options?.injector && assertInInjectionContext(effect);
+    const injector = options?.injector ?? inject(Injector);
+    const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
+    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, (typeof Zone === 'undefined') ? null : Zone.current, destroyRef, injector, options?.allowSignalWrites ?? false);
+    // Effects need to be marked dirty manually to trigger their initial run. The timing of this
+    // marking matters, because the effects may read signals that track component inputs, which are
+    // only available after those components have had their first update pass.
+    //
+    // We inject `ChangeDetectorRef` optionally, to determine whether this effect is being created in
+    // the context of a component or not. If it is, then we check whether the component has already
+    // run its update pass, and defer the effect's initial scheduling until the update pass if it
+    // hasn't already run.
+    const cdr = injector.get(ChangeDetectorRef, null, { optional: true });
+    if (!cdr || !(cdr._lView[FLAGS] & 8 /* LViewFlags.FirstLViewPass */)) {
+        // This effect is either not running in a view injector, or the view has already
+        // undergone its first change detection pass, which is necessary for any required inputs to be
+        // set.
+        handle.watcher.notify();
+    }
+    else {
+        // Delay the initialization of the effect until the view is fully initialized.
+        (cdr._lView[EFFECTS_TO_SCHEDULE] ??= []).push(handle.watcher.notify);
+    }
+    return handle;
 }
 
 // clang-format off
