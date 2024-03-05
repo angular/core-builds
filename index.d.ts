@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.1+sha-0ecf515
+ * @license Angular v17.3.0-next.1+sha-d2ec5b6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1106,7 +1106,7 @@ declare interface ClassDebugInfo {
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @usageNotes
  *
@@ -1138,7 +1138,7 @@ export declare interface ClassProvider extends ClassSansProvider {
  * Configures the `Injector` to return a value by invoking a `useClass` function.
  * Base for `ClassProvider` decorator.
  *
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @publicApi
  */
@@ -1819,7 +1819,7 @@ export declare function computed<T>(computation: () => T, options?: CreateComput
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @usageNotes
  *
@@ -1846,7 +1846,7 @@ export declare interface ConstructorProvider extends ConstructorSansProvider {
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @usageNotes
  *
@@ -3848,7 +3848,7 @@ export declare const EventEmitter: {
 /**
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @usageNotes
  *
@@ -3876,7 +3876,7 @@ export declare interface ExistingProvider extends ExistingSansProvider {
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
  * @see {@link ExistingProvider}
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @publicApi
  */
@@ -3904,7 +3904,7 @@ declare type FactoryFn<T> = {
 
 /**
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @usageNotes
  *
@@ -3936,7 +3936,7 @@ export declare interface FactoryProvider extends FactorySansProvider {
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
  *
  * @see {@link FactoryProvider}
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @publicApi
  */
@@ -5191,7 +5191,7 @@ export declare interface InjectDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="InjectWithoutDecorator">
      * </code-example>
      *
-     * @see ["Dependency Injection Guide"](guide/dependency-injection)
+     * @see [Dependency Injection Guide](guide/dependency-injection)
      *
      */
     (token: any): any;
@@ -7543,7 +7543,7 @@ export declare interface OptionalDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
      * </code-example>
      *
-     * @see ["Dependency Injection Guide"](guide/dependency-injection).
+     * @see [Dependency Injection Guide](guide/dependency-injection).
      */
     (): any;
     new (): Optional;
@@ -7865,7 +7865,7 @@ declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
 
 /**
  * Describes how the `Injector` should be configured.
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @see {@link StaticProvider}
  *
@@ -9090,7 +9090,7 @@ export declare type StateKey<T> = string & {
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @usageNotes
  *
@@ -9142,7 +9142,7 @@ export declare interface StaticClassSansProvider {
  * A static provider provides tokens to an injector for various types of dependencies.
  *
  * @see {@link Injector.create()}
- * @see ["Dependency Injection Guide"](guide/dependency-injection-providers).
+ * @see [Dependency Injection Guide](guide/dependency-injection-providers).
  *
  * @publicApi
  */
@@ -10839,7 +10839,7 @@ export declare type ValueEqualityFn<T> = (a: T, b: T) => boolean;
 
 /**
  * Configures the `Injector` to return a value for a token.
- * @see ["Dependency Injection Guide"](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/dependency-injection).
  *
  * @usageNotes
  *
