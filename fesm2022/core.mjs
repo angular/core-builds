@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.1+sha-e5885fa
+ * @license Angular v17.3.0-next.1+sha-7243c70
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15474,7 +15474,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.1+sha-e5885fa']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-next.1+sha-7243c70']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -16622,7 +16622,7 @@ function createModelSignal(initialValue) {
         return node.value;
     }
     getter[SIGNAL$1] = node;
-    getter.asReadonly = (() => getter());
+    getter.asReadonly = signalAsReadonlyFn.bind(getter);
     // TODO: Should we throw an error when updating a destroyed model?
     getter.set = (newValue) => {
         if (!node.equal(node.value, newValue)) {
@@ -29570,7 +29570,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-next.1+sha-e5885fa');
+const VERSION = new Version('17.3.0-next.1+sha-7243c70');
 
 class Console {
     log(message) {
