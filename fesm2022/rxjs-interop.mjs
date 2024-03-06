@@ -1,10 +1,10 @@
 /**
- * @license Angular v17.3.0-next.1+sha-bd60fb1
+ * @license Angular v17.3.0-next.1+sha-d4154f9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { assertInInjectionContext, inject, DestroyRef, Injector, effect, untracked, assertNotInReactiveContext, signal, ɵRuntimeError, computed } from '@angular/core';
+import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, assertNotInReactiveContext, signal, computed } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -30,6 +30,85 @@ function takeUntilDestroyed(destroyRef) {
     return (source) => {
         return source.pipe(takeUntil(destroyed$));
     };
+}
+
+/**
+ * Implementation of `OutputRef` that emits values from
+ * an RxJS observable source.
+ *
+ * @internal
+ */
+class OutputFromObservableRef {
+    constructor(source) {
+        this.source = source;
+        this.destroyed = false;
+        this.destroyRef = inject(DestroyRef);
+        this.destroyRef.onDestroy(() => {
+            this.destroyed = true;
+        });
+    }
+    subscribe(callbackFn) {
+        if (this.destroyed) {
+            throw new ɵRuntimeError(953 /* ɵRuntimeErrorCode.OUTPUT_REF_DESTROYED */, ngDevMode &&
+                'Unexpected subscription to destroyed `OutputRef`. ' +
+                    'The owning directive/component is destroyed.');
+        }
+        // Stop yielding more values when the directive/component is already destroyed.
+        const subscription = this.source.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: value => callbackFn(value),
+        });
+        return {
+            unsubscribe: () => subscription.unsubscribe(),
+        };
+    }
+}
+/**
+ * Declares an Angular output that is using an RxJS observable as a source
+ * for events dispatched to parent subscribers.
+ *
+ * The behavior for an observable as source is defined as followed:
+ *    1. New values are forwarded to the Angular output (next notifications).
+ *    2. Errors notifications are not handled by Angular. You need to handle these manually.
+ *       For example by using `catchError`.
+ *    3. Completion notifications stop the output from emitting new values.
+ *
+ * @usageNotes
+ * Initialize an output in your directive by declaring a
+ * class field and initializing it with the `outputFromObservable()` function.
+ *
+ * ```ts
+ * @Directive({..})
+ * export class MyDir {
+ *   nameChange$ = <some-observable>;
+ *   nameChange = outputFromObservable(this.nameChange$);
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+function outputFromObservable(observable, opts) {
+    ngDevMode && assertInInjectionContext(outputFromObservable);
+    return new OutputFromObservableRef(observable);
+}
+
+/**
+ * Converts an Angular output declared via `output()` or `outputFromObservable()`
+ * to an observable.
+ *
+ * You can subscribe to the output via `Observable.subscribe` then.
+ *
+ * @developerPreview
+ */
+function outputToObservable(ref) {
+    const destroyRef = ɵgetOutputDestroyRef(ref);
+    return new Observable(observer => {
+        // Complete the observable upon directive/component destroy.
+        // Note: May be `undefined` if an `EventEmitter` is declared outside
+        // of an injection context.
+        destroyRef?.onDestroy(() => observer.complete());
+        const subscription = ref.subscribe(v => observer.next(v));
+        return () => subscription.unsubscribe();
+    });
 }
 
 /**
@@ -150,5 +229,5 @@ function toSignal(source, options) {
  * Generated bundle index. Do not edit.
  */
 
-export { takeUntilDestroyed, toObservable, toSignal };
+export { outputFromObservable, outputToObservable, takeUntilDestroyed, toObservable, toSignal };
 //# sourceMappingURL=rxjs-interop.mjs.map

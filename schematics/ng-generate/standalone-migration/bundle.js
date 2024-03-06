@@ -29329,7 +29329,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.0-next.1+sha-bd60fb1");
+var VERSION2 = new Version("17.3.0-next.1+sha-d4154f9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -30395,7 +30395,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.3.0-next.1+sha-bd60fb1"));
+  definitionMap.set("version", literal("17.3.0-next.1+sha-d4154f9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -30464,7 +30464,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.3.0-next.1+sha-bd60fb1"));
+  definitionMap.set("version", literal("17.3.0-next.1+sha-d4154f9"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -30763,7 +30763,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.3.0-next.1+sha-bd60fb1"));
+  definitionMap.set("version", literal("17.3.0-next.1+sha-d4154f9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -30786,7 +30786,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.3.0-next.1+sha-bd60fb1"));
+  definitionMap.set("version", literal("17.3.0-next.1+sha-d4154f9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -30824,7 +30824,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.3.0-next.1+sha-bd60fb1"));
+  definitionMap.set("version", literal("17.3.0-next.1+sha-d4154f9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -30848,7 +30848,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.3.0-next.1+sha-bd60fb1"));
+  definitionMap.set("version", literal("17.3.0-next.1+sha-d4154f9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -30883,7 +30883,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.3.0-next.1+sha-bd60fb1"));
+  definitionMap.set("version", literal("17.3.0-next.1+sha-d4154f9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -30900,7 +30900,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.3.0-next.1+sha-bd60fb1");
+var VERSION3 = new Version("17.3.0-next.1+sha-d4154f9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -37987,58 +37987,71 @@ var import_typescript55 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/directive/src/initializer_functions.mjs
 var import_typescript52 = __toESM(require("typescript"), 1);
-function tryParseInitializerApiMember(fnNames, member, reflector, importTracker) {
+function tryParseInitializerApiMember(functions, member, reflector, importTracker) {
   if (member.value === null || !import_typescript52.default.isCallExpression(member.value)) {
     return null;
   }
   const call2 = member.value;
-  const staticResult = parseTopLevelCall(call2, fnNames, importTracker) || parseTopLevelRequiredCall(call2, fnNames, importTracker) || parseTopLevelCallFromNamespace(call2, fnNames, importTracker);
+  const staticResult = parseTopLevelCall(call2, functions, importTracker) || parseTopLevelRequiredCall(call2, functions, importTracker) || parseTopLevelCallFromNamespace(call2, functions, importTracker);
   if (staticResult === null) {
     return null;
   }
-  const resolvedImport = reflector.getImportOfIdentifier(staticResult.node);
-  if (resolvedImport === null || !fnNames.includes(resolvedImport.name)) {
+  const resolvedImport = reflector.getImportOfIdentifier(staticResult.apiReference);
+  if (resolvedImport === null || staticResult.api.functionName !== resolvedImport.name || staticResult.api.owningModule !== resolvedImport.from) {
     return null;
   }
   return {
+    api: staticResult.api,
     call: call2,
-    isRequired: staticResult.isRequired,
-    apiName: resolvedImport.name
+    isRequired: staticResult.isRequired
   };
 }
-function parseTopLevelCall(call2, fnNames, importTracker) {
+function parseTopLevelCall(call2, functions, importTracker) {
   const node = call2.expression;
   if (!import_typescript52.default.isIdentifier(node)) {
     return null;
   }
-  return fnNames.some((name) => importTracker.isPotentialReferenceToNamedImport(node, name, CORE_MODULE2)) ? { node, isRequired: false } : null;
+  const matchingApi = functions.find((fn2) => importTracker.isPotentialReferenceToNamedImport(node, fn2.functionName, fn2.owningModule));
+  if (matchingApi === void 0) {
+    return null;
+  }
+  return { api: matchingApi, apiReference: node, isRequired: false };
 }
-function parseTopLevelRequiredCall(call2, fnNames, importTracker) {
+function parseTopLevelRequiredCall(call2, functions, importTracker) {
   const node = call2.expression;
   if (!import_typescript52.default.isPropertyAccessExpression(node) || !import_typescript52.default.isIdentifier(node.expression) || node.name.text !== "required") {
     return null;
   }
   const expression = node.expression;
-  const matchesCoreApi = fnNames.some((name) => importTracker.isPotentialReferenceToNamedImport(expression, name, CORE_MODULE2));
-  return matchesCoreApi ? { node: expression, isRequired: true } : null;
+  const matchingApi = functions.find((fn2) => importTracker.isPotentialReferenceToNamedImport(expression, fn2.functionName, fn2.owningModule));
+  if (matchingApi === void 0) {
+    return null;
+  }
+  return { api: matchingApi, apiReference: expression, isRequired: true };
 }
-function parseTopLevelCallFromNamespace(call2, fnNames, importTracker) {
+function parseTopLevelCallFromNamespace(call2, functions, importTracker) {
   const node = call2.expression;
   if (!import_typescript52.default.isPropertyAccessExpression(node)) {
     return null;
   }
   let apiReference = null;
+  let matchingApi = void 0;
   let isRequired = false;
-  if (import_typescript52.default.isIdentifier(node.expression) && import_typescript52.default.isIdentifier(node.name) && importTracker.isPotentialReferenceToNamespaceImport(node.expression, CORE_MODULE2)) {
+  if (import_typescript52.default.isIdentifier(node.expression) && import_typescript52.default.isIdentifier(node.name)) {
+    const namespaceRef = node.expression;
     apiReference = node.name;
-  } else if (import_typescript52.default.isPropertyAccessExpression(node.expression) && import_typescript52.default.isIdentifier(node.expression.expression) && import_typescript52.default.isIdentifier(node.expression.name) && importTracker.isPotentialReferenceToNamespaceImport(node.expression.expression, CORE_MODULE2) && node.name.text === "required") {
+    matchingApi = functions.find((fn2) => node.name.text === fn2.functionName && importTracker.isPotentialReferenceToNamespaceImport(namespaceRef, fn2.owningModule));
+  } else if (import_typescript52.default.isPropertyAccessExpression(node.expression) && import_typescript52.default.isIdentifier(node.expression.expression) && import_typescript52.default.isIdentifier(node.expression.name) && node.name.text === "required") {
+    const potentialName = node.expression.name.text;
+    const namespaceRef = node.expression.expression;
     apiReference = node.expression.name;
+    matchingApi = functions.find((fn2) => fn2.functionName === potentialName && importTracker.isPotentialReferenceToNamespaceImport(namespaceRef, fn2.owningModule));
     isRequired = true;
   }
-  if (apiReference === null || !fnNames.includes(apiReference.text)) {
+  if (matchingApi === void 0 || apiReference === null) {
     return null;
   }
-  return { node: apiReference, isRequired };
+  return { api: matchingApi, apiReference, isRequired };
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/directive/src/input_output_parse_options.mjs
@@ -38062,7 +38075,7 @@ function parseAndValidateInputAndOutputOptions(optionsNode) {
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/directive/src/input_function.mjs
 function tryParseSignalInputMapping(member, reflector, importTracker) {
   var _a2;
-  const signalInput = tryParseInitializerApiMember(["input"], member, reflector, importTracker);
+  const signalInput = tryParseInitializerApiMember([{ functionName: "input", owningModule: "@angular/core" }], member, reflector, importTracker);
   if (signalInput === null) {
     return null;
   }
@@ -38081,7 +38094,7 @@ function tryParseSignalInputMapping(member, reflector, importTracker) {
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/directive/src/model_function.mjs
 function tryParseSignalModelMapping(member, reflector, importTracker) {
   var _a2;
-  const model = tryParseInitializerApiMember(["model"], member, reflector, importTracker);
+  const model = tryParseInitializerApiMember([{ functionName: "model", owningModule: "@angular/core" }], member, reflector, importTracker);
   if (model === null) {
     return null;
   }
@@ -38109,14 +38122,17 @@ function tryParseSignalModelMapping(member, reflector, importTracker) {
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/directive/src/output_function.mjs
 function tryParseInitializerBasedOutput(member, reflector, importTracker) {
   var _a2;
-  const output = tryParseInitializerApiMember(["output", "\u0275output"], member, reflector, importTracker);
+  const output = tryParseInitializerApiMember([
+    { functionName: "output", owningModule: "@angular/core" },
+    { functionName: "outputFromObservable", owningModule: "@angular/core/rxjs-interop" }
+  ], member, reflector, importTracker);
   if (output === null) {
     return null;
   }
   if (output.isRequired) {
     throw new FatalDiagnosticError(ErrorCode.INITIALIZER_API_NO_REQUIRED_FUNCTION, output.call, `Output does not support ".required()".`);
   }
-  const optionsNode = output.call.arguments[0];
+  const optionsNode = output.api.functionName === "output" ? output.call.arguments[0] : output.call.arguments[1];
   const options = optionsNode !== void 0 ? parseAndValidateInputAndOutputOptions(optionsNode) : null;
   const classPropertyName = member.name;
   return {
@@ -38134,11 +38150,13 @@ var import_typescript54 = __toESM(require("typescript"), 1);
 var queryFunctionNames = ["viewChild", "viewChildren", "contentChild", "contentChildren"];
 var defaultDescendantsValue = (type) => type !== "contentChildren";
 function tryParseSignalQueryFromInitializer(member, reflector, importTracker) {
-  const query = tryParseInitializerApiMember(queryFunctionNames, member, reflector, importTracker);
+  const initializerFns = queryFunctionNames.map((fnName) => ({ functionName: fnName, owningModule: "@angular/core" }));
+  const query = tryParseInitializerApiMember(initializerFns, member, reflector, importTracker);
   if (query === null) {
     return null;
   }
-  const isSingleQuery = query.apiName === "viewChild" || query.apiName === "contentChild";
+  const { functionName } = query.api;
+  const isSingleQuery = functionName === "viewChild" || functionName === "contentChild";
   const predicateNode = query.call.arguments[0];
   if (predicateNode === void 0) {
     throw new FatalDiagnosticError(ErrorCode.VALUE_HAS_WRONG_TYPE, query.call, "No locator specified.");
@@ -38149,9 +38167,9 @@ function tryParseSignalQueryFromInitializer(member, reflector, importTracker) {
   }
   const options = optionsNode && reflectObjectLiteral(optionsNode);
   const read = (options == null ? void 0 : options.has("read")) ? parseReadOption(options.get("read")) : null;
-  const descendants = (options == null ? void 0 : options.has("descendants")) ? parseDescendantsOption(options.get("descendants")) : defaultDescendantsValue(query.apiName);
+  const descendants = (options == null ? void 0 : options.has("descendants")) ? parseDescendantsOption(options.get("descendants")) : defaultDescendantsValue(functionName);
   return {
-    name: query.apiName,
+    name: functionName,
     call: query.call,
     metadata: {
       isSignal: true,
@@ -39300,7 +39318,12 @@ function createModuleWithProvidersResolver(reflector, isCore) {
       if (import_typescript56.default.isTypeLiteralNode(t)) {
         for (const m of t.members) {
           const ngModuleType = import_typescript56.default.isPropertySignature(m) && import_typescript56.default.isIdentifier(m.name) && m.name.text === "ngModule" && m.type || null;
-          const ngModuleExpression = ngModuleType && typeNodeToValueExpr(ngModuleType);
+          let ngModuleExpression = null;
+          if (ngModuleType !== null && import_typescript56.default.isTypeQueryNode(ngModuleType)) {
+            ngModuleExpression = entityNameToValue(ngModuleType.exprName);
+          } else if (ngModuleType !== null) {
+            ngModuleExpression = typeNodeToValueExpr(ngModuleType);
+          }
           if (ngModuleExpression) {
             return ngModuleExpression;
           }

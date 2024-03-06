@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-next.1+sha-bd60fb1
+ * @license Angular v17.3.0-next.1+sha-d4154f9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3803,7 +3803,7 @@ export declare class ErrorHandler {
  * @see [Observables in Angular](guide/observables-in-angular)
  * @publicApi
  */
-export declare interface EventEmitter<T> extends Subject<T> {
+export declare interface EventEmitter<T> extends Subject<T>, OutputRef<T> {
     /**
      * Creates an instance of this class that can
      * deliver events synchronously or asynchronously.
@@ -6797,12 +6797,10 @@ export declare interface ModelOptions {
  *
  * @developerPreview
  */
-export declare interface ModelSignal<T> extends WritableSignal<T> {
+export declare interface ModelSignal<T> extends WritableSignal<T>, OutputRef<T> {
     [SIGNAL]: InputSignalNode<T, T>;
     [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: T;
     [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: T;
-    /** @deprecated Do not use, will be removed. */
-    subscribe(callback: (value: T) => void): () => void;
 }
 
 /**
@@ -7568,6 +7566,29 @@ export declare interface Output {
 export declare const Output: OutputDecorator;
 
 /**
+ * The `outputs` function allows declaration of outputs in directives and
+ * components.
+ *
+ * Initializes an output that can emit values to consumers of your
+ * directive/component.
+ *
+ * @usageNotes
+ * Initialize an output in your directive by declaring a
+ * class field and initializing it with the `output()` function.
+ *
+ * ```ts
+ * @Directive({..})
+ * export class MyDir {
+ *   nameChange = output<string>();     // OutputEmitterRef<string>
+ *   onClick = output();                // OutputEmitterRef<void>
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+export declare function output<T = void>(opts?: OutputOptions): OutputEmitterRef<T>;
+
+/**
  * Type of the Output decorator / constructor function.
  *
  * @publicApi
@@ -7591,6 +7612,67 @@ export declare interface OutputDecorator {
      */
     (alias?: string): any;
     new (alias?: string): any;
+}
+
+/**
+ * An `OutputEmitterRef` is created by the `output()` function and can be
+ * used to emit values to consumers of your directive or component.
+ *
+ * Consumers of your directive/component can bind to the output and
+ * subscribe to changes via the bound event syntax. For example:
+ *
+ * ```html
+ * <my-comp (valueChange)="processNewValue($event)" />
+ * ```
+ *
+ * @developerPreview
+ */
+export declare class OutputEmitterRef<T> implements OutputRef<T> {
+    private destroyed;
+    private listeners;
+    constructor();
+    subscribe(callback: (value: T) => void): OutputRefSubscription;
+    /** Emits a new value to the output. */
+    emit(value: T): void;
+}
+
+/**
+ * Options for declaring an output.
+ *
+ * @developerPreview
+ */
+export declare interface OutputOptions {
+    alias?: string;
+}
+
+/**
+ * A reference to an Angular output.
+ *
+ * @developerPreview
+ */
+export declare interface OutputRef<T> {
+    /**
+     * Registers a callback that is invoked whenever the output
+     * emits a new value of type `T`.
+     *
+     * Angular will automatically clean up the subscription when
+     * the directive/component of the output is destroyed.
+     */
+    subscribe(callback: (value: T) => void): OutputRefSubscription;
+}
+
+
+/**
+ * Function that can be used to manually clean up a
+ * programmatic {@link OutputRef#subscribe} subscription.
+ *
+ * Note: Angular will automatically clean up subscriptions
+ * when the directive/component of the output is destroyed.
+ *
+ * @developerPreview
+ */
+export declare interface OutputRefSubscription {
+    unsubscribe(): void;
 }
 
 /**
@@ -11412,14 +11494,11 @@ declare interface ViewRefTracker {
     detachView(viewRef: ViewRef): void;
 }
 
-/** Symbol used distinguish `WritableSignal` from other non-writable signals and functions. */
-declare const WRITABLE_SIGNAL: unique symbol;
-
 /**
  * A `Signal` with a value that can be mutated via a setter interface.
  */
 export declare interface WritableSignal<T> extends Signal<T> {
-    [WRITABLE_SIGNAL]: T;
+    [ɵWRITABLE_SIGNAL]: T;
     /**
      * Directly set the signal to a new value, and notify any dependents.
      */
@@ -12342,6 +12421,9 @@ export declare function ɵgetLocaleCurrencyCode(locale: string): string | null;
  */
 export declare function ɵgetLocalePluralCase(locale: string): (value: number) => number;
 
+/** Gets the owning `DestroyRef` for the given output. */
+export declare function ɵgetOutputDestroyRef(ref: OutputRef<unknown>): DestroyRef | undefined;
+
 export declare function ɵgetSanitizationBypassType(value: any): ɵBypassType | null;
 
 /**
@@ -12750,56 +12832,6 @@ export declare function ɵnoSideEffects<T>(fn: () => T): T;
 
 
 export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
-
-/**
- * The `outputs` function allows declaration of outputs in directives and
- * components.
- *
- * Initializes an output that can emit values to consumers of your
- * directive/component.
- *
- * @usageNotes
- * Initialize an output in your directive by declaring a
- * class field and initializing it with the `output()` function.
- *
- * ```ts
- * @Directive({..})
- * export class MyDir {
- *   nameChange = output<string>();     // OutputEmitter<string>
- *   onClick = output();                // OutputEmitter<void>
- * }
- * ```
- *
- * @developerPreview
- */
-export declare function ɵoutput<T = void>(opts?: ɵOutputOptions): ɵOutputEmitter<T>;
-
-
-/**
- * An `OutputEmitter` is created by the `output()` function and can be
- * used to emit values to consumers of your directive or component.
- *
- * Consumers of your directive/component can bind to the output and
- * subscribe to changes via the bound event syntax. For example:
- *
- * ```html
- * <my-comp (valueChange)="processNewValue($event)" />
- * ```
- *
- * @developerPreview
- */
-export declare interface ɵOutputEmitter<T> {
-    emit(value: T): void;
-}
-
-/**
- * Options for declaring an output.
- *
- * @developerPreview
- */
-export declare interface ɵOutputOptions {
-    alias?: string;
-}
 
 /**
  * Patch the definition of a component with directives and pipes from the compilation scope of
@@ -13247,6 +13279,7 @@ export declare const enum ɵRuntimeErrorCode {
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = -952,
+    OUTPUT_REF_DESTROYED = 953,
     RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,
     RUNTIME_DEPS_ORPHAN_COMPONENT = 1001
 }
@@ -13456,7 +13489,7 @@ export declare function ɵunwrapSafeValue<T>(value: T): T;
  * @codeGenApi
  */
 export declare function ɵunwrapWritableSignal<T>(value: T | {
-    [WRITABLE_SIGNAL]: T;
+    [ɵWRITABLE_SIGNAL]: T;
 }): T;
 
 /**
@@ -13733,6 +13766,9 @@ export declare function ɵwithDomHydration(): EnvironmentProviders;
 export declare type ɵWritable<T> = {
     -readonly [K in keyof T]: T[K];
 };
+
+/** Symbol used distinguish `WritableSignal` from other non-writable signals and functions. */
+declare const ɵWRITABLE_SIGNAL: unique symbol;
 
 /**
  * URL for the XSS security documentation.
