@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.3+sha-c75c168
+ * @license Angular v17.2.3+sha-443e5f1
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15361,7 +15361,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.3+sha-c75c168']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.3+sha-443e5f1']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -16515,7 +16515,7 @@ function createModelSignal(initialValue) {
         }
     }
     getter[SIGNAL$1] = node;
-    getter.asReadonly = (() => getter());
+    getter.asReadonly = signalAsReadonlyFn.bind(getter);
     getter.set = (newValue) => {
         if (!node.equal(node.value, newValue)) {
             signalSetFn$1(node, newValue);
@@ -29472,7 +29472,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.3+sha-c75c168');
+const VERSION = new Version('17.2.3+sha-443e5f1');
 
 class Console {
     log(message) {
