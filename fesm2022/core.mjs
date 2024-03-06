@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-d9c0a16
+ * @license Angular v18.0.0-next.0+sha-ad045ef
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4160,8 +4160,9 @@ const profiler = function (event, instance, hookOrListener) {
 const SVG_NAMESPACE = 'svg';
 const MATH_ML_NAMESPACE = 'math';
 
-// TODO(atscott): flip default internally ASAP and externally for v18 (#52928)
-let _ensureDirtyViewsAreAlwaysReachable = false;
+// TODO(atscott): Remove prior to v18 release. Keeping this around in case anyone internally needs
+// to opt out temporarily.
+let _ensureDirtyViewsAreAlwaysReachable = true;
 function getEnsureDirtyViewsAreAlwaysReachable() {
     return _ensureDirtyViewsAreAlwaysReachable;
 }
@@ -15474,7 +15475,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-d9c0a16']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-ad045ef']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29570,7 +29571,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.0+sha-d9c0a16');
+const VERSION = new Version('18.0.0-next.0+sha-ad045ef');
 
 class Console {
     log(message) {
@@ -29589,14 +29590,6 @@ class Console {
         type: Injectable,
         args: [{ providedIn: 'platform' }]
     }], null, null); })();
-
-/**
- * Used to patch behavior that needs to _temporarily_ be different between g3 and external.
- *
- * For example, make breaking changes ahead of the main branch targeting a major version.
- * Permanent differences between g3 and external should be configured by individual patches.
- */
-const isG3 = false;
 
 /**
  * These are the data structures that our framework injector profiler will fill with data in order
@@ -31412,9 +31405,7 @@ function detectChangesInViewIfRequired(lView, isFirstPass, notifyErrorHandler) {
     detectChangesInView(lView, notifyErrorHandler, isFirstPass);
 }
 function shouldRecheckView(view) {
-    return requiresRefreshOrTraversal(view) ||
-        // TODO(atscott): Remove isG3 check and make this a breaking change for v18
-        (isG3 && !!(view[FLAGS] & 64 /* LViewFlags.Dirty */));
+    return requiresRefreshOrTraversal(view) || !!(view[FLAGS] & 64 /* LViewFlags.Dirty */);
 }
 function detectChangesInView(lView, notifyErrorHandler, isFirstPass) {
     let mode;
@@ -35638,6 +35629,14 @@ function verifySsrContentsIntegrity() {
                 'relies on HTML produced by the server, including whitespaces and comment nodes.');
     }
 }
+
+/**
+ * Used to patch behavior that needs to _temporarily_ be different between g3 and external.
+ *
+ * For example, make breaking changes ahead of the main branch targeting a major version.
+ * Permanent differences between g3 and external should be configured by individual patches.
+ */
+const isG3 = false;
 
 /**
  * Queue a state update to be performed asynchronously.
