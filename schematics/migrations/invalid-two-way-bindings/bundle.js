@@ -3607,6 +3607,688 @@ function getInjectFn(target) {
   }
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/expression_parser/ast.mjs
+var ParserError = class {
+  constructor(message, input, errLocation, ctxLocation) {
+    this.input = input;
+    this.errLocation = errLocation;
+    this.ctxLocation = ctxLocation;
+    this.message = `Parser Error: ${message} ${errLocation} [${input}] in ${ctxLocation}`;
+  }
+};
+var ParseSpan = class {
+  constructor(start, end) {
+    this.start = start;
+    this.end = end;
+  }
+  toAbsolute(absoluteOffset) {
+    return new AbsoluteSourceSpan(absoluteOffset + this.start, absoluteOffset + this.end);
+  }
+};
+var AST = class {
+  constructor(span, sourceSpan) {
+    this.span = span;
+    this.sourceSpan = sourceSpan;
+  }
+  toString() {
+    return "AST";
+  }
+};
+var ASTWithName = class extends AST {
+  constructor(span, sourceSpan, nameSpan) {
+    super(span, sourceSpan);
+    this.nameSpan = nameSpan;
+  }
+};
+var EmptyExpr = class extends AST {
+  visit(visitor, context = null) {
+  }
+};
+var ImplicitReceiver = class extends AST {
+  visit(visitor, context = null) {
+    return visitor.visitImplicitReceiver(this, context);
+  }
+};
+var ThisReceiver = class extends ImplicitReceiver {
+  visit(visitor, context = null) {
+    var _a2;
+    return (_a2 = visitor.visitThisReceiver) == null ? void 0 : _a2.call(visitor, this, context);
+  }
+};
+var Chain = class extends AST {
+  constructor(span, sourceSpan, expressions) {
+    super(span, sourceSpan);
+    this.expressions = expressions;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitChain(this, context);
+  }
+};
+var Conditional = class extends AST {
+  constructor(span, sourceSpan, condition, trueExp, falseExp) {
+    super(span, sourceSpan);
+    this.condition = condition;
+    this.trueExp = trueExp;
+    this.falseExp = falseExp;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitConditional(this, context);
+  }
+};
+var PropertyRead = class extends ASTWithName {
+  constructor(span, sourceSpan, nameSpan, receiver, name) {
+    super(span, sourceSpan, nameSpan);
+    this.receiver = receiver;
+    this.name = name;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitPropertyRead(this, context);
+  }
+};
+var PropertyWrite = class extends ASTWithName {
+  constructor(span, sourceSpan, nameSpan, receiver, name, value) {
+    super(span, sourceSpan, nameSpan);
+    this.receiver = receiver;
+    this.name = name;
+    this.value = value;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitPropertyWrite(this, context);
+  }
+};
+var SafePropertyRead = class extends ASTWithName {
+  constructor(span, sourceSpan, nameSpan, receiver, name) {
+    super(span, sourceSpan, nameSpan);
+    this.receiver = receiver;
+    this.name = name;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitSafePropertyRead(this, context);
+  }
+};
+var KeyedRead = class extends AST {
+  constructor(span, sourceSpan, receiver, key) {
+    super(span, sourceSpan);
+    this.receiver = receiver;
+    this.key = key;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitKeyedRead(this, context);
+  }
+};
+var SafeKeyedRead = class extends AST {
+  constructor(span, sourceSpan, receiver, key) {
+    super(span, sourceSpan);
+    this.receiver = receiver;
+    this.key = key;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitSafeKeyedRead(this, context);
+  }
+};
+var KeyedWrite = class extends AST {
+  constructor(span, sourceSpan, receiver, key, value) {
+    super(span, sourceSpan);
+    this.receiver = receiver;
+    this.key = key;
+    this.value = value;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitKeyedWrite(this, context);
+  }
+};
+var BindingPipe = class extends ASTWithName {
+  constructor(span, sourceSpan, exp, name, args, nameSpan) {
+    super(span, sourceSpan, nameSpan);
+    this.exp = exp;
+    this.name = name;
+    this.args = args;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitPipe(this, context);
+  }
+};
+var LiteralPrimitive = class extends AST {
+  constructor(span, sourceSpan, value) {
+    super(span, sourceSpan);
+    this.value = value;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitLiteralPrimitive(this, context);
+  }
+};
+var LiteralArray = class extends AST {
+  constructor(span, sourceSpan, expressions) {
+    super(span, sourceSpan);
+    this.expressions = expressions;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitLiteralArray(this, context);
+  }
+};
+var LiteralMap = class extends AST {
+  constructor(span, sourceSpan, keys, values) {
+    super(span, sourceSpan);
+    this.keys = keys;
+    this.values = values;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitLiteralMap(this, context);
+  }
+};
+var Interpolation = class extends AST {
+  constructor(span, sourceSpan, strings, expressions) {
+    super(span, sourceSpan);
+    this.strings = strings;
+    this.expressions = expressions;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitInterpolation(this, context);
+  }
+};
+var Binary = class extends AST {
+  constructor(span, sourceSpan, operation, left, right) {
+    super(span, sourceSpan);
+    this.operation = operation;
+    this.left = left;
+    this.right = right;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitBinary(this, context);
+  }
+};
+var Unary = class extends Binary {
+  static createMinus(span, sourceSpan, expr) {
+    return new Unary(span, sourceSpan, "-", expr, "-", new LiteralPrimitive(span, sourceSpan, 0), expr);
+  }
+  static createPlus(span, sourceSpan, expr) {
+    return new Unary(span, sourceSpan, "+", expr, "-", expr, new LiteralPrimitive(span, sourceSpan, 0));
+  }
+  constructor(span, sourceSpan, operator, expr, binaryOp, binaryLeft, binaryRight) {
+    super(span, sourceSpan, binaryOp, binaryLeft, binaryRight);
+    this.operator = operator;
+    this.expr = expr;
+    this.left = null;
+    this.right = null;
+    this.operation = null;
+  }
+  visit(visitor, context = null) {
+    if (visitor.visitUnary !== void 0) {
+      return visitor.visitUnary(this, context);
+    }
+    return visitor.visitBinary(this, context);
+  }
+};
+var PrefixNot = class extends AST {
+  constructor(span, sourceSpan, expression) {
+    super(span, sourceSpan);
+    this.expression = expression;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitPrefixNot(this, context);
+  }
+};
+var NonNullAssert = class extends AST {
+  constructor(span, sourceSpan, expression) {
+    super(span, sourceSpan);
+    this.expression = expression;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitNonNullAssert(this, context);
+  }
+};
+var Call = class extends AST {
+  constructor(span, sourceSpan, receiver, args, argumentSpan) {
+    super(span, sourceSpan);
+    this.receiver = receiver;
+    this.args = args;
+    this.argumentSpan = argumentSpan;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitCall(this, context);
+  }
+};
+var SafeCall = class extends AST {
+  constructor(span, sourceSpan, receiver, args, argumentSpan) {
+    super(span, sourceSpan);
+    this.receiver = receiver;
+    this.args = args;
+    this.argumentSpan = argumentSpan;
+  }
+  visit(visitor, context = null) {
+    return visitor.visitSafeCall(this, context);
+  }
+};
+var AbsoluteSourceSpan = class {
+  constructor(start, end) {
+    this.start = start;
+    this.end = end;
+  }
+};
+var ASTWithSource = class extends AST {
+  constructor(ast, source, location, absoluteOffset, errors) {
+    super(new ParseSpan(0, source === null ? 0 : source.length), new AbsoluteSourceSpan(absoluteOffset, source === null ? absoluteOffset : absoluteOffset + source.length));
+    this.ast = ast;
+    this.source = source;
+    this.location = location;
+    this.errors = errors;
+  }
+  visit(visitor, context = null) {
+    if (visitor.visitASTWithSource) {
+      return visitor.visitASTWithSource(this, context);
+    }
+    return this.ast.visit(visitor, context);
+  }
+  toString() {
+    return `${this.source} in ${this.location}`;
+  }
+};
+var VariableBinding = class {
+  constructor(sourceSpan, key, value) {
+    this.sourceSpan = sourceSpan;
+    this.key = key;
+    this.value = value;
+  }
+};
+var ExpressionBinding = class {
+  constructor(sourceSpan, key, value) {
+    this.sourceSpan = sourceSpan;
+    this.key = key;
+    this.value = value;
+  }
+};
+var RecursiveAstVisitor = class {
+  visit(ast, context) {
+    ast.visit(this, context);
+  }
+  visitUnary(ast, context) {
+    this.visit(ast.expr, context);
+  }
+  visitBinary(ast, context) {
+    this.visit(ast.left, context);
+    this.visit(ast.right, context);
+  }
+  visitChain(ast, context) {
+    this.visitAll(ast.expressions, context);
+  }
+  visitConditional(ast, context) {
+    this.visit(ast.condition, context);
+    this.visit(ast.trueExp, context);
+    this.visit(ast.falseExp, context);
+  }
+  visitPipe(ast, context) {
+    this.visit(ast.exp, context);
+    this.visitAll(ast.args, context);
+  }
+  visitImplicitReceiver(ast, context) {
+  }
+  visitThisReceiver(ast, context) {
+  }
+  visitInterpolation(ast, context) {
+    this.visitAll(ast.expressions, context);
+  }
+  visitKeyedRead(ast, context) {
+    this.visit(ast.receiver, context);
+    this.visit(ast.key, context);
+  }
+  visitKeyedWrite(ast, context) {
+    this.visit(ast.receiver, context);
+    this.visit(ast.key, context);
+    this.visit(ast.value, context);
+  }
+  visitLiteralArray(ast, context) {
+    this.visitAll(ast.expressions, context);
+  }
+  visitLiteralMap(ast, context) {
+    this.visitAll(ast.values, context);
+  }
+  visitLiteralPrimitive(ast, context) {
+  }
+  visitPrefixNot(ast, context) {
+    this.visit(ast.expression, context);
+  }
+  visitNonNullAssert(ast, context) {
+    this.visit(ast.expression, context);
+  }
+  visitPropertyRead(ast, context) {
+    this.visit(ast.receiver, context);
+  }
+  visitPropertyWrite(ast, context) {
+    this.visit(ast.receiver, context);
+    this.visit(ast.value, context);
+  }
+  visitSafePropertyRead(ast, context) {
+    this.visit(ast.receiver, context);
+  }
+  visitSafeKeyedRead(ast, context) {
+    this.visit(ast.receiver, context);
+    this.visit(ast.key, context);
+  }
+  visitCall(ast, context) {
+    this.visit(ast.receiver, context);
+    this.visitAll(ast.args, context);
+  }
+  visitSafeCall(ast, context) {
+    this.visit(ast.receiver, context);
+    this.visitAll(ast.args, context);
+  }
+  visitAll(asts, context) {
+    for (const ast of asts) {
+      this.visit(ast, context);
+    }
+  }
+};
+var AstTransformer = class {
+  visitImplicitReceiver(ast, context) {
+    return ast;
+  }
+  visitThisReceiver(ast, context) {
+    return ast;
+  }
+  visitInterpolation(ast, context) {
+    return new Interpolation(ast.span, ast.sourceSpan, ast.strings, this.visitAll(ast.expressions));
+  }
+  visitLiteralPrimitive(ast, context) {
+    return new LiteralPrimitive(ast.span, ast.sourceSpan, ast.value);
+  }
+  visitPropertyRead(ast, context) {
+    return new PropertyRead(ast.span, ast.sourceSpan, ast.nameSpan, ast.receiver.visit(this), ast.name);
+  }
+  visitPropertyWrite(ast, context) {
+    return new PropertyWrite(ast.span, ast.sourceSpan, ast.nameSpan, ast.receiver.visit(this), ast.name, ast.value.visit(this));
+  }
+  visitSafePropertyRead(ast, context) {
+    return new SafePropertyRead(ast.span, ast.sourceSpan, ast.nameSpan, ast.receiver.visit(this), ast.name);
+  }
+  visitLiteralArray(ast, context) {
+    return new LiteralArray(ast.span, ast.sourceSpan, this.visitAll(ast.expressions));
+  }
+  visitLiteralMap(ast, context) {
+    return new LiteralMap(ast.span, ast.sourceSpan, ast.keys, this.visitAll(ast.values));
+  }
+  visitUnary(ast, context) {
+    switch (ast.operator) {
+      case "+":
+        return Unary.createPlus(ast.span, ast.sourceSpan, ast.expr.visit(this));
+      case "-":
+        return Unary.createMinus(ast.span, ast.sourceSpan, ast.expr.visit(this));
+      default:
+        throw new Error(`Unknown unary operator ${ast.operator}`);
+    }
+  }
+  visitBinary(ast, context) {
+    return new Binary(ast.span, ast.sourceSpan, ast.operation, ast.left.visit(this), ast.right.visit(this));
+  }
+  visitPrefixNot(ast, context) {
+    return new PrefixNot(ast.span, ast.sourceSpan, ast.expression.visit(this));
+  }
+  visitNonNullAssert(ast, context) {
+    return new NonNullAssert(ast.span, ast.sourceSpan, ast.expression.visit(this));
+  }
+  visitConditional(ast, context) {
+    return new Conditional(ast.span, ast.sourceSpan, ast.condition.visit(this), ast.trueExp.visit(this), ast.falseExp.visit(this));
+  }
+  visitPipe(ast, context) {
+    return new BindingPipe(ast.span, ast.sourceSpan, ast.exp.visit(this), ast.name, this.visitAll(ast.args), ast.nameSpan);
+  }
+  visitKeyedRead(ast, context) {
+    return new KeyedRead(ast.span, ast.sourceSpan, ast.receiver.visit(this), ast.key.visit(this));
+  }
+  visitKeyedWrite(ast, context) {
+    return new KeyedWrite(ast.span, ast.sourceSpan, ast.receiver.visit(this), ast.key.visit(this), ast.value.visit(this));
+  }
+  visitCall(ast, context) {
+    return new Call(ast.span, ast.sourceSpan, ast.receiver.visit(this), this.visitAll(ast.args), ast.argumentSpan);
+  }
+  visitSafeCall(ast, context) {
+    return new SafeCall(ast.span, ast.sourceSpan, ast.receiver.visit(this), this.visitAll(ast.args), ast.argumentSpan);
+  }
+  visitAll(asts) {
+    const res = [];
+    for (let i = 0; i < asts.length; ++i) {
+      res[i] = asts[i].visit(this);
+    }
+    return res;
+  }
+  visitChain(ast, context) {
+    return new Chain(ast.span, ast.sourceSpan, this.visitAll(ast.expressions));
+  }
+  visitSafeKeyedRead(ast, context) {
+    return new SafeKeyedRead(ast.span, ast.sourceSpan, ast.receiver.visit(this), ast.key.visit(this));
+  }
+};
+var AstMemoryEfficientTransformer = class {
+  visitImplicitReceiver(ast, context) {
+    return ast;
+  }
+  visitThisReceiver(ast, context) {
+    return ast;
+  }
+  visitInterpolation(ast, context) {
+    const expressions = this.visitAll(ast.expressions);
+    if (expressions !== ast.expressions)
+      return new Interpolation(ast.span, ast.sourceSpan, ast.strings, expressions);
+    return ast;
+  }
+  visitLiteralPrimitive(ast, context) {
+    return ast;
+  }
+  visitPropertyRead(ast, context) {
+    const receiver = ast.receiver.visit(this);
+    if (receiver !== ast.receiver) {
+      return new PropertyRead(ast.span, ast.sourceSpan, ast.nameSpan, receiver, ast.name);
+    }
+    return ast;
+  }
+  visitPropertyWrite(ast, context) {
+    const receiver = ast.receiver.visit(this);
+    const value = ast.value.visit(this);
+    if (receiver !== ast.receiver || value !== ast.value) {
+      return new PropertyWrite(ast.span, ast.sourceSpan, ast.nameSpan, receiver, ast.name, value);
+    }
+    return ast;
+  }
+  visitSafePropertyRead(ast, context) {
+    const receiver = ast.receiver.visit(this);
+    if (receiver !== ast.receiver) {
+      return new SafePropertyRead(ast.span, ast.sourceSpan, ast.nameSpan, receiver, ast.name);
+    }
+    return ast;
+  }
+  visitLiteralArray(ast, context) {
+    const expressions = this.visitAll(ast.expressions);
+    if (expressions !== ast.expressions) {
+      return new LiteralArray(ast.span, ast.sourceSpan, expressions);
+    }
+    return ast;
+  }
+  visitLiteralMap(ast, context) {
+    const values = this.visitAll(ast.values);
+    if (values !== ast.values) {
+      return new LiteralMap(ast.span, ast.sourceSpan, ast.keys, values);
+    }
+    return ast;
+  }
+  visitUnary(ast, context) {
+    const expr = ast.expr.visit(this);
+    if (expr !== ast.expr) {
+      switch (ast.operator) {
+        case "+":
+          return Unary.createPlus(ast.span, ast.sourceSpan, expr);
+        case "-":
+          return Unary.createMinus(ast.span, ast.sourceSpan, expr);
+        default:
+          throw new Error(`Unknown unary operator ${ast.operator}`);
+      }
+    }
+    return ast;
+  }
+  visitBinary(ast, context) {
+    const left = ast.left.visit(this);
+    const right = ast.right.visit(this);
+    if (left !== ast.left || right !== ast.right) {
+      return new Binary(ast.span, ast.sourceSpan, ast.operation, left, right);
+    }
+    return ast;
+  }
+  visitPrefixNot(ast, context) {
+    const expression = ast.expression.visit(this);
+    if (expression !== ast.expression) {
+      return new PrefixNot(ast.span, ast.sourceSpan, expression);
+    }
+    return ast;
+  }
+  visitNonNullAssert(ast, context) {
+    const expression = ast.expression.visit(this);
+    if (expression !== ast.expression) {
+      return new NonNullAssert(ast.span, ast.sourceSpan, expression);
+    }
+    return ast;
+  }
+  visitConditional(ast, context) {
+    const condition = ast.condition.visit(this);
+    const trueExp = ast.trueExp.visit(this);
+    const falseExp = ast.falseExp.visit(this);
+    if (condition !== ast.condition || trueExp !== ast.trueExp || falseExp !== ast.falseExp) {
+      return new Conditional(ast.span, ast.sourceSpan, condition, trueExp, falseExp);
+    }
+    return ast;
+  }
+  visitPipe(ast, context) {
+    const exp = ast.exp.visit(this);
+    const args = this.visitAll(ast.args);
+    if (exp !== ast.exp || args !== ast.args) {
+      return new BindingPipe(ast.span, ast.sourceSpan, exp, ast.name, args, ast.nameSpan);
+    }
+    return ast;
+  }
+  visitKeyedRead(ast, context) {
+    const obj = ast.receiver.visit(this);
+    const key = ast.key.visit(this);
+    if (obj !== ast.receiver || key !== ast.key) {
+      return new KeyedRead(ast.span, ast.sourceSpan, obj, key);
+    }
+    return ast;
+  }
+  visitKeyedWrite(ast, context) {
+    const obj = ast.receiver.visit(this);
+    const key = ast.key.visit(this);
+    const value = ast.value.visit(this);
+    if (obj !== ast.receiver || key !== ast.key || value !== ast.value) {
+      return new KeyedWrite(ast.span, ast.sourceSpan, obj, key, value);
+    }
+    return ast;
+  }
+  visitAll(asts) {
+    const res = [];
+    let modified = false;
+    for (let i = 0; i < asts.length; ++i) {
+      const original = asts[i];
+      const value = original.visit(this);
+      res[i] = value;
+      modified = modified || value !== original;
+    }
+    return modified ? res : asts;
+  }
+  visitChain(ast, context) {
+    const expressions = this.visitAll(ast.expressions);
+    if (expressions !== ast.expressions) {
+      return new Chain(ast.span, ast.sourceSpan, expressions);
+    }
+    return ast;
+  }
+  visitCall(ast, context) {
+    const receiver = ast.receiver.visit(this);
+    const args = this.visitAll(ast.args);
+    if (receiver !== ast.receiver || args !== ast.args) {
+      return new Call(ast.span, ast.sourceSpan, receiver, args, ast.argumentSpan);
+    }
+    return ast;
+  }
+  visitSafeCall(ast, context) {
+    const receiver = ast.receiver.visit(this);
+    const args = this.visitAll(ast.args);
+    if (receiver !== ast.receiver || args !== ast.args) {
+      return new SafeCall(ast.span, ast.sourceSpan, receiver, args, ast.argumentSpan);
+    }
+    return ast;
+  }
+  visitSafeKeyedRead(ast, context) {
+    const obj = ast.receiver.visit(this);
+    const key = ast.key.visit(this);
+    if (obj !== ast.receiver || key !== ast.key) {
+      return new SafeKeyedRead(ast.span, ast.sourceSpan, obj, key);
+    }
+    return ast;
+  }
+};
+var ParsedProperty = class {
+  constructor(name, expression, type, sourceSpan, keySpan, valueSpan) {
+    this.name = name;
+    this.expression = expression;
+    this.type = type;
+    this.sourceSpan = sourceSpan;
+    this.keySpan = keySpan;
+    this.valueSpan = valueSpan;
+    this.isLiteral = this.type === ParsedPropertyType.LITERAL_ATTR;
+    this.isAnimation = this.type === ParsedPropertyType.ANIMATION;
+  }
+};
+var ParsedPropertyType;
+(function(ParsedPropertyType2) {
+  ParsedPropertyType2[ParsedPropertyType2["DEFAULT"] = 0] = "DEFAULT";
+  ParsedPropertyType2[ParsedPropertyType2["LITERAL_ATTR"] = 1] = "LITERAL_ATTR";
+  ParsedPropertyType2[ParsedPropertyType2["ANIMATION"] = 2] = "ANIMATION";
+  ParsedPropertyType2[ParsedPropertyType2["TWO_WAY"] = 3] = "TWO_WAY";
+})(ParsedPropertyType || (ParsedPropertyType = {}));
+var ParsedEventType;
+(function(ParsedEventType2) {
+  ParsedEventType2[ParsedEventType2["Regular"] = 0] = "Regular";
+  ParsedEventType2[ParsedEventType2["Animation"] = 1] = "Animation";
+  ParsedEventType2[ParsedEventType2["TwoWay"] = 2] = "TwoWay";
+})(ParsedEventType || (ParsedEventType = {}));
+var ParsedEvent = class {
+  constructor(name, targetOrPhase, type, handler, sourceSpan, handlerSpan, keySpan) {
+    this.name = name;
+    this.targetOrPhase = targetOrPhase;
+    this.type = type;
+    this.handler = handler;
+    this.sourceSpan = sourceSpan;
+    this.handlerSpan = handlerSpan;
+    this.keySpan = keySpan;
+  }
+};
+var ParsedVariable = class {
+  constructor(name, value, sourceSpan, keySpan, valueSpan) {
+    this.name = name;
+    this.value = value;
+    this.sourceSpan = sourceSpan;
+    this.keySpan = keySpan;
+    this.valueSpan = valueSpan;
+  }
+};
+var BindingType;
+(function(BindingType2) {
+  BindingType2[BindingType2["Property"] = 0] = "Property";
+  BindingType2[BindingType2["Attribute"] = 1] = "Attribute";
+  BindingType2[BindingType2["Class"] = 2] = "Class";
+  BindingType2[BindingType2["Style"] = 3] = "Style";
+  BindingType2[BindingType2["Animation"] = 4] = "Animation";
+  BindingType2[BindingType2["TwoWay"] = 5] = "TwoWay";
+})(BindingType || (BindingType = {}));
+var BoundElementProperty = class {
+  constructor(name, type, securityContext, value, unit, sourceSpan, keySpan, valueSpan) {
+    this.name = name;
+    this.type = type;
+    this.securityContext = securityContext;
+    this.value = value;
+    this.unit = unit;
+    this.sourceSpan = sourceSpan;
+    this.keySpan = keySpan;
+    this.valueSpan = valueSpan;
+  }
+};
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/tags.mjs
 var TagContentType;
 (function(TagContentType2) {
@@ -3720,8 +4402,8 @@ var BoundEvent = class {
     this.keySpan = keySpan;
   }
   static fromParsedEvent(event) {
-    const target = event.type === 0 ? event.targetOrPhase : null;
-    const phase = event.type === 1 ? event.targetOrPhase : null;
+    const target = event.type === ParsedEventType.Regular ? event.targetOrPhase : null;
+    const phase = event.type === ParsedEventType.Animation ? event.targetOrPhase : null;
     if (event.keySpan === void 0) {
       throw new Error(`Unexpected state: keySpan must be defined for bound event but was not for ${event.name}: ${event.sourceSpan}`);
     }
@@ -4572,7 +5254,7 @@ function getAttrsForDirectiveMatching(elOrTpl) {
       }
     });
     elOrTpl.inputs.forEach((i) => {
-      if (i.type === 0 || i.type === 5) {
+      if (i.type === BindingType.Property || i.type === BindingType.TwoWay) {
         attributesMap[i.name] = "";
       }
     });
@@ -5394,673 +6076,6 @@ var R3TemplateDependencyKind;
   R3TemplateDependencyKind2[R3TemplateDependencyKind2["Pipe"] = 1] = "Pipe";
   R3TemplateDependencyKind2[R3TemplateDependencyKind2["NgModule"] = 2] = "NgModule";
 })(R3TemplateDependencyKind || (R3TemplateDependencyKind = {}));
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/expression_parser/ast.mjs
-var ParserError = class {
-  constructor(message, input, errLocation, ctxLocation) {
-    this.input = input;
-    this.errLocation = errLocation;
-    this.ctxLocation = ctxLocation;
-    this.message = `Parser Error: ${message} ${errLocation} [${input}] in ${ctxLocation}`;
-  }
-};
-var ParseSpan = class {
-  constructor(start, end) {
-    this.start = start;
-    this.end = end;
-  }
-  toAbsolute(absoluteOffset) {
-    return new AbsoluteSourceSpan(absoluteOffset + this.start, absoluteOffset + this.end);
-  }
-};
-var AST = class {
-  constructor(span, sourceSpan) {
-    this.span = span;
-    this.sourceSpan = sourceSpan;
-  }
-  toString() {
-    return "AST";
-  }
-};
-var ASTWithName = class extends AST {
-  constructor(span, sourceSpan, nameSpan) {
-    super(span, sourceSpan);
-    this.nameSpan = nameSpan;
-  }
-};
-var EmptyExpr = class extends AST {
-  visit(visitor, context = null) {
-  }
-};
-var ImplicitReceiver = class extends AST {
-  visit(visitor, context = null) {
-    return visitor.visitImplicitReceiver(this, context);
-  }
-};
-var ThisReceiver = class extends ImplicitReceiver {
-  visit(visitor, context = null) {
-    var _a2;
-    return (_a2 = visitor.visitThisReceiver) == null ? void 0 : _a2.call(visitor, this, context);
-  }
-};
-var Chain = class extends AST {
-  constructor(span, sourceSpan, expressions) {
-    super(span, sourceSpan);
-    this.expressions = expressions;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitChain(this, context);
-  }
-};
-var Conditional = class extends AST {
-  constructor(span, sourceSpan, condition, trueExp, falseExp) {
-    super(span, sourceSpan);
-    this.condition = condition;
-    this.trueExp = trueExp;
-    this.falseExp = falseExp;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitConditional(this, context);
-  }
-};
-var PropertyRead = class extends ASTWithName {
-  constructor(span, sourceSpan, nameSpan, receiver, name) {
-    super(span, sourceSpan, nameSpan);
-    this.receiver = receiver;
-    this.name = name;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitPropertyRead(this, context);
-  }
-};
-var PropertyWrite = class extends ASTWithName {
-  constructor(span, sourceSpan, nameSpan, receiver, name, value) {
-    super(span, sourceSpan, nameSpan);
-    this.receiver = receiver;
-    this.name = name;
-    this.value = value;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitPropertyWrite(this, context);
-  }
-};
-var SafePropertyRead = class extends ASTWithName {
-  constructor(span, sourceSpan, nameSpan, receiver, name) {
-    super(span, sourceSpan, nameSpan);
-    this.receiver = receiver;
-    this.name = name;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitSafePropertyRead(this, context);
-  }
-};
-var KeyedRead = class extends AST {
-  constructor(span, sourceSpan, receiver, key) {
-    super(span, sourceSpan);
-    this.receiver = receiver;
-    this.key = key;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitKeyedRead(this, context);
-  }
-};
-var SafeKeyedRead = class extends AST {
-  constructor(span, sourceSpan, receiver, key) {
-    super(span, sourceSpan);
-    this.receiver = receiver;
-    this.key = key;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitSafeKeyedRead(this, context);
-  }
-};
-var KeyedWrite = class extends AST {
-  constructor(span, sourceSpan, receiver, key, value) {
-    super(span, sourceSpan);
-    this.receiver = receiver;
-    this.key = key;
-    this.value = value;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitKeyedWrite(this, context);
-  }
-};
-var BindingPipe = class extends ASTWithName {
-  constructor(span, sourceSpan, exp, name, args, nameSpan) {
-    super(span, sourceSpan, nameSpan);
-    this.exp = exp;
-    this.name = name;
-    this.args = args;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitPipe(this, context);
-  }
-};
-var LiteralPrimitive = class extends AST {
-  constructor(span, sourceSpan, value) {
-    super(span, sourceSpan);
-    this.value = value;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitLiteralPrimitive(this, context);
-  }
-};
-var LiteralArray = class extends AST {
-  constructor(span, sourceSpan, expressions) {
-    super(span, sourceSpan);
-    this.expressions = expressions;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitLiteralArray(this, context);
-  }
-};
-var LiteralMap = class extends AST {
-  constructor(span, sourceSpan, keys, values) {
-    super(span, sourceSpan);
-    this.keys = keys;
-    this.values = values;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitLiteralMap(this, context);
-  }
-};
-var Interpolation = class extends AST {
-  constructor(span, sourceSpan, strings, expressions) {
-    super(span, sourceSpan);
-    this.strings = strings;
-    this.expressions = expressions;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitInterpolation(this, context);
-  }
-};
-var Binary = class extends AST {
-  constructor(span, sourceSpan, operation, left, right) {
-    super(span, sourceSpan);
-    this.operation = operation;
-    this.left = left;
-    this.right = right;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitBinary(this, context);
-  }
-};
-var Unary = class extends Binary {
-  static createMinus(span, sourceSpan, expr) {
-    return new Unary(span, sourceSpan, "-", expr, "-", new LiteralPrimitive(span, sourceSpan, 0), expr);
-  }
-  static createPlus(span, sourceSpan, expr) {
-    return new Unary(span, sourceSpan, "+", expr, "-", expr, new LiteralPrimitive(span, sourceSpan, 0));
-  }
-  constructor(span, sourceSpan, operator, expr, binaryOp, binaryLeft, binaryRight) {
-    super(span, sourceSpan, binaryOp, binaryLeft, binaryRight);
-    this.operator = operator;
-    this.expr = expr;
-    this.left = null;
-    this.right = null;
-    this.operation = null;
-  }
-  visit(visitor, context = null) {
-    if (visitor.visitUnary !== void 0) {
-      return visitor.visitUnary(this, context);
-    }
-    return visitor.visitBinary(this, context);
-  }
-};
-var PrefixNot = class extends AST {
-  constructor(span, sourceSpan, expression) {
-    super(span, sourceSpan);
-    this.expression = expression;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitPrefixNot(this, context);
-  }
-};
-var NonNullAssert = class extends AST {
-  constructor(span, sourceSpan, expression) {
-    super(span, sourceSpan);
-    this.expression = expression;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitNonNullAssert(this, context);
-  }
-};
-var Call = class extends AST {
-  constructor(span, sourceSpan, receiver, args, argumentSpan) {
-    super(span, sourceSpan);
-    this.receiver = receiver;
-    this.args = args;
-    this.argumentSpan = argumentSpan;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitCall(this, context);
-  }
-};
-var SafeCall = class extends AST {
-  constructor(span, sourceSpan, receiver, args, argumentSpan) {
-    super(span, sourceSpan);
-    this.receiver = receiver;
-    this.args = args;
-    this.argumentSpan = argumentSpan;
-  }
-  visit(visitor, context = null) {
-    return visitor.visitSafeCall(this, context);
-  }
-};
-var AbsoluteSourceSpan = class {
-  constructor(start, end) {
-    this.start = start;
-    this.end = end;
-  }
-};
-var ASTWithSource = class extends AST {
-  constructor(ast, source, location, absoluteOffset, errors) {
-    super(new ParseSpan(0, source === null ? 0 : source.length), new AbsoluteSourceSpan(absoluteOffset, source === null ? absoluteOffset : absoluteOffset + source.length));
-    this.ast = ast;
-    this.source = source;
-    this.location = location;
-    this.errors = errors;
-  }
-  visit(visitor, context = null) {
-    if (visitor.visitASTWithSource) {
-      return visitor.visitASTWithSource(this, context);
-    }
-    return this.ast.visit(visitor, context);
-  }
-  toString() {
-    return `${this.source} in ${this.location}`;
-  }
-};
-var VariableBinding = class {
-  constructor(sourceSpan, key, value) {
-    this.sourceSpan = sourceSpan;
-    this.key = key;
-    this.value = value;
-  }
-};
-var ExpressionBinding = class {
-  constructor(sourceSpan, key, value) {
-    this.sourceSpan = sourceSpan;
-    this.key = key;
-    this.value = value;
-  }
-};
-var RecursiveAstVisitor = class {
-  visit(ast, context) {
-    ast.visit(this, context);
-  }
-  visitUnary(ast, context) {
-    this.visit(ast.expr, context);
-  }
-  visitBinary(ast, context) {
-    this.visit(ast.left, context);
-    this.visit(ast.right, context);
-  }
-  visitChain(ast, context) {
-    this.visitAll(ast.expressions, context);
-  }
-  visitConditional(ast, context) {
-    this.visit(ast.condition, context);
-    this.visit(ast.trueExp, context);
-    this.visit(ast.falseExp, context);
-  }
-  visitPipe(ast, context) {
-    this.visit(ast.exp, context);
-    this.visitAll(ast.args, context);
-  }
-  visitImplicitReceiver(ast, context) {
-  }
-  visitThisReceiver(ast, context) {
-  }
-  visitInterpolation(ast, context) {
-    this.visitAll(ast.expressions, context);
-  }
-  visitKeyedRead(ast, context) {
-    this.visit(ast.receiver, context);
-    this.visit(ast.key, context);
-  }
-  visitKeyedWrite(ast, context) {
-    this.visit(ast.receiver, context);
-    this.visit(ast.key, context);
-    this.visit(ast.value, context);
-  }
-  visitLiteralArray(ast, context) {
-    this.visitAll(ast.expressions, context);
-  }
-  visitLiteralMap(ast, context) {
-    this.visitAll(ast.values, context);
-  }
-  visitLiteralPrimitive(ast, context) {
-  }
-  visitPrefixNot(ast, context) {
-    this.visit(ast.expression, context);
-  }
-  visitNonNullAssert(ast, context) {
-    this.visit(ast.expression, context);
-  }
-  visitPropertyRead(ast, context) {
-    this.visit(ast.receiver, context);
-  }
-  visitPropertyWrite(ast, context) {
-    this.visit(ast.receiver, context);
-    this.visit(ast.value, context);
-  }
-  visitSafePropertyRead(ast, context) {
-    this.visit(ast.receiver, context);
-  }
-  visitSafeKeyedRead(ast, context) {
-    this.visit(ast.receiver, context);
-    this.visit(ast.key, context);
-  }
-  visitCall(ast, context) {
-    this.visit(ast.receiver, context);
-    this.visitAll(ast.args, context);
-  }
-  visitSafeCall(ast, context) {
-    this.visit(ast.receiver, context);
-    this.visitAll(ast.args, context);
-  }
-  visitAll(asts, context) {
-    for (const ast of asts) {
-      this.visit(ast, context);
-    }
-  }
-};
-var AstTransformer = class {
-  visitImplicitReceiver(ast, context) {
-    return ast;
-  }
-  visitThisReceiver(ast, context) {
-    return ast;
-  }
-  visitInterpolation(ast, context) {
-    return new Interpolation(ast.span, ast.sourceSpan, ast.strings, this.visitAll(ast.expressions));
-  }
-  visitLiteralPrimitive(ast, context) {
-    return new LiteralPrimitive(ast.span, ast.sourceSpan, ast.value);
-  }
-  visitPropertyRead(ast, context) {
-    return new PropertyRead(ast.span, ast.sourceSpan, ast.nameSpan, ast.receiver.visit(this), ast.name);
-  }
-  visitPropertyWrite(ast, context) {
-    return new PropertyWrite(ast.span, ast.sourceSpan, ast.nameSpan, ast.receiver.visit(this), ast.name, ast.value.visit(this));
-  }
-  visitSafePropertyRead(ast, context) {
-    return new SafePropertyRead(ast.span, ast.sourceSpan, ast.nameSpan, ast.receiver.visit(this), ast.name);
-  }
-  visitLiteralArray(ast, context) {
-    return new LiteralArray(ast.span, ast.sourceSpan, this.visitAll(ast.expressions));
-  }
-  visitLiteralMap(ast, context) {
-    return new LiteralMap(ast.span, ast.sourceSpan, ast.keys, this.visitAll(ast.values));
-  }
-  visitUnary(ast, context) {
-    switch (ast.operator) {
-      case "+":
-        return Unary.createPlus(ast.span, ast.sourceSpan, ast.expr.visit(this));
-      case "-":
-        return Unary.createMinus(ast.span, ast.sourceSpan, ast.expr.visit(this));
-      default:
-        throw new Error(`Unknown unary operator ${ast.operator}`);
-    }
-  }
-  visitBinary(ast, context) {
-    return new Binary(ast.span, ast.sourceSpan, ast.operation, ast.left.visit(this), ast.right.visit(this));
-  }
-  visitPrefixNot(ast, context) {
-    return new PrefixNot(ast.span, ast.sourceSpan, ast.expression.visit(this));
-  }
-  visitNonNullAssert(ast, context) {
-    return new NonNullAssert(ast.span, ast.sourceSpan, ast.expression.visit(this));
-  }
-  visitConditional(ast, context) {
-    return new Conditional(ast.span, ast.sourceSpan, ast.condition.visit(this), ast.trueExp.visit(this), ast.falseExp.visit(this));
-  }
-  visitPipe(ast, context) {
-    return new BindingPipe(ast.span, ast.sourceSpan, ast.exp.visit(this), ast.name, this.visitAll(ast.args), ast.nameSpan);
-  }
-  visitKeyedRead(ast, context) {
-    return new KeyedRead(ast.span, ast.sourceSpan, ast.receiver.visit(this), ast.key.visit(this));
-  }
-  visitKeyedWrite(ast, context) {
-    return new KeyedWrite(ast.span, ast.sourceSpan, ast.receiver.visit(this), ast.key.visit(this), ast.value.visit(this));
-  }
-  visitCall(ast, context) {
-    return new Call(ast.span, ast.sourceSpan, ast.receiver.visit(this), this.visitAll(ast.args), ast.argumentSpan);
-  }
-  visitSafeCall(ast, context) {
-    return new SafeCall(ast.span, ast.sourceSpan, ast.receiver.visit(this), this.visitAll(ast.args), ast.argumentSpan);
-  }
-  visitAll(asts) {
-    const res = [];
-    for (let i = 0; i < asts.length; ++i) {
-      res[i] = asts[i].visit(this);
-    }
-    return res;
-  }
-  visitChain(ast, context) {
-    return new Chain(ast.span, ast.sourceSpan, this.visitAll(ast.expressions));
-  }
-  visitSafeKeyedRead(ast, context) {
-    return new SafeKeyedRead(ast.span, ast.sourceSpan, ast.receiver.visit(this), ast.key.visit(this));
-  }
-};
-var AstMemoryEfficientTransformer = class {
-  visitImplicitReceiver(ast, context) {
-    return ast;
-  }
-  visitThisReceiver(ast, context) {
-    return ast;
-  }
-  visitInterpolation(ast, context) {
-    const expressions = this.visitAll(ast.expressions);
-    if (expressions !== ast.expressions)
-      return new Interpolation(ast.span, ast.sourceSpan, ast.strings, expressions);
-    return ast;
-  }
-  visitLiteralPrimitive(ast, context) {
-    return ast;
-  }
-  visitPropertyRead(ast, context) {
-    const receiver = ast.receiver.visit(this);
-    if (receiver !== ast.receiver) {
-      return new PropertyRead(ast.span, ast.sourceSpan, ast.nameSpan, receiver, ast.name);
-    }
-    return ast;
-  }
-  visitPropertyWrite(ast, context) {
-    const receiver = ast.receiver.visit(this);
-    const value = ast.value.visit(this);
-    if (receiver !== ast.receiver || value !== ast.value) {
-      return new PropertyWrite(ast.span, ast.sourceSpan, ast.nameSpan, receiver, ast.name, value);
-    }
-    return ast;
-  }
-  visitSafePropertyRead(ast, context) {
-    const receiver = ast.receiver.visit(this);
-    if (receiver !== ast.receiver) {
-      return new SafePropertyRead(ast.span, ast.sourceSpan, ast.nameSpan, receiver, ast.name);
-    }
-    return ast;
-  }
-  visitLiteralArray(ast, context) {
-    const expressions = this.visitAll(ast.expressions);
-    if (expressions !== ast.expressions) {
-      return new LiteralArray(ast.span, ast.sourceSpan, expressions);
-    }
-    return ast;
-  }
-  visitLiteralMap(ast, context) {
-    const values = this.visitAll(ast.values);
-    if (values !== ast.values) {
-      return new LiteralMap(ast.span, ast.sourceSpan, ast.keys, values);
-    }
-    return ast;
-  }
-  visitUnary(ast, context) {
-    const expr = ast.expr.visit(this);
-    if (expr !== ast.expr) {
-      switch (ast.operator) {
-        case "+":
-          return Unary.createPlus(ast.span, ast.sourceSpan, expr);
-        case "-":
-          return Unary.createMinus(ast.span, ast.sourceSpan, expr);
-        default:
-          throw new Error(`Unknown unary operator ${ast.operator}`);
-      }
-    }
-    return ast;
-  }
-  visitBinary(ast, context) {
-    const left = ast.left.visit(this);
-    const right = ast.right.visit(this);
-    if (left !== ast.left || right !== ast.right) {
-      return new Binary(ast.span, ast.sourceSpan, ast.operation, left, right);
-    }
-    return ast;
-  }
-  visitPrefixNot(ast, context) {
-    const expression = ast.expression.visit(this);
-    if (expression !== ast.expression) {
-      return new PrefixNot(ast.span, ast.sourceSpan, expression);
-    }
-    return ast;
-  }
-  visitNonNullAssert(ast, context) {
-    const expression = ast.expression.visit(this);
-    if (expression !== ast.expression) {
-      return new NonNullAssert(ast.span, ast.sourceSpan, expression);
-    }
-    return ast;
-  }
-  visitConditional(ast, context) {
-    const condition = ast.condition.visit(this);
-    const trueExp = ast.trueExp.visit(this);
-    const falseExp = ast.falseExp.visit(this);
-    if (condition !== ast.condition || trueExp !== ast.trueExp || falseExp !== ast.falseExp) {
-      return new Conditional(ast.span, ast.sourceSpan, condition, trueExp, falseExp);
-    }
-    return ast;
-  }
-  visitPipe(ast, context) {
-    const exp = ast.exp.visit(this);
-    const args = this.visitAll(ast.args);
-    if (exp !== ast.exp || args !== ast.args) {
-      return new BindingPipe(ast.span, ast.sourceSpan, exp, ast.name, args, ast.nameSpan);
-    }
-    return ast;
-  }
-  visitKeyedRead(ast, context) {
-    const obj = ast.receiver.visit(this);
-    const key = ast.key.visit(this);
-    if (obj !== ast.receiver || key !== ast.key) {
-      return new KeyedRead(ast.span, ast.sourceSpan, obj, key);
-    }
-    return ast;
-  }
-  visitKeyedWrite(ast, context) {
-    const obj = ast.receiver.visit(this);
-    const key = ast.key.visit(this);
-    const value = ast.value.visit(this);
-    if (obj !== ast.receiver || key !== ast.key || value !== ast.value) {
-      return new KeyedWrite(ast.span, ast.sourceSpan, obj, key, value);
-    }
-    return ast;
-  }
-  visitAll(asts) {
-    const res = [];
-    let modified = false;
-    for (let i = 0; i < asts.length; ++i) {
-      const original = asts[i];
-      const value = original.visit(this);
-      res[i] = value;
-      modified = modified || value !== original;
-    }
-    return modified ? res : asts;
-  }
-  visitChain(ast, context) {
-    const expressions = this.visitAll(ast.expressions);
-    if (expressions !== ast.expressions) {
-      return new Chain(ast.span, ast.sourceSpan, expressions);
-    }
-    return ast;
-  }
-  visitCall(ast, context) {
-    const receiver = ast.receiver.visit(this);
-    const args = this.visitAll(ast.args);
-    if (receiver !== ast.receiver || args !== ast.args) {
-      return new Call(ast.span, ast.sourceSpan, receiver, args, ast.argumentSpan);
-    }
-    return ast;
-  }
-  visitSafeCall(ast, context) {
-    const receiver = ast.receiver.visit(this);
-    const args = this.visitAll(ast.args);
-    if (receiver !== ast.receiver || args !== ast.args) {
-      return new SafeCall(ast.span, ast.sourceSpan, receiver, args, ast.argumentSpan);
-    }
-    return ast;
-  }
-  visitSafeKeyedRead(ast, context) {
-    const obj = ast.receiver.visit(this);
-    const key = ast.key.visit(this);
-    if (obj !== ast.receiver || key !== ast.key) {
-      return new SafeKeyedRead(ast.span, ast.sourceSpan, obj, key);
-    }
-    return ast;
-  }
-};
-var ParsedProperty = class {
-  constructor(name, expression, type, sourceSpan, keySpan, valueSpan) {
-    this.name = name;
-    this.expression = expression;
-    this.type = type;
-    this.sourceSpan = sourceSpan;
-    this.keySpan = keySpan;
-    this.valueSpan = valueSpan;
-    this.isLiteral = this.type === ParsedPropertyType.LITERAL_ATTR;
-    this.isAnimation = this.type === ParsedPropertyType.ANIMATION;
-  }
-};
-var ParsedPropertyType;
-(function(ParsedPropertyType2) {
-  ParsedPropertyType2[ParsedPropertyType2["DEFAULT"] = 0] = "DEFAULT";
-  ParsedPropertyType2[ParsedPropertyType2["LITERAL_ATTR"] = 1] = "LITERAL_ATTR";
-  ParsedPropertyType2[ParsedPropertyType2["ANIMATION"] = 2] = "ANIMATION";
-  ParsedPropertyType2[ParsedPropertyType2["TWO_WAY"] = 3] = "TWO_WAY";
-})(ParsedPropertyType || (ParsedPropertyType = {}));
-var ParsedEvent = class {
-  constructor(name, targetOrPhase, type, handler, sourceSpan, handlerSpan, keySpan) {
-    this.name = name;
-    this.targetOrPhase = targetOrPhase;
-    this.type = type;
-    this.handler = handler;
-    this.sourceSpan = sourceSpan;
-    this.handlerSpan = handlerSpan;
-    this.keySpan = keySpan;
-  }
-};
-var ParsedVariable = class {
-  constructor(name, value, sourceSpan, keySpan, valueSpan) {
-    this.name = name;
-    this.value = value;
-    this.sourceSpan = sourceSpan;
-    this.keySpan = keySpan;
-    this.valueSpan = valueSpan;
-  }
-};
-var BoundElementProperty = class {
-  constructor(name, type, securityContext, value, unit, sourceSpan, keySpan, valueSpan) {
-    this.name = name;
-    this.type = type;
-    this.securityContext = securityContext;
-    this.value = value;
-    this.unit = unit;
-    this.sourceSpan = sourceSpan;
-    this.keySpan = keySpan;
-    this.valueSpan = valueSpan;
-  }
-};
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/compiler_util/expression_converter.mjs
 var _EventHandlerVars = class {
@@ -19763,7 +19778,7 @@ function ingestHostAttribute(job, name, value, securityContexts) {
   job.root.update.push(attrBinding);
 }
 function ingestHostEvent(job, event) {
-  const [phase, target] = event.type !== 1 ? [null, event.targetOrPhase] : [event.targetOrPhase, null];
+  const [phase, target] = event.type !== ParsedEventType.Animation ? [null, event.targetOrPhase] : [event.targetOrPhase, null];
   const eventBinding = createListenerOp(job.root.xref, new SlotHandle(), event.name, null, makeListenerHandlerOps(job.root, event.handler, event.handlerSpan), phase, target, true, event.sourceSpan);
   job.root.create.push(eventBinding);
 }
@@ -20228,12 +20243,12 @@ function convertAstWithInterpolation(job, value, i18nMeta, sourceSpan) {
   return expression;
 }
 var BINDING_KINDS = /* @__PURE__ */ new Map([
-  [0, BindingKind.Property],
-  [5, BindingKind.TwoWayProperty],
-  [1, BindingKind.Attribute],
-  [2, BindingKind.ClassName],
-  [3, BindingKind.StyleProperty],
-  [4, BindingKind.Animation]
+  [BindingType.Property, BindingKind.Property],
+  [BindingType.TwoWay, BindingKind.TwoWayProperty],
+  [BindingType.Attribute, BindingKind.Attribute],
+  [BindingType.Class, BindingKind.ClassName],
+  [BindingType.Style, BindingKind.StyleProperty],
+  [BindingType.Animation, BindingKind.Animation]
 ]);
 function isPlainTemplate(tmpl) {
   var _a2;
@@ -20268,10 +20283,10 @@ function ingestElementBindings(unit, op, element2) {
   unit.create.push(bindings.filter((b) => (b == null ? void 0 : b.kind) === OpKind.ExtractedAttribute));
   unit.update.push(bindings.filter((b) => (b == null ? void 0 : b.kind) === OpKind.Binding));
   for (const output of element2.outputs) {
-    if (output.type === 1 && output.phase === null) {
+    if (output.type === ParsedEventType.Animation && output.phase === null) {
       throw Error("Animation listener should have a phase");
     }
-    if (output.type === 2) {
+    if (output.type === ParsedEventType.TwoWay) {
       unit.create.push(createTwoWayListenerOp(op.xref, op.handle, output.name, op.tag, makeTwoWayListenerHandlerOps(unit, output.handler, output.handlerSpan), output.sourceSpan));
     } else {
       unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, output.target, false, output.sourceSpan));
@@ -20286,14 +20301,14 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
   for (const attr of template2.templateAttrs) {
     if (attr instanceof TextAttribute) {
       const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
-      bindings.push(createTemplateBinding(unit, op.xref, 1, attr.name, attr.value, null, securityContext, true, templateKind, asMessage(attr.i18n), attr.sourceSpan));
+      bindings.push(createTemplateBinding(unit, op.xref, BindingType.Attribute, attr.name, attr.value, null, securityContext, true, templateKind, asMessage(attr.i18n), attr.sourceSpan));
     } else {
       bindings.push(createTemplateBinding(unit, op.xref, attr.type, attr.name, astOf(attr.value), attr.unit, attr.securityContext, true, templateKind, asMessage(attr.i18n), attr.sourceSpan));
     }
   }
   for (const attr of template2.attributes) {
     const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
-    bindings.push(createTemplateBinding(unit, op.xref, 1, attr.name, attr.value, null, securityContext, false, templateKind, asMessage(attr.i18n), attr.sourceSpan));
+    bindings.push(createTemplateBinding(unit, op.xref, BindingType.Attribute, attr.name, attr.value, null, securityContext, false, templateKind, asMessage(attr.i18n), attr.sourceSpan));
   }
   for (const input of template2.inputs) {
     bindings.push(createTemplateBinding(unit, op.xref, input.type, input.name, astOf(input.value), input.unit, input.securityContext, false, templateKind, asMessage(input.i18n), input.sourceSpan));
@@ -20301,17 +20316,17 @@ function ingestTemplateBindings(unit, op, template2, templateKind) {
   unit.create.push(bindings.filter((b) => (b == null ? void 0 : b.kind) === OpKind.ExtractedAttribute));
   unit.update.push(bindings.filter((b) => (b == null ? void 0 : b.kind) === OpKind.Binding));
   for (const output of template2.outputs) {
-    if (output.type === 1 && output.phase === null) {
+    if (output.type === ParsedEventType.Animation && output.phase === null) {
       throw Error("Animation listener should have a phase");
     }
     if (templateKind === TemplateKind.NgTemplate) {
-      if (output.type === 2) {
+      if (output.type === ParsedEventType.TwoWay) {
         unit.create.push(createTwoWayListenerOp(op.xref, op.handle, output.name, op.tag, makeTwoWayListenerHandlerOps(unit, output.handler, output.handlerSpan), output.sourceSpan));
       } else {
         unit.create.push(createListenerOp(op.xref, op.handle, output.name, op.tag, makeListenerHandlerOps(unit, output.handler, output.handlerSpan), output.phase, output.target, false, output.sourceSpan));
       }
     }
-    if (templateKind === TemplateKind.Structural && output.type !== 1) {
+    if (templateKind === TemplateKind.Structural && output.type !== ParsedEventType.Animation) {
       const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, output.name, false);
       unit.create.push(createExtractedAttributeOp(op.xref, BindingKind.Property, null, output.name, null, null, null, securityContext));
     }
@@ -20325,21 +20340,21 @@ function createTemplateBinding(view, xref, type, name, value, unit, securityCont
   if (templateKind === TemplateKind.Structural) {
     if (!isStructuralTemplateAttribute) {
       switch (type) {
-        case 0:
-        case 2:
-        case 3:
+        case BindingType.Property:
+        case BindingType.Class:
+        case BindingType.Style:
           return createExtractedAttributeOp(xref, BindingKind.Property, null, name, null, null, i18nMessage, securityContext);
-        case 5:
+        case BindingType.TwoWay:
           return createExtractedAttributeOp(xref, BindingKind.TwoWayProperty, null, name, null, null, i18nMessage, securityContext);
       }
     }
-    if (!isTextBinding && (type === 1 || type === 4)) {
+    if (!isTextBinding && (type === BindingType.Attribute || type === BindingType.Animation)) {
       return null;
     }
   }
   let bindingType = BINDING_KINDS.get(type);
   if (templateKind === TemplateKind.NgTemplate) {
-    if (type === 2 || type === 3 || type === 1 && !isTextBinding) {
+    if (type === BindingType.Class || type === BindingType.Style || type === BindingType.Attribute && !isTextBinding) {
       bindingType = BindingKind.Property;
     }
   }
@@ -20689,7 +20704,7 @@ var BindingParser = class {
   }
   createBoundElementProperty(elementSelector, boundProp, skipValidation = false, mapPropertyName = true) {
     if (boundProp.isAnimation) {
-      return new BoundElementProperty(boundProp.name, 4, SecurityContext.NONE, boundProp.expression, null, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
+      return new BoundElementProperty(boundProp.name, BindingType.Animation, SecurityContext.NONE, boundProp.expression, null, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
     }
     let unit = null;
     let bindingType = void 0;
@@ -20709,15 +20724,15 @@ var BindingParser = class {
           const name = boundPropertyName.substring(nsSeparatorIdx + 1);
           boundPropertyName = mergeNsAndName(ns, name);
         }
-        bindingType = 1;
+        bindingType = BindingType.Attribute;
       } else if (parts[0] == CLASS_PREFIX) {
         boundPropertyName = parts[1];
-        bindingType = 2;
+        bindingType = BindingType.Class;
         securityContexts = [SecurityContext.NONE];
       } else if (parts[0] == STYLE_PREFIX) {
         unit = parts.length > 2 ? parts[2] : null;
         boundPropertyName = parts[1];
-        bindingType = 3;
+        bindingType = BindingType.Style;
         securityContexts = [SecurityContext.STYLE];
       }
     }
@@ -20725,7 +20740,7 @@ var BindingParser = class {
       const mappedPropName = this._schemaRegistry.getMappedPropName(boundProp.name);
       boundPropertyName = mapPropertyName ? mappedPropName : boundProp.name;
       securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, mappedPropName, false);
-      bindingType = boundProp.type === ParsedPropertyType.TWO_WAY ? 5 : 0;
+      bindingType = boundProp.type === ParsedPropertyType.TWO_WAY ? BindingType.TwoWay : BindingType.Property;
       if (!skipValidation) {
         this._validatePropertyOrAttributeName(mappedPropName, boundProp.sourceSpan, false);
       }
@@ -20755,7 +20770,7 @@ var BindingParser = class {
     const eventName = matches[0];
     const phase = matches[1].toLowerCase();
     const ast = this._parseAction(expression, handlerSpan);
-    targetEvents.push(new ParsedEvent(eventName, phase, 1, ast, sourceSpan, handlerSpan, keySpan));
+    targetEvents.push(new ParsedEvent(eventName, phase, ParsedEventType.Animation, ast, sourceSpan, handlerSpan, keySpan));
     if (eventName.length === 0) {
       this._reportError(`Animation event name is missing in binding`, sourceSpan);
     }
@@ -20776,7 +20791,7 @@ var BindingParser = class {
     if (isAssignmentEvent && isValid && !this._isAllowedAssignmentEvent(ast)) {
       this._reportError("Unsupported expression in a two-way binding", sourceSpan);
     }
-    targetEvents.push(new ParsedEvent(eventName, target, isAssignmentEvent ? 2 : 0, ast, sourceSpan, handlerSpan, keySpan));
+    targetEvents.push(new ParsedEvent(eventName, target, isAssignmentEvent ? ParsedEventType.TwoWay : ParsedEventType.Regular, ast, sourceSpan, handlerSpan, keySpan));
   }
   _parseAction(value, sourceSpan) {
     const sourceInfo = (sourceSpan && sourceSpan.start || "(unknown").toString();
@@ -22234,13 +22249,13 @@ var StylingBuilder = class {
     let binding = null;
     let name = input.name;
     switch (input.type) {
-      case 0:
+      case BindingType.Property:
         binding = this.registerInputBasedOnName(name, input.value, input.sourceSpan);
         break;
-      case 3:
+      case BindingType.Style:
         binding = this.registerStyleInput(name, false, input.value, input.sourceSpan, input.unit);
         break;
-      case 2:
+      case BindingType.Class:
         binding = this.registerClassInput(name, false, input.value, input.sourceSpan);
         break;
     }
@@ -22562,7 +22577,7 @@ function prepareEventListenerParameters(eventAst, handlerName = null, scope = nu
   const eventArgumentName = "$event";
   const implicitReceiverAccesses = /* @__PURE__ */ new Set();
   const implicitReceiverExpr = scope === null || scope.bindingLevel === 0 ? variable(CONTEXT_NAME) : scope.getOrCreateSharedContextVar(0);
-  const bindingStatements = eventAst.type === 2 ? convertAssignmentActionBinding(scope, implicitReceiverExpr, handler, "b", eventAst.handlerSpan, implicitReceiverAccesses, EVENT_BINDING_SCOPE_GLOBALS) : convertActionBinding(scope, implicitReceiverExpr, handler, "b", eventAst.handlerSpan, implicitReceiverAccesses, EVENT_BINDING_SCOPE_GLOBALS);
+  const bindingStatements = eventAst.type === ParsedEventType.TwoWay ? convertAssignmentActionBinding(scope, implicitReceiverExpr, handler, "b", eventAst.handlerSpan, implicitReceiverAccesses, EVENT_BINDING_SCOPE_GLOBALS) : convertActionBinding(scope, implicitReceiverExpr, handler, "b", eventAst.handlerSpan, implicitReceiverAccesses, EVENT_BINDING_SCOPE_GLOBALS);
   const statements = [];
   const variableDeclarations = scope == null ? void 0 : scope.variableDeclarations();
   const restoreViewStatement = scope == null ? void 0 : scope.restoreViewStatement();
@@ -22579,7 +22594,7 @@ function prepareEventListenerParameters(eventAst, handlerName = null, scope = nu
       statements.push(new ExpressionStatement(invokeInstruction(null, Identifiers.resetView, [])));
     }
   }
-  const eventName = type === 1 ? prepareSyntheticListenerName(name, phase) : name;
+  const eventName = type === ParsedEventType.Animation ? prepareSyntheticListenerName(name, phase) : name;
   const fnName = handlerName && sanitizeIdentifier(handlerName);
   const fnArgs = [];
   if (implicitReceiverAccesses.has(eventArgumentName)) {
@@ -22954,7 +22969,7 @@ var TemplateDefinitionBuilder = class {
     element2.inputs.forEach((input) => {
       const stylingInputWasSet = stylingBuilder.registerBoundInput(input);
       if (!stylingInputWasSet) {
-        if ((input.type === 0 || input.type === 5) && input.i18n) {
+        if ((input.type === BindingType.Property || input.type === BindingType.TwoWay) && input.i18n) {
           boundI18nAttrs.push(input);
         } else {
           allOtherInputs.push(input);
@@ -22988,7 +23003,7 @@ var TemplateDefinitionBuilder = class {
       }
       if (element2.outputs.length > 0) {
         for (const outputAst of element2.outputs) {
-          this.creationInstruction(outputAst.sourceSpan, outputAst.type === 2 ? Identifiers.twoWayListener : Identifiers.listener, this.prepareListenerParameter(element2.name, outputAst, elementIndex));
+          this.creationInstruction(outputAst.sourceSpan, outputAst.type === ParsedEventType.TwoWay ? Identifiers.twoWayListener : Identifiers.listener, this.prepareListenerParameter(element2.name, outputAst, elementIndex));
         }
       }
       if (isI18nRootElement) {
@@ -23006,7 +23021,7 @@ var TemplateDefinitionBuilder = class {
     const attributeBindings = [];
     allOtherInputs.forEach((input) => {
       const inputType = input.type;
-      if (inputType === 4) {
+      if (inputType === BindingType.Animation) {
         const value = input.value.visit(this._valueConverter);
         const hasValue = value instanceof LiteralPrimitive ? !!value.value : true;
         this.allocateBindingSlots(value);
@@ -23022,7 +23037,7 @@ var TemplateDefinitionBuilder = class {
         if (value !== void 0) {
           const params = [];
           const [attrNamespace, attrName] = splitNsName(input.name);
-          const isAttributeBinding = inputType === 1;
+          const isAttributeBinding = inputType === BindingType.Attribute;
           let sanitizationRef = resolveSanitizationFn(input.securityContext, isAttributeBinding);
           if (!sanitizationRef) {
             if (isIframeElement2(element2.name) && isIframeSecuritySensitiveAttr(input.name)) {
@@ -23041,17 +23056,17 @@ var TemplateDefinitionBuilder = class {
             }
           }
           this.allocateBindingSlots(value);
-          if (inputType === 0 || inputType === 5) {
+          if (inputType === BindingType.Property || inputType === BindingType.TwoWay) {
             if (value instanceof Interpolation) {
               this.interpolatedUpdateInstruction(getPropertyInterpolationExpression(value), elementIndex, attrName, input, value, params);
             } else {
               propertyBindings.push({
                 span: input.sourceSpan,
-                reference: inputType === 5 ? Identifiers.twoWayProperty : Identifiers.property,
+                reference: inputType === BindingType.TwoWay ? Identifiers.twoWayProperty : Identifiers.property,
                 paramsOrFn: getBindingFunctionParams(() => this.convertPropertyBinding(value), attrName, params)
               });
             }
-          } else if (inputType === 1) {
+          } else if (inputType === BindingType.Attribute) {
             if (value instanceof Interpolation && getInterpolationArgsLength(value) > 1) {
               this.interpolatedUpdateInstruction(getAttributeInterpolationExpression(value), elementIndex, attrName, input, value, params);
             } else {
@@ -23151,7 +23166,7 @@ var TemplateDefinitionBuilder = class {
         this.templatePropertyBindings(templateIndex, inputs);
       }
       for (const outputAst of template2.outputs) {
-        this.creationInstruction(outputAst.sourceSpan, outputAst.type === 2 ? Identifiers.twoWayListener : Identifiers.listener, this.prepareListenerParameter("ng_template", outputAst, templateIndex));
+        this.creationInstruction(outputAst.sourceSpan, outputAst.type === ParsedEventType.TwoWay ? Identifiers.twoWayListener : Identifiers.listener, this.prepareListenerParameter("ng_template", outputAst, templateIndex));
       }
     }
   }
@@ -23665,13 +23680,13 @@ var TemplateDefinitionBuilder = class {
       const attrsLengthBeforeInputs = attrExprs.length;
       for (let i = 0; i < inputs.length; i++) {
         const input = inputs[i];
-        if (input.type !== 4 && input.type !== 1) {
+        if (input.type !== BindingType.Animation && input.type !== BindingType.Attribute) {
           addAttrExpr(input.name);
         }
       }
       for (let i = 0; i < outputs.length; i++) {
         const output = outputs[i];
-        if (output.type !== 1) {
+        if (output.type !== ParsedEventType.Animation) {
           addAttrExpr(output.name);
         }
       }
@@ -23725,7 +23740,7 @@ var TemplateDefinitionBuilder = class {
   prepareListenerParameter(tagName, outputAst, index) {
     return () => {
       const eventName = outputAst.name;
-      const bindingFnName = outputAst.type === 1 ? prepareSyntheticListenerFunctionName(eventName, outputAst.phase) : sanitizeIdentifier(eventName);
+      const bindingFnName = outputAst.type === ParsedEventType.Animation ? prepareSyntheticListenerFunctionName(eventName, outputAst.phase) : sanitizeIdentifier(eventName);
       const handlerName = `${this.templateName}_${tagName}_${bindingFnName}_${index}_listener`;
       const scope = this._bindingScope.nestedScope(this._bindingScope.bindingLevel, EVENT_BINDING_SCOPE_GLOBALS);
       return prepareEventListenerParameters(outputAst, handlerName, scope);
@@ -24810,10 +24825,10 @@ function createHostListeners(eventBindings, name) {
   const instructions = [];
   for (const binding of eventBindings) {
     let bindingName = binding.name && sanitizeIdentifier(binding.name);
-    const bindingFnName = binding.type === 1 ? prepareSyntheticListenerFunctionName(bindingName, binding.targetOrPhase) : bindingName;
+    const bindingFnName = binding.type === ParsedEventType.Animation ? prepareSyntheticListenerFunctionName(bindingName, binding.targetOrPhase) : bindingName;
     const handlerName = name && bindingName ? `${name}_${bindingFnName}_HostBindingHandler` : null;
     const params = prepareEventListenerParameters(BoundEvent.fromParsedEvent(binding), handlerName);
-    if (binding.type == 1) {
+    if (binding.type == ParsedEventType.Animation) {
       syntheticListenerParams.push(params);
     } else {
       listenerParams.push(params);
@@ -26144,7 +26159,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.0+sha-cd242a1");
+var VERSION2 = new Version("18.0.0-next.0+sha-ef39107");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26289,17 +26304,17 @@ var InvalidTwoWayBindingCollector = class extends RecursiveVisitor {
   visitNodeWithBindings(node) {
     const seenOneWayBindings = /* @__PURE__ */ new Set();
     for (const output of node.outputs) {
-      if (output.type === 0) {
+      if (output.type === ParsedEventType.Regular) {
         seenOneWayBindings.add(output.name);
       }
     }
     for (const input of node.inputs) {
-      if (input.type === 0) {
+      if (input.type === BindingType.Property) {
         seenOneWayBindings.add(input.name);
       }
     }
     for (const input of node.inputs) {
-      if (input.type !== 5 || seenOneWayBindings.has(input.name) || seenOneWayBindings.has(input.name + "Change")) {
+      if (input.type !== BindingType.TwoWay || seenOneWayBindings.has(input.name) || seenOneWayBindings.has(input.name + "Change")) {
         continue;
       }
       let value = input.value;
