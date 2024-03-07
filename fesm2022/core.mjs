@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.4+sha-ea9c10e
+ * @license Angular v17.2.4+sha-b9a0d02
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15361,7 +15361,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.4+sha-ea9c10e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.4+sha-b9a0d02']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23153,6 +23153,19 @@ function applyI18n(tView, lView, index) {
     changeMask = 0b0;
     changeMaskCounter = 0;
 }
+function locateOrCreateNode(lView, index, textOrName, nodeType) {
+    // TODO: Add support for hydration
+    lastNodeWasCreated(true);
+    const renderer = lView[RENDERER];
+    switch (nodeType) {
+        case Node.COMMENT_NODE:
+            return createCommentNode(renderer, textOrName);
+        case Node.TEXT_NODE:
+            return createTextNode(renderer, textOrName);
+        case Node.ELEMENT_NODE:
+            return createElementNode(renderer, textOrName, null);
+    }
+}
 /**
  * Apply `I18nCreateOpCodes` op-codes as stored in `TI18n.create`.
  *
@@ -23177,7 +23190,7 @@ function applyCreateOpCodes(lView, createOpCodes, parentRNode, insertInFrontOf) 
             // We only create new DOM nodes if they don't already exist: If ICU switches case back to a
             // case which was already instantiated, no need to create new DOM nodes.
             rNode = lView[index] =
-                isComment ? renderer.createComment(text) : createTextNode(renderer, text);
+                locateOrCreateNode(lView, index, text, isComment ? Node.COMMENT_NODE : Node.TEXT_NODE);
         }
         if (appendNow && parentRNode !== null) {
             nativeInsertBefore(renderer, parentRNode, rNode, insertInFrontOf, false);
@@ -23210,7 +23223,7 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
             if (lView[textNodeIndex] === null) {
                 ngDevMode && ngDevMode.rendererCreateTextNode++;
                 ngDevMode && assertIndexInRange(lView, textNodeIndex);
-                lView[textNodeIndex] = createTextNode(renderer, opCode);
+                lView[textNodeIndex] = locateOrCreateNode(lView, textNodeIndex, opCode, Node.TEXT_NODE);
             }
         }
         else if (typeof opCode == 'number') {
@@ -23285,7 +23298,7 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
                         ngDevMode && ngDevMode.rendererCreateComment++;
                         ngDevMode && assertIndexInExpandoRange(lView, commentNodeIndex);
                         const commentRNode = lView[commentNodeIndex] =
-                            createCommentNode(renderer, commentValue);
+                            locateOrCreateNode(lView, commentNodeIndex, commentValue, Node.COMMENT_NODE);
                         // FIXME(misko): Attaching patch data is only needed for the root (Also add tests)
                         attachPatchData(commentRNode, lView);
                     }
@@ -23299,7 +23312,7 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
                         ngDevMode && ngDevMode.rendererCreateElement++;
                         ngDevMode && assertIndexInExpandoRange(lView, elementNodeIndex);
                         const elementRNode = lView[elementNodeIndex] =
-                            createElementNode(renderer, tagName, null);
+                            locateOrCreateNode(lView, elementNodeIndex, tagName, Node.ELEMENT_NODE);
                         // FIXME(misko): Attaching patch data is only needed for the root (Also add tests)
                         attachPatchData(elementRNode, lView);
                     }
@@ -29518,7 +29531,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.4+sha-ea9c10e');
+const VERSION = new Version('17.2.4+sha-b9a0d02');
 
 class Console {
     log(message) {
