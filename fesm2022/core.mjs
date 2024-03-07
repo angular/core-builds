@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.4+sha-4d708b2
+ * @license Angular v17.2.4+sha-ea9c10e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15361,7 +15361,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.4+sha-4d708b2']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.2.4+sha-ea9c10e']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17728,6 +17728,15 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
     return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
 }
 
+/**
+ * Checks whether a TNode is considered detached, i.e. not present in the
+ * translated i18n template. We should not attempt hydration for such nodes
+ * and instead, use a regular "creation mode".
+ */
+function isDetachedByI18n(tNode) {
+    return (tNode.flags & 32 /* TNodeFlags.isDetached */) === 32 /* TNodeFlags.isDetached */;
+}
+
 function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
@@ -17804,7 +17813,8 @@ function createContainerAnchorImpl(tView, lView, tNode, index) {
  */
 function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() ||
+        isDetachedByI18n(tNode) || isDisconnectedNode$1(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -22286,7 +22296,7 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     }
     setCurrentTNode(tNode, true);
     setupStaticAttributes(renderer, native, tNode);
-    if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */ && wasLastNodeCreated()) {
+    if (!isDetachedByI18n(tNode) && wasLastNodeCreated()) {
         // In the i18n case, the translation may have removed this element, so only add it if it is not
         // detached. See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
         appendChild(tView, lView, native, tNode);
@@ -22371,7 +22381,8 @@ let _locateOrCreateElementNode = (tView, lView, tNode, renderer, name, index) =>
  */
 function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() ||
+        isDetachedByI18n(tNode) || isDisconnectedNode$1(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -22529,7 +22540,7 @@ let _locateOrCreateElementContainerNode = (tView, lView, tNode, index) => {
 function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
     let comment;
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDetachedByI18n(tNode);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -23815,6 +23826,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
     const createOpCodes = [];
     const updateOpCodes = [];
     const existingTNodeStack = [[]];
+    const astStack = [[]];
     if (ngDevMode) {
         attachDebugGetter(createOpCodes, i18nCreateOpCodesToString);
         attachDebugGetter(updateOpCodes, i18nUpdateOpCodesToString);
@@ -23833,7 +23845,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
                     const text = part;
                     ngDevMode && assertString(text, 'Parsed ICU part should be string');
                     if (text !== '') {
-                        i18nStartFirstCreatePassProcessTextNode(tView, rootTNode, existingTNodeStack[0], createOpCodes, updateOpCodes, lView, text);
+                        i18nStartFirstCreatePassProcessTextNode(astStack[0], tView, rootTNode, existingTNodeStack[0], createOpCodes, updateOpCodes, lView, text);
                     }
                 }
                 else {
@@ -23852,7 +23864,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
                     const icuNodeIndex = icuContainerTNode.index;
                     ngDevMode &&
                         assertGreaterThanOrEqual(icuNodeIndex, HEADER_OFFSET, 'Index must be in absolute LView offset');
-                    icuStart(tView, lView, updateOpCodes, parentTNodeIndex, icuExpression, icuNodeIndex);
+                    icuStart(astStack[0], tView, lView, updateOpCodes, parentTNodeIndex, icuExpression, icuNodeIndex);
                 }
             }
         }
@@ -23865,18 +23877,29 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
             const index = HEADER_OFFSET + Number.parseInt(value.substring((isClosing ? 2 : 1)));
             if (isClosing) {
                 existingTNodeStack.shift();
+                astStack.shift();
                 setCurrentTNode(getCurrentParentTNode(), false);
             }
             else {
                 const tNode = createTNodePlaceholder(tView, existingTNodeStack[0], index);
                 existingTNodeStack.unshift([]);
                 setCurrentTNode(tNode, true);
+                const placeholderNode = {
+                    kind: 2 /* I18nNodeKind.PLACEHOLDER */,
+                    index,
+                    children: [],
+                    type: type === 35 /* CharCode.HASH */ ? 0 /* I18nPlaceholderType.ELEMENT */ :
+                        1 /* I18nPlaceholderType.SUBTEMPLATE */,
+                };
+                astStack[0].push(placeholderNode);
+                astStack.unshift(placeholderNode.children);
             }
         }
     }
     tView.data[index] = {
         create: createOpCodes,
         update: updateOpCodes,
+        ast: astStack[0],
     };
 }
 /**
@@ -23945,12 +23968,14 @@ function createTNodeAndAddOpCode(tView, rootTNode, existingTNodes, lView, create
  * @param lView Current `LView`
  * @param text The translated text (which may contain binding)
  */
-function i18nStartFirstCreatePassProcessTextNode(tView, rootTNode, existingTNodes, createOpCodes, updateOpCodes, lView, text) {
+function i18nStartFirstCreatePassProcessTextNode(ast, tView, rootTNode, existingTNodes, createOpCodes, updateOpCodes, lView, text) {
     const hasBinding = text.match(BINDING_REGEXP);
     const tNode = createTNodeAndAddOpCode(tView, rootTNode, existingTNodes, lView, createOpCodes, hasBinding ? null : text, false);
+    const index = tNode.index;
     if (hasBinding) {
-        generateBindingUpdateOpCodes(updateOpCodes, text, tNode.index, null, 0, null);
+        generateBindingUpdateOpCodes(updateOpCodes, text, index, null, 0, null);
     }
+    ast.push({ kind: 0 /* I18nNodeKind.TEXT */, index });
 }
 /**
  * See `i18nAttributes` above.
@@ -24128,7 +24153,7 @@ function getTranslationForTemplate(message, subTemplateIndex) {
  *   - `lView[anchorIdx]` points to a `Comment` node representing the anchor for the ICU.
  *   - `tView.data[anchorIdx]` points to the `TIcuContainerNode` if ICU is root (`null` otherwise)
  */
-function icuStart(tView, lView, updateOpCodes, parentIdx, icuExpression, anchorIdx) {
+function icuStart(ast, tView, lView, updateOpCodes, parentIdx, icuExpression, anchorIdx) {
     ngDevMode && assertDefined(icuExpression, 'ICU expression must be defined');
     let bindingMask = 0;
     const tIcu = {
@@ -24143,6 +24168,7 @@ function icuStart(tView, lView, updateOpCodes, parentIdx, icuExpression, anchorI
     addUpdateIcuSwitch(updateOpCodes, icuExpression, anchorIdx);
     setTIcu(tView, anchorIdx, tIcu);
     const values = icuExpression.values;
+    const cases = [];
     for (let i = 0; i < values.length; i++) {
         // Each value is an array of strings & other ICU expressions
         const valueArr = values[i];
@@ -24156,12 +24182,20 @@ function icuStart(tView, lView, updateOpCodes, parentIdx, icuExpression, anchorI
                 valueArr[j] = `<!--�${icuIndex}�-->`;
             }
         }
-        bindingMask = parseIcuCase(tView, tIcu, lView, updateOpCodes, parentIdx, icuExpression.cases[i], valueArr.join(''), nestedIcus) |
+        const caseAst = [];
+        cases.push(caseAst);
+        bindingMask = parseIcuCase(caseAst, tView, tIcu, lView, updateOpCodes, parentIdx, icuExpression.cases[i], valueArr.join(''), nestedIcus) |
             bindingMask;
     }
     if (bindingMask) {
         addUpdateIcuUpdate(updateOpCodes, bindingMask, anchorIdx);
     }
+    ast.push({
+        kind: 3 /* I18nNodeKind.ICU */,
+        index: anchorIdx,
+        cases,
+        currentCaseLViewIndex: tIcu.currentCaseLViewIndex
+    });
 }
 /**
  * Parses text containing an ICU expression and produces a JSON object for it.
@@ -24258,7 +24292,7 @@ function i18nParseTextIntoPartsAndICU(pattern) {
  * Parses a node, its children and its siblings, and generates the mutate & update OpCodes.
  *
  */
-function parseIcuCase(tView, tIcu, lView, updateOpCodes, parentIdx, caseName, unsafeCaseHtml, nestedIcus) {
+function parseIcuCase(ast, tView, tIcu, lView, updateOpCodes, parentIdx, caseName, unsafeCaseHtml, nestedIcus) {
     const create = [];
     const remove = [];
     const update = [];
@@ -24276,13 +24310,13 @@ function parseIcuCase(tView, tIcu, lView, updateOpCodes, parentIdx, caseName, un
     ngDevMode && assertDefined(inertBodyElement, 'Unable to generate inert body element');
     const inertRootNode = getTemplateContent(inertBodyElement) || inertBodyElement;
     if (inertRootNode) {
-        return walkIcuTree(tView, tIcu, lView, updateOpCodes, create, remove, update, inertRootNode, parentIdx, nestedIcus, 0);
+        return walkIcuTree(ast, tView, tIcu, lView, updateOpCodes, create, remove, update, inertRootNode, parentIdx, nestedIcus, 0);
     }
     else {
         return 0;
     }
 }
-function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, parentNode, parentIdx, nestedIcus, depth) {
+function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, parentNode, parentIdx, nestedIcus, depth) {
     let bindingMask = 0;
     let currentNode = parentNode.firstChild;
     while (currentNode) {
@@ -24320,9 +24354,16 @@ function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, up
                             addCreateAttribute(create, newIndex, attr);
                         }
                     }
+                    const elementNode = {
+                        kind: 1 /* I18nNodeKind.ELEMENT */,
+                        index: newIndex,
+                        children: [],
+                    };
+                    ast.push(elementNode);
                     // Parse the children of this node (if any)
-                    bindingMask = walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, currentNode, newIndex, nestedIcus, depth + 1) |
-                        bindingMask;
+                    bindingMask =
+                        walkIcuTree(elementNode.children, tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, currentNode, newIndex, nestedIcus, depth + 1) |
+                            bindingMask;
                     addRemoveNode(remove, newIndex, depth);
                 }
                 break;
@@ -24335,6 +24376,10 @@ function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, up
                     bindingMask =
                         generateBindingUpdateOpCodes(update, value, newIndex, null, 0, null) | bindingMask;
                 }
+                ast.push({
+                    kind: 0 /* I18nNodeKind.TEXT */,
+                    index: newIndex,
+                });
                 break;
             case Node.COMMENT_NODE:
                 // Check if the comment node is a placeholder for a nested ICU
@@ -24344,7 +24389,7 @@ function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, up
                     const icuExpression = nestedIcus[nestedIcuIndex];
                     // Create the comment node that will anchor the ICU expression
                     addCreateNodeAndAppend(create, ICU_MARKER, ngDevMode ? `nested ICU ${nestedIcuIndex}` : '', parentIdx, newIndex);
-                    icuStart(tView, lView, sharedUpdateOpCodes, parentIdx, icuExpression, newIndex);
+                    icuStart(ast, tView, lView, sharedUpdateOpCodes, parentIdx, icuExpression, newIndex);
                     addRemoveNestedIcu(remove, newIndex, depth);
                 }
                 break;
@@ -26312,7 +26357,8 @@ let _locateOrCreateTextNode = (tView, lView, tNode, value, index) => {
  */
 function locateOrCreateTextNodeImpl(tView, lView, tNode, value, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() ||
+        isDetachedByI18n(tNode) || isDisconnectedNode$1(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -29472,7 +29518,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.2.4+sha-4d708b2');
+const VERSION = new Version('17.2.4+sha-ea9c10e');
 
 class Console {
     log(message) {

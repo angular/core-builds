@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.2.4+sha-4d708b2
+ * @license Angular v17.2.4+sha-ea9c10e
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4695,6 +4695,62 @@ declare interface I18nDebug {
 }
 
 /**
+ * Represents a simple DOM element in a translation, such as `<div>...</div>`
+ */
+declare interface I18nElementNode {
+    /** The AST node kind */
+    kind: I18nNodeKind.ELEMENT;
+    /** The LView index */
+    index: number;
+    /** The child nodes */
+    children: Array<I18nNode>;
+}
+
+/**
+ * Represents an ICU in a translation.
+ */
+declare interface I18nICUNode {
+    /** The AST node kind */
+    kind: I18nNodeKind.ICU;
+    /** The LView index */
+    index: number;
+    /** The branching cases */
+    cases: Array<Array<I18nNode>>;
+    /** The LView index that stores the active case */
+    currentCaseLViewIndex: number;
+}
+
+declare type I18nNode = I18nTextNode | I18nElementNode | I18nICUNode | I18nPlaceholderNode;
+
+declare const enum I18nNodeKind {
+    TEXT = 0,
+    ELEMENT = 1,
+    PLACEHOLDER = 2,
+    ICU = 3
+}
+
+/**
+ * Represents special content that is embedded into the translation. This can
+ * either be a special built-in element, such as <ng-container> and <ng-content>,
+ * or it can be a sub-template, for example, from a structural directive.
+ */
+declare interface I18nPlaceholderNode {
+    /** The AST node kind */
+    kind: I18nNodeKind.PLACEHOLDER;
+    /** The LView index */
+    index: number;
+    /** The child nodes */
+    children: Array<I18nNode>;
+    /** The placeholder type */
+    type: I18nPlaceholderType;
+}
+
+declare const enum I18nPlaceholderType {
+    ELEMENT = 0,
+    SUBTEMPLATE = 1
+}
+
+/**
  * Stores a list of nodes which need to be removed.
  *
  * Numbers are indexes into the `LView`
@@ -4703,6 +4759,16 @@ declare interface I18nDebug {
  */
 declare interface I18nRemoveOpCodes extends Array<number> {
     __brand__: 'I18nRemoveOpCodes';
+}
+
+/**
+ * Represents a block of text in a translation, such as `Hello, {{ name }}!`.
+ */
+declare interface I18nTextNode {
+    /** The AST node kind */
+    kind: I18nNodeKind.TEXT;
+    /** The LView index */
+    index: number;
 }
 
 /**
@@ -9434,6 +9500,11 @@ declare interface TI18n {
      * DOM are required.
      */
     update: I18nUpdateOpCodes;
+    /**
+     * An AST representing the translated message. This is used for hydration (and serialization),
+     * while the Update and Create OpCodes are used at runtime.
+     */
+    ast: Array<I18nNode>;
 }
 
 declare interface TIcu {
