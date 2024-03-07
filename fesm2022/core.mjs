@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-43ab781
+ * @license Angular v18.0.0-next.0+sha-2787c50
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4336,6 +4336,7 @@ function requiresRefreshOrTraversal(lView) {
  * parents above.
  */
 function updateAncestorTraversalFlagsOnAttach(lView) {
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(1 /* NotificationType.AfterRenderHooks */);
     // TODO(atscott): Simplify if...else cases once getEnsureDirtyViewsAreAlwaysReachable is always
     // `true`. When we attach a view that's marked `Dirty`, we should ensure that it is reached during
     // the next CD traversal so we add the `RefreshView` flag and mark ancestors accordingly.
@@ -9598,6 +9599,10 @@ function addViewToDOM(tView, parentTNode, renderer, lView, parentNativeNode, bef
  * @param lView the `LView` to be detached.
  */
 function detachViewFromDOM(tView, lView) {
+    // When we remove a view from the DOM, we need to rerun afterRender hooks
+    // We don't necessarily needs to run change detection. DOM removal only requires
+    // change detection if animations are enabled (this notification is handled by animations).
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(1 /* NotificationType.AfterRenderHooks */);
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
 /**
@@ -14591,7 +14596,7 @@ function afterRender(callback, options) {
         unregisterFn();
     };
     const unregisterFn = injector.get(DestroyRef).onDestroy(destroy);
-    const instance = new AfterRenderCallback(injector, phase, callback);
+    const instance = runInInjectionContext(injector, () => new AfterRenderCallback(phase, callback));
     callbackHandler.register(instance);
     return { destroy };
 }
@@ -14661,10 +14666,10 @@ function afterNextRender(callback, options) {
         unregisterFn();
     };
     const unregisterFn = injector.get(DestroyRef).onDestroy(destroy);
-    const instance = new AfterRenderCallback(injector, phase, () => {
+    const instance = runInInjectionContext(injector, () => new AfterRenderCallback(phase, () => {
         destroy();
         callback();
-    });
+    }));
     callbackHandler.register(instance);
     return { destroy };
 }
@@ -14672,11 +14677,13 @@ function afterNextRender(callback, options) {
  * A wrapper around a function to be used as an after render callback.
  */
 class AfterRenderCallback {
-    constructor(injector, phase, callbackFn) {
+    constructor(phase, callbackFn) {
         this.phase = phase;
         this.callbackFn = callbackFn;
-        this.zone = injector.get(NgZone);
-        this.errorHandler = injector.get(ErrorHandler, null, { optional: true });
+        this.zone = inject(NgZone);
+        this.errorHandler = inject(ErrorHandler, { optional: true });
+        // Registering a callback will notify the scheduler.
+        inject(ChangeDetectionScheduler, { optional: true })?.notify(1 /* NotificationType.AfterRenderHooks */);
     }
     invoke() {
         try {
@@ -15475,7 +15482,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-43ab781']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-2787c50']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29630,7 +29637,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.0+sha-43ab781');
+const VERSION = new Version('18.0.0-next.0+sha-2787c50');
 
 class Console {
     log(message) {
@@ -31281,6 +31288,10 @@ class ApplicationRef {
      * detection pass during which all change detection must complete.
      */
     tick() {
+        this._tick(true);
+    }
+    /** @internal */
+    _tick(refreshViews) {
         (typeof ngDevMode === 'undefined' || ngDevMode) && this.warnIfDestroyed();
         if (this._runningTick) {
             throw new RuntimeError(101 /* RuntimeErrorCode.RECURSIVE_APPLICATION_REF_TICK */, ngDevMode && 'ApplicationRef.tick is called recursively');
@@ -31288,7 +31299,7 @@ class ApplicationRef {
         const prevConsumer = setActiveConsumer$1(null);
         try {
             this._runningTick = true;
-            this.detectChangesInAttachedViews();
+            this.detectChangesInAttachedViews(refreshViews);
             if ((typeof ngDevMode === 'undefined' || ngDevMode)) {
                 for (let view of this._views) {
                     view.checkNoChanges();
@@ -31305,7 +31316,7 @@ class ApplicationRef {
             setActiveConsumer$1(prevConsumer);
         }
     }
-    detectChangesInAttachedViews() {
+    detectChangesInAttachedViews(refreshViews) {
         let runs = 0;
         const afterRenderEffectManager = this.afterRenderEffectManager;
         while (true) {
@@ -31314,10 +31325,12 @@ class ApplicationRef {
                     'Infinite change detection while refreshing application views. ' +
                         'Ensure afterRender or queueStateUpdate hooks are not continuously causing updates.');
             }
-            const isFirstPass = runs === 0;
-            this.beforeRender.next(isFirstPass);
-            for (let { _lView, notifyErrorHandler } of this._views) {
-                detectChangesInViewIfRequired(_lView, isFirstPass, notifyErrorHandler);
+            if (refreshViews) {
+                const isFirstPass = runs === 0;
+                this.beforeRender.next(isFirstPass);
+                for (let { _lView, notifyErrorHandler } of this._views) {
+                    detectChangesInViewIfRequired(_lView, isFirstPass, notifyErrorHandler);
+                }
             }
             runs++;
             afterRenderEffectManager.executeInternalCallbacks();
@@ -34865,10 +34878,15 @@ class ChangeDetectionSchedulerImpl {
         this.appRef = inject(ApplicationRef);
         this.taskService = inject(PendingTasks);
         this.pendingRenderTaskId = null;
+        this.shouldRefreshViews = false;
     }
-    notify() {
-        if (this.pendingRenderTaskId !== null)
+    notify(type = 0 /* NotificationType.RefreshViews */) {
+        // When the only source of notification is an afterRender hook will skip straight to the hooks
+        // rather than refreshing views in ApplicationRef.tick
+        this.shouldRefreshViews ||= type === 0 /* NotificationType.RefreshViews */;
+        if (this.pendingRenderTaskId !== null) {
             return;
+        }
         this.pendingRenderTaskId = this.taskService.add();
         this.raceTimeoutAndRequestAnimationFrame();
     }
@@ -34906,10 +34924,11 @@ class ChangeDetectionSchedulerImpl {
     tick() {
         try {
             if (!this.appRef.destroyed) {
-                this.appRef.tick();
+                this.appRef._tick(this.shouldRefreshViews);
             }
         }
         finally {
+            this.shouldRefreshViews = false;
             // If this is the last task, the service will synchronously emit a stable notification. If
             // there is a subscriber that then acts in a way that tries to notify the scheduler again,
             // we need to be able to respond to schedule a new change detection. Therefore, we should

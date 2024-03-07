@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-43ab781
+ * @license Angular v18.0.0-next.0+sha-2787c50
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7467,6 +7467,12 @@ declare type NodeOutputBindings = Record<string, (number | string)[]>;
 
 declare const NODES = "n";
 
+
+declare const enum NotificationType {
+    RefreshViews = 0,
+    AfterRenderHooks = 1
+}
+
 declare const NUM_ROOT_NODES = "r";
 
 /**
@@ -11842,12 +11848,11 @@ export declare const enum ɵBypassType {
     Style = "Style"
 }
 
-
 /**
  * Injectable that is notified when an `LView` is made aware of changes to application state.
  */
 export declare abstract class ɵChangeDetectionScheduler {
-    abstract notify(): void;
+    abstract notify(source?: NotificationType): void;
 }
 
 export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
