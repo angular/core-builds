@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-fb189c6
+ * @license Angular v18.0.0-next.0+sha-37d1f71
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15482,7 +15482,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-fb189c6']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-37d1f71']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29637,7 +29637,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.0+sha-fb189c6');
+const VERSION = new Version('18.0.0-next.0+sha-37d1f71');
 
 class Console {
     log(message) {
@@ -31480,9 +31480,27 @@ function shouldRecheckView(view) {
     return requiresRefreshOrTraversal(view) || !!(view[FLAGS] & 64 /* LViewFlags.Dirty */);
 }
 function detectChangesInView(lView, notifyErrorHandler, isFirstPass) {
-    const mode = isFirstPass || lView[FLAGS] & 64 /* LViewFlags.Dirty */ ?
-        0 /* ChangeDetectionMode.Global */ :
-        1 /* ChangeDetectionMode.Targeted */;
+    let mode;
+    if (isFirstPass) {
+        // The first pass is always in Global mode, which includes `CheckAlways` views.
+        mode = 0 /* ChangeDetectionMode.Global */;
+        // Add `RefreshView` flag to ensure this view is refreshed if not already dirty.
+        // `RefreshView` flag is used intentionally over `Dirty` because it gets cleared before
+        // executing any of the actual refresh code while the `Dirty` flag doesn't get cleared
+        // until the end of the refresh. Using `RefreshView` prevents creating a potential
+        // difference in the state of the LViewFlags during template execution.
+        lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
+    }
+    else if (lView[FLAGS] & 64 /* LViewFlags.Dirty */) {
+        // The root view has been explicitly marked for check, so check it in Global mode.
+        mode = 0 /* ChangeDetectionMode.Global */;
+    }
+    else {
+        // The view has not been marked for check, but contains a view marked for refresh
+        // (likely via a signal). Start this change detection in Targeted mode to skip the root
+        // view and check just the view(s) that need refreshed.
+        mode = 1 /* ChangeDetectionMode.Targeted */;
+    }
     detectChangesInternal(lView, notifyErrorHandler, mode);
 }
 
