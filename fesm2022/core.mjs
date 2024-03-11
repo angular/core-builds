@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-rc.0+sha-d870856
+ * @license Angular v17.3.0-rc.0+sha-619f3c8
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4335,6 +4335,7 @@ function requiresRefreshOrTraversal(lView) {
  * parents above.
  */
 function updateAncestorTraversalFlagsOnAttach(lView) {
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(1 /* NotificationType.AfterRenderHooks */);
     // TODO(atscott): Simplify if...else cases once getEnsureDirtyViewsAreAlwaysReachable is always
     // `true`. When we attach a view that's marked `Dirty`, we should ensure that it is reached during
     // the next CD traversal so we add the `RefreshView` flag and mark ancestors accordingly.
@@ -9597,6 +9598,10 @@ function addViewToDOM(tView, parentTNode, renderer, lView, parentNativeNode, bef
  * @param lView the `LView` to be detached.
  */
 function detachViewFromDOM(tView, lView) {
+    // When we remove a view from the DOM, we need to rerun afterRender hooks
+    // We don't necessarily needs to run change detection. DOM removal only requires
+    // change detection if animations are enabled (this notification is handled by animations).
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(1 /* NotificationType.AfterRenderHooks */);
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
 /**
@@ -13326,10 +13331,26 @@ function cleanupLContainer(lContainer) {
     }
 }
 /**
+ * Removes any remaining dehydrated i18n nodes from a given LView,
+ * both in internal data structure, as well as removing the
+ * corresponding DOM nodes.
+ */
+function cleanupDehydratedI18nNodes(lView) {
+    const i18nNodes = lView[HYDRATION]?.i18nNodes;
+    if (i18nNodes) {
+        const renderer = lView[RENDERER];
+        for (const node of i18nNodes.values()) {
+            nativeRemoveNode(renderer, node, false);
+        }
+        lView[HYDRATION].i18nNodes = undefined;
+    }
+}
+/**
  * Walks over `LContainer`s and components registered within
  * this LView and invokes dehydrated views cleanup function for each one.
  */
 function cleanupLView(lView) {
+    cleanupDehydratedI18nNodes(lView);
     const tView = lView[TVIEW];
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
         if (isLContainer(lView[i])) {
@@ -13449,6 +13470,24 @@ function isDisconnectedNode(tNode, lView) {
         !unwrapRNode(lView[tNode.index])?.isConnected;
 }
 /**
+ * Locate a node in an i18n tree that corresponds to a given instruction index.
+ *
+ * @param hydrationInfo The hydration annotation data
+ * @param noOffsetIndex the instruction index
+ * @returns an RNode that corresponds to the instruction index
+ */
+function locateI18nRNodeByIndex(hydrationInfo, noOffsetIndex) {
+    const i18nNodes = hydrationInfo.i18nNodes;
+    if (i18nNodes) {
+        const native = i18nNodes.get(noOffsetIndex);
+        if (native) {
+            i18nNodes.delete(noOffsetIndex);
+        }
+        return native;
+    }
+    return null;
+}
+/**
  * Locate a node in DOM tree that corresponds to a given TNode.
  *
  * @param hydrationInfo The hydration annotation data
@@ -13458,51 +13497,53 @@ function isDisconnectedNode(tNode, lView) {
  * @returns an RNode that represents a given tNode
  */
 function locateNextRNode(hydrationInfo, tView, lView, tNode) {
-    let native = null;
     const noOffsetIndex = getNoOffsetIndex(tNode);
-    const nodes = hydrationInfo.data[NODES];
-    if (nodes?.[noOffsetIndex]) {
-        // We know the exact location of the node.
-        native = locateRNodeByPath(nodes[noOffsetIndex], lView);
-    }
-    else if (tView.firstChild === tNode) {
-        // We create a first node in this view, so we use a reference
-        // to the first child in this DOM segment.
-        native = hydrationInfo.firstChild;
-    }
-    else {
-        // Locate a node based on a previous sibling or a parent node.
-        const previousTNodeParent = tNode.prev === null;
-        const previousTNode = (tNode.prev ?? tNode.parent);
-        ngDevMode &&
-            assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
-                'to the previous node or a parent node.');
-        if (isFirstElementInNgContainer(tNode)) {
-            const noOffsetParentIndex = getNoOffsetIndex(tNode.parent);
-            native = getSegmentHead(hydrationInfo, noOffsetParentIndex);
+    let native = locateI18nRNodeByIndex(hydrationInfo, noOffsetIndex);
+    if (!native) {
+        const nodes = hydrationInfo.data[NODES];
+        if (nodes?.[noOffsetIndex]) {
+            // We know the exact location of the node.
+            native = locateRNodeByPath(nodes[noOffsetIndex], lView);
+        }
+        else if (tView.firstChild === tNode) {
+            // We create a first node in this view, so we use a reference
+            // to the first child in this DOM segment.
+            native = hydrationInfo.firstChild;
         }
         else {
-            let previousRElement = getNativeByTNode(previousTNode, lView);
-            if (previousTNodeParent) {
-                native = previousRElement.firstChild;
+            // Locate a node based on a previous sibling or a parent node.
+            const previousTNodeParent = tNode.prev === null;
+            const previousTNode = (tNode.prev ?? tNode.parent);
+            ngDevMode &&
+                assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
+                    'to the previous node or a parent node.');
+            if (isFirstElementInNgContainer(tNode)) {
+                const noOffsetParentIndex = getNoOffsetIndex(tNode.parent);
+                native = getSegmentHead(hydrationInfo, noOffsetParentIndex);
             }
             else {
-                // If the previous node is an element, but it also has container info,
-                // this means that we are processing a node like `<div #vcrTarget>`, which is
-                // represented in the DOM as `<div></div>...<!--container-->`.
-                // In this case, there are nodes *after* this element and we need to skip
-                // all of them to reach an element that we are looking for.
-                const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
-                const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
-                if (previousTNode.type === 2 /* TNodeType.Element */ && segmentHead) {
-                    const numRootNodesToSkip = calcSerializedContainerSize(hydrationInfo, noOffsetPrevSiblingIndex);
-                    // `+1` stands for an anchor comment node after all the views in this container.
-                    const nodesToSkip = numRootNodesToSkip + 1;
-                    // First node after this segment.
-                    native = siblingAfter(nodesToSkip, segmentHead);
+                let previousRElement = getNativeByTNode(previousTNode, lView);
+                if (previousTNodeParent) {
+                    native = previousRElement.firstChild;
                 }
                 else {
-                    native = previousRElement.nextSibling;
+                    // If the previous node is an element, but it also has container info,
+                    // this means that we are processing a node like `<div #vcrTarget>`, which is
+                    // represented in the DOM as `<div></div>...<!--container-->`.
+                    // In this case, there are nodes *after* this element and we need to skip
+                    // all of them to reach an element that we are looking for.
+                    const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
+                    const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
+                    if (previousTNode.type === 2 /* TNodeType.Element */ && segmentHead) {
+                        const numRootNodesToSkip = calcSerializedContainerSize(hydrationInfo, noOffsetPrevSiblingIndex);
+                        // `+1` stands for an anchor comment node after all the views in this container.
+                        const nodesToSkip = numRootNodesToSkip + 1;
+                        // First node after this segment.
+                        native = siblingAfter(nodesToSkip, segmentHead);
+                    }
+                    else {
+                        native = previousRElement.nextSibling;
+                    }
                 }
             }
         }
@@ -14590,7 +14631,7 @@ function afterRender(callback, options) {
         unregisterFn();
     };
     const unregisterFn = injector.get(DestroyRef).onDestroy(destroy);
-    const instance = new AfterRenderCallback(injector, phase, callback);
+    const instance = runInInjectionContext(injector, () => new AfterRenderCallback(phase, callback));
     callbackHandler.register(instance);
     return { destroy };
 }
@@ -14660,10 +14701,10 @@ function afterNextRender(callback, options) {
         unregisterFn();
     };
     const unregisterFn = injector.get(DestroyRef).onDestroy(destroy);
-    const instance = new AfterRenderCallback(injector, phase, () => {
+    const instance = runInInjectionContext(injector, () => new AfterRenderCallback(phase, () => {
         destroy();
         callback();
-    });
+    }));
     callbackHandler.register(instance);
     return { destroy };
 }
@@ -14671,11 +14712,13 @@ function afterNextRender(callback, options) {
  * A wrapper around a function to be used as an after render callback.
  */
 class AfterRenderCallback {
-    constructor(injector, phase, callbackFn) {
+    constructor(phase, callbackFn) {
         this.phase = phase;
         this.callbackFn = callbackFn;
-        this.zone = injector.get(NgZone);
-        this.errorHandler = injector.get(ErrorHandler, null, { optional: true });
+        this.zone = inject(NgZone);
+        this.errorHandler = inject(ErrorHandler, { optional: true });
+        // Registering a callback will notify the scheduler.
+        inject(ChangeDetectionScheduler, { optional: true })?.notify(1 /* NotificationType.AfterRenderHooks */);
     }
     invoke() {
         try {
@@ -15474,7 +15517,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-d870856']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-619f3c8']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17831,6 +17874,15 @@ function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
     return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
 }
 
+/**
+ * Checks whether a TNode is considered detached, i.e. not present in the
+ * translated i18n template. We should not attempt hydration for such nodes
+ * and instead, use a regular "creation mode".
+ */
+function isDetachedByI18n(tNode) {
+    return (tNode.flags & 32 /* TNodeFlags.isDetached */) === 32 /* TNodeFlags.isDetached */;
+}
+
 function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
@@ -17907,7 +17959,8 @@ function createContainerAnchorImpl(tView, lView, tNode, index) {
  */
 function locateOrCreateContainerAnchorImpl(tView, lView, tNode, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() ||
+        isDetachedByI18n(tNode) || isDisconnectedNode$1(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -22389,7 +22442,7 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     }
     setCurrentTNode(tNode, true);
     setupStaticAttributes(renderer, native, tNode);
-    if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */ && wasLastNodeCreated()) {
+    if (!isDetachedByI18n(tNode) && wasLastNodeCreated()) {
         // In the i18n case, the translation may have removed this element, so only add it if it is not
         // detached. See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
         appendChild(tView, lView, native, tNode);
@@ -22474,7 +22527,8 @@ let _locateOrCreateElementNode = (tView, lView, tNode, renderer, name, index) =>
  */
 function locateOrCreateElementNodeImpl(tView, lView, tNode, renderer, name, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() ||
+        isDetachedByI18n(tNode) || isDisconnectedNode$1(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -22632,7 +22686,7 @@ let _locateOrCreateElementContainerNode = (tView, lView, tNode, index) => {
 function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
     let comment;
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDetachedByI18n(tNode);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -23245,6 +23299,19 @@ function applyI18n(tView, lView, index) {
     changeMask = 0b0;
     changeMaskCounter = 0;
 }
+function locateOrCreateNode(lView, index, textOrName, nodeType) {
+    // TODO: Add support for hydration
+    lastNodeWasCreated(true);
+    const renderer = lView[RENDERER];
+    switch (nodeType) {
+        case Node.COMMENT_NODE:
+            return createCommentNode(renderer, textOrName);
+        case Node.TEXT_NODE:
+            return createTextNode(renderer, textOrName);
+        case Node.ELEMENT_NODE:
+            return createElementNode(renderer, textOrName, null);
+    }
+}
 /**
  * Apply `I18nCreateOpCodes` op-codes as stored in `TI18n.create`.
  *
@@ -23269,7 +23336,7 @@ function applyCreateOpCodes(lView, createOpCodes, parentRNode, insertInFrontOf) 
             // We only create new DOM nodes if they don't already exist: If ICU switches case back to a
             // case which was already instantiated, no need to create new DOM nodes.
             rNode = lView[index] =
-                isComment ? renderer.createComment(text) : createTextNode(renderer, text);
+                locateOrCreateNode(lView, index, text, isComment ? Node.COMMENT_NODE : Node.TEXT_NODE);
         }
         if (appendNow && parentRNode !== null) {
             nativeInsertBefore(renderer, parentRNode, rNode, insertInFrontOf, false);
@@ -23302,7 +23369,7 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
             if (lView[textNodeIndex] === null) {
                 ngDevMode && ngDevMode.rendererCreateTextNode++;
                 ngDevMode && assertIndexInRange(lView, textNodeIndex);
-                lView[textNodeIndex] = createTextNode(renderer, opCode);
+                lView[textNodeIndex] = locateOrCreateNode(lView, textNodeIndex, opCode, Node.TEXT_NODE);
             }
         }
         else if (typeof opCode == 'number') {
@@ -23377,7 +23444,7 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
                         ngDevMode && ngDevMode.rendererCreateComment++;
                         ngDevMode && assertIndexInExpandoRange(lView, commentNodeIndex);
                         const commentRNode = lView[commentNodeIndex] =
-                            createCommentNode(renderer, commentValue);
+                            locateOrCreateNode(lView, commentNodeIndex, commentValue, Node.COMMENT_NODE);
                         // FIXME(misko): Attaching patch data is only needed for the root (Also add tests)
                         attachPatchData(commentRNode, lView);
                     }
@@ -23391,7 +23458,7 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
                         ngDevMode && ngDevMode.rendererCreateElement++;
                         ngDevMode && assertIndexInExpandoRange(lView, elementNodeIndex);
                         const elementRNode = lView[elementNodeIndex] =
-                            createElementNode(renderer, tagName, null);
+                            locateOrCreateNode(lView, elementNodeIndex, tagName, Node.ELEMENT_NODE);
                         // FIXME(misko): Attaching patch data is only needed for the root (Also add tests)
                         attachPatchData(elementRNode, lView);
                     }
@@ -23918,6 +23985,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
     const createOpCodes = [];
     const updateOpCodes = [];
     const existingTNodeStack = [[]];
+    const astStack = [[]];
     if (ngDevMode) {
         attachDebugGetter(createOpCodes, i18nCreateOpCodesToString);
         attachDebugGetter(updateOpCodes, i18nUpdateOpCodesToString);
@@ -23936,7 +24004,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
                     const text = part;
                     ngDevMode && assertString(text, 'Parsed ICU part should be string');
                     if (text !== '') {
-                        i18nStartFirstCreatePassProcessTextNode(tView, rootTNode, existingTNodeStack[0], createOpCodes, updateOpCodes, lView, text);
+                        i18nStartFirstCreatePassProcessTextNode(astStack[0], tView, rootTNode, existingTNodeStack[0], createOpCodes, updateOpCodes, lView, text);
                     }
                 }
                 else {
@@ -23955,7 +24023,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
                     const icuNodeIndex = icuContainerTNode.index;
                     ngDevMode &&
                         assertGreaterThanOrEqual(icuNodeIndex, HEADER_OFFSET, 'Index must be in absolute LView offset');
-                    icuStart(tView, lView, updateOpCodes, parentTNodeIndex, icuExpression, icuNodeIndex);
+                    icuStart(astStack[0], tView, lView, updateOpCodes, parentTNodeIndex, icuExpression, icuNodeIndex);
                 }
             }
         }
@@ -23968,18 +24036,29 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
             const index = HEADER_OFFSET + Number.parseInt(value.substring((isClosing ? 2 : 1)));
             if (isClosing) {
                 existingTNodeStack.shift();
+                astStack.shift();
                 setCurrentTNode(getCurrentParentTNode(), false);
             }
             else {
                 const tNode = createTNodePlaceholder(tView, existingTNodeStack[0], index);
                 existingTNodeStack.unshift([]);
                 setCurrentTNode(tNode, true);
+                const placeholderNode = {
+                    kind: 2 /* I18nNodeKind.PLACEHOLDER */,
+                    index,
+                    children: [],
+                    type: type === 35 /* CharCode.HASH */ ? 0 /* I18nPlaceholderType.ELEMENT */ :
+                        1 /* I18nPlaceholderType.SUBTEMPLATE */,
+                };
+                astStack[0].push(placeholderNode);
+                astStack.unshift(placeholderNode.children);
             }
         }
     }
     tView.data[index] = {
         create: createOpCodes,
         update: updateOpCodes,
+        ast: astStack[0],
     };
 }
 /**
@@ -24048,12 +24127,14 @@ function createTNodeAndAddOpCode(tView, rootTNode, existingTNodes, lView, create
  * @param lView Current `LView`
  * @param text The translated text (which may contain binding)
  */
-function i18nStartFirstCreatePassProcessTextNode(tView, rootTNode, existingTNodes, createOpCodes, updateOpCodes, lView, text) {
+function i18nStartFirstCreatePassProcessTextNode(ast, tView, rootTNode, existingTNodes, createOpCodes, updateOpCodes, lView, text) {
     const hasBinding = text.match(BINDING_REGEXP);
     const tNode = createTNodeAndAddOpCode(tView, rootTNode, existingTNodes, lView, createOpCodes, hasBinding ? null : text, false);
+    const index = tNode.index;
     if (hasBinding) {
-        generateBindingUpdateOpCodes(updateOpCodes, text, tNode.index, null, 0, null);
+        generateBindingUpdateOpCodes(updateOpCodes, text, index, null, 0, null);
     }
+    ast.push({ kind: 0 /* I18nNodeKind.TEXT */, index });
 }
 /**
  * See `i18nAttributes` above.
@@ -24231,7 +24312,7 @@ function getTranslationForTemplate(message, subTemplateIndex) {
  *   - `lView[anchorIdx]` points to a `Comment` node representing the anchor for the ICU.
  *   - `tView.data[anchorIdx]` points to the `TIcuContainerNode` if ICU is root (`null` otherwise)
  */
-function icuStart(tView, lView, updateOpCodes, parentIdx, icuExpression, anchorIdx) {
+function icuStart(ast, tView, lView, updateOpCodes, parentIdx, icuExpression, anchorIdx) {
     ngDevMode && assertDefined(icuExpression, 'ICU expression must be defined');
     let bindingMask = 0;
     const tIcu = {
@@ -24246,6 +24327,7 @@ function icuStart(tView, lView, updateOpCodes, parentIdx, icuExpression, anchorI
     addUpdateIcuSwitch(updateOpCodes, icuExpression, anchorIdx);
     setTIcu(tView, anchorIdx, tIcu);
     const values = icuExpression.values;
+    const cases = [];
     for (let i = 0; i < values.length; i++) {
         // Each value is an array of strings & other ICU expressions
         const valueArr = values[i];
@@ -24259,12 +24341,20 @@ function icuStart(tView, lView, updateOpCodes, parentIdx, icuExpression, anchorI
                 valueArr[j] = `<!--�${icuIndex}�-->`;
             }
         }
-        bindingMask = parseIcuCase(tView, tIcu, lView, updateOpCodes, parentIdx, icuExpression.cases[i], valueArr.join(''), nestedIcus) |
+        const caseAst = [];
+        cases.push(caseAst);
+        bindingMask = parseIcuCase(caseAst, tView, tIcu, lView, updateOpCodes, parentIdx, icuExpression.cases[i], valueArr.join(''), nestedIcus) |
             bindingMask;
     }
     if (bindingMask) {
         addUpdateIcuUpdate(updateOpCodes, bindingMask, anchorIdx);
     }
+    ast.push({
+        kind: 3 /* I18nNodeKind.ICU */,
+        index: anchorIdx,
+        cases,
+        currentCaseLViewIndex: tIcu.currentCaseLViewIndex
+    });
 }
 /**
  * Parses text containing an ICU expression and produces a JSON object for it.
@@ -24361,7 +24451,7 @@ function i18nParseTextIntoPartsAndICU(pattern) {
  * Parses a node, its children and its siblings, and generates the mutate & update OpCodes.
  *
  */
-function parseIcuCase(tView, tIcu, lView, updateOpCodes, parentIdx, caseName, unsafeCaseHtml, nestedIcus) {
+function parseIcuCase(ast, tView, tIcu, lView, updateOpCodes, parentIdx, caseName, unsafeCaseHtml, nestedIcus) {
     const create = [];
     const remove = [];
     const update = [];
@@ -24379,13 +24469,13 @@ function parseIcuCase(tView, tIcu, lView, updateOpCodes, parentIdx, caseName, un
     ngDevMode && assertDefined(inertBodyElement, 'Unable to generate inert body element');
     const inertRootNode = getTemplateContent(inertBodyElement) || inertBodyElement;
     if (inertRootNode) {
-        return walkIcuTree(tView, tIcu, lView, updateOpCodes, create, remove, update, inertRootNode, parentIdx, nestedIcus, 0);
+        return walkIcuTree(ast, tView, tIcu, lView, updateOpCodes, create, remove, update, inertRootNode, parentIdx, nestedIcus, 0);
     }
     else {
         return 0;
     }
 }
-function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, parentNode, parentIdx, nestedIcus, depth) {
+function walkIcuTree(ast, tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, parentNode, parentIdx, nestedIcus, depth) {
     let bindingMask = 0;
     let currentNode = parentNode.firstChild;
     while (currentNode) {
@@ -24423,9 +24513,16 @@ function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, up
                             addCreateAttribute(create, newIndex, attr);
                         }
                     }
+                    const elementNode = {
+                        kind: 1 /* I18nNodeKind.ELEMENT */,
+                        index: newIndex,
+                        children: [],
+                    };
+                    ast.push(elementNode);
                     // Parse the children of this node (if any)
-                    bindingMask = walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, currentNode, newIndex, nestedIcus, depth + 1) |
-                        bindingMask;
+                    bindingMask =
+                        walkIcuTree(elementNode.children, tView, tIcu, lView, sharedUpdateOpCodes, create, remove, update, currentNode, newIndex, nestedIcus, depth + 1) |
+                            bindingMask;
                     addRemoveNode(remove, newIndex, depth);
                 }
                 break;
@@ -24438,6 +24535,10 @@ function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, up
                     bindingMask =
                         generateBindingUpdateOpCodes(update, value, newIndex, null, 0, null) | bindingMask;
                 }
+                ast.push({
+                    kind: 0 /* I18nNodeKind.TEXT */,
+                    index: newIndex,
+                });
                 break;
             case Node.COMMENT_NODE:
                 // Check if the comment node is a placeholder for a nested ICU
@@ -24447,7 +24548,7 @@ function walkIcuTree(tView, tIcu, lView, sharedUpdateOpCodes, create, remove, up
                     const icuExpression = nestedIcus[nestedIcuIndex];
                     // Create the comment node that will anchor the ICU expression
                     addCreateNodeAndAppend(create, ICU_MARKER, ngDevMode ? `nested ICU ${nestedIcuIndex}` : '', parentIdx, newIndex);
-                    icuStart(tView, lView, sharedUpdateOpCodes, parentIdx, icuExpression, newIndex);
+                    icuStart(ast, tView, lView, sharedUpdateOpCodes, parentIdx, icuExpression, newIndex);
                     addRemoveNestedIcu(remove, newIndex, depth);
                 }
                 break;
@@ -26410,7 +26511,8 @@ let _locateOrCreateTextNode = (tView, lView, tNode, value, index) => {
  */
 function locateOrCreateTextNodeImpl(tView, lView, tNode, value, index) {
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, index);
+    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() ||
+        isDetachedByI18n(tNode) || isDisconnectedNode$1(hydrationInfo, index);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -29570,7 +29672,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-rc.0+sha-d870856');
+const VERSION = new Version('17.3.0-rc.0+sha-619f3c8');
 
 class Console {
     log(message) {
@@ -29589,14 +29691,6 @@ class Console {
         type: Injectable,
         args: [{ providedIn: 'platform' }]
     }], null, null); })();
-
-/**
- * Used to patch behavior that needs to _temporarily_ be different between g3 and external.
- *
- * For example, make breaking changes ahead of the main branch targeting a major version.
- * Permanent differences between g3 and external should be configured by individual patches.
- */
-const isG3 = false;
 
 /**
  * These are the data structures that our framework injector profiler will fill with data in order
@@ -31229,6 +31323,10 @@ class ApplicationRef {
      * detection pass during which all change detection must complete.
      */
     tick() {
+        this._tick(true);
+    }
+    /** @internal */
+    _tick(refreshViews) {
         (typeof ngDevMode === 'undefined' || ngDevMode) && this.warnIfDestroyed();
         if (this._runningTick) {
             throw new RuntimeError(101 /* RuntimeErrorCode.RECURSIVE_APPLICATION_REF_TICK */, ngDevMode && 'ApplicationRef.tick is called recursively');
@@ -31236,7 +31334,7 @@ class ApplicationRef {
         const prevConsumer = setActiveConsumer$1(null);
         try {
             this._runningTick = true;
-            this.detectChangesInAttachedViews();
+            this.detectChangesInAttachedViews(refreshViews);
             if ((typeof ngDevMode === 'undefined' || ngDevMode)) {
                 for (let view of this._views) {
                     view.checkNoChanges();
@@ -31253,7 +31351,7 @@ class ApplicationRef {
             setActiveConsumer$1(prevConsumer);
         }
     }
-    detectChangesInAttachedViews() {
+    detectChangesInAttachedViews(refreshViews) {
         let runs = 0;
         const afterRenderEffectManager = this.afterRenderEffectManager;
         while (true) {
@@ -31262,10 +31360,12 @@ class ApplicationRef {
                     'Infinite change detection while refreshing application views. ' +
                         'Ensure afterRender or queueStateUpdate hooks are not continuously causing updates.');
             }
-            const isFirstPass = runs === 0;
-            this.beforeRender.next(isFirstPass);
-            for (let { _lView, notifyErrorHandler } of this._views) {
-                detectChangesInViewIfRequired(_lView, isFirstPass, notifyErrorHandler);
+            if (refreshViews) {
+                const isFirstPass = runs === 0;
+                this.beforeRender.next(isFirstPass);
+                for (let { _lView, notifyErrorHandler } of this._views) {
+                    detectChangesInViewIfRequired(_lView, isFirstPass, notifyErrorHandler);
+                }
             }
             runs++;
             afterRenderEffectManager.executeInternalCallbacks();
@@ -31412,9 +31512,7 @@ function detectChangesInViewIfRequired(lView, isFirstPass, notifyErrorHandler) {
     detectChangesInView(lView, notifyErrorHandler, isFirstPass);
 }
 function shouldRecheckView(view) {
-    return requiresRefreshOrTraversal(view) ||
-        // TODO(atscott): Remove isG3 check and make this a breaking change for v18
-        (isG3 && !!(view[FLAGS] & 64 /* LViewFlags.Dirty */));
+    return requiresRefreshOrTraversal(view);
 }
 function detectChangesInView(lView, notifyErrorHandler, isFirstPass) {
     let mode;
@@ -34833,10 +34931,15 @@ class ChangeDetectionSchedulerImpl {
         this.appRef = inject(ApplicationRef);
         this.taskService = inject(PendingTasks);
         this.pendingRenderTaskId = null;
+        this.shouldRefreshViews = false;
     }
-    notify() {
-        if (this.pendingRenderTaskId !== null)
+    notify(type = 0 /* NotificationType.RefreshViews */) {
+        // When the only source of notification is an afterRender hook will skip straight to the hooks
+        // rather than refreshing views in ApplicationRef.tick
+        this.shouldRefreshViews ||= type === 0 /* NotificationType.RefreshViews */;
+        if (this.pendingRenderTaskId !== null) {
             return;
+        }
         this.pendingRenderTaskId = this.taskService.add();
         this.raceTimeoutAndRequestAnimationFrame();
     }
@@ -34874,10 +34977,11 @@ class ChangeDetectionSchedulerImpl {
     tick() {
         try {
             if (!this.appRef.destroyed) {
-                this.appRef.tick();
+                this.appRef._tick(this.shouldRefreshViews);
             }
         }
         finally {
+            this.shouldRefreshViews = false;
             // If this is the last task, the service will synchronously emit a stable notification. If
             // there is a subscriber that then acts in a way that tries to notify the scheduler again,
             // we need to be able to respond to schedule a new change detection. Therefore, we should
@@ -35664,9 +35768,7 @@ function queueStateUpdate(callback, options) {
         callback();
     };
     internalAfterNextRender(runCallbackOnce, { injector, runOnServer: true });
-    queueMicrotask(() => {
-        runCallbackOnce();
-    });
+    queueMicrotask(runCallbackOnce);
 }
 
 /**
@@ -36176,5 +36278,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PendingTasks as ɵPendingTasks, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getEnsureDirtyViewsAreAlwaysReachable as ɵgetEnsureDirtyViewsAreAlwaysReachable, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalAfterNextRender as ɵinternalAfterNextRender, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isG3 as ɵisG3, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, provideZonelessChangeDetection as ɵprovideZonelessChangeDetection, queueStateUpdate as ɵqueueStateUpdate, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setEnsureDirtyViewsAreAlwaysReachable as ɵsetEnsureDirtyViewsAreAlwaysReachable, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, InputFlags as ɵɵInputFlags, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PendingTasks as ɵPendingTasks, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getEnsureDirtyViewsAreAlwaysReachable as ɵgetEnsureDirtyViewsAreAlwaysReachable, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalAfterNextRender as ɵinternalAfterNextRender, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, provideZonelessChangeDetection as ɵprovideZonelessChangeDetection, queueStateUpdate as ɵqueueStateUpdate, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setEnsureDirtyViewsAreAlwaysReachable as ɵsetEnsureDirtyViewsAreAlwaysReachable, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, InputFlags as ɵɵInputFlags, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=core.mjs.map

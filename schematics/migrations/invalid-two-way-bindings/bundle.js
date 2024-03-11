@@ -18858,10 +18858,13 @@ function transformTwoWayBindingSet(job) {
   }
 }
 function wrapSetOperation(target, value) {
+  if (target instanceof ReadVariableExpr) {
+    return twoWayBindingSet(target, value);
+  }
   return twoWayBindingSet(target, value).or(target.set(value));
 }
 function isReadExpression2(value) {
-  return value instanceof ReadPropExpr || value instanceof ReadKeyExpr;
+  return value instanceof ReadPropExpr || value instanceof ReadKeyExpr || value instanceof ReadVariableExpr;
 }
 function wrapAction(target, value) {
   if (isReadExpression2(target)) {
@@ -21063,6 +21066,9 @@ function parseForLoopParameters(block, errors, bindingParser) {
         errors.push(new ParseError(param.sourceSpan, '@for loop can only have one "track" expression'));
       } else {
         const expression = parseBlockParameterToBinding(param, bindingParser, trackMatch[1]);
+        if (expression.ast instanceof EmptyExpr) {
+          errors.push(new ParseError(param.sourceSpan, '@for loop must have a "track" expression'));
+        }
         const keywordSpan = new ParseSourceSpan(param.sourceSpan.start, param.sourceSpan.start.moveBy("track".length));
         result.trackBy = { expression, keywordSpan };
       }
@@ -26144,7 +26150,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.0-rc.0+sha-d870856");
+var VERSION2 = new Version("17.3.0-rc.0+sha-619f3c8");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
