@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-d714e99
+ * @license Angular v18.0.0-next.0+sha-64f870c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -395,7 +395,15 @@ class PseudoApplicationComponentFixture extends ComponentFixture {
             });
             this.beforeRenderSubscription = this._testAppRef.beforeRender.subscribe((isFirstPass) => {
                 try {
-                    ɵdetectChangesInViewIfRequired(this.componentRef.hostView._lView, isFirstPass, this.componentRef.hostView.notifyErrorHandler);
+                    if (isFirstPass) {
+                        // TODO(atscott): This matches old behavior where change detection was forced on every
+                        // microtask empty, ignoring OnPush. This is incorrect and should be fixed in a major
+                        // version if possible.
+                        this.changeDetectorRef.detectChanges();
+                    }
+                    else {
+                        ɵdetectChangesInViewIfRequired(this.componentRef.hostView._lView, isFirstPass, this.componentRef.hostView.notifyErrorHandler);
+                    }
                 }
                 catch (e) {
                     // If an error ocurred during change detection, remove the test view from the application
