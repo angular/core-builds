@@ -1409,24 +1409,6 @@ var ConditionalExpr = class extends Expression {
     return new ConditionalExpr(this.condition.clone(), this.trueCase.clone(), (_a2 = this.falseCase) == null ? void 0 : _a2.clone(), this.type, this.sourceSpan);
   }
 };
-var DynamicImportExpr = class extends Expression {
-  constructor(url, sourceSpan) {
-    super(null, sourceSpan);
-    this.url = url;
-  }
-  isEquivalent(e) {
-    return e instanceof DynamicImportExpr && this.url === e.url;
-  }
-  isConstant() {
-    return false;
-  }
-  visitExpression(visitor, context) {
-    return visitor.visitDynamicImportExpr(this, context);
-  }
-  clone() {
-    return new DynamicImportExpr(this.url, this.sourceSpan);
-  }
-};
 var NotExpr = class extends Expression {
   constructor(condition, sourceSpan) {
     super(BOOL_TYPE, sourceSpan);
@@ -7738,7 +7720,7 @@ function createExtractedAttributeOp(target, bindingKind, namespace, name, expres
     trustedValueFn: null
   }, NEW_OP);
 }
-function createDeferOp(xref, main, mainSlot, metadata, resolverFn, sourceSpan) {
+function createDeferOp(xref, main, mainSlot, ownResolverFn, resolverFn, sourceSpan) {
   return __spreadProps(__spreadValues(__spreadValues({
     kind: OpKind.Defer,
     xref,
@@ -7756,7 +7738,7 @@ function createDeferOp(xref, main, mainSlot, metadata, resolverFn, sourceSpan) {
     placeholderMinimumTime: null,
     errorView: null,
     errorSlot: null,
-    metadata,
+    ownResolverFn,
     resolverFn,
     sourceSpan
   }, NEW_OP), TRAIT_CONSUMES_SLOT), {
@@ -7893,11 +7875,11 @@ var CompilationJob = class {
   }
 };
 var ComponentCompilationJob = class extends CompilationJob {
-  constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta, allDeferrableDepsFn) {
+  constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn) {
     super(componentName, pool, compatibility);
     this.relativeContextFilePath = relativeContextFilePath;
     this.i18nUseExternalIds = i18nUseExternalIds;
-    this.deferBlocksMeta = deferBlocksMeta;
+    this.deferMeta = deferMeta;
     this.allDeferrableDepsFn = allDeferrableDepsFn;
     this.kind = CompilationJobKind.Tmpl;
     this.fnSuffix = "Template";
@@ -8666,41 +8648,26 @@ function convertI18nBindings(job) {
   }
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/create_defer_deps_fns.mjs
-function createDeferDepsFns(job) {
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/resolve_defer_deps_fns.mjs
+function resolveDeferDepsFns(job) {
   var _a2;
   for (const unit of job.units) {
     for (const op of unit.create) {
       if (op.kind === OpKind.Defer) {
-        if (op.metadata.deps.length === 0) {
-          continue;
-        }
         if (op.resolverFn !== null) {
           continue;
         }
-        const dependencies = [];
-        for (const dep of op.metadata.deps) {
-          if (dep.isDeferrable) {
-            const innerFn = arrowFn(
-              [new FnParam("m", DYNAMIC_TYPE)],
-              variable("m").prop(dep.isDefaultImport ? "default" : dep.symbolName)
-            );
-            const importExpr2 = new DynamicImportExpr(dep.importPath).prop("then").callFn([innerFn]);
-            dependencies.push(importExpr2);
-          } else {
-            dependencies.push(dep.type);
+        if (op.ownResolverFn !== null) {
+          if (op.handle.slot === null) {
+            throw new Error("AssertionError: slot must be assigned before extracting defer deps functions");
           }
+          const fullPathName = (_a2 = unit.fnName) == null ? void 0 : _a2.replace("_Template", "");
+          op.resolverFn = job.pool.getSharedFunctionReference(
+            op.ownResolverFn,
+            `${fullPathName}_Defer_${op.handle.slot}_DepsFn`,
+            false
+          );
         }
-        const depsFnExpr = arrowFn([], literalArr(dependencies));
-        if (op.handle.slot === null) {
-          throw new Error("AssertionError: slot must be assigned bfore extracting defer deps functions");
-        }
-        const fullPathName = (_a2 = unit.fnName) == null ? void 0 : _a2.replace(`_Template`, ``);
-        op.resolverFn = job.pool.getSharedFunctionReference(
-          depsFnExpr,
-          `${fullPathName}_Defer_${op.handle.slot}_DepsFn`,
-          false
-        );
       }
     }
   }
@@ -18485,7 +18452,7 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: generateAdvance },
   { kind: CompilationJobKind.Both, fn: optimizeVariables },
   { kind: CompilationJobKind.Both, fn: nameFunctionsAndVariables },
-  { kind: CompilationJobKind.Tmpl, fn: createDeferDepsFns },
+  { kind: CompilationJobKind.Tmpl, fn: resolveDeferDepsFns },
   { kind: CompilationJobKind.Tmpl, fn: mergeNextContextExpressions },
   { kind: CompilationJobKind.Tmpl, fn: generateNgContainerOps },
   { kind: CompilationJobKind.Tmpl, fn: collapseEmptyInstructions },
@@ -18606,8 +18573,8 @@ function isI18nRootNode(meta) {
 function isSingleI18nIcu(meta) {
   return isI18nRootNode(meta) && meta.nodes.length === 1 && meta.nodes[0] instanceof Icu2;
 }
-function ingestComponent(componentName, template2, constantPool, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta, allDeferrableDepsFn) {
-  const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds, deferBlocksMeta, allDeferrableDepsFn);
+function ingestComponent(componentName, template2, constantPool, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn) {
+  const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn);
   ingestNodes(job.root, template2);
   return job;
 }
@@ -18861,24 +18828,27 @@ function ingestDeferView(unit, suffix, i18nMeta, children, sourceSpan) {
   return templateOp;
 }
 function ingestDeferBlock(unit, deferBlock) {
-  var _a2, _b2, _c2, _d2, _e2, _f2, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s;
-  const blockMeta = unit.job.deferBlocksMeta.get(deferBlock);
-  if (blockMeta === void 0) {
-    throw new Error(`AssertionError: unable to find metadata for deferred block`);
+  var _a2, _b2, _c2, _d2, _e2, _f2, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t;
+  let ownResolverFn = null;
+  if (unit.job.deferMeta.mode === 0) {
+    if (!unit.job.deferMeta.blocks.has(deferBlock)) {
+      throw new Error(`AssertionError: unable to find a dependency function for this deferred block`);
+    }
+    ownResolverFn = (_a2 = unit.job.deferMeta.blocks.get(deferBlock)) != null ? _a2 : null;
   }
   const main = ingestDeferView(unit, "", deferBlock.i18n, deferBlock.children, deferBlock.sourceSpan);
-  const loading = ingestDeferView(unit, "Loading", (_a2 = deferBlock.loading) == null ? void 0 : _a2.i18n, (_b2 = deferBlock.loading) == null ? void 0 : _b2.children, (_c2 = deferBlock.loading) == null ? void 0 : _c2.sourceSpan);
-  const placeholder = ingestDeferView(unit, "Placeholder", (_d2 = deferBlock.placeholder) == null ? void 0 : _d2.i18n, (_e2 = deferBlock.placeholder) == null ? void 0 : _e2.children, (_f2 = deferBlock.placeholder) == null ? void 0 : _f2.sourceSpan);
-  const error = ingestDeferView(unit, "Error", (_g = deferBlock.error) == null ? void 0 : _g.i18n, (_h = deferBlock.error) == null ? void 0 : _h.children, (_i = deferBlock.error) == null ? void 0 : _i.sourceSpan);
+  const loading = ingestDeferView(unit, "Loading", (_b2 = deferBlock.loading) == null ? void 0 : _b2.i18n, (_c2 = deferBlock.loading) == null ? void 0 : _c2.children, (_d2 = deferBlock.loading) == null ? void 0 : _d2.sourceSpan);
+  const placeholder = ingestDeferView(unit, "Placeholder", (_e2 = deferBlock.placeholder) == null ? void 0 : _e2.i18n, (_f2 = deferBlock.placeholder) == null ? void 0 : _f2.children, (_g = deferBlock.placeholder) == null ? void 0 : _g.sourceSpan);
+  const error = ingestDeferView(unit, "Error", (_h = deferBlock.error) == null ? void 0 : _h.i18n, (_i = deferBlock.error) == null ? void 0 : _i.children, (_j = deferBlock.error) == null ? void 0 : _j.sourceSpan);
   const deferXref = unit.job.allocateXrefId();
-  const deferOp = createDeferOp(deferXref, main.xref, main.handle, blockMeta, unit.job.allDeferrableDepsFn, deferBlock.sourceSpan);
-  deferOp.placeholderView = (_j = placeholder == null ? void 0 : placeholder.xref) != null ? _j : null;
-  deferOp.placeholderSlot = (_k = placeholder == null ? void 0 : placeholder.handle) != null ? _k : null;
-  deferOp.loadingSlot = (_l = loading == null ? void 0 : loading.handle) != null ? _l : null;
-  deferOp.errorSlot = (_m = error == null ? void 0 : error.handle) != null ? _m : null;
-  deferOp.placeholderMinimumTime = (_o = (_n = deferBlock.placeholder) == null ? void 0 : _n.minimumTime) != null ? _o : null;
-  deferOp.loadingMinimumTime = (_q = (_p = deferBlock.loading) == null ? void 0 : _p.minimumTime) != null ? _q : null;
-  deferOp.loadingAfterTime = (_s = (_r = deferBlock.loading) == null ? void 0 : _r.afterTime) != null ? _s : null;
+  const deferOp = createDeferOp(deferXref, main.xref, main.handle, ownResolverFn, unit.job.allDeferrableDepsFn, deferBlock.sourceSpan);
+  deferOp.placeholderView = (_k = placeholder == null ? void 0 : placeholder.xref) != null ? _k : null;
+  deferOp.placeholderSlot = (_l = placeholder == null ? void 0 : placeholder.handle) != null ? _l : null;
+  deferOp.loadingSlot = (_m = loading == null ? void 0 : loading.handle) != null ? _m : null;
+  deferOp.errorSlot = (_n = error == null ? void 0 : error.handle) != null ? _n : null;
+  deferOp.placeholderMinimumTime = (_p = (_o = deferBlock.placeholder) == null ? void 0 : _o.minimumTime) != null ? _p : null;
+  deferOp.loadingMinimumTime = (_r = (_q = deferBlock.loading) == null ? void 0 : _q.minimumTime) != null ? _r : null;
+  deferOp.loadingAfterTime = (_t = (_s = deferBlock.loading) == null ? void 0 : _s.afterTime) != null ? _t : null;
   unit.create.push(deferOp);
   let prefetch = false;
   let deferOnOps = [];
@@ -21234,17 +21204,6 @@ function compileDirectiveFromMetadata(meta, constantPool, bindingParser) {
   const type = createDirectiveType(meta);
   return { expression, type, statements: [] };
 }
-function createDeferredDepsFunction(constantPool, name, deps) {
-  const dependencyExp = [];
-  for (const [symbolName, { importPath, isDefaultImport }] of deps) {
-    const innerFn = arrowFn([new FnParam("m", DYNAMIC_TYPE)], variable("m").prop(isDefaultImport ? "default" : symbolName));
-    const importExpr2 = new DynamicImportExpr(importPath).prop("then").callFn([innerFn]);
-    dependencyExp.push(importExpr2);
-  }
-  const depsFnExpr = arrowFn([], literalArr(dependencyExp));
-  constantPool.statements.push(depsFnExpr.toDeclStmt(name, StmtModifier.Final));
-  return variable(name);
-}
 function compileComponentFromMetadata(meta, constantPool, bindingParser) {
   const definitionMap = baseDirectiveFields(meta, constantPool, bindingParser);
   addFeatures(definitionMap, meta);
@@ -21261,11 +21220,12 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
   }
   const templateTypeName = meta.name;
   let allDeferrableDepsFn = null;
-  if (meta.deferBlocks.size > 0 && meta.deferrableTypes.size > 0 && meta.deferBlockDepsEmitMode === 1) {
+  if (meta.defer.mode === 1 && meta.defer.dependenciesFn !== null) {
     const fnName = `${templateTypeName}_DeferFn`;
-    allDeferrableDepsFn = createDeferredDepsFunction(constantPool, fnName, meta.deferrableTypes);
+    constantPool.statements.push(meta.defer.dependenciesFn.toDeclStmt(fnName, StmtModifier.Final));
+    allDeferrableDepsFn = variable(fnName);
   }
-  const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.deferBlocks, allDeferrableDepsFn);
+  const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.defer, allDeferrableDepsFn);
   transform(tpl, CompilationJobKind.Tmpl);
   const templateFn = emitTemplateFn(tpl, constantPool);
   if (tpl.contentSelectors !== null) {
@@ -22276,16 +22236,13 @@ var CompilerFacadeImpl = class {
   }
   compileComponent(angularCoreEnv, sourceMapUrl, facade) {
     var _a2;
-    const { template: template2, interpolation, deferBlocks } = parseJitTemplate(facade.template, facade.name, sourceMapUrl, facade.preserveWhitespaces, facade.interpolation);
+    const { template: template2, interpolation, defer: defer2 } = parseJitTemplate(facade.template, facade.name, sourceMapUrl, facade.preserveWhitespaces, facade.interpolation);
     const meta = __spreadProps(__spreadValues(__spreadValues({}, facade), convertDirectiveFacadeToMetadata(facade)), {
       selector: facade.selector || this.elementSchemaRegistry.getDefaultComponentElementName(),
       template: template2,
       declarations: facade.declarations.map(convertDeclarationFacadeToMetadata),
       declarationListEmitMode: 0,
-      deferBlocks,
-      deferrableTypes: /* @__PURE__ */ new Map(),
-      deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
-      deferBlockDepsEmitMode: 0,
+      defer: defer2,
       styles: [...facade.styles, ...template2.styles],
       encapsulation: facade.encapsulation,
       interpolation,
@@ -22468,7 +22425,7 @@ function convertOpaqueValuesToExpressions(obj) {
 }
 function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMapUrl) {
   var _a2, _b2, _c2, _d2;
-  const { template: template2, interpolation, deferBlocks } = parseJitTemplate(decl.template, decl.type.name, sourceMapUrl, (_a2 = decl.preserveWhitespaces) != null ? _a2 : false, decl.interpolation);
+  const { template: template2, interpolation, defer: defer2 } = parseJitTemplate(decl.template, decl.type.name, sourceMapUrl, (_a2 = decl.preserveWhitespaces) != null ? _a2 : false, decl.interpolation);
   const declarations = [];
   if (decl.dependencies) {
     for (const innerDep of decl.dependencies) {
@@ -22493,10 +22450,7 @@ function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMap
     declarations,
     viewProviders: decl.viewProviders !== void 0 ? new WrappedNodeExpr(decl.viewProviders) : null,
     animations: decl.animations !== void 0 ? new WrappedNodeExpr(decl.animations) : null,
-    deferBlocks,
-    deferrableTypes: /* @__PURE__ */ new Map(),
-    deferrableDeclToImportDecl: /* @__PURE__ */ new Map(),
-    deferBlockDepsEmitMode: 0,
+    defer: defer2,
     changeDetection: (_c2 = decl.changeDetection) != null ? _c2 : ChangeDetectionStrategy.Default,
     encapsulation: (_d2 = decl.encapsulation) != null ? _d2 : ViewEncapsulation.Emulated,
     interpolation,
@@ -22553,7 +22507,7 @@ function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces
   return {
     template: parsed,
     interpolation: interpolationConfig,
-    deferBlocks: createR3DeferredMetadata(boundTarget)
+    defer: createR3ComponentDeferMetadata(boundTarget)
   };
 }
 function convertToProviderExpression(obj, property2) {
@@ -22593,22 +22547,13 @@ function createR3DependencyMetadata(token, isAttributeDep, host, optional, self,
   const attributeNameType = isAttributeDep ? literal("unknown") : null;
   return { token, attributeNameType, host, optional, self, skipSelf };
 }
-function createR3DeferredMetadata(boundTarget) {
+function createR3ComponentDeferMetadata(boundTarget) {
   const deferredBlocks = boundTarget.getDeferBlocks();
-  const meta = /* @__PURE__ */ new Map();
+  const blocks = /* @__PURE__ */ new Map();
   for (const block of deferredBlocks) {
-    const triggerElements = /* @__PURE__ */ new Map();
-    resolveDeferTriggers(block, block.triggers, boundTarget, triggerElements);
-    resolveDeferTriggers(block, block.prefetchTriggers, boundTarget, triggerElements);
-    meta.set(block, { deps: [], triggerElements });
+    blocks.set(block, null);
   }
-  return meta;
-}
-function resolveDeferTriggers(block, triggers, boundTarget, triggerElements) {
-  Object.keys(triggers).forEach((key) => {
-    const trigger = triggers[key];
-    triggerElements.set(trigger, boundTarget.getDeferredTriggerTarget(block, trigger));
-  });
+  return { mode: 0, blocks };
 }
 function extractHostBindings(propMetadata, sourceSpan, host) {
   const bindings = parseHostBindings(host || {});
@@ -22736,7 +22681,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.0+sha-64f870c");
+var VERSION2 = new Version("18.0.0-next.0+sha-6ea208e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
