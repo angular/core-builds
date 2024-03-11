@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-81ccf5d
+ * @license Angular v18.0.0-next.0+sha-280a3a2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13332,10 +13332,26 @@ function cleanupLContainer(lContainer) {
     }
 }
 /**
+ * Removes any remaining dehydrated i18n nodes from a given LView,
+ * both in internal data structure, as well as removing the
+ * corresponding DOM nodes.
+ */
+function cleanupDehydratedI18nNodes(lView) {
+    const i18nNodes = lView[HYDRATION]?.i18nNodes;
+    if (i18nNodes) {
+        const renderer = lView[RENDERER];
+        for (const node of i18nNodes.values()) {
+            nativeRemoveNode(renderer, node, false);
+        }
+        lView[HYDRATION].i18nNodes = undefined;
+    }
+}
+/**
  * Walks over `LContainer`s and components registered within
  * this LView and invokes dehydrated views cleanup function for each one.
  */
 function cleanupLView(lView) {
+    cleanupDehydratedI18nNodes(lView);
     const tView = lView[TVIEW];
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
         if (isLContainer(lView[i])) {
@@ -13455,6 +13471,24 @@ function isDisconnectedNode(tNode, lView) {
         !unwrapRNode(lView[tNode.index])?.isConnected;
 }
 /**
+ * Locate a node in an i18n tree that corresponds to a given instruction index.
+ *
+ * @param hydrationInfo The hydration annotation data
+ * @param noOffsetIndex the instruction index
+ * @returns an RNode that corresponds to the instruction index
+ */
+function locateI18nRNodeByIndex(hydrationInfo, noOffsetIndex) {
+    const i18nNodes = hydrationInfo.i18nNodes;
+    if (i18nNodes) {
+        const native = i18nNodes.get(noOffsetIndex);
+        if (native) {
+            i18nNodes.delete(noOffsetIndex);
+        }
+        return native;
+    }
+    return null;
+}
+/**
  * Locate a node in DOM tree that corresponds to a given TNode.
  *
  * @param hydrationInfo The hydration annotation data
@@ -13464,51 +13498,53 @@ function isDisconnectedNode(tNode, lView) {
  * @returns an RNode that represents a given tNode
  */
 function locateNextRNode(hydrationInfo, tView, lView, tNode) {
-    let native = null;
     const noOffsetIndex = getNoOffsetIndex(tNode);
-    const nodes = hydrationInfo.data[NODES];
-    if (nodes?.[noOffsetIndex]) {
-        // We know the exact location of the node.
-        native = locateRNodeByPath(nodes[noOffsetIndex], lView);
-    }
-    else if (tView.firstChild === tNode) {
-        // We create a first node in this view, so we use a reference
-        // to the first child in this DOM segment.
-        native = hydrationInfo.firstChild;
-    }
-    else {
-        // Locate a node based on a previous sibling or a parent node.
-        const previousTNodeParent = tNode.prev === null;
-        const previousTNode = (tNode.prev ?? tNode.parent);
-        ngDevMode &&
-            assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
-                'to the previous node or a parent node.');
-        if (isFirstElementInNgContainer(tNode)) {
-            const noOffsetParentIndex = getNoOffsetIndex(tNode.parent);
-            native = getSegmentHead(hydrationInfo, noOffsetParentIndex);
+    let native = locateI18nRNodeByIndex(hydrationInfo, noOffsetIndex);
+    if (!native) {
+        const nodes = hydrationInfo.data[NODES];
+        if (nodes?.[noOffsetIndex]) {
+            // We know the exact location of the node.
+            native = locateRNodeByPath(nodes[noOffsetIndex], lView);
+        }
+        else if (tView.firstChild === tNode) {
+            // We create a first node in this view, so we use a reference
+            // to the first child in this DOM segment.
+            native = hydrationInfo.firstChild;
         }
         else {
-            let previousRElement = getNativeByTNode(previousTNode, lView);
-            if (previousTNodeParent) {
-                native = previousRElement.firstChild;
+            // Locate a node based on a previous sibling or a parent node.
+            const previousTNodeParent = tNode.prev === null;
+            const previousTNode = (tNode.prev ?? tNode.parent);
+            ngDevMode &&
+                assertDefined(previousTNode, 'Unexpected state: current TNode does not have a connection ' +
+                    'to the previous node or a parent node.');
+            if (isFirstElementInNgContainer(tNode)) {
+                const noOffsetParentIndex = getNoOffsetIndex(tNode.parent);
+                native = getSegmentHead(hydrationInfo, noOffsetParentIndex);
             }
             else {
-                // If the previous node is an element, but it also has container info,
-                // this means that we are processing a node like `<div #vcrTarget>`, which is
-                // represented in the DOM as `<div></div>...<!--container-->`.
-                // In this case, there are nodes *after* this element and we need to skip
-                // all of them to reach an element that we are looking for.
-                const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
-                const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
-                if (previousTNode.type === 2 /* TNodeType.Element */ && segmentHead) {
-                    const numRootNodesToSkip = calcSerializedContainerSize(hydrationInfo, noOffsetPrevSiblingIndex);
-                    // `+1` stands for an anchor comment node after all the views in this container.
-                    const nodesToSkip = numRootNodesToSkip + 1;
-                    // First node after this segment.
-                    native = siblingAfter(nodesToSkip, segmentHead);
+                let previousRElement = getNativeByTNode(previousTNode, lView);
+                if (previousTNodeParent) {
+                    native = previousRElement.firstChild;
                 }
                 else {
-                    native = previousRElement.nextSibling;
+                    // If the previous node is an element, but it also has container info,
+                    // this means that we are processing a node like `<div #vcrTarget>`, which is
+                    // represented in the DOM as `<div></div>...<!--container-->`.
+                    // In this case, there are nodes *after* this element and we need to skip
+                    // all of them to reach an element that we are looking for.
+                    const noOffsetPrevSiblingIndex = getNoOffsetIndex(previousTNode);
+                    const segmentHead = getSegmentHead(hydrationInfo, noOffsetPrevSiblingIndex);
+                    if (previousTNode.type === 2 /* TNodeType.Element */ && segmentHead) {
+                        const numRootNodesToSkip = calcSerializedContainerSize(hydrationInfo, noOffsetPrevSiblingIndex);
+                        // `+1` stands for an anchor comment node after all the views in this container.
+                        const nodesToSkip = numRootNodesToSkip + 1;
+                        // First node after this segment.
+                        native = siblingAfter(nodesToSkip, segmentHead);
+                    }
+                    else {
+                        native = previousRElement.nextSibling;
+                    }
                 }
             }
         }
@@ -15482,7 +15518,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-81ccf5d']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-280a3a2']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29637,7 +29673,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.0+sha-81ccf5d');
+const VERSION = new Version('18.0.0-next.0+sha-280a3a2');
 
 class Console {
     log(message) {

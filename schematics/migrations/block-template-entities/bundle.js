@@ -17659,10 +17659,13 @@ function transformTwoWayBindingSet(job) {
   }
 }
 function wrapSetOperation(target, value) {
+  if (target instanceof ReadVariableExpr) {
+    return twoWayBindingSet(target, value);
+  }
   return twoWayBindingSet(target, value).or(target.set(value));
 }
 function isReadExpression(value) {
-  return value instanceof ReadPropExpr || value instanceof ReadKeyExpr;
+  return value instanceof ReadPropExpr || value instanceof ReadKeyExpr || value instanceof ReadVariableExpr;
 }
 function wrapAction(target, value) {
   if (isReadExpression(target)) {
@@ -22644,7 +22647,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.0+sha-81ccf5d");
+var VERSION2 = new Version("18.0.0-next.0+sha-280a3a2");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
