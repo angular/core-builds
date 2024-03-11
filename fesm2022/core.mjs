@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-rc.0+sha-57e54e2
+ * @license Angular v17.3.0-rc.0+sha-1f77083
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3420,6 +3420,12 @@ function runInInjectionContext(injector, fn) {
     }
 }
 /**
+ * Whether the current stack frame is inside an injection context.
+ */
+function isInInjectionContext() {
+    return getInjectImplementation() !== undefined || getCurrentInjector() != null;
+}
+/**
  * Asserts that the current stack frame is within an [injection
  * context](guide/dependency-injection-context) and has access to `inject`.
  *
@@ -3430,7 +3436,7 @@ function runInInjectionContext(injector, fn) {
 function assertInInjectionContext(debugFn) {
     // Taking a `Function` instead of a string name here prevents the unminified name of the function
     // from being retained in the bundle regardless of minification.
-    if (!getInjectImplementation() && !getCurrentInjector()) {
+    if (!isInInjectionContext()) {
         throw new RuntimeError(-203 /* RuntimeErrorCode.MISSING_INJECTION_CONTEXT */, ngDevMode &&
             (debugFn.name +
                 '() can only be used within an injection context such as a constructor, a factory function, a field initializer, or a function used with `runInInjectionContext`'));
@@ -6709,14 +6715,12 @@ function unwrapElementRef(value) {
 class EventEmitter_ extends Subject {
     constructor(isAsync = false) {
         super();
+        this.destroyRef = undefined;
         this.__isAsync = isAsync;
         // Attempt to retrieve a `DestroyRef` optionally.
-        // For backwards compatibility reasons, this cannot be required.
-        try {
-            this.destroyRef = inject(DestroyRef);
-        }
-        catch {
-            this.destroyRef = undefined;
+        // For backwards compatibility reasons, this cannot be required
+        if (isInInjectionContext()) {
+            this.destroyRef = inject(DestroyRef, { optional: true }) ?? undefined;
         }
     }
     emit(value) {
@@ -15557,7 +15561,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-57e54e2']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-1f77083']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -22287,6 +22291,8 @@ class RepeaterMetadata {
  */
 function ɵɵrepeaterCreate(index, templateFn, decls, vars, tagName, attrsIndex, trackByFn, trackByUsesComponentInstance, emptyTemplateFn, emptyDecls, emptyVars, emptyTagName, emptyAttrsIndex) {
     performanceMarkFeature('NgControlFlow');
+    ngDevMode &&
+        assertFunction(trackByFn, `A track expression must be a function, was ${typeof trackByFn} instead.`);
     const hasEmptyBlock = emptyTemplateFn !== undefined;
     const hostLView = getLView();
     const boundTrackBy = trackByUsesComponentInstance ?
@@ -29712,7 +29718,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-rc.0+sha-57e54e2');
+const VERSION = new Version('17.3.0-rc.0+sha-1f77083');
 
 class Console {
     log(message) {
