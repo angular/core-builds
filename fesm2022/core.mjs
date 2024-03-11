@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-280a3a2
+ * @license Angular v18.0.0-next.0+sha-eaff724
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8187,6 +8187,7 @@ class SanitizingHtmlSerializer {
         // again, so it shouldn't be vulnerable to DOM clobbering.
         let current = el.firstChild;
         let traverseContent = true;
+        let parentNodes = [];
         while (current) {
             if (current.nodeType === Node.ELEMENT_NODE) {
                 traverseContent = this.startElement(current);
@@ -8199,20 +8200,24 @@ class SanitizingHtmlSerializer {
                 this.sanitizedSomething = true;
             }
             if (traverseContent && current.firstChild) {
-                current = current.firstChild;
+                // Push current node to the parent stack before entering its content.
+                parentNodes.push(current);
+                current = getFirstChild(current);
                 continue;
             }
             while (current) {
-                // Leaving the element. Walk up and to the right, closing tags as we go.
+                // Leaving the element.
+                // Walk up and to the right, closing tags as we go.
                 if (current.nodeType === Node.ELEMENT_NODE) {
                     this.endElement(current);
                 }
-                let next = this.checkClobberedElement(current, current.nextSibling);
+                let next = getNextSibling(current);
                 if (next) {
                     current = next;
                     break;
                 }
-                current = this.checkClobberedElement(current, current.parentNode);
+                // There was no next sibling, walk up to the parent node (extract it from the stack).
+                current = parentNodes.pop();
             }
         }
         return this.buf.join('');
@@ -8226,7 +8231,7 @@ class SanitizingHtmlSerializer {
      * @return True if the element's contents should be traversed.
      */
     startElement(element) {
-        const tagName = element.nodeName.toLowerCase();
+        const tagName = getNodeName(element).toLowerCase();
         if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
             this.sanitizedSomething = true;
             return !SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS.hasOwnProperty(tagName);
@@ -8252,7 +8257,7 @@ class SanitizingHtmlSerializer {
         return true;
     }
     endElement(current) {
-        const tagName = current.nodeName.toLowerCase();
+        const tagName = getNodeName(current).toLowerCase();
         if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
             this.buf.push('</');
             this.buf.push(tagName);
@@ -8262,14 +8267,49 @@ class SanitizingHtmlSerializer {
     chars(chars) {
         this.buf.push(encodeEntities(chars));
     }
-    checkClobberedElement(node, nextNode) {
-        if (nextNode &&
-            (node.compareDocumentPosition(nextNode) &
-                Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
-            throw new Error(`Failed to sanitize html because the element is clobbered: ${node.outerHTML}`);
-        }
-        return nextNode;
+}
+/**
+ * Verifies whether a given child node is a descendant of a given parent node.
+ * It may not be the case when properties like `.firstChild` are clobbered and
+ * accessing `.firstChild` results in an unexpected node returned.
+ */
+function isClobberedElement(parentNode, childNode) {
+    return (parentNode.compareDocumentPosition(childNode) & Node.DOCUMENT_POSITION_CONTAINED_BY) !==
+        Node.DOCUMENT_POSITION_CONTAINED_BY;
+}
+/**
+ * Retrieves next sibling node and makes sure that there is no
+ * clobbering of the `nextSibling` property happening.
+ */
+function getNextSibling(node) {
+    const nextSibling = node.nextSibling;
+    // Make sure there is no `nextSibling` clobbering: navigating to
+    // the next sibling and going back to the previous one should result
+    // in the original node.
+    if (nextSibling && node !== nextSibling.previousSibling) {
+        throw clobberedElementError(nextSibling);
     }
+    return nextSibling;
+}
+/**
+ * Retrieves first child node and makes sure that there is no
+ * clobbering of the `firstChild` property happening.
+ */
+function getFirstChild(node) {
+    const firstChild = node.firstChild;
+    if (firstChild && isClobberedElement(node, firstChild)) {
+        throw clobberedElementError(firstChild);
+    }
+    return firstChild;
+}
+/** Gets a reasonable nodeName, even for clobbered nodes. */
+function getNodeName(node) {
+    const nodeName = node.nodeName;
+    // If the property is clobbered, assume it is an `HTMLFormElement`.
+    return (typeof nodeName === 'string') ? nodeName : 'FORM';
+}
+function clobberedElementError(node) {
+    return new Error(`Failed to sanitize html because the element is clobbered: ${node.outerHTML}`);
 }
 // Regular Expressions for parsing tags and attributes
 const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
@@ -15518,7 +15558,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-280a3a2']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-eaff724']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29673,7 +29713,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.0+sha-280a3a2');
+const VERSION = new Version('18.0.0-next.0+sha-eaff724');
 
 class Console {
     log(message) {
