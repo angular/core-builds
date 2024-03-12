@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-rc.0+sha-39a50f9
+ * @license Angular v17.3.0-rc.0+sha-9889346
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7647,7 +7647,7 @@ export declare interface Output {
 export declare const Output: OutputDecorator;
 
 /**
- * The `outputs` function allows declaration of outputs in directives and
+ * The `output` function allows declaration of outputs in directives and
  * components.
  *
  * Initializes an output that can emit values to consumers of your

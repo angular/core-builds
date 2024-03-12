@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-rc.0+sha-39a50f9
+ * @license Angular v17.3.0-rc.0+sha-9889346
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6595,7 +6595,7 @@ function getOutputDestroyRef(ref) {
 }
 
 /**
- * The `outputs` function allows declaration of outputs in directives and
+ * The `output` function allows declaration of outputs in directives and
  * components.
  *
  * Initializes an output that can emit values to consumers of your
@@ -15563,7 +15563,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-39a50f9']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-9889346']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29725,7 +29725,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-rc.0+sha-39a50f9');
+const VERSION = new Version('17.3.0-rc.0+sha-9889346');
 
 class Console {
     log(message) {
