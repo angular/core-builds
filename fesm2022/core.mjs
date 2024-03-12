@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-db2f9a9
+ * @license Angular v18.0.0-next.0+sha-456f18b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7700,6 +7700,11 @@ const PRESERVE_HOST_CONTENT = new InjectionToken((typeof ngDevMode === 'undefine
     providedIn: 'root',
     factory: () => PRESERVE_HOST_CONTENT_DEFAULT,
 });
+/**
+ * Internal token that indicates whether hydration support for i18n
+ * is enabled.
+ */
+const IS_I18N_HYDRATION_ENABLED = new InjectionToken((typeof ngDevMode === 'undefined' || !!ngDevMode ? 'IS_I18N_HYDRATION_ENABLED' : ''));
 
 /**
  * @fileoverview
@@ -15574,7 +15579,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-db2f9a9']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-456f18b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23363,9 +23368,7 @@ function applyI18n(tView, lView, index) {
     changeMask = 0b0;
     changeMaskCounter = 0;
 }
-function locateOrCreateNode(lView, index, textOrName, nodeType) {
-    // TODO: Add support for hydration
-    lastNodeWasCreated(true);
+function createNodeWithoutHydration(lView, textOrName, nodeType) {
     const renderer = lView[RENDERER];
     switch (nodeType) {
         case Node.COMMENT_NODE:
@@ -23375,6 +23378,18 @@ function locateOrCreateNode(lView, index, textOrName, nodeType) {
         case Node.ELEMENT_NODE:
             return createElementNode(renderer, textOrName, null);
     }
+}
+let _locateOrCreateNode = (lView, index, textOrName, nodeType) => {
+    lastNodeWasCreated(true);
+    return createNodeWithoutHydration(lView, textOrName, nodeType);
+};
+function locateOrCreateNodeImpl(lView, index, textOrName, nodeType) {
+    // TODO: Add support for hydration
+    lastNodeWasCreated(true);
+    return createNodeWithoutHydration(lView, textOrName, nodeType);
+}
+function enableLocateOrCreateI18nNodeImpl() {
+    _locateOrCreateNode = locateOrCreateNodeImpl;
 }
 /**
  * Apply `I18nCreateOpCodes` op-codes as stored in `TI18n.create`.
@@ -23396,13 +23411,15 @@ function applyCreateOpCodes(lView, createOpCodes, parentRNode, insertInFrontOf) 
         const appendNow = (opCode & I18nCreateOpCode.APPEND_EAGERLY) === I18nCreateOpCode.APPEND_EAGERLY;
         const index = opCode >>> I18nCreateOpCode.SHIFT;
         let rNode = lView[index];
+        let lastNodeWasCreated = false;
         if (rNode === null) {
             // We only create new DOM nodes if they don't already exist: If ICU switches case back to a
             // case which was already instantiated, no need to create new DOM nodes.
             rNode = lView[index] =
-                locateOrCreateNode(lView, index, text, isComment ? Node.COMMENT_NODE : Node.TEXT_NODE);
+                _locateOrCreateNode(lView, index, text, isComment ? Node.COMMENT_NODE : Node.TEXT_NODE);
+            lastNodeWasCreated = wasLastNodeCreated();
         }
-        if (appendNow && parentRNode !== null) {
+        if (appendNow && parentRNode !== null && lastNodeWasCreated) {
             nativeInsertBefore(renderer, parentRNode, rNode, insertInFrontOf, false);
         }
     }
@@ -23433,7 +23450,7 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
             if (lView[textNodeIndex] === null) {
                 ngDevMode && ngDevMode.rendererCreateTextNode++;
                 ngDevMode && assertIndexInRange(lView, textNodeIndex);
-                lView[textNodeIndex] = locateOrCreateNode(lView, textNodeIndex, opCode, Node.TEXT_NODE);
+                lView[textNodeIndex] = _locateOrCreateNode(lView, textNodeIndex, opCode, Node.TEXT_NODE);
             }
         }
         else if (typeof opCode == 'number') {
@@ -23508,7 +23525,7 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
                         ngDevMode && ngDevMode.rendererCreateComment++;
                         ngDevMode && assertIndexInExpandoRange(lView, commentNodeIndex);
                         const commentRNode = lView[commentNodeIndex] =
-                            locateOrCreateNode(lView, commentNodeIndex, commentValue, Node.COMMENT_NODE);
+                            _locateOrCreateNode(lView, commentNodeIndex, commentValue, Node.COMMENT_NODE);
                         // FIXME(misko): Attaching patch data is only needed for the root (Also add tests)
                         attachPatchData(commentRNode, lView);
                     }
@@ -23522,7 +23539,7 @@ function applyMutableOpCodes(tView, mutableOpCodes, lView, anchorRNode) {
                         ngDevMode && ngDevMode.rendererCreateElement++;
                         ngDevMode && assertIndexInExpandoRange(lView, elementNodeIndex);
                         const elementRNode = lView[elementNodeIndex] =
-                            locateOrCreateNode(lView, elementNodeIndex, tagName, Node.ELEMENT_NODE);
+                            _locateOrCreateNode(lView, elementNodeIndex, tagName, Node.ELEMENT_NODE);
                         // FIXME(misko): Attaching patch data is only needed for the root (Also add tests)
                         attachPatchData(elementRNode, lView);
                     }
@@ -29736,7 +29753,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.0+sha-db2f9a9');
+const VERSION = new Version('18.0.0-next.0+sha-456f18b');
 
 class Console {
     log(message) {
@@ -35090,6 +35107,226 @@ function getDeferBlocks(lView, deferBlocks) {
 }
 
 /**
+ * Indicates whether the hydration-related code was added,
+ * prevents adding it multiple times.
+ */
+let isHydrationSupportEnabled = false;
+/**
+ * Indicates whether support for hydrating i18n blocks is enabled.
+ */
+let _isI18nHydrationSupportEnabled = false;
+/**
+ * Defines a period of time that Angular waits for the `ApplicationRef.isStable` to emit `true`.
+ * If there was no event with the `true` value during this time, Angular reports a warning.
+ */
+const APPLICATION_IS_STABLE_TIMEOUT = 10_000;
+/**
+ * Brings the necessary hydration code in tree-shakable manner.
+ * The code is only present when the `provideClientHydration` is
+ * invoked. Otherwise, this code is tree-shaken away during the
+ * build optimization step.
+ *
+ * This technique allows us to swap implementations of methods so
+ * tree shaking works appropriately when hydration is disabled or
+ * enabled. It brings in the appropriate version of the method that
+ * supports hydration only when enabled.
+ */
+function enableHydrationRuntimeSupport() {
+    if (!isHydrationSupportEnabled) {
+        isHydrationSupportEnabled = true;
+        enableRetrieveHydrationInfoImpl();
+        enableLocateOrCreateElementNodeImpl();
+        enableLocateOrCreateTextNodeImpl();
+        enableLocateOrCreateElementContainerNodeImpl();
+        enableLocateOrCreateContainerAnchorImpl();
+        enableLocateOrCreateContainerRefImpl();
+        enableFindMatchingDehydratedViewImpl();
+        enableApplyRootElementTransformImpl();
+        enableLocateOrCreateI18nNodeImpl();
+    }
+}
+/**
+ * Outputs a message with hydration stats into a console.
+ */
+function printHydrationStats(injector) {
+    const console = injector.get(Console);
+    const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
+        `and ${ngDevMode.hydratedNodes} node(s), ` +
+        `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
+        `Learn more at https://angular.io/guide/hydration.`;
+    // tslint:disable-next-line:no-console
+    console.log(message);
+}
+/**
+ * Returns a Promise that is resolved when an application becomes stable.
+ */
+function whenStableWithTimeout(appRef, injector) {
+    const whenStablePromise = whenStable(appRef);
+    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+        const timeoutTime = APPLICATION_IS_STABLE_TIMEOUT;
+        const console = injector.get(Console);
+        const ngZone = injector.get(NgZone);
+        // The following call should not and does not prevent the app to become stable
+        // We cannot use RxJS timer here because the app would remain unstable.
+        // This also avoids an extra change detection cycle.
+        const timeoutId = ngZone.runOutsideAngular(() => {
+            return setTimeout(() => logWarningOnStableTimedout(timeoutTime, console), timeoutTime);
+        });
+        whenStablePromise.finally(() => clearTimeout(timeoutId));
+    }
+    return whenStablePromise;
+}
+/**
+ * Returns a set of providers required to setup hydration support
+ * for an application that is server side rendered. This function is
+ * included into the `provideClientHydration` public API function from
+ * the `platform-browser` package.
+ *
+ * The function sets up an internal flag that would be recognized during
+ * the server side rendering time as well, so there is no need to
+ * configure or change anything in NgUniversal to enable the feature.
+ */
+function withDomHydration() {
+    return makeEnvironmentProviders([
+        {
+            provide: IS_HYDRATION_DOM_REUSE_ENABLED,
+            useFactory: () => {
+                let isEnabled = true;
+                if (isPlatformBrowser()) {
+                    // On the client, verify that the server response contains
+                    // hydration annotations. Otherwise, keep hydration disabled.
+                    const transferState = inject(TransferState, { optional: true });
+                    isEnabled = !!transferState?.get(NGH_DATA_KEY, null);
+                    if (!isEnabled && (typeof ngDevMode !== 'undefined' && ngDevMode)) {
+                        const console = inject(Console);
+                        const message = formatRuntimeError(-505 /* RuntimeErrorCode.MISSING_HYDRATION_ANNOTATIONS */, 'Angular hydration was requested on the client, but there was no ' +
+                            'serialized information present in the server response, ' +
+                            'thus hydration was not enabled. ' +
+                            'Make sure the `provideClientHydration()` is included into the list ' +
+                            'of providers in the server part of the application configuration.');
+                        // tslint:disable-next-line:no-console
+                        console.warn(message);
+                    }
+                }
+                if (isEnabled) {
+                    performanceMarkFeature('NgHydration');
+                }
+                return isEnabled;
+            },
+        },
+        {
+            provide: ENVIRONMENT_INITIALIZER,
+            useValue: () => {
+                _isI18nHydrationSupportEnabled = !!inject(IS_I18N_HYDRATION_ENABLED, { optional: true });
+                // Since this function is used across both server and client,
+                // make sure that the runtime code is only added when invoked
+                // on the client. Moving forward, the `isPlatformBrowser` check should
+                // be replaced with a tree-shakable alternative (e.g. `isServer`
+                // flag).
+                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
+                    verifySsrContentsIntegrity();
+                    enableHydrationRuntimeSupport();
+                }
+            },
+            multi: true,
+        },
+        {
+            provide: PRESERVE_HOST_CONTENT,
+            useFactory: () => {
+                // Preserve host element content only in a browser
+                // environment and when hydration is configured properly.
+                // On a server, an application is rendered from scratch,
+                // so the host content needs to be empty.
+                return isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED);
+            }
+        },
+        {
+            provide: APP_BOOTSTRAP_LISTENER,
+            useFactory: () => {
+                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
+                    const appRef = inject(ApplicationRef);
+                    const injector = inject(Injector);
+                    return () => {
+                        // Wait until an app becomes stable and cleanup all views that
+                        // were not claimed during the application bootstrap process.
+                        // The timing is similar to when we start the serialization process
+                        // on the server.
+                        //
+                        // Note: the cleanup task *MUST* be scheduled within the Angular zone
+                        // to ensure that change detection is properly run afterward.
+                        whenStableWithTimeout(appRef, injector).then(() => {
+                            NgZone.assertInAngularZone();
+                            cleanupDehydratedViews(appRef);
+                            if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+                                printHydrationStats(injector);
+                            }
+                        });
+                    };
+                }
+                return () => { }; // noop
+            },
+            multi: true,
+        }
+    ]);
+}
+/**
+ * Returns a set of providers required to setup support for i18n hydration.
+ * Requires hydration to be enabled separately.
+ */
+function withI18nHydration() {
+    return makeEnvironmentProviders([
+        {
+            provide: IS_I18N_HYDRATION_ENABLED,
+            useValue: true,
+        },
+    ]);
+}
+/**
+ * Returns whether i18n hydration support is enabled.
+ */
+function isI18nHydrationSupportEnabled() {
+    return _isI18nHydrationSupportEnabled;
+}
+/**
+ *
+ * @param time The time in ms until the stable timedout warning message is logged
+ */
+function logWarningOnStableTimedout(time, console) {
+    const message = `Angular hydration expected the ApplicationRef.isStable() to emit \`true\`, but it ` +
+        `didn't happen within ${time}ms. Angular hydration logic depends on the application becoming stable ` +
+        `as a signal to complete hydration process.`;
+    console.warn(formatRuntimeError(-506 /* RuntimeErrorCode.HYDRATION_STABLE_TIMEDOUT */, message));
+}
+/**
+ * Verifies whether the DOM contains a special marker added during SSR time to make sure
+ * there is no SSR'ed contents transformations happen after SSR is completed. Typically that
+ * happens either by CDN or during the build process as an optimization to remove comment nodes.
+ * Hydration process requires comment nodes produced by Angular to locate correct DOM segments.
+ * When this special marker is *not* present - throw an error and do not proceed with hydration,
+ * since it will not be able to function correctly.
+ *
+ * Note: this function is invoked only on the client, so it's safe to use DOM APIs.
+ */
+function verifySsrContentsIntegrity() {
+    const doc = getDocument();
+    let hydrationMarker;
+    for (const node of doc.body.childNodes) {
+        if (node.nodeType === Node.COMMENT_NODE &&
+            node.textContent?.trim() === SSR_CONTENT_INTEGRITY_MARKER) {
+            hydrationMarker = node;
+            break;
+        }
+    }
+    if (!hydrationMarker) {
+        throw new RuntimeError(-507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' && ngDevMode &&
+            'Angular hydration logic detected that HTML content of this page was modified after it ' +
+                'was produced during server side rendering. Make sure that there are no optimizations ' +
+                'that remove comment nodes from HTML enabled on your CDN. Angular hydration ' +
+                'relies on HTML produced by the server, including whitespaces and comment nodes.');
+    }
+}
+
+/**
  * A collection that tracks all serialized views (`ngh` DOM annotations)
  * to avoid duplication. An attempt to add a duplicate view results in the
  * collection returning the index of the previously collected serialized view.
@@ -35546,7 +35783,8 @@ function componentUsesShadowDomEncapsulation(lView) {
  */
 function annotateHostElementForHydration(element, lView, context) {
     const renderer = lView[RENDERER];
-    if (hasI18n(lView) || componentUsesShadowDomEncapsulation(lView)) {
+    if ((hasI18n(lView) && !isI18nHydrationSupportEnabled()) ||
+        componentUsesShadowDomEncapsulation(lView)) {
         // Attach the skip hydration attribute if this component:
         // - either has i18n blocks, since hydrating such blocks is not yet supported
         // - or uses ShadowDom view encapsulation, since Domino doesn't support
@@ -35591,202 +35829,6 @@ function isContentProjectedNode(tNode) {
         currentTNode = currentTNode.parent;
     }
     return false;
-}
-
-/**
- * Indicates whether the hydration-related code was added,
- * prevents adding it multiple times.
- */
-let isHydrationSupportEnabled = false;
-/**
- * Defines a period of time that Angular waits for the `ApplicationRef.isStable` to emit `true`.
- * If there was no event with the `true` value during this time, Angular reports a warning.
- */
-const APPLICATION_IS_STABLE_TIMEOUT = 10_000;
-/**
- * Brings the necessary hydration code in tree-shakable manner.
- * The code is only present when the `provideClientHydration` is
- * invoked. Otherwise, this code is tree-shaken away during the
- * build optimization step.
- *
- * This technique allows us to swap implementations of methods so
- * tree shaking works appropriately when hydration is disabled or
- * enabled. It brings in the appropriate version of the method that
- * supports hydration only when enabled.
- */
-function enableHydrationRuntimeSupport() {
-    if (!isHydrationSupportEnabled) {
-        isHydrationSupportEnabled = true;
-        enableRetrieveHydrationInfoImpl();
-        enableLocateOrCreateElementNodeImpl();
-        enableLocateOrCreateTextNodeImpl();
-        enableLocateOrCreateElementContainerNodeImpl();
-        enableLocateOrCreateContainerAnchorImpl();
-        enableLocateOrCreateContainerRefImpl();
-        enableFindMatchingDehydratedViewImpl();
-        enableApplyRootElementTransformImpl();
-    }
-}
-/**
- * Outputs a message with hydration stats into a console.
- */
-function printHydrationStats(injector) {
-    const console = injector.get(Console);
-    const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
-        `and ${ngDevMode.hydratedNodes} node(s), ` +
-        `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
-        `Learn more at https://angular.io/guide/hydration.`;
-    // tslint:disable-next-line:no-console
-    console.log(message);
-}
-/**
- * Returns a Promise that is resolved when an application becomes stable.
- */
-function whenStableWithTimeout(appRef, injector) {
-    const whenStablePromise = whenStable(appRef);
-    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-        const timeoutTime = APPLICATION_IS_STABLE_TIMEOUT;
-        const console = injector.get(Console);
-        const ngZone = injector.get(NgZone);
-        // The following call should not and does not prevent the app to become stable
-        // We cannot use RxJS timer here because the app would remain unstable.
-        // This also avoids an extra change detection cycle.
-        const timeoutId = ngZone.runOutsideAngular(() => {
-            return setTimeout(() => logWarningOnStableTimedout(timeoutTime, console), timeoutTime);
-        });
-        whenStablePromise.finally(() => clearTimeout(timeoutId));
-    }
-    return whenStablePromise;
-}
-/**
- * Returns a set of providers required to setup hydration support
- * for an application that is server side rendered. This function is
- * included into the `provideClientHydration` public API function from
- * the `platform-browser` package.
- *
- * The function sets up an internal flag that would be recognized during
- * the server side rendering time as well, so there is no need to
- * configure or change anything in NgUniversal to enable the feature.
- */
-function withDomHydration() {
-    return makeEnvironmentProviders([
-        {
-            provide: IS_HYDRATION_DOM_REUSE_ENABLED,
-            useFactory: () => {
-                let isEnabled = true;
-                if (isPlatformBrowser()) {
-                    // On the client, verify that the server response contains
-                    // hydration annotations. Otherwise, keep hydration disabled.
-                    const transferState = inject(TransferState, { optional: true });
-                    isEnabled = !!transferState?.get(NGH_DATA_KEY, null);
-                    if (!isEnabled && (typeof ngDevMode !== 'undefined' && ngDevMode)) {
-                        const console = inject(Console);
-                        const message = formatRuntimeError(-505 /* RuntimeErrorCode.MISSING_HYDRATION_ANNOTATIONS */, 'Angular hydration was requested on the client, but there was no ' +
-                            'serialized information present in the server response, ' +
-                            'thus hydration was not enabled. ' +
-                            'Make sure the `provideClientHydration()` is included into the list ' +
-                            'of providers in the server part of the application configuration.');
-                        // tslint:disable-next-line:no-console
-                        console.warn(message);
-                    }
-                }
-                if (isEnabled) {
-                    performanceMarkFeature('NgHydration');
-                }
-                return isEnabled;
-            },
-        },
-        {
-            provide: ENVIRONMENT_INITIALIZER,
-            useValue: () => {
-                // Since this function is used across both server and client,
-                // make sure that the runtime code is only added when invoked
-                // on the client. Moving forward, the `isPlatformBrowser` check should
-                // be replaced with a tree-shakable alternative (e.g. `isServer`
-                // flag).
-                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
-                    verifySsrContentsIntegrity();
-                    enableHydrationRuntimeSupport();
-                }
-            },
-            multi: true,
-        },
-        {
-            provide: PRESERVE_HOST_CONTENT,
-            useFactory: () => {
-                // Preserve host element content only in a browser
-                // environment and when hydration is configured properly.
-                // On a server, an application is rendered from scratch,
-                // so the host content needs to be empty.
-                return isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED);
-            }
-        },
-        {
-            provide: APP_BOOTSTRAP_LISTENER,
-            useFactory: () => {
-                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
-                    const appRef = inject(ApplicationRef);
-                    const injector = inject(Injector);
-                    return () => {
-                        // Wait until an app becomes stable and cleanup all views that
-                        // were not claimed during the application bootstrap process.
-                        // The timing is similar to when we start the serialization process
-                        // on the server.
-                        //
-                        // Note: the cleanup task *MUST* be scheduled within the Angular zone
-                        // to ensure that change detection is properly run afterward.
-                        whenStableWithTimeout(appRef, injector).then(() => {
-                            NgZone.assertInAngularZone();
-                            cleanupDehydratedViews(appRef);
-                            if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-                                printHydrationStats(injector);
-                            }
-                        });
-                    };
-                }
-                return () => { }; // noop
-            },
-            multi: true,
-        }
-    ]);
-}
-/**
- *
- * @param time The time in ms until the stable timedout warning message is logged
- */
-function logWarningOnStableTimedout(time, console) {
-    const message = `Angular hydration expected the ApplicationRef.isStable() to emit \`true\`, but it ` +
-        `didn't happen within ${time}ms. Angular hydration logic depends on the application becoming stable ` +
-        `as a signal to complete hydration process.`;
-    console.warn(formatRuntimeError(-506 /* RuntimeErrorCode.HYDRATION_STABLE_TIMEDOUT */, message));
-}
-/**
- * Verifies whether the DOM contains a special marker added during SSR time to make sure
- * there is no SSR'ed contents transformations happen after SSR is completed. Typically that
- * happens either by CDN or during the build process as an optimization to remove comment nodes.
- * Hydration process requires comment nodes produced by Angular to locate correct DOM segments.
- * When this special marker is *not* present - throw an error and do not proceed with hydration,
- * since it will not be able to function correctly.
- *
- * Note: this function is invoked only on the client, so it's safe to use DOM APIs.
- */
-function verifySsrContentsIntegrity() {
-    const doc = getDocument();
-    let hydrationMarker;
-    for (const node of doc.body.childNodes) {
-        if (node.nodeType === Node.COMMENT_NODE &&
-            node.textContent?.trim() === SSR_CONTENT_INTEGRITY_MARKER) {
-            hydrationMarker = node;
-            break;
-        }
-    }
-    if (!hydrationMarker) {
-        throw new RuntimeError(-507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' && ngDevMode &&
-            'Angular hydration logic detected that HTML content of this page was modified after it ' +
-                'was produced during server side rendering. Make sure that there are no optimizations ' +
-                'that remove comment nodes from HTML enabled on your CDN. Angular hydration ' +
-                'relies on HTML produced by the server, including whitespaces and comment nodes.');
-    }
 }
 
 /**
@@ -36324,5 +36366,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PendingTasks as ɵPendingTasks, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getEnsureDirtyViewsAreAlwaysReachable as ɵgetEnsureDirtyViewsAreAlwaysReachable, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalAfterNextRender as ɵinternalAfterNextRender, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, provideZonelessChangeDetection as ɵprovideZonelessChangeDetection, queueStateUpdate as ɵqueueStateUpdate, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setEnsureDirtyViewsAreAlwaysReachable as ɵsetEnsureDirtyViewsAreAlwaysReachable, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, InputFlags as ɵɵInputFlags, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderEventManager as ɵAfterRenderEventManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PendingTasks as ɵPendingTasks, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getEnsureDirtyViewsAreAlwaysReachable as ɵgetEnsureDirtyViewsAreAlwaysReachable, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalAfterNextRender as ɵinternalAfterNextRender, internalCreateApplication as ɵinternalCreateApplication, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, provideZonelessChangeDetection as ɵprovideZonelessChangeDetection, queueStateUpdate as ɵqueueStateUpdate, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setEnsureDirtyViewsAreAlwaysReachable as ɵsetEnsureDirtyViewsAreAlwaysReachable, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, withI18nHydration as ɵwithI18nHydration, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, InputFlags as ɵɵInputFlags, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=core.mjs.map

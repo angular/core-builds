@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-db2f9a9
+ * @license Angular v18.0.0-next.0+sha-456f18b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13815,6 +13815,12 @@ export declare function ɵwhenStable(applicationRef: ApplicationRef): Promise<vo
  * configure or change anything in NgUniversal to enable the feature.
  */
 export declare function ɵwithDomHydration(): EnvironmentProviders;
+
+/**
+ * Returns a set of providers required to setup support for i18n hydration.
+ * Requires hydration to be enabled separately.
+ */
+export declare function ɵwithI18nHydration(): EnvironmentProviders;
 
 /**
  * Returns a writable type version of type.
