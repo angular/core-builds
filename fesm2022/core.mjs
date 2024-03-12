@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-8735af0
+ * @license Angular v18.0.0-next.0+sha-4ff94aa
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6498,6 +6498,79 @@ class HostAttributeToken {
  * safe to delete this file.
  */
 
+const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
+function wrappedError(message, originalError) {
+    const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
+    const error = Error(msg);
+    error[ERROR_ORIGINAL_ERROR] = originalError;
+    return error;
+}
+function getOriginalError(error) {
+    return error[ERROR_ORIGINAL_ERROR];
+}
+
+/**
+ * Provides a hook for centralized exception handling.
+ *
+ * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+ * intercept error handling, write a custom exception handler that replaces this default as
+ * appropriate for your app.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * ```
+ * class MyErrorHandler implements ErrorHandler {
+ *   handleError(error) {
+ *     // do something with the exception
+ *   }
+ * }
+ *
+ * @NgModule({
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ * class MyModule {}
+ * ```
+ *
+ * @publicApi
+ */
+class ErrorHandler {
+    constructor() {
+        /**
+         * @internal
+         */
+        this._console = console;
+    }
+    handleError(error) {
+        const originalError = this._findOriginalError(error);
+        this._console.error('ERROR', error);
+        if (originalError) {
+            this._console.error('ORIGINAL ERROR', originalError);
+        }
+    }
+    /** @internal */
+    _findOriginalError(error) {
+        let e = error && getOriginalError(error);
+        while (e && getOriginalError(e)) {
+            e = getOriginalError(e);
+        }
+        return e || null;
+    }
+}
+/**
+ * `InjectionToken` used to configure how to call the `ErrorHandler`.
+ *
+ * `NgZone` is provided by default today so the default (and only) implementation for this
+ * is calling `ErrorHandler.handleError` outside of the Angular zone.
+ */
+const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken((typeof ngDevMode === 'undefined' || ngDevMode) ? 'internal error handler' : '', {
+    providedIn: 'root',
+    factory: () => {
+        const userErrorHandler = inject(ErrorHandler);
+        return userErrorHandler.handleError.bind(undefined);
+    }
+});
+
 /**
  * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
  * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
@@ -6549,6 +6622,7 @@ class OutputEmitterRef {
     constructor() {
         this.destroyed = false;
         this.listeners = null;
+        this.errorHandler = inject(ErrorHandler, { optional: true });
         /** @internal */
         this.destroyRef = inject(DestroyRef);
         // Clean-up all listeners and mark as destroyed upon destroy.
@@ -6580,10 +6654,19 @@ class OutputEmitterRef {
                 'Unexpected emit for destroyed `OutputRef`. ' +
                     'The owning directive/component is destroyed.');
         }
+        if (this.listeners === null) {
+            return;
+        }
         const previousConsumer = setActiveConsumer$1(null);
         try {
-            // TODO: Run every listener using `try/catch`.
-            this.listeners?.forEach(fn => fn(value));
+            for (const listenerFn of this.listeners) {
+                try {
+                    listenerFn(value);
+                }
+                catch (err) {
+                    this.errorHandler?.handleError(err);
+                }
+            }
         }
         finally {
             setActiveConsumer$1(previousConsumer);
@@ -7600,79 +7683,6 @@ function isDisconnectedNode$1(hydrationInfo, index) {
     }
     return !!hydrationInfo.disconnectedNodes?.has(index);
 }
-
-const ERROR_ORIGINAL_ERROR = 'ngOriginalError';
-function wrappedError(message, originalError) {
-    const msg = `${message} caused by: ${originalError instanceof Error ? originalError.message : originalError}`;
-    const error = Error(msg);
-    error[ERROR_ORIGINAL_ERROR] = originalError;
-    return error;
-}
-function getOriginalError(error) {
-    return error[ERROR_ORIGINAL_ERROR];
-}
-
-/**
- * Provides a hook for centralized exception handling.
- *
- * The default implementation of `ErrorHandler` prints error messages to the `console`. To
- * intercept error handling, write a custom exception handler that replaces this default as
- * appropriate for your app.
- *
- * @usageNotes
- * ### Example
- *
- * ```
- * class MyErrorHandler implements ErrorHandler {
- *   handleError(error) {
- *     // do something with the exception
- *   }
- * }
- *
- * @NgModule({
- *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
- * })
- * class MyModule {}
- * ```
- *
- * @publicApi
- */
-class ErrorHandler {
-    constructor() {
-        /**
-         * @internal
-         */
-        this._console = console;
-    }
-    handleError(error) {
-        const originalError = this._findOriginalError(error);
-        this._console.error('ERROR', error);
-        if (originalError) {
-            this._console.error('ORIGINAL ERROR', originalError);
-        }
-    }
-    /** @internal */
-    _findOriginalError(error) {
-        let e = error && getOriginalError(error);
-        while (e && getOriginalError(e)) {
-            e = getOriginalError(e);
-        }
-        return e || null;
-    }
-}
-/**
- * `InjectionToken` used to configure how to call the `ErrorHandler`.
- *
- * `NgZone` is provided by default today so the default (and only) implementation for this
- * is calling `ErrorHandler.handleError` outside of the Angular zone.
- */
-const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken((typeof ngDevMode === 'undefined' || ngDevMode) ? 'internal error handler' : '', {
-    providedIn: 'root',
-    factory: () => {
-        const userErrorHandler = inject(ErrorHandler);
-        return userErrorHandler.handleError.bind(undefined);
-    }
-});
 
 /**
  * Internal token that specifies whether DOM reuse logic
@@ -15564,7 +15574,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-8735af0']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-4ff94aa']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29726,7 +29736,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.0+sha-8735af0');
+const VERSION = new Version('18.0.0-next.0+sha-4ff94aa');
 
 class Console {
     log(message) {

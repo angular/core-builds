@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-8735af0
+ * @license Angular v18.0.0-next.0+sha-4ff94aa
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7711,6 +7711,7 @@ export declare interface OutputDecorator {
 export declare class OutputEmitterRef<T> implements OutputRef<T> {
     private destroyed;
     private listeners;
+    private errorHandler;
     constructor();
     subscribe(callback: (value: T) => void): OutputRefSubscription;
     /** Emits a new value to the output. */
