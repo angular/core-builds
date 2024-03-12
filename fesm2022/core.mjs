@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-rc.0+sha-e8badec
+ * @license Angular v17.3.0-rc.0+sha-5d41ab9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1966,47 +1966,40 @@ const NG_TEMPLATE_SELECTOR = 'ng-template';
 /**
  * Search the `TAttributes` to see if it contains `cssClassToMatch` (case insensitive)
  *
+ * @param tNode static data of the node to match
  * @param attrs `TAttributes` to search through.
  * @param cssClassToMatch class to match (lowercase)
  * @param isProjectionMode Whether or not class matching should look into the attribute `class` in
  *    addition to the `AttributeMarker.Classes`.
  */
-function isCssClassMatching(attrs, cssClassToMatch, isProjectionMode) {
-    // TODO(misko): The fact that this function needs to know about `isProjectionMode` seems suspect.
-    // It is strange to me that sometimes the class information comes in form of `class` attribute
-    // and sometimes in form of `AttributeMarker.Classes`. Some investigation is needed to determine
-    // if that is the right behavior.
+function isCssClassMatching(tNode, attrs, cssClassToMatch, isProjectionMode) {
     ngDevMode &&
         assertEqual(cssClassToMatch, cssClassToMatch.toLowerCase(), 'Class name expected to be lowercase.');
     let i = 0;
-    // Indicates whether we are processing value from the implicit
-    // attribute section (i.e. before the first marker in the array).
-    let isImplicitAttrsSection = true;
-    while (i < attrs.length) {
-        let item = attrs[i++];
-        if (typeof item === 'string' && isImplicitAttrsSection) {
-            const value = attrs[i++];
-            if (isProjectionMode && item === 'class') {
-                // We found a `class` attribute in the implicit attribute section,
-                // check if it matches the value of the `cssClassToMatch` argument.
-                if (classIndexOf(value.toLowerCase(), cssClassToMatch, 0) !== -1) {
-                    return true;
-                }
+    if (isProjectionMode) {
+        for (; i < attrs.length && typeof attrs[i] === 'string'; i += 2) {
+            // Search for an implicit `class` attribute and check if its value matches `cssClassToMatch`.
+            if (attrs[i] === 'class' &&
+                classIndexOf(attrs[i + 1].toLowerCase(), cssClassToMatch, 0) !== -1) {
+                return true;
             }
         }
-        else if (item === 1 /* AttributeMarker.Classes */) {
-            // We found the classes section. Start searching for the class.
-            while (i < attrs.length && typeof (item = attrs[i++]) == 'string') {
-                // while we have strings
-                if (item.toLowerCase() === cssClassToMatch)
-                    return true;
+    }
+    else if (isInlineTemplate(tNode)) {
+        // Matching directives (i.e. when not matching for projection mode) should not consider the
+        // class bindings that are present on inline templates, as those class bindings only target
+        // the root node of the template, not the template itself.
+        return false;
+    }
+    // Resume the search for classes after the `Classes` marker.
+    i = attrs.indexOf(1 /* AttributeMarker.Classes */, i);
+    if (i > -1) {
+        // We found the classes section. Start searching for the class.
+        let item;
+        while (++i < attrs.length && typeof (item = attrs[i]) === 'string') {
+            if (item.toLowerCase() === cssClassToMatch) {
+                return true;
             }
-            return false;
-        }
-        else if (typeof item === 'number') {
-            // We've came across a first marker, which indicates
-            // that the implicit attribute section is over.
-            isImplicitAttrsSection = false;
         }
     }
     return false;
@@ -2037,7 +2030,7 @@ function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
 /**
  * A utility function to match an Ivy node static data against a simple CSS selector
  *
- * @param node static data of the node to match
+ * @param tNode static data of the node to match
  * @param selector The selector to try matching against the node.
  * @param isProjectionMode if `true` we are matching for content projection, otherwise we are doing
  * directive matching.
@@ -2046,9 +2039,9 @@ function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
 function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
     ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
     let mode = 4 /* SelectorFlags.ELEMENT */;
-    const nodeAttrs = tNode.attrs || [];
+    const nodeAttrs = tNode.attrs;
     // Find the index of first attribute that has no value, only a name.
-    const nameOnlyMarkerIdx = getNameOnlyMarkerIndex(nodeAttrs);
+    const nameOnlyMarkerIdx = nodeAttrs !== null ? getNameOnlyMarkerIndex(nodeAttrs) : 0;
     // When processing ":not" selectors, we skip to the next ":not" if the
     // current one doesn't match
     let skipToNextSelector = false;
@@ -2078,20 +2071,16 @@ function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
                 skipToNextSelector = true;
             }
         }
-        else {
-            const selectorAttrValue = mode & 8 /* SelectorFlags.CLASS */ ? current : selector[++i];
-            // special case for matching against classes when a tNode has been instantiated with
-            // class and style values as separate attribute values (e.g. ['title', CLASS, 'foo'])
-            if ((mode & 8 /* SelectorFlags.CLASS */) && tNode.attrs !== null) {
-                if (!isCssClassMatching(tNode.attrs, selectorAttrValue, isProjectionMode)) {
-                    if (isPositive(mode))
-                        return false;
-                    skipToNextSelector = true;
-                }
-                continue;
+        else if (mode & 8 /* SelectorFlags.CLASS */) {
+            if (nodeAttrs === null || !isCssClassMatching(tNode, nodeAttrs, current, isProjectionMode)) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
             }
-            const attrName = (mode & 8 /* SelectorFlags.CLASS */) ? 'class' : current;
-            const attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs, isInlineTemplate(tNode), isProjectionMode);
+        }
+        else {
+            const selectorAttrValue = selector[++i];
+            const attrIndexInNode = findAttrIndexInNode(current, nodeAttrs, isInlineTemplate(tNode), isProjectionMode);
             if (attrIndexInNode === -1) {
                 if (isPositive(mode))
                     return false;
@@ -2111,10 +2100,7 @@ function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
                     // (selectors are already in lowercase when generated)
                     nodeAttrValue = nodeAttrs[attrIndexInNode + 1].toLowerCase();
                 }
-                const compareAgainstClassName = mode & 8 /* SelectorFlags.CLASS */ ? nodeAttrValue : null;
-                if (compareAgainstClassName &&
-                    classIndexOf(compareAgainstClassName, selectorAttrValue, 0) !== -1 ||
-                    mode & 2 /* SelectorFlags.ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
+                if (mode & 2 /* SelectorFlags.ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
                     if (isPositive(mode))
                         return false;
                     skipToNextSelector = true;
@@ -15578,7 +15564,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-e8badec']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-5d41ab9']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29752,7 +29738,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-rc.0+sha-e8badec');
+const VERSION = new Version('17.3.0-rc.0+sha-5d41ab9');
 
 class Console {
     log(message) {
