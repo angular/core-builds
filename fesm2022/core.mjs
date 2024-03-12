@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0-rc.0+sha-1f77083
+ * @license Angular v17.3.0-rc.0+sha-39a50f9
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6621,9 +6621,11 @@ function output(opts) {
 }
 
 function inputFunction(initialValue, opts) {
+    ngDevMode && assertInInjectionContext(input);
     return createInputSignal(initialValue, opts);
 }
 function inputRequiredFunction(opts) {
+    ngDevMode && assertInInjectionContext(input);
     return createInputSignal(REQUIRED_UNSET_VALUE, opts);
 }
 /**
@@ -15561,7 +15563,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-1f77083']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0-rc.0+sha-39a50f9']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -16587,9 +16589,11 @@ function refreshSignalQuery(node, firstOnly) {
 }
 
 function viewChildFn(locator, opts) {
+    ngDevMode && assertInInjectionContext(viewChild);
     return createSingleResultOptionalQuerySignalFn();
 }
 function viewChildRequiredFn(locator, opts) {
+    ngDevMode && assertInInjectionContext(viewChild);
     return createSingleResultRequiredQuerySignalFn();
 }
 /**
@@ -16638,12 +16642,15 @@ const viewChild = (() => {
  * ```
  */
 function viewChildren(locator, opts) {
+    ngDevMode && assertInInjectionContext(viewChildren);
     return createMultiResultQuerySignalFn();
 }
 function contentChildFn(locator, opts) {
+    ngDevMode && assertInInjectionContext(contentChild);
     return createSingleResultOptionalQuerySignalFn();
 }
 function contentChildRequiredFn(locator, opts) {
+    ngDevMode && assertInInjectionContext(contentChildren);
     return createSingleResultRequiredQuerySignalFn();
 }
 /**
@@ -29718,7 +29725,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0-rc.0+sha-1f77083');
+const VERSION = new Version('17.3.0-rc.0+sha-39a50f9');
 
 class Console {
     log(message) {
