@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-8cad4e8
+ * @license Angular v18.0.0-next.0+sha-0dd441d
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14047,41 +14047,74 @@ function performanceMarkFeature(feature) {
     performance?.mark?.('mark_feature_usage', { detail: { feature } });
 }
 
-function noop(...args) {
-    // Do nothing.
-}
-
-function getNativeRequestAnimationFrame() {
+/**
+ * Gets a scheduling function that runs the callback after the first of setTimeout and
+ * requestAnimationFrame resolves.
+ *
+ * - `requestAnimationFrame` ensures that change detection runs ahead of a browser repaint.
+ * This ensures that the create and update passes of a change detection always happen
+ * in the same frame.
+ * - When the browser is resource-starved, `rAF` can execute _before_ a `setTimeout` because
+ * rendering is a very high priority process. This means that `setTimeout` cannot guarantee
+ * same-frame create and update pass, when `setTimeout` is used to schedule the update phase.
+ * - While `rAF` gives us the desirable same-frame updates, it has two limitations that
+ * prevent it from being used alone. First, it does not run in background tabs, which would
+ * prevent Angular from initializing an application when opened in a new tab (for example).
+ * Second, repeated calls to requestAnimationFrame will execute at the refresh rate of the
+ * hardware (~16ms for a 60Hz display). This would cause significant slowdown of tests that
+ * are written with several updates and asserts in the form of "update; await stable; assert;".
+ * - Both `setTimeout` and `rAF` are able to "coalesce" several events from a single user
+ * interaction into a single change detection. Importantly, this reduces view tree traversals when
+ * compared to an alternative timing mechanism like `queueMicrotask`, where change detection would
+ * then be interleaves between each event.
+ *
+ * By running change detection after the first of `setTimeout` and `rAF` to execute, we get the
+ * best of both worlds.
+ */
+function getCallbackScheduler() {
     // Note: the `getNativeRequestAnimationFrame` is used in the `NgZone` class, but we cannot use the
     // `inject` function. The `NgZone` instance may be created manually, and thus the injection
     // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
     // available because otherwise, we'll fall back to `setTimeout`.
-    const isBrowser = typeof _global['requestAnimationFrame'] === 'function';
-    // Note: `requestAnimationFrame` is unavailable when the code runs in the Node.js environment. We
-    // use `setTimeout` because no changes are required other than checking if the current platform is
-    // the browser. `setTimeout` is a well-established API that is available in both environments.
-    // `requestAnimationFrame` is used in the browser to coalesce event tasks since event tasks are
-    // usually executed within the same rendering frame (but this is more implementation details of
-    // browsers).
-    let nativeRequestAnimationFrame = _global[isBrowser ? 'requestAnimationFrame' : 'setTimeout'];
-    let nativeCancelAnimationFrame = _global[isBrowser ? 'cancelAnimationFrame' : 'clearTimeout'];
-    if (typeof Zone !== 'undefined' && nativeRequestAnimationFrame && nativeCancelAnimationFrame) {
+    const hasRequestAnimationFrame = typeof _global['requestAnimationFrame'] === 'function';
+    let nativeRequestAnimationFrame = hasRequestAnimationFrame ? _global['requestAnimationFrame'] : null;
+    let nativeSetTimeout = _global['setTimeout'];
+    if (typeof Zone !== 'undefined') {
         // Note: zone.js sets original implementations on patched APIs behind the
         // `__zone_symbol__OriginalDelegate` key (see `attachOriginToPatched`). Given the following
         // example: `window.requestAnimationFrame.__zone_symbol__OriginalDelegate`; this would return an
         // unpatched implementation of the `requestAnimationFrame`, which isn't intercepted by the
         // Angular zone. We use the unpatched implementation to avoid another change detection when
         // coalescing tasks.
-        const unpatchedRequestAnimationFrame = nativeRequestAnimationFrame[Zone.__symbol__('OriginalDelegate')];
-        if (unpatchedRequestAnimationFrame) {
-            nativeRequestAnimationFrame = unpatchedRequestAnimationFrame;
+        const ORIGINAL_DELEGATE_SYMBOL = Zone.__symbol__('OriginalDelegate');
+        if (nativeRequestAnimationFrame) {
+            nativeRequestAnimationFrame =
+                nativeRequestAnimationFrame[ORIGINAL_DELEGATE_SYMBOL] ??
+                    nativeRequestAnimationFrame;
         }
-        const unpatchedCancelAnimationFrame = nativeCancelAnimationFrame[Zone.__symbol__('OriginalDelegate')];
-        if (unpatchedCancelAnimationFrame) {
-            nativeCancelAnimationFrame = unpatchedCancelAnimationFrame;
-        }
+        nativeSetTimeout = nativeSetTimeout[ORIGINAL_DELEGATE_SYMBOL] ?? nativeSetTimeout;
     }
-    return { nativeRequestAnimationFrame, nativeCancelAnimationFrame };
+    return (callback) => {
+        let executeCallback = true;
+        nativeSetTimeout(() => {
+            if (!executeCallback) {
+                return;
+            }
+            executeCallback = false;
+            callback();
+        });
+        nativeRequestAnimationFrame?.(() => {
+            if (!executeCallback) {
+                return;
+            }
+            executeCallback = false;
+            callback();
+        });
+    };
+}
+
+function noop(...args) {
+    // Do nothing.
 }
 
 class AsyncStackTaggingZoneSpec {
@@ -14233,8 +14266,8 @@ class NgZone {
         self.shouldCoalesceEventChangeDetection =
             !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
         self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
-        self.lastRequestAnimationFrameId = -1;
-        self.nativeRequestAnimationFrame = getNativeRequestAnimationFrame().nativeRequestAnimationFrame;
+        self.callbackScheduled = false;
+        self.scheduleCallback = getCallbackScheduler();
         forkInnerZoneWithAngularBehavior(self);
     }
     /**
@@ -14370,10 +14403,11 @@ function delayChangeDetectionForEvents(zone) {
      * so we also need to check the _nesting here to prevent multiple
      * change detections.
      */
-    if (zone.isCheckStableRunning || zone.lastRequestAnimationFrameId !== -1) {
+    if (zone.isCheckStableRunning || zone.callbackScheduled) {
         return;
     }
-    zone.lastRequestAnimationFrameId = zone.nativeRequestAnimationFrame.call(_global, () => {
+    zone.callbackScheduled = true;
+    zone.scheduleCallback.call(_global, () => {
         // This is a work around for https://github.com/angular/angular/issues/36839.
         // The core issue is that when event coalescing is enabled it is possible for microtasks
         // to get flushed too early (As is the case with `Promise.then`) between the
@@ -14385,7 +14419,7 @@ function delayChangeDetectionForEvents(zone) {
         // eventTask execution.
         if (!zone.fakeTopEventTask) {
             zone.fakeTopEventTask = Zone.root.scheduleEventTask('fakeTopEventTask', () => {
-                zone.lastRequestAnimationFrameId = -1;
+                zone.callbackScheduled = false;
                 updateMicroTaskStatus(zone);
                 zone.isCheckStableRunning = true;
                 checkStable(zone);
@@ -14456,7 +14490,7 @@ function forkInnerZoneWithAngularBehavior(zone) {
 function updateMicroTaskStatus(zone) {
     if (zone._hasPendingMicrotasks ||
         ((zone.shouldCoalesceEventChangeDetection || zone.shouldCoalesceRunChangeDetection) &&
-            zone.lastRequestAnimationFrameId !== -1)) {
+            zone.callbackScheduled === true)) {
         zone.hasPendingMicrotasks = true;
     }
     else {
@@ -15565,7 +15599,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-8cad4e8']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-0dd441d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29739,7 +29773,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.0+sha-8cad4e8');
+const VERSION = new Version('18.0.0-next.0+sha-0dd441d');
 
 class Console {
     log(message) {
@@ -34981,6 +35015,7 @@ class ChangeDetectionSchedulerImpl {
         this.taskService = inject(PendingTasks);
         this.pendingRenderTaskId = null;
         this.shouldRefreshViews = false;
+        this.schedule = getCallbackScheduler();
     }
     notify(type = 0 /* NotificationType.RefreshViews */) {
         // When the only source of notification is an afterRender hook will skip straight to the hooks
@@ -34990,38 +35025,9 @@ class ChangeDetectionSchedulerImpl {
             return;
         }
         this.pendingRenderTaskId = this.taskService.add();
-        this.raceTimeoutAndRequestAnimationFrame();
-    }
-    /**
-     * Run change detection after the first of setTimeout and requestAnimationFrame resolves.
-     *
-     * - `requestAnimationFrame` ensures that change detection runs ahead of a browser repaint.
-     * This ensures that the create and update passes of a change detection always happen
-     * in the same frame.
-     * - When the browser is resource-starved, `rAF` can execute _before_ a `setTimeout` because
-     * rendering is a very high priority process. This means that `setTimeout` cannot guarantee
-     * same-frame create and update pass, when `setTimeout` is used to schedule the update phase.
-     * - While `rAF` gives us the desirable same-frame updates, it has two limitations that
-     * prevent it from being used alone. First, it does not run in background tabs, which would
-     * prevent Angular from initializing an application when opened in a new tab (for example).
-     * Second, repeated calls to requestAnimationFrame will execute at the refresh rate of the
-     * hardware (~16ms for a 60Hz display). This would cause significant slowdown of tests that
-     * are written with several updates and asserts in the form of "update; await stable; assert;".
-     * - Both `setTimeout` and `rAF` are able to "coalesce" several events from a single user
-     * interaction into a single change detection. Importantly, this reduces view tree traversals when
-     * compared to an alternative timing mechanism like `queueMicrotask`, where change detection would
-     * then be interleaves between each event.
-     *
-     * By running change detection after the first of `setTimeout` and `rAF` to execute, we get the
-     * best of both worlds.
-     */
-    async raceTimeoutAndRequestAnimationFrame() {
-        const timeout = new Promise(resolve => setTimeout(resolve));
-        const rAF = typeof _global['requestAnimationFrame'] === 'function' ?
-            new Promise(resolve => requestAnimationFrame(() => resolve())) :
-            null;
-        await Promise.race([timeout, rAF]);
-        this.tick();
+        this.schedule(() => {
+            this.tick();
+        });
     }
     tick() {
         try {
