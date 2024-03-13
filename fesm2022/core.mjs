@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.0+sha-1b19d2d
+ * @license Angular v18.0.0-next.0+sha-700c052
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12245,7 +12245,7 @@ function getNearestLContainer(viewOrContainer) {
 /**
  * The maximum number of times the change detection traversal will rerun before throwing an error.
  */
-const MAXIMUM_REFRESH_RERUNS = 100;
+const MAXIMUM_REFRESH_RERUNS$1 = 100;
 function detectChangesInternal(lView, notifyErrorHandler = true, mode = 0 /* ChangeDetectionMode.Global */) {
     const environment = lView[ENVIRONMENT];
     const rendererFactory = environment.rendererFactory;
@@ -12282,7 +12282,7 @@ function detectChangesInViewWhileDirty(lView, mode) {
     // run, detect changes on the view again. We run change detection in `Targeted` mode to only
     // refresh views with the `RefreshView` flag.
     while (requiresRefreshOrTraversal(lView)) {
-        if (retries === MAXIMUM_REFRESH_RERUNS) {
+        if (retries === MAXIMUM_REFRESH_RERUNS$1) {
             throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
                 'Infinite change detection while trying to refresh views. ' +
                     'There may be components which each cause the other to require a refresh, ' +
@@ -15599,7 +15599,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-1b19d2d']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.0+sha-700c052']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29773,7 +29773,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.0+sha-1b19d2d');
+const VERSION = new Version('18.0.0-next.0+sha-700c052');
 
 class Console {
     log(message) {
@@ -31176,6 +31176,8 @@ class NgProbeToken {
         this.token = token;
     }
 }
+/** Maximum number of times ApplicationRef will refresh all attached views in a single tick. */
+const MAXIMUM_REFRESH_RERUNS = 10;
 function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
     try {
         const result = callback();
@@ -31455,12 +31457,7 @@ class ApplicationRef {
     detectChangesInAttachedViews(refreshViews) {
         let runs = 0;
         const afterRenderEffectManager = this.afterRenderEffectManager;
-        while (true) {
-            if (runs === MAXIMUM_REFRESH_RERUNS) {
-                throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
-                    'Infinite change detection while refreshing application views. ' +
-                        'Ensure afterRender or queueStateUpdate hooks are not continuously causing updates.');
-            }
+        while (runs < MAXIMUM_REFRESH_RERUNS) {
             if (refreshViews) {
                 const isFirstPass = runs === 0;
                 this.beforeRender.next(isFirstPass);
@@ -31481,6 +31478,12 @@ class ApplicationRef {
             if (![...this.externalTestViews.keys(), ...this._views].some(({ _lView }) => shouldRecheckView(_lView))) {
                 break;
             }
+        }
+        if ((typeof ngDevMode === 'undefined' || ngDevMode) && runs >= MAXIMUM_REFRESH_RERUNS) {
+            throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
+                'Infinite change detection while refreshing application views. ' +
+                    'Ensure views are not calling `markForCheck` on every template execution or ' +
+                    'that afterRender hooks always mark views for check.');
         }
     }
     /**
