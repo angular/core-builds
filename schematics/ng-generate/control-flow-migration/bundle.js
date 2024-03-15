@@ -19130,6 +19130,12 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
       const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
       unit.update.push(createBindingOp(xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
     }
+    for (const attr of root.inputs) {
+      if (attr.type !== BindingType.Animation && attr.type !== BindingType.Attribute) {
+        const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
+        unit.create.push(createExtractedAttributeOp(xref, BindingKind.Property, null, attr.name, null, null, null, securityContext));
+      }
+    }
     const tagName = root instanceof Element ? root.name : root.tagName;
     return tagName === NG_TEMPLATE_TAG_NAME ? null : tagName;
   }
@@ -22523,7 +22529,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.0+sha-3691570");
+var VERSION2 = new Version("18.0.0-next.0+sha-5a63a47");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
