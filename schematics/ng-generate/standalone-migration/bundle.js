@@ -23607,6 +23607,12 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
       const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
       unit.update.push(createBindingOp(xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
     }
+    for (const attr of root.inputs) {
+      if (attr.type !== 4 && attr.type !== 1) {
+        const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
+        unit.create.push(createExtractedAttributeOp(xref, BindingKind.Property, null, attr.name, null, null, null, securityContext));
+      }
+    }
     const tagName = root instanceof Element ? root.name : root.tagName;
     return tagName === NG_TEMPLATE_TAG_NAME ? null : tagName;
   }
@@ -29335,7 +29341,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.0+sha-33dc072");
+var VERSION2 = new Version("17.3.0+sha-80e5a0a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -30401,7 +30407,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.3.0+sha-33dc072"));
+  definitionMap.set("version", literal("17.3.0+sha-80e5a0a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -30470,7 +30476,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.3.0+sha-33dc072"));
+  definitionMap.set("version", literal("17.3.0+sha-80e5a0a"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -30769,7 +30775,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.3.0+sha-33dc072"));
+  definitionMap.set("version", literal("17.3.0+sha-80e5a0a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -30792,7 +30798,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.3.0+sha-33dc072"));
+  definitionMap.set("version", literal("17.3.0+sha-80e5a0a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -30830,7 +30836,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.3.0+sha-33dc072"));
+  definitionMap.set("version", literal("17.3.0+sha-80e5a0a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -30854,7 +30860,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.3.0+sha-33dc072"));
+  definitionMap.set("version", literal("17.3.0+sha-80e5a0a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -30889,7 +30895,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.3.0+sha-33dc072"));
+  definitionMap.set("version", literal("17.3.0+sha-80e5a0a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -30906,7 +30912,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.3.0+sha-33dc072");
+var VERSION3 = new Version("17.3.0+sha-80e5a0a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
