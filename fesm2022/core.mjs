@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.0+sha-860ecce
+ * @license Angular v17.3.0+sha-1f5ab96
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12026,7 +12026,7 @@ function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, 
         // Embedded views follow the change detection strategy of the view they're declared in.
         const isSignalView = declarationLView[FLAGS] & 4096 /* LViewFlags.SignalView */;
         const viewFlags = isSignalView ? 4096 /* LViewFlags.SignalView */ : 16 /* LViewFlags.CheckAlways */;
-        const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, null, options?.injector ?? null, options?.dehydratedView ?? null);
+        const embeddedLView = createLView(declarationLView, embeddedTView, context, viewFlags, null, templateTNode, null, null, options?.injector ?? null, options?.embeddedViewInjector ?? null, options?.dehydratedView ?? null);
         const declarationLContainer = declarationLView[templateTNode.index];
         ngDevMode && assertLContainer(declarationLContainer);
         embeddedLView[DECLARATION_LCONTAINER] = declarationLContainer;
@@ -12935,7 +12935,7 @@ const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
      * @internal
      */
     createEmbeddedViewImpl(context, injector, dehydratedView) {
-        const embeddedLView = createAndRenderEmbeddedLView(this._declarationLView, this._declarationTContainer, context, { injector, dehydratedView });
+        const embeddedLView = createAndRenderEmbeddedLView(this._declarationLView, this._declarationTContainer, context, { embeddedViewInjector: injector, dehydratedView });
         return new ViewRef$1(embeddedLView);
     }
 };
@@ -15564,7 +15564,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0+sha-860ecce']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.0+sha-1f5ab96']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19229,7 +19229,7 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
             }
         }
         const dehydratedView = findMatchingDehydratedView(lContainer, activeBlockTNode.tView.ssrId);
-        const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, { dehydratedView, injector });
+        const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, { dehydratedView, embeddedViewInjector: injector });
         addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(activeBlockTNode, dehydratedView));
         markViewDirty(embeddedLView);
     }
@@ -29738,7 +29738,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.0+sha-860ecce');
+const VERSION = new Version('17.3.0+sha-1f5ab96');
 
 class Console {
     log(message) {
