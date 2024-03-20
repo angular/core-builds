@@ -29341,7 +29341,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.0+sha-766bdf3");
+var VERSION2 = new Version("17.3.0+sha-99e9474");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -30407,7 +30407,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION = "12.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("17.3.0+sha-766bdf3"));
+  definitionMap.set("version", literal("17.3.0+sha-99e9474"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -30476,7 +30476,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("17.3.0+sha-766bdf3"));
+  definitionMap.set("version", literal("17.3.0+sha-99e9474"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -30775,7 +30775,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("17.3.0+sha-766bdf3"));
+  definitionMap.set("version", literal("17.3.0+sha-99e9474"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -30798,7 +30798,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("17.3.0+sha-766bdf3"));
+  definitionMap.set("version", literal("17.3.0+sha-99e9474"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -30836,7 +30836,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("17.3.0+sha-766bdf3"));
+  definitionMap.set("version", literal("17.3.0+sha-99e9474"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -30860,7 +30860,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("17.3.0+sha-766bdf3"));
+  definitionMap.set("version", literal("17.3.0+sha-99e9474"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -30895,7 +30895,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("17.3.0+sha-766bdf3"));
+  definitionMap.set("version", literal("17.3.0+sha-99e9474"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -30912,7 +30912,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("17.3.0+sha-766bdf3");
+var VERSION3 = new Version("17.3.0+sha-99e9474");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -49555,6 +49555,25 @@ function unwrapAstWithSource(ast) {
   return ast instanceof ASTWithSource ? ast.ast : ast;
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/core/src/core_version.mjs
+function coreHasSymbol(program, symbol) {
+  const checker = program.getTypeChecker();
+  for (const sf of program.getSourceFiles().filter(isMaybeCore)) {
+    const sym = checker.getSymbolAtLocation(sf);
+    if (sym === void 0 || sym.exports === void 0) {
+      continue;
+    }
+    if (!sym.exports.has("\u0275\u0275template")) {
+      continue;
+    }
+    return sym.exports.has(symbol.name);
+  }
+  return null;
+}
+function isMaybeCore(sf) {
+  return sf.isDeclarationFile && sf.fileName.includes("@angular/core") && sf.fileName.endsWith("index.d.ts");
+}
+
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/core/src/feature_detection.mjs
 var import_semver = __toESM(require_semver2(), 1);
 function coreVersionSupportsFeature(coreVersion, minVersion) {
@@ -49897,10 +49916,10 @@ var NgCompiler = class {
     return strictTemplates || !!this.options.fullTemplateTypeCheck;
   }
   getTypeCheckingConfig() {
-    var _a2, _b2, _c2, _d2;
+    var _a2, _b2, _c2, _d2, _e2;
     const strictTemplates = !!this.options.strictTemplates;
     const useInlineTypeConstructors = this.programDriver.supportsInlineOperations;
-    const allowSignalsInTwoWayBindings = this.angularCoreVersion === null || coreVersionSupportsFeature(this.angularCoreVersion, ">= 17.2.0-0");
+    let allowSignalsInTwoWayBindings = (_a2 = coreHasSymbol(this.inputProgram, Identifiers.unwrapWritableSignal)) != null ? _a2 : this.angularCoreVersion === null || coreVersionSupportsFeature(this.angularCoreVersion, ">= 17.2.0-0");
     let typeCheckingConfig;
     if (this.fullTemplateTypeCheck) {
       typeCheckingConfig = {
@@ -49925,7 +49944,7 @@ var NgCompiler = class {
         enableTemplateTypeChecker: this.enableTemplateTypeChecker,
         useInlineTypeConstructors,
         suggestionsForSuboptimalTypeInference: this.enableTemplateTypeChecker && !strictTemplates,
-        controlFlowPreventingContentProjection: ((_a2 = this.options.extendedDiagnostics) == null ? void 0 : _a2.defaultCategory) || DiagnosticCategoryLabel.Warning,
+        controlFlowPreventingContentProjection: ((_b2 = this.options.extendedDiagnostics) == null ? void 0 : _b2.defaultCategory) || DiagnosticCategoryLabel.Warning,
         allowSignalsInTwoWayBindings
       };
     } else {
@@ -49951,7 +49970,7 @@ var NgCompiler = class {
         enableTemplateTypeChecker: this.enableTemplateTypeChecker,
         useInlineTypeConstructors,
         suggestionsForSuboptimalTypeInference: false,
-        controlFlowPreventingContentProjection: ((_b2 = this.options.extendedDiagnostics) == null ? void 0 : _b2.defaultCategory) || DiagnosticCategoryLabel.Warning,
+        controlFlowPreventingContentProjection: ((_c2 = this.options.extendedDiagnostics) == null ? void 0 : _c2.defaultCategory) || DiagnosticCategoryLabel.Warning,
         allowSignalsInTwoWayBindings
       };
     }
@@ -49987,7 +50006,7 @@ var NgCompiler = class {
     if (this.options.strictLiteralTypes !== void 0) {
       typeCheckingConfig.strictLiteralTypes = this.options.strictLiteralTypes;
     }
-    if (((_d2 = (_c2 = this.options.extendedDiagnostics) == null ? void 0 : _c2.checks) == null ? void 0 : _d2.controlFlowPreventingContentProjection) !== void 0) {
+    if (((_e2 = (_d2 = this.options.extendedDiagnostics) == null ? void 0 : _d2.checks) == null ? void 0 : _e2.controlFlowPreventingContentProjection) !== void 0) {
       typeCheckingConfig.controlFlowPreventingContentProjection = this.options.extendedDiagnostics.checks.controlFlowPreventingContentProjection;
     }
     return typeCheckingConfig;
