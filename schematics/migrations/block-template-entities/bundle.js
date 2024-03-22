@@ -19006,6 +19006,7 @@ function optimizeTrackFns(job) {
       } else if (op.track instanceof ReadVarExpr && op.track.name === "$item") {
         op.trackByFn = importExpr(Identifiers.repeaterTrackByIdentity);
       } else if (isTrackByFunctionCall(job.root.xref, op.track)) {
+        op.usesComponentInstance = true;
         if (op.track.receiver.receiver.view === unit.xref) {
           op.trackByFn = op.track.receiver;
         } else {
@@ -26067,7 +26068,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.1+sha-78d4ad2");
+var VERSION2 = new Version("17.3.1+sha-1f7e81a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
