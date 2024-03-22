@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.1+sha-0461bff
+ * @license Angular v18.0.0-next.1+sha-5bd188a
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8258,6 +8258,7 @@ declare interface R3DeclareComponentFacade extends R3DeclareDirectiveFacade {
     pipes?: {
         [pipeName: string]: OpaqueValue | (() => OpaqueValue);
     };
+    deferBlockDependencies?: (() => Promise<Type_2> | null)[];
     viewProviders?: OpaqueValue;
     animations?: OpaqueValue;
     changeDetection?: ChangeDetectionStrategy_2;
@@ -14534,8 +14535,6 @@ export declare function ɵɵcomponentInstance(): unknown;
  * built-in "if" and "switch". On the high level this instruction is responsible for adding and
  * removing views selected by a conditional expression.
  *
- * @param containerIndex index of a container in a host view (indexed from HEADER_OFFSET) where
- *     conditional views should be inserted.
  * @param matchingTemplateIndex index of a template TNode representing a conditional view to be
  *     inserted; -1 represents a special case when there is no view to insert.
  * @codeGenApi
@@ -15406,6 +15405,23 @@ export declare function ɵɵngDeclareClassMetadata(decl: {
     ctorParameters?: () => any[];
     propDecorators?: {
         [field: string]: any;
+    };
+}): void;
+
+/**
+ * Evaluates the class metadata of a component that contains deferred blocks.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵngDeclareClassMetadataAsync(decl: {
+    type: Type<any>;
+    resolveDeferredDeps: () => Promise<Type<unknown>>[];
+    resolveMetadata: (...types: Type<unknown>[]) => {
+        decorators: any[];
+        ctorParameters: (() => any[]) | null;
+        propDecorators: ({
+            [field: string]: any;
+        }) | null;
     };
 }): void;
 

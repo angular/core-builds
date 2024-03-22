@@ -1928,12 +1928,12 @@ var ConstantPool = class {
       if (isArrow && current instanceof DeclareVarStmt && ((_a2 = current.value) == null ? void 0 : _a2.isEquivalent(fn2))) {
         return variable(current.name);
       }
-      if (!isArrow && current instanceof DeclareFunctionStmt && fn2.isEquivalent(current)) {
+      if (!isArrow && current instanceof DeclareFunctionStmt && fn2 instanceof FunctionExpr && fn2.isEquivalent(current)) {
         return variable(current.name);
       }
     }
     const name = useUniqueName ? this.uniqueName(prefix) : prefix;
-    this.statements.push(fn2.toDeclStmt(name, StmtModifier.Final));
+    this.statements.push(fn2 instanceof FunctionExpr ? fn2.toDeclStmt(name, StmtModifier.Final) : new DeclareVarStmt(name, fn2, INFERRED_TYPE, StmtModifier.Final, fn2.sourceSpan));
     return variable(name);
   }
   _getLiteralFactory(key, values, resultMap) {
@@ -2558,6 +2558,9 @@ var Identifiers = _Identifiers;
 })();
 (() => {
   _Identifiers.declareClassMetadata = { name: "\u0275\u0275ngDeclareClassMetadata", moduleName: CORE };
+})();
+(() => {
+  _Identifiers.declareClassMetadataAsync = { name: "\u0275\u0275ngDeclareClassMetadataAsync", moduleName: CORE };
 })();
 (() => {
   _Identifiers.setClassMetadata = { name: "\u0275setClassMetadata", moduleName: CORE };
@@ -4439,7 +4442,7 @@ var RecursiveVisitor = class {
     visitAll(this, block.children);
   }
   visitForLoopBlock(block) {
-    const blockItems = [block.item, ...Object.values(block.contextVariables), ...block.children];
+    const blockItems = [block.item, ...block.contextVariables, ...block.children];
     block.empty && blockItems.push(block.empty);
     visitAll(this, blockItems);
   }
@@ -17952,6 +17955,7 @@ function optimizeTrackFns(job) {
       } else if (op.track instanceof ReadVarExpr && op.track.name === "$item") {
         op.trackByFn = importExpr(Identifiers.repeaterTrackByIdentity);
       } else if (isTrackByFunctionCall(job.root.xref, op.track)) {
+        op.usesComponentInstance = true;
         if (op.track.receiver.receiver.view === unit.xref) {
           op.trackByFn = op.track.receiver;
         } else {
@@ -17996,7 +18000,7 @@ function generateTrackVariables(job) {
       }
       op.track = transformExpressionsInExpression(op.track, (expr) => {
         if (expr instanceof LexicalReadExpr) {
-          if (expr.name === op.varNames.$index) {
+          if (op.varNames.$index.has(expr.name)) {
             return variable("$index");
           } else if (expr.name === op.varNames.$implicit) {
             return variable("$item");
@@ -18755,10 +18759,7 @@ function ingestIfBlock(unit, ifBlock) {
   for (let i = 0; i < ifBlock.branches.length; i++) {
     const ifCase = ifBlock.branches[i];
     const cView = unit.job.allocateView(unit.xref);
-    let tagName = null;
-    if (i === 0) {
-      tagName = ingestControlFlowInsertionPoint(unit, cView.xref, ifCase);
-    }
+    const tagName = ingestControlFlowInsertionPoint(unit, cView.xref, ifCase);
     if (ifCase.expressionAlias !== null) {
       cView.contextVariables.set(ifCase.expressionAlias.name, CTX_REF);
     }
@@ -18793,6 +18794,7 @@ function ingestSwitchBlock(unit, switchBlock) {
   let conditions = [];
   for (const switchCase of switchBlock.cases) {
     const cView = unit.job.allocateView(unit.xref);
+    const tagName = ingestControlFlowInsertionPoint(unit, cView.xref, switchCase);
     let switchCaseI18nMeta = void 0;
     if (switchCase.i18n !== void 0) {
       if (!(switchCase.i18n instanceof BlockPlaceholder)) {
@@ -18800,7 +18802,7 @@ function ingestSwitchBlock(unit, switchBlock) {
       }
       switchCaseI18nMeta = switchCase.i18n;
     }
-    const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, null, "Case", Namespace.HTML, switchCaseI18nMeta, switchCase.startSourceSpan, switchCase.sourceSpan);
+    const templateOp = createTemplateOp(cView.xref, TemplateKind.Block, tagName, "Case", Namespace.HTML, switchCaseI18nMeta, switchCase.startSourceSpan, switchCase.sourceSpan);
     unit.create.push(templateOp);
     if (firstXref === null) {
       firstXref = cView.xref;
@@ -18934,37 +18936,27 @@ function ingestIcu(unit, icu) {
 function ingestForBlock(unit, forBlock) {
   var _a2, _b2, _c2;
   const repeaterView = unit.job.allocateView(unit.xref);
+  const indexName = `\u0275$index_${repeaterView.xref}`;
+  const countName = `\u0275$count_${repeaterView.xref}`;
+  const indexVarNames = /* @__PURE__ */ new Set();
   repeaterView.contextVariables.set(forBlock.item.name, forBlock.item.value);
-  repeaterView.contextVariables.set(forBlock.contextVariables.$index.name, forBlock.contextVariables.$index.value);
-  repeaterView.contextVariables.set(forBlock.contextVariables.$count.name, forBlock.contextVariables.$count.value);
-  const indexName = `\u0275${forBlock.contextVariables.$index.name}_${repeaterView.xref}`;
-  const countName = `\u0275${forBlock.contextVariables.$count.name}_${repeaterView.xref}`;
-  repeaterView.contextVariables.set(indexName, forBlock.contextVariables.$index.value);
-  repeaterView.contextVariables.set(countName, forBlock.contextVariables.$count.value);
-  repeaterView.aliases.add({
-    kind: SemanticVariableKind.Alias,
-    name: null,
-    identifier: forBlock.contextVariables.$first.name,
-    expression: new LexicalReadExpr(indexName).identical(literal(0))
-  });
-  repeaterView.aliases.add({
-    kind: SemanticVariableKind.Alias,
-    name: null,
-    identifier: forBlock.contextVariables.$last.name,
-    expression: new LexicalReadExpr(indexName).identical(new LexicalReadExpr(countName).minus(literal(1)))
-  });
-  repeaterView.aliases.add({
-    kind: SemanticVariableKind.Alias,
-    name: null,
-    identifier: forBlock.contextVariables.$even.name,
-    expression: new LexicalReadExpr(indexName).modulo(literal(2)).identical(literal(0))
-  });
-  repeaterView.aliases.add({
-    kind: SemanticVariableKind.Alias,
-    name: null,
-    identifier: forBlock.contextVariables.$odd.name,
-    expression: new LexicalReadExpr(indexName).modulo(literal(2)).notIdentical(literal(0))
-  });
+  for (const variable2 of forBlock.contextVariables) {
+    if (variable2.value === "$index") {
+      indexVarNames.add(variable2.name);
+    }
+    if (variable2.name === "$index") {
+      repeaterView.contextVariables.set("$index", variable2.value).set(indexName, variable2.value);
+    } else if (variable2.name === "$count") {
+      repeaterView.contextVariables.set("$count", variable2.value).set(countName, variable2.value);
+    } else {
+      repeaterView.aliases.add({
+        kind: SemanticVariableKind.Alias,
+        name: null,
+        identifier: variable2.name,
+        expression: getComputedForLoopVariableExpression(variable2, indexName, countName)
+      });
+    }
+  }
   const sourceSpan = convertSourceSpan(forBlock.trackBy.span, forBlock.sourceSpan);
   const track = convertAst(forBlock.trackBy, unit.job, sourceSpan);
   ingestNodes(repeaterView, forBlock.children);
@@ -18976,12 +18968,7 @@ function ingestForBlock(unit, forBlock) {
     emptyTagName = ingestControlFlowInsertionPoint(unit, emptyView.xref, forBlock.empty);
   }
   const varNames = {
-    $index: forBlock.contextVariables.$index.name,
-    $count: forBlock.contextVariables.$count.name,
-    $first: forBlock.contextVariables.$first.name,
-    $last: forBlock.contextVariables.$last.name,
-    $even: forBlock.contextVariables.$even.name,
-    $odd: forBlock.contextVariables.$odd.name,
+    $index: indexVarNames,
     $implicit: forBlock.item.name
   };
   if (forBlock.i18n !== void 0 && !(forBlock.i18n instanceof BlockPlaceholder)) {
@@ -18998,6 +18985,24 @@ function ingestForBlock(unit, forBlock) {
   const expression = convertAst(forBlock.expression, unit.job, convertSourceSpan(forBlock.expression.span, forBlock.sourceSpan));
   const repeater2 = createRepeaterOp(repeaterCreate2.xref, repeaterCreate2.handle, expression, forBlock.sourceSpan);
   unit.update.push(repeater2);
+}
+function getComputedForLoopVariableExpression(variable2, indexName, countName) {
+  switch (variable2.value) {
+    case "$index":
+      return new LexicalReadExpr(indexName);
+    case "$count":
+      return new LexicalReadExpr(countName);
+    case "$first":
+      return new LexicalReadExpr(indexName).identical(literal(0));
+    case "$last":
+      return new LexicalReadExpr(indexName).identical(new LexicalReadExpr(countName).minus(literal(1)));
+    case "$even":
+      return new LexicalReadExpr(indexName).modulo(literal(2)).identical(literal(0));
+    case "$odd":
+      return new LexicalReadExpr(indexName).modulo(literal(2)).notIdentical(literal(0));
+    default:
+      throw new Error(`AssertionError: unknown @for loop variable ${variable2.value}`);
+  }
 }
 function convertAst(ast, job, baseSourceSpan) {
   if (ast instanceof ASTWithSource) {
@@ -20040,7 +20045,10 @@ function parseForLoopParameters(block, errors, bindingParser) {
     itemName: new Variable(itemName, "$implicit", variableSpan, variableSpan),
     trackBy: null,
     expression: parseBlockParameterToBinding(expressionParam, bindingParser, rawExpression),
-    context: {}
+    context: Array.from(ALLOWED_FOR_LOOP_LET_VARIABLES, (variableName2) => {
+      const emptySpanAfterForBlockStart = new ParseSourceSpan(block.startSourceSpan.end, block.startSourceSpan.end);
+      return new Variable(variableName2, variableName2, emptySpanAfterForBlockStart, emptySpanAfterForBlockStart);
+    })
   };
   for (const param of secondaryParams) {
     const letMatch = param.expression.match(FOR_LOOP_LET_PATTERN);
@@ -20065,12 +20073,6 @@ function parseForLoopParameters(block, errors, bindingParser) {
     }
     errors.push(new ParseError(param.sourceSpan, `Unrecognized @for loop paramater "${param.expression}"`));
   }
-  for (const variableName2 of ALLOWED_FOR_LOOP_LET_VARIABLES) {
-    if (!result.context.hasOwnProperty(variableName2)) {
-      const emptySpanAfterForBlockStart = new ParseSourceSpan(block.startSourceSpan.end, block.startSourceSpan.end);
-      result.context[variableName2] = new Variable(variableName2, variableName2, emptySpanAfterForBlockStart, emptySpanAfterForBlockStart);
-    }
-  }
   return result;
 }
 function parseLetParameter(sourceSpan, expression, span, context, errors) {
@@ -20085,7 +20087,7 @@ function parseLetParameter(sourceSpan, expression, span, context, errors) {
       errors.push(new ParseError(sourceSpan, `Invalid @for loop "let" parameter. Parameter should match the pattern "<name> = <variable name>"`));
     } else if (!ALLOWED_FOR_LOOP_LET_VARIABLES.has(variableName)) {
       errors.push(new ParseError(sourceSpan, `Unknown "let" parameter variable "${variableName}". The allowed variables are: ${Array.from(ALLOWED_FOR_LOOP_LET_VARIABLES).join(", ")}`));
-    } else if (context.hasOwnProperty(variableName)) {
+    } else if (context.some((v) => v.name === name)) {
       errors.push(new ParseError(sourceSpan, `Duplicate "let" parameter variable "${variableName}"`));
     } else {
       const [, keyLeadingWhitespace, keyName] = (_a2 = expressionParts[0].match(CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN)) != null ? _a2 : [];
@@ -20099,7 +20101,7 @@ function parseLetParameter(sourceSpan, expression, span, context, errors) {
         valueSpan = valueLeadingWhitespace !== void 0 ? new ParseSourceSpan(startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length), startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length + implicit.length)) : void 0;
       }
       const sourceSpan2 = new ParseSourceSpan(keySpan.start, (_c2 = valueSpan == null ? void 0 : valueSpan.end) != null ? _c2 : keySpan.end);
-      context[variableName] = new Variable(name, variableName, sourceSpan2, keySpan, valueSpan);
+      context.push(new Variable(name, variableName, sourceSpan2, keySpan, valueSpan));
     }
     startSpan = startSpan.moveBy(part.length + 1);
   }
@@ -21228,7 +21230,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
   let allDeferrableDepsFn = null;
   if (meta.defer.mode === 1 && meta.defer.dependenciesFn !== null) {
     const fnName = `${templateTypeName}_DeferFn`;
-    constantPool.statements.push(meta.defer.dependenciesFn.toDeclStmt(fnName, StmtModifier.Final));
+    constantPool.statements.push(new DeclareVarStmt(fnName, meta.defer.dependenciesFn, void 0, StmtModifier.Final));
     allDeferrableDepsFn = variable(fnName);
   }
   const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.defer, allDeferrableDepsFn);
@@ -21540,7 +21542,7 @@ var Scope2 = class {
       nodeOrNodes.children.forEach((node) => node.visit(this));
     } else if (nodeOrNodes instanceof ForLoopBlock) {
       this.visitVariable(nodeOrNodes.item);
-      Object.values(nodeOrNodes.contextVariables).forEach((v) => this.visitVariable(v));
+      nodeOrNodes.contextVariables.forEach((v) => this.visitVariable(v));
       nodeOrNodes.children.forEach((node) => node.visit(this));
     } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlock || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading) {
       nodeOrNodes.children.forEach((node) => node.visit(this));
@@ -21738,7 +21740,7 @@ var DirectiveBinder = class {
   visitForLoopBlock(block) {
     var _a2;
     block.item.visit(this);
-    Object.values(block.contextVariables).forEach((v) => v.visit(this));
+    block.contextVariables.forEach((v) => v.visit(this));
     block.children.forEach((node) => node.visit(this));
     (_a2 = block.empty) == null ? void 0 : _a2.visit(this);
   }
@@ -21806,7 +21808,7 @@ var TemplateBinder = class extends RecursiveAstVisitor {
     const usedPipes = /* @__PURE__ */ new Set();
     const eagerPipes = /* @__PURE__ */ new Set();
     const template2 = nodes instanceof Template ? nodes : null;
-    const deferBlocks = /* @__PURE__ */ new Map();
+    const deferBlocks = [];
     const binder = new TemplateBinder(expressions, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, template2, 0);
     binder.ingest(nodes);
     return { expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks };
@@ -21824,7 +21826,7 @@ var TemplateBinder = class extends RecursiveAstVisitor {
       this.nestingLevel.set(nodeOrNodes, this.level);
     } else if (nodeOrNodes instanceof ForLoopBlock) {
       this.visitNode(nodeOrNodes.item);
-      Object.values(nodeOrNodes.contextVariables).forEach((v) => this.visitNode(v));
+      nodeOrNodes.contextVariables.forEach((v) => this.visitNode(v));
       nodeOrNodes.trackBy.visit(this);
       nodeOrNodes.children.forEach(this.visitNode);
       this.nestingLevel.set(nodeOrNodes, this.level);
@@ -21832,7 +21834,7 @@ var TemplateBinder = class extends RecursiveAstVisitor {
       if (this.scope.rootNode !== nodeOrNodes) {
         throw new Error(`Assertion error: resolved incorrect scope for deferred block ${nodeOrNodes}`);
       }
-      this.deferBlocks.set(nodeOrNodes, this.scope);
+      this.deferBlocks.push([nodeOrNodes, this.scope]);
       nodeOrNodes.children.forEach((node) => node.visit(this));
       this.nestingLevel.set(nodeOrNodes, this.level);
     } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading) {
@@ -21967,7 +21969,7 @@ var TemplateBinder = class extends RecursiveAstVisitor {
   }
 };
 var R3BoundTarget = class {
-  constructor(target, directives, eagerDirectives, bindings, references, exprTargets, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks) {
+  constructor(target, directives, eagerDirectives, bindings, references, exprTargets, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, rawDeferred) {
     this.target = target;
     this.directives = directives;
     this.eagerDirectives = eagerDirectives;
@@ -21979,7 +21981,8 @@ var R3BoundTarget = class {
     this.scopedNodeEntities = scopedNodeEntities;
     this.usedPipes = usedPipes;
     this.eagerPipes = eagerPipes;
-    this.deferBlocks = deferBlocks;
+    this.deferredBlocks = rawDeferred.map((current) => current[0]);
+    this.deferredScopes = new Map(rawDeferred);
   }
   getEntitiesInScope(node) {
     var _a2;
@@ -22019,7 +22022,7 @@ var R3BoundTarget = class {
     return Array.from(this.eagerPipes);
   }
   getDeferBlocks() {
-    return Array.from(this.deferBlocks.keys());
+    return this.deferredBlocks;
   }
   getDeferredTriggerTarget(block, trigger) {
     if (!(trigger instanceof InteractionDeferredTrigger) && !(trigger instanceof ViewportDeferredTrigger) && !(trigger instanceof HoverDeferredTrigger)) {
@@ -22060,8 +22063,11 @@ var R3BoundTarget = class {
     return null;
   }
   isDeferred(element2) {
-    for (const deferredScope of this.deferBlocks.values()) {
-      const stack = [deferredScope];
+    for (const block of this.deferredBlocks) {
+      if (!this.deferredScopes.has(block)) {
+        continue;
+      }
+      const stack = [this.deferredScopes.get(block)];
       while (stack.length > 0) {
         const current = stack.pop();
         if (current.elementsInScope.has(element2)) {
@@ -22242,7 +22248,7 @@ var CompilerFacadeImpl = class {
   }
   compileComponent(angularCoreEnv, sourceMapUrl, facade) {
     var _a2;
-    const { template: template2, interpolation, defer: defer2 } = parseJitTemplate(facade.template, facade.name, sourceMapUrl, facade.preserveWhitespaces, facade.interpolation);
+    const { template: template2, interpolation, defer: defer2 } = parseJitTemplate(facade.template, facade.name, sourceMapUrl, facade.preserveWhitespaces, facade.interpolation, void 0);
     const meta = __spreadProps(__spreadValues(__spreadValues({}, facade), convertDirectiveFacadeToMetadata(facade)), {
       selector: facade.selector || this.elementSchemaRegistry.getDefaultComponentElementName(),
       template: template2,
@@ -22431,7 +22437,7 @@ function convertOpaqueValuesToExpressions(obj) {
 }
 function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMapUrl) {
   var _a2, _b2, _c2, _d2;
-  const { template: template2, interpolation, defer: defer2 } = parseJitTemplate(decl.template, decl.type.name, sourceMapUrl, (_a2 = decl.preserveWhitespaces) != null ? _a2 : false, decl.interpolation);
+  const { template: template2, interpolation, defer: defer2 } = parseJitTemplate(decl.template, decl.type.name, sourceMapUrl, (_a2 = decl.preserveWhitespaces) != null ? _a2 : false, decl.interpolation, decl.deferBlockDependencies);
   const declarations = [];
   if (decl.dependencies) {
     for (const innerDep of decl.dependencies) {
@@ -22501,7 +22507,7 @@ function convertPipeDeclarationToMetadata(pipe2) {
     type: new WrappedNodeExpr(pipe2.type)
   };
 }
-function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces, interpolation) {
+function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces, interpolation, deferBlockDependencies) {
   const interpolationConfig = interpolation ? InterpolationConfig.fromArray(interpolation) : DEFAULT_INTERPOLATION_CONFIG;
   const parsed = parseTemplate(template2, sourceMapUrl, { preserveWhitespaces, interpolationConfig });
   if (parsed.errors !== null) {
@@ -22513,7 +22519,7 @@ function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces
   return {
     template: parsed,
     interpolation: interpolationConfig,
-    defer: createR3ComponentDeferMetadata(boundTarget)
+    defer: createR3ComponentDeferMetadata(boundTarget, deferBlockDependencies)
   };
 }
 function convertToProviderExpression(obj, property2) {
@@ -22553,11 +22559,12 @@ function createR3DependencyMetadata(token, isAttributeDep, host, optional, self,
   const attributeNameType = isAttributeDep ? literal("unknown") : null;
   return { token, attributeNameType, host, optional, self, skipSelf };
 }
-function createR3ComponentDeferMetadata(boundTarget) {
+function createR3ComponentDeferMetadata(boundTarget, deferBlockDependencies) {
   const deferredBlocks = boundTarget.getDeferBlocks();
   const blocks = /* @__PURE__ */ new Map();
-  for (const block of deferredBlocks) {
-    blocks.set(block, null);
+  for (let i = 0; i < deferredBlocks.length; i++) {
+    const dependencyFn = deferBlockDependencies == null ? void 0 : deferBlockDependencies[i];
+    blocks.set(deferredBlocks[i], dependencyFn ? new WrappedNodeExpr(dependencyFn) : null);
   }
   return { mode: 0, blocks };
 }
@@ -22687,7 +22694,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.1+sha-0461bff");
+var VERSION2 = new Version("18.0.0-next.1+sha-5bd188a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
