@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.1+sha-e1650e3
+ * @license Angular v18.0.0-next.1+sha-d15dca0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1900,6 +1900,9 @@ export declare const ContentChild: ContentChildDecorator;
  *   headerRequired = contentChild.required(MyHeader);            // Signal<MyHeader>
  * }
  * ```
+ *
+ * @initializerApiFunction
+ * @developerPreview
  */
 export declare const contentChild: ContentChildFunction;
 
@@ -1987,6 +1990,7 @@ export declare interface ContentChildDecorator {
  * provides access to required query results via the `.required` property.
  *
  * @developerPreview
+ * @docsPrivate Ignored because `contentChild` is the canonical API entry.
  */
 export declare interface ContentChildFunction {
     /**
@@ -2005,8 +2009,6 @@ export declare interface ContentChildFunction {
     }): Signal<ReadT | undefined>;
     /**
      * Initializes a content child query that is always expected to match.
-     *
-     * @developerPreview
      */
     required: {
         <LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
@@ -5575,29 +5577,52 @@ export declare interface Input {
 export declare const Input: InputDecorator;
 
 /**
- * The `input` function allows declaration of inputs in directives and
- * components.
+ * The `input` function allows declaration of Angular inputs in directives
+ * and components.
  *
- * Initializes an input with an initial value. If no explicit value
- * is specified, Angular will use `undefined`.
+ * There are two variants of inputs that can be declared:
  *
- * Consider using `input.required` for inputs that don't need an
- * initial value.
+ *   1. **Optional inputs** with an initial value.
+ *   2. **Required inputs** that consumers need to set.
+ *
+ * By default, the `input` function will declare optional inputs that
+ * always have an initial value. Required inputs can be declared
+ * using the `input.required()` function.
+ *
+ * Inputs are signals. The values of an input are exposed as a `Signal`.
+ * The signal always holds the latest value of the input that is bound
+ * from the parent.
  *
  * @usageNotes
- * Initialize an input in your directive or component by declaring a
- * class field and initializing it with the `input()` function.
+ * To use signal-based inputs, import `input` from `@angular/core`.
+ *
+ * ```
+ * import {input} from '@angular/core`;
+ * ```
+ *
+ * Inside your component, introduce a new class member and initialize
+ * it with a call to `input` or `input.required`.
  *
  * ```ts
- * @Directive({..})
- * export class MyDir {
- *   firstName = input<string>();            // string|undefined
- *   lastName = input.required<string>();    // string
- *   age = input(0);                         // number
+ * @Component({
+ *   ...
+ * })
+ * export class UserProfileComponent {
+ *   firstName = input<string>();             // Signal<string|undefined>
+ *   lastName  = input.required<string>();    // Signal<string>
+ *   age       = input(0)                     // Signal<number>
  * }
  * ```
  *
+ * Inside your component template, you can display values of the inputs
+ * by calling the signal.
+ *
+ * ```html
+ * <span>{{firstName()}}</span>
+ * ```
+ *
  * @developerPreview
+ * @initializerApiFunction
  */
 export declare const input: InputFunction;
 
@@ -5667,46 +5692,43 @@ export declare interface InputDecorator {
  * The function exposes an API for also declaring required inputs via the
  * `input.required` function.
  *
- * @usageNotes
- * Initialize an input in your directive or component by declaring a
- * class field and initializing it with the `input()` or `input.required()`
- * function.
- *
- * ```ts
- * @Directive({..})
- * export class MyDir {
- *   firstName = input<string>();            // string|undefined
- *   lastName = input.required<string>();    // string
- *   age = input(0);                         // number
- * }
- * ```
- *
  * @developerPreview
+ * @docsPrivate Ignored because `input` is the canonical API entry.
  */
 export declare interface InputFunction {
     /**
-     * Initializes an input with an initial value. If no explicit value
-     * is specified, Angular will use `undefined`.
-     *
-     * Consider using `input.required` for inputs that don't need an
-     * initial value.
-     *
-     * @developerPreview
+     * Initializes an input of type `T` with an initial value of `undefined`.
+     * Angular will implicitly use `undefined` as initial value.
      */
-    <ReadT>(): InputSignal<ReadT | undefined>;
-    <ReadT>(initialValue: ReadT, opts?: InputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
-    <ReadT, WriteT>(initialValue: ReadT, opts: InputOptionsWithTransform<ReadT, WriteT>): InputSignalWithTransform<ReadT, WriteT>;
+    <T>(): InputSignal<T | undefined>;
+    /** Declares an input of type `T` with an explicit initial value. */
+    <T>(initialValue: T, opts?: InputOptionsWithoutTransform<T>): InputSignal<T>;
+    /**
+     * Declares an input of type `T` with an initial value and a transform
+     * function.
+     *
+     * The input accepts values of type `TransformT` and the given
+     * transform function will transform the value to type `T`.
+     */
+    <T, TransformT>(initialValue: T, opts: InputOptionsWithTransform<T, TransformT>): InputSignalWithTransform<T, TransformT>;
     /**
      * Initializes a required input.
      *
-     * Users of your directive/component need to bind to this
+     * Consumers of your directive/component need to bind to this
      * input. If unset, a compile time error will be reported.
      *
      * @developerPreview
      */
     required: {
-        <ReadT>(opts?: InputOptionsWithoutTransform<ReadT>): InputSignal<ReadT>;
-        <ReadT, WriteT>(opts: InputOptionsWithTransform<ReadT, WriteT>): InputSignalWithTransform<ReadT, WriteT>;
+        /** Declares a required input of type `T`. */
+        <T>(opts?: InputOptionsWithoutTransform<T>): InputSignal<T>;
+        /**
+         * Declares a required input of type `T` with a transform function.
+         *
+         * The input accepts values of type `TransformT` and the given
+         * transform function will transform the value to type `T`.
+         */
+        <T, TransformT>(opts: InputOptionsWithTransform<T, TransformT>): InputSignalWithTransform<T, TransformT>;
     };
 }
 
@@ -5715,7 +5737,7 @@ export declare interface InputFunction {
  *
  * Options for signal inputs.
  */
-export declare interface InputOptions<ReadT, WriteT> {
+export declare interface InputOptions<T, TransformT> {
     /** Optional public name for the input. By default, the class field name is used. */
     alias?: string;
     /**
@@ -5728,7 +5750,7 @@ export declare interface InputOptions<ReadT, WriteT> {
      * attribute form to bind to the input via `<my-dir input>`. A transform can then
      * handle such string values and convert them to `boolean`. See: {@link booleanAttribute}.
      */
-    transform?: (v: WriteT) => ReadT;
+    transform?: (v: TransformT) => T;
 }
 
 /**
@@ -5736,7 +5758,7 @@ export declare interface InputOptions<ReadT, WriteT> {
  *
  * @developerPreview
  */
-export declare type InputOptionsWithoutTransform<ReadT> = Omit<InputOptions<ReadT, ReadT>, 'transform'> & {
+export declare type InputOptionsWithoutTransform<T> = Omit<InputOptions<T, T>, 'transform'> & {
     transform?: undefined;
 };
 
@@ -5745,7 +5767,7 @@ export declare type InputOptionsWithoutTransform<ReadT> = Omit<InputOptions<Read
  *
  * @developerPreview
  */
-export declare type InputOptionsWithTransform<ReadT, WriteT> = Required<Pick<InputOptions<ReadT, WriteT>, 'transform'>> & InputOptions<ReadT, WriteT>;
+export declare type InputOptionsWithTransform<T, TransformT> = Required<Pick<InputOptions<T, TransformT>, 'transform'>> & InputOptions<T, TransformT>;
 
 /**
  * `InputSignal` represents a special `Signal` for a directive/component input.
@@ -5758,28 +5780,28 @@ export declare type InputOptionsWithTransform<ReadT, WriteT> = Required<Pick<Inp
  *
  * @developerPreview
  */
-export declare interface InputSignal<ReadT> extends InputSignalWithTransform<ReadT, ReadT> {
+export declare interface InputSignal<T> extends InputSignalWithTransform<T, T> {
 }
 
 /**
  * Reactive node type for an input signal. An input signal extends a signal.
  * There are special properties to enable transforms and required inputs.
  */
-declare interface InputSignalNode<ReadT, WriteT> extends SignalNode<ReadT> {
+declare interface InputSignalNode<T, TransformT> extends SignalNode<T> {
     /**
      * User-configured transform that will run whenever a new value is applied
      * to the input signal node.
      */
-    transformFn: ((value: WriteT) => ReadT) | undefined;
+    transformFn: ((value: TransformT) => T) | undefined;
     /**
      * Applies a new value to the input signal. Expects transforms to be run
      * manually before.
      *
      * This function is called by the framework runtime code whenever a binding
      * changes. The value can in practice be anything at runtime, but for typing
-     * purposes we assume it's a valid `ReadT` value. Type-checking will enforce that.
+     * purposes we assume it's a valid `T` value. Type-checking will enforce that.
      */
-    applyValueToInputSignal<ReadT, WriteT>(node: InputSignalNode<ReadT, WriteT>, value: ReadT): void;
+    applyValueToInputSignal<T, TransformT>(node: InputSignalNode<T, TransformT>, value: T): void;
 }
 
 /**
@@ -5806,10 +5828,10 @@ declare interface InputSignalNode<ReadT, WriteT> extends SignalNode<ReadT> {
  *
  * @developerPreview
  */
-export declare interface InputSignalWithTransform<ReadT, WriteT> extends Signal<ReadT> {
-    [SIGNAL]: InputSignalNode<ReadT, WriteT>;
-    [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: ReadT;
-    [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: WriteT;
+export declare interface InputSignalWithTransform<T, TransformT> extends Signal<T> {
+    [SIGNAL]: InputSignalNode<T, TransformT>;
+    [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: T;
+    [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: TransformT;
 }
 
 /** Function that can be used to transform incoming input values. */
@@ -6776,31 +6798,51 @@ export declare enum MissingTranslationStrategy {
 }
 
 /**
- * `model` declares a writeable signal that is exposed as an input/output pair on the containing
- * directive. The input name is taken either from the class member or from the `alias` option.
+ * `model` declares a writeable signal that is exposed as an input/output
+ * pair on the containing directive.
+ *
+ * The input name is taken either from the class member or from the `alias` option.
  * The output name is generated by taking the input name and appending `Change`.
  *
- * Initializes a model with an initial value. If no explicit value
- * is specified, Angular will use `undefined`.
- *
- * Consider using `model.required` for models that don't need an
- * initial value.
- *
  * @usageNotes
- * Initialize a model in your directive or component by declaring a
- * class field and initializing it with the `model()` or `model.required()`
- * function.
+ *
+ * To use `model()`, import the function from `@angular/core`.
+ *
+ * ```
+ * import {model} from '@angular/core`;
+ * ```
+ *
+ * Inside your component, introduce a new class member and initialize
+ * it with a call to `model` or `model.required`.
  *
  * ```ts
- * @Directive({..})
+ * @Directive({
+ *   ...
+ * })
  * export class MyDir {
- *   firstName = model<string>();            // string|undefined
- *   lastName = model.required<string>();    // string
- *   age = model(0);                         // number
+ *   firstName = model<string>();            // ModelSignal<string|undefined>
+ *   lastName  = model.required<string>();   // ModelSignal<string>
+ *   age       = model(0);                   // ModelSignal<number>
+ * }
+ * ```
+ *
+ * Inside your component template, you can display the value of a `model`
+ * by calling the signal.
+ *
+ * ```html
+ * <span>{{firstName()}}</span>
+ * ```
+ *
+ * Updating the `model` is equivalent to updating a writable signal.
+ *
+ * ```ts
+ * updateName(newFirstName: string): void {
+ *   this.firstName.set(newFirstName);
  * }
  * ```
  *
  * @developerPreview
+ * @initializerApiFunction
  */
 export declare const model: ModelFunction;
 
@@ -6812,43 +6854,26 @@ export declare const model: ModelFunction;
  * The function exposes an API for also declaring required models via the
  * `model.required` function.
  *
- * @usageNotes
- * Initialize a model in your directive or component by declaring a
- * class field and initializing it with the `model()` or `model.required()`
- * function.
- *
- * ```ts
- * @Directive({..})
- * export class MyDir {
- *   firstName = model<string>();            // string|undefined
- *   lastName = model.required<string>();    // string
- *   age = model(0);                         // number
- * }
- * ```
- *
  * @developerPreview
+ * @docsPrivate Ignored because `model` is the canonical API entry.
  */
 export declare interface ModelFunction {
     /**
-     * Initializes a model with an initial value. If no explicit value
-     * is specified, Angular will use `undefined`.
-     *
-     * Consider using `model.required` for models that don't need an
-     * initial value.
-     *
-     * @developerPreview
+     * Initializes a model of type `T` with an initial value of `undefined`.
+     * Angular will implicitly use `undefined` as initial value.
      */
     <T>(): ModelSignal<T | undefined>;
+    /** Initializes a model of type `T` with the given initial value. */
     <T>(initialValue: T, opts?: ModelOptions): ModelSignal<T>;
-    /**
-     * Initializes a required model.
-     *
-     * Users of your directive/component need to bind to the input side of the model.
-     * If unset, a compile time error will be reported.
-     *
-     * @developerPreview
-     */
-    required<T>(opts?: ModelOptions): ModelSignal<T>;
+    required: {
+        /**
+         * Initializes a required model.
+         *
+         * Users of your directive/component need to bind to the input side of the model.
+         * If unset, a compile time error will be reported.
+         */
+        <T>(opts?: ModelOptions): ModelSignal<T>;
+    };
 }
 
 /**
@@ -7647,25 +7672,47 @@ export declare interface Output {
 export declare const Output: OutputDecorator;
 
 /**
- * The `output` function allows declaration of outputs in directives and
- * components.
+ * The `output` function allows declaration of Angular outputs in
+ * directives and components.
  *
- * Initializes an output that can emit values to consumers of your
- * directive/component.
+ * You can use outputs to emit values to parent directives and component.
+ * Parents can subscribe to changes via:
+ *
+ * - template event bindings. For example, `(myOutput)="doSomething($event)"`
+ * - programmatic subscription by using `OutputRef#subscribe`.
  *
  * @usageNotes
- * Initialize an output in your directive by declaring a
- * class field and initializing it with the `output()` function.
+ *
+ * To use `output()`, import the function from `@angular/core`.
+ *
+ * ```
+ * import {output} from '@angular/core`;
+ * ```
+ *
+ * Inside your component, introduce a new class member and initialize
+ * it with a call to `output`.
  *
  * ```ts
- * @Directive({..})
+ * @Directive({
+ *   ...
+ * })
  * export class MyDir {
- *   nameChange = output<string>();     // OutputEmitterRef<string>
- *   onClick = output();                // OutputEmitterRef<void>
+ *   nameChange = output<string>();    // OutputEmitterRef<string>
+ *   onClick    = output();            // OutputEmitterRef<void>
+ * }
+ * ```
+ *
+ * You can emit values to consumers of your directive, by using
+ * the `emit` method from `OutputEmitterRef`.
+ *
+ * ```ts
+ * updateName(newName: string): void {
+ *   this.nameChange.emit(newName);
  * }
  * ```
  *
  * @developerPreview
+ * @initializerApiFunction {"showTypesInSignaturePreview": true}
  */
 export declare function output<T = void>(opts?: OutputOptions): OutputEmitterRef<T>;
 
@@ -11104,6 +11151,7 @@ export declare const ViewChild: ViewChildDecorator;
  * ```
  *
  * @developerPreview
+ * @initializerApiFunction
  */
 export declare const viewChild: ViewChildFunction;
 
@@ -11185,6 +11233,7 @@ export declare interface ViewChildDecorator {
  * property.
  *
  * @developerPreview
+ * @docsPrivate Ignored because `viewChild` is the canonical API entry.
  */
 export declare interface ViewChildFunction {
     /**
@@ -13556,7 +13605,7 @@ export declare type ɵUnwrapDirectiveSignalInputs<Dir, Fields extends keyof Dir>
     [P in Fields]: ɵUnwrapInputSignalWriteType<Dir[P]>;
 };
 
-/** Retrieves the `WriteT` of an `InputSignal` and `InputSignalWithTransform`. */
+/** Retrieves the write type of an `InputSignal` and `InputSignalWithTransform`. */
 declare type ɵUnwrapInputSignalWriteType<Field> = Field extends InputSignalWithTransform<any, infer WriteT> ? WriteT : never;
 
 export declare function ɵunwrapSafeValue(value: ɵSafeValue): string;
@@ -15600,14 +15649,19 @@ export declare type ɵɵPipeDeclaration<T, Name extends string, IsStandalone ext
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
  *
- * @param nodeIndex
- * @param selectorIndex:
- *        - 0 when the selector is `*` (or unspecified as this is the default value),
- *        - 1 based index of the selector from the {@link projectionDef}
+ * @param nodeIndex Index of the projection node.
+ * @param selectorIndex Index of the slot selector.
+ *  - 0 when the selector is `*` (or unspecified as this is the default value),
+ *  - 1 based index of the selector from the {@link projectionDef}
+ * @param attrs Static attributes set on the `ng-content` node.
+ * @param fallbackTemplateFn Template function with fallback content.
+ *   Will be rendered if the slot is empty at runtime.
+ * @param fallbackDecls Number of declarations in the fallback template.
+ * @param fallbackVars Number of variables in the fallback template.
  *
  * @codeGenApi
  */
-export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes): void;
+export declare function ɵɵprojection(nodeIndex: number, selectorIndex?: number, attrs?: TAttributes, fallbackTemplateFn?: ComponentTemplate<unknown>, fallbackDecls?: number, fallbackVars?: number): void;
 
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.

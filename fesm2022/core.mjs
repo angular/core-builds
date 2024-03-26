@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.1+sha-e1650e3
+ * @license Angular v18.0.0-next.1+sha-d15dca0
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6677,25 +6677,47 @@ function getOutputDestroyRef(ref) {
 }
 
 /**
- * The `output` function allows declaration of outputs in directives and
- * components.
+ * The `output` function allows declaration of Angular outputs in
+ * directives and components.
  *
- * Initializes an output that can emit values to consumers of your
- * directive/component.
+ * You can use outputs to emit values to parent directives and component.
+ * Parents can subscribe to changes via:
+ *
+ * - template event bindings. For example, `(myOutput)="doSomething($event)"`
+ * - programmatic subscription by using `OutputRef#subscribe`.
  *
  * @usageNotes
- * Initialize an output in your directive by declaring a
- * class field and initializing it with the `output()` function.
+ *
+ * To use `output()`, import the function from `@angular/core`.
+ *
+ * ```
+ * import {output} from '@angular/core`;
+ * ```
+ *
+ * Inside your component, introduce a new class member and initialize
+ * it with a call to `output`.
  *
  * ```ts
- * @Directive({..})
+ * @Directive({
+ *   ...
+ * })
  * export class MyDir {
- *   nameChange = output<string>();     // OutputEmitterRef<string>
- *   onClick = output();                // OutputEmitterRef<void>
+ *   nameChange = output<string>();    // OutputEmitterRef<string>
+ *   onClick    = output();            // OutputEmitterRef<void>
+ * }
+ * ```
+ *
+ * You can emit values to consumers of your directive, by using
+ * the `emit` method from `OutputEmitterRef`.
+ *
+ * ```ts
+ * updateName(newName: string): void {
+ *   this.nameChange.emit(newName);
  * }
  * ```
  *
  * @developerPreview
+ * @initializerApiFunction {"showTypesInSignaturePreview": true}
  */
 function output(opts) {
     ngDevMode && assertInInjectionContext(output);
@@ -6711,29 +6733,52 @@ function inputRequiredFunction(opts) {
     return createInputSignal(REQUIRED_UNSET_VALUE, opts);
 }
 /**
- * The `input` function allows declaration of inputs in directives and
- * components.
+ * The `input` function allows declaration of Angular inputs in directives
+ * and components.
  *
- * Initializes an input with an initial value. If no explicit value
- * is specified, Angular will use `undefined`.
+ * There are two variants of inputs that can be declared:
  *
- * Consider using `input.required` for inputs that don't need an
- * initial value.
+ *   1. **Optional inputs** with an initial value.
+ *   2. **Required inputs** that consumers need to set.
+ *
+ * By default, the `input` function will declare optional inputs that
+ * always have an initial value. Required inputs can be declared
+ * using the `input.required()` function.
+ *
+ * Inputs are signals. The values of an input are exposed as a `Signal`.
+ * The signal always holds the latest value of the input that is bound
+ * from the parent.
  *
  * @usageNotes
- * Initialize an input in your directive or component by declaring a
- * class field and initializing it with the `input()` function.
+ * To use signal-based inputs, import `input` from `@angular/core`.
+ *
+ * ```
+ * import {input} from '@angular/core`;
+ * ```
+ *
+ * Inside your component, introduce a new class member and initialize
+ * it with a call to `input` or `input.required`.
  *
  * ```ts
- * @Directive({..})
- * export class MyDir {
- *   firstName = input<string>();            // string|undefined
- *   lastName = input.required<string>();    // string
- *   age = input(0);                         // number
+ * @Component({
+ *   ...
+ * })
+ * export class UserProfileComponent {
+ *   firstName = input<string>();             // Signal<string|undefined>
+ *   lastName  = input.required<string>();    // Signal<string>
+ *   age       = input(0)                     // Signal<number>
  * }
  * ```
  *
+ * Inside your component template, you can display values of the inputs
+ * by calling the signal.
+ *
+ * ```html
+ * <span>{{firstName()}}</span>
+ * ```
+ *
  * @developerPreview
+ * @initializerApiFunction
  */
 const input = (() => {
     // Note: This may be considered a side-effect, but nothing will depend on
@@ -16040,7 +16085,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.1+sha-e1650e3']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.1+sha-d15dca0']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -17093,6 +17138,7 @@ function viewChildRequiredFn(locator, opts) {
  * ```
  *
  * @developerPreview
+ * @initializerApiFunction
  */
 const viewChild = (() => {
     // Note: This may be considered a side-effect, but nothing will depend on
@@ -17117,6 +17163,9 @@ const viewChild = (() => {
  *   divEls = viewChildren<ElementRef>('el');   // Signal<ReadonlyArray<ElementRef>>
  * }
  * ```
+ *
+ * @initializerApiFunction
+ * @developerPreview
  */
 function viewChildren(locator, opts) {
     ngDevMode && assertInInjectionContext(viewChildren);
@@ -17147,6 +17196,9 @@ function contentChildRequiredFn(locator, opts) {
  *   headerRequired = contentChild.required(MyHeader);            // Signal<MyHeader>
  * }
  * ```
+ *
+ * @initializerApiFunction
+ * @developerPreview
  */
 const contentChild = (() => {
     // Note: This may be considered a side-effect, but nothing will depend on
@@ -17171,6 +17223,9 @@ const contentChild = (() => {
  *   headerEl = contentChildren<ElementRef>('h');   // Signal<ReadonlyArray<ElementRef>>
  * }
  * ```
+ *
+ * @initializerApiFunction
+ * @developerPreview
  */
 function contentChildren(locator, opts) {
     return createMultiResultQuerySignalFn();
@@ -17228,31 +17283,51 @@ function modelRequiredFunction() {
     return createModelSignal(REQUIRED_UNSET_VALUE);
 }
 /**
- * `model` declares a writeable signal that is exposed as an input/output pair on the containing
- * directive. The input name is taken either from the class member or from the `alias` option.
+ * `model` declares a writeable signal that is exposed as an input/output
+ * pair on the containing directive.
+ *
+ * The input name is taken either from the class member or from the `alias` option.
  * The output name is generated by taking the input name and appending `Change`.
  *
- * Initializes a model with an initial value. If no explicit value
- * is specified, Angular will use `undefined`.
- *
- * Consider using `model.required` for models that don't need an
- * initial value.
- *
  * @usageNotes
- * Initialize a model in your directive or component by declaring a
- * class field and initializing it with the `model()` or `model.required()`
- * function.
+ *
+ * To use `model()`, import the function from `@angular/core`.
+ *
+ * ```
+ * import {model} from '@angular/core`;
+ * ```
+ *
+ * Inside your component, introduce a new class member and initialize
+ * it with a call to `model` or `model.required`.
  *
  * ```ts
- * @Directive({..})
+ * @Directive({
+ *   ...
+ * })
  * export class MyDir {
- *   firstName = model<string>();            // string|undefined
- *   lastName = model.required<string>();    // string
- *   age = model(0);                         // number
+ *   firstName = model<string>();            // ModelSignal<string|undefined>
+ *   lastName  = model.required<string>();   // ModelSignal<string>
+ *   age       = model(0);                   // ModelSignal<number>
+ * }
+ * ```
+ *
+ * Inside your component template, you can display the value of a `model`
+ * by calling the signal.
+ *
+ * ```html
+ * <span>{{firstName()}}</span>
+ * ```
+ *
+ * Updating the `model` is equivalent to updating a writable signal.
+ *
+ * ```ts
+ * updateName(newFirstName: string): void {
+ *   this.firstName.set(newFirstName);
  * }
  * ```
  *
  * @developerPreview
+ * @initializerApiFunction
  */
 const model = (() => {
     // Note: This may be considered a side-effect, but nothing will depend on
@@ -18411,18 +18486,59 @@ function isDetachedByI18n(tNode) {
     return (tNode.flags & 32 /* TNodeFlags.isDetached */) === 32 /* TNodeFlags.isDetached */;
 }
 
-function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) {
+function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrs, localRefsIndex) {
     ngDevMode && assertFirstCreatePass(tView);
     ngDevMode && ngDevMode.firstCreatePass++;
     const tViewConsts = tView.consts;
     // TODO(pk): refactor getOrCreateTNode to have the "create" only version
-    const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, getConstant(tViewConsts, attrsIndex));
+    const tNode = getOrCreateTNode(tView, index, 4 /* TNodeType.Container */, tagName || null, attrs || null);
     resolveDirectives(tView, lView, tNode, getConstant(tViewConsts, localRefsIndex));
     registerPostOrderHooks(tView, tNode);
     const embeddedTView = tNode.tView = createTView(2 /* TViewType.Embedded */, tNode, templateFn, decls, vars, tView.directiveRegistry, tView.pipeRegistry, null, tView.schemas, tViewConsts, null /* ssrId */);
     if (tView.queries !== null) {
         tView.queries.template(tView, tNode);
         embeddedTView.queries = tView.queries.embeddedTView(tNode);
+    }
+    return tNode;
+}
+/**
+ * Creates an LContainer for an embedded view.
+ *
+ * @param declarationLView LView in which the template was declared.
+ * @param declarationTView TView in which the template wa declared.
+ * @param index The index of the container in the data array
+ * @param templateFn Inline template
+ * @param decls The number of nodes, local refs, and pipes for this template
+ * @param vars The number of bindings for this template
+ * @param tagName The name of the container element, if applicable
+ * @param attrsIndex Index of template attributes in the `consts` array.
+ * @param localRefs Index of the local references in the `consts` array.
+ * @param localRefExtractor A function which extracts local-refs values from the template.
+ *        Defaults to the current element associated with the local-ref.
+ */
+function declareTemplate(declarationLView, declarationTView, index, templateFn, decls, vars, tagName, attrs, localRefsIndex, localRefExtractor) {
+    const adjustedIndex = index + HEADER_OFFSET;
+    const tNode = declarationTView.firstCreatePass ?
+        templateFirstCreatePass(adjustedIndex, declarationTView, declarationLView, templateFn, decls, vars, tagName, attrs, localRefsIndex) :
+        declarationTView.data[adjustedIndex];
+    setCurrentTNode(tNode, false);
+    const comment = _locateOrCreateContainerAnchor(declarationTView, declarationLView, tNode, index);
+    if (wasLastNodeCreated()) {
+        appendChild(declarationTView, declarationLView, comment, tNode);
+    }
+    attachPatchData(comment, declarationLView);
+    const lContainer = createLContainer(comment, declarationLView, comment, tNode);
+    declarationLView[adjustedIndex] = lContainer;
+    addToViewTree(declarationLView, lContainer);
+    // If hydration is enabled, looks up dehydrated views in the DOM
+    // using hydration annotation info and stores those views on LContainer.
+    // In client-only mode, this function is a noop.
+    populateDehydratedViewsInLContainer(lContainer, tNode, declarationLView);
+    if (isDirectiveHost(tNode)) {
+        createDirectivesInstances(declarationTView, declarationLView, tNode);
+    }
+    if (localRefsIndex != null) {
+        saveResolvedLocalsInData(declarationLView, tNode, localRefExtractor);
     }
     return tNode;
 }
@@ -18448,28 +18564,8 @@ function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, t
 function ɵɵtemplate(index, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex, localRefExtractor) {
     const lView = getLView();
     const tView = getTView();
-    const adjustedIndex = index + HEADER_OFFSET;
-    const tNode = tView.firstCreatePass ? templateFirstCreatePass(adjustedIndex, tView, lView, templateFn, decls, vars, tagName, attrsIndex, localRefsIndex) :
-        tView.data[adjustedIndex];
-    setCurrentTNode(tNode, false);
-    const comment = _locateOrCreateContainerAnchor(tView, lView, tNode, index);
-    if (wasLastNodeCreated()) {
-        appendChild(tView, lView, comment, tNode);
-    }
-    attachPatchData(comment, lView);
-    const lContainer = createLContainer(comment, lView, comment, tNode);
-    lView[adjustedIndex] = lContainer;
-    addToViewTree(lView, lContainer);
-    // If hydration is enabled, looks up dehydrated views in the DOM
-    // using hydration annotation info and stores those views on LContainer.
-    // In client-only mode, this function is a noop.
-    populateDehydratedViewsInLContainer(lContainer, tNode, lView);
-    if (isDirectiveHost(tNode)) {
-        createDirectivesInstances(tView, lView, tNode);
-    }
-    if (localRefsIndex != null) {
-        saveResolvedLocalsInData(lView, tNode, localRefExtractor);
-    }
+    const attrs = getConstant(tView.consts, attrsIndex);
+    declareTemplate(lView, tView, index, templateFn, decls, vars, tagName, attrs, localRefsIndex, localRefExtractor);
     return ɵɵtemplate;
 }
 let _locateOrCreateContainerAnchor = createContainerAnchorImpl;
@@ -19363,7 +19459,7 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
     const lView = getLView();
     const tView = getTView();
     const adjustedIndex = index + HEADER_OFFSET;
-    ɵɵtemplate(index, null, 0, 0);
+    const tNode = declareTemplate(lView, tView, index, null, 0, 0);
     if (tView.firstCreatePass) {
         performanceMarkFeature('NgDefer');
         const tDetails = {
@@ -19381,7 +19477,6 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
         enableTimerScheduling?.(tView, tDetails, placeholderConfigIndex, loadingConfigIndex);
         setTDeferBlockDetails(tView, adjustedIndex, tDetails);
     }
-    const tNode = getCurrentTNode();
     const lContainer = lView[adjustedIndex];
     // If hydration is enabled, looks up dehydrated views in the DOM
     // using hydration annotation info and stores those views on LContainer.
@@ -22783,6 +22878,8 @@ function ɵɵrepeaterCreate(index, templateFn, decls, vars, tagName, attrsIndex,
     performanceMarkFeature('NgControlFlow');
     ngDevMode &&
         assertFunction(trackByFn, `A track expression must be a function, was ${typeof trackByFn} instead.`);
+    const lView = getLView();
+    const tView = getTView();
     const hasEmptyBlock = emptyTemplateFn !== undefined;
     const hostLView = getLView();
     const boundTrackBy = trackByUsesComponentInstance ?
@@ -22792,13 +22889,13 @@ function ɵɵrepeaterCreate(index, templateFn, decls, vars, tagName, attrsIndex,
         trackByFn;
     const metadata = new RepeaterMetadata(hasEmptyBlock, boundTrackBy);
     hostLView[HEADER_OFFSET + index] = metadata;
-    ɵɵtemplate(index + 1, templateFn, decls, vars, tagName, attrsIndex);
+    declareTemplate(lView, tView, index + 1, templateFn, decls, vars, tagName, getConstant(tView.consts, attrsIndex));
     if (hasEmptyBlock) {
         ngDevMode &&
             assertDefined(emptyDecls, 'Missing number of declarations for the empty repeater block.');
         ngDevMode &&
             assertDefined(emptyVars, 'Missing number of bindings for the empty repeater block.');
-        ɵɵtemplate(index + 2, emptyTemplateFn, emptyDecls, emptyVars, emptyTagName, emptyAttrsIndex);
+        declareTemplate(lView, tView, index + 2, emptyTemplateFn, emptyDecls, emptyVars, emptyTagName, getConstant(tView.consts, emptyAttrsIndex));
     }
 }
 class LiveCollectionLContainerImpl extends LiveCollection {
@@ -25743,29 +25840,51 @@ function ɵɵprojectionDef(projectionSlots) {
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
  *
- * @param nodeIndex
- * @param selectorIndex:
- *        - 0 when the selector is `*` (or unspecified as this is the default value),
- *        - 1 based index of the selector from the {@link projectionDef}
+ * @param nodeIndex Index of the projection node.
+ * @param selectorIndex Index of the slot selector.
+ *  - 0 when the selector is `*` (or unspecified as this is the default value),
+ *  - 1 based index of the selector from the {@link projectionDef}
+ * @param attrs Static attributes set on the `ng-content` node.
+ * @param fallbackTemplateFn Template function with fallback content.
+ *   Will be rendered if the slot is empty at runtime.
+ * @param fallbackDecls Number of declarations in the fallback template.
+ * @param fallbackVars Number of variables in the fallback template.
  *
  * @codeGenApi
  */
-function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs) {
+function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs, fallbackTemplateFn, fallbackDecls, fallbackVars) {
     const lView = getLView();
     const tView = getTView();
     const tProjectionNode = getOrCreateTNode(tView, HEADER_OFFSET + nodeIndex, 16 /* TNodeType.Projection */, null, attrs || null);
     // We can't use viewData[HOST_NODE] because projection nodes can be nested in embedded views.
-    if (tProjectionNode.projection === null)
+    if (tProjectionNode.projection === null) {
         tProjectionNode.projection = selectorIndex;
-    // `<ng-content>` has no content
+    }
+    // `<ng-content>` has no content. Even if there's fallback
+    // content, the fallback is shown next to it.
     setCurrentTNodeAsNotParent();
     const hydrationInfo = lView[HYDRATION];
     const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1();
-    if (isNodeCreationMode &&
+    const componentHostNode = lView[DECLARATION_COMPONENT_VIEW][T_HOST];
+    const isEmpty = componentHostNode.projection[tProjectionNode.projection] === null;
+    if (isEmpty && fallbackTemplateFn) {
+        insertFallbackContent(lView, tView, nodeIndex, fallbackTemplateFn, fallbackDecls, fallbackVars, attrs);
+    }
+    else if (isNodeCreationMode &&
         (tProjectionNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
         // re-distribution of projectable nodes is stored on a component's view level
         applyProjection(tView, lView, tProjectionNode);
     }
+}
+/** Inserts the fallback content of a projection slot. Assumes there's no projected content. */
+function insertFallbackContent(lView, tView, projectionIndex, templateFn, decls, vars, attrs) {
+    const fallbackIndex = projectionIndex + 1;
+    const fallbackTNode = declareTemplate(lView, tView, fallbackIndex, templateFn, decls, vars, null, attrs);
+    const fallbackLContainer = lView[HEADER_OFFSET + fallbackIndex];
+    ngDevMode && assertLContainer(fallbackLContainer);
+    const dehydratedView = findMatchingDehydratedView(fallbackLContainer, fallbackTNode.tView.ssrId);
+    const fallbackLView = createAndRenderEmbeddedLView(lView, fallbackTNode, undefined, { dehydratedView });
+    addLViewToLContainer(fallbackLContainer, fallbackLView, 0, shouldAddViewToDom(fallbackTNode, dehydratedView));
 }
 
 /**
@@ -29810,7 +29929,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.1+sha-e1650e3');
+const VERSION = new Version('18.0.0-next.1+sha-d15dca0');
 
 class Console {
     log(message) {

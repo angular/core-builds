@@ -4361,9 +4361,10 @@ var Template = class {
   }
 };
 var Content = class {
-  constructor(selector, attributes, sourceSpan, i18n2) {
+  constructor(selector, attributes, children, sourceSpan, i18n2) {
     this.selector = selector;
     this.attributes = attributes;
+    this.children = children;
     this.sourceSpan = sourceSpan;
     this.i18n = i18n2;
     this.name = "ng-content";
@@ -4458,6 +4459,7 @@ var RecursiveVisitor = class {
     visitAll(this, blockItems);
   }
   visitContent(content) {
+    visitAll(this, content.children);
   }
   visitVariable(variable2) {
   }
@@ -7696,18 +7698,21 @@ function createProjectionDefOp(def) {
     def
   }, NEW_OP);
 }
-function createProjectionOp(xref, selector, i18nPlaceholder, sourceSpan) {
-  return __spreadValues(__spreadValues({
+function createProjectionOp(xref, selector, i18nPlaceholder, fallbackView, sourceSpan) {
+  return __spreadProps(__spreadValues(__spreadValues({
     kind: OpKind.Projection,
     xref,
     handle: new SlotHandle(),
     selector,
     i18nPlaceholder,
+    fallbackView,
     projectionSlotIndex: 0,
     attributes: null,
     localRefs: [],
     sourceSpan
-  }, NEW_OP), TRAIT_CONSUMES_SLOT);
+  }, NEW_OP), TRAIT_CONSUMES_SLOT), {
+    numSlotsUsed: fallbackView === null ? 1 : 2
+  });
 }
 function createExtractedAttributeOp(target, bindingKind, namespace, name, expression, i18nContext, i18nMessage, securityContext) {
   return __spreadValues({
@@ -9252,6 +9257,11 @@ function recursivelyProcessView(view, parentScope) {
     switch (op.kind) {
       case OpKind.Template:
         recursivelyProcessView(view.job.views.get(op.xref), scope);
+        break;
+      case OpKind.Projection:
+        if (op.fallbackView !== null) {
+          recursivelyProcessView(view.job.views.get(op.fallbackView), scope);
+        }
         break;
       case OpKind.RepeaterCreate:
         recursivelyProcessView(view.job.views.get(op.xref), scope);
@@ -15833,6 +15843,18 @@ function addNamesToView(unit, baseName, state, compatibility) {
         }
         addNamesToView(unit.job.views.get(op.xref), `${baseName}_${op.functionNameSuffix}_${op.handle.slot + 1}`, state, compatibility);
         break;
+      case OpKind.Projection:
+        if (!(unit instanceof ViewCompilationUnit)) {
+          throw new Error(`AssertionError: must be compiling a component`);
+        }
+        if (op.handle.slot === null) {
+          throw new Error(`Expected slot to be assigned`);
+        }
+        if (op.fallbackView !== null) {
+          const fallbackView = unit.job.views.get(op.fallbackView);
+          addNamesToView(fallbackView, `${baseName}_ProjectionFallback_${op.handle.slot}`, state, compatibility);
+        }
+        break;
       case OpKind.Template:
         if (!(unit instanceof ViewCompilationUnit)) {
           throw new Error(`AssertionError: must be compiling a component`);
@@ -16499,12 +16521,18 @@ function deferOn(trigger, args, prefetch, sourceSpan) {
 function projectionDef(def) {
   return call(Identifiers.projectionDef, def ? [def] : [], null);
 }
-function projection(slot, projectionSlotIndex, attributes, sourceSpan) {
+function projection(slot, projectionSlotIndex, attributes, fallbackFnName, fallbackDecls, fallbackVars, sourceSpan) {
   const args = [literal(slot)];
-  if (projectionSlotIndex !== 0 || attributes !== null) {
+  if (projectionSlotIndex !== 0 || attributes !== null || fallbackFnName !== null) {
     args.push(literal(projectionSlotIndex));
     if (attributes !== null) {
       args.push(attributes);
+    }
+    if (fallbackFnName !== null) {
+      if (attributes === null) {
+        args.push(literal(null));
+      }
+      args.push(variable(fallbackFnName), literal(fallbackDecls), literal(fallbackVars));
     }
   }
   return call(Identifiers.projection, args, sourceSpan);
@@ -17008,7 +17036,25 @@ function reifyCreateOperations(unit, ops) {
         if (op.handle.slot === null) {
           throw new Error("No slot was assigned for project instruction");
         }
-        OpList.replace(op, projection(op.handle.slot, op.projectionSlotIndex, op.attributes, op.sourceSpan));
+        let fallbackViewFnName = null;
+        let fallbackDecls = null;
+        let fallbackVars = null;
+        if (op.fallbackView !== null) {
+          if (!(unit instanceof ViewCompilationUnit)) {
+            throw new Error(`AssertionError: must be compiling a component`);
+          }
+          const fallbackView = unit.job.views.get(op.fallbackView);
+          if (fallbackView === void 0) {
+            throw new Error("AssertionError: projection had fallback view xref, but fallback view was not found");
+          }
+          if (fallbackView.fnName === null || fallbackView.decls === null || fallbackView.vars === null) {
+            throw new Error(`AssertionError: expected projection fallback view to have been named and counted`);
+          }
+          fallbackViewFnName = fallbackView.fnName;
+          fallbackDecls = fallbackView.decls;
+          fallbackVars = fallbackView.vars;
+        }
+        OpList.replace(op, projection(op.handle.slot, op.projectionSlotIndex, op.attributes, fallbackViewFnName, fallbackDecls, fallbackVars, op.sourceSpan));
         break;
       case OpKind.RepeaterCreate:
         if (op.handle.slot === null) {
@@ -18717,10 +18763,17 @@ function ingestTemplate(unit, tmpl) {
   }
 }
 function ingestContent(unit, content) {
+  var _a2;
   if (content.i18n !== void 0 && !(content.i18n instanceof TagPlaceholder)) {
     throw Error(`Unhandled i18n metadata type for element: ${content.i18n.constructor.name}`);
   }
-  const op = createProjectionOp(unit.job.allocateXrefId(), content.selector, content.i18n, content.sourceSpan);
+  const id = unit.job.allocateXrefId();
+  let fallbackView = null;
+  if (content.children.some((child) => !(child instanceof Comment) && (!(child instanceof Text) || child.value.trim().length > 0))) {
+    fallbackView = unit.job.allocateView(unit.xref);
+    ingestNodes(fallbackView, content.children);
+  }
+  const op = createProjectionOp(id, content.selector, content.i18n, (_a2 = fallbackView == null ? void 0 : fallbackView.xref) != null ? _a2 : null, content.sourceSpan);
   for (const attr of content.attributes) {
     const securityContext = domSchema.securityContext(content.name, attr.name, true);
     unit.update.push(createBindingOp(op.xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
@@ -20744,12 +20797,9 @@ var HtmlAstToIvyAst = class {
     }
     let parsedElement;
     if (preparsedElement.type === PreparsedElementType.NG_CONTENT) {
-      if (element2.children && !element2.children.every((node) => isEmptyTextNode(node) || isCommentNode(node))) {
-        this.reportError(`<ng-content> element cannot have content.`, element2.sourceSpan);
-      }
       const selector = preparsedElement.selectAttr;
       const attrs = element2.attrs.map((attr) => this.visitAttribute(attr));
-      parsedElement = new Content(selector, attrs, element2.sourceSpan, element2.i18n);
+      parsedElement = new Content(selector, attrs, children, element2.sourceSpan, element2.i18n);
       this.ngContentSelectors.push(selector);
     } else if (isTemplateElement) {
       const attrs = this.extractAttributes(element2.name, parsedProperties, i18nAttrsMeta);
@@ -21052,12 +21102,6 @@ function normalizeAttributeName(attrName) {
 }
 function addEvents(events, boundEvents) {
   boundEvents.push(...events.map((e) => BoundEvent.fromParsedEvent(e)));
-}
-function isEmptyTextNode(node) {
-  return node instanceof Text4 && node.value.trim().length == 0;
-}
-function isCommentNode(node) {
-  return node instanceof Comment2;
 }
 function textContents(node) {
   if (node.children.length !== 1 || !(node.children[0] instanceof Text4)) {
@@ -21549,7 +21593,7 @@ var Scope2 = class {
       this.visitVariable(nodeOrNodes.item);
       nodeOrNodes.contextVariables.forEach((v) => this.visitVariable(v));
       nodeOrNodes.children.forEach((node) => node.visit(this));
-    } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlock || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading) {
+    } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlock || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading || nodeOrNodes instanceof Content) {
       nodeOrNodes.children.forEach((node) => node.visit(this));
     } else {
       nodeOrNodes.forEach((node) => node.visit(this));
@@ -21607,6 +21651,7 @@ var Scope2 = class {
     this.ingestScopedNode(block);
   }
   visitContent(content) {
+    this.ingestScopedNode(content);
   }
   visitBoundAttribute(attr) {
   }
@@ -21761,6 +21806,7 @@ var DirectiveBinder = class {
     block.children.forEach((node) => node.visit(this));
   }
   visitContent(content) {
+    content.children.forEach((child) => child.visit(this));
   }
   visitVariable(variable2) {
   }
@@ -21842,7 +21888,7 @@ var TemplateBinder = class extends RecursiveAstVisitor {
       this.deferBlocks.push([nodeOrNodes, this.scope]);
       nodeOrNodes.children.forEach((node) => node.visit(this));
       this.nestingLevel.set(nodeOrNodes, this.level);
-    } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading) {
+    } else if (nodeOrNodes instanceof SwitchBlockCase || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading || nodeOrNodes instanceof Content) {
       nodeOrNodes.children.forEach((node) => node.visit(this));
       this.nestingLevel.set(nodeOrNodes, this.level);
     } else {
@@ -21873,8 +21919,6 @@ var TemplateBinder = class extends RecursiveAstVisitor {
     }
   }
   visitText(text2) {
-  }
-  visitContent(content) {
   }
   visitTextAttribute(attribute2) {
   }
@@ -21935,6 +21979,9 @@ var TemplateBinder = class extends RecursiveAstVisitor {
     var _a2;
     (_a2 = block.expression) == null ? void 0 : _a2.visit(this);
     this.ingestScopedNode(block);
+  }
+  visitContent(content) {
+    this.ingestScopedNode(content);
   }
   visitBoundText(text2) {
     text2.value.visit(this);
@@ -22699,7 +22746,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.1+sha-e1650e3");
+var VERSION2 = new Version("18.0.0-next.1+sha-d15dca0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
