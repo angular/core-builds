@@ -20039,6 +20039,9 @@ function parseForLoopParameters(block, errors, bindingParser) {
     return null;
   }
   const [, itemName, rawExpression] = match;
+  if (ALLOWED_FOR_LOOP_LET_VARIABLES.has(itemName)) {
+    errors.push(new ParseError(expressionParam.sourceSpan, `@for loop item name cannot be one of ${Array.from(ALLOWED_FOR_LOOP_LET_VARIABLES).join(", ")}.`));
+  }
   const variableName = expressionParam.expression.split(" ")[0];
   const variableSpan = new ParseSourceSpan(expressionParam.sourceSpan.start, expressionParam.sourceSpan.start.moveBy(variableName.length));
   const result = {
@@ -20054,7 +20057,7 @@ function parseForLoopParameters(block, errors, bindingParser) {
     const letMatch = param.expression.match(FOR_LOOP_LET_PATTERN);
     if (letMatch !== null) {
       const variablesSpan = new ParseSourceSpan(param.sourceSpan.start.moveBy(letMatch[0].length - letMatch[1].length), param.sourceSpan.end);
-      parseLetParameter(param.sourceSpan, letMatch[1], variablesSpan, result.context, errors);
+      parseLetParameter(param.sourceSpan, letMatch[1], variablesSpan, itemName, result.context, errors);
       continue;
     }
     const trackMatch = param.expression.match(FOR_LOOP_TRACK_PATTERN);
@@ -20075,7 +20078,7 @@ function parseForLoopParameters(block, errors, bindingParser) {
   }
   return result;
 }
-function parseLetParameter(sourceSpan, expression, span, context, errors) {
+function parseLetParameter(sourceSpan, expression, span, loopItemName, context, errors) {
   var _a2, _b2, _c2;
   const parts = expression.split(",");
   let startSpan = span.start;
@@ -20087,6 +20090,8 @@ function parseLetParameter(sourceSpan, expression, span, context, errors) {
       errors.push(new ParseError(sourceSpan, `Invalid @for loop "let" parameter. Parameter should match the pattern "<name> = <variable name>"`));
     } else if (!ALLOWED_FOR_LOOP_LET_VARIABLES.has(variableName)) {
       errors.push(new ParseError(sourceSpan, `Unknown "let" parameter variable "${variableName}". The allowed variables are: ${Array.from(ALLOWED_FOR_LOOP_LET_VARIABLES).join(", ")}`));
+    } else if (name === loopItemName) {
+      errors.push(new ParseError(sourceSpan, `Invalid @for loop "let" parameter. Variable cannot be called "${loopItemName}"`));
     } else if (context.some((v) => v.name === name)) {
       errors.push(new ParseError(sourceSpan, `Duplicate "let" parameter variable "${variableName}"`));
     } else {
@@ -22694,7 +22699,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.1+sha-ee3bb81");
+var VERSION2 = new Version("18.0.0-next.1+sha-e1650e3");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
