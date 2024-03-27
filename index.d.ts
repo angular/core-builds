@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.1+sha-9e60609
+ * @license Angular v18.0.0-next.1+sha-80f96e7
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7501,7 +7501,6 @@ declare type NodeOutputBindings = Record<string, (number | string)[]>;
 
 declare const NODES = "n";
 
-
 declare const enum NotificationType {
     RefreshViews = 0,
     AfterRenderHooks = 1
@@ -11913,6 +11912,7 @@ export declare const enum ɵBypassType {
  */
 export declare abstract class ɵChangeDetectionScheduler {
     abstract notify(source?: NotificationType): void;
+    abstract tick(shouldRefreshViews: boolean): void;
 }
 
 export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
@@ -13908,6 +13908,9 @@ declare const ɵWRITABLE_SIGNAL: unique symbol;
  * URL for the XSS security documentation.
  */
 export declare const ɵXSS_SECURITY_URL = "https://g.co/ng/security#xss";
+
+/** Token used to indicate if zoneless was enabled via provideZonelessChangeDetection(). */
+export declare const ɵZONELESS_ENABLED: InjectionToken<boolean>;
 
 /**
  * Advances to an element for later binding instructions.
