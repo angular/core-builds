@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.1+sha-e44b077
+ * @license Angular v18.0.0-next.1+sha-658cf8c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -71,6 +71,7 @@ export declare abstract class ComponentFixture<T> {
     changeDetectorRef: ChangeDetectorRef;
     private _renderer;
     private _isDestroyed;
+    private readonly pendingTasks;
     ngZone: NgZone | null;
     /** @nodoc */
     constructor(componentRef: ComponentRef<T>);
@@ -92,14 +93,14 @@ export declare abstract class ComponentFixture<T> {
      * Return whether the fixture is currently stable or has async tasks that have not been completed
      * yet.
      */
-    abstract isStable(): boolean;
+    isStable(): boolean;
     /**
      * Get a promise that resolves when the fixture is stable.
      *
      * This can be used to resume testing after events have triggered asynchronous activity or
      * asynchronous change detection.
      */
-    abstract whenStable(): Promise<any>;
+    whenStable(): Promise<any>;
     /**
      * Retrieves all defer block fixtures in the component fixture.
      *

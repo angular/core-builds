@@ -22042,9 +22042,9 @@ var R3BoundTarget = class {
   }
   findEntityInScope(rootNode, name) {
     const entities = this.getEntitiesInScope(rootNode);
-    for (const entitity of entities) {
-      if (entitity.name === name) {
-        return entitity;
+    for (const entity of entities) {
+      if (entity.name === name) {
+        return entity;
       }
     }
     return null;
@@ -22656,7 +22656,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.1+sha-e44b077");
+var VERSION2 = new Version("18.0.0-next.1+sha-658cf8c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

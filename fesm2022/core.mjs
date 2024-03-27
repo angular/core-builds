@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.1+sha-e44b077
+ * @license Angular v18.0.0-next.1+sha-658cf8c
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16085,7 +16085,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.1+sha-e44b077']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.1+sha-658cf8c']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29929,7 +29929,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.1+sha-e44b077');
+const VERSION = new Version('18.0.0-next.1+sha-658cf8c');
 
 class Console {
     log(message) {
@@ -30112,7 +30112,7 @@ function handleInstanceCreatedByInjectorEvent(context, data) {
     }
     const environmentInjector = context.injector.get(EnvironmentInjector, null, { optional: true });
     // Standalone components should have an environment injector. If one cannot be
-    // found we may be in a test case for low level functionality that did not explictly
+    // found we may be in a test case for low level functionality that did not explicitly
     // setup this injector. In those cases, we simply ignore this event.
     if (environmentInjector === null) {
         return;
@@ -30709,7 +30709,7 @@ function getInjectorParent(injector) {
         // todo(aleksanderbodurri): ideally nothing in packages/core should deal
         // directly with router concerns. Refactor this so that we can make the jump from
         // NodeInjector -> OutletInjector -> NodeInjector
-        // without explictly relying on types contracts from packages/router
+        // without explicitly relying on types contracts from packages/router
         const injectorParent = chainedInjector.injector?.parent;
         if (injectorParent instanceof NodeInjector) {
             return injectorParent;
