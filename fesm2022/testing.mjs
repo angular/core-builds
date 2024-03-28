@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.2+sha-67f0cf5
+ * @license Angular v17.3.2+sha-4d04399
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -404,6 +404,11 @@ function resetFakeAsyncZone() {
         return fakeAsyncTestModule.resetFakeAsyncZone();
     }
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
+}
+function resetFakeAsyncZoneIfExists() {
+    if (fakeAsyncTestModule) {
+        fakeAsyncTestModule.resetFakeAsyncZone();
+    }
 }
 /**
  * Wraps a function to be executed in the `fakeAsync` zone:
@@ -2213,7 +2218,7 @@ function getCleanupHook(expectedTeardownValue) {
         const testBed = TestBedImpl.INSTANCE;
         if (testBed.shouldTearDownTestingModule() === expectedTeardownValue) {
             testBed.resetTestingModule();
-            resetFakeAsyncZone();
+            resetFakeAsyncZoneIfExists();
         }
     };
 }
