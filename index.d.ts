@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-914e453
+ * @license Angular v18.0.0-next.2+sha-b87b2fc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -339,7 +339,7 @@ export declare interface AfterViewInit {
 export declare const ANIMATION_MODULE_TYPE: InjectionToken<"NoopAnimations" | "BrowserAnimations">;
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
+ * A DI token that provides a set of callbacks to
  * be called for every component that is bootstrapped.
  *
  * Each callback must take a `ComponentRef` instance and return nothing.
@@ -351,7 +351,7 @@ export declare const ANIMATION_MODULE_TYPE: InjectionToken<"NoopAnimations" | "B
 export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<readonly ((compRef: ComponentRef<any>) => void)[]>;
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") representing a string ID, used
+ * A DI token representing a string ID, used
  * primarily for prefixing application attributes and CSS styles when
  * {@link ViewEncapsulation#Emulated} is being used.
  *
@@ -383,7 +383,7 @@ export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<readonly ((compRef: 
 export declare const APP_ID: InjectionToken<string>;
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
+ * A DI token that you can use to provide
  * one or more initialization functions.
  *
  * The provided functions are injected at application startup and executed during
@@ -1767,11 +1767,11 @@ export declare abstract class ComponentRef<C> {
      */
     abstract setInput(name: string, value: unknown): void;
     /**
-     * The host or anchor [element](guide/glossary#element) for this component instance.
+     * The host or anchor element for this component instance.
      */
     abstract get location(): ElementRef;
     /**
-     * The [dependency injector](guide/glossary#injector) for this component instance.
+     * The dependency injector for this component instance.
      */
     abstract get injector(): Injector;
     /**
@@ -1779,7 +1779,7 @@ export declare abstract class ComponentRef<C> {
      */
     abstract get instance(): C;
     /**
-     * The [host view](guide/glossary#view-hierarchy) defined by the template
+     * The host view defined by the template
      * for this component instance.
      */
     abstract get hostView(): ViewRef;
@@ -3004,9 +3004,9 @@ export declare interface Directive {
      */
     outputs?: string[];
     /**
-     * Configures the [injector](guide/glossary#injector) of this
-     * directive or component with a [token](guide/glossary#di-token)
-     * that maps to a [provider](guide/glossary#provider) of a dependency.
+     * Configures the injector of this
+     * directive or component with a token
+     * that maps to a provider of a dependency.
      */
     providers?: Provider[];
     /**
@@ -3574,8 +3574,8 @@ export declare class ElementRef<T = any> {
 declare const EMBEDDED_VIEW_INJECTOR = 20;
 
 /**
- * Represents an Angular [view](guide/glossary#view) in a view container.
- * An [embedded view](guide/glossary#view-hierarchy) can be referenced from a component
+ * Represents an Angular view in a view container.
+ * An embedded view can be referenced from a component
  * other than the hosting component whose template defines it, or it can be defined
  * independently by a `TemplateRef`.
  *
@@ -5062,7 +5062,7 @@ declare type InitialInputs = (string | ɵɵInputFlags)[];
  */
 export declare interface Inject {
     /**
-     * A [DI token](guide/glossary#di-token) that maps to the dependency to be injected.
+     * A DI token that maps to the dependency to be injected.
      */
     token: any;
 }
@@ -6920,8 +6920,8 @@ export declare class ModuleWithComponentFactories<T> {
 }
 
 /**
- * A wrapper around an NgModule that associates it with [providers](guide/glossary#provider
- * "Definition"). Usage without a generic type is deprecated.
+ * A wrapper around an NgModule that associates it with providers
+ * Usage without a generic type is deprecated.
  *
  * @see [Deprecations](guide/deprecations#modulewithproviders-type-without-a-generic)
  *
@@ -7008,7 +7008,7 @@ export declare interface NgModule {
      */
     providers?: Array<Provider | EnvironmentProviders>;
     /**
-     * The set of components, directives, and pipes ([declarables](guide/glossary#declarable))
+     * The set of components, directives, and pipes (declarables
      * that belong to this module.
      *
      * @usageNotes
@@ -7035,7 +7035,7 @@ export declare interface NgModule {
      */
     declarations?: Array<Type<any> | any[]>;
     /**
-     * The set of NgModules whose exported [declarables](guide/glossary#declarable)
+     * The set of NgModules whose exported declarables
      * are available to templates in this module.
      *
      * @usageNotes
@@ -7804,7 +7804,7 @@ export declare interface OutputRefSubscription {
 }
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
+ * A DI token that indicates the root directory of
  * the application
  * @publicApi
  * @deprecated
@@ -7821,7 +7821,7 @@ declare const PARENT = 3;
 export declare interface Pipe {
     /**
      * The pipe name to use in template bindings.
-     * Typically uses [lowerCamelCase](guide/glossary#case-types)
+     * Typically uses lowerCamelCase
      * because the name cannot contain hyphens.
      */
     name: string;
@@ -11356,7 +11356,7 @@ export declare interface ViewChildrenDecorator {
  * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
  *
  * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-hierarchy).
+ * creating a view hierarchy.
  *
  * @usageNotes
  *
@@ -11413,7 +11413,7 @@ export declare abstract class ViewContainerRef {
      */
     abstract get element(): ElementRef;
     /**
-     * The [dependency injector](guide/glossary#injector) for this view container.
+     * The dependency injector for this view container.
      */
     abstract get injector(): Injector;
     /** @deprecated No replacement */
@@ -11595,7 +11595,7 @@ declare enum ViewEncapsulation_2 {
 declare type ViewQueriesFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U) => void;
 
 /**
- * Represents an Angular [view](guide/glossary#view "Definition").
+ * Represents an Angular view.
  *
  * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
  *

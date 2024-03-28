@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-914e453
+ * @license Angular v18.0.0-next.2+sha-b87b2fc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -140,7 +140,7 @@ export declare interface ToSignalOptions {
     injector?: Injector;
     /**
      * Whether the subscription should be automatically cleaned up (via `DestroyRef`) when
-     * `toObservable`'s creation context is destroyed.
+     * `toSignal`'s creation context is destroyed.
      *
      * If manual cleanup is enabled, then `DestroyRef` is not used, and the subscription will persist
      * until the `Observable` itself completes.

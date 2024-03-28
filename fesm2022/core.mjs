@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-914e453
+ * @license Angular v18.0.0-next.2+sha-b87b2fc
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7983,7 +7983,7 @@ function getDocument() {
 }
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") representing a string ID, used
+ * A DI token representing a string ID, used
  * primarily for prefixing application attributes and CSS styles when
  * {@link ViewEncapsulation#Emulated} is being used.
  *
@@ -8032,7 +8032,7 @@ const PLATFORM_ID = new InjectionToken(ngDevMode ? 'Platform ID' : '', {
     factory: () => 'unknown', // set a default platform name, when none set explicitly
 });
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") that indicates the root directory of
+ * A DI token that indicates the root directory of
  * the application
  * @publicApi
  * @deprecated
@@ -16093,7 +16093,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-914e453']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-b87b2fc']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -16148,7 +16148,7 @@ function LifecycleHooksFeature() {
  * (created by instantiating a `TemplateRef` with the `createEmbeddedView()` method).
  *
  * A view container instance can contain other view containers,
- * creating a [view hierarchy](guide/glossary#view-hierarchy).
+ * creating a view hierarchy.
  *
  * @usageNotes
  *
@@ -29951,7 +29951,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.2+sha-914e453');
+const VERSION = new Version('18.0.0-next.2+sha-b87b2fc');
 
 class Console {
     log(message) {
@@ -31132,7 +31132,7 @@ function isSubscribable(obj) {
 }
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") that you can use to provide
+ * A DI token that you can use to provide
  * one or more initialization functions.
  *
  * The provided functions are injected at application startup and executed during
@@ -31316,7 +31316,7 @@ class ApplicationInitStatus {
     }], () => [], null); })();
 
 /**
- * A [DI token](guide/glossary#di-token "DI token definition") that provides a set of callbacks to
+ * A DI token that provides a set of callbacks to
  * be called for every component that is bootstrapped.
  *
  * Each callback must take a `ComponentRef` instance and return nothing.
@@ -32838,7 +32838,7 @@ function createViewRef(tNode, lView, isPipe) {
 }
 
 /**
- * Represents an Angular [view](guide/glossary#view "Definition").
+ * Represents an Angular view.
  *
  * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
  *
@@ -32847,8 +32847,8 @@ function createViewRef(tNode, lView, isPipe) {
 class ViewRef extends ChangeDetectorRef {
 }
 /**
- * Represents an Angular [view](guide/glossary#view) in a view container.
- * An [embedded view](guide/glossary#view-hierarchy) can be referenced from a component
+ * Represents an Angular view in a view container.
+ * An embedded view can be referenced from a component
  * other than the hosting component whose template defines it, or it can be defined
  * independently by a `TemplateRef`.
  *
