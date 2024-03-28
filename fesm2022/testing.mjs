@@ -1,14 +1,45 @@
 /**
- * @license Angular v18.0.0-next.2+sha-d839c58
+ * @license Angular v18.0.0-next.2+sha-0b450ff
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, ɵNoopNgZone, NgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵZONELESS_ENABLED, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockBehavior, InjectionToken, ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, inject as inject$1, ɵNoopNgZone, NgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵZONELESS_ENABLED, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { ResourceLoader } from '@angular/compiler';
+
+/** Whether test modules should be torn down by default. */
+const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
+/** Whether unknown elements in templates should throw by default. */
+const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
+/** Whether unknown properties in templates should throw by default. */
+const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
+/** Whether defer blocks should use manual triggering or play through normally. */
+const DEFER_BLOCK_DEFAULT_BEHAVIOR = ɵDeferBlockBehavior.Playthrough;
+/**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @publicApi
+ */
+class TestComponentRenderer {
+    insertRootElement(rootElementId) { }
+    removeAllRootElements() { }
+}
+/**
+ * @publicApi
+ */
+const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
+/**
+ * TODO(atscott): Make public API once we have decided if we want this error and how we want devs to
+ * disable it.
+ */
+const AllowDetectChangesAndAcknowledgeItCanHideApplicationBugs = new InjectionToken('AllowDetectChangesAndAcknowledgeItCanHideApplicationBugs');
+/**
+ * @publicApi
+ */
+const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -131,37 +162,6 @@ function getDeferBlockStateNameFromEnum(state) {
             return 'Main';
     }
 }
-
-/** Whether test modules should be torn down by default. */
-const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
-/** Whether unknown elements in templates should throw by default. */
-const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
-/** Whether unknown properties in templates should throw by default. */
-const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
-/** Whether defer blocks should use manual triggering or play through normally. */
-const DEFER_BLOCK_DEFAULT_BEHAVIOR = ɵDeferBlockBehavior.Playthrough;
-/**
- * An abstract class for inserting the root test component element in a platform independent way.
- *
- * @publicApi
- */
-class TestComponentRenderer {
-    insertRootElement(rootElementId) { }
-    removeAllRootElements() { }
-}
-/**
- * @publicApi
- */
-const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
-/**
- * TODO(atscott): Make public API once we have decided if we want this error and how we want devs to
- * disable it.
- */
-const AllowDetectChangesAndAcknowledgeItCanHideApplicationBugs = new InjectionToken('AllowDetectChangesAndAcknowledgeItCanHideApplicationBugs');
-/**
- * @publicApi
- */
-const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
 /**
  * Fixture for debugging and testing a component.

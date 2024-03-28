@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-d839c58
+ * @license Angular v18.0.0-next.2+sha-0b450ff
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13460,7 +13460,7 @@ export declare interface ɵSafeValue {
 /**
  * Configures change detection scheduling when using ZoneJS.
  */
-export declare const enum ɵSchedulingMode {
+export declare enum ɵSchedulingMode {
     /**
      * Change detection will run when the `NgZone.onMicrotaskEmpty` observable emits.
      * Change detection will also be scheduled to run whenever Angular is notified
