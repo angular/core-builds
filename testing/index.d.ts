@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-f9417ea
+ * @license Angular v18.0.0-next.2+sha-22dd52f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -539,6 +539,12 @@ export declare function waitForAsync(fn: Function): (done: any) => any;
 export declare function withModule(moduleDef: TestModuleMetadata): InjectSetupWrapper;
 
 export declare function withModule(moduleDef: TestModuleMetadata, fn: Function): () => any;
+
+/**
+ * TODO(atscott): Make public API once we have decided if we want this error and how we want devs to
+ * disable it.
+ */
+export declare const ɵAllowDetectChangesAndAcknowledgeItCanHideApplicationBugs: InjectionToken<boolean>;
 
 export declare class ɵMetadataOverrider {
     private _references;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-f9417ea
+ * @license Angular v18.0.0-next.2+sha-22dd52f
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2248,5 +2248,5 @@ const __core_private_testing_placeholder__ = '';
  * Generated bundle index. Do not edit.
  */
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, AllowDetectChangesAndAcknowledgeItCanHideApplicationBugs as ɵAllowDetectChangesAndAcknowledgeItCanHideApplicationBugs, MetadataOverrider as ɵMetadataOverrider };
 //# sourceMappingURL=testing.mjs.map
