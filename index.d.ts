@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-b87b2fc
+ * @license Angular v18.0.0-next.2+sha-f9417ea
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13458,6 +13458,23 @@ export declare interface ɵSafeUrl extends ɵSafeValue {
  * @publicApi
  */
 export declare interface ɵSafeValue {
+}
+
+/**
+ * Configures change detection scheduling when using ZoneJS.
+ */
+export declare const enum ɵSchedulingMode {
+    /**
+     * Change detection will run when the `NgZone.onMicrotaskEmpty` observable emits.
+     * Change detection will also be scheduled to run whenever Angular is notified
+     * of a change. This includes calling `ChangeDetectorRef.markForCheck`,
+     * setting a `signal` value, and attaching a view.
+     */
+    Hybrid = 0,
+    /**
+     * Change detection will only run when the `NgZone.onMicrotaskEmpty` observable emits.
+     */
+    NgZoneOnly = 1
 }
 
 /**
