@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.2+sha-4d04399
+ * @license Angular v17.3.2+sha-9cef0d2
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -155,7 +155,7 @@ function toObservable(source, options) {
  * does not include an `undefined` type.
  *
  * By default, the subscription will be automatically cleaned up when the current [injection
- * context](/guide/dependency-injection-context) is destroyed. For example, when `toObservable` is
+ * context](/guide/dependency-injection-context) is destroyed. For example, when `toSignal` is
  * called during the construction of a component, the subscription will be cleaned up when the
  * component is destroyed. If an injection context is not available, an explicit `Injector` can be
  * passed instead.
