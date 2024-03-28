@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.1+sha-336916c
+ * @license Angular v18.0.0-next.1+sha-86a359b
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16093,7 +16093,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.1+sha-336916c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.1+sha-86a359b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19776,6 +19776,14 @@ function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling 
     }
 }
 /**
+ * Detects whether an injector is an instance of a `ChainedInjector`,
+ * created based on the `OutletInjector`.
+ */
+function isRouterOutletInjector(currentInjector) {
+    return (currentInjector instanceof ChainedInjector) &&
+        (currentInjector.injector.__ngOutletInjector);
+}
+/**
  * Applies changes to the DOM to reflect a given state.
  */
 function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) {
@@ -19801,14 +19809,20 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
             const providers = tDetails.providers;
             if (providers && providers.length > 0) {
                 const parentInjector = hostLView[INJECTOR];
-                const parentEnvInjector = parentInjector.get(EnvironmentInjector);
-                injector =
-                    parentEnvInjector.get(CachedInjectorService)
-                        .getOrCreateInjector(tDetails, parentEnvInjector, providers, ngDevMode ? 'DeferBlock Injector' : '');
+                // Note: we have a special case for Router's `OutletInjector`,
+                // since it's not an instance of the `EnvironmentInjector`, so
+                // we can't inject it. Once the `OutletInjector` is replaced
+                // with the `EnvironmentInjector` in Router's code, this special
+                // handling can be removed.
+                const parentEnvInjector = isRouterOutletInjector(parentInjector) ?
+                    parentInjector :
+                    parentInjector.get(EnvironmentInjector);
+                injector = parentEnvInjector.get(CachedInjectorService)
+                    .getOrCreateInjector(tDetails, parentEnvInjector, providers, ngDevMode ? 'DeferBlock Injector' : '');
             }
         }
         const dehydratedView = findMatchingDehydratedView(lContainer, activeBlockTNode.tView.ssrId);
-        const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, { dehydratedView, embeddedViewInjector: injector });
+        const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, { dehydratedView, injector });
         addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(activeBlockTNode, dehydratedView));
         markViewDirty(embeddedLView);
     }
@@ -29937,7 +29951,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.1+sha-336916c');
+const VERSION = new Version('18.0.0-next.1+sha-86a359b');
 
 class Console {
     log(message) {
