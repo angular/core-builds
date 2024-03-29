@@ -25999,7 +25999,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("17.3.2+sha-d10dc5c");
+var VERSION2 = new Version("17.3.2+sha-949dec2");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26576,6 +26576,15 @@ function validateI18nStructure(parsed, fileName) {
 function isChildOf(parent, el) {
   return parent.sourceSpan.start.offset < el.sourceSpan.start.offset && parent.sourceSpan.end.offset > el.sourceSpan.end.offset;
 }
+var PlaceholderKind;
+(function(PlaceholderKind2) {
+  PlaceholderKind2[PlaceholderKind2["Default"] = 0] = "Default";
+  PlaceholderKind2[PlaceholderKind2["Alternate"] = 1] = "Alternate";
+})(PlaceholderKind || (PlaceholderKind = {}));
+function getPlaceholder(value, kind = PlaceholderKind.Default) {
+  const name = `<<<\u0275\u0275ngControlFlowMigration_${kind}\u0275\u0275>>>`;
+  return `___${name}${value}${name}___`;
+}
 function calculateNesting(visitor, hasLineBreaks2) {
   let nestedQueue = [];
   for (let i = 0; i < visitor.elements.length; i++) {
@@ -26644,8 +26653,8 @@ function processNgTemplates(template2) {
   try {
     const templates = getTemplates(template2);
     for (const [name, t] of templates) {
-      const replaceRegex = new RegExp(`\u03B8${name.slice(1)}\\\u03B4`, "g");
-      const forRegex = new RegExp(`\u03B8${name.slice(1)}\\\u03C6`, "g");
+      const replaceRegex = new RegExp(getPlaceholder(name.slice(1)), "g");
+      const forRegex = new RegExp(getPlaceholder(name.slice(1), PlaceholderKind.Alternate), "g");
       const forMatches = [...template2.matchAll(forRegex)];
       const matches = [...forMatches, ...template2.matchAll(replaceRegex)];
       let safeToRemove = true;
@@ -26678,11 +26687,14 @@ function processNgTemplates(template2) {
   }
 }
 function replaceRemainingPlaceholders(template2) {
-  const replaceRegex = new RegExp(`\u03B8.*\u03B4`, "g");
+  const pattern = ".*";
+  const placeholderPattern = getPlaceholder(pattern);
+  const replaceRegex = new RegExp(placeholderPattern, "g");
+  const [placeholderStart, placeholderEnd] = placeholderPattern.split(pattern);
   const placeholders = [...template2.matchAll(replaceRegex)];
   for (let ph of placeholders) {
     const placeholder = ph[0];
-    const name = placeholder.slice(1, placeholder.length - 1);
+    const name = placeholder.slice(placeholderStart.length, placeholder.length - placeholderEnd.length);
     template2 = template2.replace(placeholder, `<ng-template [ngTemplateOutlet]="${name}"></ng-template>`);
   }
   return template2;
@@ -27045,7 +27057,7 @@ function migrateStandardNgFor(etm, tmpl, offset) {
       trackBy = `${trackByFn}($index, ${loopVar})`;
     }
     if (part.startsWith("template:")) {
-      tmplPlaceholder = `\u03B8${part.split(":")[1].trim()}\u03C6`;
+      tmplPlaceholder = getPlaceholder(part.split(":")[1].trim(), PlaceholderKind.Alternate);
     }
     if (part.match(aliasWithEqualRegexp)) {
       const aliasParts = part.split("=");
@@ -27222,7 +27234,7 @@ function buildIfBlock(etm, tmpl, offset) {
 }
 function buildStandardIfElseBlock(etm, tmpl, elseString, offset) {
   const condition = etm.getCondition().replace(" as ", "; as ").replace(/;\s*let/g, "; as");
-  const elsePlaceholder = `\u03B8${etm.getTemplateName(elseString)}\u03B4`;
+  const elsePlaceholder = getPlaceholder(etm.getTemplateName(elseString));
   return buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset);
 }
 function buildBoundIfElseBlock(etm, tmpl, offset) {
@@ -27237,9 +27249,9 @@ function buildBoundIfElseBlock(etm, tmpl, offset) {
   } else if (aliases.length === 1) {
     condition += `; as ${aliases[0]}`;
   }
-  const elsePlaceholder = `\u03B8${etm.elseAttr.value.trim()}\u03B4`;
+  const elsePlaceholder = getPlaceholder(etm.elseAttr.value.trim());
   if (etm.thenAttr !== void 0) {
-    const thenPlaceholder = `\u03B8${etm.thenAttr.value.trim()}\u03B4`;
+    const thenPlaceholder = getPlaceholder(etm.thenAttr.value.trim());
     return buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset);
   }
   return buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset);
@@ -27261,13 +27273,13 @@ function buildIfElseBlock(etm, tmpl, condition, elsePlaceholder, offset) {
 }
 function buildStandardIfThenElseBlock(etm, tmpl, thenString, elseString, offset) {
   const condition = etm.getCondition().replace(" as ", "; as ").replace(/;\s*let/g, "; as");
-  const thenPlaceholder = `\u03B8${etm.getTemplateName(thenString, elseString)}\u03B4`;
-  const elsePlaceholder = `\u03B8${etm.getTemplateName(elseString)}\u03B4`;
+  const thenPlaceholder = getPlaceholder(etm.getTemplateName(thenString, elseString));
+  const elsePlaceholder = getPlaceholder(etm.getTemplateName(elseString));
   return buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset);
 }
 function buildStandardIfThenBlock(etm, tmpl, thenString, offset) {
   const condition = etm.getCondition().replace(" as ", "; as ").replace(/;\s*let/g, "; as");
-  const thenPlaceholder = `\u03B8${etm.getTemplateName(thenString)}\u03B4`;
+  const thenPlaceholder = getPlaceholder(etm.getTemplateName(thenString));
   return buildIfThenBlock(etm, tmpl, condition, thenPlaceholder, offset);
 }
 function buildIfThenElseBlock(etm, tmpl, condition, thenPlaceholder, elsePlaceholder, offset) {
