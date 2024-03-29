@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-a122bd1
+ * @license Angular v18.0.0-next.2+sha-3974c21
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12786,7 +12786,7 @@ function detectChangesInViewWhileDirty(lView, mode) {
     const lastIsRefreshingViewsValue = isRefreshingViews();
     try {
         setIsRefreshingViews(true);
-        detectChangesInView$1(lView, mode);
+        detectChangesInView(lView, mode);
         let retries = 0;
         // If after running change detection, this view still needs to be refreshed or there are
         // descendants views that need to be refreshed due to re-dirtying during the change detection
@@ -12802,7 +12802,7 @@ function detectChangesInViewWhileDirty(lView, mode) {
             retries++;
             // Even if this view is detached, we still detect changes in targeted mode because this was
             // the root of the change detection run.
-            detectChangesInView$1(lView, 1 /* ChangeDetectionMode.Targeted */);
+            detectChangesInView(lView, 1 /* ChangeDetectionMode.Targeted */);
         }
     }
     finally {
@@ -13037,7 +13037,7 @@ function detectChangesInViewIfAttached(lView, mode) {
     if (!viewAttachedToChangeDetector(lView)) {
         return;
     }
-    detectChangesInView$1(lView, mode);
+    detectChangesInView(lView, mode);
 }
 /**
  * Visits a view as part of change detection traversal.
@@ -13049,7 +13049,7 @@ function detectChangesInViewIfAttached(lView, mode) {
  * The view is not refreshed, but descendants are traversed in `ChangeDetectionMode.Targeted` if the
  * view HasChildViewsToRefresh flag is set.
  */
-function detectChangesInView$1(lView, mode) {
+function detectChangesInView(lView, mode) {
     const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
     const tView = lView[TVIEW];
     const flags = lView[FLAGS];
@@ -16735,7 +16735,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-a122bd1']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-3974c21']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30374,7 +30374,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.2+sha-a122bd1');
+const VERSION = new Version('18.0.0-next.2+sha-3974c21');
 
 class Console {
     log(message) {
@@ -31906,6 +31906,7 @@ class ApplicationRef {
         this._views = [];
         this.internalErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
         this.afterRenderEffectManager = inject(AfterRenderEventManager);
+        this.zonelessEnabled = inject(ZONELESS_ENABLED);
         // Needed for ComponentFixture temporarily during migration of autoDetect behavior
         // Eventually the hostView of the fixture should just attach to ApplicationRef.
         this.externalTestViews = new Set();
@@ -32063,20 +32064,20 @@ class ApplicationRef {
                 const isFirstPass = runs === 0;
                 this.beforeRender.next(isFirstPass);
                 for (let { _lView, notifyErrorHandler } of this._views) {
-                    detectChangesInViewIfRequired(_lView, isFirstPass, notifyErrorHandler);
+                    detectChangesInViewIfRequired(_lView, notifyErrorHandler, isFirstPass, this.zonelessEnabled);
                 }
             }
             runs++;
             afterRenderEffectManager.executeInternalCallbacks();
             // If we have a newly dirty view after running internal callbacks, recheck the views again
             // before running user-provided callbacks
-            if ([...this.externalTestViews.keys(), ...this._views].some(({ _lView }) => shouldRecheckView(_lView))) {
+            if ([...this.externalTestViews.keys(), ...this._views].some(({ _lView }) => requiresRefreshOrTraversal(_lView))) {
                 continue;
             }
             afterRenderEffectManager.execute();
             // If after running all afterRender callbacks we have no more views that need to be refreshed,
             // we can break out of the loop
-            if (![...this.externalTestViews.keys(), ...this._views].some(({ _lView }) => shouldRecheckView(_lView))) {
+            if (![...this.externalTestViews.keys(), ...this._views].some(({ _lView }) => requiresRefreshOrTraversal(_lView))) {
                 break;
             }
         }
@@ -32209,18 +32210,12 @@ function whenStable(applicationRef) {
     applicationRef.onDestroy(() => whenStableStore?.delete(applicationRef));
     return whenStablePromise;
 }
-function detectChangesInViewIfRequired(lView, isFirstPass, notifyErrorHandler) {
+function detectChangesInViewIfRequired(lView, notifyErrorHandler, isFirstPass, zonelessEnabled) {
     // When re-checking, only check views which actually need it.
-    if (!isFirstPass && !shouldRecheckView(lView)) {
+    if (!isFirstPass && !requiresRefreshOrTraversal(lView)) {
         return;
     }
-    detectChangesInView(lView, notifyErrorHandler, isFirstPass);
-}
-function shouldRecheckView(view) {
-    return requiresRefreshOrTraversal(view);
-}
-function detectChangesInView(lView, notifyErrorHandler, isFirstPass) {
-    const mode = isFirstPass || lView[FLAGS] & 64 /* LViewFlags.Dirty */ ?
+    const mode = (isFirstPass && !zonelessEnabled) ?
         0 /* ChangeDetectionMode.Global */ :
         1 /* ChangeDetectionMode.Targeted */;
     detectChangesInternal(lView, notifyErrorHandler, mode);

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-a122bd1
+ * @license Angular v18.0.0-next.2+sha-3974c21
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -644,6 +644,7 @@ export declare class ApplicationRef {
     private _destroyListeners;
     private readonly internalErrorHandler;
     private readonly afterRenderEffectManager;
+    private readonly zonelessEnabled;
     private externalTestViews;
     private beforeRender;
     private afterTick;
@@ -12265,7 +12266,7 @@ export declare enum ɵDeferBlockState {
 /** The deps tracker to be used in the current Angular app in dev mode. */
 export declare const ɵdepsTracker: DepsTracker;
 
-export declare function ɵdetectChangesInViewIfRequired(lView: LView, isFirstPass: boolean, notifyErrorHandler: boolean): void;
+export declare function ɵdetectChangesInViewIfRequired(lView: LView, notifyErrorHandler: boolean, isFirstPass: boolean, zonelessEnabled: boolean): void;
 
 
 export declare function ɵdevModeEqual(a: any, b: any): boolean;

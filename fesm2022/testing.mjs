@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-a122bd1
+ * @license Angular v18.0.0-next.2+sha-3974c21
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -360,7 +360,7 @@ class PseudoApplicationComponentFixture extends ComponentFixture {
             });
             this.beforeRenderSubscription = this._testAppRef.beforeRender.subscribe((isFirstPass) => {
                 try {
-                    ɵdetectChangesInViewIfRequired(this.componentRef.hostView._lView, isFirstPass, this.componentRef.hostView.notifyErrorHandler);
+                    ɵdetectChangesInViewIfRequired(this.componentRef.hostView._lView, this.componentRef.hostView.notifyErrorHandler, isFirstPass, false /** zoneless enabled */);
                 }
                 catch (e) {
                     // If an error occurred during change detection, remove the test view from the application
