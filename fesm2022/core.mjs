@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-218c5bd
+ * @license Angular v18.0.0-next.2+sha-367b3ee
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16735,7 +16735,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-218c5bd']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-367b3ee']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30374,7 +30374,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.2+sha-218c5bd');
+const VERSION = new Version('18.0.0-next.2+sha-367b3ee');
 
 class Console {
     log(message) {
@@ -32408,7 +32408,9 @@ class ChangeDetectionSchedulerImpl {
             return;
         }
         this.pendingRenderTaskId = this.taskService.add();
-        if (Zone?.root?.run) {
+        // TODO(atscott): This zone.root.run can maybe just be removed when we more
+        // effectively get the unpatched versions of setTimeout and rAF (#55092)
+        if (typeof Zone !== 'undefined' && Zone.root?.run) {
             Zone.root.run(() => {
                 this.cancelScheduledCallback = this.schedule(() => {
                     this.tick(this.shouldRefreshViews);
