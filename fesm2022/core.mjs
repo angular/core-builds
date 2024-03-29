@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-1c5f158
+ * @license Angular v18.0.0-next.2+sha-112fae5
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8227,6 +8227,7 @@ const NUM_ROOT_NODES = 'r';
 const TEMPLATE_ID = 'i'; // as it's also an "id"
 const NODES = 'n';
 const DISCONNECTED_NODES = 'd';
+const I18N_DATA = 'l';
 
 /**
  * The name of the key used in the TransferState collection,
@@ -8495,6 +8496,9 @@ function getNgContainerSize(hydrationInfo, index) {
     }
     return size;
 }
+function isSerializedElementContainer(hydrationInfo, index) {
+    return hydrationInfo.data[ELEMENT_CONTAINERS]?.[index] !== undefined;
+}
 function getSerializedContainerViews(hydrationInfo, index) {
     return hydrationInfo.data[CONTAINERS]?.[index] ?? null;
 }
@@ -8511,6 +8515,18 @@ function calcSerializedContainerSize(hydrationInfo, index) {
     return numNodes;
 }
 /**
+ * Attempt to initialize the `disconnectedNodes` field of the given
+ * `DehydratedView`. Returns the initialized value.
+ */
+function initDisconnectedNodes(hydrationInfo) {
+    // Check if we are processing disconnected info for the first time.
+    if (typeof hydrationInfo.disconnectedNodes === 'undefined') {
+        const nodeIds = hydrationInfo.data[DISCONNECTED_NODES];
+        hydrationInfo.disconnectedNodes = nodeIds ? new Set(nodeIds) : null;
+    }
+    return hydrationInfo.disconnectedNodes;
+}
+/**
  * Checks whether a node is annotated as "disconnected", i.e. not present
  * in the DOM at serialization time. We should not attempt hydration for
  * such nodes and instead, use a regular "creation mode".
@@ -8521,7 +8537,51 @@ function isDisconnectedNode$1(hydrationInfo, index) {
         const nodeIds = hydrationInfo.data[DISCONNECTED_NODES];
         hydrationInfo.disconnectedNodes = nodeIds ? new Set(nodeIds) : null;
     }
-    return !!hydrationInfo.disconnectedNodes?.has(index);
+    return !!initDisconnectedNodes(hydrationInfo)?.has(index);
+}
+/**
+ * Helper function to prepare text nodes for serialization by ensuring
+ * that seperate logical text blocks in the DOM remain separate after
+ * serialization.
+ */
+function processTextNodeBeforeSerialization(context, node) {
+    // Handle cases where text nodes can be lost after DOM serialization:
+    //  1. When there is an *empty text node* in DOM: in this case, this
+    //     node would not make it into the serialized string and as a result,
+    //     this node wouldn't be created in a browser. This would result in
+    //     a mismatch during the hydration, where the runtime logic would expect
+    //     a text node to be present in live DOM, but no text node would exist.
+    //     Example: `<span>{{ name }}</span>` when the `name` is an empty string.
+    //     This would result in `<span></span>` string after serialization and
+    //     in a browser only the `span` element would be created. To resolve that,
+    //     an extra comment node is appended in place of an empty text node and
+    //     that special comment node is replaced with an empty text node *before*
+    //     hydration.
+    //  2. When there are 2 consecutive text nodes present in the DOM.
+    //     Example: `<div>Hello <ng-container *ngIf="true">world</ng-container></div>`.
+    //     In this scenario, the live DOM would look like this:
+    //       <div>#text('Hello ') #text('world') #comment('container')</div>
+    //     Serialized string would look like this: `<div>Hello world<!--container--></div>`.
+    //     The live DOM in a browser after that would be:
+    //       <div>#text('Hello world') #comment('container')</div>
+    //     Notice how 2 text nodes are now "merged" into one. This would cause hydration
+    //     logic to fail, since it'd expect 2 text nodes being present, not one.
+    //     To fix this, we insert a special comment node in between those text nodes, so
+    //     serialized representation is: `<div>Hello <!--ngtns-->world<!--container--></div>`.
+    //     This forces browser to create 2 text nodes separated by a comment node.
+    //     Before running a hydration process, this special comment node is removed, so the
+    //     live DOM has exactly the same state as it was before serialization.
+    // Collect this node as required special annotation only when its
+    // contents is empty. Otherwise, such text node would be present on
+    // the client after server-side rendering and no special handling needed.
+    const el = node;
+    const corruptedTextNodes = context.corruptedTextNodes;
+    if (el.textContent === '') {
+        corruptedTextNodes.set(el, "ngetn" /* TextNodeMarker.EmptyNode */);
+    }
+    else if (el.nextSibling?.nodeType === Node.TEXT_NODE) {
+        corruptedTextNodes.set(el, "ngtns" /* TextNodeMarker.Separator */);
+    }
 }
 
 /**
@@ -13800,108 +13860,244 @@ function shorten(input, maxLength = 50) {
 }
 
 /**
- * Removes all dehydrated views from a given LContainer:
- * both in internal data structure, as well as removing
- * corresponding DOM nodes that belong to that dehydrated view.
+ * Find a node in front of which `currentTNode` should be inserted (takes i18n into account).
+ *
+ * This method determines the `RNode` in front of which we should insert the `currentRNode`. This
+ * takes `TNode.insertBeforeIndex` into account.
+ *
+ * @param parentTNode parent `TNode`
+ * @param currentTNode current `TNode` (The node which we would like to insert into the DOM)
+ * @param lView current `LView`
  */
-function removeDehydratedViews(lContainer) {
-    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
-    const parentLView = lContainer[PARENT];
-    const renderer = parentLView[RENDERER];
-    for (const view of views) {
-        removeDehydratedView(view, renderer);
-        ngDevMode && ngDevMode.dehydratedViewsRemoved++;
+function getInsertInFrontOfRNodeWithI18n(parentTNode, currentTNode, lView) {
+    const tNodeInsertBeforeIndex = currentTNode.insertBeforeIndex;
+    const insertBeforeIndex = Array.isArray(tNodeInsertBeforeIndex) ? tNodeInsertBeforeIndex[0] : tNodeInsertBeforeIndex;
+    if (insertBeforeIndex === null) {
+        return getInsertInFrontOfRNodeWithNoI18n(parentTNode, currentTNode, lView);
     }
-    // Reset the value to an empty array to indicate that no
-    // further processing of dehydrated views is needed for
-    // this view container (i.e. do not trigger the lookup process
-    // once again in case a `ViewContainerRef` is created later).
-    lContainer[DEHYDRATED_VIEWS] = EMPTY_ARRAY;
+    else {
+        ngDevMode && assertIndexInRange(lView, insertBeforeIndex);
+        return unwrapRNode(lView[insertBeforeIndex]);
+    }
 }
 /**
- * Helper function to remove all nodes from a dehydrated view.
+ * Process `TNode.insertBeforeIndex` by adding i18n text nodes.
+ *
+ * See `TNode.insertBeforeIndex`
  */
-function removeDehydratedView(dehydratedView, renderer) {
-    let nodesRemoved = 0;
-    let currentRNode = dehydratedView.firstChild;
-    if (currentRNode) {
-        const numNodes = dehydratedView.data[NUM_ROOT_NODES];
-        while (nodesRemoved < numNodes) {
-            ngDevMode && validateSiblingNodeExists(currentRNode);
-            const nextSibling = currentRNode.nextSibling;
-            nativeRemoveNode(renderer, currentRNode, false);
-            currentRNode = nextSibling;
-            nodesRemoved++;
+function processI18nInsertBefore(renderer, childTNode, lView, childRNode, parentRElement) {
+    const tNodeInsertBeforeIndex = childTNode.insertBeforeIndex;
+    if (Array.isArray(tNodeInsertBeforeIndex)) {
+        // An array indicates that there are i18n nodes that need to be added as children of this
+        // `childRNode`. These i18n nodes were created before this `childRNode` was available and so
+        // only now can be added. The first element of the array is the normal index where we should
+        // insert the `childRNode`. Additional elements are the extra nodes to be added as children of
+        // `childRNode`.
+        ngDevMode && assertDomNode(childRNode);
+        let i18nParent = childRNode;
+        let anchorRNode = null;
+        if (!(childTNode.type & 3 /* TNodeType.AnyRNode */)) {
+            anchorRNode = i18nParent;
+            i18nParent = parentRElement;
         }
-    }
-}
-/**
- * Walks over all views within this LContainer invokes dehydrated views
- * cleanup function for each one.
- */
-function cleanupLContainer(lContainer) {
-    removeDehydratedViews(lContainer);
-    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-        cleanupLView(lContainer[i]);
-    }
-}
-/**
- * Removes any remaining dehydrated i18n nodes from a given LView,
- * both in internal data structure, as well as removing the
- * corresponding DOM nodes.
- */
-function cleanupDehydratedI18nNodes(lView) {
-    const i18nNodes = lView[HYDRATION]?.i18nNodes;
-    if (i18nNodes) {
-        const renderer = lView[RENDERER];
-        for (const node of i18nNodes.values()) {
-            nativeRemoveNode(renderer, node, false);
-        }
-        lView[HYDRATION].i18nNodes = undefined;
-    }
-}
-/**
- * Walks over `LContainer`s and components registered within
- * this LView and invokes dehydrated views cleanup function for each one.
- */
-function cleanupLView(lView) {
-    cleanupDehydratedI18nNodes(lView);
-    const tView = lView[TVIEW];
-    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
-        if (isLContainer(lView[i])) {
-            const lContainer = lView[i];
-            cleanupLContainer(lContainer);
-        }
-        else if (isLView(lView[i])) {
-            // This is a component, enter the `cleanupLView` recursively.
-            cleanupLView(lView[i]);
-        }
-    }
-}
-/**
- * Walks over all views registered within the ApplicationRef and removes
- * all dehydrated views from all `LContainer`s along the way.
- */
-function cleanupDehydratedViews(appRef) {
-    const viewRefs = appRef._views;
-    for (const viewRef of viewRefs) {
-        const lNode = getLNodeForHydration(viewRef);
-        // An `lView` might be `null` if a `ViewRef` represents
-        // an embedded view (not a component view).
-        if (lNode !== null && lNode[HOST] !== null) {
-            if (isLView(lNode)) {
-                cleanupLView(lNode);
+        if (i18nParent !== null && childTNode.componentOffset === -1) {
+            for (let i = 1; i < tNodeInsertBeforeIndex.length; i++) {
+                // No need to `unwrapRNode` because all of the indexes point to i18n text nodes.
+                // see `assertDomNode` below.
+                const i18nChild = lView[tNodeInsertBeforeIndex[i]];
+                nativeInsertBefore(renderer, i18nParent, i18nChild, anchorRNode, false);
             }
-            else {
-                // Cleanup in the root component view
-                const componentLView = lNode[HOST];
-                cleanupLView(componentLView);
-                // Cleanup in all views within this view container
-                cleanupLContainer(lNode);
-            }
-            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
         }
     }
+}
+
+/**
+ * Add `tNode` to `previousTNodes` list and update relevant `TNode`s in `previousTNodes` list
+ * `tNode.insertBeforeIndex`.
+ *
+ * Things to keep in mind:
+ * 1. All i18n text nodes are encoded as `TNodeType.Element` and are created eagerly by the
+ *    `ɵɵi18nStart` instruction.
+ * 2. All `TNodeType.Placeholder` `TNodes` are elements which will be created later by
+ *    `ɵɵelementStart` instruction.
+ * 3. `ɵɵelementStart` instruction will create `TNode`s in the ascending `TNode.index` order. (So a
+ *    smaller index `TNode` is guaranteed to be created before a larger one)
+ *
+ * We use the above three invariants to determine `TNode.insertBeforeIndex`.
+ *
+ * In an ideal world `TNode.insertBeforeIndex` would always be `TNode.next.index`. However,
+ * this will not work because `TNode.next.index` may be larger than `TNode.index` which means that
+ * the next node is not yet created and therefore we can't insert in front of it.
+ *
+ * Rule1: `TNode.insertBeforeIndex = null` if `TNode.next === null` (Initial condition, as we don't
+ *        know if there will be further `TNode`s inserted after.)
+ * Rule2: If `previousTNode` is created after the `tNode` being inserted, then
+ *        `previousTNode.insertBeforeNode = tNode.index` (So when a new `tNode` is added we check
+ *        previous to see if we can update its `insertBeforeTNode`)
+ *
+ * See `TNode.insertBeforeIndex` for more context.
+ *
+ * @param previousTNodes A list of previous TNodes so that we can easily traverse `TNode`s in
+ *     reverse order. (If `TNode` would have `previous` this would not be necessary.)
+ * @param newTNode A TNode to add to the `previousTNodes` list.
+ */
+function addTNodeAndUpdateInsertBeforeIndex(previousTNodes, newTNode) {
+    // Start with Rule1
+    ngDevMode &&
+        assertEqual(newTNode.insertBeforeIndex, null, 'We expect that insertBeforeIndex is not set');
+    previousTNodes.push(newTNode);
+    if (previousTNodes.length > 1) {
+        for (let i = previousTNodes.length - 2; i >= 0; i--) {
+            const existingTNode = previousTNodes[i];
+            // Text nodes are created eagerly and so they don't need their `indexBeforeIndex` updated.
+            // It is safe to ignore them.
+            if (!isI18nText(existingTNode)) {
+                if (isNewTNodeCreatedBefore(existingTNode, newTNode) &&
+                    getInsertBeforeIndex(existingTNode) === null) {
+                    // If it was created before us in time, (and it does not yet have `insertBeforeIndex`)
+                    // then add the `insertBeforeIndex`.
+                    setInsertBeforeIndex(existingTNode, newTNode.index);
+                }
+            }
+        }
+    }
+}
+function isI18nText(tNode) {
+    return !(tNode.type & 64 /* TNodeType.Placeholder */);
+}
+function isNewTNodeCreatedBefore(existingTNode, newTNode) {
+    return isI18nText(newTNode) || existingTNode.index > newTNode.index;
+}
+function getInsertBeforeIndex(tNode) {
+    const index = tNode.insertBeforeIndex;
+    return Array.isArray(index) ? index[0] : index;
+}
+function setInsertBeforeIndex(tNode, value) {
+    const index = tNode.insertBeforeIndex;
+    if (Array.isArray(index)) {
+        // Array is stored if we have to insert child nodes. See `TNode.insertBeforeIndex`
+        index[0] = value;
+    }
+    else {
+        setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore);
+        tNode.insertBeforeIndex = value;
+    }
+}
+
+/**
+ * Retrieve `TIcu` at a given `index`.
+ *
+ * The `TIcu` can be stored either directly (if it is nested ICU) OR
+ * it is stored inside tho `TIcuContainer` if it is top level ICU.
+ *
+ * The reason for this is that the top level ICU need a `TNode` so that they are part of the render
+ * tree, but nested ICU's have no TNode, because we don't know ahead of time if the nested ICU is
+ * expressed (parent ICU may have selected a case which does not contain it.)
+ *
+ * @param tView Current `TView`.
+ * @param index Index where the value should be read from.
+ */
+function getTIcu(tView, index) {
+    const value = tView.data[index];
+    if (value === null || typeof value === 'string')
+        return null;
+    if (ngDevMode &&
+        !(value.hasOwnProperty('tView') || value.hasOwnProperty('currentCaseLViewIndex'))) {
+        throwError('We expect to get \'null\'|\'TIcu\'|\'TIcuContainer\', but got: ' + value);
+    }
+    // Here the `value.hasOwnProperty('currentCaseLViewIndex')` is a polymorphic read as it can be
+    // either TIcu or TIcuContainerNode. This is not ideal, but we still think it is OK because it
+    // will be just two cases which fits into the browser inline cache (inline cache can take up to
+    // 4)
+    const tIcu = value.hasOwnProperty('currentCaseLViewIndex') ? value :
+        value.value;
+    ngDevMode && assertTIcu(tIcu);
+    return tIcu;
+}
+/**
+ * Store `TIcu` at a give `index`.
+ *
+ * The `TIcu` can be stored either directly (if it is nested ICU) OR
+ * it is stored inside tho `TIcuContainer` if it is top level ICU.
+ *
+ * The reason for this is that the top level ICU need a `TNode` so that they are part of the render
+ * tree, but nested ICU's have no TNode, because we don't know ahead of time if the nested ICU is
+ * expressed (parent ICU may have selected a case which does not contain it.)
+ *
+ * @param tView Current `TView`.
+ * @param index Index where the value should be stored at in `Tview.data`
+ * @param tIcu The TIcu to store.
+ */
+function setTIcu(tView, index, tIcu) {
+    const tNode = tView.data[index];
+    ngDevMode &&
+        assertEqual(tNode === null || tNode.hasOwnProperty('tView'), true, 'We expect to get \'null\'|\'TIcuContainer\'');
+    if (tNode === null) {
+        tView.data[index] = tIcu;
+    }
+    else {
+        ngDevMode && assertTNodeType(tNode, 32 /* TNodeType.Icu */);
+        tNode.value = tIcu;
+    }
+}
+/**
+ * Set `TNode.insertBeforeIndex` taking the `Array` into account.
+ *
+ * See `TNode.insertBeforeIndex`
+ */
+function setTNodeInsertBeforeIndex(tNode, index) {
+    ngDevMode && assertTNode(tNode);
+    let insertBeforeIndex = tNode.insertBeforeIndex;
+    if (insertBeforeIndex === null) {
+        setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore);
+        insertBeforeIndex = tNode.insertBeforeIndex =
+            [null /* may be updated to number later */, index];
+    }
+    else {
+        assertEqual(Array.isArray(insertBeforeIndex), true, 'Expecting array here');
+        insertBeforeIndex.push(index);
+    }
+}
+/**
+ * Create `TNode.type=TNodeType.Placeholder` node.
+ *
+ * See `TNodeType.Placeholder` for more information.
+ */
+function createTNodePlaceholder(tView, previousTNodes, index) {
+    const tNode = createTNodeAtIndex(tView, index, 64 /* TNodeType.Placeholder */, null, null);
+    addTNodeAndUpdateInsertBeforeIndex(previousTNodes, tNode);
+    return tNode;
+}
+/**
+ * Returns current ICU case.
+ *
+ * ICU cases are stored as index into the `TIcu.cases`.
+ * At times it is necessary to communicate that the ICU case just switched and that next ICU update
+ * should update all bindings regardless of the mask. In such a case the we store negative numbers
+ * for cases which have just been switched. This function removes the negative flag.
+ */
+function getCurrentICUCaseIndex(tIcu, lView) {
+    const currentCase = lView[tIcu.currentCaseLViewIndex];
+    return currentCase === null ? currentCase : (currentCase < 0 ? ~currentCase : currentCase);
+}
+function getParentFromIcuCreateOpCode(mergedCode) {
+    return mergedCode >>> 17 /* IcuCreateOpCode.SHIFT_PARENT */;
+}
+function getRefFromIcuCreateOpCode(mergedCode) {
+    return (mergedCode & 131070 /* IcuCreateOpCode.MASK_REF */) >>> 1 /* IcuCreateOpCode.SHIFT_REF */;
+}
+function getInstructionFromIcuCreateOpCode(mergedCode) {
+    return mergedCode & 1 /* IcuCreateOpCode.MASK_INSTRUCTION */;
+}
+function icuCreateOpCode(opCode, parentIdx, refIdx) {
+    ngDevMode && assertGreaterThanOrEqual(parentIdx, 0, 'Missing parent index');
+    ngDevMode && assertGreaterThan(refIdx, 0, 'Missing ref index');
+    return opCode | parentIdx << 17 /* IcuCreateOpCode.SHIFT_PARENT */ | refIdx << 1 /* IcuCreateOpCode.SHIFT_REF */;
+}
+// Returns whether the given value corresponds to a root template message,
+// or a sub-template.
+function isRootTemplateMessage(subTemplateIndex) {
+    return subTemplateIndex === -1;
 }
 
 /**
@@ -13994,13 +14190,22 @@ function isDisconnectedNode(tNode, lView) {
 function locateI18nRNodeByIndex(hydrationInfo, noOffsetIndex) {
     const i18nNodes = hydrationInfo.i18nNodes;
     if (i18nNodes) {
-        const native = i18nNodes.get(noOffsetIndex);
-        if (native) {
-            i18nNodes.delete(noOffsetIndex);
-        }
-        return native;
+        return i18nNodes.get(noOffsetIndex);
     }
-    return null;
+    return undefined;
+}
+/**
+ * Attempt to locate an RNode by a path, if it exists.
+ *
+ * @param hydrationInfo The hydration annotation data
+ * @param lView the current lView
+ * @param noOffsetIndex the instruction index
+ * @returns an RNode that corresponds to the instruction index or null if no path exists
+ */
+function tryLocateRNodeByPath(hydrationInfo, lView, noOffsetIndex) {
+    const nodes = hydrationInfo.data[NODES];
+    const path = nodes?.[noOffsetIndex];
+    return path ? locateRNodeByPath(path, lView) : null;
 }
 /**
  * Locate a node in DOM tree that corresponds to a given TNode.
@@ -14014,7 +14219,7 @@ function locateI18nRNodeByIndex(hydrationInfo, noOffsetIndex) {
 function locateNextRNode(hydrationInfo, tView, lView, tNode) {
     const noOffsetIndex = getNoOffsetIndex(tNode);
     let native = locateI18nRNodeByIndex(hydrationInfo, noOffsetIndex);
-    if (!native) {
+    if (native === undefined) {
         const nodes = hydrationInfo.data[NODES];
         if (nodes?.[noOffsetIndex]) {
             // We know the exact location of the node.
@@ -14204,7 +14409,7 @@ function calcPathBetween(from, to, fromNodeName) {
  * Invoked at serialization time (on the server) when a set of navigation
  * instructions needs to be generated for a TNode.
  */
-function calcPathForNode(tNode, lView) {
+function calcPathForNode(tNode, lView, excludedParentNodes) {
     let parentTNode = tNode.parent;
     let parentIndex;
     let parentRNode;
@@ -14216,7 +14421,12 @@ function calcPathForNode(tNode, lView) {
     // a content of an element is projected and used, when a parent element
     // itself remains detached from DOM. In this scenario we try to find a parent
     // element that is attached to DOM and can act as an anchor instead.
-    while (parentTNode !== null && isDisconnectedNode(parentTNode, lView)) {
+    //
+    // It can also happen that the parent node should be excluded, for example,
+    // because it belongs to an i18n block, which requires paths which aren't
+    // relative to other views in an i18n block.
+    while (parentTNode !== null &&
+        (isDisconnectedNode(parentTNode, lView) || (excludedParentNodes?.has(parentTNode.index)))) {
         parentTNode = parentTNode.parent;
     }
     if (parentTNode === null || !(parentTNode.type & 3 /* TNodeType.AnyRNode */)) {
@@ -14265,6 +14475,457 @@ function calcPathForNode(tNode, lView) {
         }
     }
     return path;
+}
+
+let _isI18nHydrationSupportEnabled = false;
+let _prepareI18nBlockForHydrationImpl = () => {
+    // noop unless `enablePrepareI18nBlockForHydrationImpl` is invoked.
+};
+function setIsI18nHydrationSupportEnabled(enabled) {
+    _isI18nHydrationSupportEnabled = enabled;
+}
+function isI18nHydrationSupportEnabled() {
+    return _isI18nHydrationSupportEnabled;
+}
+/**
+ * Prepares an i18n block and its children, located at the given
+ * view and instruction index, for hydration.
+ *
+ * @param lView lView with the i18n block
+ * @param index index of the i18n block in the lView
+ * @param parentTNode TNode of the parent of the i18n block
+ * @param subTemplateIndex sub-template index, or -1 for the main template
+ */
+function prepareI18nBlockForHydration(lView, index, parentTNode, subTemplateIndex) {
+    _prepareI18nBlockForHydrationImpl(lView, index, parentTNode, subTemplateIndex);
+}
+function enablePrepareI18nBlockForHydrationImpl() {
+    _prepareI18nBlockForHydrationImpl = prepareI18nBlockForHydrationImpl;
+}
+function isI18nHydrationEnabled(injector) {
+    injector = injector ?? inject(Injector);
+    return injector.get(IS_I18N_HYDRATION_ENABLED, false);
+}
+/**
+ * Collects, if not already cached, all of the indices in the
+ * given TView which are children of an i18n block.
+ *
+ * Since i18n blocks don't introduce a parent TNode, this is necessary
+ * in order to determine which indices in a LView are translated.
+ */
+function getOrComputeI18nChildren(tView, context) {
+    let i18nChildren = context.i18nChildren.get(tView);
+    if (i18nChildren === undefined) {
+        i18nChildren = collectI18nChildren(tView);
+        context.i18nChildren.set(tView, i18nChildren);
+    }
+    return i18nChildren;
+}
+function collectI18nChildren(tView) {
+    const children = new Set();
+    function collectI18nViews(node) {
+        children.add(node.index);
+        switch (node.kind) {
+            case 1 /* I18nNodeKind.ELEMENT */:
+            case 2 /* I18nNodeKind.PLACEHOLDER */: {
+                for (const childNode of node.children) {
+                    collectI18nViews(childNode);
+                }
+                break;
+            }
+            case 3 /* I18nNodeKind.ICU */: {
+                for (const caseNodes of node.cases) {
+                    for (const caseNode of caseNodes) {
+                        collectI18nViews(caseNode);
+                    }
+                }
+                break;
+            }
+        }
+    }
+    // Traverse through the AST of each i18n block in the LView,
+    // and collect every instruction index.
+    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
+        const tI18n = tView.data[i];
+        if (!tI18n || !tI18n.ast) {
+            continue;
+        }
+        for (const node of tI18n.ast) {
+            collectI18nViews(node);
+        }
+    }
+    return children.size === 0 ? null : children;
+}
+/**
+ * Attempts to serialize i18n data for an i18n block, located at
+ * the given view and instruction index.
+ *
+ * @param lView lView with the i18n block
+ * @param index index of the i18n block in the lView
+ * @param context the hydration context
+ * @returns the i18n data, or null if there is no relevant data
+ */
+function trySerializeI18nBlock(lView, index, context) {
+    if (!context.isI18nHydrationEnabled) {
+        return null;
+    }
+    const tView = lView[TVIEW];
+    const tI18n = tView.data[index];
+    if (!tI18n || !tI18n.ast) {
+        return null;
+    }
+    const caseQueue = [];
+    tI18n.ast.forEach(node => serializeI18nBlock(lView, caseQueue, context, node));
+    return caseQueue.length > 0 ? caseQueue : null;
+}
+function serializeI18nBlock(lView, caseQueue, context, node) {
+    switch (node.kind) {
+        case 0 /* I18nNodeKind.TEXT */:
+            const rNode = unwrapRNode(lView[node.index]);
+            processTextNodeBeforeSerialization(context, rNode);
+            break;
+        case 1 /* I18nNodeKind.ELEMENT */:
+        case 2 /* I18nNodeKind.PLACEHOLDER */:
+            node.children.forEach(node => serializeI18nBlock(lView, caseQueue, context, node));
+            break;
+        case 3 /* I18nNodeKind.ICU */:
+            const currentCase = lView[node.currentCaseLViewIndex];
+            if (currentCase != null) {
+                // i18n uses a negative value to signal a change to a new case, so we
+                // need to invert it to get the proper value.
+                const caseIdx = currentCase < 0 ? ~currentCase : currentCase;
+                caseQueue.push(caseIdx);
+                node.cases[caseIdx].forEach(node => serializeI18nBlock(lView, caseQueue, context, node));
+            }
+            break;
+    }
+}
+function setCurrentNode(state, node) {
+    state.currentNode = node;
+}
+/**
+ * Marks the current RNode as the hydration root for the given
+ * AST node.
+ */
+function appendI18nNodeToCollection(context, state, astNode) {
+    const noOffsetIndex = astNode.index - HEADER_OFFSET;
+    const { disconnectedNodes } = context;
+    const currentNode = state.currentNode;
+    if (state.isConnected) {
+        context.i18nNodes.set(noOffsetIndex, currentNode);
+        // We expect the node to be connected, so ensure that it
+        // is not in the set, regardless of whether we found it,
+        // so that the downstream error handling can provide the
+        // proper context.
+        disconnectedNodes.delete(noOffsetIndex);
+    }
+    else {
+        disconnectedNodes.add(noOffsetIndex);
+    }
+    return currentNode;
+}
+/**
+ * Skip over some sibling nodes during hydration.
+ *
+ * Note: we use this instead of `siblingAfter` as it's expected that
+ * sometimes we might encounter null nodes. In those cases, we want to
+ * defer to downstream error handling to provide proper context.
+ */
+function skipSiblingNodes(state, skip) {
+    let currentNode = state.currentNode;
+    for (let i = 0; i < skip; i++) {
+        if (!currentNode) {
+            break;
+        }
+        currentNode = currentNode?.nextSibling ?? null;
+    }
+    return currentNode;
+}
+/**
+ * Fork the given state into a new state for hydrating children.
+ */
+function forkHydrationState(state, nextNode) {
+    return { currentNode: nextNode, isConnected: state.isConnected };
+}
+function prepareI18nBlockForHydrationImpl(lView, index, parentTNode, subTemplateIndex) {
+    if (!isI18nHydrationSupportEnabled()) {
+        return;
+    }
+    const hydrationInfo = lView[HYDRATION];
+    if (!hydrationInfo) {
+        return;
+    }
+    const tView = lView[TVIEW];
+    const tI18n = tView.data[index];
+    ngDevMode &&
+        assertDefined(tI18n, 'Expected i18n data to be present in a given TView slot during hydration');
+    function findHydrationRoot() {
+        if (isRootTemplateMessage(subTemplateIndex)) {
+            // This is the root of an i18n block. In this case, our hydration root will
+            // depend on where our parent TNode (i.e. the block with i18n applied) is
+            // in the DOM.
+            ngDevMode && assertDefined(parentTNode, 'Expected parent TNode while hydrating i18n root');
+            const rootNode = locateNextRNode(hydrationInfo, tView, lView, parentTNode);
+            // If this i18n block is attached to an <ng-container>, then we want to begin
+            // hydrating directly with the RNode. Otherwise, for a TNode with a physical DOM
+            // element, we want to recurse into the first child and begin there.
+            return (parentTNode.type & 8 /* TNodeType.ElementContainer */) ? rootNode : rootNode.firstChild;
+        }
+        // This is a nested template in an i18n block. In this case, the entire view
+        // is translated, and part of a dehydrated view in a container. This means that
+        // we can simply begin hydration with the first dehydrated child.
+        return hydrationInfo?.firstChild;
+    }
+    const currentNode = findHydrationRoot();
+    ngDevMode && assertDefined(currentNode, 'Expected root i18n node during hydration');
+    const disconnectedNodes = initDisconnectedNodes(hydrationInfo) ?? new Set();
+    const i18nNodes = hydrationInfo.i18nNodes ??= new Map();
+    const caseQueue = hydrationInfo.data[I18N_DATA]?.[index - HEADER_OFFSET] ?? [];
+    const dehydratedIcuData = hydrationInfo.dehydratedIcuData ??=
+        new Map();
+    collectI18nNodesFromDom({ hydrationInfo, lView, i18nNodes, disconnectedNodes, caseQueue, dehydratedIcuData }, { currentNode, isConnected: true }, tI18n.ast);
+    // Nodes from inactive ICU cases should be considered disconnected. We track them above
+    // because they aren't (and shouldn't be) serialized. Since we may mutate or create a
+    // new set, we need to be sure to write the expected value back to the DehydratedView.
+    hydrationInfo.disconnectedNodes = disconnectedNodes.size === 0 ? null : disconnectedNodes;
+}
+function collectI18nNodesFromDom(context, state, nodeOrNodes) {
+    if (Array.isArray(nodeOrNodes)) {
+        for (const node of nodeOrNodes) {
+            // If the node is being projected elsewhere, we need to temporarily
+            // branch the state to that location to continue hydration.
+            // Otherwise, we continue hydration from the current location.
+            const targetNode = tryLocateRNodeByPath(context.hydrationInfo, context.lView, node.index - HEADER_OFFSET);
+            const nextState = targetNode ? forkHydrationState(state, targetNode) : state;
+            collectI18nNodesFromDom(context, nextState, node);
+        }
+    }
+    else {
+        switch (nodeOrNodes.kind) {
+            case 0 /* I18nNodeKind.TEXT */: {
+                // Claim a text node for hydration
+                const currentNode = appendI18nNodeToCollection(context, state, nodeOrNodes);
+                setCurrentNode(state, currentNode?.nextSibling ?? null);
+                break;
+            }
+            case 1 /* I18nNodeKind.ELEMENT */: {
+                // Recurse into the current element's children...
+                collectI18nNodesFromDom(context, forkHydrationState(state, state.currentNode?.firstChild ?? null), nodeOrNodes.children);
+                // And claim the parent element itself.
+                const currentNode = appendI18nNodeToCollection(context, state, nodeOrNodes);
+                setCurrentNode(state, currentNode?.nextSibling ?? null);
+                break;
+            }
+            case 2 /* I18nNodeKind.PLACEHOLDER */: {
+                const noOffsetIndex = nodeOrNodes.index - HEADER_OFFSET;
+                const { hydrationInfo } = context;
+                const containerSize = getNgContainerSize(hydrationInfo, noOffsetIndex);
+                switch (nodeOrNodes.type) {
+                    case 0 /* I18nPlaceholderType.ELEMENT */: {
+                        // Hydration expects to find the head of the element.
+                        const currentNode = appendI18nNodeToCollection(context, state, nodeOrNodes);
+                        // A TNode for the node may not yet if we're hydrating during the first pass,
+                        // so use the serialized data to determine if this is an <ng-container>.
+                        if (isSerializedElementContainer(hydrationInfo, noOffsetIndex)) {
+                            // An <ng-container> doesn't have a physical DOM node, so we need to
+                            // continue hydrating from siblings.
+                            collectI18nNodesFromDom(context, state, nodeOrNodes.children);
+                            // Skip over the anchor element. It will be claimed by the
+                            // downstream container hydration.
+                            const nextNode = skipSiblingNodes(state, 1);
+                            setCurrentNode(state, nextNode);
+                        }
+                        else {
+                            // Non-container elements represent an actual node in the DOM, so we
+                            // need to continue hydration with the children, and claim the node.
+                            collectI18nNodesFromDom(context, forkHydrationState(state, state.currentNode?.firstChild ?? null), nodeOrNodes.children);
+                            setCurrentNode(state, currentNode?.nextSibling ?? null);
+                            // Elements can also be the anchor of a view container, so there may
+                            // be elements after this node that we need to skip.
+                            if (containerSize !== null) {
+                                // `+1` stands for an anchor node after all of the views in the container.
+                                const nextNode = skipSiblingNodes(state, containerSize + 1);
+                                setCurrentNode(state, nextNode);
+                            }
+                        }
+                        break;
+                    }
+                    case 1 /* I18nPlaceholderType.SUBTEMPLATE */: {
+                        ngDevMode &&
+                            assertNotEqual(containerSize, null, 'Expected a container size while hydrating i18n subtemplate');
+                        // Hydration expects to find the head of the template.
+                        appendI18nNodeToCollection(context, state, nodeOrNodes);
+                        // Skip over all of the template children, as well as the anchor
+                        // node, since the template itself will handle them instead.
+                        const nextNode = skipSiblingNodes(state, containerSize + 1);
+                        setCurrentNode(state, nextNode);
+                        break;
+                    }
+                }
+                break;
+            }
+            case 3 /* I18nNodeKind.ICU */: {
+                // If the current node is connected, we need to pop the next case from the
+                // queue, so that the active case is also considered connected.
+                const selectedCase = state.isConnected ? context.caseQueue.shift() : null;
+                const childState = { currentNode: null, isConnected: false };
+                // We traverse through each case, even if it's not active,
+                // so that we correctly populate disconnected nodes.
+                for (let i = 0; i < nodeOrNodes.cases.length; i++) {
+                    collectI18nNodesFromDom(context, i === selectedCase ? state : childState, nodeOrNodes.cases[i]);
+                }
+                if (selectedCase !== null) {
+                    // ICUs represent a branching state, and the selected case could be different
+                    // than what it was on the server. In that case, we need to be able to clean
+                    // up the nodes from the original case. To do that, we store the selected case.
+                    context.dehydratedIcuData.set(nodeOrNodes.index, { case: selectedCase, node: nodeOrNodes });
+                }
+                // Hydration expects to find the ICU anchor element.
+                const currentNode = appendI18nNodeToCollection(context, state, nodeOrNodes);
+                setCurrentNode(state, currentNode?.nextSibling ?? null);
+                break;
+            }
+        }
+    }
+}
+let _claimDehydratedIcuCaseImpl = () => {
+    // noop unless `enableClaimDehydratedIcuCaseImpl` is invoked
+};
+/**
+ * Mark the case for the ICU node at the given index in the view as claimed,
+ * allowing its nodes to be hydrated and not cleaned up.
+ */
+function claimDehydratedIcuCase(lView, icuIndex, caseIndex) {
+    _claimDehydratedIcuCaseImpl(lView, icuIndex, caseIndex);
+}
+function enableClaimDehydratedIcuCaseImpl() {
+    _claimDehydratedIcuCaseImpl = claimDehydratedIcuCaseImpl;
+}
+function claimDehydratedIcuCaseImpl(lView, icuIndex, caseIndex) {
+    const dehydratedIcuDataMap = lView[HYDRATION]?.dehydratedIcuData;
+    if (dehydratedIcuDataMap) {
+        const dehydratedIcuData = dehydratedIcuDataMap.get(icuIndex);
+        if (dehydratedIcuData?.case === caseIndex) {
+            // If the case we're attempting to claim matches the dehydrated one,
+            // we remove it from the map to mark it as "claimed."
+            dehydratedIcuDataMap.delete(icuIndex);
+        }
+    }
+}
+/**
+ * Clean up all i18n hydration data associated with the given view.
+ */
+function cleanupI18nHydrationData(lView) {
+    const hydrationInfo = lView[HYDRATION];
+    if (hydrationInfo) {
+        const { i18nNodes, dehydratedIcuData: dehydratedIcuDataMap } = hydrationInfo;
+        if (i18nNodes && dehydratedIcuDataMap) {
+            const renderer = lView[RENDERER];
+            for (const dehydratedIcuData of dehydratedIcuDataMap.values()) {
+                cleanupDehydratedIcuData(renderer, i18nNodes, dehydratedIcuData);
+            }
+        }
+        hydrationInfo.i18nNodes = undefined;
+        hydrationInfo.dehydratedIcuData = undefined;
+    }
+}
+function cleanupDehydratedIcuData(renderer, i18nNodes, dehydratedIcuData) {
+    for (const node of dehydratedIcuData.node.cases[dehydratedIcuData.case]) {
+        const rNode = i18nNodes.get(node.index - HEADER_OFFSET);
+        if (rNode) {
+            nativeRemoveNode(renderer, rNode, false);
+        }
+    }
+}
+
+/**
+ * Removes all dehydrated views from a given LContainer:
+ * both in internal data structure, as well as removing
+ * corresponding DOM nodes that belong to that dehydrated view.
+ */
+function removeDehydratedViews(lContainer) {
+    const views = lContainer[DEHYDRATED_VIEWS] ?? [];
+    const parentLView = lContainer[PARENT];
+    const renderer = parentLView[RENDERER];
+    for (const view of views) {
+        removeDehydratedView(view, renderer);
+        ngDevMode && ngDevMode.dehydratedViewsRemoved++;
+    }
+    // Reset the value to an empty array to indicate that no
+    // further processing of dehydrated views is needed for
+    // this view container (i.e. do not trigger the lookup process
+    // once again in case a `ViewContainerRef` is created later).
+    lContainer[DEHYDRATED_VIEWS] = EMPTY_ARRAY;
+}
+/**
+ * Helper function to remove all nodes from a dehydrated view.
+ */
+function removeDehydratedView(dehydratedView, renderer) {
+    let nodesRemoved = 0;
+    let currentRNode = dehydratedView.firstChild;
+    if (currentRNode) {
+        const numNodes = dehydratedView.data[NUM_ROOT_NODES];
+        while (nodesRemoved < numNodes) {
+            ngDevMode && validateSiblingNodeExists(currentRNode);
+            const nextSibling = currentRNode.nextSibling;
+            nativeRemoveNode(renderer, currentRNode, false);
+            currentRNode = nextSibling;
+            nodesRemoved++;
+        }
+    }
+}
+/**
+ * Walks over all views within this LContainer invokes dehydrated views
+ * cleanup function for each one.
+ */
+function cleanupLContainer(lContainer) {
+    removeDehydratedViews(lContainer);
+    for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+        cleanupLView(lContainer[i]);
+    }
+}
+/**
+ * Walks over `LContainer`s and components registered within
+ * this LView and invokes dehydrated views cleanup function for each one.
+ */
+function cleanupLView(lView) {
+    cleanupI18nHydrationData(lView);
+    const tView = lView[TVIEW];
+    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
+        if (isLContainer(lView[i])) {
+            const lContainer = lView[i];
+            cleanupLContainer(lContainer);
+        }
+        else if (isLView(lView[i])) {
+            // This is a component, enter the `cleanupLView` recursively.
+            cleanupLView(lView[i]);
+        }
+    }
+}
+/**
+ * Walks over all views registered within the ApplicationRef and removes
+ * all dehydrated views from all `LContainer`s along the way.
+ */
+function cleanupDehydratedViews(appRef) {
+    const viewRefs = appRef._views;
+    for (const viewRef of viewRefs) {
+        const lNode = getLNodeForHydration(viewRef);
+        // An `lView` might be `null` if a `ViewRef` represents
+        // an embedded view (not a component view).
+        if (lNode !== null && lNode[HOST] !== null) {
+            if (isLView(lNode)) {
+                cleanupLView(lNode);
+            }
+            else {
+                // Cleanup in the root component view
+                const componentLView = lNode[HOST];
+                cleanupLView(componentLView);
+                // Cleanup in all views within this view container
+                cleanupLContainer(lNode);
+            }
+            ngDevMode && ngDevMode.dehydratedViewsCleanupRuns++;
+        }
+    }
 }
 
 /**
@@ -16074,7 +16735,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-1c5f158']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-112fae5']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23654,242 +24315,6 @@ function getLocaleId() {
 }
 
 /**
- * Find a node in front of which `currentTNode` should be inserted (takes i18n into account).
- *
- * This method determines the `RNode` in front of which we should insert the `currentRNode`. This
- * takes `TNode.insertBeforeIndex` into account.
- *
- * @param parentTNode parent `TNode`
- * @param currentTNode current `TNode` (The node which we would like to insert into the DOM)
- * @param lView current `LView`
- */
-function getInsertInFrontOfRNodeWithI18n(parentTNode, currentTNode, lView) {
-    const tNodeInsertBeforeIndex = currentTNode.insertBeforeIndex;
-    const insertBeforeIndex = Array.isArray(tNodeInsertBeforeIndex) ? tNodeInsertBeforeIndex[0] : tNodeInsertBeforeIndex;
-    if (insertBeforeIndex === null) {
-        return getInsertInFrontOfRNodeWithNoI18n(parentTNode, currentTNode, lView);
-    }
-    else {
-        ngDevMode && assertIndexInRange(lView, insertBeforeIndex);
-        return unwrapRNode(lView[insertBeforeIndex]);
-    }
-}
-/**
- * Process `TNode.insertBeforeIndex` by adding i18n text nodes.
- *
- * See `TNode.insertBeforeIndex`
- */
-function processI18nInsertBefore(renderer, childTNode, lView, childRNode, parentRElement) {
-    const tNodeInsertBeforeIndex = childTNode.insertBeforeIndex;
-    if (Array.isArray(tNodeInsertBeforeIndex)) {
-        // An array indicates that there are i18n nodes that need to be added as children of this
-        // `childRNode`. These i18n nodes were created before this `childRNode` was available and so
-        // only now can be added. The first element of the array is the normal index where we should
-        // insert the `childRNode`. Additional elements are the extra nodes to be added as children of
-        // `childRNode`.
-        ngDevMode && assertDomNode(childRNode);
-        let i18nParent = childRNode;
-        let anchorRNode = null;
-        if (!(childTNode.type & 3 /* TNodeType.AnyRNode */)) {
-            anchorRNode = i18nParent;
-            i18nParent = parentRElement;
-        }
-        if (i18nParent !== null && childTNode.componentOffset === -1) {
-            for (let i = 1; i < tNodeInsertBeforeIndex.length; i++) {
-                // No need to `unwrapRNode` because all of the indexes point to i18n text nodes.
-                // see `assertDomNode` below.
-                const i18nChild = lView[tNodeInsertBeforeIndex[i]];
-                nativeInsertBefore(renderer, i18nParent, i18nChild, anchorRNode, false);
-            }
-        }
-    }
-}
-
-/**
- * Add `tNode` to `previousTNodes` list and update relevant `TNode`s in `previousTNodes` list
- * `tNode.insertBeforeIndex`.
- *
- * Things to keep in mind:
- * 1. All i18n text nodes are encoded as `TNodeType.Element` and are created eagerly by the
- *    `ɵɵi18nStart` instruction.
- * 2. All `TNodeType.Placeholder` `TNodes` are elements which will be created later by
- *    `ɵɵelementStart` instruction.
- * 3. `ɵɵelementStart` instruction will create `TNode`s in the ascending `TNode.index` order. (So a
- *    smaller index `TNode` is guaranteed to be created before a larger one)
- *
- * We use the above three invariants to determine `TNode.insertBeforeIndex`.
- *
- * In an ideal world `TNode.insertBeforeIndex` would always be `TNode.next.index`. However,
- * this will not work because `TNode.next.index` may be larger than `TNode.index` which means that
- * the next node is not yet created and therefore we can't insert in front of it.
- *
- * Rule1: `TNode.insertBeforeIndex = null` if `TNode.next === null` (Initial condition, as we don't
- *        know if there will be further `TNode`s inserted after.)
- * Rule2: If `previousTNode` is created after the `tNode` being inserted, then
- *        `previousTNode.insertBeforeNode = tNode.index` (So when a new `tNode` is added we check
- *        previous to see if we can update its `insertBeforeTNode`)
- *
- * See `TNode.insertBeforeIndex` for more context.
- *
- * @param previousTNodes A list of previous TNodes so that we can easily traverse `TNode`s in
- *     reverse order. (If `TNode` would have `previous` this would not be necessary.)
- * @param newTNode A TNode to add to the `previousTNodes` list.
- */
-function addTNodeAndUpdateInsertBeforeIndex(previousTNodes, newTNode) {
-    // Start with Rule1
-    ngDevMode &&
-        assertEqual(newTNode.insertBeforeIndex, null, 'We expect that insertBeforeIndex is not set');
-    previousTNodes.push(newTNode);
-    if (previousTNodes.length > 1) {
-        for (let i = previousTNodes.length - 2; i >= 0; i--) {
-            const existingTNode = previousTNodes[i];
-            // Text nodes are created eagerly and so they don't need their `indexBeforeIndex` updated.
-            // It is safe to ignore them.
-            if (!isI18nText(existingTNode)) {
-                if (isNewTNodeCreatedBefore(existingTNode, newTNode) &&
-                    getInsertBeforeIndex(existingTNode) === null) {
-                    // If it was created before us in time, (and it does not yet have `insertBeforeIndex`)
-                    // then add the `insertBeforeIndex`.
-                    setInsertBeforeIndex(existingTNode, newTNode.index);
-                }
-            }
-        }
-    }
-}
-function isI18nText(tNode) {
-    return !(tNode.type & 64 /* TNodeType.Placeholder */);
-}
-function isNewTNodeCreatedBefore(existingTNode, newTNode) {
-    return isI18nText(newTNode) || existingTNode.index > newTNode.index;
-}
-function getInsertBeforeIndex(tNode) {
-    const index = tNode.insertBeforeIndex;
-    return Array.isArray(index) ? index[0] : index;
-}
-function setInsertBeforeIndex(tNode, value) {
-    const index = tNode.insertBeforeIndex;
-    if (Array.isArray(index)) {
-        // Array is stored if we have to insert child nodes. See `TNode.insertBeforeIndex`
-        index[0] = value;
-    }
-    else {
-        setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore);
-        tNode.insertBeforeIndex = value;
-    }
-}
-
-/**
- * Retrieve `TIcu` at a given `index`.
- *
- * The `TIcu` can be stored either directly (if it is nested ICU) OR
- * it is stored inside tho `TIcuContainer` if it is top level ICU.
- *
- * The reason for this is that the top level ICU need a `TNode` so that they are part of the render
- * tree, but nested ICU's have no TNode, because we don't know ahead of time if the nested ICU is
- * expressed (parent ICU may have selected a case which does not contain it.)
- *
- * @param tView Current `TView`.
- * @param index Index where the value should be read from.
- */
-function getTIcu(tView, index) {
-    const value = tView.data[index];
-    if (value === null || typeof value === 'string')
-        return null;
-    if (ngDevMode &&
-        !(value.hasOwnProperty('tView') || value.hasOwnProperty('currentCaseLViewIndex'))) {
-        throwError('We expect to get \'null\'|\'TIcu\'|\'TIcuContainer\', but got: ' + value);
-    }
-    // Here the `value.hasOwnProperty('currentCaseLViewIndex')` is a polymorphic read as it can be
-    // either TIcu or TIcuContainerNode. This is not ideal, but we still think it is OK because it
-    // will be just two cases which fits into the browser inline cache (inline cache can take up to
-    // 4)
-    const tIcu = value.hasOwnProperty('currentCaseLViewIndex') ? value :
-        value.value;
-    ngDevMode && assertTIcu(tIcu);
-    return tIcu;
-}
-/**
- * Store `TIcu` at a give `index`.
- *
- * The `TIcu` can be stored either directly (if it is nested ICU) OR
- * it is stored inside tho `TIcuContainer` if it is top level ICU.
- *
- * The reason for this is that the top level ICU need a `TNode` so that they are part of the render
- * tree, but nested ICU's have no TNode, because we don't know ahead of time if the nested ICU is
- * expressed (parent ICU may have selected a case which does not contain it.)
- *
- * @param tView Current `TView`.
- * @param index Index where the value should be stored at in `Tview.data`
- * @param tIcu The TIcu to store.
- */
-function setTIcu(tView, index, tIcu) {
-    const tNode = tView.data[index];
-    ngDevMode &&
-        assertEqual(tNode === null || tNode.hasOwnProperty('tView'), true, 'We expect to get \'null\'|\'TIcuContainer\'');
-    if (tNode === null) {
-        tView.data[index] = tIcu;
-    }
-    else {
-        ngDevMode && assertTNodeType(tNode, 32 /* TNodeType.Icu */);
-        tNode.value = tIcu;
-    }
-}
-/**
- * Set `TNode.insertBeforeIndex` taking the `Array` into account.
- *
- * See `TNode.insertBeforeIndex`
- */
-function setTNodeInsertBeforeIndex(tNode, index) {
-    ngDevMode && assertTNode(tNode);
-    let insertBeforeIndex = tNode.insertBeforeIndex;
-    if (insertBeforeIndex === null) {
-        setI18nHandling(getInsertInFrontOfRNodeWithI18n, processI18nInsertBefore);
-        insertBeforeIndex = tNode.insertBeforeIndex =
-            [null /* may be updated to number later */, index];
-    }
-    else {
-        assertEqual(Array.isArray(insertBeforeIndex), true, 'Expecting array here');
-        insertBeforeIndex.push(index);
-    }
-}
-/**
- * Create `TNode.type=TNodeType.Placeholder` node.
- *
- * See `TNodeType.Placeholder` for more information.
- */
-function createTNodePlaceholder(tView, previousTNodes, index) {
-    const tNode = createTNodeAtIndex(tView, index, 64 /* TNodeType.Placeholder */, null, null);
-    addTNodeAndUpdateInsertBeforeIndex(previousTNodes, tNode);
-    return tNode;
-}
-/**
- * Returns current ICU case.
- *
- * ICU cases are stored as index into the `TIcu.cases`.
- * At times it is necessary to communicate that the ICU case just switched and that next ICU update
- * should update all bindings regardless of the mask. In such a case the we store negative numbers
- * for cases which have just been switched. This function removes the negative flag.
- */
-function getCurrentICUCaseIndex(tIcu, lView) {
-    const currentCase = lView[tIcu.currentCaseLViewIndex];
-    return currentCase === null ? currentCase : (currentCase < 0 ? ~currentCase : currentCase);
-}
-function getParentFromIcuCreateOpCode(mergedCode) {
-    return mergedCode >>> 17 /* IcuCreateOpCode.SHIFT_PARENT */;
-}
-function getRefFromIcuCreateOpCode(mergedCode) {
-    return (mergedCode & 131070 /* IcuCreateOpCode.MASK_REF */) >>> 1 /* IcuCreateOpCode.SHIFT_REF */;
-}
-function getInstructionFromIcuCreateOpCode(mergedCode) {
-    return mergedCode & 1 /* IcuCreateOpCode.MASK_INSTRUCTION */;
-}
-function icuCreateOpCode(opCode, parentIdx, refIdx) {
-    ngDevMode && assertGreaterThanOrEqual(parentIdx, 0, 'Missing parent index');
-    ngDevMode && assertGreaterThan(refIdx, 0, 'Missing ref index');
-    return opCode | parentIdx << 17 /* IcuCreateOpCode.SHIFT_PARENT */ | refIdx << 1 /* IcuCreateOpCode.SHIFT_REF */;
-}
-
-/**
  * Keep track of which input bindings in `ɵɵi18nExp` have changed.
  *
  * This is used to efficiently update expressions in i18n only when the corresponding input has
@@ -23951,9 +24376,27 @@ let _locateOrCreateNode = (lView, index, textOrName, nodeType) => {
     return createNodeWithoutHydration(lView, textOrName, nodeType);
 };
 function locateOrCreateNodeImpl(lView, index, textOrName, nodeType) {
-    // TODO: Add support for hydration
-    lastNodeWasCreated(true);
-    return createNodeWithoutHydration(lView, textOrName, nodeType);
+    const hydrationInfo = lView[HYDRATION];
+    const noOffsetIndex = index - HEADER_OFFSET;
+    const isNodeCreationMode = !isI18nHydrationSupportEnabled() || !hydrationInfo ||
+        isInSkipHydrationBlock$1() || isDisconnectedNode$1(hydrationInfo, noOffsetIndex);
+    lastNodeWasCreated(isNodeCreationMode);
+    if (isNodeCreationMode) {
+        return createNodeWithoutHydration(lView, textOrName, nodeType);
+    }
+    const native = locateI18nRNodeByIndex(hydrationInfo, noOffsetIndex);
+    // TODO: Improve error handling
+    //
+    // Other hydration paths use validateMatchingNode() in order to provide
+    // detailed information in development mode about the expected DOM.
+    // However, not every node in an i18n block has a TNode. Instead, we
+    // need to be able to use the AST to generate a similar message.
+    ngDevMode && assertDefined(native, 'expected native element');
+    ngDevMode && assertEqual(native.nodeType, nodeType, 'expected matching nodeType');
+    ngDevMode && nodeType === Node.ELEMENT_NODE &&
+        assertEqual(native.tagName.toLowerCase(), textOrName.toLowerCase(), 'expecting matching tagName');
+    ngDevMode && markRNodeAsClaimedByHydration(native);
+    return native;
 }
 function enableLocateOrCreateI18nNodeImpl() {
     _locateOrCreateNode = locateOrCreateNodeImpl;
@@ -24245,6 +24688,7 @@ function applyIcuSwitchCase(tView, tIcu, lView, value) {
                 ngDevMode && assertDomNode(anchorRNode);
                 applyMutableOpCodes(tView, tIcu.create[caseIndex], lView, anchorRNode);
             }
+            claimDehydratedIcuCase(lView, tIcu.anchorIdx, caseIndex);
         }
     }
 }
@@ -24895,9 +25339,6 @@ function countBindings(opCodes) {
 function toMaskBit(bindingIndex) {
     return 1 << Math.min(bindingIndex, 31);
 }
-function isRootTemplateMessage(subTemplateIndex) {
-    return subTemplateIndex === -1;
-}
 /**
  * Removes everything inside the sub-templates of a message.
  */
@@ -25401,6 +25842,7 @@ function ɵɵi18nStart(index, messageIndex, subTemplateIndex = -1) {
     const insertInFrontOf = parentTNode && (parentTNode.type & 8 /* TNodeType.ElementContainer */) ?
         lView[parentTNode.index] :
         null;
+    prepareI18nBlockForHydration(lView, adjustedIndex, parentTNode, subTemplateIndex);
     applyCreateOpCodes(lView, tI18n.create, parentRNode, insertInFrontOf);
     setInI18nBlock(true);
 }
@@ -29932,7 +30374,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.2+sha-1c5f158');
+const VERSION = new Version('18.0.0-next.2+sha-112fae5');
 
 class Console {
     log(message) {
@@ -35360,226 +35802,6 @@ function getDeferBlocks(lView, deferBlocks) {
 }
 
 /**
- * Indicates whether the hydration-related code was added,
- * prevents adding it multiple times.
- */
-let isHydrationSupportEnabled = false;
-/**
- * Indicates whether support for hydrating i18n blocks is enabled.
- */
-let _isI18nHydrationSupportEnabled = false;
-/**
- * Defines a period of time that Angular waits for the `ApplicationRef.isStable` to emit `true`.
- * If there was no event with the `true` value during this time, Angular reports a warning.
- */
-const APPLICATION_IS_STABLE_TIMEOUT = 10_000;
-/**
- * Brings the necessary hydration code in tree-shakable manner.
- * The code is only present when the `provideClientHydration` is
- * invoked. Otherwise, this code is tree-shaken away during the
- * build optimization step.
- *
- * This technique allows us to swap implementations of methods so
- * tree shaking works appropriately when hydration is disabled or
- * enabled. It brings in the appropriate version of the method that
- * supports hydration only when enabled.
- */
-function enableHydrationRuntimeSupport() {
-    if (!isHydrationSupportEnabled) {
-        isHydrationSupportEnabled = true;
-        enableRetrieveHydrationInfoImpl();
-        enableLocateOrCreateElementNodeImpl();
-        enableLocateOrCreateTextNodeImpl();
-        enableLocateOrCreateElementContainerNodeImpl();
-        enableLocateOrCreateContainerAnchorImpl();
-        enableLocateOrCreateContainerRefImpl();
-        enableFindMatchingDehydratedViewImpl();
-        enableApplyRootElementTransformImpl();
-        enableLocateOrCreateI18nNodeImpl();
-    }
-}
-/**
- * Outputs a message with hydration stats into a console.
- */
-function printHydrationStats(injector) {
-    const console = injector.get(Console);
-    const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
-        `and ${ngDevMode.hydratedNodes} node(s), ` +
-        `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
-        `Learn more at https://angular.io/guide/hydration.`;
-    // tslint:disable-next-line:no-console
-    console.log(message);
-}
-/**
- * Returns a Promise that is resolved when an application becomes stable.
- */
-function whenStableWithTimeout(appRef, injector) {
-    const whenStablePromise = whenStable(appRef);
-    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-        const timeoutTime = APPLICATION_IS_STABLE_TIMEOUT;
-        const console = injector.get(Console);
-        const ngZone = injector.get(NgZone);
-        // The following call should not and does not prevent the app to become stable
-        // We cannot use RxJS timer here because the app would remain unstable.
-        // This also avoids an extra change detection cycle.
-        const timeoutId = ngZone.runOutsideAngular(() => {
-            return setTimeout(() => logWarningOnStableTimedout(timeoutTime, console), timeoutTime);
-        });
-        whenStablePromise.finally(() => clearTimeout(timeoutId));
-    }
-    return whenStablePromise;
-}
-/**
- * Returns a set of providers required to setup hydration support
- * for an application that is server side rendered. This function is
- * included into the `provideClientHydration` public API function from
- * the `platform-browser` package.
- *
- * The function sets up an internal flag that would be recognized during
- * the server side rendering time as well, so there is no need to
- * configure or change anything in NgUniversal to enable the feature.
- */
-function withDomHydration() {
-    return makeEnvironmentProviders([
-        {
-            provide: IS_HYDRATION_DOM_REUSE_ENABLED,
-            useFactory: () => {
-                let isEnabled = true;
-                if (isPlatformBrowser()) {
-                    // On the client, verify that the server response contains
-                    // hydration annotations. Otherwise, keep hydration disabled.
-                    const transferState = inject(TransferState, { optional: true });
-                    isEnabled = !!transferState?.get(NGH_DATA_KEY, null);
-                    if (!isEnabled && (typeof ngDevMode !== 'undefined' && ngDevMode)) {
-                        const console = inject(Console);
-                        const message = formatRuntimeError(-505 /* RuntimeErrorCode.MISSING_HYDRATION_ANNOTATIONS */, 'Angular hydration was requested on the client, but there was no ' +
-                            'serialized information present in the server response, ' +
-                            'thus hydration was not enabled. ' +
-                            'Make sure the `provideClientHydration()` is included into the list ' +
-                            'of providers in the server part of the application configuration.');
-                        // tslint:disable-next-line:no-console
-                        console.warn(message);
-                    }
-                }
-                if (isEnabled) {
-                    performanceMarkFeature('NgHydration');
-                }
-                return isEnabled;
-            },
-        },
-        {
-            provide: ENVIRONMENT_INITIALIZER,
-            useValue: () => {
-                _isI18nHydrationSupportEnabled = !!inject(IS_I18N_HYDRATION_ENABLED, { optional: true });
-                // Since this function is used across both server and client,
-                // make sure that the runtime code is only added when invoked
-                // on the client. Moving forward, the `isPlatformBrowser` check should
-                // be replaced with a tree-shakable alternative (e.g. `isServer`
-                // flag).
-                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
-                    verifySsrContentsIntegrity();
-                    enableHydrationRuntimeSupport();
-                }
-            },
-            multi: true,
-        },
-        {
-            provide: PRESERVE_HOST_CONTENT,
-            useFactory: () => {
-                // Preserve host element content only in a browser
-                // environment and when hydration is configured properly.
-                // On a server, an application is rendered from scratch,
-                // so the host content needs to be empty.
-                return isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED);
-            }
-        },
-        {
-            provide: APP_BOOTSTRAP_LISTENER,
-            useFactory: () => {
-                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
-                    const appRef = inject(ApplicationRef);
-                    const injector = inject(Injector);
-                    return () => {
-                        // Wait until an app becomes stable and cleanup all views that
-                        // were not claimed during the application bootstrap process.
-                        // The timing is similar to when we start the serialization process
-                        // on the server.
-                        //
-                        // Note: the cleanup task *MUST* be scheduled within the Angular zone
-                        // to ensure that change detection is properly run afterward.
-                        whenStableWithTimeout(appRef, injector).then(() => {
-                            NgZone.assertInAngularZone();
-                            cleanupDehydratedViews(appRef);
-                            if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-                                printHydrationStats(injector);
-                            }
-                        });
-                    };
-                }
-                return () => { }; // noop
-            },
-            multi: true,
-        }
-    ]);
-}
-/**
- * Returns a set of providers required to setup support for i18n hydration.
- * Requires hydration to be enabled separately.
- */
-function withI18nHydration() {
-    return makeEnvironmentProviders([
-        {
-            provide: IS_I18N_HYDRATION_ENABLED,
-            useValue: true,
-        },
-    ]);
-}
-/**
- * Returns whether i18n hydration support is enabled.
- */
-function isI18nHydrationSupportEnabled() {
-    return _isI18nHydrationSupportEnabled;
-}
-/**
- *
- * @param time The time in ms until the stable timedout warning message is logged
- */
-function logWarningOnStableTimedout(time, console) {
-    const message = `Angular hydration expected the ApplicationRef.isStable() to emit \`true\`, but it ` +
-        `didn't happen within ${time}ms. Angular hydration logic depends on the application becoming stable ` +
-        `as a signal to complete hydration process.`;
-    console.warn(formatRuntimeError(-506 /* RuntimeErrorCode.HYDRATION_STABLE_TIMEDOUT */, message));
-}
-/**
- * Verifies whether the DOM contains a special marker added during SSR time to make sure
- * there is no SSR'ed contents transformations happen after SSR is completed. Typically that
- * happens either by CDN or during the build process as an optimization to remove comment nodes.
- * Hydration process requires comment nodes produced by Angular to locate correct DOM segments.
- * When this special marker is *not* present - throw an error and do not proceed with hydration,
- * since it will not be able to function correctly.
- *
- * Note: this function is invoked only on the client, so it's safe to use DOM APIs.
- */
-function verifySsrContentsIntegrity() {
-    const doc = getDocument();
-    let hydrationMarker;
-    for (const node of doc.body.childNodes) {
-        if (node.nodeType === Node.COMMENT_NODE &&
-            node.textContent?.trim() === SSR_CONTENT_INTEGRITY_MARKER) {
-            hydrationMarker = node;
-            break;
-        }
-    }
-    if (!hydrationMarker) {
-        throw new RuntimeError(-507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' && ngDevMode &&
-            'Angular hydration logic detected that HTML content of this page was modified after it ' +
-                'was produced during server side rendering. Make sure that there are no optimizations ' +
-                'that remove comment nodes from HTML enabled on your CDN. Angular hydration ' +
-                'relies on HTML produced by the server, including whitespaces and comment nodes.');
-    }
-}
-
-/**
  * A collection that tracks all serialized views (`ngh` DOM annotations)
  * to avoid duplication. An attempt to add a duplicate view results in the
  * collection returning the index of the previously collected serialized view.
@@ -35689,6 +35911,8 @@ function annotateLContainerForHydration(lContainer, context) {
  * @param doc A reference to the current Document instance.
  */
 function annotateForHydration(appRef, doc) {
+    const injector = appRef.injector;
+    const isI18nHydrationEnabledVal = isI18nHydrationEnabled(injector);
     const serializedViewCollection = new SerializedViewCollection();
     const corruptedTextNodes = new Map();
     const viewRefs = appRef._views;
@@ -35700,6 +35924,8 @@ function annotateForHydration(appRef, doc) {
             const context = {
                 serializedViewCollection,
                 corruptedTextNodes,
+                isI18nHydrationEnabled: isI18nHydrationEnabledVal,
+                i18nChildren: new Map(),
             };
             if (isLContainer(lNode)) {
                 annotateLContainerForHydration(lNode, context);
@@ -35716,7 +35942,7 @@ function annotateForHydration(appRef, doc) {
     // hydration logic was setup and enabled correctly. Otherwise, if a client
     // hydration doesn't find a key in the transfer state - an error is produced.
     const serializedViews = serializedViewCollection.getAll();
-    const transferState = appRef.injector.get(TransferState);
+    const transferState = injector.get(TransferState);
     transferState.set(NGH_DATA_KEY, serializedViews);
 }
 /**
@@ -35797,10 +36023,10 @@ function serializeLContainer(lContainer, context) {
  * needs to take to locate a node) and stores it in the `NODES` section of the
  * current serialized view.
  */
-function appendSerializedNodePath(ngh, tNode, lView) {
+function appendSerializedNodePath(ngh, tNode, lView, excludedParentNodes) {
     const noOffsetIndex = tNode.index - HEADER_OFFSET;
     ngh[NODES] ??= {};
-    ngh[NODES][noOffsetIndex] = calcPathForNode(tNode, lView);
+    ngh[NODES][noOffsetIndex] = calcPathForNode(tNode, lView, excludedParentNodes);
 }
 /**
  * Helper function to append information about a disconnected node.
@@ -35826,10 +36052,19 @@ function appendDisconnectedNodeIndex(ngh, tNode) {
 function serializeLView(lView, context) {
     const ngh = {};
     const tView = lView[TVIEW];
+    const i18nChildren = getOrComputeI18nChildren(tView, context);
     // Iterate over DOM element references in an LView.
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
         const tNode = tView.data[i];
         const noOffsetIndex = i - HEADER_OFFSET;
+        // Attempt to serialize any i18n data for the given slot. We do this first, as i18n
+        // has its own process for serialization.
+        const i18nData = trySerializeI18nBlock(lView, i, context);
+        if (i18nData) {
+            ngh[I18N_DATA] ??= {};
+            ngh[I18N_DATA][noOffsetIndex] = i18nData;
+            continue;
+        }
         // Skip processing of a given slot in the following cases:
         // - Local refs (e.g. <div #localRef>) take up an extra slot in LViews
         //   to store the same element. In this case, there is no information in
@@ -35837,6 +36072,12 @@ function serializeLView(lView, context) {
         // - When a slot contains something other than a TNode. For example, there
         //   might be some metadata information about a defer block or a control flow block.
         if (!isTNodeShape(tNode)) {
+            continue;
+        }
+        // Skip any nodes that are in an i18n block but are considered detached (i.e. not
+        // present in the template). These nodes are disconnected from the DOM tree, and
+        // so we don't want to serialize any information about them.
+        if (isDetachedByI18n(tNode)) {
             continue;
         }
         // Check if a native node that represents a given TNode is disconnected from the DOM tree.
@@ -35870,7 +36111,7 @@ function serializeLView(lView, context) {
                             appendDisconnectedNodeIndex(ngh, projectionHeadTNode);
                         }
                         else {
-                            appendSerializedNodePath(ngh, projectionHeadTNode, lView);
+                            appendSerializedNodePath(ngh, projectionHeadTNode, lView, i18nChildren);
                         }
                     }
                 }
@@ -35887,7 +36128,7 @@ function serializeLView(lView, context) {
                 }
             }
         }
-        conditionallyAnnotateNodePath(ngh, tNode, lView);
+        conditionallyAnnotateNodePath(ngh, tNode, lView, i18nChildren);
         if (isLContainer(lView[i])) {
             // Serialize information about a template.
             const embeddedTView = tNode.tView;
@@ -35937,47 +36178,13 @@ function serializeLView(lView, context) {
                 }
                 if (nextTNode && !isInSkipHydrationBlock(nextTNode)) {
                     // Handle a tNode after the `<ng-content>` slot.
-                    appendSerializedNodePath(ngh, nextTNode, lView);
+                    appendSerializedNodePath(ngh, nextTNode, lView, i18nChildren);
                 }
             }
             else {
-                // Handle cases where text nodes can be lost after DOM serialization:
-                //  1. When there is an *empty text node* in DOM: in this case, this
-                //     node would not make it into the serialized string and as a result,
-                //     this node wouldn't be created in a browser. This would result in
-                //     a mismatch during the hydration, where the runtime logic would expect
-                //     a text node to be present in live DOM, but no text node would exist.
-                //     Example: `<span>{{ name }}</span>` when the `name` is an empty string.
-                //     This would result in `<span></span>` string after serialization and
-                //     in a browser only the `span` element would be created. To resolve that,
-                //     an extra comment node is appended in place of an empty text node and
-                //     that special comment node is replaced with an empty text node *before*
-                //     hydration.
-                //  2. When there are 2 consecutive text nodes present in the DOM.
-                //     Example: `<div>Hello <ng-container *ngIf="true">world</ng-container></div>`.
-                //     In this scenario, the live DOM would look like this:
-                //       <div>#text('Hello ') #text('world') #comment('container')</div>
-                //     Serialized string would look like this: `<div>Hello world<!--container--></div>`.
-                //     The live DOM in a browser after that would be:
-                //       <div>#text('Hello world') #comment('container')</div>
-                //     Notice how 2 text nodes are now "merged" into one. This would cause hydration
-                //     logic to fail, since it'd expect 2 text nodes being present, not one.
-                //     To fix this, we insert a special comment node in between those text nodes, so
-                //     serialized representation is: `<div>Hello <!--ngtns-->world<!--container--></div>`.
-                //     This forces browser to create 2 text nodes separated by a comment node.
-                //     Before running a hydration process, this special comment node is removed, so the
-                //     live DOM has exactly the same state as it was before serialization.
                 if (tNode.type & 1 /* TNodeType.Text */) {
                     const rNode = unwrapRNode(lView[i]);
-                    // Collect this node as required special annotation only when its
-                    // contents is empty. Otherwise, such text node would be present on
-                    // the client after server-side rendering and no special handling needed.
-                    if (rNode.textContent === '') {
-                        context.corruptedTextNodes.set(rNode, "ngetn" /* TextNodeMarker.EmptyNode */);
-                    }
-                    else if (rNode.nextSibling?.nodeType === Node.TEXT_NODE) {
-                        context.corruptedTextNodes.set(rNode, "ngtns" /* TextNodeMarker.Separator */);
-                    }
+                    processTextNodeBeforeSerialization(context, rNode);
                 }
             }
         }
@@ -35990,17 +36197,17 @@ function serializeLView(lView, context) {
  *  1. If `tNode.projectionNext` is different from `tNode.next` - it means that
  *     the next `tNode` after projection is different from the one in the original
  *     template. Since hydration relies on `tNode.next`, this serialized info
- *     if required to help runtime code find the node at the correct location.
+ *     is required to help runtime code find the node at the correct location.
  *  2. In certain content projection-based use-cases, it's possible that only
  *     a content of a projected element is rendered. In this case, content nodes
  *     require an extra annotation, since runtime logic can't rely on parent-child
  *     connection to identify the location of a node.
  */
-function conditionallyAnnotateNodePath(ngh, tNode, lView) {
+function conditionallyAnnotateNodePath(ngh, tNode, lView, excludedParentNodes) {
     // Handle case #1 described above.
     if (tNode.projectionNext && tNode.projectionNext !== tNode.next &&
         !isInSkipHydrationBlock(tNode.projectionNext)) {
-        appendSerializedNodePath(ngh, tNode.projectionNext, lView);
+        appendSerializedNodePath(ngh, tNode.projectionNext, lView, excludedParentNodes);
     }
     // Handle case #2 described above.
     // Note: we only do that for the first node (i.e. when `tNode.prev === null`),
@@ -36008,7 +36215,7 @@ function conditionallyAnnotateNodePath(ngh, tNode, lView) {
     // annotation is needed.
     if (tNode.prev === null && tNode.parent !== null && isDisconnectedNode(tNode.parent, lView) &&
         !isDisconnectedNode(tNode, lView)) {
-        appendSerializedNodePath(ngh, tNode, lView);
+        appendSerializedNodePath(ngh, tNode, lView, excludedParentNodes);
     }
 }
 /**
@@ -36082,6 +36289,244 @@ function isContentProjectedNode(tNode) {
         currentTNode = currentTNode.parent;
     }
     return false;
+}
+
+/**
+ * Indicates whether the hydration-related code was added,
+ * prevents adding it multiple times.
+ */
+let isHydrationSupportEnabled = false;
+/**
+ * Indicates whether the i18n-related code was added,
+ * prevents adding it multiple times.
+ *
+ * Note: This merely controls whether the code is loaded,
+ * while `setIsI18nHydrationSupportEnabled` determines
+ * whether i18n blocks are serialized or hydrated.
+ */
+let isI18nHydrationRuntimeSupportEnabled = false;
+/**
+ * Defines a period of time that Angular waits for the `ApplicationRef.isStable` to emit `true`.
+ * If there was no event with the `true` value during this time, Angular reports a warning.
+ */
+const APPLICATION_IS_STABLE_TIMEOUT = 10_000;
+/**
+ * Brings the necessary hydration code in tree-shakable manner.
+ * The code is only present when the `provideClientHydration` is
+ * invoked. Otherwise, this code is tree-shaken away during the
+ * build optimization step.
+ *
+ * This technique allows us to swap implementations of methods so
+ * tree shaking works appropriately when hydration is disabled or
+ * enabled. It brings in the appropriate version of the method that
+ * supports hydration only when enabled.
+ */
+function enableHydrationRuntimeSupport() {
+    if (!isHydrationSupportEnabled) {
+        isHydrationSupportEnabled = true;
+        enableRetrieveHydrationInfoImpl();
+        enableLocateOrCreateElementNodeImpl();
+        enableLocateOrCreateTextNodeImpl();
+        enableLocateOrCreateElementContainerNodeImpl();
+        enableLocateOrCreateContainerAnchorImpl();
+        enableLocateOrCreateContainerRefImpl();
+        enableFindMatchingDehydratedViewImpl();
+        enableApplyRootElementTransformImpl();
+    }
+}
+/**
+ * Brings the necessary i18n hydration code in tree-shakable manner.
+ * Similar to `enableHydrationRuntimeSupport`, the code is only
+ * present when `withI18nHydration` is invoked.
+ */
+function enableI18nHydrationRuntimeSupport() {
+    if (!isI18nHydrationRuntimeSupportEnabled) {
+        isI18nHydrationRuntimeSupportEnabled = true;
+        enableLocateOrCreateI18nNodeImpl();
+        enablePrepareI18nBlockForHydrationImpl();
+        enableClaimDehydratedIcuCaseImpl();
+    }
+}
+/**
+ * Outputs a message with hydration stats into a console.
+ */
+function printHydrationStats(injector) {
+    const console = injector.get(Console);
+    const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
+        `and ${ngDevMode.hydratedNodes} node(s), ` +
+        `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
+        `Learn more at https://angular.io/guide/hydration.`;
+    // tslint:disable-next-line:no-console
+    console.log(message);
+}
+/**
+ * Returns a Promise that is resolved when an application becomes stable.
+ */
+function whenStableWithTimeout(appRef, injector) {
+    const whenStablePromise = whenStable(appRef);
+    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+        const timeoutTime = APPLICATION_IS_STABLE_TIMEOUT;
+        const console = injector.get(Console);
+        const ngZone = injector.get(NgZone);
+        // The following call should not and does not prevent the app to become stable
+        // We cannot use RxJS timer here because the app would remain unstable.
+        // This also avoids an extra change detection cycle.
+        const timeoutId = ngZone.runOutsideAngular(() => {
+            return setTimeout(() => logWarningOnStableTimedout(timeoutTime, console), timeoutTime);
+        });
+        whenStablePromise.finally(() => clearTimeout(timeoutId));
+    }
+    return whenStablePromise;
+}
+/**
+ * Returns a set of providers required to setup hydration support
+ * for an application that is server side rendered. This function is
+ * included into the `provideClientHydration` public API function from
+ * the `platform-browser` package.
+ *
+ * The function sets up an internal flag that would be recognized during
+ * the server side rendering time as well, so there is no need to
+ * configure or change anything in NgUniversal to enable the feature.
+ */
+function withDomHydration() {
+    return makeEnvironmentProviders([
+        {
+            provide: IS_HYDRATION_DOM_REUSE_ENABLED,
+            useFactory: () => {
+                let isEnabled = true;
+                if (isPlatformBrowser()) {
+                    // On the client, verify that the server response contains
+                    // hydration annotations. Otherwise, keep hydration disabled.
+                    const transferState = inject(TransferState, { optional: true });
+                    isEnabled = !!transferState?.get(NGH_DATA_KEY, null);
+                    if (!isEnabled && (typeof ngDevMode !== 'undefined' && ngDevMode)) {
+                        const console = inject(Console);
+                        const message = formatRuntimeError(-505 /* RuntimeErrorCode.MISSING_HYDRATION_ANNOTATIONS */, 'Angular hydration was requested on the client, but there was no ' +
+                            'serialized information present in the server response, ' +
+                            'thus hydration was not enabled. ' +
+                            'Make sure the `provideClientHydration()` is included into the list ' +
+                            'of providers in the server part of the application configuration.');
+                        // tslint:disable-next-line:no-console
+                        console.warn(message);
+                    }
+                }
+                if (isEnabled) {
+                    performanceMarkFeature('NgHydration');
+                }
+                return isEnabled;
+            },
+        },
+        {
+            provide: ENVIRONMENT_INITIALIZER,
+            useValue: () => {
+                setIsI18nHydrationSupportEnabled(isI18nHydrationEnabled());
+                // Since this function is used across both server and client,
+                // make sure that the runtime code is only added when invoked
+                // on the client. Moving forward, the `isPlatformBrowser` check should
+                // be replaced with a tree-shakable alternative (e.g. `isServer`
+                // flag).
+                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
+                    verifySsrContentsIntegrity();
+                    enableHydrationRuntimeSupport();
+                }
+            },
+            multi: true,
+        },
+        {
+            provide: PRESERVE_HOST_CONTENT,
+            useFactory: () => {
+                // Preserve host element content only in a browser
+                // environment and when hydration is configured properly.
+                // On a server, an application is rendered from scratch,
+                // so the host content needs to be empty.
+                return isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED);
+            }
+        },
+        {
+            provide: APP_BOOTSTRAP_LISTENER,
+            useFactory: () => {
+                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
+                    const appRef = inject(ApplicationRef);
+                    const injector = inject(Injector);
+                    return () => {
+                        // Wait until an app becomes stable and cleanup all views that
+                        // were not claimed during the application bootstrap process.
+                        // The timing is similar to when we start the serialization process
+                        // on the server.
+                        //
+                        // Note: the cleanup task *MUST* be scheduled within the Angular zone
+                        // to ensure that change detection is properly run afterward.
+                        whenStableWithTimeout(appRef, injector).then(() => {
+                            NgZone.assertInAngularZone();
+                            cleanupDehydratedViews(appRef);
+                            if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+                                printHydrationStats(injector);
+                            }
+                        });
+                    };
+                }
+                return () => { }; // noop
+            },
+            multi: true,
+        }
+    ]);
+}
+/**
+ * Returns a set of providers required to setup support for i18n hydration.
+ * Requires hydration to be enabled separately.
+ */
+function withI18nHydration() {
+    return makeEnvironmentProviders([
+        {
+            provide: IS_I18N_HYDRATION_ENABLED,
+            useValue: true,
+        },
+        {
+            provide: ENVIRONMENT_INITIALIZER,
+            useValue: () => {
+                enableI18nHydrationRuntimeSupport();
+            },
+            multi: true,
+        },
+    ]);
+}
+/**
+ *
+ * @param time The time in ms until the stable timedout warning message is logged
+ */
+function logWarningOnStableTimedout(time, console) {
+    const message = `Angular hydration expected the ApplicationRef.isStable() to emit \`true\`, but it ` +
+        `didn't happen within ${time}ms. Angular hydration logic depends on the application becoming stable ` +
+        `as a signal to complete hydration process.`;
+    console.warn(formatRuntimeError(-506 /* RuntimeErrorCode.HYDRATION_STABLE_TIMEDOUT */, message));
+}
+/**
+ * Verifies whether the DOM contains a special marker added during SSR time to make sure
+ * there is no SSR'ed contents transformations happen after SSR is completed. Typically that
+ * happens either by CDN or during the build process as an optimization to remove comment nodes.
+ * Hydration process requires comment nodes produced by Angular to locate correct DOM segments.
+ * When this special marker is *not* present - throw an error and do not proceed with hydration,
+ * since it will not be able to function correctly.
+ *
+ * Note: this function is invoked only on the client, so it's safe to use DOM APIs.
+ */
+function verifySsrContentsIntegrity() {
+    const doc = getDocument();
+    let hydrationMarker;
+    for (const node of doc.body.childNodes) {
+        if (node.nodeType === Node.COMMENT_NODE &&
+            node.textContent?.trim() === SSR_CONTENT_INTEGRITY_MARKER) {
+            hydrationMarker = node;
+            break;
+        }
+    }
+    if (!hydrationMarker) {
+        throw new RuntimeError(-507 /* RuntimeErrorCode.MISSING_SSR_CONTENT_INTEGRITY_MARKER */, typeof ngDevMode !== 'undefined' && ngDevMode &&
+            'Angular hydration logic detected that HTML content of this page was modified after it ' +
+                'was produced during server side rendering. Make sure that there are no optimizations ' +
+                'that remove comment nodes from HTML enabled on your CDN. Angular hydration ' +
+                'relies on HTML produced by the server, including whitespaces and comment nodes.');
+    }
 }
 
 /**
