@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-e18a0ed
+ * @license Angular v18.0.0-next.2+sha-840c375
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15204,7 +15204,7 @@ function performanceMarkFeature(feature) {
  *
  * @returns a function to cancel the scheduled callback
  */
-function getCallbackScheduler() {
+function scheduleCallback(callback) {
     // Note: the `getNativeRequestAnimationFrame` is used in the `NgZone` class, but we cannot use the
     // `inject` function. The `NgZone` instance may be created manually, and thus the injection
     // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
@@ -15227,25 +15227,23 @@ function getCallbackScheduler() {
         }
         nativeSetTimeout = nativeSetTimeout[ORIGINAL_DELEGATE_SYMBOL] ?? nativeSetTimeout;
     }
-    return (callback) => {
-        let executeCallback = true;
-        nativeSetTimeout(() => {
-            if (!executeCallback) {
-                return;
-            }
-            executeCallback = false;
-            callback();
-        });
-        nativeRequestAnimationFrame?.(() => {
-            if (!executeCallback) {
-                return;
-            }
-            executeCallback = false;
-            callback();
-        });
-        return () => {
-            executeCallback = false;
-        };
+    let executeCallback = true;
+    nativeSetTimeout(() => {
+        if (!executeCallback) {
+            return;
+        }
+        executeCallback = false;
+        callback();
+    });
+    nativeRequestAnimationFrame?.(() => {
+        if (!executeCallback) {
+            return;
+        }
+        executeCallback = false;
+        callback();
+    });
+    return () => {
+        executeCallback = false;
     };
 }
 
@@ -15403,7 +15401,7 @@ class NgZone {
             !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
         self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
         self.callbackScheduled = false;
-        self.scheduleCallback = getCallbackScheduler();
+        self.scheduleCallback = scheduleCallback;
         forkInnerZoneWithAngularBehavior(self);
     }
     /**
@@ -16735,7 +16733,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-e18a0ed']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-840c375']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30374,7 +30372,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.2+sha-e18a0ed');
+const VERSION = new Version('18.0.0-next.2+sha-840c375');
 
 class Console {
     log(message) {
@@ -32380,7 +32378,6 @@ class ChangeDetectionSchedulerImpl {
         this.taskService = inject(PendingTasks);
         this.pendingRenderTaskId = null;
         this.shouldRefreshViews = false;
-        this.schedule = getCallbackScheduler();
         this.ngZone = inject(NgZone);
         this.runningTick = false;
         this.cancelScheduledCallback = null;
@@ -32407,13 +32404,13 @@ class ChangeDetectionSchedulerImpl {
         // effectively get the unpatched versions of setTimeout and rAF (#55092)
         if (typeof Zone !== 'undefined' && Zone.root?.run) {
             Zone.root.run(() => {
-                this.cancelScheduledCallback = this.schedule(() => {
+                this.cancelScheduledCallback = scheduleCallback(() => {
                     this.tick(this.shouldRefreshViews);
                 });
             });
         }
         else {
-            this.cancelScheduledCallback = this.schedule(() => {
+            this.cancelScheduledCallback = scheduleCallback(() => {
                 this.tick(this.shouldRefreshViews);
             });
         }
