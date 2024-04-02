@@ -25985,7 +25985,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.2+sha-666d646");
+var VERSION2 = new Version("18.0.0-next.2+sha-58942db");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27048,7 +27048,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.0.0-next.2+sha-666d646"));
+  definitionMap.set("version", literal("18.0.0-next.2+sha-58942db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27067,7 +27067,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.0.0-next.2+sha-666d646"));
+  definitionMap.set("version", literal("18.0.0-next.2+sha-58942db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27135,7 +27135,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.0.0-next.2+sha-666d646"));
+  definitionMap.set("version", literal("18.0.0-next.2+sha-58942db"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27451,7 +27451,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.0.0-next.2+sha-666d646"));
+  definitionMap.set("version", literal("18.0.0-next.2+sha-58942db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27474,7 +27474,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.0.0-next.2+sha-666d646"));
+  definitionMap.set("version", literal("18.0.0-next.2+sha-58942db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27512,7 +27512,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.0.0-next.2+sha-666d646"));
+  definitionMap.set("version", literal("18.0.0-next.2+sha-58942db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27536,7 +27536,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.0.0-next.2+sha-666d646"));
+  definitionMap.set("version", literal("18.0.0-next.2+sha-58942db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27571,7 +27571,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.0.0-next.2+sha-666d646"));
+  definitionMap.set("version", literal("18.0.0-next.2+sha-58942db"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27588,7 +27588,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.0.0-next.2+sha-666d646");
+var VERSION3 = new Version("18.0.0-next.2+sha-58942db");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -27711,7 +27711,6 @@ var FatalDiagnosticError = class extends Error {
     this.node = node;
     this.diagnosticMessage = diagnosticMessage;
     this.relatedInformation = relatedInformation;
-    this.message = this.message;
     this._isFatalDiagnosticError = true;
     Object.setPrototypeOf(this, new.target.prototype);
   }
@@ -44975,30 +44974,14 @@ var TcbSwitchOp = class extends TcbOp {
     return false;
   }
   execute() {
-    const comparisonExpression = tcbExpression(this.block.expression, this.tcb, this.scope);
-    markIgnoreDiagnostics(comparisonExpression);
-    const expression = import_typescript107.default.factory.createParenthesizedExpression(comparisonExpression);
-    const root = this.generateCase(0, expression, null);
-    if (root !== void 0) {
-      this.scope.addStatement(root);
-    }
+    const switchExpression = tcbExpression(this.block.expression, this.tcb, this.scope);
+    const clauses = this.block.cases.map((current) => {
+      const clauseScope = Scope3.forNodes(this.tcb, this.scope, null, current.children, this.generateGuard(current, switchExpression));
+      const statements = [...clauseScope.render(), import_typescript107.default.factory.createBreakStatement()];
+      return current.expression === null ? import_typescript107.default.factory.createDefaultClause(statements) : import_typescript107.default.factory.createCaseClause(tcbExpression(current.expression, this.tcb, clauseScope), statements);
+    });
+    this.scope.addStatement(import_typescript107.default.factory.createSwitchStatement(switchExpression, import_typescript107.default.factory.createCaseBlock(clauses)));
     return null;
-  }
-  generateCase(index, switchValue, defaultCase) {
-    if (index >= this.block.cases.length) {
-      if (defaultCase !== null) {
-        const defaultScope = Scope3.forNodes(this.tcb, this.scope, null, defaultCase.children, this.generateGuard(defaultCase, switchValue));
-        return import_typescript107.default.factory.createBlock(defaultScope.render());
-      }
-      return void 0;
-    }
-    const current = this.block.cases[index];
-    if (current.expression === null) {
-      return this.generateCase(index + 1, switchValue, current);
-    }
-    const caseScope = Scope3.forNodes(this.tcb, this.scope, null, current.children, this.generateGuard(current, switchValue));
-    const caseValue = tcbExpression(current.expression, this.tcb, caseScope);
-    return import_typescript107.default.factory.createIfStatement(import_typescript107.default.factory.createBinaryExpression(switchValue, import_typescript107.default.SyntaxKind.EqualsEqualsEqualsToken, caseValue), import_typescript107.default.factory.createBlock(caseScope.render()), this.generateCase(index + 1, switchValue, defaultCase));
   }
   generateGuard(node, switchValue) {
     if (node.expression !== null) {
@@ -45242,7 +45225,7 @@ var _Scope = class {
     } else if (node instanceof IfBlock) {
       this.opQueue.push(new TcbIfOp(this.tcb, this, node));
     } else if (node instanceof SwitchBlock) {
-      this.opQueue.push(new TcbExpressionOp(this.tcb, this, node.expression), new TcbSwitchOp(this.tcb, this, node));
+      this.opQueue.push(new TcbSwitchOp(this.tcb, this, node));
     } else if (node instanceof ForLoopBlock) {
       this.opQueue.push(new TcbForOfOp(this.tcb, this, node));
       node.empty && this.appendChildren(node.empty);

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-666d646
+ * @license Angular v18.0.0-next.2+sha-58942db
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15205,7 +15205,7 @@ function performanceMarkFeature(feature) {
  * @returns a function to cancel the scheduled callback
  */
 function scheduleCallback(callback) {
-    // Note: the `getNativeRequestAnimationFrame` is used in the `NgZone` class, but we cannot use the
+    // Note: the `scheduleCallback` is used in the `NgZone` class, but we cannot use the
     // `inject` function. The `NgZone` instance may be created manually, and thus the injection
     // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
     // available because otherwise, we'll fall back to `setTimeout`.
@@ -15213,19 +15213,11 @@ function scheduleCallback(callback) {
     let nativeRequestAnimationFrame = hasRequestAnimationFrame ? _global['requestAnimationFrame'] : null;
     let nativeSetTimeout = _global['setTimeout'];
     if (typeof Zone !== 'undefined') {
-        // Note: zone.js sets original implementations on patched APIs behind the
-        // `__zone_symbol__OriginalDelegate` key (see `attachOriginToPatched`). Given the following
-        // example: `window.requestAnimationFrame.__zone_symbol__OriginalDelegate`; this would return an
-        // unpatched implementation of the `requestAnimationFrame`, which isn't intercepted by the
-        // Angular zone. We use the unpatched implementation to avoid another change detection when
-        // coalescing tasks.
-        const ORIGINAL_DELEGATE_SYMBOL = Zone.__symbol__('OriginalDelegate');
-        if (nativeRequestAnimationFrame) {
+        if (hasRequestAnimationFrame) {
             nativeRequestAnimationFrame =
-                nativeRequestAnimationFrame[ORIGINAL_DELEGATE_SYMBOL] ??
-                    nativeRequestAnimationFrame;
+                _global[Zone.__symbol__('requestAnimationFrame')] ?? nativeRequestAnimationFrame;
         }
-        nativeSetTimeout = nativeSetTimeout[ORIGINAL_DELEGATE_SYMBOL] ?? nativeSetTimeout;
+        nativeSetTimeout = _global[Zone.__symbol__('setTimeout')] ?? nativeSetTimeout;
     }
     let executeCallback = true;
     nativeSetTimeout(() => {
@@ -16733,7 +16725,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-666d646']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.2+sha-58942db']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30372,7 +30364,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.2+sha-666d646');
+const VERSION = new Version('18.0.0-next.2+sha-58942db');
 
 class Console {
     log(message) {
