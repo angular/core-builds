@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.2+sha-f577319
+ * @license Angular v18.0.0-next.2+sha-45ae7a6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13917,7 +13917,7 @@ export declare function ɵwithDomHydration(): EnvironmentProviders;
  * Returns a set of providers required to setup support for i18n hydration.
  * Requires hydration to be enabled separately.
  */
-export declare function ɵwithI18nHydration(): EnvironmentProviders;
+export declare function ɵwithI18nSupport(): Provider[];
 
 /**
  * Returns a writable type version of type.
