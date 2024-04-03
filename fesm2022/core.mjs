@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.2+sha-816ddf4
+ * @license Angular v17.3.2+sha-158ceaf
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16022,7 +16022,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.2+sha-816ddf4']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.2+sha-158ceaf']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29830,7 +29830,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.2+sha-816ddf4');
+const VERSION = new Version('17.3.2+sha-158ceaf');
 
 class Console {
     log(message) {
@@ -30592,8 +30592,11 @@ function getInjectorParent(injector) {
     else if (injector instanceof NullInjector) {
         return null;
     }
+    else if (injector instanceof ChainedInjector) {
+        return injector.parentInjector;
+    }
     else {
-        throwError('getInjectorParent only support injectors of type R3Injector, NodeInjector, NullInjector');
+        throwError('getInjectorParent only support injectors of type R3Injector, NodeInjector, NullInjector, ChainedInjector');
     }
     const parentLocation = getParentInjectorLocation(tNode, lView);
     if (hasParentInjector(parentLocation)) {
@@ -30632,8 +30635,8 @@ function getModuleInjectorOfNodeInjector(injector) {
     else {
         throwError('getModuleInjectorOfNodeInjector must be called with a NodeInjector');
     }
-    const chainedInjector = lView[INJECTOR];
-    const moduleInjector = chainedInjector.parentInjector;
+    const inj = lView[INJECTOR];
+    const moduleInjector = (inj instanceof ChainedInjector) ? inj.parentInjector : inj.parent;
     if (!moduleInjector) {
         throwError('NodeInjector must have some connection to the module injector tree');
     }
