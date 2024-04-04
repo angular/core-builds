@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.3+sha-9ad4ed1
+ * @license Angular v18.0.0-next.3+sha-39624c6
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3442,7 +3442,7 @@ declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDef
  */
 declare type DirectiveInputs<T> = {
     [P in keyof T]?: string | [
-    flags: ɵɵInputFlags,
+    flags: InputFlags,
     publicName: string,
     declaredName?: string,
     transform?: InputTransformFunction
@@ -5081,7 +5081,7 @@ declare type InitialInputData = (InitialInputs | null)[];
  *
  * e.g. ['role-min', 'minified-input', 'button']
  */
-declare type InitialInputs = (string | ɵɵInputFlags)[];
+declare type InitialInputs = (string | InputFlags)[];
 
 /**
  * Type of the Inject metadata.
@@ -5711,6 +5711,14 @@ export declare interface InputDecorator {
      */
     (arg?: string | Input): any;
     new (arg?: string | Input): any;
+}
+
+
+/** Flags describing an input for a directive. */
+declare enum InputFlags {
+    None = 0,
+    SignalBased = 1,
+    HasDecoratorInputTransform = 2
 }
 
 /**
@@ -7511,7 +7519,7 @@ export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
  * }
  * ```
  */
-declare type NodeInputBindings = Record<string, (number | string | ɵɵInputFlags)[]>;
+declare type NodeInputBindings = Record<string, (number | string | InputFlags)[]>;
 
 /**
  * Store the runtime output names for all the directives.
@@ -12291,7 +12299,7 @@ export declare interface ɵDirectiveDef<T> {
      * (along with flags if there are any).
      */
     readonly inputs: {
-        [P in keyof T]?: string | [minifiedName: string, flags: ɵɵInputFlags];
+        [P in keyof T]?: string | [minifiedName: string, flags: InputFlags];
     };
     /**
      * A dictionary mapping the private names of inputs to their transformation functions.
@@ -12309,7 +12317,7 @@ export declare interface ɵDirectiveDef<T> {
      * used to do further processing after the `inputs` have been inverted.
      */
     readonly inputConfig: {
-        [P in keyof T]?: string | [ɵɵInputFlags, string, string?, InputTransformFunction?];
+        [P in keyof T]?: string | [InputFlags, string, string?, InputTransformFunction?];
     };
     /**
      * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
@@ -15388,14 +15396,6 @@ export declare type ɵɵInjectorDeclaration<T> = unknown;
 export declare interface ɵɵInjectorDef<T> {
     providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | EnvironmentProviders | any[])[];
     imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
-}
-
-
-/** Flags describing an input for a directive. */
-export declare enum ɵɵInputFlags {
-    None = 0,
-    SignalBased = 1,
-    HasDecoratorInputTransform = 2
 }
 
 /**

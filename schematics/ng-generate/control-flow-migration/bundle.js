@@ -2506,12 +2506,6 @@ var Identifiers = _Identifiers;
   };
 })();
 (() => {
-  _Identifiers.InputFlags = {
-    name: "\u0275\u0275InputFlags",
-    moduleName: CORE
-  };
-})();
-(() => {
   _Identifiers.sanitizeHtml = { name: "\u0275\u0275sanitizeHtml", moduleName: CORE };
 })();
 (() => {
@@ -4553,16 +4547,15 @@ function conditionallyCreateDirectiveBindingLiteral(map, forInputs) {
       publicName = value.bindingPropertyName;
       const differentDeclaringName = publicName !== declaredName;
       const hasDecoratorInputTransform = value.transformFunction !== null;
-      let flags = null;
+      let flags = InputFlags.None;
       if (value.isSignal) {
-        flags = bitwiseOrInputFlagsExpr(InputFlags.SignalBased, flags);
+        flags |= InputFlags.SignalBased;
       }
       if (hasDecoratorInputTransform) {
-        flags = bitwiseOrInputFlagsExpr(InputFlags.HasDecoratorInputTransform, flags);
+        flags |= InputFlags.HasDecoratorInputTransform;
       }
-      if (forInputs && (differentDeclaringName || hasDecoratorInputTransform || flags !== null)) {
-        const flagsExpr = flags != null ? flags : importExpr(Identifiers.InputFlags).prop(InputFlags[InputFlags.None]);
-        const result = [flagsExpr, asLiteral(publicName)];
+      if (forInputs && (differentDeclaringName || hasDecoratorInputTransform || flags !== InputFlags.None)) {
+        const result = [literal(flags), asLiteral(publicName)];
         if (differentDeclaringName || hasDecoratorInputTransform) {
           result.push(asLiteral(declaredName));
           if (hasDecoratorInputTransform) {
@@ -4580,15 +4573,6 @@ function conditionallyCreateDirectiveBindingLiteral(map, forInputs) {
       value: expressionValue
     };
   }));
-}
-function getInputFlagExpr(flag) {
-  return importExpr(Identifiers.InputFlags).prop(InputFlags[flag]);
-}
-function bitwiseOrInputFlagsExpr(flag, expr) {
-  if (expr === null) {
-    return getInputFlagExpr(flag);
-  }
-  return getInputFlagExpr(flag).bitwiseOr(expr);
 }
 var DefinitionMap = class {
   constructor() {
@@ -22587,7 +22571,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.3+sha-9ad4ed1");
+var VERSION2 = new Version("18.0.0-next.3+sha-39624c6");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
