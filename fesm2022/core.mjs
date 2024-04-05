@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.3+sha-58e2f47
+ * @license Angular v18.0.0-next.3+sha-59c7538
  * (c) 2010-2022 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10305,23 +10305,28 @@ function insertView(tView, lView, lContainer, index) {
 }
 /**
  * Track views created from the declaration container (TemplateRef) and inserted into a
- * different LContainer.
+ * different LContainer or attached directly to ApplicationRef.
  */
 function trackMovedView(declarationContainer, lView) {
     ngDevMode && assertDefined(lView, 'LView required');
     ngDevMode && assertLContainer(declarationContainer);
     const movedViews = declarationContainer[MOVED_VIEWS];
-    const insertedLContainer = lView[PARENT];
-    ngDevMode && assertLContainer(insertedLContainer);
-    const insertedComponentLView = insertedLContainer[PARENT][DECLARATION_COMPONENT_VIEW];
-    ngDevMode && assertDefined(insertedComponentLView, 'Missing insertedComponentLView');
-    const declaredComponentLView = lView[DECLARATION_COMPONENT_VIEW];
-    ngDevMode && assertDefined(declaredComponentLView, 'Missing declaredComponentLView');
-    if (declaredComponentLView !== insertedComponentLView) {
-        // At this point the declaration-component is not same as insertion-component; this means that
-        // this is a transplanted view. Mark the declared lView as having transplanted views so that
-        // those views can participate in CD.
+    const parent = lView[PARENT];
+    ngDevMode && assertDefined(parent, 'missing parent');
+    if (isLView(parent)) {
         declarationContainer[FLAGS] |= LContainerFlags.HasTransplantedViews;
+    }
+    else {
+        const insertedComponentLView = parent[PARENT][DECLARATION_COMPONENT_VIEW];
+        ngDevMode && assertDefined(insertedComponentLView, 'Missing insertedComponentLView');
+        const declaredComponentLView = lView[DECLARATION_COMPONENT_VIEW];
+        ngDevMode && assertDefined(declaredComponentLView, 'Missing declaredComponentLView');
+        if (declaredComponentLView !== insertedComponentLView) {
+            // At this point the declaration-component is not same as insertion-component; this means that
+            // this is a transplanted view. Mark the declared lView as having transplanted views so that
+            // those views can participate in CD.
+            declarationContainer[FLAGS] |= LContainerFlags.HasTransplantedViews;
+        }
     }
     if (movedViews === null) {
         declarationContainer[MOVED_VIEWS] = [lView];
@@ -10336,7 +10341,6 @@ function detachMovedView(declarationContainer, lView) {
         assertDefined(declarationContainer[MOVED_VIEWS], 'A projected view should belong to a non-empty projected views collection');
     const movedViews = declarationContainer[MOVED_VIEWS];
     const declarationViewIndex = movedViews.indexOf(lView);
-    ngDevMode && assertLContainer(lView[PARENT]);
     movedViews.splice(declarationViewIndex, 1);
 }
 /**
@@ -12999,7 +13003,7 @@ function detectChangesInEmbeddedViews(lView, mode) {
     }
 }
 /**
- * Mark transplanted views as needing to be refreshed at their insertion points.
+ * Mark transplanted views as needing to be refreshed at their attachment points.
  *
  * @param lView The `LView` that may have transplanted views.
  */
@@ -13011,8 +13015,6 @@ function markTransplantedViewsForRefresh(lView) {
         ngDevMode && assertDefined(movedViews, 'Transplanted View flags set but missing MOVED_VIEWS');
         for (let i = 0; i < movedViews.length; i++) {
             const movedLView = movedViews[i];
-            const insertionLContainer = movedLView[PARENT];
-            ngDevMode && assertLContainer(insertionLContainer);
             markViewForRefresh(movedLView);
         }
     }
@@ -13398,6 +13400,11 @@ class ViewRef$1 {
     }
     detachFromAppRef() {
         this._appRef = null;
+        const isRoot = isRootView(this._lView);
+        const declarationContainer = this._lView[DECLARATION_LCONTAINER];
+        if (declarationContainer !== null && !isRoot) {
+            detachMovedView(declarationContainer, this._lView);
+        }
         detachViewFromDOM(this._lView[TVIEW], this._lView);
     }
     attachToAppRef(appRef) {
@@ -13405,6 +13412,11 @@ class ViewRef$1 {
             throw new RuntimeError(902 /* RuntimeErrorCode.VIEW_ALREADY_ATTACHED */, ngDevMode && 'This view is already attached to a ViewContainer!');
         }
         this._appRef = appRef;
+        const isRoot = isRootView(this._lView);
+        const declarationContainer = this._lView[DECLARATION_LCONTAINER];
+        if (declarationContainer !== null && !isRoot) {
+            trackMovedView(declarationContainer, this._lView);
+        }
         updateAncestorTraversalFlagsOnAttach(this._lView);
     }
 }
@@ -16725,7 +16737,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-58e2f47']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-59c7538']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30363,7 +30375,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.3+sha-58e2f47');
+const VERSION = new Version('18.0.0-next.3+sha-59c7538');
 
 class Console {
     log(message) {
