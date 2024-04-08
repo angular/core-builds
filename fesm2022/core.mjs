@@ -1,6 +1,6 @@
 /**
- * @license Angular v18.0.0-next.3+sha-3583d67
- * (c) 2010-2022 Google LLC. https://angular.io/
+ * @license Angular v18.0.0-next.3+sha-f8d5921
+ * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
@@ -16737,7 +16737,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-3583d67']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-f8d5921']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30375,7 +30375,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.3+sha-3583d67');
+const VERSION = new Version('18.0.0-next.3+sha-f8d5921');
 
 class Console {
     log(message) {
@@ -32406,20 +32406,9 @@ class ChangeDetectionSchedulerImpl {
             return;
         }
         this.pendingRenderTaskId = this.taskService.add();
-        // TODO(atscott): This zone.root.run can maybe just be removed when we more
-        // effectively get the unpatched versions of setTimeout and rAF (#55092)
-        if (typeof Zone !== 'undefined' && Zone.root?.run) {
-            Zone.root.run(() => {
-                this.cancelScheduledCallback = scheduleCallback(() => {
-                    this.tick(this.shouldRefreshViews);
-                });
-            });
-        }
-        else {
-            this.cancelScheduledCallback = scheduleCallback(() => {
-                this.tick(this.shouldRefreshViews);
-            });
-        }
+        this.cancelScheduledCallback = scheduleCallback(() => {
+            this.tick(this.shouldRefreshViews);
+        });
     }
     shouldScheduleTick() {
         if (this.disableScheduling) {
