@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.3+sha-87cdfaf
+ * @license Angular v18.0.0-next.3+sha-ed6df68
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16737,7 +16737,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-87cdfaf']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-ed6df68']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30375,7 +30375,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.3+sha-87cdfaf');
+const VERSION = new Version('18.0.0-next.3+sha-ed6df68');
 
 class Console {
     log(message) {
@@ -32480,6 +32480,7 @@ class ChangeDetectionSchedulerImpl {
         args: [{ providedIn: 'root' }]
     }], () => [], null); })();
 function provideZonelessChangeDetection() {
+    performanceMarkFeature('NgZoneless');
     return makeEnvironmentProviders([
         { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
         { provide: NgZone, useClass: NoopNgZone },
@@ -32606,7 +32607,16 @@ function ngZoneApplicationErrorHandlerFactory() {
  */
 function provideZoneChangeDetection(options) {
     const schedulingMode = options?.schedulingMode;
-    const zoneProviders = internalProvideZoneChangeDetection({ ngZoneFactory: () => new NgZone(getNgZoneOptions(options)), schedulingMode });
+    const zoneProviders = internalProvideZoneChangeDetection({
+        ngZoneFactory: () => {
+            const ngZoneOptions = getNgZoneOptions(options);
+            if (ngZoneOptions.shouldCoalesceEventChangeDetection) {
+                performanceMarkFeature('NgZone_CoalesceEvent');
+            }
+            return new NgZone(ngZoneOptions);
+        },
+        schedulingMode
+    });
     return makeEnvironmentProviders([
         (typeof ngDevMode === 'undefined' || ngDevMode) ? { provide: PROVIDED_NG_ZONE, useValue: true } :
             [],
