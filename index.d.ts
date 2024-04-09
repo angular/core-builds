@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.3+sha-216199d
+ * @license Angular v18.0.0-next.3+sha-1c6553e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -33,7 +33,7 @@ export declare interface AbstractType<T> extends Function {
  * has been checked and most of the time it's during a change detection cycle.
  *
  * @see {@link AfterViewChecked}
- * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -60,7 +60,7 @@ export declare interface AfterContentChecked {
  *
  * @see {@link OnInit}
  * @see {@link AfterViewInit}
- * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -284,7 +284,7 @@ export declare interface AfterRenderRef {
  * completed checking a component's view for changes.
  *
  * @see {@link AfterContentChecked}
- * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -311,7 +311,7 @@ export declare interface AfterViewChecked {
  *
  * @see {@link OnInit}
  * @see {@link AfterContentInit}
- * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -813,7 +813,7 @@ export declare function asNativeElements(debugEls: DebugElement[]): any;
 
 /**
  * Asserts that the current stack frame is within an [injection
- * context](guide/dependency-injection-context) and has access to `inject`.
+ * context](guide/di/dependency-injection-context) and has access to `inject`.
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
  *
@@ -995,8 +995,8 @@ declare type ChangeDetectionStrategy_2 = number;
  * Use the methods to add and remove views from the tree, initiate change-detection,
  * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
  *
- * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
- * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
+ * @see [Using change detection hooks](guide/components/lifecycle#using-change-detection-hooks)
+ * @see [Defining custom change detection](guide/components/lifecycle#defining-custom-change-detection)
  *
  * @usageNotes
  *
@@ -1107,7 +1107,7 @@ declare interface ClassDebugInfo {
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @usageNotes
  *
@@ -1139,7 +1139,7 @@ export declare interface ClassProvider extends ClassSansProvider {
  * Configures the `Injector` to return a value by invoking a `useClass` function.
  * Base for `ClassProvider` decorator.
  *
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @publicApi
  */
@@ -1165,8 +1165,6 @@ declare const CLEANUP = 7;
  *
  * @deprecated
  * Ivy JIT mode doesn't require accessing this symbol.
- * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
- * additional context.
  */
 export declare class Compiler {
     /**
@@ -1216,8 +1214,6 @@ export declare const COMPILER_OPTIONS: InjectionToken<CompilerOptions[]>;
  *
  * @deprecated
  * Ivy JIT mode doesn't require accessing this symbol.
- * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
- * additional context.
  */
 export declare abstract class CompilerFactory {
     abstract createCompiler(options?: CompilerOptions[]): Compiler;
@@ -1294,7 +1290,7 @@ export declare interface Component extends Directive {
     /**
      * One or more animation `trigger()` calls, containing
      * [`state()`](api/animations/state) and `transition()` definitions.
-     * See the [Animations guide](/guide/animations) and animations API documentation.
+     * See the [Animations guide](guide/animations) and animations API documentation.
      *
      */
     animations?: any[];
@@ -1331,7 +1327,7 @@ export declare interface Component extends Directive {
      * used in a template) via the imports property.
      *
      * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/standalone-components).
+     * guide](guide/components/importing).
      */
     standalone?: boolean;
     /**
@@ -1343,7 +1339,7 @@ export declare interface Component extends Directive {
      * declared in an NgModule generates a compilation error.
      *
      * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/standalone-components).
+     * guide](guide/components/importing).
      */
     imports?: (Type<any> | ReadonlyArray<any>)[];
     /**
@@ -1354,7 +1350,7 @@ export declare interface Component extends Directive {
      * declared in an NgModule generates a compilation error.
      *
      * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/standalone-components).
+     * guide](guide/components/importing).
      */
     schemas?: SchemaMetadata[];
 }
@@ -1392,7 +1388,7 @@ export declare interface ComponentDecorator {
      * Note that, in addition to these options for configuring a directive,
      * you can control a component's runtime behavior by implementing
      * life-cycle hooks. For more information, see the
-     * [Lifecycle Hooks](guide/lifecycle-hooks) guide.
+     * [Lifecycle Hooks](guide/components/lifecycle) guide.
      *
      * @usageNotes
      *
@@ -1820,7 +1816,7 @@ export declare function computed<T>(computation: () => T, options?: CreateComput
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @usageNotes
  *
@@ -1847,7 +1843,7 @@ export declare interface ConstructorProvider extends ConstructorSansProvider {
 /**
  * Configures the `Injector` to return an instance of a token.
  *
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @usageNotes
  *
@@ -2185,13 +2181,12 @@ declare const CONTEXT = 8;
  *
  * @param component Component class reference.
  * @param options Set of options to use:
- *  * `environmentInjector`: An `EnvironmentInjector` instance to be used for the component, see
- * additional info about it [here](/guide/standalone-components#environment-injectors).
+ *  * `environmentInjector`: An `EnvironmentInjector` instance to be used for the component.
  *  * `hostElement` (optional): A DOM node that should act as a host node for the component. If not
  * provided, Angular creates one based on the tag name used in the component selector (and falls
  * back to using `div` if selector doesn't have tag name info).
  *  * `elementInjector` (optional): An `ElementInjector` instance, see additional info about it
- * [here](/guide/hierarchical-dependency-injection#elementinjector).
+ * [here](guide/di/hierarchical-dependency-injection#elementinjector).
  *  * `projectableNodes` (optional): A list of DOM nodes that should be projected through
  *                      [`<ng-content>`](api/core/ng-content) of the new component instance.
  * @returns ComponentRef instance that represents a given Component.
@@ -2224,7 +2219,7 @@ export declare interface CreateEffectOptions {
     /**
      * The `Injector` in which to create the effect.
      *
-     * If this is not provided, the current [injection context](guide/dependency-injection-context)
+     * If this is not provided, the current [injection context](guide/di/dependency-injection-context)
      * will be used instead (via `inject`).
      */
     injector?: Injector;
@@ -2246,9 +2241,6 @@ export declare interface CreateEffectOptions {
 
 /**
  * Create a new environment injector.
- *
- * Learn more about environment injectors in
- * [this guide](guide/standalone-components#environment-injectors).
  *
  * @param providers An array of providers.
  * @param parent A parent environment injector.
@@ -2395,9 +2387,9 @@ export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
 /**
  * @publicApi
  *
- * @see [Component testing scenarios](guide/testing-components-scenarios)
- * @see [Basics of testing components](guide/testing-components-basics)
- * @see [Testing utility APIs](guide/testing-utility-apis)
+ * @see [Component testing scenarios](guide/testing/components-scenarios)
+ * @see [Basics of testing components](guide/testing/components-basics)
+ * @see [Testing utility APIs](guide/testing/utility-apis)
  */
 export declare class DebugElement extends DebugNode {
     constructor(nativeNode: Element);
@@ -2481,7 +2473,7 @@ export declare class DebugElement extends DebugNode {
      * @param eventName The name of the event to trigger
      * @param eventObj The _event object_ expected by the handler
      *
-     * @see [Testing components scenarios](guide/testing-components-scenarios#trigger-event-handler)
+     * @see [Testing components scenarios](guide/testing/components-scenarios#trigger-event-handler)
      */
     triggerEventHandler(eventName: string, eventObj?: any): void;
 }
@@ -2555,7 +2547,7 @@ declare const DECLARATION_VIEW = 14;
  * CurrencyPipe when there is no currency code passed into it. This is only used by
  * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
  *
- * See the [i18n guide](guide/i18n-common-locale-id) for more information.
+ * See the [i18n guide](guide/i18n/locale-id) for more information.
  *
  * <div class="alert is-helpful">
  *
@@ -3135,7 +3127,7 @@ export declare interface Directive {
      * providers).
      *
      * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/standalone-components).
+     * guide](guide/components/importing).
      */
     standalone?: boolean;
     /**
@@ -3188,7 +3180,7 @@ export declare interface DirectiveDecorator {
      * runtime.
      *
      * Directive classes, like component classes, can implement
-     * [life-cycle hooks](guide/lifecycle-hooks) to influence their configuration and behavior.
+     * [life-cycle hooks](guide/components/lifecycle) to influence their configuration and behavior.
      *
      *
      * @usageNotes
@@ -3209,13 +3201,13 @@ export declare interface DirectiveDecorator {
      *
      * In order to make a directive available to other components in your application, you should do
      * one of the following:
-     *  - either mark the directive as [standalone](guide/standalone-components),
+     *  - either mark the directive as [standalone](guide/components/importing),
      *  - or declare it in an NgModule by adding it to the `declarations` and `exports` fields.
      *
      * ** Marking a directive as standalone **
      *
      * You can add the `standalone: true` flag to the Directive decorator metadata to declare it as
-     * [standalone](guide/standalone-components):
+     * [standalone](guide/components/importing):
      *
      * ```ts
      * @Directive({
@@ -3458,7 +3450,7 @@ declare const DISCONNECTED_NODES = "d";
  *
  * Reference to the current application is provided as a parameter.
  *
- * See ["Bootstrapping"](guide/bootstrapping).
+ * See ["Bootstrapping"](guide/ngmodules/bootstrapping).
  *
  * @usageNotes
  * The example below uses `ApplicationRef.bootstrap()` to render the
@@ -3492,7 +3484,7 @@ export declare interface DoBootstrap {
  * changes on the same input.
  *
  * @see {@link OnChanges}
- * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface
@@ -3501,7 +3493,7 @@ export declare interface DoBootstrap {
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
  *
  * For a more complete example and discussion, see
- * [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection).
+ * [Defining custom change detection](guide/components/lifecycle#defining-custom-change-detection).
  *
  * @publicApi
  */
@@ -3837,7 +3829,6 @@ export declare class ErrorHandler {
  * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
  * ```
  *
- * @see [Observables in Angular](guide/observables-in-angular)
  * @publicApi
  */
 export declare interface EventEmitter<T> extends Subject<T>, OutputRef<T> {
@@ -3885,7 +3876,7 @@ export declare const EventEmitter: {
 /**
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @usageNotes
  *
@@ -3913,7 +3904,7 @@ export declare interface ExistingProvider extends ExistingSansProvider {
  * Configures the `Injector` to return a value of another `useExisting` token.
  *
  * @see {@link ExistingProvider}
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @publicApi
  */
@@ -3941,7 +3932,7 @@ declare type FactoryFn<T> = {
 
 /**
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @usageNotes
  *
@@ -3973,7 +3964,7 @@ export declare interface FactoryProvider extends FactorySansProvider {
  * Configures the `Injector` to return a value by invoking a `useFactory` function.
  *
  * @see {@link FactoryProvider}
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @publicApi
  */
@@ -4539,7 +4530,7 @@ export declare interface HostDecorator {
      * </code-example>
      *
      * For an extended example, see ["Dependency Injection
-     * Guide"](guide/dependency-injection-in-action#optional).
+     * Guide"](guide/di/di-in-action#optional).
      */
     (): any;
     new (): Host;
@@ -5010,7 +5001,7 @@ export declare type ImportedNgModuleProviders = EnvironmentProviders;
  * providers.
  *
  * More information about standalone components can be found in [this
- * guide](guide/standalone-components).
+ * guide](guide/components/importing).
  *
  * @usageNotes
  * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
@@ -5228,8 +5219,8 @@ export declare interface InjectableDecorator {
      * Decorator that marks a class as available to be
      * provided and injected as a dependency.
      *
-     * @see [Introduction to Services and DI](guide/architecture-services)
-     * @see [Dependency Injection Guide](guide/dependency-injection)
+     * @see [Introduction to Services and DI](guide/di)
+     * @see [Dependency Injection Guide](guide/di/dependency-injection
      *
      * @usageNotes
      *
@@ -5296,7 +5287,7 @@ export declare interface InjectDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="InjectWithoutDecorator">
      * </code-example>
      *
-     * @see [Dependency Injection Guide](guide/dependency-injection)
+     * @see [Dependency Injection Guide](guide/di/dependency-injection
      *
      */
     (token: any): any;
@@ -5458,10 +5449,10 @@ export declare const INJECTOR: InjectionToken<Injector>;
 
 /**
  * Concrete injectors implement this interface. Injectors are configured
- * with [providers](guide/dependency-injection-providers) that associate
- * dependencies of various types with [injection tokens](guide/dependency-injection-providers).
+ * with [providers](guide/di/dependency-injection-providers) that associate
+ * dependencies of various types with [injection tokens](guide/di/dependency-injection-providers).
  *
- * @see [DI Providers](guide/dependency-injection-providers).
+ * @see [DI Providers](guide/di/dependency-injection-providers).
  * @see {@link StaticProvider}
  *
  * @usageNotes
@@ -5707,7 +5698,8 @@ export declare interface InputDecorator {
      * class App {}
      * ```
      *
-     * @see [Input and Output properties](guide/inputs-outputs)
+     * @see [Input properties](guide/components/inputs)
+     * @see [Output properties](guide/components/outputs)
      */
     (arg?: string | Input): any;
     new (arg?: string | Input): any;
@@ -5951,7 +5943,7 @@ export declare function isSignal(value: unknown): value is Signal<unknown>;
 /**
  * Checks whether a given Component, Directive or Pipe is marked as standalone.
  * This will return false if passed anything other than a Component, Directive, or Pipe class
- * See [this guide](/guide/standalone-components) for additional information:
+ * See [this guide](guide/components/importing) for additional information:
  *
  * @param type A reference to a Component, Directive or Pipe.
  * @publicApi
@@ -6349,7 +6341,7 @@ declare interface Listener {
  * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
  * DecimalPipe and PercentPipe) and by ICU expressions.
  *
- * See the [i18n guide](guide/i18n-common-locale-id) for more information.
+ * See the [i18n guide](guide/i18n/locale-id) for more information.
  *
  * @usageNotes
  * ### Example
@@ -6811,7 +6803,7 @@ export declare function mergeApplicationConfig(...configs: ApplicationConfig[]):
  * - Warning (default): show a warning in the console and/or shell.
  * - Ignore: do nothing.
  *
- * See the [i18n guide](guide/i18n-common-merge#report-missing-translations) for more information.
+ * See the [i18n guide](guide/i18n/merge#report-missing-translations) for more information.
  *
  * @usageNotes
  * ### Example
@@ -6946,8 +6938,6 @@ export declare interface ModelSignal<T> extends WritableSignal<T>, OutputRef<T> 
  *
  * @deprecated
  * Ivy JIT mode doesn't require accessing this symbol.
- * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
- * additional context.
  */
 export declare class ModuleWithComponentFactories<T> {
     ngModuleFactory: NgModuleFactory<T>;
@@ -6958,8 +6948,6 @@ export declare class ModuleWithComponentFactories<T> {
 /**
  * A wrapper around an NgModule that associates it with providers
  * Usage without a generic type is deprecated.
- *
- * @see [Deprecations](guide/deprecations#modulewithproviders-type-without-a-generic)
  *
  * @publicApi
  */
@@ -6999,8 +6987,8 @@ export declare interface NgModule {
      * The set of injectable objects that are available in the injector
      * of this module.
      *
-     * @see [Dependency Injection guide](guide/dependency-injection)
-     * @see [NgModule guide](guide/providers)
+     * @see [Dependency Injection guide](guide/di/dependency-injection
+     * @see [NgModule guide](guide/ngmodules/providers)
      *
      * @usageNotes
      *
@@ -7181,8 +7169,7 @@ export declare interface NgModuleDecorator {
  *
  * @deprecated
  * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
- * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
- * for additional context. Angular provides APIs that accept NgModule classes directly (such as
+ * JIT mode. Angular provides APIs that accept NgModule classes directly (such as
  * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
  * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
  * using factory-based ones.
@@ -7568,7 +7555,7 @@ declare const ON_DESTROY_HOOKS = 21;
  *
  * @see {@link DoCheck}
  * @see {@link OnInit}
- * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -7593,7 +7580,7 @@ export declare interface OnChanges {
  * A lifecycle hook that is called when a directive, pipe, or service is destroyed.
  * Use for any custom cleanup that needs to occur when the
  * instance is destroyed.
- * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface
@@ -7618,7 +7605,7 @@ export declare interface OnDestroy {
  * Define an `ngOnInit()` method to handle any additional initialization tasks.
  *
  * @see {@link AfterContentInit}
- * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface to
@@ -7682,7 +7669,7 @@ export declare interface OptionalDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
      * </code-example>
      *
-     * @see [Dependency Injection Guide](guide/dependency-injection).
+     * @see [Dependency Injection Guide](guide/di/dependency-injection.
      */
     (): any;
     new (): Optional;
@@ -7770,7 +7757,8 @@ export declare interface OutputDecorator {
      *
      * See `Input` decorator for an example of providing a binding name.
      *
-     * @see [Input and Output properties](guide/inputs-outputs)
+     * @see [Input properties](guide/components/inputs)
+     * @see [Output properties](guide/components/outputs)
      *
      */
     (alias?: string): any;
@@ -7877,7 +7865,7 @@ export declare interface Pipe {
      * pipes don't depend on any "intermediate context" of an NgModule (ex. configured providers).
      *
      * More information about standalone components, directives, and pipes can be found in [this
-     * guide](guide/standalone-components).
+     * guide](guide/components/importing).
      */
     standalone?: boolean;
 }
@@ -7912,7 +7900,7 @@ export declare interface PipeDecorator {
      * to a template. To make it a member of an NgModule,
      * list it in the `declarations` field of the `NgModule` metadata.
      *
-     * @see [Style Guide: Pipe Names](guide/styleguide#02-09)
+     * @see [Style Guide: Pipe Names](style-guide#02-09)
      *
      */
     (obj: Pipe): TypeDecorator;
@@ -8111,7 +8099,7 @@ declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
 
 /**
  * Describes how the `Injector` should be configured.
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @see {@link StaticProvider}
  *
@@ -8965,7 +8953,7 @@ declare interface RText extends RNode {
 }
 
 /**
- * Runs the given function in the [context](guide/dependency-injection-context) of the given
+ * Runs the given function in the [context](guide/di/dependency-injection-context) of the given
  * `Injector`.
  *
  * Within the function's stack frame, [`inject`](api/core/inject) can be used to inject dependencies
@@ -9298,7 +9286,7 @@ export declare interface SkipSelfDecorator {
      * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf">
      * </code-example>
      *
-     * @see [Dependency Injection guide](guide/dependency-injection-in-action#skip).
+     * @see [Dependency Injection guide](guide/di/di-in-action#skip).
      * @see {@link Self}
      * @see {@link Optional}
      *
@@ -9344,7 +9332,7 @@ export declare type StateKey<T> = string & {
 
 /**
  * Configures the `Injector` to return an instance of `useClass` for a token.
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @usageNotes
  *
@@ -9396,7 +9384,7 @@ export declare interface StaticClassSansProvider {
  * A static provider provides tokens to an injector for various types of dependencies.
  *
  * @see {@link Injector.create()}
- * @see [Dependency Injection Guide](guide/dependency-injection-providers).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection-providers).
  *
  * @publicApi
  */
@@ -9585,7 +9573,6 @@ declare const TEMPLATE_ID = "i";
  * a component or a directive.
  *
  * @see {@link ViewContainerRef}
- * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
  *
  * @publicApi
  */
@@ -9593,8 +9580,8 @@ export declare abstract class TemplateRef<C> {
     /**
      * The anchor element in the parent view for this embedded view.
      *
-     * The data-binding and [injection contexts](guide/dependency-injection-context) of embedded views
-     * created from this `TemplateRef` inherit from the contexts of this location.
+     * The data-binding and [injection contexts](guide/di/dependency-injection-context) of embedded
+     * views created from this `TemplateRef` inherit from the contexts of this location.
      *
      * Typically new embedded views are attached to the view container of this location, but in
      * advanced use-cases, the view can be attached to a different container while keeping the
@@ -10552,7 +10539,7 @@ export declare class TransferState {
  * Use this token at bootstrap to provide the content of your translation file (`xtb`,
  * `xlf` or `xlf2`) when you want to translate your application in another language.
  *
- * See the [i18n guide](guide/i18n-common-merge) for more information.
+ * See the [i18n guide](guide/i18n/merge) for more information.
  *
  * @usageNotes
  * ### Example
@@ -10578,7 +10565,7 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
  * `xlf` or `xlf2`.
  *
- * See the [i18n guide](guide/i18n-common-merge) for more information.
+ * See the [i18n guide](guide/i18n/merge) for more information.
  *
  * @usageNotes
  * ### Example
@@ -11073,7 +11060,7 @@ declare type TypeOrFactory<T> = T | (() => T);
  * Create an instance by invoking the `new` operator and supplying additional arguments.
  * This form is a short form of `TypeProvider`;
  *
- * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
+ * For more details, see the ["Dependency Injection Guide"](guide/di/dependency-injection.
  *
  * @usageNotes
  *
@@ -11098,7 +11085,7 @@ export declare type ValueEqualityFn<T> = (a: T, b: T) => boolean;
 
 /**
  * Configures the `Injector` to return a value for a token.
- * @see [Dependency Injection Guide](guide/dependency-injection).
+ * @see [Dependency Injection Guide](guide/di/dependency-injection.
  *
  * @usageNotes
  *
@@ -12472,7 +12459,7 @@ export declare const enum ɵExtraLocaleDataIndex {
  *
  * @param locale The locale code.
  * @returns The locale data.
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n-overview)
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
  */
 export declare function ɵfindLocaleData(locale: string): any;
 
@@ -12593,7 +12580,7 @@ export declare function ɵgetLocaleCurrencyCode(locale: string): string | null;
  * @param locale A locale code for the locale format rules to use.
  * @returns The plural function for the locale.
  * @see {@link NgPlural}
- * @see [Internationalization (i18n) Guide](/guide/i18n-overview)
+ * @see [Internationalization (i18n) Guide](guide/i18n)
  */
 export declare function ɵgetLocalePluralCase(locale: string): (value: number) => number;
 
@@ -12656,7 +12643,7 @@ export declare const ɵIMAGE_CONFIG_DEFAULTS: ɵImageConfig;
  * - disableImageLazyLoadWarning: A boolean value. Setting this to true will
  *      disable console warnings about LCP images configured with `loading="lazy"`.
  * Learn more about the responsive image configuration in [the NgOptimizedImage
- * guide](guide/image-directive).
+ * guide](guide/image-optimization).
  * Learn more about image warning options in [the related error page](errors/NG0913).
  * @publicApi
  */
@@ -13199,7 +13186,7 @@ export declare class ɵReflectionCapabilities implements PlatformReflectionCapab
 
 /**
  * Register locale data to be used internally by Angular. See the
- * ["I18n guide"](guide/i18n-common-format-data-locale) to know how to import additional locale
+ * ["I18n guide"](guide/i18n/format-data-locale) to know how to import additional locale
  * data.
  *
  * The signature `registerLocaleData(data: any, extraData?: any)` is deprecated since v5.1

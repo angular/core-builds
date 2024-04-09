@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.3+sha-216199d
+ * @license Angular v18.0.0-next.3+sha-1c6553e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1123,8 +1123,8 @@ Please check that 1) the type for the parameter at index ${index} is correct and
 }
 /**
  * Injects a token from the currently active injector.
- * `inject` is only supported in an [injection context](/guide/dependency-injection-context). It can
- * be used during:
+ * `inject` is only supported in an [injection context](guide/di/dependency-injection-context). It
+ * can be used during:
  * - Construction (via the `constructor`) of a class being instantiated by the DI system, such
  * as an `@Injectable` or `@Component`.
  * - In the initializer for fields of such classes.
@@ -2537,7 +2537,7 @@ function getPipeDef$1(type) {
 /**
  * Checks whether a given Component, Directive or Pipe is marked as standalone.
  * This will return false if passed anything other than a Component, Directive, or Pipe class
- * See [this guide](/guide/standalone-components) for additional information:
+ * See [this guide](guide/components/importing) for additional information:
  *
  * @param type A reference to a Component, Directive or Pipe.
  * @publicApi
@@ -2671,7 +2671,7 @@ function makeEnvironmentProviders(providers) {
  * providers.
  *
  * More information about standalone components can be found in [this
- * guide](guide/standalone-components).
+ * guide](guide/components/importing).
  *
  * @usageNotes
  * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
@@ -3373,7 +3373,7 @@ function forEachSingleProvider(providers, fn) {
 }
 
 /**
- * Runs the given function in the [context](guide/dependency-injection-context) of the given
+ * Runs the given function in the [context](guide/di/dependency-injection-context) of the given
  * `Injector`.
  *
  * Within the function's stack frame, [`inject`](api/core/inject) can be used to inject dependencies
@@ -3413,7 +3413,7 @@ function isInInjectionContext() {
 }
 /**
  * Asserts that the current stack frame is within an [injection
- * context](guide/dependency-injection-context) and has access to `inject`.
+ * context](guide/di/dependency-injection-context) and has access to `inject`.
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
  *
@@ -6368,10 +6368,10 @@ function createInjectorWithoutInjectorInstances(defType, parent = null, addition
 
 /**
  * Concrete injectors implement this interface. Injectors are configured
- * with [providers](guide/dependency-injection-providers) that associate
- * dependencies of various types with [injection tokens](guide/dependency-injection-providers).
+ * with [providers](guide/di/dependency-injection-providers) that associate
+ * dependencies of various types with [injection tokens](guide/di/dependency-injection-providers).
  *
- * @see [DI Providers](guide/dependency-injection-providers).
+ * @see [DI Providers](guide/di/dependency-injection-providers).
  * @see {@link StaticProvider}
  *
  * @usageNotes
@@ -13435,7 +13435,6 @@ class ViewRef$1 {
  * a component or a directive.
  *
  * @see {@link ViewContainerRef}
- * @see [Navigate the Component Tree with DI](guide/dependency-injection-navtree)
  *
  * @publicApi
  */
@@ -16737,7 +16736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-216199d']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-1c6553e']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18692,8 +18691,7 @@ class NgModuleRef$1 {
  *
  * @deprecated
  * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
- * JIT mode. See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes)
- * for additional context. Angular provides APIs that accept NgModule classes directly (such as
+ * JIT mode. Angular provides APIs that accept NgModule classes directly (such as
  * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
  * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
  * using factory-based ones.
@@ -18803,9 +18801,6 @@ class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
 }
 /**
  * Create a new environment injector.
- *
- * Learn more about environment injectors in
- * [this guide](guide/standalone-components#environment-injectors).
  *
  * @param providers An array of providers.
  * @param parent A parent environment injector.
@@ -24116,7 +24111,7 @@ var localeEn = ["en", [["a", "p"], ["AM", "PM"], u], [["AM", "PM"], u, u], [["S"
 let LOCALE_DATA = {};
 /**
  * Register locale data to be used internally by Angular. See the
- * ["I18n guide"](guide/i18n-common-format-data-locale) to know how to import additional locale
+ * ["I18n guide"](guide/i18n/format-data-locale) to know how to import additional locale
  * data.
  *
  * The signature `registerLocaleData(data: any, extraData?: any)` is deprecated since v5.1
@@ -24137,7 +24132,7 @@ function registerLocaleData(data, localeId, extraData) {
  *
  * @param locale The locale code.
  * @returns The locale data.
- * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n-overview)
+ * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
  */
 function findLocaleData(locale) {
     const normalizedLocale = normalizeLocale(locale);
@@ -24175,7 +24170,7 @@ function getLocaleCurrencyCode(locale) {
  * @param locale A locale code for the locale format rules to use.
  * @returns The plural function for the locale.
  * @see {@link NgPlural}
- * @see [Internationalization (i18n) Guide](/guide/i18n-overview)
+ * @see [Internationalization (i18n) Guide](guide/i18n)
  */
 function getLocalePluralCase(locale) {
     const data = findLocaleData(locale);
@@ -30375,7 +30370,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.3+sha-216199d');
+const VERSION = new Version('18.0.0-next.3+sha-1c6553e');
 
 class Console {
     log(message) {
@@ -32232,8 +32227,6 @@ function detectChangesInViewIfRequired(lView, notifyErrorHandler, isFirstPass, z
  *
  * @deprecated
  * Ivy JIT mode doesn't require accessing this symbol.
- * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
- * additional context.
  */
 class ModuleWithComponentFactories {
     constructor(ngModuleFactory, componentFactories) {
@@ -32254,8 +32247,6 @@ class ModuleWithComponentFactories {
  *
  * @deprecated
  * Ivy JIT mode doesn't require accessing this symbol.
- * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
- * additional context.
  */
 class Compiler {
     /**
@@ -32325,8 +32316,6 @@ const COMPILER_OPTIONS = new InjectionToken(ngDevMode ? 'compilerOptions' : '');
  *
  * @deprecated
  * Ivy JIT mode doesn't require accessing this symbol.
- * See [JIT API changes due to ViewEngine deprecation](guide/deprecations#jit-api-changes) for
- * additional context.
  */
 class CompilerFactory {
 }
@@ -32710,7 +32699,7 @@ function getGlobalLocale() {
  * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
  * DecimalPipe and PercentPipe) and by ICU expressions.
  *
- * See the [i18n guide](guide/i18n-common-locale-id) for more information.
+ * See the [i18n guide](guide/i18n/locale-id) for more information.
  *
  * @usageNotes
  * ### Example
@@ -32736,7 +32725,7 @@ const LOCALE_ID = new InjectionToken(ngDevMode ? 'LocaleId' : '', {
  * CurrencyPipe when there is no currency code passed into it. This is only used by
  * CurrencyPipe and has no relation to locale currency. Defaults to USD if not configured.
  *
- * See the [i18n guide](guide/i18n-common-locale-id) for more information.
+ * See the [i18n guide](guide/i18n/locale-id) for more information.
  *
  * <div class="alert is-helpful">
  *
@@ -32777,7 +32766,7 @@ const DEFAULT_CURRENCY_CODE = new InjectionToken(ngDevMode ? 'DefaultCurrencyCod
  * Use this token at bootstrap to provide the content of your translation file (`xtb`,
  * `xlf` or `xlf2`) when you want to translate your application in another language.
  *
- * See the [i18n guide](guide/i18n-common-merge) for more information.
+ * See the [i18n guide](guide/i18n/merge) for more information.
  *
  * @usageNotes
  * ### Example
@@ -32802,7 +32791,7 @@ const TRANSLATIONS = new InjectionToken(ngDevMode ? 'Translations' : '');
  * Provide this token at bootstrap to set the format of your {@link TRANSLATIONS}: `xtb`,
  * `xlf` or `xlf2`.
  *
- * See the [i18n guide](guide/i18n-common-merge) for more information.
+ * See the [i18n guide](guide/i18n/merge) for more information.
  *
  * @usageNotes
  * ### Example
@@ -32827,7 +32816,7 @@ const TRANSLATIONS_FORMAT = new InjectionToken(ngDevMode ? 'TranslationsFormat' 
  * - Warning (default): show a warning in the console and/or shell.
  * - Ignore: do nothing.
  *
- * See the [i18n guide](guide/i18n-common-merge#report-missing-translations) for more information.
+ * See the [i18n guide](guide/i18n/merge#report-missing-translations) for more information.
  *
  * @usageNotes
  * ### Example
@@ -33202,8 +33191,8 @@ function noModuleError(id) {
  * Use the methods to add and remove views from the tree, initiate change-detection,
  * and explicitly mark views as _dirty_, meaning that they have changed and need to be re-rendered.
  *
- * @see [Using change detection hooks](guide/lifecycle-hooks#using-change-detection-hooks)
- * @see [Defining custom change detection](guide/lifecycle-hooks#defining-custom-change-detection)
+ * @see [Using change detection hooks](guide/components/lifecycle#using-change-detection-hooks)
+ * @see [Defining custom change detection](guide/components/lifecycle#defining-custom-change-detection)
  *
  * @usageNotes
  *
@@ -33425,9 +33414,9 @@ class DebugNode {
 /**
  * @publicApi
  *
- * @see [Component testing scenarios](guide/testing-components-scenarios)
- * @see [Basics of testing components](guide/testing-components-basics)
- * @see [Testing utility APIs](guide/testing-utility-apis)
+ * @see [Component testing scenarios](guide/testing/components-scenarios)
+ * @see [Basics of testing components](guide/testing/components-basics)
+ * @see [Testing utility APIs](guide/testing/utility-apis)
  */
 class DebugElement extends DebugNode {
     constructor(nativeNode) {
@@ -33619,7 +33608,7 @@ class DebugElement extends DebugNode {
      * @param eventName The name of the event to trigger
      * @param eventObj The _event object_ expected by the handler
      *
-     * @see [Testing components scenarios](guide/testing-components-scenarios#trigger-event-handler)
+     * @see [Testing components scenarios](guide/testing/components-scenarios#trigger-event-handler)
      */
     triggerEventHandler(eventName, eventObj) {
         const node = this.nativeNode;
@@ -36939,13 +36928,12 @@ function effect(effectFn, options) {
  *
  * @param component Component class reference.
  * @param options Set of options to use:
- *  * `environmentInjector`: An `EnvironmentInjector` instance to be used for the component, see
- * additional info about it [here](/guide/standalone-components#environment-injectors).
+ *  * `environmentInjector`: An `EnvironmentInjector` instance to be used for the component.
  *  * `hostElement` (optional): A DOM node that should act as a host node for the component. If not
  * provided, Angular creates one based on the tag name used in the component selector (and falls
  * back to using `div` if selector doesn't have tag name info).
  *  * `elementInjector` (optional): An `ElementInjector` instance, see additional info about it
- * [here](/guide/hierarchical-dependency-injection#elementinjector).
+ * [here](guide/di/hierarchical-dependency-injection#elementinjector).
  *  * `projectableNodes` (optional): A list of DOM nodes that should be projected through
  *                      [`<ng-content>`](api/core/ng-content) of the new component instance.
  * @returns ComponentRef instance that represents a given Component.

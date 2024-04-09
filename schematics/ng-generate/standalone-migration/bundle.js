@@ -25969,7 +25969,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.3+sha-216199d");
+var VERSION2 = new Version("18.0.0-next.3+sha-1c6553e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27032,7 +27032,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.0.0-next.3+sha-216199d"));
+  definitionMap.set("version", literal("18.0.0-next.3+sha-1c6553e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27051,7 +27051,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.0.0-next.3+sha-216199d"));
+  definitionMap.set("version", literal("18.0.0-next.3+sha-1c6553e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27119,7 +27119,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.0.0-next.3+sha-216199d"));
+  definitionMap.set("version", literal("18.0.0-next.3+sha-1c6553e"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27435,7 +27435,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.0.0-next.3+sha-216199d"));
+  definitionMap.set("version", literal("18.0.0-next.3+sha-1c6553e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27458,7 +27458,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.0.0-next.3+sha-216199d"));
+  definitionMap.set("version", literal("18.0.0-next.3+sha-1c6553e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27496,7 +27496,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.0.0-next.3+sha-216199d"));
+  definitionMap.set("version", literal("18.0.0-next.3+sha-1c6553e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27520,7 +27520,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.0.0-next.3+sha-216199d"));
+  definitionMap.set("version", literal("18.0.0-next.3+sha-1c6553e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27555,7 +27555,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.0.0-next.3+sha-216199d"));
+  definitionMap.set("version", literal("18.0.0-next.3+sha-1c6553e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27572,7 +27572,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.0.0-next.3+sha-216199d");
+var VERSION3 = new Version("18.0.0-next.3+sha-1c6553e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -43670,7 +43670,7 @@ Consider enabling the 'strictTemplates' option in your tsconfig.json for better 
   splitTwoWayBinding(templateId, input, output, inputConsumer, outputConsumer) {
     const mapping = this.resolver.getSourceMapping(templateId);
     const errorMsg = `The property and event halves of the two-way binding '${input.name}' are not bound to the same target.
-            Find more at https://angular.io/guide/two-way-binding#how-two-way-binding-works`;
+            Find more at https://angular.dev/guide/templates/two-way-binding#how-two-way-binding-works`;
     const relatedMessages = [];
     relatedMessages.push({
       text: `The property half of the binding is to the '${inputConsumer.name.text}' component.`,
@@ -47460,7 +47460,7 @@ var InvalidBananaInBoxCheck = class extends TemplateCheckWithVisitor {
     const boundSyntax = node.sourceSpan.toString();
     const expectedBoundSyntax = boundSyntax.replace(`(${name})`, `[(${name.slice(1, -1)})]`);
     const diagnostic = ctx.makeTemplateDiagnostic(node.sourceSpan, `In the two-way binding syntax the parentheses should be inside the brackets, ex. '${expectedBoundSyntax}'.
-        Find more at https://angular.io/guide/two-way-binding`);
+        Find more at https://angular.dev/guide/templates/two-way-binding`);
     return [diagnostic];
   }
 };
@@ -48633,7 +48633,7 @@ One of the following actions is required:
 2. Remove "strictTemplates" or set it to 'false'.
 
 More information about the template type checking compiler options can be found in the documentation:
-https://angular.io/guide/template-typecheck
+https://angular.dev/tools/cli/template-typecheck
       `.trim()
     });
   }
@@ -50787,7 +50787,7 @@ function standalone_migration_default(options) {
     }
     context.logger.info("\u{1F389} Automated migration step has finished! \u{1F389}");
     context.logger.info("IMPORTANT! Please verify manually that your application builds and behaves as expected.");
-    context.logger.info(`See https://angular.io/guide/standalone-migration for more information.`);
+    context.logger.info(`See https://angular.dev/reference/migrations/standalone for more information.`);
   });
 }
 function standaloneMigration(tree, tsconfigPath, basePath, pathToMigrate, schematicOptions, oldProgram) {

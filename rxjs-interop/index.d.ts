@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.3+sha-216199d
+ * @license Angular v18.0.0-next.3+sha-1c6553e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -56,7 +56,7 @@ export declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
  *
  * @param destroyRef optionally, the `DestroyRef` representing the current context. This can be
  *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
- * context](guide/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
+ * context](guide/di/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
  *
  * @developerPreview
  */
@@ -82,7 +82,7 @@ export declare interface ToObservableOptions {
     /**
      * The `Injector` to use when creating the underlying `effect` which watches the signal.
      *
-     * If this isn't specified, the current [injection context](guide/dependency-injection-context)
+     * If this isn't specified, the current [injection context](guide/di/dependency-injection-context)
      * will be used.
      */
     injector?: Injector;
@@ -135,7 +135,7 @@ export declare interface ToSignalOptions {
      * `Injector` which will provide the `DestroyRef` used to clean up the Observable subscription.
      *
      * If this is not provided, a `DestroyRef` will be retrieved from the current [injection
-     * context](/guide/dependency-injection-context), unless manual cleanup is requested.
+     * context](guide/di/dependency-injection-context), unless manual cleanup is requested.
      */
     injector?: Injector;
     /**

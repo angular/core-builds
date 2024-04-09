@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.3+sha-216199d
+ * @license Angular v18.0.0-next.3+sha-1c6553e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,7 +14,7 @@ import { takeUntil } from 'rxjs/operators';
  *
  * @param destroyRef optionally, the `DestroyRef` representing the current context. This can be
  *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
- * context](guide/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
+ * context](guide/di/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
  *
  * @developerPreview
  */
@@ -155,7 +155,7 @@ function toObservable(source, options) {
  * does not include an `undefined` type.
  *
  * By default, the subscription will be automatically cleaned up when the current [injection
- * context](/guide/dependency-injection-context) is destroyed. For example, when `toSignal` is
+ * context](guide/di/dependency-injection-context) is destroyed. For example, when `toSignal` is
  * called during the construction of a component, the subscription will be cleaned up when the
  * component is destroyed. If an injection context is not available, an explicit `Injector` can be
  * passed instead.
