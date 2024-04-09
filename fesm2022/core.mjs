@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.3+sha-bc394de
+ * @license Angular v18.0.0-next.3+sha-216199d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16737,7 +16737,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-bc394de']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-216199d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30375,7 +30375,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.3+sha-bc394de');
+const VERSION = new Version('18.0.0-next.3+sha-216199d');
 
 class Console {
     log(message) {
@@ -36455,10 +36455,9 @@ function withDomHydration() {
                         // The timing is similar to when we start the serialization process
                         // on the server.
                         //
-                        // Note: the cleanup task *MUST* be scheduled within the Angular zone
+                        // Note: the cleanup task *MUST* be scheduled within the Angular zone in Zone apps
                         // to ensure that change detection is properly run afterward.
                         whenStableWithTimeout(appRef, injector).then(() => {
-                            NgZone.assertInAngularZone();
                             cleanupDehydratedViews(appRef);
                             if (typeof ngDevMode !== 'undefined' && ngDevMode) {
                                 printHydrationStats(injector);
