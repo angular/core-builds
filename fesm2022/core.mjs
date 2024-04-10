@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.3+sha-6993146
+ * @license Angular v18.0.0-next.3+sha-e742787
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16736,7 +16736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-6993146']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.3+sha-e742787']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23612,6 +23612,26 @@ class LiveCollectionLContainerImpl extends LiveCollection {
         return getExistingLViewFromLContainer(this.lContainer, index);
     }
 }
+function detectDuplicateKeys(collection, trackByFn) {
+    const keyToIdx = new Map();
+    let duplicatedKeysMsg = [];
+    let idx = 0;
+    for (const item of collection) {
+        const key = trackByFn(idx, item);
+        if (keyToIdx.has(key)) {
+            const prevIdx = keyToIdx.get(key);
+            duplicatedKeysMsg.push(`key "${key}" at index "${prevIdx}" and "${idx}"`);
+        }
+        keyToIdx.set(key, idx++);
+    }
+    if (duplicatedKeysMsg.length > 0) {
+        const message = formatRuntimeError(955 /* RuntimeErrorCode.LOOP_TRACK_DUPLICATE_KEYS */, 'The provided track expression resulted in duplicated keys for a given collection. ' +
+            'Adjust the tracking expression such that it uniquely identifies all the items in the collection. ' +
+            'Duplicated keys were: \n' + duplicatedKeysMsg.join(', \n') + '.');
+        // tslint:disable-next-line:no-console
+        console.warn(message);
+    }
+}
 /**
  * The repeater instruction does update-time diffing of a provided collection (against the
  * collection seen previously) and maps changes in the collection to views structure (by adding,
@@ -23635,6 +23655,10 @@ function ɵɵrepeater(collection) {
         }
         else {
             metadata.liveCollection.reset();
+        }
+        // make sure that tracking expression doesn't result in duplicate keys for a given collection
+        if (ngDevMode && collection != null) {
+            detectDuplicateKeys(collection, metadata.trackByFn);
         }
         const liveCollection = metadata.liveCollection;
         reconcile(liveCollection, collection, metadata.trackByFn);
@@ -30370,7 +30394,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.3+sha-6993146');
+const VERSION = new Version('18.0.0-next.3+sha-e742787');
 
 class Console {
     log(message) {
