@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.4+sha-c9abe77
+ * @license Angular v18.0.0-next.4+sha-fdd560e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -961,6 +961,19 @@ export declare interface BootstrapOptions {
      *
      */
     ngZoneRunCoalescing?: boolean;
+    /**
+     * When false, change detection is scheduled when Angular receives
+     * a clear indication that templates need to be refreshed. This includes:
+     *
+     * - calling `ChangeDetectorRef.markForCheck`
+     * - calling `ComponentRef.setInput`
+     * - updating a signal that is read in a template
+     * - when bound host or template listeners are triggered
+     * - attaching a view that is marked dirty
+     * - removing a view
+     * - registering a render hook (templates are only refreshed if render hooks do one of the above)
+     */
+    ignoreChangesOutsideZone?: boolean;
 }
 
 
@@ -7476,6 +7489,19 @@ export declare interface NgZoneOptions {
      *
      */
     runCoalescing?: boolean;
+    /**
+     * When false, change detection is scheduled when Angular receives
+     * a clear indication that templates need to be refreshed. This includes:
+     *
+     * - calling `ChangeDetectorRef.markForCheck`
+     * - calling `ComponentRef.setInput`
+     * - updating a signal that is read in a template
+     * - when bound host or template listeners are triggered
+     * - attaching a view that is marked dirty
+     * - removing a view
+     * - registering a render hook (templates are only refreshed if render hooks do one of the above)
+     */
+    ignoreChangesOutsideZone?: boolean;
 }
 
 /**
@@ -13485,23 +13511,6 @@ export declare interface ɵSafeUrl extends ɵSafeValue {
  * @publicApi
  */
 export declare interface ɵSafeValue {
-}
-
-/**
- * Configures change detection scheduling when using ZoneJS.
- */
-export declare enum ɵSchedulingMode {
-    /**
-     * Change detection will run when the `NgZone.onMicrotaskEmpty` observable emits.
-     * Change detection will also be scheduled to run whenever Angular is notified
-     * of a change. This includes calling `ChangeDetectorRef.markForCheck`,
-     * setting a `signal` value, and attaching a view.
-     */
-    Hybrid = 0,
-    /**
-     * Change detection will only run when the `NgZone.onMicrotaskEmpty` observable emits.
-     */
-    NgZoneOnly = 1
 }
 
 /**
