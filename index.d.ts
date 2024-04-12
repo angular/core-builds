@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.4+sha-fdd560e
+ * @license Angular v18.0.0-next.4+sha-e41a522
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9650,22 +9650,11 @@ declare const TEMPLATES = "t";
 export declare class Testability implements PublicTestability {
     private _ngZone;
     private registry;
-    private _pendingCount;
     private _isZoneStable;
     private _callbacks;
     private taskTrackingZone;
     constructor(_ngZone: NgZone, registry: TestabilityRegistry, testabilityGetter: GetTestability);
     private _watchAngularEvents;
-    /**
-     * Increases the number of pending request
-     * @deprecated pending requests are now tracked with zones.
-     */
-    increasePendingRequestCount(): number;
-    /**
-     * Decreases the number of pending request
-     * @deprecated pending requests are now tracked with zones
-     */
-    decreasePendingRequestCount(): number;
     /**
      * Whether an associated application is stable
      */
@@ -9686,11 +9675,6 @@ export declare class Testability implements PublicTestability {
      *    and no further updates will be issued.
      */
     whenStable(doneCb: Function, timeout?: number, updateCb?: Function): void;
-    /**
-     * Get the number of pending requests
-     * @deprecated pending requests are now tracked with zones
-     */
-    getPendingRequestCount(): number;
     /**
      * Find providers by name
      * @param using The root element to search from

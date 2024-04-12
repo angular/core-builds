@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.4+sha-fdd560e
+ * @license Angular v18.0.0-next.4+sha-e41a522
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16736,7 +16736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-fdd560e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-e41a522']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30370,7 +30370,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.4+sha-fdd560e');
+const VERSION = new Version('18.0.0-next.4+sha-e41a522');
 
 class Console {
     log(message) {
@@ -31292,7 +31292,6 @@ class Testability {
     constructor(_ngZone, registry, testabilityGetter) {
         this._ngZone = _ngZone;
         this.registry = registry;
-        this._pendingCount = 0;
         this._isZoneStable = true;
         this._callbacks = [];
         this.taskTrackingZone = null;
@@ -31327,30 +31326,10 @@ class Testability {
         });
     }
     /**
-     * Increases the number of pending request
-     * @deprecated pending requests are now tracked with zones.
-     */
-    increasePendingRequestCount() {
-        this._pendingCount += 1;
-        return this._pendingCount;
-    }
-    /**
-     * Decreases the number of pending request
-     * @deprecated pending requests are now tracked with zones
-     */
-    decreasePendingRequestCount() {
-        this._pendingCount -= 1;
-        if (this._pendingCount < 0) {
-            throw new Error('pending async requests below zero');
-        }
-        this._runCallbacksIfReady();
-        return this._pendingCount;
-    }
-    /**
      * Whether an associated application is stable
      */
     isStable() {
-        return this._isZoneStable && this._pendingCount === 0 && !this._ngZone.hasPendingMacrotasks;
+        return this._isZoneStable && !this._ngZone.hasPendingMacrotasks;
     }
     _runCallbacksIfReady() {
         if (this.isStable()) {
@@ -31419,13 +31398,6 @@ class Testability {
         }
         this.addCallback(doneCb, timeout, updateCb);
         this._runCallbacksIfReady();
-    }
-    /**
-     * Get the number of pending requests
-     * @deprecated pending requests are now tracked with zones
-     */
-    getPendingRequestCount() {
-        return this._pendingCount;
     }
     /**
      * Registers an application with a testability hook so that it can be tracked.
