@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.4+sha-e41a522
+ * @license Angular v18.0.0-next.4+sha-571a61b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16736,7 +16736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-e41a522']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-571a61b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30370,7 +30370,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.4+sha-e41a522');
+const VERSION = new Version('18.0.0-next.4+sha-571a61b');
 
 class Console {
     log(message) {
@@ -32350,7 +32350,7 @@ class ChangeDetectionSchedulerImpl {
         this.cancelScheduledCallback = null;
         this.zonelessEnabled = inject(ZONELESS_ENABLED);
         this.disableScheduling = inject(ZONELESS_SCHEDULER_DISABLED, { optional: true }) ?? false;
-        this.zoneIsDefined = typeof Zone !== 'undefined';
+        this.zoneIsDefined = typeof Zone !== 'undefined' && !!Zone.root.scheduleEventTask;
         // TODO(atscott): These conditions will need to change when zoneless is the default
         // Instead, they should flip to checking if ZoneJS scheduling is provided
         this.disableScheduling ||= !this.zonelessEnabled &&
@@ -32368,7 +32368,16 @@ class ChangeDetectionSchedulerImpl {
         }
         this.pendingRenderTaskId = this.taskService.add();
         this.cancelScheduledCallback = scheduleCallback(() => {
-            this.tick(this.shouldRefreshViews);
+            if (this.zoneIsDefined) {
+                // https://github.com/angular/angular/blob/c9abe775d07d075b171a187844d09e57f9685f3b/packages/core/src/zone/ng_zone.ts#L387-L395
+                const task = Zone.root.scheduleEventTask('fakeTopEventTask', () => {
+                    this.tick(this.shouldRefreshViews);
+                }, undefined, () => { }, () => { });
+                task.invoke();
+            }
+            else {
+                this.tick(this.shouldRefreshViews);
+            }
         });
     }
     shouldScheduleTick() {
