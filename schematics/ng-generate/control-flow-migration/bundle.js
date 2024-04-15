@@ -22571,7 +22571,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.4+sha-3471c41");
+var VERSION2 = new Version("18.0.0-next.4+sha-43cf239");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24013,7 +24013,6 @@ function control_flow_migration_default(options) {
     if (!allPaths.length) {
       throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the control flow migration.");
     }
-    context.logger.warn("IMPORTANT! This migration is in developer preview. Use with caution.");
     let errors = [];
     for (const tsconfigPath of allPaths) {
       const migrateErrors = runControlFlowMigration(tree, tsconfigPath, basePath, pathToMigrate, options);
