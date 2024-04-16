@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.4+sha-f09c5a7
+ * @license Angular v18.0.0-next.4+sha-e6425f7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15215,7 +15215,7 @@ function performanceMarkFeature(feature) {
  *
  * @returns a function to cancel the scheduled callback
  */
-function scheduleCallback(callback) {
+function scheduleCallback(callback, useNativeTimers = true) {
     // Note: the `scheduleCallback` is used in the `NgZone` class, but we cannot use the
     // `inject` function. The `NgZone` instance may be created manually, and thus the injection
     // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
@@ -15223,7 +15223,7 @@ function scheduleCallback(callback) {
     const hasRequestAnimationFrame = typeof _global['requestAnimationFrame'] === 'function';
     let nativeRequestAnimationFrame = hasRequestAnimationFrame ? _global['requestAnimationFrame'] : null;
     let nativeSetTimeout = _global['setTimeout'];
-    if (typeof Zone !== 'undefined') {
+    if (typeof Zone !== 'undefined' && useNativeTimers) {
         if (hasRequestAnimationFrame) {
             nativeRequestAnimationFrame =
                 _global[Zone.__symbol__('requestAnimationFrame')] ?? nativeRequestAnimationFrame;
@@ -16736,7 +16736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-f09c5a7']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-e6425f7']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30347,7 +30347,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.4+sha-f09c5a7');
+const VERSION = new Version('18.0.0-next.4+sha-e6425f7');
 
 class Console {
     log(message) {
@@ -32329,7 +32329,7 @@ class ChangeDetectionSchedulerImpl {
         this.cancelScheduledCallback = null;
         this.zonelessEnabled = inject(ZONELESS_ENABLED);
         this.disableScheduling = inject(ZONELESS_SCHEDULER_DISABLED, { optional: true }) ?? false;
-        this.zoneIsDefined = typeof Zone !== 'undefined' && !!Zone.root.scheduleEventTask;
+        this.zoneIsDefined = typeof Zone !== 'undefined' && !!Zone.root.run;
         this.afterTickSubscription = this.appRef.afterTick.subscribe(() => {
             // If the scheduler isn't running a tick but the application ticked, that means
             // someone called ApplicationRef.tick manually. In this case, we should cancel
@@ -32354,18 +32354,18 @@ class ChangeDetectionSchedulerImpl {
             return;
         }
         this.pendingRenderTaskId = this.taskService.add();
-        this.cancelScheduledCallback = scheduleCallback(() => {
-            if (this.zoneIsDefined) {
-                // https://github.com/angular/angular/blob/c9abe775d07d075b171a187844d09e57f9685f3b/packages/core/src/zone/ng_zone.ts#L387-L395
-                const task = Zone.root.scheduleEventTask('fakeTopEventTask', () => {
+        if (this.zoneIsDefined) {
+            Zone.root.run(() => {
+                this.cancelScheduledCallback = scheduleCallback(() => {
                     this.tick(this.shouldRefreshViews);
-                }, undefined, () => { }, () => { });
-                task.invoke();
-            }
-            else {
+                }, false /** useNativeTimers */);
+            });
+        }
+        else {
+            this.cancelScheduledCallback = scheduleCallback(() => {
                 this.tick(this.shouldRefreshViews);
-            }
-        });
+            }, false /** useNativeTimers */);
+        }
     }
     shouldScheduleTick() {
         if (this.disableScheduling) {
