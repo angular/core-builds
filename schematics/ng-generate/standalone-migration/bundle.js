@@ -20937,48 +20937,21 @@ function transformTwoWayBindingSet(job) {
     for (const op of unit.create) {
       if (op.kind === OpKind.TwoWayListener) {
         transformExpressionsInOp(op, (expr) => {
-          if (expr instanceof TwoWayBindingSetExpr) {
-            return wrapAction(expr.target, expr.value);
+          if (!(expr instanceof TwoWayBindingSetExpr)) {
+            return expr;
           }
-          return expr;
+          const { target, value } = expr;
+          if (target instanceof ReadPropExpr || target instanceof ReadKeyExpr) {
+            return twoWayBindingSet(target, value).or(target.set(value));
+          }
+          if (target instanceof ReadVariableExpr) {
+            return twoWayBindingSet(target, value);
+          }
+          throw new Error(`Unsupported expression in two-way action binding.`);
         }, VisitorContextFlag.InChildOperation);
       }
     }
   }
-}
-function wrapSetOperation(target, value) {
-  if (target instanceof ReadVariableExpr) {
-    return twoWayBindingSet(target, value);
-  }
-  return twoWayBindingSet(target, value).or(target.set(value));
-}
-function isReadExpression(value) {
-  return value instanceof ReadPropExpr || value instanceof ReadKeyExpr || value instanceof ReadVariableExpr;
-}
-function wrapAction(target, value) {
-  if (isReadExpression(target)) {
-    return wrapSetOperation(target, value);
-  }
-  if (target instanceof BinaryOperatorExpr && isReadExpression(target.rhs)) {
-    return new BinaryOperatorExpr(target.operator, target.lhs, wrapSetOperation(target.rhs, value));
-  }
-  if (target instanceof ConditionalExpr && isReadExpression(target.falseCase)) {
-    return new ConditionalExpr(target.condition, target.trueCase, wrapSetOperation(target.falseCase, value));
-  }
-  if (target instanceof NotExpr) {
-    let expr = target.condition;
-    while (true) {
-      if (expr instanceof NotExpr) {
-        expr = expr.condition;
-      } else {
-        if (isReadExpression(expr)) {
-          return wrapSetOperation(expr, value);
-        }
-        break;
-      }
-    }
-  }
-  throw new Error(`Unsupported expression in two-way action binding.`);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/save_restore_view.mjs
@@ -22739,11 +22712,12 @@ var STYLE_PREFIX = "style";
 var TEMPLATE_ATTR_PREFIX = "*";
 var ANIMATE_PROP_PREFIX = "animate-";
 var BindingParser = class {
-  constructor(_exprParser, _interpolationConfig, _schemaRegistry, errors) {
+  constructor(_exprParser, _interpolationConfig, _schemaRegistry, errors, _allowInvalidAssignmentEvents = false) {
     this._exprParser = _exprParser;
     this._interpolationConfig = _interpolationConfig;
     this._schemaRegistry = _schemaRegistry;
     this.errors = errors;
+    this._allowInvalidAssignmentEvents = _allowInvalidAssignmentEvents;
   }
   get interpolationConfig() {
     return this._interpolationConfig;
@@ -23046,6 +23020,9 @@ var BindingParser = class {
     }
     if (ast instanceof PropertyRead || ast instanceof KeyedRead) {
       return true;
+    }
+    if (!this._allowInvalidAssignmentEvents) {
+      return false;
     }
     if (ast instanceof Binary) {
       return (ast.operation === "&&" || ast.operation === "||" || ast.operation === "??") && (ast.right instanceof PropertyRead || ast.right instanceof KeyedRead);
@@ -24292,8 +24269,8 @@ function textContents(node) {
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function parseTemplate(template2, templateUrl, options = {}) {
   var _a2;
-  const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat } = options;
-  const bindingParser = makeBindingParser(interpolationConfig);
+  const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat, allowInvalidAssignmentEvents } = options;
+  const bindingParser = makeBindingParser(interpolationConfig, allowInvalidAssignmentEvents);
   const htmlParser = new HtmlParser();
   const parseResult = htmlParser.parse(template2, templateUrl, __spreadProps(__spreadValues({
     leadingTriviaChars: LEADING_TRIVIA_CHARS
@@ -24358,8 +24335,8 @@ function parseTemplate(template2, templateUrl, options = {}) {
   return parsedTemplate;
 }
 var elementRegistry = new DomElementSchemaRegistry();
-function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
-  return new BindingParser(new Parser(new Lexer()), interpolationConfig, elementRegistry, []);
+function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, allowInvalidAssignmentEvents = false) {
+  return new BindingParser(new Parser(new Lexer()), interpolationConfig, elementRegistry, [], allowInvalidAssignmentEvents);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/compiler.mjs
@@ -25947,7 +25924,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.4+sha-d28614b");
+var VERSION2 = new Version("18.0.0-next.4+sha-3bc63ea");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27010,7 +26987,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.0.0-next.4+sha-d28614b"));
+  definitionMap.set("version", literal("18.0.0-next.4+sha-3bc63ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27029,7 +27006,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.0.0-next.4+sha-d28614b"));
+  definitionMap.set("version", literal("18.0.0-next.4+sha-3bc63ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27097,7 +27074,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.0.0-next.4+sha-d28614b"));
+  definitionMap.set("version", literal("18.0.0-next.4+sha-3bc63ea"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27413,7 +27390,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.0.0-next.4+sha-d28614b"));
+  definitionMap.set("version", literal("18.0.0-next.4+sha-3bc63ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27436,7 +27413,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.0.0-next.4+sha-d28614b"));
+  definitionMap.set("version", literal("18.0.0-next.4+sha-3bc63ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27474,7 +27451,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.0.0-next.4+sha-d28614b"));
+  definitionMap.set("version", literal("18.0.0-next.4+sha-3bc63ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27498,7 +27475,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.0.0-next.4+sha-d28614b"));
+  definitionMap.set("version", literal("18.0.0-next.4+sha-3bc63ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27533,7 +27510,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.0.0-next.4+sha-d28614b"));
+  definitionMap.set("version", literal("18.0.0-next.4+sha-3bc63ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27550,7 +27527,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.0.0-next.4+sha-d28614b");
+var VERSION3 = new Version("18.0.0-next.4+sha-3bc63ea");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);

@@ -17722,48 +17722,21 @@ function transformTwoWayBindingSet(job) {
     for (const op of unit.create) {
       if (op.kind === OpKind.TwoWayListener) {
         transformExpressionsInOp(op, (expr) => {
-          if (expr instanceof TwoWayBindingSetExpr) {
-            return wrapAction(expr.target, expr.value);
+          if (!(expr instanceof TwoWayBindingSetExpr)) {
+            return expr;
           }
-          return expr;
+          const { target, value } = expr;
+          if (target instanceof ReadPropExpr || target instanceof ReadKeyExpr) {
+            return twoWayBindingSet(target, value).or(target.set(value));
+          }
+          if (target instanceof ReadVariableExpr) {
+            return twoWayBindingSet(target, value);
+          }
+          throw new Error(`Unsupported expression in two-way action binding.`);
         }, VisitorContextFlag.InChildOperation);
       }
     }
   }
-}
-function wrapSetOperation(target, value) {
-  if (target instanceof ReadVariableExpr) {
-    return twoWayBindingSet(target, value);
-  }
-  return twoWayBindingSet(target, value).or(target.set(value));
-}
-function isReadExpression(value) {
-  return value instanceof ReadPropExpr || value instanceof ReadKeyExpr || value instanceof ReadVariableExpr;
-}
-function wrapAction(target, value) {
-  if (isReadExpression(target)) {
-    return wrapSetOperation(target, value);
-  }
-  if (target instanceof BinaryOperatorExpr && isReadExpression(target.rhs)) {
-    return new BinaryOperatorExpr(target.operator, target.lhs, wrapSetOperation(target.rhs, value));
-  }
-  if (target instanceof ConditionalExpr && isReadExpression(target.falseCase)) {
-    return new ConditionalExpr(target.condition, target.trueCase, wrapSetOperation(target.falseCase, value));
-  }
-  if (target instanceof NotExpr) {
-    let expr = target.condition;
-    while (true) {
-      if (expr instanceof NotExpr) {
-        expr = expr.condition;
-      } else {
-        if (isReadExpression(expr)) {
-          return wrapSetOperation(expr, value);
-        }
-        break;
-      }
-    }
-  }
-  throw new Error(`Unsupported expression in two-way action binding.`);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template/pipeline/src/phases/save_restore_view.mjs
@@ -19524,11 +19497,12 @@ var STYLE_PREFIX = "style";
 var TEMPLATE_ATTR_PREFIX = "*";
 var ANIMATE_PROP_PREFIX = "animate-";
 var BindingParser = class {
-  constructor(_exprParser, _interpolationConfig, _schemaRegistry, errors) {
+  constructor(_exprParser, _interpolationConfig, _schemaRegistry, errors, _allowInvalidAssignmentEvents = false) {
     this._exprParser = _exprParser;
     this._interpolationConfig = _interpolationConfig;
     this._schemaRegistry = _schemaRegistry;
     this.errors = errors;
+    this._allowInvalidAssignmentEvents = _allowInvalidAssignmentEvents;
   }
   get interpolationConfig() {
     return this._interpolationConfig;
@@ -19831,6 +19805,9 @@ var BindingParser = class {
     }
     if (ast instanceof PropertyRead || ast instanceof KeyedRead) {
       return true;
+    }
+    if (!this._allowInvalidAssignmentEvents) {
+      return false;
     }
     if (ast instanceof Binary) {
       return (ast.operation === "&&" || ast.operation === "||" || ast.operation === "??") && (ast.right instanceof PropertyRead || ast.right instanceof KeyedRead);
@@ -21077,8 +21054,8 @@ function textContents(node) {
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function parseTemplate(template2, templateUrl, options = {}) {
   var _a2;
-  const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat } = options;
-  const bindingParser = makeBindingParser(interpolationConfig);
+  const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat, allowInvalidAssignmentEvents } = options;
+  const bindingParser = makeBindingParser(interpolationConfig, allowInvalidAssignmentEvents);
   const htmlParser = new HtmlParser();
   const parseResult = htmlParser.parse(template2, templateUrl, __spreadProps(__spreadValues({
     leadingTriviaChars: LEADING_TRIVIA_CHARS
@@ -21143,8 +21120,8 @@ function parseTemplate(template2, templateUrl, options = {}) {
   return parsedTemplate;
 }
 var elementRegistry = new DomElementSchemaRegistry();
-function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
-  return new BindingParser(new Parser(new Lexer()), interpolationConfig, elementRegistry, []);
+function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, allowInvalidAssignmentEvents = false) {
+  return new BindingParser(new Parser(new Lexer()), interpolationConfig, elementRegistry, [], allowInvalidAssignmentEvents);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/compiler.mjs
@@ -22708,7 +22685,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.4+sha-d28614b");
+var VERSION2 = new Version("18.0.0-next.4+sha-3bc63ea");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -22760,7 +22737,7 @@ function migrateTemplate(template2) {
   }
   let rootNodes = null;
   try {
-    const parsed = parseTemplate(template2, "");
+    const parsed = parseTemplate(template2, "", { allowInvalidAssignmentEvents: true });
     if (parsed.errors === null) {
       rootNodes = parsed.nodes;
     }
@@ -22799,9 +22776,9 @@ function migrateTwoWayEvent(value, binding, printer) {
     return null;
   }
   let migrated = null;
-  if (import_typescript4.default.isBinaryExpression(expression) && isReadExpression2(expression.right)) {
+  if (import_typescript4.default.isBinaryExpression(expression) && isReadExpression(expression.right)) {
     migrated = import_typescript4.default.factory.updateBinaryExpression(expression, expression.left, expression.operatorToken, wrapInEventAssignment(expression.right));
-  } else if (import_typescript4.default.isConditionalExpression(expression) && isReadExpression2(expression.whenFalse)) {
+  } else if (import_typescript4.default.isConditionalExpression(expression) && isReadExpression(expression.whenFalse)) {
     migrated = import_typescript4.default.factory.updateConditionalExpression(expression, expression.condition, expression.questionToken, expression.whenTrue, expression.colonToken, wrapInEventAssignment(expression.whenFalse));
   } else if (isPrefixNot(expression)) {
     let innerExpression = expression.operand;
@@ -22809,7 +22786,7 @@ function migrateTwoWayEvent(value, binding, printer) {
       if (isPrefixNot(innerExpression)) {
         innerExpression = innerExpression.operand;
       } else {
-        if (isReadExpression2(innerExpression)) {
+        if (isReadExpression(innerExpression)) {
           migrated = wrapInEventAssignment(innerExpression);
         }
         break;
@@ -22825,7 +22802,7 @@ function migrateTwoWayEvent(value, binding, printer) {
 function wrapInEventAssignment(node) {
   return import_typescript4.default.factory.createBinaryExpression(node, import_typescript4.default.factory.createToken(import_typescript4.default.SyntaxKind.EqualsToken), import_typescript4.default.factory.createIdentifier("$event"));
 }
-function isReadExpression2(node) {
+function isReadExpression(node) {
   return import_typescript4.default.isIdentifier(node) || import_typescript4.default.isPropertyAccessExpression(node) || import_typescript4.default.isElementAccessExpression(node);
 }
 function isPrefixNot(node) {

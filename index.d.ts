@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.4+sha-d28614b
+ * @license Angular v18.0.0-next.4+sha-3bc63ea
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8079,9 +8079,7 @@ declare interface PlatformReflectionCapabilities {
  *
  * @publicApi
  */
-export declare interface Predicate<T> {
-    (value: T): boolean;
-}
+export declare type Predicate<T> = (value: T) => boolean;
 
 declare const PREORDER_HOOK_FLAGS = 17;
 
