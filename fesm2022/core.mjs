@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.4+sha-9afa2ea
+ * @license Angular v18.0.0-next.4+sha-7d5bc1c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16736,7 +16736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-9afa2ea']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-7d5bc1c']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23463,12 +23463,12 @@ class UniqueValueMultiKeyMap {
  * built-in "if" and "switch". On the high level this instruction is responsible for adding and
  * removing views selected by a conditional expression.
  *
- * @param matchingTemplateIndex index of a template TNode representing a conditional view to be
+ * @param matchingTemplateIndex Index of a template TNode representing a conditional view to be
  *     inserted; -1 represents a special case when there is no view to insert.
+ * @param contextValue Value that should be exposed as the context of the conditional.
  * @codeGenApi
  */
-function ɵɵconditional(containerIndex, matchingTemplateIndex, value) {
-    // TODO: we could remove the containerIndex argument to this instruction now (!)
+function ɵɵconditional(matchingTemplateIndex, contextValue) {
     performanceMarkFeature('NgControlFlow');
     const hostLView = getLView();
     const bindingIndex = nextBindingIndex();
@@ -23492,7 +23492,7 @@ function ɵɵconditional(containerIndex, matchingTemplateIndex, value) {
                 const nextContainer = getLContainer(hostLView, nextLContainerIndex);
                 const templateTNode = getExistingTNode(hostLView[TVIEW], nextLContainerIndex);
                 const dehydratedView = findMatchingDehydratedView(nextContainer, templateTNode.tView.ssrId);
-                const embeddedLView = createAndRenderEmbeddedLView(hostLView, templateTNode, value, { dehydratedView });
+                const embeddedLView = createAndRenderEmbeddedLView(hostLView, templateTNode, contextValue, { dehydratedView });
                 addLViewToLContainer(nextContainer, embeddedLView, viewInContainerIdx, shouldAddViewToDom(templateTNode, dehydratedView));
             }
         }
@@ -23505,7 +23505,7 @@ function ɵɵconditional(containerIndex, matchingTemplateIndex, value) {
         // changed - re-bind in context.
         const lView = getLViewFromLContainer(prevContainer, viewInContainerIdx);
         if (lView !== undefined) {
-            lView[CONTEXT] = value;
+            lView[CONTEXT] = contextValue;
         }
     }
 }
@@ -30347,7 +30347,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.4+sha-9afa2ea');
+const VERSION = new Version('18.0.0-next.4+sha-7d5bc1c');
 
 class Console {
     log(message) {

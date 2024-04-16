@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.4+sha-9afa2ea
+ * @license Angular v18.0.0-next.4+sha-7d5bc1c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14616,11 +14616,12 @@ export declare function ɵɵcomponentInstance(): unknown;
  * built-in "if" and "switch". On the high level this instruction is responsible for adding and
  * removing views selected by a conditional expression.
  *
- * @param matchingTemplateIndex index of a template TNode representing a conditional view to be
+ * @param matchingTemplateIndex Index of a template TNode representing a conditional view to be
  *     inserted; -1 represents a special case when there is no view to insert.
+ * @param contextValue Value that should be exposed as the context of the conditional.
  * @codeGenApi
  */
-export declare function ɵɵconditional<T>(containerIndex: number, matchingTemplateIndex: number, value?: T): void;
+export declare function ɵɵconditional<T>(matchingTemplateIndex: number, contextValue?: T): void;
 
 /**
  * Registers a QueryList, associated with a content query, for later refresh (part of a view

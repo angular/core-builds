@@ -6411,11 +6411,10 @@ function createAdvanceOp(delta, sourceSpan) {
     sourceSpan
   }, NEW_OP);
 }
-function createConditionalOp(target, targetSlot, test, conditions, sourceSpan) {
+function createConditionalOp(target, test, conditions, sourceSpan) {
   return __spreadValues(__spreadValues(__spreadValues({
     kind: OpKind.Conditional,
     target,
-    targetSlot,
     test,
     conditions,
     processed: null,
@@ -16637,19 +16636,7 @@ function pipeBindV(slot, varOffset, args) {
   ]);
 }
 function textInterpolate(strings, expressions, sourceSpan) {
-  if (strings.length < 1 || expressions.length !== strings.length - 1) {
-    throw new Error(`AssertionError: expected specific shape of args for strings/expressions in interpolation`);
-  }
-  const interpolationArgs = [];
-  if (expressions.length === 1 && strings[0] === "" && strings[1] === "") {
-    interpolationArgs.push(expressions[0]);
-  } else {
-    let idx;
-    for (idx = 0; idx < expressions.length; idx++) {
-      interpolationArgs.push(literal(strings[idx]), expressions[idx]);
-    }
-    interpolationArgs.push(literal(strings[idx]));
-  }
+  const interpolationArgs = collateInterpolationArgs(strings, expressions);
   return callVariadicInstruction(TEXT_INTERPOLATE_CONFIG, [], interpolationArgs, [], sourceSpan);
 }
 function i18nExp(expr, sourceSpan) {
@@ -16726,8 +16713,8 @@ function call(instruction, args, sourceSpan) {
   const expr = importExpr(instruction).callFn(args, sourceSpan);
   return createStatementOp(new ExpressionStatement(expr, sourceSpan));
 }
-function conditional(slot, condition, contextValue, sourceSpan) {
-  const args = [literal(slot), condition];
+function conditional(condition, contextValue, sourceSpan) {
+  const args = [condition];
   if (contextValue !== null) {
     args.push(contextValue);
   }
@@ -17153,10 +17140,7 @@ function reifyUpdateOperations(_unit, ops) {
         if (op.processed === null) {
           throw new Error(`Conditional test was not set.`);
         }
-        if (op.targetSlot.slot === null) {
-          throw new Error(`Conditional slot was not set.`);
-        }
-        OpList.replace(op, conditional(op.targetSlot.slot, op.processed, op.contextValue, op.sourceSpan));
+        OpList.replace(op, conditional(op.processed, op.contextValue, op.sourceSpan));
         break;
       case OpKind.Repeater:
         OpList.replace(op, repeater(op.collection, op.sourceSpan));
@@ -18791,7 +18775,6 @@ function ingestBoundText(unit, text2, icuPlaceholder) {
 function ingestIfBlock(unit, ifBlock) {
   var _a2;
   let firstXref = null;
-  let firstSlotHandle = null;
   let conditions = [];
   for (let i = 0; i < ifBlock.branches.length; i++) {
     const ifCase = ifBlock.branches[i];
@@ -18811,15 +18794,13 @@ function ingestIfBlock(unit, ifBlock) {
     unit.create.push(templateOp);
     if (firstXref === null) {
       firstXref = cView.xref;
-      firstSlotHandle = templateOp.handle;
     }
     const caseExpr = ifCase.expression ? convertAst(ifCase.expression, unit.job, null) : null;
     const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, templateOp.xref, templateOp.handle, ifCase.expressionAlias);
     conditions.push(conditionalCaseExpr);
     ingestNodes(cView, ifCase.children);
   }
-  const conditional2 = createConditionalOp(firstXref, firstSlotHandle, null, conditions, ifBlock.sourceSpan);
-  unit.update.push(conditional2);
+  unit.update.push(createConditionalOp(firstXref, null, conditions, ifBlock.sourceSpan));
 }
 function ingestSwitchBlock(unit, switchBlock) {
   var _a2;
@@ -18827,7 +18808,6 @@ function ingestSwitchBlock(unit, switchBlock) {
     return;
   }
   let firstXref = null;
-  let firstSlotHandle = null;
   let conditions = [];
   for (const switchCase of switchBlock.cases) {
     const cView = unit.job.allocateView(unit.xref);
@@ -18843,15 +18823,13 @@ function ingestSwitchBlock(unit, switchBlock) {
     unit.create.push(templateOp);
     if (firstXref === null) {
       firstXref = cView.xref;
-      firstSlotHandle = templateOp.handle;
     }
     const caseExpr = switchCase.expression ? convertAst(switchCase.expression, unit.job, switchBlock.startSourceSpan) : null;
     const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, templateOp.xref, templateOp.handle);
     conditions.push(conditionalCaseExpr);
     ingestNodes(cView, switchCase.children);
   }
-  const conditional2 = createConditionalOp(firstXref, firstSlotHandle, convertAst(switchBlock.expression, unit.job, null), conditions, switchBlock.sourceSpan);
-  unit.update.push(conditional2);
+  unit.update.push(createConditionalOp(firstXref, convertAst(switchBlock.expression, unit.job, null), conditions, switchBlock.sourceSpan));
 }
 function ingestDeferView(unit, suffix, i18nMeta, children, sourceSpan) {
   if (i18nMeta !== void 0 && !(i18nMeta instanceof BlockPlaceholder)) {
@@ -22730,7 +22708,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.4+sha-9afa2ea");
+var VERSION2 = new Version("18.0.0-next.4+sha-7d5bc1c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
