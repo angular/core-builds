@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.4+sha-a5623dc
+ * @license Angular v18.0.0-next.4+sha-de7447d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16736,7 +16736,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-a5623dc']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.4+sha-de7447d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30309,7 +30309,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.4+sha-a5623dc');
+const VERSION = new Version('18.0.0-next.4+sha-de7447d');
 
 class Console {
     log(message) {
@@ -32280,6 +32280,9 @@ function _lastDefined(args) {
     return undefined;
 }
 
+/** Flag to enable/disable the zoneless scheduler as default provider with zone scheduling. */
+const alwaysProvideZonelessScheduler = true;
+
 class ChangeDetectionSchedulerImpl {
     constructor() {
         this.appRef = inject(ApplicationRef);
@@ -32513,10 +32516,12 @@ function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsid
             }
         },
         { provide: INTERNAL_APPLICATION_ERROR_HANDLER, useFactory: ngZoneApplicationErrorHandlerFactory },
-        // Always disable scheduler whenever explicitly disabled, even if Hybrid was specified elsewhere
+        // Always disable scheduler whenever explicitly disabled, even if another place called
+        // `provideZoneChangeDetection` without the 'ignore' option.
         ignoreChangesOutsideZone === true ? { provide: ZONELESS_SCHEDULER_DISABLED, useValue: true } : [],
-        // Only provide scheduler when explicitly not disabled
-        ignoreChangesOutsideZone === false ?
+        // TODO(atscott): This should move to the same places that zone change detection is provided by
+        // default instead of being in the zone scheduling providers.
+        alwaysProvideZonelessScheduler || ignoreChangesOutsideZone === false ?
             { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl } :
             [],
     ];
