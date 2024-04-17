@@ -1,45 +1,14 @@
 /**
- * @license Angular v18.0.0-next.4+sha-c778977
+ * @license Angular v18.0.0-next.4+sha-ff686f3
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ɵDeferBlockBehavior, InjectionToken, ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, inject as inject$1, ɵNoopNgZone, NgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵZONELESS_ENABLED, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, ɵNoopNgZone, NgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, provideZoneChangeDetection, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵZONELESS_ENABLED, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { ResourceLoader } from '@angular/compiler';
-
-/** Whether test modules should be torn down by default. */
-const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
-/** Whether unknown elements in templates should throw by default. */
-const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
-/** Whether unknown properties in templates should throw by default. */
-const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
-/** Whether defer blocks should use manual triggering or play through normally. */
-const DEFER_BLOCK_DEFAULT_BEHAVIOR = ɵDeferBlockBehavior.Playthrough;
-/**
- * An abstract class for inserting the root test component element in a platform independent way.
- *
- * @publicApi
- */
-class TestComponentRenderer {
-    insertRootElement(rootElementId) { }
-    removeAllRootElements() { }
-}
-/**
- * @publicApi
- */
-const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
-/**
- * TODO(atscott): Make public API once we have decided if we want this error and how we want devs to
- * disable it.
- */
-const AllowDetectChangesAndAcknowledgeItCanHideApplicationBugs = new InjectionToken('AllowDetectChangesAndAcknowledgeItCanHideApplicationBugs');
-/**
- * @publicApi
- */
-const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -163,6 +132,32 @@ function getDeferBlockStateNameFromEnum(state) {
     }
 }
 
+/** Whether test modules should be torn down by default. */
+const TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT = true;
+/** Whether unknown elements in templates should throw by default. */
+const THROW_ON_UNKNOWN_ELEMENTS_DEFAULT = false;
+/** Whether unknown properties in templates should throw by default. */
+const THROW_ON_UNKNOWN_PROPERTIES_DEFAULT = false;
+/** Whether defer blocks should use manual triggering or play through normally. */
+const DEFER_BLOCK_DEFAULT_BEHAVIOR = ɵDeferBlockBehavior.Playthrough;
+/**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @publicApi
+ */
+class TestComponentRenderer {
+    insertRootElement(rootElementId) { }
+    removeAllRootElements() { }
+}
+/**
+ * @publicApi
+ */
+const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
+/**
+ * @publicApi
+ */
+const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
+
 /**
  * Fixture for debugging and testing a component.
  *
@@ -272,19 +267,11 @@ class ComponentFixture {
  * `ApplicationRef.isStable`, and `autoDetectChanges` cannot be disabled.
  */
 class ScheduledComponentFixture extends ComponentFixture {
-    constructor() {
-        super(...arguments);
-        this.disableDetectChangesError = inject$1(AllowDetectChangesAndAcknowledgeItCanHideApplicationBugs, { optional: true }) ?? false;
-    }
     initialize() {
         this._appRef.attachView(this.componentRef.hostView);
     }
     detectChanges(checkNoChanges = true) {
-        if (!this.disableDetectChangesError) {
-            throw new Error('Do not use `detectChanges` directly when using zoneless change detection.' +
-                ' Instead, wait for the next render or `fixture.whenStable`.');
-        }
-        else if (!checkNoChanges) {
+        if (!checkNoChanges) {
             throw new Error('Cannot disable `checkNoChanges` in this configuration. ' +
                 'Use `fixture.componentRef.hostView.changeDetectorRef.detectChanges()` instead.');
         }
@@ -293,7 +280,10 @@ class ScheduledComponentFixture extends ComponentFixture {
         this._effectRunner.flush();
     }
     autoDetectChanges(autoDetect) {
-        throw new Error('Cannot call autoDetectChanges when using change detection scheduling.');
+        if (!autoDetect) {
+            throw new Error('Cannot disable autoDetect when using the zoneless scheduler.');
+        }
+        this.detectChanges();
     }
 }
 /**
@@ -2248,5 +2238,5 @@ const __core_private_testing_placeholder__ = '';
  * Generated bundle index. Do not edit.
  */
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, AllowDetectChangesAndAcknowledgeItCanHideApplicationBugs as ɵAllowDetectChangesAndAcknowledgeItCanHideApplicationBugs, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, MetadataOverrider as ɵMetadataOverrider };
 //# sourceMappingURL=testing.mjs.map
