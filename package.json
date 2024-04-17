@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "18.0.0-next.4+sha-ff686f3",
+  "version": "18.0.0-next.4+sha-9f5e90e",
   "description": "Angular - the core framework",
   "author": "angular",
   "license": "MIT",
@@ -10,6 +10,9 @@
   "exports": {
     "./schematics/*": {
       "default": "./schematics/*.js"
+    },
+    "./event-dispatch-contract.min.js": {
+      "default": "./event-dispatch-contract.min.js"
     },
     "./package.json": {
       "default": "./package.json"
