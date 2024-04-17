@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-e1eae84
+ * @license Angular v18.0.0-next.5+sha-a5b5b7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -64,9 +64,9 @@ const REACTIVE_NODE = {
  */
 function producerAccessed(node) {
     if (inNotificationPhase) {
-        throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode ?
-            `Assertion error: signal read during notification phase` :
-            '');
+        throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode
+            ? `Assertion error: signal read during notification phase`
+            : '');
     }
     if (activeConsumer === null) {
         // Accessed outside of a reactive context, so nothing to record.
@@ -96,8 +96,9 @@ function producerAccessed(node) {
         activeConsumer.producerNode[idx] = node;
         // If the active consumer is live, then add it as a live consumer. If not, then use 0 as a
         // placeholder value.
-        activeConsumer.producerIndexOfThis[idx] =
-            consumerIsLive(activeConsumer) ? producerAddLiveConsumer(node, activeConsumer, idx) : 0;
+        activeConsumer.producerIndexOfThis[idx] = consumerIsLive(activeConsumer)
+            ? producerAddLiveConsumer(node, activeConsumer, idx)
+            : 0;
     }
     activeConsumer.producerLastReadVersion[idx] = node.version;
 }
@@ -187,7 +188,9 @@ function consumerBeforeComputation(node) {
  */
 function consumerAfterComputation(node, prevConsumer) {
     setActiveConsumer(prevConsumer);
-    if (!node || node.producerNode === undefined || node.producerIndexOfThis === undefined ||
+    if (!node ||
+        node.producerNode === undefined ||
+        node.producerIndexOfThis === undefined ||
         node.producerLastReadVersion === undefined) {
         return;
     }
@@ -245,8 +248,10 @@ function consumerDestroy(node) {
         }
     }
     // Truncate all the arrays to drop all connection from this node to the graph.
-    node.producerNode.length = node.producerLastReadVersion.length = node.producerIndexOfThis.length =
-        0;
+    node.producerNode.length =
+        node.producerLastReadVersion.length =
+            node.producerIndexOfThis.length =
+                0;
     if (node.liveConsumerNode) {
         node.liveConsumerNode.length = node.liveConsumerIndexOfThis.length = 0;
     }
@@ -386,7 +391,9 @@ const COMPUTED_NODE = /* @__PURE__ */ (() => {
             finally {
                 consumerAfterComputation(node, prevConsumer);
             }
-            if (oldValue !== UNSET && oldValue !== ERRORED && newValue !== ERRORED &&
+            if (oldValue !== UNSET &&
+                oldValue !== ERRORED &&
+                newValue !== ERRORED &&
                 node.equal(oldValue, newValue)) {
                 // No change to `valueVersion` - old and new values are
                 // semantically equivalent.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-e1eae84
+ * @license Angular v18.0.0-next.5+sha-a5b5b7d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4354,6 +4354,29 @@ export declare interface Host {
  * @publicApi
  */
 export declare const Host: HostDecorator;
+
+/**
+ * A token that can be used to inject the tag name of the host node.
+ *
+ * @usageNotes
+ * ### Injecting a tag name that is known to exist
+ * ```typescript
+ * @Directive()
+ * class MyDir {
+ *   tagName: string = inject(HOST_TAG_NAME);
+ * }
+ * ```
+ *
+ * ### Optionally injecting a tag name
+ * ```typescript
+ * @Directive()
+ * class MyDir {
+ *   tagName: string | null = inject(HOST_TAG_NAME, {optional: true});
+ * }
+ * ```
+ * @publicApi
+ */
+export declare const HOST_TAG_NAME: InjectionToken<string>;
 
 /**
  * Creates a token that can be used to inject static attributes of the host node.
