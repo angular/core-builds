@@ -2044,49 +2044,88 @@ var Identifiers = _Identifiers;
   _Identifiers.advance = { name: "\u0275\u0275advance", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.syntheticHostProperty = { name: "\u0275\u0275syntheticHostProperty", moduleName: CORE };
+  _Identifiers.syntheticHostProperty = {
+    name: "\u0275\u0275syntheticHostProperty",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.syntheticHostListener = { name: "\u0275\u0275syntheticHostListener", moduleName: CORE };
+  _Identifiers.syntheticHostListener = {
+    name: "\u0275\u0275syntheticHostListener",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.attribute = { name: "\u0275\u0275attribute", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.attributeInterpolate1 = { name: "\u0275\u0275attributeInterpolate1", moduleName: CORE };
+  _Identifiers.attributeInterpolate1 = {
+    name: "\u0275\u0275attributeInterpolate1",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.attributeInterpolate2 = { name: "\u0275\u0275attributeInterpolate2", moduleName: CORE };
+  _Identifiers.attributeInterpolate2 = {
+    name: "\u0275\u0275attributeInterpolate2",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.attributeInterpolate3 = { name: "\u0275\u0275attributeInterpolate3", moduleName: CORE };
+  _Identifiers.attributeInterpolate3 = {
+    name: "\u0275\u0275attributeInterpolate3",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.attributeInterpolate4 = { name: "\u0275\u0275attributeInterpolate4", moduleName: CORE };
+  _Identifiers.attributeInterpolate4 = {
+    name: "\u0275\u0275attributeInterpolate4",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.attributeInterpolate5 = { name: "\u0275\u0275attributeInterpolate5", moduleName: CORE };
+  _Identifiers.attributeInterpolate5 = {
+    name: "\u0275\u0275attributeInterpolate5",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.attributeInterpolate6 = { name: "\u0275\u0275attributeInterpolate6", moduleName: CORE };
+  _Identifiers.attributeInterpolate6 = {
+    name: "\u0275\u0275attributeInterpolate6",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.attributeInterpolate7 = { name: "\u0275\u0275attributeInterpolate7", moduleName: CORE };
+  _Identifiers.attributeInterpolate7 = {
+    name: "\u0275\u0275attributeInterpolate7",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.attributeInterpolate8 = { name: "\u0275\u0275attributeInterpolate8", moduleName: CORE };
+  _Identifiers.attributeInterpolate8 = {
+    name: "\u0275\u0275attributeInterpolate8",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.attributeInterpolateV = { name: "\u0275\u0275attributeInterpolateV", moduleName: CORE };
+  _Identifiers.attributeInterpolateV = {
+    name: "\u0275\u0275attributeInterpolateV",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.classProp = { name: "\u0275\u0275classProp", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.elementContainerStart = { name: "\u0275\u0275elementContainerStart", moduleName: CORE };
+  _Identifiers.elementContainerStart = {
+    name: "\u0275\u0275elementContainerStart",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.elementContainerEnd = { name: "\u0275\u0275elementContainerEnd", moduleName: CORE };
+  _Identifiers.elementContainerEnd = {
+    name: "\u0275\u0275elementContainerEnd",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.elementContainer = { name: "\u0275\u0275elementContainer", moduleName: CORE };
@@ -2095,91 +2134,172 @@ var Identifiers = _Identifiers;
   _Identifiers.styleMap = { name: "\u0275\u0275styleMap", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.styleMapInterpolate1 = { name: "\u0275\u0275styleMapInterpolate1", moduleName: CORE };
+  _Identifiers.styleMapInterpolate1 = {
+    name: "\u0275\u0275styleMapInterpolate1",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.styleMapInterpolate2 = { name: "\u0275\u0275styleMapInterpolate2", moduleName: CORE };
+  _Identifiers.styleMapInterpolate2 = {
+    name: "\u0275\u0275styleMapInterpolate2",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.styleMapInterpolate3 = { name: "\u0275\u0275styleMapInterpolate3", moduleName: CORE };
+  _Identifiers.styleMapInterpolate3 = {
+    name: "\u0275\u0275styleMapInterpolate3",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.styleMapInterpolate4 = { name: "\u0275\u0275styleMapInterpolate4", moduleName: CORE };
+  _Identifiers.styleMapInterpolate4 = {
+    name: "\u0275\u0275styleMapInterpolate4",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.styleMapInterpolate5 = { name: "\u0275\u0275styleMapInterpolate5", moduleName: CORE };
+  _Identifiers.styleMapInterpolate5 = {
+    name: "\u0275\u0275styleMapInterpolate5",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.styleMapInterpolate6 = { name: "\u0275\u0275styleMapInterpolate6", moduleName: CORE };
+  _Identifiers.styleMapInterpolate6 = {
+    name: "\u0275\u0275styleMapInterpolate6",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.styleMapInterpolate7 = { name: "\u0275\u0275styleMapInterpolate7", moduleName: CORE };
+  _Identifiers.styleMapInterpolate7 = {
+    name: "\u0275\u0275styleMapInterpolate7",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.styleMapInterpolate8 = { name: "\u0275\u0275styleMapInterpolate8", moduleName: CORE };
+  _Identifiers.styleMapInterpolate8 = {
+    name: "\u0275\u0275styleMapInterpolate8",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.styleMapInterpolateV = { name: "\u0275\u0275styleMapInterpolateV", moduleName: CORE };
+  _Identifiers.styleMapInterpolateV = {
+    name: "\u0275\u0275styleMapInterpolateV",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.classMap = { name: "\u0275\u0275classMap", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.classMapInterpolate1 = { name: "\u0275\u0275classMapInterpolate1", moduleName: CORE };
+  _Identifiers.classMapInterpolate1 = {
+    name: "\u0275\u0275classMapInterpolate1",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.classMapInterpolate2 = { name: "\u0275\u0275classMapInterpolate2", moduleName: CORE };
+  _Identifiers.classMapInterpolate2 = {
+    name: "\u0275\u0275classMapInterpolate2",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.classMapInterpolate3 = { name: "\u0275\u0275classMapInterpolate3", moduleName: CORE };
+  _Identifiers.classMapInterpolate3 = {
+    name: "\u0275\u0275classMapInterpolate3",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.classMapInterpolate4 = { name: "\u0275\u0275classMapInterpolate4", moduleName: CORE };
+  _Identifiers.classMapInterpolate4 = {
+    name: "\u0275\u0275classMapInterpolate4",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.classMapInterpolate5 = { name: "\u0275\u0275classMapInterpolate5", moduleName: CORE };
+  _Identifiers.classMapInterpolate5 = {
+    name: "\u0275\u0275classMapInterpolate5",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.classMapInterpolate6 = { name: "\u0275\u0275classMapInterpolate6", moduleName: CORE };
+  _Identifiers.classMapInterpolate6 = {
+    name: "\u0275\u0275classMapInterpolate6",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.classMapInterpolate7 = { name: "\u0275\u0275classMapInterpolate7", moduleName: CORE };
+  _Identifiers.classMapInterpolate7 = {
+    name: "\u0275\u0275classMapInterpolate7",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.classMapInterpolate8 = { name: "\u0275\u0275classMapInterpolate8", moduleName: CORE };
+  _Identifiers.classMapInterpolate8 = {
+    name: "\u0275\u0275classMapInterpolate8",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.classMapInterpolateV = { name: "\u0275\u0275classMapInterpolateV", moduleName: CORE };
+  _Identifiers.classMapInterpolateV = {
+    name: "\u0275\u0275classMapInterpolateV",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.styleProp = { name: "\u0275\u0275styleProp", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.stylePropInterpolate1 = { name: "\u0275\u0275stylePropInterpolate1", moduleName: CORE };
+  _Identifiers.stylePropInterpolate1 = {
+    name: "\u0275\u0275stylePropInterpolate1",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.stylePropInterpolate2 = { name: "\u0275\u0275stylePropInterpolate2", moduleName: CORE };
+  _Identifiers.stylePropInterpolate2 = {
+    name: "\u0275\u0275stylePropInterpolate2",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.stylePropInterpolate3 = { name: "\u0275\u0275stylePropInterpolate3", moduleName: CORE };
+  _Identifiers.stylePropInterpolate3 = {
+    name: "\u0275\u0275stylePropInterpolate3",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.stylePropInterpolate4 = { name: "\u0275\u0275stylePropInterpolate4", moduleName: CORE };
+  _Identifiers.stylePropInterpolate4 = {
+    name: "\u0275\u0275stylePropInterpolate4",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.stylePropInterpolate5 = { name: "\u0275\u0275stylePropInterpolate5", moduleName: CORE };
+  _Identifiers.stylePropInterpolate5 = {
+    name: "\u0275\u0275stylePropInterpolate5",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.stylePropInterpolate6 = { name: "\u0275\u0275stylePropInterpolate6", moduleName: CORE };
+  _Identifiers.stylePropInterpolate6 = {
+    name: "\u0275\u0275stylePropInterpolate6",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.stylePropInterpolate7 = { name: "\u0275\u0275stylePropInterpolate7", moduleName: CORE };
+  _Identifiers.stylePropInterpolate7 = {
+    name: "\u0275\u0275stylePropInterpolate7",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.stylePropInterpolate8 = { name: "\u0275\u0275stylePropInterpolate8", moduleName: CORE };
+  _Identifiers.stylePropInterpolate8 = {
+    name: "\u0275\u0275stylePropInterpolate8",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.stylePropInterpolateV = { name: "\u0275\u0275stylePropInterpolateV", moduleName: CORE };
+  _Identifiers.stylePropInterpolateV = {
+    name: "\u0275\u0275stylePropInterpolateV",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.nextContext = { name: "\u0275\u0275nextContext", moduleName: CORE };
@@ -2218,25 +2338,46 @@ var Identifiers = _Identifiers;
   _Identifiers.deferPrefetchWhen = { name: "\u0275\u0275deferPrefetchWhen", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.deferPrefetchOnIdle = { name: "\u0275\u0275deferPrefetchOnIdle", moduleName: CORE };
+  _Identifiers.deferPrefetchOnIdle = {
+    name: "\u0275\u0275deferPrefetchOnIdle",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.deferPrefetchOnImmediate = { name: "\u0275\u0275deferPrefetchOnImmediate", moduleName: CORE };
+  _Identifiers.deferPrefetchOnImmediate = {
+    name: "\u0275\u0275deferPrefetchOnImmediate",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.deferPrefetchOnTimer = { name: "\u0275\u0275deferPrefetchOnTimer", moduleName: CORE };
+  _Identifiers.deferPrefetchOnTimer = {
+    name: "\u0275\u0275deferPrefetchOnTimer",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.deferPrefetchOnHover = { name: "\u0275\u0275deferPrefetchOnHover", moduleName: CORE };
+  _Identifiers.deferPrefetchOnHover = {
+    name: "\u0275\u0275deferPrefetchOnHover",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.deferPrefetchOnInteraction = { name: "\u0275\u0275deferPrefetchOnInteraction", moduleName: CORE };
+  _Identifiers.deferPrefetchOnInteraction = {
+    name: "\u0275\u0275deferPrefetchOnInteraction",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.deferPrefetchOnViewport = { name: "\u0275\u0275deferPrefetchOnViewport", moduleName: CORE };
+  _Identifiers.deferPrefetchOnViewport = {
+    name: "\u0275\u0275deferPrefetchOnViewport",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.deferEnableTimerScheduling = { name: "\u0275\u0275deferEnableTimerScheduling", moduleName: CORE };
+  _Identifiers.deferEnableTimerScheduling = {
+    name: "\u0275\u0275deferEnableTimerScheduling",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.conditional = { name: "\u0275\u0275conditional", moduleName: CORE };
@@ -2248,10 +2389,16 @@ var Identifiers = _Identifiers;
   _Identifiers.repeaterCreate = { name: "\u0275\u0275repeaterCreate", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.repeaterTrackByIndex = { name: "\u0275\u0275repeaterTrackByIndex", moduleName: CORE };
+  _Identifiers.repeaterTrackByIndex = {
+    name: "\u0275\u0275repeaterTrackByIndex",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.repeaterTrackByIdentity = { name: "\u0275\u0275repeaterTrackByIdentity", moduleName: CORE };
+  _Identifiers.repeaterTrackByIdentity = {
+    name: "\u0275\u0275repeaterTrackByIdentity",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.componentInstance = { name: "\u0275\u0275componentInstance", moduleName: CORE };
@@ -2353,34 +2500,64 @@ var Identifiers = _Identifiers;
   _Identifiers.property = { name: "\u0275\u0275property", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.propertyInterpolate = { name: "\u0275\u0275propertyInterpolate", moduleName: CORE };
+  _Identifiers.propertyInterpolate = {
+    name: "\u0275\u0275propertyInterpolate",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.propertyInterpolate1 = { name: "\u0275\u0275propertyInterpolate1", moduleName: CORE };
+  _Identifiers.propertyInterpolate1 = {
+    name: "\u0275\u0275propertyInterpolate1",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.propertyInterpolate2 = { name: "\u0275\u0275propertyInterpolate2", moduleName: CORE };
+  _Identifiers.propertyInterpolate2 = {
+    name: "\u0275\u0275propertyInterpolate2",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.propertyInterpolate3 = { name: "\u0275\u0275propertyInterpolate3", moduleName: CORE };
+  _Identifiers.propertyInterpolate3 = {
+    name: "\u0275\u0275propertyInterpolate3",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.propertyInterpolate4 = { name: "\u0275\u0275propertyInterpolate4", moduleName: CORE };
+  _Identifiers.propertyInterpolate4 = {
+    name: "\u0275\u0275propertyInterpolate4",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.propertyInterpolate5 = { name: "\u0275\u0275propertyInterpolate5", moduleName: CORE };
+  _Identifiers.propertyInterpolate5 = {
+    name: "\u0275\u0275propertyInterpolate5",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.propertyInterpolate6 = { name: "\u0275\u0275propertyInterpolate6", moduleName: CORE };
+  _Identifiers.propertyInterpolate6 = {
+    name: "\u0275\u0275propertyInterpolate6",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.propertyInterpolate7 = { name: "\u0275\u0275propertyInterpolate7", moduleName: CORE };
+  _Identifiers.propertyInterpolate7 = {
+    name: "\u0275\u0275propertyInterpolate7",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.propertyInterpolate8 = { name: "\u0275\u0275propertyInterpolate8", moduleName: CORE };
+  _Identifiers.propertyInterpolate8 = {
+    name: "\u0275\u0275propertyInterpolate8",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.propertyInterpolateV = { name: "\u0275\u0275propertyInterpolateV", moduleName: CORE };
+  _Identifiers.propertyInterpolateV = {
+    name: "\u0275\u0275propertyInterpolateV",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.i18n = { name: "\u0275\u0275i18n", moduleName: CORE };
@@ -2431,7 +2608,10 @@ var Identifiers = _Identifiers;
   _Identifiers.invalidFactoryDep = { name: "\u0275\u0275invalidFactoryDep", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.templateRefExtractor = { name: "\u0275\u0275templateRefExtractor", moduleName: CORE };
+  _Identifiers.templateRefExtractor = {
+    name: "\u0275\u0275templateRefExtractor",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.forwardRef = { name: "forwardRef", moduleName: CORE };
@@ -2446,7 +2626,10 @@ var Identifiers = _Identifiers;
   _Identifiers.declareInjectable = { name: "\u0275\u0275ngDeclareInjectable", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.InjectableDeclaration = { name: "\u0275\u0275InjectableDeclaration", moduleName: CORE };
+  _Identifiers.InjectableDeclaration = {
+    name: "\u0275\u0275InjectableDeclaration",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.resolveWindow = { name: "\u0275\u0275resolveWindow", moduleName: CORE };
@@ -2458,7 +2641,10 @@ var Identifiers = _Identifiers;
   _Identifiers.resolveBody = { name: "\u0275\u0275resolveBody", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.getComponentDepsFactory = { name: "\u0275\u0275getComponentDepsFactory", moduleName: CORE };
+  _Identifiers.getComponentDepsFactory = {
+    name: "\u0275\u0275getComponentDepsFactory",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.defineComponent = { name: "\u0275\u0275defineComponent", moduleName: CORE };
@@ -2515,7 +2701,10 @@ var Identifiers = _Identifiers;
   _Identifiers.InjectorDef = { name: "\u0275\u0275InjectorDef", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.InjectorDeclaration = { name: "\u0275\u0275InjectorDeclaration", moduleName: CORE };
+  _Identifiers.InjectorDeclaration = {
+    name: "\u0275\u0275InjectorDeclaration",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.defineInjector = { name: "\u0275\u0275defineInjector", moduleName: CORE };
@@ -2545,7 +2734,10 @@ var Identifiers = _Identifiers;
   _Identifiers.setNgModuleScope = { name: "\u0275\u0275setNgModuleScope", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.registerNgModuleType = { name: "\u0275\u0275registerNgModuleType", moduleName: CORE };
+  _Identifiers.registerNgModuleType = {
+    name: "\u0275\u0275registerNgModuleType",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.PipeDeclaration = { name: "\u0275\u0275PipeDeclaration", moduleName: CORE };
@@ -2557,16 +2749,25 @@ var Identifiers = _Identifiers;
   _Identifiers.declarePipe = { name: "\u0275\u0275ngDeclarePipe", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.declareClassMetadata = { name: "\u0275\u0275ngDeclareClassMetadata", moduleName: CORE };
+  _Identifiers.declareClassMetadata = {
+    name: "\u0275\u0275ngDeclareClassMetadata",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.declareClassMetadataAsync = { name: "\u0275\u0275ngDeclareClassMetadataAsync", moduleName: CORE };
+  _Identifiers.declareClassMetadataAsync = {
+    name: "\u0275\u0275ngDeclareClassMetadataAsync",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.setClassMetadata = { name: "\u0275setClassMetadata", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.setClassMetadataAsync = { name: "\u0275setClassMetadataAsync", moduleName: CORE };
+  _Identifiers.setClassMetadataAsync = {
+    name: "\u0275setClassMetadataAsync",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.setClassDebugInfo = { name: "\u0275setClassDebugInfo", moduleName: CORE };
@@ -2605,10 +2806,16 @@ var Identifiers = _Identifiers;
   _Identifiers.NgOnChangesFeature = { name: "\u0275\u0275NgOnChangesFeature", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.InheritDefinitionFeature = { name: "\u0275\u0275InheritDefinitionFeature", moduleName: CORE };
+  _Identifiers.InheritDefinitionFeature = {
+    name: "\u0275\u0275InheritDefinitionFeature",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.CopyDefinitionFeature = { name: "\u0275\u0275CopyDefinitionFeature", moduleName: CORE };
+  _Identifiers.CopyDefinitionFeature = {
+    name: "\u0275\u0275CopyDefinitionFeature",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.StandaloneFeature = { name: "\u0275\u0275StandaloneFeature", moduleName: CORE };
@@ -2617,10 +2824,16 @@ var Identifiers = _Identifiers;
   _Identifiers.ProvidersFeature = { name: "\u0275\u0275ProvidersFeature", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.HostDirectivesFeature = { name: "\u0275\u0275HostDirectivesFeature", moduleName: CORE };
+  _Identifiers.HostDirectivesFeature = {
+    name: "\u0275\u0275HostDirectivesFeature",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.InputTransformsFeatureFeature = { name: "\u0275\u0275InputTransformsFeature", moduleName: CORE };
+  _Identifiers.InputTransformsFeatureFeature = {
+    name: "\u0275\u0275InputTransformsFeature",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.listener = { name: "\u0275\u0275listener", moduleName: CORE };
@@ -2638,7 +2851,10 @@ var Identifiers = _Identifiers;
   _Identifiers.sanitizeStyle = { name: "\u0275\u0275sanitizeStyle", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.sanitizeResourceUrl = { name: "\u0275\u0275sanitizeResourceUrl", moduleName: CORE };
+  _Identifiers.sanitizeResourceUrl = {
+    name: "\u0275\u0275sanitizeResourceUrl",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.sanitizeScript = { name: "\u0275\u0275sanitizeScript", moduleName: CORE };
@@ -2647,16 +2863,25 @@ var Identifiers = _Identifiers;
   _Identifiers.sanitizeUrl = { name: "\u0275\u0275sanitizeUrl", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.sanitizeUrlOrResourceUrl = { name: "\u0275\u0275sanitizeUrlOrResourceUrl", moduleName: CORE };
+  _Identifiers.sanitizeUrlOrResourceUrl = {
+    name: "\u0275\u0275sanitizeUrlOrResourceUrl",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.trustConstantHtml = { name: "\u0275\u0275trustConstantHtml", moduleName: CORE };
 })();
 (() => {
-  _Identifiers.trustConstantResourceUrl = { name: "\u0275\u0275trustConstantResourceUrl", moduleName: CORE };
+  _Identifiers.trustConstantResourceUrl = {
+    name: "\u0275\u0275trustConstantResourceUrl",
+    moduleName: CORE
+  };
 })();
 (() => {
-  _Identifiers.validateIframeAttribute = { name: "\u0275\u0275validateIframeAttribute", moduleName: CORE };
+  _Identifiers.validateIframeAttribute = {
+    name: "\u0275\u0275validateIframeAttribute",
+    moduleName: CORE
+  };
 })();
 (() => {
   _Identifiers.InputSignalBrandWriteType = { name: "\u0275INPUT_SIGNAL_BRAND_WRITE_TYPE", moduleName: CORE };
@@ -3473,10 +3698,7 @@ function compileFactoryFunction(meta) {
   }
   let factoryFn = fn([new FnParam("t", DYNAMIC_TYPE)], body, INFERRED_TYPE, void 0, `${meta.name}_Factory`);
   if (baseFactoryVar !== null) {
-    factoryFn = arrowFn([], [
-      new DeclareVarStmt(baseFactoryVar.name),
-      new ReturnStatement(factoryFn)
-    ]).callFn([], void 0, true);
+    factoryFn = arrowFn([], [new DeclareVarStmt(baseFactoryVar.name), new ReturnStatement(factoryFn)]).callFn([], void 0, true);
   }
   return {
     expression: factoryFn,
@@ -3486,7 +3708,10 @@ function compileFactoryFunction(meta) {
 }
 function createFactoryType(meta) {
   const ctorDepsType = meta.deps !== null && meta.deps !== "invalid" ? createCtorDepsType(meta.deps) : NONE_TYPE;
-  return expressionType(importExpr(Identifiers.FactoryDeclaration, [typeWithParameters(meta.type.type, meta.typeArgumentCount), ctorDepsType]));
+  return expressionType(importExpr(Identifiers.FactoryDeclaration, [
+    typeWithParameters(meta.type.type, meta.typeArgumentCount),
+    ctorDepsType
+  ]));
 }
 function injectDependencies(deps, target) {
   return deps.map((dep, index) => compileInjectDependency(dep, target, index));
@@ -4506,13 +4731,15 @@ var Message = class {
     this.id = this.customId;
     this.messageString = serializeMessage(this.nodes);
     if (nodes.length) {
-      this.sources = [{
-        filePath: nodes[0].sourceSpan.start.file.url,
-        startLine: nodes[0].sourceSpan.start.line + 1,
-        startCol: nodes[0].sourceSpan.start.col + 1,
-        endLine: nodes[nodes.length - 1].sourceSpan.end.line + 1,
-        endCol: nodes[0].sourceSpan.start.col + 1
-      }];
+      this.sources = [
+        {
+          filePath: nodes[0].sourceSpan.start.file.url,
+          startLine: nodes[0].sourceSpan.start.line + 1,
+          startCol: nodes[0].sourceSpan.start.col + 1,
+          endLine: nodes[nodes.length - 1].sourceSpan.end.line + 1,
+          endCol: nodes[0].sourceSpan.start.col + 1
+        }
+      ];
     } else {
       this.sources = [];
     }
@@ -4900,7 +5127,9 @@ function compileInjectable(meta, resolveForwardRefs) {
   };
 }
 function createInjectableType(meta) {
-  return new ExpressionType(importExpr(Identifiers.InjectableDeclaration, [typeWithParameters(meta.type.type, meta.typeArgumentCount)]));
+  return new ExpressionType(importExpr(Identifiers.InjectableDeclaration, [
+    typeWithParameters(meta.type.type, meta.typeArgumentCount)
+  ]));
 }
 function delegateToFactory(type, useType, unwrapForwardRefs) {
   if (type.node === useType.node) {
@@ -5321,10 +5550,7 @@ var JitEvaluator = class {
     const converter = new JitEmitterVisitor(refResolver);
     const ctx = EmitterVisitorContext.createRoot();
     if (statements.length > 0 && !isUseStrictStatement(statements[0])) {
-      statements = [
-        literal("use strict").toStmt(),
-        ...statements
-      ];
+      statements = [literal("use strict").toStmt(), ...statements];
     }
     converter.visitAllStatements(statements, ctx);
     converter.createReturnStmt(ctx);
@@ -5561,14 +5787,8 @@ function generateSetNgModuleScopeCall(meta) {
     [meta.type.value, scopeMap.toLiteralMap()]
   );
   const guardedCall = jitOnlyGuardedExpression(fnCall);
-  const iife = new FunctionExpr(
-    [],
-    [guardedCall.toStmt()]
-  );
-  const iifeCall = new InvokeFunctionExpr(
-    iife,
-    []
-  );
+  const iife = new FunctionExpr([], [guardedCall.toStmt()]);
+  const iifeCall = new InvokeFunctionExpr(iife, []);
   return iifeCall.toStmt();
 }
 function tupleTypeOf(exp) {
@@ -5639,7 +5859,15 @@ var animationKeywords = /* @__PURE__ */ new Set([
   "jump-start",
   "start"
 ]);
-var scopedAtRuleIdentifiers = ["@media", "@supports", "@document", "@layer", "@container", "@scope", "@starting-style"];
+var scopedAtRuleIdentifiers = [
+  "@media",
+  "@supports",
+  "@document",
+  "@layer",
+  "@container",
+  "@scope",
+  "@starting-style"
+];
 var ShadowCss = class {
   constructor() {
     this._animationDeclarationKeyframesRe = /(^|\s+)(?:(?:(['"])((?:\\\\|\\\2|(?!\2).)+)\2)|(-?[A-Za-z][\w\-]*))(?=[,\s]|$)/g;
@@ -8401,14 +8629,20 @@ var BINARY_OPERATORS = /* @__PURE__ */ new Map([
 ]);
 function namespaceForKey(namespacePrefixKey) {
   var _a2;
-  const NAMESPACES = /* @__PURE__ */ new Map([["svg", Namespace.SVG], ["math", Namespace.Math]]);
+  const NAMESPACES = /* @__PURE__ */ new Map([
+    ["svg", Namespace.SVG],
+    ["math", Namespace.Math]
+  ]);
   if (namespacePrefixKey === null) {
     return Namespace.HTML;
   }
   return (_a2 = NAMESPACES.get(namespacePrefixKey)) != null ? _a2 : Namespace.HTML;
 }
 function keyForNamespace(namespace) {
-  const NAMESPACES = /* @__PURE__ */ new Map([["svg", Namespace.SVG], ["math", Namespace.Math]]);
+  const NAMESPACES = /* @__PURE__ */ new Map([
+    ["svg", Namespace.SVG],
+    ["math", Namespace.Math]
+  ]);
   for (const [k, n] of NAMESPACES.entries()) {
     if (n === namespace) {
       return k;
@@ -10803,11 +11037,7 @@ var _SECURITY_SCHEMA;
 function SECURITY_SCHEMA() {
   if (!_SECURITY_SCHEMA) {
     _SECURITY_SCHEMA = {};
-    registerContext(SecurityContext.HTML, [
-      "iframe|srcdoc",
-      "*|innerHTML",
-      "*|outerHTML"
-    ]);
+    registerContext(SecurityContext.HTML, ["iframe|srcdoc", "*|innerHTML", "*|outerHTML"]);
     registerContext(SecurityContext.STYLE, ["*|style"]);
     registerContext(SecurityContext.URL, [
       "*|formAction",
@@ -10851,7 +11081,14 @@ function registerContext(ctx, specs) {
   for (const spec of specs)
     _SECURITY_SCHEMA[spec.toLowerCase()] = ctx;
 }
-var IFRAME_SECURITY_SENSITIVE_ATTRS = /* @__PURE__ */ new Set(["sandbox", "allow", "allowfullscreen", "referrerpolicy", "csp", "fetchpriority"]);
+var IFRAME_SECURITY_SENSITIVE_ATTRS = /* @__PURE__ */ new Set([
+  "sandbox",
+  "allow",
+  "allowfullscreen",
+  "referrerpolicy",
+  "csp",
+  "fetchpriority"
+]);
 function isIframeSecuritySensitiveAttr(attrName) {
   return IFRAME_SECURITY_SENSITIVE_ATTRS.has(attrName.toLowerCase());
 }
@@ -11307,20 +11544,38 @@ function getHtmlTagDefinition(tagName) {
       "li": new HtmlTagDefinition({ closedByChildren: ["li"], closedByParent: true }),
       "dt": new HtmlTagDefinition({ closedByChildren: ["dt", "dd"] }),
       "dd": new HtmlTagDefinition({ closedByChildren: ["dt", "dd"], closedByParent: true }),
-      "rb": new HtmlTagDefinition({ closedByChildren: ["rb", "rt", "rtc", "rp"], closedByParent: true }),
-      "rt": new HtmlTagDefinition({ closedByChildren: ["rb", "rt", "rtc", "rp"], closedByParent: true }),
+      "rb": new HtmlTagDefinition({
+        closedByChildren: ["rb", "rt", "rtc", "rp"],
+        closedByParent: true
+      }),
+      "rt": new HtmlTagDefinition({
+        closedByChildren: ["rb", "rt", "rtc", "rp"],
+        closedByParent: true
+      }),
       "rtc": new HtmlTagDefinition({ closedByChildren: ["rb", "rtc", "rp"], closedByParent: true }),
-      "rp": new HtmlTagDefinition({ closedByChildren: ["rb", "rt", "rtc", "rp"], closedByParent: true }),
+      "rp": new HtmlTagDefinition({
+        closedByChildren: ["rb", "rt", "rtc", "rp"],
+        closedByParent: true
+      }),
       "optgroup": new HtmlTagDefinition({ closedByChildren: ["optgroup"], closedByParent: true }),
-      "option": new HtmlTagDefinition({ closedByChildren: ["option", "optgroup"], closedByParent: true }),
+      "option": new HtmlTagDefinition({
+        closedByChildren: ["option", "optgroup"],
+        closedByParent: true
+      }),
       "pre": new HtmlTagDefinition({ ignoreFirstLf: true }),
       "listing": new HtmlTagDefinition({ ignoreFirstLf: true }),
       "style": new HtmlTagDefinition({ contentType: TagContentType.RAW_TEXT }),
       "script": new HtmlTagDefinition({ contentType: TagContentType.RAW_TEXT }),
       "title": new HtmlTagDefinition({
-        contentType: { default: TagContentType.ESCAPABLE_RAW_TEXT, svg: TagContentType.PARSABLE_DATA }
+        contentType: {
+          default: TagContentType.ESCAPABLE_RAW_TEXT,
+          svg: TagContentType.PARSABLE_DATA
+        }
       }),
-      "textarea": new HtmlTagDefinition({ contentType: TagContentType.ESCAPABLE_RAW_TEXT, ignoreFirstLf: true })
+      "textarea": new HtmlTagDefinition({
+        contentType: TagContentType.ESCAPABLE_RAW_TEXT,
+        ignoreFirstLf: true
+      })
     });
     new DomElementSchemaRegistry().allKnownElementNames().forEach((knownTagName) => {
       if (!TAG_DEFINITIONS[knownTagName] && getNsPrefix(knownTagName) === null) {
@@ -13824,7 +14079,12 @@ var _Tokenizer = class {
     this._tokenizeIcu = options.tokenizeExpansionForms || false;
     this._interpolationConfig = options.interpolationConfig || DEFAULT_INTERPOLATION_CONFIG;
     this._leadingTriviaCodePoints = options.leadingTriviaChars && options.leadingTriviaChars.map((c) => c.codePointAt(0) || 0);
-    const range = options.range || { endPos: _file.content.length, startPos: 0, startLine: 0, startCol: 0 };
+    const range = options.range || {
+      endPos: _file.content.length,
+      startPos: 0,
+      startLine: 0,
+      startCol: 0
+    };
     this._cursor = options.escapedString ? new EscapedCharacterCursor(_file, range) : new PlainCharacterCursor(_file, range);
     this._preserveLineEndings = options.preserveLineEndings || false;
     this._i18nNormalizeLineEndingsInICUs = options.i18nNormalizeLineEndingsInICUs || false;
@@ -15507,7 +15767,10 @@ function collectMessage(job, fileBasedI18nSuffix, messages, messageOp) {
   let transformFn = void 0;
   if (messageOp.needsPostprocessing || messageOp.postprocessingParams.size > 0) {
     const postprocessingParams = Object.fromEntries([...messageOp.postprocessingParams.entries()].sort());
-    const formattedPostprocessingParams = formatI18nPlaceholderNamesInMap(postprocessingParams, false);
+    const formattedPostprocessingParams = formatI18nPlaceholderNamesInMap(
+      postprocessingParams,
+      false
+    );
     const extraTransformFnParams = [];
     if (messageOp.postprocessingParams.size > 0) {
       extraTransformFnParams.push(mapLiteral(formattedPostprocessingParams, true));
@@ -15771,7 +16034,10 @@ function nameFunctionsAndVariables(job) {
 }
 function addNamesToView(unit, baseName, state, compatibility) {
   if (unit.fnName === null) {
-    unit.fnName = unit.job.pool.uniqueName(sanitizeIdentifier(`${baseName}_${unit.job.fnSuffix}`), false);
+    unit.fnName = unit.job.pool.uniqueName(
+      sanitizeIdentifier(`${baseName}_${unit.job.fnSuffix}`),
+      false
+    );
   }
   const varNames = /* @__PURE__ */ new Map();
   for (const op of unit.ops()) {
@@ -16077,7 +16343,7 @@ function orderWithin(opList, ordering) {
   let firstTargetInGroup = null;
   for (const op of opList) {
     const currentTarget = hasDependsOnSlotContextTrait(op) ? op.target : null;
-    if (!handledOpKinds.has(op.kind) || currentTarget !== firstTargetInGroup && (firstTargetInGroup !== null && currentTarget !== null)) {
+    if (!handledOpKinds.has(op.kind) || currentTarget !== firstTargetInGroup && firstTargetInGroup !== null && currentTarget !== null) {
       OpList.insertBefore(reorder(opsToOrder, ordering), op);
       opsToOrder = [];
       firstTargetInGroup = null;
@@ -16366,10 +16632,24 @@ function elementEnd(sourceSpan) {
   return call(Identifiers.elementEnd, [], sourceSpan);
 }
 function elementContainerStart(slot, constIndex, localRefIndex, sourceSpan) {
-  return elementOrContainerBase(Identifiers.elementContainerStart, slot, null, constIndex, localRefIndex, sourceSpan);
+  return elementOrContainerBase(
+    Identifiers.elementContainerStart,
+    slot,
+    null,
+    constIndex,
+    localRefIndex,
+    sourceSpan
+  );
 }
 function elementContainer(slot, constIndex, localRefIndex, sourceSpan) {
-  return elementOrContainerBase(Identifiers.elementContainer, slot, null, constIndex, localRefIndex, sourceSpan);
+  return elementOrContainerBase(
+    Identifiers.elementContainer,
+    slot,
+    null,
+    constIndex,
+    localRefIndex,
+    sourceSpan
+  );
 }
 function elementContainerEnd() {
   return call(Identifiers.elementContainerEnd, [], null);
@@ -16413,10 +16693,7 @@ function twoWayListener(name, handlerFn, sourceSpan) {
   return call(Identifiers.twoWayListener, [literal(name), handlerFn], sourceSpan);
 }
 function pipe(slot, name) {
-  return call(Identifiers.pipe, [
-    literal(slot),
-    literal(name)
-  ], null);
+  return call(Identifiers.pipe, [literal(slot), literal(name)], null);
 }
 function namespaceHTML() {
   return call(Identifiers.namespaceHTML, [], null);
@@ -16431,9 +16708,7 @@ function advance(delta, sourceSpan) {
   return call(Identifiers.advance, delta > 1 ? [literal(delta)] : [], sourceSpan);
 }
 function reference(slot) {
-  return importExpr(Identifiers.reference).callFn([
-    literal(slot)
-  ]);
+  return importExpr(Identifiers.reference).callFn([literal(slot)]);
 }
 function nextContext(steps) {
   return importExpr(Identifiers.nextContext).callFn(steps === 1 ? [] : [literal(steps)]);
@@ -16442,14 +16717,10 @@ function getCurrentView() {
   return importExpr(Identifiers.getCurrentView).callFn([]);
 }
 function restoreView(savedView) {
-  return importExpr(Identifiers.restoreView).callFn([
-    savedView
-  ]);
+  return importExpr(Identifiers.restoreView).callFn([savedView]);
 }
 function resetView(returnValue) {
-  return importExpr(Identifiers.resetView).callFn([
-    returnValue
-  ]);
+  return importExpr(Identifiers.resetView).callFn([returnValue]);
 }
 function text(slot, initialValue, sourceSpan) {
   const args = [literal(slot, null)];
@@ -16622,18 +16893,10 @@ function pipeBind(slot, varOffset, args) {
     throw new Error(`pipeBind() argument count out of bounds`);
   }
   const instruction = PIPE_BINDINGS[args.length - 1];
-  return importExpr(instruction).callFn([
-    literal(slot),
-    literal(varOffset),
-    ...args
-  ]);
+  return importExpr(instruction).callFn([literal(slot), literal(varOffset), ...args]);
 }
 function pipeBindV(slot, varOffset, args) {
-  return importExpr(Identifiers.pipeBindV).callFn([
-    literal(slot),
-    literal(varOffset),
-    args
-  ]);
+  return importExpr(Identifiers.pipeBindV).callFn([literal(slot), literal(varOffset), args]);
 }
 function textInterpolate(strings, expressions, sourceSpan) {
   const interpolationArgs = collateInterpolationArgs(strings, expressions);
@@ -16688,10 +16951,7 @@ function syntheticHostProperty(name, expression, sourceSpan) {
   return call(Identifiers.syntheticHostProperty, [literal(name), expression], sourceSpan);
 }
 function pureFunction(varOffset, fn2, args) {
-  return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [
-    literal(varOffset),
-    fn2
-  ], args, [], null);
+  return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [literal(varOffset), fn2], args, [], null);
 }
 function collateInterpolationArgs(strings, expressions) {
   if (strings.length < 1 || expressions.length !== strings.length - 1) {
@@ -18495,14 +18755,8 @@ function emitView(view) {
   const createCond = maybeGenerateRfBlock(1, createStatements);
   const updateCond = maybeGenerateRfBlock(2, updateStatements);
   return fn(
-    [
-      new FnParam("rf"),
-      new FnParam("ctx")
-    ],
-    [
-      ...createCond,
-      ...updateCond
-    ],
+    [new FnParam("rf"), new FnParam("ctx")],
+    [...createCond, ...updateCond],
     void 0,
     void 0,
     view.fnName
@@ -18540,14 +18794,8 @@ function emitHostBindingFunction(job) {
   const createCond = maybeGenerateRfBlock(1, createStatements);
   const updateCond = maybeGenerateRfBlock(2, updateStatements);
   return fn(
-    [
-      new FnParam("rf"),
-      new FnParam("ctx")
-    ],
-    [
-      ...createCond,
-      ...updateCond
-    ],
+    [new FnParam("rf"), new FnParam("ctx")],
+    [...createCond, ...updateCond],
     void 0,
     void 0,
     job.root.fnName
@@ -18601,7 +18849,19 @@ function ingestHostProperty(job, property2, bindingKind, securityContexts) {
   } else {
     expression = convertAst(ast, job, property2.sourceSpan);
   }
-  job.root.update.push(createBindingOp(job.root.xref, bindingKind, property2.name, expression, null, securityContexts, false, false, null, null, property2.sourceSpan));
+  job.root.update.push(createBindingOp(
+    job.root.xref,
+    bindingKind,
+    property2.name,
+    expression,
+    null,
+    securityContexts,
+    false,
+    false,
+    null,
+    null,
+    property2.sourceSpan
+  ));
 }
 function ingestHostAttribute(job, name, value, securityContexts) {
   const attrBinding = createBindingOp(
@@ -19535,7 +19795,16 @@ var BindingParser = class {
     for (const propName of Object.keys(hostListeners)) {
       const expression = hostListeners[propName];
       if (typeof expression === "string") {
-        this.parseEvent(propName, expression, false, sourceSpan, sourceSpan, [], targetEvents, sourceSpan);
+        this.parseEvent(
+          propName,
+          expression,
+          false,
+          sourceSpan,
+          sourceSpan,
+          [],
+          targetEvents,
+          sourceSpan
+        );
       } else {
         this._reportError(`Value of the host listener "${propName}" needs to be a string representing an expression but got "${expression}" (${typeof expression})`, sourceSpan);
       }
@@ -19920,7 +20189,14 @@ var CONDITIONAL_ALIAS_PATTERN = /^(as\s)+(.*)/;
 var ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
 var FOR_LOOP_LET_PATTERN = /^let\s+([\S\s]*)/;
 var CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN = /(\s*)(\S+)(\s*)/;
-var ALLOWED_FOR_LOOP_LET_VARIABLES = /* @__PURE__ */ new Set(["$index", "$first", "$last", "$even", "$odd", "$count"]);
+var ALLOWED_FOR_LOOP_LET_VARIABLES = /* @__PURE__ */ new Set([
+  "$index",
+  "$first",
+  "$last",
+  "$even",
+  "$odd",
+  "$count"
+]);
 function isConnectedForLoopBlock(name) {
   return name === "empty";
 }
@@ -20875,7 +21151,12 @@ var HtmlAstToIvyAst = class {
       if (prop.isLiteral) {
         literal2.push(new TextAttribute(prop.name, prop.expression.source || "", prop.sourceSpan, prop.keySpan, prop.valueSpan, i18n2));
       } else {
-        const bep = this.bindingParser.createBoundElementProperty(elementName, prop, true, false);
+        const bep = this.bindingParser.createBoundElementProperty(
+          elementName,
+          prop,
+          true,
+          false
+        );
         bound.push(BoundAttribute.fromBoundElementProperty(bep, i18n2));
       }
     });
@@ -20915,7 +21196,16 @@ var HtmlAstToIvyAst = class {
         const events = [];
         const identifier = bindParts[IDENT_KW_IDX];
         const keySpan2 = createKeySpan(srcSpan, bindParts[KW_ON_IDX], identifier);
-        this.bindingParser.parseEvent(identifier, value, false, srcSpan, attribute2.valueSpan || srcSpan, matchableAttributes, events, keySpan2);
+        this.bindingParser.parseEvent(
+          identifier,
+          value,
+          false,
+          srcSpan,
+          attribute2.valueSpan || srcSpan,
+          matchableAttributes,
+          events,
+          keySpan2
+        );
         addEvents(events, boundEvents);
       } else if (bindParts[KW_BINDON_IDX]) {
         const identifier = bindParts[IDENT_KW_IDX];
@@ -20946,7 +21236,16 @@ var HtmlAstToIvyAst = class {
         this.bindingParser.parsePropertyBinding(identifier, value, false, false, srcSpan, absoluteOffset, attribute2.valueSpan, matchableAttributes, parsedProperties, keySpan2);
       } else {
         const events = [];
-        this.bindingParser.parseEvent(identifier, value, false, srcSpan, attribute2.valueSpan || srcSpan, matchableAttributes, events, keySpan2);
+        this.bindingParser.parseEvent(
+          identifier,
+          value,
+          false,
+          srcSpan,
+          attribute2.valueSpan || srcSpan,
+          matchableAttributes,
+          events,
+          keySpan2
+        );
         addEvents(events, boundEvents);
       }
       return true;
@@ -20980,7 +21279,16 @@ var HtmlAstToIvyAst = class {
   }
   parseAssignmentEvent(name, expression, sourceSpan, valueSpan, targetMatchableAttrs, boundEvents, keySpan) {
     const events = [];
-    this.bindingParser.parseEvent(`${name}Change`, expression, true, sourceSpan, valueSpan || sourceSpan, targetMatchableAttrs, events, keySpan);
+    this.bindingParser.parseEvent(
+      `${name}Change`,
+      expression,
+      true,
+      sourceSpan,
+      valueSpan || sourceSpan,
+      targetMatchableAttrs,
+      events,
+      keySpan
+    );
     addEvents(events, boundEvents);
   }
   reportError(message, sourceSpan, level = ParseErrorLevel.ERROR) {
@@ -21079,7 +21387,11 @@ function parseTemplate(template2, templateUrl, options = {}) {
     return parsedTemplate2;
   }
   let rootNodes = parseResult.rootNodes;
-  const i18nMetaVisitor = new I18nMetaVisitor(interpolationConfig, !preserveWhitespaces, enableI18nLegacyMessageIdFormat);
+  const i18nMetaVisitor = new I18nMetaVisitor(
+    interpolationConfig,
+    !preserveWhitespaces,
+    enableI18nLegacyMessageIdFormat
+  );
   const i18nMetaResult = i18nMetaVisitor.visitAllWithErrors(rootNodes);
   if (!options.alwaysAttemptHtmlToR3AstConversion && i18nMetaResult.errors && i18nMetaResult.errors.length > 0) {
     const parsedTemplate2 = {
@@ -21231,10 +21543,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
   definitionMap.set("vars", literal(tpl.root.vars));
   if (tpl.consts.length > 0) {
     if (tpl.constsInitializers.length > 0) {
-      definitionMap.set("consts", arrowFn([], [
-        ...tpl.constsInitializers,
-        new ReturnStatement(literalArr(tpl.consts))
-      ]));
+      definitionMap.set("consts", arrowFn([], [...tpl.constsInitializers, new ReturnStatement(literalArr(tpl.consts))]));
     } else {
       definitionMap.set("consts", literalArr(tpl.consts));
     }
@@ -21444,8 +21753,16 @@ function createHostDirectivesType(meta) {
   }
   return expressionType(literalArr(meta.hostDirectives.map((hostMeta) => literalMap([
     { key: "directive", value: typeofExpr(hostMeta.directive.type), quoted: false },
-    { key: "inputs", value: stringMapAsLiteralExpression(hostMeta.inputs || {}), quoted: false },
-    { key: "outputs", value: stringMapAsLiteralExpression(hostMeta.outputs || {}), quoted: false }
+    {
+      key: "inputs",
+      value: stringMapAsLiteralExpression(hostMeta.inputs || {}),
+      quoted: false
+    },
+    {
+      key: "outputs",
+      value: stringMapAsLiteralExpression(hostMeta.outputs || {}),
+      quoted: false
+    }
   ]))));
 }
 function createHostDirectivesFeatureArg(hostDirectives) {
@@ -22297,7 +22614,12 @@ var CompilerFacadeImpl = class {
       ...preStatements,
       new DeclareVarStmt("$def", def, void 0, StmtModifier.Exported)
     ];
-    const res = this.jitEvaluator.evaluateStatements(sourceUrl, statements, new R3JitReflector(context), true);
+    const res = this.jitEvaluator.evaluateStatements(
+      sourceUrl,
+      statements,
+      new R3JitReflector(context),
+      true
+    );
     return res["$def"];
   }
 };
@@ -22685,7 +23007,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.5+sha-a5b5b7d");
+var VERSION2 = new Version("18.0.0-next.5+sha-ca517d7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
