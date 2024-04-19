@@ -26254,7 +26254,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.5+sha-ca517d7");
+var VERSION2 = new Version("18.0.0-next.5+sha-164dde4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27348,7 +27348,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.0.0-next.5+sha-ca517d7"));
+  definitionMap.set("version", literal("18.0.0-next.5+sha-164dde4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27367,7 +27367,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.0.0-next.5+sha-ca517d7"));
+  definitionMap.set("version", literal("18.0.0-next.5+sha-164dde4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27435,7 +27435,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.0.0-next.5+sha-ca517d7"));
+  definitionMap.set("version", literal("18.0.0-next.5+sha-164dde4"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27753,7 +27753,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.0.0-next.5+sha-ca517d7"));
+  definitionMap.set("version", literal("18.0.0-next.5+sha-164dde4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27776,7 +27776,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.0.0-next.5+sha-ca517d7"));
+  definitionMap.set("version", literal("18.0.0-next.5+sha-164dde4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27814,7 +27814,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.0.0-next.5+sha-ca517d7"));
+  definitionMap.set("version", literal("18.0.0-next.5+sha-164dde4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27838,7 +27838,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.0.0-next.5+sha-ca517d7"));
+  definitionMap.set("version", literal("18.0.0-next.5+sha-164dde4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27873,7 +27873,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.0.0-next.5+sha-ca517d7"));
+  definitionMap.set("version", literal("18.0.0-next.5+sha-164dde4"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27890,7 +27890,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.0.0-next.5+sha-ca517d7");
+var VERSION3 = new Version("18.0.0-next.5+sha-164dde4");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -40262,8 +40262,8 @@ var DocsExtractor = class {
         const realSourceFile = node.getSourceFile();
         entry.source = {
           filePath: getRelativeFilePath(realSourceFile, rootDir),
-          startLine: import_typescript82.default.getLineAndCharacterOfPosition(realSourceFile, node.getFullStart()).line,
-          endLine: import_typescript82.default.getLineAndCharacterOfPosition(realSourceFile, node.getEnd()).line
+          startLine: import_typescript82.default.getLineAndCharacterOfPosition(realSourceFile, node.getStart()).line + 1,
+          endLine: import_typescript82.default.getLineAndCharacterOfPosition(realSourceFile, node.getEnd()).line + 1
         };
         entries.push(__spreadProps(__spreadValues({}, entry), { name: exportName }));
       }
@@ -45252,15 +45252,19 @@ var TcbIfOp = class extends TcbOp {
       return void 0;
     }
     if (branch.expression === null) {
-      const branchScope = Scope3.forNodes(this.tcb, this.scope, null, branch.children, this.generateBranchGuard(index));
+      const branchScope = this.getBranchScope(this.scope, branch, index);
       return import_typescript107.default.factory.createBlock(branchScope.render());
     }
     const expressionScope = Scope3.forNodes(this.tcb, this.scope, branch, [], null);
     expressionScope.render().forEach((stmt) => this.scope.addStatement(stmt));
     this.expressionScopes.set(branch, expressionScope);
     const expression = branch.expressionAlias === null ? tcbExpression(branch.expression, this.tcb, expressionScope) : expressionScope.resolve(branch.expressionAlias);
-    const bodyScope = Scope3.forNodes(this.tcb, expressionScope, null, branch.children, this.generateBranchGuard(index));
+    const bodyScope = this.getBranchScope(expressionScope, branch, index);
     return import_typescript107.default.factory.createIfStatement(expression, import_typescript107.default.factory.createBlock(bodyScope.render()), this.generateBranch(index + 1));
+  }
+  getBranchScope(parentScope, branch, index) {
+    const checkBody = this.tcb.env.config.checkControlFlowBodies;
+    return Scope3.forNodes(this.tcb, parentScope, null, checkBody ? branch.children : [], checkBody ? this.generateBranchGuard(index) : null);
   }
   generateBranchGuard(index) {
     let guard = null;
@@ -45299,7 +45303,8 @@ var TcbSwitchOp = class extends TcbOp {
   execute() {
     const switchExpression = tcbExpression(this.block.expression, this.tcb, this.scope);
     const clauses = this.block.cases.map((current) => {
-      const clauseScope = Scope3.forNodes(this.tcb, this.scope, null, current.children, this.generateGuard(current, switchExpression));
+      const checkBody = this.tcb.env.config.checkControlFlowBodies;
+      const clauseScope = Scope3.forNodes(this.tcb, this.scope, null, checkBody ? current.children : [], checkBody ? this.generateGuard(current, switchExpression) : null);
       const statements = [...clauseScope.render(), import_typescript107.default.factory.createBreakStatement()];
       return current.expression === null ? import_typescript107.default.factory.createDefaultClause(statements) : import_typescript107.default.factory.createCaseClause(tcbExpression(current.expression, this.tcb, clauseScope), statements);
     });
@@ -45340,7 +45345,7 @@ var TcbForOfOp = class extends TcbOp {
     return false;
   }
   execute() {
-    const loopScope = Scope3.forNodes(this.tcb, this.scope, this.block, this.block.children, null);
+    const loopScope = Scope3.forNodes(this.tcb, this.scope, this.block, this.tcb.env.config.checkControlFlowBodies ? this.block.children : [], null);
     const initializerId = loopScope.resolve(this.block.item);
     if (!import_typescript107.default.isIdentifier(initializerId)) {
       throw new Error(`Could not resolve for loop variable ${this.block.item.name} to an identifier`);
@@ -45551,7 +45556,7 @@ var _Scope = class {
       this.opQueue.push(new TcbSwitchOp(this.tcb, this, node));
     } else if (node instanceof ForLoopBlock) {
       this.opQueue.push(new TcbForOfOp(this.tcb, this, node));
-      node.empty && this.appendChildren(node.empty);
+      node.empty && this.tcb.env.config.checkControlFlowBodies && this.appendChildren(node.empty);
     } else if (node instanceof BoundText) {
       this.opQueue.push(new TcbExpressionOp(this.tcb, this, node.value));
     } else if (node instanceof Icu) {
@@ -48658,6 +48663,7 @@ var NgCompiler = class {
         alwaysCheckSchemaInTemplateBodies: true,
         checkTypeOfInputBindings: strictTemplates,
         honorAccessModifiersForInputBindings: false,
+        checkControlFlowBodies: true,
         strictNullInputBindings: strictTemplates,
         checkTypeOfAttributes: strictTemplates,
         checkTypeOfDomBindings: false,
@@ -48681,6 +48687,7 @@ var NgCompiler = class {
         applyTemplateContextGuards: false,
         checkQueries: false,
         checkTemplateBodies: false,
+        checkControlFlowBodies: false,
         alwaysCheckSchemaInTemplateBodies: this.closureCompilerEnabled,
         checkTypeOfInputBindings: false,
         strictNullInputBindings: false,

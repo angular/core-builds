@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-ca517d7
+ * @license Angular v18.0.0-next.5+sha-164dde4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15269,7 +15269,7 @@ function performanceMarkFeature(feature) {
  *
  * @returns a function to cancel the scheduled callback
  */
-function scheduleCallback(callback, useNativeTimers = true) {
+function scheduleCallbackWithRafRace(callback, useNativeTimers = true) {
     // Note: the `scheduleCallback` is used in the `NgZone` class, but we cannot use the
     // `inject` function. The `NgZone` instance may be created manually, and thus the injection
     // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
@@ -15298,6 +15298,17 @@ function scheduleCallback(callback, useNativeTimers = true) {
         }
         executeCallback = false;
         callback();
+    });
+    return () => {
+        executeCallback = false;
+    };
+}
+function scheduleCallbackWithMicrotask(callback) {
+    let executeCallback = true;
+    queueMicrotask(() => {
+        if (executeCallback) {
+            callback();
+        }
     });
     return () => {
         executeCallback = false;
@@ -15458,7 +15469,7 @@ class NgZone {
             !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
         self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
         self.callbackScheduled = false;
-        self.scheduleCallback = scheduleCallback;
+        self.scheduleCallback = scheduleCallbackWithRafRace;
         forkInnerZoneWithAngularBehavior(self);
     }
     /**
@@ -16806,7 +16817,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-ca517d7']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-164dde4']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23225,6 +23236,15 @@ function valuesMatching(liveIdx, liveValue, newIdx, newValue, trackBy) {
     }
     return 0;
 }
+function recordDuplicateKeys(keyToIdx, key, idx) {
+    const idxSoFar = keyToIdx.get(key);
+    if (idxSoFar !== undefined) {
+        idxSoFar.add(idx);
+    }
+    else {
+        keyToIdx.set(key, new Set([idx]));
+    }
+}
 /**
  * The live collection reconciliation algorithm that perform various in-place operations, so it
  * reflects the content of the new (incoming) collection.
@@ -23253,12 +23273,16 @@ function reconcile(liveCollection, newCollection, trackByFn) {
     let liveKeysInTheFuture = undefined;
     let liveStartIdx = 0;
     let liveEndIdx = liveCollection.length - 1;
+    const duplicateKeys = ngDevMode ? new Map() : undefined;
     if (Array.isArray(newCollection)) {
         let newEndIdx = newCollection.length - 1;
         while (liveStartIdx <= liveEndIdx && liveStartIdx <= newEndIdx) {
             // compare from the beginning
             const liveStartValue = liveCollection.at(liveStartIdx);
             const newStartValue = newCollection[liveStartIdx];
+            if (ngDevMode) {
+                recordDuplicateKeys(duplicateKeys, trackByFn(liveStartIdx, newStartValue), liveStartIdx);
+            }
             const isStartMatching = valuesMatching(liveStartIdx, liveStartValue, liveStartIdx, newStartValue, trackByFn);
             if (isStartMatching !== 0) {
                 if (isStartMatching < 0) {
@@ -23271,6 +23295,9 @@ function reconcile(liveCollection, newCollection, trackByFn) {
             // TODO(perf): do _all_ the matching from the end
             const liveEndValue = liveCollection.at(liveEndIdx);
             const newEndValue = newCollection[newEndIdx];
+            if (ngDevMode) {
+                recordDuplicateKeys(duplicateKeys, trackByFn(newEndIdx, newEndValue), newEndIdx);
+            }
             const isEndMatching = valuesMatching(liveEndIdx, liveEndValue, newEndIdx, newEndValue, trackByFn);
             if (isEndMatching !== 0) {
                 if (isEndMatching < 0) {
@@ -23342,6 +23369,9 @@ function reconcile(liveCollection, newCollection, trackByFn) {
         while (!newIterationResult.done && liveStartIdx <= liveEndIdx) {
             const liveValue = liveCollection.at(liveStartIdx);
             const newValue = newIterationResult.value;
+            if (ngDevMode) {
+                recordDuplicateKeys(duplicateKeys, trackByFn(liveStartIdx, newValue), liveStartIdx);
+            }
             const isStartMatching = valuesMatching(liveStartIdx, liveValue, liveStartIdx, newValue, trackByFn);
             if (isStartMatching !== 0) {
                 // found a match - move on, but update value
@@ -23393,6 +23423,25 @@ function reconcile(liveCollection, newCollection, trackByFn) {
     detachedItems?.forEach(item => {
         liveCollection.destroy(item);
     });
+    // report duplicate keys (dev mode only)
+    if (ngDevMode) {
+        let duplicatedKeysMsg = [];
+        for (const [key, idxSet] of duplicateKeys) {
+            if (idxSet.size > 1) {
+                const idx = [...idxSet].sort((a, b) => a - b);
+                for (let i = 1; i < idx.length; i++) {
+                    duplicatedKeysMsg.push(`key "${stringifyForError(key)}" at index "${idx[i - 1]}" and "${idx[i]}"`);
+                }
+            }
+        }
+        if (duplicatedKeysMsg.length > 0) {
+            const message = formatRuntimeError(955 /* RuntimeErrorCode.LOOP_TRACK_DUPLICATE_KEYS */, 'The provided track expression resulted in duplicated keys for a given collection. ' +
+                'Adjust the tracking expression such that it uniquely identifies all the items in the collection. ' +
+                'Duplicated keys were: \n' + duplicatedKeysMsg.join(', \n') + '.');
+            // tslint:disable-next-line:no-console
+            console.warn(message);
+        }
+    }
 }
 function attachPreviouslyDetached(prevCollection, detachedItems, index, key) {
     if (detachedItems !== undefined && detachedItems.has(key)) {
@@ -30379,7 +30428,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.5+sha-ca517d7');
+const VERSION = new Version('18.0.0-next.5+sha-164dde4');
 
 class Console {
     log(message) {
@@ -32353,6 +32402,23 @@ function _lastDefined(args) {
 /** Flag to enable/disable the zoneless scheduler as default provider with zone scheduling. */
 const alwaysProvideZonelessScheduler = true;
 
+const CONSECUTIVE_MICROTASK_NOTIFICATION_LIMIT = 100;
+let consecutiveMicrotaskNotifications = 0;
+let stackFromLastFewNotifications = [];
+function trackMicrotaskNotificationForDebugging() {
+    consecutiveMicrotaskNotifications++;
+    if (CONSECUTIVE_MICROTASK_NOTIFICATION_LIMIT - consecutiveMicrotaskNotifications < 5) {
+        const stack = new Error().stack;
+        if (stack) {
+            stackFromLastFewNotifications.push(stack);
+        }
+    }
+    if (consecutiveMicrotaskNotifications === CONSECUTIVE_MICROTASK_NOTIFICATION_LIMIT) {
+        throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, 'Angular could not stabilize because there were endless change notifications within the browser event loop. ' +
+            'The stack from the last several notifications: \n' +
+            stackFromLastFewNotifications.join('\n'));
+    }
+}
 class ChangeDetectionSchedulerImpl {
     constructor() {
         this.appRef = inject(ApplicationRef);
@@ -32374,6 +32440,7 @@ class ChangeDetectionSchedulerImpl {
                 this.cleanup();
             }
         });
+        this.useMicrotaskScheduler = false;
         // TODO(atscott): These conditions will need to change when zoneless is the default
         // Instead, they should flip to checking if ZoneJS scheduling is provided
         this.disableScheduling ||= !this.zonelessEnabled &&
@@ -32389,6 +32456,16 @@ class ChangeDetectionSchedulerImpl {
         if (!this.shouldScheduleTick()) {
             return;
         }
+        if ((typeof ngDevMode === 'undefined' || ngDevMode)) {
+            if (this.useMicrotaskScheduler) {
+                trackMicrotaskNotificationForDebugging();
+            }
+            else {
+                consecutiveMicrotaskNotifications = 0;
+                stackFromLastFewNotifications.length = 0;
+            }
+        }
+        const scheduleCallback = this.useMicrotaskScheduler ? scheduleCallbackWithMicrotask : scheduleCallbackWithRafRace;
         this.pendingRenderTaskId = this.taskService.add();
         if (this.zoneIsDefined) {
             Zone.root.run(() => {
@@ -32434,15 +32511,30 @@ class ChangeDetectionSchedulerImpl {
         if (this.runningTick || this.appRef.destroyed) {
             return;
         }
+        const task = this.taskService.add();
         try {
             this.ngZone.run(() => {
                 this.runningTick = true;
                 this.appRef._tick(shouldRefreshViews);
             }, undefined, this.schedulerTickApplyArgs);
         }
+        catch (e) {
+            this.taskService.remove(task);
+            throw e;
+        }
         finally {
             this.cleanup();
         }
+        // If we're notified of a change within 1 microtask of running change
+        // detection, run another round in the same event loop. This allows code
+        // which uses Promise.resolve (see NgModel) to avoid
+        // ExpressionChanged...Error to still be reflected in a single browser
+        // paint, even if that spans multiple rounds of change detection.
+        this.useMicrotaskScheduler = true;
+        scheduleCallbackWithMicrotask(() => {
+            this.useMicrotaskScheduler = false;
+            this.taskService.remove(task);
+        });
     }
     ngOnDestroy() {
         this.afterTickSubscription.unsubscribe();

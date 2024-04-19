@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-ca517d7
+ * @license Angular v18.0.0-next.5+sha-164dde4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13496,6 +13496,7 @@ export declare const enum ɵRuntimeErrorCode {
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = -952,
     OUTPUT_REF_DESTROYED = 953,
+    LOOP_TRACK_DUPLICATE_KEYS = 955,
     RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,
     RUNTIME_DEPS_ORPHAN_COMPONENT = 1001
 }
