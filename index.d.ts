@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-b67e11a
+ * @license Angular v18.0.0-next.5+sha-a730f09
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11804,8 +11804,9 @@ export declare const enum ɵAnimationRendererType {
  *
  * @param appRef An instance of an ApplicationRef.
  * @param doc A reference to the current Document instance.
+ * @return event types that need to be replayed
  */
-export declare function ɵannotateForHydration(appRef: ApplicationRef, doc: Document): void;
+export declare function ɵannotateForHydration(appRef: ApplicationRef, doc: Document): Set<string> | undefined;
 
 
 /**
@@ -13952,6 +13953,12 @@ export declare function ɵwhenStable(applicationRef: ApplicationRef): Promise<vo
  * configure or change anything in NgUniversal to enable the feature.
  */
 export declare function ɵwithDomHydration(): EnvironmentProviders;
+
+/**
+ * Returns a set of providers required to setup support for event replay.
+ * Requires hydration to be enabled separately.
+ */
+export declare function ɵwithEventReplay(): Provider[];
 
 /**
  * Returns a set of providers required to setup support for i18n hydration.
