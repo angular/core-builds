@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-8aef3f8
+ * @license Angular v18.0.0-next.5+sha-9894278
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16822,7 +16822,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-8aef3f8']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-9894278']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -20506,7 +20506,20 @@ function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling 
  */
 function isRouterOutletInjector(currentInjector) {
     return (currentInjector instanceof ChainedInjector) &&
-        (currentInjector.injector.__ngOutletInjector);
+        (typeof currentInjector.injector.__ngOutletInjector === 'function');
+}
+/**
+ * Creates an instance of the `OutletInjector` using a private factory
+ * function available on the `OutletInjector` class.
+ *
+ * @param parentOutletInjector Parent OutletInjector, which should be used
+ *                             to produce a new instance.
+ * @param parentInjector An Injector, which should be used as a parent one
+ *                       for a newly created `OutletInjector` instance.
+ */
+function createRouterOutletInjector(parentOutletInjector, parentInjector) {
+    const outletInjector = parentOutletInjector.injector;
+    return outletInjector.__ngOutletInjector(parentInjector);
 }
 /**
  * Applies changes to the DOM to reflect a given state.
@@ -20539,11 +20552,18 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
                 // we can't inject it. Once the `OutletInjector` is replaced
                 // with the `EnvironmentInjector` in Router's code, this special
                 // handling can be removed.
-                const parentEnvInjector = isRouterOutletInjector(parentInjector) ?
-                    parentInjector :
-                    parentInjector.get(EnvironmentInjector);
+                const isParentOutletInjector = isRouterOutletInjector(parentInjector);
+                const parentEnvInjector = isParentOutletInjector ? parentInjector : parentInjector.get(EnvironmentInjector);
                 injector = parentEnvInjector.get(CachedInjectorService)
                     .getOrCreateInjector(tDetails, parentEnvInjector, providers, ngDevMode ? 'DeferBlock Injector' : '');
+                // Note: this is a continuation of the special case for Router's `OutletInjector`.
+                // Since the `OutletInjector` handles `ActivatedRoute` and `ChildrenOutletContexts`
+                // dynamically (i.e. their values are not really stored statically in an injector),
+                // we need to "wrap" a defer injector into another `OutletInjector`, so we retain
+                // the dynamic resolution of the mentioned tokens.
+                if (isParentOutletInjector) {
+                    injector = createRouterOutletInjector(parentInjector, injector);
+                }
             }
         }
         const dehydratedView = findMatchingDehydratedView(lContainer, activeBlockTNode.tView.ssrId);
@@ -30479,7 +30499,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.5+sha-8aef3f8');
+const VERSION = new Version('18.0.0-next.5+sha-9894278');
 
 class Console {
     log(message) {
