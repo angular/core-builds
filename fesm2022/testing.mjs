@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.5+sha-9cb003a
+ * @license Angular v17.3.5+sha-5083d89
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -83,7 +83,6 @@ class DeferBlockFixture {
         const skipTimerScheduling = true;
         ɵrenderDeferBlockState(state, this.block.tNode, this.block.lContainer, skipTimerScheduling);
         this.componentFixture.detectChanges();
-        return this.componentFixture.whenStable();
     }
     /**
      * Retrieves all nested child defer block fixtures

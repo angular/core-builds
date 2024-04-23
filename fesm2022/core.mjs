@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.5+sha-9cb003a
+ * @license Angular v17.3.5+sha-5083d89
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16022,7 +16022,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.5+sha-9cb003a']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.5+sha-5083d89']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19853,7 +19853,7 @@ function triggerResourceLoading(tDetails, lView, tNode) {
         // If the loading status is different from initial one, it means that
         // the loading of dependencies is in progress and there is nothing to do
         // in this function. All details can be obtained from the `tDetails` object.
-        return;
+        return tDetails.loadingPromise ?? Promise.resolve();
     }
     const lDetails = getLDeferBlockDetails(lView, tNode);
     const primaryBlockTNode = getPrimaryBlockTNode(tView, tDetails);
@@ -19881,7 +19881,7 @@ function triggerResourceLoading(tDetails, lView, tNode) {
             tDetails.loadingState = DeferDependenciesLoadingState.COMPLETE;
             pendingTasks.remove(taskId);
         });
-        return;
+        return tDetails.loadingPromise;
     }
     // Start downloading of defer block dependencies.
     tDetails.loadingPromise = Promise.allSettled(dependenciesFn()).then(results => {
@@ -19941,6 +19941,7 @@ function triggerResourceLoading(tDetails, lView, tNode) {
             }
         }
     });
+    return tDetails.loadingPromise;
 }
 /** Utility function to render placeholder content (if present) */
 function renderPlaceholder(lView, tNode) {
@@ -29852,7 +29853,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.5+sha-9cb003a');
+const VERSION = new Version('17.3.5+sha-5083d89');
 
 class Console {
     log(message) {
