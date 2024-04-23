@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-d34c033
+ * @license Angular v18.0.0-next.5+sha-5948193
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16822,7 +16822,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-d34c033']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-5948193']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -20483,8 +20483,10 @@ function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling 
     const currentState = lDetails[DEFER_BLOCK_STATE];
     if (isValidStateChange(currentState, newState) &&
         isValidStateChange(lDetails[NEXT_DEFER_BLOCK_STATE] ?? -1, newState)) {
+        const injector = hostLView[INJECTOR];
         const tDetails = getTDeferBlockDetails(hostTView, tNode);
-        const needsScheduling = !skipTimerScheduling &&
+        // Skips scheduling on the server since it can delay the server response.
+        const needsScheduling = !skipTimerScheduling && isPlatformBrowser(injector) &&
             (getLoadingBlockAfter(tDetails) !== null ||
                 getMinimumDurationForState(tDetails, DeferBlockState.Loading) !== null ||
                 getMinimumDurationForState(tDetails, DeferBlockState.Placeholder));
@@ -30499,7 +30501,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.5+sha-d34c033');
+const VERSION = new Version('18.0.0-next.5+sha-5948193');
 
 class Console {
     log(message) {
