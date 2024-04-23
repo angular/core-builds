@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-c773238
+ * @license Angular v18.0.0-next.5+sha-5a10f40
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -43,14 +43,6 @@ function waitForAsync(fn) {
         return Promise.reject('zone-testing.js is needed for the async() test helper but could not be found. ' +
             'Please make sure that your environment includes zone.js/testing');
     };
-}
-/**
- * @deprecated use `waitForAsync()`, (expected removal in v12)
- * @see {@link waitForAsync}
- * @publicApi
- * */
-function async(fn) {
-    return waitForAsync(fn);
 }
 
 /**
@@ -2238,5 +2230,5 @@ const __core_private_testing_placeholder__ = '';
  * Generated bundle index. Do not edit.
  */
 
-export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, async, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, MetadataOverrider as ɵMetadataOverrider };
+export { ComponentFixture, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, DeferBlockFixture, InjectSetupWrapper, TestBed, TestComponentRenderer, __core_private_testing_placeholder__, discardPeriodicTasks, fakeAsync, flush, flushMicrotasks, getTestBed, inject, resetFakeAsyncZone, tick, waitForAsync, withModule, MetadataOverrider as ɵMetadataOverrider };
 //# sourceMappingURL=testing.mjs.map

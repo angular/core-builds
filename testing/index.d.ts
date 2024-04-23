@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-c773238
+ * @license Angular v18.0.0-next.5+sha-5a10f40
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -34,13 +34,6 @@ import { ɵDeferBlockDetails } from '@angular/core';
  * @codeGenApi
  */
 export declare const __core_private_testing_placeholder__ = "";
-
-/**
- * @deprecated use `waitForAsync()`, (expected removal in v12)
- * @see {@link waitForAsync}
- * @publicApi
- * */
-export declare function async(fn: Function): (done: any) => any;
 
 /**
  * Fixture for debugging and testing a component.
