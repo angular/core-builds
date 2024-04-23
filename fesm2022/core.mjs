@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-2e2ca5e
+ * @license Angular v18.0.0-next.5+sha-811fe00
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,6 +7,7 @@
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
+import { Dispatcher, registerDispatcher } from '@angular/core/primitives/event-dispatch';
 
 /**
  * Base URL for the error details page.
@@ -7349,6 +7350,20 @@ function getComponentViewByInstance(componentInstance) {
  * This property will be monkey-patched on elements, components and directives.
  */
 const MONKEY_PATCH_KEY_NAME = '__ngContext__';
+function attachLViewId(target, data) {
+    target[MONKEY_PATCH_KEY_NAME] = data[ID];
+}
+/**
+ * Returns the monkey-patch value data present on the target (which could be
+ * a component, directive or a DOM node).
+ */
+function readLView(target) {
+    const data = readPatchedData(target);
+    if (isLView(data)) {
+        return data;
+    }
+    return data ? data.lView : null;
+}
 /**
  * Assigns the given data to the given target (which could be a component,
  * directive or DOM node instance) using monkey-patching.
@@ -16822,7 +16837,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-2e2ca5e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-811fe00']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30502,7 +30517,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.5+sha-2e2ca5e');
+const VERSION = new Version('18.0.0-next.5+sha-811fe00');
 
 class Console {
     log(message) {
@@ -35991,6 +36006,7 @@ function getDeferBlocks(lView, deferBlocks) {
 }
 
 const EVENT_REPLAY_ENABLED_DEFAULT = false;
+const CONTRACT_PROPERTY = 'ngContracts';
 /**
  * Returns a set of providers required to setup support for event replay.
  * Requires hydration to be enabled separately.
@@ -36001,6 +36017,33 @@ function withEventReplay() {
             provide: IS_EVENT_REPLAY_ENABLED,
             useValue: true,
         },
+        {
+            provide: APP_BOOTSTRAP_LISTENER,
+            useFactory: () => {
+                if (isPlatformBrowser()) {
+                    const injector = inject(Injector);
+                    const appRef = inject(ApplicationRef);
+                    return () => {
+                        // Kick off event replay logic once hydration for the initial part
+                        // of the application is completed. This timing is similar to the unclaimed
+                        // dehydrated views cleanup timing.
+                        whenStable(appRef).then(() => {
+                            const appId = injector.get(APP_ID);
+                            // This is set in packages/platform-server/src/utils.ts
+                            const eventContract = globalThis[CONTRACT_PROPERTY][appId];
+                            if (eventContract) {
+                                const dispatcher = new Dispatcher();
+                                setEventReplayer(dispatcher);
+                                // Event replay is kicked off as a side-effect of executing this function.
+                                registerDispatcher(eventContract, dispatcher);
+                            }
+                        });
+                    };
+                }
+                return () => { }; // noop for the server code
+            },
+            multi: true,
+        }
     ];
 }
 /**
@@ -36050,6 +36093,78 @@ function setJSActionAttribute(tNode, rNode, nativeElementToEvents) {
             nativeElement.setAttribute('jsaction', parts.join(';'));
         }
     }
+}
+/**
+ * Registers a function that should be invoked to replay events.
+ */
+function setEventReplayer(dispatcher) {
+    dispatcher.setEventReplayer(queue => {
+        for (const event of queue) {
+            handleEvent(event);
+        }
+    });
+}
+/**
+ * Finds an LView that a given DOM element belongs to.
+ */
+function getLViewByElement(target) {
+    let lView = readLView(target);
+    if (lView) {
+        return lView;
+    }
+    else {
+        // If this node doesn't have LView info attached, then we need to
+        // traverse upwards up the DOM to find the nearest element that
+        // has already been monkey patched with data.
+        let parent = target;
+        while (parent = parent.parentNode) {
+            lView = readLView(parent);
+            if (lView) {
+                // To prevent additional lookups, monkey-patch LView id onto this DOM node.
+                // TODO: consider patching all parent nodes that didn't have LView id, so that
+                // we can avoid lookups for more nodes.
+                attachLViewId(target, lView);
+                return lView;
+            }
+        }
+    }
+    return null;
+}
+function handleEvent(event) {
+    const nativeElement = event.getAction().element;
+    // Dispatch event via Angular's logic
+    if (nativeElement) {
+        const lView = getLViewByElement(nativeElement);
+        if (lView !== null) {
+            const tView = lView[TVIEW];
+            const eventName = event.getEventType();
+            const origEvent = event.getEvent();
+            const listeners = getEventListeners(tView, lView, nativeElement, eventName);
+            for (const listener of listeners) {
+                listener(origEvent);
+            }
+        }
+    }
+}
+function getEventListeners(tView, lView, nativeElement, eventName) {
+    const listeners = [];
+    const lCleanup = lView[CLEANUP];
+    const tCleanup = tView.cleanup;
+    if (tCleanup && lCleanup) {
+        for (let i = 0; i < tCleanup.length;) {
+            const storedEventName = tCleanup[i++];
+            const nativeElementIndex = tCleanup[i++];
+            if (typeof storedEventName === 'string') {
+                const listenerElement = unwrapRNode(lView[nativeElementIndex]);
+                const listener = lCleanup[tCleanup[i++]];
+                i++; // increment to the next position;
+                if (listenerElement === nativeElement && eventName === storedEventName) {
+                    listeners.push(listener);
+                }
+            }
+        }
+    }
+    return listeners;
 }
 
 /**

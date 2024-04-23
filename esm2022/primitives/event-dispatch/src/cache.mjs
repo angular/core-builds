@@ -1,0 +1,95 @@
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { Property } from './property';
+/**
+ * Map from jsaction annotation to a parsed map from event name to action name.
+ */
+const parseCache = {};
+/**
+ * Reads the jsaction parser cache from the given DOM Element.
+ *
+ * @param element .
+ * @return Map from event to qualified name of the jsaction bound to it.
+ */
+export function get(element) {
+    // @ts-ignore
+    return element[Property.JSACTION];
+}
+/**
+ * Writes the jsaction parser cache to the given DOM Element.
+ *
+ * @param element .
+ * @param actionMap Map from event to qualified name of the jsaction bound to
+ *     it.
+ */
+export function set(element, actionMap) {
+    // @ts-ignore
+    element[Property.JSACTION] = actionMap;
+}
+/**
+ * Looks up the parsed action map from the source jsaction attribute value.
+ *
+ * @param text Unparsed jsaction attribute value.
+ * @return Parsed jsaction attribute value, if already present in the cache.
+ */
+export function getParsed(text) {
+    return parseCache[text];
+}
+/**
+ * Inserts the parse result for the given source jsaction value into the cache.
+ *
+ * @param text Unparsed jsaction attribute value.
+ * @param parsed Attribute value parsed into the action map.
+ */
+export function setParsed(text, parsed) {
+    parseCache[text] = parsed;
+}
+/**
+ * Clears the jsaction parser cache from the given DOM Element.
+ *
+ * @param element .
+ */
+export function clear(element) {
+    if (Property.JSACTION in element) {
+        delete element[Property.JSACTION];
+    }
+}
+/**
+ * Reads the cached jsaction namespace from the given DOM
+ * Element. Undefined means there is no cached value; null is a cached
+ * jsnamespace attribute that's absent.
+ *
+ * @param element .
+ * @return .
+ */
+export function getNamespace(element) {
+    // @ts-ignore
+    return element[Property.JSNAMESPACE];
+}
+/**
+ * Writes the cached jsaction namespace to the given DOM Element. Null
+ * represents a jsnamespace attribute that's absent.
+ *
+ * @param element .
+ * @param jsnamespace .
+ */
+export function setNamespace(element, jsnamespace) {
+    // @ts-ignore
+    element[Property.JSNAMESPACE] = jsnamespace;
+}
+/**
+ * Clears the cached jsaction namespace from the given DOM Element.
+ *
+ * @param element .
+ */
+export function clearNamespace(element) {
+    if (Property.JSNAMESPACE in element) {
+        delete element[Property.JSNAMESPACE];
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY2FjaGUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3ByaW1pdGl2ZXMvZXZlbnQtZGlzcGF0Y2gvc3JjL2NhY2hlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVILE9BQU8sRUFBQyxRQUFRLEVBQUMsTUFBTSxZQUFZLENBQUM7QUFFcEM7O0dBRUc7QUFDSCxNQUFNLFVBQVUsR0FBNkMsRUFBRSxDQUFDO0FBRWhFOzs7OztHQUtHO0FBQ0gsTUFBTSxVQUFVLEdBQUcsQ0FBQyxPQUFnQjtJQUNsQyxhQUFhO0lBQ2IsT0FBTyxPQUFPLENBQUMsUUFBUSxDQUFDLFFBQVEsQ0FBQyxDQUFDO0FBQ3BDLENBQUM7QUFFRDs7Ozs7O0dBTUc7QUFDSCxNQUFNLFVBQVUsR0FBRyxDQUFDLE9BQWdCLEVBQUUsU0FBa0M7SUFDdEUsYUFBYTtJQUNiLE9BQU8sQ0FBQyxRQUFRLENBQUMsUUFBUSxDQUFDLEdBQUcsU0FBUyxDQUFDO0FBQ3pDLENBQUM7QUFFRDs7Ozs7R0FLRztBQUNILE1BQU0sVUFBVSxTQUFTLENBQUMsSUFBWTtJQUNwQyxPQUFPLFVBQVUsQ0FBQyxJQUFJLENBQUMsQ0FBQztBQUMxQixDQUFDO0FBRUQ7Ozs7O0dBS0c7QUFDSCxNQUFNLFVBQVUsU0FBUyxDQUFDLElBQVksRUFBRSxNQUErQjtJQUNyRSxVQUFVLENBQUMsSUFBSSxDQUFDLEdBQUcsTUFBTSxDQUFDO0FBQzVCLENBQUM7QUFFRDs7OztHQUlHO0FBQ0gsTUFBTSxVQUFVLEtBQUssQ0FBQyxPQUFnQjtJQUNwQyxJQUFJLFFBQVEsQ0FBQyxRQUFRLElBQUksT0FBTyxFQUFFLENBQUM7UUFDakMsT0FBTyxPQUFPLENBQUMsUUFBUSxDQUFDLFFBQVEsQ0FBQyxDQUFDO0lBQ3BDLENBQUM7QUFDSCxDQUFDO0FBRUQ7Ozs7Ozs7R0FPRztBQUNILE1BQU0sVUFBVSxZQUFZLENBQUMsT0FBZ0I7SUFDM0MsYUFBYTtJQUNiLE9BQU8sT0FBTyxDQUFDLFFBQVEsQ0FBQyxXQUFXLENBQUMsQ0FBQztBQUN2QyxDQUFDO0FBRUQ7Ozs7OztHQU1HO0FBQ0gsTUFBTSxVQUFVLFlBQVksQ0FBQyxPQUFnQixFQUFFLFdBQTBCO0lBQ3ZFLGFBQWE7SUFDYixPQUFPLENBQUMsUUFBUSxDQUFDLFdBQVcsQ0FBQyxHQUFHLFdBQVcsQ0FBQztBQUM5QyxDQUFDO0FBRUQ7Ozs7R0FJRztBQUNILE1BQU0sVUFBVSxjQUFjLENBQUMsT0FBZ0I7SUFDN0MsSUFBSSxRQUFRLENBQUMsV0FBVyxJQUFJLE9BQU8sRUFBRSxDQUFDO1FBQ3BDLE9BQU8sT0FBTyxDQUFDLFFBQVEsQ0FBQyxXQUFXLENBQUMsQ0FBQztJQUN2QyxDQUFDO0FBQ0gsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgTExDIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG5pbXBvcnQge1Byb3BlcnR5fSBmcm9tICcuL3Byb3BlcnR5JztcblxuLyoqXG4gKiBNYXAgZnJvbSBqc2FjdGlvbiBhbm5vdGF0aW9uIHRvIGEgcGFyc2VkIG1hcCBmcm9tIGV2ZW50IG5hbWUgdG8gYWN0aW9uIG5hbWUuXG4gKi9cbmNvbnN0IHBhcnNlQ2FjaGU6IHtba2V5OiBzdHJpbmddOiB7W2tleTogc3RyaW5nXTogc3RyaW5nfX0gPSB7fTtcblxuLyoqXG4gKiBSZWFkcyB0aGUganNhY3Rpb24gcGFyc2VyIGNhY2hlIGZyb20gdGhlIGdpdmVuIERPTSBFbGVtZW50LlxuICpcbiAqIEBwYXJhbSBlbGVtZW50IC5cbiAqIEByZXR1cm4gTWFwIGZyb20gZXZlbnQgdG8gcXVhbGlmaWVkIG5hbWUgb2YgdGhlIGpzYWN0aW9uIGJvdW5kIHRvIGl0LlxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0KGVsZW1lbnQ6IEVsZW1lbnQpOiB7W2tleTogc3RyaW5nXTogc3RyaW5nfSB7XG4gIC8vIEB0cy1pZ25vcmVcbiAgcmV0dXJuIGVsZW1lbnRbUHJvcGVydHkuSlNBQ1RJT05dO1xufVxuXG4vKipcbiAqIFdyaXRlcyB0aGUganNhY3Rpb24gcGFyc2VyIGNhY2hlIHRvIHRoZSBnaXZlbiBET00gRWxlbWVudC5cbiAqXG4gKiBAcGFyYW0gZWxlbWVudCAuXG4gKiBAcGFyYW0gYWN0aW9uTWFwIE1hcCBmcm9tIGV2ZW50IHRvIHF1YWxpZmllZCBuYW1lIG9mIHRoZSBqc2FjdGlvbiBib3VuZCB0b1xuICogICAgIGl0LlxuICovXG5leHBvcnQgZnVuY3Rpb24gc2V0KGVsZW1lbnQ6IEVsZW1lbnQsIGFjdGlvbk1hcDoge1trZXk6IHN0cmluZ106IHN0cmluZ30pIHtcbiAgLy8gQHRzLWlnbm9yZVxuICBlbGVtZW50W1Byb3BlcnR5LkpTQUNUSU9OXSA9IGFjdGlvbk1hcDtcbn1cblxuLyoqXG4gKiBMb29rcyB1cCB0aGUgcGFyc2VkIGFjdGlvbiBtYXAgZnJvbSB0aGUgc291cmNlIGpzYWN0aW9uIGF0dHJpYnV0ZSB2YWx1ZS5cbiAqXG4gKiBAcGFyYW0gdGV4dCBVbnBhcnNlZCBqc2FjdGlvbiBhdHRyaWJ1dGUgdmFsdWUuXG4gKiBAcmV0dXJuIFBhcnNlZCBqc2FjdGlvbiBhdHRyaWJ1dGUgdmFsdWUsIGlmIGFscmVhZHkgcHJlc2VudCBpbiB0aGUgY2FjaGUuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRQYXJzZWQodGV4dDogc3RyaW5nKToge1trZXk6IHN0cmluZ106IHN0cmluZ30gfCB1bmRlZmluZWQge1xuICByZXR1cm4gcGFyc2VDYWNoZVt0ZXh0XTtcbn1cblxuLyoqXG4gKiBJbnNlcnRzIHRoZSBwYXJzZSByZXN1bHQgZm9yIHRoZSBnaXZlbiBzb3VyY2UganNhY3Rpb24gdmFsdWUgaW50byB0aGUgY2FjaGUuXG4gKlxuICogQHBhcmFtIHRleHQgVW5wYXJzZWQganNhY3Rpb24gYXR0cmlidXRlIHZhbHVlLlxuICogQHBhcmFtIHBhcnNlZCBBdHRyaWJ1dGUgdmFsdWUgcGFyc2VkIGludG8gdGhlIGFjdGlvbiBtYXAuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBzZXRQYXJzZWQodGV4dDogc3RyaW5nLCBwYXJzZWQ6IHtba2V5OiBzdHJpbmddOiBzdHJpbmd9KSB7XG4gIHBhcnNlQ2FjaGVbdGV4dF0gPSBwYXJzZWQ7XG59XG5cbi8qKlxuICogQ2xlYXJzIHRoZSBqc2FjdGlvbiBwYXJzZXIgY2FjaGUgZnJvbSB0aGUgZ2l2ZW4gRE9NIEVsZW1lbnQuXG4gKlxuICogQHBhcmFtIGVsZW1lbnQgLlxuICovXG5leHBvcnQgZnVuY3Rpb24gY2xlYXIoZWxlbWVudDogRWxlbWVudCkge1xuICBpZiAoUHJvcGVydHkuSlNBQ1RJT04gaW4gZWxlbWVudCkge1xuICAgIGRlbGV0ZSBlbGVtZW50W1Byb3BlcnR5LkpTQUNUSU9OXTtcbiAgfVxufVxuXG4vKipcbiAqIFJlYWRzIHRoZSBjYWNoZWQganNhY3Rpb24gbmFtZXNwYWNlIGZyb20gdGhlIGdpdmVuIERPTVxuICogRWxlbWVudC4gVW5kZWZpbmVkIG1lYW5zIHRoZXJlIGlzIG5vIGNhY2hlZCB2YWx1ZTsgbnVsbCBpcyBhIGNhY2hlZFxuICoganNuYW1lc3BhY2UgYXR0cmlidXRlIHRoYXQncyBhYnNlbnQuXG4gKlxuICogQHBhcmFtIGVsZW1lbnQgLlxuICogQHJldHVybiAuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXROYW1lc3BhY2UoZWxlbWVudDogRWxlbWVudCk6IHN0cmluZyB8IG51bGwgfCB1bmRlZmluZWQge1xuICAvLyBAdHMtaWdub3JlXG4gIHJldHVybiBlbGVtZW50W1Byb3BlcnR5LkpTTkFNRVNQQUNFXTtcbn1cblxuLyoqXG4gKiBXcml0ZXMgdGhlIGNhY2hlZCBqc2FjdGlvbiBuYW1lc3BhY2UgdG8gdGhlIGdpdmVuIERPTSBFbGVtZW50LiBOdWxsXG4gKiByZXByZXNlbnRzIGEganNuYW1lc3BhY2UgYXR0cmlidXRlIHRoYXQncyBhYnNlbnQuXG4gKlxuICogQHBhcmFtIGVsZW1lbnQgLlxuICogQHBhcmFtIGpzbmFtZXNwYWNlIC5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHNldE5hbWVzcGFjZShlbGVtZW50OiBFbGVtZW50LCBqc25hbWVzcGFjZTogc3RyaW5nIHwgbnVsbCkge1xuICAvLyBAdHMtaWdub3JlXG4gIGVsZW1lbnRbUHJvcGVydHkuSlNOQU1FU1BBQ0VdID0ganNuYW1lc3BhY2U7XG59XG5cbi8qKlxuICogQ2xlYXJzIHRoZSBjYWNoZWQganNhY3Rpb24gbmFtZXNwYWNlIGZyb20gdGhlIGdpdmVuIERPTSBFbGVtZW50LlxuICpcbiAqIEBwYXJhbSBlbGVtZW50IC5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGNsZWFyTmFtZXNwYWNlKGVsZW1lbnQ6IEVsZW1lbnQpIHtcbiAgaWYgKFByb3BlcnR5LkpTTkFNRVNQQUNFIGluIGVsZW1lbnQpIHtcbiAgICBkZWxldGUgZWxlbWVudFtQcm9wZXJ0eS5KU05BTUVTUEFDRV07XG4gIH1cbn1cbiJdfQ==
