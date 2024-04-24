@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-617bc33
+ * @license Angular v18.0.0-next.5+sha-e3d5607
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7601,6 +7601,11 @@ declare type NodeOutputBindings = Record<string, (number | string)[]>;
 
 declare const NODES = "n";
 
+declare const enum NotificationType {
+    RefreshViews = 0,
+    AfterRenderHooks = 1
+}
+
 declare const NUM_ROOT_NODES = "r";
 
 /**
@@ -12037,7 +12042,7 @@ export declare const enum ɵBypassType {
  * Injectable that is notified when an `LView` is made aware of changes to application state.
  */
 export declare abstract class ɵChangeDetectionScheduler {
-    abstract notify(source: ɵNotificationSource): void;
+    abstract notify(source?: NotificationType): void;
     abstract runningTick: boolean;
 }
 
@@ -13083,19 +13088,6 @@ export declare function ɵnoSideEffects<T>(fn: () => T): T;
 
 
 export declare const ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
-
-export declare const enum ɵNotificationSource {
-    MarkAncestorsForTraversal = 0,
-    SetInput = 1,
-    DeferBlockStateUpdate = 2,
-    DebugApplyChanges = 3,
-    MarkForCheck = 4,
-    Listener = 5,
-    NewRenderHook = 6,
-    ViewAttached = 7,
-    ViewDetachedFromDOM = 8,
-    AsyncAnimationsLoaded = 9
-}
 
 /**
  * Patch the definition of a component with directives and pipes from the compilation scope of
