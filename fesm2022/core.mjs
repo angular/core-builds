@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-4bf3d89
+ * @license Angular v18.0.0-next.5+sha-9ab36cf
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4335,7 +4335,7 @@ function updateAncestorTraversalFlagsOnAttach(lView) {
  * flag is already `true` or the `lView` is detached.
  */
 function markAncestorsForTraversal(lView) {
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify();
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(0 /* NotificationType.RefreshViews */);
     let parent = getLViewParent(lView);
     while (parent !== null) {
         // We stop adding markers to the ancestors once we reach one that already has the marker. This
@@ -10275,9 +10275,7 @@ function addViewToDOM(tView, parentTNode, renderer, lView, parentNativeNode, bef
  * @param lView the `LView` to be detached.
  */
 function detachViewFromDOM(tView, lView) {
-    // When we remove a view from the DOM, we need to rerun afterRender hooks
-    // We don't necessarily needs to run change detection. DOM removal only requires
-    // change detection if animations are enabled (this notification is handled by animations).
+    // When we remove a view from the DOM, we need to rerun afterRender hooks.
     lView[ENVIRONMENT].changeDetectionScheduler?.notify(1 /* NotificationType.AfterRenderHooks */);
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
@@ -13187,7 +13185,7 @@ function markViewDirty(lView) {
         // afterRender hooks as well as animation listeners which execute after detecting
         // changes in a view when the render factory flushes.
         1024 /* LViewFlags.RefreshView */ | 64 /* LViewFlags.Dirty */;
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify();
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(0 /* NotificationType.RefreshViews */);
     while (lView) {
         lView[FLAGS] |= dirtyBitsToUse;
         const parent = getLViewParent(lView);
@@ -16837,7 +16835,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-4bf3d89']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.5+sha-9ab36cf']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30517,7 +30515,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.5+sha-4bf3d89');
+const VERSION = new Version('18.0.0-next.5+sha-9ab36cf');
 
 class Console {
     log(message) {
@@ -32177,6 +32175,10 @@ class ApplicationRef {
         }
     }
     detectChangesInAttachedViews(refreshViews) {
+        let rendererFactory = null;
+        if (!this._injector.destroyed) {
+            rendererFactory = this._injector.get(RendererFactory2);
+        }
         let runs = 0;
         const afterRenderEffectManager = this.afterRenderEffectManager;
         while (runs < MAXIMUM_REFRESH_RERUNS) {
@@ -32194,6 +32196,10 @@ class ApplicationRef {
             if ([...this.externalTestViews.keys(), ...this._views].some(({ _lView }) => requiresRefreshOrTraversal(_lView))) {
                 continue;
             }
+            // Even if no views require refresh, we need to ensure
+            // renderFactory begin and end happen to flush animations.
+            rendererFactory?.begin?.();
+            rendererFactory?.end?.();
             afterRenderEffectManager.execute();
             // If after running all afterRender callbacks we have no more views that need to be refreshed,
             // we can break out of the loop
@@ -36030,7 +36036,9 @@ function withEventReplay() {
                         whenStable(appRef).then(() => {
                             const appId = injector.get(APP_ID);
                             // This is set in packages/platform-server/src/utils.ts
-                            const eventContract = globalThis[CONTRACT_PROPERTY][appId];
+                            // Note: globalThis[CONTRACT_PROPERTY] may be undefined in case Event Replay feature
+                            // is enabled, but there are no events configured in an application.
+                            const eventContract = globalThis[CONTRACT_PROPERTY]?.[appId];
                             if (eventContract) {
                                 const dispatcher = new Dispatcher();
                                 setEventReplayer(dispatcher);
