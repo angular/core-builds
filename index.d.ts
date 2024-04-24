@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-cf2e1b3
+ * @license Angular v18.0.0-next.5+sha-ac863de
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3924,6 +3924,43 @@ export declare interface ExistingSansProvider {
      * Existing `token` to return. (Equivalent to `injector.get(useExisting)`)
      */
     useExisting: any;
+}
+
+/**
+ * Experimental service that keeps track of pending tasks contributing to the stableness of Angular
+ * application. While several existing Angular services (ex.: `HttpClient`) will internally manage
+ * tasks influencing stability, this API gives control over stability to library and application
+ * developers for specific cases not covered by Angular internals.
+ *
+ * The concept of stability comes into play in several important scenarios:
+ * - SSR process needs to wait for the application stability before serializing and sending rendered
+ * HTML;
+ * - tests might want to delay assertions until the application becomes stable;
+ *
+ * @usageNotes
+ * ```typescript
+ * const pendingTasks = inject(ExperimentalPendingTasks);
+ * const taskCleanup = pendingTasks.add();
+ * // do work that should block application's stability and then:
+ * taskCleanup();
+ * ```
+ *
+ * This API is experimental. Neither the shape, nor the underlying behavior is stable and can change
+ * in patch versions. We will iterate on the exact API based on the feedback and our understanding
+ * of the problem and solution space.
+ *
+ * @publicApi
+ * @experimental
+ */
+export declare class ExperimentalPendingTasks {
+    internalPendingTasks: ɵPendingTasks;
+    /**
+     * Adds a new task that should block application's stability.
+     * @returns A cleanup function that removes a task when called.
+     */
+    add(): () => void;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ExperimentalPendingTasks, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<ExperimentalPendingTasks>;
 }
 
 /**
@@ -8162,8 +8199,8 @@ declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
  * ```
  *
  * This API is experimental. Neither the shape, nor the underlying behavior is stable and can change
- * in patch versions. There are known feature gaps, including the lack of a public zoneless API
- * which prevents the application from serializing too early with SSR.
+ * in patch versions. There are known feature gaps and API ergonomic considerations. We will iterate
+ * on the exact API based on the feedback and our understanding of the problem and solution space.
  *
  * @publicApi
  * @experimental
@@ -13059,14 +13096,7 @@ export declare const enum ɵNotificationType {
 export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
 
 /**
- * *Internal* service that keeps track of pending tasks happening in the system.
- *
- * This information is needed to make sure that the serialization on the server
- * is delayed until all tasks in the queue (such as an initial navigation or a
- * pending HTTP request) are completed.
- *
- * Pending tasks continue to contribute to the stableness of `ApplicationRef`
- * throughout the lifetime of the application.
+ * Internal implementation of the pending tasks service.
  */
 export declare class ɵPendingTasks implements OnDestroy {
     private taskId;
