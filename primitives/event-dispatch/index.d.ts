@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.5+sha-811fe00
+ * @license Angular v18.0.0-next.5+sha-4bf3d89
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -72,19 +72,19 @@ declare function createEventInfoFromParameters(eventType: string, event: Event, 
  */
 export declare class Dispatcher {
     private readonly getHandler?;
+    private readonly baseDispatcher;
+    /** Whether to stop propagation for an `EventInfo`. */
+    private readonly stopPropagation;
     /**
      * The actions that are registered for this Dispatcher instance.
      * This should be the primary one used once migration off of registerHandlers
      * is done.
      */
     private readonly actions;
-    /** The queue of events. */
-    private readonly queuedEventInfos;
     /** A map of global event handlers, where each key is an event type. */
-    private readonly globalHandlers_;
-    private eventReplayer;
-    private eventReplayScheduled;
-    private readonly stopPropagation;
+    private readonly globalHandlers;
+    /** The event replayer. */
+    private eventReplayer?;
     /**
      * Receives a DOM event, determines the jsaction associated with the source
      * element of the DOM event, and invokes the handler associated with the
@@ -93,8 +93,9 @@ export declare class Dispatcher {
      * @param getHandler A function that knows how to get the handler for a
      *     given event info.
      */
-    constructor(getHandler?: ((eventInfoWrapper: EventInfoWrapper) => EventInfoHandler | void) | undefined, { stopPropagation }?: {
+    constructor(getHandler?: ((eventInfoWrapper: EventInfoWrapper) => EventInfoWrapperHandler | void) | undefined, { stopPropagation, eventReplayer, }?: {
         stopPropagation?: boolean;
+        eventReplayer?: Replayer;
     });
     /**
      * Receives an event or the event queue from the EventContract. The event
@@ -122,6 +123,10 @@ export declare class Dispatcher {
      */
     dispatch(eventInfo: EventInfo, isGlobalDispatch?: boolean): EventInfo | void;
     /**
+     * Dispatches an `EventInfoWrapper`.
+     */
+    private dispatchToHandler;
+    /**
      * Registers multiple methods all bound to the same object
      * instance. This is a common case: an application module binds
      * multiple of its methods under public names to the event contract of
@@ -139,7 +144,7 @@ export declare class Dispatcher {
      *     methods of instance.
      */
     registerEventInfoHandlers<T>(namespace: string, instance: T | null, methods: {
-        [key: string]: EventInfoHandler;
+        [key: string]: EventInfoWrapperHandler;
     }): void;
     /**
      * Unregisters an action.  Provided as an easy way to reverse the effects of
@@ -167,12 +172,6 @@ export declare class Dispatcher {
      * event replayer to check whether the dispatcher can replay an event.
      */
     canDispatch(eventInfoWrapper: EventInfoWrapper): boolean;
-    /**
-     * Replays queued events, if any. The replaying will happen in its own
-     * stack once the current flow cedes control. This is done to mimic
-     * browser event handling.
-     */
-    private scheduleEventReplay;
     /**
      * Sets the event replayer, enabling queued events to be replayed when actions
      * are bound. To replay events, you must register the dispatcher to the
@@ -220,7 +219,6 @@ declare type Dispatcher_2 = (eventInfo: eventInfoLib.EventInfo, globalDispatch?:
  * be delay loaded in a generic way.
  */
 export declare class EventContract implements UnrenamedEventContract {
-    private readonly stopPropagation;
     static CUSTOM_EVENT_SUPPORT: boolean;
     static STOP_PROPAGATION: boolean;
     static A11Y_SUPPORT_IN_DISPATCHER: boolean;
@@ -258,7 +256,7 @@ export declare class EventContract implements UnrenamedEventContract {
     private preventDefaultForA11yClick?;
     private populateClickOnlyAction?;
     ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
-    constructor(containerManager: EventContractContainerManager, stopPropagation?: false);
+    constructor(containerManager: EventContractContainerManager);
     private handleEvent;
     /**
      * Handle an `EventInfo`.
@@ -451,11 +449,6 @@ declare interface EventInfo {
     eiack?: boolean;
 }
 
-/**
- * A handler is dispatched to during normal handling.
- */
-declare type EventInfoHandler = (eventInfoWrapper: EventInfoWrapper) => void;
-
 declare namespace eventInfoLib {
     export {
         getEventType,
@@ -514,6 +507,11 @@ export declare class EventInfoWrapper {
     setIsReplay(replay: boolean): void;
     clone(): EventInfoWrapper;
 }
+
+/**
+ * A handler is dispatched to during normal handling.
+ */
+declare type EventInfoWrapperHandler = (eventInfoWrapper: EventInfoWrapper) => void;
 
 /** Added for readability when accessing stable property names. */
 declare function getA11yClickKey(eventInfo: EventInfo): boolean | undefined;
