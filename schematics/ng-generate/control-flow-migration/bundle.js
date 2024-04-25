@@ -18809,12 +18809,12 @@ function ingestContent(unit, content) {
   if (content.i18n !== void 0 && !(content.i18n instanceof TagPlaceholder)) {
     throw Error(`Unhandled i18n metadata type for element: ${content.i18n.constructor.name}`);
   }
-  const id = unit.job.allocateXrefId();
   let fallbackView = null;
   if (content.children.some((child) => !(child instanceof Comment) && (!(child instanceof Text) || child.value.trim().length > 0))) {
     fallbackView = unit.job.allocateView(unit.xref);
     ingestNodes(fallbackView, content.children);
   }
+  const id = unit.job.allocateXrefId();
   const op = createProjectionOp(id, content.selector, content.i18n, (_a2 = fallbackView == null ? void 0 : fallbackView.xref) != null ? _a2 : null, content.sourceSpan);
   for (const attr of content.attributes) {
     const securityContext = domSchema.securityContext(content.name, attr.name, true);
@@ -22848,7 +22848,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.6+sha-5ad2f5f");
+var VERSION2 = new Version("18.0.0-next.6+sha-a177abe");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
