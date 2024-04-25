@@ -1,36 +1,323 @@
 /**
- * @license Angular v18.1.0-next.0+sha-7e89753
+ * @license Angular v18.1.0-next.0+sha-f1d6f86
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
+/** Added for readability when accessing stable property names. */
+function getEventType(eventInfo) {
+    return eventInfo.eventType;
+}
+/** Added for readability when accessing stable property names. */
+function setEventType(eventInfo, eventType) {
+    eventInfo.eventType = eventType;
+}
+/** Added for readability when accessing stable property names. */
+function getEvent(eventInfo) {
+    return eventInfo.event;
+}
+/** Added for readability when accessing stable property names. */
+function setEvent(eventInfo, event) {
+    eventInfo.event = event;
+}
+/** Added for readability when accessing stable property names. */
+function getTargetElement(eventInfo) {
+    return eventInfo.targetElement;
+}
+/** Added for readability when accessing stable property names. */
+function setTargetElement(eventInfo, targetElement) {
+    eventInfo.targetElement = targetElement;
+}
+/** Added for readability when accessing stable property names. */
+function getContainer(eventInfo) {
+    return eventInfo.eic;
+}
+/** Added for readability when accessing stable property names. */
+function setContainer(eventInfo, container) {
+    eventInfo.eic = container;
+}
+/** Added for readability when accessing stable property names. */
+function getTimestamp(eventInfo) {
+    return eventInfo.timeStamp;
+}
+/** Added for readability when accessing stable property names. */
+function setTimestamp(eventInfo, timestamp) {
+    eventInfo.timeStamp = timestamp;
+}
+/** Added for readability when accessing stable property names. */
+function getAction(eventInfo) {
+    return eventInfo.eia;
+}
+/** Added for readability when accessing stable property names. */
+function setAction(eventInfo, actionName, actionElement) {
+    eventInfo.eia = [actionName, actionElement];
+}
+/** Added for readability when accessing stable property names. */
+function unsetAction(eventInfo) {
+    eventInfo.eia = undefined;
+}
+/** Added for readability when accessing stable property names. */
+function getActionName(actionInfo) {
+    return actionInfo[0];
+}
+/** Added for readability when accessing stable property names. */
+function getActionElement(actionInfo) {
+    return actionInfo[1];
+}
+/** Added for readability when accessing stable property names. */
+function getIsReplay(eventInfo) {
+    return eventInfo.eirp;
+}
+/** Added for readability when accessing stable property names. */
+function setIsReplay(eventInfo, replay) {
+    eventInfo.eirp = replay;
+}
+/** Added for readability when accessing stable property names. */
+function getA11yClickKey(eventInfo) {
+    return eventInfo.eiack;
+}
+/** Added for readability when accessing stable property names. */
+function setA11yClickKey(eventInfo, a11yClickKey) {
+    eventInfo.eiack = a11yClickKey;
+}
+/** Clones an `EventInfo` */
+function cloneEventInfo(eventInfo) {
+    return {
+        eventType: eventInfo.eventType,
+        event: eventInfo.event,
+        targetElement: eventInfo.targetElement,
+        eic: eventInfo.eic,
+        eia: eventInfo.eia,
+        timeStamp: eventInfo.timeStamp,
+        eirp: eventInfo.eirp,
+        eiack: eventInfo.eiack,
+    };
+}
 /**
- * Defines special EventInfo and Event properties used when
- * A11Y_SUPPORT_IN_DISPATCHER is enabled.
+ * Utility function for creating an `EventInfo`.
+ *
+ * This can be used from code-size sensitive compilation units, as taking
+ * parameters vs. an `Object` literal reduces code size.
  */
-var Attribute$1;
-(function (Attribute) {
+function createEventInfoFromParameters(eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey) {
+    return {
+        eventType,
+        event,
+        targetElement,
+        eic: container,
+        timeStamp: timestamp,
+        eia: action,
+        eirp: isReplay,
+        eiack: a11yClickKey,
+    };
+}
+/**
+ * Utility function for creating an `EventInfo`.
+ *
+ * This should be used in compilation units that are less sensitive to code
+ * size.
+ */
+function createEventInfo({ eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey, }) {
+    return {
+        eventType,
+        event,
+        targetElement,
+        eic: container,
+        timeStamp: timestamp,
+        eia: action ? [action.name, action.element] : undefined,
+        eirp: isReplay,
+        eiack: a11yClickKey,
+    };
+}
+/**
+ * Utility class around an `EventInfo`.
+ *
+ * This should be used in compilation units that are less sensitive to code
+ * size.
+ */
+class EventInfoWrapper {
+    constructor(eventInfo) {
+        this.eventInfo = eventInfo;
+    }
+    getEventType() {
+        return getEventType(this.eventInfo);
+    }
+    setEventType(eventType) {
+        setEventType(this.eventInfo, eventType);
+    }
+    getEvent() {
+        return getEvent(this.eventInfo);
+    }
+    setEvent(event) {
+        setEvent(this.eventInfo, event);
+    }
+    getTargetElement() {
+        return getTargetElement(this.eventInfo);
+    }
+    setTargetElement(targetElement) {
+        setTargetElement(this.eventInfo, targetElement);
+    }
+    getContainer() {
+        return getContainer(this.eventInfo);
+    }
+    setContainer(container) {
+        setContainer(this.eventInfo, container);
+    }
+    getTimestamp() {
+        return getTimestamp(this.eventInfo);
+    }
+    setTimestamp(timestamp) {
+        setTimestamp(this.eventInfo, timestamp);
+    }
+    getAction() {
+        const action = getAction(this.eventInfo);
+        if (!action)
+            return undefined;
+        return {
+            name: action[0],
+            element: action[1],
+        };
+    }
+    setAction(action) {
+        if (!action) {
+            unsetAction(this.eventInfo);
+            return;
+        }
+        setAction(this.eventInfo, action.name, action.element);
+    }
+    getIsReplay() {
+        return getIsReplay(this.eventInfo);
+    }
+    setIsReplay(replay) {
+        setIsReplay(this.eventInfo, replay);
+    }
+    clone() {
+        return new EventInfoWrapper(cloneEventInfo(this.eventInfo));
+    }
+}
+
+/**
+ * @fileoverview An enum to control who can call certain jsaction APIs.
+ */
+var Restriction;
+(function (Restriction) {
+    Restriction[Restriction["I_AM_THE_JSACTION_FRAMEWORK"] = 1] = "I_AM_THE_JSACTION_FRAMEWORK";
+})(Restriction || (Restriction = {}));
+
+/**
+ * Receives a DOM event, determines the jsaction associated with the source
+ * element of the DOM event, and invokes the handler associated with the
+ * jsaction.
+ */
+class BaseDispatcher {
     /**
-     * An event-type set when the event contract detects a KEYDOWN event but
-     * doesn't know if the key press can be treated like a click. The dispatcher
-     * will use this event-type to parse the keypress and handle it accordingly.
+     * Options are:
+     *   1. `eventReplayer`: When the event contract dispatches replay events
+     *      to the Dispatcher, the Dispatcher collects them and in the next tick
+     *      dispatches them to the `eventReplayer`.
+     * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
      */
-    Attribute["MAYBE_CLICK_EVENT_TYPE"] = "maybe_click";
+    constructor(dispatchDelegate, { eventReplayer = undefined } = {}) {
+        this.dispatchDelegate = dispatchDelegate;
+        /** The queue of events. */
+        this.queuedEventInfoWrappers = [];
+        /** Whether the event replay is scheduled. */
+        this.eventReplayScheduled = false;
+        this.eventReplayer = eventReplayer;
+    }
     /**
-     * A property added to a dispatched event that had the MAYBE_CLICK_EVENTTYPE
-     * event-type but could not be used as a click. The dispatcher sets this
-     * property for non-global dispatches before it retriggers the event and it
-     * signifies that the event contract should not dispatch this event globally.
+     * Receives an event or the event queue from the EventContract. The event
+     * queue is copied and it attempts to replay.
+     * If event info is passed in it looks for an action handler that can handle
+     * the given event.  If there is no handler registered queues the event and
+     * checks if a loader is registered for the given namespace. If so, calls it.
+     *
+     * Alternatively, if in global dispatch mode, calls all registered global
+     * handlers for the appropriate event type.
+     *
+     * The three functionalities of this call are deliberately not split into
+     * three methods (and then declared as an abstract interface), because the
+     * interface is used by EventContract, which lives in a different jsbinary.
+     * Therefore the interface between the three is defined entirely in terms that
+     * are invariant under jscompiler processing (Function and Array, as opposed
+     * to a custom type with method names).
+     *
+     * @param eventInfo The info for the event that triggered this call or the
+     *     queue of events from EventContract.
+     * @param isGlobalDispatch If true, dispatches a global event instead of a
+     *     regular jsaction handler.
      */
-    Attribute["SKIP_GLOBAL_DISPATCH"] = "a11ysgd";
+    dispatch(eventInfo, isGlobalDispatch) {
+        const eventInfoWrapper = new EventInfoWrapper(eventInfo);
+        if (eventInfoWrapper.getIsReplay()) {
+            if (isGlobalDispatch || !this.eventReplayer) {
+                return;
+            }
+            this.queueEventInfoWrapper(eventInfoWrapper);
+            this.scheduleEventReplay();
+            return;
+        }
+        this.dispatchDelegate(eventInfoWrapper, isGlobalDispatch);
+    }
+    /** Queue an `EventInfoWrapper` for replay. */
+    queueEventInfoWrapper(eventInfoWrapper) {
+        this.queuedEventInfoWrappers.push(eventInfoWrapper);
+    }
     /**
-     * A property added to a dispatched event that had the MAYBE_CLICK_EVENTTYPE
-     * event-type but could not be used as a click. The dispatcher sets this
-     * property before it retriggers the event and it signifies that the event
-     * contract should not look at CLICK actions for KEYDOWN events.
+     * Replays queued events, if any. The replaying will happen in its own
+     * stack once the current flow cedes control. This is done to mimic
+     * browser event handling.
      */
-    Attribute["SKIP_A11Y_CHECK"] = "a11ysc";
-})(Attribute$1 || (Attribute$1 = {}));
+    scheduleEventReplay() {
+        if (this.eventReplayScheduled ||
+            !this.eventReplayer ||
+            this.queuedEventInfoWrappers.length === 0) {
+            return;
+        }
+        this.eventReplayScheduled = true;
+        Promise.resolve().then(() => {
+            this.eventReplayScheduled = false;
+            this.eventReplayer(this.queuedEventInfoWrappers);
+        });
+    }
+}
+/**
+ * Registers deferred functionality for an EventContract and a Jsaction
+ * Dispatcher.
+ */
+function registerDispatcher$1(eventContract, dispatcher) {
+    eventContract.ecrd((eventInfo, globalDispatch) => {
+        dispatcher.dispatch(eventInfo, globalDispatch);
+    }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
+}
+
+const Char = {
+    /**
+     * The separator between the namespace and the action name in the
+     * jsaction attribute value.
+     */
+    NAMESPACE_ACTION_SEPARATOR: '.',
+    /**
+     * The separator between the event name and action in the jsaction
+     * attribute value.
+     */
+    EVENT_ACTION_SEPARATOR: ':',
+    /**
+     * The separator between the logged oi attribute values in the &oi=
+     * URL parameter value.
+     */
+    OI_SEPARATOR: '.',
+    /**
+     * The separator between the key and the value pairs in the &cad=
+     * URL parameter value.
+     */
+    CAD_KEY_VALUE_SEPARATOR: ':',
+    /**
+     * The separator between the key-value pairs in the &cad= URL
+     * parameter value.
+     */
+    CAD_SEPARATOR: ',',
+};
 
 /**
  * Determines if one node is contained within another. Adapted from
@@ -946,855 +1233,10 @@ const NATIVE_HTML_CONTROLS = {
     'TEXTAREA': true,
 };
 /** Exported for testing. */
-const testing$1 = {
+const testing = {
     setIsMac(value) {
         isMac = value;
     },
-};
-
-/** Added for readability when accessing stable property names. */
-function getEventType(eventInfo) {
-    return eventInfo.eventType;
-}
-/** Added for readability when accessing stable property names. */
-function setEventType(eventInfo, eventType) {
-    eventInfo.eventType = eventType;
-}
-/** Added for readability when accessing stable property names. */
-function getEvent(eventInfo) {
-    return eventInfo.event;
-}
-/** Added for readability when accessing stable property names. */
-function setEvent(eventInfo, event) {
-    eventInfo.event = event;
-}
-/** Added for readability when accessing stable property names. */
-function getTargetElement(eventInfo) {
-    return eventInfo.targetElement;
-}
-/** Added for readability when accessing stable property names. */
-function setTargetElement(eventInfo, targetElement) {
-    eventInfo.targetElement = targetElement;
-}
-/** Added for readability when accessing stable property names. */
-function getContainer(eventInfo) {
-    return eventInfo.eic;
-}
-/** Added for readability when accessing stable property names. */
-function setContainer(eventInfo, container) {
-    eventInfo.eic = container;
-}
-/** Added for readability when accessing stable property names. */
-function getTimestamp(eventInfo) {
-    return eventInfo.timeStamp;
-}
-/** Added for readability when accessing stable property names. */
-function setTimestamp(eventInfo, timestamp) {
-    eventInfo.timeStamp = timestamp;
-}
-/** Added for readability when accessing stable property names. */
-function getAction(eventInfo) {
-    return eventInfo.eia;
-}
-/** Added for readability when accessing stable property names. */
-function setAction(eventInfo, actionName, actionElement) {
-    eventInfo.eia = [actionName, actionElement];
-}
-/** Added for readability when accessing stable property names. */
-function unsetAction(eventInfo) {
-    eventInfo.eia = undefined;
-}
-/** Added for readability when accessing stable property names. */
-function getActionName(actionInfo) {
-    return actionInfo[0];
-}
-/** Added for readability when accessing stable property names. */
-function getActionElement(actionInfo) {
-    return actionInfo[1];
-}
-/** Added for readability when accessing stable property names. */
-function getIsReplay(eventInfo) {
-    return eventInfo.eirp;
-}
-/** Added for readability when accessing stable property names. */
-function setIsReplay(eventInfo, replay) {
-    eventInfo.eirp = replay;
-}
-/** Added for readability when accessing stable property names. */
-function getA11yClickKey(eventInfo) {
-    return eventInfo.eiack;
-}
-/** Added for readability when accessing stable property names. */
-function setA11yClickKey(eventInfo, a11yClickKey) {
-    eventInfo.eiack = a11yClickKey;
-}
-/** Clones an `EventInfo` */
-function cloneEventInfo(eventInfo) {
-    return {
-        eventType: eventInfo.eventType,
-        event: eventInfo.event,
-        targetElement: eventInfo.targetElement,
-        eic: eventInfo.eic,
-        eia: eventInfo.eia,
-        timeStamp: eventInfo.timeStamp,
-        eirp: eventInfo.eirp,
-        eiack: eventInfo.eiack,
-    };
-}
-/**
- * Utility function for creating an `EventInfo`.
- *
- * This can be used from code-size sensitive compilation units, as taking
- * parameters vs. an `Object` literal reduces code size.
- */
-function createEventInfoFromParameters(eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey) {
-    return {
-        eventType,
-        event,
-        targetElement,
-        eic: container,
-        timeStamp: timestamp,
-        eia: action,
-        eirp: isReplay,
-        eiack: a11yClickKey,
-    };
-}
-/**
- * Utility function for creating an `EventInfo`.
- *
- * This should be used in compilation units that are less sensitive to code
- * size.
- */
-function createEventInfo({ eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey, }) {
-    return {
-        eventType,
-        event,
-        targetElement,
-        eic: container,
-        timeStamp: timestamp,
-        eia: action ? [action.name, action.element] : undefined,
-        eirp: isReplay,
-        eiack: a11yClickKey,
-    };
-}
-/**
- * Utility class around an `EventInfo`.
- *
- * This should be used in compilation units that are less sensitive to code
- * size.
- */
-class EventInfoWrapper {
-    constructor(eventInfo) {
-        this.eventInfo = eventInfo;
-    }
-    getEventType() {
-        return getEventType(this.eventInfo);
-    }
-    setEventType(eventType) {
-        setEventType(this.eventInfo, eventType);
-    }
-    getEvent() {
-        return getEvent(this.eventInfo);
-    }
-    setEvent(event) {
-        setEvent(this.eventInfo, event);
-    }
-    getTargetElement() {
-        return getTargetElement(this.eventInfo);
-    }
-    setTargetElement(targetElement) {
-        setTargetElement(this.eventInfo, targetElement);
-    }
-    getContainer() {
-        return getContainer(this.eventInfo);
-    }
-    setContainer(container) {
-        setContainer(this.eventInfo, container);
-    }
-    getTimestamp() {
-        return getTimestamp(this.eventInfo);
-    }
-    setTimestamp(timestamp) {
-        setTimestamp(this.eventInfo, timestamp);
-    }
-    getAction() {
-        const action = getAction(this.eventInfo);
-        if (!action)
-            return undefined;
-        return {
-            name: action[0],
-            element: action[1],
-        };
-    }
-    setAction(action) {
-        if (!action) {
-            unsetAction(this.eventInfo);
-            return;
-        }
-        setAction(this.eventInfo, action.name, action.element);
-    }
-    getIsReplay() {
-        return getIsReplay(this.eventInfo);
-    }
-    setIsReplay(replay) {
-        setIsReplay(this.eventInfo, replay);
-    }
-    clone() {
-        return new EventInfoWrapper(cloneEventInfo(this.eventInfo));
-    }
-}
-
-/**
- * Create a custom event with the specified data.
- * @param type The type of the action, e.g., 'submit'.
- * @param data An optional data payload.
- * @param triggeringEvent The event that triggers this custom event. This can be
- *     accessed from the custom event's action flow like so:
- *     actionFlow.event().detail.triggeringEvent.
- * @return The new custom event.
- */
-function createCustomEvent(type, data, triggeringEvent) {
-    let event;
-    const unrenamedDetail = {
-        '_type': type,
-    };
-    const renamedDetail = {
-        type,
-        data,
-        triggeringEvent,
-    };
-    const detail = { ...unrenamedDetail, ...renamedDetail };
-    try {
-        // We don't use the CustomEvent constructor directly since it isn't
-        // supported in IE 9 or 10 and initCustomEvent below works just fine.
-        event = document.createEvent('CustomEvent');
-        event.initCustomEvent(EventType.CUSTOM, true, false, detail);
-    }
-    catch (e) {
-        // If custom events aren't supported, fall back to custom-named HTMLEvent.
-        // Fallback used by Android Gingerbread, FF4-5.
-        // Hack to emulate `CustomEvent`, `HTMLEvents` doesn't satisfy `CustomEvent`
-        // type.
-        // tslint:disable-next-line:no-any
-        event = document.createEvent('HTMLEvents');
-        event.initEvent(EventType.CUSTOM, true, false);
-        // Hack to emulate `CustomEvent`, `detail` is readonly on `CustomEvent`.
-        // tslint:disable-next-line:no-any
-        event['detail'] = detail;
-    }
-    return event;
-}
-/**
- * Fires a custom event with an optional payload. Only intended to be consumed
- * by jsaction itself. Supported in Firefox 6+, IE 9+, and all Chrome versions.
- *
- * @param target The target element.
- * @param type The type of the action, e.g., 'submit'.
- * @param data An optional data payload.
- * @param triggeringEvent An optional data for the Event triggered this custom
- *     event.
- */
-function fireCustomEvent(target, type, data, triggeringEvent) {
-    const event = createCustomEvent(type, data, triggeringEvent);
-    target.dispatchEvent(event);
-}
-
-/**
- * @fileoverview Functions for replaying events by the jsaction
- * Dispatcher.
- * All ts-ignores in this file are due to APIs that are no longer in the browser.
- */
-/**
- * Replays an event.
- */
-function replayEvent(event, targetElement, eventType) {
-    triggerEvent(targetElement, createEvent(event, eventType));
-}
-/**
- * Checks if a given event was triggered by the keyboard.
- * @param eventType The event type.
- * @return Whether it's a keyboard event.
- */
-function isKeyboardEvent(eventType) {
-    return (eventType === EventType.KEYPRESS ||
-        eventType === EventType.KEYDOWN ||
-        eventType === EventType.KEYUP);
-}
-/**
- * Checks if a given event was triggered by the mouse.
- * @param eventType The event type.
- * @return Whether it's a mouse event.
- */
-function isMouseEvent(eventType) {
-    // TODO: Verify if Drag events should be bound here.
-    return (eventType === EventType.CLICK ||
-        eventType === EventType.DBLCLICK ||
-        eventType === EventType.MOUSEDOWN ||
-        eventType === EventType.MOUSEOVER ||
-        eventType === EventType.MOUSEOUT ||
-        eventType === EventType.MOUSEMOVE);
-}
-/**
- * Checks if a given event is a general UI event.
- * @param eventType The event type.
- * @return Whether it's a focus event.
- */
-function isUiEvent(eventType) {
-    // Almost nobody supports the W3C method of creating FocusEvents.
-    // For now, we're going to use the UIEvent as a super-interface.
-    return (eventType === EventType.FOCUS ||
-        eventType === EventType.BLUR ||
-        eventType === EventType.FOCUSIN ||
-        eventType === EventType.FOCUSOUT ||
-        eventType === EventType.SCROLL);
-}
-/**
- * Create a whitespace-delineated list of modifier keys that should be
- * considered to be active on the event's key. See details at
- * https://developer.mozilla.org/en/DOM/KeyboardEvent.
- * @param alt Alt pressed.
- * @param ctrl Control pressed.
- * @param meta Command pressed (OSX only).
- * @param shift Shift pressed.
- * @return The constructed modifier keys string.
- */
-function createKeyboardModifiersList(alt, ctrl, meta, shift) {
-    const keys = [];
-    if (alt) {
-        keys.push('Alt');
-    }
-    if (ctrl) {
-        keys.push('Control');
-    }
-    if (meta) {
-        keys.push('Meta');
-    }
-    if (shift) {
-        keys.push('Shift');
-    }
-    return keys.join(' ');
-}
-/**
- * Creates a UI event object for replaying through the DOM.
- * @param original The event to create a new event from.
- * @param opt_eventType The type this event is being handled as by jsaction.
- *     e.g. blur events are handled as focusout
- * @return The event object.
- */
-function createUiEvent(original, opt_eventType) {
-    let event;
-    if (document.createEvent) {
-        const originalUiEvent = original;
-        // Event creation as per W3C event model specification.  This codepath
-        // is used by most non-IE browsers and also by IE 9 and later.
-        event = document.createEvent('UIEvent');
-        // On IE and Opera < 12, we must provide non-undefined values to
-        // initEvent, otherwise it will fail.
-        event.initUIEvent(opt_eventType || originalUiEvent.type, originalUiEvent.bubbles !== undefined ? originalUiEvent.bubbles : true, originalUiEvent.cancelable || false, originalUiEvent.view || window, original.detail || 0);
-        // detail
-    }
-    else {
-        // Older versions of IE (up to version 8) do not support the
-        // W3C event model. Use the IE specific function instead.
-        // Suppressing errors for ts-migration.
-        //   TS2339: Property 'createEventObject' does not exist on type 'Document'.
-        // @ts-ignore
-        event = document.createEventObject();
-        event.type = opt_eventType || original.type;
-        event.bubbles = original.bubbles !== undefined ? original.bubbles : true;
-        event.cancelable = original.cancelable || false;
-        event.view = original.view || window;
-        event.detail = original.detail || 0;
-    }
-    // Some focus events also have a nullable relatedTarget value which isn't
-    // directly supported in the initUIEvent() method.
-    event.relatedTarget = original.relatedTarget || null;
-    event.originalTimestamp = original.timeStamp;
-    return event;
-}
-/**
- * Creates a keyboard event object for replaying through the DOM.
- * @param original The event to create a new event from.
- * @param opt_eventType The type this event is being handled as by jsaction.
- *     E.g. a keypress is handled as click in some cases.
- * @return The event object.
- * @suppress {strictMissingProperties} Two definitions of initKeyboardEvent.
- */
-function createKeyboardEvent(original, opt_eventType) {
-    let event;
-    const keyboardEvent = original;
-    if (document.createEvent) {
-        // Event creation as per W3C event model specification.  This codepath
-        // is used by most non-IE browsers and also by IE 9 and later.
-        event = document.createEvent('KeyboardEvent');
-        if (event.initKeyboardEvent) {
-            if (isIe) {
-                // IE9+
-                // https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/ff975945(v=vs.85)
-                const modifiers = createKeyboardModifiersList(keyboardEvent.altKey, keyboardEvent.ctrlKey, keyboardEvent.metaKey, keyboardEvent.shiftKey);
-                event.initKeyboardEvent(opt_eventType || keyboardEvent.type, true, true, window, keyboardEvent.key, keyboardEvent.location, 
-                // Suppressing errors for ts-migration.
-                //   TS2345: Argument of type 'string' is not assignable to
-                //   parameter of type 'boolean | undefined'.
-                // @ts-ignore
-                modifiers, keyboardEvent.repeat, 
-                // @ts-ignore This doesn't exist
-                keyboardEvent.locale);
-            }
-            else {
-                // W3C DOM Level 3 Events model.
-                // https://www.w3.org/TR/uievents/#idl-interface-KeyboardEvent-initializers
-                event.initKeyboardEvent(opt_eventType || original.type, true, true, window, keyboardEvent.key, keyboardEvent.location, keyboardEvent.ctrlKey, keyboardEvent.altKey, keyboardEvent.shiftKey, keyboardEvent.metaKey);
-                Object.defineProperty(event, 'repeat', {
-                    get: () => original.repeat,
-                    enumerable: true,
-                });
-                // Add missing 'locale' which is not part of the spec.
-                // https://bugs.chromium.org/p/chromium/issues/detail?id=168971
-                Object.defineProperty(event, 'locale', {
-                    // Suppressing errors for ts-migration.
-                    //   TS2339: Property 'locale' does not exist on type 'Event'.
-                    // @ts-ignore
-                    get: () => original.locale,
-                    enumerable: true,
-                });
-                // Apple WebKit has a non-standard altGraphKey that is not implemented
-                // here.
-                // https://developer.apple.com/documentation/webkitjs/keyboardevent/1633753-initkeyboardevent
-            }
-            // Blink and Webkit had a bug that causes the `charCode`, `keyCode`, and
-            // `which` properties to always be unset when synthesizing a keyboard
-            // event. Details at: https://bugs.webkit.org/show_bug.cgi?id=16735. With
-            // these properties being deprecated, the bug has evolved into affecting
-            // the `key` property. We work around it by redefining the `key` and
-            // deprecated properties; a simple assignment here would fail because the
-            // native properties are readonly.
-            if (isWebKit) {
-                if (keyboardEvent.key && event.key === '') {
-                    Object.defineProperty(event, 'key', {
-                        get: () => keyboardEvent.key,
-                        enumerable: true,
-                    });
-                }
-            }
-            // Re-implement the deprecated `charCode`, `keyCode` and `which` which
-            // are also an issue on IE9+.
-            if (isWebKit || isIe || isGecko) {
-                Object.defineProperty(event, 'charCode', {
-                    get: () => original.charCode,
-                    enumerable: true,
-                });
-                const keyCodeGetter = () => original.keyCode;
-                Object.defineProperty(event, 'keyCode', {
-                    get: keyCodeGetter,
-                    enumerable: true,
-                });
-                Object.defineProperty(event, 'which', {
-                    get: keyCodeGetter,
-                    enumerable: true,
-                });
-            }
-        }
-        else {
-            // Gecko only supports an older/deprecated version from DOM Level 2. See
-            // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/initKeyEvent
-            // for details.
-            // @ts-ignore ditto
-            event.initKeyEvent(opt_eventType || original.type, true, true, window, 
-            // Suppressing errors for ts-migration.
-            //   TS2339: Property 'ctrlKey' does not exist on type 'Event'.
-            // @ts-ignore
-            original.ctrlKey, 
-            // Suppressing errors for ts-migration.
-            //   TS2339: Property 'altKey' does not exist on type 'Event'.
-            // @ts-ignore
-            original.altKey, 
-            // Suppressing errors for ts-migration.
-            //   TS2339: Property 'shiftKey' does not exist on type 'Event'.
-            // @ts-ignore
-            original.shiftKey, 
-            // Suppressing errors for ts-migration.
-            //   TS2339: Property 'metaKey' does not exist on type 'Event'.
-            // @ts-ignore
-            original.metaKey, 
-            // Suppressing errors for ts-migration.
-            //   TS2339: Property 'keyCode' does not exist on type 'Event'.
-            // @ts-ignore
-            original.keyCode, 
-            // Suppressing errors for ts-migration.
-            //   TS2339: Property 'charCode' does not exist on type 'Event'.
-            // @ts-ignore
-            original.charCode);
-        }
-    }
-    else {
-        // Older versions of IE (up to version 8) do not support the
-        // W3C event model. Use the IE specific function instead.
-        // Suppressing errors for ts-migration.
-        // @ts-ignore
-        event = document.createEventObject();
-        event.type = opt_eventType || original.type;
-        const originalKeyboardEvent = original;
-        event.repeat = originalKeyboardEvent.repeat;
-        event.ctrlKey = originalKeyboardEvent.ctrlKey;
-        event.altKey = originalKeyboardEvent.altKey;
-        event.shiftKey = originalKeyboardEvent.shiftKey;
-        event.metaKey = originalKeyboardEvent.metaKey;
-        event.key = originalKeyboardEvent.key;
-        event.keyCode = originalKeyboardEvent.keyCode;
-        event.charCode = originalKeyboardEvent.charCode;
-    }
-    event.originalTimestamp = original.timeStamp;
-    return event;
-}
-/**
- * Creates a mouse event object for replaying through the DOM.
- * @param original The event to create a new event from.
- * @param opt_eventType The type this event is being handled as by jsaction.
- *     E.g. a keypress is handled as click in some cases.
- * @return The event object.
- */
-function createMouseEvent(original, opt_eventType) {
-    let event;
-    const originalMouseEvent = original;
-    if (document.createEvent) {
-        // Event creation as per W3C event model specification.  This codepath
-        // is used by most non-IE browsers and also by IE 9 and later.
-        event = document.createEvent('MouseEvent');
-        // On IE and Opera < 12, we must provide non-undefined values to
-        // initMouseEvent, otherwise it will fail.
-        event.initMouseEvent(opt_eventType || original.type, true, // canBubble
-        true, // cancelable
-        window, original.detail || 1, originalMouseEvent.screenX || 0, originalMouseEvent.screenY || 0, originalMouseEvent.clientX || 0, originalMouseEvent.clientY || 0, originalMouseEvent.ctrlKey || false, originalMouseEvent.altKey || false, originalMouseEvent.shiftKey || false, originalMouseEvent.metaKey || false, originalMouseEvent.button || 0, originalMouseEvent.relatedTarget || null);
-    }
-    else {
-        // Older versions of IE (up to version 8) do not support the
-        // W3C event model. Use the IE specific function instead.
-        // @ts-ignore
-        event = document.createEventObject();
-        event.type = opt_eventType || original.type;
-        event.clientX = originalMouseEvent.clientX;
-        event.clientY = originalMouseEvent.clientY;
-        event.button = originalMouseEvent.button;
-        event.detail = original.detail;
-        event.ctrlKey = originalMouseEvent.ctrlKey;
-        event.altKey = originalMouseEvent.altKey;
-        event.shiftKey = originalMouseEvent.shiftKey;
-        event.metaKey = originalMouseEvent.metaKey;
-    }
-    event.originalTimestamp = original.timeStamp;
-    return event;
-}
-/**
- * Creates a generic event object for replaying through the DOM.
- * @param original The event to create a new event from.
- * @param opt_eventType The type this event is being handled as by jsaction.
- *     E.g. a keypress is handled as click in some cases.
- * @return The event object.
- */
-function createGenericEvent(original, opt_eventType) {
-    let event;
-    if (document.createEvent) {
-        // Event creation as per W3C event model specification.  This codepath
-        // is used by most non-IE browsers and also by IE 9 and later.
-        event = document.createEvent('Event');
-        event.initEvent(opt_eventType || original.type, true, true);
-    }
-    else {
-        // Older versions of IE (up to version 8) do not support the
-        // W3C event model. Use the IE specific function instead.
-        // Suppressing errors for ts-migration.
-        //   TS2339: Property 'createEventObject' does not exist on type 'Document'.
-        // @ts-ignore
-        event = document.createEventObject();
-        event.type = opt_eventType || original.type;
-    }
-    event.originalTimestamp = original.timeStamp;
-    return event;
-}
-/**
- * Creates an event object for replaying through the DOM.
- * NOTE: This function is visible just for testing.  Please don't use
- * it outside JsAction internal testing.
- * TODO: Add support for FocusEvent and WheelEvent.
- * @param base The event to create a new event from.
- * @param opt_eventType The type this event is being handled as by jsaction.
- *     E.g. a keypress is handled as click in some cases.
- * @return The event object.
- */
-function createEvent(base, opt_eventType) {
-    const original = base;
-    let event;
-    let eventType;
-    if (original.type === EventType.CUSTOM) {
-        eventType = EventType.CUSTOM;
-    }
-    else {
-        eventType = opt_eventType || original.type;
-    }
-    if (isKeyboardEvent(eventType)) {
-        event = createKeyboardEvent(original, opt_eventType);
-    }
-    else if (isMouseEvent(eventType)) {
-        event = createMouseEvent(original, opt_eventType);
-    }
-    else if (isUiEvent(eventType)) {
-        event = createUiEvent(original, opt_eventType);
-    }
-    else if (eventType === EventType.CUSTOM) {
-        event = createCustomEvent(opt_eventType, original['detail']['data'], original['detail']['triggeringEvent']);
-        event.originalTimestamp = original.timeStamp;
-    }
-    else {
-        // This ensures we don't send an undefined event object to the replayer.
-        event = createGenericEvent(original, opt_eventType);
-    }
-    return event;
-}
-/**
- * Sends an event for replay to the DOM.
- * @param target The target for the event.
- * @param event The event object.
- * @return The return value of the event replay, i.e., whether preventDefault()
- *     was called on it.
- */
-function triggerEvent(target, event) {
-    if (target.dispatchEvent) {
-        return target.dispatchEvent(event);
-    }
-    else {
-        // Suppressing errors for ts-migration.
-        //   TS2339: Property 'fireEvent' does not exist on type 'Element'.
-        // @ts-ignore
-        return target.fireEvent('on' + event.type, event);
-    }
-}
-/** Do not use outiside of testing. */
-const testing = {
-    createKeyboardModifiersList,
-    createGenericEvent,
-    isKeyboardEvent,
-    isMouseEvent,
-    isUiEvent,
-};
-
-/**
- * @fileoverview An enum to control who can call certain jsaction APIs.
- */
-var Restriction;
-(function (Restriction) {
-    Restriction[Restriction["I_AM_THE_JSACTION_FRAMEWORK"] = 1] = "I_AM_THE_JSACTION_FRAMEWORK";
-})(Restriction || (Restriction = {}));
-
-/**
- * Receives a DOM event, determines the jsaction associated with the source
- * element of the DOM event, and invokes the handler associated with the
- * jsaction.
- */
-class BaseDispatcher {
-    /**
-     * Options are:
-     *   1. `eventReplayer`: When the event contract dispatches replay events
-     *      to the Dispatcher, the Dispatcher collects them and in the next tick
-     *      dispatches them to the `eventReplayer`.
-     * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
-     */
-    constructor(dispatchDelegate, { eventReplayer = undefined } = {}) {
-        this.dispatchDelegate = dispatchDelegate;
-        /** The queue of events. */
-        this.queuedEventInfoWrappers = [];
-        /** Whether the event replay is scheduled. */
-        this.eventReplayScheduled = false;
-        this.eventReplayer = eventReplayer;
-    }
-    /**
-     * Receives an event or the event queue from the EventContract. The event
-     * queue is copied and it attempts to replay.
-     * If event info is passed in it looks for an action handler that can handle
-     * the given event.  If there is no handler registered queues the event and
-     * checks if a loader is registered for the given namespace. If so, calls it.
-     *
-     * Alternatively, if in global dispatch mode, calls all registered global
-     * handlers for the appropriate event type.
-     *
-     * The three functionalities of this call are deliberately not split into
-     * three methods (and then declared as an abstract interface), because the
-     * interface is used by EventContract, which lives in a different jsbinary.
-     * Therefore the interface between the three is defined entirely in terms that
-     * are invariant under jscompiler processing (Function and Array, as opposed
-     * to a custom type with method names).
-     *
-     * @param eventInfo The info for the event that triggered this call or the
-     *     queue of events from EventContract.
-     * @param isGlobalDispatch If true, dispatches a global event instead of a
-     *     regular jsaction handler.
-     * @return An `EventInfo` for the `EventContract` to handle again if the
-     *    `Dispatcher` tried to resolve an a11y event as a click but failed.
-     */
-    dispatch(eventInfo, isGlobalDispatch) {
-        const eventInfoWrapper = new EventInfoWrapper(eventInfo);
-        if (eventInfoWrapper.getIsReplay()) {
-            if (isGlobalDispatch || !this.eventReplayer) {
-                return;
-            }
-            const resolved = resolveA11yEvent(eventInfoWrapper, isGlobalDispatch);
-            if (!resolved) {
-                // Send the event back through the `EventContract` by dispatching to
-                // the browser.
-                replayEvent(eventInfoWrapper.getEvent(), eventInfoWrapper.getTargetElement(), eventInfoWrapper.getEventType());
-                return;
-            }
-            this.queueEventInfoWrapper(eventInfoWrapper);
-            this.scheduleEventReplay();
-            return;
-        }
-        const resolved = resolveA11yEvent(eventInfoWrapper, isGlobalDispatch);
-        if (!resolved) {
-            // Reset action information.
-            eventInfoWrapper.setAction(undefined);
-            return eventInfoWrapper.eventInfo;
-        }
-        this.dispatchDelegate(eventInfoWrapper, isGlobalDispatch);
-    }
-    /** Queue an `EventInfoWrapper` for replay. */
-    queueEventInfoWrapper(eventInfoWrapper) {
-        this.queuedEventInfoWrappers.push(eventInfoWrapper);
-    }
-    /**
-     * Replays queued events, if any. The replaying will happen in its own
-     * stack once the current flow cedes control. This is done to mimic
-     * browser event handling.
-     */
-    scheduleEventReplay() {
-        if (this.eventReplayScheduled ||
-            !this.eventReplayer ||
-            this.queuedEventInfoWrappers.length === 0) {
-            return;
-        }
-        this.eventReplayScheduled = true;
-        Promise.resolve().then(() => {
-            this.eventReplayScheduled = false;
-            this.eventReplayer(this.queuedEventInfoWrappers);
-        });
-    }
-}
-/**
- * If a 'MAYBE_CLICK_EVENT_TYPE' event was dispatched, updates the eventType
- * to either click or keydown based on whether the keydown action can be
- * treated as a click. For MAYBE_CLICK_EVENT_TYPE events that are just
- * keydowns, we set flags on the event object so that the event contract
- * does't try to dispatch it as a MAYBE_CLICK_EVENT_TYPE again.
- *
- * @param isGlobalDispatch Whether the eventInfo is meant to be dispatched to
- *     the global handlers.
- * @return Returns false if the a11y event could not be resolved and should
- *    be re-dispatched.
- */
-function resolveA11yEvent(eventInfoWrapper, isGlobalDispatch = false) {
-    if (eventInfoWrapper.getEventType() !== Attribute$1.MAYBE_CLICK_EVENT_TYPE) {
-        return true;
-    }
-    if (isA11yClickEvent(eventInfoWrapper, isGlobalDispatch)) {
-        if (shouldPreventDefault(eventInfoWrapper)) {
-            preventDefault(eventInfoWrapper.getEvent());
-        }
-        // If the keydown event can be treated as a click, we change the eventType
-        // to 'click' so that the dispatcher can retrieve the right handler for
-        // it. Even though EventInfo['action'] corresponds to the click action,
-        // the global handler and any custom 'getHandler' implementations may rely
-        // on the eventType instead.
-        eventInfoWrapper.setEventType(EventType.CLICK);
-    }
-    else {
-        // Otherwise, if the keydown can't be treated as a click, we need to
-        // retrigger it because now we need to look for 'keydown' actions instead.
-        eventInfoWrapper.setEventType(EventType.KEYDOWN);
-        if (!isGlobalDispatch) {
-            // This prevents the event contract from setting the
-            // AccessibilityAttribute.MAYBE_CLICK_EVENT_TYPE type for Keydown
-            // events.
-            eventInfoWrapper.getEvent()[Attribute$1.SKIP_A11Y_CHECK] = true;
-            // Since globally dispatched events will get handled by the dispatcher,
-            // don't have the event contract dispatch it again.
-            eventInfoWrapper.getEvent()[Attribute$1.SKIP_GLOBAL_DISPATCH] = true;
-            return false;
-        }
-    }
-    return true;
-}
-/**
- * Returns true if the default action for this event should be prevented
- * before the event handler is envoked.
- */
-function shouldPreventDefault(eventInfoWrapper) {
-    const actionElement = eventInfoWrapper.getAction()?.element;
-    // For parity with no-a11y-support behavior.
-    if (!actionElement) {
-        return false;
-    }
-    // Prevent scrolling if the Space key was pressed
-    if (isSpaceKeyEvent(eventInfoWrapper.getEvent())) {
-        return true;
-    }
-    // or prevent the browser's default action for native HTML controls.
-    if (shouldCallPreventDefaultOnNativeHtmlControl(eventInfoWrapper.getEvent())) {
-        return true;
-    }
-    // Prevent browser from following <a> node links if a jsaction is present
-    // and we are dispatching the action now. Note that the targetElement may be
-    // a child of an anchor that has a jsaction attached. For that reason, we
-    // need to check the actionElement rather than the targetElement.
-    if (actionElement.tagName === 'A') {
-        return true;
-    }
-    return false;
-}
-/**
- * Returns true if the given key event can be treated as a 'click'.
- *
- * @param isGlobalDispatch Whether the eventInfo is meant to be dispatched to
- *     the global handlers.
- */
-function isA11yClickEvent(eventInfoWrapper, isGlobalDispatch) {
-    return ((isGlobalDispatch || eventInfoWrapper.getAction() !== undefined) &&
-        isActionKeyEvent(eventInfoWrapper.getEvent()));
-}
-/**
- * Registers deferred functionality for an EventContract and a Jsaction
- * Dispatcher.
- */
-function registerDispatcher$1(eventContract, dispatcher) {
-    eventContract.ecrd((eventInfo, globalDispatch) => {
-        return dispatcher.dispatch(eventInfo, globalDispatch);
-    }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
-}
-
-const Char = {
-    /**
-     * The separator between the namespace and the action name in the
-     * jsaction attribute value.
-     */
-    NAMESPACE_ACTION_SEPARATOR: '.',
-    /**
-     * The separator between the event name and action in the jsaction
-     * attribute value.
-     */
-    EVENT_ACTION_SEPARATOR: ':',
-    /**
-     * The separator between the logged oi attribute values in the &oi=
-     * URL parameter value.
-     */
-    OI_SEPARATOR: '.',
-    /**
-     * The separator between the key and the value pairs in the &cad=
-     * URL parameter value.
-     */
-    CAD_KEY_VALUE_SEPARATOR: ':',
-    /**
-     * The separator between the key-value pairs in the &cad= URL
-     * parameter value.
-     */
-    CAD_SEPARATOR: ',',
 };
 
 /**
@@ -1821,6 +1263,7 @@ class Dispatcher {
         this.actions = {};
         /** A map of global event handlers, where each key is an event type. */
         this.globalHandlers = new Map();
+        this.eventReplayer = eventReplayer;
         this.baseDispatcher = new BaseDispatcher((eventInfoWrapper, isGlobalDispatch) => {
             this.dispatchToHandler(eventInfoWrapper, isGlobalDispatch);
         }, {
@@ -1851,11 +1294,9 @@ class Dispatcher {
      *     queue of events from EventContract.
      * @param isGlobalDispatch If true, dispatches a global event instead of a
      *     regular jsaction handler.
-     * @return An `EventInfo` for the `EventContract` to handle again if the
-     *    `Dispatcher` tried to resolve an a11y event as a click but failed.
      */
     dispatch(eventInfo, isGlobalDispatch) {
-        return this.baseDispatcher.dispatch(eventInfo, isGlobalDispatch);
+        this.baseDispatcher.dispatch(eventInfo, isGlobalDispatch);
     }
     /**
      * Dispatches an `EventInfoWrapper`.
@@ -2035,7 +1476,7 @@ function stopPropagation(eventInfoWrapper) {
  */
 function registerDispatcher(eventContract, dispatcher) {
     eventContract.ecrd((eventInfo, globalDispatch) => {
-        return dispatcher.dispatch(eventInfo, globalDispatch);
+        dispatcher.dispatch(eventInfo, globalDispatch);
     }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
 }
 
@@ -2324,22 +1765,10 @@ function clearNamespace(element) {
  */
 const JSNAMESPACE_SUPPORT = true;
 /**
- * @define Handles a11y click casting in the dispatcher rather than
- * the event contract. When enabled, it will enable
- * EventContract.A11Y_CLICK_SUPPORT as well as both are required for this
- * functionality.
- */
-const A11Y_SUPPORT_IN_DISPATCHER = false;
-/**
  * @define Support for accessible click actions.  This flag can be overridden in
  * a build rule.
  */
-const A11Y_CLICK_SUPPORT_FLAG_ENABLED = false;
-/**
- * Enables a11y click casting when either A11Y_CLICK_SUPPORT_FLAG_ENABLED or
- * A11Y_SUPPORT_IN_DISPATCHER.
- */
-const A11Y_CLICK_SUPPORT = A11Y_CLICK_SUPPORT_FLAG_ENABLED || A11Y_SUPPORT_IN_DISPATCHER;
+const A11Y_CLICK_SUPPORT = false;
 /**
  * @define Support for the non-bubbling mouseenter and mouseleave events.  This
  * flag can be overridden in a build rule.
@@ -2409,7 +1838,6 @@ const REGEXP_SEMICOLON = /\s*;\s*/;
 class EventContract {
     static { this.CUSTOM_EVENT_SUPPORT = CUSTOM_EVENT_SUPPORT; }
     static { this.STOP_PROPAGATION = STOP_PROPAGATION; }
-    static { this.A11Y_SUPPORT_IN_DISPATCHER = A11Y_SUPPORT_IN_DISPATCHER; }
     static { this.A11Y_CLICK_SUPPORT = A11Y_CLICK_SUPPORT; }
     static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
     static { this.JSNAMESPACE_SUPPORT = JSNAMESPACE_SUPPORT; }
@@ -2439,7 +1867,7 @@ class EventContract {
         /** Whether a11y click support has been loaded or not. */
         this.hasA11yClickSupport = false;
         /** Whether to add an a11y click listener. */
-        this.addA11yClickListener = EventContract.A11Y_SUPPORT_IN_DISPATCHER;
+        this.addA11yClickListener = false;
         this.updateEventInfoForA11yClick = undefined;
         this.preventDefaultForA11yClick = undefined;
         this.populateClickOnlyAction = undefined;
@@ -2463,10 +1891,8 @@ class EventContract {
     }
     /**
      * Handle an `EventInfo`.
-     * @param allowRehandling Used in the case of a11y click casting to prevent
-     * us from trying to rehandle in an infinite loop.
      */
-    handleEventInfo(eventInfo, allowRehandling = true) {
+    handleEventInfo(eventInfo) {
         if (!this.dispatcher) {
             // All events are queued when the dispatcher isn't yet loaded.
             setIsReplay(eventInfo, true);
@@ -2484,35 +1910,25 @@ class EventContract {
             setEventType(eventInfo, detail['_type']);
         }
         this.populateAction(eventInfo);
-        if (this.dispatcher &&
-            !getEvent(eventInfo)[Attribute$1.SKIP_GLOBAL_DISPATCH]) {
-            const globalEventInfo = cloneEventInfo(eventInfo);
-            // In some cases, `populateAction` will rewrite `click` events to
-            // `clickonly`. Revert back to a regular click, otherwise we won't be able
-            // to execute global event handlers registered on click events.
-            if (getEventType(globalEventInfo) === EventType.CLICKONLY) {
-                setEventType(globalEventInfo, EventType.CLICK);
-            }
-            this.dispatcher(globalEventInfo, /* dispatch global event */ true);
-        }
-        const action = getAction(eventInfo);
-        if (!action && !checkDispatcherForA11yClick(eventInfo)) {
+        if (!this.dispatcher) {
             return;
         }
-        if (this.dispatcher) {
-            if (action &&
-                shouldPreventDefaultBeforeDispatching(getActionElement(action), eventInfo)) {
-                preventDefault(getEvent(eventInfo));
-            }
-            const unresolvedEventInfo = this.dispatcher(eventInfo);
-            if (unresolvedEventInfo && allowRehandling) {
-                // The dispatcher only returns an event for MAYBE_CLICK_EVENT_TYPE
-                // events that can't be casted to a click. We run it through the
-                // handler again to find keydown actions for it.
-                this.handleEventInfo(unresolvedEventInfo, /* allowRehandling= */ false);
-                return;
-            }
+        const globalEventInfo = cloneEventInfo(eventInfo);
+        // In some cases, `populateAction` will rewrite `click` events to
+        // `clickonly`. Revert back to a regular click, otherwise we won't be able
+        // to execute global event handlers registered on click events.
+        if (getEventType(globalEventInfo) === EventType.CLICKONLY) {
+            setEventType(globalEventInfo, EventType.CLICK);
         }
+        this.dispatcher(globalEventInfo, /* dispatch global event */ true);
+        const action = getAction(eventInfo);
+        if (!action) {
+            return;
+        }
+        if (shouldPreventDefaultBeforeDispatching(getActionElement(action), eventInfo)) {
+            preventDefault(getEvent(eventInfo));
+        }
+        this.dispatcher(eventInfo);
     }
     /**
      * Searches for a jsaction that the DOM event maps to and creates an
@@ -2566,13 +1982,6 @@ class EventContract {
         }
         else if (this.hasA11yClickSupport) {
             this.updateEventInfoForA11yClick(eventInfo);
-        }
-        else if (EventContract.A11Y_SUPPORT_IN_DISPATCHER &&
-            getEventType(eventInfo) === EventType.KEYDOWN &&
-            !getEvent(eventInfo)[Attribute$1.SKIP_A11Y_CHECK]) {
-            // We use a string literal as this value needs to be referenced in the
-            // dispatcher's binary.
-            setEventType(eventInfo, Attribute$1.MAYBE_CLICK_EVENT_TYPE);
         }
         // Walk to the parent node, unless the node has a different owner in
         // which case we walk to the owner. Attempt to walk to host of a
@@ -2656,24 +2065,6 @@ class EventContract {
         }
         if (this.hasA11yClickSupport) {
             this.populateClickOnlyAction(actionElement, eventInfo, actionMap);
-        }
-        if (EventContract.A11Y_SUPPORT_IN_DISPATCHER) {
-            if (getEventType(eventInfo) === Attribute$1.MAYBE_CLICK_EVENT_TYPE &&
-                actionMap[EventType.CLICK] !== undefined) {
-                // We'll take the first CLICK action we find and have the dispatcher
-                // check if the keydown event can be used as a CLICK. If not, the
-                // dispatcher will retrigger the event so that we can find a keydown
-                // event instead.
-                // When we get MAYBE_CLICK_EVENT_TYPE as an eventType, we want to
-                // retrieve the action corresponding to CLICK, but still keep the
-                // eventInfoLib.getEventType(eventInfo, ) as MAYBE_CLICK_EVENT_TYPE. The
-                // dispatcher uses this event type to determine if it should get the
-                // handler for the action.
-                setAction(eventInfo, actionMap[EventType.CLICK], actionElement);
-            }
-            else {
-                populateClickOnlyAction(actionElement, eventInfo, actionMap);
-            }
         }
     }
     /**
@@ -2849,14 +2240,6 @@ class EventContract {
  */
 function addDeferredA11yClickSupport(eventContract) {
     eventContract.ecaacs?.(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction);
-}
-/**
- * Determines whether or not the `EventContract` needs to check with the
- * dispatcher even if there's no action.
- */
-function checkDispatcherForA11yClick(eventInfo) {
-    return (EventContract.A11Y_SUPPORT_IN_DISPATCHER &&
-        getEventType(eventInfo) === Attribute$1.MAYBE_CLICK_EVENT_TYPE);
 }
 /**
  * Returns true if the default action of this event should be prevented before

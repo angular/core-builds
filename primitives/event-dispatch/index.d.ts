@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-7e89753
+ * @license Angular v18.1.0-next.0+sha-f1d6f86
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -118,10 +118,8 @@ export declare class Dispatcher {
      *     queue of events from EventContract.
      * @param isGlobalDispatch If true, dispatches a global event instead of a
      *     regular jsaction handler.
-     * @return An `EventInfo` for the `EventContract` to handle again if the
-     *    `Dispatcher` tried to resolve an a11y event as a click but failed.
      */
-    dispatch(eventInfo: EventInfo, isGlobalDispatch?: boolean): EventInfo | void;
+    dispatch(eventInfo: EventInfo, isGlobalDispatch?: boolean): void;
     /**
      * Dispatches an `EventInfoWrapper`.
      */
@@ -202,7 +200,7 @@ export declare class Dispatcher {
 }
 
 /** A function that is called to handle events captured by the EventContract. */
-declare type Dispatcher_2 = (eventInfo: eventInfoLib.EventInfo, globalDispatch?: boolean) => eventInfoLib.EventInfo | void;
+declare type Dispatcher_2 = (eventInfo: eventInfoLib.EventInfo, globalDispatch?: boolean) => void;
 
 /**
  * EventContract intercepts events in the bubbling phase at the
@@ -221,7 +219,6 @@ declare type Dispatcher_2 = (eventInfo: eventInfoLib.EventInfo, globalDispatch?:
 export declare class EventContract implements UnrenamedEventContract {
     static CUSTOM_EVENT_SUPPORT: boolean;
     static STOP_PROPAGATION: boolean;
-    static A11Y_SUPPORT_IN_DISPATCHER: boolean;
     static A11Y_CLICK_SUPPORT: boolean;
     static MOUSE_SPECIAL_SUPPORT: boolean;
     static JSNAMESPACE_SUPPORT: boolean;
@@ -260,8 +257,6 @@ export declare class EventContract implements UnrenamedEventContract {
     private handleEvent;
     /**
      * Handle an `EventInfo`.
-     * @param allowRehandling Used in the case of a11y click casting to prevent
-     * us from trying to rehandle in an infinite loop.
      */
     private handleEventInfo;
     /**
