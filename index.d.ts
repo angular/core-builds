@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-3667352
+ * @license Angular v18.1.0-next.0+sha-e54c950
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3953,7 +3953,7 @@ export declare interface ExistingSansProvider {
  * @experimental
  */
 export declare class ExperimentalPendingTasks {
-    internalPendingTasks: ɵPendingTasks;
+    private internalPendingTasks;
     /**
      * Adds a new task that should block application's stability.
      * @returns A cleanup function that removes a task when called.
