@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.6+sha-ae29f04
+ * @license Angular v18.0.0-next.6+sha-a80fa8d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4319,7 +4319,7 @@ function requiresRefreshOrTraversal(lView) {
  * parents above.
  */
 function updateAncestorTraversalFlagsOnAttach(lView) {
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(1 /* NotificationType.AfterRenderHooks */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(8 /* NotificationSource.ViewAttached */);
     if (lView[FLAGS] & 64 /* LViewFlags.Dirty */) {
         lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
     }
@@ -4335,7 +4335,7 @@ function updateAncestorTraversalFlagsOnAttach(lView) {
  * flag is already `true` or the `lView` is detached.
  */
 function markAncestorsForTraversal(lView) {
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify();
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(0 /* NotificationSource.MarkAncestorsForTraversal */);
     let parent = getLViewParent(lView);
     while (parent !== null) {
         // We stop adding markers to the ancestors once we reach one that already has the marker. This
@@ -10278,7 +10278,7 @@ function detachViewFromDOM(tView, lView) {
     // When we remove a view from the DOM, we need to rerun afterRender hooks
     // We don't necessarily needs to run change detection. DOM removal only requires
     // change detection if animations are enabled (this notification is handled by animations).
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(1 /* NotificationType.AfterRenderHooks */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(9 /* NotificationSource.ViewDetachedFromDOM */);
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
 /**
@@ -13178,7 +13178,7 @@ function detectChangesInChildComponents(hostLView, components, mode) {
  * @param lView The starting LView to mark dirty
  * @returns the root LView
  */
-function markViewDirty(lView) {
+function markViewDirty(lView, source) {
     const dirtyBitsToUse = isRefreshingViews() ?
         64 /* LViewFlags.Dirty */ :
         // When we are not actively refreshing a view tree, it is absolutely
@@ -13187,7 +13187,7 @@ function markViewDirty(lView) {
         // afterRender hooks as well as animation listeners which execute after detecting
         // changes in a view when the render factory flushes.
         1024 /* LViewFlags.RefreshView */ | 64 /* LViewFlags.Dirty */;
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify();
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(source);
     while (lView) {
         lView[FLAGS] |= dirtyBitsToUse;
         const parent = getLViewParent(lView);
@@ -13307,7 +13307,7 @@ class ViewRef$1 {
      * ```
      */
     markForCheck() {
-        markViewDirty(this._cdRefInjectingView || this._lView);
+        markViewDirty(this._cdRefInjectingView || this._lView, 4 /* NotificationSource.MarkForCheck */);
     }
     /**
      * Detaches the view from the change detection tree.
@@ -15505,7 +15505,7 @@ class AfterRenderCallback {
         this.callbackFn = callbackFn;
         this.errorHandler = inject(ErrorHandler, { optional: true });
         // Registering a callback will notify the scheduler.
-        inject(ChangeDetectionScheduler, { optional: true })?.notify(1 /* NotificationType.AfterRenderHooks */);
+        inject(ChangeDetectionScheduler, { optional: true })?.notify(7 /* NotificationSource.NewRenderHook */);
     }
     invoke() {
         try {
@@ -16184,7 +16184,7 @@ class ComponentRef extends ComponentRef$1 {
             setInputsForProperty(lView[TVIEW], lView, dataValue, name, value);
             this.previousInputValues.set(name, value);
             const childComponentLView = getComponentLViewByIndex(this._tNode.index, lView);
-            markViewDirty(childComponentLView);
+            markViewDirty(childComponentLView, 1 /* NotificationSource.SetInput */);
         }
         else {
             if (ngDevMode) {
@@ -16304,7 +16304,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.6+sha-ae29f04']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.6+sha-a80fa8d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -20627,7 +20627,7 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
         const dehydratedView = findMatchingDehydratedView(lContainer, activeBlockTNode.tView.ssrId);
         const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, { dehydratedView, injector });
         addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(activeBlockTNode, dehydratedView));
-        markViewDirty(embeddedLView);
+        markViewDirty(embeddedLView, 2 /* NotificationSource.DeferBlockStateUpdate */);
     }
 }
 /**
@@ -26405,7 +26405,7 @@ function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault)
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
         const startView = tNode.componentOffset > -1 ? getComponentLViewByIndex(tNode.index, lView) : lView;
-        markViewDirty(startView);
+        markViewDirty(startView, 6 /* NotificationSource.Listener */);
         let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.
@@ -30566,7 +30566,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.6+sha-ae29f04');
+const VERSION = new Version('18.0.0-next.6+sha-a80fa8d');
 
 class Console {
     log(message) {
@@ -30834,7 +30834,7 @@ function canBeHeldWeakly(value) {
  */
 function applyChanges(component) {
     ngDevMode && assertDefined(component, 'component');
-    markViewDirty(getComponentViewByInstance(component));
+    markViewDirty(getComponentViewByInstance(component), 3 /* NotificationSource.DebugApplyChanges */);
     getRootComponents(component).forEach(rootComponent => detectChanges(rootComponent));
 }
 /**
@@ -31427,7 +31427,10 @@ let _published = false;
 function publishDefaultGlobalUtils$1() {
     if (!_published) {
         _published = true;
-        setupFrameworkInjectorProfiler();
+        if (typeof window !== 'undefined') {
+            // Only configure the injector profiler when running in the browser.
+            setupFrameworkInjectorProfiler();
+        }
         for (const [methodName, method] of Object.entries(globalUtilsFunctions)) {
             publishGlobalUtil(methodName, method);
         }
@@ -32587,10 +32590,39 @@ class ChangeDetectionSchedulerImpl {
                 // The same goes for the lack of Zone without enabling zoneless scheduling
                 !this.zoneIsDefined);
     }
-    notify(type = 0 /* NotificationType.RefreshViews */) {
-        // When the only source of notification is an afterRender hook will skip straight to the hooks
-        // rather than refreshing views in ApplicationRef.tick
-        this.shouldRefreshViews ||= type === 0 /* NotificationType.RefreshViews */;
+    notify(source) {
+        if (!this.zonelessEnabled && source === 6 /* NotificationSource.Listener */) {
+            // When the notification comes from a listener, we skip the notification unless the
+            // application has enabled zoneless. Ideally, listeners wouldn't notify the scheduler at all
+            // automatically. We do not know that a developer made a change in the listener callback that
+            // requires an `ApplicationRef.tick` (synchronize templates / run render hooks). We do this
+            // only for an easier migration from OnPush components to zoneless. Because listeners are
+            // usually executed inside the Angular zone and listeners automatically call `markViewDirty`,
+            // developers never needed to manually use `ChangeDetectorRef.markForCheck` or some other API
+            // to make listener callbacks work correctly with `OnPush` components.
+            return;
+        }
+        switch (source) {
+            case 3 /* NotificationSource.DebugApplyChanges */:
+            case 2 /* NotificationSource.DeferBlockStateUpdate */:
+            case 0 /* NotificationSource.MarkAncestorsForTraversal */:
+            case 4 /* NotificationSource.MarkForCheck */:
+            case 6 /* NotificationSource.Listener */:
+            case 5 /* NotificationSource.AnimationQueuedNodeRemoval */:
+            case 1 /* NotificationSource.SetInput */: {
+                this.shouldRefreshViews = true;
+                break;
+            }
+            case 9 /* NotificationSource.ViewDetachedFromDOM */:
+            case 8 /* NotificationSource.ViewAttached */:
+            case 7 /* NotificationSource.NewRenderHook */:
+            case 10 /* NotificationSource.AsyncAnimationsLoaded */:
+            default: {
+                // These notifications only schedule a tick but do not change whether we should refresh
+                // views. Instead, we only need to run render hooks unless another notification from the
+                // other set is also received before `tick` happens.
+            }
+        }
         if (!this.shouldScheduleTick()) {
             return;
         }
