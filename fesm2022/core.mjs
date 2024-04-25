@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.6+sha-a80fa8d
+ * @license Angular v18.0.0-next.6+sha-9ec0136
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16304,7 +16304,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.6+sha-a80fa8d']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-next.6+sha-9ec0136']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30566,7 +30566,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-next.6+sha-a80fa8d');
+const VERSION = new Version('18.0.0-next.6+sha-9ec0136');
 
 class Console {
     log(message) {
@@ -32564,24 +32564,33 @@ class ChangeDetectionSchedulerImpl {
     constructor() {
         this.appRef = inject(ApplicationRef);
         this.taskService = inject(PendingTasks);
-        this.pendingRenderTaskId = null;
-        this.shouldRefreshViews = false;
         this.ngZone = inject(NgZone);
-        this.runningTick = false;
-        this.cancelScheduledCallback = null;
         this.zonelessEnabled = inject(ZONELESS_ENABLED);
         this.disableScheduling = inject(ZONELESS_SCHEDULER_DISABLED, { optional: true }) ?? false;
         this.zoneIsDefined = typeof Zone !== 'undefined' && !!Zone.root.run;
         this.schedulerTickApplyArgs = [{ data: { '__scheduler_tick__': true } }];
-        this.afterTickSubscription = this.appRef.afterTick.subscribe(() => {
+        this.subscriptions = new Subscription();
+        this.cancelScheduledCallback = null;
+        this.shouldRefreshViews = false;
+        this.pendingRenderTaskId = null;
+        this.useMicrotaskScheduler = false;
+        this.runningTick = false;
+        this.subscriptions.add(this.appRef.afterTick.subscribe(() => {
             // If the scheduler isn't running a tick but the application ticked, that means
             // someone called ApplicationRef.tick manually. In this case, we should cancel
             // any change detections that had been scheduled so we don't run an extra one.
             if (!this.runningTick) {
                 this.cleanup();
             }
-        });
-        this.useMicrotaskScheduler = false;
+        }));
+        this.subscriptions.add(this.ngZone.onUnstable.subscribe(() => {
+            // If the zone becomes unstable when we're not running tick (this happens from the zone.run),
+            // we should cancel any scheduled change detection here because at this point we
+            // know that the zone will stabilize at some point and run change detection itself.
+            if (!this.runningTick) {
+                this.cleanup();
+            }
+        }));
         // TODO(atscott): These conditions will need to change when zoneless is the default
         // Instead, they should flip to checking if ZoneJS scheduling is provided
         this.disableScheduling ||= !this.zonelessEnabled &&
@@ -32707,7 +32716,7 @@ class ChangeDetectionSchedulerImpl {
         });
     }
     ngOnDestroy() {
-        this.afterTickSubscription.unsubscribe();
+        this.subscriptions.unsubscribe();
         this.cleanup();
     }
     cleanup() {
