@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.6+sha-f93e518
+ * @license Angular v18.0.0-next.6+sha-b5ec30a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -258,8 +258,14 @@ class ComponentFixture {
  * `ApplicationRef.isStable`, and `autoDetectChanges` cannot be disabled.
  */
 class ScheduledComponentFixture extends ComponentFixture {
+    constructor() {
+        super(...arguments);
+        this._autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? true;
+    }
     initialize() {
-        this._appRef.attachView(this.componentRef.hostView);
+        if (this._autoDetect) {
+            this._appRef.attachView(this.componentRef.hostView);
+        }
     }
     detectChanges(checkNoChanges = true) {
         if (!checkNoChanges) {
@@ -272,7 +278,12 @@ class ScheduledComponentFixture extends ComponentFixture {
     }
     autoDetectChanges(autoDetect) {
         if (!autoDetect) {
-            throw new Error('Cannot disable autoDetect when using the zoneless scheduler.');
+            throw new Error('Cannot disable autoDetect after it has been enabled when using the zoneless scheduler. ' +
+                'To disable autoDetect, add `{provide: ComponentFixtureAutoDetect, useValue: false}` to the TestBed providers.');
+        }
+        else if (!this._autoDetect) {
+            this._autoDetect = autoDetect;
+            this._appRef.attachView(this.componentRef.hostView);
         }
         this.detectChanges();
     }
