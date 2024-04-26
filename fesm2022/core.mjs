@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-5b4970b
+ * @license Angular v18.1.0-next.0+sha-91b1f24
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1664,7 +1664,8 @@ class NullInjector {
  * The strategy that the default change detector uses to detect changes.
  * When set, takes effect the next time change detection is triggered.
  *
- * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
+ * @see [Change detection usage](/api/core/ChangeDetectorRef?tab=usage-notes)
+ * @see [Skipping component subtrees](/best-practices/skipping-subtrees)
  *
  * @publicApi
  */
@@ -16304,7 +16305,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-5b4970b']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-91b1f24']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30566,7 +30567,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.0+sha-5b4970b');
+const VERSION = new Version('18.1.0-next.0+sha-91b1f24');
 
 class Console {
     log(message) {
