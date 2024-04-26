@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.6+sha-7a97678
+ * @license Angular v18.0.0-next.6+sha-f93e518
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -979,7 +979,8 @@ export declare interface BootstrapOptions {
  * The strategy that the default change detector uses to detect changes.
  * When set, takes effect the next time change detection is triggered.
  *
- * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
+ * @see [Change detection usage](/api/core/ChangeDetectorRef?tab=usage-notes)
+ * @see [Skipping component subtrees](/best-practices/skipping-subtrees)
  *
  * @publicApi
  */
