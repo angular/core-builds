@@ -244,7 +244,10 @@ function analyze(sourceFile, analyzedFiles) {
       }
       switch (prop.name.text) {
         case "template":
-          AnalyzedFile.addRange(sourceFile.fileName, analyzedFiles, [prop.initializer.getStart() + 1, prop.initializer.getEnd() - 1]);
+          AnalyzedFile.addRange(sourceFile.fileName, analyzedFiles, [
+            prop.initializer.getStart() + 1,
+            prop.initializer.getEnd() - 1
+          ]);
           break;
         case "templateUrl":
           const path2 = (0, import_path2.join)((0, import_path2.dirname)(sourceFile.fileName), prop.initializer.text);
@@ -23007,7 +23010,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.0-next.6+sha-b5ec30a");
+var VERSION2 = new Version("18.0.0-next.6+sha-9d89898");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
