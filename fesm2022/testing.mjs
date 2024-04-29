@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-be17de5
+ * @license Angular v18.1.0-next.0+sha-f307e95
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -208,7 +208,7 @@ class ComponentFixture {
         if (this.isStable()) {
             return Promise.resolve(false);
         }
-        return this._appRef.isStable.pipe(first(stable => stable)).toPromise();
+        return this._appRef.isStable.pipe(first((stable) => stable)).toPromise();
     }
     /**
      * Retrieves all defer block fixtures in the component fixture.
@@ -496,7 +496,7 @@ function fakeAsync(fn) {
  * @publicApi
  */
 function tick(millis = 0, tickOptions = {
-    processNewMacroTasksSynchronously: true
+    processNewMacroTasksSynchronously: true,
 }) {
     if (fakeAsyncTestModule) {
         return fakeAsyncTestModule.tick(millis, tickOptions);
@@ -555,7 +555,7 @@ class MetadataOverrider {
     overrideMetadata(metadataClass, oldMetadata, override) {
         const props = {};
         if (oldMetadata) {
-            _valueProps(oldMetadata).forEach((prop) => props[prop] = oldMetadata[prop]);
+            _valueProps(oldMetadata).forEach((prop) => (props[prop] = oldMetadata[prop]));
         }
         if (override.set) {
             if (override.remove || override.add) {
@@ -653,7 +653,7 @@ function _valueProps(obj) {
     });
     // getters
     let proto = obj;
-    while (proto = Object.getPrototypeOf(proto)) {
+    while ((proto = Object.getPrototypeOf(proto))) {
         Object.keys(proto).forEach((protoProp) => {
             const desc = Object.getOwnPropertyDescriptor(proto, protoProp);
             if (!protoProp.startsWith('_') && desc && 'get' in desc) {
@@ -694,8 +694,10 @@ class OverrideResolver {
         // annotation has the right type.
         for (let i = annotations.length - 1; i >= 0; i--) {
             const annotation = annotations[i];
-            const isKnownType = annotation instanceof Directive || annotation instanceof Component ||
-                annotation instanceof Pipe || annotation instanceof NgModule;
+            const isKnownType = annotation instanceof Directive ||
+                annotation instanceof Component ||
+                annotation instanceof Pipe ||
+                annotation instanceof NgModule;
             if (isKnownType) {
                 return annotation instanceof this.type ? annotation : null;
             }
@@ -710,7 +712,7 @@ class OverrideResolver {
                 const overrides = this.overrides.get(type);
                 if (overrides) {
                     const overrider = new MetadataOverrider();
-                    overrides.forEach(override => {
+                    overrides.forEach((override) => {
                         resolved = overrider.overrideMetadata(this.type, resolved, override);
                     });
                 }
@@ -747,11 +749,10 @@ var TestingModuleOverride;
     TestingModuleOverride[TestingModuleOverride["OVERRIDE_TEMPLATE"] = 1] = "OVERRIDE_TEMPLATE";
 })(TestingModuleOverride || (TestingModuleOverride = {}));
 function isTestingModuleOverride(value) {
-    return value === TestingModuleOverride.DECLARATION ||
-        value === TestingModuleOverride.OVERRIDE_TEMPLATE;
+    return (value === TestingModuleOverride.DECLARATION || value === TestingModuleOverride.OVERRIDE_TEMPLATE);
 }
 function assertNoStandaloneComponents(types, resolver, location) {
-    types.forEach(type => {
+    types.forEach((type) => {
         if (!ɵgetAsyncClassMetadataFn(type)) {
             const component = resolver.resolve(type);
             if (component && component.standalone) {
@@ -879,7 +880,8 @@ class TestBedCompiler {
         this.pendingPipes.add(pipe);
     }
     verifyNoStandaloneFlagOverrides(type, override) {
-        if (override.add?.hasOwnProperty('standalone') || override.set?.hasOwnProperty('standalone') ||
+        if (override.add?.hasOwnProperty('standalone') ||
+            override.set?.hasOwnProperty('standalone') ||
             override.remove?.hasOwnProperty('standalone')) {
             throw new Error(`An override for the ${type.name} class has the \`standalone\` flag. ` +
                 `Changing the \`standalone\` flag via TestBed overrides is not supported.`);
@@ -892,7 +894,7 @@ class TestBedCompiler {
                 provide: token,
                 useFactory: provider.useFactory,
                 deps: provider.deps || [],
-                multi: provider.multi
+                multi: provider.multi,
             };
         }
         else if (provider.useValue !== undefined) {
@@ -931,7 +933,9 @@ class TestBedCompiler {
         // resolution). In order to avoid this, we preemptively set styleUrls to an empty array,
         // preserve current styles available on Component def and restore styles back once compilation
         // is complete.
-        const override = overrideStyleUrls ? { template, styles: [], styleUrls: [], styleUrl: undefined } : { template };
+        const override = overrideStyleUrls
+            ? { template, styles: [], styleUrls: [], styleUrl: undefined }
+            : { template };
         this.overrideComponent(type, { set: override });
         if (overrideStyleUrls && def.styles && def.styles.length > 0) {
             this.existingComponentStyles.set(type, def.styles);
@@ -1048,7 +1052,7 @@ class TestBedCompiler {
     compileTypesSync() {
         // Compile all queued components, directives, pipes.
         let needsAsyncResources = false;
-        this.pendingComponents.forEach(declaration => {
+        this.pendingComponents.forEach((declaration) => {
             if (ɵgetAsyncClassMetadataFn(declaration)) {
                 throw new Error(`Component '${declaration.name}' has unresolved metadata. ` +
                     `Please call \`await TestBed.compileComponents()\` before running this test.`);
@@ -1065,7 +1069,7 @@ class TestBedCompiler {
             ɵcompileComponent(declaration, metadata);
         });
         this.pendingComponents.clear();
-        this.pendingDirectives.forEach(declaration => {
+        this.pendingDirectives.forEach((declaration) => {
             const metadata = this.resolvers.directive.resolve(declaration);
             if (metadata === null) {
                 throw invalidTypeError(declaration.name, 'Directive');
@@ -1074,7 +1078,7 @@ class TestBedCompiler {
             ɵcompileDirective(declaration, metadata);
         });
         this.pendingDirectives.clear();
-        this.pendingPipes.forEach(declaration => {
+        this.pendingPipes.forEach((declaration) => {
             const metadata = this.resolvers.pipe.resolve(declaration);
             if (metadata === null) {
                 throw invalidTypeError(declaration.name, 'Pipe');
@@ -1093,7 +1097,7 @@ class TestBedCompiler {
             const testingModuleDef = this.testModuleType[ɵNG_MOD_DEF];
             const affectedModules = this.collectModulesAffectedByOverrides(testingModuleDef.imports);
             if (affectedModules.size > 0) {
-                affectedModules.forEach(moduleType => {
+                affectedModules.forEach((moduleType) => {
                     if (!ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
                         this.storeFieldOfDefOnType(moduleType, ɵNG_MOD_DEF, 'transitiveCompileScopes');
                         moduleType[ɵNG_MOD_DEF].transitiveCompileScopes = null;
@@ -1178,7 +1182,7 @@ class TestBedCompiler {
         else {
             const providers = [
                 ...injectorDef.providers,
-                ...(this.providerOverridesByModule.get(type) || [])
+                ...(this.providerOverridesByModule.get(type) || []),
             ];
             if (this.hasProviderOverrides(providers)) {
                 this.maybeStoreNgDef(ɵNG_INJ_DEF, type);
@@ -1198,7 +1202,7 @@ class TestBedCompiler {
                     this.defCleanupOps.push({
                         object: importedModule,
                         fieldName: 'providers',
-                        originalValue: importedModule.providers
+                        originalValue: importedModule.providers,
                     });
                     importedModule.providers = this.getOverriddenProviders(importedModule.providers);
                 }
@@ -1206,7 +1210,7 @@ class TestBedCompiler {
         }
     }
     patchComponentsWithExistingStyles() {
-        this.existingComponentStyles.forEach((styles, type) => type[ɵNG_COMP_DEF].styles = styles);
+        this.existingComponentStyles.forEach((styles, type) => (type[ɵNG_COMP_DEF].styles = styles));
         this.existingComponentStyles.clear();
     }
     queueTypeArray(arr, moduleType) {
@@ -1259,8 +1263,8 @@ class TestBedCompiler {
             // real module, which was imported. This pattern is understood to mean that the component
             // should use its original scope, but that the testing module should also contain the
             // component in its scope.
-            if ((!this.componentToModuleScope.has(type) ||
-                this.componentToModuleScope.get(type) === TestingModuleOverride.DECLARATION)) {
+            if (!this.componentToModuleScope.has(type) ||
+                this.componentToModuleScope.get(type) === TestingModuleOverride.DECLARATION) {
                 this.componentToModuleScope.set(type, moduleType);
             }
             return;
@@ -1353,13 +1357,13 @@ class TestBedCompiler {
                         // the whole path that leads to that module as affected, but do not descend into its
                         // imports, since we already examined them before.
                         if (affectedModules.has(value)) {
-                            path.forEach(item => affectedModules.add(item));
+                            path.forEach((item) => affectedModules.add(item));
                         }
                         continue;
                     }
                     seenModules.add(value);
                     if (this.overriddenModules.has(value)) {
-                        path.forEach(item => affectedModules.add(item));
+                        path.forEach((item) => affectedModules.add(item));
                     }
                     // Examine module imports recursively to look for overridden modules.
                     const moduleDef = value[ɵNG_MOD_DEF];
@@ -1465,7 +1469,8 @@ class TestBedCompiler {
             imports,
             schemas: this.schemas,
             providers,
-        }, /* allowDuplicateDeclarationsInRoot */ true);
+        }, 
+        /* allowDuplicateDeclarationsInRoot */ true);
         // clang-format on
         this.applyProviderOverridesInScope(this.testModuleType);
     }
@@ -1475,7 +1480,7 @@ class TestBedCompiler {
         }
         const providers = [];
         const compilerOptions = this.platform.injector.get(COMPILER_OPTIONS);
-        compilerOptions.forEach(opts => {
+        compilerOptions.forEach((opts) => {
             if (opts.providers) {
                 providers.push(opts.providers);
             }
@@ -1549,7 +1554,7 @@ function initResolvers() {
         module: new NgModuleResolver(),
         component: new ComponentResolver(),
         directive: new DirectiveResolver(),
-        pipe: new PipeResolver()
+        pipe: new PipeResolver(),
     };
 }
 function isStandaloneComponent(value) {
@@ -1570,7 +1575,7 @@ function maybeUnwrapFn(maybeFn) {
 }
 function flatten(values) {
     const out = [];
-    values.forEach(value => {
+    values.forEach((value) => {
         if (Array.isArray(value)) {
             out.push(...flatten(value));
         }
@@ -1641,7 +1646,7 @@ class R3TestCompiler {
     clearCacheFor(type) { }
     getModuleId(moduleType) {
         const meta = this.testBed._getModuleResolver().resolve(moduleType);
-        return meta && meta.id || undefined;
+        return (meta && meta.id) || undefined;
     }
 }
 
@@ -1684,7 +1689,7 @@ class TestBedImpl {
     }
     static { this._INSTANCE = null; }
     static get INSTANCE() {
-        return TestBedImpl._INSTANCE = TestBedImpl._INSTANCE || new TestBedImpl();
+        return (TestBedImpl._INSTANCE = TestBedImpl._INSTANCE || new TestBedImpl());
     }
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
@@ -1905,8 +1910,9 @@ class TestBedImpl {
         }
         const UNDEFINED = {};
         const result = this.testModuleRef.injector.get(token, UNDEFINED, ɵconvertToBitFlags(flags));
-        return result === UNDEFINED ? this.compiler.injector.get(token, notFoundValue, flags) :
-            result;
+        return result === UNDEFINED
+            ? this.compiler.injector.get(token, notFoundValue, flags)
+            : result;
     }
     /** @deprecated from v9.0.0 use TestBed.inject */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
@@ -1916,7 +1922,7 @@ class TestBedImpl {
         return runInInjectionContext(this.inject(EnvironmentInjector), fn);
     }
     execute(tokens, fn, context) {
-        const params = tokens.map(t => this.inject(t));
+        const params = tokens.map((t) => this.inject(t));
         return fn.apply(context, params);
     }
     overrideModule(ngModule, override) {
@@ -1972,8 +1978,9 @@ class TestBedImpl {
             const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this.testModuleRef);
             return this.runInInjectionContext(() => {
                 const isZoneless = this.inject(ɵZONELESS_ENABLED);
-                const fixture = isZoneless ? new ScheduledComponentFixture(componentRef) :
-                    new PseudoApplicationComponentFixture(componentRef);
+                const fixture = isZoneless
+                    ? new ScheduledComponentFixture(componentRef)
+                    : new PseudoApplicationComponentFixture(componentRef);
                 fixture.initialize();
                 return fixture;
             });
@@ -2046,7 +2053,7 @@ class TestBedImpl {
         });
         this._activeFixtures = [];
         if (errorCount > 0 && this.shouldRethrowTeardownErrors()) {
-            throw Error(`${errorCount} ${(errorCount === 1 ? 'component' : 'components')} ` +
+            throw Error(`${errorCount} ${errorCount === 1 ? 'component' : 'components'} ` +
                 `threw errors during cleanup`);
         }
     }
@@ -2058,24 +2065,26 @@ class TestBedImpl {
             return TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
         }
         // Otherwise use the configured behavior or default to rethrowing.
-        return instanceOptions?.rethrowErrors ?? environmentOptions?.rethrowErrors ??
-            this.shouldTearDownTestingModule();
+        return (instanceOptions?.rethrowErrors ??
+            environmentOptions?.rethrowErrors ??
+            this.shouldTearDownTestingModule());
     }
     shouldThrowErrorOnUnknownElements() {
         // Check if a configuration has been provided to throw when an unknown element is found
-        return this._instanceErrorOnUnknownElementsOption ??
-            TestBedImpl._environmentErrorOnUnknownElementsOption ?? THROW_ON_UNKNOWN_ELEMENTS_DEFAULT;
+        return (this._instanceErrorOnUnknownElementsOption ??
+            TestBedImpl._environmentErrorOnUnknownElementsOption ??
+            THROW_ON_UNKNOWN_ELEMENTS_DEFAULT);
     }
     shouldThrowErrorOnUnknownProperties() {
         // Check if a configuration has been provided to throw when an unknown property is found
-        return this._instanceErrorOnUnknownPropertiesOption ??
+        return (this._instanceErrorOnUnknownPropertiesOption ??
             TestBedImpl._environmentErrorOnUnknownPropertiesOption ??
-            THROW_ON_UNKNOWN_PROPERTIES_DEFAULT;
+            THROW_ON_UNKNOWN_PROPERTIES_DEFAULT);
     }
     shouldTearDownTestingModule() {
-        return this._instanceTeardownOptions?.destroyAfterEach ??
+        return (this._instanceTeardownOptions?.destroyAfterEach ??
             TestBedImpl._environmentTeardownOptions?.destroyAfterEach ??
-            TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT;
+            TEARDOWN_TESTING_MODULE_ON_DESTROY_DEFAULT);
     }
     getDeferBlockBehavior() {
         return this._instanceDeferBlockBehavior;

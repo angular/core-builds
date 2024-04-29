@@ -22848,7 +22848,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.0+sha-be17de5");
+var VERSION2 = new Version("18.1.0-next.0+sha-f307e95");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -22929,11 +22929,7 @@ var importRemovals = [
 ];
 var importWithCommonRemovals = [...importRemovals, "CommonModule"];
 function allFormsOf(selector) {
-  return [
-    selector,
-    `*${selector}`,
-    `[${selector}]`
-  ];
+  return [selector, `*${selector}`, `[${selector}]`];
 }
 var commonModuleDirectives = /* @__PURE__ */ new Set([
   ...allFormsOf("ngComponentOutlet"),
@@ -23355,7 +23351,12 @@ function analyzeDecorators(node, sourceFile, analyzedFiles) {
       case "templateUrl":
         if (import_typescript6.default.isStringLiteralLike(prop.initializer)) {
           const path2 = (0, import_path2.join)((0, import_path2.dirname)(sourceFile.fileName), prop.initializer.text);
-          AnalyzedFile.addRange(path2, sourceFile, analyzedFiles, { start: 0, node: prop, type: "templateUrl", remove: true });
+          AnalyzedFile.addRange(path2, sourceFile, analyzedFiles, {
+            start: 0,
+            node: prop,
+            type: "templateUrl",
+            remove: true
+          });
         }
         break;
     }
@@ -23705,7 +23706,7 @@ function formatTemplate(tmpl, templateType) {
         const ind = line.search(/\S/);
         mindent = ind > -1 ? line.slice(0, ind) : "";
       }
-      if ((closeBlockRegex.test(line) || closeElRegex.test(line) && (!singleLineElRegex.test(line) && !closeMultiLineElRegex.test(line))) && indent !== "") {
+      if ((closeBlockRegex.test(line) || closeElRegex.test(line) && !singleLineElRegex.test(line) && !closeMultiLineElRegex.test(line)) && indent !== "") {
         indent = indent.slice(2);
       }
       const isOpenDoubleAttr = openAttrDoubleRegex.test(line);
@@ -23760,13 +23761,7 @@ var switchcase = "*ngSwitchCase";
 var nakedcase = "ngSwitchCase";
 var switchdefault = "*ngSwitchDefault";
 var nakeddefault = "ngSwitchDefault";
-var cases = [
-  boundcase,
-  switchcase,
-  nakedcase,
-  switchdefault,
-  nakeddefault
-];
+var cases = [boundcase, switchcase, nakedcase, switchdefault, nakeddefault];
 function migrateCase(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
@@ -23835,10 +23830,7 @@ function migrateNgSwitchDefault(etm, tmpl, offset) {
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/fors.mjs
 var ngfor = "*ngFor";
 var nakedngfor2 = "ngFor";
-var fors = [
-  ngfor,
-  nakedngfor2
-];
+var fors = [ngfor, nakedngfor2];
 var commaSeparatedSyntax = /* @__PURE__ */ new Map([
   ["(", ")"],
   ["{", "}"],
@@ -24010,11 +24002,7 @@ function getNgForParts(expression) {
 var ngif = "*ngIf";
 var boundngif = "[ngIf]";
 var nakedngif = "ngIf";
-var ifs = [
-  ngif,
-  nakedngif,
-  boundngif
-];
+var ifs = [ngif, nakedngif, boundngif];
 function migrateIf(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);
@@ -24161,9 +24149,7 @@ function buildIfThenBlock(etm, tmpl, condition, thenPlaceholder, offset) {
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/control-flow-migration/switches.mjs
 var ngswitch = "[ngSwitch]";
-var switches = [
-  ngswitch
-];
+var switches = [ngswitch];
 function migrateSwitch(template2) {
   let errors = [];
   let parsed = parseTemplate2(template2);

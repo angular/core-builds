@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-be17de5
+ * @license Angular v18.1.0-next.0+sha-f307e95
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7428,7 +7428,7 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection, shouldCoalesceRunChangeDetection }: {
+    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection, shouldCoalesceRunChangeDetection, }: {
         enableLongStackTrace?: boolean | undefined;
         shouldCoalesceEventChangeDetection?: boolean | undefined;
         shouldCoalesceRunChangeDetection?: boolean | undefined;
@@ -13422,9 +13422,9 @@ export declare function ɵresetJitOptions(): void;
  * @param resourceResolver a function which is responsible for returning a `Promise` to the
  * contents of the resolved URL. Browser's `fetch()` method is a good default implementation.
  */
-export declare function ɵresolveComponentResources(resourceResolver: (url: string) => (Promise<string | {
+export declare function ɵresolveComponentResources(resourceResolver: (url: string) => Promise<string | {
     text(): Promise<string>;
-}>)): Promise<void>;
+}>): Promise<void>;
 
 export declare function ɵrestoreComponentResolutionQueue(queue: Map<Type<any>, Component>): void;
 
@@ -15351,7 +15351,7 @@ export declare function ɵɵi18nExp<T>(value: T): typeof ɵɵi18nExp;
  * @codeGenApi
  */
 export declare function ɵɵi18nPostprocess(message: string, replacements?: {
-    [key: string]: (string | string[]);
+    [key: string]: string | string[];
 }): string;
 
 /**
@@ -15599,9 +15599,9 @@ export declare function ɵɵngDeclareClassMetadataAsync(decl: {
     resolveMetadata: (...types: Type<unknown>[]) => {
         decorators: any[];
         ctorParameters: (() => any[]) | null;
-        propDecorators: ({
+        propDecorators: {
             [field: string]: any;
-        }) | null;
+        } | null;
     };
 }): void;
 

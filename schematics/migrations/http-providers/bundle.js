@@ -418,7 +418,11 @@ var ChangeTracker = class {
     this.replaceText(sourceFile, oldNode.getStart(), oldNode.getWidth(), this._printer.printNode(emitHint, newNode, sourceFileWhenPrinting || sourceFile));
   }
   removeNode(node) {
-    this._trackChange(node.getSourceFile(), { start: node.getStart(), removeLength: node.getWidth(), text: "" });
+    this._trackChange(node.getSourceFile(), {
+      start: node.getStart(),
+      removeLength: node.getWidth(),
+      text: ""
+    });
   }
   addImport(sourceFile, symbolName, moduleName, alias = null, keepSymbolName = false) {
     if (this._importRemapper) {

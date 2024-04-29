@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-be17de5
+ * @license Angular v18.1.0-next.0+sha-f307e95
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23,7 +23,7 @@ function takeUntilDestroyed(destroyRef) {
         assertInInjectionContext(takeUntilDestroyed);
         destroyRef = inject(DestroyRef);
     }
-    const destroyed$ = new Observable(observer => {
+    const destroyed$ = new Observable((observer) => {
         const unregisterFn = destroyRef.onDestroy(observer.next.bind(observer));
         return unregisterFn;
     });
@@ -55,7 +55,7 @@ class OutputFromObservableRef {
         }
         // Stop yielding more values when the directive/component is already destroyed.
         const subscription = this.source.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-            next: value => callbackFn(value),
+            next: (value) => callbackFn(value),
         });
         return {
             unsubscribe: () => subscription.unsubscribe(),
@@ -101,12 +101,12 @@ function outputFromObservable(observable, opts) {
  */
 function outputToObservable(ref) {
     const destroyRef = ɵgetOutputDestroyRef(ref);
-    return new Observable(observer => {
+    return new Observable((observer) => {
         // Complete the observable upon directive/component destroy.
         // Note: May be `undefined` if an `EventEmitter` is declared outside
         // of an injection context.
         destroyRef?.onDestroy(() => observer.complete());
-        const subscription = ref.subscribe(v => observer.next(v));
+        const subscription = ref.subscribe((v) => observer.next(v));
         return () => subscription.unsubscribe();
     });
 }
@@ -172,7 +172,9 @@ function toSignal(source, options) {
             'Consider moving `toSignal` outside of the reactive context and read the signal value where needed.');
     const requiresCleanup = !options?.manualCleanup;
     requiresCleanup && !options?.injector && assertInInjectionContext(toSignal);
-    const cleanupRef = requiresCleanup ? options?.injector?.get(DestroyRef) ?? inject(DestroyRef) : null;
+    const cleanupRef = requiresCleanup
+        ? options?.injector?.get(DestroyRef) ?? inject(DestroyRef)
+        : null;
     // Note: T is the Observable value type, and U is the initial value type. They don't have to be
     // the same - the returned signal gives values of type `T`.
     let state;
@@ -191,8 +193,8 @@ function toSignal(source, options) {
     // subscription. Additional context (related to async pipe):
     // https://github.com/angular/angular/pull/50522.
     const sub = source.subscribe({
-        next: value => state.set({ kind: 1 /* StateKind.Value */, value }),
-        error: error => {
+        next: (value) => state.set({ kind: 1 /* StateKind.Value */, value }),
+        error: (error) => {
             if (options?.rejectErrors) {
                 // Kick the error back to RxJS. It will be caught and rethrown in a macrotask, which causes
                 // the error to end up as an uncaught exception.
