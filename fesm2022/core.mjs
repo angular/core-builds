@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-3312727
+ * @license Angular v18.1.0-next.0+sha-024e9bf
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4327,7 +4327,7 @@ function requiresRefreshOrTraversal(lView) {
  * parents above.
  */
 function updateAncestorTraversalFlagsOnAttach(lView) {
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(8 /* NotificationSource.ViewAttached */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(7 /* NotificationSource.ViewAttached */);
     if (lView[FLAGS] & 64 /* LViewFlags.Dirty */) {
         lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
     }
@@ -10320,7 +10320,7 @@ function detachViewFromDOM(tView, lView) {
     // When we remove a view from the DOM, we need to rerun afterRender hooks
     // We don't necessarily needs to run change detection. DOM removal only requires
     // change detection if animations are enabled (this notification is handled by animations).
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(9 /* NotificationSource.ViewDetachedFromDOM */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(8 /* NotificationSource.ViewDetachedFromDOM */);
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
 /**
@@ -15568,7 +15568,7 @@ class AfterRenderCallback {
         this.callbackFn = callbackFn;
         this.errorHandler = inject(ErrorHandler, { optional: true });
         // Registering a callback will notify the scheduler.
-        inject(ChangeDetectionScheduler, { optional: true })?.notify(7 /* NotificationSource.NewRenderHook */);
+        inject(ChangeDetectionScheduler, { optional: true })?.notify(6 /* NotificationSource.NewRenderHook */);
     }
     invoke() {
         try {
@@ -16366,7 +16366,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-3312727']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-024e9bf']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -26583,7 +26583,7 @@ function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault)
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
         const startView = tNode.componentOffset > -1 ? getComponentLViewByIndex(tNode.index, lView) : lView;
-        markViewDirty(startView, 6 /* NotificationSource.Listener */);
+        markViewDirty(startView, 5 /* NotificationSource.Listener */);
         let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.
@@ -30796,7 +30796,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.0+sha-3312727');
+const VERSION = new Version('18.1.0-next.0+sha-024e9bf');
 
 class Console {
     log(message) {
@@ -32335,6 +32335,9 @@ class ApplicationRef {
         this.isStable = inject(PendingTasks).hasPendingTasks.pipe(map((pending) => !pending));
         this._injector = inject(EnvironmentInjector);
     }
+    get allViews() {
+        return [...this.externalTestViews.keys(), ...this._views];
+    }
     /**
      * Indicates whether this instance was destroyed.
      */
@@ -32467,6 +32470,10 @@ class ApplicationRef {
         }
     }
     detectChangesInAttachedViews(refreshViews) {
+        let rendererFactory = null;
+        if (!this._injector.destroyed) {
+            rendererFactory = this._injector.get(RendererFactory2, null, { optional: true });
+        }
         let runs = 0;
         const afterRenderEffectManager = this.afterRenderEffectManager;
         while (runs < MAXIMUM_REFRESH_RERUNS) {
@@ -32477,17 +32484,23 @@ class ApplicationRef {
                     detectChangesInViewIfRequired(_lView, notifyErrorHandler, isFirstPass, this.zonelessEnabled);
                 }
             }
+            else {
+                // If we skipped refreshing views above, there might still be unflushed animations
+                // because we never called `detectChangesInternal` on the views.
+                rendererFactory?.begin?.();
+                rendererFactory?.end?.();
+            }
             runs++;
             afterRenderEffectManager.executeInternalCallbacks();
             // If we have a newly dirty view after running internal callbacks, recheck the views again
             // before running user-provided callbacks
-            if ([...this.externalTestViews.keys(), ...this._views].some(({ _lView }) => requiresRefreshOrTraversal(_lView))) {
+            if (this.allViews.some(({ _lView }) => requiresRefreshOrTraversal(_lView))) {
                 continue;
             }
             afterRenderEffectManager.execute();
             // If after running all afterRender callbacks we have no more views that need to be refreshed,
             // we can break out of the loop
-            if (![...this.externalTestViews.keys(), ...this._views].some(({ _lView }) => requiresRefreshOrTraversal(_lView))) {
+            if (!this.allViews.some(({ _lView }) => requiresRefreshOrTraversal(_lView))) {
                 break;
             }
         }
@@ -32842,7 +32855,7 @@ class ChangeDetectionSchedulerImpl {
                     !this.zoneIsDefined);
     }
     notify(source) {
-        if (!this.zonelessEnabled && source === 6 /* NotificationSource.Listener */) {
+        if (!this.zonelessEnabled && source === 5 /* NotificationSource.Listener */) {
             // When the notification comes from a listener, we skip the notification unless the
             // application has enabled zoneless. Ideally, listeners wouldn't notify the scheduler at all
             // automatically. We do not know that a developer made a change in the listener callback that
@@ -32858,16 +32871,15 @@ class ChangeDetectionSchedulerImpl {
             case 2 /* NotificationSource.DeferBlockStateUpdate */:
             case 0 /* NotificationSource.MarkAncestorsForTraversal */:
             case 4 /* NotificationSource.MarkForCheck */:
-            case 6 /* NotificationSource.Listener */:
-            case 5 /* NotificationSource.AnimationQueuedNodeRemoval */:
+            case 5 /* NotificationSource.Listener */:
             case 1 /* NotificationSource.SetInput */: {
                 this.shouldRefreshViews = true;
                 break;
             }
-            case 9 /* NotificationSource.ViewDetachedFromDOM */:
-            case 8 /* NotificationSource.ViewAttached */:
-            case 7 /* NotificationSource.NewRenderHook */:
-            case 10 /* NotificationSource.AsyncAnimationsLoaded */:
+            case 8 /* NotificationSource.ViewDetachedFromDOM */:
+            case 7 /* NotificationSource.ViewAttached */:
+            case 6 /* NotificationSource.NewRenderHook */:
+            case 9 /* NotificationSource.AsyncAnimationsLoaded */:
             default: {
                 // These notifications only schedule a tick but do not change whether we should refresh
                 // views. Instead, we only need to run render hooks unless another notification from the
