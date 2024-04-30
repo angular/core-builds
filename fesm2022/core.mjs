@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-fd54415
+ * @license Angular v18.1.0-next.0+sha-0a77825
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16366,7 +16366,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-fd54415']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-0a77825']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23689,7 +23689,7 @@ function reconcile(liveCollection, newCollection, trackByFn) {
             }
         }
         if (duplicatedKeysMsg.length > 0) {
-            const message = formatRuntimeError(955 /* RuntimeErrorCode.LOOP_TRACK_DUPLICATE_KEYS */, 'The provided track expression resulted in duplicated keys for a given collection. ' +
+            const message = formatRuntimeError(-955 /* RuntimeErrorCode.LOOP_TRACK_DUPLICATE_KEYS */, 'The provided track expression resulted in duplicated keys for a given collection. ' +
                 'Adjust the tracking expression such that it uniquely identifies all the items in the collection. ' +
                 'Duplicated keys were: \n' +
                 duplicatedKeysMsg.join(', \n') +
@@ -24056,7 +24056,7 @@ function ɵɵrepeater(collection) {
             metadata.trackByFn === ɵɵrepeaterTrackByIdentity &&
             liveCollection.operationsCounter?.wasReCreated(liveCollection.length) &&
             isViewExpensiveToRecreate(getExistingLViewFromLContainer(lContainer, 0))) {
-            const message = formatRuntimeError(956 /* RuntimeErrorCode.LOOP_TRACK_RECREATE */, `The configured tracking expression (track by identity) caused re-creation of the entire collection of size ${liveCollection.length}. ` +
+            const message = formatRuntimeError(-956 /* RuntimeErrorCode.LOOP_TRACK_RECREATE */, `The configured tracking expression (track by identity) caused re-creation of the entire collection of size ${liveCollection.length}. ` +
                 'This is an expensive operation requiring destruction and subsequent creation of DOM nodes, directives, components etc. ' +
                 'Please review the "track expression" and make sure that it uniquely identifies items in a collection.');
             console.warn(message);
@@ -30796,7 +30796,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.0+sha-fd54415');
+const VERSION = new Version('18.1.0-next.0+sha-0a77825');
 
 class Console {
     log(message) {
