@@ -225,7 +225,7 @@ function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault)
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
         const startView = tNode.componentOffset > -1 ? getComponentLViewByIndex(tNode.index, lView) : lView;
-        markViewDirty(startView, 6 /* NotificationSource.Listener */);
+        markViewDirty(startView, 5 /* NotificationSource.Listener */);
         let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.

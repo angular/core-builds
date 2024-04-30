@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-next.6+sha-354cd9c
+ * @license Angular v18.0.0-next.6+sha-122478c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -646,6 +646,7 @@ export declare class ApplicationRef {
     private readonly zonelessEnabled;
     private externalTestViews;
     private beforeRender;
+    private get allViews();
     /**
      * Indicates whether this instance was destroyed.
      */
@@ -13091,12 +13092,11 @@ export declare const enum ɵNotificationSource {
     DeferBlockStateUpdate = 2,
     DebugApplyChanges = 3,
     MarkForCheck = 4,
-    AnimationQueuedNodeRemoval = 5,
-    Listener = 6,
-    NewRenderHook = 7,
-    ViewAttached = 8,
-    ViewDetachedFromDOM = 9,
-    AsyncAnimationsLoaded = 10
+    Listener = 5,
+    NewRenderHook = 6,
+    ViewAttached = 7,
+    ViewDetachedFromDOM = 8,
+    AsyncAnimationsLoaded = 9
 }
 
 /**

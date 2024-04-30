@@ -257,7 +257,7 @@ class AfterRenderCallback {
         this.callbackFn = callbackFn;
         this.errorHandler = inject(ErrorHandler, { optional: true });
         // Registering a callback will notify the scheduler.
-        inject(ChangeDetectionScheduler, { optional: true })?.notify(7 /* NotificationSource.NewRenderHook */);
+        inject(ChangeDetectionScheduler, { optional: true })?.notify(6 /* NotificationSource.NewRenderHook */);
     }
     invoke() {
         try {
