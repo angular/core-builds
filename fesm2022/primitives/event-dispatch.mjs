@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.0+sha-e58ff4a
+ * @license Angular v18.0.0-rc.0+sha-4837621
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1760,59 +1760,6 @@ function clearNamespace(element) {
 }
 
 /**
- * @define Support for jsnamespace attribute.  This flag can be overridden in a
- * build rule to trim down the EventContract's binary size.
- */
-const JSNAMESPACE_SUPPORT = true;
-/**
- * @define Support for accessible click actions.  This flag can be overridden in
- * a build rule.
- */
-const A11Y_CLICK_SUPPORT = false;
-/**
- * @define Support for the non-bubbling mouseenter and mouseleave events.  This
- * flag can be overridden in a build rule.
- */
-const MOUSE_SPECIAL_SUPPORT = false;
-/**
- * @define Call stopPropagation on handled events. When integrating with
- * non-jsaction event handler based code, you will likely want to turn this flag
- * off. While most event handlers will continue to work, jsaction binds focus
- * and blur events in the capture phase and thus with stopPropagation, none of
- * your non-jsaction-handlers will ever see it.
- */
-const STOP_PROPAGATION = true;
-/**
- * @define Support for custom events, which are type EventType.CUSTOM. These are
- * native DOM events with an additional type field and an optional payload.
- */
-const CUSTOM_EVENT_SUPPORT = false;
-
-/**
- * @fileoverview Implements the local event handling contract. This
- * allows DOM objects in a container that enters into this contract to
- * define event handlers which are executed in a local context.
- *
- * One EventContract instance can manage the contract for multiple
- * containers, which are added using the addContainer() method.
- *
- * Events can be registered using the addEvent() method.
- *
- * A Dispatcher is added using the registerDispatcher() method. Until there is
- * a dispatcher, events are queued. The idea is that the EventContract
- * class is inlined in the HTML of the top level page and instantiated
- * right after the start of <body>. The Dispatcher class is contained
- * in the external deferred js, and instantiated and registered with
- * EventContract when the external javascript in the page loads. The
- * external javascript will also register the jsaction handlers, which
- * then pick up the queued events at the time of registration.
- *
- * Since this class is meant to be inlined in the main page HTML, the
- * size of the binary compiled from this file MUST be kept as small as
- * possible and thus its dependencies to a minimum.
- */
-const DEFAULT_EVENT_TYPE = EventType.CLICK;
-/**
  * Since maps from event to action are immutable we can use a single map
  * to represent the empty map.
  */
@@ -1821,114 +1768,33 @@ const EMPTY_ACTION_MAP = {};
  * This regular expression matches a semicolon.
  */
 const REGEXP_SEMICOLON = /\s*;\s*/;
-/**
- * EventContract intercepts events in the bubbling phase at the
- * boundary of a container element, and maps them to generic actions
- * which are specified using the custom jsaction attribute in
- * HTML. Behavior of the application is then specified in terms of
- * handler for such actions, cf. jsaction.Dispatcher in dispatcher.js.
- *
- * This has several benefits: (1) No DOM event handlers need to be
- * registered on the specific elements in the UI. (2) The set of
- * events that the application has to handle can be specified in terms
- * of the semantics of the application, rather than in terms of DOM
- * events. (3) Invocation of handlers can be delayed and handlers can
- * be delay loaded in a generic way.
- */
-class EventContract {
-    static { this.CUSTOM_EVENT_SUPPORT = CUSTOM_EVENT_SUPPORT; }
-    static { this.STOP_PROPAGATION = STOP_PROPAGATION; }
-    static { this.A11Y_CLICK_SUPPORT = A11Y_CLICK_SUPPORT; }
-    static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
-    static { this.JSNAMESPACE_SUPPORT = JSNAMESPACE_SUPPORT; }
-    constructor(containerManager) {
-        /**
-         * The DOM events which this contract covers. Used to prevent double
-         * registration of event types. The value of the map is the
-         * internally created DOM event handler function that handles the
-         * DOM events. See addEvent().
-         *
-         */
-        this.eventHandlers = {};
-        this.browserEventTypeToExtraEventTypes = {};
-        /**
-         * The dispatcher function. Events are passed to this function for
-         * handling once it was set using the registerDispatcher() method. This is
-         * done because the function is passed from another jsbinary, so passing the
-         * instance and invoking the method here would require to leave the method
-         * unobfuscated.
-         */
-        this.dispatcher = null;
-        /**
-         * The list of suspended `EventInfo` that will be dispatched
-         * as soon as the `Dispatcher` is registered.
-         */
-        this.queuedEventInfos = [];
-        /** Whether a11y click support has been loaded or not. */
-        this.hasA11yClickSupport = false;
-        /** Whether to add an a11y click listener. */
-        this.addA11yClickListener = false;
+/** If no event type is defined, defaults to `click`. */
+const DEFAULT_EVENT_TYPE = EventType.CLICK;
+/** Resolves actions for Events. */
+class ActionResolver {
+    constructor({ customEventSupport = false, jsnamespaceSupport = false, syntheticMouseEventSupport = false, } = {}) {
+        this.a11yClickSupport = false;
         this.updateEventInfoForA11yClick = undefined;
         this.preventDefaultForA11yClick = undefined;
         this.populateClickOnlyAction = undefined;
-        this.containerManager = containerManager;
-        if (EventContract.CUSTOM_EVENT_SUPPORT) {
-            this.addEvent(EventType.CUSTOM);
-        }
-        if (EventContract.A11Y_CLICK_SUPPORT) {
-            // Add a11y click support to the `EventContract`.
-            this.addA11yClickSupport();
-        }
+        this.customEventSupport = customEventSupport;
+        this.jsnamespaceSupport = jsnamespaceSupport;
+        this.syntheticMouseEventSupport = syntheticMouseEventSupport;
     }
-    handleEvent(eventType, event, container) {
-        const eventInfo = createEventInfoFromParameters(
-        /* eventType= */ eventType, 
-        /* event= */ event, 
-        /* targetElement= */ event.target, 
-        /* container= */ container, 
-        /* timestamp= */ Date.now());
-        this.handleEventInfo(eventInfo);
-    }
-    /**
-     * Handle an `EventInfo`.
-     */
-    handleEventInfo(eventInfo) {
-        if (!this.dispatcher) {
-            // All events are queued when the dispatcher isn't yet loaded.
-            setIsReplay(eventInfo, true);
-            this.queuedEventInfos?.push(eventInfo);
-        }
-        if (EventContract.CUSTOM_EVENT_SUPPORT &&
-            getEventType(eventInfo) === EventType.CUSTOM) {
-            const detail = getEvent(eventInfo).detail;
-            // For custom events, use a secondary dispatch based on the internal
-            // custom type of the event.
-            if (!detail || !detail['_type']) {
-                // This should never happen.
-                return;
+    resolve(eventInfo) {
+        if (this.customEventSupport) {
+            if (getEventType(eventInfo) === EventType.CUSTOM) {
+                const detail = getEvent(eventInfo).detail;
+                // For custom events, use a secondary dispatch based on the internal
+                // custom type of the event.
+                if (!detail || !detail['_type']) {
+                    // This should never happen.
+                    return;
+                }
+                setEventType(eventInfo, detail['_type']);
             }
-            setEventType(eventInfo, detail['_type']);
         }
         this.populateAction(eventInfo);
-        if (!this.dispatcher) {
-            return;
-        }
-        const globalEventInfo = cloneEventInfo(eventInfo);
-        // In some cases, `populateAction` will rewrite `click` events to
-        // `clickonly`. Revert back to a regular click, otherwise we won't be able
-        // to execute global event handlers registered on click events.
-        if (getEventType(globalEventInfo) === EventType.CLICKONLY) {
-            setEventType(globalEventInfo, EventType.CLICK);
-        }
-        this.dispatcher(globalEventInfo, /* dispatch global event */ true);
-        const action = getAction(eventInfo);
-        if (!action) {
-            return;
-        }
-        if (shouldPreventDefaultBeforeDispatching(getActionElement(action), eventInfo)) {
-            preventDefault(getEvent(eventInfo));
-        }
-        this.dispatcher(eventInfo);
     }
     /**
      * Searches for a jsaction that the DOM event maps to and creates an
@@ -1980,7 +1846,7 @@ class EventContract {
             isModifiedClickEvent(getEvent(eventInfo))) {
             setEventType(eventInfo, EventType.CLICKMOD);
         }
-        else if (this.hasA11yClickSupport) {
+        else if (this.a11yClickSupport) {
             this.updateEventInfoForA11yClick(eventInfo);
         }
         // Walk to the parent node, unless the node has a different owner in
@@ -1988,7 +1854,9 @@ class EventContract {
         // shadow root if needed.
         let actionElement = getTargetElement(eventInfo);
         while (actionElement && actionElement !== getContainer(eventInfo)) {
-            this.populateActionOnElement(actionElement, eventInfo);
+            if (actionElement.nodeType === Node.ELEMENT_NODE) {
+                this.populateActionOnElement(actionElement, eventInfo);
+            }
             if (getAction(eventInfo)) {
                 // An event is handled by at most one jsaction. Thus we stop at the
                 // first matching jsaction specified in a jsaction attribute up the
@@ -2011,35 +1879,36 @@ class EventContract {
             // No action found.
             return;
         }
-        if (this.hasA11yClickSupport) {
+        if (this.a11yClickSupport) {
             this.preventDefaultForA11yClick(eventInfo);
         }
         // We attempt to handle the mouseenter/mouseleave events here by
         // detecting whether the mouseover/mouseout events correspond to
         // entering/leaving an element.
-        if (EventContract.MOUSE_SPECIAL_SUPPORT &&
-            (getEventType(eventInfo) === EventType.MOUSEENTER ||
+        if (this.syntheticMouseEventSupport) {
+            if (getEventType(eventInfo) === EventType.MOUSEENTER ||
                 getEventType(eventInfo) === EventType.MOUSELEAVE ||
                 getEventType(eventInfo) === EventType.POINTERENTER ||
-                getEventType(eventInfo) === EventType.POINTERLEAVE)) {
-            // We attempt to handle the mouseenter/mouseleave events here by
-            // detecting whether the mouseover/mouseout events correspond to
-            // entering/leaving an element.
-            if (isMouseSpecialEvent(getEvent(eventInfo), getEventType(eventInfo), getActionElement(action))) {
-                // If both mouseover/mouseout and mouseenter/mouseleave events are
-                // enabled, two separate handlers for mouseover/mouseout are
-                // registered. Both handlers will see the same event instance
-                // so we create a copy to avoid interfering with the dispatching of
-                // the mouseover/mouseout event.
-                const copiedEvent = createMouseSpecialEvent(getEvent(eventInfo), getActionElement(action));
-                setEvent(eventInfo, copiedEvent);
-                // Since the mouseenter/mouseleave events do not bubble, the target
-                // of the event is technically the `actionElement` (the node with the
-                // `jsaction` attribute)
-                setTargetElement(eventInfo, getActionElement(action));
-            }
-            else {
-                unsetAction(eventInfo);
+                getEventType(eventInfo) === EventType.POINTERLEAVE) {
+                // We attempt to handle the mouseenter/mouseleave events here by
+                // detecting whether the mouseover/mouseout events correspond to
+                // entering/leaving an element.
+                if (isMouseSpecialEvent(getEvent(eventInfo), getEventType(eventInfo), getActionElement(action))) {
+                    // If both mouseover/mouseout and mouseenter/mouseleave events are
+                    // enabled, two separate handlers for mouseover/mouseout are
+                    // registered. Both handlers will see the same event instance
+                    // so we create a copy to avoid interfering with the dispatching of
+                    // the mouseover/mouseout event.
+                    const copiedEvent = createMouseSpecialEvent(getEvent(eventInfo), getActionElement(action));
+                    setEvent(eventInfo, copiedEvent);
+                    // Since the mouseenter/mouseleave events do not bubble, the target
+                    // of the event is technically the `actionElement` (the node with the
+                    // `jsaction` attribute)
+                    setTargetElement(eventInfo, getActionElement(action));
+                }
+                else {
+                    unsetAction(eventInfo);
+                }
             }
         }
     }
@@ -2058,14 +1927,269 @@ class EventContract {
      *    action is found on the `actionElement`.
      */
     populateActionOnElement(actionElement, eventInfo) {
-        const actionMap = parseActions(actionElement, getContainer(eventInfo));
+        const actionMap = this.parseActions(actionElement, getContainer(eventInfo));
         const actionName = actionMap[getEventType(eventInfo)];
         if (actionName !== undefined) {
             setAction(eventInfo, actionName, actionElement);
         }
-        if (this.hasA11yClickSupport) {
+        if (this.a11yClickSupport) {
             this.populateClickOnlyAction(actionElement, eventInfo, actionMap);
         }
+    }
+    /**
+     * Parses and caches an element's jsaction element into a map.
+     *
+     * This is primarily for internal use.
+     *
+     * @param actionElement The DOM node to retrieve the jsaction map from.
+     * @param container The node which limits the namespace lookup for a jsaction
+     * name. The container node itself will not be searched.
+     * @return Map from event to qualified name of the jsaction bound to it.
+     */
+    parseActions(actionElement, container) {
+        let actionMap = get(actionElement);
+        if (!actionMap) {
+            const jsactionAttribute = actionElement.getAttribute(Attribute.JSACTION);
+            if (!jsactionAttribute) {
+                actionMap = EMPTY_ACTION_MAP;
+                set(actionElement, actionMap);
+            }
+            else {
+                actionMap = getParsed(jsactionAttribute);
+                if (!actionMap) {
+                    actionMap = {};
+                    const values = jsactionAttribute.split(REGEXP_SEMICOLON);
+                    for (let idx = 0; idx < values.length; idx++) {
+                        const value = values[idx];
+                        if (!value) {
+                            continue;
+                        }
+                        const colon = value.indexOf(Char.EVENT_ACTION_SEPARATOR);
+                        const hasColon = colon !== -1;
+                        const type = hasColon ? value.substr(0, colon).trim() : DEFAULT_EVENT_TYPE;
+                        const action = hasColon ? value.substr(colon + 1).trim() : value;
+                        actionMap[type] = action;
+                    }
+                    setParsed(jsactionAttribute, actionMap);
+                }
+                // If namespace support is active we need to augment the (potentially
+                // cached) jsaction mapping with the namespace.
+                if (this.jsnamespaceSupport) {
+                    const noNs = actionMap;
+                    actionMap = {};
+                    for (const type in noNs) {
+                        actionMap[type] = this.getFullyQualifiedAction(noNs[type], actionElement, container);
+                    }
+                }
+                set(actionElement, actionMap);
+            }
+        }
+        return actionMap;
+    }
+    /**
+     * Returns the fully qualified jsaction action. If the given jsaction
+     * name doesn't already contain the namespace, the function iterates
+     * over ancestor nodes until a jsnamespace attribute is found, and
+     * uses the value of that attribute as the namespace.
+     *
+     * @param action The jsaction action to resolve.
+     * @param start The node from which to start searching for a jsnamespace
+     * attribute.
+     * @param container The node which limits the search for a jsnamespace
+     * attribute. This node will be searched.
+     * @return The fully qualified name of the jsaction. If no namespace is found,
+     * returns the unqualified name in case it exists in the global namespace.
+     */
+    getFullyQualifiedAction(action, start, container) {
+        if (isNamespacedAction(action)) {
+            return action;
+        }
+        let node = start;
+        while (node && node.nodeType === Node.ELEMENT_NODE) {
+            const namespace = getNamespaceFromElement(node);
+            if (namespace) {
+                return namespace + Char.NAMESPACE_ACTION_SEPARATOR + action;
+            }
+            // If this node is the container, stop.
+            if (node === container) {
+                break;
+            }
+            node = node.parentNode;
+        }
+        return action;
+    }
+    addA11yClickSupport(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction) {
+        this.a11yClickSupport = true;
+        this.updateEventInfoForA11yClick = updateEventInfoForA11yClick;
+        this.preventDefaultForA11yClick = preventDefaultForA11yClick;
+        this.populateClickOnlyAction = populateClickOnlyAction;
+    }
+}
+/**
+ * Checks if a jsaction action contains a namespace part.
+ */
+function isNamespacedAction(action) {
+    return action.indexOf(Char.NAMESPACE_ACTION_SEPARATOR) >= 0;
+}
+/**
+ * Returns the value of the jsnamespace attribute of the given node.
+ * Also caches the value for subsequent lookups.
+ * @param element The node whose jsnamespace attribute is being asked for.
+ * @return The value of the jsnamespace attribute, or null if not found.
+ */
+function getNamespaceFromElement(element) {
+    let namespace = getNamespace(element);
+    // Only query for the attribute if it has not been queried for
+    // before. getAttribute() returns null if an attribute is not present. Thus,
+    // namespace is string|null if the query took place in the past, or
+    // undefined if the query did not take place.
+    if (namespace === undefined) {
+        namespace = element.getAttribute(Attribute.JSNAMESPACE);
+        setNamespace(element, namespace);
+    }
+    return namespace;
+}
+
+/**
+ * @define Support for jsnamespace attribute.  This flag can be overridden in a
+ * build rule to trim down the EventContract's binary size.
+ */
+const JSNAMESPACE_SUPPORT = true;
+/**
+ * @define Support for accessible click actions.  This flag can be overridden in
+ * a build rule.
+ */
+const A11Y_CLICK_SUPPORT = false;
+/**
+ * @define Support for the non-bubbling mouseenter and mouseleave events.  This
+ * flag can be overridden in a build rule.
+ */
+const MOUSE_SPECIAL_SUPPORT = false;
+/**
+ * @define Support for custom events, which are type EventType.CUSTOM. These are
+ * native DOM events with an additional type field and an optional payload.
+ */
+const CUSTOM_EVENT_SUPPORT = false;
+
+/**
+ * @fileoverview Implements the local event handling contract. This
+ * allows DOM objects in a container that enters into this contract to
+ * define event handlers which are executed in a local context.
+ *
+ * One EventContract instance can manage the contract for multiple
+ * containers, which are added using the addContainer() method.
+ *
+ * Events can be registered using the addEvent() method.
+ *
+ * A Dispatcher is added using the registerDispatcher() method. Until there is
+ * a dispatcher, events are queued. The idea is that the EventContract
+ * class is inlined in the HTML of the top level page and instantiated
+ * right after the start of <body>. The Dispatcher class is contained
+ * in the external deferred js, and instantiated and registered with
+ * EventContract when the external javascript in the page loads. The
+ * external javascript will also register the jsaction handlers, which
+ * then pick up the queued events at the time of registration.
+ *
+ * Since this class is meant to be inlined in the main page HTML, the
+ * size of the binary compiled from this file MUST be kept as small as
+ * possible and thus its dependencies to a minimum.
+ */
+/**
+ * EventContract intercepts events in the bubbling phase at the
+ * boundary of a container element, and maps them to generic actions
+ * which are specified using the custom jsaction attribute in
+ * HTML. Behavior of the application is then specified in terms of
+ * handler for such actions, cf. jsaction.Dispatcher in dispatcher.js.
+ *
+ * This has several benefits: (1) No DOM event handlers need to be
+ * registered on the specific elements in the UI. (2) The set of
+ * events that the application has to handle can be specified in terms
+ * of the semantics of the application, rather than in terms of DOM
+ * events. (3) Invocation of handlers can be delayed and handlers can
+ * be delay loaded in a generic way.
+ */
+class EventContract {
+    static { this.CUSTOM_EVENT_SUPPORT = CUSTOM_EVENT_SUPPORT; }
+    static { this.A11Y_CLICK_SUPPORT = A11Y_CLICK_SUPPORT; }
+    static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
+    static { this.JSNAMESPACE_SUPPORT = JSNAMESPACE_SUPPORT; }
+    constructor(containerManager) {
+        this.actionResolver = new ActionResolver({
+            customEventSupport: EventContract.CUSTOM_EVENT_SUPPORT,
+            jsnamespaceSupport: EventContract.JSNAMESPACE_SUPPORT,
+            syntheticMouseEventSupport: EventContract.MOUSE_SPECIAL_SUPPORT,
+        });
+        /**
+         * The DOM events which this contract covers. Used to prevent double
+         * registration of event types. The value of the map is the
+         * internally created DOM event handler function that handles the
+         * DOM events. See addEvent().
+         *
+         */
+        this.eventHandlers = {};
+        this.browserEventTypeToExtraEventTypes = {};
+        /**
+         * The dispatcher function. Events are passed to this function for
+         * handling once it was set using the registerDispatcher() method. This is
+         * done because the function is passed from another jsbinary, so passing the
+         * instance and invoking the method here would require to leave the method
+         * unobfuscated.
+         */
+        this.dispatcher = null;
+        /**
+         * The list of suspended `EventInfo` that will be dispatched
+         * as soon as the `Dispatcher` is registered.
+         */
+        this.queuedEventInfos = [];
+        /** Whether to add an a11y click listener. */
+        this.addA11yClickListener = false;
+        this.containerManager = containerManager;
+        if (EventContract.CUSTOM_EVENT_SUPPORT) {
+            this.addEvent(EventType.CUSTOM);
+        }
+        if (EventContract.A11Y_CLICK_SUPPORT) {
+            // Add a11y click support to the `EventContract`.
+            this.addA11yClickSupport();
+        }
+    }
+    handleEvent(eventType, event, container) {
+        const eventInfo = createEventInfoFromParameters(
+        /* eventType= */ eventType, 
+        /* event= */ event, 
+        /* targetElement= */ event.target, 
+        /* container= */ container, 
+        /* timestamp= */ Date.now());
+        this.handleEventInfo(eventInfo);
+    }
+    /**
+     * Handle an `EventInfo`.
+     */
+    handleEventInfo(eventInfo) {
+        if (!this.dispatcher) {
+            // All events are queued when the dispatcher isn't yet loaded.
+            setIsReplay(eventInfo, true);
+            this.queuedEventInfos?.push(eventInfo);
+        }
+        this.actionResolver.resolve(eventInfo);
+        if (!this.dispatcher) {
+            return;
+        }
+        const globalEventInfo = cloneEventInfo(eventInfo);
+        // In some cases, `populateAction` will rewrite `click` events to
+        // `clickonly`. Revert back to a regular click, otherwise we won't be able
+        // to execute global event handlers registered on click events.
+        if (getEventType(globalEventInfo) === EventType.CLICKONLY) {
+            setEventType(globalEventInfo, EventType.CLICK);
+        }
+        this.dispatcher(globalEventInfo, /* dispatch global event */ true);
+        const action = getAction(eventInfo);
+        if (!action) {
+            return;
+        }
+        if (shouldPreventDefaultBeforeDispatching(getActionElement(action), eventInfo)) {
+            preventDefault(getEvent(eventInfo));
+        }
+        this.dispatcher(eventInfo);
     }
     /**
      * Enables jsaction handlers to be called for the event type given by
@@ -2226,10 +2350,7 @@ class EventContract {
      */
     addA11yClickSupportImpl(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction) {
         this.addA11yClickListener = true;
-        this.hasA11yClickSupport = true;
-        this.updateEventInfoForA11yClick = updateEventInfoForA11yClick;
-        this.preventDefaultForA11yClick = preventDefaultForA11yClick;
-        this.populateClickOnlyAction = populateClickOnlyAction;
+        this.actionResolver.addA11yClickSupport(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction);
     }
 }
 /**
@@ -2253,151 +2374,6 @@ function shouldPreventDefaultBeforeDispatching(actionElement, eventInfo) {
     return (actionElement.tagName === 'A' &&
         (getEventType(eventInfo) === EventType.CLICK ||
             getEventType(eventInfo) === EventType.CLICKMOD));
-}
-/**
- * Parses and caches an element's jsaction element into a map.
- *
- * This is primarily for internal use.
- *
- * @param actionElement The DOM node to retrieve the jsaction map from.
- * @param container The node which limits the namespace lookup for a jsaction
- * name. The container node itself will not be searched.
- * @return Map from event to qualified name of the jsaction bound to it.
- */
-function parseActions(actionElement, container) {
-    let actionMap = get(actionElement);
-    if (!actionMap) {
-        const jsactionAttribute = getAttr(actionElement, Attribute.JSACTION);
-        if (!jsactionAttribute) {
-            actionMap = EMPTY_ACTION_MAP;
-            set(actionElement, actionMap);
-        }
-        else {
-            actionMap = getParsed(jsactionAttribute);
-            if (!actionMap) {
-                actionMap = {};
-                const values = jsactionAttribute.split(REGEXP_SEMICOLON);
-                for (let idx = 0; idx < values.length; idx++) {
-                    const value = values[idx];
-                    if (!value) {
-                        continue;
-                    }
-                    const colon = value.indexOf(Char.EVENT_ACTION_SEPARATOR);
-                    const hasColon = colon !== -1;
-                    const type = hasColon ? stringTrim(value.substr(0, colon)) : DEFAULT_EVENT_TYPE;
-                    const action = hasColon ? stringTrim(value.substr(colon + 1)) : value;
-                    actionMap[type] = action;
-                }
-                setParsed(jsactionAttribute, actionMap);
-            }
-            // If namespace support is active we need to augment the (potentially
-            // cached) jsaction mapping with the namespace.
-            if (EventContract.JSNAMESPACE_SUPPORT) {
-                const noNs = actionMap;
-                actionMap = {};
-                for (const type in noNs) {
-                    actionMap[type] = getFullyQualifiedAction(noNs[type], actionElement, container);
-                }
-            }
-            set(actionElement, actionMap);
-        }
-    }
-    return actionMap;
-}
-/**
- * Returns the fully qualified jsaction action. If the given jsaction
- * name doesn't already contain the namespace, the function iterates
- * over ancestor nodes until a jsnamespace attribute is found, and
- * uses the value of that attribute as the namespace.
- *
- * @param action The jsaction action to resolve.
- * @param start The node from which to start searching for a jsnamespace
- * attribute.
- * @param container The node which limits the search for a jsnamespace
- * attribute. This node will be searched.
- * @return The fully qualified name of the jsaction. If no namespace is found,
- * returns the unqualified name in case it exists in the global namespace.
- */
-function getFullyQualifiedAction(action, start, container) {
-    if (EventContract.JSNAMESPACE_SUPPORT) {
-        if (isNamespacedAction(action)) {
-            return action;
-        }
-        let node = start;
-        while (node) {
-            const namespace = getNamespaceFromElement(node);
-            if (namespace) {
-                return namespace + Char.NAMESPACE_ACTION_SEPARATOR + action;
-            }
-            // If this node is the container, stop.
-            if (node === container) {
-                break;
-            }
-            node = node.parentNode;
-        }
-    }
-    return action;
-}
-/**
- * Checks if a jsaction action contains a namespace part.
- */
-function isNamespacedAction(action) {
-    return action.indexOf(Char.NAMESPACE_ACTION_SEPARATOR) >= 0;
-}
-/**
- * Returns the value of the jsnamespace attribute of the given node.
- * Also caches the value for subsequent lookups.
- * @param element The node whose jsnamespace attribute is being asked for.
- * @return The value of the jsnamespace attribute, or null if not found.
- */
-function getNamespaceFromElement(element) {
-    let namespace = getNamespace(element);
-    // Only query for the attribute if it has not been queried for
-    // before. getAttr() returns null if an attribute is not present. Thus,
-    // namespace is string|null if the query took place in the past, or
-    // undefined if the query did not take place.
-    if (namespace === undefined) {
-        namespace = getAttr(element, Attribute.JSNAMESPACE);
-        setNamespace(element, namespace);
-    }
-    return namespace;
-}
-/**
- * Accesses the event handler attribute value of a DOM node. It guards
- * against weird situations (described in the body) that occur in
- * connection with nodes that are removed from their document.
- * @param element The DOM element.
- * @param attribute The name of the attribute to access.
- * @return The attribute value if it was found, null otherwise.
- */
-function getAttr(element, attribute) {
-    let value = null;
-    // NOTE: Nodes in IE do not always have a getAttribute
-    // method defined. This is the case where sourceElement has in
-    // fact been removed from the DOM before eventContract begins
-    // handling - where a parentNode does not have getAttribute
-    // defined.
-    // NOTE: We must use the 'in' operator instead of the regular dot
-    // notation, since the latter fails in IE8 if the getAttribute method is not
-    // defined. See b/7139109.
-    if ('getAttribute' in element) {
-        value = element.getAttribute(attribute);
-    }
-    return value;
-}
-/**
- * Helper function to trim whitespace from the beginning and the end
- * of the string. This deliberately doesn't use the closure equivalent
- * to keep dependencies small.
- * @param str  Input string.
- * @return  Trimmed string.
- */
-function stringTrim(str) {
-    if (typeof String.prototype.trim === 'function') {
-        return str.trim();
-    }
-    const trimmedLeft = str.replace(/^\s+/, '');
-    return trimmedLeft.replace(/\s+$/, '');
 }
 
 /**
