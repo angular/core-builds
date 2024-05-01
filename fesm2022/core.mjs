@@ -1,5 +1,5 @@
 /**
- * @license Angular v17.3.7+sha-4c50e1e
+ * @license Angular v17.3.7+sha-3818436
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15545,7 +15545,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.7+sha-4c50e1e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '17.3.7+sha-3818436']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19619,9 +19619,13 @@ function scheduleDelayedTrigger(scheduleFn) {
     const lView = getLView();
     const tNode = getCurrentTNode();
     renderPlaceholder(lView, tNode);
-    const cleanupFn = scheduleFn(() => triggerDeferBlock(lView, tNode), lView);
-    const lDetails = getLDeferBlockDetails(lView, tNode);
-    storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, cleanupFn);
+    // Only trigger the scheduled trigger on the browser
+    // since we don't want to delay the server response.
+    if (isPlatformBrowser(lView[INJECTOR])) {
+        const cleanupFn = scheduleFn(() => triggerDeferBlock(lView, tNode), lView);
+        const lDetails = getLDeferBlockDetails(lView, tNode);
+        storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, cleanupFn);
+    }
 }
 /**
  * Schedules prefetching for `on idle` and `on timer` triggers.
@@ -19630,14 +19634,18 @@ function scheduleDelayedTrigger(scheduleFn) {
  */
 function scheduleDelayedPrefetching(scheduleFn) {
     const lView = getLView();
-    const tNode = getCurrentTNode();
-    const tView = lView[TVIEW];
-    const tDetails = getTDeferBlockDetails(tView, tNode);
-    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-        const lDetails = getLDeferBlockDetails(lView, tNode);
-        const prefetch = () => triggerPrefetching(tDetails, lView, tNode);
-        const cleanupFn = scheduleFn(prefetch, lView);
-        storeTriggerCleanupFn(1 /* TriggerType.Prefetch */, lDetails, cleanupFn);
+    // Only trigger the scheduled trigger on the browser
+    // since we don't want to delay the server response.
+    if (isPlatformBrowser(lView[INJECTOR])) {
+        const tNode = getCurrentTNode();
+        const tView = lView[TVIEW];
+        const tDetails = getTDeferBlockDetails(tView, tNode);
+        if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+            const lDetails = getLDeferBlockDetails(lView, tNode);
+            const prefetch = () => triggerPrefetching(tDetails, lView, tNode);
+            const cleanupFn = scheduleFn(prefetch, lView);
+            storeTriggerCleanupFn(1 /* TriggerType.Prefetch */, lDetails, cleanupFn);
+        }
     }
 }
 /**
@@ -29852,7 +29860,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('17.3.7+sha-4c50e1e');
+const VERSION = new Version('17.3.7+sha-3818436');
 
 class Console {
     log(message) {
