@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-874d332
+ * @license Angular v18.1.0-next.0+sha-b9a997c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -218,11 +218,11 @@ declare type Dispatcher_2 = (eventInfo: eventInfoLib.EventInfo, globalDispatch?:
  */
 export declare class EventContract implements UnrenamedEventContract {
     static CUSTOM_EVENT_SUPPORT: boolean;
-    static STOP_PROPAGATION: boolean;
     static A11Y_CLICK_SUPPORT: boolean;
     static MOUSE_SPECIAL_SUPPORT: boolean;
     static JSNAMESPACE_SUPPORT: boolean;
     private containerManager;
+    private readonly actionResolver;
     /**
      * The DOM events which this contract covers. Used to prevent double
      * registration of event types. The value of the map is the
@@ -245,13 +245,8 @@ export declare class EventContract implements UnrenamedEventContract {
      * as soon as the `Dispatcher` is registered.
      */
     private queuedEventInfos;
-    /** Whether a11y click support has been loaded or not. */
-    private hasA11yClickSupport;
     /** Whether to add an a11y click listener. */
     private addA11yClickListener;
-    private updateEventInfoForA11yClick?;
-    private preventDefaultForA11yClick?;
-    private populateClickOnlyAction?;
     ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
     constructor(containerManager: EventContractContainerManager);
     private handleEvent;
@@ -259,34 +254,6 @@ export declare class EventContract implements UnrenamedEventContract {
      * Handle an `EventInfo`.
      */
     private handleEventInfo;
-    /**
-     * Searches for a jsaction that the DOM event maps to and creates an
-     * object containing event information used for dispatching by
-     * jsaction.Dispatcher. This method populates the `action` and `actionElement`
-     * fields of the EventInfo object passed in by finding the first
-     * jsaction attribute above the target Node of the event, and below
-     * the container Node, that specifies a jsaction for the event
-     * type. If no such jsaction is found, then action is undefined.
-     *
-     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
-     *    action is found on any `Element` in the path of the `Event`.
-     */
-    private populateAction;
-    /**
-     * Accesses the jsaction map on a node and retrieves the name of the
-     * action the given event is mapped to, if any. It parses the
-     * attribute value and stores it in a property on the node for
-     * subsequent retrieval without re-parsing and re-accessing the
-     * attribute. In order to fully qualify jsaction names using a
-     * namespace, the DOM is searched starting at the current node and
-     * going through ancestor nodes until a jsnamespace attribute is
-     * found.
-     *
-     * @param actionElement The DOM node to retrieve the jsaction map from.
-     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
-     *    action is found on the `actionElement`.
-     */
-    private populateActionOnElement;
     /**
      * Enables jsaction handlers to be called for the event type given by
      * name.
