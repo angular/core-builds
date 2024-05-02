@@ -11095,7 +11095,37 @@ var SCHEMA = [
   "menuitem^[HTMLElement]|type,label,icon,!disabled,!checked,radiogroup,!default",
   "summary^[HTMLElement]|",
   "time^[HTMLElement]|dateTime",
-  ":svg:cursor^:svg:|"
+  ":svg:cursor^:svg:|",
+  ":math:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforeinput,*beforematch,*beforetoggle,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contentvisibilityautostatechange,*contextlost,*contextmenu,*contextrestored,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*scrollend,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex",
+  ":math:math^:math:|",
+  ":math:maction^:math:|",
+  ":math:menclose^:math:|",
+  ":math:merror^:math:|",
+  ":math:mfenced^:math:|",
+  ":math:mfrac^:math:|",
+  ":math:mi^:math:|",
+  ":math:mmultiscripts^:math:|",
+  ":math:mn^:math:|",
+  ":math:mo^:math:|",
+  ":math:mover^:math:|",
+  ":math:mpadded^:math:|",
+  ":math:mphantom^:math:|",
+  ":math:mroot^:math:|",
+  ":math:mrow^:math:|",
+  ":math:ms^:math:|",
+  ":math:mspace^:math:|",
+  ":math:msqrt^:math:|",
+  ":math:mstyle^:math:|",
+  ":math:msub^:math:|",
+  ":math:msubsup^:math:|",
+  ":math:msup^:math:|",
+  ":math:mtable^:math:|",
+  ":math:mtd^:math:|",
+  ":math:mtext^:math:|",
+  ":math:mtr^:math:|",
+  ":math:munder^:math:|",
+  ":math:munderover^:math:|",
+  ":math:semantics^:math:|"
 ];
 var _ATTR_TO_PROP = new Map(Object.entries({
   "class": "className",
@@ -22848,7 +22878,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.0+sha-a0ec2d8");
+var VERSION2 = new Version("18.1.0-next.0+sha-2e891ad");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
