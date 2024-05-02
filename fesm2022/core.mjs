@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-b44e35f
+ * @license Angular v18.1.0-next.0+sha-58a8f12
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15350,38 +15350,24 @@ function performanceMarkFeature(feature) {
  *
  * @returns a function to cancel the scheduled callback
  */
-function scheduleCallbackWithRafRace(callback, useNativeTimers = true) {
-    // Note: the `scheduleCallback` is used in the `NgZone` class, but we cannot use the
-    // `inject` function. The `NgZone` instance may be created manually, and thus the injection
-    // context will be unavailable. This might be enough to check whether `requestAnimationFrame` is
-    // available because otherwise, we'll fall back to `setTimeout`.
-    const hasRequestAnimationFrame = typeof _global['requestAnimationFrame'] === 'function';
-    let nativeRequestAnimationFrame = hasRequestAnimationFrame
-        ? _global['requestAnimationFrame']
-        : null;
-    let nativeSetTimeout = _global['setTimeout'];
-    if (typeof Zone !== 'undefined' && useNativeTimers) {
-        if (hasRequestAnimationFrame) {
-            nativeRequestAnimationFrame =
-                _global[Zone.__symbol__('requestAnimationFrame')] ?? nativeRequestAnimationFrame;
-        }
-        nativeSetTimeout = _global[Zone.__symbol__('setTimeout')] ?? nativeSetTimeout;
-    }
+function scheduleCallbackWithRafRace(callback) {
     let executeCallback = true;
-    nativeSetTimeout(() => {
+    setTimeout(() => {
         if (!executeCallback) {
             return;
         }
         executeCallback = false;
         callback();
     });
-    nativeRequestAnimationFrame?.(() => {
-        if (!executeCallback) {
-            return;
-        }
-        executeCallback = false;
-        callback();
-    });
+    if (typeof _global['requestAnimationFrame'] === 'function') {
+        _global['requestAnimationFrame'](() => {
+            if (!executeCallback) {
+                return;
+            }
+            executeCallback = false;
+            callback();
+        });
+    }
     return () => {
         executeCallback = false;
     };
@@ -15552,7 +15538,6 @@ class NgZone {
             !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
         self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
         self.callbackScheduled = false;
-        self.scheduleCallback = scheduleCallbackWithRafRace;
         forkInnerZoneWithAngularBehavior(self);
     }
     /**
@@ -15692,26 +15677,14 @@ function delayChangeDetectionForEvents(zone) {
         return;
     }
     zone.callbackScheduled = true;
-    zone.scheduleCallback.call(_global, () => {
-        // This is a work around for https://github.com/angular/angular/issues/36839.
-        // The core issue is that when event coalescing is enabled it is possible for microtasks
-        // to get flushed too early (As is the case with `Promise.then`) between the
-        // coalescing eventTasks.
-        //
-        // To workaround this we schedule a "fake" eventTask before we process the
-        // coalescing eventTasks. The benefit of this is that the "fake" container eventTask
-        //  will prevent the microtasks queue from getting drained in between the coalescing
-        // eventTask execution.
-        if (!zone.fakeTopEventTask) {
-            zone.fakeTopEventTask = Zone.root.scheduleEventTask('fakeTopEventTask', () => {
-                zone.callbackScheduled = false;
-                updateMicroTaskStatus(zone);
-                zone.isCheckStableRunning = true;
-                checkStable(zone);
-                zone.isCheckStableRunning = false;
-            }, undefined, () => { }, () => { });
-        }
-        zone.fakeTopEventTask.invoke();
+    Zone.root.run(() => {
+        scheduleCallbackWithRafRace(() => {
+            zone.callbackScheduled = false;
+            updateMicroTaskStatus(zone);
+            zone.isCheckStableRunning = true;
+            checkStable(zone);
+            zone.isCheckStableRunning = false;
+        });
     });
     updateMicroTaskStatus(zone);
 }
@@ -16902,7 +16875,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-b44e35f']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-58a8f12']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19527,7 +19500,6 @@ const LOADING_AFTER_SLOT = 1;
  * Describes the current state of this defer block instance.
  *
  * @publicApi
- * @developerPreview
  */
 var DeferBlockState;
 (function (DeferBlockState) {
@@ -19564,7 +19536,6 @@ const PREFETCH_TRIGGER_CLEANUP_FNS = 5;
 /**
  * Options for configuring defer blocks behavior.
  * @publicApi
- * @developerPreview
  */
 var DeferBlockBehavior;
 (function (DeferBlockBehavior) {
@@ -30816,7 +30787,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.0+sha-b44e35f');
+const VERSION = new Version('18.1.0-next.0+sha-58a8f12');
 
 class Console {
     log(message) {
@@ -32928,13 +32899,13 @@ class ChangeDetectionSchedulerImpl {
             Zone.root.run(() => {
                 this.cancelScheduledCallback = scheduleCallback(() => {
                     this.tick(this.shouldRefreshViews);
-                }, false /** useNativeTimers */);
+                });
             });
         }
         else {
             this.cancelScheduledCallback = scheduleCallback(() => {
                 this.tick(this.shouldRefreshViews);
-            }, false /** useNativeTimers */);
+            });
         }
     }
     shouldScheduleTick() {

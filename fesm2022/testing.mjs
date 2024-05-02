@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-b44e35f
+ * @license Angular v18.1.0-next.0+sha-58a8f12
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -49,7 +49,6 @@ function waitForAsync(fn) {
  * Represents an individual defer block for testing purposes.
  *
  * @publicApi
- * @developerPreview
  */
 class DeferBlockFixture {
     /** @nodoc */
@@ -212,8 +211,6 @@ class ComponentFixture {
     }
     /**
      * Retrieves all defer block fixtures in the component fixture.
-     *
-     * @developerPreview
      */
     getDeferBlocks() {
         const deferBlocks = [];

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-b44e35f
+ * @license Angular v18.1.0-next.0+sha-58a8f12
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12288,7 +12288,6 @@ export declare const ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR: InjectionToken<ɵDefe
 /**
  * Options for configuring defer blocks behavior.
  * @publicApi
- * @developerPreview
  */
 export declare enum ɵDeferBlockBehavior {
     /**
@@ -12343,7 +12342,6 @@ export declare interface ɵDeferBlockDetails {
  * Describes the current state of this defer block instance.
  *
  * @publicApi
- * @developerPreview
  */
 export declare enum ɵDeferBlockState {
     /** The placeholder block content is rendered */
