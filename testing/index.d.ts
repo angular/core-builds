@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.0+sha-73de8b6
+ * @license Angular v18.0.0-rc.0+sha-eb91efa
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -96,8 +96,6 @@ export declare abstract class ComponentFixture<T> {
     whenStable(): Promise<any>;
     /**
      * Retrieves all defer block fixtures in the component fixture.
-     *
-     * @developerPreview
      */
     getDeferBlocks(): Promise<DeferBlockFixture[]>;
     private _getRenderer;
@@ -127,7 +125,6 @@ export { DeferBlockBehavior }
  * Represents an individual defer block for testing purposes.
  *
  * @publicApi
- * @developerPreview
  */
 export declare class DeferBlockFixture {
     private block;
