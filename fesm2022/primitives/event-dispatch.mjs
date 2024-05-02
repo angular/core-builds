@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.0+sha-91b007e
+ * @license Angular v18.0.0-rc.0+sha-662bca4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2054,7 +2054,7 @@ function getNamespaceFromElement(element) {
  * @define Support for jsnamespace attribute.  This flag can be overridden in a
  * build rule to trim down the EventContract's binary size.
  */
-const JSNAMESPACE_SUPPORT = true;
+const JSNAMESPACE_SUPPORT = false;
 /**
  * @define Support for accessible click actions.  This flag can be overridden in
  * a build rule.
