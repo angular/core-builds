@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.0+sha-0510930
+ * @license Angular v18.0.0-rc.0+sha-8483721
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -247,7 +247,6 @@ export declare class EventContract implements UnrenamedEventContract {
     static CUSTOM_EVENT_SUPPORT: boolean;
     static A11Y_CLICK_SUPPORT: boolean;
     static MOUSE_SPECIAL_SUPPORT: boolean;
-    static JSNAMESPACE_SUPPORT: boolean;
     private containerManager;
     private readonly actionResolver;
     /**
