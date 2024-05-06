@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-8795374
+ * @license Angular v18.1.0-next.0+sha-77ae5a3
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13222,6 +13222,12 @@ export declare const enum ɵProfilerEvent {
      */
     OutputEnd = 7
 }
+
+/**
+ * Internal token used to verify that `provideZoneChangeDetection` is not used
+ * with the bootstrapModule API.
+ */
+export declare const ɵPROVIDED_NG_ZONE: InjectionToken<boolean>;
 
 /**
  * An object that contains information about a provider that has been configured
