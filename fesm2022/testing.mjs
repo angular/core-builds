@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.0+sha-a040fb7
+ * @license Angular v18.0.0-rc.0+sha-0510930
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1450,10 +1450,9 @@ class TestBedCompiler {
         class RootScopeModule {
         }
         ɵcompileNgModuleDefs(RootScopeModule, {
-            providers: [...this.rootProviderOverrides],
+            providers: [...this.rootProviderOverrides, provideZoneChangeDetection()],
         });
         const providers = [
-            provideZoneChangeDetection(),
             { provide: Compiler, useFactory: () => new R3TestCompiler(this) },
             { provide: ɵDEFER_BLOCK_CONFIG, useValue: { behavior: this.deferBlockBehavior } },
             ...this.providers,
