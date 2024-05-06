@@ -5817,7 +5817,7 @@ var ShadowCss = class {
     });
   }
   _scopeSelector(selector, scopeSelector, hostSelector) {
-    return selector.split(",").map((part) => part.trim().split(_shadowDeepSelectors)).map((deepParts) => {
+    return selector.split(/ ?, ?/).map((part) => part.split(_shadowDeepSelectors)).map((deepParts) => {
       const [shallowPart, ...otherParts] = deepParts;
       const applyScope = (shallowPart2) => {
         if (this._selectorNeedsScoping(shallowPart2, scopeSelector)) {
@@ -5859,9 +5859,9 @@ var ShadowCss = class {
     const _scopeSelectorPart = (p) => {
       let scopedP = p.trim();
       if (!scopedP) {
-        return "";
+        return p;
       }
-      if (p.indexOf(_polyfillHostNoCombinator) > -1) {
+      if (p.includes(_polyfillHostNoCombinator)) {
         scopedP = this._applySimpleSelectorScope(p, scopeSelector, hostSelector);
       } else {
         const t = p.replace(_polyfillHostRe, "");
@@ -5880,21 +5880,21 @@ var ShadowCss = class {
     let startIndex = 0;
     let res;
     const sep = /( |>|\+|~(?!=))\s*/g;
-    const hasHost = selector.indexOf(_polyfillHostNoCombinator) > -1;
+    const hasHost = selector.includes(_polyfillHostNoCombinator);
     let shouldScope = !hasHost;
     while ((res = sep.exec(selector)) !== null) {
       const separator = res[1];
-      const part2 = selector.slice(startIndex, res.index).trim();
+      const part2 = selector.slice(startIndex, res.index);
       if (part2.match(/__esc-ph-(\d+)__/) && ((_a2 = selector[res.index + 1]) == null ? void 0 : _a2.match(/[a-fA-F\d]/))) {
         continue;
       }
-      shouldScope = shouldScope || part2.indexOf(_polyfillHostNoCombinator) > -1;
+      shouldScope = shouldScope || part2.includes(_polyfillHostNoCombinator);
       const scopedPart = shouldScope ? _scopeSelectorPart(part2) : part2;
       scopedSelector += `${scopedPart} ${separator} `;
       startIndex = sep.lastIndex;
     }
     const part = selector.substring(startIndex);
-    shouldScope = shouldScope || part.indexOf(_polyfillHostNoCombinator) > -1;
+    shouldScope = shouldScope || part.includes(_polyfillHostNoCombinator);
     scopedSelector += shouldScope ? _scopeSelectorPart(part) : part;
     return safeContent.restore(scopedSelector);
   }
@@ -22878,7 +22878,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.0+sha-8f273ce");
+var VERSION2 = new Version("18.1.0-next.0+sha-3e1d6e9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
