@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.0+sha-f1dc74f
+ * @license Angular v18.0.0-rc.0+sha-6baa3bc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2242,10 +2242,10 @@ class EventContract {
      * in the provided event contract. Once all the events are replayed, it cleans
      * up the early contract.
      */
-    replayEarlyEvents() {
+    replayEarlyEvents(earlyJsactionContainer = window) {
         // Check if the early contract is present and prevent calling this function
         // more than once.
-        const earlyJsactionData = window._ejsa;
+        const earlyJsactionData = earlyJsactionContainer._ejsa;
         if (!earlyJsactionData) {
             return;
         }
@@ -2263,13 +2263,10 @@ class EventContract {
             }
         }
         // Clean up the early contract.
-        const earlyEventTypes = earlyJsactionData.et;
         const earlyEventHandler = earlyJsactionData.h;
-        for (let idx = 0; idx < earlyEventTypes.length; idx++) {
-            const eventType = earlyEventTypes[idx];
-            window.document.documentElement.removeEventListener(eventType, earlyEventHandler);
-        }
-        delete window._ejsa;
+        removeEventListeners(earlyJsactionData.c, earlyJsactionData.et, earlyEventHandler);
+        removeEventListeners(earlyJsactionData.c, earlyJsactionData.etc, earlyEventHandler, true);
+        delete earlyJsactionContainer._ejsa;
     }
     /**
      * Returns all JSAction event types that have been registered for a given
@@ -2353,6 +2350,11 @@ class EventContract {
         this.actionResolver.addA11yClickSupport(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction);
     }
 }
+function removeEventListeners(container, eventTypes, earlyEventHandler, capture) {
+    for (let idx = 0; idx < eventTypes.length; idx++) {
+        container.removeEventListener(eventTypes[idx], earlyEventHandler, /* useCapture */ capture);
+    }
+}
 /**
  * Adds a11y click support to the given `EventContract`. Meant to be called
  * in a different compilation unit from the `EventContract`. The `EventContract`
@@ -2377,27 +2379,79 @@ function shouldPreventDefaultBeforeDispatching(actionElement, eventInfo) {
 }
 
 /**
+ * EarlyEventContract intercepts events in the bubbling phase at the
+ * boundary of the document body. This mapping will be passed to the
+ * late-loaded EventContract.
+ */
+class EarlyEventContract {
+    constructor(replaySink = window, container = window.document.documentElement) {
+        this.replaySink = replaySink;
+        this.container = container;
+        this.replaySink._ejsa = {
+            c: container,
+            q: [],
+            et: [],
+            etc: [],
+            h: (event) => {
+                const eventInfo = createEventInfoFromParameters(event.type, event, event.target, window.document.documentElement, Date.now());
+                this.replaySink._ejsa.q.push(eventInfo);
+            },
+        };
+    }
+    /**
+     * Installs a list of event types for container .
+     */
+    addEvents(types, capture) {
+        const replaySink = this.replaySink._ejsa;
+        for (let idx = 0; idx < types.length; idx++) {
+            const eventType = types[idx];
+            const eventTypes = capture ? replaySink.etc : replaySink.et;
+            eventTypes.push(eventType);
+            this.container.addEventListener(eventType, replaySink.h, capture);
+        }
+    }
+}
+
+/**
  * Provides a factory function for bootstrapping an event contract on a
- * window object.
- * @param field The property on the window that the event contract will be placed on.
+ * specified object (by default, exposed on the `window`).
+ * @param field The property on the object that the event contract will be placed on.
  * @param container The container that listens to events
  * @param appId A given identifier for an application. If there are multiple apps on the page
  *              then this is how contracts can be initialized for each one.
  * @param events An array of event names that should be listened to.
- * @param anyWindow The global window object that should receive the event contract.
- * @returns The `event` contract. This is both assigned to `anyWindow` and returned for testing.
+ * @param earlyJsactionTracker The object that should receive the event contract.
  */
-function bootstrapEventContract(field, container, appId, events, anyWindow = window) {
-    if (!anyWindow[field]) {
-        anyWindow[field] = {};
+function bootstrapEventContract(field, container, appId, events, earlyJsactionTracker = window) {
+    if (!earlyJsactionTracker[field]) {
+        earlyJsactionTracker[field] = {};
     }
     const eventContract = new EventContract(new EventContractContainer(container));
-    anyWindow[field][appId] = eventContract;
+    earlyJsactionTracker[field][appId] = eventContract;
     for (const ev of events) {
         eventContract.addEvent(ev);
     }
-    return eventContract;
+}
+/**
+ * Provides a factory function for bootstrapping an event contract on a
+ * specified object (by default, exposed on the `window`).
+ * @param field The property on the object that the event contract will be placed on.
+ * @param container The container that listens to events
+ * @param appId A given identifier for an application. If there are multiple apps on the page
+ *              then this is how contracts can be initialized for each one.
+ * @param eventTypes An array of event names that should be listened to.
+ * @param captureEventTypes An array of event names that should be listened to with capture.
+ * @param earlyJsactionTracker The object that should receive the event contract.
+ */
+function bootstrapEarlyEventContract(field, container, appId, eventTypes, captureEventTypes, earlyJsactionTracker = window) {
+    if (!earlyJsactionTracker[field]) {
+        earlyJsactionTracker[field] = {};
+    }
+    earlyJsactionTracker[field][appId] = {};
+    const eventContract = new EarlyEventContract(earlyJsactionTracker[field][appId], container);
+    eventContract.addEvents(eventTypes);
+    eventContract.addEvents(captureEventTypes, true);
 }
 
-export { Dispatcher, EventContract, EventContractContainer, EventInfoWrapper, bootstrapEventContract, registerDispatcher };
+export { Dispatcher, EventContract, EventContractContainer, EventInfoWrapper, bootstrapEarlyEventContract, bootstrapEventContract, registerDispatcher };
 //# sourceMappingURL=event-dispatch.mjs.map
