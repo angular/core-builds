@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-7330b69
+ * @license Angular v18.1.0-next.0+sha-8795374
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1772,13 +1772,12 @@ const REGEXP_SEMICOLON = /\s*;\s*/;
 const DEFAULT_EVENT_TYPE = EventType.CLICK;
 /** Resolves actions for Events. */
 class ActionResolver {
-    constructor({ customEventSupport = false, jsnamespaceSupport = false, syntheticMouseEventSupport = false, } = {}) {
+    constructor({ customEventSupport = false, syntheticMouseEventSupport = false, } = {}) {
         this.a11yClickSupport = false;
         this.updateEventInfoForA11yClick = undefined;
         this.preventDefaultForA11yClick = undefined;
         this.populateClickOnlyAction = undefined;
         this.customEventSupport = customEventSupport;
-        this.jsnamespaceSupport = jsnamespaceSupport;
         this.syntheticMouseEventSupport = syntheticMouseEventSupport;
     }
     resolve(eventInfo) {
@@ -1917,17 +1916,14 @@ class ActionResolver {
      * action the given event is mapped to, if any. It parses the
      * attribute value and stores it in a property on the node for
      * subsequent retrieval without re-parsing and re-accessing the
-     * attribute. In order to fully qualify jsaction names using a
-     * namespace, the DOM is searched starting at the current node and
-     * going through ancestor nodes until a jsnamespace attribute is
-     * found.
+     * attribute.
      *
      * @param actionElement The DOM node to retrieve the jsaction map from.
      * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
      *    action is found on the `actionElement`.
      */
     populateActionOnElement(actionElement, eventInfo) {
-        const actionMap = this.parseActions(actionElement, getContainer(eventInfo));
+        const actionMap = this.parseActions(actionElement);
         const actionName = actionMap[getEventType(eventInfo)];
         if (actionName !== undefined) {
             setAction(eventInfo, actionName, actionElement);
@@ -1942,11 +1938,9 @@ class ActionResolver {
      * This is primarily for internal use.
      *
      * @param actionElement The DOM node to retrieve the jsaction map from.
-     * @param container The node which limits the namespace lookup for a jsaction
-     * name. The container node itself will not be searched.
      * @return Map from event to qualified name of the jsaction bound to it.
      */
-    parseActions(actionElement, container) {
+    parseActions(actionElement) {
         let actionMap = get(actionElement);
         if (!actionMap) {
             const jsactionAttribute = actionElement.getAttribute(Attribute.JSACTION);
@@ -1972,51 +1966,10 @@ class ActionResolver {
                     }
                     setParsed(jsactionAttribute, actionMap);
                 }
-                // If namespace support is active we need to augment the (potentially
-                // cached) jsaction mapping with the namespace.
-                if (this.jsnamespaceSupport) {
-                    const noNs = actionMap;
-                    actionMap = {};
-                    for (const type in noNs) {
-                        actionMap[type] = this.getFullyQualifiedAction(noNs[type], actionElement, container);
-                    }
-                }
                 set(actionElement, actionMap);
             }
         }
         return actionMap;
-    }
-    /**
-     * Returns the fully qualified jsaction action. If the given jsaction
-     * name doesn't already contain the namespace, the function iterates
-     * over ancestor nodes until a jsnamespace attribute is found, and
-     * uses the value of that attribute as the namespace.
-     *
-     * @param action The jsaction action to resolve.
-     * @param start The node from which to start searching for a jsnamespace
-     * attribute.
-     * @param container The node which limits the search for a jsnamespace
-     * attribute. This node will be searched.
-     * @return The fully qualified name of the jsaction. If no namespace is found,
-     * returns the unqualified name in case it exists in the global namespace.
-     */
-    getFullyQualifiedAction(action, start, container) {
-        if (isNamespacedAction(action)) {
-            return action;
-        }
-        let node = start;
-        while (node && node.nodeType === Node.ELEMENT_NODE) {
-            const namespace = getNamespaceFromElement(node);
-            if (namespace) {
-                return namespace + Char.NAMESPACE_ACTION_SEPARATOR + action;
-            }
-            // If this node is the container, stop.
-            if (node === container) {
-                break;
-            }
-            node = node.parentNode;
-        }
-        return action;
     }
     addA11yClickSupport(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction) {
         this.a11yClickSupport = true;
@@ -2025,36 +1978,7 @@ class ActionResolver {
         this.populateClickOnlyAction = populateClickOnlyAction;
     }
 }
-/**
- * Checks if a jsaction action contains a namespace part.
- */
-function isNamespacedAction(action) {
-    return action.indexOf(Char.NAMESPACE_ACTION_SEPARATOR) >= 0;
-}
-/**
- * Returns the value of the jsnamespace attribute of the given node.
- * Also caches the value for subsequent lookups.
- * @param element The node whose jsnamespace attribute is being asked for.
- * @return The value of the jsnamespace attribute, or null if not found.
- */
-function getNamespaceFromElement(element) {
-    let namespace = getNamespace(element);
-    // Only query for the attribute if it has not been queried for
-    // before. getAttribute() returns null if an attribute is not present. Thus,
-    // namespace is string|null if the query took place in the past, or
-    // undefined if the query did not take place.
-    if (namespace === undefined) {
-        namespace = element.getAttribute(Attribute.JSNAMESPACE);
-        setNamespace(element, namespace);
-    }
-    return namespace;
-}
 
-/**
- * @define Support for jsnamespace attribute.  This flag can be overridden in a
- * build rule to trim down the EventContract's binary size.
- */
-const JSNAMESPACE_SUPPORT = false;
 /**
  * @define Support for accessible click actions.  This flag can be overridden in
  * a build rule.
@@ -2112,11 +2036,9 @@ class EventContract {
     static { this.CUSTOM_EVENT_SUPPORT = CUSTOM_EVENT_SUPPORT; }
     static { this.A11Y_CLICK_SUPPORT = A11Y_CLICK_SUPPORT; }
     static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
-    static { this.JSNAMESPACE_SUPPORT = JSNAMESPACE_SUPPORT; }
     constructor(containerManager) {
         this.actionResolver = new ActionResolver({
             customEventSupport: EventContract.CUSTOM_EVENT_SUPPORT,
-            jsnamespaceSupport: EventContract.JSNAMESPACE_SUPPORT,
             syntheticMouseEventSupport: EventContract.MOUSE_SPECIAL_SUPPORT,
         });
         /**
