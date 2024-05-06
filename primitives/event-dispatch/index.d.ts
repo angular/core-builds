@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-8f273ce
+ * @license Angular v18.1.0-next.0+sha-aea3b57
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26,28 +26,16 @@ declare type ActionInfoInternal = [name: string, element: Element];
 
 /**
  * Provides a factory function for bootstrapping an event contract on a
- * specified object (by default, exposed on the `window`).
- * @param field The property on the object that the event contract will be placed on.
- * @param container The container that listens to events
- * @param appId A given identifier for an application. If there are multiple apps on the page
- *              then this is how contracts can be initialized for each one.
- * @param eventTypes An array of event names that should be listened to.
- * @param captureEventTypes An array of event names that should be listened to with capture.
- * @param earlyJsactionTracker The object that should receive the event contract.
- */
-export declare function bootstrapEarlyEventContract(field: string, container: HTMLElement, appId: string, eventTypes: string[], captureEventTypes: string[], earlyJsactionTracker?: EventContractTracker<EarlyJsactionDataContainer>): void;
-
-/**
- * Provides a factory function for bootstrapping an event contract on a
- * specified object (by default, exposed on the `window`).
- * @param field The property on the object that the event contract will be placed on.
+ * window object.
+ * @param field The property on the window that the event contract will be placed on.
  * @param container The container that listens to events
  * @param appId A given identifier for an application. If there are multiple apps on the page
  *              then this is how contracts can be initialized for each one.
  * @param events An array of event names that should be listened to.
- * @param earlyJsactionTracker The object that should receive the event contract.
+ * @param anyWindow The global window object that should receive the event contract.
+ * @returns The `event` contract. This is both assigned to `anyWindow` and returned for testing.
  */
-export declare function bootstrapEventContract(field: string, container: Element, appId: string, events: string[], earlyJsactionTracker?: EventContractTracker<EventContract>): void;
+export declare function bootstrapEventContract(field: string, container: Element, appId: string, events: string[], anyWindow?: any): EventContract;
 
 /** Clones an `EventInfo` */
 declare function cloneEventInfo(eventInfo: EventInfo): EventInfo;
@@ -215,21 +203,6 @@ export declare class Dispatcher {
 declare type Dispatcher_2 = (eventInfo: eventInfoLib.EventInfo, globalDispatch?: boolean) => void;
 
 /**
- * Defines the early jsaction data types.
- */
-declare interface EarlyJsactionData {
-    et: string[];
-    etc: string[];
-    q: EventInfo[];
-    h: (event: Event) => void;
-    c: HTMLElement;
-}
-
-declare interface EarlyJsactionDataContainer {
-    _ejsa?: EarlyJsactionData;
-}
-
-/**
  * EventContract intercepts events in the bubbling phase at the
  * boundary of a container element, and maps them to generic actions
  * which are specified using the custom jsaction attribute in
@@ -300,7 +273,7 @@ export declare class EventContract implements UnrenamedEventContract {
      * in the provided event contract. Once all the events are replayed, it cleans
      * up the early contract.
      */
-    replayEarlyEvents(earlyJsactionContainer?: EarlyJsactionDataContainer): void;
+    replayEarlyEvents(): void;
     /**
      * Returns all JSAction event types that have been registered for a given
      * browser event type.
@@ -386,12 +359,6 @@ declare interface EventContractContainerManager {
     addEventListener(eventType: string, getHandler: (element: Element) => (event: Event) => void): void;
     cleanUp(): void;
 }
-
-export declare type EventContractTracker<T> = {
-    [key: string]: {
-        [appId: string]: T;
-    };
-};
 
 /**
  * A function that handles an event dispatched from the browser.
