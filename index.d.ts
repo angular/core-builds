@@ -1,11 +1,12 @@
 /**
- * @license Angular v18.1.0-next.0+sha-0fb455f
+ * @license Angular v18.1.0-next.0+sha-8305e50
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 
 import { BehaviorSubject } from 'rxjs';
+import { EnvironmentProviders as EnvironmentProviders_2 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ReactiveNode } from '@angular/core/primitives/signals';
 import { SIGNAL } from '@angular/core/primitives/signals';
@@ -646,7 +647,6 @@ export declare class ApplicationRef {
     private readonly zonelessEnabled;
     private externalTestViews;
     private beforeRender;
-    private get allViews();
     /**
      * Indicates whether this instance was destroyed.
      */
@@ -8170,6 +8170,32 @@ declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
 declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
 
 /**
+ * Used to periodically verify no expressions have changed after they were checked.
+ *
+ * @param options Used to configure when the check will execute.
+ *   - `interval` will periodically run exhaustive `checkNoChanges` on application views
+ *   - `useNgZoneOnStable` will us ZoneJS to determine when change detection might have run
+ *      in an application using ZoneJS to drive change detection. When the `NgZone.onStable` would
+ *      have emit, all views attached to the `ApplicationRef` are checked for changes.
+ *   - 'exhaustive' means that all views attached to `ApplicationRef` and all the descendants of those views will be
+ *     checked for changes (excluding those subtrees which are detached via `ChangeDetectorRef.detach()`).
+ *     This is useful because the check that runs after regular change detection does not work for components using `ChangeDetectionStrategy.OnPush`.
+ *     This check is will surface any existing errors hidden by `OnPush` components. By default, this check is exhaustive
+ *     and will always check all views, regardless of their "dirty" state and `ChangeDetectionStrategy`.
+ *
+ * When the `useNgZoneOnStable` option is `true`, this function will provide its own `NgZone` implementation and needs
+ * to come after any other `NgZone` provider, including `provideZoneChangeDetection()` and `provideExperimentalZonelessChangeDetection()`.
+ *
+ * @experimental
+ * @publicApi
+ */
+export declare function provideExperimentalCheckNoChangesForDebug(options: {
+    interval?: number;
+    useNgZoneOnStable?: boolean;
+    exhaustive?: boolean;
+}): EnvironmentProviders_2;
+
+/**
  * Provides change detection without ZoneJS for the application bootstrapped using
  * `bootstrapApplication`.
  *
@@ -12826,6 +12852,11 @@ export declare interface ɵInternalEnvironmentProviders extends EnvironmentProvi
     ɵfromNgModule?: true;
 }
 
+export declare function ɵinternalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsideZone, }: {
+    ngZoneFactory?: () => NgZone;
+    ignoreChangesOutsideZone?: boolean;
+}): StaticProvider[];
+
 /**
  * Internal token that specifies whether DOM reuse logic
  * during hydration is enabled.
@@ -13224,12 +13255,6 @@ export declare const enum ɵProfilerEvent {
 }
 
 /**
- * Internal token used to verify that `provideZoneChangeDetection` is not used
- * with the bootstrapModule API.
- */
-export declare const ɵPROVIDED_NG_ZONE: InjectionToken<boolean>;
-
-/**
  * An object that contains information about a provider that has been configured
  *
  * TODO: rename to indicate that it is a debug structure eg. ProviderDebugInfo.
@@ -13508,6 +13533,7 @@ export declare const enum ɵRuntimeErrorCode {
     ASYNC_INITIALIZERS_STILL_RUNNING = 405,
     APPLICATION_REF_ALREADY_DESTROYED = 406,
     RENDERER_NOT_FOUND = 407,
+    PROVIDED_BOTH_ZONE_AND_ZONELESS = 408,
     HYDRATION_NODE_MISMATCH = -500,
     HYDRATION_MISSING_SIBLINGS = -501,
     HYDRATION_MISSING_NODE = -502,
