@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.0+sha-2646c40
+ * @license Angular v18.0.0-rc.0+sha-bdd6d3c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16875,7 +16875,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.0+sha-2646c40']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.0+sha-bdd6d3c']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30787,7 +30787,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-rc.0+sha-2646c40');
+const VERSION = new Version('18.0.0-rc.0+sha-bdd6d3c');
 
 class Console {
     log(message) {
@@ -36369,6 +36369,7 @@ function getDeferBlocks(lView, deferBlocks) {
 const EVENT_REPLAY_ENABLED_DEFAULT = false;
 const CONTRACT_PROPERTY = 'ngContracts';
 const JSACTION_ATTRIBUTE = 'jsaction';
+const removeJsactionQueue = [];
 /**
  * Returns a set of providers required to setup support for event replay.
  * Requires hydration to be enabled separately.
@@ -36384,7 +36385,9 @@ function withEventReplay() {
             useValue: () => {
                 setDisableEventReplayImpl((el) => {
                     if (el.hasAttribute(JSACTION_ATTRIBUTE)) {
-                        el.removeAttribute(JSACTION_ATTRIBUTE);
+                        // We don't immediately remove the attribute here because
+                        // we need it for replay that happens after hydration.
+                        removeJsactionQueue.push(el);
                     }
                 });
             },
@@ -36411,6 +36414,10 @@ function withEventReplay() {
                                 setEventReplayer(dispatcher);
                                 // Event replay is kicked off as a side-effect of executing this function.
                                 registerDispatcher(eventContract, dispatcher);
+                                for (const el of removeJsactionQueue) {
+                                    el.removeAttribute(JSACTION_ATTRIBUTE);
+                                }
+                                removeJsactionQueue.length = 0;
                             }
                         });
                     };
