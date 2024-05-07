@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-67bb310
+ * @license Angular v18.1.0-next.0+sha-0fb455f
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -128,8 +128,6 @@ export declare class Dispatcher {
      *
      * @param eventInfo The info for the event that triggered this call or the
      *     queue of events from EventContract.
-     * @param isGlobalDispatch If true, dispatches a global event instead of a
-     *     regular jsaction handler.
      */
     dispatch(eventInfo: EventInfo, isGlobalDispatch?: boolean): void;
     /**

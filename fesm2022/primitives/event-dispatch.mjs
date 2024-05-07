@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-67bb310
+ * @license Angular v18.1.0-next.0+sha-0fb455f
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -244,20 +244,18 @@ class BaseDispatcher {
      *
      * @param eventInfo The info for the event that triggered this call or the
      *     queue of events from EventContract.
-     * @param isGlobalDispatch If true, dispatches a global event instead of a
-     *     regular jsaction handler.
      */
-    dispatch(eventInfo, isGlobalDispatch) {
+    dispatch(eventInfo) {
         const eventInfoWrapper = new EventInfoWrapper(eventInfo);
         if (eventInfoWrapper.getIsReplay()) {
-            if (isGlobalDispatch || !this.eventReplayer) {
+            if (!this.eventReplayer) {
                 return;
             }
             this.queueEventInfoWrapper(eventInfoWrapper);
             this.scheduleEventReplay();
             return;
         }
-        this.dispatchDelegate(eventInfoWrapper, isGlobalDispatch);
+        this.dispatchDelegate(eventInfoWrapper);
     }
     /** Queue an `EventInfoWrapper` for replay. */
     queueEventInfoWrapper(eventInfoWrapper) {
@@ -286,8 +284,8 @@ class BaseDispatcher {
  * Dispatcher.
  */
 function registerDispatcher$1(eventContract, dispatcher) {
-    eventContract.ecrd((eventInfo, globalDispatch) => {
-        dispatcher.dispatch(eventInfo, globalDispatch);
+    eventContract.ecrd((eventInfo) => {
+        dispatcher.dispatch(eventInfo);
     }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
 }
 
@@ -1264,8 +1262,8 @@ class Dispatcher {
         /** A map of global event handlers, where each key is an event type. */
         this.globalHandlers = new Map();
         this.eventReplayer = eventReplayer;
-        this.baseDispatcher = new BaseDispatcher((eventInfoWrapper, isGlobalDispatch) => {
-            this.dispatchToHandler(eventInfoWrapper, isGlobalDispatch);
+        this.baseDispatcher = new BaseDispatcher((eventInfoWrapper) => {
+            this.dispatchToHandler(eventInfoWrapper);
         }, {
             eventReplayer: (eventInfoWrappers) => {
                 this.eventReplayer?.(eventInfoWrappers, this);
@@ -1292,38 +1290,45 @@ class Dispatcher {
      *
      * @param eventInfo The info for the event that triggered this call or the
      *     queue of events from EventContract.
-     * @param isGlobalDispatch If true, dispatches a global event instead of a
-     *     regular jsaction handler.
      */
     dispatch(eventInfo, isGlobalDispatch) {
-        this.baseDispatcher.dispatch(eventInfo, isGlobalDispatch);
+        this.baseDispatcher.dispatch(eventInfo);
     }
     /**
      * Dispatches an `EventInfoWrapper`.
      */
-    dispatchToHandler(eventInfoWrapper, isGlobalDispatch) {
-        if (isGlobalDispatch) {
+    dispatchToHandler(eventInfoWrapper) {
+        if (this.globalHandlers.size) {
+            const globalEventInfoWrapper = eventInfoWrapper.clone();
+            // In some cases, `populateAction` will rewrite `click` events to
+            // `clickonly`. Revert back to a regular click, otherwise we won't be able
+            // to execute global event handlers registered on click events.
+            if (globalEventInfoWrapper.getEventType() === EventType.CLICKONLY) {
+                globalEventInfoWrapper.setEventType(EventType.CLICK);
+            }
             // Skip everything related to jsaction handlers, and execute the global
             // handlers.
-            const ev = eventInfoWrapper.getEvent();
-            const eventTypeHandlers = this.globalHandlers.get(eventInfoWrapper.getEventType());
+            const event = globalEventInfoWrapper.getEvent();
+            const eventTypeHandlers = this.globalHandlers.get(globalEventInfoWrapper.getEventType());
             let shouldPreventDefault = false;
             if (eventTypeHandlers) {
                 for (const handler of eventTypeHandlers) {
-                    if (handler(ev) === false) {
+                    if (handler(event) === false) {
                         shouldPreventDefault = true;
                     }
                 }
             }
             if (shouldPreventDefault) {
-                preventDefault(ev);
+                preventDefault(event);
             }
+        }
+        const action = eventInfoWrapper.getAction();
+        if (!action) {
             return;
         }
         if (this.stopPropagation) {
             stopPropagation(eventInfoWrapper);
         }
-        const action = eventInfoWrapper.getAction();
         let handler = undefined;
         if (this.getHandler) {
             handler = this.getHandler(eventInfoWrapper);
@@ -1475,8 +1480,8 @@ function stopPropagation(eventInfoWrapper) {
  * Dispatcher.
  */
 function registerDispatcher(eventContract, dispatcher) {
-    eventContract.ecrd((eventInfo, globalDispatch) => {
-        dispatcher.dispatch(eventInfo, globalDispatch);
+    eventContract.ecrd((eventInfo) => {
+        dispatcher.dispatch(eventInfo);
     }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
 }
 
@@ -2091,25 +2096,14 @@ class EventContract {
             // All events are queued when the dispatcher isn't yet loaded.
             setIsReplay(eventInfo, true);
             this.queuedEventInfos?.push(eventInfo);
+            return;
         }
         this.actionResolver.resolve(eventInfo);
-        if (!this.dispatcher) {
-            return;
-        }
-        const globalEventInfo = cloneEventInfo(eventInfo);
-        // In some cases, `populateAction` will rewrite `click` events to
-        // `clickonly`. Revert back to a regular click, otherwise we won't be able
-        // to execute global event handlers registered on click events.
-        if (getEventType(globalEventInfo) === EventType.CLICKONLY) {
-            setEventType(globalEventInfo, EventType.CLICK);
-        }
-        this.dispatcher(globalEventInfo, /* dispatch global event */ true);
         const action = getAction(eventInfo);
-        if (!action) {
-            return;
-        }
-        if (shouldPreventDefaultBeforeDispatching(getActionElement(action), eventInfo)) {
-            preventDefault(getEvent(eventInfo));
+        if (action) {
+            if (shouldPreventDefaultBeforeDispatching(getActionElement(action), eventInfo)) {
+                preventDefault(getEvent(eventInfo));
+            }
         }
         this.dispatcher(eventInfo);
     }
