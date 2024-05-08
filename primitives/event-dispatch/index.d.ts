@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-fb54863
+ * @license Angular v18.1.0-next.0+sha-c001286
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -216,10 +216,15 @@ declare type Dispatcher_2 = (eventInfo: eventInfoLib.EventInfo, globalDispatch?:
  * Defines the early jsaction data types.
  */
 declare interface EarlyJsactionData {
+    /** List used to keep track of the early JSAction event types. */
     et: string[];
+    /** List used to keep track of capture event types. */
     etc: string[];
+    /** List used to keep track of the JSAction events if using earlyeventcontract. */
     q: EventInfo[];
+    /** Early Jsaction handler. */
     h: (event: Event) => void;
+    /** Container for listening to events. */
     c: HTMLElement;
 }
 
