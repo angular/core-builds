@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-84f1639
+ * @license Angular v18.0.0-rc.1+sha-f9aac83
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2303,14 +2303,14 @@ class EarlyEventContract {
     constructor(replaySink = window, container = window.document.documentElement) {
         this.replaySink = replaySink;
         this.container = container;
-        this.replaySink._ejsa = {
+        replaySink._ejsa = {
             c: container,
             q: [],
             et: [],
             etc: [],
             h: (event) => {
-                const eventInfo = createEventInfoFromParameters(event.type, event, event.target, window.document.documentElement, Date.now());
-                this.replaySink._ejsa.q.push(eventInfo);
+                const eventInfo = createEventInfoFromParameters(event.type, event, event.target, container, Date.now());
+                replaySink._ejsa.q.push(eventInfo);
             },
         };
     }
