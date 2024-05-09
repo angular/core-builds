@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-61007dc
+ * @license Angular v18.0.0-rc.1+sha-72b107b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -283,39 +283,11 @@ class BaseDispatcher {
  * Registers deferred functionality for an EventContract and a Jsaction
  * Dispatcher.
  */
-function registerDispatcher$1(eventContract, dispatcher) {
+function registerDispatcher(eventContract, dispatcher) {
     eventContract.ecrd((eventInfo) => {
         dispatcher.dispatch(eventInfo);
     }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
 }
-
-const Char = {
-    /**
-     * The separator between the namespace and the action name in the
-     * jsaction attribute value.
-     */
-    NAMESPACE_ACTION_SEPARATOR: '.',
-    /**
-     * The separator between the event name and action in the jsaction
-     * attribute value.
-     */
-    EVENT_ACTION_SEPARATOR: ':',
-    /**
-     * The separator between the logged oi attribute values in the &oi=
-     * URL parameter value.
-     */
-    OI_SEPARATOR: '.',
-    /**
-     * The separator between the key and the value pairs in the &cad=
-     * URL parameter value.
-     */
-    CAD_KEY_VALUE_SEPARATOR: ':',
-    /**
-     * The separator between the key-value pairs in the &cad= URL
-     * parameter value.
-     */
-    CAD_SEPARATOR: ',',
-};
 
 /**
  * Determines if one node is contained within another. Adapted from
@@ -691,7 +663,7 @@ function removeEventListener(element, info) {
  * Cancels propagation of an event.
  * @param e The event to cancel propagation for.
  */
-function stopPropagation$1(e) {
+function stopPropagation(e) {
     e.stopPropagation ? e.stopPropagation() : (e.cancelBubble = true);
 }
 /**
@@ -1238,254 +1210,6 @@ const testing = {
 };
 
 /**
- * Receives a DOM event, determines the jsaction associated with the source
- * element of the DOM event, and invokes the handler associated with the
- * jsaction.
- */
-class Dispatcher {
-    /**
-     * Receives a DOM event, determines the jsaction associated with the source
-     * element of the DOM event, and invokes the handler associated with the
-     * jsaction.
-     *
-     * @param getHandler A function that knows how to get the handler for a
-     *     given event info.
-     */
-    constructor(getHandler, { stopPropagation = false, eventReplayer = undefined, } = {}) {
-        this.getHandler = getHandler;
-        /**
-         * The actions that are registered for this Dispatcher instance.
-         * This should be the primary one used once migration off of registerHandlers
-         * is done.
-         */
-        this.actions = {};
-        /** A map of global event handlers, where each key is an event type. */
-        this.globalHandlers = new Map();
-        this.eventReplayer = eventReplayer;
-        this.baseDispatcher = new BaseDispatcher((eventInfoWrapper) => {
-            this.dispatchToHandler(eventInfoWrapper);
-        }, {
-            eventReplayer: (eventInfoWrappers) => {
-                this.eventReplayer?.(eventInfoWrappers, this);
-            },
-        });
-        this.stopPropagation = stopPropagation;
-    }
-    /**
-     * Receives an event or the event queue from the EventContract. The event
-     * queue is copied and it attempts to replay.
-     * If event info is passed in it looks for an action handler that can handle
-     * the given event.  If there is no handler registered queues the event and
-     * checks if a loader is registered for the given namespace. If so, calls it.
-     *
-     * Alternatively, if in global dispatch mode, calls all registered global
-     * handlers for the appropriate event type.
-     *
-     * The three functionalities of this call are deliberately not split into
-     * three methods (and then declared as an abstract interface), because the
-     * interface is used by EventContract, which lives in a different jsbinary.
-     * Therefore the interface between the three is defined entirely in terms that
-     * are invariant under jscompiler processing (Function and Array, as opposed
-     * to a custom type with method names).
-     *
-     * @param eventInfo The info for the event that triggered this call or the
-     *     queue of events from EventContract.
-     */
-    dispatch(eventInfo, isGlobalDispatch) {
-        this.baseDispatcher.dispatch(eventInfo);
-    }
-    /**
-     * Dispatches an `EventInfoWrapper`.
-     */
-    dispatchToHandler(eventInfoWrapper) {
-        if (this.globalHandlers.size) {
-            const globalEventInfoWrapper = eventInfoWrapper.clone();
-            // In some cases, `populateAction` will rewrite `click` events to
-            // `clickonly`. Revert back to a regular click, otherwise we won't be able
-            // to execute global event handlers registered on click events.
-            if (globalEventInfoWrapper.getEventType() === EventType.CLICKONLY) {
-                globalEventInfoWrapper.setEventType(EventType.CLICK);
-            }
-            // Skip everything related to jsaction handlers, and execute the global
-            // handlers.
-            const event = globalEventInfoWrapper.getEvent();
-            const eventTypeHandlers = this.globalHandlers.get(globalEventInfoWrapper.getEventType());
-            let shouldPreventDefault = false;
-            if (eventTypeHandlers) {
-                for (const handler of eventTypeHandlers) {
-                    if (handler(event) === false) {
-                        shouldPreventDefault = true;
-                    }
-                }
-            }
-            if (shouldPreventDefault) {
-                preventDefault(event);
-            }
-        }
-        const action = eventInfoWrapper.getAction();
-        if (!action) {
-            return;
-        }
-        if (this.stopPropagation) {
-            stopPropagation(eventInfoWrapper);
-        }
-        let handler = undefined;
-        if (this.getHandler) {
-            handler = this.getHandler(eventInfoWrapper);
-        }
-        if (!handler) {
-            handler = this.actions[action.name];
-        }
-        if (handler) {
-            handler(eventInfoWrapper);
-            return;
-        }
-        // No handler was found.
-        this.baseDispatcher.queueEventInfoWrapper(eventInfoWrapper);
-    }
-    /**
-     * Registers multiple methods all bound to the same object
-     * instance. This is a common case: an application module binds
-     * multiple of its methods under public names to the event contract of
-     * the application. So we provide a shortcut for it.
-     * Attempts to replay the queued events after registering the handlers.
-     *
-     * @param namespace The namespace of the jsaction name.
-     *
-     * @param instance The object to bind the methods to. If this is null, then
-     *     the functions are not bound, but directly added under the public names.
-     *
-     * @param methods A map from public name to functions that will be bound to
-     *     instance and registered as action under the public name. I.e. the
-     *     property names are the public names. The property values are the
-     *     methods of instance.
-     */
-    registerEventInfoHandlers(namespace, instance, methods) {
-        for (const [name, method] of Object.entries(methods)) {
-            const handler = instance ? method.bind(instance) : method;
-            if (namespace) {
-                // Include a '.' separator between namespace name and action name.
-                // In the case that no namespace name is provided, the jsaction name
-                // consists of the action name only (no period).
-                const fullName = namespace + Char.NAMESPACE_ACTION_SEPARATOR + name;
-                this.actions[fullName] = handler;
-            }
-            else {
-                this.actions[name] = handler;
-            }
-        }
-        this.baseDispatcher.scheduleEventReplay();
-    }
-    /**
-     * Unregisters an action.  Provided as an easy way to reverse the effects of
-     * registerHandlers.
-     * @param namespace The namespace of the jsaction name.
-     * @param name The action name to unbind.
-     */
-    unregisterHandler(namespace, name) {
-        const fullName = namespace ? namespace + Char.NAMESPACE_ACTION_SEPARATOR + name : name;
-        delete this.actions[fullName];
-    }
-    /** Registers a global event handler. */
-    registerGlobalHandler(eventType, handler) {
-        if (!this.globalHandlers.has(eventType)) {
-            this.globalHandlers.set(eventType, new Set([handler]));
-        }
-        else {
-            this.globalHandlers.get(eventType).add(handler);
-        }
-    }
-    /** Unregisters a global event handler. */
-    unregisterGlobalHandler(eventType, handler) {
-        if (this.globalHandlers.has(eventType)) {
-            this.globalHandlers.get(eventType).delete(handler);
-        }
-    }
-    /**
-     * Checks whether there is an action registered under the given
-     * name. This returns true if there is a namespace handler, even
-     * if it can not yet handle the event.
-     *
-     * @param name Action name.
-     * @return Whether the name is registered.
-     * @see #canDispatch
-     */
-    hasAction(name) {
-        return this.actions.hasOwnProperty(name);
-    }
-    /**
-     * Whether this dispatcher can dispatch the event. This can be used by
-     * event replayer to check whether the dispatcher can replay an event.
-     */
-    canDispatch(eventInfoWrapper) {
-        const action = eventInfoWrapper.getAction();
-        if (!action) {
-            return false;
-        }
-        return this.hasAction(action.name);
-    }
-    /**
-     * Sets the event replayer, enabling queued events to be replayed when actions
-     * are bound. To replay events, you must register the dispatcher to the
-     * contract after setting the `EventReplayer`. The event replayer takes as
-     * parameters the queue of events and the dispatcher (used to check whether
-     * actions have handlers registered and can be replayed). The event replayer
-     * is also responsible for dequeuing events.
-     *
-     * Example: An event replayer that replays only the last event.
-     *
-     *   const dispatcher = new Dispatcher();
-     *   // ...
-     *   dispatcher.setEventReplayer((queue, dispatcher) => {
-     *     const lastEventInfoWrapper = queue[queue.length -1];
-     *     if (dispatcher.canDispatch(lastEventInfoWrapper.getAction())) {
-     *       jsaction.replay.replayEvent(
-     *           lastEventInfoWrapper.getEvent(),
-     *           lastEventInfoWrapper.getTargetElement(),
-     *           lastEventInfoWrapper.getEventType(),
-     *       );
-     *       queue.length = 0;
-     *     }
-     *   });
-     *
-     * @param eventReplayer It allows elements to be replayed and dequeuing.
-     */
-    setEventReplayer(eventReplayer) {
-        this.eventReplayer = eventReplayer;
-    }
-}
-/** Stop propagation for an `EventInfo`. */
-function stopPropagation(eventInfoWrapper) {
-    if (isGecko &&
-        (eventInfoWrapper.getTargetElement().tagName === 'INPUT' ||
-            eventInfoWrapper.getTargetElement().tagName === 'TEXTAREA') &&
-        eventInfoWrapper.getEventType() === EventType.FOCUS) {
-        /**
-         * Do nothing since stopping propagation on a focus event on an input
-         * element in Firefox makes the text cursor disappear:
-         * https://bugzilla.mozilla.org/show_bug.cgi?id=509684
-         */
-        return;
-    }
-    const event = eventInfoWrapper.getEvent();
-    // There are some cases where users of the `Dispatcher` will call dispatch
-    // with a fake event that does not support `stopPropagation`.
-    if (!event.stopPropagation) {
-        return;
-    }
-    event.stopPropagation();
-}
-/**
- * Registers deferred functionality for an EventContract and a Jsaction
- * Dispatcher.
- */
-function registerDispatcher(eventContract, dispatcher) {
-    eventContract.ecrd((eventInfo) => {
-        dispatcher.dispatch(eventInfo);
-    }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
-}
-
-/**
  * Whether the user agent is running on iOS.
  */
 const isIos = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent);
@@ -1648,6 +1372,34 @@ var Attribute;
      */
     Attribute["JSTRACK"] = "jstrack";
 })(Attribute || (Attribute = {}));
+
+const Char = {
+    /**
+     * The separator between the namespace and the action name in the
+     * jsaction attribute value.
+     */
+    NAMESPACE_ACTION_SEPARATOR: '.',
+    /**
+     * The separator between the event name and action in the jsaction
+     * attribute value.
+     */
+    EVENT_ACTION_SEPARATOR: ':',
+    /**
+     * The separator between the logged oi attribute values in the &oi=
+     * URL parameter value.
+     */
+    OI_SEPARATOR: '.',
+    /**
+     * The separator between the key and the value pairs in the &cad=
+     * URL parameter value.
+     */
+    CAD_KEY_VALUE_SEPARATOR: ':',
+    /**
+     * The separator between the key-value pairs in the &cad= URL
+     * parameter value.
+     */
+    CAD_SEPARATOR: ',',
+};
 
 /** All properties that are used by jsaction. */
 var Property;
@@ -2335,26 +2087,6 @@ class EarlyEventContract {
  * @param container The container that listens to events
  * @param appId A given identifier for an application. If there are multiple apps on the page
  *              then this is how contracts can be initialized for each one.
- * @param events An array of event names that should be listened to.
- * @param earlyJsactionTracker The object that should receive the event contract.
- */
-function bootstrapEventContract(field, container, appId, events, earlyJsactionTracker = window) {
-    if (!earlyJsactionTracker[field]) {
-        earlyJsactionTracker[field] = {};
-    }
-    const eventContract = new EventContract(new EventContractContainer(container));
-    earlyJsactionTracker[field][appId] = eventContract;
-    for (const ev of events) {
-        eventContract.addEvent(ev);
-    }
-}
-/**
- * Provides a factory function for bootstrapping an event contract on a
- * specified object (by default, exposed on the `window`).
- * @param field The property on the object that the event contract will be placed on.
- * @param container The container that listens to events
- * @param appId A given identifier for an application. If there are multiple apps on the page
- *              then this is how contracts can be initialized for each one.
  * @param eventTypes An array of event names that should be listened to.
  * @param captureEventTypes An array of event names that should be listened to with capture.
  * @param earlyJsactionTracker The object that should receive the event contract.
@@ -2365,9 +2097,11 @@ function bootstrapEarlyEventContract(field, container, appId, eventTypes, captur
     }
     earlyJsactionTracker[field][appId] = {};
     const eventContract = new EarlyEventContract(earlyJsactionTracker[field][appId], container);
-    eventContract.addEvents(eventTypes);
-    eventContract.addEvents(captureEventTypes, true);
+    if (eventTypes)
+        eventContract.addEvents(eventTypes);
+    if (captureEventTypes)
+        eventContract.addEvents(captureEventTypes, true);
 }
 
-export { Dispatcher, EventContract, EventContractContainer, EventInfoWrapper, bootstrapEarlyEventContract, bootstrapEventContract, registerDispatcher };
+export { BaseDispatcher, EventContract, EventContractContainer, EventInfoWrapper, bootstrapEarlyEventContract, registerDispatcher };
 //# sourceMappingURL=event-dispatch.mjs.map

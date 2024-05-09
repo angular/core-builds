@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-61007dc
+ * @license Angular v18.0.0-rc.1+sha-72b107b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
-import { Dispatcher, registerDispatcher } from '@angular/core/primitives/event-dispatch';
+import { EventContract, EventContractContainer, BaseDispatcher, registerDispatcher } from '@angular/core/primitives/event-dispatch';
 
 /**
  * Base URL for the error details page.
@@ -16888,7 +16888,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-61007dc']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-72b107b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30800,7 +30800,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-rc.1+sha-61007dc');
+const VERSION = new Version('18.0.0-rc.1+sha-72b107b');
 
 class Console {
     log(message) {
@@ -36534,6 +36534,10 @@ function getDeferBlocks(lView, deferBlocks) {
 
 const EVENT_REPLAY_ENABLED_DEFAULT = false;
 const CONTRACT_PROPERTY = 'ngContracts';
+// TODO: Upstream this back into event-dispatch.
+function getJsactionData(container) {
+    return container._ejsa;
+}
 const JSACTION_ATTRIBUTE = 'jsaction';
 const removeJsactionQueue = [];
 /**
@@ -36574,11 +36578,25 @@ function withEventReplay() {
                             // This is set in packages/platform-server/src/utils.ts
                             // Note: globalThis[CONTRACT_PROPERTY] may be undefined in case Event Replay feature
                             // is enabled, but there are no events configured in an application.
-                            const eventContract = globalThis[CONTRACT_PROPERTY]?.[appId];
-                            if (eventContract) {
-                                const dispatcher = new Dispatcher();
-                                setEventReplayer(dispatcher);
-                                // Event replay is kicked off as a side-effect of executing this function.
+                            const container = globalThis[CONTRACT_PROPERTY]?.[appId];
+                            const earlyJsactionData = getJsactionData(container);
+                            if (earlyJsactionData) {
+                                const eventContract = new EventContract(new EventContractContainer(earlyJsactionData.c));
+                                for (const et of earlyJsactionData.et) {
+                                    eventContract.addEvent(et);
+                                }
+                                for (const et of earlyJsactionData.etc) {
+                                    eventContract.addEvent(et);
+                                }
+                                eventContract.replayEarlyEvents(container);
+                                const dispatcher = new BaseDispatcher(() => { }, {
+                                    eventReplayer: (queue) => {
+                                        for (const event of queue) {
+                                            handleEvent(event);
+                                        }
+                                        queue.length = 0;
+                                    },
+                                });
                                 registerDispatcher(eventContract, dispatcher);
                                 for (const el of removeJsactionQueue) {
                                     el.removeAttribute(JSACTION_ATTRIBUTE);
@@ -36641,16 +36659,6 @@ function setJSActionAttribute(tNode, rNode, nativeElementToEvents) {
             nativeElement.setAttribute(JSACTION_ATTRIBUTE, parts.join(';'));
         }
     }
-}
-/**
- * Registers a function that should be invoked to replay events.
- */
-function setEventReplayer(dispatcher) {
-    dispatcher.setEventReplayer((queue) => {
-        for (const event of queue) {
-            handleEvent(event);
-        }
-    });
 }
 /**
  * Finds an LView that a given DOM element belongs to.
