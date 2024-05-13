@@ -18561,6 +18561,7 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: generateNullishCoalesceExpressions },
   { kind: CompilationJobKind.Both, fn: expandSafeReads },
   { kind: CompilationJobKind.Both, fn: generateTemporaryVariables },
+  { kind: CompilationJobKind.Both, fn: optimizeVariables },
   { kind: CompilationJobKind.Tmpl, fn: allocateSlots },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
@@ -18572,7 +18573,6 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: removeI18nContexts },
   { kind: CompilationJobKind.Both, fn: countVariables },
   { kind: CompilationJobKind.Tmpl, fn: generateAdvance },
-  { kind: CompilationJobKind.Both, fn: optimizeVariables },
   { kind: CompilationJobKind.Both, fn: nameFunctionsAndVariables },
   { kind: CompilationJobKind.Tmpl, fn: resolveDeferDepsFns },
   { kind: CompilationJobKind.Tmpl, fn: mergeNextContextExpressions },
@@ -22878,7 +22878,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.0+sha-76d0aea");
+var VERSION2 = new Version("18.1.0-next.0+sha-7187394");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
