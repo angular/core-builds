@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-7187394
+ * @license Angular v18.1.0-next.0+sha-0cb5031
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -23,60 +23,6 @@ declare interface ActionInfo {
 }
 
 declare type ActionInfoInternal = [name: string, element: Element];
-
-/**
- * Receives a DOM event, determines the jsaction associated with the source
- * element of the DOM event, and invokes the handler associated with the
- * jsaction.
- */
-export declare class BaseDispatcher {
-    private readonly dispatchDelegate;
-    /** The queue of events. */
-    private readonly queuedEventInfoWrappers;
-    /** The replayer function to be called when there are queued events. */
-    private eventReplayer?;
-    /** Whether the event replay is scheduled. */
-    private eventReplayScheduled;
-    /**
-     * Options are:
-     *   1. `eventReplayer`: When the event contract dispatches replay events
-     *      to the Dispatcher, the Dispatcher collects them and in the next tick
-     *      dispatches them to the `eventReplayer`.
-     * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
-     */
-    constructor(dispatchDelegate: (eventInfoWrapper: EventInfoWrapper) => void, { eventReplayer }?: {
-        eventReplayer?: Replayer;
-    });
-    /**
-     * Receives an event or the event queue from the EventContract. The event
-     * queue is copied and it attempts to replay.
-     * If event info is passed in it looks for an action handler that can handle
-     * the given event.  If there is no handler registered queues the event and
-     * checks if a loader is registered for the given namespace. If so, calls it.
-     *
-     * Alternatively, if in global dispatch mode, calls all registered global
-     * handlers for the appropriate event type.
-     *
-     * The three functionalities of this call are deliberately not split into
-     * three methods (and then declared as an abstract interface), because the
-     * interface is used by EventContract, which lives in a different jsbinary.
-     * Therefore the interface between the three is defined entirely in terms that
-     * are invariant under jscompiler processing (Function and Array, as opposed
-     * to a custom type with method names).
-     *
-     * @param eventInfo The info for the event that triggered this call or the
-     *     queue of events from EventContract.
-     */
-    dispatch(eventInfo: EventInfo): void;
-    /** Queue an `EventInfoWrapper` for replay. */
-    queueEventInfoWrapper(eventInfoWrapper: EventInfoWrapper): void;
-    /**
-     * Replays queued events, if any. The replaying will happen in its own
-     * stack once the current flow cedes control. This is done to mimic
-     * browser event handling.
-     */
-    scheduleEventReplay(): void;
-}
 
 /**
  * Provides a factory function for bootstrapping an event contract on a
@@ -119,8 +65,60 @@ declare function createEventInfo({ eventType, event, targetElement, container, t
  */
 declare function createEventInfoFromParameters(eventType: string, event: Event, targetElement: Element, container: Element, timestamp: number, action?: ActionInfoInternal, isReplay?: boolean, a11yClickKey?: boolean): EventInfo;
 
+/**
+ * Receives a DOM event, determines the jsaction associated with the source
+ * element of the DOM event, and invokes the handler associated with the
+ * jsaction.
+ */
+export declare class Dispatcher {
+    private readonly dispatchDelegate;
+    /** The queue of events. */
+    private readonly replayEventInfoWrappers;
+    /** The replayer function to be called when there are queued events. */
+    private eventReplayer?;
+    /** Whether the event replay is scheduled. */
+    private eventReplayScheduled;
+    /**
+     * Options are:
+     *   1. `eventReplayer`: When the event contract dispatches replay events
+     *      to the Dispatcher, the Dispatcher collects them and in the next tick
+     *      dispatches them to the `eventReplayer`.
+     * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
+     */
+    constructor(dispatchDelegate: (eventInfoWrapper: EventInfoWrapper) => void, { eventReplayer }?: {
+        eventReplayer?: Replayer;
+    });
+    /**
+     * Receives an event or the event queue from the EventContract. The event
+     * queue is copied and it attempts to replay.
+     * If event info is passed in it looks for an action handler that can handle
+     * the given event.  If there is no handler registered queues the event and
+     * checks if a loader is registered for the given namespace. If so, calls it.
+     *
+     * Alternatively, if in global dispatch mode, calls all registered global
+     * handlers for the appropriate event type.
+     *
+     * The three functionalities of this call are deliberately not split into
+     * three methods (and then declared as an abstract interface), because the
+     * interface is used by EventContract, which lives in a different jsbinary.
+     * Therefore the interface between the three is defined entirely in terms that
+     * are invariant under jscompiler processing (Function and Array, as opposed
+     * to a custom type with method names).
+     *
+     * @param eventInfo The info for the event that triggered this call or the
+     *     queue of events from EventContract.
+     */
+    dispatch(eventInfo: EventInfo): void;
+    /**
+     * Schedules an `EventInfoWrapper` for replay. The replaying will happen in its own
+     * stack once the current flow cedes control. This is done to mimic
+     * browser event handling.
+     */
+    private scheduleEventInfoWrapperReplay;
+}
+
 /** A function that is called to handle events captured by the EventContract. */
-declare type Dispatcher = (eventInfo: eventInfoLib.EventInfo, globalDispatch?: boolean) => void;
+declare type Dispatcher_2 = (eventInfo: eventInfoLib.EventInfo, globalDispatch?: boolean) => void;
 
 /**
  * Defines the early jsaction data types.
@@ -236,13 +234,13 @@ export declare class EventContract implements UnrenamedEventContract {
      * @param dispatcher The dispatcher function.
      * @param restriction
      */
-    registerDispatcher(dispatcher: Dispatcher, restriction: Restriction): void;
+    registerDispatcher(dispatcher: Dispatcher_2, restriction: Restriction): void;
     /**
      * Unrenamed alias for registerDispatcher. Necessary for any codebases that
      * split the `EventContract` and `Dispatcher` code into different compilation
      * units.
      */
-    ecrd(dispatcher: Dispatcher, restriction: Restriction): void;
+    ecrd(dispatcher: Dispatcher_2, restriction: Restriction): void;
     /**
      * Adds a11y click support to the given `EventContract`. Meant to be called in
      * the same compilation unit as the `EventContract`.
@@ -462,7 +460,7 @@ declare function preventDefaultForA11yClick(eventInfo: eventInfoLib.EventInfo): 
  * Registers deferred functionality for an EventContract and a Jsaction
  * Dispatcher.
  */
-export declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: BaseDispatcher): void;
+export declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: Dispatcher): void;
 
 /**
  * A replayer is a function that is called when there are queued events,
@@ -506,7 +504,7 @@ declare function setTimestamp(eventInfo: EventInfo, timestamp: number): void;
  * The API of an EventContract that is safe to call from any compilation unit.
  */
 declare interface UnrenamedEventContract {
-    ecrd(dispatcher: Dispatcher, restriction: Restriction): void;
+    ecrd(dispatcher: Dispatcher_2, restriction: Restriction): void;
     ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
 }
 
