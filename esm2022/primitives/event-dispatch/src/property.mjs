@@ -5,31 +5,34 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * The parsed value of the jsaction attribute is stored in this
+ * property on the DOM node. The parsed value is an Object. The
+ * property names of the object are the events; the values are the
+ * names of the actions. This property is attached even on nodes
+ * that don't have a jsaction attribute as an optimization, because
+ * property lookup is faster than attribute access.
+ */
+export const JSACTION = '__jsaction';
+/**
+ * The parsed value of the jsnamespace attribute is stored in this
+ * property on the DOM node.
+ */
+export const JSNAMESPACE = '__jsnamespace';
+/** The value of the oi attribute as a property, for faster access. */
+export const OI = '__oi';
+/**
+ * The owner property references an a logical owner for a DOM node. JSAction
+ * will follow this reference instead of parentNode when traversing the DOM
+ * to find jsaction attributes. This allows overlaying a logical structure
+ * over a document where the DOM structure can't reflect that structure.
+ */
+export const OWNER = '__owner';
 /** All properties that are used by jsaction. */
-export var Property;
-(function (Property) {
-    /**
-     * The parsed value of the jsaction attribute is stored in this
-     * property on the DOM node. The parsed value is an Object. The
-     * property names of the object are the events; the values are the
-     * names of the actions. This property is attached even on nodes
-     * that don't have a jsaction attribute as an optimization, because
-     * property lookup is faster than attribute access.
-     */
-    Property["JSACTION"] = "__jsaction";
-    /**
-     * The parsed value of the jsnamespace attribute is stored in this
-     * property on the DOM node.
-     */
-    Property["JSNAMESPACE"] = "__jsnamespace";
-    /** The value of the oi attribute as a property, for faster access. */
-    Property["OI"] = "__oi";
-    /**
-     * The owner property references an a logical owner for a DOM node. JSAction
-     * will follow this reference instead of parentNode when traversing the DOM
-     * to find jsaction attributes. This allows overlaying a logical structure
-     * over a document where the DOM structure can't reflect that structure.
-     */
-    Property["OWNER"] = "__owner";
-})(Property || (Property = {}));
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvcGVydHkuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3ByaW1pdGl2ZXMvZXZlbnQtZGlzcGF0Y2gvc3JjL3Byb3BlcnR5LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVILGdEQUFnRDtBQUNoRCxNQUFNLENBQU4sSUFBWSxRQTJCWDtBQTNCRCxXQUFZLFFBQVE7SUFDbEI7Ozs7Ozs7T0FPRztJQUNILG1DQUF1QixDQUFBO0lBRXZCOzs7T0FHRztJQUNILHlDQUE2QixDQUFBO0lBRTdCLHNFQUFzRTtJQUN0RSx1QkFBVyxDQUFBO0lBRVg7Ozs7O09BS0c7SUFDSCw2QkFBaUIsQ0FBQTtBQUNuQixDQUFDLEVBM0JXLFFBQVEsS0FBUixRQUFRLFFBMkJuQiIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgTExDIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG4vKiogQWxsIHByb3BlcnRpZXMgdGhhdCBhcmUgdXNlZCBieSBqc2FjdGlvbi4gKi9cbmV4cG9ydCBlbnVtIFByb3BlcnR5IHtcbiAgLyoqXG4gICAqIFRoZSBwYXJzZWQgdmFsdWUgb2YgdGhlIGpzYWN0aW9uIGF0dHJpYnV0ZSBpcyBzdG9yZWQgaW4gdGhpc1xuICAgKiBwcm9wZXJ0eSBvbiB0aGUgRE9NIG5vZGUuIFRoZSBwYXJzZWQgdmFsdWUgaXMgYW4gT2JqZWN0LiBUaGVcbiAgICogcHJvcGVydHkgbmFtZXMgb2YgdGhlIG9iamVjdCBhcmUgdGhlIGV2ZW50czsgdGhlIHZhbHVlcyBhcmUgdGhlXG4gICAqIG5hbWVzIG9mIHRoZSBhY3Rpb25zLiBUaGlzIHByb3BlcnR5IGlzIGF0dGFjaGVkIGV2ZW4gb24gbm9kZXNcbiAgICogdGhhdCBkb24ndCBoYXZlIGEganNhY3Rpb24gYXR0cmlidXRlIGFzIGFuIG9wdGltaXphdGlvbiwgYmVjYXVzZVxuICAgKiBwcm9wZXJ0eSBsb29rdXAgaXMgZmFzdGVyIHRoYW4gYXR0cmlidXRlIGFjY2Vzcy5cbiAgICovXG4gIEpTQUNUSU9OID0gJ19fanNhY3Rpb24nLFxuXG4gIC8qKlxuICAgKiBUaGUgcGFyc2VkIHZhbHVlIG9mIHRoZSBqc25hbWVzcGFjZSBhdHRyaWJ1dGUgaXMgc3RvcmVkIGluIHRoaXNcbiAgICogcHJvcGVydHkgb24gdGhlIERPTSBub2RlLlxuICAgKi9cbiAgSlNOQU1FU1BBQ0UgPSAnX19qc25hbWVzcGFjZScsXG5cbiAgLyoqIFRoZSB2YWx1ZSBvZiB0aGUgb2kgYXR0cmlidXRlIGFzIGEgcHJvcGVydHksIGZvciBmYXN0ZXIgYWNjZXNzLiAqL1xuICBPSSA9ICdfX29pJyxcblxuICAvKipcbiAgICogVGhlIG93bmVyIHByb3BlcnR5IHJlZmVyZW5jZXMgYW4gYSBsb2dpY2FsIG93bmVyIGZvciBhIERPTSBub2RlLiBKU0FjdGlvblxuICAgKiB3aWxsIGZvbGxvdyB0aGlzIHJlZmVyZW5jZSBpbnN0ZWFkIG9mIHBhcmVudE5vZGUgd2hlbiB0cmF2ZXJzaW5nIHRoZSBET01cbiAgICogdG8gZmluZCBqc2FjdGlvbiBhdHRyaWJ1dGVzLiBUaGlzIGFsbG93cyBvdmVybGF5aW5nIGEgbG9naWNhbCBzdHJ1Y3R1cmVcbiAgICogb3ZlciBhIGRvY3VtZW50IHdoZXJlIHRoZSBET00gc3RydWN0dXJlIGNhbid0IHJlZmxlY3QgdGhhdCBzdHJ1Y3R1cmUuXG4gICAqL1xuICBPV05FUiA9ICdfX293bmVyJyxcbn1cblxuZGVjbGFyZSBnbG9iYWwge1xuICBpbnRlcmZhY2UgTm9kZSB7XG4gICAgW1Byb3BlcnR5LkpTQUNUSU9OXT86IHN0cmluZztcbiAgICBbUHJvcGVydHkuSlNOQU1FU1BBQ0VdPzogc3RyaW5nO1xuICAgIFtQcm9wZXJ0eS5PSV0/OiBzdHJpbmc7XG4gICAgW1Byb3BlcnR5Lk9XTkVSXT86IFBhcmVudE5vZGU7XG4gIH1cbn1cbiJdfQ==
+export const Property = {
+    JSACTION,
+    JSNAMESPACE,
+    OI,
+    OWNER,
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvcGVydHkuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3ByaW1pdGl2ZXMvZXZlbnQtZGlzcGF0Y2gvc3JjL3Byb3BlcnR5LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVIOzs7Ozs7O0dBT0c7QUFDSCxNQUFNLENBQUMsTUFBTSxRQUFRLEdBQUcsWUFBWSxDQUFDO0FBRXJDOzs7R0FHRztBQUNILE1BQU0sQ0FBQyxNQUFNLFdBQVcsR0FBRyxlQUFlLENBQUM7QUFFM0Msc0VBQXNFO0FBQ3RFLE1BQU0sQ0FBQyxNQUFNLEVBQUUsR0FBRyxNQUFNLENBQUM7QUFFekI7Ozs7O0dBS0c7QUFDSCxNQUFNLENBQUMsTUFBTSxLQUFLLEdBQUcsU0FBUyxDQUFDO0FBRS9CLGdEQUFnRDtBQUNoRCxNQUFNLENBQUMsTUFBTSxRQUFRLEdBQUc7SUFDdEIsUUFBUTtJQUNSLFdBQVc7SUFDWCxFQUFFO0lBQ0YsS0FBSztDQUNOLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIExMQyBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuLyoqXG4gKiBUaGUgcGFyc2VkIHZhbHVlIG9mIHRoZSBqc2FjdGlvbiBhdHRyaWJ1dGUgaXMgc3RvcmVkIGluIHRoaXNcbiAqIHByb3BlcnR5IG9uIHRoZSBET00gbm9kZS4gVGhlIHBhcnNlZCB2YWx1ZSBpcyBhbiBPYmplY3QuIFRoZVxuICogcHJvcGVydHkgbmFtZXMgb2YgdGhlIG9iamVjdCBhcmUgdGhlIGV2ZW50czsgdGhlIHZhbHVlcyBhcmUgdGhlXG4gKiBuYW1lcyBvZiB0aGUgYWN0aW9ucy4gVGhpcyBwcm9wZXJ0eSBpcyBhdHRhY2hlZCBldmVuIG9uIG5vZGVzXG4gKiB0aGF0IGRvbid0IGhhdmUgYSBqc2FjdGlvbiBhdHRyaWJ1dGUgYXMgYW4gb3B0aW1pemF0aW9uLCBiZWNhdXNlXG4gKiBwcm9wZXJ0eSBsb29rdXAgaXMgZmFzdGVyIHRoYW4gYXR0cmlidXRlIGFjY2Vzcy5cbiAqL1xuZXhwb3J0IGNvbnN0IEpTQUNUSU9OID0gJ19fanNhY3Rpb24nO1xuXG4vKipcbiAqIFRoZSBwYXJzZWQgdmFsdWUgb2YgdGhlIGpzbmFtZXNwYWNlIGF0dHJpYnV0ZSBpcyBzdG9yZWQgaW4gdGhpc1xuICogcHJvcGVydHkgb24gdGhlIERPTSBub2RlLlxuICovXG5leHBvcnQgY29uc3QgSlNOQU1FU1BBQ0UgPSAnX19qc25hbWVzcGFjZSc7XG5cbi8qKiBUaGUgdmFsdWUgb2YgdGhlIG9pIGF0dHJpYnV0ZSBhcyBhIHByb3BlcnR5LCBmb3IgZmFzdGVyIGFjY2Vzcy4gKi9cbmV4cG9ydCBjb25zdCBPSSA9ICdfX29pJztcblxuLyoqXG4gKiBUaGUgb3duZXIgcHJvcGVydHkgcmVmZXJlbmNlcyBhbiBhIGxvZ2ljYWwgb3duZXIgZm9yIGEgRE9NIG5vZGUuIEpTQWN0aW9uXG4gKiB3aWxsIGZvbGxvdyB0aGlzIHJlZmVyZW5jZSBpbnN0ZWFkIG9mIHBhcmVudE5vZGUgd2hlbiB0cmF2ZXJzaW5nIHRoZSBET01cbiAqIHRvIGZpbmQganNhY3Rpb24gYXR0cmlidXRlcy4gVGhpcyBhbGxvd3Mgb3ZlcmxheWluZyBhIGxvZ2ljYWwgc3RydWN0dXJlXG4gKiBvdmVyIGEgZG9jdW1lbnQgd2hlcmUgdGhlIERPTSBzdHJ1Y3R1cmUgY2FuJ3QgcmVmbGVjdCB0aGF0IHN0cnVjdHVyZS5cbiAqL1xuZXhwb3J0IGNvbnN0IE9XTkVSID0gJ19fb3duZXInO1xuXG4vKiogQWxsIHByb3BlcnRpZXMgdGhhdCBhcmUgdXNlZCBieSBqc2FjdGlvbi4gKi9cbmV4cG9ydCBjb25zdCBQcm9wZXJ0eSA9IHtcbiAgSlNBQ1RJT04sXG4gIEpTTkFNRVNQQUNFLFxuICBPSSxcbiAgT1dORVIsXG59O1xuXG5kZWNsYXJlIGdsb2JhbCB7XG4gIGludGVyZmFjZSBOb2RlIHtcbiAgICBbSlNBQ1RJT05dPzogc3RyaW5nO1xuICAgIFtKU05BTUVTUEFDRV0/OiBzdHJpbmc7XG4gICAgW09JXT86IHN0cmluZztcbiAgICBbT1dORVJdPzogUGFyZW50Tm9kZTtcbiAgfVxufVxuIl19

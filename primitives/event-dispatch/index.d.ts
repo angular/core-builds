@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-85ac2de
+ * @license Angular v18.1.0-next.0+sha-3068de4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -476,7 +476,7 @@ declare type Replayer = (eventInfoWrappers: EventInfoWrapper[]) => void;
  * @fileoverview An enum to control who can call certain jsaction APIs.
  */
 declare enum Restriction {
-    I_AM_THE_JSACTION_FRAMEWORK = 1
+    I_AM_THE_JSACTION_FRAMEWORK = 0
 }
 
 /** Added for readability when accessing stable property names. */

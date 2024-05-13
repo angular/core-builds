@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-85ac2de
+ * @license Angular v18.1.0-next.0+sha-3068de4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -201,7 +201,7 @@ class EventInfoWrapper {
  */
 var Restriction;
 (function (Restriction) {
-    Restriction[Restriction["I_AM_THE_JSACTION_FRAMEWORK"] = 1] = "I_AM_THE_JSACTION_FRAMEWORK";
+    Restriction[Restriction["I_AM_THE_JSACTION_FRAMEWORK"] = 0] = "I_AM_THE_JSACTION_FRAMEWORK";
 })(Restriction || (Restriction = {}));
 
 /**
@@ -567,19 +567,17 @@ const EventType = {
     CUSTOM: '_custom',
 };
 
+/**
+ * If on a Macintosh with an extended keyboard, the Enter key located in the
+ * numeric pad has a different ASCII code.
+ */
+const MAC_ENTER = 3;
+/** The Enter key. */
+const ENTER = 13;
+/** The Space key. */
+const SPACE = 32;
 /** Special keycodes used by jsaction for the generic click action. */
-var KeyCode;
-(function (KeyCode) {
-    /**
-     * If on a Macintosh with an extended keyboard, the Enter key located in the
-     * numeric pad has a different ASCII code.
-     */
-    KeyCode[KeyCode["MAC_ENTER"] = 3] = "MAC_ENTER";
-    /** The Enter key. */
-    KeyCode[KeyCode["ENTER"] = 13] = "ENTER";
-    /** The Space key. */
-    KeyCode[KeyCode["SPACE"] = 32] = "SPACE";
-})(KeyCode || (KeyCode = {}));
+const KeyCode = { MAC_ENTER, ENTER, SPACE };
 
 /**
  * Gets a browser event type, if it would differ from the JSAction event type.
@@ -1308,70 +1306,68 @@ function populateClickOnlyAction(actionElement, eventInfo, actionMap) {
     setAction(eventInfo, actionMap[EventType.CLICKONLY], actionElement);
 }
 
-var Attribute;
-(function (Attribute) {
-    /**
-     * The jsaction attribute defines a mapping of a DOM event to a
-     * generic event (aka jsaction), to which the actual event handlers
-     * that implement the behavior of the application are bound. The
-     * value is a semicolon separated list of colon separated pairs of
-     * an optional DOM event name and a jsaction name. If the optional
-     * DOM event name is omitted, 'click' is assumed. The jsaction names
-     * are dot separated pairs of a namespace and a simple jsaction
-     * name. If the namespace is absent, it is taken from the closest
-     * ancestor element with a jsnamespace attribute, if there is
-     * any. If there is no ancestor with a jsnamespace attribute, the
-     * simple name is assumed to be the jsaction name.
-     *
-     * Used by EventContract.
-     */
-    Attribute["JSACTION"] = "jsaction";
-    /**
-     * The jsnamespace attribute provides the namespace part of the
-     * jaction names occurring in the jsaction attribute where it's
-     * missing.
-     *
-     * Used by EventContract.
-     */
-    Attribute["JSNAMESPACE"] = "jsnamespace";
-    /**
-     * The oi attribute is a log impression tag for impression logging
-     * and action tracking. For an element that carries a jsaction
-     * attribute, the element is identified for the purpose of
-     * impression logging and click tracking by the dot separated path
-     * of all oi attributes in the chain of ancestors of the element.
-     *
-     * Used by ActionFlow.
-     */
-    Attribute["OI"] = "oi";
-    /**
-     * The ved attribute is an encoded ClickTrackingCGI proto to track
-     * visual elements.
-     *
-     * Used by ActionFlow.
-     */
-    Attribute["VED"] = "ved";
-    /**
-     * The vet attribute is the visual element type used to identify tracked
-     * visual elements.
-     */
-    Attribute["VET"] = "vet";
-    /**
-     * Support for iteration on reprocessing.
-     *
-     * Used by ActionFlow.
-     */
-    Attribute["JSINSTANCE"] = "jsinstance";
-    /**
-     * All click jsactions that happen on the element that carries this
-     * attribute or its descendants are automatically logged.
-     * Impressions of jsactions on these elements are tracked too, if
-     * requested by the impression() method of ActionFlow.
-     *
-     * Used by ActionFlow.
-     */
-    Attribute["JSTRACK"] = "jstrack";
-})(Attribute || (Attribute = {}));
+/**
+ * The jsaction attribute defines a mapping of a DOM event to a
+ * generic event (aka jsaction), to which the actual event handlers
+ * that implement the behavior of the application are bound. The
+ * value is a semicolon separated list of colon separated pairs of
+ * an optional DOM event name and a jsaction name. If the optional
+ * DOM event name is omitted, 'click' is assumed. The jsaction names
+ * are dot separated pairs of a namespace and a simple jsaction
+ * name. If the namespace is absent, it is taken from the closest
+ * ancestor element with a jsnamespace attribute, if there is
+ * any. If there is no ancestor with a jsnamespace attribute, the
+ * simple name is assumed to be the jsaction name.
+ *
+ * Used by EventContract.
+ */
+const JSACTION$1 = 'jsaction';
+/**
+ * The jsnamespace attribute provides the namespace part of the
+ * jaction names occurring in the jsaction attribute where it's
+ * missing.
+ *
+ * Used by EventContract.
+ */
+const JSNAMESPACE$1 = 'jsnamespace';
+/**
+ * The oi attribute is a log impression tag for impression logging
+ * and action tracking. For an element that carries a jsaction
+ * attribute, the element is identified for the purpose of
+ * impression logging and click tracking by the dot separated path
+ * of all oi attributes in the chain of ancestors of the element.
+ *
+ * Used by ActionFlow.
+ */
+const OI$1 = 'oi';
+/**
+ * The ved attribute is an encoded ClickTrackingCGI proto to track
+ * visual elements.
+ *
+ * Used by ActionFlow.
+ */
+const VED = 'ved';
+/**
+ * The vet attribute is the visual element type used to identify tracked
+ * visual elements.
+ */
+const VET = 'vet';
+/**
+ * Support for iteration on reprocessing.
+ *
+ * Used by ActionFlow.
+ */
+const JSINSTANCE = 'jsinstance';
+/**
+ * All click jsactions that happen on the element that carries this
+ * attribute or its descendants are automatically logged.
+ * Impressions of jsactions on these elements are tracked too, if
+ * requested by the impression() method of ActionFlow.
+ *
+ * Used by ActionFlow.
+ */
+const JSTRACK = 'jstrack';
+const Attribute = { JSACTION: JSACTION$1, JSNAMESPACE: JSNAMESPACE$1, OI: OI$1, VED, VET, JSINSTANCE, JSTRACK };
 
 const Char = {
     /**
@@ -1401,33 +1397,36 @@ const Char = {
     CAD_SEPARATOR: ',',
 };
 
+/**
+ * The parsed value of the jsaction attribute is stored in this
+ * property on the DOM node. The parsed value is an Object. The
+ * property names of the object are the events; the values are the
+ * names of the actions. This property is attached even on nodes
+ * that don't have a jsaction attribute as an optimization, because
+ * property lookup is faster than attribute access.
+ */
+const JSACTION = '__jsaction';
+/**
+ * The parsed value of the jsnamespace attribute is stored in this
+ * property on the DOM node.
+ */
+const JSNAMESPACE = '__jsnamespace';
+/** The value of the oi attribute as a property, for faster access. */
+const OI = '__oi';
+/**
+ * The owner property references an a logical owner for a DOM node. JSAction
+ * will follow this reference instead of parentNode when traversing the DOM
+ * to find jsaction attributes. This allows overlaying a logical structure
+ * over a document where the DOM structure can't reflect that structure.
+ */
+const OWNER = '__owner';
 /** All properties that are used by jsaction. */
-var Property;
-(function (Property) {
-    /**
-     * The parsed value of the jsaction attribute is stored in this
-     * property on the DOM node. The parsed value is an Object. The
-     * property names of the object are the events; the values are the
-     * names of the actions. This property is attached even on nodes
-     * that don't have a jsaction attribute as an optimization, because
-     * property lookup is faster than attribute access.
-     */
-    Property["JSACTION"] = "__jsaction";
-    /**
-     * The parsed value of the jsnamespace attribute is stored in this
-     * property on the DOM node.
-     */
-    Property["JSNAMESPACE"] = "__jsnamespace";
-    /** The value of the oi attribute as a property, for faster access. */
-    Property["OI"] = "__oi";
-    /**
-     * The owner property references an a logical owner for a DOM node. JSAction
-     * will follow this reference instead of parentNode when traversing the DOM
-     * to find jsaction attributes. This allows overlaying a logical structure
-     * over a document where the DOM structure can't reflect that structure.
-     */
-    Property["OWNER"] = "__owner";
-})(Property || (Property = {}));
+const Property = {
+    JSACTION,
+    JSNAMESPACE,
+    OI,
+    OWNER,
+};
 
 /**
  * Map from jsaction annotation to a parsed map from event name to action name.
@@ -1441,7 +1440,7 @@ const parseCache = {};
  */
 function get(element) {
     // @ts-ignore
-    return element[Property.JSACTION];
+    return element[JSACTION];
 }
 /**
  * Writes the jsaction parser cache to the given DOM Element.
@@ -1452,7 +1451,7 @@ function get(element) {
  */
 function set(element, actionMap) {
     // @ts-ignore
-    element[Property.JSACTION] = actionMap;
+    element[JSACTION] = actionMap;
 }
 /**
  * Looks up the parsed action map from the source jsaction attribute value.
@@ -1478,8 +1477,8 @@ function setParsed(text, parsed) {
  * @param element .
  */
 function clear(element) {
-    if (Property.JSACTION in element) {
-        delete element[Property.JSACTION];
+    if (JSACTION in element) {
+        delete element[JSACTION];
     }
 }
 /**
@@ -1492,7 +1491,7 @@ function clear(element) {
  */
 function getNamespace(element) {
     // @ts-ignore
-    return element[Property.JSNAMESPACE];
+    return element[JSNAMESPACE];
 }
 /**
  * Writes the cached jsaction namespace to the given DOM Element. Null
@@ -1503,7 +1502,7 @@ function getNamespace(element) {
  */
 function setNamespace(element, jsnamespace) {
     // @ts-ignore
-    element[Property.JSNAMESPACE] = jsnamespace;
+    element[JSNAMESPACE] = jsnamespace;
 }
 /**
  * Clears the cached jsaction namespace from the given DOM Element.
@@ -1511,8 +1510,8 @@ function setNamespace(element, jsnamespace) {
  * @param element .
  */
 function clearNamespace(element) {
-    if (Property.JSNAMESPACE in element) {
-        delete element[Property.JSNAMESPACE];
+    if (JSNAMESPACE in element) {
+        delete element[JSNAMESPACE];
     }
 }
 
@@ -1619,8 +1618,8 @@ class ActionResolver {
                 // ancestor chain of the event target node.
                 break;
             }
-            if (actionElement[Property.OWNER]) {
-                actionElement = actionElement[Property.OWNER];
+            if (actionElement[OWNER]) {
+                actionElement = actionElement[OWNER];
                 continue;
             }
             if (actionElement.parentNode?.nodeName !== '#document-fragment') {
