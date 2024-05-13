@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-7c9d37d
+ * @license Angular v18.0.0-rc.1+sha-eb31f2c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1528,27 +1528,14 @@ const REGEXP_SEMICOLON = /\s*;\s*/;
 const DEFAULT_EVENT_TYPE = EventType.CLICK;
 /** Resolves actions for Events. */
 class ActionResolver {
-    constructor({ customEventSupport = false, syntheticMouseEventSupport = false, } = {}) {
+    constructor({ syntheticMouseEventSupport = false, } = {}) {
         this.a11yClickSupport = false;
         this.updateEventInfoForA11yClick = undefined;
         this.preventDefaultForA11yClick = undefined;
         this.populateClickOnlyAction = undefined;
-        this.customEventSupport = customEventSupport;
         this.syntheticMouseEventSupport = syntheticMouseEventSupport;
     }
     resolve(eventInfo) {
-        if (this.customEventSupport) {
-            if (getEventType(eventInfo) === EventType.CUSTOM) {
-                const detail = getEvent(eventInfo).detail;
-                // For custom events, use a secondary dispatch based on the internal
-                // custom type of the event.
-                if (!detail || !detail['_type']) {
-                    // This should never happen.
-                    return;
-                }
-                setEventType(eventInfo, detail['_type']);
-            }
-        }
         this.populateAction(eventInfo);
     }
     /**
@@ -1745,11 +1732,6 @@ const A11Y_CLICK_SUPPORT = false;
  * flag can be overridden in a build rule.
  */
 const MOUSE_SPECIAL_SUPPORT = false;
-/**
- * @define Support for custom events, which are type EventType.CUSTOM. These are
- * native DOM events with an additional type field and an optional payload.
- */
-const CUSTOM_EVENT_SUPPORT = false;
 
 /**
  * @fileoverview Implements the local event handling contract. This
@@ -1789,12 +1771,10 @@ const CUSTOM_EVENT_SUPPORT = false;
  * be delay loaded in a generic way.
  */
 class EventContract {
-    static { this.CUSTOM_EVENT_SUPPORT = CUSTOM_EVENT_SUPPORT; }
     static { this.A11Y_CLICK_SUPPORT = A11Y_CLICK_SUPPORT; }
     static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
     constructor(containerManager) {
         this.actionResolver = new ActionResolver({
-            customEventSupport: EventContract.CUSTOM_EVENT_SUPPORT,
             syntheticMouseEventSupport: EventContract.MOUSE_SPECIAL_SUPPORT,
         });
         /**
@@ -1822,9 +1802,6 @@ class EventContract {
         /** Whether to add an a11y click listener. */
         this.addA11yClickListener = false;
         this.containerManager = containerManager;
-        if (EventContract.CUSTOM_EVENT_SUPPORT) {
-            this.addEvent(EventType.CUSTOM);
-        }
         if (EventContract.A11Y_CLICK_SUPPORT) {
             // Add a11y click support to the `EventContract`.
             this.addA11yClickSupport();
