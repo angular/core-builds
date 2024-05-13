@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-3068de4
+ * @license Angular v18.1.0-next.0+sha-76d0aea
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -157,7 +157,6 @@ export declare interface EarlyJsactionDataContainer {
  * be delay loaded in a generic way.
  */
 export declare class EventContract implements UnrenamedEventContract {
-    static CUSTOM_EVENT_SUPPORT: boolean;
     static A11Y_CLICK_SUPPORT: boolean;
     static MOUSE_SPECIAL_SUPPORT: boolean;
     private containerManager;
