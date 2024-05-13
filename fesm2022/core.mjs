@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-eb31f2c
+ * @license Angular v18.0.0-rc.1+sha-a028943
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8528,7 +8528,6 @@ var HydrationStatus;
     HydrationStatus["Skipped"] = "skipped";
     HydrationStatus["Mismatched"] = "mismatched";
 })(HydrationStatus || (HydrationStatus = {}));
-// clang-format on
 const HYDRATION_INFO_KEY = '__ngDebugHydrationInfo__';
 function patchHydrationInfo(node, info) {
     node[HYDRATION_INFO_KEY] = info;
@@ -16888,7 +16887,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-eb31f2c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-a028943']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30800,7 +30799,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-rc.1+sha-eb31f2c');
+const VERSION = new Version('18.0.0-rc.1+sha-a028943');
 
 class Console {
     log(message) {
@@ -37659,8 +37658,7 @@ function ɵɵngDeclarePipe(decl) {
     return compiler.compilePipeDeclaration(angularCoreEnv, `ng:///${decl.type.name}/ɵpipe.js`, decl);
 }
 
-// clang-format off
-// clang-format on
+// we reexport these symbols just so that they are retained during the dead code elimination
 
 /**
  * Create a computed `Signal` which derives a reactive value from an expression.
@@ -37849,9 +37847,6 @@ function effect(effectFn, options) {
     }
     return handle;
 }
-
-// clang-format off
-// clang-format on
 
 // This file exists to allow the set of reactivity exports to be modified in g3, as these APIs are
 

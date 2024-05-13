@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-eb31f2c
+ * @license Angular v18.0.0-rc.1+sha-a028943
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1459,7 +1459,6 @@ class TestBedCompiler {
             ...this.providerOverrides,
         ];
         const imports = [RootScopeModule, this.additionalModuleTypes, this.imports || []];
-        // clang-format off
         ɵcompileNgModuleDefs(this.testModuleType, {
             declarations: this.declarations,
             imports,
@@ -1467,7 +1466,6 @@ class TestBedCompiler {
             providers,
         }, 
         /* allowDuplicateDeclarationsInRoot */ true);
-        // clang-format on
         this.applyProviderOverridesInScope(this.testModuleType);
     }
     get injector() {
