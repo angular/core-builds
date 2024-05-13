@@ -5,17 +5,15 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * If on a Macintosh with an extended keyboard, the Enter key located in the
+ * numeric pad has a different ASCII code.
+ */
+export const MAC_ENTER = 3;
+/** The Enter key. */
+export const ENTER = 13;
+/** The Space key. */
+export const SPACE = 32;
 /** Special keycodes used by jsaction for the generic click action. */
-export var KeyCode;
-(function (KeyCode) {
-    /**
-     * If on a Macintosh with an extended keyboard, the Enter key located in the
-     * numeric pad has a different ASCII code.
-     */
-    KeyCode[KeyCode["MAC_ENTER"] = 3] = "MAC_ENTER";
-    /** The Enter key. */
-    KeyCode[KeyCode["ENTER"] = 13] = "ENTER";
-    /** The Space key. */
-    KeyCode[KeyCode["SPACE"] = 32] = "SPACE";
-})(KeyCode || (KeyCode = {}));
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia2V5X2NvZGUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3ByaW1pdGl2ZXMvZXZlbnQtZGlzcGF0Y2gvc3JjL2tleV9jb2RlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVILHNFQUFzRTtBQUN0RSxNQUFNLENBQU4sSUFBWSxPQVlYO0FBWkQsV0FBWSxPQUFPO0lBQ2pCOzs7T0FHRztJQUNILCtDQUFhLENBQUE7SUFFYixxQkFBcUI7SUFDckIsd0NBQVUsQ0FBQTtJQUVWLHFCQUFxQjtJQUNyQix3Q0FBVSxDQUFBO0FBQ1osQ0FBQyxFQVpXLE9BQU8sS0FBUCxPQUFPLFFBWWxCIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBMTEMgQWxsIFJpZ2h0cyBSZXNlcnZlZC5cbiAqXG4gKiBVc2Ugb2YgdGhpcyBzb3VyY2UgY29kZSBpcyBnb3Zlcm5lZCBieSBhbiBNSVQtc3R5bGUgbGljZW5zZSB0aGF0IGNhbiBiZVxuICogZm91bmQgaW4gdGhlIExJQ0VOU0UgZmlsZSBhdCBodHRwczovL2FuZ3VsYXIuaW8vbGljZW5zZVxuICovXG5cbi8qKiBTcGVjaWFsIGtleWNvZGVzIHVzZWQgYnkganNhY3Rpb24gZm9yIHRoZSBnZW5lcmljIGNsaWNrIGFjdGlvbi4gKi9cbmV4cG9ydCBlbnVtIEtleUNvZGUge1xuICAvKipcbiAgICogSWYgb24gYSBNYWNpbnRvc2ggd2l0aCBhbiBleHRlbmRlZCBrZXlib2FyZCwgdGhlIEVudGVyIGtleSBsb2NhdGVkIGluIHRoZVxuICAgKiBudW1lcmljIHBhZCBoYXMgYSBkaWZmZXJlbnQgQVNDSUkgY29kZS5cbiAgICovXG4gIE1BQ19FTlRFUiA9IDMsXG5cbiAgLyoqIFRoZSBFbnRlciBrZXkuICovXG4gIEVOVEVSID0gMTMsXG5cbiAgLyoqIFRoZSBTcGFjZSBrZXkuICovXG4gIFNQQUNFID0gMzIsXG59XG4iXX0=
+export const KeyCode = { MAC_ENTER, ENTER, SPACE };
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia2V5X2NvZGUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3ByaW1pdGl2ZXMvZXZlbnQtZGlzcGF0Y2gvc3JjL2tleV9jb2RlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7R0FNRztBQUVIOzs7R0FHRztBQUNILE1BQU0sQ0FBQyxNQUFNLFNBQVMsR0FBRyxDQUFDLENBQUM7QUFFM0IscUJBQXFCO0FBQ3JCLE1BQU0sQ0FBQyxNQUFNLEtBQUssR0FBRyxFQUFFLENBQUM7QUFFeEIscUJBQXFCO0FBQ3JCLE1BQU0sQ0FBQyxNQUFNLEtBQUssR0FBRyxFQUFFLENBQUM7QUFFeEIsc0VBQXNFO0FBQ3RFLE1BQU0sQ0FBQyxNQUFNLE9BQU8sR0FBRyxFQUFDLFNBQVMsRUFBRSxLQUFLLEVBQUUsS0FBSyxFQUFDLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEBsaWNlbnNlXG4gKiBDb3B5cmlnaHQgR29vZ2xlIExMQyBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuLyoqXG4gKiBJZiBvbiBhIE1hY2ludG9zaCB3aXRoIGFuIGV4dGVuZGVkIGtleWJvYXJkLCB0aGUgRW50ZXIga2V5IGxvY2F0ZWQgaW4gdGhlXG4gKiBudW1lcmljIHBhZCBoYXMgYSBkaWZmZXJlbnQgQVNDSUkgY29kZS5cbiAqL1xuZXhwb3J0IGNvbnN0IE1BQ19FTlRFUiA9IDM7XG5cbi8qKiBUaGUgRW50ZXIga2V5LiAqL1xuZXhwb3J0IGNvbnN0IEVOVEVSID0gMTM7XG5cbi8qKiBUaGUgU3BhY2Uga2V5LiAqL1xuZXhwb3J0IGNvbnN0IFNQQUNFID0gMzI7XG5cbi8qKiBTcGVjaWFsIGtleWNvZGVzIHVzZWQgYnkganNhY3Rpb24gZm9yIHRoZSBnZW5lcmljIGNsaWNrIGFjdGlvbi4gKi9cbmV4cG9ydCBjb25zdCBLZXlDb2RlID0ge01BQ19FTlRFUiwgRU5URVIsIFNQQUNFfTtcbiJdfQ==
