@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-a028943
+ * @license Angular v18.0.0-rc.1+sha-dc0c55c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -194,140 +194,6 @@ class EventInfoWrapper {
     clone() {
         return new EventInfoWrapper(cloneEventInfo(this.eventInfo));
     }
-}
-
-/**
- * @fileoverview An enum to control who can call certain jsaction APIs.
- */
-var Restriction;
-(function (Restriction) {
-    Restriction[Restriction["I_AM_THE_JSACTION_FRAMEWORK"] = 0] = "I_AM_THE_JSACTION_FRAMEWORK";
-})(Restriction || (Restriction = {}));
-
-/**
- * Receives a DOM event, determines the jsaction associated with the source
- * element of the DOM event, and invokes the handler associated with the
- * jsaction.
- */
-class BaseDispatcher {
-    /**
-     * Options are:
-     *   1. `eventReplayer`: When the event contract dispatches replay events
-     *      to the Dispatcher, the Dispatcher collects them and in the next tick
-     *      dispatches them to the `eventReplayer`.
-     * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
-     */
-    constructor(dispatchDelegate, { eventReplayer = undefined } = {}) {
-        this.dispatchDelegate = dispatchDelegate;
-        /** The queue of events. */
-        this.queuedEventInfoWrappers = [];
-        /** Whether the event replay is scheduled. */
-        this.eventReplayScheduled = false;
-        this.eventReplayer = eventReplayer;
-    }
-    /**
-     * Receives an event or the event queue from the EventContract. The event
-     * queue is copied and it attempts to replay.
-     * If event info is passed in it looks for an action handler that can handle
-     * the given event.  If there is no handler registered queues the event and
-     * checks if a loader is registered for the given namespace. If so, calls it.
-     *
-     * Alternatively, if in global dispatch mode, calls all registered global
-     * handlers for the appropriate event type.
-     *
-     * The three functionalities of this call are deliberately not split into
-     * three methods (and then declared as an abstract interface), because the
-     * interface is used by EventContract, which lives in a different jsbinary.
-     * Therefore the interface between the three is defined entirely in terms that
-     * are invariant under jscompiler processing (Function and Array, as opposed
-     * to a custom type with method names).
-     *
-     * @param eventInfo The info for the event that triggered this call or the
-     *     queue of events from EventContract.
-     */
-    dispatch(eventInfo) {
-        const eventInfoWrapper = new EventInfoWrapper(eventInfo);
-        if (eventInfoWrapper.getIsReplay()) {
-            if (!this.eventReplayer) {
-                return;
-            }
-            this.queueEventInfoWrapper(eventInfoWrapper);
-            this.scheduleEventReplay();
-            return;
-        }
-        this.dispatchDelegate(eventInfoWrapper);
-    }
-    /** Queue an `EventInfoWrapper` for replay. */
-    queueEventInfoWrapper(eventInfoWrapper) {
-        this.queuedEventInfoWrappers.push(eventInfoWrapper);
-    }
-    /**
-     * Replays queued events, if any. The replaying will happen in its own
-     * stack once the current flow cedes control. This is done to mimic
-     * browser event handling.
-     */
-    scheduleEventReplay() {
-        if (this.eventReplayScheduled ||
-            !this.eventReplayer ||
-            this.queuedEventInfoWrappers.length === 0) {
-            return;
-        }
-        this.eventReplayScheduled = true;
-        Promise.resolve().then(() => {
-            this.eventReplayScheduled = false;
-            this.eventReplayer(this.queuedEventInfoWrappers);
-        });
-    }
-}
-/**
- * Registers deferred functionality for an EventContract and a Jsaction
- * Dispatcher.
- */
-function registerDispatcher(eventContract, dispatcher) {
-    eventContract.ecrd((eventInfo) => {
-        dispatcher.dispatch(eventInfo);
-    }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
-}
-
-/**
- * Determines if one node is contained within another. Adapted from
- * {@see goog.dom.contains}.
- * @param node Node that should contain otherNode.
- * @param otherNode Node being contained.
- * @return True if otherNode is contained within node.
- */
-function contains(node, otherNode) {
-    if (otherNode === null) {
-        return false;
-    }
-    // We use browser specific methods for this if available since it is faster
-    // that way.
-    // IE DOM
-    if ('contains' in node && otherNode.nodeType === 1) {
-        return node.contains(otherNode);
-    }
-    // W3C DOM Level 3
-    if ('compareDocumentPosition' in node) {
-        return node === otherNode || Boolean(node.compareDocumentPosition(otherNode) & 16);
-    }
-    // W3C DOM Level 1
-    while (otherNode && node !== otherNode) {
-        otherNode = otherNode.parentNode;
-    }
-    return otherNode === node;
-}
-/**
- * Helper method for broadcastCustomEvent. Returns true if any member of
- * the set is an ancestor of element.
- */
-function hasAncestorInNodeList(element, nodeList) {
-    for (let idx = 0; idx < nodeList.length; ++idx) {
-        const member = nodeList[idx];
-        if (member !== element && contains(member, element)) {
-            return true;
-        }
-    }
-    return false;
 }
 
 /*
@@ -568,6 +434,55 @@ const EventType = {
 };
 
 /**
+ * @fileoverview An enum to control who can call certain jsaction APIs.
+ */
+var Restriction;
+(function (Restriction) {
+    Restriction[Restriction["I_AM_THE_JSACTION_FRAMEWORK"] = 0] = "I_AM_THE_JSACTION_FRAMEWORK";
+})(Restriction || (Restriction = {}));
+
+/**
+ * Determines if one node is contained within another. Adapted from
+ * {@see goog.dom.contains}.
+ * @param node Node that should contain otherNode.
+ * @param otherNode Node being contained.
+ * @return True if otherNode is contained within node.
+ */
+function contains(node, otherNode) {
+    if (otherNode === null) {
+        return false;
+    }
+    // We use browser specific methods for this if available since it is faster
+    // that way.
+    // IE DOM
+    if ('contains' in node && otherNode.nodeType === 1) {
+        return node.contains(otherNode);
+    }
+    // W3C DOM Level 3
+    if ('compareDocumentPosition' in node) {
+        return node === otherNode || Boolean(node.compareDocumentPosition(otherNode) & 16);
+    }
+    // W3C DOM Level 1
+    while (otherNode && node !== otherNode) {
+        otherNode = otherNode.parentNode;
+    }
+    return otherNode === node;
+}
+/**
+ * Helper method for broadcastCustomEvent. Returns true if any member of
+ * the set is an ancestor of element.
+ */
+function hasAncestorInNodeList(element, nodeList) {
+    for (let idx = 0; idx < nodeList.length; ++idx) {
+        const member = nodeList[idx];
+        if (member !== element && contains(member, element)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * If on a Macintosh with an extended keyboard, the Enter key located in the
  * numeric pad has a different ASCII code.
  */
@@ -661,7 +576,7 @@ function removeEventListener(element, info) {
  * Cancels propagation of an event.
  * @param e The event to cancel propagation for.
  */
-function stopPropagation(e) {
+function stopPropagation$1(e) {
     e.stopPropagation ? e.stopPropagation() : (e.cancelBubble = true);
 }
 /**
@@ -1206,6 +1121,106 @@ const testing = {
         isMac = value;
     },
 };
+
+/**
+ * Receives a DOM event, determines the jsaction associated with the source
+ * element of the DOM event, and invokes the handler associated with the
+ * jsaction.
+ */
+class Dispatcher {
+    /**
+     * Options are:
+     *   1. `eventReplayer`: When the event contract dispatches replay events
+     *      to the Dispatcher, the Dispatcher collects them and in the next tick
+     *      dispatches them to the `eventReplayer`.
+     * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
+     */
+    constructor(dispatchDelegate, { eventReplayer = undefined } = {}) {
+        this.dispatchDelegate = dispatchDelegate;
+        /** The queue of events. */
+        this.replayEventInfoWrappers = [];
+        /** Whether the event replay is scheduled. */
+        this.eventReplayScheduled = false;
+        this.eventReplayer = eventReplayer;
+    }
+    /**
+     * Receives an event or the event queue from the EventContract. The event
+     * queue is copied and it attempts to replay.
+     * If event info is passed in it looks for an action handler that can handle
+     * the given event.  If there is no handler registered queues the event and
+     * checks if a loader is registered for the given namespace. If so, calls it.
+     *
+     * Alternatively, if in global dispatch mode, calls all registered global
+     * handlers for the appropriate event type.
+     *
+     * The three functionalities of this call are deliberately not split into
+     * three methods (and then declared as an abstract interface), because the
+     * interface is used by EventContract, which lives in a different jsbinary.
+     * Therefore the interface between the three is defined entirely in terms that
+     * are invariant under jscompiler processing (Function and Array, as opposed
+     * to a custom type with method names).
+     *
+     * @param eventInfo The info for the event that triggered this call or the
+     *     queue of events from EventContract.
+     */
+    dispatch(eventInfo) {
+        const eventInfoWrapper = new EventInfoWrapper(eventInfo);
+        if (eventInfoWrapper.getIsReplay()) {
+            if (!this.eventReplayer) {
+                return;
+            }
+            this.scheduleEventInfoWrapperReplay(eventInfoWrapper);
+            return;
+        }
+        this.dispatchDelegate(eventInfoWrapper);
+    }
+    /**
+     * Schedules an `EventInfoWrapper` for replay. The replaying will happen in its own
+     * stack once the current flow cedes control. This is done to mimic
+     * browser event handling.
+     */
+    scheduleEventInfoWrapperReplay(eventInfoWrapper) {
+        this.replayEventInfoWrappers.push(eventInfoWrapper);
+        if (this.eventReplayScheduled || !this.eventReplayer) {
+            return;
+        }
+        this.eventReplayScheduled = true;
+        Promise.resolve().then(() => {
+            this.eventReplayScheduled = false;
+            this.eventReplayer(this.replayEventInfoWrappers);
+        });
+    }
+}
+/** Stop propagation for an `EventInfo`. */
+function stopPropagation(eventInfoWrapper) {
+    if (isGecko &&
+        (eventInfoWrapper.getTargetElement().tagName === 'INPUT' ||
+            eventInfoWrapper.getTargetElement().tagName === 'TEXTAREA') &&
+        eventInfoWrapper.getEventType() === EventType.FOCUS) {
+        /**
+         * Do nothing since stopping propagation on a focus event on an input
+         * element in Firefox makes the text cursor disappear:
+         * https://bugzilla.mozilla.org/show_bug.cgi?id=509684
+         */
+        return;
+    }
+    const event = eventInfoWrapper.getEvent();
+    // There are some cases where users of the `Dispatcher` will call dispatch
+    // with a fake event that does not support `stopPropagation`.
+    if (!event.stopPropagation) {
+        return;
+    }
+    event.stopPropagation();
+}
+/**
+ * Registers deferred functionality for an EventContract and a Jsaction
+ * Dispatcher.
+ */
+function registerDispatcher(eventContract, dispatcher) {
+    eventContract.ecrd((eventInfo) => {
+        dispatcher.dispatch(eventInfo);
+    }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
+}
 
 /**
  * Whether the user agent is running on iOS.
@@ -2079,5 +2094,5 @@ function bootstrapEarlyEventContract(field, container, appId, eventTypes, captur
         eventContract.addEvents(captureEventTypes, true);
 }
 
-export { BaseDispatcher, EventContract, EventContractContainer, EventInfoWrapper, bootstrapEarlyEventContract, registerDispatcher };
+export { Dispatcher, EventContract, EventContractContainer, EventInfoWrapper, bootstrapEarlyEventContract, registerDispatcher };
 //# sourceMappingURL=event-dispatch.mjs.map

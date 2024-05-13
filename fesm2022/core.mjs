@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-a028943
+ * @license Angular v18.0.0-rc.1+sha-dc0c55c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1 } from '@angular/core/primitives/signals';
 import { Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
-import { EventContract, EventContractContainer, BaseDispatcher, registerDispatcher } from '@angular/core/primitives/event-dispatch';
+import { EventContract, EventContractContainer, Dispatcher, registerDispatcher } from '@angular/core/primitives/event-dispatch';
 
 /**
  * Base URL for the error details page.
@@ -16887,7 +16887,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-a028943']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-dc0c55c']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30799,7 +30799,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-rc.1+sha-a028943');
+const VERSION = new Version('18.0.0-rc.1+sha-dc0c55c');
 
 class Console {
     log(message) {
@@ -36588,7 +36588,7 @@ function withEventReplay() {
                                     eventContract.addEvent(et);
                                 }
                                 eventContract.replayEarlyEvents(container);
-                                const dispatcher = new BaseDispatcher(() => { }, {
+                                const dispatcher = new Dispatcher(() => { }, {
                                     eventReplayer: (queue) => {
                                         for (const event of queue) {
                                             handleEvent(event);
