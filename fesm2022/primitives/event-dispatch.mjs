@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-3fae2f1
+ * @license Angular v18.1.0-next.0+sha-caedd10
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1165,6 +1165,10 @@ class Dispatcher {
      */
     dispatch(eventInfo) {
         const eventInfoWrapper = new EventInfoWrapper(eventInfo);
+        const action = eventInfoWrapper.getAction();
+        if (action && shouldPreventDefaultBeforeDispatching(action.element, eventInfoWrapper)) {
+            preventDefault(eventInfoWrapper.getEvent());
+        }
         if (eventInfoWrapper.getIsReplay()) {
             if (!this.eventReplayer) {
                 return;
@@ -1211,6 +1215,18 @@ function stopPropagation(eventInfoWrapper) {
         return;
     }
     event.stopPropagation();
+}
+/**
+ * Returns true if the default action of this event should be prevented before
+ * this event is dispatched.
+ */
+function shouldPreventDefaultBeforeDispatching(actionElement, eventInfoWrapper) {
+    // Prevent browser from following <a> node links if a jsaction is present
+    // and we are dispatching the action now. Note that the targetElement may be
+    // a child of an anchor that has a jsaction attached. For that reason, we
+    // need to check the actionElement rather than the targetElement.
+    return ((actionElement.tagName === 'A' && eventInfoWrapper.getEventType() === EventType.CLICK) ||
+        eventInfoWrapper.getEventType() === EventType.CLICKMOD);
 }
 /**
  * Registers deferred functionality for an EventContract and a Jsaction
@@ -1842,12 +1858,6 @@ class EventContract {
             return;
         }
         this.actionResolver.resolve(eventInfo);
-        const action = getAction(eventInfo);
-        if (action) {
-            if (shouldPreventDefaultBeforeDispatching(getActionElement(action), eventInfo)) {
-                preventDefault(getEvent(eventInfo));
-            }
-        }
         this.dispatcher(eventInfo);
     }
     /**
@@ -2022,19 +2032,6 @@ function removeEventListeners(container, eventTypes, earlyEventHandler, capture)
  */
 function addDeferredA11yClickSupport(eventContract) {
     eventContract.ecaacs?.(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction);
-}
-/**
- * Returns true if the default action of this event should be prevented before
- * this event is dispatched.
- */
-function shouldPreventDefaultBeforeDispatching(actionElement, eventInfo) {
-    // Prevent browser from following <a> node links if a jsaction is present
-    // and we are dispatching the action now. Note that the targetElement may be
-    // a child of an anchor that has a jsaction attached. For that reason, we
-    // need to check the actionElement rather than the targetElement.
-    return (actionElement.tagName === 'A' &&
-        (getEventType(eventInfo) === EventType.CLICK ||
-            getEventType(eventInfo) === EventType.CLICKMOD));
 }
 
 /**
