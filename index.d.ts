@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-e205dcb
+ * @license Angular v18.0.0-rc.1+sha-1fd63e9
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1325,6 +1325,8 @@ export declare interface Component extends Directive {
     encapsulation?: ViewEncapsulation;
     /**
      * Overrides the default interpolation start and end delimiters (`{{` and `}}`).
+     *
+     * @deprecated use Angular's default interpolation delimiters instead.
      */
     interpolation?: [string, string];
     /**
