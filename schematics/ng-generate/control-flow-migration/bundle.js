@@ -5817,7 +5817,7 @@ var ShadowCss = class {
     });
   }
   _scopeSelector(selector, scopeSelector, hostSelector) {
-    return selector.split(",").map((part) => part.trim().split(_shadowDeepSelectors)).map((deepParts) => {
+    return selector.split(/ ?, ?/).map((part) => part.split(_shadowDeepSelectors)).map((deepParts) => {
       const [shallowPart, ...otherParts] = deepParts;
       const applyScope = (shallowPart2) => {
         if (this._selectorNeedsScoping(shallowPart2, scopeSelector)) {
@@ -5859,9 +5859,9 @@ var ShadowCss = class {
     const _scopeSelectorPart = (p) => {
       let scopedP = p.trim();
       if (!scopedP) {
-        return "";
+        return p;
       }
-      if (p.indexOf(_polyfillHostNoCombinator) > -1) {
+      if (p.includes(_polyfillHostNoCombinator)) {
         scopedP = this._applySimpleSelectorScope(p, scopeSelector, hostSelector);
       } else {
         const t = p.replace(_polyfillHostRe, "");
@@ -5880,21 +5880,21 @@ var ShadowCss = class {
     let startIndex = 0;
     let res;
     const sep = /( |>|\+|~(?!=))\s*/g;
-    const hasHost = selector.indexOf(_polyfillHostNoCombinator) > -1;
+    const hasHost = selector.includes(_polyfillHostNoCombinator);
     let shouldScope = !hasHost;
     while ((res = sep.exec(selector)) !== null) {
       const separator = res[1];
-      const part2 = selector.slice(startIndex, res.index).trim();
+      const part2 = selector.slice(startIndex, res.index);
       if (part2.match(/__esc-ph-(\d+)__/) && ((_a2 = selector[res.index + 1]) == null ? void 0 : _a2.match(/[a-fA-F\d]/))) {
         continue;
       }
-      shouldScope = shouldScope || part2.indexOf(_polyfillHostNoCombinator) > -1;
+      shouldScope = shouldScope || part2.includes(_polyfillHostNoCombinator);
       const scopedPart = shouldScope ? _scopeSelectorPart(part2) : part2;
       scopedSelector += `${scopedPart} ${separator} `;
       startIndex = sep.lastIndex;
     }
     const part = selector.substring(startIndex);
-    shouldScope = shouldScope || part.indexOf(_polyfillHostNoCombinator) > -1;
+    shouldScope = shouldScope || part.includes(_polyfillHostNoCombinator);
     scopedSelector += shouldScope ? _scopeSelectorPart(part) : part;
     return safeContent.restore(scopedSelector);
   }
@@ -11095,7 +11095,37 @@ var SCHEMA = [
   "menuitem^[HTMLElement]|type,label,icon,!disabled,!checked,radiogroup,!default",
   "summary^[HTMLElement]|",
   "time^[HTMLElement]|dateTime",
-  ":svg:cursor^:svg:|"
+  ":svg:cursor^:svg:|",
+  ":math:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforeinput,*beforematch,*beforetoggle,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contentvisibilityautostatechange,*contextlost,*contextmenu,*contextrestored,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*scrollend,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex",
+  ":math:math^:math:|",
+  ":math:maction^:math:|",
+  ":math:menclose^:math:|",
+  ":math:merror^:math:|",
+  ":math:mfenced^:math:|",
+  ":math:mfrac^:math:|",
+  ":math:mi^:math:|",
+  ":math:mmultiscripts^:math:|",
+  ":math:mn^:math:|",
+  ":math:mo^:math:|",
+  ":math:mover^:math:|",
+  ":math:mpadded^:math:|",
+  ":math:mphantom^:math:|",
+  ":math:mroot^:math:|",
+  ":math:mrow^:math:|",
+  ":math:ms^:math:|",
+  ":math:mspace^:math:|",
+  ":math:msqrt^:math:|",
+  ":math:mstyle^:math:|",
+  ":math:msub^:math:|",
+  ":math:msubsup^:math:|",
+  ":math:msup^:math:|",
+  ":math:mtable^:math:|",
+  ":math:mtd^:math:|",
+  ":math:mtext^:math:|",
+  ":math:mtr^:math:|",
+  ":math:munder^:math:|",
+  ":math:munderover^:math:|",
+  ":math:semantics^:math:|"
 ];
 var _ATTR_TO_PROP = new Map(Object.entries({
   "class": "className",
@@ -18531,6 +18561,7 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: generateNullishCoalesceExpressions },
   { kind: CompilationJobKind.Both, fn: expandSafeReads },
   { kind: CompilationJobKind.Both, fn: generateTemporaryVariables },
+  { kind: CompilationJobKind.Both, fn: optimizeVariables },
   { kind: CompilationJobKind.Tmpl, fn: allocateSlots },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
@@ -18542,7 +18573,6 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: removeI18nContexts },
   { kind: CompilationJobKind.Both, fn: countVariables },
   { kind: CompilationJobKind.Tmpl, fn: generateAdvance },
-  { kind: CompilationJobKind.Both, fn: optimizeVariables },
   { kind: CompilationJobKind.Both, fn: nameFunctionsAndVariables },
   { kind: CompilationJobKind.Tmpl, fn: resolveDeferDepsFns },
   { kind: CompilationJobKind.Tmpl, fn: mergeNextContextExpressions },
@@ -22848,7 +22878,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.0+sha-aea3b57");
+var VERSION2 = new Version("18.1.0-next.0+sha-4c895c9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

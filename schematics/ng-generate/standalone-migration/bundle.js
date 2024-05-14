@@ -9242,7 +9242,7 @@ var ShadowCss = class {
     });
   }
   _scopeSelector(selector, scopeSelector, hostSelector) {
-    return selector.split(",").map((part) => part.trim().split(_shadowDeepSelectors)).map((deepParts) => {
+    return selector.split(/ ?, ?/).map((part) => part.split(_shadowDeepSelectors)).map((deepParts) => {
       const [shallowPart, ...otherParts] = deepParts;
       const applyScope = (shallowPart2) => {
         if (this._selectorNeedsScoping(shallowPart2, scopeSelector)) {
@@ -9284,9 +9284,9 @@ var ShadowCss = class {
     const _scopeSelectorPart = (p2) => {
       let scopedP = p2.trim();
       if (!scopedP) {
-        return "";
+        return p2;
       }
-      if (p2.indexOf(_polyfillHostNoCombinator) > -1) {
+      if (p2.includes(_polyfillHostNoCombinator)) {
         scopedP = this._applySimpleSelectorScope(p2, scopeSelector, hostSelector);
       } else {
         const t = p2.replace(_polyfillHostRe, "");
@@ -9305,21 +9305,21 @@ var ShadowCss = class {
     let startIndex = 0;
     let res;
     const sep2 = /( |>|\+|~(?!=))\s*/g;
-    const hasHost = selector.indexOf(_polyfillHostNoCombinator) > -1;
+    const hasHost = selector.includes(_polyfillHostNoCombinator);
     let shouldScope = !hasHost;
     while ((res = sep2.exec(selector)) !== null) {
       const separator = res[1];
-      const part2 = selector.slice(startIndex, res.index).trim();
+      const part2 = selector.slice(startIndex, res.index);
       if (part2.match(/__esc-ph-(\d+)__/) && ((_a2 = selector[res.index + 1]) == null ? void 0 : _a2.match(/[a-fA-F\d]/))) {
         continue;
       }
-      shouldScope = shouldScope || part2.indexOf(_polyfillHostNoCombinator) > -1;
+      shouldScope = shouldScope || part2.includes(_polyfillHostNoCombinator);
       const scopedPart = shouldScope ? _scopeSelectorPart(part2) : part2;
       scopedSelector += `${scopedPart} ${separator} `;
       startIndex = sep2.lastIndex;
     }
     const part = selector.substring(startIndex);
-    shouldScope = shouldScope || part.indexOf(_polyfillHostNoCombinator) > -1;
+    shouldScope = shouldScope || part.includes(_polyfillHostNoCombinator);
     scopedSelector += shouldScope ? _scopeSelectorPart(part) : part;
     return safeContent.restore(scopedSelector);
   }
@@ -14479,7 +14479,37 @@ var SCHEMA = [
   "menuitem^[HTMLElement]|type,label,icon,!disabled,!checked,radiogroup,!default",
   "summary^[HTMLElement]|",
   "time^[HTMLElement]|dateTime",
-  ":svg:cursor^:svg:|"
+  ":svg:cursor^:svg:|",
+  ":math:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforeinput,*beforematch,*beforetoggle,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contentvisibilityautostatechange,*contextlost,*contextmenu,*contextrestored,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*scrollend,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex",
+  ":math:math^:math:|",
+  ":math:maction^:math:|",
+  ":math:menclose^:math:|",
+  ":math:merror^:math:|",
+  ":math:mfenced^:math:|",
+  ":math:mfrac^:math:|",
+  ":math:mi^:math:|",
+  ":math:mmultiscripts^:math:|",
+  ":math:mn^:math:|",
+  ":math:mo^:math:|",
+  ":math:mover^:math:|",
+  ":math:mpadded^:math:|",
+  ":math:mphantom^:math:|",
+  ":math:mroot^:math:|",
+  ":math:mrow^:math:|",
+  ":math:ms^:math:|",
+  ":math:mspace^:math:|",
+  ":math:msqrt^:math:|",
+  ":math:mstyle^:math:|",
+  ":math:msub^:math:|",
+  ":math:msubsup^:math:|",
+  ":math:msup^:math:|",
+  ":math:mtable^:math:|",
+  ":math:mtd^:math:|",
+  ":math:mtext^:math:|",
+  ":math:mtr^:math:|",
+  ":math:munder^:math:|",
+  ":math:munderover^:math:|",
+  ":math:semantics^:math:|"
 ];
 var _ATTR_TO_PROP = new Map(Object.entries({
   "class": "className",
@@ -21915,6 +21945,7 @@ var phases = [
   { kind: CompilationJobKind.Both, fn: generateNullishCoalesceExpressions },
   { kind: CompilationJobKind.Both, fn: expandSafeReads },
   { kind: CompilationJobKind.Both, fn: generateTemporaryVariables },
+  { kind: CompilationJobKind.Both, fn: optimizeVariables },
   { kind: CompilationJobKind.Tmpl, fn: allocateSlots },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nElementPlaceholders },
   { kind: CompilationJobKind.Tmpl, fn: resolveI18nExpressionPlaceholders },
@@ -21926,7 +21957,6 @@ var phases = [
   { kind: CompilationJobKind.Tmpl, fn: removeI18nContexts },
   { kind: CompilationJobKind.Both, fn: countVariables },
   { kind: CompilationJobKind.Tmpl, fn: generateAdvance },
-  { kind: CompilationJobKind.Both, fn: optimizeVariables },
   { kind: CompilationJobKind.Both, fn: nameFunctionsAndVariables },
   { kind: CompilationJobKind.Tmpl, fn: resolveDeferDepsFns },
   { kind: CompilationJobKind.Tmpl, fn: mergeNextContextExpressions },
@@ -26256,7 +26286,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.0+sha-aea3b57");
+var VERSION2 = new Version("18.1.0-next.0+sha-4c895c9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27350,7 +27380,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-aea3b57"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-4c895c9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27369,7 +27399,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-aea3b57"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-4c895c9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27437,7 +27467,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-aea3b57"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-4c895c9"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27755,7 +27785,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-aea3b57"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-4c895c9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27778,7 +27808,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-aea3b57"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-4c895c9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27816,7 +27846,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-aea3b57"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-4c895c9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27840,7 +27870,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-aea3b57"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-4c895c9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27875,7 +27905,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-aea3b57"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-4c895c9"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27892,7 +27922,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.1.0-next.0+sha-aea3b57");
+var VERSION3 = new Version("18.1.0-next.0+sha-4c895c9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -29553,6 +29583,10 @@ var LocalCompilationExtraImportsTracker = class {
     this.typeChecker = typeChecker;
     this.localImportsMap = /* @__PURE__ */ new Map();
     this.globalImportsSet = /* @__PURE__ */ new Set();
+    this.markedFilesSet = /* @__PURE__ */ new Set();
+  }
+  markFileForExtraImportGeneration(sf) {
+    this.markedFilesSet.add(sf.fileName);
   }
   addImportForFile(sf, moduleName) {
     if (!this.localImportsMap.has(sf.fileName)) {
@@ -29583,6 +29617,9 @@ var LocalCompilationExtraImportsTracker = class {
   }
   getImportsForFile(sf) {
     var _a2;
+    if (!this.markedFilesSet.has(sf.fileName)) {
+      return [];
+    }
     return [...this.globalImportsSet, ...(_a2 = this.localImportsMap.get(sf.fileName)) != null ? _a2 : []];
   }
 };
@@ -38318,7 +38355,7 @@ var ComponentDecoratorHandler = class {
     return templateSemanticsChecker.getDiagnosticsForComponent(component);
   }
   resolve(node, analysis, symbol) {
-    var _a2;
+    var _a2, _b2;
     const metadata = analysis.meta;
     const diagnostics = [];
     const context = getSourceFile(node);
@@ -38364,6 +38401,9 @@ var ComponentDecoratorHandler = class {
       const isModuleScope = scope.kind === ComponentScopeKind.NgModule;
       const dependencies = isModuleScope ? scope.compilation.dependencies : scope.dependencies;
       const explicitlyDeferredDependencies = getExplicitlyDeferredDeps(scope);
+      if (isModuleScope && context.fileName !== getSourceFile(scope.ngModule).fileName) {
+        (_b2 = this.localCompilationExtraImportsTracker) == null ? void 0 : _b2.markFileForExtraImportGeneration(context);
+      }
       if (metadata.isStandalone && analysis.rawDeferredImports !== null && explicitlyDeferredDependencies.length > 0) {
         const diagnostic = validateNoImportOverlap(dependencies, explicitlyDeferredDependencies, analysis.rawDeferredImports);
         if (diagnostic !== null) {

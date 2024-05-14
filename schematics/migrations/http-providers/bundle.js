@@ -558,7 +558,7 @@ var HTTP_MODULES = /* @__PURE__ */ new Set([
 ]);
 var HTTP_TESTING_MODULES = /* @__PURE__ */ new Set([HTTP_CLIENT_TESTING_MODULE]);
 function migrateFile(sourceFile, typeChecker, rewriteFn) {
-  var _a, _b, _c;
+  var _a, _b, _c, _d, _e;
   const changeTracker = new ChangeTracker(import_typescript7.default.createPrinter());
   const addedImports = /* @__PURE__ */ new Map([
     [COMMON_HTTP, /* @__PURE__ */ new Set()],
@@ -574,7 +574,7 @@ function migrateFile(sourceFile, typeChecker, rewriteFn) {
         migrateDecorator(decorator, commonHttpIdentifiers, addedImports, changeTracker);
       });
     }
-    migrateTestingModuleImports(node, commonHttpTestingIdentifiers, addedImports, changeTracker);
+    migrateTestingModuleImports(node, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker);
   });
   const commonHttpImports = getNamedImports(sourceFile, COMMON_HTTP);
   if (commonHttpImports) {
@@ -586,6 +586,10 @@ function migrateFile(sourceFile, typeChecker, rewriteFn) {
       })
     ]);
     changeTracker.replaceNode(commonHttpImports, newImports);
+  } else if ((_b = addedImports.get(COMMON_HTTP)) == null ? void 0 : _b.size) {
+    (_c = addedImports.get(COMMON_HTTP)) == null ? void 0 : _c.forEach((entry) => {
+      changeTracker.addImport(sourceFile, entry, COMMON_HTTP);
+    });
   }
   const commonHttpTestingImports = getNamedImports(sourceFile, COMMON_HTTP_TESTING);
   if (commonHttpTestingImports) {
@@ -594,7 +598,7 @@ function migrateFile(sourceFile, typeChecker, rewriteFn) {
     ]);
     const newHttpTestingImports = import_typescript7.default.factory.updateNamedImports(commonHttpTestingImports, [
       ...commonHttpTestingImports.elements.filter((current) => !symbolImportsToRemove.includes(current)),
-      ...[...(_b = addedImports.get(COMMON_HTTP_TESTING)) != null ? _b : []].map((entry) => {
+      ...[...(_d = addedImports.get(COMMON_HTTP_TESTING)) != null ? _d : []].map((entry) => {
         return import_typescript7.default.factory.createImportSpecifier(false, void 0, import_typescript7.default.factory.createIdentifier(entry));
       })
     ]);
@@ -602,12 +606,12 @@ function migrateFile(sourceFile, typeChecker, rewriteFn) {
   }
   for (const changesInFile of changeTracker.recordChanges().values()) {
     for (const change of changesInFile) {
-      rewriteFn(change.start, (_c = change.removeLength) != null ? _c : 0, change.text);
+      rewriteFn(change.start, (_e = change.removeLength) != null ? _e : 0, change.text);
     }
   }
 }
 function migrateDecorator(decorator, commonHttpIdentifiers, addedImports, changeTracker) {
-  var _a, _b, _c, _d, _e, _f;
+  var _a;
   if (decorator.name !== "NgModule" && decorator.name !== "Component" || decorator.node.expression.arguments.length < 1) {
     return;
   }
@@ -624,37 +628,35 @@ function migrateDecorator(decorator, commonHttpIdentifiers, addedImports, change
     return;
   }
   const addedProviders = /* @__PURE__ */ new Set();
+  const commonHttpAddedImports = addedImports.get(COMMON_HTTP);
   if (importedModules.client) {
-    (_a = addedImports.get(COMMON_HTTP)) == null ? void 0 : _a.add(WITH_INTERCEPTORS_FROM_DI);
+    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_INTERCEPTORS_FROM_DI);
     addedProviders.add(createCallExpression(WITH_INTERCEPTORS_FROM_DI));
   }
   if (importedModules.clientJsonp) {
-    (_b = addedImports.get(COMMON_HTTP)) == null ? void 0 : _b.add(WITH_JSONP_SUPPORT);
+    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_JSONP_SUPPORT);
     addedProviders.add(createCallExpression(WITH_JSONP_SUPPORT));
   }
   if (importedModules.xsrf) {
     if (importedModules.xsrfOptions === "disable") {
-      (_c = addedImports.get(COMMON_HTTP)) == null ? void 0 : _c.add(WITH_NOXSRF_PROTECTION);
+      commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_NOXSRF_PROTECTION);
       addedProviders.add(createCallExpression(WITH_NOXSRF_PROTECTION));
     } else {
-      (_d = addedImports.get(COMMON_HTTP)) == null ? void 0 : _d.add(WITH_XSRF_CONFIGURATION);
-      addedProviders.add(createCallExpression(WITH_XSRF_CONFIGURATION, ((_e = importedModules.xsrfOptions) == null ? void 0 : _e.options) ? [importedModules.xsrfOptions.options] : []));
+      commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_XSRF_CONFIGURATION);
+      addedProviders.add(createCallExpression(WITH_XSRF_CONFIGURATION, ((_a = importedModules.xsrfOptions) == null ? void 0 : _a.options) ? [importedModules.xsrfOptions.options] : []));
     }
   }
   const newImports = import_typescript7.default.factory.createArrayLiteralExpression([
     ...moduleImports.elements.filter((item) => item !== importedModules.client && item !== importedModules.clientJsonp && item !== importedModules.xsrf)
   ]);
-  (_f = addedImports.get(COMMON_HTTP)) == null ? void 0 : _f.add(PROVIDE_HTTP_CLIENT);
+  commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(PROVIDE_HTTP_CLIENT);
   const providers = getProvidersFromLiteralExpr(metadata);
   const provideHttpExpr = createCallExpression(PROVIDE_HTTP_CLIENT, [...addedProviders]);
   let newProviders;
   if (!providers) {
     newProviders = import_typescript7.default.factory.createArrayLiteralExpression([provideHttpExpr]);
   } else {
-    newProviders = import_typescript7.default.factory.createArrayLiteralExpression([
-      ...providers.elements,
-      provideHttpExpr
-    ]);
+    newProviders = import_typescript7.default.factory.updateArrayLiteralExpression(providers, import_typescript7.default.factory.createNodeArray([...providers.elements, provideHttpExpr], providers.elements.hasTrailingComma));
   }
   const newDecoratorArgs = import_typescript7.default.factory.createObjectLiteralExpression([
     ...metadata.properties.filter((p) => p.getText() === "imports"),
@@ -663,7 +665,7 @@ function migrateDecorator(decorator, commonHttpIdentifiers, addedImports, change
   ]);
   changeTracker.replaceNode(metadata, newDecoratorArgs);
 }
-function migrateTestingModuleImports(node, commonHttpTestingIdentifiers, addedImports, changeTracker) {
+function migrateTestingModuleImports(node, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker) {
   var _a;
   if (!import_typescript7.default.isCallExpression(node) || node.arguments.length < 1 || !import_typescript7.default.isPropertyAccessExpression(node.expression) || !import_typescript7.default.isIdentifier(node.expression.expression) || node.expression.expression.text !== "TestBed" || node.expression.name.text !== "configureTestingModule") {
     return;
@@ -676,38 +678,52 @@ function migrateTestingModuleImports(node, commonHttpTestingIdentifiers, addedIm
   if (!importsArray) {
     return;
   }
+  const commonHttpAddedImports = addedImports.get(COMMON_HTTP);
+  const httpClient = importsArray.elements.find((elt) => elt.getText() === HTTP_CLIENT_MODULE);
+  if (httpClient && commonHttpIdentifiers.has(HTTP_CLIENT_MODULE)) {
+    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(PROVIDE_HTTP_CLIENT);
+    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_INTERCEPTORS_FROM_DI);
+    const newImports = import_typescript7.default.factory.createArrayLiteralExpression([
+      ...importsArray.elements.filter((item) => item !== httpClient)
+    ]);
+    const provideHttpClient = createCallExpression(PROVIDE_HTTP_CLIENT, [
+      createCallExpression(WITH_INTERCEPTORS_FROM_DI)
+    ]);
+    const providers = getProvidersFromLiteralExpr(configureTestingModuleArgs);
+    let newProviders;
+    if (!providers) {
+      newProviders = import_typescript7.default.factory.createArrayLiteralExpression([provideHttpClient]);
+    } else {
+      newProviders = import_typescript7.default.factory.updateArrayLiteralExpression(providers, import_typescript7.default.factory.createNodeArray([...providers.elements, provideHttpClient], providers.elements.hasTrailingComma));
+    }
+    const newTestingModuleArgs = updateTestBedConfiguration(configureTestingModuleArgs, newImports, newProviders);
+    changeTracker.replaceNode(configureTestingModuleArgs, newTestingModuleArgs);
+  }
   const httpClientTesting = importsArray.elements.find((elt) => elt.getText() === HTTP_CLIENT_TESTING_MODULE);
-  if (!httpClientTesting || !commonHttpTestingIdentifiers.has(HTTP_CLIENT_TESTING_MODULE)) {
-    return;
-  }
-  (_a = addedImports.get(COMMON_HTTP_TESTING)) == null ? void 0 : _a.add(PROVIDE_HTTP_CLIENT_TESTING);
-  const newImports = import_typescript7.default.factory.createArrayLiteralExpression([
-    ...importsArray.elements.filter((item) => item !== httpClientTesting)
-  ]);
-  const provideHttpClient = createCallExpression(PROVIDE_HTTP_CLIENT, [
-    createCallExpression(WITH_INTERCEPTORS_FROM_DI)
-  ]);
-  const provideHttpClientTesting = createCallExpression(PROVIDE_HTTP_CLIENT_TESTING);
-  const providers = getProvidersFromLiteralExpr(configureTestingModuleArgs);
-  let newProviders;
-  if (!providers) {
-    newProviders = import_typescript7.default.factory.createArrayLiteralExpression([
-      provideHttpClient,
-      provideHttpClientTesting
+  if (httpClientTesting && commonHttpTestingIdentifiers.has(HTTP_CLIENT_TESTING_MODULE)) {
+    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(PROVIDE_HTTP_CLIENT);
+    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_INTERCEPTORS_FROM_DI);
+    (_a = addedImports.get(COMMON_HTTP_TESTING)) == null ? void 0 : _a.add(PROVIDE_HTTP_CLIENT_TESTING);
+    const newImports = import_typescript7.default.factory.createArrayLiteralExpression([
+      ...importsArray.elements.filter((item) => item !== httpClientTesting)
     ]);
-  } else {
-    newProviders = import_typescript7.default.factory.createArrayLiteralExpression([
-      ...providers.elements,
-      provideHttpClient,
-      provideHttpClientTesting
+    const provideHttpClient = createCallExpression(PROVIDE_HTTP_CLIENT, [
+      createCallExpression(WITH_INTERCEPTORS_FROM_DI)
     ]);
+    const provideHttpClientTesting = createCallExpression(PROVIDE_HTTP_CLIENT_TESTING);
+    const providers = getProvidersFromLiteralExpr(configureTestingModuleArgs);
+    let newProviders;
+    if (!providers) {
+      newProviders = import_typescript7.default.factory.createArrayLiteralExpression([
+        provideHttpClient,
+        provideHttpClientTesting
+      ]);
+    } else {
+      newProviders = import_typescript7.default.factory.updateArrayLiteralExpression(providers, import_typescript7.default.factory.createNodeArray([...providers.elements, provideHttpClient, provideHttpClientTesting], providers.elements.hasTrailingComma));
+    }
+    const newTestingModuleArgs = updateTestBedConfiguration(configureTestingModuleArgs, newImports, newProviders);
+    changeTracker.replaceNode(configureTestingModuleArgs, newTestingModuleArgs);
   }
-  const newTestingModuleArgs = import_typescript7.default.factory.createObjectLiteralExpression([
-    ...configureTestingModuleArgs.properties.filter((p) => p.getText() === "imports"),
-    import_typescript7.default.factory.createPropertyAssignment("imports", newImports),
-    import_typescript7.default.factory.createPropertyAssignment("providers", newProviders)
-  ]);
-  changeTracker.replaceNode(configureTestingModuleArgs, newTestingModuleArgs);
 }
 function getImportsProp(literal) {
   const properties = literal.properties;
@@ -777,6 +793,12 @@ function getImportedHttpModules(imports, commonHttpIdentifiers) {
 }
 function createCallExpression(functionName, args = []) {
   return import_typescript7.default.factory.createCallExpression(import_typescript7.default.factory.createIdentifier(functionName), void 0, args);
+}
+function updateTestBedConfiguration(configureTestingModuleArgs, newImports, newProviders) {
+  return import_typescript7.default.factory.updateObjectLiteralExpression(configureTestingModuleArgs, [
+    import_typescript7.default.factory.createPropertyAssignment("imports", newImports),
+    import_typescript7.default.factory.createPropertyAssignment("providers", newProviders)
+  ]);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/migrations/http-providers/index.mjs
