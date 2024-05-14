@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-9d1acd6
+ * @license Angular v18.0.0-rc.1+sha-bfb5f2b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16887,7 +16887,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-9d1acd6']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-bfb5f2b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -26371,7 +26371,7 @@ function ɵɵi18nPostprocess(message, replacements = {}) {
  * an actual implementation when the event replay feature is enabled via
  * `withEventReplay()` call.
  */
-let disableEventReplayFn = (el) => { };
+let disableEventReplayFn = (el, eventName, listenerFn) => { };
 function setDisableEventReplayImpl(fn) {
     disableEventReplayFn = fn;
 }
@@ -26479,7 +26479,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
         const idxOrTargetGetter = eventTargetResolver
             ? (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index]))
             : tNode.index;
-        disableEventReplayFn(native);
+        disableEventReplayFn(native, eventName, listenerFn);
         // In order to match current behavior, native DOM event listeners must be added for all
         // events (including outputs).
         // There might be cases where multiple directives on the same element try to register an event
@@ -30799,7 +30799,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-rc.1+sha-9d1acd6');
+const VERSION = new Version('18.0.0-rc.1+sha-bfb5f2b');
 
 class Console {
     log(message) {
@@ -36538,7 +36538,7 @@ function getJsactionData(container) {
     return container._ejsa;
 }
 const JSACTION_ATTRIBUTE = 'jsaction';
-const removeJsactionQueue = [];
+const jsactionMap = new Map();
 /**
  * Returns a set of providers required to setup support for event replay.
  * Requires hydration to be enabled separately.
@@ -36552,11 +36552,18 @@ function withEventReplay() {
         {
             provide: ENVIRONMENT_INITIALIZER,
             useValue: () => {
-                setDisableEventReplayImpl((el) => {
-                    if (el.hasAttribute(JSACTION_ATTRIBUTE)) {
+                setDisableEventReplayImpl((rEl, eventName, listenerFn) => {
+                    if (rEl.hasAttribute(JSACTION_ATTRIBUTE)) {
+                        const el = unwrapRNode(rEl);
                         // We don't immediately remove the attribute here because
                         // we need it for replay that happens after hydration.
-                        removeJsactionQueue.push(el);
+                        if (!jsactionMap.has(el)) {
+                            jsactionMap.set(el, new Map());
+                        }
+                        if (!jsactionMap.get(el).has(eventName)) {
+                            jsactionMap.get(el).set(eventName, []);
+                        }
+                        jsactionMap.get(el).get(eventName).push(listenerFn);
                     }
                 });
             },
@@ -36593,14 +36600,14 @@ function withEventReplay() {
                                         for (const event of queue) {
                                             handleEvent(event);
                                         }
+                                        jsactionMap.clear();
                                         queue.length = 0;
                                     },
                                 });
                                 registerDispatcher(eventContract, dispatcher);
-                                for (const el of removeJsactionQueue) {
+                                for (const el of jsactionMap.keys()) {
                                     el.removeAttribute(JSACTION_ATTRIBUTE);
                                 }
-                                removeJsactionQueue.length = 0;
                             }
                         });
                     };
@@ -36629,6 +36636,12 @@ function collectDomEventsInfo(tView, lView, eventTypesToReplay) {
             continue;
         }
         const name = firstParam;
+        if (name === 'mouseenter' ||
+            name === 'mouseleave' ||
+            name === 'pointerenter' ||
+            name === 'pointerleave') {
+            continue;
+        }
         eventTypesToReplay.add(name);
         const listenerElement = unwrapRNode(lView[secondParam]);
         i++; // move the cursor to the next position (location of the listener idx)
@@ -36659,67 +36672,15 @@ function setJSActionAttribute(tNode, rNode, nativeElementToEvents) {
         }
     }
 }
-/**
- * Finds an LView that a given DOM element belongs to.
- */
-function getLViewByElement(target) {
-    let lView = readLView(target);
-    if (lView) {
-        return lView;
-    }
-    else {
-        // If this node doesn't have LView info attached, then we need to
-        // traverse upwards up the DOM to find the nearest element that
-        // has already been monkey patched with data.
-        let parent = target;
-        while ((parent = parent.parentNode)) {
-            lView = readLView(parent);
-            if (lView) {
-                // To prevent additional lookups, monkey-patch LView id onto this DOM node.
-                // TODO: consider patching all parent nodes that didn't have LView id, so that
-                // we can avoid lookups for more nodes.
-                attachLViewId(target, lView);
-                return lView;
-            }
-        }
-    }
-    return null;
-}
 function handleEvent(event) {
-    const nativeElement = event.getAction().element;
-    // Dispatch event via Angular's logic
-    if (nativeElement) {
-        const lView = getLViewByElement(nativeElement);
-        if (lView !== null) {
-            const tView = lView[TVIEW];
-            const eventName = event.getEventType();
-            const origEvent = event.getEvent();
-            const listeners = getEventListeners(tView, lView, nativeElement, eventName);
-            for (const listener of listeners) {
-                listener(origEvent);
-            }
-        }
+    const nativeElement = unwrapRNode(event.getAction().element);
+    const handlerFns = jsactionMap.get(nativeElement)?.get(event.getEventType());
+    if (!handlerFns) {
+        return;
     }
-}
-function getEventListeners(tView, lView, nativeElement, eventName) {
-    const listeners = [];
-    const lCleanup = lView[CLEANUP];
-    const tCleanup = tView.cleanup;
-    if (tCleanup && lCleanup) {
-        for (let i = 0; i < tCleanup.length;) {
-            const storedEventName = tCleanup[i++];
-            const nativeElementIndex = tCleanup[i++];
-            if (typeof storedEventName === 'string') {
-                const listenerElement = unwrapRNode(lView[nativeElementIndex]);
-                const listener = lCleanup[tCleanup[i++]];
-                i++; // increment to the next position;
-                if (listenerElement === nativeElement && eventName === storedEventName) {
-                    listeners.push(listener);
-                }
-            }
-        }
+    for (const handler of handlerFns) {
+        handler(event.getEvent());
     }
-    return listeners;
 }
 
 /**
