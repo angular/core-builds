@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-caedd10
+ * @license Angular v18.1.0-next.0+sha-f1e3ec2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1135,12 +1135,13 @@ class Dispatcher {
      *      dispatches them to the `eventReplayer`.
      * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
      */
-    constructor(dispatchDelegate, { eventReplayer = undefined } = {}) {
+    constructor(dispatchDelegate, { actionResolver = undefined, eventReplayer = undefined, } = {}) {
         this.dispatchDelegate = dispatchDelegate;
-        /** The queue of events. */
-        this.replayEventInfoWrappers = [];
         /** Whether the event replay is scheduled. */
         this.eventReplayScheduled = false;
+        /** The queue of events. */
+        this.replayEventInfoWrappers = [];
+        this.actionResolver = actionResolver;
         this.eventReplayer = eventReplayer;
     }
     /**
@@ -1165,6 +1166,7 @@ class Dispatcher {
      */
     dispatch(eventInfo) {
         const eventInfoWrapper = new EventInfoWrapper(eventInfo);
+        this.actionResolver?.resolve(eventInfo);
         const action = eventInfoWrapper.getAction();
         if (action && shouldPreventDefaultBeforeDispatching(action.element, eventInfoWrapper)) {
             preventDefault(eventInfoWrapper.getEvent());
@@ -1804,10 +1806,8 @@ const MOUSE_SPECIAL_SUPPORT = false;
 class EventContract {
     static { this.A11Y_CLICK_SUPPORT = A11Y_CLICK_SUPPORT; }
     static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
-    constructor(containerManager) {
-        this.actionResolver = new ActionResolver({
-            syntheticMouseEventSupport: EventContract.MOUSE_SPECIAL_SUPPORT,
-        });
+    constructor(containerManager, useActionResolver = true) {
+        this.useActionResolver = useActionResolver;
         /**
          * The DOM events which this contract covers. Used to prevent double
          * registration of event types. The value of the map is the
@@ -1833,6 +1833,11 @@ class EventContract {
         /** Whether to add an a11y click listener. */
         this.addA11yClickListener = false;
         this.containerManager = containerManager;
+        if (this.useActionResolver) {
+            this.actionResolver = new ActionResolver({
+                syntheticMouseEventSupport: EventContract.MOUSE_SPECIAL_SUPPORT,
+            });
+        }
         if (EventContract.A11Y_CLICK_SUPPORT) {
             // Add a11y click support to the `EventContract`.
             this.addA11yClickSupport();
@@ -1857,7 +1862,9 @@ class EventContract {
             this.queuedEventInfos?.push(eventInfo);
             return;
         }
-        this.actionResolver.resolve(eventInfo);
+        if (this.useActionResolver) {
+            this.actionResolver.resolve(eventInfo);
+        }
         this.dispatcher(eventInfo);
     }
     /**
@@ -2016,7 +2023,9 @@ class EventContract {
      */
     addA11yClickSupportImpl(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction) {
         this.addA11yClickListener = true;
-        this.actionResolver.addA11yClickSupport(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction);
+        if (this.useActionResolver) {
+            this.actionResolver.addA11yClickSupport(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction);
+        }
     }
 }
 function removeEventListeners(container, eventTypes, earlyEventHandler, capture) {
