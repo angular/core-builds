@@ -659,7 +659,10 @@ function migrateDecorator(decorator, commonHttpIdentifiers, addedImports, change
     newProviders = import_typescript7.default.factory.updateArrayLiteralExpression(providers, import_typescript7.default.factory.createNodeArray([...providers.elements, provideHttpExpr], providers.elements.hasTrailingComma));
   }
   const newDecoratorArgs = import_typescript7.default.factory.createObjectLiteralExpression([
-    ...metadata.properties.filter((p) => p.getText() === "imports"),
+    ...metadata.properties.filter((property) => {
+      var _a2, _b;
+      return ((_a2 = property.name) == null ? void 0 : _a2.getText()) !== "imports" && ((_b = property.name) == null ? void 0 : _b.getText()) !== "providers";
+    }),
     import_typescript7.default.factory.createPropertyAssignment("imports", newImports),
     import_typescript7.default.factory.createPropertyAssignment("providers", newProviders)
   ]);
@@ -796,6 +799,10 @@ function createCallExpression(functionName, args = []) {
 }
 function updateTestBedConfiguration(configureTestingModuleArgs, newImports, newProviders) {
   return import_typescript7.default.factory.updateObjectLiteralExpression(configureTestingModuleArgs, [
+    ...configureTestingModuleArgs.properties.filter((property) => {
+      var _a, _b;
+      return ((_a = property.name) == null ? void 0 : _a.getText()) !== "imports" && ((_b = property.name) == null ? void 0 : _b.getText()) !== "providers";
+    }),
     import_typescript7.default.factory.createPropertyAssignment("imports", newImports),
     import_typescript7.default.factory.createPropertyAssignment("providers", newProviders)
   ]);
