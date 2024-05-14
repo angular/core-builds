@@ -1,11 +1,11 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-3b1b4e2
+ * @license Angular v18.0.0-rc.1+sha-4352598
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 
-declare namespace a11yClickLib {
+declare namespace a11yClick {
     export {
         updateEventInfoForA11yClick,
         preventDefaultForA11yClick,
@@ -23,6 +23,54 @@ declare interface ActionInfo {
 }
 
 declare type ActionInfoInternal = [name: string, element: Element];
+
+/** Resolves actions for Events. */
+declare class ActionResolver {
+    private a11yClickSupport;
+    private readonly syntheticMouseEventSupport;
+    private updateEventInfoForA11yClick?;
+    private preventDefaultForA11yClick?;
+    private populateClickOnlyAction?;
+    constructor({ syntheticMouseEventSupport, }?: {
+        syntheticMouseEventSupport?: boolean;
+    });
+    resolve(eventInfo: eventInfoLib.EventInfo): void;
+    /**
+     * Searches for a jsaction that the DOM event maps to and creates an
+     * object containing event information used for dispatching by
+     * jsaction.Dispatcher. This method populates the `action` and `actionElement`
+     * fields of the EventInfo object passed in by finding the first
+     * jsaction attribute above the target Node of the event, and below
+     * the container Node, that specifies a jsaction for the event
+     * type. If no such jsaction is found, then action is undefined.
+     *
+     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
+     *    action is found on any `Element` in the path of the `Event`.
+     */
+    private populateAction;
+    /**
+     * Accesses the jsaction map on a node and retrieves the name of the
+     * action the given event is mapped to, if any. It parses the
+     * attribute value and stores it in a property on the node for
+     * subsequent retrieval without re-parsing and re-accessing the
+     * attribute.
+     *
+     * @param actionElement The DOM node to retrieve the jsaction map from.
+     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
+     *    action is found on the `actionElement`.
+     */
+    private populateActionOnElement;
+    /**
+     * Parses and caches an element's jsaction element into a map.
+     *
+     * This is primarily for internal use.
+     *
+     * @param actionElement The DOM node to retrieve the jsaction map from.
+     * @return Map from event to qualified name of the jsaction bound to it.
+     */
+    private parseActions;
+    addA11yClickSupport(updateEventInfoForA11yClick: typeof a11yClick.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClick.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClick.populateClickOnlyAction): void;
+}
 
 /**
  * Provides a factory function for bootstrapping an event contract on a
@@ -72,12 +120,13 @@ declare function createEventInfoFromParameters(eventType: string, event: Event, 
  */
 export declare class Dispatcher {
     private readonly dispatchDelegate;
-    /** The queue of events. */
-    private readonly replayEventInfoWrappers;
+    private actionResolver?;
     /** The replayer function to be called when there are queued events. */
     private eventReplayer?;
     /** Whether the event replay is scheduled. */
     private eventReplayScheduled;
+    /** The queue of events. */
+    private readonly replayEventInfoWrappers;
     /**
      * Options are:
      *   1. `eventReplayer`: When the event contract dispatches replay events
@@ -85,7 +134,8 @@ export declare class Dispatcher {
      *      dispatches them to the `eventReplayer`.
      * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
      */
-    constructor(dispatchDelegate: (eventInfoWrapper: EventInfoWrapper) => void, { eventReplayer }?: {
+    constructor(dispatchDelegate: (eventInfoWrapper: EventInfoWrapper) => void, { actionResolver, eventReplayer, }?: {
+        actionResolver?: ActionResolver;
         eventReplayer?: Replayer;
     });
     /**
@@ -155,10 +205,11 @@ export declare interface EarlyJsactionDataContainer {
  * be delay loaded in a generic way.
  */
 export declare class EventContract implements UnrenamedEventContract {
+    private readonly useActionResolver;
     static A11Y_CLICK_SUPPORT: boolean;
     static MOUSE_SPECIAL_SUPPORT: boolean;
     private containerManager;
-    private readonly actionResolver;
+    private readonly actionResolver?;
     /**
      * The DOM events which this contract covers. Used to prevent double
      * registration of event types. The value of the map is the
@@ -183,8 +234,8 @@ export declare class EventContract implements UnrenamedEventContract {
     private queuedEventInfos;
     /** Whether to add an a11y click listener. */
     private addA11yClickListener;
-    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
-    constructor(containerManager: EventContractContainerManager);
+    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClick.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClick.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClick.populateClickOnlyAction) => void;
+    constructor(containerManager: EventContractContainerManager, useActionResolver?: boolean);
     private handleEvent;
     /**
      * Handle an `EventInfo`.
@@ -505,7 +556,7 @@ declare function setTimestamp(eventInfo: EventInfo, timestamp: number): void;
  */
 declare interface UnrenamedEventContract {
     ecrd(dispatcher: Dispatcher_2, restriction: Restriction): void;
-    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
+    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClick.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClick.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClick.populateClickOnlyAction) => void;
 }
 
 /** Added for readability when accessing stable property names. */
