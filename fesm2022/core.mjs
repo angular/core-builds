@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-88fb946
+ * @license Angular v18.0.0-rc.1+sha-e76bebd
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15166,6 +15166,8 @@ class ChangeDetectionScheduler {
 }
 /** Token used to indicate if zoneless was enabled via provideZonelessChangeDetection(). */
 const ZONELESS_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless enabled' : '', { providedIn: 'root', factory: () => false });
+/** Token used to indicate `provideExperimentalZonelessChangeDetection` was used. */
+const PROVIDED_ZONELESS = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless provided' : '', { providedIn: 'root', factory: () => false });
 const ZONELESS_SCHEDULER_DISABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'scheduler disabled' : '');
 
 /**
@@ -16887,7 +16889,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-88fb946']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.0-rc.1+sha-e76bebd']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30799,7 +30801,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.0-rc.1+sha-88fb946');
+const VERSION = new Version('18.0.0-rc.1+sha-e76bebd');
 
 class Console {
     log(message) {
@@ -33051,6 +33053,9 @@ function provideExperimentalZonelessChangeDetection() {
         { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
         { provide: NgZone, useClass: NoopNgZone },
         { provide: ZONELESS_ENABLED, useValue: true },
+        typeof ngDevMode === 'undefined' || ngDevMode
+            ? [{ provide: PROVIDED_ZONELESS, useValue: true }]
+            : [],
     ]);
 }
 
@@ -33059,7 +33064,6 @@ class NgZoneChangeDetectionScheduler {
         this.zone = inject(NgZone);
         this.changeDetectionScheduler = inject(ChangeDetectionScheduler, { optional: true });
         this.applicationRef = inject(ApplicationRef);
-        this.zonelessEnabled = inject(ZONELESS_ENABLED);
     }
     initialize() {
         if (this._onMicrotaskEmptySubscription) {
@@ -33093,7 +33097,7 @@ class NgZoneChangeDetectionScheduler {
  * Internal token used to verify that `provideZoneChangeDetection` is not used
  * with the bootstrapModule API.
  */
-const PROVIDED_NG_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'provideZoneChangeDetection token' : '');
+const PROVIDED_NG_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'provideZoneChangeDetection token' : '', { factory: () => false });
 function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsideZone, }) {
     ngZoneFactory ??= () => new NgZone(getNgZoneOptions());
     return [
@@ -33173,8 +33177,9 @@ function provideZoneChangeDetection(options) {
     });
     return makeEnvironmentProviders([
         typeof ngDevMode === 'undefined' || ngDevMode
-            ? [{ provide: PROVIDED_NG_ZONE, useValue: true }, bothZoneAndZonelessErrorCheckProvider]
+            ? [{ provide: PROVIDED_NG_ZONE, useValue: true }]
             : [],
+        { provide: ZONELESS_ENABLED, useValue: false },
         zoneProviders,
     ]);
 }
@@ -33234,18 +33239,6 @@ class ZoneStablePendingTask {
         type: Injectable,
         args: [{ providedIn: 'root' }]
     }], null, null); })();
-const bothZoneAndZonelessErrorCheckProvider = {
-    provide: ENVIRONMENT_INITIALIZER,
-    multi: true,
-    useFactory: () => {
-        const providedZoneless = inject(ZONELESS_ENABLED, { optional: true });
-        if (providedZoneless) {
-            throw new RuntimeError(408 /* RuntimeErrorCode.PROVIDED_BOTH_ZONE_AND_ZONELESS */, 'Invalid change detection configuration: ' +
-                'provideZoneChangeDetection and provideExperimentalZonelessChangeDetection cannot be used together.');
-        }
-        return () => { };
-    },
-};
 
 /**
  * Work out the locale from the potential global properties.
@@ -33467,15 +33460,14 @@ class PlatformRef {
         return ngZone.run(() => {
             const ignoreChangesOutsideZone = options?.ignoreChangesOutsideZone;
             const moduleRef = createNgModuleRefWithProviders(moduleFactory.moduleType, this.injector, internalProvideZoneChangeDetection({ ngZoneFactory: () => ngZone, ignoreChangesOutsideZone }));
-            if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
-                moduleRef.injector.get(PROVIDED_NG_ZONE, null) !== null) {
-                throw new RuntimeError(207 /* RuntimeErrorCode.PROVIDER_IN_WRONG_CONTEXT */, '`bootstrapModule` does not support `provideZoneChangeDetection`. Use `BootstrapOptions` instead.');
-            }
-            if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
-                moduleRef.injector.get(ZONELESS_ENABLED, null) &&
-                options?.ngZone !== 'noop') {
-                throw new RuntimeError(408 /* RuntimeErrorCode.PROVIDED_BOTH_ZONE_AND_ZONELESS */, 'Invalid change detection configuration: ' +
-                    "`ngZone: 'noop'` must be set in `BootstrapOptions` with provideExperimentalZonelessChangeDetection.");
+            if (typeof ngDevMode === 'undefined' || ngDevMode) {
+                if (moduleRef.injector.get(PROVIDED_NG_ZONE)) {
+                    throw new RuntimeError(207 /* RuntimeErrorCode.PROVIDER_IN_WRONG_CONTEXT */, '`bootstrapModule` does not support `provideZoneChangeDetection`. Use `BootstrapOptions` instead.');
+                }
+                if (moduleRef.injector.get(ZONELESS_ENABLED) && options?.ngZone !== 'noop') {
+                    throw new RuntimeError(408 /* RuntimeErrorCode.PROVIDED_BOTH_ZONE_AND_ZONELESS */, 'Invalid change detection configuration: ' +
+                        "`ngZone: 'noop'` must be set in `BootstrapOptions` with provideExperimentalZonelessChangeDetection.");
+                }
             }
             const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
             if ((typeof ngDevMode === 'undefined' || ngDevMode) && exceptionHandler === null) {
@@ -36451,8 +36443,14 @@ function internalCreateApplication(config) {
         return ngZone.run(() => {
             envInjector.resolveInjectorInitializers();
             const exceptionHandler = envInjector.get(ErrorHandler, null);
-            if ((typeof ngDevMode === 'undefined' || ngDevMode) && !exceptionHandler) {
-                throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No `ErrorHandler` found in the Dependency Injection tree.');
+            if (typeof ngDevMode === 'undefined' || ngDevMode) {
+                if (!exceptionHandler) {
+                    throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No `ErrorHandler` found in the Dependency Injection tree.');
+                }
+                if (envInjector.get(PROVIDED_ZONELESS) && envInjector.get(PROVIDED_NG_ZONE)) {
+                    throw new RuntimeError(408 /* RuntimeErrorCode.PROVIDED_BOTH_ZONE_AND_ZONELESS */, 'Invalid change detection configuration: ' +
+                        'provideZoneChangeDetection and provideExperimentalZonelessChangeDetection cannot be used together.');
+                }
             }
             let onErrorSubscription;
             ngZone.runOutsideAngular(() => {
