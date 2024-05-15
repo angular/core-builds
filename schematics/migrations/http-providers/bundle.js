@@ -571,7 +571,7 @@ function migrateFile(sourceFile, typeChecker, rewriteFn) {
     if (import_typescript7.default.isClassDeclaration(node)) {
       const decorators = getAngularDecorators(typeChecker, import_typescript7.default.getDecorators(node) || []);
       decorators.forEach((decorator) => {
-        migrateDecorator(decorator, commonHttpIdentifiers, addedImports, changeTracker);
+        migrateDecorator(decorator, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker);
       });
     }
     migrateTestingModuleImports(node, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker);
@@ -610,7 +610,7 @@ function migrateFile(sourceFile, typeChecker, rewriteFn) {
     }
   }
 }
-function migrateDecorator(decorator, commonHttpIdentifiers, addedImports, changeTracker) {
+function migrateDecorator(decorator, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker) {
   var _a;
   if (decorator.name !== "NgModule" && decorator.name !== "Component" || decorator.node.expression.arguments.length < 1) {
     return;
@@ -623,13 +623,14 @@ function migrateDecorator(decorator, commonHttpIdentifiers, addedImports, change
   if (!moduleImports) {
     return;
   }
-  const importedModules = getImportedHttpModules(moduleImports, commonHttpIdentifiers);
+  const importedModules = getImportedHttpModules(moduleImports, commonHttpIdentifiers, commonHttpTestingIdentifiers);
   if (!importedModules) {
     return;
   }
   const addedProviders = /* @__PURE__ */ new Set();
   const commonHttpAddedImports = addedImports.get(COMMON_HTTP);
-  if (importedModules.client) {
+  commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(PROVIDE_HTTP_CLIENT);
+  if (importedModules.client || importedModules.clientTesting) {
     commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_INTERCEPTORS_FROM_DI);
     addedProviders.add(createCallExpression(WITH_INTERCEPTORS_FROM_DI));
   }
@@ -647,16 +648,22 @@ function migrateDecorator(decorator, commonHttpIdentifiers, addedImports, change
     }
   }
   const newImports = import_typescript7.default.factory.createArrayLiteralExpression([
-    ...moduleImports.elements.filter((item) => item !== importedModules.client && item !== importedModules.clientJsonp && item !== importedModules.xsrf)
+    ...moduleImports.elements.filter((item) => item !== importedModules.client && item !== importedModules.clientJsonp && item !== importedModules.xsrf && item !== importedModules.clientTesting)
   ]);
-  commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(PROVIDE_HTTP_CLIENT);
   const providers = getProvidersFromLiteralExpr(metadata);
+  let provideHttpClientTestingExpr;
+  if (importedModules.clientTesting) {
+    const commonHttpTestingAddedImports = addedImports.get(COMMON_HTTP_TESTING);
+    commonHttpTestingAddedImports == null ? void 0 : commonHttpTestingAddedImports.add(PROVIDE_HTTP_CLIENT_TESTING);
+    provideHttpClientTestingExpr = createCallExpression(PROVIDE_HTTP_CLIENT_TESTING);
+  }
   const provideHttpExpr = createCallExpression(PROVIDE_HTTP_CLIENT, [...addedProviders]);
+  const providersToAppend = provideHttpClientTestingExpr ? [provideHttpExpr, provideHttpClientTestingExpr] : [provideHttpExpr];
   let newProviders;
   if (!providers) {
-    newProviders = import_typescript7.default.factory.createArrayLiteralExpression([provideHttpExpr]);
+    newProviders = import_typescript7.default.factory.createArrayLiteralExpression(providersToAppend);
   } else {
-    newProviders = import_typescript7.default.factory.updateArrayLiteralExpression(providers, import_typescript7.default.factory.createNodeArray([...providers.elements, provideHttpExpr], providers.elements.hasTrailingComma));
+    newProviders = import_typescript7.default.factory.updateArrayLiteralExpression(providers, import_typescript7.default.factory.createNodeArray([...providers.elements, ...providersToAppend], providers.elements.hasTrailingComma));
   }
   const newDecoratorArgs = import_typescript7.default.factory.createObjectLiteralExpression([
     ...metadata.properties.filter((property) => {
@@ -756,15 +763,16 @@ function getProvidersFromLiteralExpr(literal) {
   }
   return null;
 }
-function getImportedHttpModules(imports, commonHttpIdentifiers) {
+function getImportedHttpModules(imports, commonHttpIdentifiers, commonHttpTestingIdentifiers) {
   let client = null;
   let clientJsonp = null;
   let xsrf = null;
+  let clientTesting = null;
   let xsrfOptions = null;
   for (const item of imports.elements) {
     if (import_typescript7.default.isIdentifier(item)) {
       const moduleName = item.getText();
-      if (!commonHttpIdentifiers.has(moduleName)) {
+      if (!commonHttpIdentifiers.has(moduleName) && !commonHttpTestingIdentifiers.has(moduleName)) {
         continue;
       }
       if (moduleName === HTTP_CLIENT_MODULE) {
@@ -773,6 +781,8 @@ function getImportedHttpModules(imports, commonHttpIdentifiers) {
         clientJsonp = item;
       } else if (moduleName === HTTP_CLIENT_XSRF_MODULE) {
         xsrf = item;
+      } else if (moduleName === HTTP_CLIENT_TESTING_MODULE) {
+        clientTesting = item;
       }
     } else if (import_typescript7.default.isCallExpression(item) && import_typescript7.default.isPropertyAccessExpression(item.expression)) {
       const moduleName = item.expression.expression.getText();
@@ -789,8 +799,8 @@ function getImportedHttpModules(imports, commonHttpIdentifiers) {
       }
     }
   }
-  if (client !== null || clientJsonp !== null || xsrf !== null) {
-    return { client, clientJsonp, xsrf, xsrfOptions };
+  if (client !== null || clientJsonp !== null || xsrf !== null || clientTesting !== null) {
+    return { client, clientJsonp, xsrf, xsrfOptions, clientTesting };
   }
   return null;
 }
@@ -815,7 +825,7 @@ function http_providers_default() {
     const basePath = process.cwd();
     const allPaths = [...buildPaths, ...testPaths];
     if (!allPaths.length) {
-      throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the transfer state migration.");
+      throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the http providers migration.");
     }
     for (const tsconfigPath of allPaths) {
       runMigration(tree, tsconfigPath, basePath);
