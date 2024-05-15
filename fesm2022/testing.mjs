@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.1+sha-4352598
+ * @license Angular v18.0.0-rc.1+sha-88fb946
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -273,7 +273,7 @@ class ScheduledComponentFixture extends ComponentFixture {
         this._appRef.tick();
         this._effectRunner.flush();
     }
-    autoDetectChanges(autoDetect) {
+    autoDetectChanges(autoDetect = true) {
         if (!autoDetect) {
             throw new Error('Cannot disable autoDetect after it has been enabled when using the zoneless scheduler. ' +
                 'To disable autoDetect, add `{provide: ComponentFixtureAutoDetect, useValue: false}` to the TestBed providers.');
