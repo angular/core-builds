@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.2+sha-e6d8f74
+ * @license Angular v18.0.0-rc.2+sha-69085ea
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8176,9 +8176,9 @@ declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
  *
  * @param options Used to configure when the check will execute.
  *   - `interval` will periodically run exhaustive `checkNoChanges` on application views
- *   - `useNgZoneOnStable` will us ZoneJS to determine when change detection might have run
+ *   - `useNgZoneOnStable` will use ZoneJS to determine when change detection might have run
  *      in an application using ZoneJS to drive change detection. When the `NgZone.onStable` would
- *      have emit, all views attached to the `ApplicationRef` are checked for changes.
+ *      have emitted, all views attached to the `ApplicationRef` are checked for changes.
  *   - 'exhaustive' means that all views attached to `ApplicationRef` and all the descendants of those views will be
  *     checked for changes (excluding those subtrees which are detached via `ChangeDetectorRef.detach()`).
  *     This is useful because the check that runs after regular change detection does not work for components using `ChangeDetectionStrategy.OnPush`.
