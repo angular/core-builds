@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-23eafb4
+ * @license Angular v18.1.0-next.0+sha-3d5c3d9
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16889,7 +16889,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-23eafb4']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-3d5c3d9']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30801,7 +30801,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.0+sha-23eafb4');
+const VERSION = new Version('18.1.0-next.0+sha-3d5c3d9');
 
 class Console {
     log(message) {
@@ -33707,9 +33707,9 @@ function runPlatformInitializers(injector) {
  *
  * @param options Used to configure when the check will execute.
  *   - `interval` will periodically run exhaustive `checkNoChanges` on application views
- *   - `useNgZoneOnStable` will us ZoneJS to determine when change detection might have run
+ *   - `useNgZoneOnStable` will use ZoneJS to determine when change detection might have run
  *      in an application using ZoneJS to drive change detection. When the `NgZone.onStable` would
- *      have emit, all views attached to the `ApplicationRef` are checked for changes.
+ *      have emitted, all views attached to the `ApplicationRef` are checked for changes.
  *   - 'exhaustive' means that all views attached to `ApplicationRef` and all the descendants of those views will be
  *     checked for changes (excluding those subtrees which are detached via `ChangeDetectorRef.detach()`).
  *     This is useful because the check that runs after regular change detection does not work for components using `ChangeDetectionStrategy.OnPush`.
@@ -33743,7 +33743,7 @@ function provideExperimentalCheckNoChangesForDebug(options) {
                 useValue: () => {
                     if (options?.useNgZoneOnStable &&
                         !(inject(NgZone) instanceof DebugNgZoneForCheckNoChanges)) {
-                        throw new Error('`provideCheckNoChangesForDebug` with `useNgZoneOnStable` must be after any other provider for `NgZone`.');
+                        throw new Error('`provideExperimentalCheckNoChangesForDebug` with `useNgZoneOnStable` must be after any other provider for `NgZone`.');
                     }
                 },
             },
@@ -33756,7 +33756,7 @@ function provideExperimentalCheckNoChangesForDebug(options) {
 class DebugNgZoneForCheckNoChanges extends NgZone {
     constructor(checkNoChangesMode) {
         const zonelessEnabled = inject(ZONELESS_ENABLED);
-        // Use coalsecing to ensure we aren't ever running this check synchronously
+        // Use coalescing to ensure we aren't ever running this check synchronously
         super({
             shouldCoalesceEventChangeDetection: true,
             shouldCoalesceRunChangeDetection: zonelessEnabled,
