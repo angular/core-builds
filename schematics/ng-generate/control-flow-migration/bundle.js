@@ -4947,6 +4947,7 @@ function createFactoryFunction(type) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/assertions.mjs
 var UNUSABLE_INTERPOLATION_REGEXPS = [
+  /@/,
   /^\s*$/,
   /[<>]/,
   /^[{}]$/,
@@ -22878,7 +22879,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.0+sha-20a530a");
+var VERSION2 = new Version("18.1.0-next.0+sha-400911e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
