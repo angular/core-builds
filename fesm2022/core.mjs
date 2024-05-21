@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-1360110
+ * @license Angular v18.1.0-next.0+sha-87c5f3c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12927,6 +12927,12 @@ function detectChangesInViewWhileDirty(lView, mode) {
     try {
         setIsRefreshingViews(true);
         detectChangesInView(lView, mode);
+        // We don't need or want to do any looping when in exhaustive checkNoChanges because we
+        // already traverse all the views and nothing should change so we shouldn't have to do
+        // another pass to pick up new changes.
+        if (ngDevMode && isExhaustiveCheckNoChanges()) {
+            return;
+        }
         let retries = 0;
         // If after running change detection, this view still needs to be refreshed or there are
         // descendants views that need to be refreshed due to re-dirtying during the change detection
@@ -12975,6 +12981,7 @@ function refreshView(tView, lView, templateFn, context) {
     // Check no changes mode is a dev only mode used to verify that bindings have not changed
     // since they were assigned. We do not want to execute lifecycle hooks in that mode.
     const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
+    const isInExhaustiveCheckNoChangesPass = ngDevMode && isExhaustiveCheckNoChanges();
     !isInCheckNoChangesPass && lView[ENVIRONMENT].inlineEffectRunner?.flush();
     // Start component reactive context
     // - We might already be in a reactive context if this is an embedded view of the host.
@@ -13010,10 +13017,14 @@ function refreshView(tView, lView, templateFn, context) {
                 incrementInitPhaseFlags(lView, 0 /* InitPhaseState.OnInitHooksToBeRun */);
             }
         }
-        // First mark transplanted views that are declared in this lView as needing a refresh at their
-        // insertion points. This is needed to avoid the situation where the template is defined in this
-        // `LView` but its declaration appears after the insertion component.
-        markTransplantedViewsForRefresh(lView);
+        // We do not need to mark transplanted views for refresh when doing exhaustive checks
+        // because all views will be reached anyways during the traversal.
+        if (!isInExhaustiveCheckNoChangesPass) {
+            // First mark transplanted views that are declared in this lView as needing a refresh at their
+            // insertion points. This is needed to avoid the situation where the template is defined in this
+            // `LView` but its declaration appears after the insertion component.
+            markTransplantedViewsForRefresh(lView);
+        }
         detectChangesInEmbeddedViews(lView, 0 /* ChangeDetectionMode.Global */);
         // Content query results must be refreshed before content hooks are called.
         if (tView.contentQueries !== null) {
@@ -16889,7 +16900,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-1360110']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.0+sha-87c5f3c']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30801,7 +30812,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.0+sha-1360110');
+const VERSION = new Version('18.1.0-next.0+sha-87c5f3c');
 
 class Console {
     log(message) {
@@ -33049,6 +33060,12 @@ class ChangeDetectionSchedulerImpl {
  */
 function provideExperimentalZonelessChangeDetection() {
     performanceMarkFeature('NgZoneless');
+    if ((typeof ngDevMode === 'undefined' || ngDevMode) && typeof Zone !== 'undefined' && Zone) {
+        const message = formatRuntimeError(914 /* RuntimeErrorCode.UNEXPECTED_ZONEJS_PRESENT_IN_ZONELESS_MODE */, `The application is using zoneless change detection, but is still loading Zone.js.` +
+            `Consider removing Zone.js to get the full benefits of zoneless. ` +
+            `In applcations using the Angular CLI, Zone.js is typically included in the "polyfills" section of the angular.json file.`);
+        console.warn(message);
+    }
     return makeEnvironmentProviders([
         { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
         { provide: NgZone, useClass: NoopNgZone },
@@ -36536,6 +36553,10 @@ function getJsactionData(container) {
     return container._ejsa;
 }
 const JSACTION_ATTRIBUTE = 'jsaction';
+/**
+ * Associates a DOM element with `jsaction` attribute to a map that contains info about all event
+ * types (event names) and corresponding listeners.
+ */
 const jsactionMap = new Map();
 /**
  * Returns a set of providers required to setup support for event replay.
@@ -36552,16 +36573,17 @@ function withEventReplay() {
             useValue: () => {
                 setDisableEventReplayImpl((rEl, eventName, listenerFn) => {
                     if (rEl.hasAttribute(JSACTION_ATTRIBUTE)) {
-                        const el = unwrapRNode(rEl);
+                        const el = rEl;
                         // We don't immediately remove the attribute here because
                         // we need it for replay that happens after hydration.
                         if (!jsactionMap.has(el)) {
                             jsactionMap.set(el, new Map());
                         }
-                        if (!jsactionMap.get(el).has(eventName)) {
-                            jsactionMap.get(el).set(eventName, []);
+                        const eventMap = jsactionMap.get(el);
+                        if (!eventMap.has(eventName)) {
+                            eventMap.set(eventName, []);
                         }
-                        jsactionMap.get(el).get(eventName).push(listenerFn);
+                        eventMap.get(eventName).push(listenerFn);
                     }
                 });
             },
@@ -36671,7 +36693,7 @@ function setJSActionAttribute(tNode, rNode, nativeElementToEvents) {
     }
 }
 function handleEvent(event) {
-    const nativeElement = unwrapRNode(event.getAction().element);
+    const nativeElement = event.getAction().element;
     const handlerFns = jsactionMap.get(nativeElement)?.get(event.getEventType());
     if (!handlerFns) {
         return;

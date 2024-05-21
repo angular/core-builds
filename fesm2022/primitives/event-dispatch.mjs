@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-1360110
+ * @license Angular v18.1.0-next.0+sha-87c5f3c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -576,7 +576,7 @@ function removeEventListener(element, info) {
  * Cancels propagation of an event.
  * @param e The event to cancel propagation for.
  */
-function stopPropagation$1(e) {
+function stopPropagation(e) {
     e.stopPropagation ? e.stopPropagation() : (e.cancelBubble = true);
 }
 /**
@@ -1130,12 +1130,12 @@ const testing = {
 class Dispatcher {
     /**
      * Options are:
-     *   1. `eventReplayer`: When the event contract dispatches replay events
+     *   - `eventReplayer`: When the event contract dispatches replay events
      *      to the Dispatcher, the Dispatcher collects them and in the next tick
-     *      dispatches them to the `eventReplayer`.
+     *      dispatches them to the `eventReplayer`. Defaults to dispatching to `dispatchDelegate`.
      * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
      */
-    constructor(dispatchDelegate, { actionResolver = undefined, eventReplayer = undefined, } = {}) {
+    constructor(dispatchDelegate, { actionResolver, eventReplayer = createEventReplayer(dispatchDelegate), } = {}) {
         this.dispatchDelegate = dispatchDelegate;
         /** Whether the event replay is scheduled. */
         this.eventReplayScheduled = false;
@@ -1172,9 +1172,6 @@ class Dispatcher {
             preventDefault(eventInfoWrapper.getEvent());
         }
         if (eventInfoWrapper.getIsReplay()) {
-            if (!this.eventReplayer) {
-                return;
-            }
             this.scheduleEventInfoWrapperReplay(eventInfoWrapper);
             return;
         }
@@ -1187,7 +1184,7 @@ class Dispatcher {
      */
     scheduleEventInfoWrapperReplay(eventInfoWrapper) {
         this.replayEventInfoWrappers.push(eventInfoWrapper);
-        if (this.eventReplayScheduled || !this.eventReplayer) {
+        if (this.eventReplayScheduled) {
             return;
         }
         this.eventReplayScheduled = true;
@@ -1197,26 +1194,16 @@ class Dispatcher {
         });
     }
 }
-/** Stop propagation for an `EventInfo`. */
-function stopPropagation(eventInfoWrapper) {
-    if (isGecko &&
-        (eventInfoWrapper.getTargetElement().tagName === 'INPUT' ||
-            eventInfoWrapper.getTargetElement().tagName === 'TEXTAREA') &&
-        eventInfoWrapper.getEventType() === EventType.FOCUS) {
-        /**
-         * Do nothing since stopping propagation on a focus event on an input
-         * element in Firefox makes the text cursor disappear:
-         * https://bugzilla.mozilla.org/show_bug.cgi?id=509684
-         */
-        return;
-    }
-    const event = eventInfoWrapper.getEvent();
-    // There are some cases where users of the `Dispatcher` will call dispatch
-    // with a fake event that does not support `stopPropagation`.
-    if (!event.stopPropagation) {
-        return;
-    }
-    event.stopPropagation();
+/**
+ * Creates an `EventReplayer` that calls the `replay` function for every `eventInfoWrapper` in
+ * the queue.
+ */
+function createEventReplayer(replay) {
+    return (eventInfoWrappers) => {
+        for (const eventInfoWrapper of eventInfoWrappers) {
+            replay(eventInfoWrapper);
+        }
+    };
 }
 /**
  * Returns true if the default action of this event should be prevented before
@@ -1347,22 +1334,11 @@ function populateClickOnlyAction(actionElement, eventInfo, actionMap) {
  * an optional DOM event name and a jsaction name. If the optional
  * DOM event name is omitted, 'click' is assumed. The jsaction names
  * are dot separated pairs of a namespace and a simple jsaction
- * name. If the namespace is absent, it is taken from the closest
- * ancestor element with a jsnamespace attribute, if there is
- * any. If there is no ancestor with a jsnamespace attribute, the
- * simple name is assumed to be the jsaction name.
+ * name.
  *
- * Used by EventContract.
+ * See grammar in README.md for expected syntax in the attribute value.
  */
 const JSACTION$1 = 'jsaction';
-/**
- * The jsnamespace attribute provides the namespace part of the
- * jaction names occurring in the jsaction attribute where it's
- * missing.
- *
- * Used by EventContract.
- */
-const JSNAMESPACE$1 = 'jsnamespace';
 /**
  * The oi attribute is a log impression tag for impression logging
  * and action tracking. For an element that carries a jsaction
@@ -1400,7 +1376,7 @@ const JSINSTANCE = 'jsinstance';
  * Used by ActionFlow.
  */
 const JSTRACK = 'jstrack';
-const Attribute = { JSACTION: JSACTION$1, JSNAMESPACE: JSNAMESPACE$1, OI: OI$1, VED, VET, JSINSTANCE, JSTRACK };
+const Attribute = { JSACTION: JSACTION$1, OI: OI$1, VED, VET, JSINSTANCE, JSTRACK };
 
 const Char = {
     /**
@@ -1439,11 +1415,6 @@ const Char = {
  * property lookup is faster than attribute access.
  */
 const JSACTION = '__jsaction';
-/**
- * The parsed value of the jsnamespace attribute is stored in this
- * property on the DOM node.
- */
-const JSNAMESPACE = '__jsnamespace';
 /** The value of the oi attribute as a property, for faster access. */
 const OI = '__oi';
 /**
@@ -1456,7 +1427,6 @@ const OWNER = '__owner';
 /** All properties that are used by jsaction. */
 const Property = {
     JSACTION,
-    JSNAMESPACE,
     OI,
     OWNER,
 };
@@ -1512,39 +1482,6 @@ function setParsed(text, parsed) {
 function clear(element) {
     if (JSACTION in element) {
         delete element[JSACTION];
-    }
-}
-/**
- * Reads the cached jsaction namespace from the given DOM
- * Element. Undefined means there is no cached value; null is a cached
- * jsnamespace attribute that's absent.
- *
- * @param element .
- * @return .
- */
-function getNamespace(element) {
-    // @ts-ignore
-    return element[JSNAMESPACE];
-}
-/**
- * Writes the cached jsaction namespace to the given DOM Element. Null
- * represents a jsnamespace attribute that's absent.
- *
- * @param element .
- * @param jsnamespace .
- */
-function setNamespace(element, jsnamespace) {
-    // @ts-ignore
-    element[JSNAMESPACE] = jsnamespace;
-}
-/**
- * Clears the cached jsaction namespace from the given DOM Element.
- *
- * @param element .
- */
-function clearNamespace(element) {
-    if (JSNAMESPACE in element) {
-        delete element[JSNAMESPACE];
     }
 }
 

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-1360110
+ * @license Angular v18.1.0-next.0+sha-87c5f3c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13565,6 +13565,7 @@ export declare const enum ɵRuntimeErrorCode {
     VIEW_ALREADY_DESTROYED = 911,
     COMPONENT_ID_COLLISION = -912,
     IMAGE_PERFORMANCE_WARNING = -913,
+    UNEXPECTED_ZONEJS_PRESENT_IN_ZONELESS_MODE = 914,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = -952,

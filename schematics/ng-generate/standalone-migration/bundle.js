@@ -26287,7 +26287,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.0+sha-1360110");
+var VERSION2 = new Version("18.1.0-next.0+sha-87c5f3c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27381,7 +27381,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-1360110"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-87c5f3c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27400,7 +27400,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-1360110"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-87c5f3c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27468,7 +27468,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-1360110"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-87c5f3c"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27786,7 +27786,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-1360110"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-87c5f3c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27809,7 +27809,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-1360110"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-87c5f3c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27847,7 +27847,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-1360110"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-87c5f3c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27871,7 +27871,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-1360110"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-87c5f3c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27906,7 +27906,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.1.0-next.0+sha-1360110"));
+  definitionMap.set("version", literal("18.1.0-next.0+sha-87c5f3c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27923,7 +27923,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.1.0-next.0+sha-1360110");
+var VERSION3 = new Version("18.1.0-next.0+sha-87c5f3c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -45397,7 +45397,10 @@ var TcbIfOp = class extends TcbOp {
     const expressionScope = Scope3.forNodes(this.tcb, this.scope, branch, [], null);
     expressionScope.render().forEach((stmt) => this.scope.addStatement(stmt));
     this.expressionScopes.set(branch, expressionScope);
-    const expression = branch.expressionAlias === null ? tcbExpression(branch.expression, this.tcb, expressionScope) : expressionScope.resolve(branch.expressionAlias);
+    let expression = tcbExpression(branch.expression, this.tcb, expressionScope);
+    if (branch.expressionAlias !== null) {
+      expression = import_typescript107.default.factory.createBinaryExpression(import_typescript107.default.factory.createParenthesizedExpression(expression), import_typescript107.default.SyntaxKind.AmpersandAmpersandToken, expressionScope.resolve(branch.expressionAlias));
+    }
     const bodyScope = this.getBranchScope(expressionScope, branch, index);
     return import_typescript107.default.factory.createIfStatement(expression, import_typescript107.default.factory.createBlock(bodyScope.render()), this.generateBranch(index + 1));
   }
@@ -45417,12 +45420,11 @@ var TcbIfOp = class extends TcbOp {
       }
       const expressionScope = this.expressionScopes.get(branch);
       let expression;
-      if (branch.expressionAlias === null) {
-        expression = tcbExpression(branch.expression, this.tcb, expressionScope);
-        markIgnoreDiagnostics(expression);
-      } else {
-        expression = expressionScope.resolve(branch.expressionAlias);
+      expression = tcbExpression(branch.expression, this.tcb, expressionScope);
+      if (branch.expressionAlias !== null) {
+        expression = import_typescript107.default.factory.createBinaryExpression(import_typescript107.default.factory.createParenthesizedExpression(expression), import_typescript107.default.SyntaxKind.AmpersandAmpersandToken, expressionScope.resolve(branch.expressionAlias));
       }
+      markIgnoreDiagnostics(expression);
       const comparisonExpression = i === index ? expression : import_typescript107.default.factory.createPrefixUnaryExpression(import_typescript107.default.SyntaxKind.ExclamationToken, import_typescript107.default.factory.createParenthesizedExpression(expression));
       guard = guard === null ? comparisonExpression : import_typescript107.default.factory.createBinaryExpression(guard, import_typescript107.default.SyntaxKind.AmpersandAmpersandToken, comparisonExpression);
     }
@@ -47924,6 +47926,14 @@ var InterpolatedSignalCheck = class extends TemplateCheckWithVisitor {
   visitNode(ctx, component, node) {
     if (node instanceof Interpolation) {
       return node.expressions.filter((item) => item instanceof PropertyRead).flatMap((item) => buildDiagnosticForSignal(ctx, item, component));
+    } else if (node instanceof BoundAttribute) {
+      const symbol = ctx.templateTypeChecker.getSymbolOfNode(node, component);
+      if (symbol !== null && symbol.kind === SymbolKind.Input) {
+        return [];
+      }
+      if (node.type === BindingType.Property && node.value instanceof ASTWithSource && node.value.ast instanceof PropertyRead) {
+        return buildDiagnosticForSignal(ctx, node.value.ast, component);
+      }
     }
     return [];
   }

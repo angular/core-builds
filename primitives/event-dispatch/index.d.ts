@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-1360110
+ * @license Angular v18.1.0-next.0+sha-87c5f3c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -122,16 +122,16 @@ export declare class Dispatcher {
     private readonly dispatchDelegate;
     private actionResolver?;
     /** The replayer function to be called when there are queued events. */
-    private eventReplayer?;
+    private eventReplayer;
     /** Whether the event replay is scheduled. */
     private eventReplayScheduled;
     /** The queue of events. */
     private readonly replayEventInfoWrappers;
     /**
      * Options are:
-     *   1. `eventReplayer`: When the event contract dispatches replay events
+     *   - `eventReplayer`: When the event contract dispatches replay events
      *      to the Dispatcher, the Dispatcher collects them and in the next tick
-     *      dispatches them to the `eventReplayer`.
+     *      dispatches them to the `eventReplayer`. Defaults to dispatching to `dispatchDelegate`.
      * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
      */
     constructor(dispatchDelegate: (eventInfoWrapper: EventInfoWrapper) => void, { actionResolver, eventReplayer, }?: {
