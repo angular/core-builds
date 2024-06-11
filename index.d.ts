@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.2+sha-69a8399
+ * @license Angular v18.0.2+sha-ca78553
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11868,7 +11868,10 @@ export declare const enum ɵAnimationRendererType {
  * @param doc A reference to the current Document instance.
  * @return event types that need to be replayed
  */
-export declare function ɵannotateForHydration(appRef: ApplicationRef, doc: Document): Set<string> | undefined;
+export declare function ɵannotateForHydration(appRef: ApplicationRef, doc: Document): {
+    regular: Set<string>;
+    capture: Set<string>;
+};
 
 
 /**
@@ -12069,6 +12072,39 @@ export declare const enum ɵBypassType {
 export declare abstract class ɵChangeDetectionScheduler {
     abstract notify(source: ɵNotificationSource): void;
     abstract runningTick: boolean;
+}
+
+export declare class ɵChangeDetectionSchedulerImpl implements ɵChangeDetectionScheduler {
+    private readonly appRef;
+    private readonly taskService;
+    private readonly ngZone;
+    private readonly zonelessEnabled;
+    private readonly disableScheduling;
+    private readonly zoneIsDefined;
+    private readonly schedulerTickApplyArgs;
+    private readonly subscriptions;
+    private cancelScheduledCallback;
+    private shouldRefreshViews;
+    private useMicrotaskScheduler;
+    runningTick: boolean;
+    pendingRenderTaskId: number | null;
+    constructor();
+    notify(source: ɵNotificationSource): void;
+    private shouldScheduleTick;
+    /**
+     * Calls ApplicationRef._tick inside the `NgZone`.
+     *
+     * Calling `tick` directly runs change detection and cancels any change detection that had been
+     * scheduled previously.
+     *
+     * @param shouldRefreshViews Passed directly to `ApplicationRef._tick` and skips straight to
+     *     render hooks when `false`.
+     */
+    private tick;
+    ngOnDestroy(): void;
+    private cleanup;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ɵChangeDetectionSchedulerImpl, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<ɵChangeDetectionSchedulerImpl>;
 }
 
 export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
@@ -13257,6 +13293,12 @@ export declare const enum ɵProfilerEvent {
 }
 
 /**
+ * Internal token used to verify that `provideZoneChangeDetection` is not used
+ * with the bootstrapModule API.
+ */
+export declare const ɵPROVIDED_NG_ZONE: InjectionToken<boolean>;
+
+/**
  * An object that contains information about a provider that has been configured
  *
  * TODO: rename to indicate that it is a debug structure eg. ProviderDebugInfo.
@@ -13489,7 +13531,7 @@ export declare class ɵRuntimeError<T extends number = ɵRuntimeErrorCode> exten
  * angular.io. This extra annotation is needed to avoid introducing a separate set to store
  * error codes which have guides, which might leak into runtime code.
  *
- * Full list of available error guides can be found at https://angular.io/errors.
+ * Full list of available error guides can be found at https://angular.dev/errors.
  *
  * Error code ranges per package:
  *  - core (this package): 100-999
@@ -13565,6 +13607,7 @@ export declare const enum ɵRuntimeErrorCode {
     VIEW_ALREADY_DESTROYED = 911,
     COMPONENT_ID_COLLISION = -912,
     IMAGE_PERFORMANCE_WARNING = -913,
+    UNEXPECTED_ZONEJS_PRESENT_IN_ZONELESS_MODE = 914,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = -952,

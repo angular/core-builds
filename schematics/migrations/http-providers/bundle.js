@@ -571,7 +571,7 @@ function migrateFile(sourceFile, typeChecker, rewriteFn) {
     if (import_typescript7.default.isClassDeclaration(node)) {
       const decorators = getAngularDecorators(typeChecker, import_typescript7.default.getDecorators(node) || []);
       decorators.forEach((decorator) => {
-        migrateDecorator(decorator, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker);
+        migrateDecorator(decorator, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker, sourceFile);
       });
     }
     migrateTestingModuleImports(node, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker);
@@ -610,7 +610,7 @@ function migrateFile(sourceFile, typeChecker, rewriteFn) {
     }
   }
 }
-function migrateDecorator(decorator, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker) {
+function migrateDecorator(decorator, commonHttpIdentifiers, commonHttpTestingIdentifiers, addedImports, changeTracker, sourceFile) {
   var _a;
   if (decorator.name !== "NgModule" && decorator.name !== "Component" || decorator.node.expression.arguments.length < 1) {
     return;
@@ -625,6 +625,14 @@ function migrateDecorator(decorator, commonHttpIdentifiers, commonHttpTestingIde
   }
   const importedModules = getImportedHttpModules(moduleImports, commonHttpIdentifiers, commonHttpTestingIdentifiers);
   if (!importedModules) {
+    return;
+  }
+  const isComponent = decorator.name === "Component";
+  if (isComponent && importedModules.client) {
+    const httpClientModuleIdentifier = importedModules.client;
+    const commentText = "\n// TODO: `HttpClientModule` should not be imported into a component directly.\n// Please refactor the code to add `provideHttpClient()` call to the provider list in the\n// application bootstrap logic and remove the `HttpClientModule` import from this component.\n";
+    import_typescript7.default.addSyntheticLeadingComment(httpClientModuleIdentifier, import_typescript7.default.SyntaxKind.SingleLineCommentTrivia, commentText, true);
+    changeTracker.insertText(sourceFile, httpClientModuleIdentifier.getStart(), commentText);
     return;
   }
   const addedProviders = /* @__PURE__ */ new Set();

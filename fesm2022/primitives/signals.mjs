@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.0-rc.2+sha-69a8399
+ * @license Angular v18.0.2+sha-ca78553
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -264,8 +264,7 @@ function consumerDestroy(node) {
  */
 function producerAddLiveConsumer(node, consumer, indexOfThis) {
     assertProducerNode(node);
-    assertConsumerNode(node);
-    if (node.liveConsumerNode.length === 0) {
+    if (node.liveConsumerNode.length === 0 && isConsumerNode(node)) {
         // When going from 0 to 1 live consumers, we become a live consumer to our producers.
         for (let i = 0; i < node.producerNode.length; i++) {
             node.producerIndexOfThis[i] = producerAddLiveConsumer(node.producerNode[i], node, i);
@@ -279,11 +278,10 @@ function producerAddLiveConsumer(node, consumer, indexOfThis) {
  */
 function producerRemoveLiveConsumerAtIndex(node, idx) {
     assertProducerNode(node);
-    assertConsumerNode(node);
     if (typeof ngDevMode !== 'undefined' && ngDevMode && idx >= node.liveConsumerNode.length) {
         throw new Error(`Assertion error: active consumer index ${idx} is out of bounds of ${node.liveConsumerNode.length} consumers)`);
     }
-    if (node.liveConsumerNode.length === 1) {
+    if (node.liveConsumerNode.length === 1 && isConsumerNode(node)) {
         // When removing the last live consumer, we will no longer be live. We need to remove
         // ourselves from our producers' tracking (which may cause consumer-producers to lose
         // liveness as well).
@@ -319,6 +317,9 @@ function assertConsumerNode(node) {
 function assertProducerNode(node) {
     node.liveConsumerNode ??= [];
     node.liveConsumerIndexOfThis ??= [];
+}
+function isConsumerNode(node) {
+    return node.producerNode !== undefined;
 }
 
 /**

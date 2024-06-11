@@ -1,200 +1,88 @@
 /**
- * @license Angular v18.0.0-rc.2+sha-69a8399
+ * @license Angular v18.0.2+sha-ca78553
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-/** Added for readability when accessing stable property names. */
-function getEventType(eventInfo) {
-    return eventInfo.eventType;
-}
-/** Added for readability when accessing stable property names. */
-function setEventType(eventInfo, eventType) {
-    eventInfo.eventType = eventType;
-}
-/** Added for readability when accessing stable property names. */
-function getEvent(eventInfo) {
-    return eventInfo.event;
-}
-/** Added for readability when accessing stable property names. */
-function setEvent(eventInfo, event) {
-    eventInfo.event = event;
-}
-/** Added for readability when accessing stable property names. */
-function getTargetElement(eventInfo) {
-    return eventInfo.targetElement;
-}
-/** Added for readability when accessing stable property names. */
-function setTargetElement(eventInfo, targetElement) {
-    eventInfo.targetElement = targetElement;
-}
-/** Added for readability when accessing stable property names. */
-function getContainer(eventInfo) {
-    return eventInfo.eic;
-}
-/** Added for readability when accessing stable property names. */
-function setContainer(eventInfo, container) {
-    eventInfo.eic = container;
-}
-/** Added for readability when accessing stable property names. */
-function getTimestamp(eventInfo) {
-    return eventInfo.timeStamp;
-}
-/** Added for readability when accessing stable property names. */
-function setTimestamp(eventInfo, timestamp) {
-    eventInfo.timeStamp = timestamp;
-}
-/** Added for readability when accessing stable property names. */
-function getAction(eventInfo) {
-    return eventInfo.eia;
-}
-/** Added for readability when accessing stable property names. */
-function setAction(eventInfo, actionName, actionElement) {
-    eventInfo.eia = [actionName, actionElement];
-}
-/** Added for readability when accessing stable property names. */
-function unsetAction(eventInfo) {
-    eventInfo.eia = undefined;
-}
-/** Added for readability when accessing stable property names. */
-function getActionName(actionInfo) {
-    return actionInfo[0];
-}
-/** Added for readability when accessing stable property names. */
-function getActionElement(actionInfo) {
-    return actionInfo[1];
-}
-/** Added for readability when accessing stable property names. */
-function getIsReplay(eventInfo) {
-    return eventInfo.eirp;
-}
-/** Added for readability when accessing stable property names. */
-function setIsReplay(eventInfo, replay) {
-    eventInfo.eirp = replay;
-}
-/** Added for readability when accessing stable property names. */
-function getA11yClickKey(eventInfo) {
-    return eventInfo.eiack;
-}
-/** Added for readability when accessing stable property names. */
-function setA11yClickKey(eventInfo, a11yClickKey) {
-    eventInfo.eiack = a11yClickKey;
-}
-/** Clones an `EventInfo` */
-function cloneEventInfo(eventInfo) {
-    return {
-        eventType: eventInfo.eventType,
-        event: eventInfo.event,
-        targetElement: eventInfo.targetElement,
-        eic: eventInfo.eic,
-        eia: eventInfo.eia,
-        timeStamp: eventInfo.timeStamp,
-        eirp: eventInfo.eirp,
-        eiack: eventInfo.eiack,
-    };
-}
 /**
- * Utility function for creating an `EventInfo`.
+ * The jsaction attribute defines a mapping of a DOM event to a
+ * generic event (aka jsaction), to which the actual event handlers
+ * that implement the behavior of the application are bound. The
+ * value is a semicolon separated list of colon separated pairs of
+ * an optional DOM event name and a jsaction name. If the optional
+ * DOM event name is omitted, 'click' is assumed. The jsaction names
+ * are dot separated pairs of a namespace and a simple jsaction
+ * name.
  *
- * This can be used from code-size sensitive compilation units, as taking
- * parameters vs. an `Object` literal reduces code size.
+ * See grammar in README.md for expected syntax in the attribute value.
  */
-function createEventInfoFromParameters(eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey) {
-    return {
-        eventType,
-        event,
-        targetElement,
-        eic: container,
-        timeStamp: timestamp,
-        eia: action,
-        eirp: isReplay,
-        eiack: a11yClickKey,
-    };
-}
+const JSACTION$1 = 'jsaction';
 /**
- * Utility function for creating an `EventInfo`.
+ * The oi attribute is a log impression tag for impression logging
+ * and action tracking. For an element that carries a jsaction
+ * attribute, the element is identified for the purpose of
+ * impression logging and click tracking by the dot separated path
+ * of all oi attributes in the chain of ancestors of the element.
  *
- * This should be used in compilation units that are less sensitive to code
- * size.
+ * Used by ActionFlow.
  */
-function createEventInfo({ eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey, }) {
-    return {
-        eventType,
-        event,
-        targetElement,
-        eic: container,
-        timeStamp: timestamp,
-        eia: action ? [action.name, action.element] : undefined,
-        eirp: isReplay,
-        eiack: a11yClickKey,
-    };
-}
+const OI$1 = 'oi';
 /**
- * Utility class around an `EventInfo`.
+ * The ved attribute is an encoded ClickTrackingCGI proto to track
+ * visual elements.
  *
- * This should be used in compilation units that are less sensitive to code
- * size.
+ * Used by ActionFlow.
  */
-class EventInfoWrapper {
-    constructor(eventInfo) {
-        this.eventInfo = eventInfo;
-    }
-    getEventType() {
-        return getEventType(this.eventInfo);
-    }
-    setEventType(eventType) {
-        setEventType(this.eventInfo, eventType);
-    }
-    getEvent() {
-        return getEvent(this.eventInfo);
-    }
-    setEvent(event) {
-        setEvent(this.eventInfo, event);
-    }
-    getTargetElement() {
-        return getTargetElement(this.eventInfo);
-    }
-    setTargetElement(targetElement) {
-        setTargetElement(this.eventInfo, targetElement);
-    }
-    getContainer() {
-        return getContainer(this.eventInfo);
-    }
-    setContainer(container) {
-        setContainer(this.eventInfo, container);
-    }
-    getTimestamp() {
-        return getTimestamp(this.eventInfo);
-    }
-    setTimestamp(timestamp) {
-        setTimestamp(this.eventInfo, timestamp);
-    }
-    getAction() {
-        const action = getAction(this.eventInfo);
-        if (!action)
-            return undefined;
-        return {
-            name: action[0],
-            element: action[1],
-        };
-    }
-    setAction(action) {
-        if (!action) {
-            unsetAction(this.eventInfo);
-            return;
-        }
-        setAction(this.eventInfo, action.name, action.element);
-    }
-    getIsReplay() {
-        return getIsReplay(this.eventInfo);
-    }
-    setIsReplay(replay) {
-        setIsReplay(this.eventInfo, replay);
-    }
-    clone() {
-        return new EventInfoWrapper(cloneEventInfo(this.eventInfo));
-    }
-}
+const VED = 'ved';
+/**
+ * The vet attribute is the visual element type used to identify tracked
+ * visual elements.
+ */
+const VET = 'vet';
+/**
+ * Support for iteration on reprocessing.
+ *
+ * Used by ActionFlow.
+ */
+const JSINSTANCE = 'jsinstance';
+/**
+ * All click jsactions that happen on the element that carries this
+ * attribute or its descendants are automatically logged.
+ * Impressions of jsactions on these elements are tracked too, if
+ * requested by the impression() method of ActionFlow.
+ *
+ * Used by ActionFlow.
+ */
+const JSTRACK = 'jstrack';
+const Attribute = { JSACTION: JSACTION$1, OI: OI$1, VED, VET, JSINSTANCE, JSTRACK };
+
+const Char = {
+    /**
+     * The separator between the namespace and the action name in the
+     * jsaction attribute value.
+     */
+    NAMESPACE_ACTION_SEPARATOR: '.',
+    /**
+     * The separator between the event name and action in the jsaction
+     * attribute value.
+     */
+    EVENT_ACTION_SEPARATOR: ':',
+    /**
+     * The separator between the logged oi attribute values in the &oi=
+     * URL parameter value.
+     */
+    OI_SEPARATOR: '.',
+    /**
+     * The separator between the key and the value pairs in the &cad=
+     * URL parameter value.
+     */
+    CAD_KEY_VALUE_SEPARATOR: ':',
+    /**
+     * The separator between the key-value pairs in the &cad= URL
+     * parameter value.
+     */
+    CAD_SEPARATOR: ',',
+};
 
 /*
  * Names of events that are special to jsaction. These are not all
@@ -432,14 +320,376 @@ const EventType = {
      */
     CUSTOM: '_custom',
 };
+const NON_BUBBLING_MOUSE_EVENTS = [
+    EventType.MOUSEENTER,
+    EventType.MOUSELEAVE,
+    'pointerenter',
+    'pointerleave',
+];
+/**
+ * Detects whether a given event type is supported by JSAction.
+ */
+const isSupportedEvent = (eventType) => SUPPORTED_EVENTS.indexOf(eventType) >= 0;
+const SUPPORTED_EVENTS = [
+    EventType.CLICK,
+    EventType.DBLCLICK,
+    EventType.FOCUS,
+    EventType.FOCUSIN,
+    EventType.BLUR,
+    EventType.ERROR,
+    EventType.FOCUSOUT,
+    EventType.KEYDOWN,
+    EventType.KEYUP,
+    EventType.KEYPRESS,
+    EventType.LOAD,
+    EventType.MOUSEOVER,
+    EventType.MOUSEOUT,
+    EventType.SUBMIT,
+    EventType.TOGGLE,
+    EventType.TOUCHSTART,
+    EventType.TOUCHEND,
+    EventType.TOUCHMOVE,
+    'touchcancel',
+    'auxclick',
+    'change',
+    'compositionstart',
+    'compositionupdate',
+    'compositionend',
+    'beforeinput',
+    'input',
+    'select',
+    'copy',
+    'cut',
+    'paste',
+    'mousedown',
+    'mouseup',
+    'wheel',
+    'contextmenu',
+    'dragover',
+    'dragenter',
+    'dragleave',
+    'drop',
+    'dragstart',
+    'dragend',
+    'pointerdown',
+    'pointermove',
+    'pointerup',
+    'pointercancel',
+    'pointerover',
+    'pointerout',
+    'gotpointercapture',
+    'lostpointercapture',
+    // Video events.
+    'ended',
+    'loadedmetadata',
+    // Page visibility events.
+    'pagehide',
+    'pageshow',
+    'visibilitychange',
+    // Content visibility events.
+    'beforematch',
+];
+/**
+ *
+ * Decides whether or not an event type is an event that only has a capture phase.
+ *
+ * @param eventType
+ * @returns bool
+ */
+const isCaptureEvent = (eventType) => CAPTURE_EVENTS.indexOf(eventType) >= 0;
+const CAPTURE_EVENTS = [
+    EventType.FOCUS,
+    EventType.BLUR,
+    EventType.ERROR,
+    EventType.LOAD,
+    EventType.TOGGLE,
+];
 
 /**
- * @fileoverview An enum to control who can call certain jsaction APIs.
+ * The parsed value of the jsaction attribute is stored in this
+ * property on the DOM node. The parsed value is an Object. The
+ * property names of the object are the events; the values are the
+ * names of the actions. This property is attached even on nodes
+ * that don't have a jsaction attribute as an optimization, because
+ * property lookup is faster than attribute access.
  */
-var Restriction;
-(function (Restriction) {
-    Restriction[Restriction["I_AM_THE_JSACTION_FRAMEWORK"] = 0] = "I_AM_THE_JSACTION_FRAMEWORK";
-})(Restriction || (Restriction = {}));
+const JSACTION = '__jsaction';
+/** The value of the oi attribute as a property, for faster access. */
+const OI = '__oi';
+/**
+ * The owner property references an a logical owner for a DOM node. JSAction
+ * will follow this reference instead of parentNode when traversing the DOM
+ * to find jsaction attributes. This allows overlaying a logical structure
+ * over a document where the DOM structure can't reflect that structure.
+ */
+const OWNER = '__owner';
+/** All properties that are used by jsaction. */
+const Property = {
+    JSACTION,
+    OI,
+    OWNER,
+};
+
+/**
+ * Map from jsaction annotation to a parsed map from event name to action name.
+ */
+const parseCache = {};
+/**
+ * Reads the jsaction parser cache from the given DOM Element.
+ *
+ * @param element .
+ * @return Map from event to qualified name of the jsaction bound to it.
+ */
+function get(element) {
+    // @ts-ignore
+    return element[JSACTION];
+}
+/**
+ * Writes the jsaction parser cache to the given DOM Element.
+ *
+ * @param element .
+ * @param actionMap Map from event to qualified name of the jsaction bound to
+ *     it.
+ */
+function set(element, actionMap) {
+    // @ts-ignore
+    element[JSACTION] = actionMap;
+}
+/**
+ * Looks up the parsed action map from the source jsaction attribute value.
+ *
+ * @param text Unparsed jsaction attribute value.
+ * @return Parsed jsaction attribute value, if already present in the cache.
+ */
+function getParsed(text) {
+    return parseCache[text];
+}
+/**
+ * Inserts the parse result for the given source jsaction value into the cache.
+ *
+ * @param text Unparsed jsaction attribute value.
+ * @param parsed Attribute value parsed into the action map.
+ */
+function setParsed(text, parsed) {
+    parseCache[text] = parsed;
+}
+/**
+ * Clears the jsaction parser cache from the given DOM Element.
+ *
+ * @param element .
+ */
+function clear(element) {
+    if (JSACTION in element) {
+        delete element[JSACTION];
+    }
+}
+
+/** Added for readability when accessing stable property names. */
+function getEventType(eventInfo) {
+    return eventInfo.eventType;
+}
+/** Added for readability when accessing stable property names. */
+function setEventType(eventInfo, eventType) {
+    eventInfo.eventType = eventType;
+}
+/** Added for readability when accessing stable property names. */
+function getEvent(eventInfo) {
+    return eventInfo.event;
+}
+/** Added for readability when accessing stable property names. */
+function setEvent(eventInfo, event) {
+    eventInfo.event = event;
+}
+/** Added for readability when accessing stable property names. */
+function getTargetElement(eventInfo) {
+    return eventInfo.targetElement;
+}
+/** Added for readability when accessing stable property names. */
+function setTargetElement(eventInfo, targetElement) {
+    eventInfo.targetElement = targetElement;
+}
+/** Added for readability when accessing stable property names. */
+function getContainer(eventInfo) {
+    return eventInfo.eic;
+}
+/** Added for readability when accessing stable property names. */
+function setContainer(eventInfo, container) {
+    eventInfo.eic = container;
+}
+/** Added for readability when accessing stable property names. */
+function getTimestamp(eventInfo) {
+    return eventInfo.timeStamp;
+}
+/** Added for readability when accessing stable property names. */
+function setTimestamp(eventInfo, timestamp) {
+    eventInfo.timeStamp = timestamp;
+}
+/** Added for readability when accessing stable property names. */
+function getAction(eventInfo) {
+    return eventInfo.eia;
+}
+/** Added for readability when accessing stable property names. */
+function setAction(eventInfo, actionName, actionElement) {
+    eventInfo.eia = [actionName, actionElement];
+}
+/** Added for readability when accessing stable property names. */
+function unsetAction(eventInfo) {
+    eventInfo.eia = undefined;
+}
+/** Added for readability when accessing stable property names. */
+function getActionName(actionInfo) {
+    return actionInfo[0];
+}
+/** Added for readability when accessing stable property names. */
+function getActionElement(actionInfo) {
+    return actionInfo[1];
+}
+/** Added for readability when accessing stable property names. */
+function getIsReplay(eventInfo) {
+    return eventInfo.eirp;
+}
+/** Added for readability when accessing stable property names. */
+function setIsReplay(eventInfo, replay) {
+    eventInfo.eirp = replay;
+}
+/** Added for readability when accessing stable property names. */
+function getA11yClickKey(eventInfo) {
+    return eventInfo.eiack;
+}
+/** Added for readability when accessing stable property names. */
+function setA11yClickKey(eventInfo, a11yClickKey) {
+    eventInfo.eiack = a11yClickKey;
+}
+/** Added for readability when accessing stable property names. */
+function getResolved(eventInfo) {
+    return eventInfo.eir;
+}
+/** Added for readability when accessing stable property names. */
+function setResolved(eventInfo, resolved) {
+    eventInfo.eir = resolved;
+}
+/** Clones an `EventInfo` */
+function cloneEventInfo(eventInfo) {
+    return {
+        eventType: eventInfo.eventType,
+        event: eventInfo.event,
+        targetElement: eventInfo.targetElement,
+        eic: eventInfo.eic,
+        eia: eventInfo.eia,
+        timeStamp: eventInfo.timeStamp,
+        eirp: eventInfo.eirp,
+        eiack: eventInfo.eiack,
+        eir: eventInfo.eir,
+    };
+}
+/**
+ * Utility function for creating an `EventInfo`.
+ *
+ * This can be used from code-size sensitive compilation units, as taking
+ * parameters vs. an `Object` literal reduces code size.
+ */
+function createEventInfoFromParameters(eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey) {
+    return {
+        eventType,
+        event,
+        targetElement,
+        eic: container,
+        timeStamp: timestamp,
+        eia: action,
+        eirp: isReplay,
+        eiack: a11yClickKey,
+    };
+}
+/**
+ * Utility function for creating an `EventInfo`.
+ *
+ * This should be used in compilation units that are less sensitive to code
+ * size.
+ */
+function createEventInfo({ eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey, }) {
+    return {
+        eventType,
+        event,
+        targetElement,
+        eic: container,
+        timeStamp: timestamp,
+        eia: action ? [action.name, action.element] : undefined,
+        eirp: isReplay,
+        eiack: a11yClickKey,
+    };
+}
+/**
+ * Utility class around an `EventInfo`.
+ *
+ * This should be used in compilation units that are less sensitive to code
+ * size.
+ */
+class EventInfoWrapper {
+    constructor(eventInfo) {
+        this.eventInfo = eventInfo;
+    }
+    getEventType() {
+        return getEventType(this.eventInfo);
+    }
+    setEventType(eventType) {
+        setEventType(this.eventInfo, eventType);
+    }
+    getEvent() {
+        return getEvent(this.eventInfo);
+    }
+    setEvent(event) {
+        setEvent(this.eventInfo, event);
+    }
+    getTargetElement() {
+        return getTargetElement(this.eventInfo);
+    }
+    setTargetElement(targetElement) {
+        setTargetElement(this.eventInfo, targetElement);
+    }
+    getContainer() {
+        return getContainer(this.eventInfo);
+    }
+    setContainer(container) {
+        setContainer(this.eventInfo, container);
+    }
+    getTimestamp() {
+        return getTimestamp(this.eventInfo);
+    }
+    setTimestamp(timestamp) {
+        setTimestamp(this.eventInfo, timestamp);
+    }
+    getAction() {
+        const action = getAction(this.eventInfo);
+        if (!action)
+            return undefined;
+        return {
+            name: action[0],
+            element: action[1],
+        };
+    }
+    setAction(action) {
+        if (!action) {
+            unsetAction(this.eventInfo);
+            return;
+        }
+        setAction(this.eventInfo, action.name, action.element);
+    }
+    getIsReplay() {
+        return getIsReplay(this.eventInfo);
+    }
+    setIsReplay(replay) {
+        setIsReplay(this.eventInfo, replay);
+    }
+    getResolved() {
+        return getResolved(this.eventInfo);
+    }
+    setResolved(resolved) {
+        setResolved(this.eventInfo, resolved);
+    }
+    clone() {
+        return new EventInfoWrapper(cloneEventInfo(this.eventInfo));
+    }
+}
 
 /**
  * Determines if one node is contained within another. Adapted from
@@ -542,11 +792,7 @@ function addEventListener(element, eventType, handler) {
     // Error and load events (i.e. on images) do not bubble so they are also
     // handled in the capture phase.
     let capture = false;
-    if (eventType === EventType.FOCUS ||
-        eventType === EventType.BLUR ||
-        eventType === EventType.ERROR ||
-        eventType === EventType.LOAD ||
-        eventType === EventType.TOGGLE) {
+    if (isCaptureEvent(eventType)) {
         capture = true;
     }
     element.addEventListener(eventType, handler, capture);
@@ -576,7 +822,7 @@ function removeEventListener(element, info) {
  * Cancels propagation of an event.
  * @param e The event to cancel propagation for.
  */
-function stopPropagation$1(e) {
+function stopPropagation(e) {
     e.stopPropagation ? e.stopPropagation() : (e.cancelBubble = true);
 }
 /**
@@ -1123,6 +1369,241 @@ const testing = {
 };
 
 /**
+ * Since maps from event to action are immutable we can use a single map
+ * to represent the empty map.
+ */
+const EMPTY_ACTION_MAP = {};
+/**
+ * This regular expression matches a semicolon.
+ */
+const REGEXP_SEMICOLON = /\s*;\s*/;
+/** If no event type is defined, defaults to `click`. */
+const DEFAULT_EVENT_TYPE = EventType.CLICK;
+/** Resolves actions for Events. */
+class ActionResolver {
+    constructor({ syntheticMouseEventSupport = false, } = {}) {
+        this.a11yClickSupport = false;
+        this.updateEventInfoForA11yClick = undefined;
+        this.preventDefaultForA11yClick = undefined;
+        this.populateClickOnlyAction = undefined;
+        this.syntheticMouseEventSupport = syntheticMouseEventSupport;
+    }
+    resolveEventType(eventInfo) {
+        // We distinguish modified and plain clicks in order to support the
+        // default browser behavior of modified clicks on links; usually to
+        // open the URL of the link in new tab or new window on ctrl/cmd
+        // click. A DOM 'click' event is mapped to the jsaction 'click'
+        // event iff there is no modifier present on the event. If there is
+        // a modifier, it's mapped to 'clickmod' instead.
+        //
+        // It's allowed to omit the event in the jsaction attribute. In that
+        // case, 'click' is assumed. Thus the following two are equivalent:
+        //
+        //   <a href="someurl" jsaction="gna.fu">
+        //   <a href="someurl" jsaction="click:gna.fu">
+        //
+        // For unmodified clicks, EventContract invokes the jsaction
+        // 'gna.fu'. For modified clicks, EventContract won't find a
+        // suitable action and leave the event to be handled by the
+        // browser.
+        //
+        // In order to also invoke a jsaction handler for a modifier click,
+        // 'clickmod' needs to be used:
+        //
+        //   <a href="someurl" jsaction="clickmod:gna.fu">
+        //
+        // EventContract invokes the jsaction 'gna.fu' for modified
+        // clicks. Unmodified clicks are left to the browser.
+        //
+        // In order to set up the event contract to handle both clickonly and
+        // clickmod, only addEvent(EventType.CLICK) is necessary.
+        //
+        // In order to set up the event contract to handle click,
+        // addEvent() is necessary for CLICK, KEYDOWN, and KEYPRESS event types.  If
+        // a11y click support is enabled, addEvent() will set up the appropriate key
+        // event handler automatically.
+        if (getEventType(eventInfo) === EventType.CLICK &&
+            isModifiedClickEvent(getEvent(eventInfo))) {
+            setEventType(eventInfo, EventType.CLICKMOD);
+        }
+        else if (this.a11yClickSupport) {
+            this.updateEventInfoForA11yClick(eventInfo);
+        }
+    }
+    resolveAction(eventInfo) {
+        if (getResolved(eventInfo)) {
+            return;
+        }
+        this.populateAction(eventInfo, getTargetElement(eventInfo));
+        setResolved(eventInfo, true);
+    }
+    resolveParentAction(eventInfo) {
+        const action = getAction(eventInfo);
+        const actionElement = action && getActionElement(action);
+        unsetAction(eventInfo);
+        const parentNode = actionElement && this.getParentNode(actionElement);
+        if (!parentNode) {
+            return;
+        }
+        this.populateAction(eventInfo, parentNode);
+    }
+    /**
+     * Searches for a jsaction that the DOM event maps to and creates an
+     * object containing event information used for dispatching by
+     * jsaction.Dispatcher. This method populates the `action` and `actionElement`
+     * fields of the EventInfo object passed in by finding the first
+     * jsaction attribute above the target Node of the event, and below
+     * the container Node, that specifies a jsaction for the event
+     * type. If no such jsaction is found, then action is undefined.
+     *
+     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
+     *    action is found on any `Element` in the path of the `Event`.
+     */
+    populateAction(eventInfo, currentTarget) {
+        let actionElement = currentTarget;
+        while (actionElement && actionElement !== getContainer(eventInfo)) {
+            if (actionElement.nodeType === Node.ELEMENT_NODE) {
+                this.populateActionOnElement(actionElement, eventInfo);
+            }
+            if (getAction(eventInfo)) {
+                // An event is handled by at most one jsaction. Thus we stop at the
+                // first matching jsaction specified in a jsaction attribute up the
+                // ancestor chain of the event target node.
+                break;
+            }
+            actionElement = this.getParentNode(actionElement);
+        }
+        const action = getAction(eventInfo);
+        if (!action) {
+            // No action found.
+            return;
+        }
+        if (this.a11yClickSupport) {
+            this.preventDefaultForA11yClick(eventInfo);
+        }
+        // We attempt to handle the mouseenter/mouseleave events here by
+        // detecting whether the mouseover/mouseout events correspond to
+        // entering/leaving an element.
+        if (this.syntheticMouseEventSupport) {
+            if (getEventType(eventInfo) === EventType.MOUSEENTER ||
+                getEventType(eventInfo) === EventType.MOUSELEAVE ||
+                getEventType(eventInfo) === EventType.POINTERENTER ||
+                getEventType(eventInfo) === EventType.POINTERLEAVE) {
+                // We attempt to handle the mouseenter/mouseleave events here by
+                // detecting whether the mouseover/mouseout events correspond to
+                // entering/leaving an element.
+                if (isMouseSpecialEvent(getEvent(eventInfo), getEventType(eventInfo), getActionElement(action))) {
+                    // If both mouseover/mouseout and mouseenter/mouseleave events are
+                    // enabled, two separate handlers for mouseover/mouseout are
+                    // registered. Both handlers will see the same event instance
+                    // so we create a copy to avoid interfering with the dispatching of
+                    // the mouseover/mouseout event.
+                    const copiedEvent = createMouseSpecialEvent(getEvent(eventInfo), getActionElement(action));
+                    setEvent(eventInfo, copiedEvent);
+                    // Since the mouseenter/mouseleave events do not bubble, the target
+                    // of the event is technically the `actionElement` (the node with the
+                    // `jsaction` attribute)
+                    setTargetElement(eventInfo, getActionElement(action));
+                }
+                else {
+                    unsetAction(eventInfo);
+                }
+            }
+        }
+    }
+    /**
+     * Walk to the parent node, unless the node has a different owner in
+     * which case we walk to the owner. Attempt to walk to host of a
+     * shadow root if needed.
+     */
+    getParentNode(element) {
+        const owner = element[OWNER];
+        if (owner) {
+            return owner;
+        }
+        const parentNode = element.parentNode;
+        if (parentNode?.nodeName === '#document-fragment') {
+            return parentNode?.host ?? null;
+        }
+        return parentNode;
+    }
+    /**
+     * Accesses the jsaction map on a node and retrieves the name of the
+     * action the given event is mapped to, if any. It parses the
+     * attribute value and stores it in a property on the node for
+     * subsequent retrieval without re-parsing and re-accessing the
+     * attribute.
+     *
+     * @param actionElement The DOM node to retrieve the jsaction map from.
+     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
+     *    action is found on the `actionElement`.
+     */
+    populateActionOnElement(actionElement, eventInfo) {
+        const actionMap = this.parseActions(actionElement);
+        const actionName = actionMap[getEventType(eventInfo)];
+        if (actionName !== undefined) {
+            setAction(eventInfo, actionName, actionElement);
+        }
+        if (this.a11yClickSupport) {
+            this.populateClickOnlyAction(actionElement, eventInfo, actionMap);
+        }
+    }
+    /**
+     * Parses and caches an element's jsaction element into a map.
+     *
+     * This is primarily for internal use.
+     *
+     * @param actionElement The DOM node to retrieve the jsaction map from.
+     * @return Map from event to qualified name of the jsaction bound to it.
+     */
+    parseActions(actionElement) {
+        let actionMap = get(actionElement);
+        if (!actionMap) {
+            const jsactionAttribute = actionElement.getAttribute(Attribute.JSACTION);
+            if (!jsactionAttribute) {
+                actionMap = EMPTY_ACTION_MAP;
+                set(actionElement, actionMap);
+            }
+            else {
+                actionMap = getParsed(jsactionAttribute);
+                if (!actionMap) {
+                    actionMap = {};
+                    const values = jsactionAttribute.split(REGEXP_SEMICOLON);
+                    for (let idx = 0; idx < values.length; idx++) {
+                        const value = values[idx];
+                        if (!value) {
+                            continue;
+                        }
+                        const colon = value.indexOf(Char.EVENT_ACTION_SEPARATOR);
+                        const hasColon = colon !== -1;
+                        const type = hasColon ? value.substr(0, colon).trim() : DEFAULT_EVENT_TYPE;
+                        const action = hasColon ? value.substr(colon + 1).trim() : value;
+                        actionMap[type] = action;
+                    }
+                    setParsed(jsactionAttribute, actionMap);
+                }
+                set(actionElement, actionMap);
+            }
+        }
+        return actionMap;
+    }
+    addA11yClickSupport(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction) {
+        this.a11yClickSupport = true;
+        this.updateEventInfoForA11yClick = updateEventInfoForA11yClick;
+        this.preventDefaultForA11yClick = preventDefaultForA11yClick;
+        this.populateClickOnlyAction = populateClickOnlyAction;
+    }
+}
+
+/**
+ * @fileoverview An enum to control who can call certain jsaction APIs.
+ */
+var Restriction;
+(function (Restriction) {
+    Restriction[Restriction["I_AM_THE_JSACTION_FRAMEWORK"] = 0] = "I_AM_THE_JSACTION_FRAMEWORK";
+})(Restriction || (Restriction = {}));
+
+/**
  * Receives a DOM event, determines the jsaction associated with the source
  * element of the DOM event, and invokes the handler associated with the
  * jsaction.
@@ -1130,12 +1611,12 @@ const testing = {
 class Dispatcher {
     /**
      * Options are:
-     *   1. `eventReplayer`: When the event contract dispatches replay events
+     *   - `eventReplayer`: When the event contract dispatches replay events
      *      to the Dispatcher, the Dispatcher collects them and in the next tick
-     *      dispatches them to the `eventReplayer`.
+     *      dispatches them to the `eventReplayer`. Defaults to dispatching to `dispatchDelegate`.
      * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
      */
-    constructor(dispatchDelegate, { actionResolver = undefined, eventReplayer = undefined, } = {}) {
+    constructor(dispatchDelegate, { actionResolver, eventReplayer, } = {}) {
         this.dispatchDelegate = dispatchDelegate;
         /** Whether the event replay is scheduled. */
         this.eventReplayScheduled = false;
@@ -1166,15 +1647,13 @@ class Dispatcher {
      */
     dispatch(eventInfo) {
         const eventInfoWrapper = new EventInfoWrapper(eventInfo);
-        this.actionResolver?.resolve(eventInfo);
+        this.actionResolver?.resolveEventType(eventInfo);
+        this.actionResolver?.resolveAction(eventInfo);
         const action = eventInfoWrapper.getAction();
         if (action && shouldPreventDefaultBeforeDispatching(action.element, eventInfoWrapper)) {
             preventDefault(eventInfoWrapper.getEvent());
         }
-        if (eventInfoWrapper.getIsReplay()) {
-            if (!this.eventReplayer) {
-                return;
-            }
+        if (this.eventReplayer && eventInfoWrapper.getIsReplay()) {
             this.scheduleEventInfoWrapperReplay(eventInfoWrapper);
             return;
         }
@@ -1187,7 +1666,7 @@ class Dispatcher {
      */
     scheduleEventInfoWrapperReplay(eventInfoWrapper) {
         this.replayEventInfoWrappers.push(eventInfoWrapper);
-        if (this.eventReplayScheduled || !this.eventReplayer) {
+        if (this.eventReplayScheduled) {
             return;
         }
         this.eventReplayScheduled = true;
@@ -1197,26 +1676,16 @@ class Dispatcher {
         });
     }
 }
-/** Stop propagation for an `EventInfo`. */
-function stopPropagation(eventInfoWrapper) {
-    if (isGecko &&
-        (eventInfoWrapper.getTargetElement().tagName === 'INPUT' ||
-            eventInfoWrapper.getTargetElement().tagName === 'TEXTAREA') &&
-        eventInfoWrapper.getEventType() === EventType.FOCUS) {
-        /**
-         * Do nothing since stopping propagation on a focus event on an input
-         * element in Firefox makes the text cursor disappear:
-         * https://bugzilla.mozilla.org/show_bug.cgi?id=509684
-         */
-        return;
-    }
-    const event = eventInfoWrapper.getEvent();
-    // There are some cases where users of the `Dispatcher` will call dispatch
-    // with a fake event that does not support `stopPropagation`.
-    if (!event.stopPropagation) {
-        return;
-    }
-    event.stopPropagation();
+/**
+ * Creates an `EventReplayer` that calls the `replay` function for every `eventInfoWrapper` in
+ * the queue.
+ */
+function createEventReplayer(replay) {
+    return (eventInfoWrappers) => {
+        for (const eventInfoWrapper of eventInfoWrappers) {
+            replay(eventInfoWrapper);
+        }
+    };
 }
 /**
  * Returns true if the default action of this event should be prevented before
@@ -1227,8 +1696,127 @@ function shouldPreventDefaultBeforeDispatching(actionElement, eventInfoWrapper) 
     // and we are dispatching the action now. Note that the targetElement may be
     // a child of an anchor that has a jsaction attached. For that reason, we
     // need to check the actionElement rather than the targetElement.
-    return ((actionElement.tagName === 'A' && eventInfoWrapper.getEventType() === EventType.CLICK) ||
-        eventInfoWrapper.getEventType() === EventType.CLICKMOD);
+    return (actionElement.tagName === 'A' &&
+        (eventInfoWrapper.getEventType() === EventType.CLICK ||
+            eventInfoWrapper.getEventType() === EventType.CLICKMOD));
+}
+/**
+ * Registers deferred functionality for an EventContract and a Jsaction
+ * Dispatcher.
+ */
+function registerDispatcher$1(eventContract, dispatcher) {
+    eventContract.ecrd((eventInfo) => {
+        dispatcher.dispatch(eventInfo);
+    }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
+}
+
+/** An internal symbol used to indicate whether propagation should be stopped or not. */
+const PROPAGATION_STOPPED_SYMBOL = Symbol.for('propagationStopped');
+/** Extra event phases beyond what the browser provides. */
+const EventPhase = {
+    REPLAY: 101,
+};
+const PREVENT_DEFAULT_ERROR_MESSAGE_DETAILS = ' Because event replay occurs after browser dispatch, `preventDefault` would have no ' +
+    'effect. You can check whether an event is being replayed by accessing the event phase: ' +
+    '`event.eventPhase === EventPhase.REPLAY`.';
+const PREVENT_DEFAULT_ERROR_MESSAGE = `\`preventDefault\` called during event replay.`;
+const COMPOSED_PATH_ERROR_MESSAGE_DETAILS = ' Because event replay occurs after browser ' +
+    'dispatch, `composedPath()` will be empty. Iterate parent nodes from `event.target` or ' +
+    '`event.currentTarget` if you need to check elements in the event path.';
+const COMPOSED_PATH_ERROR_MESSAGE = `\`composedPath\` called during event replay.`;
+/**
+ * A dispatcher that uses browser-based `Event` semantics, for example bubbling, `stopPropagation`,
+ * `currentTarget`, etc.
+ */
+class EventDispatcher {
+    constructor(dispatchDelegate) {
+        this.dispatchDelegate = dispatchDelegate;
+        this.actionResolver = new ActionResolver();
+        this.dispatcher = new Dispatcher((eventInfoWrapper) => {
+            this.dispatchToDelegate(eventInfoWrapper);
+        }, {
+            actionResolver: this.actionResolver,
+        });
+    }
+    /**
+     * The entrypoint for the `EventContract` dispatch.
+     */
+    dispatch(eventInfo) {
+        this.dispatcher.dispatch(eventInfo);
+    }
+    /** Internal method that does basic disaptching. */
+    dispatchToDelegate(eventInfoWrapper) {
+        if (eventInfoWrapper.getIsReplay()) {
+            prepareEventForReplay(eventInfoWrapper);
+        }
+        prepareEventForBubbling(eventInfoWrapper);
+        while (eventInfoWrapper.getAction()) {
+            prepareEventForDispatch(eventInfoWrapper);
+            this.dispatchDelegate(eventInfoWrapper.getEvent(), eventInfoWrapper.getAction().name);
+            if (propagationStopped(eventInfoWrapper)) {
+                return;
+            }
+            this.actionResolver.resolveParentAction(eventInfoWrapper.eventInfo);
+        }
+    }
+}
+function prepareEventForBubbling(eventInfoWrapper) {
+    const event = eventInfoWrapper.getEvent();
+    const stopPropagation = () => {
+        event[PROPAGATION_STOPPED_SYMBOL] = true;
+    };
+    patchEventInstance(event, 'stopPropagation', stopPropagation);
+    patchEventInstance(event, 'stopImmediatePropagation', stopPropagation);
+}
+function propagationStopped(eventInfoWrapper) {
+    const event = eventInfoWrapper.getEvent();
+    return !!event[PROPAGATION_STOPPED_SYMBOL];
+}
+function prepareEventForReplay(eventInfoWrapper) {
+    const event = eventInfoWrapper.getEvent();
+    const target = eventInfoWrapper.getTargetElement();
+    patchEventInstance(event, 'target', target);
+    patchEventInstance(event, 'eventPhase', EventPhase.REPLAY);
+    patchEventInstance(event, 'preventDefault', () => {
+        throw new Error(PREVENT_DEFAULT_ERROR_MESSAGE + (ngDevMode ? PREVENT_DEFAULT_ERROR_MESSAGE_DETAILS : ''));
+    });
+    patchEventInstance(event, 'composedPath', () => {
+        throw new Error(COMPOSED_PATH_ERROR_MESSAGE + (ngDevMode ? COMPOSED_PATH_ERROR_MESSAGE_DETAILS : ''));
+    });
+}
+function prepareEventForDispatch(eventInfoWrapper) {
+    const event = eventInfoWrapper.getEvent();
+    const currentTarget = eventInfoWrapper.getAction()?.element;
+    if (currentTarget) {
+        patchEventInstance(event, 'currentTarget', currentTarget, {
+            // `currentTarget` is going to get reassigned every dispatch.
+            configurable: true,
+        });
+    }
+}
+/**
+ * Patch `Event` instance during non-standard `Event` dispatch. This patches just the `Event`
+ * instance that the browser created, it does not patch global properties or methods.
+ *
+ * This is necessary because dispatching an `Event` outside of browser dispatch results in
+ * incorrect properties and methods that need to be polyfilled or do not work.
+ *
+ * JSAction dispatch adds two extra "phases" to event dispatch:
+ * 1. Event delegation - the event is being dispatched by a delegating event handler on a container
+ *    (typically `window.document.documentElement`), to a delegated event handler on some child
+ *    element. Certain `Event` properties will be unintuitive, such as `currentTarget`, which would
+ *    be the container rather than the child element. Bubbling would also not work. In order to
+ *    emulate the browser, these properties and methods on the `Event` are patched.
+ * 2. Event replay - the event is being dispatched by the framework once the handlers have been
+ *    loaded (during hydration, or late-loaded). Certain `Event` properties can be unset by the
+ *    browser because the `Event` is no longer actively being dispatched, such as `target`. Other
+ *    methods have no effect because the `Event` has already been dispatched, such as
+ *    `preventDefault`. Bubbling would also not work. These properties and methods are patched,
+ *    either to fill in information that the browser may have removed, or to throw errors in methods
+ *    that no longer behave as expected.
+ */
+function patchEventInstance(event, property, value, { configurable = false } = {}) {
+    Object.defineProperty(event, property, { value, configurable });
 }
 /**
  * Registers deferred functionality for an EventContract and a Jsaction
@@ -1340,422 +1928,6 @@ function populateClickOnlyAction(actionElement, eventInfo, actionMap) {
 }
 
 /**
- * The jsaction attribute defines a mapping of a DOM event to a
- * generic event (aka jsaction), to which the actual event handlers
- * that implement the behavior of the application are bound. The
- * value is a semicolon separated list of colon separated pairs of
- * an optional DOM event name and a jsaction name. If the optional
- * DOM event name is omitted, 'click' is assumed. The jsaction names
- * are dot separated pairs of a namespace and a simple jsaction
- * name. If the namespace is absent, it is taken from the closest
- * ancestor element with a jsnamespace attribute, if there is
- * any. If there is no ancestor with a jsnamespace attribute, the
- * simple name is assumed to be the jsaction name.
- *
- * Used by EventContract.
- */
-const JSACTION$1 = 'jsaction';
-/**
- * The jsnamespace attribute provides the namespace part of the
- * jaction names occurring in the jsaction attribute where it's
- * missing.
- *
- * Used by EventContract.
- */
-const JSNAMESPACE$1 = 'jsnamespace';
-/**
- * The oi attribute is a log impression tag for impression logging
- * and action tracking. For an element that carries a jsaction
- * attribute, the element is identified for the purpose of
- * impression logging and click tracking by the dot separated path
- * of all oi attributes in the chain of ancestors of the element.
- *
- * Used by ActionFlow.
- */
-const OI$1 = 'oi';
-/**
- * The ved attribute is an encoded ClickTrackingCGI proto to track
- * visual elements.
- *
- * Used by ActionFlow.
- */
-const VED = 'ved';
-/**
- * The vet attribute is the visual element type used to identify tracked
- * visual elements.
- */
-const VET = 'vet';
-/**
- * Support for iteration on reprocessing.
- *
- * Used by ActionFlow.
- */
-const JSINSTANCE = 'jsinstance';
-/**
- * All click jsactions that happen on the element that carries this
- * attribute or its descendants are automatically logged.
- * Impressions of jsactions on these elements are tracked too, if
- * requested by the impression() method of ActionFlow.
- *
- * Used by ActionFlow.
- */
-const JSTRACK = 'jstrack';
-const Attribute = { JSACTION: JSACTION$1, JSNAMESPACE: JSNAMESPACE$1, OI: OI$1, VED, VET, JSINSTANCE, JSTRACK };
-
-const Char = {
-    /**
-     * The separator between the namespace and the action name in the
-     * jsaction attribute value.
-     */
-    NAMESPACE_ACTION_SEPARATOR: '.',
-    /**
-     * The separator between the event name and action in the jsaction
-     * attribute value.
-     */
-    EVENT_ACTION_SEPARATOR: ':',
-    /**
-     * The separator between the logged oi attribute values in the &oi=
-     * URL parameter value.
-     */
-    OI_SEPARATOR: '.',
-    /**
-     * The separator between the key and the value pairs in the &cad=
-     * URL parameter value.
-     */
-    CAD_KEY_VALUE_SEPARATOR: ':',
-    /**
-     * The separator between the key-value pairs in the &cad= URL
-     * parameter value.
-     */
-    CAD_SEPARATOR: ',',
-};
-
-/**
- * The parsed value of the jsaction attribute is stored in this
- * property on the DOM node. The parsed value is an Object. The
- * property names of the object are the events; the values are the
- * names of the actions. This property is attached even on nodes
- * that don't have a jsaction attribute as an optimization, because
- * property lookup is faster than attribute access.
- */
-const JSACTION = '__jsaction';
-/**
- * The parsed value of the jsnamespace attribute is stored in this
- * property on the DOM node.
- */
-const JSNAMESPACE = '__jsnamespace';
-/** The value of the oi attribute as a property, for faster access. */
-const OI = '__oi';
-/**
- * The owner property references an a logical owner for a DOM node. JSAction
- * will follow this reference instead of parentNode when traversing the DOM
- * to find jsaction attributes. This allows overlaying a logical structure
- * over a document where the DOM structure can't reflect that structure.
- */
-const OWNER = '__owner';
-/** All properties that are used by jsaction. */
-const Property = {
-    JSACTION,
-    JSNAMESPACE,
-    OI,
-    OWNER,
-};
-
-/**
- * Map from jsaction annotation to a parsed map from event name to action name.
- */
-const parseCache = {};
-/**
- * Reads the jsaction parser cache from the given DOM Element.
- *
- * @param element .
- * @return Map from event to qualified name of the jsaction bound to it.
- */
-function get(element) {
-    // @ts-ignore
-    return element[JSACTION];
-}
-/**
- * Writes the jsaction parser cache to the given DOM Element.
- *
- * @param element .
- * @param actionMap Map from event to qualified name of the jsaction bound to
- *     it.
- */
-function set(element, actionMap) {
-    // @ts-ignore
-    element[JSACTION] = actionMap;
-}
-/**
- * Looks up the parsed action map from the source jsaction attribute value.
- *
- * @param text Unparsed jsaction attribute value.
- * @return Parsed jsaction attribute value, if already present in the cache.
- */
-function getParsed(text) {
-    return parseCache[text];
-}
-/**
- * Inserts the parse result for the given source jsaction value into the cache.
- *
- * @param text Unparsed jsaction attribute value.
- * @param parsed Attribute value parsed into the action map.
- */
-function setParsed(text, parsed) {
-    parseCache[text] = parsed;
-}
-/**
- * Clears the jsaction parser cache from the given DOM Element.
- *
- * @param element .
- */
-function clear(element) {
-    if (JSACTION in element) {
-        delete element[JSACTION];
-    }
-}
-/**
- * Reads the cached jsaction namespace from the given DOM
- * Element. Undefined means there is no cached value; null is a cached
- * jsnamespace attribute that's absent.
- *
- * @param element .
- * @return .
- */
-function getNamespace(element) {
-    // @ts-ignore
-    return element[JSNAMESPACE];
-}
-/**
- * Writes the cached jsaction namespace to the given DOM Element. Null
- * represents a jsnamespace attribute that's absent.
- *
- * @param element .
- * @param jsnamespace .
- */
-function setNamespace(element, jsnamespace) {
-    // @ts-ignore
-    element[JSNAMESPACE] = jsnamespace;
-}
-/**
- * Clears the cached jsaction namespace from the given DOM Element.
- *
- * @param element .
- */
-function clearNamespace(element) {
-    if (JSNAMESPACE in element) {
-        delete element[JSNAMESPACE];
-    }
-}
-
-/**
- * Since maps from event to action are immutable we can use a single map
- * to represent the empty map.
- */
-const EMPTY_ACTION_MAP = {};
-/**
- * This regular expression matches a semicolon.
- */
-const REGEXP_SEMICOLON = /\s*;\s*/;
-/** If no event type is defined, defaults to `click`. */
-const DEFAULT_EVENT_TYPE = EventType.CLICK;
-/** Resolves actions for Events. */
-class ActionResolver {
-    constructor({ syntheticMouseEventSupport = false, } = {}) {
-        this.a11yClickSupport = false;
-        this.updateEventInfoForA11yClick = undefined;
-        this.preventDefaultForA11yClick = undefined;
-        this.populateClickOnlyAction = undefined;
-        this.syntheticMouseEventSupport = syntheticMouseEventSupport;
-    }
-    resolve(eventInfo) {
-        this.populateAction(eventInfo);
-    }
-    /**
-     * Searches for a jsaction that the DOM event maps to and creates an
-     * object containing event information used for dispatching by
-     * jsaction.Dispatcher. This method populates the `action` and `actionElement`
-     * fields of the EventInfo object passed in by finding the first
-     * jsaction attribute above the target Node of the event, and below
-     * the container Node, that specifies a jsaction for the event
-     * type. If no such jsaction is found, then action is undefined.
-     *
-     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
-     *    action is found on any `Element` in the path of the `Event`.
-     */
-    populateAction(eventInfo) {
-        // We distinguish modified and plain clicks in order to support the
-        // default browser behavior of modified clicks on links; usually to
-        // open the URL of the link in new tab or new window on ctrl/cmd
-        // click. A DOM 'click' event is mapped to the jsaction 'click'
-        // event iff there is no modifier present on the event. If there is
-        // a modifier, it's mapped to 'clickmod' instead.
-        //
-        // It's allowed to omit the event in the jsaction attribute. In that
-        // case, 'click' is assumed. Thus the following two are equivalent:
-        //
-        //   <a href="someurl" jsaction="gna.fu">
-        //   <a href="someurl" jsaction="click:gna.fu">
-        //
-        // For unmodified clicks, EventContract invokes the jsaction
-        // 'gna.fu'. For modified clicks, EventContract won't find a
-        // suitable action and leave the event to be handled by the
-        // browser.
-        //
-        // In order to also invoke a jsaction handler for a modifier click,
-        // 'clickmod' needs to be used:
-        //
-        //   <a href="someurl" jsaction="clickmod:gna.fu">
-        //
-        // EventContract invokes the jsaction 'gna.fu' for modified
-        // clicks. Unmodified clicks are left to the browser.
-        //
-        // In order to set up the event contract to handle both clickonly and
-        // clickmod, only addEvent(EventType.CLICK) is necessary.
-        //
-        // In order to set up the event contract to handle click,
-        // addEvent() is necessary for CLICK, KEYDOWN, and KEYPRESS event types.  If
-        // a11y click support is enabled, addEvent() will set up the appropriate key
-        // event handler automatically.
-        if (getEventType(eventInfo) === EventType.CLICK &&
-            isModifiedClickEvent(getEvent(eventInfo))) {
-            setEventType(eventInfo, EventType.CLICKMOD);
-        }
-        else if (this.a11yClickSupport) {
-            this.updateEventInfoForA11yClick(eventInfo);
-        }
-        // Walk to the parent node, unless the node has a different owner in
-        // which case we walk to the owner. Attempt to walk to host of a
-        // shadow root if needed.
-        let actionElement = getTargetElement(eventInfo);
-        while (actionElement && actionElement !== getContainer(eventInfo)) {
-            if (actionElement.nodeType === Node.ELEMENT_NODE) {
-                this.populateActionOnElement(actionElement, eventInfo);
-            }
-            if (getAction(eventInfo)) {
-                // An event is handled by at most one jsaction. Thus we stop at the
-                // first matching jsaction specified in a jsaction attribute up the
-                // ancestor chain of the event target node.
-                break;
-            }
-            if (actionElement[OWNER]) {
-                actionElement = actionElement[OWNER];
-                continue;
-            }
-            if (actionElement.parentNode?.nodeName !== '#document-fragment') {
-                actionElement = actionElement.parentNode;
-            }
-            else {
-                actionElement = actionElement.parentNode?.host ?? null;
-            }
-        }
-        const action = getAction(eventInfo);
-        if (!action) {
-            // No action found.
-            return;
-        }
-        if (this.a11yClickSupport) {
-            this.preventDefaultForA11yClick(eventInfo);
-        }
-        // We attempt to handle the mouseenter/mouseleave events here by
-        // detecting whether the mouseover/mouseout events correspond to
-        // entering/leaving an element.
-        if (this.syntheticMouseEventSupport) {
-            if (getEventType(eventInfo) === EventType.MOUSEENTER ||
-                getEventType(eventInfo) === EventType.MOUSELEAVE ||
-                getEventType(eventInfo) === EventType.POINTERENTER ||
-                getEventType(eventInfo) === EventType.POINTERLEAVE) {
-                // We attempt to handle the mouseenter/mouseleave events here by
-                // detecting whether the mouseover/mouseout events correspond to
-                // entering/leaving an element.
-                if (isMouseSpecialEvent(getEvent(eventInfo), getEventType(eventInfo), getActionElement(action))) {
-                    // If both mouseover/mouseout and mouseenter/mouseleave events are
-                    // enabled, two separate handlers for mouseover/mouseout are
-                    // registered. Both handlers will see the same event instance
-                    // so we create a copy to avoid interfering with the dispatching of
-                    // the mouseover/mouseout event.
-                    const copiedEvent = createMouseSpecialEvent(getEvent(eventInfo), getActionElement(action));
-                    setEvent(eventInfo, copiedEvent);
-                    // Since the mouseenter/mouseleave events do not bubble, the target
-                    // of the event is technically the `actionElement` (the node with the
-                    // `jsaction` attribute)
-                    setTargetElement(eventInfo, getActionElement(action));
-                }
-                else {
-                    unsetAction(eventInfo);
-                }
-            }
-        }
-    }
-    /**
-     * Accesses the jsaction map on a node and retrieves the name of the
-     * action the given event is mapped to, if any. It parses the
-     * attribute value and stores it in a property on the node for
-     * subsequent retrieval without re-parsing and re-accessing the
-     * attribute.
-     *
-     * @param actionElement The DOM node to retrieve the jsaction map from.
-     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
-     *    action is found on the `actionElement`.
-     */
-    populateActionOnElement(actionElement, eventInfo) {
-        const actionMap = this.parseActions(actionElement);
-        const actionName = actionMap[getEventType(eventInfo)];
-        if (actionName !== undefined) {
-            setAction(eventInfo, actionName, actionElement);
-        }
-        if (this.a11yClickSupport) {
-            this.populateClickOnlyAction(actionElement, eventInfo, actionMap);
-        }
-    }
-    /**
-     * Parses and caches an element's jsaction element into a map.
-     *
-     * This is primarily for internal use.
-     *
-     * @param actionElement The DOM node to retrieve the jsaction map from.
-     * @return Map from event to qualified name of the jsaction bound to it.
-     */
-    parseActions(actionElement) {
-        let actionMap = get(actionElement);
-        if (!actionMap) {
-            const jsactionAttribute = actionElement.getAttribute(Attribute.JSACTION);
-            if (!jsactionAttribute) {
-                actionMap = EMPTY_ACTION_MAP;
-                set(actionElement, actionMap);
-            }
-            else {
-                actionMap = getParsed(jsactionAttribute);
-                if (!actionMap) {
-                    actionMap = {};
-                    const values = jsactionAttribute.split(REGEXP_SEMICOLON);
-                    for (let idx = 0; idx < values.length; idx++) {
-                        const value = values[idx];
-                        if (!value) {
-                            continue;
-                        }
-                        const colon = value.indexOf(Char.EVENT_ACTION_SEPARATOR);
-                        const hasColon = colon !== -1;
-                        const type = hasColon ? value.substr(0, colon).trim() : DEFAULT_EVENT_TYPE;
-                        const action = hasColon ? value.substr(colon + 1).trim() : value;
-                        actionMap[type] = action;
-                    }
-                    setParsed(jsactionAttribute, actionMap);
-                }
-                set(actionElement, actionMap);
-            }
-        }
-        return actionMap;
-    }
-    addA11yClickSupport(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction) {
-        this.a11yClickSupport = true;
-        this.updateEventInfoForA11yClick = updateEventInfoForA11yClick;
-        this.preventDefaultForA11yClick = preventDefaultForA11yClick;
-        this.populateClickOnlyAction = populateClickOnlyAction;
-    }
-}
-
-/**
  * @define Support for accessible click actions.  This flag can be overridden in
  * a build rule.
  */
@@ -1863,7 +2035,8 @@ class EventContract {
             return;
         }
         if (this.useActionResolver) {
-            this.actionResolver.resolve(eventInfo);
+            this.actionResolver.resolveEventType(eventInfo);
+            this.actionResolver.resolveAction(eventInfo);
         }
         this.dispatcher(eventInfo);
     }
@@ -1884,11 +2057,7 @@ class EventContract {
         if (eventType in this.eventHandlers || !this.containerManager) {
             return;
         }
-        if (!EventContract.MOUSE_SPECIAL_SUPPORT &&
-            (eventType === EventType.MOUSEENTER ||
-                eventType === EventType.MOUSELEAVE ||
-                eventType === EventType.POINTERENTER ||
-                eventType === EventType.POINTERLEAVE)) {
+        if (!EventContract.MOUSE_SPECIAL_SUPPORT && NON_BUBBLING_MOUSE_EVENTS.indexOf(eventType) >= 0) {
             return;
         }
         const eventHandler = (eventType, event, container) => {
@@ -2100,5 +2269,5 @@ function bootstrapEarlyEventContract(field, container, appId, eventTypes, captur
         eventContract.addEvents(captureEventTypes, true);
 }
 
-export { Dispatcher, EventContract, EventContractContainer, EventInfoWrapper, bootstrapEarlyEventContract, registerDispatcher };
+export { Attribute, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, JSACTION$1 as JSACTION, JSINSTANCE, JSTRACK, OI$1 as OI, VED, VET, bootstrapEarlyEventContract, isCaptureEvent, isSupportedEvent, registerDispatcher };
 //# sourceMappingURL=event-dispatch.mjs.map
