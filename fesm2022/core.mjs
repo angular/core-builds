@@ -1,11 +1,11 @@
 /**
- * @license Angular v18.0.2+sha-5ec24c9
+ * @license Angular v18.0.2+sha-dbd0fa0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1 } from '@angular/core/primitives/signals';
-import { Subject, Subscription, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { map, first } from 'rxjs/operators';
 import * as Attributes from '@angular/core/primitives/event-dispatch';
 import { EventContract, EventContractContainer, EventDispatcher, registerDispatcher, isSupportedEvent, isCaptureEvent } from '@angular/core/primitives/event-dispatch';
@@ -6917,15 +6917,102 @@ function unwrapElementRef(value) {
     return value instanceof ElementRef ? value.nativeElement : value;
 }
 
+/**
+ * Internal implementation of the pending tasks service.
+ */
+class PendingTasks {
+    constructor() {
+        this.taskId = 0;
+        this.pendingTasks = new Set();
+        this.hasPendingTasks = new BehaviorSubject(false);
+    }
+    get _hasPendingTasks() {
+        return this.hasPendingTasks.value;
+    }
+    add() {
+        if (!this._hasPendingTasks) {
+            this.hasPendingTasks.next(true);
+        }
+        const taskId = this.taskId++;
+        this.pendingTasks.add(taskId);
+        return taskId;
+    }
+    remove(taskId) {
+        this.pendingTasks.delete(taskId);
+        if (this.pendingTasks.size === 0 && this._hasPendingTasks) {
+            this.hasPendingTasks.next(false);
+        }
+    }
+    ngOnDestroy() {
+        this.pendingTasks.clear();
+        if (this._hasPendingTasks) {
+            this.hasPendingTasks.next(false);
+        }
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: PendingTasks,
+        providedIn: 'root',
+        factory: () => new PendingTasks(),
+    }); }
+}
+/**
+ * Experimental service that keeps track of pending tasks contributing to the stableness of Angular
+ * application. While several existing Angular services (ex.: `HttpClient`) will internally manage
+ * tasks influencing stability, this API gives control over stability to library and application
+ * developers for specific cases not covered by Angular internals.
+ *
+ * The concept of stability comes into play in several important scenarios:
+ * - SSR process needs to wait for the application stability before serializing and sending rendered
+ * HTML;
+ * - tests might want to delay assertions until the application becomes stable;
+ *
+ * @usageNotes
+ * ```typescript
+ * const pendingTasks = inject(ExperimentalPendingTasks);
+ * const taskCleanup = pendingTasks.add();
+ * // do work that should block application's stability and then:
+ * taskCleanup();
+ * ```
+ *
+ * This API is experimental. Neither the shape, nor the underlying behavior is stable and can change
+ * in patch versions. We will iterate on the exact API based on the feedback and our understanding
+ * of the problem and solution space.
+ *
+ * @publicApi
+ * @experimental
+ */
+class ExperimentalPendingTasks {
+    constructor() {
+        this.internalPendingTasks = inject(PendingTasks);
+    }
+    /**
+     * Adds a new task that should block application's stability.
+     * @returns A cleanup function that removes a task when called.
+     */
+    add() {
+        const taskId = this.internalPendingTasks.add();
+        return () => this.internalPendingTasks.remove(taskId);
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: ExperimentalPendingTasks,
+        providedIn: 'root',
+        factory: () => new ExperimentalPendingTasks(),
+    }); }
+}
+
 class EventEmitter_ extends Subject {
     constructor(isAsync = false) {
         super();
         this.destroyRef = undefined;
+        this.pendingTasks = undefined;
         this.__isAsync = isAsync;
         // Attempt to retrieve a `DestroyRef` optionally.
         // For backwards compatibility reasons, this cannot be required
         if (isInInjectionContext()) {
             this.destroyRef = inject(DestroyRef, { optional: true }) ?? undefined;
+            this.pendingTasks = inject(PendingTasks);
         }
     }
     emit(value) {
@@ -6948,12 +7035,12 @@ class EventEmitter_ extends Subject {
             completeFn = observer.complete?.bind(observer);
         }
         if (this.__isAsync) {
-            errorFn = _wrapInTimeout(errorFn);
+            errorFn = this.wrapInTimeout(errorFn);
             if (nextFn) {
-                nextFn = _wrapInTimeout(nextFn);
+                nextFn = this.wrapInTimeout(nextFn);
             }
             if (completeFn) {
-                completeFn = _wrapInTimeout(completeFn);
+                completeFn = this.wrapInTimeout(completeFn);
             }
         }
         const sink = super.subscribe({ next: nextFn, error: errorFn, complete: completeFn });
@@ -6962,11 +7049,17 @@ class EventEmitter_ extends Subject {
         }
         return sink;
     }
-}
-function _wrapInTimeout(fn) {
-    return (value) => {
-        setTimeout(fn, undefined, value);
-    };
+    wrapInTimeout(fn) {
+        return (value) => {
+            const taskId = this.pendingTasks?.add();
+            setTimeout(() => {
+                fn(value);
+                if (taskId !== undefined) {
+                    this.pendingTasks?.remove(taskId);
+                }
+            });
+        };
+    }
 }
 /**
  * @publicApi
@@ -16962,7 +17055,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.2+sha-5ec24c9']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.2+sha-dbd0fa0']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19103,190 +19196,6 @@ class CachedInjectorService {
         factory: () => new CachedInjectorService(),
     }); }
 }
-
-/**
- * The name of a field that Angular monkey-patches onto a component
- * class to store a function that loads defer-loadable dependencies
- * and applies metadata to a class.
- */
-const ASYNC_COMPONENT_METADATA_FN = '__ngAsyncComponentMetadataFn__';
-/**
- * If a given component has unresolved async metadata - returns a reference
- * to a function that applies component metadata after resolving defer-loadable
- * dependencies. Otherwise - this function returns `null`.
- */
-function getAsyncClassMetadataFn(type) {
-    const componentClass = type; // cast to `any`, so that we can read a monkey-patched field
-    return componentClass[ASYNC_COMPONENT_METADATA_FN] ?? null;
-}
-/**
- * Handles the process of applying metadata info to a component class in case
- * component template has defer blocks (thus some dependencies became deferrable).
- *
- * @param type Component class where metadata should be added
- * @param dependencyLoaderFn Function that loads dependencies
- * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
- */
-function setClassMetadataAsync(type, dependencyLoaderFn, metadataSetterFn) {
-    const componentClass = type; // cast to `any`, so that we can monkey-patch it
-    componentClass[ASYNC_COMPONENT_METADATA_FN] = () => Promise.all(dependencyLoaderFn()).then((dependencies) => {
-        metadataSetterFn(...dependencies);
-        // Metadata is now set, reset field value to indicate that this component
-        // can by used/compiled synchronously.
-        componentClass[ASYNC_COMPONENT_METADATA_FN] = null;
-        return dependencies;
-    });
-    return componentClass[ASYNC_COMPONENT_METADATA_FN];
-}
-/**
- * Adds decorator, constructor, and property metadata to a given type via static metadata fields
- * on the type.
- *
- * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
- *
- * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
- * being tree-shaken away during production builds.
- */
-function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
-    return noSideEffects(() => {
-        const clazz = type;
-        if (decorators !== null) {
-            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
-                clazz.decorators.push(...decorators);
-            }
-            else {
-                clazz.decorators = decorators;
-            }
-        }
-        if (ctorParameters !== null) {
-            // Rather than merging, clobber the existing parameters. If other projects exist which
-            // use tsickle-style annotations and reflect over them in the same way, this could
-            // cause issues, but that is vanishingly unlikely.
-            clazz.ctorParameters = ctorParameters;
-        }
-        if (propDecorators !== null) {
-            // The property decorator objects are merged as it is possible different fields have
-            // different decorator types. Decorators on individual fields are not merged, as it's
-            // also incredibly unlikely that a field will be decorated both with an Angular
-            // decorator and a non-Angular decorator that's also been downleveled.
-            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
-                clazz.propDecorators = { ...clazz.propDecorators, ...propDecorators };
-            }
-            else {
-                clazz.propDecorators = propDecorators;
-            }
-        }
-    });
-}
-
-/*
- * This file exists to support compilation of @angular/core in Ivy mode.
- *
- * When the Angular compiler processes a compilation unit, it normally writes imports to
- * @angular/core. When compiling the core package itself this strategy isn't usable. Instead, the
- * compiler writes imports to this file.
- *
- * Only a subset of such imports are supported - core is not allowed to declare components or pipes.
- * A check in ngtsc's `R3SymbolsImportRewriter` validates this condition. The rewriter is only used
- * when compiling @angular/core and is responsible for translating an external name (prefixed with
- * ɵ) to the internal symbol name as exported below.
- *
- * The below symbols are used for @Injectable and @NgModule compilation.
- */
-/**
- * The existence of this constant (in this particular file) informs the Angular compiler that the
- * current program is actually @angular/core, which needs to be compiled specially.
- */
-const ITS_JUST_ANGULAR = true;
-
-/**
- * Internal implementation of the pending tasks service.
- */
-class PendingTasks {
-    constructor() {
-        this.taskId = 0;
-        this.pendingTasks = new Set();
-        this.hasPendingTasks = new BehaviorSubject(false);
-    }
-    get _hasPendingTasks() {
-        return this.hasPendingTasks.value;
-    }
-    add() {
-        if (!this._hasPendingTasks) {
-            this.hasPendingTasks.next(true);
-        }
-        const taskId = this.taskId++;
-        this.pendingTasks.add(taskId);
-        return taskId;
-    }
-    remove(taskId) {
-        this.pendingTasks.delete(taskId);
-        if (this.pendingTasks.size === 0 && this._hasPendingTasks) {
-            this.hasPendingTasks.next(false);
-        }
-    }
-    ngOnDestroy() {
-        this.pendingTasks.clear();
-        if (this._hasPendingTasks) {
-            this.hasPendingTasks.next(false);
-        }
-    }
-    static { this.ɵfac = function PendingTasks_Factory(t) { return new (t || PendingTasks)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PendingTasks, factory: PendingTasks.ɵfac, providedIn: 'root' }); }
-}
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PendingTasks, [{
-        type: Injectable,
-        args: [{
-                providedIn: 'root',
-            }]
-    }], null, null); })();
-/**
- * Experimental service that keeps track of pending tasks contributing to the stableness of Angular
- * application. While several existing Angular services (ex.: `HttpClient`) will internally manage
- * tasks influencing stability, this API gives control over stability to library and application
- * developers for specific cases not covered by Angular internals.
- *
- * The concept of stability comes into play in several important scenarios:
- * - SSR process needs to wait for the application stability before serializing and sending rendered
- * HTML;
- * - tests might want to delay assertions until the application becomes stable;
- *
- * @usageNotes
- * ```typescript
- * const pendingTasks = inject(ExperimentalPendingTasks);
- * const taskCleanup = pendingTasks.add();
- * // do work that should block application's stability and then:
- * taskCleanup();
- * ```
- *
- * This API is experimental. Neither the shape, nor the underlying behavior is stable and can change
- * in patch versions. We will iterate on the exact API based on the feedback and our understanding
- * of the problem and solution space.
- *
- * @publicApi
- * @experimental
- */
-class ExperimentalPendingTasks {
-    constructor() {
-        this.internalPendingTasks = inject(PendingTasks);
-    }
-    /**
-     * Adds a new task that should block application's stability.
-     * @returns A cleanup function that removes a task when called.
-     */
-    add() {
-        const taskId = this.internalPendingTasks.add();
-        return () => this.internalPendingTasks.remove(taskId);
-    }
-    static { this.ɵfac = function ExperimentalPendingTasks_Factory(t) { return new (t || ExperimentalPendingTasks)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ExperimentalPendingTasks, factory: ExperimentalPendingTasks.ɵfac, providedIn: 'root' }); }
-}
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ExperimentalPendingTasks, [{
-        type: Injectable,
-        args: [{
-                providedIn: 'root',
-            }]
-    }], null, null); })();
 
 function isIterable(obj) {
     return obj !== null && typeof obj === 'object' && obj[Symbol.iterator] !== undefined;
@@ -28915,6 +28824,81 @@ function maybeUnwrapModuleWithProviders(value) {
 }
 
 /**
+ * The name of a field that Angular monkey-patches onto a component
+ * class to store a function that loads defer-loadable dependencies
+ * and applies metadata to a class.
+ */
+const ASYNC_COMPONENT_METADATA_FN = '__ngAsyncComponentMetadataFn__';
+/**
+ * If a given component has unresolved async metadata - returns a reference
+ * to a function that applies component metadata after resolving defer-loadable
+ * dependencies. Otherwise - this function returns `null`.
+ */
+function getAsyncClassMetadataFn(type) {
+    const componentClass = type; // cast to `any`, so that we can read a monkey-patched field
+    return componentClass[ASYNC_COMPONENT_METADATA_FN] ?? null;
+}
+/**
+ * Handles the process of applying metadata info to a component class in case
+ * component template has defer blocks (thus some dependencies became deferrable).
+ *
+ * @param type Component class where metadata should be added
+ * @param dependencyLoaderFn Function that loads dependencies
+ * @param metadataSetterFn Function that forms a scope in which the `setClassMetadata` is invoked
+ */
+function setClassMetadataAsync(type, dependencyLoaderFn, metadataSetterFn) {
+    const componentClass = type; // cast to `any`, so that we can monkey-patch it
+    componentClass[ASYNC_COMPONENT_METADATA_FN] = () => Promise.all(dependencyLoaderFn()).then((dependencies) => {
+        metadataSetterFn(...dependencies);
+        // Metadata is now set, reset field value to indicate that this component
+        // can by used/compiled synchronously.
+        componentClass[ASYNC_COMPONENT_METADATA_FN] = null;
+        return dependencies;
+    });
+    return componentClass[ASYNC_COMPONENT_METADATA_FN];
+}
+/**
+ * Adds decorator, constructor, and property metadata to a given type via static metadata fields
+ * on the type.
+ *
+ * These metadata fields can later be read with Angular's `ReflectionCapabilities` API.
+ *
+ * Calls to `setClassMetadata` can be guarded by ngDevMode, resulting in the metadata assignments
+ * being tree-shaken away during production builds.
+ */
+function setClassMetadata(type, decorators, ctorParameters, propDecorators) {
+    return noSideEffects(() => {
+        const clazz = type;
+        if (decorators !== null) {
+            if (clazz.hasOwnProperty('decorators') && clazz.decorators !== undefined) {
+                clazz.decorators.push(...decorators);
+            }
+            else {
+                clazz.decorators = decorators;
+            }
+        }
+        if (ctorParameters !== null) {
+            // Rather than merging, clobber the existing parameters. If other projects exist which
+            // use tsickle-style annotations and reflect over them in the same way, this could
+            // cause issues, but that is vanishingly unlikely.
+            clazz.ctorParameters = ctorParameters;
+        }
+        if (propDecorators !== null) {
+            // The property decorator objects are merged as it is possible different fields have
+            // different decorator types. Decorators on individual fields are not merged, as it's
+            // also incredibly unlikely that a field will be decorated both with an Angular
+            // decorator and a non-Angular decorator that's also been downleveled.
+            if (clazz.hasOwnProperty('propDecorators') && clazz.propDecorators !== undefined) {
+                clazz.propDecorators = { ...clazz.propDecorators, ...propDecorators };
+            }
+            else {
+                clazz.propDecorators = propDecorators;
+            }
+        }
+    });
+}
+
+/**
  * Bindings for pure functions are stored after regular bindings.
  *
  * |-------decls------|---------vars---------|                 |----- hostVars (dir1) ------|
@@ -30871,7 +30855,27 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.2+sha-5ec24c9');
+const VERSION = new Version('18.0.2+sha-dbd0fa0');
+
+/*
+ * This file exists to support compilation of @angular/core in Ivy mode.
+ *
+ * When the Angular compiler processes a compilation unit, it normally writes imports to
+ * @angular/core. When compiling the core package itself this strategy isn't usable. Instead, the
+ * compiler writes imports to this file.
+ *
+ * Only a subset of such imports are supported - core is not allowed to declare components or pipes.
+ * A check in ngtsc's `R3SymbolsImportRewriter` validates this condition. The rewriter is only used
+ * when compiling @angular/core and is responsible for translating an external name (prefixed with
+ * ɵ) to the internal symbol name as exported below.
+ *
+ * The below symbols are used for @Injectable and @NgModule compilation.
+ */
+/**
+ * The existence of this constant (in this particular file) informs the Angular compiler that the
+ * current program is actually @angular/core, which needs to be compiled specially.
+ */
+const ITS_JUST_ANGULAR = true;
 
 class Console {
     log(message) {

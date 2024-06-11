@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.2+sha-5ec24c9
+ * @license Angular v18.0.2+sha-dbd0fa0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3963,8 +3963,8 @@ export declare class ExperimentalPendingTasks {
      * @returns A cleanup function that removes a task when called.
      */
     add(): () => void;
-    static ɵfac: i0.ɵɵFactoryDeclaration<ExperimentalPendingTasks, never>;
-    static ɵprov: i0.ɵɵInjectableDeclaration<ExperimentalPendingTasks>;
+    /** @nocollapse */
+    static ɵprov: unknown;
 }
 
 /**
@@ -13182,8 +13182,8 @@ export declare class ɵPendingTasks implements OnDestroy {
     add(): number;
     remove(taskId: number): void;
     ngOnDestroy(): void;
-    static ɵfac: i0.ɵɵFactoryDeclaration<ɵPendingTasks, never>;
-    static ɵprov: i0.ɵɵInjectableDeclaration<ɵPendingTasks>;
+    /** @nocollapse */
+    static ɵprov: unknown;
 }
 
 
