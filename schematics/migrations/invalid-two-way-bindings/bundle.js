@@ -4563,6 +4563,18 @@ var UnknownBlock = class {
     return visitor.visitUnknownBlock(this);
   }
 };
+var LetDeclaration = class {
+  constructor(name, value, sourceSpan, nameSpan, valueSpan) {
+    this.name = name;
+    this.value = value;
+    this.sourceSpan = sourceSpan;
+    this.nameSpan = nameSpan;
+    this.valueSpan = valueSpan;
+  }
+  visit(visitor) {
+    return visitor.visitLetDeclaration(this);
+  }
+};
 var Template = class {
   constructor(tagName, attributes, inputs, outputs, templateAttrs, children, references, variables, sourceSpan, startSourceSpan, endSourceSpan, i18n2) {
     this.tagName = tagName;
@@ -4702,6 +4714,8 @@ var RecursiveVisitor = class {
   visitDeferredTrigger(trigger) {
   }
   visitUnknownBlock(block) {
+  }
+  visitLetDeclaration(decl) {
   }
 };
 function visitAll(visitor, nodes) {
@@ -11024,6 +11038,18 @@ var BlockParameter = class {
     return visitor.visitBlockParameter(this, context);
   }
 };
+var LetDeclaration2 = class {
+  constructor(name, value, sourceSpan, nameSpan, valueSpan) {
+    this.name = name;
+    this.value = value;
+    this.sourceSpan = sourceSpan;
+    this.nameSpan = nameSpan;
+    this.valueSpan = valueSpan;
+  }
+  visit(visitor, context) {
+    return visitor.visitLetDeclaration(this, context);
+  }
+};
 function visitAll2(visitor, nodes, context = null) {
   const result = [];
   const visit = visitor.visit ? (ast) => visitor.visit(ast, context) || ast.visit(visitor, context) : (ast) => ast.visit(visitor, context);
@@ -11851,6 +11877,9 @@ var _I18nVisitor = class {
   }
   visitBlockParameter(_parameter, _context) {
     throw new Error("Unreachable code");
+  }
+  visitLetDeclaration(decl, context) {
+    return null;
   }
   _visitTextWithInterpolation(tokens, sourceSpan, context, previousI18n) {
     const nodes = [];
@@ -14123,6 +14152,7 @@ var _Tokenizer = class {
     this._preserveLineEndings = options.preserveLineEndings || false;
     this._i18nNormalizeLineEndingsInICUs = options.i18nNormalizeLineEndingsInICUs || false;
     this._tokenizeBlocks = (_a2 = options.tokenizeBlocks) != null ? _a2 : true;
+    this._tokenizeLet = options.tokenizeLet || false;
     try {
       this._cursor.init();
     } catch (e) {
@@ -14153,6 +14183,8 @@ var _Tokenizer = class {
           } else {
             this._consumeTagOpen(start);
           }
+        } else if (this._tokenizeLet && this._cursor.peek() === $AT && !this._inInterpolation && this._attemptStr("@let")) {
+          this._consumeLetDeclaration(start);
         } else if (this._tokenizeBlocks && this._attemptCharCode($AT)) {
           this._consumeBlockStart(start);
         } else if (this._tokenizeBlocks && !this._inInterpolation && !this._isInExpansionCase() && !this._isInExpansionForm() && this._attemptCharCode($RBRACE)) {
@@ -14164,7 +14196,7 @@ var _Tokenizer = class {
         this.handleError(e);
       }
     }
-    this._beginToken(29);
+    this._beginToken(33);
     this._endToken([]);
   }
   _getBlockName() {
@@ -14236,6 +14268,67 @@ var _Tokenizer = class {
       this._endToken([this._cursor.getChars(start)]);
       this._attemptCharCodeUntilFn(isBlockParameterChar);
     }
+  }
+  _consumeLetDeclaration(start) {
+    this._beginToken(29, start);
+    if (isWhitespace(this._cursor.peek())) {
+      this._attemptCharCodeUntilFn(isNotWhitespace);
+    } else {
+      const token = this._endToken([this._cursor.getChars(start)]);
+      token.type = 32;
+      return;
+    }
+    const startToken = this._endToken([this._getLetDeclarationName()]);
+    this._attemptCharCodeUntilFn(isNotWhitespace);
+    if (!this._attemptCharCode($EQ)) {
+      startToken.type = 32;
+      return;
+    }
+    this._attemptCharCodeUntilFn((code) => isNotWhitespace(code) && !isNewLine(code));
+    this._consumeLetDeclarationValue();
+    const endChar = this._cursor.peek();
+    if (endChar === $SEMICOLON) {
+      this._beginToken(31);
+      this._endToken([]);
+      this._cursor.advance();
+    } else {
+      startToken.type = 32;
+      startToken.sourceSpan = this._cursor.getSpan(start);
+    }
+  }
+  _getLetDeclarationName() {
+    const nameCursor = this._cursor.clone();
+    let allowDigit = false;
+    this._attemptCharCodeUntilFn((code) => {
+      if (isAsciiLetter(code) || code === $_ || allowDigit && isDigit(code)) {
+        allowDigit = true;
+        return false;
+      }
+      return true;
+    });
+    return this._cursor.getChars(nameCursor).trim();
+  }
+  _consumeLetDeclarationValue() {
+    const start = this._cursor.clone();
+    this._beginToken(30, start);
+    while (this._cursor.peek() !== $EOF) {
+      const char = this._cursor.peek();
+      if (char === $SEMICOLON) {
+        break;
+      }
+      if (isQuote(char)) {
+        this._cursor.advance();
+        this._attemptCharCodeUntilFn((inner) => {
+          if (inner === $BACKSLASH) {
+            this._cursor.advance();
+            return false;
+          }
+          return inner === char;
+        });
+      }
+      this._cursor.advance();
+    }
+    this._endToken([this._cursor.getChars(start)]);
   }
   _tokenizeExpansionForm() {
     if (this.isExpansionFormStart()) {
@@ -15023,7 +15116,7 @@ var _TreeBuilder = class {
     this._advance();
   }
   build() {
-    while (this._peek.type !== 29) {
+    while (this._peek.type !== 33) {
       if (this._peek.type === 0 || this._peek.type === 4) {
         this._consumeStartTag(this._advance());
       } else if (this._peek.type === 3) {
@@ -15048,6 +15141,12 @@ var _TreeBuilder = class {
       } else if (this._peek.type === 28) {
         this._closeVoidElement();
         this._consumeIncompleteBlock(this._advance());
+      } else if (this._peek.type === 29) {
+        this._closeVoidElement();
+        this._consumeLet(this._advance());
+      } else if (this._peek.type === 32) {
+        this._closeVoidElement();
+        this._consumeIncompleteLet(this._advance());
       } else {
         this._advance();
       }
@@ -15112,7 +15211,7 @@ var _TreeBuilder = class {
     if (!exp)
       return null;
     const end = this._advance();
-    exp.push({ type: 29, parts: [], sourceSpan: end.sourceSpan });
+    exp.push({ type: 33, parts: [], sourceSpan: end.sourceSpan });
     const expansionCaseParser = new _TreeBuilder(exp, this.getTagDefinition);
     expansionCaseParser.build();
     if (expansionCaseParser.errors.length > 0) {
@@ -15148,7 +15247,7 @@ var _TreeBuilder = class {
           return null;
         }
       }
-      if (this._peek.type === 29) {
+      if (this._peek.type === 33) {
         this.errors.push(TreeError.create(null, start.sourceSpan, `Invalid ICU message. Missing '}'.`));
         return null;
       }
@@ -15319,6 +15418,44 @@ var _TreeBuilder = class {
     this._pushContainer(block, false);
     this._popContainer(null, Block, null);
     this.errors.push(TreeError.create(token.parts[0], span, `Incomplete block "${token.parts[0]}". If you meant to write the @ character, you should use the "&#64;" HTML entity instead.`));
+  }
+  _consumeLet(startToken) {
+    const name = startToken.parts[0];
+    let valueToken;
+    let endToken;
+    if (this._peek.type !== 30) {
+      this.errors.push(TreeError.create(startToken.parts[0], startToken.sourceSpan, `Invalid @let declaration "${name}". Declaration must have a value.`));
+      return;
+    } else {
+      valueToken = this._advance();
+    }
+    if (this._peek.type !== 31) {
+      this.errors.push(TreeError.create(startToken.parts[0], startToken.sourceSpan, `Unterminated @let declaration "${name}". Declaration must be terminated with a semicolon.`));
+      return;
+    } else {
+      endToken = this._advance();
+    }
+    const end = endToken.sourceSpan.fullStart;
+    const span = new ParseSourceSpan(startToken.sourceSpan.start, end, startToken.sourceSpan.fullStart);
+    const startOffset = startToken.sourceSpan.toString().lastIndexOf(name);
+    const nameStart = startToken.sourceSpan.start.moveBy(startOffset);
+    const nameSpan = new ParseSourceSpan(nameStart, startToken.sourceSpan.end);
+    const node = new LetDeclaration2(name, valueToken.parts[0], span, nameSpan, valueToken.sourceSpan);
+    this._addToParent(node);
+  }
+  _consumeIncompleteLet(token) {
+    var _a2;
+    const name = (_a2 = token.parts[0]) != null ? _a2 : "";
+    const nameString = name ? ` "${name}"` : "";
+    if (name.length > 0) {
+      const startOffset = token.sourceSpan.toString().lastIndexOf(name);
+      const nameStart = token.sourceSpan.start.moveBy(startOffset);
+      const nameSpan = new ParseSourceSpan(nameStart, token.sourceSpan.end);
+      const valueSpan = new ParseSourceSpan(token.sourceSpan.start, token.sourceSpan.start.moveBy(0));
+      const node = new LetDeclaration2(name, "", token.sourceSpan, nameSpan, valueSpan);
+      this._addToParent(node);
+    }
+    this.errors.push(TreeError.create(token.parts[0], token.sourceSpan, `Incomplete @let declaration${nameString}. @let declarations must be written as \`@let <name> = <value>;\``));
   }
   _getContainer() {
     return this._containerStack.length > 0 ? this._containerStack[this._containerStack.length - 1] : null;
@@ -15491,6 +15628,9 @@ var I18nMetaVisitor = class {
   }
   visitBlockParameter(parameter, context) {
     return parameter;
+  }
+  visitLetDeclaration(decl, context) {
+    return decl;
   }
   _parseMetadata(meta) {
     return typeof meta === "string" ? parseI18nMeta(meta) : meta instanceof Message ? meta : {};
@@ -18256,7 +18396,7 @@ function optimizeTrackFns(job) {
   }
 }
 function isTrackByFunctionCall(rootView, expr) {
-  if (!(expr instanceof InvokeFunctionExpr) || expr.args.length !== 2) {
+  if (!(expr instanceof InvokeFunctionExpr) || expr.args.length === 0 || expr.args.length > 2) {
     return false;
   }
   if (!(expr.receiver instanceof ReadPropExpr && expr.receiver.receiver instanceof ContextExpr) || expr.receiver.receiver.view !== rootView) {
@@ -18265,6 +18405,8 @@ function isTrackByFunctionCall(rootView, expr) {
   const [arg0, arg1] = expr.args;
   if (!(arg0 instanceof ReadVarExpr) || arg0.name !== "$index") {
     return false;
+  } else if (expr.args.length === 1) {
+    return true;
   }
   if (!(arg1 instanceof ReadVarExpr) || arg1.name !== "$item") {
     return false;
@@ -18940,6 +19082,7 @@ function ingestNodes(unit, template2) {
       ingestIcu(unit, node);
     } else if (node instanceof ForLoopBlock) {
       ingestForBlock(unit, node);
+    } else if (node instanceof LetDeclaration) {
     } else {
       throw new Error(`Unsupported template node: ${node.constructor.name}`);
     }
@@ -19763,6 +19906,9 @@ var WhitespaceVisitor = class {
   }
   visitBlockParameter(parameter, context) {
     return parameter;
+  }
+  visitLetDeclaration(decl, context) {
+    return decl;
   }
 };
 function createWhitespaceProcessedTextToken({ type, parts, sourceSpan }) {
@@ -21113,6 +21259,13 @@ var HtmlAstToIvyAst = class {
     }
     return null;
   }
+  visitLetDeclaration(decl, context) {
+    const value = this.bindingParser.parseBinding(decl.value, false, decl.valueSpan, decl.valueSpan.start.offset);
+    if (value.errors.length === 0 && value.ast instanceof EmptyExpr) {
+      this.reportError("@let declaration value cannot be empty", decl.valueSpan);
+    }
+    return new LetDeclaration(decl.name, value, decl.sourceSpan, decl.nameSpan, decl.valueSpan);
+  }
   visitBlockParameter() {
     return null;
   }
@@ -21165,6 +21318,9 @@ var HtmlAstToIvyAst = class {
     const relatedBlocks = [];
     for (let i = primaryBlockIndex + 1; i < siblings.length; i++) {
       const node = siblings[i];
+      if (node instanceof Comment2) {
+        continue;
+      }
       if (node instanceof Text4 && node.value.trim().length === 0) {
         this.processedNodes.add(node);
         continue;
@@ -21376,6 +21532,9 @@ var NonBindableVisitor = class {
   visitBlockParameter(parameter, context) {
     return null;
   }
+  visitLetDeclaration(decl, context) {
+    return new Text(`@let ${decl.name} = ${decl.value};`, decl.sourceSpan);
+  }
 };
 var NON_BINDABLE_VISITOR = new NonBindableVisitor();
 function normalizeAttributeName(attrName) {
@@ -21395,7 +21554,7 @@ function textContents(node) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/template.mjs
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function parseTemplate(template2, templateUrl, options = {}) {
-  var _a2;
+  var _a2, _b2;
   const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat, allowInvalidAssignmentEvents } = options;
   const bindingParser = makeBindingParser(interpolationConfig, allowInvalidAssignmentEvents);
   const htmlParser = new HtmlParser();
@@ -21403,7 +21562,8 @@ function parseTemplate(template2, templateUrl, options = {}) {
     leadingTriviaChars: LEADING_TRIVIA_CHARS
   }, options), {
     tokenizeExpansionForms: true,
-    tokenizeBlocks: (_a2 = options.enableBlockSyntax) != null ? _a2 : true
+    tokenizeBlocks: (_a2 = options.enableBlockSyntax) != null ? _a2 : true,
+    tokenizeLet: (_b2 = options.enableLetSyntax) != null ? _b2 : false
   }));
   if (!options.alwaysAttemptHtmlToR3AstConversion && parseResult.errors && parseResult.errors.length > 0) {
     const parsedTemplate2 = {
@@ -21943,6 +22103,9 @@ var Scope2 = class {
   visitContent(content) {
     this.ingestScopedNode(content);
   }
+  visitLetDeclaration(decl) {
+    this.maybeDeclare(decl);
+  }
   visitBoundAttribute(attr) {
   }
   visitBoundEvent(event) {
@@ -22120,6 +22283,8 @@ var DirectiveBinder = class {
   }
   visitUnknownBlock(block) {
   }
+  visitLetDeclaration(decl) {
+  }
 };
 var TemplateBinder = class extends RecursiveAstVisitor {
   constructor(bindings, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, rootNode, level) {
@@ -22276,6 +22441,12 @@ var TemplateBinder = class extends RecursiveAstVisitor {
   visitBoundText(text2) {
     text2.value.visit(this);
   }
+  visitLetDeclaration(decl) {
+    decl.value.visit(this);
+    if (this.rootNode !== null) {
+      this.symbols.set(decl, this.rootNode);
+    }
+  }
   visitPipe(ast, context) {
     this.usedPipes.add(ast.name);
     if (!this.scope.isDeferred) {
@@ -22304,7 +22475,10 @@ var TemplateBinder = class extends RecursiveAstVisitor {
     if (!(ast.receiver instanceof ImplicitReceiver)) {
       return;
     }
-    let target = this.scope.lookup(name);
+    const target = this.scope.lookup(name);
+    if (target instanceof LetDeclaration && ast.receiver instanceof ThisReceiver) {
+      return;
+    }
     if (target !== null) {
       this.bindings.set(ast, target);
     }
@@ -23041,7 +23215,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.0+sha-1360110");
+var VERSION2 = new Version("18.1.0-next.1+sha-567c2f6");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

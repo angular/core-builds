@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.0+sha-1360110
+ * @license Angular v18.1.0-next.1+sha-567c2f6
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,6 +14,7 @@ import { SignalNode } from '@angular/core/primitives/signals';
 import { Subject } from 'rxjs';
 import { Subscribable } from 'rxjs';
 import { Subscription } from 'rxjs';
+import { ɵProfiler as ɵProfiler_2 } from '@angular/core';
 
 /**
  * @description
@@ -82,19 +83,105 @@ export declare interface AfterContentInit {
 }
 
 /**
- * Register a callback to be invoked the next time the application
- * finishes rendering.
+ * Register callbacks to be invoked the next time the application finishes rendering, during the
+ * specified phases. The available phases are:
+ * - `earlyRead`
+ *   Use this phase to **read** from the DOM before a subsequent `write` callback, for example to
+ *   perform custom layout that the browser doesn't natively support. Prefer the `read` phase if
+ *   reading can wait until after the write phase. **Never** write to the DOM in this phase.
+ * - `write`
+ *    Use this phase to **write** to the DOM. **Never** read from the DOM in this phase.
+ * - `mixedReadWrite`
+ *    Use this phase to read from and write to the DOM simultaneously. **Never** use this phase if
+ *    it is possible to divide the work among the other phases instead.
+ * - `read`
+ *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
  *
  * <div class="alert is-critical">
  *
- * You should always explicitly specify a non-default [phase](api/core/AfterRenderPhase), or you
- * risk significant performance degradation.
+ * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
+ * phases when possible, to avoid performance degradation.
+ *
+ * </div>
+ *
+ * Note that:
+ * - Callbacks run in the following phase order *once, after the next render*:
+ *   1. `earlyRead`
+ *   2. `write`
+ *   3. `mixedReadWrite`
+ *   4. `read`
+ * - Callbacks in the same phase run in the order they are registered.
+ * - Callbacks run on browser platforms only, they will not run on the server.
+ *
+ * The first phase callback to run as part of this spec will receive no parameters. Each
+ * subsequent phase callback in this spec will receive the return value of the previously run
+ * phase callback as a parameter. This can be used to coordinate work across multiple phases.
+ *
+ * Angular is unable to verify or enforce that phases are used correctly, and instead
+ * relies on each developer to follow the guidelines documented for each value and
+ * carefully choose the appropriate one, refactoring their code if necessary. By doing
+ * so, Angular is better able to minimize the performance degradation associated with
+ * manual DOM access, ensuring the best experience for the end users of your application
+ * or library.
+ *
+ * <div class="alert is-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param spec The callback functions to register
+ *
+ * @usageNotes
+ *
+ * Use `afterNextRender` to read or write the DOM once,
+ * for example to initialize a non-Angular library.
+ *
+ * ### Example
+ * ```ts
+ * @Component({
+ *   selector: 'my-chart-cmp',
+ *   template: `<div #chart>{{ ... }}</div>`,
+ * })
+ * export class MyChartCmp {
+ *   @ViewChild('chart') chartRef: ElementRef;
+ *   chart: MyChart|null;
+ *
+ *   constructor() {
+ *     afterNextRender({
+ *       write: () => {
+ *         this.chart = new MyChart(this.chartRef.nativeElement);
+ *       }
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+export declare function afterNextRender<E = never, W = never, M = never>(spec: {
+    earlyRead?: () => E;
+    write?: (...args: ɵFirstAvailable<[E]>) => W;
+    mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
+    read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
+}, opts?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+
+/**
+ * Register a callback to be invoked the next time the application finishes rendering, during the
+ * `mixedReadWrite` phase.
+ *
+ * <div class="alert is-critical">
+ *
+ * You should prefer specifying an explicit phase for the callback instead, or you risk significant
+ * performance degradation.
  *
  * </div>
  *
  * Note that the callback will run
  * - in the order it was registered
  * - on browser platforms only
+ * - during the `mixedReadWrite` phase
  *
  * <div class="alert is-important">
  *
@@ -121,9 +208,11 @@ export declare interface AfterContentInit {
  *   chart: MyChart|null;
  *
  *   constructor() {
- *     afterNextRender(() => {
- *       this.chart = new MyChart(this.chartRef.nativeElement);
- *     }, {phase: AfterRenderPhase.Write});
+ *     afterNextRender({
+ *       write: () => {
+ *         this.chart = new MyChart(this.chartRef.nativeElement);
+ *       }
+ *     });
  *   }
  * }
  * ```
@@ -133,13 +222,96 @@ export declare interface AfterContentInit {
 export declare function afterNextRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
 
 /**
- * Register a callback to be invoked each time the application
- * finishes rendering.
+ * Register callbacks to be invoked each time the application finishes rendering, during the
+ * specified phases. The available phases are:
+ * - `earlyRead`
+ *   Use this phase to **read** from the DOM before a subsequent `write` callback, for example to
+ *   perform custom layout that the browser doesn't natively support. Prefer the `read` phase if
+ *   reading can wait until after the write phase. **Never** write to the DOM in this phase.
+ * - `write`
+ *    Use this phase to **write** to the DOM. **Never** read from the DOM in this phase.
+ * - `mixedReadWrite`
+ *    Use this phase to read from and write to the DOM simultaneously. **Never** use this phase if
+ *    it is possible to divide the work among the other phases instead.
+ * - `read`
+ *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
  *
  * <div class="alert is-critical">
  *
- * You should always explicitly specify a non-default [phase](api/core/AfterRenderPhase), or you
- * risk significant performance degradation.
+ * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
+ * phases when possible, to avoid performance degradation.
+ *
+ * </div>
+ *
+ * Note that:
+ * - Callbacks run in the following phase order *after each render*:
+ *   1. `earlyRead`
+ *   2. `write`
+ *   3. `mixedReadWrite`
+ *   4. `read`
+ * - Callbacks in the same phase run in the order they are registered.
+ * - Callbacks run on browser platforms only, they will not run on the server.
+ *
+ * The first phase callback to run as part of this spec will receive no parameters. Each
+ * subsequent phase callback in this spec will receive the return value of the previously run
+ * phase callback as a parameter. This can be used to coordinate work across multiple phases.
+ *
+ * Angular is unable to verify or enforce that phases are used correctly, and instead
+ * relies on each developer to follow the guidelines documented for each value and
+ * carefully choose the appropriate one, refactoring their code if necessary. By doing
+ * so, Angular is better able to minimize the performance degradation associated with
+ * manual DOM access, ensuring the best experience for the end users of your application
+ * or library.
+ *
+ * <div class="alert is-important">
+ *
+ * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
+ * You must use caution when directly reading or writing the DOM and layout.
+ *
+ * </div>
+ *
+ * @param spec The callback functions to register
+ *
+ * @usageNotes
+ *
+ * Use `afterRender` to read or write the DOM after each render.
+ *
+ * ### Example
+ * ```ts
+ * @Component({
+ *   selector: 'my-cmp',
+ *   template: `<span #content>{{ ... }}</span>`,
+ * })
+ * export class MyComponent {
+ *   @ViewChild('content') contentRef: ElementRef;
+ *
+ *   constructor() {
+ *     afterRender({
+ *       read: () => {
+ *         console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
+ *       }
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @developerPreview
+ */
+export declare function afterRender<E = never, W = never, M = never>(spec: {
+    earlyRead?: () => E;
+    write?: (...args: ɵFirstAvailable<[E]>) => W;
+    mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
+    read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
+}, opts?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+
+/**
+ * Register a callback to be invoked each time the application finishes rendering, during the
+ * `mixedReadWrite` phase.
+ *
+ * <div class="alert is-critical">
+ *
+ * You should prefer specifying an explicit phase for the callback instead, or you risk significant
+ * performance degradation.
  *
  * </div>
  *
@@ -147,6 +319,7 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
  * - in the order it was registered
  * - once per render
  * - on browser platforms only
+ * - during the `mixedReadWrite` phase
  *
  * <div class="alert is-important">
  *
@@ -171,9 +344,11 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
  *   @ViewChild('content') contentRef: ElementRef;
  *
  *   constructor() {
- *     afterRender(() => {
- *       console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
- *     }, {phase: AfterRenderPhase.Read});
+ *     afterRender({
+ *       read: () => {
+ *         console.log('content height: ' + this.contentRef.nativeElement.scrollHeight);
+ *       }
+ *     });
  *   }
  * }
  * ```
@@ -203,6 +378,9 @@ export declare interface AfterRenderOptions {
      * phase instead. See `AfterRenderPhase` for more information.
      *
      * </div>
+     *
+     * @deprecated Specify the phase for your callback to run in by passing a spec-object as the first
+     *   parameter to `afterRender` or `afterNextRender` insetad of a function.
      */
     phase?: AfterRenderPhase;
 }
@@ -225,14 +403,16 @@ export declare interface AfterRenderOptions {
  * manual DOM access, ensuring the best experience for the end users of your application
  * or library.
  *
- * @developerPreview
+ * @deprecated Specify the phase for your callback to run in by passing a spec-object as the first
+ *   parameter to `afterRender` or `afterNextRender` insetad of a function.
  */
 export declare enum AfterRenderPhase {
     /**
      * Use `AfterRenderPhase.EarlyRead` for callbacks that only need to **read** from the
      * DOM before a subsequent `AfterRenderPhase.Write` callback, for example to perform
-     * custom layout that the browser doesn't natively support. **Never** use this phase
-     * for callbacks that can write to the DOM or when `AfterRenderPhase.Read` is adequate.
+     * custom layout that the browser doesn't natively support. Prefer the
+     * `AfterRenderPhase.EarlyRead` phase if reading can wait until after the write phase.
+     * **Never** write to the DOM in this phase.
      *
      * <div class="alert is-important">
      *
@@ -244,25 +424,25 @@ export declare enum AfterRenderPhase {
     EarlyRead = 0,
     /**
      * Use `AfterRenderPhase.Write` for callbacks that only **write** to the DOM. **Never**
-     * use this phase for callbacks that can read from the DOM.
+     * read from the DOM in this phase.
      */
     Write = 1,
     /**
      * Use `AfterRenderPhase.MixedReadWrite` for callbacks that read from or write to the
-     * DOM, that haven't been refactored to use a different phase. **Never** use this phase
-     * for callbacks that can use a different phase instead.
+     * DOM, that haven't been refactored to use a different phase. **Never** use this phase if
+     * it is possible to divide the work among the other phases instead.
      *
      * <div class="alert is-critical">
      *
      * Using this value can **significantly** degrade performance.
-     * Instead, prefer refactoring into multiple callbacks using a more specific phase.
+     * Instead, prefer dividing work into the appropriate phase callbacks.
      *
      * </div>
      */
     MixedReadWrite = 2,
     /**
      * Use `AfterRenderPhase.Read` for callbacks that only **read** from the DOM. **Never**
-     * use this phase for callbacks that can write to the DOM.
+     * write to the DOM in this phase.
      */
     Read = 3
 }
@@ -4341,7 +4521,7 @@ declare const globalUtilsFunctions: {
     ɵgetInjectorProviders: typeof getInjectorProviders;
     ɵgetInjectorResolutionPath: typeof getInjectorResolutionPath;
     ɵgetInjectorMetadata: typeof getInjectorMetadata;
-    ɵsetProfiler: (profiler: ɵProfiler | null) => void;
+    ɵsetProfiler: (profiler: ɵProfiler_2 | null) => void;
     getDirectiveMetadata: typeof getDirectiveMetadata;
     getComponent: typeof getComponent;
     getContext: typeof getContext;
@@ -11752,7 +11932,7 @@ declare type ViewQueriesFunction<T> = <U extends T>(rf: ɵRenderFlags, ctx: U) =
 /**
  * Represents an Angular view.
  *
- * @see {@link ChangeDetectorRef#usage-notes Change detection usage}
+ * @see [Change detection usage](/api/core/ChangeDetectorRef?tab=usage-notes)
  *
  * @publicApi
  */
@@ -11868,7 +12048,10 @@ export declare const enum ɵAnimationRendererType {
  * @param doc A reference to the current Document instance.
  * @return event types that need to be replayed
  */
-export declare function ɵannotateForHydration(appRef: ApplicationRef, doc: Document): Set<string> | undefined;
+export declare function ɵannotateForHydration(appRef: ApplicationRef, doc: Document): {
+    regular: Set<string>;
+    capture: Set<string>;
+};
 
 
 /**
@@ -12069,6 +12252,39 @@ export declare const enum ɵBypassType {
 export declare abstract class ɵChangeDetectionScheduler {
     abstract notify(source: ɵNotificationSource): void;
     abstract runningTick: boolean;
+}
+
+export declare class ɵChangeDetectionSchedulerImpl implements ɵChangeDetectionScheduler {
+    private readonly appRef;
+    private readonly taskService;
+    private readonly ngZone;
+    private readonly zonelessEnabled;
+    private readonly disableScheduling;
+    private readonly zoneIsDefined;
+    private readonly schedulerTickApplyArgs;
+    private readonly subscriptions;
+    private cancelScheduledCallback;
+    private shouldRefreshViews;
+    private useMicrotaskScheduler;
+    runningTick: boolean;
+    pendingRenderTaskId: number | null;
+    constructor();
+    notify(source: ɵNotificationSource): void;
+    private shouldScheduleTick;
+    /**
+     * Calls ApplicationRef._tick inside the `NgZone`.
+     *
+     * Calling `tick` directly runs change detection and cancels any change detection that had been
+     * scheduled previously.
+     *
+     * @param shouldRefreshViews Passed directly to `ApplicationRef._tick` and skips straight to
+     *     render hooks when `false`.
+     */
+    private tick;
+    ngOnDestroy(): void;
+    private cleanup;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ɵChangeDetectionSchedulerImpl, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<ɵChangeDetectionSchedulerImpl>;
 }
 
 export declare function ɵclearResolutionOfComponentResourcesQueue(): Map<Type<any>, Component>;
@@ -12586,6 +12802,12 @@ export declare const enum ɵExtraLocaleDataIndex {
  * @see [Internationalization (i18n) Guide](https://angular.io/guide/i18n)
  */
 export declare function ɵfindLocaleData(locale: string): any;
+
+/**
+ * An argument list containing the first non-never type in the given type array, or an empty
+ * argument list if there are no non-never types in the type array.
+ */
+export declare type ɵFirstAvailable<T extends unknown[]> = T extends [infer H, ...infer R] ? [H] extends [never] ? ɵFirstAvailable<R> : [H] : [];
 
 /**
  * Loops over queued module definitions, if a given module definition has all of its
@@ -13208,7 +13430,6 @@ export declare interface ɵProfiler {
     (event: ɵProfilerEvent, instance: {} | null, hookOrListener?: (e?: any) => any): void;
 }
 
-
 /**
  * Profiler events is an enum used by the profiler to distinguish between different calls of user
  * code invoked throughout the application lifecycle.
@@ -13255,6 +13476,12 @@ export declare const enum ɵProfilerEvent {
      */
     OutputEnd = 7
 }
+
+/**
+ * Internal token used to verify that `provideZoneChangeDetection` is not used
+ * with the bootstrapModule API.
+ */
+export declare const ɵPROVIDED_NG_ZONE: InjectionToken<boolean>;
 
 /**
  * An object that contains information about a provider that has been configured
@@ -13489,7 +13716,7 @@ export declare class ɵRuntimeError<T extends number = ɵRuntimeErrorCode> exten
  * angular.io. This extra annotation is needed to avoid introducing a separate set to store
  * error codes which have guides, which might leak into runtime code.
  *
- * Full list of available error guides can be found at https://angular.io/errors.
+ * Full list of available error guides can be found at https://angular.dev/errors.
  *
  * Error code ranges per package:
  *  - core (this package): 100-999
@@ -13565,6 +13792,7 @@ export declare const enum ɵRuntimeErrorCode {
     VIEW_ALREADY_DESTROYED = 911,
     COMPONENT_ID_COLLISION = -912,
     IMAGE_PERFORMANCE_WARNING = -913,
+    UNEXPECTED_ZONEJS_PRESENT_IN_ZONELESS_MODE = 914,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
     REQUIRED_MODEL_NO_VALUE = -952,
@@ -13821,7 +14049,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
      *
      * This may be different from `_lView` if the `_cdRefInjectingView` is an embedded view.
      */
-    _cdRefInjectingView?: LView<unknown> | undefined, notifyErrorHandler?: boolean);
+    _cdRefInjectingView?: LView | undefined, notifyErrorHandler?: boolean);
     get context(): T;
     /**
      * @deprecated Replacing the full context object is not supported. Modify the context

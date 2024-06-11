@@ -1,11 +1,11 @@
 /**
- * @license Angular v18.1.0-next.0+sha-1360110
+ * @license Angular v18.1.0-next.1+sha-567c2f6
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 
-declare namespace a11yClick {
+declare namespace a11yClickLib {
     export {
         updateEventInfoForA11yClick,
         preventDefaultForA11yClick,
@@ -24,53 +24,14 @@ declare interface ActionInfo {
 
 declare type ActionInfoInternal = [name: string, element: Element];
 
-/** Resolves actions for Events. */
-declare class ActionResolver {
-    private a11yClickSupport;
-    private readonly syntheticMouseEventSupport;
-    private updateEventInfoForA11yClick?;
-    private preventDefaultForA11yClick?;
-    private populateClickOnlyAction?;
-    constructor({ syntheticMouseEventSupport, }?: {
-        syntheticMouseEventSupport?: boolean;
-    });
-    resolve(eventInfo: eventInfoLib.EventInfo): void;
-    /**
-     * Searches for a jsaction that the DOM event maps to and creates an
-     * object containing event information used for dispatching by
-     * jsaction.Dispatcher. This method populates the `action` and `actionElement`
-     * fields of the EventInfo object passed in by finding the first
-     * jsaction attribute above the target Node of the event, and below
-     * the container Node, that specifies a jsaction for the event
-     * type. If no such jsaction is found, then action is undefined.
-     *
-     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
-     *    action is found on any `Element` in the path of the `Event`.
-     */
-    private populateAction;
-    /**
-     * Accesses the jsaction map on a node and retrieves the name of the
-     * action the given event is mapped to, if any. It parses the
-     * attribute value and stores it in a property on the node for
-     * subsequent retrieval without re-parsing and re-accessing the
-     * attribute.
-     *
-     * @param actionElement The DOM node to retrieve the jsaction map from.
-     * @param eventInfo `EventInfo` to set `action` and `actionElement` if an
-     *    action is found on the `actionElement`.
-     */
-    private populateActionOnElement;
-    /**
-     * Parses and caches an element's jsaction element into a map.
-     *
-     * This is primarily for internal use.
-     *
-     * @param actionElement The DOM node to retrieve the jsaction map from.
-     * @return Map from event to qualified name of the jsaction bound to it.
-     */
-    private parseActions;
-    addA11yClickSupport(updateEventInfoForA11yClick: typeof a11yClick.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClick.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClick.populateClickOnlyAction): void;
-}
+export declare const Attribute: {
+    JSACTION: string;
+    OI: string;
+    VED: string;
+    VET: string;
+    JSINSTANCE: string;
+    JSTRACK: string;
+};
 
 /**
  * Provides a factory function for bootstrapping an event contract on a
@@ -113,62 +74,8 @@ declare function createEventInfo({ eventType, event, targetElement, container, t
  */
 declare function createEventInfoFromParameters(eventType: string, event: Event, targetElement: Element, container: Element, timestamp: number, action?: ActionInfoInternal, isReplay?: boolean, a11yClickKey?: boolean): EventInfo;
 
-/**
- * Receives a DOM event, determines the jsaction associated with the source
- * element of the DOM event, and invokes the handler associated with the
- * jsaction.
- */
-export declare class Dispatcher {
-    private readonly dispatchDelegate;
-    private actionResolver?;
-    /** The replayer function to be called when there are queued events. */
-    private eventReplayer?;
-    /** Whether the event replay is scheduled. */
-    private eventReplayScheduled;
-    /** The queue of events. */
-    private readonly replayEventInfoWrappers;
-    /**
-     * Options are:
-     *   1. `eventReplayer`: When the event contract dispatches replay events
-     *      to the Dispatcher, the Dispatcher collects them and in the next tick
-     *      dispatches them to the `eventReplayer`.
-     * @param dispatchDelegate A function that should handle dispatching an `EventInfoWrapper` to handlers.
-     */
-    constructor(dispatchDelegate: (eventInfoWrapper: EventInfoWrapper) => void, { actionResolver, eventReplayer, }?: {
-        actionResolver?: ActionResolver;
-        eventReplayer?: Replayer;
-    });
-    /**
-     * Receives an event or the event queue from the EventContract. The event
-     * queue is copied and it attempts to replay.
-     * If event info is passed in it looks for an action handler that can handle
-     * the given event.  If there is no handler registered queues the event and
-     * checks if a loader is registered for the given namespace. If so, calls it.
-     *
-     * Alternatively, if in global dispatch mode, calls all registered global
-     * handlers for the appropriate event type.
-     *
-     * The three functionalities of this call are deliberately not split into
-     * three methods (and then declared as an abstract interface), because the
-     * interface is used by EventContract, which lives in a different jsbinary.
-     * Therefore the interface between the three is defined entirely in terms that
-     * are invariant under jscompiler processing (Function and Array, as opposed
-     * to a custom type with method names).
-     *
-     * @param eventInfo The info for the event that triggered this call or the
-     *     queue of events from EventContract.
-     */
-    dispatch(eventInfo: EventInfo): void;
-    /**
-     * Schedules an `EventInfoWrapper` for replay. The replaying will happen in its own
-     * stack once the current flow cedes control. This is done to mimic
-     * browser event handling.
-     */
-    private scheduleEventInfoWrapperReplay;
-}
-
 /** A function that is called to handle events captured by the EventContract. */
-declare type Dispatcher_2 = (eventInfo: eventInfoLib.EventInfo, globalDispatch?: boolean) => void;
+declare type Dispatcher = (eventInfo: eventInfoLib.EventInfo, globalDispatch?: boolean) => void;
 
 /**
  * Defines the early jsaction data types.
@@ -234,7 +141,7 @@ export declare class EventContract implements UnrenamedEventContract {
     private queuedEventInfos;
     /** Whether to add an a11y click listener. */
     private addA11yClickListener;
-    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClick.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClick.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClick.populateClickOnlyAction) => void;
+    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
     constructor(containerManager: EventContractContainerManager, useActionResolver?: boolean);
     private handleEvent;
     /**
@@ -285,13 +192,13 @@ export declare class EventContract implements UnrenamedEventContract {
      * @param dispatcher The dispatcher function.
      * @param restriction
      */
-    registerDispatcher(dispatcher: Dispatcher_2, restriction: Restriction): void;
+    registerDispatcher(dispatcher: Dispatcher, restriction: Restriction): void;
     /**
      * Unrenamed alias for registerDispatcher. Necessary for any codebases that
      * split the `EventContract` and `Dispatcher` code into different compilation
      * units.
      */
-    ecrd(dispatcher: Dispatcher_2, restriction: Restriction): void;
+    ecrd(dispatcher: Dispatcher, restriction: Restriction): void;
     /**
      * Adds a11y click support to the given `EventContract`. Meant to be called in
      * the same compilation unit as the `EventContract`.
@@ -354,6 +261,23 @@ export declare type EventContractTracker<T> = {
 };
 
 /**
+ * A dispatcher that uses browser-based `Event` semantics, for example bubbling, `stopPropagation`,
+ * `currentTarget`, etc.
+ */
+export declare class EventDispatcher {
+    private readonly dispatchDelegate;
+    private readonly actionResolver;
+    private readonly dispatcher;
+    constructor(dispatchDelegate: (event: Event, actionName: string) => void);
+    /**
+     * The entrypoint for the `EventContract` dispatch.
+     */
+    dispatch(eventInfo: EventInfo): void;
+    /** Internal method that does basic disaptching. */
+    private dispatchToDelegate;
+}
+
+/**
  * A function that handles an event dispatched from the browser.
  *
  * eventType: May differ from `event.type` if JSAction uses a
@@ -402,6 +326,8 @@ declare interface EventInfo {
      * as a `click`. Only used when a11y click events is on.
      */
     eiack?: boolean;
+    /** Whether action resolution has already run on this `EventInfo`. */
+    eir?: boolean;
 }
 
 declare namespace eventInfoLib {
@@ -425,6 +351,8 @@ declare namespace eventInfoLib {
         setIsReplay,
         getA11yClickKey,
         setA11yClickKey,
+        getResolved,
+        setResolved,
         cloneEventInfo,
         createEventInfoFromParameters,
         createEventInfo,
@@ -460,8 +388,15 @@ export declare class EventInfoWrapper {
     setAction(action: ActionInfo | undefined): void;
     getIsReplay(): boolean | undefined;
     setIsReplay(replay: boolean): void;
+    getResolved(): boolean | undefined;
+    setResolved(resolved: boolean): void;
     clone(): EventInfoWrapper;
 }
+
+/** Extra event phases beyond what the browser provides. */
+export declare const EventPhase: {
+    REPLAY: number;
+};
 
 /** Added for readability when accessing stable property names. */
 declare function getA11yClickKey(eventInfo: EventInfo): boolean | undefined;
@@ -488,10 +423,69 @@ declare function getEventType(eventInfo: EventInfo): string;
 declare function getIsReplay(eventInfo: EventInfo): boolean | undefined;
 
 /** Added for readability when accessing stable property names. */
+declare function getResolved(eventInfo: EventInfo): boolean | undefined;
+
+/** Added for readability when accessing stable property names. */
 declare function getTargetElement(eventInfo: EventInfo): Element;
 
 /** Added for readability when accessing stable property names. */
 declare function getTimestamp(eventInfo: EventInfo): number;
+
+/**
+ *
+ * Decides whether or not an event type is an event that only has a capture phase.
+ *
+ * @param eventType
+ * @returns bool
+ */
+export declare const isCaptureEvent: (eventType: string) => boolean;
+
+/**
+ * Detects whether a given event type is supported by JSAction.
+ */
+export declare const isSupportedEvent: (eventType: string) => boolean;
+
+/**
+ * The jsaction attribute defines a mapping of a DOM event to a
+ * generic event (aka jsaction), to which the actual event handlers
+ * that implement the behavior of the application are bound. The
+ * value is a semicolon separated list of colon separated pairs of
+ * an optional DOM event name and a jsaction name. If the optional
+ * DOM event name is omitted, 'click' is assumed. The jsaction names
+ * are dot separated pairs of a namespace and a simple jsaction
+ * name.
+ *
+ * See grammar in README.md for expected syntax in the attribute value.
+ */
+export declare const JSACTION = "jsaction";
+
+/**
+ * Support for iteration on reprocessing.
+ *
+ * Used by ActionFlow.
+ */
+export declare const JSINSTANCE = "jsinstance";
+
+/**
+ * All click jsactions that happen on the element that carries this
+ * attribute or its descendants are automatically logged.
+ * Impressions of jsactions on these elements are tracked too, if
+ * requested by the impression() method of ActionFlow.
+ *
+ * Used by ActionFlow.
+ */
+export declare const JSTRACK = "jstrack";
+
+/**
+ * The oi attribute is a log impression tag for impression logging
+ * and action tracking. For an element that carries a jsaction
+ * attribute, the element is identified for the purpose of
+ * impression logging and click tracking by the dot separated path
+ * of all oi attributes in the chain of ancestors of the element.
+ *
+ * Used by ActionFlow.
+ */
+export declare const OI = "oi";
 
 /**
  * Sets the `action` to `clickonly` for a click event that is not an a11y click
@@ -511,13 +505,7 @@ declare function preventDefaultForA11yClick(eventInfo: eventInfoLib.EventInfo): 
  * Registers deferred functionality for an EventContract and a Jsaction
  * Dispatcher.
  */
-export declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: Dispatcher): void;
-
-/**
- * A replayer is a function that is called when there are queued events,
- * either from the `EventContract` or when there are no detected handlers.
- */
-declare type Replayer = (eventInfoWrappers: EventInfoWrapper[]) => void;
+export declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: EventDispatcher): void;
 
 
 /**
@@ -546,6 +534,9 @@ declare function setEventType(eventInfo: EventInfo, eventType: string): void;
 declare function setIsReplay(eventInfo: EventInfo, replay: boolean): void;
 
 /** Added for readability when accessing stable property names. */
+declare function setResolved(eventInfo: EventInfo, resolved: boolean): void;
+
+/** Added for readability when accessing stable property names. */
 declare function setTargetElement(eventInfo: EventInfo, targetElement: Element): void;
 
 /** Added for readability when accessing stable property names. */
@@ -555,8 +546,8 @@ declare function setTimestamp(eventInfo: EventInfo, timestamp: number): void;
  * The API of an EventContract that is safe to call from any compilation unit.
  */
 declare interface UnrenamedEventContract {
-    ecrd(dispatcher: Dispatcher_2, restriction: Restriction): void;
-    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClick.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClick.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClick.populateClickOnlyAction) => void;
+    ecrd(dispatcher: Dispatcher, restriction: Restriction): void;
+    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
 }
 
 /** Added for readability when accessing stable property names. */
@@ -567,5 +558,19 @@ declare function unsetAction(eventInfo: EventInfo): void;
  * is a a11y click.
  */
 declare function updateEventInfoForA11yClick(eventInfo: eventInfoLib.EventInfo): void;
+
+/**
+ * The ved attribute is an encoded ClickTrackingCGI proto to track
+ * visual elements.
+ *
+ * Used by ActionFlow.
+ */
+export declare const VED = "ved";
+
+/**
+ * The vet attribute is the visual element type used to identify tracked
+ * visual elements.
+ */
+export declare const VET = "vet";
 
 export { }
