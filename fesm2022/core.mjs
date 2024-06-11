@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.2+sha-65bf5ec
+ * @license Angular v18.0.2+sha-5ec24c9
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12895,6 +12895,59 @@ const REACTIVE_LVIEW_CONSUMER_NODE = {
         this.lView[REACTIVE_TEMPLATE_CONSUMER] = this;
     },
 };
+/**
+ * Creates a temporary consumer for use with `LView`s that should not have consumers.
+ * If the LView already has a consumer, returns the existing one instead.
+ *
+ * This is necessary because some APIs may cause change detection directly on an LView
+ * that we do not want to have a consumer (Embedded views today). As a result, there
+ * would be no active consumer from running change detection on its host component
+ * and any signals in the LView template would be untracked. Instead, we create
+ * this temporary consumer that marks the first parent that _should_ have a consumer
+ * for refresh. Once change detection runs as part of that refresh, we throw away
+ * this consumer because its signals will then be tracked by the parent's consumer.
+ */
+function getOrCreateTemporaryConsumer(lView) {
+    const consumer = lView[REACTIVE_TEMPLATE_CONSUMER] ?? Object.create(TEMPORARY_CONSUMER_NODE);
+    consumer.lView = lView;
+    return consumer;
+}
+const TEMPORARY_CONSUMER_NODE = {
+    ...REACTIVE_NODE$1,
+    consumerIsAlwaysLive: true,
+    consumerMarkedDirty: (node) => {
+        let parent = getLViewParent(node.lView);
+        while (parent && !viewShouldHaveReactiveConsumer(parent[TVIEW])) {
+            parent = getLViewParent(parent);
+        }
+        if (!parent) {
+            // If we can't find an appropriate parent that should have a consumer, we
+            // don't have a way of appropriately refreshing this LView as part of application synchronization.
+            return;
+        }
+        markViewForRefresh(parent);
+    },
+    consumerOnSignalRead() {
+        this.lView[REACTIVE_TEMPLATE_CONSUMER] = this;
+    },
+};
+/**
+ * Indicates if the view should get its own reactive consumer node.
+ *
+ * In the current design, all embedded views share a consumer with the component view. This allows
+ * us to refresh at the component level rather than at a per-view level. In addition, root views get
+ * their own reactive node because root component will have a host view that executes the
+ * component's host bindings. This needs to be tracked in a consumer as well.
+ *
+ * To get a more granular change detection than per-component, all we would just need to update the
+ * condition here so that a given view gets a reactive consumer which can become dirty independently
+ * from its parent component. For example embedded views for signal components could be created with
+ * a new type "SignalEmbeddedView" and the condition here wouldn't even need updating in order to
+ * get granular per-view change detection for signal components.
+ */
+function viewShouldHaveReactiveConsumer(tView) {
+    return tView.type !== 2 /* TViewType.Embedded */;
+}
 
 /**
  * The maximum number of times the change detection traversal will rerun before throwing an error.
@@ -12993,11 +13046,29 @@ function refreshView(tView, lView, templateFn, context) {
     // - We might already be in a reactive context if this is an embedded view of the host.
     // - We might be descending into a view that needs a consumer.
     enterView(lView);
+    let returnConsumerToPool = true;
     let prevConsumer = null;
     let currentConsumer = null;
-    if (!isInCheckNoChangesPass && viewShouldHaveReactiveConsumer(tView)) {
-        currentConsumer = getOrBorrowReactiveLViewConsumer(lView);
-        prevConsumer = consumerBeforeComputation$1(currentConsumer);
+    if (!isInCheckNoChangesPass) {
+        if (viewShouldHaveReactiveConsumer(tView)) {
+            currentConsumer = getOrBorrowReactiveLViewConsumer(lView);
+            prevConsumer = consumerBeforeComputation$1(currentConsumer);
+        }
+        else if (getActiveConsumer$1() === null) {
+            // If the current view should not have a reactive consumer but we don't have an active consumer,
+            // we still need to create a temporary consumer to track any signal reads in this template.
+            // This is a rare case that can happen with `viewContainerRef.createEmbeddedView(...).detectChanges()`.
+            // This temporary consumer marks the first parent that _should_ have a consumer for refresh.
+            // Once that refresh happens, the signals will be tracked in the parent consumer and we can destroy
+            // the temporary one.
+            returnConsumerToPool = false;
+            currentConsumer = getOrCreateTemporaryConsumer(lView);
+            prevConsumer = consumerBeforeComputation$1(currentConsumer);
+        }
+        else if (lView[REACTIVE_TEMPLATE_CONSUMER]) {
+            consumerDestroy$1(lView[REACTIVE_TEMPLATE_CONSUMER]);
+            lView[REACTIVE_TEMPLATE_CONSUMER] = null;
+        }
     }
     try {
         resetPreOrderHookFlags(lView);
@@ -13123,27 +13194,12 @@ function refreshView(tView, lView, templateFn, context) {
     finally {
         if (currentConsumer !== null) {
             consumerAfterComputation$1(currentConsumer, prevConsumer);
-            maybeReturnReactiveLViewConsumer(currentConsumer);
+            if (returnConsumerToPool) {
+                maybeReturnReactiveLViewConsumer(currentConsumer);
+            }
         }
         leaveView();
     }
-}
-/**
- * Indicates if the view should get its own reactive consumer node.
- *
- * In the current design, all embedded views share a consumer with the component view. This allows
- * us to refresh at the component level rather than at a per-view level. In addition, root views get
- * their own reactive node because root component will have a host view that executes the
- * component's host bindings. This needs to be tracked in a consumer as well.
- *
- * To get a more granular change detection than per-component, all we would just need to update the
- * condition here so that a given view gets a reactive consumer which can become dirty independently
- * from its parent component. For example embedded views for signal components could be created with
- * a new type "SignalEmbeddedView" and the condition here wouldn't even need updating in order to
- * get granular per-view change detection for signal components.
- */
-function viewShouldHaveReactiveConsumer(tView) {
-    return tView.type !== 2 /* TViewType.Embedded */;
 }
 /**
  * Goes over embedded views (ones created through ViewContainerRef APIs) and refreshes
@@ -16906,7 +16962,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.2+sha-65bf5ec']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.2+sha-5ec24c9']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30815,7 +30871,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.2+sha-65bf5ec');
+const VERSION = new Version('18.0.2+sha-5ec24c9');
 
 class Console {
     log(message) {

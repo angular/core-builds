@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.2+sha-65bf5ec
+ * @license Angular v18.0.2+sha-5ec24c9
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8674,7 +8674,6 @@ declare const REACTIVE_TEMPLATE_CONSUMER = 23;
 
 declare interface ReactiveLViewConsumer extends ReactiveNode {
     lView: LView | null;
-    slot: typeof REACTIVE_TEMPLATE_CONSUMER;
 }
 
 /**
