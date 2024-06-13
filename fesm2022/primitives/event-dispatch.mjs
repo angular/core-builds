@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.3+sha-be09f0b
+ * @license Angular v18.0.3+sha-7c76eb5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1978,7 +1978,7 @@ const MOUSE_SPECIAL_SUPPORT = false;
 class EventContract {
     static { this.A11Y_CLICK_SUPPORT = A11Y_CLICK_SUPPORT; }
     static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
-    constructor(containerManager, useActionResolver = true) {
+    constructor(containerManager, useActionResolver) {
         this.useActionResolver = useActionResolver;
         /**
          * The DOM events which this contract covers. Used to prevent double
