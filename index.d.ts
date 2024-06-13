@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.2+sha-c698668
+ * @license Angular v18.1.0-next.2+sha-0b867e8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1851,6 +1851,7 @@ declare abstract class ComponentFactory<C> {
         propName: string;
         templateName: string;
         transform?: (value: any) => any;
+        isSignal: boolean;
     }[];
     /**
      * The outputs of the component.
@@ -1922,6 +1923,7 @@ export declare interface ComponentMirror<C> {
         readonly propName: string;
         readonly templateName: string;
         readonly transform?: (value: any) => any;
+        readonly isSignal: boolean;
     }>;
     /**
      * The outputs of the component.
@@ -13565,6 +13567,7 @@ export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
     get inputs(): {
         propName: string;
         templateName: string;
+        isSignal: boolean;
         transform?: (value: any) => any;
     }[];
     get outputs(): {

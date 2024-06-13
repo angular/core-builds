@@ -10698,13 +10698,15 @@ var _ParseAST = class {
         const keyStart = this.inputIndex;
         const quoted = this.next.isString();
         const key = this.expectIdentifierOrKeywordOrString();
-        keys.push({ key, quoted });
+        const literalMapKey = { key, quoted };
+        keys.push(literalMapKey);
         if (quoted) {
           this.expectCharacter($COLON);
           values.push(this.parsePipe());
         } else if (this.consumeOptionalCharacter($COLON)) {
           values.push(this.parsePipe());
         } else {
+          literalMapKey.isShorthandInitialized = true;
           const span = this.span(keyStart);
           const sourceSpan = this.sourceSpan(keyStart);
           values.push(new PropertyRead(span, sourceSpan, sourceSpan, new ImplicitReceiver(span, sourceSpan), key));
@@ -23215,7 +23217,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.2+sha-c698668");
+var VERSION2 = new Version("18.1.0-next.2+sha-0b867e8");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.2+sha-c698668
+ * @license Angular v18.1.0-next.2+sha-0b867e8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16644,7 +16644,7 @@ class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
         return new ComponentFactory(componentDef, this.ngModule);
     }
 }
-function toRefArray(map) {
+function toRefArray(map, isInputMap) {
     const array = [];
     for (const publicName in map) {
         if (!map.hasOwnProperty(publicName)) {
@@ -16654,10 +16654,22 @@ function toRefArray(map) {
         if (value === undefined) {
             continue;
         }
-        array.push({
-            propName: Array.isArray(value) ? value[0] : value,
-            templateName: publicName,
-        });
+        const isArray = Array.isArray(value);
+        const propName = isArray ? value[0] : value;
+        const flags = isArray ? value[1] : InputFlags.None;
+        if (isInputMap) {
+            array.push({
+                propName: propName,
+                templateName: publicName,
+                isSignal: (flags & InputFlags.SignalBased) !== 0,
+            });
+        }
+        else {
+            array.push({
+                propName: propName,
+                templateName: publicName,
+            });
+        }
     }
     return array;
 }
@@ -16696,7 +16708,7 @@ class ComponentFactory extends ComponentFactory$1 {
     get inputs() {
         const componentDef = this.componentDef;
         const inputTransforms = componentDef.inputTransforms;
-        const refArray = toRefArray(componentDef.inputs);
+        const refArray = toRefArray(componentDef.inputs, true);
         if (inputTransforms !== null) {
             for (const input of refArray) {
                 if (inputTransforms.hasOwnProperty(input.propName)) {
@@ -16707,7 +16719,7 @@ class ComponentFactory extends ComponentFactory$1 {
         return refArray;
     }
     get outputs() {
-        return toRefArray(this.componentDef.outputs);
+        return toRefArray(this.componentDef.outputs, false);
     }
     /**
      * @param componentDef The component definition.
@@ -16990,7 +17002,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.2+sha-c698668']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.2+sha-0b867e8']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30790,7 +30802,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.2+sha-c698668');
+const VERSION = new Version('18.1.0-next.2+sha-0b867e8');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
