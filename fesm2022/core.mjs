@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.2+sha-a114eba
+ * @license Angular v18.1.0-next.2+sha-ef2ad1b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16990,7 +16990,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.2+sha-a114eba']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.2+sha-ef2ad1b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30790,7 +30790,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.2+sha-a114eba');
+const VERSION = new Version('18.1.0-next.2+sha-ef2ad1b');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -36596,7 +36596,8 @@ const initGlobalEventDelegation = (eventDelegation, injector) => {
     if (injector.get(IS_EVENT_REPLAY_ENABLED, EVENT_REPLAY_ENABLED_DEFAULT)) {
         return;
     }
-    eventDelegation.eventContract = new EventContract(new EventContractContainer(document.body));
+    eventDelegation.eventContract = new EventContract(new EventContractContainer(document.body), 
+    /* useActionResolver= */ false);
     const dispatcher = new EventDispatcher(invokeRegisteredListeners);
     registerDispatcher(eventDelegation.eventContract, dispatcher);
 };
@@ -36673,7 +36674,8 @@ const initEventReplay = (eventDelegation, injector) => {
     // is enabled, but there are no events configured in an application.
     const container = globalThis[CONTRACT_PROPERTY]?.[appId];
     const earlyJsactionData = getJsactionData(container);
-    const eventContract = (eventDelegation.eventContract = new EventContract(new EventContractContainer(earlyJsactionData.c)));
+    const eventContract = (eventDelegation.eventContract = new EventContract(new EventContractContainer(earlyJsactionData.c), 
+    /* useActionResolver= */ false));
     for (const et of earlyJsactionData.et) {
         eventContract.addEvent(et);
     }
