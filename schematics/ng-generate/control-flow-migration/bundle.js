@@ -23055,7 +23055,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.2+sha-1d3a752");
+var VERSION2 = new Version("18.1.0-next.2+sha-d64ee6c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
