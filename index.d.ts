@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.3+sha-a620231
+ * @license Angular v18.0.3+sha-34e7d14
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13609,7 +13609,7 @@ export declare const enum ɵRuntimeErrorCode {
     UNEXPECTED_ZONEJS_PRESENT_IN_ZONELESS_MODE = 914,
     REQUIRED_INPUT_NO_VALUE = -950,
     REQUIRED_QUERY_NO_VALUE = -951,
-    REQUIRED_MODEL_NO_VALUE = -952,
+    REQUIRED_MODEL_NO_VALUE = 952,
     OUTPUT_REF_DESTROYED = 953,
     LOOP_TRACK_DUPLICATE_KEYS = -955,
     LOOP_TRACK_RECREATE = -956,

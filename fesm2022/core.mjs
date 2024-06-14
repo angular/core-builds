@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.3+sha-a620231
+ * @license Angular v18.0.3+sha-34e7d14
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17055,7 +17055,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.3+sha-a620231']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.3+sha-34e7d14']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18246,7 +18246,7 @@ function createModelSignal(initialValue) {
 /** Asserts that a model's value is set. */
 function assertModelSet(value) {
     if (value === REQUIRED_UNSET_VALUE) {
-        throw new RuntimeError(-952 /* RuntimeErrorCode.REQUIRED_MODEL_NO_VALUE */, ngDevMode && 'Model is required but no value is available yet.');
+        throw new RuntimeError(952 /* RuntimeErrorCode.REQUIRED_MODEL_NO_VALUE */, ngDevMode && 'Model is required but no value is available yet.');
     }
 }
 
@@ -30855,7 +30855,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.3+sha-a620231');
+const VERSION = new Version('18.0.3+sha-34e7d14');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
