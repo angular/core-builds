@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.3+sha-01b82a3
+ * @license Angular v18.0.3+sha-1d48e72
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5403,6 +5403,50 @@ function assertPureTNodeType(type) {
     }
 }
 
+// This default value is when checking the hierarchy for a token.
+//
+// It means both:
+// - the token is not provided by the current injector,
+// - only the element injectors should be checked (ie do not check module injectors
+//
+//          mod1
+//         /
+//       el1   mod2
+//         \  /
+//         el2
+//
+// When requesting el2.injector.get(token), we should check in the following order and return the
+// first found value:
+// - el2.injector.get(token, default)
+// - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
+// - mod2.injector.get(token, default)
+const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
+
+/**
+ * Injector that looks up a value using a specific injector, before falling back to the module
+ * injector. Used primarily when creating components or embedded views dynamically.
+ */
+class ChainedInjector {
+    constructor(injector, parentInjector) {
+        this.injector = injector;
+        this.parentInjector = parentInjector;
+    }
+    get(token, notFoundValue, flags) {
+        flags = convertToBitFlags(flags);
+        const value = this.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
+        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
+            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+            // Return the value from the root element injector when
+            // - it provides it
+            //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+            // - the module injector should not be checked
+            //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+            return value;
+        }
+        return this.parentInjector.get(token, notFoundValue, flags);
+    }
+}
+
 /// Parent Injector Utils ///////////////////////////////////////////////////////////////
 function hasParentInjector(parentLocation) {
     return parentLocation !== NO_PARENT_INJECTOR;
@@ -5440,6 +5484,14 @@ function getParentInjectorView(location, startView) {
         viewOffset--;
     }
     return parentView;
+}
+/**
+ * Detects whether an injector is an instance of a `ChainedInjector`,
+ * created based on the `OutletInjector`.
+ */
+function isRouterOutletInjector(currentInjector) {
+    return (currentInjector instanceof ChainedInjector &&
+        typeof currentInjector.injector.__ngOutletInjector === 'function');
 }
 
 /**
@@ -15451,25 +15503,6 @@ class Sanitizer {
     }); }
 }
 
-// This default value is when checking the hierarchy for a token.
-//
-// It means both:
-// - the token is not provided by the current injector,
-// - only the element injectors should be checked (ie do not check module injectors
-//
-//          mod1
-//         /
-//       el1   mod2
-//         \  /
-//         el2
-//
-// When requesting el2.injector.get(token), we should check in the following order and return the
-// first found value:
-// - el2.injector.get(token, default)
-// - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
-// - mod2.injector.get(token, default)
-const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
-
 /**
  * Asserts that the current stack frame is not within a reactive context. Useful
  * to disallow certain code from running inside a reactive context (see {@link toSignal}).
@@ -16731,30 +16764,6 @@ function getNamespace(elementName) {
     return name === 'svg' ? SVG_NAMESPACE : name === 'math' ? MATH_ML_NAMESPACE : null;
 }
 /**
- * Injector that looks up a value using a specific injector, before falling back to the module
- * injector. Used primarily when creating components or embedded views dynamically.
- */
-class ChainedInjector {
-    constructor(injector, parentInjector) {
-        this.injector = injector;
-        this.parentInjector = parentInjector;
-    }
-    get(token, notFoundValue, flags) {
-        flags = convertToBitFlags(flags);
-        const value = this.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, flags);
-        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
-            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
-            // Return the value from the root element injector when
-            // - it provides it
-            //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-            // - the module injector should not be checked
-            //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
-            return value;
-        }
-        return this.parentInjector.get(token, notFoundValue, flags);
-    }
-}
-/**
  * ComponentFactory interface implementation.
  */
 class ComponentFactory extends ComponentFactory$1 {
@@ -17055,7 +17064,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.3+sha-01b82a3']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.3+sha-1d48e72']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -20628,14 +20637,6 @@ function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling 
             handleError(hostLView, error);
         }
     }
-}
-/**
- * Detects whether an injector is an instance of a `ChainedInjector`,
- * created based on the `OutletInjector`.
- */
-function isRouterOutletInjector(currentInjector) {
-    return (currentInjector instanceof ChainedInjector &&
-        typeof currentInjector.injector.__ngOutletInjector === 'function');
 }
 /**
  * Creates an instance of the `OutletInjector` using a private factory
@@ -30855,7 +30856,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.3+sha-01b82a3');
+const VERSION = new Version('18.0.3+sha-1d48e72');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -31632,7 +31633,16 @@ function getInjectorResolutionPathHelper(injector, resolutionPath) {
  */
 function getInjectorParent(injector) {
     if (injector instanceof R3Injector) {
-        return injector.parent;
+        const parent = injector.parent;
+        if (isRouterOutletInjector(parent)) {
+            // This is a special case for a `ChainedInjector` instance, which represents
+            // a combination of a Router's `OutletInjector` and an EnvironmentInjector,
+            // which represents a `@defer` block. Since the `OutletInjector` doesn't store
+            // any tokens itself, we point to the parent injector instead. See the
+            // `OutletInjector.__ngOutletInjector` field for additional information.
+            return parent.parentInjector;
+        }
+        return parent;
     }
     let tNode;
     let lView;
@@ -31647,7 +31657,7 @@ function getInjectorParent(injector) {
         return injector.parentInjector;
     }
     else {
-        throwError('getInjectorParent only support injectors of type R3Injector, NodeInjector, NullInjector, ChainedInjector');
+        throwError('getInjectorParent only support injectors of type R3Injector, NodeInjector, NullInjector');
     }
     const parentLocation = getParentInjectorLocation(tNode, lView);
     if (hasParentInjector(parentLocation)) {
