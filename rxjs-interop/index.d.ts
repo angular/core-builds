@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.2+sha-08038e8
+ * @license Angular v18.1.0-next.2+sha-89ec195
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13,6 +13,7 @@ import { OutputOptions } from '@angular/core';
 import { OutputRef } from '@angular/core';
 import { Signal } from '@angular/core';
 import { Subscribable } from 'rxjs';
+import { ValueEqualityFn } from '@angular/core/primitives/signals';
 
 /**
  * Declares an Angular output that is using an RxJS observable as a source
@@ -90,22 +91,22 @@ export declare interface ToObservableOptions {
 
 export declare function toSignal<T>(source: Observable<T> | Subscribable<T>): Signal<T | undefined>;
 
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions & {
+export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | undefined>> & {
     initialValue?: undefined;
     requireSync?: false;
 }): Signal<T | undefined>;
 
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions & {
+export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | null>> & {
     initialValue?: null;
     requireSync?: false;
 }): Signal<T | null>;
 
-export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions & {
+export declare function toSignal<T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T>> & {
     initialValue?: undefined;
     requireSync: true;
 }): Signal<T>;
 
-export declare function toSignal<T, const U extends T>(source: Observable<T> | Subscribable<T>, options: ToSignalOptions & {
+export declare function toSignal<T, const U extends T>(source: Observable<T> | Subscribable<T>, options: NoInfer<ToSignalOptions<T | U>> & {
     initialValue: U;
     requireSync?: false;
 }): Signal<T | U>;
@@ -115,7 +116,7 @@ export declare function toSignal<T, const U extends T>(source: Observable<T> | S
  *
  * @publicApi
  */
-export declare interface ToSignalOptions {
+export declare interface ToSignalOptions<T> {
     /**
      * Initial value for the signal produced by `toSignal`.
      *
@@ -155,6 +156,12 @@ export declare interface ToSignalOptions {
      * the behavior of the `async` pipe.
      */
     rejectErrors?: boolean;
+    /**
+     * A comparison function which defines equality for values emitted by the observable.
+     *
+     * Equality comparisons are executed against the initial value if one is provided.
+     */
+    equals?: ValueEqualityFn<T>;
 }
 
 export { }

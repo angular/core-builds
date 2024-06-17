@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.2+sha-08038e8
+ * @license Angular v18.1.0-next.2+sha-89ec195
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -175,16 +175,17 @@ function toSignal(source, options) {
     const cleanupRef = requiresCleanup
         ? options?.injector?.get(DestroyRef) ?? inject(DestroyRef)
         : null;
+    const equal = makeToSignalEquals(options?.equals);
     // Note: T is the Observable value type, and U is the initial value type. They don't have to be
     // the same - the returned signal gives values of type `T`.
     let state;
     if (options?.requireSync) {
         // Initially the signal is in a `NoValue` state.
-        state = signal({ kind: 0 /* StateKind.NoValue */ });
+        state = signal({ kind: 0 /* StateKind.NoValue */ }, { equal });
     }
     else {
         // If an initial value was passed, use it. Otherwise, use `undefined` as the initial value.
-        state = signal({ kind: 1 /* StateKind.Value */, value: options?.initialValue });
+        state = signal({ kind: 1 /* StateKind.Value */, value: options?.initialValue }, { equal });
     }
     // Note: This code cannot run inside a reactive context (see assertion above). If we'd support
     // this, we would subscribe to the observable outside of the current reactive context, avoiding
@@ -225,6 +226,9 @@ function toSignal(source, options) {
                 throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
         }
     });
+}
+function makeToSignalEquals(userEquality = Object.is) {
+    return (a, b) => a.kind === 1 /* StateKind.Value */ && b.kind === 1 /* StateKind.Value */ && userEquality(a.value, b.value);
 }
 
 /**

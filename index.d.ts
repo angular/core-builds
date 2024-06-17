@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.2+sha-08038e8
+ * @license Angular v18.1.0-next.2+sha-89ec195
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7175,10 +7175,8 @@ export declare interface ModelOptions {
  *
  * @developerPreview
  */
-export declare interface ModelSignal<T> extends WritableSignal<T>, OutputRef<T> {
+export declare interface ModelSignal<T> extends WritableSignal<T>, InputSignal<T>, OutputRef<T> {
     [SIGNAL]: InputSignalNode<T, T>;
-    [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: T;
-    [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: T;
 }
 
 /**
