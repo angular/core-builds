@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.3+sha-841476d
+ * @license Angular v18.0.3+sha-2eaf04d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17064,7 +17064,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.3+sha-841476d']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.3+sha-2eaf04d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30856,7 +30856,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.3+sha-841476d');
+const VERSION = new Version('18.0.3+sha-2eaf04d');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
