@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.4+sha-2e58620
+ * @license Angular v18.0.4+sha-be9e489
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14476,6 +14476,89 @@ function isRootTemplateMessage(subTemplateIndex) {
     return subTemplateIndex === -1;
 }
 
+function enterIcu(state, tIcu, lView) {
+    state.index = 0;
+    const currentCase = getCurrentICUCaseIndex(tIcu, lView);
+    if (currentCase !== null) {
+        ngDevMode && assertNumberInRange(currentCase, 0, tIcu.cases.length - 1);
+        state.removes = tIcu.remove[currentCase];
+    }
+    else {
+        state.removes = EMPTY_ARRAY;
+    }
+}
+function icuContainerIteratorNext(state) {
+    if (state.index < state.removes.length) {
+        const removeOpCode = state.removes[state.index++];
+        ngDevMode && assertNumber(removeOpCode, 'Expecting OpCode number');
+        if (removeOpCode > 0) {
+            const rNode = state.lView[removeOpCode];
+            ngDevMode && assertDomNode(rNode);
+            return rNode;
+        }
+        else {
+            state.stack.push(state.index, state.removes);
+            // ICUs are represented by negative indices
+            const tIcuIndex = ~removeOpCode;
+            const tIcu = state.lView[TVIEW].data[tIcuIndex];
+            ngDevMode && assertTIcu(tIcu);
+            enterIcu(state, tIcu, state.lView);
+            return icuContainerIteratorNext(state);
+        }
+    }
+    else {
+        if (state.stack.length === 0) {
+            return null;
+        }
+        else {
+            state.removes = state.stack.pop();
+            state.index = state.stack.pop();
+            return icuContainerIteratorNext(state);
+        }
+    }
+}
+function loadIcuContainerVisitor() {
+    const _state = {
+        stack: [],
+        index: -1,
+    };
+    /**
+     * Retrieves a set of root nodes from `TIcu.remove`. Used by `TNodeType.ICUContainer`
+     * to determine which root belong to the ICU.
+     *
+     * Example of usage.
+     * ```
+     * const nextRNode = icuContainerIteratorStart(tIcuContainerNode, lView);
+     * let rNode: RNode|null;
+     * while(rNode = nextRNode()) {
+     *   console.log(rNode);
+     * }
+     * ```
+     *
+     * @param tIcuContainerNode Current `TIcuContainerNode`
+     * @param lView `LView` where the `RNode`s should be looked up.
+     */
+    function icuContainerIteratorStart(tIcuContainerNode, lView) {
+        _state.lView = lView;
+        while (_state.stack.length)
+            _state.stack.pop();
+        ngDevMode && assertTNodeForLView(tIcuContainerNode, lView);
+        enterIcu(_state, tIcuContainerNode.value, lView);
+        return icuContainerIteratorNext.bind(null, _state);
+    }
+    return icuContainerIteratorStart;
+}
+function createIcuIterator(tIcu, lView) {
+    const state = {
+        stack: [],
+        index: -1,
+        lView,
+    };
+    ngDevMode && assertTIcu(tIcu);
+    enterIcu(state, tIcu, lView);
+    return icuContainerIteratorNext.bind(null, state);
+}
+
 /**
  * Regexp that extracts a reference node information from the compressed node location.
  * The reference node is represented as either:
@@ -14547,15 +14630,21 @@ function getNoOffsetIndex(tNode) {
 }
 /**
  * Check whether a given node exists, but is disconnected from the DOM.
+ */
+function isDisconnectedNode(tNode, lView) {
+    return (!(tNode.type & 16 /* TNodeType.Projection */) &&
+        !!lView[tNode.index] &&
+        isDisconnectedRNode(unwrapRNode(lView[tNode.index])));
+}
+/**
+ * Check whether the given node exists, but is disconnected from the DOM.
  *
  * Note: we leverage the fact that we have this information available in the DOM emulation
  * layer (in Domino) for now. Longer-term solution should not rely on the DOM emulation and
  * only use internal data structures and state to compute this information.
  */
-function isDisconnectedNode(tNode, lView) {
-    return (!(tNode.type & 16 /* TNodeType.Projection */) &&
-        !!lView[tNode.index] &&
-        !unwrapRNode(lView[tNode.index])?.isConnected);
+function isDisconnectedRNode(rNode) {
+    return !!rNode && !rNode.isConnected;
 }
 /**
  * Locate a node in an i18n tree that corresponds to a given instruction index.
@@ -14819,7 +14908,7 @@ function calcPathForNode(tNode, lView, excludedParentNodes) {
         referenceNodeName = renderStringify(parentIndex - HEADER_OFFSET);
     }
     let rNode = unwrapRNode(lView[tNode.index]);
-    if (tNode.type & 12 /* TNodeType.AnyContainer */) {
+    if (tNode.type & (12 /* TNodeType.AnyContainer */ | 32 /* TNodeType.Icu */)) {
         // For <ng-container> nodes, instead of serializing a reference
         // to the anchor comment node, serialize a location of the first
         // DOM element. Paired with the container size (serialized as a part
@@ -14951,30 +15040,104 @@ function trySerializeI18nBlock(lView, index, context) {
     if (!tI18n || !tI18n.ast) {
         return null;
     }
-    const caseQueue = [];
-    tI18n.ast.forEach((node) => serializeI18nBlock(lView, caseQueue, context, node));
-    return caseQueue.length > 0 ? caseQueue : null;
+    const serializedI18nBlock = {
+        caseQueue: [],
+        disconnectedNodes: new Set(),
+        disjointNodes: new Set(),
+    };
+    serializeI18nBlock(lView, serializedI18nBlock, context, tI18n.ast);
+    return serializedI18nBlock.caseQueue.length === 0 &&
+        serializedI18nBlock.disconnectedNodes.size === 0 &&
+        serializedI18nBlock.disjointNodes.size === 0
+        ? null
+        : serializedI18nBlock;
 }
-function serializeI18nBlock(lView, caseQueue, context, node) {
+function serializeI18nBlock(lView, serializedI18nBlock, context, nodes) {
+    let prevRNode = null;
+    for (const node of nodes) {
+        const nextRNode = serializeI18nNode(lView, serializedI18nBlock, context, node);
+        if (nextRNode) {
+            if (isDisjointNode(prevRNode, nextRNode)) {
+                serializedI18nBlock.disjointNodes.add(node.index - HEADER_OFFSET);
+            }
+            prevRNode = nextRNode;
+        }
+    }
+    return prevRNode;
+}
+/**
+ * Helper to determine whether the given nodes are "disjoint".
+ *
+ * The i18n hydration process walks through the DOM and i18n nodes
+ * at the same time. It expects the sibling DOM node of the previous
+ * i18n node to be the first node of the next i18n node.
+ *
+ * In cases of content projection, this won't always be the case. So
+ * when we detect that, we mark the node as "disjoint", ensuring that
+ * we will serialize the path to the node. This way, when we hydrate the
+ * i18n node, we will be able to find the correct place to start.
+ */
+function isDisjointNode(prevNode, nextNode) {
+    return prevNode && prevNode.nextSibling !== nextNode;
+}
+/**
+ * Process the given i18n node for serialization.
+ * Returns the first RNode for the i18n node to begin hydration.
+ */
+function serializeI18nNode(lView, serializedI18nBlock, context, node) {
+    const maybeRNode = unwrapRNode(lView[node.index]);
+    if (!maybeRNode || isDisconnectedRNode(maybeRNode)) {
+        serializedI18nBlock.disconnectedNodes.add(node.index - HEADER_OFFSET);
+        return null;
+    }
+    const rNode = maybeRNode;
     switch (node.kind) {
-        case 0 /* I18nNodeKind.TEXT */:
-            const rNode = unwrapRNode(lView[node.index]);
+        case 0 /* I18nNodeKind.TEXT */: {
             processTextNodeBeforeSerialization(context, rNode);
             break;
+        }
         case 1 /* I18nNodeKind.ELEMENT */:
-        case 2 /* I18nNodeKind.PLACEHOLDER */:
-            node.children.forEach((node) => serializeI18nBlock(lView, caseQueue, context, node));
+        case 2 /* I18nNodeKind.PLACEHOLDER */: {
+            serializeI18nBlock(lView, serializedI18nBlock, context, node.children);
             break;
-        case 3 /* I18nNodeKind.ICU */:
+        }
+        case 3 /* I18nNodeKind.ICU */: {
             const currentCase = lView[node.currentCaseLViewIndex];
             if (currentCase != null) {
                 // i18n uses a negative value to signal a change to a new case, so we
                 // need to invert it to get the proper value.
                 const caseIdx = currentCase < 0 ? ~currentCase : currentCase;
-                caseQueue.push(caseIdx);
-                node.cases[caseIdx].forEach((node) => serializeI18nBlock(lView, caseQueue, context, node));
+                serializedI18nBlock.caseQueue.push(caseIdx);
+                serializeI18nBlock(lView, serializedI18nBlock, context, node.cases[caseIdx]);
             }
             break;
+        }
+    }
+    return getFirstNativeNodeForI18nNode(lView, node);
+}
+/**
+ * Helper function to get the first native node to begin hydrating
+ * the given i18n node.
+ */
+function getFirstNativeNodeForI18nNode(lView, node) {
+    const tView = lView[TVIEW];
+    const maybeTNode = tView.data[node.index];
+    if (isTNodeShape(maybeTNode)) {
+        // If the node is backed by an actual TNode, we can simply delegate.
+        return getFirstNativeNode(lView, maybeTNode);
+    }
+    else if (node.kind === 3 /* I18nNodeKind.ICU */) {
+        // A nested ICU container won't have an actual TNode. In that case, we can use
+        // an iterator to find the first child.
+        const icuIterator = createIcuIterator(maybeTNode, lView);
+        let rNode = icuIterator();
+        // If the ICU container has no nodes, then we use the ICU anchor as the node.
+        return rNode ?? unwrapRNode(lView[node.index]);
+    }
+    else {
+        // Otherwise, the node is a text or trivial element in an ICU container,
+        // and we can just use the RNode directly.
+        return unwrapRNode(lView[node.index]) ?? null;
     }
 }
 function setCurrentNode(state, node) {
@@ -15067,16 +15230,24 @@ function prepareI18nBlockForHydrationImpl(lView, index, parentTNode, subTemplate
 }
 function collectI18nNodesFromDom(context, state, nodeOrNodes) {
     if (Array.isArray(nodeOrNodes)) {
+        let nextState = state;
         for (const node of nodeOrNodes) {
-            // If the node is being projected elsewhere, we need to temporarily
-            // branch the state to that location to continue hydration.
-            // Otherwise, we continue hydration from the current location.
+            // Whenever a node doesn't directly follow the previous RNode, it
+            // is given a path. We need to resume collecting nodes from that location
+            // until and unless we find another disjoint node.
             const targetNode = tryLocateRNodeByPath(context.hydrationInfo, context.lView, node.index - HEADER_OFFSET);
-            const nextState = targetNode ? forkHydrationState(state, targetNode) : state;
+            if (targetNode) {
+                nextState = forkHydrationState(state, targetNode);
+            }
             collectI18nNodesFromDom(context, nextState, node);
         }
     }
     else {
+        if (context.disconnectedNodes.has(nodeOrNodes.index - HEADER_OFFSET)) {
+            // i18n nodes can be considered disconnected if e.g. they were projected.
+            // In that case, we have to make sure to skip over them.
+            return;
+        }
         switch (nodeOrNodes.kind) {
             case 0 /* I18nNodeKind.TEXT */: {
                 // Claim a text node for hydration
@@ -16157,6 +16328,7 @@ function internalAfterNextRender(callback, options) {
  * </div>
  *
  * @param callback A callback function to register
+ * @param options Options to control the behavior of the callback
  *
  * @usageNotes
  *
@@ -16229,6 +16401,7 @@ function afterRender(callback, options) {
  * </div>
  *
  * @param callback A callback function to register
+ * @param options Options to control the behavior of the callback
  *
  * @usageNotes
  *
@@ -17064,7 +17237,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.4+sha-2e58620']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.4+sha-be9e489']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -25149,79 +25322,6 @@ function getCaseIndex(icuExpression, bindingValue) {
     return index === -1 ? null : index;
 }
 
-function loadIcuContainerVisitor() {
-    const _stack = [];
-    let _index = -1;
-    let _lView;
-    let _removes;
-    /**
-     * Retrieves a set of root nodes from `TIcu.remove`. Used by `TNodeType.ICUContainer`
-     * to determine which root belong to the ICU.
-     *
-     * Example of usage.
-     * ```
-     * const nextRNode = icuContainerIteratorStart(tIcuContainerNode, lView);
-     * let rNode: RNode|null;
-     * while(rNode = nextRNode()) {
-     *   console.log(rNode);
-     * }
-     * ```
-     *
-     * @param tIcuContainerNode Current `TIcuContainerNode`
-     * @param lView `LView` where the `RNode`s should be looked up.
-     */
-    function icuContainerIteratorStart(tIcuContainerNode, lView) {
-        _lView = lView;
-        while (_stack.length)
-            _stack.pop();
-        ngDevMode && assertTNodeForLView(tIcuContainerNode, lView);
-        enterIcu(tIcuContainerNode.value, lView);
-        return icuContainerIteratorNext;
-    }
-    function enterIcu(tIcu, lView) {
-        _index = 0;
-        const currentCase = getCurrentICUCaseIndex(tIcu, lView);
-        if (currentCase !== null) {
-            ngDevMode && assertNumberInRange(currentCase, 0, tIcu.cases.length - 1);
-            _removes = tIcu.remove[currentCase];
-        }
-        else {
-            _removes = EMPTY_ARRAY;
-        }
-    }
-    function icuContainerIteratorNext() {
-        if (_index < _removes.length) {
-            const removeOpCode = _removes[_index++];
-            ngDevMode && assertNumber(removeOpCode, 'Expecting OpCode number');
-            if (removeOpCode > 0) {
-                const rNode = _lView[removeOpCode];
-                ngDevMode && assertDomNode(rNode);
-                return rNode;
-            }
-            else {
-                _stack.push(_index, _removes);
-                // ICUs are represented by negative indices
-                const tIcuIndex = ~removeOpCode;
-                const tIcu = _lView[TVIEW].data[tIcuIndex];
-                ngDevMode && assertTIcu(tIcu);
-                enterIcu(tIcu, _lView);
-                return icuContainerIteratorNext();
-            }
-        }
-        else {
-            if (_stack.length === 0) {
-                return null;
-            }
-            else {
-                _removes = _stack.pop();
-                _index = _stack.pop();
-                return icuContainerIteratorNext();
-            }
-        }
-    }
-    return icuContainerIteratorStart;
-}
-
 /**
  * Converts `I18nCreateOpCodes` array into a human readable format.
  *
@@ -30898,7 +30998,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.4+sha-2e58620');
+const VERSION = new Version('18.0.4+sha-be9e489');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -37106,15 +37206,18 @@ function serializeLContainer(lContainer, context) {
 function appendSerializedNodePath(ngh, tNode, lView, excludedParentNodes) {
     const noOffsetIndex = tNode.index - HEADER_OFFSET;
     ngh[NODES] ??= {};
-    ngh[NODES][noOffsetIndex] = calcPathForNode(tNode, lView, excludedParentNodes);
+    // Ensure we don't calculate the path multiple times.
+    ngh[NODES][noOffsetIndex] ??= calcPathForNode(tNode, lView, excludedParentNodes);
 }
 /**
  * Helper function to append information about a disconnected node.
  * This info is needed at runtime to avoid DOM lookups for this element
  * and instead, the element would be created from scratch.
  */
-function appendDisconnectedNodeIndex(ngh, tNode) {
-    const noOffsetIndex = tNode.index - HEADER_OFFSET;
+function appendDisconnectedNodeIndex(ngh, tNodeOrNoOffsetIndex) {
+    const noOffsetIndex = typeof tNodeOrNoOffsetIndex === 'number'
+        ? tNodeOrNoOffsetIndex
+        : tNodeOrNoOffsetIndex.index - HEADER_OFFSET;
     ngh[DISCONNECTED_NODES] ??= [];
     if (!ngh[DISCONNECTED_NODES].includes(noOffsetIndex)) {
         ngh[DISCONNECTED_NODES].push(noOffsetIndex);
@@ -37145,7 +37248,15 @@ function serializeLView(lView, context) {
         const i18nData = trySerializeI18nBlock(lView, i, context);
         if (i18nData) {
             ngh[I18N_DATA] ??= {};
-            ngh[I18N_DATA][noOffsetIndex] = i18nData;
+            ngh[I18N_DATA][noOffsetIndex] = i18nData.caseQueue;
+            for (const nodeNoOffsetIndex of i18nData.disconnectedNodes) {
+                appendDisconnectedNodeIndex(ngh, nodeNoOffsetIndex);
+            }
+            for (const nodeNoOffsetIndex of i18nData.disjointNodes) {
+                const tNode = tView.data[nodeNoOffsetIndex + HEADER_OFFSET];
+                ngDevMode && assertTNode(tNode);
+                appendSerializedNodePath(ngh, tNode, lView, i18nChildren);
+            }
             continue;
         }
         // Skip processing of a given slot in the following cases:

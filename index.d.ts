@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.4+sha-2e58620
+ * @license Angular v18.0.4+sha-be9e489
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -104,6 +104,7 @@ export declare interface AfterContentInit {
  * </div>
  *
  * @param callback A callback function to register
+ * @param options Options to control the behavior of the callback
  *
  * @usageNotes
  *
@@ -156,6 +157,7 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
  * </div>
  *
  * @param callback A callback function to register
+ * @param options Options to control the behavior of the callback
  *
  * @usageNotes
  *
