@@ -500,6 +500,19 @@ function getImportSpecifiers(sourceFile, moduleName, specifierNames) {
   }
   return matches;
 }
+function getNamedImports(sourceFile, moduleName) {
+  var _a;
+  for (const node of sourceFile.statements) {
+    if (import_typescript5.default.isImportDeclaration(node) && import_typescript5.default.isStringLiteral(node.moduleSpecifier)) {
+      const isMatch = typeof moduleName === "string" ? node.moduleSpecifier.text === moduleName : moduleName.test(node.moduleSpecifier.text);
+      const namedBindings = (_a = node.importClause) == null ? void 0 : _a.namedBindings;
+      if (isMatch && namedBindings && import_typescript5.default.isNamedImports(namedBindings)) {
+        return namedBindings;
+      }
+    }
+  }
+  return null;
+}
 function findImportSpecifier(nodes, specifierName) {
   return nodes.find((element) => {
     const { name, propertyName } = element;
@@ -514,41 +527,49 @@ var AFTER_RENDER_FNS = /* @__PURE__ */ new Set(["afterRender", "afterNextRender"
 function migrateFile(sourceFile, typeChecker, rewriteFn) {
   var _a;
   const changeTracker = new ChangeTracker(import_typescript6.default.createPrinter());
+  const coreImports = getNamedImports(sourceFile, CORE);
+  if (!coreImports) {
+    return;
+  }
   const phaseEnum = getImportSpecifier(sourceFile, CORE, AFTER_RENDER_PHASE_ENUM);
-  if (phaseEnum) {
-    changeTracker.removeNode(phaseEnum);
-    import_typescript6.default.forEachChild(sourceFile, function visit(node) {
-      var _a2;
-      import_typescript6.default.forEachChild(node, visit);
-      if (import_typescript6.default.isCallExpression(node) && import_typescript6.default.isIdentifier(node.expression) && AFTER_RENDER_FNS.has(((_a2 = getImportOfIdentifier(typeChecker, node.expression)) == null ? void 0 : _a2.name) || "")) {
-        let phase;
-        const [callback, options] = node.arguments;
-        if (import_typescript6.default.isObjectLiteralExpression(options)) {
-          const phaseProp = options.properties.find((p) => {
-            var _a3;
-            return ((_a3 = p.name) == null ? void 0 : _a3.getText()) === "phase";
-          });
-          if (phaseProp && import_typescript6.default.isPropertyAssignment(phaseProp) && import_typescript6.default.isPropertyAccessExpression(phaseProp.initializer) && phaseProp.initializer.expression.getText() === AFTER_RENDER_PHASE_ENUM) {
-            phaseProp.initializer.expression;
-            phase = phaseProp.initializer.name.getText();
-            if (options.properties.length === 1) {
-              changeTracker.removeNode(options);
-            } else {
-              const newOptions = import_typescript6.default.factory.createObjectLiteralExpression(options.properties.filter((p) => p !== phaseProp));
-              changeTracker.replaceNode(options, newOptions);
-            }
+  if (!phaseEnum) {
+    return;
+  }
+  const newCoreImports = import_typescript6.default.factory.updateNamedImports(coreImports, [
+    ...coreImports.elements.filter((current) => phaseEnum !== current)
+  ]);
+  changeTracker.replaceNode(coreImports, newCoreImports);
+  import_typescript6.default.forEachChild(sourceFile, function visit(node) {
+    var _a2;
+    import_typescript6.default.forEachChild(node, visit);
+    if (import_typescript6.default.isCallExpression(node) && import_typescript6.default.isIdentifier(node.expression) && AFTER_RENDER_FNS.has(((_a2 = getImportOfIdentifier(typeChecker, node.expression)) == null ? void 0 : _a2.name) || "")) {
+      let phase;
+      const [callback, options] = node.arguments;
+      if (import_typescript6.default.isObjectLiteralExpression(options)) {
+        const phaseProp = options.properties.find((p) => {
+          var _a3;
+          return ((_a3 = p.name) == null ? void 0 : _a3.getText()) === "phase";
+        });
+        if (phaseProp && import_typescript6.default.isPropertyAssignment(phaseProp) && import_typescript6.default.isPropertyAccessExpression(phaseProp.initializer) && phaseProp.initializer.expression.getText() === AFTER_RENDER_PHASE_ENUM) {
+          phaseProp.initializer.expression;
+          phase = phaseProp.initializer.name.getText();
+          if (options.properties.length === 1) {
+            changeTracker.removeNode(options);
+          } else {
+            const newOptions = import_typescript6.default.factory.createObjectLiteralExpression(options.properties.filter((p) => p !== phaseProp));
+            changeTracker.replaceNode(options, newOptions);
           }
         }
-        if (phase) {
-          phase = phase.substring(0, 1).toLocaleLowerCase() + phase.substring(1);
-          const spec = import_typescript6.default.factory.createObjectLiteralExpression([
-            import_typescript6.default.factory.createPropertyAssignment(import_typescript6.default.factory.createIdentifier(phase), callback)
-          ]);
-          changeTracker.replaceNode(callback, spec);
-        }
       }
-    });
-  }
+      if (phase) {
+        phase = phase.substring(0, 1).toLocaleLowerCase() + phase.substring(1);
+        const spec = import_typescript6.default.factory.createObjectLiteralExpression([
+          import_typescript6.default.factory.createPropertyAssignment(import_typescript6.default.factory.createIdentifier(phase), callback)
+        ]);
+        changeTracker.replaceNode(callback, spec);
+      }
+    }
+  });
   for (const changesInFile of changeTracker.recordChanges().values()) {
     for (const change of changesInFile) {
       rewriteFn(change.start, (_a = change.removeLength) != null ? _a : 0, change.text);

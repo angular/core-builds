@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.2+sha-0bd55a6
+ * @license Angular v18.1.0-next.2+sha-0d52c6b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -132,6 +132,7 @@ export declare interface AfterContentInit {
  * </div>
  *
  * @param spec The callback functions to register
+ * @param options Options to control the behavior of the callback
  *
  * @usageNotes
  *
@@ -165,7 +166,7 @@ export declare function afterNextRender<E = never, W = never, M = never>(spec: {
     write?: (...args: ɵFirstAvailable<[E]>) => W;
     mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
     read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
-}, opts?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
 
 /**
  * Register a callback to be invoked the next time the application finishes rendering, during the
@@ -191,6 +192,7 @@ export declare function afterNextRender<E = never, W = never, M = never>(spec: {
  * </div>
  *
  * @param callback A callback function to register
+ * @param options Options to control the behavior of the callback
  *
  * @usageNotes
  *
@@ -271,6 +273,7 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
  * </div>
  *
  * @param spec The callback functions to register
+ * @param options Options to control the behavior of the callback
  *
  * @usageNotes
  *
@@ -302,7 +305,7 @@ export declare function afterRender<E = never, W = never, M = never>(spec: {
     write?: (...args: ɵFirstAvailable<[E]>) => W;
     mixedReadWrite?: (...args: ɵFirstAvailable<[W, E]>) => M;
     read?: (...args: ɵFirstAvailable<[M, W, E]>) => void;
-}, opts?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
+}, options?: Omit<AfterRenderOptions, 'phase'>): AfterRenderRef;
 
 /**
  * Register a callback to be invoked each time the application finishes rendering, during the
@@ -329,6 +332,7 @@ export declare function afterRender<E = never, W = never, M = never>(spec: {
  * </div>
  *
  * @param callback A callback function to register
+ * @param options Options to control the behavior of the callback
  *
  * @usageNotes
  *
@@ -380,7 +384,7 @@ export declare interface AfterRenderOptions {
      * </div>
      *
      * @deprecated Specify the phase for your callback to run in by passing a spec-object as the first
-     *   parameter to `afterRender` or `afterNextRender` insetad of a function.
+     *   parameter to `afterRender` or `afterNextRender` instead of a function.
      */
     phase?: AfterRenderPhase;
 }
@@ -404,7 +408,7 @@ export declare interface AfterRenderOptions {
  * or library.
  *
  * @deprecated Specify the phase for your callback to run in by passing a spec-object as the first
- *   parameter to `afterRender` or `afterNextRender` insetad of a function.
+ *   parameter to `afterRender` or `afterNextRender` instead of a function.
  */
 export declare enum AfterRenderPhase {
     /**
@@ -15035,6 +15039,15 @@ export declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target
 export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
 /**
+ * Declares an `@let` at a specific data slot.
+ *
+ * @param index Index at which to declare the `@let`.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵdeclareLet(index: number): typeof ɵɵdeclareLet;
+
+/**
  * Creates runtime data structures for defer blocks.
  *
  * @param index Index of the `defer` instruction.
@@ -16713,6 +16726,15 @@ export declare function ɵɵqueryAdvance(indexOffset?: number): void;
 export declare function ɵɵqueryRefresh(queryList: QueryList<any>): boolean;
 
 /**
+ * Retrieves the value of a `@let` declaration defined within the same view.
+ *
+ * @param index Index of the declaration within the view.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵreadContextLet<T>(index: number): T;
+
+/**
  * Retrieves a local reference from the current contextViewData.
  *
  * If the reference to retrieve is in a parent view, this instruction is used in conjunction
@@ -16964,6 +16986,13 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: NgModuleScopeInfo
  * @codeGenApi
  */
 export declare function ɵɵStandaloneFeature(definition: ɵComponentDef<unknown>): void;
+
+/**
+ * Instruction that stores the value of a `@let` declaration on the current view.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵstoreLet<T>(value: T): T;
 
 /**
  * Update style bindings using an object literal on an element.
