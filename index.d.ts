@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.3+sha-cc6cd08
+ * @license Angular v18.0.3+sha-5f8f18d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14847,6 +14847,15 @@ export declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target
 export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
 /**
+ * Declares an `@let` at a specific data slot.
+ *
+ * @param index Index at which to declare the `@let`.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵdeclareLet(index: number): typeof ɵɵdeclareLet;
+
+/**
  * Creates runtime data structures for defer blocks.
  *
  * @param index Index of the `defer` instruction.
@@ -16525,6 +16534,15 @@ export declare function ɵɵqueryAdvance(indexOffset?: number): void;
 export declare function ɵɵqueryRefresh(queryList: QueryList<any>): boolean;
 
 /**
+ * Retrieves the value of a `@let` declaration defined within the same view.
+ *
+ * @param index Index of the declaration within the view.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵreadContextLet<T>(index: number): T;
+
+/**
  * Retrieves a local reference from the current contextViewData.
  *
  * If the reference to retrieve is in a parent view, this instruction is used in conjunction
@@ -16776,6 +16794,13 @@ export declare function ɵɵsetNgModuleScope(type: any, scope: NgModuleScopeInfo
  * @codeGenApi
  */
 export declare function ɵɵStandaloneFeature(definition: ɵComponentDef<unknown>): void;
+
+/**
+ * Instruction that stores the value of a `@let` declaration on the current view.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵstoreLet<T>(value: T): T;
 
 /**
  * Update style bindings using an object literal on an element.
