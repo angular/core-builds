@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.3+sha-ccc8c80
+ * @license Angular v18.1.0-next.3+sha-c19a4e7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10591,6 +10591,10 @@ declare const enum TNodeType {
      * existing `TNode` (rather than create a new one) and just update the missing information.
      */
     Placeholder = 64,
+    /**
+     * The TNode contains information about a `@let` declaration.
+     */
+    LetDeclaration = 128,
     AnyRNode = 3,// Text | Element
     AnyContainer = 12
 }
@@ -13758,6 +13762,7 @@ export declare const enum ɵRuntimeErrorCode {
     HOST_DIRECTIVE_UNDEFINED_BINDING = 311,
     HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
     MULTIPLE_MATCHING_PIPES = 313,
+    UNINITIALIZED_LET_ACCESS = 314,
     MULTIPLE_PLATFORMS = 400,
     PLATFORM_NOT_FOUND = 401,
     MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
@@ -15039,7 +15044,7 @@ export declare function ɵɵcontentQuerySignal<T>(directiveIndex: number, target
 export declare function ɵɵCopyDefinitionFeature(definition: ɵDirectiveDef<any> | ɵComponentDef<any>): void;
 
 /**
- * Declares an `@let` at a specific data slot.
+ * Declares an `@let` at a specific data slot. Returns itself to allow chaining.
  *
  * @param index Index at which to declare the `@let`.
  *
@@ -16726,7 +16731,7 @@ export declare function ɵɵqueryAdvance(indexOffset?: number): void;
 export declare function ɵɵqueryRefresh(queryList: QueryList<any>): boolean;
 
 /**
- * Retrieves the value of a `@let` declaration defined within the same view.
+ * Retrieves the value of a `@let` declaration defined in a parent view.
  *
  * @param index Index of the declaration within the view.
  *
@@ -16989,6 +16994,7 @@ export declare function ɵɵStandaloneFeature(definition: ɵComponentDef<unknown
 
 /**
  * Instruction that stores the value of a `@let` declaration on the current view.
+ * Returns the value to allow usage inside variable initializers.
  *
  * @codeGenApi
  */

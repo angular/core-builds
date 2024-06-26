@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.3+sha-ccc8c80
+ * @license Angular v18.1.0-next.3+sha-c19a4e7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -142,7 +142,7 @@ export declare class EventContract implements UnrenamedEventContract {
     /** Whether to add an a11y click listener. */
     private addA11yClickListener;
     ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
-    constructor(containerManager: EventContractContainerManager, useActionResolver?: boolean);
+    constructor(containerManager: EventContractContainerManager, useActionResolver: false);
     private handleEvent;
     /**
      * Handle an `EventInfo`.

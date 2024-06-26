@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.3+sha-ccc8c80
+ * @license Angular v18.1.0-next.3+sha-c19a4e7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5317,6 +5317,7 @@ function toTNodeTypeAsString(tNodeType) {
     tNodeType & 16 /* TNodeType.Projection */ && (text += '|Projection');
     tNodeType & 32 /* TNodeType.Icu */ && (text += '|IcuContainer');
     tNodeType & 64 /* TNodeType.Placeholder */ && (text += '|Placeholder');
+    tNodeType & 128 /* TNodeType.LetDeclaration */ && (text += '|LetDeclaration');
     return text.length > 0 ? text.substring(1) : text;
 }
 /**
@@ -5392,13 +5393,14 @@ function assertTNodeType(tNode, expectedTypes, message) {
     }
 }
 function assertPureTNodeType(type) {
-    if (!(type === 2 /* TNodeType.Element */ || //
-        type === 1 /* TNodeType.Text */ || //
-        type === 4 /* TNodeType.Container */ || //
-        type === 8 /* TNodeType.ElementContainer */ || //
-        type === 32 /* TNodeType.Icu */ || //
-        type === 16 /* TNodeType.Projection */ || //
-        type === 64 /* TNodeType.Placeholder */)) {
+    if (!(type === 2 /* TNodeType.Element */ ||
+        type === 1 /* TNodeType.Text */ ||
+        type === 4 /* TNodeType.Container */ ||
+        type === 8 /* TNodeType.ElementContainer */ ||
+        type === 32 /* TNodeType.Icu */ ||
+        type === 16 /* TNodeType.Projection */ ||
+        type === 64 /* TNodeType.Placeholder */ ||
+        type === 128 /* TNodeType.LetDeclaration */)) {
         throwError(`Expected TNodeType to have only a single type selected, but got ${toTNodeTypeAsString(type)}.`);
     }
 }
@@ -6595,6 +6597,9 @@ function getDevModeNodeName(tNode) {
     }
     else if (tNode.type & 4 /* TNodeType.Container */) {
         return 'an <ng-template>';
+    }
+    else if (tNode.type & 128 /* TNodeType.LetDeclaration */) {
+        return 'an @let declaration';
     }
     else {
         return 'a node';
@@ -10840,8 +10845,10 @@ function getParentRElement(tView, tNode, lView) {
 function getClosestRElement(tView, tNode, lView) {
     let parentTNode = tNode;
     // Skip over element and ICU containers as those are represented by a comment node and
-    // can't be used as a render parent.
-    while (parentTNode !== null && parentTNode.type & (8 /* TNodeType.ElementContainer */ | 32 /* TNodeType.Icu */)) {
+    // can't be used as a render parent. Also skip let declarations since they don't have a
+    // corresponding DOM node at all.
+    while (parentTNode !== null &&
+        parentTNode.type & (8 /* TNodeType.ElementContainer */ | 32 /* TNodeType.Icu */ | 128 /* TNodeType.LetDeclaration */)) {
         tNode = parentTNode;
         parentTNode = tNode.parent;
     }
@@ -11091,6 +11098,11 @@ function clearElementContents(rElement) {
 function applyNodes(renderer, action, tNode, lView, parentRElement, beforeNode, isProjection) {
     while (tNode != null) {
         ngDevMode && assertTNodeForLView(tNode, lView);
+        // Let declarations don't have corresponding DOM nodes so we skip over them.
+        if (tNode.type === 128 /* TNodeType.LetDeclaration */) {
+            tNode = tNode.next;
+            continue;
+        }
         ngDevMode &&
             assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 16 /* TNodeType.Projection */ | 32 /* TNodeType.Icu */);
         const rawSlotValue = lView[tNode.index];
@@ -12941,6 +12953,11 @@ function removeLViewFromLContainer(lContainer, index) {
 
 function collectNativeNodes(tView, lView, tNode, result, isProjection = false) {
     while (tNode !== null) {
+        // Let declarations don't have corresponding DOM nodes so we skip over them.
+        if (tNode.type === 128 /* TNodeType.LetDeclaration */) {
+            tNode = isProjection ? tNode.projectionNext : tNode.next;
+            continue;
+        }
         ngDevMode &&
             assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 16 /* TNodeType.Projection */ | 32 /* TNodeType.Icu */);
         const lNode = lView[tNode.index];
@@ -13882,6 +13899,8 @@ function getFriendlyStringFromTNodeType(tNodeType) {
             return 'projection';
         case 1 /* TNodeType.Text */:
             return 'text';
+        case 128 /* TNodeType.LetDeclaration */:
+            return '@let';
         default:
             // This should not happen as we cover all possible TNode types above.
             return '<unknown>';
@@ -14632,7 +14651,7 @@ function getNoOffsetIndex(tNode) {
  * Check whether a given node exists, but is disconnected from the DOM.
  */
 function isDisconnectedNode(tNode, lView) {
-    return (!(tNode.type & 16 /* TNodeType.Projection */) &&
+    return (!(tNode.type & (16 /* TNodeType.Projection */ | 128 /* TNodeType.LetDeclaration */)) &&
         !!lView[tNode.index] &&
         isDisconnectedRNode(unwrapRNode(lView[tNode.index])));
 }
@@ -17182,7 +17201,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.3+sha-ccc8c80']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.3+sha-c19a4e7']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -26719,17 +26738,20 @@ function ɵɵprojectionDef(projectionSlots) {
         const tails = projectionHeads.slice();
         let componentChild = componentNode.child;
         while (componentChild !== null) {
-            const slotIndex = projectionSlots
-                ? matchingProjectionSlotIndex(componentChild, projectionSlots)
-                : 0;
-            if (slotIndex !== null) {
-                if (tails[slotIndex]) {
-                    tails[slotIndex].projectionNext = componentChild;
+            // Do not project let declarations so they don't occupy a slot.
+            if (componentChild.type !== 128 /* TNodeType.LetDeclaration */) {
+                const slotIndex = projectionSlots
+                    ? matchingProjectionSlotIndex(componentChild, projectionSlots)
+                    : 0;
+                if (slotIndex !== null) {
+                    if (tails[slotIndex]) {
+                        tails[slotIndex].projectionNext = componentChild;
+                    }
+                    else {
+                        projectionHeads[slotIndex] = componentChild;
+                    }
+                    tails[slotIndex] = componentChild;
                 }
-                else {
-                    projectionHeads[slotIndex] = componentChild;
-                }
-                tails[slotIndex] = componentChild;
             }
             componentChild = componentChild.next;
         }
@@ -28458,36 +28480,52 @@ function ɵɵtwoWayListener(eventName, listenerFn) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/** Object that indicates the value of a `@let` declaration that hasn't been initialized yet. */
+const UNINITIALIZED_LET = {};
 /**
- * Declares an `@let` at a specific data slot.
+ * Declares an `@let` at a specific data slot. Returns itself to allow chaining.
  *
  * @param index Index at which to declare the `@let`.
  *
  * @codeGenApi
  */
 function ɵɵdeclareLet(index) {
-    // TODO(crisbeto): implement this
+    const tView = getTView();
+    const lView = getLView();
+    const adjustedIndex = index + HEADER_OFFSET;
+    const tNode = getOrCreateTNode(tView, adjustedIndex, 128 /* TNodeType.LetDeclaration */, null, null);
+    setCurrentTNode(tNode, false);
+    store(tView, lView, adjustedIndex, UNINITIALIZED_LET);
     return ɵɵdeclareLet;
 }
 /**
  * Instruction that stores the value of a `@let` declaration on the current view.
+ * Returns the value to allow usage inside variable initializers.
  *
  * @codeGenApi
  */
 function ɵɵstoreLet(value) {
-    // TODO(crisbeto): implement this
+    performanceMarkFeature('NgLet');
+    const tView = getTView();
+    const lView = getLView();
+    const index = getSelectedIndex();
+    store(tView, lView, index, value);
     return value;
 }
 /**
- * Retrieves the value of a `@let` declaration defined within the same view.
+ * Retrieves the value of a `@let` declaration defined in a parent view.
  *
  * @param index Index of the declaration within the view.
  *
  * @codeGenApi
  */
 function ɵɵreadContextLet(index) {
-    // TODO(crisbeto): implement this
-    return null;
+    const contextLView = getContextLView();
+    const value = load(contextLView, HEADER_OFFSET + index);
+    if (value === UNINITIALIZED_LET) {
+        throw new RuntimeError(314 /* RuntimeErrorCode.UNINITIALIZED_LET_ACCESS */, ngDevMode && 'Attempting to access a @let declaration whose value is not available yet');
+    }
+    return value;
 }
 
 /*
@@ -30943,7 +30981,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.3+sha-ccc8c80');
+const VERSION = new Version('18.1.0-next.3+sha-c19a4e7');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -34143,7 +34181,8 @@ function createViewRef(tNode, lView, isPipe) {
         const componentView = getComponentLViewByIndex(tNode.index, lView); // look down
         return new ViewRef$1(componentView, componentView);
     }
-    else if (tNode.type & (3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 32 /* TNodeType.Icu */)) {
+    else if (tNode.type &
+        (3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 32 /* TNodeType.Icu */ | 128 /* TNodeType.LetDeclaration */)) {
         // The LView represents the location where the injection is requested from.
         // We need to locate the containing LView (in case where the `lView` is an embedded view)
         const hostComponentView = lView[DECLARATION_COMPONENT_VIEW]; // look up
@@ -36758,7 +36797,8 @@ const initGlobalEventDelegation = (eventDelegation, injector) => {
     if (injector.get(IS_EVENT_REPLAY_ENABLED, EVENT_REPLAY_ENABLED_DEFAULT)) {
         return;
     }
-    eventDelegation.eventContract = new EventContract(new EventContractContainer(document.body));
+    eventDelegation.eventContract = new EventContract(new EventContractContainer(document.body), 
+    /* useActionResolver= */ false);
     const dispatcher = new EventDispatcher(invokeRegisteredListeners);
     registerDispatcher(eventDelegation.eventContract, dispatcher);
 };
@@ -36852,7 +36892,8 @@ const initEventReplay = (eventDelegation, injector) => {
     // This is set in packages/platform-server/src/utils.ts
     const container = globalThis[CONTRACT_PROPERTY]?.[appId];
     const earlyJsactionData = getJsactionData(container);
-    const eventContract = (eventDelegation.eventContract = new EventContract(new EventContractContainer(earlyJsactionData.c)));
+    const eventContract = (eventDelegation.eventContract = new EventContract(new EventContractContainer(earlyJsactionData.c), 
+    /* useActionResolver= */ false));
     for (const et of earlyJsactionData.et) {
         eventContract.addEvent(et);
     }
@@ -37314,13 +37355,14 @@ function serializeLView(lView, context) {
                 ngh[ELEMENT_CONTAINERS] ??= {};
                 ngh[ELEMENT_CONTAINERS][noOffsetIndex] = calcNumRootNodes(tView, lView, tNode.child);
             }
-            else if (tNode.type & 16 /* TNodeType.Projection */) {
-                // Current TNode represents an `<ng-content>` slot, thus it has no
-                // DOM elements associated with it, so the **next sibling** node would
-                // not be able to find an anchor. In this case, use full path instead.
+            else if (tNode.type & (16 /* TNodeType.Projection */ | 128 /* TNodeType.LetDeclaration */)) {
+                // Current TNode represents an `<ng-content>` slot or `@let` declaration,
+                // thus it has no DOM elements associated with it, so the **next sibling**
+                // node would not be able to find an anchor. In this case, use full path instead.
                 let nextTNode = tNode.next;
-                // Skip over all `<ng-content>` slots in a row.
-                while (nextTNode !== null && nextTNode.type & 16 /* TNodeType.Projection */) {
+                // Skip over all `<ng-content>` slots and `@let` declarations in a row.
+                while (nextTNode !== null &&
+                    nextTNode.type & (16 /* TNodeType.Projection */ | 128 /* TNodeType.LetDeclaration */)) {
                     nextTNode = nextTNode.next;
                 }
                 if (nextTNode && !isInSkipHydrationBlock(nextTNode)) {
@@ -37328,11 +37370,9 @@ function serializeLView(lView, context) {
                     appendSerializedNodePath(ngh, nextTNode, lView, i18nChildren);
                 }
             }
-            else {
-                if (tNode.type & 1 /* TNodeType.Text */) {
-                    const rNode = unwrapRNode(lView[i]);
-                    processTextNodeBeforeSerialization(context, rNode);
-                }
+            else if (tNode.type & 1 /* TNodeType.Text */) {
+                const rNode = unwrapRNode(lView[i]);
+                processTextNodeBeforeSerialization(context, rNode);
             }
         }
     }
