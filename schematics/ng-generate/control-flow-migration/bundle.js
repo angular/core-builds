@@ -14085,7 +14085,7 @@ var _ControlFlowError = class {
 };
 var _Tokenizer = class {
   constructor(_file, _getTagDefinition, options) {
-    var _a2;
+    var _a2, _b2;
     this._getTagDefinition = _getTagDefinition;
     this._currentTokenStart = null;
     this._currentTokenType = null;
@@ -14107,7 +14107,7 @@ var _Tokenizer = class {
     this._preserveLineEndings = options.preserveLineEndings || false;
     this._i18nNormalizeLineEndingsInICUs = options.i18nNormalizeLineEndingsInICUs || false;
     this._tokenizeBlocks = (_a2 = options.tokenizeBlocks) != null ? _a2 : true;
-    this._tokenizeLet = options.tokenizeLet || false;
+    this._tokenizeLet = (_b2 = options.tokenizeLet) != null ? _b2 : true;
     try {
       this._cursor.init();
     } catch (e) {
@@ -21605,7 +21605,7 @@ function parseTemplate(template2, templateUrl, options = {}) {
   }, options), {
     tokenizeExpansionForms: true,
     tokenizeBlocks: (_a2 = options.enableBlockSyntax) != null ? _a2 : true,
-    tokenizeLet: (_b2 = options.enableLetSyntax) != null ? _b2 : false
+    tokenizeLet: (_b2 = options.enableLetSyntax) != null ? _b2 : true
   }));
   if (!options.alwaysAttemptHtmlToR3AstConversion && parseResult.errors && parseResult.errors.length > 0) {
     const parsedTemplate2 = {
@@ -22691,7 +22691,6 @@ var ResourceLoader = class {
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/jit_compiler_facade.mjs
-var enableLetSyntax = false;
 var CompilerFacadeImpl = class {
   constructor(jitEvaluator = new JitEvaluator()) {
     this.jitEvaluator = jitEvaluator;
@@ -23075,8 +23074,7 @@ function parseJitTemplate(template2, typeName, sourceMapUrl, preserveWhitespaces
   const interpolationConfig = interpolation ? InterpolationConfig.fromArray(interpolation) : DEFAULT_INTERPOLATION_CONFIG;
   const parsed = parseTemplate(template2, sourceMapUrl, {
     preserveWhitespaces,
-    interpolationConfig,
-    enableLetSyntax
+    interpolationConfig
   });
   if (parsed.errors !== null) {
     const errors = parsed.errors.map((err) => err.toString()).join(", ");
@@ -23262,7 +23260,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.3+sha-c19a4e7");
+var VERSION2 = new Version("18.1.0-next.3+sha-cc4cb96");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
