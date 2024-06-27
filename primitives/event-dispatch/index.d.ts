@@ -1,17 +1,9 @@
 /**
- * @license Angular v18.1.0-next.4+sha-3447753
+ * @license Angular v18.1.0-next.4+sha-040d861
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-
-declare namespace a11yClickLib {
-    export {
-        updateEventInfoForA11yClick,
-        preventDefaultForA11yClick,
-        populateClickOnlyAction
-    }
-}
 
 
 /**
@@ -24,13 +16,21 @@ declare interface ActionInfo {
 
 declare type ActionInfoInternal = [name: string, element: Element];
 
+
 export declare const Attribute: {
-    JSACTION: string;
-    OI: string;
-    VED: string;
-    VET: string;
-    JSINSTANCE: string;
-    JSTRACK: string;
+    /**
+     * The jsaction attribute defines a mapping of a DOM event to a
+     * generic event (aka jsaction), to which the actual event handlers
+     * that implement the behavior of the application are bound. The
+     * value is a semicolon separated list of colon separated pairs of
+     * an optional DOM event name and a jsaction name. If the optional
+     * DOM event name is omitted, 'click' is assumed. The jsaction names
+     * are dot separated pairs of a namespace and a simple jsaction
+     * name.
+     *
+     * See grammar in README.md for expected syntax in the attribute value.
+     */
+    JSACTION: "jsaction";
 };
 
 /**
@@ -112,11 +112,10 @@ export declare interface EarlyJsactionDataContainer {
  * be delay loaded in a generic way.
  */
 export declare class EventContract implements UnrenamedEventContract {
-    private readonly useActionResolver;
+    private readonly useActionResolver?;
     static A11Y_CLICK_SUPPORT: boolean;
     static MOUSE_SPECIAL_SUPPORT: boolean;
     private containerManager;
-    private readonly actionResolver?;
     /**
      * The DOM events which this contract covers. Used to prevent double
      * registration of event types. The value of the map is the
@@ -139,10 +138,7 @@ export declare class EventContract implements UnrenamedEventContract {
      * as soon as the `Dispatcher` is registered.
      */
     private queuedEventInfos;
-    /** Whether to add an a11y click listener. */
-    private addA11yClickListener;
-    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
-    constructor(containerManager: EventContractContainerManager, useActionResolver: false);
+    constructor(containerManager: EventContractContainerManager, useActionResolver?: false | undefined);
     private handleEvent;
     /**
      * Handle an `EventInfo`.
@@ -209,10 +205,6 @@ export declare class EventContract implements UnrenamedEventContract {
      * compilation unit as the `EventContract`.
      */
     exportAddA11yClickSupport(): void;
-    /**
-     * Unrenamed function that loads a11yClickSupport.
-     */
-    private addA11yClickSupportImpl;
 }
 
 /**
@@ -446,62 +438,6 @@ export declare const isCaptureEvent: (eventType: string) => boolean;
 export declare const isSupportedEvent: (eventType: string) => boolean;
 
 /**
- * The jsaction attribute defines a mapping of a DOM event to a
- * generic event (aka jsaction), to which the actual event handlers
- * that implement the behavior of the application are bound. The
- * value is a semicolon separated list of colon separated pairs of
- * an optional DOM event name and a jsaction name. If the optional
- * DOM event name is omitted, 'click' is assumed. The jsaction names
- * are dot separated pairs of a namespace and a simple jsaction
- * name.
- *
- * See grammar in README.md for expected syntax in the attribute value.
- */
-export declare const JSACTION = "jsaction";
-
-/**
- * Support for iteration on reprocessing.
- *
- * Used by ActionFlow.
- */
-export declare const JSINSTANCE = "jsinstance";
-
-/**
- * All click jsactions that happen on the element that carries this
- * attribute or its descendants are automatically logged.
- * Impressions of jsactions on these elements are tracked too, if
- * requested by the impression() method of ActionFlow.
- *
- * Used by ActionFlow.
- */
-export declare const JSTRACK = "jstrack";
-
-/**
- * The oi attribute is a log impression tag for impression logging
- * and action tracking. For an element that carries a jsaction
- * attribute, the element is identified for the purpose of
- * impression logging and click tracking by the dot separated path
- * of all oi attributes in the chain of ancestors of the element.
- *
- * Used by ActionFlow.
- */
-export declare const OI = "oi";
-
-/**
- * Sets the `action` to `clickonly` for a click event that is not an a11y click
- * and if there is not already a click action.
- */
-declare function populateClickOnlyAction(actionElement: Element, eventInfo: eventInfoLib.EventInfo, actionMap: {
-    [key: string]: string;
-}): void;
-
-/**
- * Call `preventDefault` on an a11y click if it is space key or to prevent the
- * browser's default action for native HTML controls.
- */
-declare function preventDefaultForA11yClick(eventInfo: eventInfoLib.EventInfo): void;
-
-/**
  * Registers deferred functionality for an EventContract and a Jsaction
  * Dispatcher.
  */
@@ -547,30 +483,9 @@ declare function setTimestamp(eventInfo: EventInfo, timestamp: number): void;
  */
 declare interface UnrenamedEventContract {
     ecrd(dispatcher: Dispatcher, restriction: Restriction): void;
-    ecaacs?: (updateEventInfoForA11yClick: typeof a11yClickLib.updateEventInfoForA11yClick, preventDefaultForA11yClick: typeof a11yClickLib.preventDefaultForA11yClick, populateClickOnlyAction: typeof a11yClickLib.populateClickOnlyAction) => void;
 }
 
 /** Added for readability when accessing stable property names. */
 declare function unsetAction(eventInfo: EventInfo): void;
-
-/**
- * Update `EventInfo` to be `eventType = 'click'` and sets `a11yClickKey` if it
- * is a a11y click.
- */
-declare function updateEventInfoForA11yClick(eventInfo: eventInfoLib.EventInfo): void;
-
-/**
- * The ved attribute is an encoded ClickTrackingCGI proto to track
- * visual elements.
- *
- * Used by ActionFlow.
- */
-export declare const VED = "ved";
-
-/**
- * The vet attribute is the visual element type used to identify tracked
- * visual elements.
- */
-export declare const VET = "vet";
 
 export { }
