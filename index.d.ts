@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.5+sha-aaa00b3
+ * @license Angular v18.0.5+sha-11f066b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8253,7 +8253,7 @@ export declare function provideExperimentalCheckNoChangesForDebug(options: {
  *
  * @publicApi
  * @experimental
- * @see {@link bootstrapApplication}
+ * @see [bootstrapApplication](/api/platform-browser/bootstrapApplication)
  */
 export declare function provideExperimentalZonelessChangeDetection(): EnvironmentProviders;
 
