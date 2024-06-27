@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.5+sha-a59496c
+ * @license Angular v18.0.5+sha-aaa00b3
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { EnvironmentProviders as EnvironmentProviders_2 } from '@angular/core';
+import { EventContract } from '@angular/core/primitives/event-dispatch';
 import { Observable } from 'rxjs';
 import { ReactiveNode } from '@angular/core/primitives/signals';
 import { SIGNAL } from '@angular/core/primitives/signals';
@@ -3798,6 +3799,10 @@ export declare class ErrorHandler {
     handleError(error: any): void;
 }
 
+declare interface EventContractDetails {
+    instance?: EventContract;
+}
+
 /**
  * Use in components with the `@Output` directive to emit custom events
  * synchronously or asynchronously, and register handlers for those events
@@ -4320,6 +4325,20 @@ export declare interface GetTestability {
  * tools are patched (window.ng).
  * */
 declare const GLOBAL_PUBLISH_EXPANDO_KEY = "ng";
+
+/**
+ * This class is the delegate for `EventDelegationPlugin`. It represents the
+ * noop version of this class, with the enabled version set when
+ * `provideGlobalEventDelegation` is called.
+ */
+declare class GlobalEventDelegation {
+    private eventContractDetails;
+    supports(eventName: string): boolean;
+    addEventListener(element: HTMLElement, eventName: string, handler: Function): Function;
+    removeEventListener(element: HTMLElement, eventName: string, callback: Function): void;
+    static ɵfac: i0.ɵɵFactoryDeclaration<GlobalEventDelegation, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<GlobalEventDelegation>;
+}
 
 /**
  * The goal here is to make sure that the browser DOM API is the Renderer.
@@ -12765,6 +12784,8 @@ export declare function ɵgetUnknownPropertyStrictMode(): boolean;
 
 export declare const ɵglobal: any;
 
+export declare const ɵGLOBAL_EVENT_DELEGATION: InjectionToken<GlobalEventDelegation>;
+
 /**
  * Default debug tools available under `window.ng`.
  */
@@ -12925,6 +12946,8 @@ export declare function ɵisPromise<T = any>(obj: any): obj is Promise<T>;
  * Determine if the argument is a Subscribable
  */
 export declare function ɵisSubscribable<T>(obj: any | Subscribable<T>): obj is Subscribable<T>;
+
+export declare const ɵJSACTION_EVENT_CONTRACT: InjectionToken<EventContractDetails>;
 
 /**
  * The internal view context which is specific to a given DOM element, directive or
@@ -13300,6 +13323,11 @@ export declare const enum ɵProfilerEvent {
  * with the bootstrapModule API.
  */
 export declare const ɵPROVIDED_NG_ZONE: InjectionToken<boolean>;
+
+/**
+ * Returns a set of providers required to setup support for event delegation.
+ */
+export declare function ɵprovideGlobalEventDelegation(): Provider[];
 
 /**
  * An object that contains information about a provider that has been configured
@@ -13725,6 +13753,8 @@ export declare function ɵsetCurrentInjector(injector: Injector | null | undefin
 export declare function ɵsetDocument(document: Document | undefined): void;
 
 export declare function ɵsetInjectorProfilerContext(context: ɵInjectorProfilerContext): ɵInjectorProfilerContext;
+
+export declare function ɵsetJSActionAttribute(nativeElement: Element, eventType: string): void;
 
 
 /**
