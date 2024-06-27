@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.5+sha-62970ca
+ * @license Angular v18.0.5+sha-be6d9c5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,8 +7,7 @@
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1 } from '@angular/core/primitives/signals';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { map, first } from 'rxjs/operators';
-import * as Attributes from '@angular/core/primitives/event-dispatch';
-import { isSupportedEvent, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, isCaptureEvent } from '@angular/core/primitives/event-dispatch';
+import { Attribute as Attribute$1, isSupportedEvent, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, isCaptureEvent } from '@angular/core/primitives/event-dispatch';
 
 /**
  * Base URL for the error details page.
@@ -17256,7 +17255,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.5+sha-62970ca']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.5+sha-be6d9c5']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31036,7 +31035,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.5+sha-62970ca');
+const VERSION = new Version('18.0.5+sha-be6d9c5');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -36816,13 +36815,13 @@ function setJSActionAttributes(nativeElement, eventTypes) {
         return;
     }
     const parts = eventTypes.reduce((prev, curr) => prev + curr + ':;', '');
-    const existingAttr = nativeElement.getAttribute(Attributes.JSACTION);
-    nativeElement.setAttribute(Attributes.JSACTION, `${existingAttr ?? ''}${parts}`);
+    const existingAttr = nativeElement.getAttribute(Attribute$1.JSACTION);
+    nativeElement.setAttribute(Attribute$1.JSACTION, `${existingAttr ?? ''}${parts}`);
 }
 function setJSActionAttribute(nativeElement, eventType) {
-    const existingAttr = nativeElement.getAttribute(Attributes.JSACTION);
+    const existingAttr = nativeElement.getAttribute(Attribute$1.JSACTION);
     //  This is required to be a module accessor to appease security tests on setAttribute.
-    nativeElement.setAttribute(Attributes.JSACTION, `${existingAttr ?? ''}${eventType}:;`);
+    nativeElement.setAttribute(Attribute$1.JSACTION, `${existingAttr ?? ''}${eventType}:;`);
 }
 const sharedStashFunction = (rEl, eventType, listenerFn) => {
     const el = rEl;
@@ -36833,7 +36832,7 @@ const sharedStashFunction = (rEl, eventType, listenerFn) => {
     el.__jsaction_fns = eventListenerMap;
 };
 const removeListeners = (el) => {
-    el.removeAttribute(Attributes.JSACTION);
+    el.removeAttribute(Attribute$1.JSACTION);
     el.__jsaction_fns = undefined;
 };
 const JSACTION_EVENT_CONTRACT = new InjectionToken(ngDevMode ? 'EVENT_CONTRACT_DETAILS' : '', {
@@ -36860,11 +36859,11 @@ class GlobalEventDelegation {
     }
     removeEventListener(element, eventName, callback) {
         const newJsactionAttribute = element
-            .getAttribute(Attributes.JSACTION)
+            .getAttribute(Attribute$1.JSACTION)
             ?.split(';')
             .filter((s) => s === eventName + ':')
             .join(';');
-        element.setAttribute(Attributes.JSACTION, newJsactionAttribute ?? '');
+        element.setAttribute(Attribute$1.JSACTION, newJsactionAttribute ?? '');
     }
     static { this.ɵfac = function GlobalEventDelegation_Factory(t) { return new (t || GlobalEventDelegation)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: GlobalEventDelegation, factory: GlobalEventDelegation.ɵfac }); }

@@ -1,60 +1,24 @@
 /**
- * @license Angular v18.0.5+sha-62970ca
+ * @license Angular v18.0.5+sha-be6d9c5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-/**
- * The jsaction attribute defines a mapping of a DOM event to a
- * generic event (aka jsaction), to which the actual event handlers
- * that implement the behavior of the application are bound. The
- * value is a semicolon separated list of colon separated pairs of
- * an optional DOM event name and a jsaction name. If the optional
- * DOM event name is omitted, 'click' is assumed. The jsaction names
- * are dot separated pairs of a namespace and a simple jsaction
- * name.
- *
- * See grammar in README.md for expected syntax in the attribute value.
- */
-const JSACTION$1 = 'jsaction';
-/**
- * The oi attribute is a log impression tag for impression logging
- * and action tracking. For an element that carries a jsaction
- * attribute, the element is identified for the purpose of
- * impression logging and click tracking by the dot separated path
- * of all oi attributes in the chain of ancestors of the element.
- *
- * Used by ActionFlow.
- */
-const OI$1 = 'oi';
-/**
- * The ved attribute is an encoded ClickTrackingCGI proto to track
- * visual elements.
- *
- * Used by ActionFlow.
- */
-const VED = 'ved';
-/**
- * The vet attribute is the visual element type used to identify tracked
- * visual elements.
- */
-const VET = 'vet';
-/**
- * Support for iteration on reprocessing.
- *
- * Used by ActionFlow.
- */
-const JSINSTANCE = 'jsinstance';
-/**
- * All click jsactions that happen on the element that carries this
- * attribute or its descendants are automatically logged.
- * Impressions of jsactions on these elements are tracked too, if
- * requested by the impression() method of ActionFlow.
- *
- * Used by ActionFlow.
- */
-const JSTRACK = 'jstrack';
-const Attribute = { JSACTION: JSACTION$1, OI: OI$1, VED, VET, JSINSTANCE, JSTRACK };
+const Attribute = {
+    /**
+     * The jsaction attribute defines a mapping of a DOM event to a
+     * generic event (aka jsaction), to which the actual event handlers
+     * that implement the behavior of the application are bound. The
+     * value is a semicolon separated list of colon separated pairs of
+     * an optional DOM event name and a jsaction name. If the optional
+     * DOM event name is omitted, 'click' is assumed. The jsaction names
+     * are dot separated pairs of a namespace and a simple jsaction
+     * name.
+     *
+     * See grammar in README.md for expected syntax in the attribute value.
+     */
+    JSACTION: 'jsaction',
+};
 
 const Char = {
     /**
@@ -67,21 +31,6 @@ const Char = {
      * attribute value.
      */
     EVENT_ACTION_SEPARATOR: ':',
-    /**
-     * The separator between the logged oi attribute values in the &oi=
-     * URL parameter value.
-     */
-    OI_SEPARATOR: '.',
-    /**
-     * The separator between the key and the value pairs in the &cad=
-     * URL parameter value.
-     */
-    CAD_KEY_VALUE_SEPARATOR: ':',
-    /**
-     * The separator between the key-value pairs in the &cad= URL
-     * parameter value.
-     */
-    CAD_SEPARATOR: ',',
 };
 
 /*
@@ -405,29 +354,24 @@ const CAPTURE_EVENTS = [
     EventType.TOGGLE,
 ];
 
-/**
- * The parsed value of the jsaction attribute is stored in this
- * property on the DOM node. The parsed value is an Object. The
- * property names of the object are the events; the values are the
- * names of the actions. This property is attached even on nodes
- * that don't have a jsaction attribute as an optimization, because
- * property lookup is faster than attribute access.
- */
-const JSACTION = '__jsaction';
-/** The value of the oi attribute as a property, for faster access. */
-const OI = '__oi';
-/**
- * The owner property references an a logical owner for a DOM node. JSAction
- * will follow this reference instead of parentNode when traversing the DOM
- * to find jsaction attributes. This allows overlaying a logical structure
- * over a document where the DOM structure can't reflect that structure.
- */
-const OWNER = '__owner';
 /** All properties that are used by jsaction. */
 const Property = {
-    JSACTION,
-    OI,
-    OWNER,
+    /**
+     * The parsed value of the jsaction attribute is stored in this
+     * property on the DOM node. The parsed value is an Object. The
+     * property names of the object are the events; the values are the
+     * names of the actions. This property is attached even on nodes
+     * that don't have a jsaction attribute as an optimization, because
+     * property lookup is faster than attribute access.
+     */
+    JSACTION: '__jsaction',
+    /**
+     * The owner property references an a logical owner for a DOM node. JSAction
+     * will follow this reference instead of parentNode when traversing the DOM
+     * to find jsaction attributes. This allows overlaying a logical structure
+     * over a document where the DOM structure can't reflect that structure.
+     */
+    OWNER: '__owner',
 };
 
 /**
@@ -442,7 +386,7 @@ const parseCache = {};
  */
 function get(element) {
     // @ts-ignore
-    return element[JSACTION];
+    return element[Property.JSACTION];
 }
 /**
  * Writes the jsaction parser cache to the given DOM Element.
@@ -453,7 +397,7 @@ function get(element) {
  */
 function set(element, actionMap) {
     // @ts-ignore
-    element[JSACTION] = actionMap;
+    element[Property.JSACTION] = actionMap;
 }
 /**
  * Looks up the parsed action map from the source jsaction attribute value.
@@ -479,8 +423,8 @@ function setParsed(text, parsed) {
  * @param element .
  */
 function clear(element) {
-    if (JSACTION in element) {
-        delete element[JSACTION];
+    if (Property.JSACTION in element) {
+        delete element[Property.JSACTION];
     }
 }
 
@@ -689,47 +633,6 @@ class EventInfoWrapper {
     clone() {
         return new EventInfoWrapper(cloneEventInfo(this.eventInfo));
     }
-}
-
-/**
- * Determines if one node is contained within another. Adapted from
- * {@see goog.dom.contains}.
- * @param node Node that should contain otherNode.
- * @param otherNode Node being contained.
- * @return True if otherNode is contained within node.
- */
-function contains(node, otherNode) {
-    if (otherNode === null) {
-        return false;
-    }
-    // We use browser specific methods for this if available since it is faster
-    // that way.
-    // IE DOM
-    if ('contains' in node && otherNode.nodeType === 1) {
-        return node.contains(otherNode);
-    }
-    // W3C DOM Level 3
-    if ('compareDocumentPosition' in node) {
-        return node === otherNode || Boolean(node.compareDocumentPosition(otherNode) & 16);
-    }
-    // W3C DOM Level 1
-    while (otherNode && node !== otherNode) {
-        otherNode = otherNode.parentNode;
-    }
-    return otherNode === node;
-}
-/**
- * Helper method for broadcastCustomEvent. Returns true if any member of
- * the set is an ancestor of element.
- */
-function hasAncestorInNodeList(element, nodeList) {
-    for (let idx = 0; idx < nodeList.length; ++idx) {
-        const member = nodeList[idx];
-        if (member !== element && contains(member, element)) {
-            return true;
-        }
-    }
-    return false;
 }
 
 /**
@@ -1097,7 +1000,7 @@ function isMouseSpecialEvent(e, type, element) {
         (e.type === EventType.MOUSEOUT && type === EventType.MOUSELEAVE) ||
         (e.type === EventType.POINTEROVER && type === EventType.POINTERENTER) ||
         (e.type === EventType.POINTEROUT && type === EventType.POINTERLEAVE)) &&
-        (!related || (related !== element && !contains(element, related))));
+        (!related || (related !== element && !element.contains(related))));
 }
 /**
  * Creates a new EventLike object for a mouseenter/mouseleave event that's
@@ -1517,7 +1420,7 @@ class ActionResolver {
      * shadow root if needed.
      */
     getParentNode(element) {
-        const owner = element[OWNER];
+        const owner = element[Property.OWNER];
         if (owner) {
             return owner;
         }
@@ -1884,50 +1787,6 @@ class EventContractContainer {
 }
 
 /**
- * Update `EventInfo` to be `eventType = 'click'` and sets `a11yClickKey` if it
- * is a a11y click.
- */
-function updateEventInfoForA11yClick(eventInfo) {
-    if (!isActionKeyEvent(getEvent(eventInfo))) {
-        return;
-    }
-    setA11yClickKey(eventInfo, true);
-    // A 'click' triggered by a DOM keypress should be mapped to the 'click'
-    // jsaction.
-    setEventType(eventInfo, EventType.CLICK);
-}
-/**
- * Call `preventDefault` on an a11y click if it is space key or to prevent the
- * browser's default action for native HTML controls.
- */
-function preventDefaultForA11yClick(eventInfo) {
-    if (!getA11yClickKey(eventInfo) ||
-        (!isSpaceKeyEvent(getEvent(eventInfo)) &&
-            !shouldCallPreventDefaultOnNativeHtmlControl(getEvent(eventInfo)))) {
-        return;
-    }
-    preventDefault(getEvent(eventInfo));
-}
-/**
- * Sets the `action` to `clickonly` for a click event that is not an a11y click
- * and if there is not already a click action.
- */
-function populateClickOnlyAction(actionElement, eventInfo, actionMap) {
-    if (
-    // If there's already an action, don't attempt to set a CLICKONLY
-    getAction(eventInfo) ||
-        // Only attempt CLICKONLY if the type is CLICK
-        getEventType(eventInfo) !== EventType.CLICK ||
-        // a11y clicks are never CLICKONLY
-        getA11yClickKey(eventInfo) ||
-        actionMap[EventType.CLICKONLY] === undefined) {
-        return;
-    }
-    setEventType(eventInfo, EventType.CLICKONLY);
-    setAction(eventInfo, actionMap[EventType.CLICKONLY], actionElement);
-}
-
-/**
  * @define Support for accessible click actions.  This flag can be overridden in
  * a build rule.
  */
@@ -1938,29 +1797,6 @@ const A11Y_CLICK_SUPPORT = false;
  */
 const MOUSE_SPECIAL_SUPPORT = false;
 
-/**
- * @fileoverview Implements the local event handling contract. This
- * allows DOM objects in a container that enters into this contract to
- * define event handlers which are executed in a local context.
- *
- * One EventContract instance can manage the contract for multiple
- * containers, which are added using the addContainer() method.
- *
- * Events can be registered using the addEvent() method.
- *
- * A Dispatcher is added using the registerDispatcher() method. Until there is
- * a dispatcher, events are queued. The idea is that the EventContract
- * class is inlined in the HTML of the top level page and instantiated
- * right after the start of <body>. The Dispatcher class is contained
- * in the external deferred js, and instantiated and registered with
- * EventContract when the external javascript in the page loads. The
- * external javascript will also register the jsaction handlers, which
- * then pick up the queued events at the time of registration.
- *
- * Since this class is meant to be inlined in the main page HTML, the
- * size of the binary compiled from this file MUST be kept as small as
- * possible and thus its dependencies to a minimum.
- */
 /**
  * EventContract intercepts events in the bubbling phase at the
  * boundary of a container element, and maps them to generic actions
@@ -2002,18 +1838,7 @@ class EventContract {
          * as soon as the `Dispatcher` is registered.
          */
         this.queuedEventInfos = [];
-        /** Whether to add an a11y click listener. */
-        this.addA11yClickListener = false;
         this.containerManager = containerManager;
-        if (this.useActionResolver) {
-            this.actionResolver = new ActionResolver({
-                syntheticMouseEventSupport: EventContract.MOUSE_SPECIAL_SUPPORT,
-            });
-        }
-        if (EventContract.A11Y_CLICK_SUPPORT) {
-            // Add a11y click support to the `EventContract`.
-            this.addA11yClickSupport();
-        }
     }
     handleEvent(eventType, event, container) {
         const eventInfo = createEventInfoFromParameters(
@@ -2033,10 +1858,6 @@ class EventContract {
             setIsReplay(eventInfo, true);
             this.queuedEventInfos?.push(eventInfo);
             return;
-        }
-        if (this.useActionResolver) {
-            this.actionResolver.resolveEventType(eventInfo);
-            this.actionResolver.resolveAction(eventInfo);
         }
         this.dispatcher(eventInfo);
     }
@@ -2076,11 +1897,6 @@ class EventContract {
                 eventHandler(eventType, event, element);
             };
         });
-        // Automatically install a keypress/keydown event handler if support for
-        // accessible clicks is turned on.
-        if (this.addA11yClickListener && eventType === EventType.CLICK) {
-            this.addEvent(EventType.KEYDOWN);
-        }
     }
     /**
      * Gets the queued early events and replay them using the appropriate handler
@@ -2176,26 +1992,12 @@ class EventContract {
      * Adds a11y click support to the given `EventContract`. Meant to be called in
      * the same compilation unit as the `EventContract`.
      */
-    addA11yClickSupport() {
-        this.addA11yClickSupportImpl(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction);
-    }
+    addA11yClickSupport() { }
     /**
      * Enables a11y click support to be deferred. Meant to be called in the same
      * compilation unit as the `EventContract`.
      */
-    exportAddA11yClickSupport() {
-        this.addA11yClickListener = true;
-        this.ecaacs = this.addA11yClickSupportImpl.bind(this);
-    }
-    /**
-     * Unrenamed function that loads a11yClickSupport.
-     */
-    addA11yClickSupportImpl(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction) {
-        this.addA11yClickListener = true;
-        if (this.useActionResolver) {
-            this.actionResolver.addA11yClickSupport(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction);
-        }
-    }
+    exportAddA11yClickSupport() { }
 }
 function removeEventListeners(container, eventTypes, earlyEventHandler, capture) {
     for (let idx = 0; idx < eventTypes.length; idx++) {
@@ -2208,9 +2010,7 @@ function removeEventListeners(container, eventTypes, earlyEventHandler, capture)
  * must have called `exportAddA11yClickSupport` in its compilation unit for this
  * to have any effect.
  */
-function addDeferredA11yClickSupport(eventContract) {
-    eventContract.ecaacs?.(updateEventInfoForA11yClick, preventDefaultForA11yClick, populateClickOnlyAction);
-}
+function addDeferredA11yClickSupport(eventContract) { }
 
 /**
  * EarlyEventContract intercepts events in the bubbling phase at the
@@ -2269,5 +2069,5 @@ function bootstrapEarlyEventContract(field, container, appId, eventTypes, captur
         eventContract.addEvents(captureEventTypes, true);
 }
 
-export { Attribute, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, JSACTION$1 as JSACTION, JSINSTANCE, JSTRACK, OI$1 as OI, VED, VET, bootstrapEarlyEventContract, isCaptureEvent, isSupportedEvent, registerDispatcher };
+export { Attribute, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, bootstrapEarlyEventContract, isCaptureEvent, isSupportedEvent, registerDispatcher };
 //# sourceMappingURL=event-dispatch.mjs.map
