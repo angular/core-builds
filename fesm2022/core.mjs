@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.4+sha-a0fbd0e
+ * @license Angular v18.1.0-next.4+sha-3d1bc5a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17200,7 +17200,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.4+sha-a0fbd0e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0-next.4+sha-3d1bc5a']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30980,7 +30980,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0-next.4+sha-a0fbd0e');
+const VERSION = new Version('18.1.0-next.4+sha-3d1bc5a');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -36791,6 +36791,9 @@ const GLOBAL_EVENT_DELEGATION = new InjectionToken(ngDevMode ? 'GLOBAL_EVENT_DEL
 class GlobalEventDelegation {
     constructor() {
         this.eventContractDetails = inject(JSACTION_EVENT_CONTRACT);
+    }
+    ngOnDestroy() {
+        this.eventContractDetails.instance?.cleanUp();
     }
     supports(eventName) {
         return isSupportedEvent(eventName);
