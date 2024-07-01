@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.5+sha-9cbfc6b
+ * @license Angular v18.0.5+sha-fdd8fb0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4331,8 +4331,9 @@ declare const GLOBAL_PUBLISH_EXPANDO_KEY = "ng";
  * noop version of this class, with the enabled version set when
  * `provideGlobalEventDelegation` is called.
  */
-declare class GlobalEventDelegation {
+declare class GlobalEventDelegation implements OnDestroy {
     private eventContractDetails;
+    ngOnDestroy(): void;
     supports(eventName: string): boolean;
     addEventListener(element: HTMLElement, eventName: string, handler: Function): Function;
     removeEventListener(element: HTMLElement, eventName: string, callback: Function): void;
