@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.5+sha-4267082
+ * @license Angular v18.0.5+sha-5d52819
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13753,8 +13753,6 @@ export declare function ɵsetCurrentInjector(injector: Injector | null | undefin
 export declare function ɵsetDocument(document: Document | undefined): void;
 
 export declare function ɵsetInjectorProfilerContext(context: ɵInjectorProfilerContext): ɵInjectorProfilerContext;
-
-export declare function ɵsetJSActionAttribute(nativeElement: Element, eventType: string): void;
 
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.5+sha-4267082
+ * @license Angular v18.0.5+sha-5d52819
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -444,6 +444,9 @@ export declare const isSupportedEvent: (eventType: string) => boolean;
 export declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: EventDispatcher): void;
 
 
+export declare function registerEventType(element: Element, eventType: string, action: string): void;
+
+
 /**
  * @fileoverview An enum to control who can call certain jsaction APIs.
  */
@@ -477,6 +480,8 @@ declare function setTargetElement(eventInfo: EventInfo, targetElement: Element):
 
 /** Added for readability when accessing stable property names. */
 declare function setTimestamp(eventInfo: EventInfo, timestamp: number): void;
+
+export declare function unregisterEventType(element: Element, eventType: string): void;
 
 /**
  * The API of an EventContract that is safe to call from any compilation unit.
