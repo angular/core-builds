@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.5+sha-5cb1dd7
+ * @license Angular v18.0.5+sha-4267082
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17255,7 +17255,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.5+sha-5cb1dd7']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.5+sha-4267082']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31035,7 +31035,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.5+sha-5cb1dd7');
+const VERSION = new Version('18.0.5+sha-4267082');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -36421,6 +36421,9 @@ function signalUpdateFn(node, updater) {
         throwInvalidWriteToSignalError();
     }
     signalSetFn(node, updater(node.value));
+}
+function runPostSignalSetFn() {
+    postSignalSetFn?.();
 }
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
 // a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
