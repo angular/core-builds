@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.4+sha-2a1291e
+ * @license Angular v18.1.0-next.4+sha-46b0292
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -88,6 +88,13 @@ export declare function isReactive(value: unknown): value is Reactive;
  * Called by implementations when a producer's signal is read.
  */
 export declare function producerAccessed(node: ReactiveNode): void;
+
+/**
+ * Increment the global epoch counter.
+ *
+ * Called by source producers (that is, not computeds) whenever their values change.
+ */
+export declare function producerIncrementEpoch(): void;
 
 /**
  * Propagate a dirty notification to live consumers of this producer.
@@ -207,6 +214,8 @@ export declare interface ReactiveNode {
      */
     consumerOnSignalRead(node: unknown): void;
 }
+
+export declare function runPostSignalSetFn(): void;
 
 export declare function setActiveConsumer(consumer: ReactiveNode | null): ReactiveNode | null;
 
