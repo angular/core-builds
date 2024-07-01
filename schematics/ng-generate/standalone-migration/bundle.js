@@ -12237,7 +12237,8 @@ function getScopeForView(view, parent) {
     scope.contextVariables.set(identifier, {
       kind: SemanticVariableKind.Identifier,
       name: null,
-      identifier
+      identifier,
+      local: false
     });
   }
   for (const op of view.create) {
@@ -12256,7 +12257,8 @@ function getScopeForView(view, parent) {
             variable: {
               kind: SemanticVariableKind.Identifier,
               name: null,
-              identifier: op.localRefs[offset].name
+              identifier: op.localRefs[offset].name,
+              local: false
             }
           });
         }
@@ -12268,7 +12270,8 @@ function getScopeForView(view, parent) {
           variable: {
             kind: SemanticVariableKind.Identifier,
             name: null,
-            identifier: op.declaredName
+            identifier: op.declaredName,
+            local: false
           }
         });
         break;
@@ -20768,11 +20771,22 @@ function resolveNames(job) {
 }
 function processLexicalScope2(unit, ops, savedView) {
   const scope = /* @__PURE__ */ new Map();
+  const localDefinitions = /* @__PURE__ */ new Map();
   for (const op of ops) {
     switch (op.kind) {
       case OpKind.Variable:
         switch (op.variable.kind) {
           case SemanticVariableKind.Identifier:
+            if (op.variable.local) {
+              if (localDefinitions.has(op.variable.identifier)) {
+                continue;
+              }
+              localDefinitions.set(op.variable.identifier, op.xref);
+            } else if (scope.has(op.variable.identifier)) {
+              continue;
+            }
+            scope.set(op.variable.identifier, op.xref);
+            break;
           case SemanticVariableKind.Alias:
             if (scope.has(op.variable.identifier)) {
               continue;
@@ -20799,7 +20813,9 @@ function processLexicalScope2(unit, ops, savedView) {
     }
     transformExpressionsInOp(op, (expr) => {
       if (expr instanceof LexicalReadExpr) {
-        if (scope.has(expr.name)) {
+        if (localDefinitions.has(expr.name)) {
+          return new ReadVariableExpr(localDefinitions.get(expr.name));
+        } else if (scope.has(expr.name)) {
           return new ReadVariableExpr(scope.get(expr.name));
         } else {
           return new ReadPropExpr(new ContextExpr(unit.job.root.xref), expr.name);
@@ -21620,7 +21636,8 @@ function generateLocalLetReferences(job) {
       const variable2 = {
         kind: SemanticVariableKind.Identifier,
         name: null,
-        identifier: op.declaredName
+        identifier: op.declaredName,
+        local: true
       };
       OpList.replace(op, createVariableOp(job.allocateXrefId(), variable2, new StoreLetExpr(op.target, op.value, op.sourceSpan), VariableFlags.None));
     }
@@ -26054,7 +26071,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.4+sha-5dc6dec");
+var VERSION2 = new Version("18.1.0-next.4+sha-2a1291e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27158,7 +27175,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.1.0-next.4+sha-5dc6dec"));
+  definitionMap.set("version", literal("18.1.0-next.4+sha-2a1291e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27177,7 +27194,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.1.0-next.4+sha-5dc6dec"));
+  definitionMap.set("version", literal("18.1.0-next.4+sha-2a1291e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27245,7 +27262,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.1.0-next.4+sha-5dc6dec"));
+  definitionMap.set("version", literal("18.1.0-next.4+sha-2a1291e"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27563,7 +27580,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.1.0-next.4+sha-5dc6dec"));
+  definitionMap.set("version", literal("18.1.0-next.4+sha-2a1291e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27586,7 +27603,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.1.0-next.4+sha-5dc6dec"));
+  definitionMap.set("version", literal("18.1.0-next.4+sha-2a1291e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27624,7 +27641,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.1.0-next.4+sha-5dc6dec"));
+  definitionMap.set("version", literal("18.1.0-next.4+sha-2a1291e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27648,7 +27665,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.1.0-next.4+sha-5dc6dec"));
+  definitionMap.set("version", literal("18.1.0-next.4+sha-2a1291e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27683,7 +27700,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.1.0-next.4+sha-5dc6dec"));
+  definitionMap.set("version", literal("18.1.0-next.4+sha-2a1291e"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27700,7 +27717,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.1.0-next.4+sha-5dc6dec");
+var VERSION3 = new Version("18.1.0-next.4+sha-2a1291e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -27778,7 +27795,7 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["DEFERRED_DEPENDENCY_IMPORTED_EAGERLY"] = 8014] = "DEFERRED_DEPENDENCY_IMPORTED_EAGERLY";
   ErrorCode2[ErrorCode2["ILLEGAL_LET_WRITE"] = 8015] = "ILLEGAL_LET_WRITE";
   ErrorCode2[ErrorCode2["LET_USED_BEFORE_DEFINITION"] = 8016] = "LET_USED_BEFORE_DEFINITION";
-  ErrorCode2[ErrorCode2["DUPLICATE_LET_DECLARATION"] = 8017] = "DUPLICATE_LET_DECLARATION";
+  ErrorCode2[ErrorCode2["CONFLICTING_LET_DECLARATION"] = 8017] = "CONFLICTING_LET_DECLARATION";
   ErrorCode2[ErrorCode2["INVALID_BANANA_IN_BOX"] = 8101] = "INVALID_BANANA_IN_BOX";
   ErrorCode2[ErrorCode2["NULLISH_COALESCING_NOT_NULLABLE"] = 8102] = "NULLISH_COALESCING_NOT_NULLABLE";
   ErrorCode2[ErrorCode2["MISSING_CONTROL_FLOW_DIRECTIVE"] = 8103] = "MISSING_CONTROL_FLOW_DIRECTIVE";
@@ -40324,10 +40341,10 @@ Deferred blocks can only access triggers in same view, a parent embedded view or
     }
     this._diagnostics.push(makeTemplateDiagnostic(templateId, this.resolver.getSourceMapping(templateId), sourceSpan, import_typescript78.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.LET_USED_BEFORE_DEFINITION), `Cannot read @let declaration '${target.name}' before it has been defined.`));
   }
-  duplicateLetDeclaration(templateId, current) {
+  conflictingDeclaration(templateId, decl) {
     const mapping = this.resolver.getSourceMapping(templateId);
-    const errorMsg = `Cannot declare @let called '${current.name}' as there is another @let declaration with the same name.`;
-    this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, current.sourceSpan, import_typescript78.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.DUPLICATE_LET_DECLARATION), errorMsg));
+    const errorMsg = `Cannot declare @let called '${decl.name}' as there is another symbol in the template with the same name.`;
+    this._diagnostics.push(makeTemplateDiagnostic(templateId, mapping, decl.sourceSpan, import_typescript78.default.DiagnosticCategory.Error, ngErrorCode(ErrorCode.CONFLICTING_LET_DECLARATION), errorMsg));
   }
 };
 function makeInlineDiagnostic(templateId, code, node, messageText, relatedInformation) {
@@ -41724,14 +41741,12 @@ var _Scope = class {
     }
     for (const node of children) {
       scope.appendNode(node);
-      if (node instanceof LetDeclaration) {
-        const opIndex = scope.opQueue.push(new TcbLetDeclarationOp(tcb, scope, node)) - 1;
-        if (scope.letDeclOpMap.has(node.name)) {
-          tcb.oobRecorder.duplicateLetDeclaration(tcb.id, node);
-        } else {
-          scope.letDeclOpMap.set(node.name, opIndex);
-        }
-      }
+    }
+    for (const variable2 of scope.varMap.keys()) {
+      _Scope.checkConflictingLet(scope, variable2);
+    }
+    for (const ref of scope.referenceOpMap.keys()) {
+      _Scope.checkConflictingLet(scope, ref);
     }
     return scope;
   }
@@ -41795,7 +41810,7 @@ var _Scope = class {
     if (ref instanceof Reference && this.referenceOpMap.has(ref)) {
       return this.resolveOp(this.referenceOpMap.get(ref));
     } else if (ref instanceof LetDeclaration && this.letDeclOpMap.has(ref.name)) {
-      return this.resolveOp(this.letDeclOpMap.get(ref.name));
+      return this.resolveOp(this.letDeclOpMap.get(ref.name).opIndex);
     } else if (ref instanceof Variable && this.varMap.has(ref)) {
       const opIndexOrNode = this.varMap.get(ref);
       return typeof opIndexOrNode === "number" ? this.resolveOp(opIndexOrNode) : opIndexOrNode;
@@ -41871,6 +41886,13 @@ var _Scope = class {
       this.appendIcuExpressions(node);
     } else if (node instanceof Content) {
       this.appendChildren(node);
+    } else if (node instanceof LetDeclaration) {
+      const opIndex = this.opQueue.push(new TcbLetDeclarationOp(this.tcb, this, node)) - 1;
+      if (this.isLocal(node)) {
+        this.tcb.oobRecorder.conflictingDeclaration(this.tcb.id, node);
+      } else {
+        this.letDeclOpMap.set(node.name, { opIndex, node });
+      }
     }
   }
   appendChildren(node) {
@@ -42034,6 +42056,11 @@ var _Scope = class {
   appendReferenceBasedDeferredTrigger(block, trigger) {
     if (this.tcb.boundTarget.getDeferredTriggerTarget(block, trigger) === null) {
       this.tcb.oobRecorder.inaccessibleDeferredTriggerElement(this.tcb.id, trigger);
+    }
+  }
+  static checkConflictingLet(scope, node) {
+    if (scope.letDeclOpMap.has(node.name)) {
+      scope.tcb.oobRecorder.conflictingDeclaration(scope.tcb.id, scope.letDeclOpMap.get(node.name).node);
     }
   }
 };

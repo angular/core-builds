@@ -9629,7 +9629,8 @@ function getScopeForView(view, parent) {
     scope.contextVariables.set(identifier, {
       kind: SemanticVariableKind.Identifier,
       name: null,
-      identifier
+      identifier,
+      local: false
     });
   }
   for (const op of view.create) {
@@ -9648,7 +9649,8 @@ function getScopeForView(view, parent) {
             variable: {
               kind: SemanticVariableKind.Identifier,
               name: null,
-              identifier: op.localRefs[offset].name
+              identifier: op.localRefs[offset].name,
+              local: false
             }
           });
         }
@@ -9660,7 +9662,8 @@ function getScopeForView(view, parent) {
           variable: {
             kind: SemanticVariableKind.Identifier,
             name: null,
-            identifier: op.declaredName
+            identifier: op.declaredName,
+            local: false
           }
         });
         break;
@@ -18160,11 +18163,22 @@ function resolveNames(job) {
 }
 function processLexicalScope2(unit, ops, savedView) {
   const scope = /* @__PURE__ */ new Map();
+  const localDefinitions = /* @__PURE__ */ new Map();
   for (const op of ops) {
     switch (op.kind) {
       case OpKind.Variable:
         switch (op.variable.kind) {
           case SemanticVariableKind.Identifier:
+            if (op.variable.local) {
+              if (localDefinitions.has(op.variable.identifier)) {
+                continue;
+              }
+              localDefinitions.set(op.variable.identifier, op.xref);
+            } else if (scope.has(op.variable.identifier)) {
+              continue;
+            }
+            scope.set(op.variable.identifier, op.xref);
+            break;
           case SemanticVariableKind.Alias:
             if (scope.has(op.variable.identifier)) {
               continue;
@@ -18191,7 +18205,9 @@ function processLexicalScope2(unit, ops, savedView) {
     }
     transformExpressionsInOp(op, (expr) => {
       if (expr instanceof LexicalReadExpr) {
-        if (scope.has(expr.name)) {
+        if (localDefinitions.has(expr.name)) {
+          return new ReadVariableExpr(localDefinitions.get(expr.name));
+        } else if (scope.has(expr.name)) {
           return new ReadVariableExpr(scope.get(expr.name));
         } else {
           return new ReadPropExpr(new ContextExpr(unit.job.root.xref), expr.name);
@@ -19012,7 +19028,8 @@ function generateLocalLetReferences(job) {
       const variable2 = {
         kind: SemanticVariableKind.Identifier,
         name: null,
-        identifier: op.declaredName
+        identifier: op.declaredName,
+        local: true
       };
       OpList.replace(op, createVariableOp(job.allocateXrefId(), variable2, new StoreLetExpr(op.target, op.value, op.sourceSpan), VariableFlags.None));
     }
@@ -23422,7 +23439,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0-next.4+sha-5dc6dec");
+var VERSION2 = new Version("18.1.0-next.4+sha-2a1291e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
