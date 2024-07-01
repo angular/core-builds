@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-next.4+sha-46b0292
+ * @license Angular v18.1.0-next.4+sha-551027e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -378,6 +378,17 @@ const Property = {
  * Map from jsaction annotation to a parsed map from event name to action name.
  */
 const parseCache = {};
+function registerEventType(element, eventType, action) {
+    const cache = get(element) || {};
+    cache[eventType] = action;
+    set(element, cache);
+}
+function unregisterEventType(element, eventType) {
+    const cache = get(element);
+    if (cache) {
+        cache[eventType] = undefined;
+    }
+}
 /**
  * Reads the jsaction parser cache from the given DOM Element.
  *
@@ -2069,5 +2080,5 @@ function bootstrapEarlyEventContract(field, container, appId, eventTypes, captur
         eventContract.addEvents(captureEventTypes, true);
 }
 
-export { Attribute, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, bootstrapEarlyEventContract, isCaptureEvent, isSupportedEvent, registerDispatcher };
+export { Attribute, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, bootstrapEarlyEventContract, isCaptureEvent, isSupportedEvent, registerDispatcher, registerEventType, unregisterEventType };
 //# sourceMappingURL=event-dispatch.mjs.map
