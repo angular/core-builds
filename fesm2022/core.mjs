@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.0.5+sha-b7d3ecc
+ * @license Angular v18.0.5+sha-fec5b80
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17255,7 +17255,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.5+sha-b7d3ecc']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.0.5+sha-fec5b80']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31035,7 +31035,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.0.5+sha-b7d3ecc');
+const VERSION = new Version('18.0.5+sha-fec5b80');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -31232,7 +31232,8 @@ function handleInstanceCreatedByInjectorEvent(context, data) {
     if (typeof value === 'object') {
         standaloneComponent = value?.constructor;
     }
-    if (standaloneComponent === undefined || !isStandaloneComponent(standaloneComponent)) {
+    // We want to also cover if `standaloneComponent === null` in addition to `undefined`
+    if (standaloneComponent == undefined || !isStandaloneComponent(standaloneComponent)) {
         return;
     }
     const environmentInjector = context.injector.get(EnvironmentInjector, null, { optional: true });
