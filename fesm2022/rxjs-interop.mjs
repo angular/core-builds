@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.0+sha-d5ce323
+ * @license Angular v18.2.0-next.0+sha-5dcdbfc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -175,7 +175,7 @@ function toSignal(source, options) {
     const cleanupRef = requiresCleanup
         ? options?.injector?.get(DestroyRef) ?? inject(DestroyRef)
         : null;
-    const equal = makeToSignalEquals(options?.equals);
+    const equal = makeToSignalEqual(options?.equal);
     // Note: T is the Observable value type, and U is the initial value type. They don't have to be
     // the same - the returned signal gives values of type `T`.
     let state;
@@ -227,7 +227,7 @@ function toSignal(source, options) {
         }
     });
 }
-function makeToSignalEquals(userEquality = Object.is) {
+function makeToSignalEqual(userEquality = Object.is) {
     return (a, b) => a.kind === 1 /* StateKind.Value */ && b.kind === 1 /* StateKind.Value */ && userEquality(a.value, b.value);
 }
 
