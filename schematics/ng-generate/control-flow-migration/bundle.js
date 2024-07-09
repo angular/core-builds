@@ -23262,7 +23262,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.0.6+sha-5d8cfc6");
+var VERSION2 = new Version("18.0.6+sha-d6fff45");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23394,8 +23394,17 @@ var ElementToMigrate = class {
     this.forAttrs = forAttrs;
     this.aliasAttrs = aliasAttrs;
   }
+  normalizeConditionString(value) {
+    value = this.insertSemicolon(value, value.indexOf(" else "));
+    value = this.insertSemicolon(value, value.indexOf(" then "));
+    value = this.insertSemicolon(value, value.indexOf(" let "));
+    return value.replace(";;", ";");
+  }
+  insertSemicolon(str, ix) {
+    return ix > -1 ? `${str.slice(0, ix)};${str.slice(ix)}` : str;
+  }
   getCondition() {
-    const chunks = this.attr.value.split(";");
+    const chunks = this.normalizeConditionString(this.attr.value).split(";");
     let condition = chunks[0];
     const elseIx = condition.indexOf(" else ");
     const thenIx = condition.indexOf(" then ");
