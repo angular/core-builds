@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.0+sha-5179ce3
+ * @license Angular v18.2.0-next.0+sha-5d75b1d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -225,7 +225,7 @@ function toSignal(source, options) {
                 // TODO(alxhub): use a RuntimeError when we finalize the error semantics
                 throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
         }
-    });
+    }, { equal: options?.equal });
 }
 function makeToSignalEqual(userEquality = Object.is) {
     return (a, b) => a.kind === 1 /* StateKind.Value */ && b.kind === 1 /* StateKind.Value */ && userEquality(a.value, b.value);
