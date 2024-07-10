@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0-rc.0+sha-5f97d6a
+ * @license Angular v18.1.0-rc.0+sha-4d87b9e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -161,7 +161,7 @@ export declare interface ToSignalOptions<T> {
      *
      * Equality comparisons are executed against the initial value if one is provided.
      */
-    equals?: ValueEqualityFn<T>;
+    equal?: ValueEqualityFn<T>;
 }
 
 export { }
