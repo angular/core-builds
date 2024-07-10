@@ -26071,7 +26071,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.0+sha-6271a16");
+var VERSION2 = new Version("18.2.0-next.0+sha-7f550ea");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27175,7 +27175,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.0+sha-6271a16"));
+  definitionMap.set("version", literal("18.2.0-next.0+sha-7f550ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27194,7 +27194,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.0+sha-6271a16"));
+  definitionMap.set("version", literal("18.2.0-next.0+sha-7f550ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27262,7 +27262,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.2.0-next.0+sha-6271a16"));
+  definitionMap.set("version", literal("18.2.0-next.0+sha-7f550ea"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27580,7 +27580,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.2.0-next.0+sha-6271a16"));
+  definitionMap.set("version", literal("18.2.0-next.0+sha-7f550ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27603,7 +27603,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.2.0-next.0+sha-6271a16"));
+  definitionMap.set("version", literal("18.2.0-next.0+sha-7f550ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27641,7 +27641,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.2.0-next.0+sha-6271a16"));
+  definitionMap.set("version", literal("18.2.0-next.0+sha-7f550ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27665,7 +27665,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.2.0-next.0+sha-6271a16"));
+  definitionMap.set("version", literal("18.2.0-next.0+sha-7f550ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27700,7 +27700,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.2.0-next.0+sha-6271a16"));
+  definitionMap.set("version", literal("18.2.0-next.0+sha-7f550ea"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27717,7 +27717,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.2.0-next.0+sha-6271a16");
+var VERSION3 = new Version("18.2.0-next.0+sha-7f550ea");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -29524,11 +29524,313 @@ var ModuleResolver = class {
   }
 };
 
-// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/jit_transforms/downlevel_decorators_transform.mjs
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/downlevel_decorators_transform.mjs
 var import_typescript21 = __toESM(require("typescript"), 1);
+function isAngularDecorator(decorator, isCore) {
+  return isCore || decorator.import !== null && decorator.import.from === "@angular/core";
+}
+var DECORATOR_INVOCATION_JSDOC_TYPE = "!Array<{type: !Function, args: (undefined|!Array<?>)}>";
+function extractMetadataFromSingleDecorator(decorator, diagnostics) {
+  const metadataProperties = [];
+  const expr = decorator.expression;
+  switch (expr.kind) {
+    case import_typescript21.default.SyntaxKind.Identifier:
+      metadataProperties.push(import_typescript21.default.factory.createPropertyAssignment("type", expr));
+      break;
+    case import_typescript21.default.SyntaxKind.CallExpression:
+      const call2 = expr;
+      metadataProperties.push(import_typescript21.default.factory.createPropertyAssignment("type", call2.expression));
+      if (call2.arguments.length) {
+        const args = [];
+        for (const arg of call2.arguments) {
+          args.push(arg);
+        }
+        const argsArrayLiteral = import_typescript21.default.factory.createArrayLiteralExpression(import_typescript21.default.factory.createNodeArray(args, true));
+        metadataProperties.push(import_typescript21.default.factory.createPropertyAssignment("args", argsArrayLiteral));
+      }
+      break;
+    default:
+      diagnostics.push({
+        file: decorator.getSourceFile(),
+        start: decorator.getStart(),
+        length: decorator.getEnd() - decorator.getStart(),
+        messageText: `${import_typescript21.default.SyntaxKind[decorator.kind]} not implemented in gathering decorator metadata.`,
+        category: import_typescript21.default.DiagnosticCategory.Error,
+        code: 0
+      });
+      break;
+  }
+  return import_typescript21.default.factory.createObjectLiteralExpression(metadataProperties);
+}
+function createCtorParametersClassProperty(diagnostics, entityNameToExpression, ctorParameters, isClosureCompilerEnabled) {
+  const params = [];
+  for (const ctorParam of ctorParameters) {
+    if (!ctorParam.type && ctorParam.decorators.length === 0) {
+      params.push(import_typescript21.default.factory.createNull());
+      continue;
+    }
+    const paramType = ctorParam.type ? typeReferenceToExpression(entityNameToExpression, ctorParam.type) : void 0;
+    const members = [
+      import_typescript21.default.factory.createPropertyAssignment("type", paramType || import_typescript21.default.factory.createIdentifier("undefined"))
+    ];
+    const decorators = [];
+    for (const deco of ctorParam.decorators) {
+      decorators.push(extractMetadataFromSingleDecorator(deco, diagnostics));
+    }
+    if (decorators.length) {
+      members.push(import_typescript21.default.factory.createPropertyAssignment("decorators", import_typescript21.default.factory.createArrayLiteralExpression(decorators)));
+    }
+    params.push(import_typescript21.default.factory.createObjectLiteralExpression(members));
+  }
+  const initializer = import_typescript21.default.factory.createArrowFunction(void 0, void 0, [], void 0, import_typescript21.default.factory.createToken(import_typescript21.default.SyntaxKind.EqualsGreaterThanToken), import_typescript21.default.factory.createArrayLiteralExpression(params, true));
+  const ctorProp = import_typescript21.default.factory.createPropertyDeclaration([import_typescript21.default.factory.createToken(import_typescript21.default.SyntaxKind.StaticKeyword)], "ctorParameters", void 0, void 0, initializer);
+  if (isClosureCompilerEnabled) {
+    import_typescript21.default.setSyntheticLeadingComments(ctorProp, [
+      {
+        kind: import_typescript21.default.SyntaxKind.MultiLineCommentTrivia,
+        text: [
+          `*`,
+          ` * @type {function(): !Array<(null|{`,
+          ` *   type: ?,`,
+          ` *   decorators: (undefined|${DECORATOR_INVOCATION_JSDOC_TYPE}),`,
+          ` * })>}`,
+          ` * @nocollapse`,
+          ` `
+        ].join("\n"),
+        pos: -1,
+        end: -1,
+        hasTrailingNewLine: true
+      }
+    ]);
+  }
+  return ctorProp;
+}
+function typeReferenceToExpression(entityNameToExpression, node) {
+  let kind = node.kind;
+  if (import_typescript21.default.isLiteralTypeNode(node)) {
+    kind = node.literal.kind;
+  }
+  switch (kind) {
+    case import_typescript21.default.SyntaxKind.FunctionType:
+    case import_typescript21.default.SyntaxKind.ConstructorType:
+      return import_typescript21.default.factory.createIdentifier("Function");
+    case import_typescript21.default.SyntaxKind.ArrayType:
+    case import_typescript21.default.SyntaxKind.TupleType:
+      return import_typescript21.default.factory.createIdentifier("Array");
+    case import_typescript21.default.SyntaxKind.TypePredicate:
+    case import_typescript21.default.SyntaxKind.TrueKeyword:
+    case import_typescript21.default.SyntaxKind.FalseKeyword:
+    case import_typescript21.default.SyntaxKind.BooleanKeyword:
+      return import_typescript21.default.factory.createIdentifier("Boolean");
+    case import_typescript21.default.SyntaxKind.StringLiteral:
+    case import_typescript21.default.SyntaxKind.StringKeyword:
+      return import_typescript21.default.factory.createIdentifier("String");
+    case import_typescript21.default.SyntaxKind.ObjectKeyword:
+      return import_typescript21.default.factory.createIdentifier("Object");
+    case import_typescript21.default.SyntaxKind.NumberKeyword:
+    case import_typescript21.default.SyntaxKind.NumericLiteral:
+      return import_typescript21.default.factory.createIdentifier("Number");
+    case import_typescript21.default.SyntaxKind.TypeReference:
+      const typeRef = node;
+      return entityNameToExpression(typeRef.typeName);
+    case import_typescript21.default.SyntaxKind.UnionType:
+      const childTypeNodes = node.types.filter((t) => !(import_typescript21.default.isLiteralTypeNode(t) && t.literal.kind === import_typescript21.default.SyntaxKind.NullKeyword));
+      return childTypeNodes.length === 1 ? typeReferenceToExpression(entityNameToExpression, childTypeNodes[0]) : void 0;
+    default:
+      return void 0;
+  }
+}
+function symbolIsRuntimeValue(typeChecker, symbol) {
+  if (symbol.flags & import_typescript21.default.SymbolFlags.Alias) {
+    symbol = typeChecker.getAliasedSymbol(symbol);
+  }
+  return (symbol.flags & import_typescript21.default.SymbolFlags.Value & import_typescript21.default.SymbolFlags.ConstEnumExcludes) !== 0;
+}
+function getDownlevelDecoratorsTransform(typeChecker, host, diagnostics, isCore, isClosureCompilerEnabled, shouldTransformClass) {
+  function addJSDocTypeAnnotation(node, jsdocType) {
+    if (!isClosureCompilerEnabled) {
+      return;
+    }
+    import_typescript21.default.setSyntheticLeadingComments(node, [
+      {
+        kind: import_typescript21.default.SyntaxKind.MultiLineCommentTrivia,
+        text: `* @type {${jsdocType}} `,
+        pos: -1,
+        end: -1,
+        hasTrailingNewLine: true
+      }
+    ]);
+  }
+  function createPropDecoratorsClassProperty(diagnostics2, properties) {
+    const entries = [];
+    for (const [name, decorators] of properties.entries()) {
+      entries.push(import_typescript21.default.factory.createPropertyAssignment(name, import_typescript21.default.factory.createArrayLiteralExpression(decorators.map((deco) => extractMetadataFromSingleDecorator(deco, diagnostics2)))));
+    }
+    const initializer = import_typescript21.default.factory.createObjectLiteralExpression(entries, true);
+    const prop = import_typescript21.default.factory.createPropertyDeclaration([import_typescript21.default.factory.createToken(import_typescript21.default.SyntaxKind.StaticKeyword)], "propDecorators", void 0, void 0, initializer);
+    addJSDocTypeAnnotation(prop, `!Object<string, ${DECORATOR_INVOCATION_JSDOC_TYPE}>`);
+    return prop;
+  }
+  return (context) => {
+    const referencedParameterTypes = loadIsReferencedAliasDeclarationPatch(context);
+    function entityNameToExpression(name) {
+      const symbol = typeChecker.getSymbolAtLocation(name);
+      if (!symbol || !symbolIsRuntimeValue(typeChecker, symbol) || !symbol.declarations || symbol.declarations.length === 0) {
+        return void 0;
+      }
+      if (import_typescript21.default.isQualifiedName(name)) {
+        const containerExpr = entityNameToExpression(name.left);
+        if (containerExpr === void 0) {
+          return void 0;
+        }
+        return import_typescript21.default.factory.createPropertyAccessExpression(containerExpr, name.right);
+      }
+      const decl = symbol.declarations[0];
+      if (isAliasImportDeclaration(decl)) {
+        referencedParameterTypes.add(decl);
+        if (decl.name !== void 0) {
+          return import_typescript21.default.setOriginalNode(import_typescript21.default.factory.createIdentifier(decl.name.text), decl.name);
+        }
+      }
+      return import_typescript21.default.setOriginalNode(import_typescript21.default.factory.createIdentifier(name.text), name);
+    }
+    function transformClassElement(element2) {
+      element2 = import_typescript21.default.visitEachChild(element2, decoratorDownlevelVisitor, context);
+      const decoratorsToKeep = [];
+      const toLower = [];
+      const decorators = host.getDecoratorsOfDeclaration(element2) || [];
+      for (const decorator of decorators) {
+        const decoratorNode = decorator.node;
+        if (!isAngularDecorator(decorator, isCore)) {
+          decoratorsToKeep.push(decoratorNode);
+          continue;
+        }
+        toLower.push(decoratorNode);
+      }
+      if (!toLower.length)
+        return [void 0, element2, []];
+      if (!element2.name || !import_typescript21.default.isIdentifier(element2.name)) {
+        diagnostics.push({
+          file: element2.getSourceFile(),
+          start: element2.getStart(),
+          length: element2.getEnd() - element2.getStart(),
+          messageText: `Cannot process decorators for class element with non-analyzable name.`,
+          category: import_typescript21.default.DiagnosticCategory.Error,
+          code: 0
+        });
+        return [void 0, element2, []];
+      }
+      const elementModifiers = import_typescript21.default.canHaveModifiers(element2) ? import_typescript21.default.getModifiers(element2) : void 0;
+      let modifiers;
+      if (decoratorsToKeep.length || (elementModifiers == null ? void 0 : elementModifiers.length)) {
+        modifiers = import_typescript21.default.setTextRange(import_typescript21.default.factory.createNodeArray([...decoratorsToKeep, ...elementModifiers || []]), element2.modifiers);
+      }
+      return [element2.name.text, cloneClassElementWithModifiers(element2, modifiers), toLower];
+    }
+    function transformConstructor(ctor) {
+      ctor = import_typescript21.default.visitEachChild(ctor, decoratorDownlevelVisitor, context);
+      const newParameters = [];
+      const oldParameters = ctor.parameters;
+      const parametersInfo = [];
+      for (const param of oldParameters) {
+        const decoratorsToKeep = [];
+        const paramInfo = { decorators: [], type: null };
+        const decorators = host.getDecoratorsOfDeclaration(param) || [];
+        for (const decorator of decorators) {
+          const decoratorNode = decorator.node;
+          if (!isAngularDecorator(decorator, isCore)) {
+            decoratorsToKeep.push(decoratorNode);
+            continue;
+          }
+          paramInfo.decorators.push(decoratorNode);
+        }
+        if (param.type) {
+          paramInfo.type = param.type;
+        }
+        parametersInfo.push(paramInfo);
+        let modifiers;
+        const paramModifiers = import_typescript21.default.getModifiers(param);
+        if (decoratorsToKeep.length || (paramModifiers == null ? void 0 : paramModifiers.length)) {
+          modifiers = [...decoratorsToKeep, ...paramModifiers || []];
+        }
+        const newParam = import_typescript21.default.factory.updateParameterDeclaration(param, modifiers, param.dotDotDotToken, param.name, param.questionToken, param.type, param.initializer);
+        newParameters.push(newParam);
+      }
+      const updated = import_typescript21.default.factory.updateConstructorDeclaration(ctor, import_typescript21.default.getModifiers(ctor), newParameters, ctor.body);
+      return [updated, parametersInfo];
+    }
+    function transformClassDeclaration(classDecl) {
+      const newMembers = [];
+      const decoratedProperties = /* @__PURE__ */ new Map();
+      let classParameters = null;
+      for (const member of classDecl.members) {
+        switch (member.kind) {
+          case import_typescript21.default.SyntaxKind.PropertyDeclaration:
+          case import_typescript21.default.SyntaxKind.GetAccessor:
+          case import_typescript21.default.SyntaxKind.SetAccessor:
+          case import_typescript21.default.SyntaxKind.MethodDeclaration: {
+            const [name, newMember, decorators] = transformClassElement(member);
+            newMembers.push(newMember);
+            if (name)
+              decoratedProperties.set(name, decorators);
+            continue;
+          }
+          case import_typescript21.default.SyntaxKind.Constructor: {
+            const ctor = member;
+            if (!ctor.body)
+              break;
+            const [newMember, parametersInfo] = transformConstructor(member);
+            classParameters = parametersInfo;
+            newMembers.push(newMember);
+            continue;
+          }
+          default:
+            break;
+        }
+        newMembers.push(import_typescript21.default.visitEachChild(member, decoratorDownlevelVisitor, context));
+      }
+      const possibleAngularDecorators = host.getDecoratorsOfDeclaration(classDecl) || [];
+      const hasAngularDecorator = possibleAngularDecorators.some((d) => isAngularDecorator(d, isCore));
+      if (classParameters) {
+        if (hasAngularDecorator || classParameters.some((p2) => !!p2.decorators.length)) {
+          newMembers.push(createCtorParametersClassProperty(diagnostics, entityNameToExpression, classParameters, isClosureCompilerEnabled));
+        }
+      }
+      if (decoratedProperties.size) {
+        newMembers.push(createPropDecoratorsClassProperty(diagnostics, decoratedProperties));
+      }
+      const members = import_typescript21.default.setTextRange(import_typescript21.default.factory.createNodeArray(newMembers, classDecl.members.hasTrailingComma), classDecl.members);
+      return import_typescript21.default.factory.updateClassDeclaration(classDecl, classDecl.modifiers, classDecl.name, classDecl.typeParameters, classDecl.heritageClauses, members);
+    }
+    function decoratorDownlevelVisitor(node) {
+      if (import_typescript21.default.isClassDeclaration(node) && (shouldTransformClass === void 0 || shouldTransformClass(node))) {
+        return transformClassDeclaration(node);
+      }
+      return import_typescript21.default.visitEachChild(node, decoratorDownlevelVisitor, context);
+    }
+    return (sf) => {
+      return import_typescript21.default.visitEachChild(sf, decoratorDownlevelVisitor, context);
+    };
+  };
+}
+function cloneClassElementWithModifiers(node, modifiers) {
+  let clone;
+  if (import_typescript21.default.isMethodDeclaration(node)) {
+    clone = import_typescript21.default.factory.createMethodDeclaration(modifiers, node.asteriskToken, node.name, node.questionToken, node.typeParameters, node.parameters, node.type, node.body);
+  } else if (import_typescript21.default.isPropertyDeclaration(node)) {
+    clone = import_typescript21.default.factory.createPropertyDeclaration(modifiers, node.name, node.questionToken, node.type, node.initializer);
+  } else if (import_typescript21.default.isGetAccessor(node)) {
+    clone = import_typescript21.default.factory.createGetAccessorDeclaration(modifiers, node.name, node.parameters, node.type, node.body);
+  } else if (import_typescript21.default.isSetAccessor(node)) {
+    clone = import_typescript21.default.factory.createSetAccessorDeclaration(modifiers, node.name, node.parameters, node.body);
+  } else {
+    throw new Error(`Unsupported decorated member with kind ${import_typescript21.default.SyntaxKind[node.kind]}`);
+  }
+  return import_typescript21.default.setOriginalNode(clone, node);
+}
 
-// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/jit_transforms/initializer_api_transforms/transform.mjs
-var import_typescript95 = __toESM(require("typescript"), 1);
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/transform.mjs
+var import_typescript94 = __toESM(require("typescript"), 1);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/common/src/di.mjs
 var import_typescript23 = __toESM(require("typescript"), 1);
@@ -29575,9 +29877,9 @@ function isAngularCoreReference(reference2, symbolName) {
   return reference2.ownedByModuleGuess === CORE_MODULE2 && reference2.debugName === symbolName;
 }
 function findAngularDecorator(decorators, name, isCore) {
-  return decorators.find((decorator) => isAngularDecorator(decorator, name, isCore));
+  return decorators.find((decorator) => isAngularDecorator2(decorator, name, isCore));
 }
-function isAngularDecorator(decorator, name, isCore) {
+function isAngularDecorator2(decorator, name, isCore) {
   if (isCore) {
     return decorator.name === name;
   } else if (isAngularCore(decorator)) {
@@ -34227,7 +34529,7 @@ function extractClassMetadata(clazz, reflection, isCore, annotateForClosureCompi
   if (classDecorators === null) {
     return null;
   }
-  const ngClassDecorators = classDecorators.filter((dec) => isAngularDecorator2(dec, isCore)).map((decorator) => decoratorToMetadata(angularDecoratorTransform(decorator), annotateForClosureCompiler)).map((decorator) => removeIdentifierReferences(decorator, id.text));
+  const ngClassDecorators = classDecorators.filter((dec) => isAngularDecorator3(dec, isCore)).map((decorator) => decoratorToMetadata(angularDecoratorTransform(decorator), annotateForClosureCompiler)).map((decorator) => removeIdentifierReferences(decorator, id.text));
   if (ngClassDecorators.length === 0) {
     return null;
   }
@@ -34264,14 +34566,14 @@ function ctorParameterToMetadata(param, isCore) {
     { key: "type", value: type, quoted: false }
   ];
   if (param.decorators !== null) {
-    const ngDecorators = param.decorators.filter((dec) => isAngularDecorator2(dec, isCore)).map((decorator) => decoratorToMetadata(decorator));
+    const ngDecorators = param.decorators.filter((dec) => isAngularDecorator3(dec, isCore)).map((decorator) => decoratorToMetadata(decorator));
     const value = new WrappedNodeExpr(import_typescript49.default.factory.createArrayLiteralExpression(ngDecorators));
     mapEntries.push({ key: "decorators", value, quoted: false });
   }
   return literalMap(mapEntries);
 }
 function classMemberToMetadata(name, decorators, isCore) {
-  const ngDecorators = decorators.filter((dec) => isAngularDecorator2(dec, isCore)).map((decorator) => decoratorToMetadata(decorator));
+  const ngDecorators = decorators.filter((dec) => isAngularDecorator3(dec, isCore)).map((decorator) => decoratorToMetadata(decorator));
   const decoratorMeta = import_typescript49.default.factory.createArrayLiteralExpression(ngDecorators);
   return import_typescript49.default.factory.createPropertyAssignment(name, decoratorMeta);
 }
@@ -34290,7 +34592,7 @@ function decoratorToMetadata(decorator, wrapFunctionsInParens) {
   }
   return import_typescript49.default.factory.createObjectLiteralExpression(properties, true);
 }
-function isAngularDecorator2(decorator, isCore) {
+function isAngularDecorator3(decorator, isCore) {
   return isCore || decorator.import !== null && decorator.import.from === "@angular/core";
 }
 function removeIdentifierReferences(node, names) {
@@ -34379,6 +34681,13 @@ function compileInputTransformFields(inputs) {
   }
   return extraFields;
 }
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/common/src/jit_declaration_registry.mjs
+var JitDeclarationRegistry = class {
+  constructor() {
+    this.jitDeclarations = /* @__PURE__ */ new Set();
+  }
+};
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/annotations/component/src/handler.mjs
 var import_typescript88 = __toESM(require("typescript"), 1);
@@ -35496,7 +35805,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
     directive = reflectObjectLiteral(meta);
   }
   if (directive.has("jit")) {
-    return void 0;
+    return { jitForced: true };
   }
   const members = reflector.getMembersOfClass(clazz);
   const decoratedElements = members.filter((member) => !member.isStatic && member.decorators !== null);
@@ -35604,6 +35913,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
     hostDirectives: (hostDirectives == null ? void 0 : hostDirectives.map((hostDir) => toHostDirectiveMetadata(hostDir, sourceFile, refEmitter))) || null
   };
   return {
+    jitForced: false,
     decorator: directive,
     metadata,
     inputs,
@@ -35907,7 +36217,7 @@ function tryGetDecoratorOnMember(member, decoratorName, isCore) {
     return null;
   }
   for (const decorator of member.decorators) {
-    if (isAngularDecorator(decorator, decoratorName, isCore)) {
+    if (isAngularDecorator2(decorator, decoratorName, isCore)) {
       return decorator;
     }
   }
@@ -36373,7 +36683,7 @@ var LIFECYCLE_HOOKS = /* @__PURE__ */ new Set([
   "ngAfterContentChecked"
 ]);
 var DirectiveDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, perf, importTracker, includeClassMetadata, compilationMode, generateExtraImportsInLocalMode) {
+  constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, perf, importTracker, includeClassMetadata, compilationMode, jitDeclarationRegistry) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -36390,7 +36700,7 @@ var DirectiveDecoratorHandler = class {
     this.importTracker = importTracker;
     this.includeClassMetadata = includeClassMetadata;
     this.compilationMode = compilationMode;
-    this.generateExtraImportsInLocalMode = generateExtraImportsInLocalMode;
+    this.jitDeclarationRegistry = jitDeclarationRegistry;
     this.precedence = HandlerPrecedence.PRIMARY;
     this.name = "DirectiveDecoratorHandler";
   }
@@ -36425,7 +36735,8 @@ var DirectiveDecoratorHandler = class {
       this.compilationMode,
       null
     );
-    if (directiveResult === void 0) {
+    if (directiveResult.jitForced) {
+      this.jitDeclarationRegistry.jitDeclarations.add(node);
       return {};
     }
     const analysis = directiveResult.metadata;
@@ -36537,7 +36848,7 @@ var DirectiveDecoratorHandler = class {
         return true;
       }
       if (member.decorators) {
-        return member.decorators.some((decorator) => FIELD_DECORATORS.some((decoratorName) => isAngularDecorator(decorator, decoratorName, this.isCore)));
+        return member.decorators.some((decorator) => FIELD_DECORATORS.some((decoratorName) => isAngularDecorator2(decorator, decoratorName, this.isCore)));
       }
       return false;
     });
@@ -44016,7 +44327,7 @@ var EMPTY_ARRAY2 = [];
 var isUsedDirective = (decl) => decl.kind === R3TemplateDependencyKind.Directive;
 var isUsedPipe = (decl) => decl.kind === R3TemplateDependencyKind.Pipe;
 var ComponentDecoratorHandler = class {
-  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, localCompilationExtraImportsTracker) {
+  constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, localCompilationExtraImportsTracker, jitDeclarationRegistry) {
     this.reflector = reflector;
     this.evaluator = evaluator;
     this.metaRegistry = metaRegistry;
@@ -44054,6 +44365,7 @@ var ComponentDecoratorHandler = class {
     this.enableBlockSyntax = enableBlockSyntax;
     this.enableLetSyntax = enableLetSyntax;
     this.localCompilationExtraImportsTracker = localCompilationExtraImportsTracker;
+    this.jitDeclarationRegistry = jitDeclarationRegistry;
     this.literalCache = /* @__PURE__ */ new Map();
     this.elementSchemaRegistry = new DomElementSchemaRegistry();
     this.preanalyzeTemplateCache = /* @__PURE__ */ new Map();
@@ -44132,7 +44444,8 @@ var ComponentDecoratorHandler = class {
     let diagnostics;
     let isPoisoned = false;
     const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.importTracker, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, this.elementSchemaRegistry.getDefaultComponentElementName());
-    if (directiveResult === void 0) {
+    if (directiveResult.jitForced) {
+      this.jitDeclarationRegistry.jitDeclarations.add(node);
       return {};
     }
     const { decorator: component, metadata, inputs, outputs, hostDirectives, rawHostDirectives } = directiveResult;
@@ -45417,11 +45730,204 @@ var PipeDecoratorHandler = class {
   }
 };
 
-// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/jit_transforms/initializer_api_transforms/transform_api.mjs
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/transform_api.mjs
 var import_typescript92 = __toESM(require("typescript"), 1);
+function createSyntheticAngularCoreDecoratorAccess(factory10, importManager, ngClassDecorator, sourceFile, decoratorName) {
+  const classDecoratorIdentifier = import_typescript92.default.isIdentifier(ngClassDecorator.identifier) ? ngClassDecorator.identifier : ngClassDecorator.identifier.expression;
+  return factory10.createPropertyAccessExpression(
+    importManager.addImport({
+      exportModuleSpecifier: "@angular/core",
+      exportSymbolName: null,
+      requestedFile: sourceFile
+    }),
+    import_typescript92.default.setOriginalNode(factory10.createIdentifier(decoratorName), classDecoratorIdentifier)
+  );
+}
+function castAsAny(factory10, expr) {
+  return factory10.createAsExpression(expr, factory10.createKeywordTypeNode(import_typescript92.default.SyntaxKind.AnyKeyword));
+}
 
-// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/jit_transforms/initializer_api_transforms/model_function.mjs
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/input_function.mjs
+var signalInputsTransform = (member, host, factory10, importTracker, importManager, classDecorator, isCore) => {
+  var _a2, _b2;
+  if ((_a2 = host.getDecoratorsOfDeclaration(member.node)) == null ? void 0 : _a2.some((d) => isAngularDecorator2(d, "Input", isCore))) {
+    return member.node;
+  }
+  const inputMapping = tryParseSignalInputMapping(member, host, importTracker);
+  if (inputMapping === null) {
+    return member.node;
+  }
+  const fields = {
+    "isSignal": factory10.createTrue(),
+    "alias": factory10.createStringLiteral(inputMapping.bindingPropertyName),
+    "required": inputMapping.required ? factory10.createTrue() : factory10.createFalse(),
+    "transform": factory10.createIdentifier("undefined")
+  };
+  const sourceFile = member.node.getSourceFile();
+  const newDecorator = factory10.createDecorator(factory10.createCallExpression(createSyntheticAngularCoreDecoratorAccess(factory10, importManager, classDecorator, sourceFile, "Input"), void 0, [
+    castAsAny(factory10, factory10.createObjectLiteralExpression(Object.entries(fields).map(([name, value]) => factory10.createPropertyAssignment(name, value))))
+  ]));
+  return factory10.updatePropertyDeclaration(member.node, [newDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.name, member.node.questionToken, member.node.type, member.node.initializer);
+};
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/model_function.mjs
 var import_typescript93 = __toESM(require("typescript"), 1);
+var signalModelTransform = (member, host, factory10, importTracker, importManager, classDecorator, isCore) => {
+  var _a2, _b2;
+  if ((_a2 = host.getDecoratorsOfDeclaration(member.node)) == null ? void 0 : _a2.some((d) => {
+    return isAngularDecorator2(d, "Input", isCore) || isAngularDecorator2(d, "Output", isCore);
+  })) {
+    return member.node;
+  }
+  const modelMapping = tryParseSignalModelMapping(member, host, importTracker);
+  if (modelMapping === null) {
+    return member.node;
+  }
+  const inputConfig = factory10.createObjectLiteralExpression([
+    factory10.createPropertyAssignment("isSignal", modelMapping.input.isSignal ? factory10.createTrue() : factory10.createFalse()),
+    factory10.createPropertyAssignment("alias", factory10.createStringLiteral(modelMapping.input.bindingPropertyName)),
+    factory10.createPropertyAssignment("required", modelMapping.input.required ? factory10.createTrue() : factory10.createFalse())
+  ]);
+  const sourceFile = member.node.getSourceFile();
+  const inputDecorator = createDecorator(
+    "Input",
+    factory10.createAsExpression(inputConfig, factory10.createKeywordTypeNode(import_typescript93.default.SyntaxKind.AnyKeyword)),
+    classDecorator,
+    factory10,
+    sourceFile,
+    importManager
+  );
+  const outputDecorator = createDecorator("Output", factory10.createStringLiteral(modelMapping.output.bindingPropertyName), classDecorator, factory10, sourceFile, importManager);
+  return factory10.updatePropertyDeclaration(member.node, [inputDecorator, outputDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
+};
+function createDecorator(name, config, classDecorator, factory10, sourceFile, importManager) {
+  const callTarget = createSyntheticAngularCoreDecoratorAccess(factory10, importManager, classDecorator, sourceFile, name);
+  return factory10.createDecorator(factory10.createCallExpression(callTarget, void 0, [config]));
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/output_function.mjs
+var initializerApiOutputTransform = (member, host, factory10, importTracker, importManager, classDecorator, isCore) => {
+  var _a2, _b2;
+  if ((_a2 = host.getDecoratorsOfDeclaration(member.node)) == null ? void 0 : _a2.some((d) => isAngularDecorator2(d, "Output", isCore))) {
+    return member.node;
+  }
+  const output = tryParseInitializerBasedOutput(member, host, importTracker);
+  if (output === null) {
+    return member.node;
+  }
+  const sourceFile = member.node.getSourceFile();
+  const newDecorator = factory10.createDecorator(factory10.createCallExpression(createSyntheticAngularCoreDecoratorAccess(factory10, importManager, classDecorator, sourceFile, "Output"), void 0, [factory10.createStringLiteral(output.metadata.bindingPropertyName)]));
+  return factory10.updatePropertyDeclaration(member.node, [newDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
+};
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/query_functions.mjs
+var queryFunctionToDecorator = {
+  viewChild: "ViewChild",
+  viewChildren: "ViewChildren",
+  contentChild: "ContentChild",
+  contentChildren: "ContentChildren"
+};
+var queryFunctionsTransforms = (member, host, factory10, importTracker, importManager, classDecorator, isCore) => {
+  var _a2;
+  const decorators = host.getDecoratorsOfDeclaration(member.node);
+  const queryDecorators = decorators && getAngularDecorators(decorators, queryDecoratorNames, isCore);
+  if (queryDecorators !== null && queryDecorators.length > 0) {
+    return member.node;
+  }
+  const queryDefinition = tryParseSignalQueryFromInitializer(member, host, importTracker);
+  if (queryDefinition === null) {
+    return member.node;
+  }
+  const sourceFile = member.node.getSourceFile();
+  const callArgs = queryDefinition.call.arguments;
+  const newDecorator = factory10.createDecorator(factory10.createCallExpression(
+    createSyntheticAngularCoreDecoratorAccess(factory10, importManager, classDecorator, sourceFile, queryFunctionToDecorator[queryDefinition.name]),
+    void 0,
+    [
+      queryDefinition.call.arguments[0],
+      castAsAny(factory10, factory10.createObjectLiteralExpression([
+        ...callArgs.length > 1 ? [factory10.createSpreadAssignment(callArgs[1])] : [],
+        factory10.createPropertyAssignment("isSignal", factory10.createTrue())
+      ]))
+    ]
+  ));
+  return factory10.updatePropertyDeclaration(member.node, [newDecorator, ...(_a2 = member.node.modifiers) != null ? _a2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
+};
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/transform.mjs
+var decoratorsWithInputs = ["Directive", "Component"];
+var propertyTransforms = [
+  signalInputsTransform,
+  initializerApiOutputTransform,
+  queryFunctionsTransforms,
+  signalModelTransform
+];
+function getInitializerApiJitTransform(host, importTracker, isCore, shouldTransformClass) {
+  return (ctx) => {
+    return (sourceFile) => {
+      const importManager = new ImportManager();
+      sourceFile = import_typescript94.default.visitNode(sourceFile, createTransformVisitor(ctx, host, importManager, importTracker, isCore, shouldTransformClass), import_typescript94.default.isSourceFile);
+      return importManager.transformTsFile(ctx, sourceFile);
+    };
+  };
+}
+function createTransformVisitor(ctx, host, importManager, importTracker, isCore, shouldTransformClass) {
+  const visitor = (node) => {
+    var _a2;
+    if (import_typescript94.default.isClassDeclaration(node) && node.name !== void 0) {
+      const originalNode = import_typescript94.default.getOriginalNode(node, import_typescript94.default.isClassDeclaration);
+      const angularDecorator = (_a2 = host.getDecoratorsOfDeclaration(originalNode)) == null ? void 0 : _a2.find((d) => decoratorsWithInputs.some((name) => isAngularDecorator2(d, name, isCore)));
+      if (angularDecorator !== void 0 && (shouldTransformClass === void 0 || shouldTransformClass(node))) {
+        let hasChanged = false;
+        const members = node.members.map((memberNode) => {
+          if (!import_typescript94.default.isPropertyDeclaration(memberNode)) {
+            return memberNode;
+          }
+          const member = reflectClassMember(memberNode);
+          if (member === null) {
+            return memberNode;
+          }
+          for (const transform2 of propertyTransforms) {
+            const newNode = transform2(__spreadProps(__spreadValues({}, member), { node: memberNode }), host, ctx.factory, importTracker, importManager, angularDecorator, isCore);
+            if (newNode !== member.node) {
+              hasChanged = true;
+              return newNode;
+            }
+          }
+          return memberNode;
+        });
+        if (hasChanged) {
+          return ctx.factory.updateClassDeclaration(node, node.modifiers, node.name, node.typeParameters, node.heritageClauses, members);
+        }
+      }
+    }
+    return import_typescript94.default.visitEachChild(node, visitor, ctx);
+  };
+  return visitor;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/index.mjs
+function angularJitApplicationTransform(program, isCore = false, shouldTransformClass) {
+  const typeChecker = program.getTypeChecker();
+  const reflectionHost = new TypeScriptReflectionHost(typeChecker);
+  const importTracker = new ImportedSymbolsTracker();
+  const downlevelDecoratorTransform = getDownlevelDecoratorsTransform(
+    typeChecker,
+    reflectionHost,
+    [],
+    isCore,
+    false,
+    shouldTransformClass
+  );
+  const initializerApisJitTransform = getInitializerApiJitTransform(reflectionHost, importTracker, isCore, shouldTransformClass);
+  return (ctx) => {
+    return (sourceFile) => {
+      sourceFile = initializerApisJitTransform(ctx)(sourceFile);
+      sourceFile = downlevelDecoratorTransform(ctx)(sourceFile);
+      return sourceFile;
+    };
+  };
+}
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/transformers/api.mjs
 var EmitFlags;
@@ -48790,6 +49296,25 @@ var NgCompiler = class {
       aliasTransformFactory(compilation.traitCompiler.exportStatements),
       defaultImportTracker.importPreservingTransformer()
     ];
+    if (compilation.supportJitMode && compilation.jitDeclarationRegistry.jitDeclarations.size > 0) {
+      const { jitDeclarations } = compilation.jitDeclarationRegistry;
+      const jitDeclarationsArray = Array.from(jitDeclarations);
+      const jitDeclarationOriginalNodes = new Set(jitDeclarationsArray.map((d) => import_typescript119.default.getOriginalNode(d)));
+      const sourceFilesWithJit = new Set(jitDeclarationsArray.map((d) => d.getSourceFile().fileName));
+      before.push((ctx) => {
+        const reflectionHost = new TypeScriptReflectionHost(this.inputProgram.getTypeChecker());
+        const jitTransform = angularJitApplicationTransform(this.inputProgram, compilation.isCore, (node) => {
+          node = import_typescript119.default.getOriginalNode(node, import_typescript119.default.isClassDeclaration);
+          return reflectionHost.isClass(node) && jitDeclarationOriginalNodes.has(node);
+        })(ctx);
+        return (sourceFile) => {
+          if (!sourceFilesWithJit.has(sourceFile.fileName)) {
+            return sourceFile;
+          }
+          return jitTransform(sourceFile);
+        };
+      });
+    }
     const afterDeclarations = [];
     if (this.options.compilationMode !== "experimental-local" && compilation.dtsTransforms !== null) {
       afterDeclarations.push(declarationTransformFactory(compilation.dtsTransforms, compilation.reflector, compilation.refEmitter, importRewriter));
@@ -49106,9 +49631,10 @@ var NgCompiler = class {
     if (supportJitMode === false && this.options.forbidOrphanComponents) {
       throw new Error('JIT mode support ("supportJitMode" option) cannot be disabled when forbidOrphanComponents is set to true');
     }
+    const jitDeclarationRegistry = new JitDeclarationRegistry();
     const handlers = [
-      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, localCompilationExtraImportsTracker),
-      new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, importTracker, supportTestBed, compilationMode, !!this.options.generateExtraImportsInLocalMode),
+      new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, localCompilationExtraImportsTracker, jitDeclarationRegistry),
+      new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, importTracker, supportTestBed, compilationMode, jitDeclarationRegistry),
       new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder, supportTestBed, compilationMode, !!this.options.generateExtraImportsInLocalMode),
       new InjectableDecoratorHandler(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, compilationMode),
       new NgModuleDecoratorHandler(reflector, evaluator, metaReader, metaRegistry, ngModuleScopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, this.closureCompilerEnabled, (_d2 = this.options.onlyPublishPublicTypingsForNgModules) != null ? _d2 : false, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, supportJitMode, compilationMode, localCompilationExtraImportsTracker)
@@ -49137,8 +49663,10 @@ var NgCompiler = class {
       resourceRegistry,
       extendedTemplateChecker,
       localCompilationExtraImportsTracker,
+      jitDeclarationRegistry,
       templateSemanticsChecker,
-      sourceFileValidator
+      sourceFileValidator,
+      supportJitMode
     };
   }
 };
