@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0+sha-729bf5b
+ * @license Angular v18.1.0+sha-4b82b98
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1798,11 +1798,6 @@ class EventContractContainer {
 }
 
 /**
- * @define Support for accessible click actions.  This flag can be overridden in
- * a build rule.
- */
-const A11Y_CLICK_SUPPORT = false;
-/**
  * @define Support for the non-bubbling mouseenter and mouseleave events.  This
  * flag can be overridden in a build rule.
  */
@@ -1823,7 +1818,6 @@ const MOUSE_SPECIAL_SUPPORT = false;
  * be delay loaded in a generic way.
  */
 class EventContract {
-    static { this.A11Y_CLICK_SUPPORT = A11Y_CLICK_SUPPORT; }
     static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
     constructor(containerManager, useActionResolver) {
         this.useActionResolver = useActionResolver;

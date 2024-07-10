@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0+sha-729bf5b
+ * @license Angular v18.1.0+sha-4b82b98
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -113,7 +113,6 @@ export declare interface EarlyJsactionDataContainer {
  */
 export declare class EventContract implements UnrenamedEventContract {
     private readonly useActionResolver?;
-    static A11Y_CLICK_SUPPORT: boolean;
     static MOUSE_SPECIAL_SUPPORT: boolean;
     private containerManager;
     /**
