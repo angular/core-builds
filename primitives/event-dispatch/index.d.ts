@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0+sha-aedf832
+ * @license Angular v18.1.0+sha-a7b774c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32,19 +32,6 @@ export declare const Attribute: {
      */
     JSACTION: "jsaction";
 };
-
-/**
- * Provides a factory function for bootstrapping an event contract on a
- * specified object (by default, exposed on the `window`).
- * @param field The property on the object that the event contract will be placed on.
- * @param container The container that listens to events
- * @param appId A given identifier for an application. If there are multiple apps on the page
- *              then this is how contracts can be initialized for each one.
- * @param eventTypes An array of event names that should be listened to.
- * @param captureEventTypes An array of event names that should be listened to with capture.
- * @param earlyJsactionTracker The object that should receive the event contract.
- */
-export declare function bootstrapEarlyEventContract(field: string, container: HTMLElement, appId: string, eventTypes?: string[], captureEventTypes?: string[], earlyJsactionTracker?: EventContractTracker<EarlyJsactionDataContainer>): void;
 
 /** Clones an `EventInfo` */
 declare function cloneEventInfo(eventInfo: EventInfo): EventInfo;
@@ -83,18 +70,23 @@ declare type Dispatcher = (eventInfo: eventInfoLib.EventInfo, globalDispatch?: b
 declare interface EarlyJsactionData {
     /** List used to keep track of the early JSAction event types. */
     et: string[];
-    /** List used to keep track of capture event types. */
+    /** List used to keep track of the early JSAction capture event types. */
     etc: string[];
-    /** List used to keep track of the JSAction events if using earlyeventcontract. */
-    q: EventInfo[];
-    /** Early Jsaction handler. */
+    /** Early JSAction handler for all events. */
     h: (event: Event) => void;
+    /** Dispatcher handler. Initializes to populating `q`. */
+    d: (eventInfo: EventInfo) => void;
+    /** List used to push `EventInfo` objects if the dispatcher is not registered. */
+    q: EventInfo[];
     /** Container for listening to events. */
     c: HTMLElement;
 }
 
 export declare interface EarlyJsactionDataContainer {
     _ejsa?: EarlyJsactionData;
+    _ejsas?: {
+        [appId: string]: EarlyJsactionData | undefined;
+    };
 }
 
 /**
@@ -162,7 +154,7 @@ export declare class EventContract implements UnrenamedEventContract {
      * in the provided event contract. Once all the events are replayed, it cleans
      * up the early contract.
      */
-    replayEarlyEvents(earlyJsactionContainer?: EarlyJsactionDataContainer): void;
+    replayEarlyEvents(earlyJsactionData?: EarlyJsactionData | undefined): void;
     /**
      * Returns all JSAction event types that have been registered for a given
      * browser event type.
@@ -244,12 +236,6 @@ declare interface EventContractContainerManager {
     addEventListener(eventType: string, getHandler: (element: Element) => (event: Event) => void): void;
     cleanUp(): void;
 }
-
-export declare type EventContractTracker<T> = {
-    [key: string]: {
-        [appId: string]: T;
-    };
-};
 
 /**
  * A dispatcher that uses browser-based `Event` semantics, for example bubbling, `stopPropagation`,
@@ -395,6 +381,14 @@ declare function getA11yClickKey(eventInfo: EventInfo): boolean | undefined;
 /** Added for readability when accessing stable property names. */
 declare function getAction(eventInfo: EventInfo): ActionInfoInternal | undefined;
 
+/**
+ * Reads the jsaction parser cache for the given DOM element. If no cache is yet present,
+ * creates an empty one.
+ */
+export declare function getActionCache(element: Element): {
+    [key: string]: string | undefined;
+};
+
 /** Added for readability when accessing stable property names. */
 declare function getActionElement(actionInfo: ActionInfoInternal): Element;
 
@@ -423,27 +417,22 @@ declare function getTargetElement(eventInfo: EventInfo): Element;
 declare function getTimestamp(eventInfo: EventInfo): number;
 
 /**
- *
- * Decides whether or not an event type is an event that only has a capture phase.
- *
+ * Whether or not an event type should be registered in the capture phase.
  * @param eventType
  * @returns bool
  */
-export declare const isCaptureEvent: (eventType: string) => boolean;
+export declare const isCaptureEventType: (eventType: string) => boolean;
 
 /**
- * Detects whether a given event type is supported by JSAction.
+ * Whether or not an event type is registered in the early contract.
  */
-export declare const isSupportedEvent: (eventType: string) => boolean;
+export declare const isEarlyEventType: (eventType: string) => boolean;
 
 /**
  * Registers deferred functionality for an EventContract and a Jsaction
  * Dispatcher.
  */
 export declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: EventDispatcher): void;
-
-
-export declare function registerEventType(element: Element, eventType: string, action: string): void;
 
 
 /**
@@ -479,8 +468,6 @@ declare function setTargetElement(eventInfo: EventInfo, targetElement: Element):
 
 /** Added for readability when accessing stable property names. */
 declare function setTimestamp(eventInfo: EventInfo, timestamp: number): void;
-
-export declare function unregisterEventType(element: Element, eventType: string): void;
 
 /**
  * The API of an EventContract that is safe to call from any compilation unit.

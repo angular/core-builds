@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0+sha-aedf832
+ * @license Angular v18.1.0+sha-a7b774c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1 } from '@angular/core/primitives/signals';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { map, first } from 'rxjs/operators';
-import { Attribute as Attribute$1, isSupportedEvent, registerEventType, unregisterEventType, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, isCaptureEvent } from '@angular/core/primitives/event-dispatch';
+import { Attribute as Attribute$1, isEarlyEventType, getActionCache, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, isCaptureEventType } from '@angular/core/primitives/event-dispatch';
 
 /**
  * Base URL for the error details page.
@@ -17200,7 +17200,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0+sha-aedf832']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0+sha-a7b774c']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30998,7 +30998,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0+sha-aedf832');
+const VERSION = new Version('18.1.0+sha-a7b774c');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -36814,16 +36814,16 @@ class GlobalEventDelegation {
     ngOnDestroy() {
         this.eventContractDetails.instance?.cleanUp();
     }
-    supports(eventName) {
-        return isSupportedEvent(eventName);
+    supports(eventType) {
+        return isEarlyEventType(eventType);
     }
-    addEventListener(element, eventName, handler) {
-        this.eventContractDetails.instance.addEvent(eventName);
-        registerEventType(element, eventName, '');
-        return () => this.removeEventListener(element, eventName, handler);
+    addEventListener(element, eventType, handler) {
+        this.eventContractDetails.instance.addEvent(eventType);
+        getActionCache(element)[eventType] = '';
+        return () => this.removeEventListener(element, eventType, handler);
     }
-    removeEventListener(element, eventName, callback) {
-        unregisterEventType(element, eventName);
+    removeEventListener(element, eventType, callback) {
+        getActionCache(element)[eventType] = undefined;
     }
     static { this.ɵfac = function GlobalEventDelegation_Factory(t) { return new (t || GlobalEventDelegation)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: GlobalEventDelegation, factory: GlobalEventDelegation.ɵfac }); }
@@ -36841,7 +36841,6 @@ const initGlobalEventDelegation = (eventContractDetails, injector) => {
     registerDispatcher(eventContract, dispatcher);
 };
 
-const CONTRACT_PROPERTY = 'ngContracts';
 /**
  * A set of DOM elements with `jsaction` attributes.
  */
@@ -36871,7 +36870,7 @@ function withEventReplay() {
                     // is enabled, but there are no events configured in this application, in which case
                     // we don't activate this feature, since there are no events to replay.
                     const appId = inject(APP_ID);
-                    isEnabled = !!globalThis[CONTRACT_PROPERTY]?.[appId];
+                    isEnabled = !!window._ejsas?.[appId];
                 }
                 if (isEnabled) {
                     performanceMarkFeature('NgEventReplay');
@@ -36921,15 +36920,10 @@ function withEventReplay() {
         },
     ];
 }
-// TODO: Upstream this back into event-dispatch.
-function getJsactionData(container) {
-    return container._ejsa;
-}
 const initEventReplay = (eventDelegation, injector) => {
     const appId = injector.get(APP_ID);
     // This is set in packages/platform-server/src/utils.ts
-    const container = globalThis[CONTRACT_PROPERTY]?.[appId];
-    const earlyJsactionData = getJsactionData(container);
+    const earlyJsactionData = window._ejsas[appId];
     const eventContract = (eventDelegation.instance = new EventContract(new EventContractContainer(earlyJsactionData.c), 
     /* useActionResolver= */ false));
     for (const et of earlyJsactionData.et) {
@@ -36938,7 +36932,8 @@ const initEventReplay = (eventDelegation, injector) => {
     for (const et of earlyJsactionData.etc) {
         eventContract.addEvent(et);
     }
-    eventContract.replayEarlyEvents(container);
+    eventContract.replayEarlyEvents(earlyJsactionData);
+    window._ejsas[appId] = undefined;
     const dispatcher = new EventDispatcher(invokeRegisteredListeners);
     registerDispatcher(eventContract, dispatcher);
 };
@@ -36947,11 +36942,11 @@ const initEventReplay = (eventDelegation, injector) => {
  * LView. Maps collected events to a corresponding DOM element (an element is used as a key).
  */
 function collectDomEventsInfo(tView, lView, eventTypesToReplay) {
-    const events = new Map();
+    const domEventsInfo = new Map();
     const lCleanup = lView[CLEANUP];
     const tCleanup = tView.cleanup;
     if (!tCleanup || !lCleanup) {
-        return events;
+        return domEventsInfo;
     }
     for (let i = 0; i < tCleanup.length;) {
         const firstParam = tCleanup[i++];
@@ -36959,15 +36954,15 @@ function collectDomEventsInfo(tView, lView, eventTypesToReplay) {
         if (typeof firstParam !== 'string') {
             continue;
         }
-        const name = firstParam;
-        if (!isSupportedEvent(name)) {
+        const eventType = firstParam;
+        if (!isEarlyEventType(eventType)) {
             continue;
         }
-        if (isCaptureEvent(name)) {
-            eventTypesToReplay.capture.add(name);
+        if (isCaptureEventType(eventType)) {
+            eventTypesToReplay.capture.add(eventType);
         }
         else {
-            eventTypesToReplay.regular.add(name);
+            eventTypesToReplay.regular.add(eventType);
         }
         const listenerElement = unwrapRNode(lView[secondParam]);
         i++; // move the cursor to the next position (location of the listener idx)
@@ -36979,14 +36974,14 @@ function collectDomEventsInfo(tView, lView, eventTypesToReplay) {
         if (!isDomEvent) {
             continue;
         }
-        if (!events.has(listenerElement)) {
-            events.set(listenerElement, [name]);
+        if (!domEventsInfo.has(listenerElement)) {
+            domEventsInfo.set(listenerElement, [eventType]);
         }
         else {
-            events.get(listenerElement).push(name);
+            domEventsInfo.get(listenerElement).push(eventType);
         }
     }
-    return events;
+    return domEventsInfo;
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0+sha-aedf832
+ * @license Angular v18.1.0+sha-a7b774c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -20,18 +20,79 @@ const Attribute = {
     JSACTION: 'jsaction',
 };
 
-const Char = {
+/** All properties that are used by jsaction. */
+const Property = {
     /**
-     * The separator between the namespace and the action name in the
-     * jsaction attribute value.
+     * The parsed value of the jsaction attribute is stored in this
+     * property on the DOM node. The parsed value is an Object. The
+     * property names of the object are the events; the values are the
+     * names of the actions. This property is attached even on nodes
+     * that don't have a jsaction attribute as an optimization, because
+     * property lookup is faster than attribute access.
      */
-    NAMESPACE_ACTION_SEPARATOR: '.',
+    JSACTION: '__jsaction',
     /**
-     * The separator between the event name and action in the jsaction
-     * attribute value.
+     * The owner property references an a logical owner for a DOM node. JSAction
+     * will follow this reference instead of parentNode when traversing the DOM
+     * to find jsaction attributes. This allows overlaying a logical structure
+     * over a document where the DOM structure can't reflect that structure.
      */
-    EVENT_ACTION_SEPARATOR: ':',
+    OWNER: '__owner',
 };
+
+/**
+ * Map from jsaction annotation to a parsed map from event name to action name.
+ */
+const parseCache = {};
+/**
+ * Reads the jsaction parser cache from the given DOM Element.
+ */
+function get(element) {
+    return element[Property.JSACTION];
+}
+/**
+ * Reads the jsaction parser cache for the given DOM element. If no cache is yet present,
+ * creates an empty one.
+ */
+function getDefaulted(element) {
+    const cache = get(element) ?? {};
+    set(element, cache);
+    return cache;
+}
+/**
+ * Writes the jsaction parser cache to the given DOM Element.
+ */
+function set(element, actionMap) {
+    element[Property.JSACTION] = actionMap;
+}
+/**
+ * Looks up the parsed action map from the source jsaction attribute value.
+ *
+ * @param text Unparsed jsaction attribute value.
+ * @return Parsed jsaction attribute value, if already present in the cache.
+ */
+function getParsed(text) {
+    return parseCache[text];
+}
+/**
+ * Inserts the parse result for the given source jsaction value into the cache.
+ *
+ * @param text Unparsed jsaction attribute value.
+ * @param parsed Attribute value parsed into the action map.
+ */
+function setParsed(text, parsed) {
+    parseCache[text] = parsed;
+}
+/**
+ * Clears the jsaction parser cache from the given DOM Element.
+ *
+ * @param element .
+ */
+function clear(element) {
+    if (Property.JSACTION in element) {
+        delete element[Property.JSACTION];
+    }
+}
 
 /*
  * Names of events that are special to jsaction. These are not all
@@ -269,32 +330,25 @@ const EventType = {
      */
     CUSTOM: '_custom',
 };
-const NON_BUBBLING_MOUSE_EVENTS = [
+/** All event types that do not bubble or capture and need a polyfill. */
+const MOUSE_SPECIAL_EVENT_TYPES = [
     EventType.MOUSEENTER,
     EventType.MOUSELEAVE,
     'pointerenter',
     'pointerleave',
 ];
-/**
- * Detects whether a given event type is supported by JSAction.
- */
-const isSupportedEvent = (eventType) => SUPPORTED_EVENTS.indexOf(eventType) >= 0;
-const SUPPORTED_EVENTS = [
+/** All event types that are registered in the bubble phase. */
+const BUBBLE_EVENT_TYPES = [
     EventType.CLICK,
     EventType.DBLCLICK,
-    EventType.FOCUS,
     EventType.FOCUSIN,
-    EventType.BLUR,
-    EventType.ERROR,
     EventType.FOCUSOUT,
     EventType.KEYDOWN,
     EventType.KEYUP,
     EventType.KEYPRESS,
-    EventType.LOAD,
     EventType.MOUSEOVER,
     EventType.MOUSEOUT,
     EventType.SUBMIT,
-    EventType.TOGGLE,
     EventType.TOUCHSTART,
     EventType.TOUCHEND,
     EventType.TOUCHMOVE,
@@ -338,313 +392,26 @@ const SUPPORTED_EVENTS = [
     // Content visibility events.
     'beforematch',
 ];
-/**
- *
- * Decides whether or not an event type is an event that only has a capture phase.
- *
- * @param eventType
- * @returns bool
- */
-const isCaptureEvent = (eventType) => CAPTURE_EVENTS.indexOf(eventType) >= 0;
-const CAPTURE_EVENTS = [
+/** All event types that are registered in the capture phase. */
+const CAPTURE_EVENT_TYPES = [
     EventType.FOCUS,
     EventType.BLUR,
     EventType.ERROR,
     EventType.LOAD,
     EventType.TOGGLE,
 ];
-
-/** All properties that are used by jsaction. */
-const Property = {
-    /**
-     * The parsed value of the jsaction attribute is stored in this
-     * property on the DOM node. The parsed value is an Object. The
-     * property names of the object are the events; the values are the
-     * names of the actions. This property is attached even on nodes
-     * that don't have a jsaction attribute as an optimization, because
-     * property lookup is faster than attribute access.
-     */
-    JSACTION: '__jsaction',
-    /**
-     * The owner property references an a logical owner for a DOM node. JSAction
-     * will follow this reference instead of parentNode when traversing the DOM
-     * to find jsaction attributes. This allows overlaying a logical structure
-     * over a document where the DOM structure can't reflect that structure.
-     */
-    OWNER: '__owner',
-};
-
 /**
- * Map from jsaction annotation to a parsed map from event name to action name.
+ * Whether or not an event type should be registered in the capture phase.
+ * @param eventType
+ * @returns bool
  */
-const parseCache = {};
-function registerEventType(element, eventType, action) {
-    const cache = get(element) || {};
-    cache[eventType] = action;
-    set(element, cache);
-}
-function unregisterEventType(element, eventType) {
-    const cache = get(element);
-    if (cache) {
-        cache[eventType] = undefined;
-    }
-}
+const isCaptureEventType = (eventType) => CAPTURE_EVENT_TYPES.indexOf(eventType) >= 0;
+/** All event types that are registered early.  */
+const EARLY_EVENT_TYPES = [...BUBBLE_EVENT_TYPES, ...CAPTURE_EVENT_TYPES];
 /**
- * Reads the jsaction parser cache from the given DOM Element.
- *
- * @param element .
- * @return Map from event to qualified name of the jsaction bound to it.
+ * Whether or not an event type is registered in the early contract.
  */
-function get(element) {
-    // @ts-ignore
-    return element[Property.JSACTION];
-}
-/**
- * Writes the jsaction parser cache to the given DOM Element.
- *
- * @param element .
- * @param actionMap Map from event to qualified name of the jsaction bound to
- *     it.
- */
-function set(element, actionMap) {
-    // @ts-ignore
-    element[Property.JSACTION] = actionMap;
-}
-/**
- * Looks up the parsed action map from the source jsaction attribute value.
- *
- * @param text Unparsed jsaction attribute value.
- * @return Parsed jsaction attribute value, if already present in the cache.
- */
-function getParsed(text) {
-    return parseCache[text];
-}
-/**
- * Inserts the parse result for the given source jsaction value into the cache.
- *
- * @param text Unparsed jsaction attribute value.
- * @param parsed Attribute value parsed into the action map.
- */
-function setParsed(text, parsed) {
-    parseCache[text] = parsed;
-}
-/**
- * Clears the jsaction parser cache from the given DOM Element.
- *
- * @param element .
- */
-function clear(element) {
-    if (Property.JSACTION in element) {
-        delete element[Property.JSACTION];
-    }
-}
-
-/** Added for readability when accessing stable property names. */
-function getEventType(eventInfo) {
-    return eventInfo.eventType;
-}
-/** Added for readability when accessing stable property names. */
-function setEventType(eventInfo, eventType) {
-    eventInfo.eventType = eventType;
-}
-/** Added for readability when accessing stable property names. */
-function getEvent(eventInfo) {
-    return eventInfo.event;
-}
-/** Added for readability when accessing stable property names. */
-function setEvent(eventInfo, event) {
-    eventInfo.event = event;
-}
-/** Added for readability when accessing stable property names. */
-function getTargetElement(eventInfo) {
-    return eventInfo.targetElement;
-}
-/** Added for readability when accessing stable property names. */
-function setTargetElement(eventInfo, targetElement) {
-    eventInfo.targetElement = targetElement;
-}
-/** Added for readability when accessing stable property names. */
-function getContainer(eventInfo) {
-    return eventInfo.eic;
-}
-/** Added for readability when accessing stable property names. */
-function setContainer(eventInfo, container) {
-    eventInfo.eic = container;
-}
-/** Added for readability when accessing stable property names. */
-function getTimestamp(eventInfo) {
-    return eventInfo.timeStamp;
-}
-/** Added for readability when accessing stable property names. */
-function setTimestamp(eventInfo, timestamp) {
-    eventInfo.timeStamp = timestamp;
-}
-/** Added for readability when accessing stable property names. */
-function getAction(eventInfo) {
-    return eventInfo.eia;
-}
-/** Added for readability when accessing stable property names. */
-function setAction(eventInfo, actionName, actionElement) {
-    eventInfo.eia = [actionName, actionElement];
-}
-/** Added for readability when accessing stable property names. */
-function unsetAction(eventInfo) {
-    eventInfo.eia = undefined;
-}
-/** Added for readability when accessing stable property names. */
-function getActionName(actionInfo) {
-    return actionInfo[0];
-}
-/** Added for readability when accessing stable property names. */
-function getActionElement(actionInfo) {
-    return actionInfo[1];
-}
-/** Added for readability when accessing stable property names. */
-function getIsReplay(eventInfo) {
-    return eventInfo.eirp;
-}
-/** Added for readability when accessing stable property names. */
-function setIsReplay(eventInfo, replay) {
-    eventInfo.eirp = replay;
-}
-/** Added for readability when accessing stable property names. */
-function getA11yClickKey(eventInfo) {
-    return eventInfo.eiack;
-}
-/** Added for readability when accessing stable property names. */
-function setA11yClickKey(eventInfo, a11yClickKey) {
-    eventInfo.eiack = a11yClickKey;
-}
-/** Added for readability when accessing stable property names. */
-function getResolved(eventInfo) {
-    return eventInfo.eir;
-}
-/** Added for readability when accessing stable property names. */
-function setResolved(eventInfo, resolved) {
-    eventInfo.eir = resolved;
-}
-/** Clones an `EventInfo` */
-function cloneEventInfo(eventInfo) {
-    return {
-        eventType: eventInfo.eventType,
-        event: eventInfo.event,
-        targetElement: eventInfo.targetElement,
-        eic: eventInfo.eic,
-        eia: eventInfo.eia,
-        timeStamp: eventInfo.timeStamp,
-        eirp: eventInfo.eirp,
-        eiack: eventInfo.eiack,
-        eir: eventInfo.eir,
-    };
-}
-/**
- * Utility function for creating an `EventInfo`.
- *
- * This can be used from code-size sensitive compilation units, as taking
- * parameters vs. an `Object` literal reduces code size.
- */
-function createEventInfoFromParameters(eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey) {
-    return {
-        eventType,
-        event,
-        targetElement,
-        eic: container,
-        timeStamp: timestamp,
-        eia: action,
-        eirp: isReplay,
-        eiack: a11yClickKey,
-    };
-}
-/**
- * Utility function for creating an `EventInfo`.
- *
- * This should be used in compilation units that are less sensitive to code
- * size.
- */
-function createEventInfo({ eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey, }) {
-    return {
-        eventType,
-        event,
-        targetElement,
-        eic: container,
-        timeStamp: timestamp,
-        eia: action ? [action.name, action.element] : undefined,
-        eirp: isReplay,
-        eiack: a11yClickKey,
-    };
-}
-/**
- * Utility class around an `EventInfo`.
- *
- * This should be used in compilation units that are less sensitive to code
- * size.
- */
-class EventInfoWrapper {
-    constructor(eventInfo) {
-        this.eventInfo = eventInfo;
-    }
-    getEventType() {
-        return getEventType(this.eventInfo);
-    }
-    setEventType(eventType) {
-        setEventType(this.eventInfo, eventType);
-    }
-    getEvent() {
-        return getEvent(this.eventInfo);
-    }
-    setEvent(event) {
-        setEvent(this.eventInfo, event);
-    }
-    getTargetElement() {
-        return getTargetElement(this.eventInfo);
-    }
-    setTargetElement(targetElement) {
-        setTargetElement(this.eventInfo, targetElement);
-    }
-    getContainer() {
-        return getContainer(this.eventInfo);
-    }
-    setContainer(container) {
-        setContainer(this.eventInfo, container);
-    }
-    getTimestamp() {
-        return getTimestamp(this.eventInfo);
-    }
-    setTimestamp(timestamp) {
-        setTimestamp(this.eventInfo, timestamp);
-    }
-    getAction() {
-        const action = getAction(this.eventInfo);
-        if (!action)
-            return undefined;
-        return {
-            name: action[0],
-            element: action[1],
-        };
-    }
-    setAction(action) {
-        if (!action) {
-            unsetAction(this.eventInfo);
-            return;
-        }
-        setAction(this.eventInfo, action.name, action.element);
-    }
-    getIsReplay() {
-        return getIsReplay(this.eventInfo);
-    }
-    setIsReplay(replay) {
-        setIsReplay(this.eventInfo, replay);
-    }
-    getResolved() {
-        return getResolved(this.eventInfo);
-    }
-    setResolved(resolved) {
-        setResolved(this.eventInfo, resolved);
-    }
-    clone() {
-        return new EventInfoWrapper(cloneEventInfo(this.eventInfo));
-    }
-}
+const isEarlyEventType = (eventType) => EARLY_EVENT_TYPES.indexOf(eventType) >= 0;
 
 /**
  * If on a Macintosh with an extended keyboard, the Enter key located in the
@@ -706,7 +473,7 @@ function addEventListener(element, eventType, handler) {
     // Error and load events (i.e. on images) do not bubble so they are also
     // handled in the capture phase.
     let capture = false;
-    if (isCaptureEvent(eventType)) {
+    if (isCaptureEventType(eventType)) {
         capture = true;
     }
     element.addEventListener(eventType, handler, capture);
@@ -1283,6 +1050,281 @@ const testing = {
 };
 
 /**
+ * Whether the user agent is running on iOS.
+ */
+const isIos = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent);
+/**
+ * A class representing a container node and all the event handlers
+ * installed on it. Used so that handlers can be cleaned up if the
+ * container is removed from the contract.
+ */
+class EventContractContainer {
+    /**
+     * @param element The container Element.
+     */
+    constructor(element) {
+        this.element = element;
+        /**
+         * Array of event handlers and their corresponding event types that are
+         * installed on this container.
+         *
+         */
+        this.handlerInfos = [];
+    }
+    /**
+     * Installs the provided installer on the element owned by this container,
+     * and maintains a reference to resulting handler in order to remove it
+     * later if desired.
+     */
+    addEventListener(eventType, getHandler) {
+        // In iOS, event bubbling doesn't happen automatically in any DOM element,
+        // unless it has an onclick attribute or DOM event handler attached to it.
+        // This breaks JsAction in some cases. See "Making Elements Clickable"
+        // section at http://goo.gl/2VoGnB.
+        //
+        // A workaround for this issue is to change the CSS cursor style to 'pointer'
+        // for the container element, which magically turns on event bubbling. This
+        // solution is described in the comments section at http://goo.gl/6pEO1z.
+        //
+        // We use a navigator.userAgent check here as this problem is present both
+        // on Mobile Safari and thin WebKit wrappers, such as Chrome for iOS.
+        if (isIos) {
+            this.element.style.cursor = 'pointer';
+        }
+        this.handlerInfos.push(addEventListener(this.element, eventType, getHandler(this.element)));
+    }
+    /**
+     * Removes all the handlers installed on this container.
+     */
+    cleanUp() {
+        for (let i = 0; i < this.handlerInfos.length; i++) {
+            removeEventListener(this.element, this.handlerInfos[i]);
+        }
+        this.handlerInfos = [];
+    }
+}
+
+const Char = {
+    /**
+     * The separator between the namespace and the action name in the
+     * jsaction attribute value.
+     */
+    NAMESPACE_ACTION_SEPARATOR: '.',
+    /**
+     * The separator between the event name and action in the jsaction
+     * attribute value.
+     */
+    EVENT_ACTION_SEPARATOR: ':',
+};
+
+/** Added for readability when accessing stable property names. */
+function getEventType(eventInfo) {
+    return eventInfo.eventType;
+}
+/** Added for readability when accessing stable property names. */
+function setEventType(eventInfo, eventType) {
+    eventInfo.eventType = eventType;
+}
+/** Added for readability when accessing stable property names. */
+function getEvent(eventInfo) {
+    return eventInfo.event;
+}
+/** Added for readability when accessing stable property names. */
+function setEvent(eventInfo, event) {
+    eventInfo.event = event;
+}
+/** Added for readability when accessing stable property names. */
+function getTargetElement(eventInfo) {
+    return eventInfo.targetElement;
+}
+/** Added for readability when accessing stable property names. */
+function setTargetElement(eventInfo, targetElement) {
+    eventInfo.targetElement = targetElement;
+}
+/** Added for readability when accessing stable property names. */
+function getContainer(eventInfo) {
+    return eventInfo.eic;
+}
+/** Added for readability when accessing stable property names. */
+function setContainer(eventInfo, container) {
+    eventInfo.eic = container;
+}
+/** Added for readability when accessing stable property names. */
+function getTimestamp(eventInfo) {
+    return eventInfo.timeStamp;
+}
+/** Added for readability when accessing stable property names. */
+function setTimestamp(eventInfo, timestamp) {
+    eventInfo.timeStamp = timestamp;
+}
+/** Added for readability when accessing stable property names. */
+function getAction(eventInfo) {
+    return eventInfo.eia;
+}
+/** Added for readability when accessing stable property names. */
+function setAction(eventInfo, actionName, actionElement) {
+    eventInfo.eia = [actionName, actionElement];
+}
+/** Added for readability when accessing stable property names. */
+function unsetAction(eventInfo) {
+    eventInfo.eia = undefined;
+}
+/** Added for readability when accessing stable property names. */
+function getActionName(actionInfo) {
+    return actionInfo[0];
+}
+/** Added for readability when accessing stable property names. */
+function getActionElement(actionInfo) {
+    return actionInfo[1];
+}
+/** Added for readability when accessing stable property names. */
+function getIsReplay(eventInfo) {
+    return eventInfo.eirp;
+}
+/** Added for readability when accessing stable property names. */
+function setIsReplay(eventInfo, replay) {
+    eventInfo.eirp = replay;
+}
+/** Added for readability when accessing stable property names. */
+function getA11yClickKey(eventInfo) {
+    return eventInfo.eiack;
+}
+/** Added for readability when accessing stable property names. */
+function setA11yClickKey(eventInfo, a11yClickKey) {
+    eventInfo.eiack = a11yClickKey;
+}
+/** Added for readability when accessing stable property names. */
+function getResolved(eventInfo) {
+    return eventInfo.eir;
+}
+/** Added for readability when accessing stable property names. */
+function setResolved(eventInfo, resolved) {
+    eventInfo.eir = resolved;
+}
+/** Clones an `EventInfo` */
+function cloneEventInfo(eventInfo) {
+    return {
+        eventType: eventInfo.eventType,
+        event: eventInfo.event,
+        targetElement: eventInfo.targetElement,
+        eic: eventInfo.eic,
+        eia: eventInfo.eia,
+        timeStamp: eventInfo.timeStamp,
+        eirp: eventInfo.eirp,
+        eiack: eventInfo.eiack,
+        eir: eventInfo.eir,
+    };
+}
+/**
+ * Utility function for creating an `EventInfo`.
+ *
+ * This can be used from code-size sensitive compilation units, as taking
+ * parameters vs. an `Object` literal reduces code size.
+ */
+function createEventInfoFromParameters(eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey) {
+    return {
+        eventType,
+        event,
+        targetElement,
+        eic: container,
+        timeStamp: timestamp,
+        eia: action,
+        eirp: isReplay,
+        eiack: a11yClickKey,
+    };
+}
+/**
+ * Utility function for creating an `EventInfo`.
+ *
+ * This should be used in compilation units that are less sensitive to code
+ * size.
+ */
+function createEventInfo({ eventType, event, targetElement, container, timestamp, action, isReplay, a11yClickKey, }) {
+    return {
+        eventType,
+        event,
+        targetElement,
+        eic: container,
+        timeStamp: timestamp,
+        eia: action ? [action.name, action.element] : undefined,
+        eirp: isReplay,
+        eiack: a11yClickKey,
+    };
+}
+/**
+ * Utility class around an `EventInfo`.
+ *
+ * This should be used in compilation units that are less sensitive to code
+ * size.
+ */
+class EventInfoWrapper {
+    constructor(eventInfo) {
+        this.eventInfo = eventInfo;
+    }
+    getEventType() {
+        return getEventType(this.eventInfo);
+    }
+    setEventType(eventType) {
+        setEventType(this.eventInfo, eventType);
+    }
+    getEvent() {
+        return getEvent(this.eventInfo);
+    }
+    setEvent(event) {
+        setEvent(this.eventInfo, event);
+    }
+    getTargetElement() {
+        return getTargetElement(this.eventInfo);
+    }
+    setTargetElement(targetElement) {
+        setTargetElement(this.eventInfo, targetElement);
+    }
+    getContainer() {
+        return getContainer(this.eventInfo);
+    }
+    setContainer(container) {
+        setContainer(this.eventInfo, container);
+    }
+    getTimestamp() {
+        return getTimestamp(this.eventInfo);
+    }
+    setTimestamp(timestamp) {
+        setTimestamp(this.eventInfo, timestamp);
+    }
+    getAction() {
+        const action = getAction(this.eventInfo);
+        if (!action)
+            return undefined;
+        return {
+            name: action[0],
+            element: action[1],
+        };
+    }
+    setAction(action) {
+        if (!action) {
+            unsetAction(this.eventInfo);
+            return;
+        }
+        setAction(this.eventInfo, action.name, action.element);
+    }
+    getIsReplay() {
+        return getIsReplay(this.eventInfo);
+    }
+    setIsReplay(replay) {
+        setIsReplay(this.eventInfo, replay);
+    }
+    getResolved() {
+        return getResolved(this.eventInfo);
+    }
+    setResolved(resolved) {
+        setResolved(this.eventInfo, resolved);
+    }
+    clone() {
+        return new EventInfoWrapper(cloneEventInfo(this.eventInfo));
+    }
+}
+
+/**
  * Since maps from event to action are immutable we can use a single map
  * to represent the empty map.
  */
@@ -1743,61 +1785,6 @@ function registerDispatcher(eventContract, dispatcher) {
 }
 
 /**
- * Whether the user agent is running on iOS.
- */
-const isIos = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent);
-/**
- * A class representing a container node and all the event handlers
- * installed on it. Used so that handlers can be cleaned up if the
- * container is removed from the contract.
- */
-class EventContractContainer {
-    /**
-     * @param element The container Element.
-     */
-    constructor(element) {
-        this.element = element;
-        /**
-         * Array of event handlers and their corresponding event types that are
-         * installed on this container.
-         *
-         */
-        this.handlerInfos = [];
-    }
-    /**
-     * Installs the provided installer on the element owned by this container,
-     * and maintains a reference to resulting handler in order to remove it
-     * later if desired.
-     */
-    addEventListener(eventType, getHandler) {
-        // In iOS, event bubbling doesn't happen automatically in any DOM element,
-        // unless it has an onclick attribute or DOM event handler attached to it.
-        // This breaks JsAction in some cases. See "Making Elements Clickable"
-        // section at http://goo.gl/2VoGnB.
-        //
-        // A workaround for this issue is to change the CSS cursor style to 'pointer'
-        // for the container element, which magically turns on event bubbling. This
-        // solution is described in the comments section at http://goo.gl/6pEO1z.
-        //
-        // We use a navigator.userAgent check here as this problem is present both
-        // on Mobile Safari and thin WebKit wrappers, such as Chrome for iOS.
-        if (isIos) {
-            this.element.style.cursor = 'pointer';
-        }
-        this.handlerInfos.push(addEventListener(this.element, eventType, getHandler(this.element)));
-    }
-    /**
-     * Removes all the handlers installed on this container.
-     */
-    cleanUp() {
-        for (let i = 0; i < this.handlerInfos.length; i++) {
-            removeEventListener(this.element, this.handlerInfos[i]);
-        }
-        this.handlerInfos = [];
-    }
-}
-
-/**
  * @define Support for the non-bubbling mouseenter and mouseleave events.  This
  * flag can be overridden in a build rule.
  */
@@ -1883,7 +1870,7 @@ class EventContract {
         if (eventType in this.eventHandlers || !this.containerManager) {
             return;
         }
-        if (!EventContract.MOUSE_SPECIAL_SUPPORT && NON_BUBBLING_MOUSE_EVENTS.indexOf(eventType) >= 0) {
+        if (!EventContract.MOUSE_SPECIAL_SUPPORT && MOUSE_SPECIAL_EVENT_TYPES.indexOf(eventType) >= 0) {
             return;
         }
         const eventHandler = (eventType, event, container) => {
@@ -1908,10 +1895,9 @@ class EventContract {
      * in the provided event contract. Once all the events are replayed, it cleans
      * up the early contract.
      */
-    replayEarlyEvents(earlyJsactionContainer = window) {
+    replayEarlyEvents(earlyJsactionData = window._ejsa) {
         // Check if the early contract is present and prevent calling this function
         // more than once.
-        const earlyJsactionData = earlyJsactionContainer._ejsa;
         if (!earlyJsactionData) {
             return;
         }
@@ -1932,7 +1918,7 @@ class EventContract {
         const earlyEventHandler = earlyJsactionData.h;
         removeEventListeners(earlyJsactionData.c, earlyJsactionData.et, earlyEventHandler);
         removeEventListeners(earlyJsactionData.c, earlyJsactionData.etc, earlyEventHandler, true);
-        delete earlyJsactionContainer._ejsa;
+        delete window._ejsa;
     }
     /**
      * Returns all JSAction event types that have been registered for a given
@@ -2017,62 +2003,5 @@ function removeEventListeners(container, eventTypes, earlyEventHandler, capture)
  */
 function addDeferredA11yClickSupport(eventContract) { }
 
-/**
- * EarlyEventContract intercepts events in the bubbling phase at the
- * boundary of the document body. This mapping will be passed to the
- * late-loaded EventContract.
- */
-class EarlyEventContract {
-    constructor(replaySink = window, container = window.document.documentElement) {
-        this.replaySink = replaySink;
-        this.container = container;
-        replaySink._ejsa = {
-            c: container,
-            q: [],
-            et: [],
-            etc: [],
-            h: (event) => {
-                const eventInfo = createEventInfoFromParameters(event.type, event, event.target, container, Date.now());
-                replaySink._ejsa.q.push(eventInfo);
-            },
-        };
-    }
-    /**
-     * Installs a list of event types for container .
-     */
-    addEvents(types, capture) {
-        const replaySink = this.replaySink._ejsa;
-        for (let idx = 0; idx < types.length; idx++) {
-            const eventType = types[idx];
-            const eventTypes = capture ? replaySink.etc : replaySink.et;
-            eventTypes.push(eventType);
-            this.container.addEventListener(eventType, replaySink.h, capture);
-        }
-    }
-}
-
-/**
- * Provides a factory function for bootstrapping an event contract on a
- * specified object (by default, exposed on the `window`).
- * @param field The property on the object that the event contract will be placed on.
- * @param container The container that listens to events
- * @param appId A given identifier for an application. If there are multiple apps on the page
- *              then this is how contracts can be initialized for each one.
- * @param eventTypes An array of event names that should be listened to.
- * @param captureEventTypes An array of event names that should be listened to with capture.
- * @param earlyJsactionTracker The object that should receive the event contract.
- */
-function bootstrapEarlyEventContract(field, container, appId, eventTypes, captureEventTypes, earlyJsactionTracker = window) {
-    if (!earlyJsactionTracker[field]) {
-        earlyJsactionTracker[field] = {};
-    }
-    earlyJsactionTracker[field][appId] = {};
-    const eventContract = new EarlyEventContract(earlyJsactionTracker[field][appId], container);
-    if (eventTypes)
-        eventContract.addEvents(eventTypes);
-    if (captureEventTypes)
-        eventContract.addEvents(captureEventTypes, true);
-}
-
-export { Attribute, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, bootstrapEarlyEventContract, isCaptureEvent, isSupportedEvent, registerDispatcher, registerEventType, unregisterEventType };
+export { Attribute, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, getDefaulted as getActionCache, isCaptureEventType, isEarlyEventType, registerDispatcher };
 //# sourceMappingURL=event-dispatch.mjs.map
