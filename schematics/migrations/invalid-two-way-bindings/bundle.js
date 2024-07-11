@@ -14420,7 +14420,7 @@ var _Tokenizer = class {
     const nameCursor = this._cursor.clone();
     let allowDigit = false;
     this._attemptCharCodeUntilFn((code) => {
-      if (isAsciiLetter(code) || code == $$ || code === $_ || allowDigit && isDigit(code)) {
+      if (isAsciiLetter(code) || code === $$ || code === $_ || allowDigit && isDigit(code)) {
         allowDigit = true;
         return false;
       }
@@ -23439,7 +23439,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0+sha-94c6ec0");
+var VERSION2 = new Version("18.1.0+sha-a531106");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
