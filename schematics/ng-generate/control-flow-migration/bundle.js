@@ -23277,7 +23277,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.0+sha-634d55a");
+var VERSION2 = new Version("18.1.0+sha-c0855f0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23569,6 +23569,13 @@ var CommonCollector = class extends RecursiveVisitor {
       }
     }
     super.visitElement(el, null);
+  }
+  visitBlock(ast) {
+    for (const blockParam of ast.parameters) {
+      if (this.hasPipes(blockParam.expression)) {
+        this.count++;
+      }
+    }
   }
   visitText(ast) {
     if (this.hasPipes(ast.value)) {
