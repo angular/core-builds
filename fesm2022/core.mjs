@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.0+sha-6cfc4d8
+ * @license Angular v18.1.0+sha-f02f351
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16381,19 +16381,24 @@ function afterRenderImpl(callbackOrSpec, injector, once, phase) {
         unregisterFn();
     };
     const unregisterFn = injector.get(DestroyRef).onDestroy(destroy);
+    let callbacksLeftToRun = 0;
     const registerCallback = (phase, phaseCallback) => {
         if (!phaseCallback) {
             return;
         }
         const callback = once
             ? (...args) => {
-                destroy();
+                callbacksLeftToRun--;
+                if (callbacksLeftToRun < 1) {
+                    destroy();
+                }
                 phaseCallback(...args);
             }
             : phaseCallback;
         const instance = runInInjectionContext(injector, () => new AfterRenderCallback(phase, pipelinedArgs, callback));
         callbackHandler.register(instance);
         instances.push(instance);
+        callbacksLeftToRun++;
     };
     registerCallback(AfterRenderPhase.EarlyRead, spec.earlyRead);
     registerCallback(AfterRenderPhase.Write, spec.write);
@@ -17200,7 +17205,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0+sha-6cfc4d8']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.0+sha-f02f351']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -30998,7 +31003,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.0+sha-6cfc4d8');
+const VERSION = new Version('18.1.0+sha-f02f351');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
