@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.1+sha-bbabf54
+ * @license Angular v18.1.1+sha-f3014c5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1 } from '@angular/core/primitives/signals';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { map, first } from 'rxjs/operators';
-import { Attribute as Attribute$1, isEarlyEventType, getActionCache, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, isCaptureEventType } from '@angular/core/primitives/event-dispatch';
+import { Attribute as Attribute$1, isEarlyEventType, getActionCache, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, getAppScopedQueuedEventInfos, clearAppScopedEarlyEventContract, isCaptureEventType } from '@angular/core/primitives/event-dispatch';
 
 /**
  * Base URL for the error details page.
@@ -17205,7 +17205,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.1+sha-bbabf54']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.1+sha-f3014c5']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31003,7 +31003,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.1+sha-bbabf54');
+const VERSION = new Version('18.1.1+sha-f3014c5');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -36840,8 +36840,7 @@ const initGlobalEventDelegation = (eventContractDetails, injector) => {
     if (injector.get(IS_EVENT_REPLAY_ENABLED, EVENT_REPLAY_ENABLED_DEFAULT)) {
         return;
     }
-    const eventContract = (eventContractDetails.instance = new EventContract(new EventContractContainer(document.body), 
-    /* useActionResolver= */ false));
+    const eventContract = (eventContractDetails.instance = new EventContract(new EventContractContainer(document.body)));
     const dispatcher = new EventDispatcher(invokeRegisteredListeners);
     registerDispatcher(eventContract, dispatcher);
 };
@@ -36929,16 +36928,16 @@ const initEventReplay = (eventDelegation, injector) => {
     const appId = injector.get(APP_ID);
     // This is set in packages/platform-server/src/utils.ts
     const earlyJsactionData = window._ejsas[appId];
-    const eventContract = (eventDelegation.instance = new EventContract(new EventContractContainer(earlyJsactionData.c), 
-    /* useActionResolver= */ false));
+    const eventContract = (eventDelegation.instance = new EventContract(new EventContractContainer(earlyJsactionData.c)));
     for (const et of earlyJsactionData.et) {
         eventContract.addEvent(et);
     }
     for (const et of earlyJsactionData.etc) {
         eventContract.addEvent(et);
     }
-    eventContract.replayEarlyEvents(earlyJsactionData);
-    window._ejsas[appId] = undefined;
+    const eventInfos = getAppScopedQueuedEventInfos(appId);
+    eventContract.replayEarlyEventInfos(eventInfos);
+    clearAppScopedEarlyEventContract(appId);
     const dispatcher = new EventDispatcher(invokeRegisteredListeners);
     registerDispatcher(eventContract, dispatcher);
 };
