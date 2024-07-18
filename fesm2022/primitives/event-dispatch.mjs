@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.1+sha-658c7fe
+ * @license Angular v18.2.0-next.1+sha-425f44c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1660,7 +1660,7 @@ function shouldPreventDefaultBeforeDispatching(actionElement, eventInfoWrapper) 
  * Registers deferred functionality for an EventContract and a Jsaction
  * Dispatcher.
  */
-function registerDispatcher$1(eventContract, dispatcher) {
+function registerDispatcher$2(eventContract, dispatcher) {
     eventContract.ecrd((eventInfo) => {
         dispatcher.dispatch(eventInfo);
     }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
@@ -1778,10 +1778,79 @@ function patchEventInstance(event, property, value, { configurable = false } = {
  * Registers deferred functionality for an EventContract and a Jsaction
  * Dispatcher.
  */
-function registerDispatcher(eventContract, dispatcher) {
+function registerDispatcher$1(eventContract, dispatcher) {
     eventContract.ecrd((eventInfo) => {
         dispatcher.dispatch(eventInfo);
     }, Restriction.I_AM_THE_JSACTION_FRAMEWORK);
+}
+
+/**
+ * EarlyEventContract intercepts events in the bubbling phase at the
+ * boundary of the document body. This mapping will be passed to the
+ * late-loaded EventContract.
+ */
+class EarlyEventContract {
+    constructor(dataContainer = window, container = window.document.documentElement) {
+        this.dataContainer = dataContainer;
+        dataContainer._ejsa = createEarlyJsactionData(container);
+    }
+    /**
+     * Installs a list of event types for container .
+     */
+    addEvents(types, capture) {
+        addEvents(this.dataContainer._ejsa, types, capture);
+    }
+}
+/** Creates an `EarlyJsactionData` object. */
+function createEarlyJsactionData(container) {
+    const q = [];
+    const d = (eventInfo) => {
+        q.push(eventInfo);
+    };
+    const h = (event) => {
+        d(createEventInfoFromParameters(event.type, event, event.target, container, Date.now()));
+    };
+    return {
+        c: container,
+        q,
+        et: [],
+        etc: [],
+        d,
+        h,
+    };
+}
+/** Add all the events to the container stored in the `EarlyJsactionData`. */
+function addEvents(earlyJsactionData, types, capture) {
+    for (let i = 0; i < types.length; i++) {
+        const eventType = types[i];
+        const eventTypes = capture ? earlyJsactionData.etc : earlyJsactionData.et;
+        eventTypes.push(eventType);
+        earlyJsactionData.c.addEventListener(eventType, earlyJsactionData.h, capture);
+    }
+}
+/** Get the queued `EventInfo` objects that were dispatched before a dispatcher was registered. */
+function getQueuedEventInfos(earlyJsactionData) {
+    return earlyJsactionData?.q ?? [];
+}
+/** Register a different dispatcher function on the `EarlyJsactionData`. */
+function registerDispatcher(earlyJsactionData, dispatcher) {
+    if (!earlyJsactionData) {
+        return;
+    }
+    earlyJsactionData.d = dispatcher;
+}
+/** Removes all event listener handlers. */
+function removeAllEventListeners(earlyJsactionData) {
+    if (!earlyJsactionData) {
+        return;
+    }
+    removeEventListeners(earlyJsactionData.c, earlyJsactionData.et, earlyJsactionData.h);
+    removeEventListeners(earlyJsactionData.c, earlyJsactionData.etc, earlyJsactionData.h, true);
+}
+function removeEventListeners(container, eventTypes, earlyEventHandler, capture) {
+    for (let i = 0; i < eventTypes.length; i++) {
+        container.removeEventListener(eventTypes[i], earlyEventHandler, /* useCapture */ capture);
+    }
 }
 
 /**
@@ -1790,6 +1859,29 @@ function registerDispatcher(eventContract, dispatcher) {
  */
 const MOUSE_SPECIAL_SUPPORT = false;
 
+/**
+ * @fileoverview Implements the local event handling contract. This
+ * allows DOM objects in a container that enters into this contract to
+ * define event handlers which are executed in a local context.
+ *
+ * One EventContract instance can manage the contract for multiple
+ * containers, which are added using the addContainer() method.
+ *
+ * Events can be registered using the addEvent() method.
+ *
+ * A Dispatcher is added using the registerDispatcher() method. Until there is
+ * a dispatcher, events are queued. The idea is that the EventContract
+ * class is inlined in the HTML of the top level page and instantiated
+ * right after the start of <body>. The Dispatcher class is contained
+ * in the external deferred js, and instantiated and registered with
+ * EventContract when the external javascript in the page loads. The
+ * external javascript will also register the jsaction handlers, which
+ * then pick up the queued events at the time of registration.
+ *
+ * Since this class is meant to be inlined in the main page HTML, the
+ * size of the binary compiled from this file MUST be kept as small as
+ * possible and thus its dependencies to a minimum.
+ */
 /**
  * EventContract intercepts events in the bubbling phase at the
  * boundary of a container element, and maps them to generic actions
@@ -1806,8 +1898,7 @@ const MOUSE_SPECIAL_SUPPORT = false;
  */
 class EventContract {
     static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
-    constructor(containerManager, useActionResolver) {
-        this.useActionResolver = useActionResolver;
+    constructor(containerManager) {
         /**
          * The DOM events which this contract covers. Used to prevent double
          * registration of event types. The value of the map is the
@@ -1902,23 +1993,27 @@ class EventContract {
             return;
         }
         // Replay the early contract events.
-        const earlyEventInfos = earlyJsactionData.q;
-        for (let idx = 0; idx < earlyEventInfos.length; idx++) {
-            const earlyEventInfo = earlyEventInfos[idx];
+        this.replayEarlyEventInfos(earlyJsactionData.q);
+        // Clean up the early contract.
+        removeAllEventListeners(earlyJsactionData);
+        delete window._ejsa;
+    }
+    /**
+     * Replays all the early `EventInfo` objects, dispatching them through the normal
+     * `EventContract` flow.
+     */
+    replayEarlyEventInfos(earlyEventInfos) {
+        for (let i = 0; i < earlyEventInfos.length; i++) {
+            const earlyEventInfo = earlyEventInfos[i];
             const eventTypes = this.getEventTypesForBrowserEventType(earlyEventInfo.eventType);
-            for (let i = 0; i < eventTypes.length; i++) {
+            for (let j = 0; j < eventTypes.length; j++) {
                 const eventInfo = cloneEventInfo(earlyEventInfo);
                 // EventInfo eventType maps to JSAction's internal event type,
                 // rather than the browser event type.
-                setEventType(eventInfo, eventTypes[i]);
+                setEventType(eventInfo, eventTypes[j]);
                 this.handleEventInfo(eventInfo);
             }
         }
-        // Clean up the early contract.
-        const earlyEventHandler = earlyJsactionData.h;
-        removeEventListeners(earlyJsactionData.c, earlyJsactionData.et, earlyEventHandler);
-        removeEventListeners(earlyJsactionData.c, earlyJsactionData.etc, earlyEventHandler, true);
-        delete window._ejsa;
     }
     /**
      * Returns all JSAction event types that have been registered for a given
@@ -1979,29 +2074,43 @@ class EventContract {
             this.queuedEventInfos = null;
         }
     }
-    /**
-     * Adds a11y click support to the given `EventContract`. Meant to be called in
-     * the same compilation unit as the `EventContract`.
-     */
-    addA11yClickSupport() { }
-    /**
-     * Enables a11y click support to be deferred. Meant to be called in the same
-     * compilation unit as the `EventContract`.
-     */
-    exportAddA11yClickSupport() { }
 }
-function removeEventListeners(container, eventTypes, earlyEventHandler, capture) {
-    for (let idx = 0; idx < eventTypes.length; idx++) {
-        container.removeEventListener(eventTypes[idx], earlyEventHandler, /* useCapture */ capture);
+
+/**
+ * Creates an `EarlyJsactionData`, adds events to it, and populates it on a nested object on
+ * the window.
+ */
+function bootstrapAppScopedEarlyEventContract(container, appId, bubbleEventTypes, captureEventTypes, dataContainer = window) {
+    const earlyJsactionData = createEarlyJsactionData(container);
+    if (!dataContainer._ejsas) {
+        dataContainer._ejsas = {};
     }
+    dataContainer._ejsas[appId] = earlyJsactionData;
+    addEvents(earlyJsactionData, bubbleEventTypes);
+    addEvents(earlyJsactionData, captureEventTypes, /* capture= */ true);
+}
+/** Get the queued `EventInfo` objects that were dispatched before a dispatcher was registered. */
+function getAppScopedQueuedEventInfos(appId, dataContainer = window) {
+    return getQueuedEventInfos(dataContainer._ejsas?.[appId]);
 }
 /**
- * Adds a11y click support to the given `EventContract`. Meant to be called
- * in a different compilation unit from the `EventContract`. The `EventContract`
- * must have called `exportAddA11yClickSupport` in its compilation unit for this
- * to have any effect.
+ * Registers a dispatcher function on the `EarlyJsactionData` present on the nested object on the
+ * window.
  */
-function addDeferredA11yClickSupport(eventContract) { }
+function registerAppScopedDispatcher(restriction, appId, dispatcher, dataContainer = window) {
+    registerDispatcher(dataContainer._ejsas?.[appId], dispatcher);
+}
+/** Removes all event listener handlers. */
+function removeAllAppScopedEventListeners(appId, dataContainer = window) {
+    removeAllEventListeners(dataContainer._ejsas?.[appId]);
+}
+/** Clear the early event contract. */
+function clearAppScopedEarlyEventContract(appId, dataContainer = window) {
+    if (!dataContainer._ejsas) {
+        return;
+    }
+    dataContainer._ejsas[appId] = undefined;
+}
 
-export { Attribute, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, getDefaulted as getActionCache, isCaptureEventType, isEarlyEventType, registerDispatcher };
+export { Attribute, EventContract, EventContractContainer, EventDispatcher, EventInfoWrapper, EventPhase, bootstrapAppScopedEarlyEventContract, clearAppScopedEarlyEventContract, getDefaulted as getActionCache, getAppScopedQueuedEventInfos, isCaptureEventType, isEarlyEventType, registerAppScopedDispatcher, registerDispatcher$1 as registerDispatcher, removeAllAppScopedEventListeners };
 //# sourceMappingURL=event-dispatch.mjs.map

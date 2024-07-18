@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.1+sha-658c7fe
+ * @license Angular v18.2.0-next.1+sha-425f44c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32,6 +32,15 @@ export declare const Attribute: {
      */
     JSACTION: "jsaction";
 };
+
+/**
+ * Creates an `EarlyJsactionData`, adds events to it, and populates it on a nested object on
+ * the window.
+ */
+export declare function bootstrapAppScopedEarlyEventContract(container: HTMLElement, appId: string, bubbleEventTypes: string[], captureEventTypes: string[], dataContainer?: EarlyJsactionDataContainer): void;
+
+/** Clear the early event contract. */
+export declare function clearAppScopedEarlyEventContract(appId: string, dataContainer?: EarlyJsactionDataContainer): void;
 
 /** Clones an `EventInfo` */
 declare function cloneEventInfo(eventInfo: EventInfo): EventInfo;
@@ -104,7 +113,6 @@ export declare interface EarlyJsactionDataContainer {
  * be delay loaded in a generic way.
  */
 export declare class EventContract implements UnrenamedEventContract {
-    private readonly useActionResolver?;
     static MOUSE_SPECIAL_SUPPORT: boolean;
     private containerManager;
     /**
@@ -129,7 +137,7 @@ export declare class EventContract implements UnrenamedEventContract {
      * as soon as the `Dispatcher` is registered.
      */
     private queuedEventInfos;
-    constructor(containerManager: EventContractContainerManager, useActionResolver?: false | undefined);
+    constructor(containerManager: EventContractContainerManager);
     private handleEvent;
     /**
      * Handle an `EventInfo`.
@@ -155,6 +163,11 @@ export declare class EventContract implements UnrenamedEventContract {
      * up the early contract.
      */
     replayEarlyEvents(earlyJsactionData?: EarlyJsactionData | undefined): void;
+    /**
+     * Replays all the early `EventInfo` objects, dispatching them through the normal
+     * `EventContract` flow.
+     */
+    replayEarlyEventInfos(earlyEventInfos: eventInfoLib.EventInfo[]): void;
     /**
      * Returns all JSAction event types that have been registered for a given
      * browser event type.
@@ -186,16 +199,6 @@ export declare class EventContract implements UnrenamedEventContract {
      * units.
      */
     ecrd(dispatcher: Dispatcher, restriction: Restriction): void;
-    /**
-     * Adds a11y click support to the given `EventContract`. Meant to be called in
-     * the same compilation unit as the `EventContract`.
-     */
-    addA11yClickSupport(): void;
-    /**
-     * Enables a11y click support to be deferred. Meant to be called in the same
-     * compilation unit as the `EventContract`.
-     */
-    exportAddA11yClickSupport(): void;
 }
 
 /**
@@ -395,6 +398,9 @@ declare function getActionElement(actionInfo: ActionInfoInternal): Element;
 /** Added for readability when accessing stable property names. */
 declare function getActionName(actionInfo: ActionInfoInternal): string;
 
+/** Get the queued `EventInfo` objects that were dispatched before a dispatcher was registered. */
+export declare function getAppScopedQueuedEventInfos(appId: string, dataContainer?: EarlyJsactionDataContainer): EventInfo[];
+
 /** Added for readability when accessing stable property names. */
 declare function getContainer(eventInfo: EventInfo): Element;
 
@@ -429,10 +435,19 @@ export declare const isCaptureEventType: (eventType: string) => boolean;
 export declare const isEarlyEventType: (eventType: string) => boolean;
 
 /**
+ * Registers a dispatcher function on the `EarlyJsactionData` present on the nested object on the
+ * window.
+ */
+export declare function registerAppScopedDispatcher(restriction: Restriction, appId: string, dispatcher: (eventInfo: EventInfo) => void, dataContainer?: EarlyJsactionDataContainer): void;
+
+/**
  * Registers deferred functionality for an EventContract and a Jsaction
  * Dispatcher.
  */
 export declare function registerDispatcher(eventContract: UnrenamedEventContract, dispatcher: EventDispatcher): void;
+
+/** Removes all event listener handlers. */
+export declare function removeAllAppScopedEventListeners(appId: string, dataContainer?: EarlyJsactionDataContainer): void;
 
 
 /**
