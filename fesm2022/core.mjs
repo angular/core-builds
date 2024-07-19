@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.1+sha-c76b440
+ * @license Angular v18.2.0-next.1+sha-38e4802
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16392,7 +16392,7 @@ function afterRenderImpl(callbackOrSpec, injector, once, phase) {
                 if (callbacksLeftToRun < 1) {
                     destroy();
                 }
-                phaseCallback(...args);
+                return phaseCallback(...args);
             }
             : phaseCallback;
         const instance = runInInjectionContext(injector, () => new AfterRenderCallback(phase, pipelinedArgs, callback));
@@ -17205,7 +17205,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-next.1+sha-c76b440']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-next.1+sha-38e4802']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31003,7 +31003,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.0-next.1+sha-c76b440');
+const VERSION = new Version('18.2.0-next.1+sha-38e4802');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -36822,10 +36822,11 @@ class GlobalEventDelegation {
     supports(eventType) {
         return isEarlyEventType(eventType);
     }
-    addEventListener(element, eventType, handler) {
-        this.eventContractDetails.instance.addEvent(eventType);
-        getActionCache(element)[eventType] = '';
-        return () => this.removeEventListener(element, eventType, handler);
+    addEventListener(element, eventName, handler) {
+        this.eventContractDetails.instance.addEvent(eventName);
+        sharedStashFunction(element, eventName, handler);
+        getActionCache(element)[eventName] = '';
+        return () => this.removeEventListener(element, eventName, handler);
     }
     removeEventListener(element, eventType, callback) {
         getActionCache(element)[eventType] = undefined;
@@ -37775,7 +37776,6 @@ function provideGlobalEventDelegation() {
                 const injector = inject(Injector);
                 const eventContractDetails = injector.get(JSACTION_EVENT_CONTRACT);
                 initGlobalEventDelegation(eventContractDetails, injector);
-                setStashFn(sharedStashFunction);
             },
             multi: true,
         },
