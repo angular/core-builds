@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.1+sha-aeaf07d
+ * @license Angular v18.2.0-next.1+sha-13bc8d7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -206,8 +206,9 @@ function toSignal(source, options) {
         // Completion of the Observable is meaningless to the signal. Signals don't have a concept of
         // "complete".
     });
-    if (ngDevMode && options?.requireSync && state().kind === 0 /* StateKind.NoValue */) {
-        throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
+    if (options?.requireSync && state().kind === 0 /* StateKind.NoValue */) {
+        throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+            '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
     }
     // Unsubscribe when the current context is destroyed, if requested.
     cleanupRef?.onDestroy(sub.unsubscribe.bind(sub));
@@ -222,8 +223,8 @@ function toSignal(source, options) {
                 throw current.error;
             case 0 /* StateKind.NoValue */:
                 // This shouldn't really happen because the error is thrown on creation.
-                // TODO(alxhub): use a RuntimeError when we finalize the error semantics
-                throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
+                throw new ɵRuntimeError(601 /* ɵRuntimeErrorCode.REQUIRE_SYNC_WITHOUT_SYNC_EMIT */, (typeof ngDevMode === 'undefined' || ngDevMode) &&
+                    '`toSignal()` called with `requireSync` but `Observable` did not emit synchronously.');
         }
     }, { equal: options?.equal });
 }
