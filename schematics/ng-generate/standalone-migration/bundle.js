@@ -26083,7 +26083,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.1+sha-4639450");
+var VERSION2 = new Version("18.1.1+sha-915b0e0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27187,7 +27187,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.1.1+sha-4639450"));
+  definitionMap.set("version", literal("18.1.1+sha-915b0e0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27206,7 +27206,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.1.1+sha-4639450"));
+  definitionMap.set("version", literal("18.1.1+sha-915b0e0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27274,7 +27274,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.1.1+sha-4639450"));
+  definitionMap.set("version", literal("18.1.1+sha-915b0e0"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27592,7 +27592,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.1.1+sha-4639450"));
+  definitionMap.set("version", literal("18.1.1+sha-915b0e0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27615,7 +27615,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.1.1+sha-4639450"));
+  definitionMap.set("version", literal("18.1.1+sha-915b0e0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27653,7 +27653,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.1.1+sha-4639450"));
+  definitionMap.set("version", literal("18.1.1+sha-915b0e0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27677,7 +27677,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.1.1+sha-4639450"));
+  definitionMap.set("version", literal("18.1.1+sha-915b0e0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27712,7 +27712,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.1.1+sha-4639450"));
+  definitionMap.set("version", literal("18.1.1+sha-915b0e0"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27729,7 +27729,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.1.1+sha-4639450");
+var VERSION3 = new Version("18.1.1+sha-915b0e0");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -27819,7 +27819,6 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["INTERPOLATED_SIGNAL_NOT_INVOKED"] = 8109] = "INTERPOLATED_SIGNAL_NOT_INVOKED";
   ErrorCode2[ErrorCode2["UNSUPPORTED_INITIALIZER_API_USAGE"] = 8110] = "UNSUPPORTED_INITIALIZER_API_USAGE";
   ErrorCode2[ErrorCode2["UNINVOKED_FUNCTION_IN_EVENT_BINDING"] = 8111] = "UNINVOKED_FUNCTION_IN_EVENT_BINDING";
-  ErrorCode2[ErrorCode2["UNUSED_LET_DECLARATION"] = 8112] = "UNUSED_LET_DECLARATION";
   ErrorCode2[ErrorCode2["INLINE_TCB_REQUIRED"] = 8900] = "INLINE_TCB_REQUIRED";
   ErrorCode2[ErrorCode2["INLINE_TYPE_CTOR_REQUIRED"] = 8901] = "INLINE_TYPE_CTOR_REQUIRED";
   ErrorCode2[ErrorCode2["INJECTABLE_DUPLICATE_PROV"] = 9001] = "INJECTABLE_DUPLICATE_PROV";
@@ -27927,7 +27926,6 @@ var ExtendedTemplateDiagnosticName;
   ExtendedTemplateDiagnosticName2["SKIP_HYDRATION_NOT_STATIC"] = "skipHydrationNotStatic";
   ExtendedTemplateDiagnosticName2["INTERPOLATED_SIGNAL_NOT_INVOKED"] = "interpolatedSignalNotInvoked";
   ExtendedTemplateDiagnosticName2["CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION"] = "controlFlowPreventingContentProjection";
-  ExtendedTemplateDiagnosticName2["UNUSED_LET_DECLARATION"] = "unusedLetDeclaration";
 })(ExtendedTemplateDiagnosticName || (ExtendedTemplateDiagnosticName = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/util/src/typescript.mjs
@@ -32741,8 +32739,8 @@ var BINARY_OPERATORS3 = /* @__PURE__ */ new Map([
   [BinaryOperator.NullishCoalesce, "??"]
 ]);
 var ExpressionTranslatorVisitor = class {
-  constructor(factory11, imports, contextFile, options) {
-    this.factory = factory11;
+  constructor(factory10, imports, contextFile, options) {
+    this.factory = factory10;
     this.imports = imports;
     this.contextFile = contextFile;
     this.downlevelTaggedTemplates = options.downlevelTaggedTemplates === true;
@@ -48252,50 +48250,6 @@ var factory9 = {
   create: () => new UninvokedFunctionInEventBindingSpec()
 };
 
-// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/extended/checks/unused_let_declaration/index.mjs
-var UnusedLetDeclarationCheck = class extends TemplateCheckWithVisitor {
-  constructor() {
-    super(...arguments);
-    this.code = ErrorCode.UNUSED_LET_DECLARATION;
-    this.analysis = /* @__PURE__ */ new Map();
-  }
-  run(ctx, component, template2) {
-    super.run(ctx, component, template2);
-    const diagnostics = [];
-    const { allLetDeclarations, usedLetDeclarations } = this.getAnalysis(component);
-    for (const decl of allLetDeclarations) {
-      if (!usedLetDeclarations.has(decl)) {
-        diagnostics.push(ctx.makeTemplateDiagnostic(decl.sourceSpan, `@let ${decl.name} is declared but its value is never read.`));
-      }
-    }
-    this.analysis.clear();
-    return diagnostics;
-  }
-  visitNode(ctx, component, node) {
-    if (node instanceof LetDeclaration) {
-      this.getAnalysis(component).allLetDeclarations.add(node);
-    } else if (node instanceof AST) {
-      const unwrappedNode = node instanceof ASTWithSource ? node.ast : node;
-      const target = ctx.templateTypeChecker.getExpressionTarget(unwrappedNode, component);
-      if (target !== null && target instanceof LetDeclaration) {
-        this.getAnalysis(component).usedLetDeclarations.add(target);
-      }
-    }
-    return [];
-  }
-  getAnalysis(node) {
-    if (!this.analysis.has(node)) {
-      this.analysis.set(node, { allLetDeclarations: /* @__PURE__ */ new Set(), usedLetDeclarations: /* @__PURE__ */ new Set() });
-    }
-    return this.analysis.get(node);
-  }
-};
-var factory10 = {
-  code: ErrorCode.UNUSED_LET_DECLARATION,
-  name: ExtendedTemplateDiagnosticName.UNUSED_LET_DECLARATION,
-  create: () => new UnusedLetDeclarationCheck()
-};
-
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/extended/src/extended_template_checker.mjs
 var import_typescript116 = __toESM(require("typescript"), 1);
 
@@ -48313,12 +48267,12 @@ var ExtendedTemplateCheckerImpl = class {
     var _a2, _b2, _c2, _d2, _e2;
     this.partialCtx = { templateTypeChecker, typeChecker };
     this.templateChecks = /* @__PURE__ */ new Map();
-    for (const factory11 of templateCheckFactories) {
-      const category = diagnosticLabelToCategory((_e2 = (_d2 = (_b2 = (_a2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _a2.checks) == null ? void 0 : _b2[factory11.name]) != null ? _d2 : (_c2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _c2.defaultCategory) != null ? _e2 : DiagnosticCategoryLabel.Warning);
+    for (const factory10 of templateCheckFactories) {
+      const category = diagnosticLabelToCategory((_e2 = (_d2 = (_b2 = (_a2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _a2.checks) == null ? void 0 : _b2[factory10.name]) != null ? _d2 : (_c2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _c2.defaultCategory) != null ? _e2 : DiagnosticCategoryLabel.Warning);
       if (category === null) {
         continue;
       }
-      const check = factory11.create(options);
+      const check = factory10.create(options);
       if (check === null) {
         continue;
       }
@@ -48369,12 +48323,11 @@ var ALL_DIAGNOSTIC_FACTORIES = [
   factory4,
   factory7,
   factory,
-  factory9,
-  factory10
+  factory9
 ];
 var SUPPORTED_DIAGNOSTIC_NAMES = /* @__PURE__ */ new Set([
   ExtendedTemplateDiagnosticName.CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION,
-  ...ALL_DIAGNOSTIC_FACTORIES.map((factory11) => factory11.name)
+  ...ALL_DIAGNOSTIC_FACTORIES.map((factory10) => factory10.name)
 ]);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/template_semantics/src/template_semantics_checker.mjs
