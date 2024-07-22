@@ -8421,6 +8421,7 @@ var CHAINABLE = /* @__PURE__ */ new Set([
   Identifiers.twoWayListener,
   Identifiers.declareLet
 ]);
+var MAX_CHAIN_LENGTH = 256;
 function chain(job) {
   for (const unit of job.units) {
     chainOperationsInList(unit.create);
@@ -8443,16 +8444,18 @@ function chainOperationsInList(opList) {
       chain2 = null;
       continue;
     }
-    if (chain2 !== null && chain2.instruction === instruction) {
+    if (chain2 !== null && chain2.instruction === instruction && chain2.length < MAX_CHAIN_LENGTH) {
       const expression = chain2.expression.callFn(op.statement.expr.args, op.statement.expr.sourceSpan, op.statement.expr.pure);
       chain2.expression = expression;
       chain2.op.statement = expression.toStmt();
+      chain2.length++;
       OpList.remove(op);
     } else {
       chain2 = {
         op,
         instruction,
-        expression: op.statement.expr
+        expression: op.statement.expr,
+        length: 1
       };
     }
   }
@@ -23286,7 +23289,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.1+sha-13bc8d7");
+var VERSION2 = new Version("18.2.0-next.1+sha-08c5977");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
