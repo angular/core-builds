@@ -26083,7 +26083,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.1+sha-8718abc");
+var VERSION2 = new Version("18.2.0-next.1+sha-a50a81c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27187,7 +27187,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-8718abc"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-a50a81c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27206,7 +27206,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-8718abc"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-a50a81c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27274,7 +27274,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-8718abc"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-a50a81c"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27592,7 +27592,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-8718abc"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-a50a81c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27615,7 +27615,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-8718abc"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-a50a81c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27653,7 +27653,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-8718abc"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-a50a81c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27677,7 +27677,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-8718abc"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-a50a81c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27712,7 +27712,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-8718abc"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-a50a81c"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27729,7 +27729,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.2.0-next.1+sha-8718abc");
+var VERSION3 = new Version("18.2.0-next.1+sha-a50a81c");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -30615,6 +30615,7 @@ var DtsMetadataReader = class {
       ngContentSelectors,
       isStandalone,
       isSignal,
+      inputFieldNamesFromMetadataArray: null,
       imports: null,
       deferredImports: null,
       schemas: null,
@@ -35936,7 +35937,8 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
     outputs,
     isStructural,
     hostDirectives,
-    rawHostDirectives
+    rawHostDirectives,
+    inputFieldNamesFromMetadataArray: new Set(Object.values(inputsFromMeta).map((i) => i.classPropertyName))
   };
 }
 function extractDecoratorQueryMetadata(exprNode, name, args, propertyName, reflector, evaluator) {
@@ -36763,6 +36765,7 @@ var DirectiveDecoratorHandler = class {
     return {
       analysis: {
         inputs: directiveResult.inputs,
+        inputFieldNamesFromMetadataArray: directiveResult.inputFieldNamesFromMetadataArray,
         outputs: directiveResult.outputs,
         meta: analysis,
         hostDirectives: directiveResult.hostDirectives,
@@ -36791,6 +36794,7 @@ var DirectiveDecoratorHandler = class {
       selector: analysis.meta.selector,
       exportAs: analysis.meta.exportAs,
       inputs: analysis.inputs,
+      inputFieldNamesFromMetadataArray: analysis.inputFieldNamesFromMetadataArray,
       outputs: analysis.outputs,
       queries: analysis.meta.queries.map((query) => query.propertyName),
       isComponent: false,
@@ -44656,6 +44660,7 @@ var ComponentDecoratorHandler = class {
       analysis: {
         baseClass: readBaseClass(node, this.reflector, this.evaluator),
         inputs,
+        inputFieldNamesFromMetadataArray: directiveResult.inputFieldNamesFromMetadataArray,
         outputs,
         hostDirectives,
         rawHostDirectives,
@@ -44717,6 +44722,7 @@ var ComponentDecoratorHandler = class {
       selector: analysis.meta.selector,
       exportAs: analysis.meta.exportAs,
       inputs: analysis.inputs,
+      inputFieldNamesFromMetadataArray: analysis.inputFieldNamesFromMetadataArray,
       outputs: analysis.outputs,
       queries: analysis.meta.queries.map((query) => query.propertyName),
       isComponent: true,
@@ -49155,7 +49161,7 @@ var NgCompiler = class {
     }
   }
   constructor(adapter, options, inputProgram, programDriver, incrementalStrategy, incrementalCompilation, enableTemplateTypeChecker, usePoisonedData, livePerfRecorder) {
-    var _a2, _b2, _c2, _d2;
+    var _a2, _b2, _c2;
     this.adapter = adapter;
     this.options = options;
     this.inputProgram = inputProgram;
@@ -49168,10 +49174,11 @@ var NgCompiler = class {
     this.constructionDiagnostics = [];
     this.nonTemplateDiagnostics = null;
     this.delegatingPerfRecorder = new DelegatingPerfRecorder(this.perfRecorder);
-    this.enableTemplateTypeChecker = enableTemplateTypeChecker || ((_a2 = options["_enableTemplateTypeChecker"]) != null ? _a2 : false);
-    this.enableBlockSyntax = (_b2 = options["_enableBlockSyntax"]) != null ? _b2 : true;
-    this.enableLetSyntax = (_c2 = options["_enableLetSyntax"]) != null ? _c2 : true;
-    this.angularCoreVersion = (_d2 = options["_angularCoreVersion"]) != null ? _d2 : null;
+    this.usePoisonedData = usePoisonedData || !!options._compilePoisedComponents;
+    this.enableTemplateTypeChecker = enableTemplateTypeChecker || !!options._enableTemplateTypeChecker;
+    this.enableBlockSyntax = (_a2 = options["_enableBlockSyntax"]) != null ? _a2 : true;
+    this.enableLetSyntax = (_b2 = options["_enableLetSyntax"]) != null ? _b2 : true;
+    this.angularCoreVersion = (_c2 = options["_angularCoreVersion"]) != null ? _c2 : null;
     this.constructionDiagnostics.push(...this.adapter.constructionDiagnostics, ...verifyCompatibleTypeCheckOptions(this.options));
     this.currentProgram = inputProgram;
     this.closureCompilerEnabled = !!this.options.annotateForClosureCompiler;
