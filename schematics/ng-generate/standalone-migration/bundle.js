@@ -26083,7 +26083,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.1+sha-4ac39ae");
+var VERSION2 = new Version("18.2.0-next.1+sha-d4ff6bc");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27187,7 +27187,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-4ac39ae"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-d4ff6bc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27206,7 +27206,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-4ac39ae"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-d4ff6bc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27274,7 +27274,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-4ac39ae"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-d4ff6bc"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27592,7 +27592,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-4ac39ae"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-d4ff6bc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27615,7 +27615,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-4ac39ae"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-d4ff6bc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27653,7 +27653,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-4ac39ae"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-d4ff6bc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27677,7 +27677,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-4ac39ae"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-d4ff6bc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27712,7 +27712,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.2.0-next.1+sha-4ac39ae"));
+  definitionMap.set("version", literal("18.2.0-next.1+sha-d4ff6bc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27729,7 +27729,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.2.0-next.1+sha-4ac39ae");
+var VERSION3 = new Version("18.2.0-next.1+sha-d4ff6bc");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -27819,6 +27819,7 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["INTERPOLATED_SIGNAL_NOT_INVOKED"] = 8109] = "INTERPOLATED_SIGNAL_NOT_INVOKED";
   ErrorCode2[ErrorCode2["UNSUPPORTED_INITIALIZER_API_USAGE"] = 8110] = "UNSUPPORTED_INITIALIZER_API_USAGE";
   ErrorCode2[ErrorCode2["UNINVOKED_FUNCTION_IN_EVENT_BINDING"] = 8111] = "UNINVOKED_FUNCTION_IN_EVENT_BINDING";
+  ErrorCode2[ErrorCode2["UNUSED_LET_DECLARATION"] = 8112] = "UNUSED_LET_DECLARATION";
   ErrorCode2[ErrorCode2["INLINE_TCB_REQUIRED"] = 8900] = "INLINE_TCB_REQUIRED";
   ErrorCode2[ErrorCode2["INLINE_TYPE_CTOR_REQUIRED"] = 8901] = "INLINE_TYPE_CTOR_REQUIRED";
   ErrorCode2[ErrorCode2["INJECTABLE_DUPLICATE_PROV"] = 9001] = "INJECTABLE_DUPLICATE_PROV";
@@ -27926,6 +27927,7 @@ var ExtendedTemplateDiagnosticName;
   ExtendedTemplateDiagnosticName2["SKIP_HYDRATION_NOT_STATIC"] = "skipHydrationNotStatic";
   ExtendedTemplateDiagnosticName2["INTERPOLATED_SIGNAL_NOT_INVOKED"] = "interpolatedSignalNotInvoked";
   ExtendedTemplateDiagnosticName2["CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION"] = "controlFlowPreventingContentProjection";
+  ExtendedTemplateDiagnosticName2["UNUSED_LET_DECLARATION"] = "unusedLetDeclaration";
 })(ExtendedTemplateDiagnosticName || (ExtendedTemplateDiagnosticName = {}));
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/util/src/typescript.mjs
@@ -33043,8 +33045,8 @@ var BINARY_OPERATORS3 = /* @__PURE__ */ new Map([
   [BinaryOperator.NullishCoalesce, "??"]
 ]);
 var ExpressionTranslatorVisitor = class {
-  constructor(factory10, imports, contextFile, options) {
-    this.factory = factory10;
+  constructor(factory11, imports, contextFile, options) {
+    this.factory = factory11;
     this.imports = imports;
     this.contextFile = contextFile;
     this.downlevelTaggedTemplates = options.downlevelTaggedTemplates === true;
@@ -45746,23 +45748,23 @@ var PipeDecoratorHandler = class {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/transform_api.mjs
 var import_typescript92 = __toESM(require("typescript"), 1);
-function createSyntheticAngularCoreDecoratorAccess(factory10, importManager, ngClassDecorator, sourceFile, decoratorName) {
+function createSyntheticAngularCoreDecoratorAccess(factory11, importManager, ngClassDecorator, sourceFile, decoratorName) {
   const classDecoratorIdentifier = import_typescript92.default.isIdentifier(ngClassDecorator.identifier) ? ngClassDecorator.identifier : ngClassDecorator.identifier.expression;
-  return factory10.createPropertyAccessExpression(
+  return factory11.createPropertyAccessExpression(
     importManager.addImport({
       exportModuleSpecifier: "@angular/core",
       exportSymbolName: null,
       requestedFile: sourceFile
     }),
-    import_typescript92.default.setOriginalNode(factory10.createIdentifier(decoratorName), classDecoratorIdentifier)
+    import_typescript92.default.setOriginalNode(factory11.createIdentifier(decoratorName), classDecoratorIdentifier)
   );
 }
-function castAsAny(factory10, expr) {
-  return factory10.createAsExpression(expr, factory10.createKeywordTypeNode(import_typescript92.default.SyntaxKind.AnyKeyword));
+function castAsAny(factory11, expr) {
+  return factory11.createAsExpression(expr, factory11.createKeywordTypeNode(import_typescript92.default.SyntaxKind.AnyKeyword));
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/input_function.mjs
-var signalInputsTransform = (member, host, factory10, importTracker, importManager, classDecorator, isCore) => {
+var signalInputsTransform = (member, host, factory11, importTracker, importManager, classDecorator, isCore) => {
   var _a2, _b2;
   if ((_a2 = host.getDecoratorsOfDeclaration(member.node)) == null ? void 0 : _a2.some((d) => isAngularDecorator2(d, "Input", isCore))) {
     return member.node;
@@ -45772,21 +45774,21 @@ var signalInputsTransform = (member, host, factory10, importTracker, importManag
     return member.node;
   }
   const fields = {
-    "isSignal": factory10.createTrue(),
-    "alias": factory10.createStringLiteral(inputMapping.bindingPropertyName),
-    "required": inputMapping.required ? factory10.createTrue() : factory10.createFalse(),
-    "transform": factory10.createIdentifier("undefined")
+    "isSignal": factory11.createTrue(),
+    "alias": factory11.createStringLiteral(inputMapping.bindingPropertyName),
+    "required": inputMapping.required ? factory11.createTrue() : factory11.createFalse(),
+    "transform": factory11.createIdentifier("undefined")
   };
   const sourceFile = member.node.getSourceFile();
-  const newDecorator = factory10.createDecorator(factory10.createCallExpression(createSyntheticAngularCoreDecoratorAccess(factory10, importManager, classDecorator, sourceFile, "Input"), void 0, [
-    castAsAny(factory10, factory10.createObjectLiteralExpression(Object.entries(fields).map(([name, value]) => factory10.createPropertyAssignment(name, value))))
+  const newDecorator = factory11.createDecorator(factory11.createCallExpression(createSyntheticAngularCoreDecoratorAccess(factory11, importManager, classDecorator, sourceFile, "Input"), void 0, [
+    castAsAny(factory11, factory11.createObjectLiteralExpression(Object.entries(fields).map(([name, value]) => factory11.createPropertyAssignment(name, value))))
   ]));
-  return factory10.updatePropertyDeclaration(member.node, [newDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.name, member.node.questionToken, member.node.type, member.node.initializer);
+  return factory11.updatePropertyDeclaration(member.node, [newDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.name, member.node.questionToken, member.node.type, member.node.initializer);
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/model_function.mjs
 var import_typescript93 = __toESM(require("typescript"), 1);
-var signalModelTransform = (member, host, factory10, importTracker, importManager, classDecorator, isCore) => {
+var signalModelTransform = (member, host, factory11, importTracker, importManager, classDecorator, isCore) => {
   var _a2, _b2;
   if ((_a2 = host.getDecoratorsOfDeclaration(member.node)) == null ? void 0 : _a2.some((d) => {
     return isAngularDecorator2(d, "Input", isCore) || isAngularDecorator2(d, "Output", isCore);
@@ -45797,30 +45799,30 @@ var signalModelTransform = (member, host, factory10, importTracker, importManage
   if (modelMapping === null) {
     return member.node;
   }
-  const inputConfig = factory10.createObjectLiteralExpression([
-    factory10.createPropertyAssignment("isSignal", modelMapping.input.isSignal ? factory10.createTrue() : factory10.createFalse()),
-    factory10.createPropertyAssignment("alias", factory10.createStringLiteral(modelMapping.input.bindingPropertyName)),
-    factory10.createPropertyAssignment("required", modelMapping.input.required ? factory10.createTrue() : factory10.createFalse())
+  const inputConfig = factory11.createObjectLiteralExpression([
+    factory11.createPropertyAssignment("isSignal", modelMapping.input.isSignal ? factory11.createTrue() : factory11.createFalse()),
+    factory11.createPropertyAssignment("alias", factory11.createStringLiteral(modelMapping.input.bindingPropertyName)),
+    factory11.createPropertyAssignment("required", modelMapping.input.required ? factory11.createTrue() : factory11.createFalse())
   ]);
   const sourceFile = member.node.getSourceFile();
   const inputDecorator = createDecorator(
     "Input",
-    factory10.createAsExpression(inputConfig, factory10.createKeywordTypeNode(import_typescript93.default.SyntaxKind.AnyKeyword)),
+    factory11.createAsExpression(inputConfig, factory11.createKeywordTypeNode(import_typescript93.default.SyntaxKind.AnyKeyword)),
     classDecorator,
-    factory10,
+    factory11,
     sourceFile,
     importManager
   );
-  const outputDecorator = createDecorator("Output", factory10.createStringLiteral(modelMapping.output.bindingPropertyName), classDecorator, factory10, sourceFile, importManager);
-  return factory10.updatePropertyDeclaration(member.node, [inputDecorator, outputDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
+  const outputDecorator = createDecorator("Output", factory11.createStringLiteral(modelMapping.output.bindingPropertyName), classDecorator, factory11, sourceFile, importManager);
+  return factory11.updatePropertyDeclaration(member.node, [inputDecorator, outputDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
 };
-function createDecorator(name, config, classDecorator, factory10, sourceFile, importManager) {
-  const callTarget = createSyntheticAngularCoreDecoratorAccess(factory10, importManager, classDecorator, sourceFile, name);
-  return factory10.createDecorator(factory10.createCallExpression(callTarget, void 0, [config]));
+function createDecorator(name, config, classDecorator, factory11, sourceFile, importManager) {
+  const callTarget = createSyntheticAngularCoreDecoratorAccess(factory11, importManager, classDecorator, sourceFile, name);
+  return factory11.createDecorator(factory11.createCallExpression(callTarget, void 0, [config]));
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/output_function.mjs
-var initializerApiOutputTransform = (member, host, factory10, importTracker, importManager, classDecorator, isCore) => {
+var initializerApiOutputTransform = (member, host, factory11, importTracker, importManager, classDecorator, isCore) => {
   var _a2, _b2;
   if ((_a2 = host.getDecoratorsOfDeclaration(member.node)) == null ? void 0 : _a2.some((d) => isAngularDecorator2(d, "Output", isCore))) {
     return member.node;
@@ -45830,8 +45832,8 @@ var initializerApiOutputTransform = (member, host, factory10, importTracker, imp
     return member.node;
   }
   const sourceFile = member.node.getSourceFile();
-  const newDecorator = factory10.createDecorator(factory10.createCallExpression(createSyntheticAngularCoreDecoratorAccess(factory10, importManager, classDecorator, sourceFile, "Output"), void 0, [factory10.createStringLiteral(output.metadata.bindingPropertyName)]));
-  return factory10.updatePropertyDeclaration(member.node, [newDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
+  const newDecorator = factory11.createDecorator(factory11.createCallExpression(createSyntheticAngularCoreDecoratorAccess(factory11, importManager, classDecorator, sourceFile, "Output"), void 0, [factory11.createStringLiteral(output.metadata.bindingPropertyName)]));
+  return factory11.updatePropertyDeclaration(member.node, [newDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/query_functions.mjs
@@ -45841,7 +45843,7 @@ var queryFunctionToDecorator = {
   contentChild: "ContentChild",
   contentChildren: "ContentChildren"
 };
-var queryFunctionsTransforms = (member, host, factory10, importTracker, importManager, classDecorator, isCore) => {
+var queryFunctionsTransforms = (member, host, factory11, importTracker, importManager, classDecorator, isCore) => {
   var _a2;
   const decorators = host.getDecoratorsOfDeclaration(member.node);
   const queryDecorators = decorators && getAngularDecorators(decorators, queryDecoratorNames, isCore);
@@ -45854,18 +45856,18 @@ var queryFunctionsTransforms = (member, host, factory10, importTracker, importMa
   }
   const sourceFile = member.node.getSourceFile();
   const callArgs = queryDefinition.call.arguments;
-  const newDecorator = factory10.createDecorator(factory10.createCallExpression(
-    createSyntheticAngularCoreDecoratorAccess(factory10, importManager, classDecorator, sourceFile, queryFunctionToDecorator[queryDefinition.name]),
+  const newDecorator = factory11.createDecorator(factory11.createCallExpression(
+    createSyntheticAngularCoreDecoratorAccess(factory11, importManager, classDecorator, sourceFile, queryFunctionToDecorator[queryDefinition.name]),
     void 0,
     [
       queryDefinition.call.arguments[0],
-      castAsAny(factory10, factory10.createObjectLiteralExpression([
-        ...callArgs.length > 1 ? [factory10.createSpreadAssignment(callArgs[1])] : [],
-        factory10.createPropertyAssignment("isSignal", factory10.createTrue())
+      castAsAny(factory11, factory11.createObjectLiteralExpression([
+        ...callArgs.length > 1 ? [factory11.createSpreadAssignment(callArgs[1])] : [],
+        factory11.createPropertyAssignment("isSignal", factory11.createTrue())
       ]))
     ]
   ));
-  return factory10.updatePropertyDeclaration(member.node, [newDecorator, ...(_a2 = member.node.modifiers) != null ? _a2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
+  return factory11.updatePropertyDeclaration(member.node, [newDecorator, ...(_a2 = member.node.modifiers) != null ? _a2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
 };
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/transform.mjs
@@ -48279,6 +48281,9 @@ function isSignalSymbol(symbol) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/extended/api/api.mjs
 var TemplateCheckWithVisitor = class {
+  constructor() {
+    this.canVisitStructuralAttributes = true;
+  }
   run(ctx, component, template2) {
     const visitor = new TemplateVisitor2(ctx, component, this);
     return visitor.getDiagnostics(template2);
@@ -48315,10 +48320,13 @@ var TemplateVisitor2 = class extends RecursiveAstVisitor2 {
     this.visitAllNodes(element2.children);
   }
   visitTemplate(template2) {
+    const isInlineTemplate = template2.tagName === "ng-template";
     this.visitAllNodes(template2.attributes);
-    if (template2.tagName === "ng-template") {
+    if (isInlineTemplate) {
       this.visitAllNodes(template2.inputs);
       this.visitAllNodes(template2.outputs);
+    }
+    if (this.check.canVisitStructuralAttributes || isInlineTemplate) {
       this.visitAllNodes(template2.templateAttrs);
     }
     this.visitAllNodes(template2.variables);
@@ -48562,6 +48570,7 @@ var import_typescript114 = __toESM(require("typescript"), 1);
 var NullishCoalescingNotNullableCheck = class extends TemplateCheckWithVisitor {
   constructor() {
     super(...arguments);
+    this.canVisitStructuralAttributes = false;
     this.code = ErrorCode.NULLISH_COALESCING_NOT_NULLABLE;
   }
   visitNode(ctx, component, node) {
@@ -48606,6 +48615,7 @@ var import_typescript115 = __toESM(require("typescript"), 1);
 var OptionalChainNotNullableCheck = class extends TemplateCheckWithVisitor {
   constructor() {
     super(...arguments);
+    this.canVisitStructuralAttributes = false;
     this.code = ErrorCode.OPTIONAL_CHAIN_NOT_NULLABLE;
   }
   visitNode(ctx, component, node) {
@@ -48758,6 +48768,50 @@ var factory9 = {
   create: () => new UninvokedFunctionInEventBindingSpec()
 };
 
+// bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/extended/checks/unused_let_declaration/index.mjs
+var UnusedLetDeclarationCheck = class extends TemplateCheckWithVisitor {
+  constructor() {
+    super(...arguments);
+    this.code = ErrorCode.UNUSED_LET_DECLARATION;
+    this.analysis = /* @__PURE__ */ new Map();
+  }
+  run(ctx, component, template2) {
+    super.run(ctx, component, template2);
+    const diagnostics = [];
+    const { allLetDeclarations, usedLetDeclarations } = this.getAnalysis(component);
+    for (const decl of allLetDeclarations) {
+      if (!usedLetDeclarations.has(decl)) {
+        diagnostics.push(ctx.makeTemplateDiagnostic(decl.sourceSpan, `@let ${decl.name} is declared but its value is never read.`));
+      }
+    }
+    this.analysis.clear();
+    return diagnostics;
+  }
+  visitNode(ctx, component, node) {
+    if (node instanceof LetDeclaration) {
+      this.getAnalysis(component).allLetDeclarations.add(node);
+    } else if (node instanceof AST) {
+      const unwrappedNode = node instanceof ASTWithSource ? node.ast : node;
+      const target = ctx.templateTypeChecker.getExpressionTarget(unwrappedNode, component);
+      if (target !== null && target instanceof LetDeclaration) {
+        this.getAnalysis(component).usedLetDeclarations.add(target);
+      }
+    }
+    return [];
+  }
+  getAnalysis(node) {
+    if (!this.analysis.has(node)) {
+      this.analysis.set(node, { allLetDeclarations: /* @__PURE__ */ new Set(), usedLetDeclarations: /* @__PURE__ */ new Set() });
+    }
+    return this.analysis.get(node);
+  }
+};
+var factory10 = {
+  code: ErrorCode.UNUSED_LET_DECLARATION,
+  name: ExtendedTemplateDiagnosticName.UNUSED_LET_DECLARATION,
+  create: () => new UnusedLetDeclarationCheck()
+};
+
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/extended/src/extended_template_checker.mjs
 var import_typescript116 = __toESM(require("typescript"), 1);
 
@@ -48775,12 +48829,12 @@ var ExtendedTemplateCheckerImpl = class {
     var _a2, _b2, _c2, _d2, _e2;
     this.partialCtx = { templateTypeChecker, typeChecker };
     this.templateChecks = /* @__PURE__ */ new Map();
-    for (const factory10 of templateCheckFactories) {
-      const category = diagnosticLabelToCategory((_e2 = (_d2 = (_b2 = (_a2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _a2.checks) == null ? void 0 : _b2[factory10.name]) != null ? _d2 : (_c2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _c2.defaultCategory) != null ? _e2 : DiagnosticCategoryLabel.Warning);
+    for (const factory11 of templateCheckFactories) {
+      const category = diagnosticLabelToCategory((_e2 = (_d2 = (_b2 = (_a2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _a2.checks) == null ? void 0 : _b2[factory11.name]) != null ? _d2 : (_c2 = options == null ? void 0 : options.extendedDiagnostics) == null ? void 0 : _c2.defaultCategory) != null ? _e2 : DiagnosticCategoryLabel.Warning);
       if (category === null) {
         continue;
       }
-      const check = factory10.create(options);
+      const check = factory11.create(options);
       if (check === null) {
         continue;
       }
@@ -48831,11 +48885,12 @@ var ALL_DIAGNOSTIC_FACTORIES = [
   factory4,
   factory7,
   factory,
-  factory9
+  factory9,
+  factory10
 ];
 var SUPPORTED_DIAGNOSTIC_NAMES = /* @__PURE__ */ new Set([
   ExtendedTemplateDiagnosticName.CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION,
-  ...ALL_DIAGNOSTIC_FACTORIES.map((factory10) => factory10.name)
+  ...ALL_DIAGNOSTIC_FACTORIES.map((factory11) => factory11.name)
 ]);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/template_semantics/src/template_semantics_checker.mjs
