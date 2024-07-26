@@ -23193,7 +23193,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.2+sha-ca89ef9");
+var VERSION2 = new Version("18.2.0-next.2+sha-ca8bd5b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -23940,7 +23940,7 @@ function createGenerateUniqueIdentifierHelper() {
 var import_typescript34 = __toESM(require("typescript"), 1);
 function createTsTransformForImportManager(manager, extraStatementsForFiles) {
   return (ctx) => {
-    const { affectedFiles, newImports, updatedImports, reusedOriginalAliasDeclarations } = manager.finalize();
+    const { affectedFiles, newImports, updatedImports, reusedOriginalAliasDeclarations, deletedImports } = manager.finalize();
     if (reusedOriginalAliasDeclarations.size > 0) {
       const referencedAliasDeclarations = loadIsReferencedAliasDeclarationPatch(ctx);
       reusedOriginalAliasDeclarations.forEach((aliasDecl) => referencedAliasDeclarations.add(aliasDecl));
@@ -23953,7 +23953,13 @@ function createTsTransformForImportManager(manager, extraStatementsForFiles) {
       }
     }
     const visitStatement = (node) => {
-      if (!import_typescript34.default.isImportDeclaration(node) || node.importClause === void 0 || !import_typescript34.default.isImportClause(node.importClause)) {
+      if (!import_typescript34.default.isImportDeclaration(node)) {
+        return node;
+      }
+      if (deletedImports.has(node)) {
+        return void 0;
+      }
+      if (node.importClause === void 0 || !import_typescript34.default.isImportClause(node.importClause)) {
         return node;
       }
       const clause = node.importClause;
@@ -24089,6 +24095,7 @@ var ImportManager = class {
   constructor(config = {}) {
     var _a2, _b2, _c2, _d2, _e2, _f2;
     this.newImports = /* @__PURE__ */ new Map();
+    this.removedImports = /* @__PURE__ */ new Map();
     this.nextUniqueIndex = 0;
     this.reuseGeneratedImportsTracker = {
       directReuseCache: /* @__PURE__ */ new Map(),
@@ -24115,11 +24122,15 @@ var ImportManager = class {
     this._getNewImportsTrackerForFile(requestedFile).sideEffectImports.add(moduleSpecifier);
   }
   addImport(request) {
+    var _a2, _b2;
     if (this.config.rewriter !== null) {
       if (request.exportSymbolName !== null) {
         request.exportSymbolName = this.config.rewriter.rewriteSymbol(request.exportSymbolName, request.exportModuleSpecifier);
       }
       request.exportModuleSpecifier = this.config.rewriter.rewriteSpecifier(request.exportModuleSpecifier, request.requestedFile.fileName);
+    }
+    if (request.exportSymbolName !== null && !request.asTypeReference) {
+      (_b2 = (_a2 = this.removedImports.get(request.requestedFile)) == null ? void 0 : _a2.get(request.exportModuleSpecifier)) == null ? void 0 : _b2.delete(request.exportSymbolName);
     }
     const previousGeneratedImportRef = attemptToReuseGeneratedImports(this.reuseGeneratedImportsTracker, request);
     if (previousGeneratedImportRef !== null) {
@@ -24128,6 +24139,19 @@ var ImportManager = class {
     const resultImportRef = this._generateNewImport(request);
     captureGeneratedImport(request, this.reuseGeneratedImportsTracker, resultImportRef);
     return createImportReference(!!request.asTypeReference, resultImportRef);
+  }
+  removeImport(requestedFile, exportSymbolName, moduleSpecifier) {
+    let moduleMap = this.removedImports.get(requestedFile);
+    if (!moduleMap) {
+      moduleMap = /* @__PURE__ */ new Map();
+      this.removedImports.set(requestedFile, moduleMap);
+    }
+    let removedSymbols = moduleMap.get(moduleSpecifier);
+    if (!removedSymbols) {
+      removedSymbols = /* @__PURE__ */ new Set();
+      moduleMap.set(moduleSpecifier, removedSymbols);
+    }
+    removedSymbols.add(exportSymbolName);
   }
   _generateNewImport(request) {
     var _a2;
@@ -24175,6 +24199,8 @@ var ImportManager = class {
     const affectedFiles = /* @__PURE__ */ new Set();
     const updatedImportsResult = /* @__PURE__ */ new Map();
     const newImportsResult = /* @__PURE__ */ new Map();
+    const deletedImports = /* @__PURE__ */ new Set();
+    const importDeclarationsPerFile = /* @__PURE__ */ new Map();
     const addNewImport = (fileName, importDecl) => {
       affectedFiles.add(fileName);
       if (newImportsResult.has(fileName)) {
@@ -24184,10 +24210,42 @@ var ImportManager = class {
       }
     };
     this.reuseSourceFileImportsTracker.updatedImports.forEach((expressions, importDecl) => {
+      const sourceFile = importDecl.getSourceFile();
       const namedBindings = importDecl.importClause.namedBindings;
-      const newNamedBindings = import_typescript37.default.factory.updateNamedImports(namedBindings, namedBindings.elements.concat(expressions.map(({ propertyName, fileUniqueAlias }) => import_typescript37.default.factory.createImportSpecifier(false, fileUniqueAlias !== null ? propertyName : void 0, fileUniqueAlias != null ? fileUniqueAlias : propertyName))));
-      affectedFiles.add(importDecl.getSourceFile().fileName);
-      updatedImportsResult.set(namedBindings, newNamedBindings);
+      const moduleName = importDecl.moduleSpecifier.text;
+      const newElements = namedBindings.elements.concat(expressions.map(({ propertyName, fileUniqueAlias }) => import_typescript37.default.factory.createImportSpecifier(false, fileUniqueAlias !== null ? propertyName : void 0, fileUniqueAlias != null ? fileUniqueAlias : propertyName))).filter((specifier) => this._canAddSpecifier(sourceFile, moduleName, specifier));
+      affectedFiles.add(sourceFile.fileName);
+      if (newElements.length === 0) {
+        deletedImports.add(importDecl);
+      } else {
+        updatedImportsResult.set(namedBindings, import_typescript37.default.factory.updateNamedImports(namedBindings, newElements));
+      }
+    });
+    this.removedImports.forEach((removeMap, sourceFile) => {
+      var _a2;
+      if (removeMap.size === 0) {
+        return;
+      }
+      let allImports = importDeclarationsPerFile.get(sourceFile);
+      if (!allImports) {
+        allImports = sourceFile.statements.filter(import_typescript37.default.isImportDeclaration);
+        importDeclarationsPerFile.set(sourceFile, allImports);
+      }
+      for (const node of allImports) {
+        if (!((_a2 = node.importClause) == null ? void 0 : _a2.namedBindings) || !import_typescript37.default.isNamedImports(node.importClause.namedBindings) || this.reuseSourceFileImportsTracker.updatedImports.has(node) || deletedImports.has(node)) {
+          continue;
+        }
+        const namedBindings = node.importClause.namedBindings;
+        const moduleName = node.moduleSpecifier.text;
+        const newImports = namedBindings.elements.filter((specifier) => this._canAddSpecifier(sourceFile, moduleName, specifier));
+        if (newImports.length === 0) {
+          affectedFiles.add(sourceFile.fileName);
+          deletedImports.add(node);
+        } else if (newImports.length !== namedBindings.elements.length) {
+          affectedFiles.add(sourceFile.fileName);
+          updatedImportsResult.set(namedBindings, import_typescript37.default.factory.updateNamedImports(namedBindings, newImports));
+        }
+      }
     });
     this.newImports.forEach(({ namedImports, namespaceImports, sideEffectImports }, sourceFile) => {
       const useSingleQuotes = this.config.shouldUseSingleQuotes(sourceFile);
@@ -24201,15 +24259,19 @@ var ImportManager = class {
         addNewImport(fileName, newImport);
       });
       namedImports.forEach((specifiers, moduleName) => {
-        const newImport = import_typescript37.default.factory.createImportDeclaration(void 0, import_typescript37.default.factory.createImportClause(false, void 0, import_typescript37.default.factory.createNamedImports(specifiers)), import_typescript37.default.factory.createStringLiteral(moduleName, useSingleQuotes));
-        addNewImport(fileName, newImport);
+        const filteredSpecifiers = specifiers.filter((specifier) => this._canAddSpecifier(sourceFile, moduleName, specifier));
+        if (filteredSpecifiers.length > 0) {
+          const newImport = import_typescript37.default.factory.createImportDeclaration(void 0, import_typescript37.default.factory.createImportClause(false, void 0, import_typescript37.default.factory.createNamedImports(filteredSpecifiers)), import_typescript37.default.factory.createStringLiteral(moduleName, useSingleQuotes));
+          addNewImport(fileName, newImport);
+        }
       });
     });
     return {
       affectedFiles,
       newImports: newImportsResult,
       updatedImports: updatedImportsResult,
-      reusedOriginalAliasDeclarations: this.reuseSourceFileImportsTracker.reusedAliasDeclarations
+      reusedOriginalAliasDeclarations: this.reuseSourceFileImportsTracker.reusedAliasDeclarations,
+      deletedImports
     };
   }
   toTsTransform(extraStatementsMap) {
@@ -24228,6 +24290,10 @@ var ImportManager = class {
       });
     }
     return this.newImports.get(file);
+  }
+  _canAddSpecifier(sourceFile, moduleSpecifier, specifier) {
+    var _a2, _b2;
+    return !((_b2 = (_a2 = this.removedImports.get(sourceFile)) == null ? void 0 : _a2.get(moduleSpecifier)) == null ? void 0 : _b2.has((specifier.propertyName || specifier.name).text));
   }
 };
 function createImportReference(asTypeReference, ref) {
@@ -27170,14 +27236,23 @@ function migrateParameter(node, options, localTypeChecker, printer, tracker, sup
   }
 }
 function createInjectReplacementCall(param, options, localTypeChecker, printer, tracker) {
-  var _a2;
   const moduleName = "@angular/core";
   const sourceFile = param.getSourceFile();
   const decorators = getAngularDecorators2(localTypeChecker, import_typescript97.default.getDecorators(param) || []);
   const literalProps = [];
-  let injectedType = ((_a2 = param.type) == null ? void 0 : _a2.getText()) || "";
-  let typeArguments = param.type && hasGenerics(param.type) ? [param.type] : void 0;
+  const type = param.type;
+  let injectedType = "";
+  let typeArguments = type && hasGenerics(type) ? [type] : void 0;
   let hasOptionalDecorator = false;
+  if (type) {
+    if (import_typescript97.default.isTypeReferenceNode(type) && type.typeArguments && type.typeArguments.length > 0) {
+      injectedType = type.typeName.getText();
+    } else if (import_typescript97.default.isUnionTypeNode(type)) {
+      injectedType = (type.types.find((t) => !import_typescript97.default.isLiteralTypeNode(t)) || type.types[0]).getText();
+    } else {
+      injectedType = type.getText();
+    }
+  }
   for (const decorator of decorators) {
     if (decorator.moduleName !== moduleName) {
       continue;
@@ -27186,12 +27261,10 @@ function createInjectReplacementCall(param, options, localTypeChecker, printer, 
     switch (decorator.name) {
       case "Inject":
         if (firstArg) {
-          injectedType = firstArg.getText();
-          if (import_typescript97.default.isStringLiteralLike(firstArg)) {
-            typeArguments = [
-              param.type || import_typescript97.default.factory.createKeywordTypeNode(import_typescript97.default.SyntaxKind.AnyKeyword)
-            ];
-            injectedType += " as any";
+          const injectResult = migrateInjectDecorator(firstArg, type, localTypeChecker);
+          injectedType = injectResult.injectedType;
+          if (injectResult.typeArguments) {
+            typeArguments = injectResult.typeArguments;
           }
         }
         break;
@@ -27231,6 +27304,28 @@ function createInjectReplacementCall(param, options, localTypeChecker, printer, 
     }
   }
   return replaceNodePlaceholder(param.getSourceFile(), expression, injectedType, printer);
+}
+function migrateInjectDecorator(firstArg, type, localTypeChecker) {
+  let injectedType = firstArg.getText();
+  let typeArguments = null;
+  if (import_typescript97.default.isStringLiteralLike(firstArg)) {
+    typeArguments = [type || import_typescript97.default.factory.createKeywordTypeNode(import_typescript97.default.SyntaxKind.AnyKeyword)];
+    injectedType += " as any";
+  } else if (import_typescript97.default.isCallExpression(firstArg) && import_typescript97.default.isIdentifier(firstArg.expression) && firstArg.arguments.length === 1) {
+    const callImport = getImportOfIdentifier(localTypeChecker, firstArg.expression);
+    const arrowFn2 = firstArg.arguments[0];
+    if (callImport !== null && callImport.name === "forwardRef" && callImport.importModule === "@angular/core" && import_typescript97.default.isArrowFunction(arrowFn2)) {
+      if (import_typescript97.default.isBlock(arrowFn2.body)) {
+        const returnStatement = arrowFn2.body.statements.find((stmt) => import_typescript97.default.isReturnStatement(stmt));
+        if (returnStatement && returnStatement.expression) {
+          injectedType = returnStatement.expression.getText();
+        }
+      } else {
+        injectedType = arrowFn2.body.getText();
+      }
+    }
+  }
+  return { injectedType, typeArguments };
 }
 function stripConstructorParameters(node, tracker) {
   if (node.parameters.length === 0) {

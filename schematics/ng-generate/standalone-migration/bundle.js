@@ -26083,7 +26083,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.2+sha-ca89ef9");
+var VERSION2 = new Version("18.2.0-next.2+sha-ca8bd5b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27187,7 +27187,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-ca89ef9"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-ca8bd5b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27206,7 +27206,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-ca89ef9"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-ca8bd5b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27274,7 +27274,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-ca89ef9"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-ca8bd5b"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27592,7 +27592,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-ca89ef9"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-ca8bd5b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27615,7 +27615,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-ca89ef9"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-ca8bd5b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27653,7 +27653,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-ca89ef9"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-ca8bd5b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27677,7 +27677,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-ca89ef9"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-ca8bd5b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27712,7 +27712,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-ca89ef9"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-ca8bd5b"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27729,7 +27729,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.2.0-next.2+sha-ca89ef9");
+var VERSION3 = new Version("18.2.0-next.2+sha-ca8bd5b");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -32734,7 +32734,7 @@ function createGenerateUniqueIdentifierHelper() {
 var import_typescript35 = __toESM(require("typescript"), 1);
 function createTsTransformForImportManager(manager, extraStatementsForFiles) {
   return (ctx) => {
-    const { affectedFiles, newImports, updatedImports, reusedOriginalAliasDeclarations } = manager.finalize();
+    const { affectedFiles, newImports, updatedImports, reusedOriginalAliasDeclarations, deletedImports } = manager.finalize();
     if (reusedOriginalAliasDeclarations.size > 0) {
       const referencedAliasDeclarations = loadIsReferencedAliasDeclarationPatch(ctx);
       reusedOriginalAliasDeclarations.forEach((aliasDecl) => referencedAliasDeclarations.add(aliasDecl));
@@ -32747,7 +32747,13 @@ function createTsTransformForImportManager(manager, extraStatementsForFiles) {
       }
     }
     const visitStatement = (node) => {
-      if (!import_typescript35.default.isImportDeclaration(node) || node.importClause === void 0 || !import_typescript35.default.isImportClause(node.importClause)) {
+      if (!import_typescript35.default.isImportDeclaration(node)) {
+        return node;
+      }
+      if (deletedImports.has(node)) {
+        return void 0;
+      }
+      if (node.importClause === void 0 || !import_typescript35.default.isImportClause(node.importClause)) {
         return node;
       }
       const clause = node.importClause;
@@ -32887,6 +32893,7 @@ var ImportManager = class {
   constructor(config = {}) {
     var _a2, _b2, _c2, _d2, _e2, _f2;
     this.newImports = /* @__PURE__ */ new Map();
+    this.removedImports = /* @__PURE__ */ new Map();
     this.nextUniqueIndex = 0;
     this.reuseGeneratedImportsTracker = {
       directReuseCache: /* @__PURE__ */ new Map(),
@@ -32913,11 +32920,15 @@ var ImportManager = class {
     this._getNewImportsTrackerForFile(requestedFile).sideEffectImports.add(moduleSpecifier);
   }
   addImport(request) {
+    var _a2, _b2;
     if (this.config.rewriter !== null) {
       if (request.exportSymbolName !== null) {
         request.exportSymbolName = this.config.rewriter.rewriteSymbol(request.exportSymbolName, request.exportModuleSpecifier);
       }
       request.exportModuleSpecifier = this.config.rewriter.rewriteSpecifier(request.exportModuleSpecifier, request.requestedFile.fileName);
+    }
+    if (request.exportSymbolName !== null && !request.asTypeReference) {
+      (_b2 = (_a2 = this.removedImports.get(request.requestedFile)) == null ? void 0 : _a2.get(request.exportModuleSpecifier)) == null ? void 0 : _b2.delete(request.exportSymbolName);
     }
     const previousGeneratedImportRef = attemptToReuseGeneratedImports(this.reuseGeneratedImportsTracker, request);
     if (previousGeneratedImportRef !== null) {
@@ -32926,6 +32937,19 @@ var ImportManager = class {
     const resultImportRef = this._generateNewImport(request);
     captureGeneratedImport(request, this.reuseGeneratedImportsTracker, resultImportRef);
     return createImportReference(!!request.asTypeReference, resultImportRef);
+  }
+  removeImport(requestedFile, exportSymbolName, moduleSpecifier) {
+    let moduleMap = this.removedImports.get(requestedFile);
+    if (!moduleMap) {
+      moduleMap = /* @__PURE__ */ new Map();
+      this.removedImports.set(requestedFile, moduleMap);
+    }
+    let removedSymbols = moduleMap.get(moduleSpecifier);
+    if (!removedSymbols) {
+      removedSymbols = /* @__PURE__ */ new Set();
+      moduleMap.set(moduleSpecifier, removedSymbols);
+    }
+    removedSymbols.add(exportSymbolName);
   }
   _generateNewImport(request) {
     var _a2;
@@ -32973,6 +32997,8 @@ var ImportManager = class {
     const affectedFiles = /* @__PURE__ */ new Set();
     const updatedImportsResult = /* @__PURE__ */ new Map();
     const newImportsResult = /* @__PURE__ */ new Map();
+    const deletedImports = /* @__PURE__ */ new Set();
+    const importDeclarationsPerFile = /* @__PURE__ */ new Map();
     const addNewImport = (fileName, importDecl) => {
       affectedFiles.add(fileName);
       if (newImportsResult.has(fileName)) {
@@ -32982,10 +33008,42 @@ var ImportManager = class {
       }
     };
     this.reuseSourceFileImportsTracker.updatedImports.forEach((expressions, importDecl) => {
+      const sourceFile = importDecl.getSourceFile();
       const namedBindings = importDecl.importClause.namedBindings;
-      const newNamedBindings = import_typescript38.default.factory.updateNamedImports(namedBindings, namedBindings.elements.concat(expressions.map(({ propertyName, fileUniqueAlias }) => import_typescript38.default.factory.createImportSpecifier(false, fileUniqueAlias !== null ? propertyName : void 0, fileUniqueAlias != null ? fileUniqueAlias : propertyName))));
-      affectedFiles.add(importDecl.getSourceFile().fileName);
-      updatedImportsResult.set(namedBindings, newNamedBindings);
+      const moduleName = importDecl.moduleSpecifier.text;
+      const newElements = namedBindings.elements.concat(expressions.map(({ propertyName, fileUniqueAlias }) => import_typescript38.default.factory.createImportSpecifier(false, fileUniqueAlias !== null ? propertyName : void 0, fileUniqueAlias != null ? fileUniqueAlias : propertyName))).filter((specifier) => this._canAddSpecifier(sourceFile, moduleName, specifier));
+      affectedFiles.add(sourceFile.fileName);
+      if (newElements.length === 0) {
+        deletedImports.add(importDecl);
+      } else {
+        updatedImportsResult.set(namedBindings, import_typescript38.default.factory.updateNamedImports(namedBindings, newElements));
+      }
+    });
+    this.removedImports.forEach((removeMap, sourceFile) => {
+      var _a2;
+      if (removeMap.size === 0) {
+        return;
+      }
+      let allImports = importDeclarationsPerFile.get(sourceFile);
+      if (!allImports) {
+        allImports = sourceFile.statements.filter(import_typescript38.default.isImportDeclaration);
+        importDeclarationsPerFile.set(sourceFile, allImports);
+      }
+      for (const node of allImports) {
+        if (!((_a2 = node.importClause) == null ? void 0 : _a2.namedBindings) || !import_typescript38.default.isNamedImports(node.importClause.namedBindings) || this.reuseSourceFileImportsTracker.updatedImports.has(node) || deletedImports.has(node)) {
+          continue;
+        }
+        const namedBindings = node.importClause.namedBindings;
+        const moduleName = node.moduleSpecifier.text;
+        const newImports = namedBindings.elements.filter((specifier) => this._canAddSpecifier(sourceFile, moduleName, specifier));
+        if (newImports.length === 0) {
+          affectedFiles.add(sourceFile.fileName);
+          deletedImports.add(node);
+        } else if (newImports.length !== namedBindings.elements.length) {
+          affectedFiles.add(sourceFile.fileName);
+          updatedImportsResult.set(namedBindings, import_typescript38.default.factory.updateNamedImports(namedBindings, newImports));
+        }
+      }
     });
     this.newImports.forEach(({ namedImports, namespaceImports, sideEffectImports }, sourceFile) => {
       const useSingleQuotes = this.config.shouldUseSingleQuotes(sourceFile);
@@ -32999,15 +33057,19 @@ var ImportManager = class {
         addNewImport(fileName, newImport);
       });
       namedImports.forEach((specifiers, moduleName) => {
-        const newImport = import_typescript38.default.factory.createImportDeclaration(void 0, import_typescript38.default.factory.createImportClause(false, void 0, import_typescript38.default.factory.createNamedImports(specifiers)), import_typescript38.default.factory.createStringLiteral(moduleName, useSingleQuotes));
-        addNewImport(fileName, newImport);
+        const filteredSpecifiers = specifiers.filter((specifier) => this._canAddSpecifier(sourceFile, moduleName, specifier));
+        if (filteredSpecifiers.length > 0) {
+          const newImport = import_typescript38.default.factory.createImportDeclaration(void 0, import_typescript38.default.factory.createImportClause(false, void 0, import_typescript38.default.factory.createNamedImports(filteredSpecifiers)), import_typescript38.default.factory.createStringLiteral(moduleName, useSingleQuotes));
+          addNewImport(fileName, newImport);
+        }
       });
     });
     return {
       affectedFiles,
       newImports: newImportsResult,
       updatedImports: updatedImportsResult,
-      reusedOriginalAliasDeclarations: this.reuseSourceFileImportsTracker.reusedAliasDeclarations
+      reusedOriginalAliasDeclarations: this.reuseSourceFileImportsTracker.reusedAliasDeclarations,
+      deletedImports
     };
   }
   toTsTransform(extraStatementsMap) {
@@ -33026,6 +33088,10 @@ var ImportManager = class {
       });
     }
     return this.newImports.get(file);
+  }
+  _canAddSpecifier(sourceFile, moduleSpecifier, specifier) {
+    var _a2, _b2;
+    return !((_b2 = (_a2 = this.removedImports.get(sourceFile)) == null ? void 0 : _a2.get(moduleSpecifier)) == null ? void 0 : _b2.has((specifier.propertyName || specifier.name).text));
   }
 };
 function createImportReference(asTypeReference, ref) {
@@ -49190,7 +49256,7 @@ var NgCompiler = class {
     this.constructionDiagnostics = [];
     this.nonTemplateDiagnostics = null;
     this.delegatingPerfRecorder = new DelegatingPerfRecorder(this.perfRecorder);
-    this.usePoisonedData = usePoisonedData || !!options._compilePoisedComponents;
+    this.usePoisonedData = usePoisonedData || !!options._compilePoisonedComponents;
     this.enableTemplateTypeChecker = enableTemplateTypeChecker || !!options._enableTemplateTypeChecker;
     this.enableBlockSyntax = (_a2 = options["_enableBlockSyntax"]) != null ? _a2 : true;
     this.enableLetSyntax = (_b2 = options["_enableLetSyntax"]) != null ? _b2 : true;
@@ -49381,6 +49447,7 @@ var NgCompiler = class {
   }
   prepareEmit() {
     const compilation = this.ensureAnalyzed();
+    untagAllTsFiles(this.inputProgram);
     const coreImportsFrom = compilation.isCore ? getR3SymbolsFile(this.inputProgram) : null;
     let importRewriter;
     if (coreImportsFrom !== null) {
@@ -50213,7 +50280,6 @@ var NgtscProgram = class {
         };
       }
     }
-    untagAllTsFiles(this.tsProgram);
     const forceEmit = (_a2 = opts == null ? void 0 : opts.forceEmit) != null ? _a2 : false;
     this.compiler.perfRecorder.memory(PerfCheckpoint.PreEmit);
     const res = this.compiler.perfRecorder.inPhase(PerfPhase.TypeScriptEmit, () => {
