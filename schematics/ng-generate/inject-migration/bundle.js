@@ -23193,7 +23193,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.2+sha-6609a94");
+var VERSION2 = new Version("18.2.0-next.2+sha-ca89ef9");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26965,6 +26965,12 @@ function getConstructorUnusedParameters(declaration, localTypeChecker) {
     (_b2 = (_a2 = localTypeChecker.getSymbolAtLocation(node)) == null ? void 0 : _a2.declarations) == null ? void 0 : _b2.forEach((decl) => {
       if (import_typescript96.default.isParameter(decl) && topLevelParameters.has(decl)) {
         accessedTopLevelParameters.add(decl);
+      }
+      if (import_typescript96.default.isShorthandPropertyAssignment(decl)) {
+        const symbol = localTypeChecker.getShorthandAssignmentValueSymbol(decl);
+        if (symbol && symbol.valueDeclaration && import_typescript96.default.isParameter(symbol.valueDeclaration)) {
+          accessedTopLevelParameters.add(symbol.valueDeclaration);
+        }
       }
     });
   });
