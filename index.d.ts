@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.2+sha-d108320
+ * @license Angular v18.2.0-next.2+sha-dd56270
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13070,6 +13070,14 @@ export declare interface ɵInjectorProfilerContext {
 declare const ɵINPUT_SIGNAL_BRAND_READ_TYPE: unique symbol;
 
 export declare const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE: unique symbol;
+
+/**
+ * `InjectionToken` used to configure how to call the `ErrorHandler`.
+ *
+ * `NgZone` is provided by default today so the default (and only) implementation for this
+ * is calling `ErrorHandler.handleError` outside of the Angular zone.
+ */
+export declare const ɵINTERNAL_APPLICATION_ERROR_HANDLER: InjectionToken<(e: any) => void>;
 
 /**
  * Register a callback to run once before any userspace `afterRender` or

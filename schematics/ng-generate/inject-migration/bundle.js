@@ -3487,7 +3487,7 @@ var FactoryTarget;
   FactoryTarget3[FactoryTarget3["NgModule"] = 4] = "NgModule";
 })(FactoryTarget || (FactoryTarget = {}));
 function compileFactoryFunction(meta) {
-  const t = variable("t");
+  const t = variable("\u0275t");
   let baseFactoryVar = null;
   const typeForCtor = !isDelegatedFactoryMetadata(meta) ? new BinaryOperatorExpr(BinaryOperator.Or, t, meta.type.value) : t;
   let ctorExpr = null;
@@ -3502,7 +3502,7 @@ function compileFactoryFunction(meta) {
   const body = [];
   let retExpr = null;
   function makeConditionalFactory(nonCtorExpr) {
-    const r = variable("r");
+    const r = variable("\u0275r");
     body.push(r.set(NULL_EXPR).toDeclStmt());
     const ctorStmt = ctorExpr !== null ? r.set(ctorExpr).toStmt() : importExpr(Identifiers.invalidFactory).callFn([]).toStmt();
     body.push(ifStmt(t, [ctorStmt], [r.set(nonCtorExpr).toStmt()]));
@@ -3526,7 +3526,7 @@ function compileFactoryFunction(meta) {
   } else {
     body.push(new ReturnStatement(retExpr));
   }
-  let factoryFn = fn([new FnParam("t", DYNAMIC_TYPE)], body, INFERRED_TYPE, void 0, `${meta.name}_Factory`);
+  let factoryFn = fn([new FnParam(t.name, DYNAMIC_TYPE)], body, INFERRED_TYPE, void 0, `${meta.name}_Factory`);
   if (baseFactoryVar !== null) {
     factoryFn = arrowFn([], [new DeclareVarStmt(baseFactoryVar.name), new ReturnStatement(factoryFn)]).callFn([], void 0, true);
   }
@@ -4910,7 +4910,8 @@ function delegateToFactory(type, useType, unwrapForwardRefs) {
   return createFactoryFunction(unwrappedType);
 }
 function createFactoryFunction(type) {
-  return arrowFn([new FnParam("t", DYNAMIC_TYPE)], type.prop("\u0275fac").callFn([variable("t")]));
+  const t = new FnParam("\u0275t", DYNAMIC_TYPE);
+  return arrowFn([t], type.prop("\u0275fac").callFn([variable(t.name)]));
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/assertions.mjs
@@ -23193,7 +23194,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.2+sha-d108320");
+var VERSION2 = new Version("18.2.0-next.2+sha-dd56270");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -26812,6 +26813,13 @@ var ChangeTracker = class {
       unsafeAliasOverride: alias
     });
   }
+  removeImport(sourceFile, symbolName, moduleName) {
+    moduleName = normalizePath(moduleName);
+    if (!this._changes.has(sourceFile)) {
+      this._changes.set(sourceFile, []);
+    }
+    this._importManager.removeImport(sourceFile, symbolName, moduleName);
+  }
   recordChanges() {
     this._recordImports();
     return this._changes;
@@ -26847,9 +26855,12 @@ var ChangeTracker = class {
     return kind;
   }
   _recordImports() {
-    const { newImports, updatedImports } = this._importManager.finalize();
+    const { newImports, updatedImports, deletedImports } = this._importManager.finalize();
     for (const [original, replacement] of updatedImports) {
       this.replaceNode(original, replacement);
+    }
+    for (const node of deletedImports) {
+      this.removeNode(node);
     }
     for (const [sourceFile] of this._changes) {
       const importsToAdd = newImports.get(sourceFile.fileName);
@@ -26958,6 +26969,19 @@ function getImportOfIdentifier(typeChecker, node) {
     node: importDecl
   };
 }
+function getNamedImports(sourceFile, moduleName) {
+  var _a2;
+  for (const node of sourceFile.statements) {
+    if (import_typescript94.default.isImportDeclaration(node) && import_typescript94.default.isStringLiteral(node.moduleSpecifier)) {
+      const isMatch = typeof moduleName === "string" ? node.moduleSpecifier.text === moduleName : moduleName.test(node.moduleSpecifier.text);
+      const namedBindings = (_a2 = node.importClause) == null ? void 0 : _a2.namedBindings;
+      if (isMatch && namedBindings && import_typescript94.default.isNamedImports(namedBindings)) {
+        return namedBindings;
+      }
+    }
+  }
+  return null;
+}
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/utils/typescript/decorators.mjs
 function getCallDecoratorImport(typeChecker, decorator) {
@@ -26986,15 +27010,60 @@ var DECORATORS_SUPPORTING_DI = /* @__PURE__ */ new Set([
   "NgModule",
   "Injectable"
 ]);
-function detectClassesUsingDI(sourceFile, localTypeChecker) {
-  const results = [];
+var DI_PARAM_SYMBOLS = /* @__PURE__ */ new Set([
+  "Inject",
+  "Attribute",
+  "Optional",
+  "SkipSelf",
+  "Self",
+  "Host",
+  "forwardRef"
+]);
+function analyzeFile(sourceFile, localTypeChecker) {
+  const coreSpecifiers = getNamedImports(sourceFile, "@angular/core");
+  if (coreSpecifiers === null || coreSpecifiers.elements.length === 0) {
+    return null;
+  }
+  const classes = [];
+  const nonDecoratorReferences = {};
+  const importsToSpecifiers = coreSpecifiers.elements.reduce((map, specifier) => {
+    const symbolName = (specifier.propertyName || specifier.name).text;
+    if (DI_PARAM_SYMBOLS.has(symbolName)) {
+      map.set(symbolName, specifier);
+    }
+    return map;
+  }, /* @__PURE__ */ new Map());
   sourceFile.forEachChild(function walk(node) {
-    if (import_typescript96.default.isClassDeclaration(node)) {
+    if (import_typescript96.default.isImportDeclaration(node)) {
+      return;
+    }
+    if (import_typescript96.default.isParameter(node)) {
+      if (node.initializer) {
+        walk(node.initializer);
+      }
+      return;
+    }
+    if (import_typescript96.default.isIdentifier(node) && importsToSpecifiers.size > 0) {
+      let symbol;
+      for (const [name, specifier] of importsToSpecifiers) {
+        const localName = (specifier.propertyName || specifier.name).text;
+        if (localName === node.text) {
+          if (!symbol) {
+            symbol = localTypeChecker.getSymbolAtLocation(node);
+            if (!symbol || !symbol.declarations) {
+              break;
+            } else if (symbol.declarations.some((decl) => decl === specifier)) {
+              nonDecoratorReferences[name] = (nonDecoratorReferences[name] || 0) + 1;
+            }
+          }
+        }
+      }
+    } else if (import_typescript96.default.isClassDeclaration(node)) {
       const decorators = getAngularDecorators2(localTypeChecker, import_typescript96.default.getDecorators(node) || []);
       const supportsDI = decorators.some((dec) => DECORATORS_SUPPORTING_DI.has(dec.name));
       const constructorNode = node.members.find((member) => import_typescript96.default.isConstructorDeclaration(member) && member.body != null && member.parameters.length > 0);
       if (supportsDI && constructorNode) {
-        results.push({
+        classes.push({
           node,
           constructor: constructorNode,
           superCall: node.heritageClauses ? findSuperCall(constructorNode) : null
@@ -27003,7 +27072,7 @@ function detectClassesUsingDI(sourceFile, localTypeChecker) {
     }
     node.forEachChild(walk);
   });
-  return results;
+  return { classes, nonDecoratorReferences };
 }
 function getConstructorUnusedParameters(declaration, localTypeChecker) {
   const accessedTopLevelParameters = /* @__PURE__ */ new Set();
@@ -27125,10 +27194,19 @@ function findSuperCall(root) {
 var PLACEHOLDER = "\u0275\u0275ngGeneratePlaceholder\u0275\u0275";
 function migrateFile(sourceFile, options) {
   const localTypeChecker = getLocalTypeChecker(sourceFile);
+  const analysis = analyzeFile(sourceFile, localTypeChecker);
+  if (analysis === null || analysis.classes.length === 0) {
+    return [];
+  }
   const printer = import_typescript97.default.createPrinter();
   const tracker = new ChangeTracker(printer);
-  detectClassesUsingDI(sourceFile, localTypeChecker).forEach((result) => {
+  analysis.classes.forEach((result) => {
     migrateClass(result.node, result.constructor, result.superCall, options, localTypeChecker, printer, tracker);
+  });
+  DI_PARAM_SYMBOLS.forEach((name) => {
+    if (!analysis.nonDecoratorReferences[name]) {
+      tracker.removeImport(sourceFile, name, "@angular/core");
+    }
   });
   return tracker.recordChanges().get(sourceFile) || [];
 }
@@ -27398,14 +27476,16 @@ function runInjectMigration(tree, tsconfigPath, basePath, pathToMigrate, schemat
   }
   for (const sourceFile of sourceFiles) {
     const changes = migrateFile(sourceFile, schematicOptions);
-    const update = tree.beginUpdate((0, import_path3.relative)(basePath, sourceFile.fileName));
-    changes.forEach((change) => {
-      if (change.removeLength != null) {
-        update.remove(change.start, change.removeLength);
+    if (changes.length > 0) {
+      const update = tree.beginUpdate((0, import_path3.relative)(basePath, sourceFile.fileName));
+      for (const change of changes) {
+        if (change.removeLength != null) {
+          update.remove(change.start, change.removeLength);
+        }
+        update.insertRight(change.start, change.text);
       }
-      update.insertRight(change.start, change.text);
-    });
-    tree.commitUpdate(update);
+      tree.commitUpdate(update);
+    }
   }
 }
 // Annotate the CommonJS export names for ESM import in node:

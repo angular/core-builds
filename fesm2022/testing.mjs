@@ -1,10 +1,11 @@
 /**
- * @license Angular v18.2.0-next.2+sha-d108320
+ * @license Angular v18.2.0-next.2+sha-dd56270
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, ɵNoopNgZone, NgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵZONELESS_ENABLED, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import * as i0 from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, NgZone, ErrorHandler, ɵZONELESS_ENABLED, Injectable, ɵNoopNgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -148,6 +149,49 @@ const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetec
  */
 const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
+class TestBedApplicationErrorHandler {
+    constructor() {
+        this.zone = inject$1(NgZone);
+        this.userErrorHandler = inject$1(ErrorHandler);
+        this.zoneless = inject$1(ɵZONELESS_ENABLED);
+        this.whenStableRejectFunctions = new Set();
+    }
+    handleError(e) {
+        // TODO(atscott): Investigate if we can align the behaviors of zone and zoneless
+        if (this.zoneless) {
+            this.zonelessHandleError(e);
+        }
+        else {
+            this.zone.runOutsideAngular(() => this.userErrorHandler.handleError(e));
+        }
+    }
+    zonelessHandleError(e) {
+        try {
+            this.zone.runOutsideAngular(() => this.userErrorHandler.handleError(e));
+        }
+        catch (userError) {
+            e = userError;
+        }
+        // Instead of throwing the error when there are outstanding `fixture.whenStable` promises,
+        // reject those promises with the error. This allows developers to write
+        // expectAsync(fix.whenStable()).toBeRejected();
+        if (this.whenStableRejectFunctions.size > 0) {
+            for (const fn of this.whenStableRejectFunctions.values()) {
+                fn(e);
+            }
+            this.whenStableRejectFunctions.clear();
+        }
+        else {
+            throw e;
+        }
+    }
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "18.2.0-next.2+sha-dd56270", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
+    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "18.2.0-next.2+sha-dd56270", ngImport: i0, type: TestBedApplicationErrorHandler }); }
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "18.2.0-next.2+sha-dd56270", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+            type: Injectable
+        }] });
+
 /**
  * Fixture for debugging and testing a component.
  *
@@ -175,6 +219,10 @@ class ComponentFixture {
         /** @internal */
         this._testAppRef = this._appRef;
         this.pendingTasks = inject$1(ɵPendingTasks);
+        /** @internal */
+        this._appErrorHandler = inject$1(TestBedApplicationErrorHandler);
+        /** @internal */
+        this._rejectWhenStablePromiseOnAppError = true;
         // TODO(atscott): Remove this from public API
         this.ngZone = this._noZoneOptionIsSet ? null : this._ngZone;
         this.changeDetectorRef = componentRef.changeDetectorRef;
@@ -264,6 +312,15 @@ class ScheduledComponentFixture extends ComponentFixture {
             this._appRef.attachView(this.componentRef.hostView);
         }
     }
+    whenStable() {
+        return new Promise((resolve, reject) => {
+            this._appErrorHandler.whenStableRejectFunctions.add(reject);
+            super.whenStable().then((v) => {
+                this._appErrorHandler.whenStableRejectFunctions.delete(reject);
+                resolve(v);
+            });
+        });
+    }
     detectChanges(checkNoChanges = true) {
         if (!checkNoChanges) {
             throw new Error('Cannot disable `checkNoChanges` in this configuration. ' +
@@ -297,6 +354,10 @@ class PseudoApplicationComponentFixture extends ComponentFixture {
         this.beforeRenderSubscription = undefined;
     }
     initialize() {
+        // TODO(atscott): Determine whether we can align this behavior with the zoneless fixture.
+        // This exists to keep the previous zone-based fixture behavior consistent with how it was before.
+        // However, we currently feel that the zoneless fixture is doing the more correct thing.
+        this._rejectWhenStablePromiseOnAppError = false;
         if (this._autoDetect) {
             this.subscribeToAppRefEvents();
         }
@@ -1453,6 +1514,16 @@ class TestBedCompiler {
             providers: [
                 ...this.rootProviderOverrides,
                 ɵinternalProvideZoneChangeDetection({}),
+                TestBedApplicationErrorHandler,
+                {
+                    provide: ɵINTERNAL_APPLICATION_ERROR_HANDLER,
+                    useFactory: () => {
+                        const handler = inject$1(TestBedApplicationErrorHandler);
+                        return (e) => {
+                            handler.handleError(e);
+                        };
+                    },
+                },
                 { provide: ɵChangeDetectionScheduler, useExisting: ɵChangeDetectionSchedulerImpl },
             ],
         });
