@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.2+sha-0fbcd6e
+ * @license Angular v18.1.2+sha-62ade76
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6822,6 +6822,10 @@ class EventEmitter_ extends Subject {
  */
 const EventEmitter = EventEmitter_;
 
+function noop(...args) {
+    // Do nothing.
+}
+
 /**
  * Gets a scheduling function that runs the callback after the first of setTimeout and
  * requestAnimationFrame resolves.
@@ -6849,41 +6853,40 @@ const EventEmitter = EventEmitter_;
  * @returns a function to cancel the scheduled callback
  */
 function scheduleCallbackWithRafRace(callback) {
-    let executeCallback = true;
-    setTimeout(() => {
-        if (!executeCallback) {
-            return;
-        }
-        executeCallback = false;
-        callback();
-    });
-    if (typeof _global['requestAnimationFrame'] === 'function') {
-        _global['requestAnimationFrame'](() => {
-            if (!executeCallback) {
-                return;
+    let timeoutId;
+    let animationFrameId;
+    function cleanup() {
+        callback = noop;
+        try {
+            if (animationFrameId !== undefined && typeof cancelAnimationFrame === 'function') {
+                cancelAnimationFrame(animationFrameId);
             }
-            executeCallback = false;
+            if (timeoutId !== undefined) {
+                clearTimeout(timeoutId);
+            }
+        }
+        catch {
+            // Clearing/canceling can fail in tests due to the timing of functions being patched and unpatched
+            // Just ignore the errors - we protect ourselves from this issue by also making the callback a no-op.
+        }
+    }
+    timeoutId = setTimeout(() => {
+        callback();
+        cleanup();
+    });
+    if (typeof requestAnimationFrame === 'function') {
+        animationFrameId = requestAnimationFrame(() => {
             callback();
+            cleanup();
         });
     }
-    return () => {
-        executeCallback = false;
-    };
+    return () => cleanup();
 }
 function scheduleCallbackWithMicrotask(callback) {
-    let executeCallback = true;
-    queueMicrotask(() => {
-        if (executeCallback) {
-            callback();
-        }
-    });
+    queueMicrotask(() => callback());
     return () => {
-        executeCallback = false;
+        callback = noop;
     };
-}
-
-function noop(...args) {
-    // Do nothing.
 }
 
 class AsyncStackTaggingZoneSpec {
@@ -17215,7 +17218,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.2+sha-0fbcd6e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.2+sha-62ade76']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31011,7 +31014,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.2+sha-0fbcd6e');
+const VERSION = new Version('18.1.2+sha-62ade76');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
