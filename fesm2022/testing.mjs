@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.2+sha-165973b
+ * @license Angular v18.2.0-next.2+sha-03553c4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -185,10 +185,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "18.2.0-next.2+sha-165973b", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
-    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "18.2.0-next.2+sha-165973b", ngImport: i0, type: TestBedApplicationErrorHandler }); }
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "18.2.0-next.2+sha-03553c4", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
+    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "18.2.0-next.2+sha-03553c4", ngImport: i0, type: TestBedApplicationErrorHandler }); }
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "18.2.0-next.2+sha-165973b", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "18.2.0-next.2+sha-03553c4", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
