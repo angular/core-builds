@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.2+sha-2d8635d
+ * @license Angular v18.2.0-next.2+sha-165973b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11510,7 +11510,11 @@ function appendChild(tView, lView, childRNode, childTNode) {
 function getFirstNativeNode(lView, tNode) {
     if (tNode !== null) {
         ngDevMode &&
-            assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */ | 32 /* TNodeType.Icu */ | 16 /* TNodeType.Projection */);
+            assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ |
+                12 /* TNodeType.AnyContainer */ |
+                32 /* TNodeType.Icu */ |
+                16 /* TNodeType.Projection */ |
+                128 /* TNodeType.LetDeclaration */);
         const tNodeType = tNode.type;
         if (tNodeType & 3 /* TNodeType.AnyRNode */) {
             return getNativeByTNode(tNode, lView);
@@ -11532,6 +11536,9 @@ function getFirstNativeNode(lView, tNode) {
                     return unwrapRNode(rNodeOrLContainer);
                 }
             }
+        }
+        else if (tNodeType & 128 /* TNodeType.LetDeclaration */) {
+            return getFirstNativeNode(lView, tNode.next);
         }
         else if (tNodeType & 32 /* TNodeType.Icu */) {
             let nextRNode = icuContainerIterate(tNode, lView);
@@ -17208,7 +17215,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-next.2+sha-2d8635d']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-next.2+sha-165973b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31004,7 +31011,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.0-next.2+sha-2d8635d');
+const VERSION = new Version('18.2.0-next.2+sha-165973b');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
