@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.2+sha-03553c4
+ * @license Angular v18.2.0-next.2+sha-b558f99
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6822,6 +6822,10 @@ class EventEmitter_ extends Subject {
  */
 const EventEmitter = EventEmitter_;
 
+function noop(...args) {
+    // Do nothing.
+}
+
 /**
  * Gets a scheduling function that runs the callback after the first of setTimeout and
  * requestAnimationFrame resolves.
@@ -6849,41 +6853,40 @@ const EventEmitter = EventEmitter_;
  * @returns a function to cancel the scheduled callback
  */
 function scheduleCallbackWithRafRace(callback) {
-    let executeCallback = true;
-    setTimeout(() => {
-        if (!executeCallback) {
-            return;
-        }
-        executeCallback = false;
-        callback();
-    });
-    if (typeof _global['requestAnimationFrame'] === 'function') {
-        _global['requestAnimationFrame'](() => {
-            if (!executeCallback) {
-                return;
+    let timeoutId;
+    let animationFrameId;
+    function cleanup() {
+        callback = noop;
+        try {
+            if (animationFrameId !== undefined && typeof cancelAnimationFrame === 'function') {
+                cancelAnimationFrame(animationFrameId);
             }
-            executeCallback = false;
+            if (timeoutId !== undefined) {
+                clearTimeout(timeoutId);
+            }
+        }
+        catch {
+            // Clearing/canceling can fail in tests due to the timing of functions being patched and unpatched
+            // Just ignore the errors - we protect ourselves from this issue by also making the callback a no-op.
+        }
+    }
+    timeoutId = setTimeout(() => {
+        callback();
+        cleanup();
+    });
+    if (typeof requestAnimationFrame === 'function') {
+        animationFrameId = requestAnimationFrame(() => {
             callback();
+            cleanup();
         });
     }
-    return () => {
-        executeCallback = false;
-    };
+    return () => cleanup();
 }
 function scheduleCallbackWithMicrotask(callback) {
-    let executeCallback = true;
-    queueMicrotask(() => {
-        if (executeCallback) {
-            callback();
-        }
-    });
+    queueMicrotask(() => callback());
     return () => {
-        executeCallback = false;
+        callback = noop;
     };
-}
-
-function noop(...args) {
-    // Do nothing.
 }
 
 class AsyncStackTaggingZoneSpec {
@@ -17215,7 +17218,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-next.2+sha-03553c4']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-next.2+sha-b558f99']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19217,8 +19220,9 @@ function createNgModule(ngModule, parentInjector) {
  */
 const createNgModuleRef = createNgModule;
 class NgModuleRef extends NgModuleRef$1 {
-    constructor(ngModuleType, _parent, additionalProviders) {
+    constructor(ngModuleType, _parent, additionalProviders, runInjectorInitializers = true) {
         super();
+        this.ngModuleType = ngModuleType;
         this._parent = _parent;
         // tslint:disable-next-line:require-internal-with-underscore
         this._bootstrapComponents = [];
@@ -19245,8 +19249,13 @@ class NgModuleRef extends NgModuleRef$1 {
         // We need to resolve the injector types separately from the injector creation, because
         // the module might be trying to use this ref in its constructor for DI which will cause a
         // circular error that will eventually error out, because the injector isn't created yet.
+        if (runInjectorInitializers) {
+            this.resolveInjectorInitializers();
+        }
+    }
+    resolveInjectorInitializers() {
         this._r3Injector.resolveInjectorInitializers();
-        this.instance = this._r3Injector.get(ngModuleType);
+        this.instance = this._r3Injector.get(this.ngModuleType);
     }
     get injector() {
         return this._r3Injector;
@@ -19273,7 +19282,7 @@ class NgModuleFactory extends NgModuleFactory$1 {
     }
 }
 function createNgModuleRefWithProviders(moduleType, parentInjector, additionalProviders) {
-    return new NgModuleRef(moduleType, parentInjector, additionalProviders);
+    return new NgModuleRef(moduleType, parentInjector, additionalProviders, false);
 }
 class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
     constructor(config) {
@@ -31011,7 +31020,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.0-next.2+sha-03553c4');
+const VERSION = new Version('18.2.0-next.2+sha-b558f99');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33644,6 +33653,170 @@ var MissingTranslationStrategy;
     MissingTranslationStrategy[MissingTranslationStrategy["Ignore"] = 2] = "Ignore";
 })(MissingTranslationStrategy || (MissingTranslationStrategy = {}));
 
+// A delay in milliseconds before the scan is run after onLoad, to avoid any
+// potential race conditions with other LCP-related functions. This delay
+// happens outside of the main JavaScript execution and will only effect the timing
+// on when the warning becomes visible in the console.
+const SCAN_DELAY = 200;
+const OVERSIZED_IMAGE_TOLERANCE = 1200;
+class ImagePerformanceWarning {
+    constructor() {
+        // Map of full image URLs -> original `ngSrc` values.
+        this.window = null;
+        this.observer = null;
+        this.options = inject(IMAGE_CONFIG);
+    }
+    start() {
+        if (typeof PerformanceObserver === 'undefined' ||
+            (this.options?.disableImageSizeWarning && this.options?.disableImageLazyLoadWarning)) {
+            return;
+        }
+        this.observer = this.initPerformanceObserver();
+        const doc = getDocument();
+        const win = doc.defaultView;
+        if (typeof win !== 'undefined') {
+            this.window = win;
+            // Wait to avoid race conditions where LCP image triggers
+            // load event before it's recorded by the performance observer
+            const waitToScan = () => {
+                setTimeout(this.scanImages.bind(this), SCAN_DELAY);
+            };
+            const setup = () => {
+                // Consider the case when the application is created and destroyed multiple times.
+                // Typically, applications are created instantly once the page is loaded, and the
+                // `window.load` listener is always triggered. However, the `window.load` event will never
+                // be fired if the page is loaded, and the application is created later. Checking for
+                // `readyState` is the easiest way to determine whether the page has been loaded or not.
+                if (doc.readyState === 'complete') {
+                    waitToScan();
+                }
+                else {
+                    this.window?.addEventListener('load', waitToScan, { once: true });
+                }
+            };
+            // Angular doesn't have to run change detection whenever any asynchronous tasks are invoked in
+            // the scope of this functionality.
+            if (typeof Zone !== 'undefined') {
+                Zone.root.run(() => setup());
+            }
+            else {
+                setup();
+            }
+        }
+    }
+    ngOnDestroy() {
+        this.observer?.disconnect();
+    }
+    initPerformanceObserver() {
+        if (typeof PerformanceObserver === 'undefined') {
+            return null;
+        }
+        const observer = new PerformanceObserver((entryList) => {
+            const entries = entryList.getEntries();
+            if (entries.length === 0)
+                return;
+            // We use the latest entry produced by the `PerformanceObserver` as the best
+            // signal on which element is actually an LCP one. As an example, the first image to load on
+            // a page, by virtue of being the only thing on the page so far, is often a LCP candidate
+            // and gets reported by PerformanceObserver, but isn't necessarily the LCP element.
+            const lcpElement = entries[entries.length - 1];
+            // Cast to `any` due to missing `element` on the `LargestContentfulPaint` type of entry.
+            // See https://developer.mozilla.org/en-US/docs/Web/API/LargestContentfulPaint
+            const imgSrc = lcpElement.element?.src ?? '';
+            // Exclude `data:` and `blob:` URLs, since they are fetched resources.
+            if (imgSrc.startsWith('data:') || imgSrc.startsWith('blob:'))
+                return;
+            this.lcpImageUrl = imgSrc;
+        });
+        observer.observe({ type: 'largest-contentful-paint', buffered: true });
+        return observer;
+    }
+    scanImages() {
+        const images = getDocument().querySelectorAll('img');
+        let lcpElementFound, lcpElementLoadedCorrectly = false;
+        images.forEach((image) => {
+            if (!this.options?.disableImageSizeWarning) {
+                for (const image of images) {
+                    // Image elements using the NgOptimizedImage directive are excluded,
+                    // as that directive has its own version of this check.
+                    if (!image.getAttribute('ng-img') && this.isOversized(image)) {
+                        logOversizedImageWarning(image.src);
+                    }
+                }
+            }
+            if (!this.options?.disableImageLazyLoadWarning && this.lcpImageUrl) {
+                if (image.src === this.lcpImageUrl) {
+                    lcpElementFound = true;
+                    if (image.loading !== 'lazy' || image.getAttribute('ng-img')) {
+                        // This variable is set to true and never goes back to false to account
+                        // for the case where multiple images have the same src url, and some
+                        // have lazy loading while others don't.
+                        // Also ignore NgOptimizedImage because there's a different warning for that.
+                        lcpElementLoadedCorrectly = true;
+                    }
+                }
+            }
+        });
+        if (lcpElementFound &&
+            !lcpElementLoadedCorrectly &&
+            this.lcpImageUrl &&
+            !this.options?.disableImageLazyLoadWarning) {
+            logLazyLCPWarning(this.lcpImageUrl);
+        }
+    }
+    isOversized(image) {
+        if (!this.window) {
+            return false;
+        }
+        const computedStyle = this.window.getComputedStyle(image);
+        let renderedWidth = parseFloat(computedStyle.getPropertyValue('width'));
+        let renderedHeight = parseFloat(computedStyle.getPropertyValue('height'));
+        const boxSizing = computedStyle.getPropertyValue('box-sizing');
+        const objectFit = computedStyle.getPropertyValue('object-fit');
+        if (objectFit === `cover`) {
+            // Object fit cover may indicate a use case such as a sprite sheet where
+            // this warning does not apply.
+            return false;
+        }
+        if (boxSizing === 'border-box') {
+            const paddingTop = computedStyle.getPropertyValue('padding-top');
+            const paddingRight = computedStyle.getPropertyValue('padding-right');
+            const paddingBottom = computedStyle.getPropertyValue('padding-bottom');
+            const paddingLeft = computedStyle.getPropertyValue('padding-left');
+            renderedWidth -= parseFloat(paddingRight) + parseFloat(paddingLeft);
+            renderedHeight -= parseFloat(paddingTop) + parseFloat(paddingBottom);
+        }
+        const intrinsicWidth = image.naturalWidth;
+        const intrinsicHeight = image.naturalHeight;
+        const recommendedWidth = this.window.devicePixelRatio * renderedWidth;
+        const recommendedHeight = this.window.devicePixelRatio * renderedHeight;
+        const oversizedWidth = intrinsicWidth - recommendedWidth >= OVERSIZED_IMAGE_TOLERANCE;
+        const oversizedHeight = intrinsicHeight - recommendedHeight >= OVERSIZED_IMAGE_TOLERANCE;
+        return oversizedWidth || oversizedHeight;
+    }
+    static { this.ɵfac = function ImagePerformanceWarning_Factory(ɵt) { return new (ɵt || ImagePerformanceWarning)(); }; }
+    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ImagePerformanceWarning, factory: ImagePerformanceWarning.ɵfac, providedIn: 'root' }); }
+}
+(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ImagePerformanceWarning, [{
+        type: Injectable,
+        args: [{ providedIn: 'root' }]
+    }], null, null); })();
+function logLazyLCPWarning(src) {
+    console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} is the Largest Contentful Paint (LCP) element ` +
+        `but was given a "loading" value of "lazy", which can negatively impact ` +
+        `application loading performance. This warning can be addressed by ` +
+        `changing the loading value of the LCP image to "eager", or by using the ` +
+        `NgOptimizedImage directive's prioritization utilities. For more ` +
+        `information about addressing or disabling this warning, see ` +
+        `https://angular.dev/errors/NG0913`));
+}
+function logOversizedImageWarning(src) {
+    console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} has intrinsic file dimensions much larger than its ` +
+        `rendered size. This can negatively impact application loading performance. ` +
+        `For more information about addressing or disabling this warning, see ` +
+        `https://angular.dev/errors/NG0913`));
+}
+
 /**
  * Internal token that allows to register extra callbacks that should be invoked during the
  * `PlatformRef.destroy` operation. This token is needed to avoid a direct reference to the
@@ -33651,6 +33824,103 @@ var MissingTranslationStrategy;
  * entire class tree-shakeable.
  */
 const PLATFORM_DESTROY_LISTENERS = new InjectionToken(ngDevMode ? 'PlatformDestroyListeners' : '');
+
+function isApplicationBootstrapConfig(config) {
+    return !!config.platformInjector;
+}
+function bootstrap(config) {
+    const envInjector = isApplicationBootstrapConfig(config)
+        ? config.r3Injector
+        : config.moduleRef.injector;
+    const ngZone = envInjector.get(NgZone);
+    return ngZone.run(() => {
+        if (isApplicationBootstrapConfig(config)) {
+            config.r3Injector.resolveInjectorInitializers();
+        }
+        else {
+            config.moduleRef.resolveInjectorInitializers();
+        }
+        const exceptionHandler = envInjector.get(ErrorHandler, null);
+        if (typeof ngDevMode === 'undefined' || ngDevMode) {
+            if (exceptionHandler === null) {
+                const errorMessage = isApplicationBootstrapConfig(config)
+                    ? 'No `ErrorHandler` found in the Dependency Injection tree.'
+                    : 'No ErrorHandler. Is platform module (BrowserModule) included';
+                throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, errorMessage);
+            }
+            if (envInjector.get(PROVIDED_ZONELESS) && envInjector.get(PROVIDED_NG_ZONE)) {
+                throw new RuntimeError(408 /* RuntimeErrorCode.PROVIDED_BOTH_ZONE_AND_ZONELESS */, 'Invalid change detection configuration: ' +
+                    'provideZoneChangeDetection and provideExperimentalZonelessChangeDetection cannot be used together.');
+            }
+        }
+        let onErrorSubscription;
+        ngZone.runOutsideAngular(() => {
+            onErrorSubscription = ngZone.onError.subscribe({
+                next: (error) => {
+                    exceptionHandler.handleError(error);
+                },
+            });
+        });
+        if (isApplicationBootstrapConfig(config)) {
+            // If the whole platform is destroyed, invoke the `destroy` method
+            // for all bootstrapped applications as well.
+            const destroyListener = () => envInjector.destroy();
+            const onPlatformDestroyListeners = config.platformInjector.get(PLATFORM_DESTROY_LISTENERS);
+            onPlatformDestroyListeners.add(destroyListener);
+            envInjector.onDestroy(() => {
+                onErrorSubscription.unsubscribe();
+                onPlatformDestroyListeners.delete(destroyListener);
+            });
+        }
+        else {
+            config.moduleRef.onDestroy(() => {
+                remove(config.allPlatformModules, config.moduleRef);
+                onErrorSubscription.unsubscribe();
+            });
+        }
+        return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
+            const initStatus = envInjector.get(ApplicationInitStatus);
+            initStatus.runInitializers();
+            return initStatus.donePromise.then(() => {
+                // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
+                const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
+                setLocaleId(localeId || DEFAULT_LOCALE_ID);
+                if (typeof ngDevMode === 'undefined' || ngDevMode) {
+                    const imagePerformanceService = envInjector.get(ImagePerformanceWarning);
+                    imagePerformanceService.start();
+                }
+                if (isApplicationBootstrapConfig(config)) {
+                    const appRef = envInjector.get(ApplicationRef);
+                    if (config.rootComponent !== undefined) {
+                        appRef.bootstrap(config.rootComponent);
+                    }
+                    return appRef;
+                }
+                else {
+                    moduleDoBootstrap(config.moduleRef, config.allPlatformModules);
+                    return config.moduleRef;
+                }
+            });
+        });
+    });
+}
+function moduleDoBootstrap(moduleRef, allPlatformModules) {
+    const appRef = moduleRef.injector.get(ApplicationRef);
+    if (moduleRef._bootstrapComponents.length > 0) {
+        moduleRef._bootstrapComponents.forEach((f) => appRef.bootstrap(f));
+    }
+    else if (moduleRef.instance.ngDoBootstrap) {
+        moduleRef.instance.ngDoBootstrap(appRef);
+    }
+    else {
+        throw new RuntimeError(-403 /* RuntimeErrorCode.BOOTSTRAP_COMPONENTS_NOT_FOUND */, ngDevMode &&
+            `The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, ` +
+                `but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
+                `Please define one of these.`);
+    }
+    allPlatformModules.push(moduleRef);
+}
+
 /**
  * The Angular platform is the entry point for Angular on a web page.
  * Each page has exactly one platform. Services (such as reflection) which are common
@@ -33675,63 +33945,20 @@ class PlatformRef {
      *     argument is deprecated. Use the `PlatformRef.bootstrapModule` API instead.
      */
     bootstrapModuleFactory(moduleFactory, options) {
-        // Note: We need to create the NgZone _before_ we instantiate the module,
-        // as instantiating the module creates some providers eagerly.
-        // So we create a mini parent injector that just contains the new NgZone and
-        // pass that as parent to the NgModuleFactory.
-        const ngZone = getNgZone(options?.ngZone, getNgZoneOptions({
+        const ngZoneFactory = () => getNgZone(options?.ngZone, getNgZoneOptions({
             eventCoalescing: options?.ngZoneEventCoalescing,
             runCoalescing: options?.ngZoneRunCoalescing,
         }));
-        // Note: Create ngZoneInjector within ngZone.run so that all of the instantiated services are
-        // created within the Angular zone
-        // Do not try to replace ngZone.run with ApplicationRef#run because ApplicationRef would then be
-        // created outside of the Angular zone.
-        return ngZone.run(() => {
-            const ignoreChangesOutsideZone = options?.ignoreChangesOutsideZone;
-            const moduleRef = createNgModuleRefWithProviders(moduleFactory.moduleType, this.injector, [
-                ...internalProvideZoneChangeDetection({
-                    ngZoneFactory: () => ngZone,
-                    ignoreChangesOutsideZone,
-                }),
-                { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
-            ]);
-            if (typeof ngDevMode === 'undefined' || ngDevMode) {
-                if (moduleRef.injector.get(PROVIDED_NG_ZONE)) {
-                    throw new RuntimeError(207 /* RuntimeErrorCode.PROVIDER_IN_WRONG_CONTEXT */, '`bootstrapModule` does not support `provideZoneChangeDetection`. Use `BootstrapOptions` instead.');
-                }
-                if (moduleRef.injector.get(ZONELESS_ENABLED) && options?.ngZone !== 'noop') {
-                    throw new RuntimeError(408 /* RuntimeErrorCode.PROVIDED_BOTH_ZONE_AND_ZONELESS */, 'Invalid change detection configuration: ' +
-                        "`ngZone: 'noop'` must be set in `BootstrapOptions` with provideExperimentalZonelessChangeDetection.");
-                }
-            }
-            const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
-            if ((typeof ngDevMode === 'undefined' || ngDevMode) && exceptionHandler === null) {
-                throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No ErrorHandler. Is platform module (BrowserModule) included?');
-            }
-            ngZone.runOutsideAngular(() => {
-                const subscription = ngZone.onError.subscribe({
-                    next: (error) => {
-                        exceptionHandler.handleError(error);
-                    },
-                });
-                moduleRef.onDestroy(() => {
-                    remove(this._modules, moduleRef);
-                    subscription.unsubscribe();
-                });
-            });
-            return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
-                const initStatus = moduleRef.injector.get(ApplicationInitStatus);
-                initStatus.runInitializers();
-                return initStatus.donePromise.then(() => {
-                    // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
-                    const localeId = moduleRef.injector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
-                    setLocaleId(localeId || DEFAULT_LOCALE_ID);
-                    this._moduleDoBootstrap(moduleRef);
-                    return moduleRef;
-                });
-            });
-        });
+        const ignoreChangesOutsideZone = options?.ignoreChangesOutsideZone;
+        const allAppProviders = [
+            internalProvideZoneChangeDetection({
+                ngZoneFactory,
+                ignoreChangesOutsideZone,
+            }),
+            { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
+        ];
+        const moduleRef = createNgModuleRefWithProviders(moduleFactory.moduleType, this.injector, allAppProviders);
+        return bootstrap({ moduleRef, allPlatformModules: this._modules });
     }
     /**
      * Creates an instance of an `@NgModule` for a given platform.
@@ -33752,22 +33979,6 @@ class PlatformRef {
     bootstrapModule(moduleType, compilerOptions = []) {
         const options = optionsReducer({}, compilerOptions);
         return compileNgModuleFactory(this.injector, options, moduleType).then((moduleFactory) => this.bootstrapModuleFactory(moduleFactory, options));
-    }
-    _moduleDoBootstrap(moduleRef) {
-        const appRef = moduleRef.injector.get(ApplicationRef);
-        if (moduleRef._bootstrapComponents.length > 0) {
-            moduleRef._bootstrapComponents.forEach((f) => appRef.bootstrap(f));
-        }
-        else if (moduleRef.instance.ngDoBootstrap) {
-            moduleRef.instance.ngDoBootstrap(appRef);
-        }
-        else {
-            throw new RuntimeError(-403 /* RuntimeErrorCode.BOOTSTRAP_COMPONENTS_NOT_FOUND */, ngDevMode &&
-                `The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, ` +
-                    `but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
-                    `Please define one of these.`);
-        }
-        this._modules.push(moduleRef);
     }
     /**
      * Registers a listener to be called when the platform is destroyed.
@@ -36491,165 +36702,6 @@ function setAlternateWeakRefImpl(impl) {
     // TODO: remove this function
 }
 
-// A delay in milliseconds before the scan is run after onLoad, to avoid any
-// potential race conditions with other LCP-related functions. This delay
-// happens outside of the main JavaScript execution and will only effect the timing
-// on when the warning becomes visible in the console.
-const SCAN_DELAY = 200;
-const OVERSIZED_IMAGE_TOLERANCE = 1200;
-class ImagePerformanceWarning {
-    constructor() {
-        // Map of full image URLs -> original `ngSrc` values.
-        this.window = null;
-        this.observer = null;
-        this.options = inject(IMAGE_CONFIG);
-        this.ngZone = inject(NgZone);
-    }
-    start() {
-        if (typeof PerformanceObserver === 'undefined' ||
-            (this.options?.disableImageSizeWarning && this.options?.disableImageLazyLoadWarning)) {
-            return;
-        }
-        this.observer = this.initPerformanceObserver();
-        const doc = getDocument();
-        const win = doc.defaultView;
-        if (typeof win !== 'undefined') {
-            this.window = win;
-            // Wait to avoid race conditions where LCP image triggers
-            // load event before it's recorded by the performance observer
-            const waitToScan = () => {
-                setTimeout(this.scanImages.bind(this), SCAN_DELAY);
-            };
-            // Angular doesn't have to run change detection whenever any asynchronous tasks are invoked in
-            // the scope of this functionality.
-            this.ngZone.runOutsideAngular(() => {
-                // Consider the case when the application is created and destroyed multiple times.
-                // Typically, applications are created instantly once the page is loaded, and the
-                // `window.load` listener is always triggered. However, the `window.load` event will never
-                // be fired if the page is loaded, and the application is created later. Checking for
-                // `readyState` is the easiest way to determine whether the page has been loaded or not.
-                if (doc.readyState === 'complete') {
-                    waitToScan();
-                }
-                else {
-                    this.window?.addEventListener('load', waitToScan, { once: true });
-                }
-            });
-        }
-    }
-    ngOnDestroy() {
-        this.observer?.disconnect();
-    }
-    initPerformanceObserver() {
-        if (typeof PerformanceObserver === 'undefined') {
-            return null;
-        }
-        const observer = new PerformanceObserver((entryList) => {
-            const entries = entryList.getEntries();
-            if (entries.length === 0)
-                return;
-            // We use the latest entry produced by the `PerformanceObserver` as the best
-            // signal on which element is actually an LCP one. As an example, the first image to load on
-            // a page, by virtue of being the only thing on the page so far, is often a LCP candidate
-            // and gets reported by PerformanceObserver, but isn't necessarily the LCP element.
-            const lcpElement = entries[entries.length - 1];
-            // Cast to `any` due to missing `element` on the `LargestContentfulPaint` type of entry.
-            // See https://developer.mozilla.org/en-US/docs/Web/API/LargestContentfulPaint
-            const imgSrc = lcpElement.element?.src ?? '';
-            // Exclude `data:` and `blob:` URLs, since they are fetched resources.
-            if (imgSrc.startsWith('data:') || imgSrc.startsWith('blob:'))
-                return;
-            this.lcpImageUrl = imgSrc;
-        });
-        observer.observe({ type: 'largest-contentful-paint', buffered: true });
-        return observer;
-    }
-    scanImages() {
-        const images = getDocument().querySelectorAll('img');
-        let lcpElementFound, lcpElementLoadedCorrectly = false;
-        images.forEach((image) => {
-            if (!this.options?.disableImageSizeWarning) {
-                for (const image of images) {
-                    // Image elements using the NgOptimizedImage directive are excluded,
-                    // as that directive has its own version of this check.
-                    if (!image.getAttribute('ng-img') && this.isOversized(image)) {
-                        logOversizedImageWarning(image.src);
-                    }
-                }
-            }
-            if (!this.options?.disableImageLazyLoadWarning && this.lcpImageUrl) {
-                if (image.src === this.lcpImageUrl) {
-                    lcpElementFound = true;
-                    if (image.loading !== 'lazy' || image.getAttribute('ng-img')) {
-                        // This variable is set to true and never goes back to false to account
-                        // for the case where multiple images have the same src url, and some
-                        // have lazy loading while others don't.
-                        // Also ignore NgOptimizedImage because there's a different warning for that.
-                        lcpElementLoadedCorrectly = true;
-                    }
-                }
-            }
-        });
-        if (lcpElementFound &&
-            !lcpElementLoadedCorrectly &&
-            this.lcpImageUrl &&
-            !this.options?.disableImageLazyLoadWarning) {
-            logLazyLCPWarning(this.lcpImageUrl);
-        }
-    }
-    isOversized(image) {
-        if (!this.window) {
-            return false;
-        }
-        const computedStyle = this.window.getComputedStyle(image);
-        let renderedWidth = parseFloat(computedStyle.getPropertyValue('width'));
-        let renderedHeight = parseFloat(computedStyle.getPropertyValue('height'));
-        const boxSizing = computedStyle.getPropertyValue('box-sizing');
-        const objectFit = computedStyle.getPropertyValue('object-fit');
-        if (objectFit === `cover`) {
-            // Object fit cover may indicate a use case such as a sprite sheet where
-            // this warning does not apply.
-            return false;
-        }
-        if (boxSizing === 'border-box') {
-            const paddingTop = computedStyle.getPropertyValue('padding-top');
-            const paddingRight = computedStyle.getPropertyValue('padding-right');
-            const paddingBottom = computedStyle.getPropertyValue('padding-bottom');
-            const paddingLeft = computedStyle.getPropertyValue('padding-left');
-            renderedWidth -= parseFloat(paddingRight) + parseFloat(paddingLeft);
-            renderedHeight -= parseFloat(paddingTop) + parseFloat(paddingBottom);
-        }
-        const intrinsicWidth = image.naturalWidth;
-        const intrinsicHeight = image.naturalHeight;
-        const recommendedWidth = this.window.devicePixelRatio * renderedWidth;
-        const recommendedHeight = this.window.devicePixelRatio * renderedHeight;
-        const oversizedWidth = intrinsicWidth - recommendedWidth >= OVERSIZED_IMAGE_TOLERANCE;
-        const oversizedHeight = intrinsicHeight - recommendedHeight >= OVERSIZED_IMAGE_TOLERANCE;
-        return oversizedWidth || oversizedHeight;
-    }
-    static { this.ɵfac = function ImagePerformanceWarning_Factory(ɵt) { return new (ɵt || ImagePerformanceWarning)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ImagePerformanceWarning, factory: ImagePerformanceWarning.ɵfac, providedIn: 'root' }); }
-}
-(() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ImagePerformanceWarning, [{
-        type: Injectable,
-        args: [{ providedIn: 'root' }]
-    }], null, null); })();
-function logLazyLCPWarning(src) {
-    console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} is the Largest Contentful Paint (LCP) element ` +
-        `but was given a "loading" value of "lazy", which can negatively impact ` +
-        `application loading performance. This warning can be addressed by ` +
-        `changing the loading value of the LCP image to "eager", or by using the ` +
-        `NgOptimizedImage directive's prioritization utilities. For more ` +
-        `information about addressing or disabling this warning, see ` +
-        `https://angular.dev/errors/NG0913`));
-}
-function logOversizedImageWarning(src) {
-    console.warn(formatRuntimeError(-913 /* RuntimeErrorCode.IMAGE_PERFORMANCE_WARNING */, `An image with src ${src} has intrinsic file dimensions much larger than its ` +
-        `rendered size. This can negatively impact application loading performance. ` +
-        `For more information about addressing or disabling this warning, see ` +
-        `https://angular.dev/errors/NG0913`));
-}
-
 /**
  * Internal create application API that implements the core application creation logic and optional
  * bootstrap logic.
@@ -36683,54 +36735,10 @@ function internalCreateApplication(config) {
             // happens after we get the NgZone instance from the Injector.
             runEnvironmentInitializers: false,
         });
-        const envInjector = adapter.injector;
-        const ngZone = envInjector.get(NgZone);
-        return ngZone.run(() => {
-            envInjector.resolveInjectorInitializers();
-            const exceptionHandler = envInjector.get(ErrorHandler, null);
-            if (typeof ngDevMode === 'undefined' || ngDevMode) {
-                if (!exceptionHandler) {
-                    throw new RuntimeError(402 /* RuntimeErrorCode.MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP */, 'No `ErrorHandler` found in the Dependency Injection tree.');
-                }
-                if (envInjector.get(PROVIDED_ZONELESS) && envInjector.get(PROVIDED_NG_ZONE)) {
-                    throw new RuntimeError(408 /* RuntimeErrorCode.PROVIDED_BOTH_ZONE_AND_ZONELESS */, 'Invalid change detection configuration: ' +
-                        'provideZoneChangeDetection and provideExperimentalZonelessChangeDetection cannot be used together.');
-                }
-            }
-            let onErrorSubscription;
-            ngZone.runOutsideAngular(() => {
-                onErrorSubscription = ngZone.onError.subscribe({
-                    next: (error) => {
-                        exceptionHandler.handleError(error);
-                    },
-                });
-            });
-            // If the whole platform is destroyed, invoke the `destroy` method
-            // for all bootstrapped applications as well.
-            const destroyListener = () => envInjector.destroy();
-            const onPlatformDestroyListeners = platformInjector.get(PLATFORM_DESTROY_LISTENERS);
-            onPlatformDestroyListeners.add(destroyListener);
-            envInjector.onDestroy(() => {
-                onErrorSubscription.unsubscribe();
-                onPlatformDestroyListeners.delete(destroyListener);
-            });
-            return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
-                const initStatus = envInjector.get(ApplicationInitStatus);
-                initStatus.runInitializers();
-                return initStatus.donePromise.then(() => {
-                    const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
-                    setLocaleId(localeId || DEFAULT_LOCALE_ID);
-                    const appRef = envInjector.get(ApplicationRef);
-                    if (rootComponent !== undefined) {
-                        appRef.bootstrap(rootComponent);
-                    }
-                    if (typeof ngDevMode === 'undefined' || ngDevMode) {
-                        const imagePerformanceService = envInjector.get(ImagePerformanceWarning);
-                        imagePerformanceService.start();
-                    }
-                    return appRef;
-                });
-            });
+        return bootstrap({
+            r3Injector: adapter.injector,
+            platformInjector,
+            rootComponent,
         });
     }
     catch (e) {

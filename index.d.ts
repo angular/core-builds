@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.2+sha-03553c4
+ * @license Angular v18.2.0-next.2+sha-b558f99
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1097,7 +1097,7 @@ export declare function booleanAttribute(value: unknown): boolean;
  */
 export declare interface BootstrapOptions {
     /**
-     * Optionally specify which `NgZone` should be used.
+     * Optionally specify which `NgZone` should be used when not configured in the providers.
      *
      * - Provide your own `NgZone` instance.
      * - `zone.js` - Use default `NgZone` which requires `Zone.js`.
@@ -6200,6 +6200,7 @@ declare const enum InternalInjectFlags {
 
 declare interface InternalNgModuleRef<T> extends NgModuleRef<T> {
     _bootstrapComponents: Type<any>[];
+    resolveInjectorInitializers(): void;
 }
 
 
@@ -8302,7 +8303,6 @@ export declare class PlatformRef {
      *
      */
     bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: (CompilerOptions & BootstrapOptions) | Array<CompilerOptions & BootstrapOptions>): Promise<NgModuleRef<M>>;
-    private _moduleDoBootstrap;
     /**
      * Registers a listener to be called when the platform is destroyed.
      */
@@ -8818,49 +8818,6 @@ declare interface R3HostDirectiveMetadataFacade {
     directive: Type_2;
     inputs?: string[];
     outputs?: string[];
-}
-
-declare class R3Injector extends EnvironmentInjector {
-    readonly parent: Injector;
-    readonly source: string | null;
-    readonly scopes: Set<InjectorScope>;
-    /**
-     * Map of tokens to records which contain the instances of those tokens.
-     * - `null` value implies that we don't have the record. Used by tree-shakable injectors
-     * to prevent further searches.
-     */
-    private records;
-    /**
-     * Set of values instantiated by this injector which contain `ngOnDestroy` lifecycle hooks.
-     */
-    private _ngOnDestroyHooks;
-    private _onDestroyHooks;
-    /**
-     * Flag indicating that this injector was previously destroyed.
-     */
-    get destroyed(): boolean;
-    private _destroyed;
-    private injectorDefTypes;
-    constructor(providers: Array<Provider | EnvironmentProviders>, parent: Injector, source: string | null, scopes: Set<InjectorScope>);
-    /**
-     * Destroy the injector and release references to every instance or provider associated with it.
-     *
-     * Also calls the `OnDestroy` lifecycle hooks of every instance that was created for which a
-     * hook was found.
-     */
-    destroy(): void;
-    onDestroy(callback: () => void): () => void;
-    runInContext<ReturnT>(fn: () => ReturnT): ReturnT;
-    get<T>(token: ProviderToken<T>, notFoundValue?: any, flags?: InjectFlags | InjectOptions): T;
-    toString(): string;
-    assertNotDestroyed(): void;
-    /**
-     * Process a `SingleProvider` and add it.
-     */
-    private processProvider;
-    private hydrate;
-    private injectableDefInScope;
-    private removeOnDestroy;
 }
 
 /**
@@ -13660,13 +13617,15 @@ export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
 }
 
 export declare class ɵRender3NgModuleRef<T> extends NgModuleRef<T> implements InternalNgModuleRef<T> {
+    private readonly ngModuleType;
     _parent: Injector | null;
     _bootstrapComponents: Type<any>[];
-    _r3Injector: R3Injector;
+    private readonly _r3Injector;
     instance: T;
     destroyCbs: (() => void)[] | null;
     readonly componentFactoryResolver: ComponentFactoryResolver_2;
-    constructor(ngModuleType: Type<T>, _parent: Injector | null, additionalProviders: StaticProvider[]);
+    constructor(ngModuleType: Type<T>, _parent: Injector | null, additionalProviders: StaticProvider[], runInjectorInitializers?: boolean);
+    resolveInjectorInitializers(): void;
     get injector(): EnvironmentInjector;
     destroy(): void;
     onDestroy(callback: () => void): void;
