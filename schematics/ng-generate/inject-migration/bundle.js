@@ -23194,7 +23194,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.2+sha-e11c0c4");
+var VERSION2 = new Version("18.2.0-next.2+sha-d26a91f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24674,6 +24674,7 @@ for (let i = 0; i < chars.length; i++) {
   intToChar[i] = c;
   charToInt[c] = i;
 }
+var bufLength = 1024 * 16;
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/context.mjs
 var import_typescript83 = __toESM(require("typescript"), 1);

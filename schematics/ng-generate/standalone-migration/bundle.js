@@ -866,6 +866,7 @@ var require_lrucache = __commonJS({
 // node_modules/semver/classes/range.js
 var require_range = __commonJS({
   "node_modules/semver/classes/range.js"(exports, module2) {
+    var SPACE_CHARACTERS = /\s+/g;
     var Range = class {
       constructor(range, options) {
         options = parseOptions(options);
@@ -879,13 +880,13 @@ var require_range = __commonJS({
         if (range instanceof Comparator) {
           this.raw = range.value;
           this.set = [[range]];
-          this.format();
+          this.formatted = void 0;
           return this;
         }
         this.options = options;
         this.loose = !!options.loose;
         this.includePrerelease = !!options.includePrerelease;
-        this.raw = range.trim().split(/\s+/).join(" ");
+        this.raw = range.trim().replace(SPACE_CHARACTERS, " ");
         this.set = this.raw.split("||").map((r) => this.parseRange(r.trim())).filter((c) => c.length);
         if (!this.set.length) {
           throw new TypeError(`Invalid SemVer Range: ${this.raw}`);
@@ -904,10 +905,27 @@ var require_range = __commonJS({
             }
           }
         }
-        this.format();
+        this.formatted = void 0;
+      }
+      get range() {
+        if (this.formatted === void 0) {
+          this.formatted = "";
+          for (let i = 0; i < this.set.length; i++) {
+            if (i > 0) {
+              this.formatted += "||";
+            }
+            const comps = this.set[i];
+            for (let k = 0; k < comps.length; k++) {
+              if (k > 0) {
+                this.formatted += " ";
+              }
+              this.formatted += comps[k].toString().trim();
+            }
+          }
+        }
+        return this.formatted;
       }
       format() {
-        this.range = this.set.map((comps) => comps.join(" ").trim()).join("||").trim();
         return this.range;
       }
       toString() {
@@ -26084,7 +26102,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.2+sha-e11c0c4");
+var VERSION2 = new Version("18.2.0-next.2+sha-d26a91f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27188,7 +27206,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-e11c0c4"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-d26a91f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27207,7 +27225,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-e11c0c4"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-d26a91f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27275,7 +27293,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-e11c0c4"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-d26a91f"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27593,7 +27611,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-e11c0c4"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-d26a91f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27616,7 +27634,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-e11c0c4"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-d26a91f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27654,7 +27672,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-e11c0c4"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-d26a91f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27678,7 +27696,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-e11c0c4"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-d26a91f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27713,7 +27731,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.2.0-next.2+sha-e11c0c4"));
+  definitionMap.set("version", literal("18.2.0-next.2+sha-d26a91f"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27730,7 +27748,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.2.0-next.2+sha-e11c0c4");
+var VERSION3 = new Version("18.2.0-next.2+sha-d26a91f");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -38940,6 +38958,19 @@ for (let i = 0; i < chars.length; i++) {
   intToChar[i] = c;
   charToInt[c] = i;
 }
+function encodeInteger(builder, num, relative8) {
+  let delta = num - relative8;
+  delta = delta < 0 ? -delta << 1 | 1 : delta << 1;
+  do {
+    let clamped = delta & 31;
+    delta >>>= 5;
+    if (delta > 0)
+      clamped |= 32;
+    builder.write(intToChar[clamped]);
+  } while (delta > 0);
+  return num;
+}
+var bufLength = 1024 * 16;
 var td = typeof TextDecoder !== "undefined" ? /* @__PURE__ */ new TextDecoder() : typeof Buffer !== "undefined" ? {
   decode(buf) {
     const out = Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength);
@@ -38954,61 +38985,54 @@ var td = typeof TextDecoder !== "undefined" ? /* @__PURE__ */ new TextDecoder() 
     return out;
   }
 };
-function encode(decoded) {
-  const state = new Int32Array(5);
-  const bufLength = 1024 * 16;
-  const subLength = bufLength - 36;
-  const buf = new Uint8Array(bufLength);
-  const sub = buf.subarray(0, subLength);
-  let pos = 0;
-  let out = "";
-  for (let i = 0; i < decoded.length; i++) {
-    const line = decoded[i];
-    if (i > 0) {
-      if (pos === bufLength) {
-        out += td.decode(buf);
-        pos = 0;
-      }
-      buf[pos++] = semicolon;
-    }
-    if (line.length === 0)
-      continue;
-    state[0] = 0;
-    for (let j = 0; j < line.length; j++) {
-      const segment = line[j];
-      if (pos > subLength) {
-        out += td.decode(sub);
-        buf.copyWithin(0, subLength, pos);
-        pos -= subLength;
-      }
-      if (j > 0)
-        buf[pos++] = comma;
-      pos = encodeInteger(buf, pos, state, segment, 0);
-      if (segment.length === 1)
-        continue;
-      pos = encodeInteger(buf, pos, state, segment, 1);
-      pos = encodeInteger(buf, pos, state, segment, 2);
-      pos = encodeInteger(buf, pos, state, segment, 3);
-      if (segment.length === 4)
-        continue;
-      pos = encodeInteger(buf, pos, state, segment, 4);
+var StringWriter = class {
+  constructor() {
+    this.pos = 0;
+    this.out = "";
+    this.buffer = new Uint8Array(bufLength);
+  }
+  write(v) {
+    const { buffer } = this;
+    buffer[this.pos++] = v;
+    if (this.pos === bufLength) {
+      this.out += td.decode(buffer);
+      this.pos = 0;
     }
   }
-  return out + td.decode(buf.subarray(0, pos));
-}
-function encodeInteger(buf, pos, state, segment, j) {
-  const next = segment[j];
-  let num = next - state[j];
-  state[j] = next;
-  num = num < 0 ? -num << 1 | 1 : num << 1;
-  do {
-    let clamped = num & 31;
-    num >>>= 5;
-    if (num > 0)
-      clamped |= 32;
-    buf[pos++] = intToChar[clamped];
-  } while (num > 0);
-  return pos;
+  flush() {
+    const { buffer, out, pos } = this;
+    return pos > 0 ? out + td.decode(buffer.subarray(0, pos)) : out;
+  }
+};
+function encode(decoded) {
+  const writer = new StringWriter();
+  let sourcesIndex = 0;
+  let sourceLine = 0;
+  let sourceColumn = 0;
+  let namesIndex = 0;
+  for (let i = 0; i < decoded.length; i++) {
+    const line = decoded[i];
+    if (i > 0)
+      writer.write(semicolon);
+    if (line.length === 0)
+      continue;
+    let genColumn = 0;
+    for (let j = 0; j < line.length; j++) {
+      const segment = line[j];
+      if (j > 0)
+        writer.write(comma);
+      genColumn = encodeInteger(writer, segment[0], genColumn);
+      if (segment.length === 1)
+        continue;
+      sourcesIndex = encodeInteger(writer, segment[1], sourcesIndex);
+      sourceLine = encodeInteger(writer, segment[2], sourceLine);
+      sourceColumn = encodeInteger(writer, segment[3], sourceColumn);
+      if (segment.length === 4)
+        continue;
+      namesIndex = encodeInteger(writer, segment[4], namesIndex);
+    }
+  }
+  return writer.flush();
 }
 
 // node_modules/magic-string/dist/magic-string.es.mjs
@@ -39614,10 +39638,12 @@ var MagicString = class {
   update(start, end, content, options) {
     if (typeof content !== "string")
       throw new TypeError("replacement content must be a string");
-    while (start < 0)
-      start += this.original.length;
-    while (end < 0)
-      end += this.original.length;
+    if (this.original.length !== 0) {
+      while (start < 0)
+        start += this.original.length;
+      while (end < 0)
+        end += this.original.length;
+    }
     if (end > this.original.length)
       throw new Error("end is out of bounds");
     if (start === end)
@@ -39695,10 +39721,12 @@ var MagicString = class {
     return this;
   }
   remove(start, end) {
-    while (start < 0)
-      start += this.original.length;
-    while (end < 0)
-      end += this.original.length;
+    if (this.original.length !== 0) {
+      while (start < 0)
+        start += this.original.length;
+      while (end < 0)
+        end += this.original.length;
+    }
     if (start === end)
       return this;
     if (start < 0 || end > this.original.length)
@@ -39717,10 +39745,12 @@ var MagicString = class {
     return this;
   }
   reset(start, end) {
-    while (start < 0)
-      start += this.original.length;
-    while (end < 0)
-      end += this.original.length;
+    if (this.original.length !== 0) {
+      while (start < 0)
+        start += this.original.length;
+      while (end < 0)
+        end += this.original.length;
+    }
     if (start === end)
       return this;
     if (start < 0 || end > this.original.length)
@@ -39784,10 +39814,12 @@ var MagicString = class {
     return this.intro + lineStr;
   }
   slice(start = 0, end = this.original.length) {
-    while (start < 0)
-      start += this.original.length;
-    while (end < 0)
-      end += this.original.length;
+    if (this.original.length !== 0) {
+      while (start < 0)
+        start += this.original.length;
+      while (end < 0)
+        end += this.original.length;
+    }
     let result = "";
     let chunk = this.firstChunk;
     while (chunk && (chunk.start > start || chunk.end <= start)) {
