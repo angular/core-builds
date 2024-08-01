@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.3+sha-e8794dd
+ * @license Angular v18.1.3+sha-ad29621
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17218,7 +17218,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.3+sha-e8794dd']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.3+sha-ad29621']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31014,7 +31014,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.3+sha-e8794dd');
+const VERSION = new Version('18.1.3+sha-ad29621');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -31046,7 +31046,7 @@ class Console {
         // tslint:disable-next-line:no-console
         console.warn(message);
     }
-    static { this.ɵfac = function Console_Factory(ɵt) { return new (ɵt || Console)(); }; }
+    static { this.ɵfac = function Console_Factory(t) { return new (t || Console)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac, providedIn: 'platform' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Console, [{
@@ -32110,7 +32110,7 @@ class Testability {
         // TODO(juliemr): implement.
         return [];
     }
-    static { this.ɵfac = function Testability_Factory(ɵt) { return new (ɵt || Testability)(ɵɵinject(NgZone), ɵɵinject(TestabilityRegistry), ɵɵinject(TESTABILITY_GETTER)); }; }
+    static { this.ɵfac = function Testability_Factory(t) { return new (t || Testability)(ɵɵinject(NgZone), ɵɵinject(TestabilityRegistry), ɵɵinject(TESTABILITY_GETTER)); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Testability, [{
@@ -32177,7 +32177,7 @@ class TestabilityRegistry {
     findTestabilityInTree(elem, findInAncestors = true) {
         return _testabilityGetter?.findTestabilityInTree(this, elem, findInAncestors) ?? null;
     }
-    static { this.ɵfac = function TestabilityRegistry_Factory(ɵt) { return new (ɵt || TestabilityRegistry)(); }; }
+    static { this.ɵfac = function TestabilityRegistry_Factory(t) { return new (t || TestabilityRegistry)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac, providedIn: 'platform' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(TestabilityRegistry, [{
@@ -32384,7 +32384,7 @@ class ApplicationInitStatus {
         }
         this.initialized = true;
     }
-    static { this.ɵfac = function ApplicationInitStatus_Factory(ɵt) { return new (ɵt || ApplicationInitStatus)(); }; }
+    static { this.ɵfac = function ApplicationInitStatus_Factory(t) { return new (t || ApplicationInitStatus)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac, providedIn: 'root' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
@@ -32854,7 +32854,7 @@ class ApplicationRef {
             console.warn(formatRuntimeError(406 /* RuntimeErrorCode.APPLICATION_REF_ALREADY_DESTROYED */, 'This instance of the `ApplicationRef` has already been destroyed.'));
         }
     }
-    static { this.ɵfac = function ApplicationRef_Factory(ɵt) { return new (ɵt || ApplicationRef)(); }; }
+    static { this.ɵfac = function ApplicationRef_Factory(t) { return new (t || ApplicationRef)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
@@ -32975,7 +32975,7 @@ class Compiler {
     getModuleId(moduleType) {
         return undefined;
     }
-    static { this.ɵfac = function Compiler_Factory(ɵt) { return new (ɵt || Compiler)(); }; }
+    static { this.ɵfac = function Compiler_Factory(t) { return new (t || Compiler)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: 'root' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Compiler, [{
@@ -33072,7 +33072,7 @@ class NgZoneChangeDetectionScheduler {
     ngOnDestroy() {
         this._onMicrotaskEmptySubscription?.unsubscribe();
     }
-    static { this.ɵfac = function NgZoneChangeDetectionScheduler_Factory(ɵt) { return new (ɵt || NgZoneChangeDetectionScheduler)(); }; }
+    static { this.ɵfac = function NgZoneChangeDetectionScheduler_Factory(t) { return new (t || NgZoneChangeDetectionScheduler)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: NgZoneChangeDetectionScheduler, factory: NgZoneChangeDetectionScheduler.ɵfac, providedIn: 'root' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(NgZoneChangeDetectionScheduler, [{
@@ -33205,7 +33205,7 @@ class ZoneStablePendingTask {
     ngOnDestroy() {
         this.subscription.unsubscribe();
     }
-    static { this.ɵfac = function ZoneStablePendingTask_Factory(ɵt) { return new (ɵt || ZoneStablePendingTask)(); }; }
+    static { this.ɵfac = function ZoneStablePendingTask_Factory(t) { return new (t || ZoneStablePendingTask)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ZoneStablePendingTask, factory: ZoneStablePendingTask.ɵfac, providedIn: 'root' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ZoneStablePendingTask, [{
@@ -33409,7 +33409,7 @@ class ChangeDetectionSchedulerImpl {
             this.taskService.remove(taskId);
         }
     }
-    static { this.ɵfac = function ChangeDetectionSchedulerImpl_Factory(ɵt) { return new (ɵt || ChangeDetectionSchedulerImpl)(); }; }
+    static { this.ɵfac = function ChangeDetectionSchedulerImpl_Factory(t) { return new (t || ChangeDetectionSchedulerImpl)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ChangeDetectionSchedulerImpl, factory: ChangeDetectionSchedulerImpl.ɵfac, providedIn: 'root' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ChangeDetectionSchedulerImpl, [{
@@ -33808,7 +33808,7 @@ class PlatformRef {
     get destroyed() {
         return this._destroyed;
     }
-    static { this.ɵfac = function PlatformRef_Factory(ɵt) { return new (ɵt || PlatformRef)(ɵɵinject(Injector)); }; }
+    static { this.ɵfac = function PlatformRef_Factory(t) { return new (t || PlatformRef)(ɵɵinject(Injector)); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: 'platform' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PlatformRef, [{
@@ -35930,7 +35930,7 @@ const platformCore = createPlatformFactory(null, 'core', []);
 class ApplicationModule {
     // Inject ApplicationRef to make it eager...
     constructor(appRef) { }
-    static { this.ɵfac = function ApplicationModule_Factory(ɵt) { return new (ɵt || ApplicationModule)(ɵɵinject(ApplicationRef)); }; }
+    static { this.ɵfac = function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }; }
     static { this.ɵmod = /*@__PURE__*/ ɵɵdefineNgModule({ type: ApplicationModule }); }
     static { this.ɵinj = /*@__PURE__*/ ɵɵdefineInjector({}); }
 }
@@ -36630,7 +36630,7 @@ class ImagePerformanceWarning {
         const oversizedHeight = intrinsicHeight - recommendedHeight >= OVERSIZED_IMAGE_TOLERANCE;
         return oversizedWidth || oversizedHeight;
     }
-    static { this.ɵfac = function ImagePerformanceWarning_Factory(ɵt) { return new (ɵt || ImagePerformanceWarning)(); }; }
+    static { this.ɵfac = function ImagePerformanceWarning_Factory(t) { return new (t || ImagePerformanceWarning)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ImagePerformanceWarning, factory: ImagePerformanceWarning.ɵfac, providedIn: 'root' }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ImagePerformanceWarning, [{
@@ -36836,7 +36836,7 @@ class GlobalEventDelegation {
     removeEventListener(element, eventType, callback) {
         getActionCache(element)[eventType] = undefined;
     }
-    static { this.ɵfac = function GlobalEventDelegation_Factory(ɵt) { return new (ɵt || GlobalEventDelegation)(); }; }
+    static { this.ɵfac = function GlobalEventDelegation_Factory(t) { return new (t || GlobalEventDelegation)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: GlobalEventDelegation, factory: GlobalEventDelegation.ɵfac }); }
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(GlobalEventDelegation, [{
