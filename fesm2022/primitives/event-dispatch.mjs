@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.3+sha-d73a374
+ * @license Angular v18.2.0-next.3+sha-2a915d1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1337,12 +1337,14 @@ const REGEXP_SEMICOLON = /\s*;\s*/;
 const DEFAULT_EVENT_TYPE = EventType.CLICK;
 /** Resolves actions for Events. */
 class ActionResolver {
-    constructor({ syntheticMouseEventSupport = false, } = {}) {
+    constructor({ syntheticMouseEventSupport = false, clickModSupport = true, } = {}) {
         this.a11yClickSupport = false;
+        this.clickModSupport = true;
         this.updateEventInfoForA11yClick = undefined;
         this.preventDefaultForA11yClick = undefined;
         this.populateClickOnlyAction = undefined;
         this.syntheticMouseEventSupport = syntheticMouseEventSupport;
+        this.clickModSupport = clickModSupport;
     }
     resolveEventType(eventInfo) {
         // We distinguish modified and plain clicks in order to support the
@@ -1378,7 +1380,8 @@ class ActionResolver {
         // addEvent() is necessary for CLICK, KEYDOWN, and KEYPRESS event types.  If
         // a11y click support is enabled, addEvent() will set up the appropriate key
         // event handler automatically.
-        if (getEventType(eventInfo) === EventType.CLICK &&
+        if (this.clickModSupport &&
+            getEventType(eventInfo) === EventType.CLICK &&
             isModifiedClickEvent(getEvent(eventInfo))) {
             setEventType(eventInfo, EventType.CLICKMOD);
         }
@@ -1685,9 +1688,10 @@ const COMPOSED_PATH_ERROR_MESSAGE = `\`composedPath\` called during event replay
  * `currentTarget`, etc.
  */
 class EventDispatcher {
-    constructor(dispatchDelegate) {
+    constructor(dispatchDelegate, clickModSupport = true) {
         this.dispatchDelegate = dispatchDelegate;
-        this.actionResolver = new ActionResolver();
+        this.clickModSupport = clickModSupport;
+        this.actionResolver = new ActionResolver({ clickModSupport });
         this.dispatcher = new Dispatcher((eventInfoWrapper) => {
             this.dispatchToDelegate(eventInfoWrapper);
         }, {

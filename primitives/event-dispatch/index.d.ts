@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.3+sha-d73a374
+ * @license Angular v18.2.0-next.3+sha-2a915d1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -246,9 +246,10 @@ declare interface EventContractContainerManager {
  */
 export declare class EventDispatcher {
     private readonly dispatchDelegate;
+    private readonly clickModSupport;
     private readonly actionResolver;
     private readonly dispatcher;
-    constructor(dispatchDelegate: (event: Event, actionName: string) => void);
+    constructor(dispatchDelegate: (event: Event, actionName: string) => void, clickModSupport?: boolean);
     /**
      * The entrypoint for the `EventContract` dispatch.
      */
