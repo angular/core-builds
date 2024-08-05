@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.4+sha-4d0842d
+ * @license Angular v18.2.0-next.4+sha-f7918f5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -176,10 +176,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-4d0842d", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
-    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-4d0842d", ngImport: i0, type: TestBedApplicationErrorHandler }); }
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-f7918f5", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
+    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-f7918f5", ngImport: i0, type: TestBedApplicationErrorHandler }); }
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-4d0842d", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-f7918f5", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
@@ -449,11 +449,12 @@ function resetFakeAsyncZoneIfExists() {
  * - Microtasks are manually executed by calling `flushMicrotasks()`.
  * - Timers are synchronous; `tick()` simulates the asynchronous passage of time.
  *
- * If there are any pending timers at the end of the function, an exception is thrown.
- *
  * Can be used to wrap `inject()` calls.
  *
  * @param fn The function that you want to wrap in the `fakeAsync` zone.
+ * @param options
+ *   - flush: When true, will drain the macrotask queue after the test function completes.
+ *     When false, will throw an exception at the end of the function if there are pending timers.
  *
  * @usageNotes
  * ### Example
@@ -467,9 +468,9 @@ function resetFakeAsyncZoneIfExists() {
  *
  * @publicApi
  */
-function fakeAsync(fn) {
+function fakeAsync(fn, options) {
     if (fakeAsyncTestModule) {
-        return fakeAsyncTestModule.fakeAsync(fn);
+        return fakeAsyncTestModule.fakeAsync(fn, options);
     }
     throw new Error(fakeAsyncTestModuleNotLoadedErrorMessage);
 }

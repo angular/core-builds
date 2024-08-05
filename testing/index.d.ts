@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.4+sha-4d0842d
+ * @license Angular v18.2.0-next.4+sha-f7918f5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -158,11 +158,12 @@ export declare function discardPeriodicTasks(): void;
  * - Microtasks are manually executed by calling `flushMicrotasks()`.
  * - Timers are synchronous; `tick()` simulates the asynchronous passage of time.
  *
- * If there are any pending timers at the end of the function, an exception is thrown.
- *
  * Can be used to wrap `inject()` calls.
  *
  * @param fn The function that you want to wrap in the `fakeAsync` zone.
+ * @param options
+ *   - flush: When true, will drain the macrotask queue after the test function completes.
+ *     When false, will throw an exception at the end of the function if there are pending timers.
  *
  * @usageNotes
  * ### Example
@@ -176,7 +177,9 @@ export declare function discardPeriodicTasks(): void;
  *
  * @publicApi
  */
-export declare function fakeAsync(fn: Function): (...args: any[]) => any;
+export declare function fakeAsync(fn: Function, options?: {
+    flush?: boolean;
+}): (...args: any[]) => any;
 
 /**
  * Flushes any pending microtasks and simulates the asynchronous passage of time for the timers in
