@@ -26101,7 +26101,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.3+sha-9aa94eb");
+var VERSION2 = new Version("18.2.0-next.3+sha-e2259c7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27205,7 +27205,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.3+sha-9aa94eb"));
+  definitionMap.set("version", literal("18.2.0-next.3+sha-e2259c7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27224,7 +27224,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.2.0-next.3+sha-9aa94eb"));
+  definitionMap.set("version", literal("18.2.0-next.3+sha-e2259c7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27292,7 +27292,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.2.0-next.3+sha-9aa94eb"));
+  definitionMap.set("version", literal("18.2.0-next.3+sha-e2259c7"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27610,7 +27610,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.2.0-next.3+sha-9aa94eb"));
+  definitionMap.set("version", literal("18.2.0-next.3+sha-e2259c7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27633,7 +27633,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.2.0-next.3+sha-9aa94eb"));
+  definitionMap.set("version", literal("18.2.0-next.3+sha-e2259c7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27671,7 +27671,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.2.0-next.3+sha-9aa94eb"));
+  definitionMap.set("version", literal("18.2.0-next.3+sha-e2259c7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27695,7 +27695,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.2.0-next.3+sha-9aa94eb"));
+  definitionMap.set("version", literal("18.2.0-next.3+sha-e2259c7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27730,7 +27730,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.2.0-next.3+sha-9aa94eb"));
+  definitionMap.set("version", literal("18.2.0-next.3+sha-e2259c7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27747,7 +27747,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.2.0-next.3+sha-9aa94eb");
+var VERSION3 = new Version("18.2.0-next.3+sha-e2259c7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -45886,7 +45886,7 @@ function castAsAny(factory11, expr) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/input_function.mjs
-var signalInputsTransform = (member, host, factory11, importTracker, importManager, classDecorator, isCore) => {
+var signalInputsTransform = (member, sourceFile, host, factory11, importTracker, importManager, classDecorator, isCore) => {
   var _a2, _b2;
   if ((_a2 = host.getDecoratorsOfDeclaration(member.node)) == null ? void 0 : _a2.some((d) => isAngularDecorator2(d, "Input", isCore))) {
     return member.node;
@@ -45901,7 +45901,6 @@ var signalInputsTransform = (member, host, factory11, importTracker, importManag
     "required": inputMapping.required ? factory11.createTrue() : factory11.createFalse(),
     "transform": factory11.createIdentifier("undefined")
   };
-  const sourceFile = member.node.getSourceFile();
   const newDecorator = factory11.createDecorator(factory11.createCallExpression(createSyntheticAngularCoreDecoratorAccess(factory11, importManager, classDecorator, sourceFile, "Input"), void 0, [
     castAsAny(factory11, factory11.createObjectLiteralExpression(Object.entries(fields).map(([name, value]) => factory11.createPropertyAssignment(name, value))))
   ]));
@@ -45910,7 +45909,7 @@ var signalInputsTransform = (member, host, factory11, importTracker, importManag
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/model_function.mjs
 var import_typescript93 = __toESM(require("typescript"), 1);
-var signalModelTransform = (member, host, factory11, importTracker, importManager, classDecorator, isCore) => {
+var signalModelTransform = (member, sourceFile, host, factory11, importTracker, importManager, classDecorator, isCore) => {
   var _a2, _b2;
   if ((_a2 = host.getDecoratorsOfDeclaration(member.node)) == null ? void 0 : _a2.some((d) => {
     return isAngularDecorator2(d, "Input", isCore) || isAngularDecorator2(d, "Output", isCore);
@@ -45926,7 +45925,6 @@ var signalModelTransform = (member, host, factory11, importTracker, importManage
     factory11.createPropertyAssignment("alias", factory11.createStringLiteral(modelMapping.input.bindingPropertyName)),
     factory11.createPropertyAssignment("required", modelMapping.input.required ? factory11.createTrue() : factory11.createFalse())
   ]);
-  const sourceFile = member.node.getSourceFile();
   const inputDecorator = createDecorator(
     "Input",
     factory11.createAsExpression(inputConfig, factory11.createKeywordTypeNode(import_typescript93.default.SyntaxKind.AnyKeyword)),
@@ -45944,7 +45942,7 @@ function createDecorator(name, config, classDecorator, factory11, sourceFile, im
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/transform/jit/src/initializer_api_transforms/output_function.mjs
-var initializerApiOutputTransform = (member, host, factory11, importTracker, importManager, classDecorator, isCore) => {
+var initializerApiOutputTransform = (member, sourceFile, host, factory11, importTracker, importManager, classDecorator, isCore) => {
   var _a2, _b2;
   if ((_a2 = host.getDecoratorsOfDeclaration(member.node)) == null ? void 0 : _a2.some((d) => isAngularDecorator2(d, "Output", isCore))) {
     return member.node;
@@ -45953,7 +45951,6 @@ var initializerApiOutputTransform = (member, host, factory11, importTracker, imp
   if (output === null) {
     return member.node;
   }
-  const sourceFile = member.node.getSourceFile();
   const newDecorator = factory11.createDecorator(factory11.createCallExpression(createSyntheticAngularCoreDecoratorAccess(factory11, importManager, classDecorator, sourceFile, "Output"), void 0, [factory11.createStringLiteral(output.metadata.bindingPropertyName)]));
   return factory11.updatePropertyDeclaration(member.node, [newDecorator, ...(_b2 = member.node.modifiers) != null ? _b2 : []], member.node.name, member.node.questionToken, member.node.type, member.node.initializer);
 };
@@ -45965,7 +45962,7 @@ var queryFunctionToDecorator = {
   contentChild: "ContentChild",
   contentChildren: "ContentChildren"
 };
-var queryFunctionsTransforms = (member, host, factory11, importTracker, importManager, classDecorator, isCore) => {
+var queryFunctionsTransforms = (member, sourceFile, host, factory11, importTracker, importManager, classDecorator, isCore) => {
   var _a2;
   const decorators = host.getDecoratorsOfDeclaration(member.node);
   const queryDecorators = decorators && getAngularDecorators(decorators, queryDecoratorNames, isCore);
@@ -45976,7 +45973,6 @@ var queryFunctionsTransforms = (member, host, factory11, importTracker, importMa
   if (queryDefinition === null) {
     return member.node;
   }
-  const sourceFile = member.node.getSourceFile();
   const callArgs = queryDefinition.call.arguments;
   const newDecorator = factory11.createDecorator(factory11.createCallExpression(
     createSyntheticAngularCoreDecoratorAccess(factory11, importManager, classDecorator, sourceFile, queryFunctionToDecorator[queryDefinition.name]),
@@ -46017,6 +46013,7 @@ function createTransformVisitor(ctx, host, importManager, importTracker, isCore,
       const angularDecorator = (_a2 = host.getDecoratorsOfDeclaration(originalNode)) == null ? void 0 : _a2.find((d) => decoratorsWithInputs.some((name) => isAngularDecorator2(d, name, isCore)));
       if (angularDecorator !== void 0 && (shouldTransformClass === void 0 || shouldTransformClass(node))) {
         let hasChanged = false;
+        const sourceFile = originalNode.getSourceFile();
         const members = node.members.map((memberNode) => {
           if (!import_typescript94.default.isPropertyDeclaration(memberNode)) {
             return memberNode;
@@ -46026,7 +46023,7 @@ function createTransformVisitor(ctx, host, importManager, importTracker, isCore,
             return memberNode;
           }
           for (const transform2 of propertyTransforms) {
-            const newNode = transform2(__spreadProps(__spreadValues({}, member), { node: memberNode }), host, ctx.factory, importTracker, importManager, angularDecorator, isCore);
+            const newNode = transform2(__spreadProps(__spreadValues({}, member), { node: memberNode }), sourceFile, host, ctx.factory, importTracker, importManager, angularDecorator, isCore);
             if (newNode !== member.node) {
               hasChanged = true;
               return newNode;
