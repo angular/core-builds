@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.4+sha-f9a97c7
+ * @license Angular v18.2.0-next.4+sha-7919982
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,7 +8,6 @@ import * as i0 from '@angular/core';
 import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵZONELESS_ENABLED, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { ResourceLoader } from '@angular/compiler';
 
 /**
@@ -176,10 +175,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-f9a97c7", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
-    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-f9a97c7", ngImport: i0, type: TestBedApplicationErrorHandler }); }
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-7919982", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
+    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-7919982", ngImport: i0, type: TestBedApplicationErrorHandler }); }
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-f9a97c7", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "18.2.0-next.4+sha-7919982", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
@@ -245,12 +244,9 @@ class ComponentFixture {
         }
         return new Promise((resolve, reject) => {
             this.appErrorHandler.whenStableRejectFunctions.add(reject);
-            this._appRef.isStable
-                .pipe(first((stable) => stable))
-                .toPromise()
-                .then((v) => {
+            this._appRef.whenStable().then(() => {
                 this.appErrorHandler.whenStableRejectFunctions.delete(reject);
-                resolve(v);
+                resolve(true);
             });
         });
     }

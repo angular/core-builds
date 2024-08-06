@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.4+sha-f9a97c7
+ * @license Angular v18.2.0-next.4+sha-7919982
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -849,6 +849,10 @@ export declare class ApplicationRef {
      * Returns an Observable that indicates when the application is stable or unstable.
      */
     readonly isStable: Observable<boolean>;
+    /**
+     * @returns A promise that resolves when the application becomes stable
+     */
+    whenStable(): Promise<void>;
     private readonly _injector;
     /**
      * The `EnvironmentInjector` used to create this application.
