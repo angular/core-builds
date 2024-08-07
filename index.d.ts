@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.4+sha-7919982
+ * @license Angular v18.2.0-next.4+sha-0b1dd39
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8910,6 +8910,7 @@ declare interface RElement extends RNode {
     setAttributeNS(namespaceURI: string, qualifiedName: string, value: string | TrustedHTML | TrustedScript | TrustedScriptURL): void;
     addEventListener(type: string, listener: EventListener, useCapture?: boolean): void;
     removeEventListener(type: string, listener?: EventListener, options?: boolean): void;
+    remove(): void;
     setProperty?(name: string, value: any): void;
 }
 
@@ -8934,7 +8935,7 @@ declare interface Renderer {
     destroyNode?: ((node: RNode) => void) | null;
     appendChild(parent: RElement, newChild: RNode): void;
     insertBefore(parent: RNode, newChild: RNode, refChild: RNode | null, isMove?: boolean): void;
-    removeChild(parent: RElement, oldChild: RNode, isHostElement?: boolean): void;
+    removeChild(parent: RElement | null, oldChild: RNode, isHostElement?: boolean): void;
     selectRootElement(selectorOrNode: string | any, preserveContent?: boolean): RElement;
     parentNode(node: RNode): RElement | null;
     nextSibling(node: RNode): RNode | null;
@@ -9244,11 +9245,6 @@ declare interface RNode {
      * Gets the Node immediately following this one in the parent's childNodes
      */
     nextSibling: RNode | null;
-    /**
-     * Removes a child from the current node and returns the removed node
-     * @param oldChild the child node to remove
-     */
-    removeChild(oldChild: RNode): RNode;
     /**
      * Insert a child node.
      *

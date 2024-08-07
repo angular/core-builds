@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-next.4+sha-7919982
+ * @license Angular v18.2.0-next.4+sha-0b1dd39
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9733,7 +9733,7 @@ class DOMParserHelper {
                 // the `inertDocumentHelper` instead.
                 return this.inertDocumentHelper.getInertBodyElement(html);
             }
-            body.removeChild(body.firstChild);
+            body.firstChild?.remove();
             return body;
         }
         catch {
@@ -10076,7 +10076,7 @@ function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
         if (inertBodyElement) {
             const parent = getTemplateContent(inertBodyElement) || inertBodyElement;
             while (parent.firstChild) {
-                parent.removeChild(parent.firstChild);
+                parent.firstChild.remove();
             }
         }
     }
@@ -11413,14 +11413,6 @@ function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode, isMove)
         nativeAppendChild(renderer, parent, child);
     }
 }
-/** Removes a node from the DOM given its native parent. */
-function nativeRemoveChild(renderer, parent, child, isHostElement) {
-    renderer.removeChild(parent, child, isHostElement);
-}
-/** Checks if an element is a `<template>` node. */
-function isTemplateNode(node) {
-    return node.tagName === 'TEMPLATE' && node.content !== undefined;
-}
 /**
  * Returns a native parent of a given native node.
  */
@@ -11598,10 +11590,7 @@ function getBeforeNodeForView(viewIndexInContainer, lContainer) {
  */
 function nativeRemoveNode(renderer, rNode, isHostElement) {
     ngDevMode && ngDevMode.rendererRemoveNode++;
-    const nativeParent = nativeParentNode(renderer, rNode);
-    if (nativeParent) {
-        nativeRemoveChild(renderer, nativeParent, rNode, isHostElement);
-    }
+    renderer.removeChild(null, rNode, isHostElement);
 }
 /**
  * Clears the contents of a given RElement.
@@ -17218,7 +17207,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-next.4+sha-7919982']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-next.4+sha-0b1dd39']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31020,7 +31009,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.0-next.4+sha-7919982');
+const VERSION = new Version('18.2.0-next.4+sha-0b1dd39');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
