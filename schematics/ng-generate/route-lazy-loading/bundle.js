@@ -3488,7 +3488,7 @@ var FactoryTarget;
   FactoryTarget3[FactoryTarget3["NgModule"] = 4] = "NgModule";
 })(FactoryTarget || (FactoryTarget = {}));
 function compileFactoryFunction(meta) {
-  const t = variable("t");
+  const t = variable("__ngFactoryType__");
   let baseFactoryVar = null;
   const typeForCtor = !isDelegatedFactoryMetadata(meta) ? new BinaryOperatorExpr(BinaryOperator.Or, t, meta.type.value) : t;
   let ctorExpr = null;
@@ -3503,7 +3503,7 @@ function compileFactoryFunction(meta) {
   const body = [];
   let retExpr = null;
   function makeConditionalFactory(nonCtorExpr) {
-    const r = variable("r");
+    const r = variable("__ngConditionalFactory__");
     body.push(r.set(NULL_EXPR).toDeclStmt());
     const ctorStmt = ctorExpr !== null ? r.set(ctorExpr).toStmt() : importExpr(Identifiers.invalidFactory).callFn([]).toStmt();
     body.push(ifStmt(t, [ctorStmt], [r.set(nonCtorExpr).toStmt()]));
@@ -3527,7 +3527,7 @@ function compileFactoryFunction(meta) {
   } else {
     body.push(new ReturnStatement(retExpr));
   }
-  let factoryFn = fn([new FnParam("t", DYNAMIC_TYPE)], body, INFERRED_TYPE, void 0, `${meta.name}_Factory`);
+  let factoryFn = fn([new FnParam(t.name, DYNAMIC_TYPE)], body, INFERRED_TYPE, void 0, `${meta.name}_Factory`);
   if (baseFactoryVar !== null) {
     factoryFn = arrowFn([], [new DeclareVarStmt(baseFactoryVar.name), new ReturnStatement(factoryFn)]).callFn([], void 0, true);
   }
@@ -4911,7 +4911,8 @@ function delegateToFactory(type, useType, unwrapForwardRefs) {
   return createFactoryFunction(unwrappedType);
 }
 function createFactoryFunction(type) {
-  return arrowFn([new FnParam("t", DYNAMIC_TYPE)], type.prop("\u0275fac").callFn([variable("t")]));
+  const t = new FnParam("__ngFactoryType__", DYNAMIC_TYPE);
+  return arrowFn([t], type.prop("\u0275fac").callFn([variable(t.name)]));
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/assertions.mjs
@@ -23194,7 +23195,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-next.4+sha-0b1dd39");
+var VERSION2 = new Version("18.2.0-next.4+sha-d9d68e7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
