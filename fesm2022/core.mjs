@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-rc.0+sha-9af760e
+ * @license Angular v18.2.0-rc.0+sha-296216c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6910,6 +6910,9 @@ class AsyncStackTaggingZoneSpec {
     }
 }
 
+const isAngularZoneProperty = 'isAngularZone';
+const angularZoneInstanceIdProperty = isAngularZoneProperty + '_ID';
+let ngZoneInstanceId = 0;
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
  *
@@ -7046,7 +7049,7 @@ class NgZone {
     */
     static isInAngularZone() {
         // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
-        return typeof Zone !== 'undefined' && Zone.current.get('isAngularZone') === true;
+        return typeof Zone !== 'undefined' && Zone.current.get(isAngularZoneProperty) === true;
     }
     /**
       Assures that the method is called within the Angular Zone, otherwise throws an error.
@@ -7193,9 +7196,14 @@ function forkInnerZoneWithAngularBehavior(zone) {
     const delayChangeDetectionForEventsDelegate = () => {
         delayChangeDetectionForEvents(zone);
     };
+    const instanceId = ngZoneInstanceId++;
     zone._inner = zone._inner.fork({
         name: 'angular',
-        properties: { 'isAngularZone': true },
+        properties: {
+            [isAngularZoneProperty]: true,
+            [angularZoneInstanceIdProperty]: instanceId,
+            [angularZoneInstanceIdProperty + instanceId]: true,
+        },
         onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
             // Prevent triggering change detection when the flag is detected.
             if (shouldBeIgnoredByZone(applyArgs)) {
@@ -17207,7 +17215,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-rc.0+sha-9af760e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-rc.0+sha-296216c']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31009,7 +31017,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.0-rc.0+sha-9af760e');
+const VERSION = new Version('18.2.0-rc.0+sha-296216c');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33252,6 +33260,9 @@ class ChangeDetectionSchedulerImpl {
         this.zoneIsDefined = typeof Zone !== 'undefined' && !!Zone.root.run;
         this.schedulerTickApplyArgs = [{ data: { '__scheduler_tick__': true } }];
         this.subscriptions = new Subscription();
+        this.angularZoneId = this.zoneIsDefined
+            ? this.ngZone._inner?.get(angularZoneInstanceIdProperty)
+            : null;
         this.cancelScheduledCallback = null;
         this.shouldRefreshViews = false;
         this.useMicrotaskScheduler = false;
@@ -33353,7 +33364,9 @@ class ChangeDetectionSchedulerImpl {
         }
         // If we're inside the zone don't bother with scheduler. Zone will stabilize
         // eventually and run change detection.
-        if (!this.zonelessEnabled && this.zoneIsDefined && NgZone.isInAngularZone()) {
+        if (!this.zonelessEnabled &&
+            this.zoneIsDefined &&
+            Zone.current.get(angularZoneInstanceIdProperty + this.angularZoneId)) {
             return false;
         }
         return true;

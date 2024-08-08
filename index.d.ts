@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-rc.0+sha-9af760e
+ * @license Angular v18.2.0-rc.0+sha-296216c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12257,6 +12257,7 @@ export declare class ɵChangeDetectionSchedulerImpl implements ɵChangeDetection
     private readonly zoneIsDefined;
     private readonly schedulerTickApplyArgs;
     private readonly subscriptions;
+    private readonly angularZoneId;
     private cancelScheduledCallback;
     private shouldRefreshViews;
     private useMicrotaskScheduler;
