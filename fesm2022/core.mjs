@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.4+sha-bdf8450
+ * @license Angular v18.1.4+sha-e39b22a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17207,7 +17207,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.4+sha-bdf8450']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.4+sha-e39b22a']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31003,7 +31003,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.4+sha-bdf8450');
+const VERSION = new Version('18.1.4+sha-e39b22a');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -36816,14 +36816,26 @@ class GlobalEventDelegation {
     supports(eventType) {
         return isEarlyEventType(eventType);
     }
-    addEventListener(element, eventName, handler) {
-        this.eventContractDetails.instance.addEvent(eventName);
-        sharedStashFunction(element, eventName, handler);
-        getActionCache(element)[eventName] = '';
-        return () => this.removeEventListener(element, eventName, handler);
+    addEventListener(element, eventType, handler) {
+        // Note: contrary to the type, Window and Document can be passed in
+        // as well.
+        if (element.nodeType === Node.ELEMENT_NODE) {
+            this.eventContractDetails.instance.addEvent(eventType);
+            getActionCache(element)[eventType] = '';
+            sharedStashFunction(element, eventType, handler);
+        }
+        else {
+            element.addEventListener(eventType, handler);
+        }
+        return () => this.removeEventListener(element, eventType, handler);
     }
     removeEventListener(element, eventType, callback) {
-        getActionCache(element)[eventType] = undefined;
+        if (element.nodeType === Node.ELEMENT_NODE) {
+            getActionCache(element)[eventType] = undefined;
+        }
+        else {
+            element.removeEventListener(eventType, callback);
+        }
     }
     static { this.ɵfac = function GlobalEventDelegation_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || GlobalEventDelegation)(); }; }
     static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: GlobalEventDelegation, factory: GlobalEventDelegation.ɵfac }); }

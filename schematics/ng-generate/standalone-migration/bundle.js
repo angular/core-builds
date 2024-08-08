@@ -26102,7 +26102,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.1.4+sha-bdf8450");
+var VERSION2 = new Version("18.1.4+sha-e39b22a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27206,7 +27206,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.1.4+sha-bdf8450"));
+  definitionMap.set("version", literal("18.1.4+sha-e39b22a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27225,7 +27225,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.1.4+sha-bdf8450"));
+  definitionMap.set("version", literal("18.1.4+sha-e39b22a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27293,7 +27293,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.1.4+sha-bdf8450"));
+  definitionMap.set("version", literal("18.1.4+sha-e39b22a"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27611,7 +27611,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.1.4+sha-bdf8450"));
+  definitionMap.set("version", literal("18.1.4+sha-e39b22a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27634,7 +27634,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.1.4+sha-bdf8450"));
+  definitionMap.set("version", literal("18.1.4+sha-e39b22a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27672,7 +27672,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.1.4+sha-bdf8450"));
+  definitionMap.set("version", literal("18.1.4+sha-e39b22a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27696,7 +27696,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.1.4+sha-bdf8450"));
+  definitionMap.set("version", literal("18.1.4+sha-e39b22a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27731,7 +27731,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.1.4+sha-bdf8450"));
+  definitionMap.set("version", literal("18.1.4+sha-e39b22a"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27748,7 +27748,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.1.4+sha-bdf8450");
+var VERSION3 = new Version("18.1.4+sha-e39b22a");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -40479,7 +40479,7 @@ function translateDiagnostic(diagnostic, resolver) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/expression.mjs
 var import_typescript81 = __toESM(require("typescript"), 1);
-var NULL_AS_ANY = import_typescript81.default.factory.createAsExpression(import_typescript81.default.factory.createNull(), import_typescript81.default.factory.createKeywordTypeNode(import_typescript81.default.SyntaxKind.AnyKeyword));
+var ANY_EXPRESSION = import_typescript81.default.factory.createAsExpression(import_typescript81.default.factory.createNumericLiteral("0"), import_typescript81.default.factory.createKeywordTypeNode(import_typescript81.default.SyntaxKind.AnyKeyword));
 var UNDEFINED = import_typescript81.default.factory.createIdentifier("undefined");
 var UNARY_OPS = /* @__PURE__ */ new Map([
   ["+", import_typescript81.default.SyntaxKind.PlusToken],
@@ -40663,7 +40663,7 @@ var AstTranslator = class {
     if (this.config.strictSafeNavigationTypes) {
       const expr = import_typescript81.default.factory.createPropertyAccessExpression(import_typescript81.default.factory.createNonNullExpression(receiver), ast.name);
       addParseSpanInfo(expr, ast.nameSpan);
-      node = import_typescript81.default.factory.createParenthesizedExpression(import_typescript81.default.factory.createConditionalExpression(NULL_AS_ANY, void 0, expr, void 0, UNDEFINED));
+      node = import_typescript81.default.factory.createParenthesizedExpression(import_typescript81.default.factory.createConditionalExpression(ANY_EXPRESSION, void 0, expr, void 0, UNDEFINED));
     } else if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
       node = import_typescript81.default.factory.createPropertyAccessExpression(tsCastToAny(receiver), ast.name);
     } else {
@@ -40681,7 +40681,7 @@ var AstTranslator = class {
     if (this.config.strictSafeNavigationTypes) {
       const expr = import_typescript81.default.factory.createElementAccessExpression(import_typescript81.default.factory.createNonNullExpression(receiver), key);
       addParseSpanInfo(expr, ast.sourceSpan);
-      node = import_typescript81.default.factory.createParenthesizedExpression(import_typescript81.default.factory.createConditionalExpression(NULL_AS_ANY, void 0, expr, void 0, UNDEFINED));
+      node = import_typescript81.default.factory.createParenthesizedExpression(import_typescript81.default.factory.createConditionalExpression(ANY_EXPRESSION, void 0, expr, void 0, UNDEFINED));
     } else if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
       node = import_typescript81.default.factory.createElementAccessExpression(tsCastToAny(receiver), key);
     } else {
@@ -40727,7 +40727,7 @@ var AstTranslator = class {
   convertToSafeCall(ast, expr, args) {
     if (this.config.strictSafeNavigationTypes) {
       const call2 = import_typescript81.default.factory.createCallExpression(import_typescript81.default.factory.createNonNullExpression(expr), void 0, args);
-      return import_typescript81.default.factory.createParenthesizedExpression(import_typescript81.default.factory.createConditionalExpression(NULL_AS_ANY, void 0, call2, void 0, UNDEFINED));
+      return import_typescript81.default.factory.createParenthesizedExpression(import_typescript81.default.factory.createConditionalExpression(ANY_EXPRESSION, void 0, call2, void 0, UNDEFINED));
     }
     if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
       return import_typescript81.default.factory.createCallExpression(tsCastToAny(expr), void 0, args);
@@ -41113,7 +41113,7 @@ var TcbInvalidReferenceOp = class extends TcbOp {
   }
   execute() {
     const id = this.tcb.allocateId();
-    this.scope.addStatement(tsCreateVariable(id, NULL_AS_ANY));
+    this.scope.addStatement(tsCreateVariable(id, ANY_EXPRESSION));
     return id;
   }
 };
@@ -42177,10 +42177,10 @@ var TcbExpressionTranslator = class {
       let pipe2;
       if (pipeMeta === null) {
         this.tcb.oobRecorder.missingPipe(this.tcb.id, ast);
-        pipe2 = NULL_AS_ANY;
+        pipe2 = ANY_EXPRESSION;
       } else if (pipeMeta.isExplicitlyDeferred && this.tcb.boundTarget.getEagerlyUsedPipes().includes(ast.name)) {
         this.tcb.oobRecorder.deferredPipeUsedEagerly(this.tcb.id, ast);
-        pipe2 = NULL_AS_ANY;
+        pipe2 = ANY_EXPRESSION;
       } else {
         pipe2 = this.tcb.env.pipeInst(pipeMeta.ref);
       }
@@ -42245,7 +42245,7 @@ function tcbCallTypeCtor(dir, tcb, inputs) {
       addParseSpanInfo(assignment, input.sourceSpan);
       return assignment;
     } else {
-      return import_typescript82.default.factory.createPropertyAssignment(propertyName, NULL_AS_ANY);
+      return import_typescript82.default.factory.createPropertyAssignment(propertyName, ANY_EXPRESSION);
     }
   });
   return import_typescript82.default.factory.createCallExpression(
