@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-rc.0+sha-02d613e
+ * @license Angular v18.2.0-rc.0+sha-9af760e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4528,7 +4528,7 @@ declare class GlobalEventDelegation implements OnDestroy {
     private eventContractDetails;
     ngOnDestroy(): void;
     supports(eventType: string): boolean;
-    addEventListener(element: HTMLElement, eventName: string, handler: Function): Function;
+    addEventListener(element: HTMLElement, eventType: string, handler: Function): Function;
     removeEventListener(element: HTMLElement, eventType: string, callback: Function): void;
     static ɵfac: i0.ɵɵFactoryDeclaration<GlobalEventDelegation, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<GlobalEventDelegation>;

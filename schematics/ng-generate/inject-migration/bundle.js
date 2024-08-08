@@ -23194,7 +23194,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0-rc.0+sha-02d613e");
+var VERSION2 = new Version("18.2.0-rc.0+sha-9af760e");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -24904,7 +24904,7 @@ function addParseSpanInfo(node, span) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/typecheck/src/expression.mjs
 var import_typescript80 = __toESM(require("typescript"), 1);
-var NULL_AS_ANY = import_typescript80.default.factory.createAsExpression(import_typescript80.default.factory.createNull(), import_typescript80.default.factory.createKeywordTypeNode(import_typescript80.default.SyntaxKind.AnyKeyword));
+var ANY_EXPRESSION = import_typescript80.default.factory.createAsExpression(import_typescript80.default.factory.createNumericLiteral("0"), import_typescript80.default.factory.createKeywordTypeNode(import_typescript80.default.SyntaxKind.AnyKeyword));
 var UNDEFINED = import_typescript80.default.factory.createIdentifier("undefined");
 var UNARY_OPS = /* @__PURE__ */ new Map([
   ["+", import_typescript80.default.SyntaxKind.PlusToken],
@@ -25088,7 +25088,7 @@ var AstTranslator = class {
     if (this.config.strictSafeNavigationTypes) {
       const expr = import_typescript80.default.factory.createPropertyAccessExpression(import_typescript80.default.factory.createNonNullExpression(receiver), ast.name);
       addParseSpanInfo(expr, ast.nameSpan);
-      node = import_typescript80.default.factory.createParenthesizedExpression(import_typescript80.default.factory.createConditionalExpression(NULL_AS_ANY, void 0, expr, void 0, UNDEFINED));
+      node = import_typescript80.default.factory.createParenthesizedExpression(import_typescript80.default.factory.createConditionalExpression(ANY_EXPRESSION, void 0, expr, void 0, UNDEFINED));
     } else if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
       node = import_typescript80.default.factory.createPropertyAccessExpression(tsCastToAny(receiver), ast.name);
     } else {
@@ -25106,7 +25106,7 @@ var AstTranslator = class {
     if (this.config.strictSafeNavigationTypes) {
       const expr = import_typescript80.default.factory.createElementAccessExpression(import_typescript80.default.factory.createNonNullExpression(receiver), key);
       addParseSpanInfo(expr, ast.sourceSpan);
-      node = import_typescript80.default.factory.createParenthesizedExpression(import_typescript80.default.factory.createConditionalExpression(NULL_AS_ANY, void 0, expr, void 0, UNDEFINED));
+      node = import_typescript80.default.factory.createParenthesizedExpression(import_typescript80.default.factory.createConditionalExpression(ANY_EXPRESSION, void 0, expr, void 0, UNDEFINED));
     } else if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
       node = import_typescript80.default.factory.createElementAccessExpression(tsCastToAny(receiver), key);
     } else {
@@ -25152,7 +25152,7 @@ var AstTranslator = class {
   convertToSafeCall(ast, expr, args) {
     if (this.config.strictSafeNavigationTypes) {
       const call2 = import_typescript80.default.factory.createCallExpression(import_typescript80.default.factory.createNonNullExpression(expr), void 0, args);
-      return import_typescript80.default.factory.createParenthesizedExpression(import_typescript80.default.factory.createConditionalExpression(NULL_AS_ANY, void 0, call2, void 0, UNDEFINED));
+      return import_typescript80.default.factory.createParenthesizedExpression(import_typescript80.default.factory.createConditionalExpression(ANY_EXPRESSION, void 0, call2, void 0, UNDEFINED));
     }
     if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
       return import_typescript80.default.factory.createCallExpression(tsCastToAny(expr), void 0, args);
@@ -25493,7 +25493,7 @@ var TcbInvalidReferenceOp = class extends TcbOp {
   }
   execute() {
     const id = this.tcb.allocateId();
-    this.scope.addStatement(tsCreateVariable(id, NULL_AS_ANY));
+    this.scope.addStatement(tsCreateVariable(id, ANY_EXPRESSION));
     return id;
   }
 };
@@ -26524,10 +26524,10 @@ var TcbExpressionTranslator = class {
       let pipe2;
       if (pipeMeta === null) {
         this.tcb.oobRecorder.missingPipe(this.tcb.id, ast);
-        pipe2 = NULL_AS_ANY;
+        pipe2 = ANY_EXPRESSION;
       } else if (pipeMeta.isExplicitlyDeferred && this.tcb.boundTarget.getEagerlyUsedPipes().includes(ast.name)) {
         this.tcb.oobRecorder.deferredPipeUsedEagerly(this.tcb.id, ast);
-        pipe2 = NULL_AS_ANY;
+        pipe2 = ANY_EXPRESSION;
       } else {
         pipe2 = this.tcb.env.pipeInst(pipeMeta.ref);
       }
@@ -26592,7 +26592,7 @@ function tcbCallTypeCtor(dir, tcb, inputs) {
       addParseSpanInfo(assignment, input.sourceSpan);
       return assignment;
     } else {
-      return import_typescript81.default.factory.createPropertyAssignment(propertyName, NULL_AS_ANY);
+      return import_typescript81.default.factory.createPropertyAssignment(propertyName, ANY_EXPRESSION);
     }
   });
   return import_typescript81.default.factory.createCallExpression(
