@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.1.4+sha-e39b22a
+ * @license Angular v18.1.4+sha-810f76f
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7855,6 +7855,16 @@ function isInSkipHydrationBlock(tNode) {
     }
     return false;
 }
+/**
+ * Check if an i18n block is in a skip hydration section by looking at a parent TNode
+ * to determine if this TNode is in a skip hydration section or the TNode has
+ * the `ngSkipHydration` attribute.
+ */
+function isI18nInSkipHydrationBlock(parentTNode) {
+    return (hasInSkipHydrationBlockFlag(parentTNode) ||
+        hasSkipHydrationAttrOnTNode(parentTNode) ||
+        isInSkipHydrationBlock(parentTNode));
+}
 
 // Keeps track of the currently-active LViews.
 const TRACKED_LVIEWS = new Map();
@@ -15568,6 +15578,10 @@ function trySerializeI18nBlock(lView, index, context) {
     if (!tI18n || !tI18n.ast) {
         return null;
     }
+    const parentTNode = tView.data[tI18n.parentTNodeIndex];
+    if (parentTNode && isI18nInSkipHydrationBlock(parentTNode)) {
+        return null;
+    }
     const serializedI18nBlock = {
         caseQueue: [],
         disconnectedNodes: new Set(),
@@ -15716,7 +15730,8 @@ function forkHydrationState(state, nextNode) {
     return { currentNode: nextNode, isConnected: state.isConnected };
 }
 function prepareI18nBlockForHydrationImpl(lView, index, parentTNode, subTemplateIndex) {
-    if (!isI18nHydrationSupportEnabled()) {
+    if (!isI18nHydrationSupportEnabled() ||
+        (parentTNode && isI18nInSkipHydrationBlock(parentTNode))) {
         return;
     }
     const hydrationInfo = lView[HYDRATION];
@@ -15955,6 +15970,13 @@ function removeDehydratedView(dehydratedView, renderer) {
  */
 function cleanupLContainer(lContainer) {
     removeDehydratedViews(lContainer);
+    // The host could be an LView if this container is on a component node.
+    // In this case, descend into host LView for further cleanup. See also
+    // LContainer[HOST] docs for additional information.
+    const hostLView = lContainer[HOST];
+    if (isLView(hostLView)) {
+        cleanupLView(hostLView);
+    }
     for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
         cleanupLView(lContainer[i]);
     }
@@ -15992,9 +16014,6 @@ function cleanupDehydratedViews(appRef) {
                 cleanupLView(lNode);
             }
             else {
-                // Cleanup in the root component view
-                const componentLView = lNode[HOST];
-                cleanupLView(componentLView);
                 // Cleanup in all views within this view container
                 cleanupLContainer(lNode);
             }
@@ -17207,7 +17226,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.4+sha-e39b22a']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.1.4+sha-810f76f']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -25641,6 +25660,7 @@ function i18nStartFirstCreatePass(tView, parentTNodeIndex, lView, index, message
         create: createOpCodes,
         update: updateOpCodes,
         ast: astStack[0],
+        parentTNodeIndex,
     };
 }
 /**
@@ -31003,7 +31023,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.1.4+sha-e39b22a');
+const VERSION = new Version('18.1.4+sha-810f76f');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
