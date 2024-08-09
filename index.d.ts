@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-rc.0+sha-cab6c23
+ * @license Angular v18.2.0-rc.0+sha-5558e27
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10035,6 +10035,10 @@ declare interface TI18n {
      * while the Update and Create OpCodes are used at runtime.
      */
     ast: Array<I18nNode>;
+    /**
+     * Index of a parent TNode, which represents a host node for this i18n block.
+     */
+    parentTNodeIndex: number;
 }
 
 declare interface TIcu {
