@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.0+sha-b279081
+ * @license Angular v19.0.0-next.0+sha-468d3fb
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -432,6 +432,19 @@ export declare interface TestModuleMetadata {
      * @see [NG8002](/errors/NG8002) for the description of the error and how to fix it
      */
     errorOnUnknownProperties?: boolean;
+    /**
+     * Whether errors that happen during application change detection should be rethrown.
+     *
+     * When `true`, errors that are caught during application change detection will
+     * be reported to the `ErrorHandler` and rethrown to prevent them from going
+     * unnoticed in tests.
+     *
+     * When `false`, errors are only forwarded to the `ErrorHandler`, which by default
+     * simply logs them to the console.
+     *
+     * Defaults to `true`.
+     */
+    rethrowApplicationErrors?: boolean;
     /**
      * Whether defer blocks should behave with manual triggering or play through normally.
      * Defaults to `manual`.

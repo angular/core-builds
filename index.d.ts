@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.0+sha-b279081
+ * @license Angular v19.0.0-next.0+sha-468d3fb
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8002,8 +8002,8 @@ export declare const Output: OutputDecorator;
  *
  * To use `output()`, import the function from `@angular/core`.
  *
- * ```
- * import {output} from '@angular/core`;
+ * ```ts
+ * import {output} from '@angular/core';
  * ```
  *
  * Inside your component, introduce a new class member and initialize

@@ -1,11 +1,11 @@
 /**
- * @license Angular v19.0.0-next.0+sha-b279081
+ * @license Angular v19.0.0-next.0+sha-468d3fb
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import * as i0 from '@angular/core';
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵZONELESS_ENABLED, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵZONELESS_ENABLED, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ResourceLoader } from '@angular/compiler';
@@ -148,7 +148,7 @@ const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetec
  */
 const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
-const RETHROW_APPLICATION_ERRORS = new InjectionToken('rethrow application errors');
+const RETHROW_APPLICATION_ERRORS_DEFAULT = true;
 class TestBedApplicationErrorHandler {
     constructor() {
         this.zone = inject$1(NgZone);
@@ -175,10 +175,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-b279081", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
-    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-b279081", ngImport: i0, type: TestBedApplicationErrorHandler }); }
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-468d3fb", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
+    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-468d3fb", ngImport: i0, type: TestBedApplicationErrorHandler }); }
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-b279081", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-468d3fb", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
@@ -854,6 +854,7 @@ class TestBedCompiler {
         this.scopesWithOverriddenProviders = new Set();
         this.testModuleRef = null;
         this.deferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
+        this.rethrowApplicationTickErrors = RETHROW_APPLICATION_ERRORS_DEFAULT;
         class DynamicTestModule {
         }
         this.testModuleType = DynamicTestModule;
@@ -878,14 +879,12 @@ class TestBedCompiler {
         if (moduleDef.providers !== undefined) {
             this.providers.push(...moduleDef.providers);
         }
-        this.providers.push({
-            provide: RETHROW_APPLICATION_ERRORS,
-            useValue: moduleDef._rethrowApplicationTickErrors ?? false,
-        });
         if (moduleDef.schemas !== undefined) {
             this.schemas.push(...moduleDef.schemas);
         }
         this.deferBlockBehavior = moduleDef.deferBlockBehavior ?? DEFER_BLOCK_DEFAULT_BEHAVIOR;
+        this.rethrowApplicationTickErrors =
+            moduleDef.rethrowApplicationErrors ?? RETHROW_APPLICATION_ERRORS_DEFAULT;
     }
     overrideModule(ngModule, override) {
         if (ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT) {
@@ -1500,28 +1499,28 @@ class TestBedCompiler {
                 ...this.rootProviderOverrides,
                 ɵinternalProvideZoneChangeDetection({}),
                 TestBedApplicationErrorHandler,
-                {
-                    provide: ɵINTERNAL_APPLICATION_ERROR_HANDLER,
-                    useFactory: () => {
-                        if (inject$1(ɵZONELESS_ENABLED) || inject$1(RETHROW_APPLICATION_ERRORS, { optional: true })) {
-                            const handler = inject$1(TestBedApplicationErrorHandler);
-                            return (e) => {
-                                handler.handleError(e);
-                            };
-                        }
-                        else {
-                            const userErrorHandler = inject$1(ErrorHandler);
-                            const ngZone = inject$1(NgZone);
-                            return (e) => ngZone.runOutsideAngular(() => userErrorHandler.handleError(e));
-                        }
-                    },
-                },
                 { provide: ɵChangeDetectionScheduler, useExisting: ɵChangeDetectionSchedulerImpl },
             ],
         });
         const providers = [
             { provide: Compiler, useFactory: () => new R3TestCompiler(this) },
             { provide: ɵDEFER_BLOCK_CONFIG, useValue: { behavior: this.deferBlockBehavior } },
+            {
+                provide: ɵINTERNAL_APPLICATION_ERROR_HANDLER,
+                useFactory: () => {
+                    if (this.rethrowApplicationTickErrors) {
+                        const handler = inject$1(TestBedApplicationErrorHandler);
+                        return (e) => {
+                            handler.handleError(e);
+                        };
+                    }
+                    else {
+                        const userErrorHandler = inject$1(ErrorHandler);
+                        const ngZone = inject$1(NgZone);
+                        return (e) => ngZone.runOutsideAngular(() => userErrorHandler.handleError(e));
+                    }
+                },
+            },
             ...this.providers,
             ...this.providerOverrides,
         ];
