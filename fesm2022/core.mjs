@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-rc.0+sha-b8c82fa
+ * @license Angular v18.2.0-rc.0+sha-de85979
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7493,8 +7493,8 @@ function getOutputDestroyRef(ref) {
  *
  * To use `output()`, import the function from `@angular/core`.
  *
- * ```
- * import {output} from '@angular/core`;
+ * ```ts
+ * import {output} from '@angular/core';
  * ```
  *
  * Inside your component, introduce a new class member and initialize
@@ -15738,12 +15738,14 @@ function forkHydrationState(state, nextNode) {
     return { currentNode: nextNode, isConnected: state.isConnected };
 }
 function prepareI18nBlockForHydrationImpl(lView, index, parentTNode, subTemplateIndex) {
-    if (!isI18nHydrationSupportEnabled() ||
-        (parentTNode && isI18nInSkipHydrationBlock(parentTNode))) {
-        return;
-    }
     const hydrationInfo = lView[HYDRATION];
     if (!hydrationInfo) {
+        return;
+    }
+    if (!isI18nHydrationSupportEnabled() ||
+        (parentTNode &&
+            (isI18nInSkipHydrationBlock(parentTNode) ||
+                isDisconnectedNode$1(hydrationInfo, parentTNode.index - HEADER_OFFSET)))) {
         return;
     }
     const tView = lView[TVIEW];
@@ -17234,7 +17236,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-rc.0+sha-b8c82fa']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-rc.0+sha-de85979']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -24574,7 +24576,10 @@ let _locateOrCreateElementContainerNode = (tView, lView, tNode, index) => {
 function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
     let comment;
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDetachedByI18n(tNode);
+    const isNodeCreationMode = !hydrationInfo ||
+        isInSkipHydrationBlock$1() ||
+        isDisconnectedNode$1(hydrationInfo, index) ||
+        isDetachedByI18n(tNode);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -31037,7 +31042,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.0-rc.0+sha-b8c82fa');
+const VERSION = new Version('18.2.0-rc.0+sha-de85979');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
