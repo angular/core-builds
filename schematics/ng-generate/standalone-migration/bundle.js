@@ -26102,7 +26102,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("19.0.0-next.0+sha-e4a6198");
+var VERSION2 = new Version("19.0.0-next.0+sha-6882cc7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27206,7 +27206,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-e4a6198"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-6882cc7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27225,7 +27225,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-e4a6198"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-6882cc7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27293,7 +27293,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-e4a6198"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-6882cc7"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27611,7 +27611,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-e4a6198"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-6882cc7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27634,7 +27634,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-e4a6198"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-6882cc7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27672,7 +27672,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-e4a6198"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-6882cc7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27696,7 +27696,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-e4a6198"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-6882cc7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27731,7 +27731,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-e4a6198"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-6882cc7"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27748,7 +27748,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("19.0.0-next.0+sha-e4a6198");
+var VERSION3 = new Version("19.0.0-next.0+sha-6882cc7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -46474,55 +46474,44 @@ function extractResolvedTypeString(node, checker) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/function_extractor.mjs
 var FunctionExtractor = class {
-  constructor(name, declaration, typeChecker) {
+  constructor(name, exportDeclaration, typeChecker) {
     this.name = name;
-    this.declaration = declaration;
+    this.exportDeclaration = exportDeclaration;
     this.typeChecker = typeChecker;
   }
   extract() {
-    var _a2;
-    const signature = this.typeChecker.getSignatureFromDeclaration(this.declaration);
+    var _a2, _b2;
+    const signature = this.typeChecker.getSignatureFromDeclaration(this.exportDeclaration);
     const returnType = signature ? this.typeChecker.typeToString(
       this.typeChecker.getReturnTypeOfSignature(signature),
       void 0,
       import_typescript100.default.TypeFormatFlags.NoTypeReduction | import_typescript100.default.TypeFormatFlags.NoTruncation
     ) : "unknown";
-    const jsdocsTags = extractJsDocTags(this.declaration);
+    const implementation = (_a2 = findImplementationOfFunction(this.exportDeclaration, this.typeChecker)) != null ? _a2 : this.exportDeclaration;
+    const type = this.typeChecker.getTypeAtLocation(this.exportDeclaration);
+    const overloads = extractCallSignatures(this.name, this.typeChecker, type);
+    const jsdocsTags = extractJsDocTags(implementation);
+    const description = extractJsDocDescription(implementation);
     return {
-      params: extractAllParams(this.declaration.parameters, this.typeChecker),
       name: this.name,
-      isNewType: import_typescript100.default.isConstructSignatureDeclaration(this.declaration),
-      returnType,
-      returnDescription: (_a2 = jsdocsTags.find((tag) => tag.name === "returns")) == null ? void 0 : _a2.comment,
+      signatures: overloads,
+      implementation: {
+        params: extractAllParams(implementation.parameters, this.typeChecker),
+        isNewType: import_typescript100.default.isConstructSignatureDeclaration(implementation),
+        returnType,
+        returnDescription: (_b2 = jsdocsTags.find((tag) => tag.name === "returns")) == null ? void 0 : _b2.comment,
+        generics: extractGenerics(implementation),
+        name: this.name,
+        description,
+        entryType: EntryType.Function,
+        jsdocTags: jsdocsTags,
+        rawComment: extractRawJsDoc(implementation)
+      },
       entryType: EntryType.Function,
-      generics: extractGenerics(this.declaration),
-      description: extractJsDocDescription(this.declaration),
+      description,
       jsdocTags: jsdocsTags,
-      rawComment: extractRawJsDoc(this.declaration)
+      rawComment: extractRawJsDoc(implementation)
     };
-  }
-  getOverloads() {
-    var _a2, _b2, _c2, _d2;
-    const overloads = [];
-    const symbol = this.getSymbol();
-    const declarationCount = (_b2 = (_a2 = symbol == null ? void 0 : symbol.declarations) == null ? void 0 : _a2.length) != null ? _b2 : 0;
-    if (declarationCount > 1) {
-      for (let i = 0; i < declarationCount - 1; i++) {
-        const overloadDeclaration = (_c2 = symbol == null ? void 0 : symbol.declarations) == null ? void 0 : _c2[i];
-        if ((overloadDeclaration == null ? void 0 : overloadDeclaration.pos) === this.declaration.pos)
-          continue;
-        if (overloadDeclaration && import_typescript100.default.isFunctionDeclaration(overloadDeclaration) && ((_d2 = overloadDeclaration.modifiers) == null ? void 0 : _d2.some((mod) => mod.kind === import_typescript100.default.SyntaxKind.ExportKeyword))) {
-          overloads.push(overloadDeclaration);
-        }
-      }
-    }
-    return overloads;
-  }
-  getSymbol() {
-    return this.typeChecker.getSymbolsInScope(this.declaration, import_typescript100.default.SymbolFlags.Function).find((s) => {
-      var _a2;
-      return s.name === ((_a2 = this.declaration.name) == null ? void 0 : _a2.getText());
-    });
   }
 };
 function extractAllParams(params, typeChecker) {
@@ -46533,6 +46522,42 @@ function extractAllParams(params, typeChecker) {
     isOptional: !!(param.questionToken || param.initializer),
     isRestParam: !!param.dotDotDotToken
   }));
+}
+function filterSignatureDeclarations(signatures) {
+  const result = [];
+  for (const signature of signatures) {
+    const decl = signature.getDeclaration();
+    if (import_typescript100.default.isFunctionDeclaration(decl) || import_typescript100.default.isCallSignatureDeclaration(decl) || import_typescript100.default.isMethodDeclaration(decl)) {
+      result.push({ signature, decl });
+    }
+  }
+  return result;
+}
+function extractCallSignatures(name, typeChecker, type) {
+  return filterSignatureDeclarations(type.getCallSignatures()).map(({ decl, signature }) => ({
+    name,
+    entryType: EntryType.Function,
+    description: extractJsDocDescription(decl),
+    generics: extractGenerics(decl),
+    isNewType: false,
+    jsdocTags: extractJsDocTags(decl),
+    params: extractAllParams(decl.parameters, typeChecker),
+    rawComment: extractRawJsDoc(decl),
+    returnType: typeChecker.typeToString(
+      typeChecker.getReturnTypeOfSignature(signature),
+      void 0,
+      import_typescript100.default.TypeFormatFlags.NoTypeReduction | import_typescript100.default.TypeFormatFlags.NoTruncation
+    )
+  }));
+}
+function findImplementationOfFunction(node, typeChecker) {
+  var _a2;
+  if (node.body !== void 0 || node.name === void 0) {
+    return node;
+  }
+  const symbol = typeChecker.getSymbolAtLocation(node.name);
+  const implementation = (_a2 = symbol == null ? void 0 : symbol.declarations) == null ? void 0 : _a2.find((s) => import_typescript100.default.isFunctionDeclaration(s) && s.body !== void 0);
+  return implementation;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/internal.mjs
@@ -46585,7 +46610,7 @@ var ClassExtractor = class {
     return members;
   }
   extractClassMember(memberDeclaration) {
-    if (this.isMethod(memberDeclaration) && !this.isImplementationForOverload(memberDeclaration)) {
+    if (this.isMethod(memberDeclaration)) {
       return this.extractMethod(memberDeclaration);
     } else if (this.isProperty(memberDeclaration)) {
       return this.extractClassProperty(memberDeclaration);
@@ -46657,7 +46682,7 @@ var ClassExtractor = class {
     const staticMembers = typeOfConstructor.getProperties();
     const result = [];
     for (const member of [...members, ...staticMembers]) {
-      const memberDeclarations = (_a2 = member.getDeclarations()) != null ? _a2 : [];
+      const memberDeclarations = this.filterMethodOverloads((_a2 = member.getDeclarations()) != null ? _a2 : []);
       for (const memberDeclaration of memberDeclarations) {
         if (this.isDocumentableMember(memberDeclaration)) {
           result.push(memberDeclaration);
@@ -46665,6 +46690,14 @@ var ClassExtractor = class {
       }
     }
     return result;
+  }
+  filterMethodOverloads(declarations) {
+    return declarations.filter((declaration) => {
+      if (import_typescript102.default.isFunctionDeclaration(declaration) || import_typescript102.default.isMethodDeclaration(declaration)) {
+        return !!declaration.body || import_typescript102.default.getCombinedModifierFlags(declaration) & import_typescript102.default.ModifierFlags.Abstract;
+      }
+      return true;
+    });
   }
   getMemberTagsFromModifiers(mods) {
     const tags = [];
@@ -46715,12 +46748,6 @@ var ClassExtractor = class {
     var _a2;
     const modifiers = (_a2 = this.declaration.modifiers) != null ? _a2 : [];
     return modifiers.some((mod) => mod.kind === import_typescript102.default.SyntaxKind.AbstractKeyword);
-  }
-  isImplementationForOverload(method) {
-    if (method.kind === import_typescript102.default.SyntaxKind.MethodSignature)
-      return false;
-    const signature = this.typeChecker.getSignatureFromDeclaration(method);
-    return signature && this.typeChecker.isImplementationOfOverload(signature.declaration);
   }
 };
 var DirectiveExtractor = class extends ClassExtractor {
@@ -47005,7 +47032,7 @@ function extractInitializerApiFunction(node, typeChecker) {
   }
   const name = node.name.text;
   const type = typeChecker.getTypeAtLocation(node);
-  const callFunction = extractFunctionWithOverloads(name, type.getCallSignatures(), typeChecker);
+  const callFunction = extractFunctionWithOverloads(name, type, typeChecker);
   const subFunctions = [];
   for (const property2 of type.getProperties()) {
     const subName = property2.getName();
@@ -47014,7 +47041,7 @@ function extractInitializerApiFunction(node, typeChecker) {
       throw new Error(`Initializer API: Could not resolve declaration of sub-property: ${name}.${subName}`);
     }
     const subType = typeChecker.getTypeAtLocation(subDecl);
-    subFunctions.push(extractFunctionWithOverloads(subName, subType.getCallSignatures(), typeChecker));
+    subFunctions.push(extractFunctionWithOverloads(subName, subType, typeChecker));
   }
   let jsdocTags;
   let description;
@@ -47075,44 +47102,12 @@ function getContainerVariableStatement(node) {
   }
   return node.parent.parent;
 }
-function filterSignatureDeclarations(signatures) {
-  const result = [];
-  for (const signature of signatures) {
-    const decl = signature.getDeclaration();
-    if (import_typescript106.default.isFunctionDeclaration(decl) || import_typescript106.default.isCallSignatureDeclaration(decl)) {
-      result.push({ signature, decl });
-    }
-  }
-  return result;
-}
-function extractFunctionWithOverloads(name, signatures, typeChecker) {
+function extractFunctionWithOverloads(name, type, typeChecker) {
   return {
     name,
-    signatures: filterSignatureDeclarations(signatures).map(({ decl, signature }) => ({
-      name,
-      entryType: EntryType.Function,
-      description: extractJsDocDescription(decl),
-      generics: extractGenerics(decl),
-      isNewType: false,
-      jsdocTags: extractJsDocTags(decl),
-      params: extractAllParams(decl.parameters, typeChecker),
-      rawComment: extractRawJsDoc(decl),
-      returnType: typeChecker.typeToString(
-        typeChecker.getReturnTypeOfSignature(signature),
-        void 0,
-        import_typescript106.default.TypeFormatFlags.NoTypeReduction | import_typescript106.default.TypeFormatFlags.NoTruncation
-      )
-    })),
+    signatures: extractCallSignatures(name, typeChecker, type),
     implementation: null
   };
-}
-function findImplementationOfFunction(node, typeChecker) {
-  var _a2;
-  if (node.body !== void 0 || node.name === void 0) {
-    return node;
-  }
-  const symbol = typeChecker.getSymbolAtLocation(node.name);
-  return (_a2 = symbol == null ? void 0 : symbol.declarations) == null ? void 0 : _a2.find((s) => import_typescript106.default.isFunctionDeclaration(s) && s.body !== void 0);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/docs/src/type_alias_extractor.mjs
@@ -47183,15 +47178,6 @@ var DocsExtractor = class {
     const reflector = new TypeScriptReflectionHost(this.typeChecker);
     const exportedDeclarationMap = reflector.getExportsOfModule(sourceFile);
     let exportedDeclarations = Array.from((_a2 = exportedDeclarationMap == null ? void 0 : exportedDeclarationMap.entries()) != null ? _a2 : []).map(([exportName, declaration]) => [exportName, declaration.node]);
-    const declarationCount = exportedDeclarations.length;
-    for (let i = 0; i < declarationCount; i++) {
-      const [exportName, declaration] = exportedDeclarations[i];
-      if (import_typescript107.default.isFunctionDeclaration(declaration)) {
-        const extractor = new FunctionExtractor(exportName, declaration, this.typeChecker);
-        const overloads = extractor.getOverloads().map((overload) => [exportName, overload]);
-        exportedDeclarations.push(...overloads);
-      }
-    }
     return exportedDeclarations.sort(([a, declarationA], [b, declarationB]) => declarationA.pos - declarationB.pos);
   }
 };

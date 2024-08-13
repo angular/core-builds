@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.0+sha-e4a6198
+ * @license Angular v19.0.0-next.0+sha-6882cc7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1722,8 +1722,10 @@ class EventDispatcher {
 }
 function prepareEventForBubbling(eventInfoWrapper) {
     const event = eventInfoWrapper.getEvent();
+    const originalStopPropagation = eventInfoWrapper.getEvent().stopPropagation.bind(event);
     const stopPropagation = () => {
         event[PROPAGATION_STOPPED_SYMBOL] = true;
+        originalStopPropagation();
     };
     patchEventInstance(event, 'stopPropagation', stopPropagation);
     patchEventInstance(event, 'stopImmediatePropagation', stopPropagation);
@@ -1735,9 +1737,11 @@ function propagationStopped(eventInfoWrapper) {
 function prepareEventForReplay(eventInfoWrapper) {
     const event = eventInfoWrapper.getEvent();
     const target = eventInfoWrapper.getTargetElement();
+    const originalPreventDefault = event.preventDefault.bind(event);
     patchEventInstance(event, 'target', target);
     patchEventInstance(event, 'eventPhase', EventPhase.REPLAY);
     patchEventInstance(event, 'preventDefault', () => {
+        originalPreventDefault();
         throw new Error(PREVENT_DEFAULT_ERROR_MESSAGE + (ngDevMode ? PREVENT_DEFAULT_ERROR_MESSAGE_DETAILS : ''));
     });
     patchEventInstance(event, 'composedPath', () => {
