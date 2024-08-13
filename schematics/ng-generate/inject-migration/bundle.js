@@ -23194,7 +23194,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("19.0.0-next.0+sha-84827d5");
+var VERSION2 = new Version("19.0.0-next.0+sha-e4a6198");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -27311,7 +27311,7 @@ function migrateFile(sourceFile, options) {
         if (!statement) {
           return;
         }
-        const newProperty = import_typescript99.default.factory.updatePropertyDeclaration(property2, property2.modifiers, property2.name, property2.questionToken, property2.type, initializer);
+        const newProperty = import_typescript99.default.factory.createPropertyDeclaration(cloneModifiers(property2.modifiers), property2.name, property2.questionToken, property2.type, initializer);
         tracker.replaceText(statement.getSourceFile(), statement.getFullStart(), statement.getFullWidth(), "");
         tracker.replaceNode(property2, newProperty);
         removedStatements = removedStatements || /* @__PURE__ */ new Set();
@@ -27394,7 +27394,7 @@ ${propsToAdd.join("\n")}
   }
 }
 function migrateParameter(node, options, localTypeChecker, printer, tracker, superCall, usedInSuper, usedInConstructor, memberIndentation, innerIndentation, prependToConstructor, propsToAdd, afterSuper) {
-  var _a2;
+  var _a2, _b2;
   if (!import_typescript99.default.isIdentifier(node.name)) {
     return;
   }
@@ -27403,11 +27403,11 @@ function migrateParameter(node, options, localTypeChecker, printer, tracker, sup
   const declaresProp = parameterDeclaresProperty(node);
   if (declaresProp) {
     const prop = import_typescript99.default.factory.createPropertyDeclaration(
-      (_a2 = node.modifiers) == null ? void 0 : _a2.filter((modifier) => {
+      cloneModifiers((_a2 = node.modifiers) == null ? void 0 : _a2.filter((modifier) => {
         return !import_typescript99.default.isDecorator(modifier) && modifier.kind !== import_typescript99.default.SyntaxKind.PublicKeyword;
-      }),
+      })),
       name,
-      void 0,
+      ((_b2 = node.modifiers) == null ? void 0 : _b2.some((modifier) => modifier.kind === import_typescript99.default.SyntaxKind.PrivateKeyword)) ? void 0 : node.questionToken,
       usedInSuper ? node.type : void 0,
       usedInSuper ? void 0 : import_typescript99.default.factory.createIdentifier(PLACEHOLDER)
     );
@@ -27564,6 +27564,11 @@ function getLocalTypeChecker(sourceFile) {
 function replaceNodePlaceholder(sourceFile, node, replacement, printer) {
   const result = printer.printNode(import_typescript99.default.EmitHint.Unspecified, node, sourceFile);
   return result.replace(PLACEHOLDER, replacement);
+}
+function cloneModifiers(modifiers) {
+  return modifiers == null ? void 0 : modifiers.map((modifier) => {
+    return import_typescript99.default.isDecorator(modifier) ? import_typescript99.default.factory.createDecorator(modifier.expression) : import_typescript99.default.factory.createModifier(modifier.kind);
+  });
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/inject-migration/index.mjs
