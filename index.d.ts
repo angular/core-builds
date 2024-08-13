@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-rc.0+sha-b1a9d0f
+ * @license Angular v18.2.0-rc.0+sha-e30c60e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13496,8 +13496,10 @@ export declare const ɵPROVIDED_NG_ZONE: InjectionToken<boolean>;
 
 /**
  * Returns a set of providers required to setup support for event delegation.
+ * @param multiContract - Experimental support to provide one event contract
+ * when there are multiple binaries on the page.
  */
-export declare function ɵprovideGlobalEventDelegation(): Provider[];
+export declare function ɵprovideGlobalEventDelegation(multiContract?: boolean): Provider[];
 
 /**
  * An object that contains information about a provider that has been configured

@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0-rc.0+sha-b1a9d0f
+ * @license Angular v18.2.0-rc.0+sha-e30c60e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17236,7 +17236,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-rc.0+sha-b1a9d0f']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0-rc.0+sha-e30c60e']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31042,7 +31042,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.0-rc.0+sha-b1a9d0f');
+const VERSION = new Version('18.2.0-rc.0+sha-e30c60e');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -37831,8 +37831,10 @@ function verifySsrContentsIntegrity() {
 
 /**
  * Returns a set of providers required to setup support for event delegation.
+ * @param multiContract - Experimental support to provide one event contract
+ * when there are multiple binaries on the page.
  */
-function provideGlobalEventDelegation() {
+function provideGlobalEventDelegation(multiContract = false) {
     return [
         {
             provide: IS_GLOBAL_EVENT_DELEGATION_ENABLED,
@@ -37843,7 +37845,12 @@ function provideGlobalEventDelegation() {
             useValue: () => {
                 const injector = inject(Injector);
                 const eventContractDetails = injector.get(JSACTION_EVENT_CONTRACT);
+                if (multiContract && window.__jsaction_contract) {
+                    eventContractDetails.instance = window.__jsaction_contract;
+                    return;
+                }
                 initGlobalEventDelegation(eventContractDetails, injector);
+                window.__jsaction_contract = eventContractDetails.instance;
             },
             multi: true,
         },
