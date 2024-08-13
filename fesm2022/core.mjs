@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.0+sha-0a808fb
+ * @license Angular v19.0.0-next.0+sha-84827d5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15738,12 +15738,14 @@ function forkHydrationState(state, nextNode) {
     return { currentNode: nextNode, isConnected: state.isConnected };
 }
 function prepareI18nBlockForHydrationImpl(lView, index, parentTNode, subTemplateIndex) {
-    if (!isI18nHydrationSupportEnabled() ||
-        (parentTNode && isI18nInSkipHydrationBlock(parentTNode))) {
-        return;
-    }
     const hydrationInfo = lView[HYDRATION];
     if (!hydrationInfo) {
+        return;
+    }
+    if (!isI18nHydrationSupportEnabled() ||
+        (parentTNode &&
+            (isI18nInSkipHydrationBlock(parentTNode) ||
+                isDisconnectedNode$1(hydrationInfo, parentTNode.index - HEADER_OFFSET)))) {
         return;
     }
     const tView = lView[TVIEW];
@@ -17234,7 +17236,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.0+sha-0a808fb']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.0+sha-84827d5']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -24574,7 +24576,10 @@ let _locateOrCreateElementContainerNode = (tView, lView, tNode, index) => {
 function locateOrCreateElementContainerNode(tView, lView, tNode, index) {
     let comment;
     const hydrationInfo = lView[HYDRATION];
-    const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock$1() || isDetachedByI18n(tNode);
+    const isNodeCreationMode = !hydrationInfo ||
+        isInSkipHydrationBlock$1() ||
+        isDisconnectedNode$1(hydrationInfo, index) ||
+        isDetachedByI18n(tNode);
     lastNodeWasCreated(isNodeCreationMode);
     // Regular creation mode.
     if (isNodeCreationMode) {
@@ -31037,7 +31042,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.0+sha-0a808fb');
+const VERSION = new Version('19.0.0-next.0+sha-84827d5');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
