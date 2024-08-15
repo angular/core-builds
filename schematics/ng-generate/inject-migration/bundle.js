@@ -23194,7 +23194,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("19.0.0-next.0+sha-d4449fc");
+var VERSION2 = new Version("19.0.0-next.0+sha-58a79b6");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -27311,7 +27311,7 @@ function migrateFile(sourceFile, options) {
         if (!statement) {
           return;
         }
-        const newProperty = import_typescript99.default.factory.createPropertyDeclaration(cloneModifiers(property2.modifiers), property2.name, property2.questionToken, property2.type, initializer);
+        const newProperty = import_typescript99.default.factory.createPropertyDeclaration(cloneModifiers(property2.modifiers), cloneName(property2.name), property2.questionToken, property2.type, initializer);
         tracker.replaceText(statement.getSourceFile(), statement.getFullStart(), statement.getFullWidth(), "");
         tracker.replaceNode(property2, newProperty);
         removedStatements = removedStatements || /* @__PURE__ */ new Set();
@@ -27520,6 +27520,8 @@ function migrateInjectDecorator(firstArg, type, localTypeChecker) {
         injectedType = arrowFn2.body.getText();
       }
     }
+  } else if (type && (import_typescript99.default.isTypeReferenceNode(type) || import_typescript99.default.isUnionTypeNode(type) && type.types.some(import_typescript99.default.isTypeReferenceNode))) {
+    typeArguments = [type];
   }
   return { injectedType, typeArguments };
 }
@@ -27569,6 +27571,24 @@ function cloneModifiers(modifiers) {
   return modifiers == null ? void 0 : modifiers.map((modifier) => {
     return import_typescript99.default.isDecorator(modifier) ? import_typescript99.default.factory.createDecorator(modifier.expression) : import_typescript99.default.factory.createModifier(modifier.kind);
   });
+}
+function cloneName(node) {
+  switch (node.kind) {
+    case import_typescript99.default.SyntaxKind.Identifier:
+      return import_typescript99.default.factory.createIdentifier(node.text);
+    case import_typescript99.default.SyntaxKind.StringLiteral:
+      return import_typescript99.default.factory.createStringLiteral(node.text, node.getText()[0] === `'`);
+    case import_typescript99.default.SyntaxKind.NoSubstitutionTemplateLiteral:
+      return import_typescript99.default.factory.createNoSubstitutionTemplateLiteral(node.text, node.rawText);
+    case import_typescript99.default.SyntaxKind.NumericLiteral:
+      return import_typescript99.default.factory.createNumericLiteral(node.text);
+    case import_typescript99.default.SyntaxKind.ComputedPropertyName:
+      return import_typescript99.default.factory.createComputedPropertyName(node.expression);
+    case import_typescript99.default.SyntaxKind.PrivateIdentifier:
+      return import_typescript99.default.factory.createPrivateIdentifier(node.text);
+    default:
+      return node;
+  }
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/inject-migration/index.mjs
