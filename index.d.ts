@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0+sha-9de30a7
+ * @license Angular v18.2.0+sha-4bd9ba7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3791,8 +3791,8 @@ export declare class ElementRef<T = any> {
      *   <header>Use with caution</header>
      *   <p>
      *    Use this API as the last resort when direct access to DOM is needed. Use templating and
-     *    data-binding provided by Angular instead. Alternatively you can take a look at {@link
-     * Renderer2} which provides an API that can be safely used.
+     *    data-binding provided by Angular instead. Alternatively you can take a look at
+     *    {@link Renderer2} which provides an API that can be safely used.
      *   </p>
      * </div>
      */

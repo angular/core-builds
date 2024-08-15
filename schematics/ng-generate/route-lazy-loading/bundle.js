@@ -23195,7 +23195,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.0+sha-9de30a7");
+var VERSION2 = new Version("18.2.0+sha-4bd9ba7");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -27259,16 +27259,15 @@ var createImportThenCallExpression = (componentDeclarationName) => import_typesc
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/route-lazy-loading/index.mjs
 function route_lazy_loading_default(options) {
   return (tree, context) => __async(this, null, function* () {
-    const { buildPaths, testPaths } = yield getProjectTsConfigPaths(tree);
+    const { buildPaths } = yield getProjectTsConfigPaths(tree);
     const basePath = process.cwd();
-    const allPaths = [...buildPaths, ...testPaths];
     const pathToMigrate = normalizePath((0, import_path3.join)(basePath, options.path));
-    if (!allPaths.length) {
+    if (!buildPaths.length) {
       throw new import_schematics.SchematicsException("Could not find any tsconfig file. Cannot run the route lazy loading migration.");
     }
     let migratedRoutes = [];
     let skippedRoutes = [];
-    for (const tsconfigPath of allPaths) {
+    for (const tsconfigPath of buildPaths) {
       const { migratedRoutes: migrated, skippedRoutes: skipped } = standaloneRoutesMigration(tree, tsconfigPath, basePath, pathToMigrate, options);
       migratedRoutes.push(...migrated);
       skippedRoutes.push(...skipped);
