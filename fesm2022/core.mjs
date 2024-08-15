@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.0+sha-3b0dca7
+ * @license Angular v19.0.0-next.0+sha-f03d274
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12032,7 +12032,8 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, enviro
             4 /* LViewFlags.CreationMode */ |
             128 /* LViewFlags.Attached */ |
             8 /* LViewFlags.FirstLViewPass */ |
-            64 /* LViewFlags.Dirty */;
+            64 /* LViewFlags.Dirty */ |
+            1024 /* LViewFlags.RefreshView */;
     if (embeddedViewInjector !== null ||
         (parentLView && parentLView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */)) {
         lView[FLAGS] |= 2048 /* LViewFlags.HasEmbeddedViewInjector */;
@@ -17252,7 +17253,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.0+sha-3b0dca7']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.0+sha-f03d274']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31058,7 +31059,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.0+sha-3b0dca7');
+const VERSION = new Version('19.0.0-next.0+sha-f03d274');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -32764,7 +32765,7 @@ class ApplicationRef {
             this._runningTick = true;
             this.detectChangesInAttachedViews(refreshViews);
             if (typeof ngDevMode === 'undefined' || ngDevMode) {
-                for (let view of this._views) {
+                for (let view of this.allViews) {
                     view.checkNoChanges();
                 }
             }
@@ -32792,7 +32793,7 @@ class ApplicationRef {
             // After the we execute render hooks in the first pass, we loop while views are marked dirty and should refresh them.
             if (refreshViews || !isFirstPass) {
                 this.beforeRender.next(isFirstPass);
-                for (let { _lView, notifyErrorHandler } of this._views) {
+                for (let { _lView, notifyErrorHandler } of this.allViews) {
                     detectChangesInViewIfRequired(_lView, notifyErrorHandler, isFirstPass, this.zonelessEnabled);
                 }
             }

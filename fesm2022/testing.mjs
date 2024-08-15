@@ -1,11 +1,11 @@
 /**
- * @license Angular v19.0.0-next.0+sha-3b0dca7
+ * @license Angular v19.0.0-next.0+sha-f03d274
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import * as i0 from '@angular/core';
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, getDebugNode, RendererFactory2, ɵdetectChangesInViewIfRequired, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵZONELESS_ENABLED, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, ɵChangeDetectionScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵZONELESS_ENABLED, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ResourceLoader } from '@angular/compiler';
@@ -175,10 +175,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-3b0dca7", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
-    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-3b0dca7", ngImport: i0, type: TestBedApplicationErrorHandler }); }
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-f03d274", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
+    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-f03d274", ngImport: i0, type: TestBedApplicationErrorHandler }); }
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-3b0dca7", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.0.0-next.0+sha-f03d274", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
@@ -210,6 +210,7 @@ class ComponentFixture {
         this._testAppRef = this._appRef;
         this.pendingTasks = inject$1(ɵPendingTasks);
         this.appErrorHandler = inject$1(TestBedApplicationErrorHandler);
+        this.scheduler = inject$1(ɵChangeDetectionScheduler, { optional: true });
         // TODO(atscott): Remove this from public API
         this.ngZone = this._noZoneOptionIsSet ? null : this._ngZone;
         this.changeDetectorRef = componentRef.changeDetectorRef;
@@ -218,6 +219,16 @@ class ComponentFixture {
         this.componentInstance = componentRef.instance;
         this.nativeElement = this.elementRef.nativeElement;
         this.componentRef = componentRef;
+    }
+    /** @internal */
+    initialize() {
+        if (this._autoDetect) {
+            this._testAppRef.externalTestViews.add(this.componentRef.hostView);
+            this.scheduler?.notify(7 /* ɵNotificationSource.ViewAttached */);
+        }
+        this.componentRef.hostView.onDestroy(() => {
+            this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
+        });
     }
     /**
      * Do a change detection run to make sure there were no changes.
@@ -283,6 +294,7 @@ class ComponentFixture {
      * Trigger component destruction.
      */
     destroy() {
+        this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
         if (!this._isDestroyed) {
             this.componentRef.destroy();
             this._isDestroyed = true;
@@ -298,9 +310,11 @@ class ComponentFixture {
 class ScheduledComponentFixture extends ComponentFixture {
     constructor() {
         super(...arguments);
+        /** @internal */
         this._autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? true;
     }
     initialize() {
+        super.initialize();
         if (this._autoDetect) {
             this._appRef.attachView(this.componentRef.hostView);
         }
@@ -333,16 +347,15 @@ class PseudoApplicationComponentFixture extends ComponentFixture {
     constructor() {
         super(...arguments);
         this._subscriptions = new Subscription();
+        /** @internal */
         this._autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? false;
-        this.afterTickSubscription = undefined;
-        this.beforeRenderSubscription = undefined;
     }
     initialize() {
         if (this._autoDetect) {
-            this.subscribeToAppRefEvents();
+            this._testAppRef.externalTestViews.add(this.componentRef.hostView);
         }
         this.componentRef.hostView.onDestroy(() => {
-            this.unsubscribeFromAppRefEvents();
+            this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
         });
         // Create subscriptions outside the NgZone so that the callbacks run outside
         // of NgZone.
@@ -374,46 +387,16 @@ class PseudoApplicationComponentFixture extends ComponentFixture {
         }
         if (autoDetect !== this._autoDetect) {
             if (autoDetect) {
-                this.subscribeToAppRefEvents();
+                this._testAppRef.externalTestViews.add(this.componentRef.hostView);
             }
             else {
-                this.unsubscribeFromAppRefEvents();
+                this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
             }
         }
         this._autoDetect = autoDetect;
         this.detectChanges();
     }
-    subscribeToAppRefEvents() {
-        this._ngZone.runOutsideAngular(() => {
-            this.afterTickSubscription = this._testAppRef.afterTick.subscribe(() => {
-                this.checkNoChanges();
-            });
-            this.beforeRenderSubscription = this._testAppRef.beforeRender.subscribe((isFirstPass) => {
-                try {
-                    ɵdetectChangesInViewIfRequired(this.componentRef.hostView._lView, this.componentRef.hostView.notifyErrorHandler, isFirstPass, false /** zoneless enabled */);
-                }
-                catch (e) {
-                    // If an error occurred during change detection, remove the test view from the application
-                    // ref tracking. Note that this isn't exactly desirable but done this way because of how
-                    // things used to work with `autoDetect` and uncaught errors. Ideally we would surface
-                    // this error to the error handler instead and continue refreshing the view like
-                    // what would happen in the application.
-                    this.unsubscribeFromAppRefEvents();
-                    throw e;
-                }
-            });
-            this._testAppRef.externalTestViews.add(this.componentRef.hostView);
-        });
-    }
-    unsubscribeFromAppRefEvents() {
-        this.afterTickSubscription?.unsubscribe();
-        this.beforeRenderSubscription?.unsubscribe();
-        this.afterTickSubscription = undefined;
-        this.beforeRenderSubscription = undefined;
-        this._testAppRef.externalTestViews.delete(this.componentRef.hostView);
-    }
     destroy() {
-        this.unsubscribeFromAppRefEvents();
         this._subscriptions.unsubscribe();
         super.destroy();
     }

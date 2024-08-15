@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.0+sha-3b0dca7
+ * @license Angular v19.0.0-next.0+sha-f03d274
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -66,6 +66,7 @@ export declare abstract class ComponentFixture<T> {
     private _isDestroyed;
     private readonly pendingTasks;
     private readonly appErrorHandler;
+    private readonly scheduler;
     ngZone: NgZone | null;
     /** @nodoc */
     constructor(componentRef: ComponentRef<T>);
