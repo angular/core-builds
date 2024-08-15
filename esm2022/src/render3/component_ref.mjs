@@ -387,7 +387,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0+sha-b1ed7e2']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0+sha-9de30a7']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`

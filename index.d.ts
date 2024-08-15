@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0+sha-b1ed7e2
+ * @license Angular v18.2.0+sha-9de30a7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7645,10 +7645,10 @@ export declare class NgZone {
      * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
-    constructor({ enableLongStackTrace, shouldCoalesceEventChangeDetection, shouldCoalesceRunChangeDetection, }: {
-        enableLongStackTrace?: boolean | undefined;
-        shouldCoalesceEventChangeDetection?: boolean | undefined;
-        shouldCoalesceRunChangeDetection?: boolean | undefined;
+    constructor(options: {
+        enableLongStackTrace?: boolean;
+        shouldCoalesceEventChangeDetection?: boolean;
+        shouldCoalesceRunChangeDetection?: boolean;
     });
     /**
      This method checks whether the method call happens within an Angular Zone instance.
@@ -12262,6 +12262,7 @@ export declare class ɵChangeDetectionSchedulerImpl implements ɵChangeDetection
     private readonly schedulerTickApplyArgs;
     private readonly subscriptions;
     private readonly angularZoneId;
+    private readonly scheduleInRootZone;
     private cancelScheduledCallback;
     private shouldRefreshViews;
     private useMicrotaskScheduler;
@@ -13085,9 +13086,10 @@ export declare interface ɵInternalEnvironmentProviders extends EnvironmentProvi
     ɵfromNgModule?: true;
 }
 
-export declare function ɵinternalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsideZone, }: {
+export declare function ɵinternalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsideZone, scheduleInRootZone, }: {
     ngZoneFactory?: () => NgZone;
     ignoreChangesOutsideZone?: boolean;
+    scheduleInRootZone?: boolean;
 }): StaticProvider[];
 
 /**

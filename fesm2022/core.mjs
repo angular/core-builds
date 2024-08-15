@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.0+sha-b1ed7e2
+ * @license Angular v18.2.0+sha-9de30a7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6639,6 +6639,8 @@ function getOriginalError(error) {
     return error[ERROR_ORIGINAL_ERROR];
 }
 
+const SCHEDULE_IN_ROOT_ZONE_DEFAULT = true;
+
 /**
  * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
  * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
@@ -6988,7 +6990,7 @@ let ngZoneInstanceId = 0;
  * @publicApi
  */
 class NgZone {
-    constructor({ enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false, }) {
+    constructor(options) {
         this.hasPendingMacrotasks = false;
         this.hasPendingMicrotasks = false;
         /**
@@ -7015,6 +7017,7 @@ class NgZone {
          * Notifies that an error has been delivered.
          */
         this.onError = new EventEmitter(false);
+        const { enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false, scheduleInRootZone = SCHEDULE_IN_ROOT_ZONE_DEFAULT, } = options;
         if (typeof Zone == 'undefined') {
             throw new RuntimeError(908 /* RuntimeErrorCode.MISSING_ZONEJS */, ngDevMode && `In this configuration Angular requires Zone.js`);
         }
@@ -7042,6 +7045,7 @@ class NgZone {
             !shouldCoalesceRunChangeDetection && shouldCoalesceEventChangeDetection;
         self.shouldCoalesceRunChangeDetection = shouldCoalesceRunChangeDetection;
         self.callbackScheduled = false;
+        self.scheduleInRootZone = scheduleInRootZone;
         forkInnerZoneWithAngularBehavior(self);
     }
     /**
@@ -7181,7 +7185,7 @@ function delayChangeDetectionForEvents(zone) {
         return;
     }
     zone.callbackScheduled = true;
-    Zone.root.run(() => {
+    function scheduleCheckStable() {
         scheduleCallbackWithRafRace(() => {
             zone.callbackScheduled = false;
             updateMicroTaskStatus(zone);
@@ -7189,7 +7193,17 @@ function delayChangeDetectionForEvents(zone) {
             checkStable(zone);
             zone.isCheckStableRunning = false;
         });
-    });
+    }
+    if (zone.scheduleInRootZone) {
+        Zone.root.run(() => {
+            scheduleCheckStable();
+        });
+    }
+    else {
+        zone._outer.run(() => {
+            scheduleCheckStable();
+        });
+    }
     updateMicroTaskStatus(zone);
 }
 function forkInnerZoneWithAngularBehavior(zone) {
@@ -16115,6 +16129,8 @@ const ZONELESS_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || 
 /** Token used to indicate `provideExperimentalZonelessChangeDetection` was used. */
 const PROVIDED_ZONELESS = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless provided' : '', { providedIn: 'root', factory: () => false });
 const ZONELESS_SCHEDULER_DISABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'scheduler disabled' : '');
+// TODO(atscott): Remove in v19. Scheduler should be done with runOutsideAngular.
+const SCHEDULE_IN_ROOT_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'run changes outside zone in root' : '');
 
 /**
  * Represents a component created by a `ComponentFactory`.
@@ -17236,7 +17252,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0+sha-b1ed7e2']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.0+sha-9de30a7']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31042,7 +31058,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.0+sha-b1ed7e2');
+const VERSION = new Version('18.2.0+sha-9de30a7');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33129,8 +33145,8 @@ class NgZoneChangeDetectionScheduler {
  * with the bootstrapModule API.
  */
 const PROVIDED_NG_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'provideZoneChangeDetection token' : '', { factory: () => false });
-function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsideZone, }) {
-    ngZoneFactory ??= () => new NgZone(getNgZoneOptions());
+function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsideZone, scheduleInRootZone, }) {
+    ngZoneFactory ??= () => new NgZone({ ...getNgZoneOptions(), scheduleInRootZone });
     return [
         { provide: NgZone, useFactory: ngZoneFactory },
         {
@@ -33161,6 +33177,10 @@ function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsid
         // Always disable scheduler whenever explicitly disabled, even if another place called
         // `provideZoneChangeDetection` without the 'ignore' option.
         ignoreChangesOutsideZone === true ? { provide: ZONELESS_SCHEDULER_DISABLED, useValue: true } : [],
+        {
+            provide: SCHEDULE_IN_ROOT_ZONE,
+            useValue: scheduleInRootZone ?? SCHEDULE_IN_ROOT_ZONE_DEFAULT,
+        },
     ];
 }
 /**
@@ -33185,15 +33205,18 @@ function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsid
  */
 function provideZoneChangeDetection(options) {
     const ignoreChangesOutsideZone = options?.ignoreChangesOutsideZone;
+    const scheduleInRootZone = options?.scheduleInRootZone;
     const zoneProviders = internalProvideZoneChangeDetection({
         ngZoneFactory: () => {
             const ngZoneOptions = getNgZoneOptions(options);
+            ngZoneOptions.scheduleInRootZone = scheduleInRootZone;
             if (ngZoneOptions.shouldCoalesceEventChangeDetection) {
                 performanceMarkFeature('NgZone_CoalesceEvent');
             }
             return new NgZone(ngZoneOptions);
         },
         ignoreChangesOutsideZone,
+        scheduleInRootZone,
     });
     return makeEnvironmentProviders([
         { provide: PROVIDED_NG_ZONE, useValue: true },
@@ -33288,6 +33311,9 @@ class ChangeDetectionSchedulerImpl {
         this.angularZoneId = this.zoneIsDefined
             ? this.ngZone._inner?.get(angularZoneInstanceIdProperty)
             : null;
+        this.scheduleInRootZone = !this.zonelessEnabled &&
+            this.zoneIsDefined &&
+            (inject(SCHEDULE_IN_ROOT_ZONE, { optional: true }) ?? false);
         this.cancelScheduledCallback = null;
         this.shouldRefreshViews = false;
         this.useMicrotaskScheduler = false;
@@ -33366,17 +33392,11 @@ class ChangeDetectionSchedulerImpl {
             ? scheduleCallbackWithMicrotask
             : scheduleCallbackWithRafRace;
         this.pendingRenderTaskId = this.taskService.add();
-        if (this.zoneIsDefined) {
-            Zone.root.run(() => {
-                this.cancelScheduledCallback = scheduleCallback(() => {
-                    this.tick(this.shouldRefreshViews);
-                });
-            });
+        if (this.scheduleInRootZone) {
+            this.cancelScheduledCallback = Zone.root.run(() => scheduleCallback(() => this.tick(this.shouldRefreshViews)));
         }
         else {
-            this.cancelScheduledCallback = scheduleCallback(() => {
-                this.tick(this.shouldRefreshViews);
-            });
+            this.cancelScheduledCallback = this.ngZone.runOutsideAngular(() => scheduleCallback(() => this.tick(this.shouldRefreshViews)));
         }
     }
     shouldScheduleTick() {
@@ -33517,6 +33537,7 @@ function provideExperimentalZonelessChangeDetection() {
         { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
         { provide: NgZone, useClass: NoopNgZone },
         { provide: ZONELESS_ENABLED, useValue: true },
+        { provide: SCHEDULE_IN_ROOT_ZONE, useValue: false },
         typeof ngDevMode === 'undefined' || ngDevMode
             ? [{ provide: PROVIDED_ZONELESS, useValue: true }]
             : [],
@@ -33991,10 +34012,14 @@ class PlatformRef {
      *     argument is deprecated. Use the `PlatformRef.bootstrapModule` API instead.
      */
     bootstrapModuleFactory(moduleFactory, options) {
-        const ngZoneFactory = () => getNgZone(options?.ngZone, getNgZoneOptions({
-            eventCoalescing: options?.ngZoneEventCoalescing,
-            runCoalescing: options?.ngZoneRunCoalescing,
-        }));
+        const scheduleInRootZone = options?.scheduleInRootZone;
+        const ngZoneFactory = () => getNgZone(options?.ngZone, {
+            ...getNgZoneOptions({
+                eventCoalescing: options?.ngZoneEventCoalescing,
+                runCoalescing: options?.ngZoneRunCoalescing,
+            }),
+            scheduleInRootZone,
+        });
         const ignoreChangesOutsideZone = options?.ignoreChangesOutsideZone;
         const allAppProviders = [
             internalProvideZoneChangeDetection({
