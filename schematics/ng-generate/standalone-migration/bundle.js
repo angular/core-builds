@@ -26102,7 +26102,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("19.0.0-next.0+sha-f47901a");
+var VERSION2 = new Version("19.0.0-next.0+sha-b063468");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27206,7 +27206,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-f47901a"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-b063468"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27225,7 +27225,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-f47901a"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-b063468"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27293,7 +27293,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-f47901a"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-b063468"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27611,7 +27611,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-f47901a"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-b063468"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27634,7 +27634,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-f47901a"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-b063468"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27672,7 +27672,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-f47901a"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-b063468"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27696,7 +27696,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-f47901a"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-b063468"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27731,7 +27731,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("19.0.0-next.0+sha-f47901a"));
+  definitionMap.set("version", literal("19.0.0-next.0+sha-b063468"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27748,7 +27748,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("19.0.0-next.0+sha-f47901a");
+var VERSION3 = new Version("19.0.0-next.0+sha-b063468");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -44549,29 +44549,41 @@ var ComponentDecoratorHandler = class {
     };
     const templateAndTemplateStyleResources = preloadAndParseTemplate(this.evaluator, this.resourceLoader, this.depTracker, this.preanalyzeTemplateCache, node, decorator, component, containingFile, this.defaultPreserveWhitespaces, this.extractTemplateOptions, this.compilationMode).then((template2) => {
       if (template2 === null) {
-        return void 0;
+        return { templateStyles: [], templateStyleUrls: [] };
       }
-      return Promise.all(template2.styleUrls.map((styleUrl) => resolveStyleUrl(styleUrl))).then(() => void 0);
+      let templateUrl;
+      if (template2.sourceMapping.type === "external") {
+        templateUrl = template2.sourceMapping.templateUrl;
+      }
+      return {
+        templateUrl,
+        templateStyles: template2.styles,
+        templateStyleUrls: template2.styleUrls
+      };
     });
     const componentStyleUrls = extractComponentStyleUrls(this.evaluator, component);
-    let inlineStyles;
-    if (component.has("styles")) {
-      const litStyles = parseDirectiveStyles(component, this.evaluator, this.compilationMode);
-      if (litStyles === null) {
-        this.preanalyzeStylesCache.set(node, null);
-      } else {
-        inlineStyles = Promise.all(litStyles.map((style) => this.resourceLoader.preprocessInline(style, { type: "style", containingFile }))).then((styles) => {
-          this.preanalyzeStylesCache.set(node, styles);
-        });
+    return templateAndTemplateStyleResources.then((templateInfo) => __async(this, null, function* () {
+      let styles = null;
+      const rawStyles = parseDirectiveStyles(component, this.evaluator, this.compilationMode);
+      if (rawStyles == null ? void 0 : rawStyles.length) {
+        styles = yield Promise.all(rawStyles.map((style) => this.resourceLoader.preprocessInline(style, { type: "style", containingFile })));
       }
-    } else {
-      this.preanalyzeStylesCache.set(node, null);
-    }
-    return Promise.all([
-      templateAndTemplateStyleResources,
-      inlineStyles,
-      ...componentStyleUrls.map((styleUrl) => resolveStyleUrl(styleUrl.url))
-    ]).then(() => void 0);
+      if (templateInfo.templateStyles) {
+        styles != null ? styles : styles = [];
+        styles.push(...yield Promise.all(templateInfo.templateStyles.map((style) => {
+          var _a2;
+          return this.resourceLoader.preprocessInline(style, {
+            type: "style",
+            containingFile: (_a2 = templateInfo.templateUrl) != null ? _a2 : containingFile
+          });
+        })));
+      }
+      this.preanalyzeStylesCache.set(node, styles);
+      yield Promise.all([
+        ...componentStyleUrls.map((styleUrl) => resolveStyleUrl(styleUrl.url)),
+        ...templateInfo.templateStyleUrls.map((url) => resolveStyleUrl(url))
+      ]);
+    }));
   }
   analyze(node, decorator) {
     var _a2, _b2, _c2, _d2, _e2;
@@ -44756,9 +44768,9 @@ var ComponentDecoratorHandler = class {
           styles.push(...litStyles);
         }
       }
-    }
-    if (template2.styles.length > 0) {
-      styles.push(...template2.styles);
+      if (template2.styles.length > 0) {
+        styles.push(...template2.styles);
+      }
     }
     let explicitlyDeferredTypes = null;
     if (metadata.isStandalone && rawDeferredImports !== null) {
@@ -46173,7 +46185,7 @@ function compareVersions(v1, v2) {
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/typescript_support.mjs
 var MIN_TS_VERSION = "5.4.0";
-var MAX_TS_VERSION = "5.6.0";
+var MAX_TS_VERSION = "5.7.0";
 var tsVersion = import_typescript97.default.version;
 function checkVersion(version, minVersion, maxVersion) {
   if (compareVersions(version, minVersion) < 0 || compareVersions(version, maxVersion) >= 0) {
