@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.1+sha-87c594b
+ * @license Angular v18.2.1+sha-6059ca8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -362,6 +362,37 @@ export declare function afterRender<E = never, W = never, M = never>(spec: {
  */
 export declare function afterRender(callback: VoidFunction, options?: AfterRenderOptions): AfterRenderRef;
 
+declare type AfterRenderHook = (value?: unknown) => unknown;
+
+declare type AfterRenderHooks = [
+AfterRenderHook | undefined,
+AfterRenderHook | undefined,
+AfterRenderHook | undefined,
+AfterRenderHook | undefined
+];
+
+declare class AfterRenderImpl {
+    static readonly PHASES: readonly [AfterRenderPhase.EarlyRead, AfterRenderPhase.Write, AfterRenderPhase.MixedReadWrite, AfterRenderPhase.Read];
+    private readonly ngZone;
+    private readonly scheduler;
+    private readonly errorHandler;
+    /** Current set of active sequences. */
+    private readonly sequences;
+    /** Tracks registrations made during the current set of executions. */
+    private readonly deferredRegistrations;
+    /** Whether the `AfterRenderManager` is currently executing hooks. */
+    executing: boolean;
+    /**
+     * Run the sequence of phases of hooks, once through. As a result of executing some hooks, more
+     * might be scheduled.
+     */
+    execute(): void;
+    register(sequence: AfterRenderSequence): void;
+    unregister(sequence: AfterRenderSequence): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
+
 /**
  * Options passed to `afterRender` and `afterNextRender`.
  *
@@ -389,6 +420,7 @@ export declare interface AfterRenderOptions {
      */
     phase?: AfterRenderPhase;
 }
+
 
 /**
  * The phase to run an `afterRender` or `afterNextRender` callback in.
@@ -461,6 +493,26 @@ export declare interface AfterRenderRef {
     /**
      * Shut down the callback, preventing it from being called again.
      */
+    destroy(): void;
+}
+
+declare class AfterRenderSequence implements AfterRenderRef {
+    readonly impl: AfterRenderImpl;
+    readonly hooks: AfterRenderHooks;
+    once: boolean;
+    /**
+     * Whether this sequence errored or was destroyed during this execution, and hooks should no
+     * longer run for it.
+     */
+    erroredOrDestroyed: boolean;
+    /**
+     * The value returned by the last hook execution (if any), ready to be pipelined into the next
+     * one.
+     */
+    pipelinedValue: unknown;
+    private unregisterOnDestroy;
+    constructor(impl: AfterRenderImpl, hooks: AfterRenderHooks, once: boolean, destroyRef: DestroyRef);
+    afterRun(): void;
     destroy(): void;
 }
 
@@ -828,7 +880,7 @@ export declare class ApplicationRef {
     private _destroyed;
     private _destroyListeners;
     private readonly internalErrorHandler;
-    private readonly afterRenderEffectManager;
+    private readonly afterRenderManager;
     private readonly zonelessEnabled;
     private externalTestViews;
     private beforeRender;
@@ -948,7 +1000,30 @@ export declare class ApplicationRef {
      * detection pass during which all change detection must complete.
      */
     tick(): void;
-    private detectChangesInAttachedViews;
+    /**
+     * Performs the core work of synchronizing the application state with the UI, resolving any
+     * pending dirtiness (potentially in a loop).
+     */
+    private synchronize;
+    /**
+     * Perform a single synchronization pass.
+     */
+    private synchronizeOnce;
+    /**
+     * Checks `allViews` for views which require refresh/traversal, and updates `dirtyFlags`
+     * accordingly, with two potential behaviors:
+     *
+     * 1. If any of our views require updating, then this adds the `ViewTreeTraversal` dirty flag.
+     *    This _should_ be a no-op, since the scheduler should've added the flag at the same time the
+     *    view was marked as needing updating.
+     *
+     *    TODO(alxhub): figure out if this behavior is still needed for edge cases.
+     *
+     * 2. If none of our views require updating, then clear the view-related `dirtyFlag`s. This
+     *    happens when the scheduler is notified of a view becoming dirty, but the view itself isn't
+     *    reachable through traversal from our roots (e.g. it's detached from the CD tree).
+     */
+    private syncDirtyFlagsWithViews;
     /**
      * Attaches a view so that it will be dirty checked.
      * The view will be automatically detached when it is destroyed.
@@ -6154,24 +6229,6 @@ declare type InputTransformFunction = (value: any) => any;
 declare type InsertBeforeIndex = null | number | number[];
 
 /**
- * Options passed to `internalAfterNextRender`.
- */
-declare interface InternalAfterNextRenderOptions {
-    /**
-     * The `Injector` to use during creation.
-     *
-     * If this is not provided, the current injection context will be used instead (via `inject`).
-     */
-    injector?: Injector;
-    /**
-     * When true, the hook will execute both on client and on the server.
-     *
-     * When false or undefined, the hook only executes in the browser.
-     */
-    runOnServer?: boolean;
-}
-
-/**
  * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a
  * const enum, so actual enum values would be inlined in generated code. The `InjectFlags` enum can
  * be turned into a const enum when ViewEngine is removed (see TODO at the `InjectFlags` enum
@@ -6980,8 +7037,6 @@ declare interface LViewEnvironment {
     sanitizer: Sanitizer | null;
     /** Container for reactivity system `effect`s. */
     inlineEffectRunner: ɵEffectScheduler | null;
-    /** Container for after render hooks */
-    afterRenderEventManager: ɵAfterRenderEventManager | null;
     /** Scheduler for change detection to notify when application state changes. */
     changeDetectionScheduler: ɵChangeDetectionScheduler | null;
 }
@@ -11994,17 +12049,9 @@ export declare function ɵ_sanitizeHtml(defaultDoc: any, unsafeHtmlInput: string
 
 export declare function ɵ_sanitizeUrl(url: string): string;
 
-/**
- * Implements core timing for `afterRender` and `afterNextRender` events.
- * Delegates to an optional `AfterRenderCallbackHandler` for implementation.
- */
-export declare class ɵAfterRenderEventManager {
-    /**
-     * Executes internal and user-provided callbacks.
-     */
+export declare class ɵAfterRenderManager {
+    impl: AfterRenderImpl | null;
     execute(): void;
-    executeInternalCallbacks(): void;
-    ngOnDestroy(): void;
     /** @nocollapse */
     static ɵprov: unknown;
 }
@@ -12264,7 +12311,6 @@ export declare class ɵChangeDetectionSchedulerImpl implements ɵChangeDetection
     private readonly angularZoneId;
     private readonly scheduleInRootZone;
     private cancelScheduledCallback;
-    private shouldRefreshViews;
     private useMicrotaskScheduler;
     runningTick: boolean;
     pendingRenderTaskId: number | null;
@@ -13043,23 +13089,6 @@ export declare const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE: unique symbol;
 export declare const ɵINTERNAL_APPLICATION_ERROR_HANDLER: InjectionToken<(e: any) => void>;
 
 /**
- * Register a callback to run once before any userspace `afterRender` or
- * `afterNextRender` callbacks.
- *
- * This function should almost always be used instead of `afterRender` or
- * `afterNextRender` for implementing framework functionality. Consider:
- *
- *   1.) `AfterRenderPhase.EarlyRead` is intended to be used for implementing
- *       custom layout. If the framework itself mutates the DOM after *any*
- *       `AfterRenderPhase.EarlyRead` callbacks are run, the phase can no
- *       longer reliably serve its purpose.
- *
- *   2.) Importing `afterRender` in the framework can reduce the ability for it
- *       to be tree-shaken, and the framework shouldn't need much of the behavior.
- */
-export declare function ɵinternalAfterNextRender(callback: VoidFunction, options?: InternalAfterNextRenderOptions): void;
-
-/**
  * Internal create application API that implements the core application creation logic and optional
  * bootstrap logic.
  *
@@ -13359,10 +13388,11 @@ export declare const enum ɵNotificationSource {
     DebugApplyChanges = 3,
     MarkForCheck = 4,
     Listener = 5,
-    NewRenderHook = 6,
-    ViewAttached = 7,
-    ViewDetachedFromDOM = 8,
-    AsyncAnimationsLoaded = 9
+    RenderHook = 6,
+    DeferredRenderHook = 7,
+    ViewAttached = 8,
+    ViewDetachedFromDOM = 9,
+    AsyncAnimationsLoaded = 10
 }
 
 /**
@@ -13526,23 +13556,6 @@ export declare interface ɵProviderRecord {
      */
     importPath?: Type<unknown>[];
 }
-
-/**
- * Queue a state update to be performed asynchronously.
- *
- * This is useful to safely update application state that is used in an expression that was already
- * checked during change detection. This defers the update until later and prevents
- * `ExpressionChangedAfterItHasBeenChecked` errors. Using signals for state is recommended instead,
- * but it's not always immediately possible to change the state to a signal because it would be a
- * breaking change. When the callback updates state used in an expression, this needs to be
- * accompanied by an explicit notification to the framework that something has changed (i.e.
- * updating a signal or calling `ChangeDetectorRef.markForCheck()`) or may still cause
- * `ExpressionChangedAfterItHasBeenChecked` in dev mode or fail to synchronize the state to the DOM
- * in production.
- */
-export declare function ɵqueueStateUpdate(callback: VoidFunction, options?: {
-    injector?: Injector;
-}): void;
 
 export declare function ɵreadHydrationInfo(node: RNode): ɵHydrationInfo | null;
 

@@ -139,7 +139,7 @@ export function detachViewFromDOM(tView, lView) {
     // When we remove a view from the DOM, we need to rerun afterRender hooks
     // We don't necessarily needs to run change detection. DOM removal only requires
     // change detection if animations are enabled (this notification is handled by animations).
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(8 /* NotificationSource.ViewDetachedFromDOM */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(9 /* NotificationSource.ViewDetachedFromDOM */);
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
 /**
