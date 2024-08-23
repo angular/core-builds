@@ -177,7 +177,7 @@ export function requiresRefreshOrTraversal(lView) {
  * parents above.
  */
 export function updateAncestorTraversalFlagsOnAttach(lView) {
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(7 /* NotificationSource.ViewAttached */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(8 /* NotificationSource.ViewAttached */);
     if (lView[FLAGS] & 64 /* LViewFlags.Dirty */) {
         lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
     }
