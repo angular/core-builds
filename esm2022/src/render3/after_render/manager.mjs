@@ -75,7 +75,7 @@ export class AfterRenderImpl {
             this.sequences.add(sequence);
         }
         if (this.deferredRegistrations.size > 0) {
-            this.scheduler.notify(7 /* NotificationSource.DeferredRenderHook */);
+            this.scheduler.notify(8 /* NotificationSource.DeferredRenderHook */);
         }
         this.deferredRegistrations.clear();
     }
@@ -84,7 +84,7 @@ export class AfterRenderImpl {
             this.sequences.add(sequence);
             // Trigger an `ApplicationRef.tick()` if one is not already pending/running, because we have a
             // new render hook that needs to run.
-            this.scheduler.notify(6 /* NotificationSource.RenderHook */);
+            this.scheduler.notify(7 /* NotificationSource.RenderHook */);
         }
         else {
             this.deferredRegistrations.add(sequence);

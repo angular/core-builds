@@ -52,7 +52,7 @@ export class ComponentFixture {
     initialize() {
         if (this._autoDetect) {
             this._testAppRef.externalTestViews.add(this.componentRef.hostView);
-            this.scheduler?.notify(8 /* ɵNotificationSource.ViewAttached */);
+            this.scheduler?.notify(9 /* ɵNotificationSource.ViewAttached */);
         }
         this.componentRef.hostView.onDestroy(() => {
             this._testAppRef.externalTestViews.delete(this.componentRef.hostView);

@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.1+sha-aacef07
+ * @license Angular v19.0.0-next.1+sha-0cebfd7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13388,11 +13388,12 @@ export declare const enum ɵNotificationSource {
     DebugApplyChanges = 3,
     MarkForCheck = 4,
     Listener = 5,
-    RenderHook = 6,
-    DeferredRenderHook = 7,
-    ViewAttached = 8,
-    ViewDetachedFromDOM = 9,
-    AsyncAnimationsLoaded = 10
+    CustomElement = 6,
+    RenderHook = 7,
+    DeferredRenderHook = 8,
+    ViewAttached = 9,
+    ViewDetachedFromDOM = 10,
+    AsyncAnimationsLoaded = 11
 }
 
 /**
@@ -14089,6 +14090,10 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
     _cdRefInjectingView?: LView | undefined, notifyErrorHandler?: boolean);
     get context(): T;
     /**
+     * Reports whether the given view is considered dirty according to the different marking mechanisms.
+     */
+    get dirty(): boolean;
+    /**
      * @deprecated Replacing the full context object is not supported. Modify the context
      *   directly, or consider using a `Proxy` if you need to replace the full object.
      * // TODO(devversion): Remove this.
@@ -14129,6 +14134,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
      * ```
      */
     markForCheck(): void;
+    markForRefresh(): void;
     /**
      * Detaches the view from the change detection tree.
      *

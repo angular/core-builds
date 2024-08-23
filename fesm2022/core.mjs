@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.1+sha-aacef07
+ * @license Angular v19.0.0-next.1+sha-0cebfd7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4327,7 +4327,7 @@ function requiresRefreshOrTraversal(lView) {
  * parents above.
  */
 function updateAncestorTraversalFlagsOnAttach(lView) {
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(8 /* NotificationSource.ViewAttached */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(9 /* NotificationSource.ViewAttached */);
     if (lView[FLAGS] & 64 /* LViewFlags.Dirty */) {
         lView[FLAGS] |= 1024 /* LViewFlags.RefreshView */;
     }
@@ -11030,7 +11030,7 @@ function detachViewFromDOM(tView, lView) {
     // When we remove a view from the DOM, we need to rerun afterRender hooks
     // We don't necessarily needs to run change detection. DOM removal only requires
     // change detection if animations are enabled (this notification is handled by animations).
-    lView[ENVIRONMENT].changeDetectionScheduler?.notify(9 /* NotificationSource.ViewDetachedFromDOM */);
+    lView[ENVIRONMENT].changeDetectionScheduler?.notify(10 /* NotificationSource.ViewDetachedFromDOM */);
     applyView(tView, lView, lView[RENDERER], 2 /* WalkTNodeTreeAction.Detach */, null, null);
 }
 /**
@@ -14082,6 +14082,13 @@ class ViewRef$1 {
         return this._lView[CONTEXT];
     }
     /**
+     * Reports whether the given view is considered dirty according to the different marking mechanisms.
+     */
+    get dirty() {
+        return (!!(this._lView[FLAGS] &
+            (64 /* LViewFlags.Dirty */ | 1024 /* LViewFlags.RefreshView */ | 8192 /* LViewFlags.HasChildViewsToRefresh */)) || !!this._lView[REACTIVE_TEMPLATE_CONSUMER]?.dirty);
+    }
+    /**
      * @deprecated Replacing the full context object is not supported. Modify the context
      *   directly, or consider using a `Proxy` if you need to replace the full object.
      * // TODO(devversion): Remove this.
@@ -14153,6 +14160,9 @@ class ViewRef$1 {
      */
     markForCheck() {
         markViewDirty(this._cdRefInjectingView || this._lView, 4 /* NotificationSource.MarkForCheck */);
+    }
+    markForRefresh() {
+        markViewForRefresh(this._cdRefInjectingView || this._lView);
     }
     /**
      * Detaches the view from the change detection tree.
@@ -16934,7 +16944,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.1+sha-aacef07']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.1+sha-0cebfd7']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19632,7 +19642,7 @@ class AfterRenderImpl {
             this.sequences.add(sequence);
         }
         if (this.deferredRegistrations.size > 0) {
-            this.scheduler.notify(7 /* NotificationSource.DeferredRenderHook */);
+            this.scheduler.notify(8 /* NotificationSource.DeferredRenderHook */);
         }
         this.deferredRegistrations.clear();
     }
@@ -19641,7 +19651,7 @@ class AfterRenderImpl {
             this.sequences.add(sequence);
             // Trigger an `ApplicationRef.tick()` if one is not already pending/running, because we have a
             // new render hook that needs to run.
-            this.scheduler.notify(6 /* NotificationSource.RenderHook */);
+            this.scheduler.notify(7 /* NotificationSource.RenderHook */);
         }
         else {
             this.deferredRegistrations.add(sequence);
@@ -31024,7 +31034,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.1+sha-aacef07');
+const VERSION = new Version('19.0.0-next.1+sha-0cebfd7');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33391,6 +33401,7 @@ class ChangeDetectionSchedulerImpl {
             // to make listener callbacks work correctly with `OnPush` components.
             return;
         }
+        let force = false;
         switch (source) {
             case 0 /* NotificationSource.MarkAncestorsForTraversal */: {
                 this.appRef.dirtyFlags |= 2 /* ApplicationRefDirtyFlags.ViewTreeTraversal */;
@@ -33404,17 +33415,25 @@ class ChangeDetectionSchedulerImpl {
                 this.appRef.dirtyFlags |= 4 /* ApplicationRefDirtyFlags.ViewTreeCheck */;
                 break;
             }
-            case 7 /* NotificationSource.DeferredRenderHook */: {
+            case 8 /* NotificationSource.DeferredRenderHook */: {
                 // Render hooks are "deferred" when they're triggered from other render hooks. Using the
                 // deferred dirty flags ensures that adding new hooks doesn't automatically trigger a loop
                 // inside tick().
                 this.appRef.deferredDirtyFlags |= 8 /* ApplicationRefDirtyFlags.AfterRender */;
                 break;
             }
-            case 9 /* NotificationSource.ViewDetachedFromDOM */:
-            case 8 /* NotificationSource.ViewAttached */:
-            case 6 /* NotificationSource.RenderHook */:
-            case 10 /* NotificationSource.AsyncAnimationsLoaded */:
+            case 6 /* NotificationSource.CustomElement */: {
+                // We use `ViewTreeTraversal` to ensure we refresh the element even if this is triggered
+                // during CD. In practice this is a no-op since the elements code also calls via a
+                // `markForRefresh()` API which sends `NotificationSource.MarkAncestorsForTraversal` anyway.
+                this.appRef.dirtyFlags |= 2 /* ApplicationRefDirtyFlags.ViewTreeTraversal */;
+                force = true;
+                break;
+            }
+            case 10 /* NotificationSource.ViewDetachedFromDOM */:
+            case 9 /* NotificationSource.ViewAttached */:
+            case 7 /* NotificationSource.RenderHook */:
+            case 11 /* NotificationSource.AsyncAnimationsLoaded */:
             default: {
                 // These notifications only schedule a tick but do not change whether we should refresh
                 // views. Instead, we only need to run render hooks unless another notification from the
@@ -33422,7 +33441,7 @@ class ChangeDetectionSchedulerImpl {
                 this.appRef.dirtyFlags |= 8 /* ApplicationRefDirtyFlags.AfterRender */;
             }
         }
-        if (!this.shouldScheduleTick()) {
+        if (!this.shouldScheduleTick(force)) {
             return;
         }
         if (typeof ngDevMode === 'undefined' || ngDevMode) {
@@ -33445,8 +33464,8 @@ class ChangeDetectionSchedulerImpl {
             this.cancelScheduledCallback = this.ngZone.runOutsideAngular(() => scheduleCallback(() => this.tick()));
         }
     }
-    shouldScheduleTick() {
-        if (this.disableScheduling) {
+    shouldScheduleTick(force) {
+        if (this.disableScheduling && !force) {
             return false;
         }
         // already scheduled or running
