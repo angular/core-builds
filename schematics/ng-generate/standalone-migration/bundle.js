@@ -26102,7 +26102,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("19.0.0-next.1+sha-c9d9078");
+var VERSION2 = new Version("19.0.0-next.1+sha-969dadc");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27206,7 +27206,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("19.0.0-next.1+sha-c9d9078"));
+  definitionMap.set("version", literal("19.0.0-next.1+sha-969dadc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27225,7 +27225,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("19.0.0-next.1+sha-c9d9078"));
+  definitionMap.set("version", literal("19.0.0-next.1+sha-969dadc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27293,7 +27293,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("19.0.0-next.1+sha-c9d9078"));
+  definitionMap.set("version", literal("19.0.0-next.1+sha-969dadc"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27611,7 +27611,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("19.0.0-next.1+sha-c9d9078"));
+  definitionMap.set("version", literal("19.0.0-next.1+sha-969dadc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27634,7 +27634,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("19.0.0-next.1+sha-c9d9078"));
+  definitionMap.set("version", literal("19.0.0-next.1+sha-969dadc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27672,7 +27672,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("19.0.0-next.1+sha-c9d9078"));
+  definitionMap.set("version", literal("19.0.0-next.1+sha-969dadc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27696,7 +27696,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("19.0.0-next.1+sha-c9d9078"));
+  definitionMap.set("version", literal("19.0.0-next.1+sha-969dadc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27731,7 +27731,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("19.0.0-next.1+sha-c9d9078"));
+  definitionMap.set("version", literal("19.0.0-next.1+sha-969dadc"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27748,7 +27748,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("19.0.0-next.1+sha-c9d9078");
+var VERSION3 = new Version("19.0.0-next.1+sha-969dadc");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -37950,7 +37950,7 @@ function extractComponentStyleUrls(evaluator, component) {
       {
         url: styleUrl,
         source: 2,
-        nodeForError: styleUrlExpr
+        expression: styleUrlExpr
       }
     ];
   }
@@ -37970,7 +37970,7 @@ function extractStyleUrlsFromExpression(evaluator, styleUrlsExpr) {
         styleUrls.push({
           url: styleUrl,
           source: 2,
-          nodeForError: styleUrlExpr
+          expression: styleUrlExpr
         });
       }
     }
@@ -37983,31 +37983,16 @@ function extractStyleUrlsFromExpression(evaluator, styleUrlsExpr) {
       styleUrls.push({
         url: styleUrl,
         source: 2,
-        nodeForError: styleUrlsExpr
+        expression: styleUrlsExpr
       });
     }
   }
   return styleUrls;
 }
-function extractStyleResources(resourceLoader, component, containingFile) {
+function extractInlineStyleResources(component) {
   const styles = /* @__PURE__ */ new Set();
   function stringLiteralElements(array) {
     return array.elements.filter((e) => import_typescript62.default.isStringLiteralLike(e));
-  }
-  const styleUrlExpr = component.get("styleUrl");
-  const styleUrlsExpr = component.get("styleUrls");
-  if (styleUrlsExpr !== void 0 && import_typescript62.default.isArrayLiteralExpression(styleUrlsExpr)) {
-    for (const expression of stringLiteralElements(styleUrlsExpr)) {
-      const resource = stringLiteralUrlToResource(resourceLoader, expression, containingFile);
-      if (resource !== null) {
-        styles.add(resource);
-      }
-    }
-  } else if (styleUrlExpr !== void 0 && import_typescript62.default.isStringLiteralLike(styleUrlExpr)) {
-    const resource = stringLiteralUrlToResource(resourceLoader, styleUrlExpr, containingFile);
-    if (resource !== null) {
-      styles.add(resource);
-    }
   }
   const stylesExpr = component.get("styles");
   if (stylesExpr !== void 0) {
@@ -38021,23 +38006,15 @@ function extractStyleResources(resourceLoader, component, containingFile) {
   }
   return styles;
 }
-function stringLiteralUrlToResource(resourceLoader, expression, containingFile) {
-  try {
-    const resourceUrl = resourceLoader.resolve(expression.text, containingFile);
-    return { path: absoluteFrom(resourceUrl), expression };
-  } catch (e) {
-    return null;
-  }
-}
 function _extractTemplateStyleUrls(template2) {
   if (template2.styleUrls === null) {
     return [];
   }
-  const nodeForError = getTemplateDeclarationNodeForError(template2.declaration);
+  const expression = getTemplateDeclarationNodeForError(template2.declaration);
   return template2.styleUrls.map((url) => ({
     url,
     source: 1,
-    nodeForError
+    expression
   }));
 }
 
@@ -44717,7 +44694,7 @@ var ComponentDecoratorHandler = class {
       expression: template2.sourceMapping.node
     };
     let styles = [];
-    const styleResources = extractStyleResources(this.resourceLoader, component, containingFile);
+    const styleResources = extractInlineStyleResources(component);
     const styleUrls = [
       ...extractComponentStyleUrls(this.evaluator, component),
       ..._extractTemplateStyleUrls(template2)
@@ -44725,6 +44702,12 @@ var ComponentDecoratorHandler = class {
     for (const styleUrl of styleUrls) {
       try {
         const resourceUrl = this.resourceLoader.resolve(styleUrl.url, containingFile);
+        if (styleUrl.source === 2 && import_typescript88.default.isStringLiteralLike(styleUrl.expression)) {
+          styleResources.add({
+            path: absoluteFrom(resourceUrl),
+            expression: styleUrl.expression
+          });
+        }
         const resourceStr = this.resourceLoader.load(resourceUrl);
         styles.push(resourceStr);
         if (this.depTracker !== null) {
@@ -44738,7 +44721,7 @@ var ComponentDecoratorHandler = class {
           diagnostics = [];
         }
         const resourceType = styleUrl.source === 2 ? 2 : 1;
-        diagnostics.push(makeResourceNotFoundError(styleUrl.url, styleUrl.nodeForError, resourceType).toDiagnostic());
+        diagnostics.push(makeResourceNotFoundError(styleUrl.url, styleUrl.expression, resourceType).toDiagnostic());
       }
     }
     if (encapsulation === ViewEncapsulation.ShadowDom && metadata.selector !== null) {
