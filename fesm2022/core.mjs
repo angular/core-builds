@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.1+sha-564a8d5
+ * @license Angular v19.0.0-next.1+sha-21445a2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16749,6 +16749,7 @@ class ComponentFactory extends ComponentFactory$1 {
             enterView(rootLView);
             let component;
             let tElementNode;
+            let componentView = null;
             try {
                 const rootComponentDef = this.componentDef;
                 let rootDirectives;
@@ -16764,7 +16765,7 @@ class ComponentFactory extends ComponentFactory$1 {
                     rootDirectives = [rootComponentDef];
                 }
                 const hostTNode = createRootComponentTNode(rootLView, hostRNode);
-                const componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, environment, hostRenderer);
+                componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, environment, hostRenderer);
                 tElementNode = getTNode(rootTView, HEADER_OFFSET);
                 // TODO(crisbeto): in practice `hostRNode` should always be defined, but there are some
                 // tests where the renderer is mocked out and `undefined` is returned. We should update the
@@ -16779,6 +16780,15 @@ class ComponentFactory extends ComponentFactory$1 {
                 // and executed here? Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
                 component = createRootComponent(componentView, rootComponentDef, rootDirectives, hostDirectiveDefs, rootLView, [LifecycleHooksFeature]);
                 renderView(rootTView, rootLView, null);
+            }
+            catch (e) {
+                // Stop tracking the views if creation failed since
+                // the consumer won't have a way to dereference them.
+                if (componentView !== null) {
+                    unregisterLView(componentView);
+                }
+                unregisterLView(rootLView);
+                throw e;
             }
             finally {
                 leaveView();
@@ -16944,7 +16954,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.1+sha-564a8d5']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.1+sha-21445a2']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -16969,7 +16979,7 @@ function projectNodes(tNode, ngContentSelectors, projectableNodes) {
         // complex checks down the line.
         // We also normalize the length of the passed in projectable nodes (to match the number of
         // <ng-container> slots defined by a component).
-        projection.push(nodesforSlot != null ? Array.from(nodesforSlot) : null);
+        projection.push(nodesforSlot != null && nodesforSlot.length ? Array.from(nodesforSlot) : null);
     }
 }
 /**
@@ -31034,7 +31044,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.1+sha-564a8d5');
+const VERSION = new Version('19.0.0-next.1+sha-21445a2');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -32600,7 +32610,6 @@ class ApplicationRef {
         // Needed for ComponentFixture temporarily during migration of autoDetect behavior
         // Eventually the hostView of the fixture should just attach to ApplicationRef.
         this.externalTestViews = new Set();
-        this.beforeRender = new Subject();
         /** @internal */
         this.afterTick = new Subject();
         /**
@@ -32814,7 +32823,6 @@ class ApplicationRef {
             // Set the AfterRender bit, as we're checking views and will need to run afterRender hooks.
             this.dirtyFlags |= 8 /* ApplicationRefDirtyFlags.AfterRender */;
             // Check all potentially dirty views.
-            this.beforeRender.next(useGlobalCheck);
             for (let { _lView, notifyErrorHandler } of this.allViews) {
                 detectChangesInViewIfRequired(_lView, notifyErrorHandler, useGlobalCheck, this.zonelessEnabled);
             }

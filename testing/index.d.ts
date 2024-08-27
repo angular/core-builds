@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.1+sha-564a8d5
+ * @license Angular v19.0.0-next.1+sha-21445a2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -40,7 +40,7 @@ export declare const __core_private_testing_placeholder__ = "";
  *
  * @publicApi
  */
-export declare abstract class ComponentFixture<T> {
+export declare class ComponentFixture<T> {
     componentRef: ComponentRef<T>;
     /**
      * The DebugElement associated with the root element of this component.
@@ -64,16 +64,21 @@ export declare abstract class ComponentFixture<T> {
     changeDetectorRef: ChangeDetectorRef;
     private _renderer;
     private _isDestroyed;
+    private readonly _testAppRef;
     private readonly pendingTasks;
     private readonly appErrorHandler;
+    private readonly zonelessEnabled;
     private readonly scheduler;
+    private readonly autoDetectDefault;
+    private autoDetect;
+    private subscriptions;
     ngZone: NgZone | null;
     /** @nodoc */
     constructor(componentRef: ComponentRef<T>);
     /**
      * Trigger a change detection cycle for the component.
      */
-    abstract detectChanges(checkNoChanges?: boolean): void;
+    detectChanges(checkNoChanges?: boolean): void;
     /**
      * Do a change detection run to make sure there were no changes.
      */
@@ -83,7 +88,7 @@ export declare abstract class ComponentFixture<T> {
      *
      * Also runs detectChanges once so that any existing change is detected.
      */
-    abstract autoDetectChanges(autoDetect?: boolean): void;
+    autoDetectChanges(autoDetect?: boolean): void;
     /**
      * Return whether the fixture is currently stable or has async tasks that have not been completed
      * yet.

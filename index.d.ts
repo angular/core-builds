@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.1+sha-564a8d5
+ * @license Angular v19.0.0-next.1+sha-21445a2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -883,7 +883,6 @@ export declare class ApplicationRef {
     private readonly afterRenderManager;
     private readonly zonelessEnabled;
     private externalTestViews;
-    private beforeRender;
     /**
      * Indicates whether this instance was destroyed.
      */
