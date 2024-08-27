@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.1+sha-3067633
+ * @license Angular v18.2.1+sha-5d2e243
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16738,6 +16738,7 @@ class ComponentFactory extends ComponentFactory$1 {
             enterView(rootLView);
             let component;
             let tElementNode;
+            let componentView = null;
             try {
                 const rootComponentDef = this.componentDef;
                 let rootDirectives;
@@ -16753,7 +16754,7 @@ class ComponentFactory extends ComponentFactory$1 {
                     rootDirectives = [rootComponentDef];
                 }
                 const hostTNode = createRootComponentTNode(rootLView, hostRNode);
-                const componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, environment, hostRenderer);
+                componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, environment, hostRenderer);
                 tElementNode = getTNode(rootTView, HEADER_OFFSET);
                 // TODO(crisbeto): in practice `hostRNode` should always be defined, but there are some
                 // tests where the renderer is mocked out and `undefined` is returned. We should update the
@@ -16768,6 +16769,15 @@ class ComponentFactory extends ComponentFactory$1 {
                 // and executed here? Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
                 component = createRootComponent(componentView, rootComponentDef, rootDirectives, hostDirectiveDefs, rootLView, [LifecycleHooksFeature]);
                 renderView(rootTView, rootLView, null);
+            }
+            catch (e) {
+                // Stop tracking the views if creation failed since
+                // the consumer won't have a way to dereference them.
+                if (componentView !== null) {
+                    unregisterLView(componentView);
+                }
+                unregisterLView(rootLView);
+                throw e;
             }
             finally {
                 leaveView();
@@ -16933,7 +16943,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.1+sha-3067633']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.1+sha-5d2e243']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31023,7 +31033,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.1+sha-3067633');
+const VERSION = new Version('18.2.1+sha-5d2e243');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

@@ -457,11 +457,11 @@ var textEncoder;
 function computeDigest(message) {
   return sha1(serializeNodes(message.nodes).join("") + `[${message.meaning}]`);
 }
-function decimalDigest(message) {
-  return message.id || computeDecimalDigest(message);
+function decimalDigest(message, preservePlaceholders) {
+  return message.id || computeDecimalDigest(message, preservePlaceholders);
 }
-function computeDecimalDigest(message) {
-  const visitor = new _SerializerIgnoreIcuExpVisitor();
+function computeDecimalDigest(message, preservePlaceholders) {
+  const visitor = new _SerializerIgnoreExpVisitor(preservePlaceholders);
   const parts = message.nodes.map((a) => a.visit(visitor, null));
   return computeMsgId(parts.join(""), message.meaning);
 }
@@ -493,8 +493,15 @@ var serializerVisitor = new _SerializerVisitor();
 function serializeNodes(nodes) {
   return nodes.map((a) => a.visit(serializerVisitor, null));
 }
-var _SerializerIgnoreIcuExpVisitor = class extends _SerializerVisitor {
-  visitIcu(icu, context) {
+var _SerializerIgnoreExpVisitor = class extends _SerializerVisitor {
+  constructor(preservePlaceholders) {
+    super();
+    this.preservePlaceholders = preservePlaceholders;
+  }
+  visitPlaceholder(ph, context) {
+    return this.preservePlaceholders ? super.visitPlaceholder(ph, context) : `<ph name="${ph.name}"/>`;
+  }
+  visitIcu(icu) {
     let strCases = Object.keys(icu.cases).map((k) => `${k} {${icu.cases[k].visit(this)}}`);
     return `{${icu.type}, ${strCases.join(", ")}}`;
   }
@@ -9561,1251 +9568,6 @@ function serializeIcuNode(icu) {
   return icu.visit(serializer);
 }
 
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/expression_parser/lexer.mjs
-var TokenType;
-(function(TokenType2) {
-  TokenType2[TokenType2["Character"] = 0] = "Character";
-  TokenType2[TokenType2["Identifier"] = 1] = "Identifier";
-  TokenType2[TokenType2["PrivateIdentifier"] = 2] = "PrivateIdentifier";
-  TokenType2[TokenType2["Keyword"] = 3] = "Keyword";
-  TokenType2[TokenType2["String"] = 4] = "String";
-  TokenType2[TokenType2["Operator"] = 5] = "Operator";
-  TokenType2[TokenType2["Number"] = 6] = "Number";
-  TokenType2[TokenType2["Error"] = 7] = "Error";
-})(TokenType || (TokenType = {}));
-var KEYWORDS = ["var", "let", "as", "null", "undefined", "true", "false", "if", "else", "this"];
-var Lexer = class {
-  tokenize(text2) {
-    const scanner = new _Scanner(text2);
-    const tokens = [];
-    let token = scanner.scanToken();
-    while (token != null) {
-      tokens.push(token);
-      token = scanner.scanToken();
-    }
-    return tokens;
-  }
-};
-var Token = class {
-  constructor(index, end, type, numValue, strValue) {
-    this.index = index;
-    this.end = end;
-    this.type = type;
-    this.numValue = numValue;
-    this.strValue = strValue;
-  }
-  isCharacter(code) {
-    return this.type == TokenType.Character && this.numValue == code;
-  }
-  isNumber() {
-    return this.type == TokenType.Number;
-  }
-  isString() {
-    return this.type == TokenType.String;
-  }
-  isOperator(operator) {
-    return this.type == TokenType.Operator && this.strValue == operator;
-  }
-  isIdentifier() {
-    return this.type == TokenType.Identifier;
-  }
-  isPrivateIdentifier() {
-    return this.type == TokenType.PrivateIdentifier;
-  }
-  isKeyword() {
-    return this.type == TokenType.Keyword;
-  }
-  isKeywordLet() {
-    return this.type == TokenType.Keyword && this.strValue == "let";
-  }
-  isKeywordAs() {
-    return this.type == TokenType.Keyword && this.strValue == "as";
-  }
-  isKeywordNull() {
-    return this.type == TokenType.Keyword && this.strValue == "null";
-  }
-  isKeywordUndefined() {
-    return this.type == TokenType.Keyword && this.strValue == "undefined";
-  }
-  isKeywordTrue() {
-    return this.type == TokenType.Keyword && this.strValue == "true";
-  }
-  isKeywordFalse() {
-    return this.type == TokenType.Keyword && this.strValue == "false";
-  }
-  isKeywordThis() {
-    return this.type == TokenType.Keyword && this.strValue == "this";
-  }
-  isError() {
-    return this.type == TokenType.Error;
-  }
-  toNumber() {
-    return this.type == TokenType.Number ? this.numValue : -1;
-  }
-  toString() {
-    switch (this.type) {
-      case TokenType.Character:
-      case TokenType.Identifier:
-      case TokenType.Keyword:
-      case TokenType.Operator:
-      case TokenType.PrivateIdentifier:
-      case TokenType.String:
-      case TokenType.Error:
-        return this.strValue;
-      case TokenType.Number:
-        return this.numValue.toString();
-      default:
-        return null;
-    }
-  }
-};
-function newCharacterToken(index, end, code) {
-  return new Token(index, end, TokenType.Character, code, String.fromCharCode(code));
-}
-function newIdentifierToken(index, end, text2) {
-  return new Token(index, end, TokenType.Identifier, 0, text2);
-}
-function newPrivateIdentifierToken(index, end, text2) {
-  return new Token(index, end, TokenType.PrivateIdentifier, 0, text2);
-}
-function newKeywordToken(index, end, text2) {
-  return new Token(index, end, TokenType.Keyword, 0, text2);
-}
-function newOperatorToken(index, end, text2) {
-  return new Token(index, end, TokenType.Operator, 0, text2);
-}
-function newStringToken(index, end, text2) {
-  return new Token(index, end, TokenType.String, 0, text2);
-}
-function newNumberToken(index, end, n) {
-  return new Token(index, end, TokenType.Number, n, "");
-}
-function newErrorToken(index, end, message) {
-  return new Token(index, end, TokenType.Error, 0, message);
-}
-var EOF = new Token(-1, -1, TokenType.Character, 0, "");
-var _Scanner = class {
-  constructor(input) {
-    this.input = input;
-    this.peek = 0;
-    this.index = -1;
-    this.length = input.length;
-    this.advance();
-  }
-  advance() {
-    this.peek = ++this.index >= this.length ? $EOF : this.input.charCodeAt(this.index);
-  }
-  scanToken() {
-    const input = this.input, length = this.length;
-    let peek = this.peek, index = this.index;
-    while (peek <= $SPACE) {
-      if (++index >= length) {
-        peek = $EOF;
-        break;
-      } else {
-        peek = input.charCodeAt(index);
-      }
-    }
-    this.peek = peek;
-    this.index = index;
-    if (index >= length) {
-      return null;
-    }
-    if (isIdentifierStart(peek))
-      return this.scanIdentifier();
-    if (isDigit(peek))
-      return this.scanNumber(index);
-    const start = index;
-    switch (peek) {
-      case $PERIOD:
-        this.advance();
-        return isDigit(this.peek) ? this.scanNumber(start) : newCharacterToken(start, this.index, $PERIOD);
-      case $LPAREN:
-      case $RPAREN:
-      case $LBRACE:
-      case $RBRACE:
-      case $LBRACKET:
-      case $RBRACKET:
-      case $COMMA:
-      case $COLON:
-      case $SEMICOLON:
-        return this.scanCharacter(start, peek);
-      case $SQ:
-      case $DQ:
-        return this.scanString();
-      case $HASH:
-        return this.scanPrivateIdentifier();
-      case $PLUS:
-      case $MINUS:
-      case $STAR:
-      case $SLASH:
-      case $PERCENT:
-      case $CARET:
-        return this.scanOperator(start, String.fromCharCode(peek));
-      case $QUESTION:
-        return this.scanQuestion(start);
-      case $LT:
-      case $GT:
-        return this.scanComplexOperator(start, String.fromCharCode(peek), $EQ, "=");
-      case $BANG:
-      case $EQ:
-        return this.scanComplexOperator(start, String.fromCharCode(peek), $EQ, "=", $EQ, "=");
-      case $AMPERSAND:
-        return this.scanComplexOperator(start, "&", $AMPERSAND, "&");
-      case $BAR:
-        return this.scanComplexOperator(start, "|", $BAR, "|");
-      case $NBSP:
-        while (isWhitespace(this.peek))
-          this.advance();
-        return this.scanToken();
-    }
-    this.advance();
-    return this.error(`Unexpected character [${String.fromCharCode(peek)}]`, 0);
-  }
-  scanCharacter(start, code) {
-    this.advance();
-    return newCharacterToken(start, this.index, code);
-  }
-  scanOperator(start, str) {
-    this.advance();
-    return newOperatorToken(start, this.index, str);
-  }
-  scanComplexOperator(start, one, twoCode, two, threeCode, three) {
-    this.advance();
-    let str = one;
-    if (this.peek == twoCode) {
-      this.advance();
-      str += two;
-    }
-    if (threeCode != null && this.peek == threeCode) {
-      this.advance();
-      str += three;
-    }
-    return newOperatorToken(start, this.index, str);
-  }
-  scanIdentifier() {
-    const start = this.index;
-    this.advance();
-    while (isIdentifierPart(this.peek))
-      this.advance();
-    const str = this.input.substring(start, this.index);
-    return KEYWORDS.indexOf(str) > -1 ? newKeywordToken(start, this.index, str) : newIdentifierToken(start, this.index, str);
-  }
-  scanPrivateIdentifier() {
-    const start = this.index;
-    this.advance();
-    if (!isIdentifierStart(this.peek)) {
-      return this.error("Invalid character [#]", -1);
-    }
-    while (isIdentifierPart(this.peek))
-      this.advance();
-    const identifierName2 = this.input.substring(start, this.index);
-    return newPrivateIdentifierToken(start, this.index, identifierName2);
-  }
-  scanNumber(start) {
-    let simple = this.index === start;
-    let hasSeparators = false;
-    this.advance();
-    while (true) {
-      if (isDigit(this.peek)) {
-      } else if (this.peek === $_) {
-        if (!isDigit(this.input.charCodeAt(this.index - 1)) || !isDigit(this.input.charCodeAt(this.index + 1))) {
-          return this.error("Invalid numeric separator", 0);
-        }
-        hasSeparators = true;
-      } else if (this.peek === $PERIOD) {
-        simple = false;
-      } else if (isExponentStart(this.peek)) {
-        this.advance();
-        if (isExponentSign(this.peek))
-          this.advance();
-        if (!isDigit(this.peek))
-          return this.error("Invalid exponent", -1);
-        simple = false;
-      } else {
-        break;
-      }
-      this.advance();
-    }
-    let str = this.input.substring(start, this.index);
-    if (hasSeparators) {
-      str = str.replace(/_/g, "");
-    }
-    const value = simple ? parseIntAutoRadix(str) : parseFloat(str);
-    return newNumberToken(start, this.index, value);
-  }
-  scanString() {
-    const start = this.index;
-    const quote = this.peek;
-    this.advance();
-    let buffer = "";
-    let marker = this.index;
-    const input = this.input;
-    while (this.peek != quote) {
-      if (this.peek == $BACKSLASH) {
-        buffer += input.substring(marker, this.index);
-        let unescapedCode;
-        this.advance();
-        if (this.peek == $u) {
-          const hex = input.substring(this.index + 1, this.index + 5);
-          if (/^[0-9a-f]+$/i.test(hex)) {
-            unescapedCode = parseInt(hex, 16);
-          } else {
-            return this.error(`Invalid unicode escape [\\u${hex}]`, 0);
-          }
-          for (let i = 0; i < 5; i++) {
-            this.advance();
-          }
-        } else {
-          unescapedCode = unescape2(this.peek);
-          this.advance();
-        }
-        buffer += String.fromCharCode(unescapedCode);
-        marker = this.index;
-      } else if (this.peek == $EOF) {
-        return this.error("Unterminated quote", 0);
-      } else {
-        this.advance();
-      }
-    }
-    const last = input.substring(marker, this.index);
-    this.advance();
-    return newStringToken(start, this.index, buffer + last);
-  }
-  scanQuestion(start) {
-    this.advance();
-    let str = "?";
-    if (this.peek === $QUESTION || this.peek === $PERIOD) {
-      str += this.peek === $PERIOD ? "." : "?";
-      this.advance();
-    }
-    return newOperatorToken(start, this.index, str);
-  }
-  error(message, offset) {
-    const position = this.index + offset;
-    return newErrorToken(position, this.index, `Lexer Error: ${message} at column ${position} in expression [${this.input}]`);
-  }
-};
-function isIdentifierStart(code) {
-  return $a <= code && code <= $z || $A <= code && code <= $Z || code == $_ || code == $$;
-}
-function isIdentifierPart(code) {
-  return isAsciiLetter(code) || isDigit(code) || code == $_ || code == $$;
-}
-function isExponentStart(code) {
-  return code == $e || code == $E;
-}
-function isExponentSign(code) {
-  return code == $MINUS || code == $PLUS;
-}
-function unescape2(code) {
-  switch (code) {
-    case $n:
-      return $LF;
-    case $f:
-      return $FF;
-    case $r:
-      return $CR;
-    case $t:
-      return $TAB;
-    case $v:
-      return $VTAB;
-    default:
-      return code;
-  }
-}
-function parseIntAutoRadix(text2) {
-  const result = parseInt(text2);
-  if (isNaN(result)) {
-    throw new Error("Invalid integer literal when parsing " + text2);
-  }
-  return result;
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/expression_parser/parser.mjs
-var SplitInterpolation = class {
-  constructor(strings, expressions, offsets) {
-    this.strings = strings;
-    this.expressions = expressions;
-    this.offsets = offsets;
-  }
-};
-var TemplateBindingParseResult = class {
-  constructor(templateBindings, warnings, errors) {
-    this.templateBindings = templateBindings;
-    this.warnings = warnings;
-    this.errors = errors;
-  }
-};
-var Parser = class {
-  constructor(_lexer) {
-    this._lexer = _lexer;
-    this.errors = [];
-  }
-  parseAction(input, location, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
-    this._checkNoInterpolation(input, location, interpolationConfig);
-    const sourceToLex = this._stripComments(input);
-    const tokens = this._lexer.tokenize(sourceToLex);
-    const ast = new _ParseAST(input, location, absoluteOffset, tokens, 1, this.errors, 0).parseChain();
-    return new ASTWithSource(ast, input, location, absoluteOffset, this.errors);
-  }
-  parseBinding(input, location, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
-    const ast = this._parseBindingAst(input, location, absoluteOffset, interpolationConfig);
-    return new ASTWithSource(ast, input, location, absoluteOffset, this.errors);
-  }
-  checkSimpleExpression(ast) {
-    const checker = new SimpleExpressionChecker();
-    ast.visit(checker);
-    return checker.errors;
-  }
-  parseSimpleBinding(input, location, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
-    const ast = this._parseBindingAst(input, location, absoluteOffset, interpolationConfig);
-    const errors = this.checkSimpleExpression(ast);
-    if (errors.length > 0) {
-      this._reportError(`Host binding expression cannot contain ${errors.join(" ")}`, input, location);
-    }
-    return new ASTWithSource(ast, input, location, absoluteOffset, this.errors);
-  }
-  _reportError(message, input, errLocation, ctxLocation) {
-    this.errors.push(new ParserError(message, input, errLocation, ctxLocation));
-  }
-  _parseBindingAst(input, location, absoluteOffset, interpolationConfig) {
-    this._checkNoInterpolation(input, location, interpolationConfig);
-    const sourceToLex = this._stripComments(input);
-    const tokens = this._lexer.tokenize(sourceToLex);
-    return new _ParseAST(input, location, absoluteOffset, tokens, 0, this.errors, 0).parseChain();
-  }
-  parseTemplateBindings(templateKey, templateValue, templateUrl, absoluteKeyOffset, absoluteValueOffset) {
-    const tokens = this._lexer.tokenize(templateValue);
-    const parser = new _ParseAST(templateValue, templateUrl, absoluteValueOffset, tokens, 0, this.errors, 0);
-    return parser.parseTemplateBindings({
-      source: templateKey,
-      span: new AbsoluteSourceSpan(absoluteKeyOffset, absoluteKeyOffset + templateKey.length)
-    });
-  }
-  parseInterpolation(input, location, absoluteOffset, interpolatedTokens, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
-    const { strings, expressions, offsets } = this.splitInterpolation(input, location, interpolatedTokens, interpolationConfig);
-    if (expressions.length === 0)
-      return null;
-    const expressionNodes = [];
-    for (let i = 0; i < expressions.length; ++i) {
-      const expressionText = expressions[i].text;
-      const sourceToLex = this._stripComments(expressionText);
-      const tokens = this._lexer.tokenize(sourceToLex);
-      const ast = new _ParseAST(input, location, absoluteOffset, tokens, 0, this.errors, offsets[i]).parseChain();
-      expressionNodes.push(ast);
-    }
-    return this.createInterpolationAst(strings.map((s) => s.text), expressionNodes, input, location, absoluteOffset);
-  }
-  parseInterpolationExpression(expression, location, absoluteOffset) {
-    const sourceToLex = this._stripComments(expression);
-    const tokens = this._lexer.tokenize(sourceToLex);
-    const ast = new _ParseAST(expression, location, absoluteOffset, tokens, 0, this.errors, 0).parseChain();
-    const strings = ["", ""];
-    return this.createInterpolationAst(strings, [ast], expression, location, absoluteOffset);
-  }
-  createInterpolationAst(strings, expressions, input, location, absoluteOffset) {
-    const span = new ParseSpan(0, input.length);
-    const interpolation = new Interpolation(span, span.toAbsolute(absoluteOffset), strings, expressions);
-    return new ASTWithSource(interpolation, input, location, absoluteOffset, this.errors);
-  }
-  splitInterpolation(input, location, interpolatedTokens, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
-    var _a2;
-    const strings = [];
-    const expressions = [];
-    const offsets = [];
-    const inputToTemplateIndexMap = interpolatedTokens ? getIndexMapForOriginalTemplate(interpolatedTokens) : null;
-    let i = 0;
-    let atInterpolation = false;
-    let extendLastString = false;
-    let { start: interpStart, end: interpEnd } = interpolationConfig;
-    while (i < input.length) {
-      if (!atInterpolation) {
-        const start = i;
-        i = input.indexOf(interpStart, i);
-        if (i === -1) {
-          i = input.length;
-        }
-        const text2 = input.substring(start, i);
-        strings.push({ text: text2, start, end: i });
-        atInterpolation = true;
-      } else {
-        const fullStart = i;
-        const exprStart = fullStart + interpStart.length;
-        const exprEnd = this._getInterpolationEndIndex(input, interpEnd, exprStart);
-        if (exprEnd === -1) {
-          atInterpolation = false;
-          extendLastString = true;
-          break;
-        }
-        const fullEnd = exprEnd + interpEnd.length;
-        const text2 = input.substring(exprStart, exprEnd);
-        if (text2.trim().length === 0) {
-          this._reportError("Blank expressions are not allowed in interpolated strings", input, `at column ${i} in`, location);
-        }
-        expressions.push({ text: text2, start: fullStart, end: fullEnd });
-        const startInOriginalTemplate = (_a2 = inputToTemplateIndexMap == null ? void 0 : inputToTemplateIndexMap.get(fullStart)) != null ? _a2 : fullStart;
-        const offset = startInOriginalTemplate + interpStart.length;
-        offsets.push(offset);
-        i = fullEnd;
-        atInterpolation = false;
-      }
-    }
-    if (!atInterpolation) {
-      if (extendLastString) {
-        const piece = strings[strings.length - 1];
-        piece.text += input.substring(i);
-        piece.end = input.length;
-      } else {
-        strings.push({ text: input.substring(i), start: i, end: input.length });
-      }
-    }
-    return new SplitInterpolation(strings, expressions, offsets);
-  }
-  wrapLiteralPrimitive(input, location, absoluteOffset) {
-    const span = new ParseSpan(0, input == null ? 0 : input.length);
-    return new ASTWithSource(new LiteralPrimitive(span, span.toAbsolute(absoluteOffset), input), input, location, absoluteOffset, this.errors);
-  }
-  _stripComments(input) {
-    const i = this._commentStart(input);
-    return i != null ? input.substring(0, i) : input;
-  }
-  _commentStart(input) {
-    let outerQuote = null;
-    for (let i = 0; i < input.length - 1; i++) {
-      const char = input.charCodeAt(i);
-      const nextChar = input.charCodeAt(i + 1);
-      if (char === $SLASH && nextChar == $SLASH && outerQuote == null)
-        return i;
-      if (outerQuote === char) {
-        outerQuote = null;
-      } else if (outerQuote == null && isQuote(char)) {
-        outerQuote = char;
-      }
-    }
-    return null;
-  }
-  _checkNoInterpolation(input, location, { start, end }) {
-    let startIndex = -1;
-    let endIndex = -1;
-    for (const charIndex of this._forEachUnquotedChar(input, 0)) {
-      if (startIndex === -1) {
-        if (input.startsWith(start)) {
-          startIndex = charIndex;
-        }
-      } else {
-        endIndex = this._getInterpolationEndIndex(input, end, charIndex);
-        if (endIndex > -1) {
-          break;
-        }
-      }
-    }
-    if (startIndex > -1 && endIndex > -1) {
-      this._reportError(`Got interpolation (${start}${end}) where expression was expected`, input, `at column ${startIndex} in`, location);
-    }
-  }
-  _getInterpolationEndIndex(input, expressionEnd, start) {
-    for (const charIndex of this._forEachUnquotedChar(input, start)) {
-      if (input.startsWith(expressionEnd, charIndex)) {
-        return charIndex;
-      }
-      if (input.startsWith("//", charIndex)) {
-        return input.indexOf(expressionEnd, charIndex);
-      }
-    }
-    return -1;
-  }
-  *_forEachUnquotedChar(input, start) {
-    let currentQuote = null;
-    let escapeCount = 0;
-    for (let i = start; i < input.length; i++) {
-      const char = input[i];
-      if (isQuote(input.charCodeAt(i)) && (currentQuote === null || currentQuote === char) && escapeCount % 2 === 0) {
-        currentQuote = currentQuote === null ? char : null;
-      } else if (currentQuote === null) {
-        yield i;
-      }
-      escapeCount = char === "\\" ? escapeCount + 1 : 0;
-    }
-  }
-};
-var ParseContextFlags;
-(function(ParseContextFlags2) {
-  ParseContextFlags2[ParseContextFlags2["None"] = 0] = "None";
-  ParseContextFlags2[ParseContextFlags2["Writable"] = 1] = "Writable";
-})(ParseContextFlags || (ParseContextFlags = {}));
-var _ParseAST = class {
-  constructor(input, location, absoluteOffset, tokens, parseFlags, errors, offset) {
-    this.input = input;
-    this.location = location;
-    this.absoluteOffset = absoluteOffset;
-    this.tokens = tokens;
-    this.parseFlags = parseFlags;
-    this.errors = errors;
-    this.offset = offset;
-    this.rparensExpected = 0;
-    this.rbracketsExpected = 0;
-    this.rbracesExpected = 0;
-    this.context = ParseContextFlags.None;
-    this.sourceSpanCache = /* @__PURE__ */ new Map();
-    this.index = 0;
-  }
-  peek(offset) {
-    const i = this.index + offset;
-    return i < this.tokens.length ? this.tokens[i] : EOF;
-  }
-  get next() {
-    return this.peek(0);
-  }
-  get atEOF() {
-    return this.index >= this.tokens.length;
-  }
-  get inputIndex() {
-    return this.atEOF ? this.currentEndIndex : this.next.index + this.offset;
-  }
-  get currentEndIndex() {
-    if (this.index > 0) {
-      const curToken = this.peek(-1);
-      return curToken.end + this.offset;
-    }
-    if (this.tokens.length === 0) {
-      return this.input.length + this.offset;
-    }
-    return this.next.index + this.offset;
-  }
-  get currentAbsoluteOffset() {
-    return this.absoluteOffset + this.inputIndex;
-  }
-  span(start, artificialEndIndex) {
-    let endIndex = this.currentEndIndex;
-    if (artificialEndIndex !== void 0 && artificialEndIndex > this.currentEndIndex) {
-      endIndex = artificialEndIndex;
-    }
-    if (start > endIndex) {
-      const tmp = endIndex;
-      endIndex = start;
-      start = tmp;
-    }
-    return new ParseSpan(start, endIndex);
-  }
-  sourceSpan(start, artificialEndIndex) {
-    const serial = `${start}@${this.inputIndex}:${artificialEndIndex}`;
-    if (!this.sourceSpanCache.has(serial)) {
-      this.sourceSpanCache.set(serial, this.span(start, artificialEndIndex).toAbsolute(this.absoluteOffset));
-    }
-    return this.sourceSpanCache.get(serial);
-  }
-  advance() {
-    this.index++;
-  }
-  withContext(context, cb) {
-    this.context |= context;
-    const ret = cb();
-    this.context ^= context;
-    return ret;
-  }
-  consumeOptionalCharacter(code) {
-    if (this.next.isCharacter(code)) {
-      this.advance();
-      return true;
-    } else {
-      return false;
-    }
-  }
-  peekKeywordLet() {
-    return this.next.isKeywordLet();
-  }
-  peekKeywordAs() {
-    return this.next.isKeywordAs();
-  }
-  expectCharacter(code) {
-    if (this.consumeOptionalCharacter(code))
-      return;
-    this.error(`Missing expected ${String.fromCharCode(code)}`);
-  }
-  consumeOptionalOperator(op) {
-    if (this.next.isOperator(op)) {
-      this.advance();
-      return true;
-    } else {
-      return false;
-    }
-  }
-  expectOperator(operator) {
-    if (this.consumeOptionalOperator(operator))
-      return;
-    this.error(`Missing expected operator ${operator}`);
-  }
-  prettyPrintToken(tok) {
-    return tok === EOF ? "end of input" : `token ${tok}`;
-  }
-  expectIdentifierOrKeyword() {
-    const n = this.next;
-    if (!n.isIdentifier() && !n.isKeyword()) {
-      if (n.isPrivateIdentifier()) {
-        this._reportErrorForPrivateIdentifier(n, "expected identifier or keyword");
-      } else {
-        this.error(`Unexpected ${this.prettyPrintToken(n)}, expected identifier or keyword`);
-      }
-      return null;
-    }
-    this.advance();
-    return n.toString();
-  }
-  expectIdentifierOrKeywordOrString() {
-    const n = this.next;
-    if (!n.isIdentifier() && !n.isKeyword() && !n.isString()) {
-      if (n.isPrivateIdentifier()) {
-        this._reportErrorForPrivateIdentifier(n, "expected identifier, keyword or string");
-      } else {
-        this.error(`Unexpected ${this.prettyPrintToken(n)}, expected identifier, keyword, or string`);
-      }
-      return "";
-    }
-    this.advance();
-    return n.toString();
-  }
-  parseChain() {
-    const exprs = [];
-    const start = this.inputIndex;
-    while (this.index < this.tokens.length) {
-      const expr = this.parsePipe();
-      exprs.push(expr);
-      if (this.consumeOptionalCharacter($SEMICOLON)) {
-        if (!(this.parseFlags & 1)) {
-          this.error("Binding expression cannot contain chained expression");
-        }
-        while (this.consumeOptionalCharacter($SEMICOLON)) {
-        }
-      } else if (this.index < this.tokens.length) {
-        const errorIndex = this.index;
-        this.error(`Unexpected token '${this.next}'`);
-        if (this.index === errorIndex) {
-          break;
-        }
-      }
-    }
-    if (exprs.length === 0) {
-      const artificialStart = this.offset;
-      const artificialEnd = this.offset + this.input.length;
-      return new EmptyExpr(this.span(artificialStart, artificialEnd), this.sourceSpan(artificialStart, artificialEnd));
-    }
-    if (exprs.length == 1)
-      return exprs[0];
-    return new Chain(this.span(start), this.sourceSpan(start), exprs);
-  }
-  parsePipe() {
-    const start = this.inputIndex;
-    let result = this.parseExpression();
-    if (this.consumeOptionalOperator("|")) {
-      if (this.parseFlags & 1) {
-        this.error(`Cannot have a pipe in an action expression`);
-      }
-      do {
-        const nameStart = this.inputIndex;
-        let nameId = this.expectIdentifierOrKeyword();
-        let nameSpan;
-        let fullSpanEnd = void 0;
-        if (nameId !== null) {
-          nameSpan = this.sourceSpan(nameStart);
-        } else {
-          nameId = "";
-          fullSpanEnd = this.next.index !== -1 ? this.next.index : this.input.length + this.offset;
-          nameSpan = new ParseSpan(fullSpanEnd, fullSpanEnd).toAbsolute(this.absoluteOffset);
-        }
-        const args = [];
-        while (this.consumeOptionalCharacter($COLON)) {
-          args.push(this.parseExpression());
-        }
-        result = new BindingPipe(this.span(start), this.sourceSpan(start, fullSpanEnd), result, nameId, args, nameSpan);
-      } while (this.consumeOptionalOperator("|"));
-    }
-    return result;
-  }
-  parseExpression() {
-    return this.parseConditional();
-  }
-  parseConditional() {
-    const start = this.inputIndex;
-    const result = this.parseLogicalOr();
-    if (this.consumeOptionalOperator("?")) {
-      const yes = this.parsePipe();
-      let no;
-      if (!this.consumeOptionalCharacter($COLON)) {
-        const end = this.inputIndex;
-        const expression = this.input.substring(start, end);
-        this.error(`Conditional expression ${expression} requires all 3 expressions`);
-        no = new EmptyExpr(this.span(start), this.sourceSpan(start));
-      } else {
-        no = this.parsePipe();
-      }
-      return new Conditional(this.span(start), this.sourceSpan(start), result, yes, no);
-    } else {
-      return result;
-    }
-  }
-  parseLogicalOr() {
-    const start = this.inputIndex;
-    let result = this.parseLogicalAnd();
-    while (this.consumeOptionalOperator("||")) {
-      const right = this.parseLogicalAnd();
-      result = new Binary(this.span(start), this.sourceSpan(start), "||", result, right);
-    }
-    return result;
-  }
-  parseLogicalAnd() {
-    const start = this.inputIndex;
-    let result = this.parseNullishCoalescing();
-    while (this.consumeOptionalOperator("&&")) {
-      const right = this.parseNullishCoalescing();
-      result = new Binary(this.span(start), this.sourceSpan(start), "&&", result, right);
-    }
-    return result;
-  }
-  parseNullishCoalescing() {
-    const start = this.inputIndex;
-    let result = this.parseEquality();
-    while (this.consumeOptionalOperator("??")) {
-      const right = this.parseEquality();
-      result = new Binary(this.span(start), this.sourceSpan(start), "??", result, right);
-    }
-    return result;
-  }
-  parseEquality() {
-    const start = this.inputIndex;
-    let result = this.parseRelational();
-    while (this.next.type == TokenType.Operator) {
-      const operator = this.next.strValue;
-      switch (operator) {
-        case "==":
-        case "===":
-        case "!=":
-        case "!==":
-          this.advance();
-          const right = this.parseRelational();
-          result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
-          continue;
-      }
-      break;
-    }
-    return result;
-  }
-  parseRelational() {
-    const start = this.inputIndex;
-    let result = this.parseAdditive();
-    while (this.next.type == TokenType.Operator) {
-      const operator = this.next.strValue;
-      switch (operator) {
-        case "<":
-        case ">":
-        case "<=":
-        case ">=":
-          this.advance();
-          const right = this.parseAdditive();
-          result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
-          continue;
-      }
-      break;
-    }
-    return result;
-  }
-  parseAdditive() {
-    const start = this.inputIndex;
-    let result = this.parseMultiplicative();
-    while (this.next.type == TokenType.Operator) {
-      const operator = this.next.strValue;
-      switch (operator) {
-        case "+":
-        case "-":
-          this.advance();
-          let right = this.parseMultiplicative();
-          result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
-          continue;
-      }
-      break;
-    }
-    return result;
-  }
-  parseMultiplicative() {
-    const start = this.inputIndex;
-    let result = this.parsePrefix();
-    while (this.next.type == TokenType.Operator) {
-      const operator = this.next.strValue;
-      switch (operator) {
-        case "*":
-        case "%":
-        case "/":
-          this.advance();
-          let right = this.parsePrefix();
-          result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
-          continue;
-      }
-      break;
-    }
-    return result;
-  }
-  parsePrefix() {
-    if (this.next.type == TokenType.Operator) {
-      const start = this.inputIndex;
-      const operator = this.next.strValue;
-      let result;
-      switch (operator) {
-        case "+":
-          this.advance();
-          result = this.parsePrefix();
-          return Unary.createPlus(this.span(start), this.sourceSpan(start), result);
-        case "-":
-          this.advance();
-          result = this.parsePrefix();
-          return Unary.createMinus(this.span(start), this.sourceSpan(start), result);
-        case "!":
-          this.advance();
-          result = this.parsePrefix();
-          return new PrefixNot(this.span(start), this.sourceSpan(start), result);
-      }
-    }
-    return this.parseCallChain();
-  }
-  parseCallChain() {
-    const start = this.inputIndex;
-    let result = this.parsePrimary();
-    while (true) {
-      if (this.consumeOptionalCharacter($PERIOD)) {
-        result = this.parseAccessMember(result, start, false);
-      } else if (this.consumeOptionalOperator("?.")) {
-        if (this.consumeOptionalCharacter($LPAREN)) {
-          result = this.parseCall(result, start, true);
-        } else {
-          result = this.consumeOptionalCharacter($LBRACKET) ? this.parseKeyedReadOrWrite(result, start, true) : this.parseAccessMember(result, start, true);
-        }
-      } else if (this.consumeOptionalCharacter($LBRACKET)) {
-        result = this.parseKeyedReadOrWrite(result, start, false);
-      } else if (this.consumeOptionalCharacter($LPAREN)) {
-        result = this.parseCall(result, start, false);
-      } else if (this.consumeOptionalOperator("!")) {
-        result = new NonNullAssert(this.span(start), this.sourceSpan(start), result);
-      } else {
-        return result;
-      }
-    }
-  }
-  parsePrimary() {
-    const start = this.inputIndex;
-    if (this.consumeOptionalCharacter($LPAREN)) {
-      this.rparensExpected++;
-      const result = this.parsePipe();
-      this.rparensExpected--;
-      this.expectCharacter($RPAREN);
-      return result;
-    } else if (this.next.isKeywordNull()) {
-      this.advance();
-      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), null);
-    } else if (this.next.isKeywordUndefined()) {
-      this.advance();
-      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), void 0);
-    } else if (this.next.isKeywordTrue()) {
-      this.advance();
-      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), true);
-    } else if (this.next.isKeywordFalse()) {
-      this.advance();
-      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), false);
-    } else if (this.next.isKeywordThis()) {
-      this.advance();
-      return new ThisReceiver(this.span(start), this.sourceSpan(start));
-    } else if (this.consumeOptionalCharacter($LBRACKET)) {
-      this.rbracketsExpected++;
-      const elements = this.parseExpressionList($RBRACKET);
-      this.rbracketsExpected--;
-      this.expectCharacter($RBRACKET);
-      return new LiteralArray(this.span(start), this.sourceSpan(start), elements);
-    } else if (this.next.isCharacter($LBRACE)) {
-      return this.parseLiteralMap();
-    } else if (this.next.isIdentifier()) {
-      return this.parseAccessMember(new ImplicitReceiver(this.span(start), this.sourceSpan(start)), start, false);
-    } else if (this.next.isNumber()) {
-      const value = this.next.toNumber();
-      this.advance();
-      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), value);
-    } else if (this.next.isString()) {
-      const literalValue = this.next.toString();
-      this.advance();
-      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), literalValue);
-    } else if (this.next.isPrivateIdentifier()) {
-      this._reportErrorForPrivateIdentifier(this.next, null);
-      return new EmptyExpr(this.span(start), this.sourceSpan(start));
-    } else if (this.index >= this.tokens.length) {
-      this.error(`Unexpected end of expression: ${this.input}`);
-      return new EmptyExpr(this.span(start), this.sourceSpan(start));
-    } else {
-      this.error(`Unexpected token ${this.next}`);
-      return new EmptyExpr(this.span(start), this.sourceSpan(start));
-    }
-  }
-  parseExpressionList(terminator) {
-    const result = [];
-    do {
-      if (!this.next.isCharacter(terminator)) {
-        result.push(this.parsePipe());
-      } else {
-        break;
-      }
-    } while (this.consumeOptionalCharacter($COMMA));
-    return result;
-  }
-  parseLiteralMap() {
-    const keys = [];
-    const values = [];
-    const start = this.inputIndex;
-    this.expectCharacter($LBRACE);
-    if (!this.consumeOptionalCharacter($RBRACE)) {
-      this.rbracesExpected++;
-      do {
-        const keyStart = this.inputIndex;
-        const quoted = this.next.isString();
-        const key = this.expectIdentifierOrKeywordOrString();
-        const literalMapKey = { key, quoted };
-        keys.push(literalMapKey);
-        if (quoted) {
-          this.expectCharacter($COLON);
-          values.push(this.parsePipe());
-        } else if (this.consumeOptionalCharacter($COLON)) {
-          values.push(this.parsePipe());
-        } else {
-          literalMapKey.isShorthandInitialized = true;
-          const span = this.span(keyStart);
-          const sourceSpan = this.sourceSpan(keyStart);
-          values.push(new PropertyRead(span, sourceSpan, sourceSpan, new ImplicitReceiver(span, sourceSpan), key));
-        }
-      } while (this.consumeOptionalCharacter($COMMA) && !this.next.isCharacter($RBRACE));
-      this.rbracesExpected--;
-      this.expectCharacter($RBRACE);
-    }
-    return new LiteralMap(this.span(start), this.sourceSpan(start), keys, values);
-  }
-  parseAccessMember(readReceiver, start, isSafe) {
-    const nameStart = this.inputIndex;
-    const id = this.withContext(ParseContextFlags.Writable, () => {
-      var _a2;
-      const id2 = (_a2 = this.expectIdentifierOrKeyword()) != null ? _a2 : "";
-      if (id2.length === 0) {
-        this.error(`Expected identifier for property access`, readReceiver.span.end);
-      }
-      return id2;
-    });
-    const nameSpan = this.sourceSpan(nameStart);
-    let receiver;
-    if (isSafe) {
-      if (this.consumeOptionalOperator("=")) {
-        this.error("The '?.' operator cannot be used in the assignment");
-        receiver = new EmptyExpr(this.span(start), this.sourceSpan(start));
-      } else {
-        receiver = new SafePropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
-      }
-    } else {
-      if (this.consumeOptionalOperator("=")) {
-        if (!(this.parseFlags & 1)) {
-          this.error("Bindings cannot contain assignments");
-          return new EmptyExpr(this.span(start), this.sourceSpan(start));
-        }
-        const value = this.parseConditional();
-        receiver = new PropertyWrite(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id, value);
-      } else {
-        receiver = new PropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
-      }
-    }
-    return receiver;
-  }
-  parseCall(receiver, start, isSafe) {
-    const argumentStart = this.inputIndex;
-    this.rparensExpected++;
-    const args = this.parseCallArguments();
-    const argumentSpan = this.span(argumentStart, this.inputIndex).toAbsolute(this.absoluteOffset);
-    this.expectCharacter($RPAREN);
-    this.rparensExpected--;
-    const span = this.span(start);
-    const sourceSpan = this.sourceSpan(start);
-    return isSafe ? new SafeCall(span, sourceSpan, receiver, args, argumentSpan) : new Call(span, sourceSpan, receiver, args, argumentSpan);
-  }
-  parseCallArguments() {
-    if (this.next.isCharacter($RPAREN))
-      return [];
-    const positionals = [];
-    do {
-      positionals.push(this.parsePipe());
-    } while (this.consumeOptionalCharacter($COMMA));
-    return positionals;
-  }
-  expectTemplateBindingKey() {
-    let result = "";
-    let operatorFound = false;
-    const start = this.currentAbsoluteOffset;
-    do {
-      result += this.expectIdentifierOrKeywordOrString();
-      operatorFound = this.consumeOptionalOperator("-");
-      if (operatorFound) {
-        result += "-";
-      }
-    } while (operatorFound);
-    return {
-      source: result,
-      span: new AbsoluteSourceSpan(start, start + result.length)
-    };
-  }
-  parseTemplateBindings(templateKey) {
-    const bindings = [];
-    bindings.push(...this.parseDirectiveKeywordBindings(templateKey));
-    while (this.index < this.tokens.length) {
-      const letBinding = this.parseLetBinding();
-      if (letBinding) {
-        bindings.push(letBinding);
-      } else {
-        const key = this.expectTemplateBindingKey();
-        const binding = this.parseAsBinding(key);
-        if (binding) {
-          bindings.push(binding);
-        } else {
-          key.source = templateKey.source + key.source.charAt(0).toUpperCase() + key.source.substring(1);
-          bindings.push(...this.parseDirectiveKeywordBindings(key));
-        }
-      }
-      this.consumeStatementTerminator();
-    }
-    return new TemplateBindingParseResult(bindings, [], this.errors);
-  }
-  parseKeyedReadOrWrite(receiver, start, isSafe) {
-    return this.withContext(ParseContextFlags.Writable, () => {
-      this.rbracketsExpected++;
-      const key = this.parsePipe();
-      if (key instanceof EmptyExpr) {
-        this.error(`Key access cannot be empty`);
-      }
-      this.rbracketsExpected--;
-      this.expectCharacter($RBRACKET);
-      if (this.consumeOptionalOperator("=")) {
-        if (isSafe) {
-          this.error("The '?.' operator cannot be used in the assignment");
-        } else {
-          const value = this.parseConditional();
-          return new KeyedWrite(this.span(start), this.sourceSpan(start), receiver, key, value);
-        }
-      } else {
-        return isSafe ? new SafeKeyedRead(this.span(start), this.sourceSpan(start), receiver, key) : new KeyedRead(this.span(start), this.sourceSpan(start), receiver, key);
-      }
-      return new EmptyExpr(this.span(start), this.sourceSpan(start));
-    });
-  }
-  parseDirectiveKeywordBindings(key) {
-    const bindings = [];
-    this.consumeOptionalCharacter($COLON);
-    const value = this.getDirectiveBoundTarget();
-    let spanEnd = this.currentAbsoluteOffset;
-    const asBinding = this.parseAsBinding(key);
-    if (!asBinding) {
-      this.consumeStatementTerminator();
-      spanEnd = this.currentAbsoluteOffset;
-    }
-    const sourceSpan = new AbsoluteSourceSpan(key.span.start, spanEnd);
-    bindings.push(new ExpressionBinding(sourceSpan, key, value));
-    if (asBinding) {
-      bindings.push(asBinding);
-    }
-    return bindings;
-  }
-  getDirectiveBoundTarget() {
-    if (this.next === EOF || this.peekKeywordAs() || this.peekKeywordLet()) {
-      return null;
-    }
-    const ast = this.parsePipe();
-    const { start, end } = ast.span;
-    const value = this.input.substring(start, end);
-    return new ASTWithSource(ast, value, this.location, this.absoluteOffset + start, this.errors);
-  }
-  parseAsBinding(value) {
-    if (!this.peekKeywordAs()) {
-      return null;
-    }
-    this.advance();
-    const key = this.expectTemplateBindingKey();
-    this.consumeStatementTerminator();
-    const sourceSpan = new AbsoluteSourceSpan(value.span.start, this.currentAbsoluteOffset);
-    return new VariableBinding(sourceSpan, key, value);
-  }
-  parseLetBinding() {
-    if (!this.peekKeywordLet()) {
-      return null;
-    }
-    const spanStart = this.currentAbsoluteOffset;
-    this.advance();
-    const key = this.expectTemplateBindingKey();
-    let value = null;
-    if (this.consumeOptionalOperator("=")) {
-      value = this.expectTemplateBindingKey();
-    }
-    this.consumeStatementTerminator();
-    const sourceSpan = new AbsoluteSourceSpan(spanStart, this.currentAbsoluteOffset);
-    return new VariableBinding(sourceSpan, key, value);
-  }
-  consumeStatementTerminator() {
-    this.consumeOptionalCharacter($SEMICOLON) || this.consumeOptionalCharacter($COMMA);
-  }
-  error(message, index = null) {
-    this.errors.push(new ParserError(message, this.input, this.locationText(index), this.location));
-    this.skip();
-  }
-  locationText(index = null) {
-    if (index == null)
-      index = this.index;
-    return index < this.tokens.length ? `at column ${this.tokens[index].index + 1} in` : `at the end of the expression`;
-  }
-  _reportErrorForPrivateIdentifier(token, extraMessage) {
-    let errorMessage = `Private identifiers are not supported. Unexpected private identifier: ${token}`;
-    if (extraMessage !== null) {
-      errorMessage += `, ${extraMessage}`;
-    }
-    this.error(errorMessage);
-  }
-  skip() {
-    let n = this.next;
-    while (this.index < this.tokens.length && !n.isCharacter($SEMICOLON) && !n.isOperator("|") && (this.rparensExpected <= 0 || !n.isCharacter($RPAREN)) && (this.rbracesExpected <= 0 || !n.isCharacter($RBRACE)) && (this.rbracketsExpected <= 0 || !n.isCharacter($RBRACKET)) && (!(this.context & ParseContextFlags.Writable) || !n.isOperator("="))) {
-      if (this.next.isError()) {
-        this.errors.push(new ParserError(this.next.toString(), this.input, this.locationText(), this.location));
-      }
-      this.advance();
-      n = this.next;
-    }
-  }
-};
-var SimpleExpressionChecker = class extends RecursiveAstVisitor {
-  constructor() {
-    super(...arguments);
-    this.errors = [];
-  }
-  visitPipe() {
-    this.errors.push("pipes");
-  }
-};
-function getIndexMapForOriginalTemplate(interpolatedTokens) {
-  let offsetMap = /* @__PURE__ */ new Map();
-  let consumedInOriginalTemplate = 0;
-  let consumedInInput = 0;
-  let tokenIndex = 0;
-  while (tokenIndex < interpolatedTokens.length) {
-    const currentToken = interpolatedTokens[tokenIndex];
-    if (currentToken.type === 9) {
-      const [decoded, encoded] = currentToken.parts;
-      consumedInOriginalTemplate += encoded.length;
-      consumedInInput += decoded.length;
-    } else {
-      const lengthOfParts = currentToken.parts.reduce((sum, current) => sum + current.length, 0);
-      consumedInInput += lengthOfParts;
-      consumedInOriginalTemplate += lengthOfParts;
-    }
-    offsetMap.set(consumedInInput, consumedInOriginalTemplate);
-    tokenIndex++;
-  }
-  return offsetMap;
-}
-
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/ast.mjs
 var NodeWithI18n = class {
   constructor(sourceSpan, i18n2) {
@@ -10928,901 +9690,6 @@ function visitAll2(visitor, nodes, context = null) {
   });
   return result;
 }
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/schema/dom_security_schema.mjs
-var _SECURITY_SCHEMA;
-function SECURITY_SCHEMA() {
-  if (!_SECURITY_SCHEMA) {
-    _SECURITY_SCHEMA = {};
-    registerContext(SecurityContext.HTML, ["iframe|srcdoc", "*|innerHTML", "*|outerHTML"]);
-    registerContext(SecurityContext.STYLE, ["*|style"]);
-    registerContext(SecurityContext.URL, [
-      "*|formAction",
-      "area|href",
-      "area|ping",
-      "audio|src",
-      "a|href",
-      "a|ping",
-      "blockquote|cite",
-      "body|background",
-      "del|cite",
-      "form|action",
-      "img|src",
-      "input|src",
-      "ins|cite",
-      "q|cite",
-      "source|src",
-      "track|src",
-      "video|poster",
-      "video|src"
-    ]);
-    registerContext(SecurityContext.RESOURCE_URL, [
-      "applet|code",
-      "applet|codebase",
-      "base|href",
-      "embed|src",
-      "frame|src",
-      "head|profile",
-      "html|manifest",
-      "iframe|src",
-      "link|href",
-      "media|src",
-      "object|codebase",
-      "object|data",
-      "script|src"
-    ]);
-  }
-  return _SECURITY_SCHEMA;
-}
-function registerContext(ctx, specs) {
-  for (const spec of specs)
-    _SECURITY_SCHEMA[spec.toLowerCase()] = ctx;
-}
-var IFRAME_SECURITY_SENSITIVE_ATTRS = /* @__PURE__ */ new Set([
-  "sandbox",
-  "allow",
-  "allowfullscreen",
-  "referrerpolicy",
-  "csp",
-  "fetchpriority"
-]);
-function isIframeSecuritySensitiveAttr(attrName) {
-  return IFRAME_SECURITY_SENSITIVE_ATTRS.has(attrName.toLowerCase());
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/schema/element_schema_registry.mjs
-var ElementSchemaRegistry = class {
-};
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/schema/dom_element_schema_registry.mjs
-var BOOLEAN = "boolean";
-var NUMBER = "number";
-var STRING = "string";
-var OBJECT = "object";
-var SCHEMA = [
-  "[Element]|textContent,%ariaAtomic,%ariaAutoComplete,%ariaBusy,%ariaChecked,%ariaColCount,%ariaColIndex,%ariaColSpan,%ariaCurrent,%ariaDescription,%ariaDisabled,%ariaExpanded,%ariaHasPopup,%ariaHidden,%ariaKeyShortcuts,%ariaLabel,%ariaLevel,%ariaLive,%ariaModal,%ariaMultiLine,%ariaMultiSelectable,%ariaOrientation,%ariaPlaceholder,%ariaPosInSet,%ariaPressed,%ariaReadOnly,%ariaRelevant,%ariaRequired,%ariaRoleDescription,%ariaRowCount,%ariaRowIndex,%ariaRowSpan,%ariaSelected,%ariaSetSize,%ariaSort,%ariaValueMax,%ariaValueMin,%ariaValueNow,%ariaValueText,%classList,className,elementTiming,id,innerHTML,*beforecopy,*beforecut,*beforepaste,*fullscreenchange,*fullscreenerror,*search,*webkitfullscreenchange,*webkitfullscreenerror,outerHTML,%part,#scrollLeft,#scrollTop,slot,*message,*mozfullscreenchange,*mozfullscreenerror,*mozpointerlockchange,*mozpointerlockerror,*webglcontextcreationerror,*webglcontextlost,*webglcontextrestored",
-  "[HTMLElement]^[Element]|accessKey,autocapitalize,!autofocus,contentEditable,dir,!draggable,enterKeyHint,!hidden,!inert,innerText,inputMode,lang,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,outerText,!spellcheck,%style,#tabIndex,title,!translate,virtualKeyboardPolicy",
-  "abbr,address,article,aside,b,bdi,bdo,cite,content,code,dd,dfn,dt,em,figcaption,figure,footer,header,hgroup,i,kbd,main,mark,nav,noscript,rb,rp,rt,rtc,ruby,s,samp,section,small,strong,sub,sup,u,var,wbr^[HTMLElement]|accessKey,autocapitalize,!autofocus,contentEditable,dir,!draggable,enterKeyHint,!hidden,innerText,inputMode,lang,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,outerText,!spellcheck,%style,#tabIndex,title,!translate,virtualKeyboardPolicy",
-  "media^[HTMLElement]|!autoplay,!controls,%controlsList,%crossOrigin,#currentTime,!defaultMuted,#defaultPlaybackRate,!disableRemotePlayback,!loop,!muted,*encrypted,*waitingforkey,#playbackRate,preload,!preservesPitch,src,%srcObject,#volume",
-  ":svg:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex",
-  ":svg:graphics^:svg:|",
-  ":svg:animation^:svg:|*begin,*end,*repeat",
-  ":svg:geometry^:svg:|",
-  ":svg:componentTransferFunction^:svg:|",
-  ":svg:gradient^:svg:|",
-  ":svg:textContent^:svg:graphics|",
-  ":svg:textPositioning^:svg:textContent|",
-  "a^[HTMLElement]|charset,coords,download,hash,host,hostname,href,hreflang,name,password,pathname,ping,port,protocol,referrerPolicy,rel,%relList,rev,search,shape,target,text,type,username",
-  "area^[HTMLElement]|alt,coords,download,hash,host,hostname,href,!noHref,password,pathname,ping,port,protocol,referrerPolicy,rel,%relList,search,shape,target,username",
-  "audio^media|",
-  "br^[HTMLElement]|clear",
-  "base^[HTMLElement]|href,target",
-  "body^[HTMLElement]|aLink,background,bgColor,link,*afterprint,*beforeprint,*beforeunload,*blur,*error,*focus,*hashchange,*languagechange,*load,*message,*messageerror,*offline,*online,*pagehide,*pageshow,*popstate,*rejectionhandled,*resize,*scroll,*storage,*unhandledrejection,*unload,text,vLink",
-  "button^[HTMLElement]|!disabled,formAction,formEnctype,formMethod,!formNoValidate,formTarget,name,type,value",
-  "canvas^[HTMLElement]|#height,#width",
-  "content^[HTMLElement]|select",
-  "dl^[HTMLElement]|!compact",
-  "data^[HTMLElement]|value",
-  "datalist^[HTMLElement]|",
-  "details^[HTMLElement]|!open",
-  "dialog^[HTMLElement]|!open,returnValue",
-  "dir^[HTMLElement]|!compact",
-  "div^[HTMLElement]|align",
-  "embed^[HTMLElement]|align,height,name,src,type,width",
-  "fieldset^[HTMLElement]|!disabled,name",
-  "font^[HTMLElement]|color,face,size",
-  "form^[HTMLElement]|acceptCharset,action,autocomplete,encoding,enctype,method,name,!noValidate,target",
-  "frame^[HTMLElement]|frameBorder,longDesc,marginHeight,marginWidth,name,!noResize,scrolling,src",
-  "frameset^[HTMLElement]|cols,*afterprint,*beforeprint,*beforeunload,*blur,*error,*focus,*hashchange,*languagechange,*load,*message,*messageerror,*offline,*online,*pagehide,*pageshow,*popstate,*rejectionhandled,*resize,*scroll,*storage,*unhandledrejection,*unload,rows",
-  "hr^[HTMLElement]|align,color,!noShade,size,width",
-  "head^[HTMLElement]|",
-  "h1,h2,h3,h4,h5,h6^[HTMLElement]|align",
-  "html^[HTMLElement]|version",
-  "iframe^[HTMLElement]|align,allow,!allowFullscreen,!allowPaymentRequest,csp,frameBorder,height,loading,longDesc,marginHeight,marginWidth,name,referrerPolicy,%sandbox,scrolling,src,srcdoc,width",
-  "img^[HTMLElement]|align,alt,border,%crossOrigin,decoding,#height,#hspace,!isMap,loading,longDesc,lowsrc,name,referrerPolicy,sizes,src,srcset,useMap,#vspace,#width",
-  "input^[HTMLElement]|accept,align,alt,autocomplete,!checked,!defaultChecked,defaultValue,dirName,!disabled,%files,formAction,formEnctype,formMethod,!formNoValidate,formTarget,#height,!incremental,!indeterminate,max,#maxLength,min,#minLength,!multiple,name,pattern,placeholder,!readOnly,!required,selectionDirection,#selectionEnd,#selectionStart,#size,src,step,type,useMap,value,%valueAsDate,#valueAsNumber,#width",
-  "li^[HTMLElement]|type,#value",
-  "label^[HTMLElement]|htmlFor",
-  "legend^[HTMLElement]|align",
-  "link^[HTMLElement]|as,charset,%crossOrigin,!disabled,href,hreflang,imageSizes,imageSrcset,integrity,media,referrerPolicy,rel,%relList,rev,%sizes,target,type",
-  "map^[HTMLElement]|name",
-  "marquee^[HTMLElement]|behavior,bgColor,direction,height,#hspace,#loop,#scrollAmount,#scrollDelay,!trueSpeed,#vspace,width",
-  "menu^[HTMLElement]|!compact",
-  "meta^[HTMLElement]|content,httpEquiv,media,name,scheme",
-  "meter^[HTMLElement]|#high,#low,#max,#min,#optimum,#value",
-  "ins,del^[HTMLElement]|cite,dateTime",
-  "ol^[HTMLElement]|!compact,!reversed,#start,type",
-  "object^[HTMLElement]|align,archive,border,code,codeBase,codeType,data,!declare,height,#hspace,name,standby,type,useMap,#vspace,width",
-  "optgroup^[HTMLElement]|!disabled,label",
-  "option^[HTMLElement]|!defaultSelected,!disabled,label,!selected,text,value",
-  "output^[HTMLElement]|defaultValue,%htmlFor,name,value",
-  "p^[HTMLElement]|align",
-  "param^[HTMLElement]|name,type,value,valueType",
-  "picture^[HTMLElement]|",
-  "pre^[HTMLElement]|#width",
-  "progress^[HTMLElement]|#max,#value",
-  "q,blockquote,cite^[HTMLElement]|",
-  "script^[HTMLElement]|!async,charset,%crossOrigin,!defer,event,htmlFor,integrity,!noModule,%referrerPolicy,src,text,type",
-  "select^[HTMLElement]|autocomplete,!disabled,#length,!multiple,name,!required,#selectedIndex,#size,value",
-  "slot^[HTMLElement]|name",
-  "source^[HTMLElement]|#height,media,sizes,src,srcset,type,#width",
-  "span^[HTMLElement]|",
-  "style^[HTMLElement]|!disabled,media,type",
-  "caption^[HTMLElement]|align",
-  "th,td^[HTMLElement]|abbr,align,axis,bgColor,ch,chOff,#colSpan,headers,height,!noWrap,#rowSpan,scope,vAlign,width",
-  "col,colgroup^[HTMLElement]|align,ch,chOff,#span,vAlign,width",
-  "table^[HTMLElement]|align,bgColor,border,%caption,cellPadding,cellSpacing,frame,rules,summary,%tFoot,%tHead,width",
-  "tr^[HTMLElement]|align,bgColor,ch,chOff,vAlign",
-  "tfoot,thead,tbody^[HTMLElement]|align,ch,chOff,vAlign",
-  "template^[HTMLElement]|",
-  "textarea^[HTMLElement]|autocomplete,#cols,defaultValue,dirName,!disabled,#maxLength,#minLength,name,placeholder,!readOnly,!required,#rows,selectionDirection,#selectionEnd,#selectionStart,value,wrap",
-  "time^[HTMLElement]|dateTime",
-  "title^[HTMLElement]|text",
-  "track^[HTMLElement]|!default,kind,label,src,srclang",
-  "ul^[HTMLElement]|!compact,type",
-  "unknown^[HTMLElement]|",
-  "video^media|!disablePictureInPicture,#height,*enterpictureinpicture,*leavepictureinpicture,!playsInline,poster,#width",
-  ":svg:a^:svg:graphics|",
-  ":svg:animate^:svg:animation|",
-  ":svg:animateMotion^:svg:animation|",
-  ":svg:animateTransform^:svg:animation|",
-  ":svg:circle^:svg:geometry|",
-  ":svg:clipPath^:svg:graphics|",
-  ":svg:defs^:svg:graphics|",
-  ":svg:desc^:svg:|",
-  ":svg:discard^:svg:|",
-  ":svg:ellipse^:svg:geometry|",
-  ":svg:feBlend^:svg:|",
-  ":svg:feColorMatrix^:svg:|",
-  ":svg:feComponentTransfer^:svg:|",
-  ":svg:feComposite^:svg:|",
-  ":svg:feConvolveMatrix^:svg:|",
-  ":svg:feDiffuseLighting^:svg:|",
-  ":svg:feDisplacementMap^:svg:|",
-  ":svg:feDistantLight^:svg:|",
-  ":svg:feDropShadow^:svg:|",
-  ":svg:feFlood^:svg:|",
-  ":svg:feFuncA^:svg:componentTransferFunction|",
-  ":svg:feFuncB^:svg:componentTransferFunction|",
-  ":svg:feFuncG^:svg:componentTransferFunction|",
-  ":svg:feFuncR^:svg:componentTransferFunction|",
-  ":svg:feGaussianBlur^:svg:|",
-  ":svg:feImage^:svg:|",
-  ":svg:feMerge^:svg:|",
-  ":svg:feMergeNode^:svg:|",
-  ":svg:feMorphology^:svg:|",
-  ":svg:feOffset^:svg:|",
-  ":svg:fePointLight^:svg:|",
-  ":svg:feSpecularLighting^:svg:|",
-  ":svg:feSpotLight^:svg:|",
-  ":svg:feTile^:svg:|",
-  ":svg:feTurbulence^:svg:|",
-  ":svg:filter^:svg:|",
-  ":svg:foreignObject^:svg:graphics|",
-  ":svg:g^:svg:graphics|",
-  ":svg:image^:svg:graphics|decoding",
-  ":svg:line^:svg:geometry|",
-  ":svg:linearGradient^:svg:gradient|",
-  ":svg:mpath^:svg:|",
-  ":svg:marker^:svg:|",
-  ":svg:mask^:svg:|",
-  ":svg:metadata^:svg:|",
-  ":svg:path^:svg:geometry|",
-  ":svg:pattern^:svg:|",
-  ":svg:polygon^:svg:geometry|",
-  ":svg:polyline^:svg:geometry|",
-  ":svg:radialGradient^:svg:gradient|",
-  ":svg:rect^:svg:geometry|",
-  ":svg:svg^:svg:graphics|#currentScale,#zoomAndPan",
-  ":svg:script^:svg:|type",
-  ":svg:set^:svg:animation|",
-  ":svg:stop^:svg:|",
-  ":svg:style^:svg:|!disabled,media,title,type",
-  ":svg:switch^:svg:graphics|",
-  ":svg:symbol^:svg:|",
-  ":svg:tspan^:svg:textPositioning|",
-  ":svg:text^:svg:textPositioning|",
-  ":svg:textPath^:svg:textContent|",
-  ":svg:title^:svg:|",
-  ":svg:use^:svg:graphics|",
-  ":svg:view^:svg:|#zoomAndPan",
-  "data^[HTMLElement]|value",
-  "keygen^[HTMLElement]|!autofocus,challenge,!disabled,form,keytype,name",
-  "menuitem^[HTMLElement]|type,label,icon,!disabled,!checked,radiogroup,!default",
-  "summary^[HTMLElement]|",
-  "time^[HTMLElement]|dateTime",
-  ":svg:cursor^:svg:|",
-  ":math:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforeinput,*beforematch,*beforetoggle,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contentvisibilityautostatechange,*contextlost,*contextmenu,*contextrestored,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*scrollend,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex",
-  ":math:math^:math:|",
-  ":math:maction^:math:|",
-  ":math:menclose^:math:|",
-  ":math:merror^:math:|",
-  ":math:mfenced^:math:|",
-  ":math:mfrac^:math:|",
-  ":math:mi^:math:|",
-  ":math:mmultiscripts^:math:|",
-  ":math:mn^:math:|",
-  ":math:mo^:math:|",
-  ":math:mover^:math:|",
-  ":math:mpadded^:math:|",
-  ":math:mphantom^:math:|",
-  ":math:mroot^:math:|",
-  ":math:mrow^:math:|",
-  ":math:ms^:math:|",
-  ":math:mspace^:math:|",
-  ":math:msqrt^:math:|",
-  ":math:mstyle^:math:|",
-  ":math:msub^:math:|",
-  ":math:msubsup^:math:|",
-  ":math:msup^:math:|",
-  ":math:mtable^:math:|",
-  ":math:mtd^:math:|",
-  ":math:mtext^:math:|",
-  ":math:mtr^:math:|",
-  ":math:munder^:math:|",
-  ":math:munderover^:math:|",
-  ":math:semantics^:math:|"
-];
-var _ATTR_TO_PROP = new Map(Object.entries({
-  "class": "className",
-  "for": "htmlFor",
-  "formaction": "formAction",
-  "innerHtml": "innerHTML",
-  "readonly": "readOnly",
-  "tabindex": "tabIndex"
-}));
-var _PROP_TO_ATTR = Array.from(_ATTR_TO_PROP).reduce((inverted, [propertyName, attributeName]) => {
-  inverted.set(propertyName, attributeName);
-  return inverted;
-}, /* @__PURE__ */ new Map());
-var DomElementSchemaRegistry = class extends ElementSchemaRegistry {
-  constructor() {
-    super();
-    this._schema = /* @__PURE__ */ new Map();
-    this._eventSchema = /* @__PURE__ */ new Map();
-    SCHEMA.forEach((encodedType) => {
-      const type = /* @__PURE__ */ new Map();
-      const events = /* @__PURE__ */ new Set();
-      const [strType, strProperties] = encodedType.split("|");
-      const properties = strProperties.split(",");
-      const [typeNames, superName] = strType.split("^");
-      typeNames.split(",").forEach((tag) => {
-        this._schema.set(tag.toLowerCase(), type);
-        this._eventSchema.set(tag.toLowerCase(), events);
-      });
-      const superType = superName && this._schema.get(superName.toLowerCase());
-      if (superType) {
-        for (const [prop, value] of superType) {
-          type.set(prop, value);
-        }
-        for (const superEvent of this._eventSchema.get(superName.toLowerCase())) {
-          events.add(superEvent);
-        }
-      }
-      properties.forEach((property2) => {
-        if (property2.length > 0) {
-          switch (property2[0]) {
-            case "*":
-              events.add(property2.substring(1));
-              break;
-            case "!":
-              type.set(property2.substring(1), BOOLEAN);
-              break;
-            case "#":
-              type.set(property2.substring(1), NUMBER);
-              break;
-            case "%":
-              type.set(property2.substring(1), OBJECT);
-              break;
-            default:
-              type.set(property2, STRING);
-          }
-        }
-      });
-    });
-  }
-  hasProperty(tagName, propName, schemaMetas) {
-    if (schemaMetas.some((schema) => schema.name === NO_ERRORS_SCHEMA.name)) {
-      return true;
-    }
-    if (tagName.indexOf("-") > -1) {
-      if (isNgContainer(tagName) || isNgContent(tagName)) {
-        return false;
-      }
-      if (schemaMetas.some((schema) => schema.name === CUSTOM_ELEMENTS_SCHEMA.name)) {
-        return true;
-      }
-    }
-    const elementProperties = this._schema.get(tagName.toLowerCase()) || this._schema.get("unknown");
-    return elementProperties.has(propName);
-  }
-  hasElement(tagName, schemaMetas) {
-    if (schemaMetas.some((schema) => schema.name === NO_ERRORS_SCHEMA.name)) {
-      return true;
-    }
-    if (tagName.indexOf("-") > -1) {
-      if (isNgContainer(tagName) || isNgContent(tagName)) {
-        return true;
-      }
-      if (schemaMetas.some((schema) => schema.name === CUSTOM_ELEMENTS_SCHEMA.name)) {
-        return true;
-      }
-    }
-    return this._schema.has(tagName.toLowerCase());
-  }
-  securityContext(tagName, propName, isAttribute) {
-    if (isAttribute) {
-      propName = this.getMappedPropName(propName);
-    }
-    tagName = tagName.toLowerCase();
-    propName = propName.toLowerCase();
-    let ctx = SECURITY_SCHEMA()[tagName + "|" + propName];
-    if (ctx) {
-      return ctx;
-    }
-    ctx = SECURITY_SCHEMA()["*|" + propName];
-    return ctx ? ctx : SecurityContext.NONE;
-  }
-  getMappedPropName(propName) {
-    var _a2;
-    return (_a2 = _ATTR_TO_PROP.get(propName)) != null ? _a2 : propName;
-  }
-  getDefaultComponentElementName() {
-    return "ng-component";
-  }
-  validateProperty(name) {
-    if (name.toLowerCase().startsWith("on")) {
-      const msg = `Binding to event property '${name}' is disallowed for security reasons, please use (${name.slice(2)})=...
-If '${name}' is a directive input, make sure the directive is imported by the current module.`;
-      return { error: true, msg };
-    } else {
-      return { error: false };
-    }
-  }
-  validateAttribute(name) {
-    if (name.toLowerCase().startsWith("on")) {
-      const msg = `Binding to event attribute '${name}' is disallowed for security reasons, please use (${name.slice(2)})=...`;
-      return { error: true, msg };
-    } else {
-      return { error: false };
-    }
-  }
-  allKnownElementNames() {
-    return Array.from(this._schema.keys());
-  }
-  allKnownAttributesOfElement(tagName) {
-    const elementProperties = this._schema.get(tagName.toLowerCase()) || this._schema.get("unknown");
-    return Array.from(elementProperties.keys()).map((prop) => {
-      var _a2;
-      return (_a2 = _PROP_TO_ATTR.get(prop)) != null ? _a2 : prop;
-    });
-  }
-  allKnownEventsOfElement(tagName) {
-    var _a2;
-    return Array.from((_a2 = this._eventSchema.get(tagName.toLowerCase())) != null ? _a2 : []);
-  }
-  normalizeAnimationStyleProperty(propName) {
-    return dashCaseToCamelCase(propName);
-  }
-  normalizeAnimationStyleValue(camelCaseProp, userProvidedProp, val) {
-    let unit = "";
-    const strVal = val.toString().trim();
-    let errorMsg = null;
-    if (_isPixelDimensionStyle(camelCaseProp) && val !== 0 && val !== "0") {
-      if (typeof val === "number") {
-        unit = "px";
-      } else {
-        const valAndSuffixMatch = val.match(/^[+-]?[\d\.]+([a-z]*)$/);
-        if (valAndSuffixMatch && valAndSuffixMatch[1].length == 0) {
-          errorMsg = `Please provide a CSS unit value for ${userProvidedProp}:${val}`;
-        }
-      }
-    }
-    return { error: errorMsg, value: strVal + unit };
-  }
-};
-function _isPixelDimensionStyle(prop) {
-  switch (prop) {
-    case "width":
-    case "height":
-    case "minWidth":
-    case "minHeight":
-    case "maxWidth":
-    case "maxHeight":
-    case "left":
-    case "top":
-    case "bottom":
-    case "right":
-    case "fontSize":
-    case "outlineWidth":
-    case "outlineOffset":
-    case "paddingTop":
-    case "paddingLeft":
-    case "paddingBottom":
-    case "paddingRight":
-    case "marginTop":
-    case "marginLeft":
-    case "marginBottom":
-    case "marginRight":
-    case "borderRadius":
-    case "borderWidth":
-    case "borderTopWidth":
-    case "borderLeftWidth":
-    case "borderRightWidth":
-    case "borderBottomWidth":
-    case "textIndent":
-      return true;
-    default:
-      return false;
-  }
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/html_tags.mjs
-var HtmlTagDefinition = class {
-  constructor({ closedByChildren, implicitNamespacePrefix, contentType = TagContentType.PARSABLE_DATA, closedByParent = false, isVoid = false, ignoreFirstLf = false, preventNamespaceInheritance = false, canSelfClose = false } = {}) {
-    this.closedByChildren = {};
-    this.closedByParent = false;
-    if (closedByChildren && closedByChildren.length > 0) {
-      closedByChildren.forEach((tagName) => this.closedByChildren[tagName] = true);
-    }
-    this.isVoid = isVoid;
-    this.closedByParent = closedByParent || isVoid;
-    this.implicitNamespacePrefix = implicitNamespacePrefix || null;
-    this.contentType = contentType;
-    this.ignoreFirstLf = ignoreFirstLf;
-    this.preventNamespaceInheritance = preventNamespaceInheritance;
-    this.canSelfClose = canSelfClose != null ? canSelfClose : isVoid;
-  }
-  isClosedByChild(name) {
-    return this.isVoid || name.toLowerCase() in this.closedByChildren;
-  }
-  getContentType(prefix) {
-    if (typeof this.contentType === "object") {
-      const overrideType = prefix === void 0 ? void 0 : this.contentType[prefix];
-      return overrideType != null ? overrideType : this.contentType.default;
-    }
-    return this.contentType;
-  }
-};
-var DEFAULT_TAG_DEFINITION;
-var TAG_DEFINITIONS;
-function getHtmlTagDefinition(tagName) {
-  var _a2, _b2;
-  if (!TAG_DEFINITIONS) {
-    DEFAULT_TAG_DEFINITION = new HtmlTagDefinition({ canSelfClose: true });
-    TAG_DEFINITIONS = Object.assign(/* @__PURE__ */ Object.create(null), {
-      "base": new HtmlTagDefinition({ isVoid: true }),
-      "meta": new HtmlTagDefinition({ isVoid: true }),
-      "area": new HtmlTagDefinition({ isVoid: true }),
-      "embed": new HtmlTagDefinition({ isVoid: true }),
-      "link": new HtmlTagDefinition({ isVoid: true }),
-      "img": new HtmlTagDefinition({ isVoid: true }),
-      "input": new HtmlTagDefinition({ isVoid: true }),
-      "param": new HtmlTagDefinition({ isVoid: true }),
-      "hr": new HtmlTagDefinition({ isVoid: true }),
-      "br": new HtmlTagDefinition({ isVoid: true }),
-      "source": new HtmlTagDefinition({ isVoid: true }),
-      "track": new HtmlTagDefinition({ isVoid: true }),
-      "wbr": new HtmlTagDefinition({ isVoid: true }),
-      "p": new HtmlTagDefinition({
-        closedByChildren: [
-          "address",
-          "article",
-          "aside",
-          "blockquote",
-          "div",
-          "dl",
-          "fieldset",
-          "footer",
-          "form",
-          "h1",
-          "h2",
-          "h3",
-          "h4",
-          "h5",
-          "h6",
-          "header",
-          "hgroup",
-          "hr",
-          "main",
-          "nav",
-          "ol",
-          "p",
-          "pre",
-          "section",
-          "table",
-          "ul"
-        ],
-        closedByParent: true
-      }),
-      "thead": new HtmlTagDefinition({ closedByChildren: ["tbody", "tfoot"] }),
-      "tbody": new HtmlTagDefinition({ closedByChildren: ["tbody", "tfoot"], closedByParent: true }),
-      "tfoot": new HtmlTagDefinition({ closedByChildren: ["tbody"], closedByParent: true }),
-      "tr": new HtmlTagDefinition({ closedByChildren: ["tr"], closedByParent: true }),
-      "td": new HtmlTagDefinition({ closedByChildren: ["td", "th"], closedByParent: true }),
-      "th": new HtmlTagDefinition({ closedByChildren: ["td", "th"], closedByParent: true }),
-      "col": new HtmlTagDefinition({ isVoid: true }),
-      "svg": new HtmlTagDefinition({ implicitNamespacePrefix: "svg" }),
-      "foreignObject": new HtmlTagDefinition({
-        implicitNamespacePrefix: "svg",
-        preventNamespaceInheritance: true
-      }),
-      "math": new HtmlTagDefinition({ implicitNamespacePrefix: "math" }),
-      "li": new HtmlTagDefinition({ closedByChildren: ["li"], closedByParent: true }),
-      "dt": new HtmlTagDefinition({ closedByChildren: ["dt", "dd"] }),
-      "dd": new HtmlTagDefinition({ closedByChildren: ["dt", "dd"], closedByParent: true }),
-      "rb": new HtmlTagDefinition({
-        closedByChildren: ["rb", "rt", "rtc", "rp"],
-        closedByParent: true
-      }),
-      "rt": new HtmlTagDefinition({
-        closedByChildren: ["rb", "rt", "rtc", "rp"],
-        closedByParent: true
-      }),
-      "rtc": new HtmlTagDefinition({ closedByChildren: ["rb", "rtc", "rp"], closedByParent: true }),
-      "rp": new HtmlTagDefinition({
-        closedByChildren: ["rb", "rt", "rtc", "rp"],
-        closedByParent: true
-      }),
-      "optgroup": new HtmlTagDefinition({ closedByChildren: ["optgroup"], closedByParent: true }),
-      "option": new HtmlTagDefinition({
-        closedByChildren: ["option", "optgroup"],
-        closedByParent: true
-      }),
-      "pre": new HtmlTagDefinition({ ignoreFirstLf: true }),
-      "listing": new HtmlTagDefinition({ ignoreFirstLf: true }),
-      "style": new HtmlTagDefinition({ contentType: TagContentType.RAW_TEXT }),
-      "script": new HtmlTagDefinition({ contentType: TagContentType.RAW_TEXT }),
-      "title": new HtmlTagDefinition({
-        contentType: {
-          default: TagContentType.ESCAPABLE_RAW_TEXT,
-          svg: TagContentType.PARSABLE_DATA
-        }
-      }),
-      "textarea": new HtmlTagDefinition({
-        contentType: TagContentType.ESCAPABLE_RAW_TEXT,
-        ignoreFirstLf: true
-      })
-    });
-    new DomElementSchemaRegistry().allKnownElementNames().forEach((knownTagName) => {
-      if (!TAG_DEFINITIONS[knownTagName] && getNsPrefix(knownTagName) === null) {
-        TAG_DEFINITIONS[knownTagName] = new HtmlTagDefinition({ canSelfClose: false });
-      }
-    });
-  }
-  return (_b2 = (_a2 = TAG_DEFINITIONS[tagName]) != null ? _a2 : TAG_DEFINITIONS[tagName.toLowerCase()]) != null ? _b2 : DEFAULT_TAG_DEFINITION;
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/serializers/placeholder.mjs
-var TAG_TO_PLACEHOLDER_NAMES = {
-  "A": "LINK",
-  "B": "BOLD_TEXT",
-  "BR": "LINE_BREAK",
-  "EM": "EMPHASISED_TEXT",
-  "H1": "HEADING_LEVEL1",
-  "H2": "HEADING_LEVEL2",
-  "H3": "HEADING_LEVEL3",
-  "H4": "HEADING_LEVEL4",
-  "H5": "HEADING_LEVEL5",
-  "H6": "HEADING_LEVEL6",
-  "HR": "HORIZONTAL_RULE",
-  "I": "ITALIC_TEXT",
-  "LI": "LIST_ITEM",
-  "LINK": "MEDIA_LINK",
-  "OL": "ORDERED_LIST",
-  "P": "PARAGRAPH",
-  "Q": "QUOTATION",
-  "S": "STRIKETHROUGH_TEXT",
-  "SMALL": "SMALL_TEXT",
-  "SUB": "SUBSTRIPT",
-  "SUP": "SUPERSCRIPT",
-  "TBODY": "TABLE_BODY",
-  "TD": "TABLE_CELL",
-  "TFOOT": "TABLE_FOOTER",
-  "TH": "TABLE_HEADER_CELL",
-  "THEAD": "TABLE_HEADER",
-  "TR": "TABLE_ROW",
-  "TT": "MONOSPACED_TEXT",
-  "U": "UNDERLINED_TEXT",
-  "UL": "UNORDERED_LIST"
-};
-var PlaceholderRegistry = class {
-  constructor() {
-    this._placeHolderNameCounts = {};
-    this._signatureToName = {};
-  }
-  getStartTagPlaceholderName(tag, attrs, isVoid) {
-    const signature = this._hashTag(tag, attrs, isVoid);
-    if (this._signatureToName[signature]) {
-      return this._signatureToName[signature];
-    }
-    const upperTag = tag.toUpperCase();
-    const baseName = TAG_TO_PLACEHOLDER_NAMES[upperTag] || `TAG_${upperTag}`;
-    const name = this._generateUniqueName(isVoid ? baseName : `START_${baseName}`);
-    this._signatureToName[signature] = name;
-    return name;
-  }
-  getCloseTagPlaceholderName(tag) {
-    const signature = this._hashClosingTag(tag);
-    if (this._signatureToName[signature]) {
-      return this._signatureToName[signature];
-    }
-    const upperTag = tag.toUpperCase();
-    const baseName = TAG_TO_PLACEHOLDER_NAMES[upperTag] || `TAG_${upperTag}`;
-    const name = this._generateUniqueName(`CLOSE_${baseName}`);
-    this._signatureToName[signature] = name;
-    return name;
-  }
-  getPlaceholderName(name, content) {
-    const upperName = name.toUpperCase();
-    const signature = `PH: ${upperName}=${content}`;
-    if (this._signatureToName[signature]) {
-      return this._signatureToName[signature];
-    }
-    const uniqueName = this._generateUniqueName(upperName);
-    this._signatureToName[signature] = uniqueName;
-    return uniqueName;
-  }
-  getUniquePlaceholder(name) {
-    return this._generateUniqueName(name.toUpperCase());
-  }
-  getStartBlockPlaceholderName(name, parameters) {
-    const signature = this._hashBlock(name, parameters);
-    if (this._signatureToName[signature]) {
-      return this._signatureToName[signature];
-    }
-    const placeholder = this._generateUniqueName(`START_BLOCK_${this._toSnakeCase(name)}`);
-    this._signatureToName[signature] = placeholder;
-    return placeholder;
-  }
-  getCloseBlockPlaceholderName(name) {
-    const signature = this._hashClosingBlock(name);
-    if (this._signatureToName[signature]) {
-      return this._signatureToName[signature];
-    }
-    const placeholder = this._generateUniqueName(`CLOSE_BLOCK_${this._toSnakeCase(name)}`);
-    this._signatureToName[signature] = placeholder;
-    return placeholder;
-  }
-  _hashTag(tag, attrs, isVoid) {
-    const start = `<${tag}`;
-    const strAttrs = Object.keys(attrs).sort().map((name) => ` ${name}=${attrs[name]}`).join("");
-    const end = isVoid ? "/>" : `></${tag}>`;
-    return start + strAttrs + end;
-  }
-  _hashClosingTag(tag) {
-    return this._hashTag(`/${tag}`, {}, false);
-  }
-  _hashBlock(name, parameters) {
-    const params = parameters.length === 0 ? "" : ` (${parameters.sort().join("; ")})`;
-    return `@${name}${params} {}`;
-  }
-  _hashClosingBlock(name) {
-    return this._hashBlock(`close_${name}`, []);
-  }
-  _toSnakeCase(name) {
-    return name.toUpperCase().replace(/[^A-Z0-9]/g, "_");
-  }
-  _generateUniqueName(base) {
-    const seen = this._placeHolderNameCounts.hasOwnProperty(base);
-    if (!seen) {
-      this._placeHolderNameCounts[base] = 1;
-      return base;
-    }
-    const id = this._placeHolderNameCounts[base];
-    this._placeHolderNameCounts[base] = id + 1;
-    return `${base}_${id}`;
-  }
-};
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/i18n_parser.mjs
-var _expParser = new Parser(new Lexer());
-function createI18nMessageFactory(interpolationConfig, containerBlocks) {
-  const visitor = new _I18nVisitor(_expParser, interpolationConfig, containerBlocks);
-  return (nodes, meaning, description, customId, visitNodeFn) => visitor.toI18nMessage(nodes, meaning, description, customId, visitNodeFn);
-}
-function noopVisitNodeFn(_html, i18n2) {
-  return i18n2;
-}
-var _I18nVisitor = class {
-  constructor(_expressionParser, _interpolationConfig, _containerBlocks) {
-    this._expressionParser = _expressionParser;
-    this._interpolationConfig = _interpolationConfig;
-    this._containerBlocks = _containerBlocks;
-  }
-  toI18nMessage(nodes, meaning = "", description = "", customId = "", visitNodeFn) {
-    const context = {
-      isIcu: nodes.length == 1 && nodes[0] instanceof Expansion,
-      icuDepth: 0,
-      placeholderRegistry: new PlaceholderRegistry(),
-      placeholderToContent: {},
-      placeholderToMessage: {},
-      visitNodeFn: visitNodeFn || noopVisitNodeFn
-    };
-    const i18nodes = visitAll2(this, nodes, context);
-    return new Message(i18nodes, context.placeholderToContent, context.placeholderToMessage, meaning, description, customId);
-  }
-  visitElement(el, context) {
-    var _a2;
-    const children = visitAll2(this, el.children, context);
-    const attrs = {};
-    el.attrs.forEach((attr) => {
-      attrs[attr.name] = attr.value;
-    });
-    const isVoid = getHtmlTagDefinition(el.name).isVoid;
-    const startPhName = context.placeholderRegistry.getStartTagPlaceholderName(el.name, attrs, isVoid);
-    context.placeholderToContent[startPhName] = {
-      text: el.startSourceSpan.toString(),
-      sourceSpan: el.startSourceSpan
-    };
-    let closePhName = "";
-    if (!isVoid) {
-      closePhName = context.placeholderRegistry.getCloseTagPlaceholderName(el.name);
-      context.placeholderToContent[closePhName] = {
-        text: `</${el.name}>`,
-        sourceSpan: (_a2 = el.endSourceSpan) != null ? _a2 : el.sourceSpan
-      };
-    }
-    const node = new TagPlaceholder(el.name, attrs, startPhName, closePhName, children, isVoid, el.sourceSpan, el.startSourceSpan, el.endSourceSpan);
-    return context.visitNodeFn(el, node);
-  }
-  visitAttribute(attribute2, context) {
-    const node = attribute2.valueTokens === void 0 || attribute2.valueTokens.length === 1 ? new Text2(attribute2.value, attribute2.valueSpan || attribute2.sourceSpan) : this._visitTextWithInterpolation(attribute2.valueTokens, attribute2.valueSpan || attribute2.sourceSpan, context, attribute2.i18n);
-    return context.visitNodeFn(attribute2, node);
-  }
-  visitText(text2, context) {
-    const node = text2.tokens.length === 1 ? new Text2(text2.value, text2.sourceSpan) : this._visitTextWithInterpolation(text2.tokens, text2.sourceSpan, context, text2.i18n);
-    return context.visitNodeFn(text2, node);
-  }
-  visitComment(comment, context) {
-    return null;
-  }
-  visitExpansion(icu, context) {
-    context.icuDepth++;
-    const i18nIcuCases = {};
-    const i18nIcu = new Icu2(icu.switchValue, icu.type, i18nIcuCases, icu.sourceSpan);
-    icu.cases.forEach((caze) => {
-      i18nIcuCases[caze.value] = new Container(caze.expression.map((node2) => node2.visit(this, context)), caze.expSourceSpan);
-    });
-    context.icuDepth--;
-    if (context.isIcu || context.icuDepth > 0) {
-      const expPh = context.placeholderRegistry.getUniquePlaceholder(`VAR_${icu.type}`);
-      i18nIcu.expressionPlaceholder = expPh;
-      context.placeholderToContent[expPh] = {
-        text: icu.switchValue,
-        sourceSpan: icu.switchValueSourceSpan
-      };
-      return context.visitNodeFn(icu, i18nIcu);
-    }
-    const phName = context.placeholderRegistry.getPlaceholderName("ICU", icu.sourceSpan.toString());
-    context.placeholderToMessage[phName] = this.toI18nMessage([icu], "", "", "", void 0);
-    const node = new IcuPlaceholder(i18nIcu, phName, icu.sourceSpan);
-    return context.visitNodeFn(icu, node);
-  }
-  visitExpansionCase(_icuCase, _context) {
-    throw new Error("Unreachable code");
-  }
-  visitBlock(block, context) {
-    var _a2;
-    const children = visitAll2(this, block.children, context);
-    if (this._containerBlocks.has(block.name)) {
-      return new Container(children, block.sourceSpan);
-    }
-    const parameters = block.parameters.map((param) => param.expression);
-    const startPhName = context.placeholderRegistry.getStartBlockPlaceholderName(block.name, parameters);
-    const closePhName = context.placeholderRegistry.getCloseBlockPlaceholderName(block.name);
-    context.placeholderToContent[startPhName] = {
-      text: block.startSourceSpan.toString(),
-      sourceSpan: block.startSourceSpan
-    };
-    context.placeholderToContent[closePhName] = {
-      text: block.endSourceSpan ? block.endSourceSpan.toString() : "}",
-      sourceSpan: (_a2 = block.endSourceSpan) != null ? _a2 : block.sourceSpan
-    };
-    const node = new BlockPlaceholder(block.name, parameters, startPhName, closePhName, children, block.sourceSpan, block.startSourceSpan, block.endSourceSpan);
-    return context.visitNodeFn(block, node);
-  }
-  visitBlockParameter(_parameter, _context) {
-    throw new Error("Unreachable code");
-  }
-  visitLetDeclaration(decl, context) {
-    return null;
-  }
-  _visitTextWithInterpolation(tokens, sourceSpan, context, previousI18n) {
-    const nodes = [];
-    let hasInterpolation = false;
-    for (const token of tokens) {
-      switch (token.type) {
-        case 8:
-        case 17:
-          hasInterpolation = true;
-          const expression = token.parts[1];
-          const baseName = extractPlaceholderName(expression) || "INTERPOLATION";
-          const phName = context.placeholderRegistry.getPlaceholderName(baseName, expression);
-          context.placeholderToContent[phName] = {
-            text: token.parts.join(""),
-            sourceSpan: token.sourceSpan
-          };
-          nodes.push(new Placeholder(expression, phName, token.sourceSpan));
-          break;
-        default:
-          if (token.parts[0].length > 0) {
-            const previous = nodes[nodes.length - 1];
-            if (previous instanceof Text2) {
-              previous.value += token.parts[0];
-              previous.sourceSpan = new ParseSourceSpan(previous.sourceSpan.start, token.sourceSpan.end, previous.sourceSpan.fullStart, previous.sourceSpan.details);
-            } else {
-              nodes.push(new Text2(token.parts[0], token.sourceSpan));
-            }
-          }
-          break;
-      }
-    }
-    if (hasInterpolation) {
-      reusePreviousSourceSpans(nodes, previousI18n);
-      return new Container(nodes, sourceSpan);
-    } else {
-      return nodes[0];
-    }
-  }
-};
-function reusePreviousSourceSpans(nodes, previousI18n) {
-  if (previousI18n instanceof Message) {
-    assertSingleContainerMessage(previousI18n);
-    previousI18n = previousI18n.nodes[0];
-  }
-  if (previousI18n instanceof Container) {
-    assertEquivalentNodes(previousI18n.children, nodes);
-    for (let i = 0; i < nodes.length; i++) {
-      nodes[i].sourceSpan = previousI18n.children[i].sourceSpan;
-    }
-  }
-}
-function assertSingleContainerMessage(message) {
-  const nodes = message.nodes;
-  if (nodes.length !== 1 || !(nodes[0] instanceof Container)) {
-    throw new Error("Unexpected previous i18n message - expected it to consist of only a single `Container` node.");
-  }
-}
-function assertEquivalentNodes(previousNodes, nodes) {
-  if (previousNodes.length !== nodes.length) {
-    throw new Error("The number of i18n message children changed between first and second pass.");
-  }
-  if (previousNodes.some((node, i) => nodes[i].constructor !== node.constructor)) {
-    throw new Error("The types of the i18n message children changed between first and second pass.");
-  }
-}
-var _CUSTOM_PH_EXP = /\/\/[\s\S]*i18n[\s\S]*\([\s\S]*ph[\s\S]*=[\s\S]*("|')([\s\S]*?)\1[\s\S]*\)/g;
-function extractPlaceholderName(input) {
-  return input.split(_CUSTOM_PH_EXP)[2];
-}
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/parse_util.mjs
-var I18nError = class extends ParseError {
-  constructor(span, msg) {
-    super(span, msg);
-  }
-};
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/entities.mjs
 var NAMED_ENTITIES = {
@@ -14961,7 +12828,7 @@ var ParseTreeResult = class {
     this.errors = errors;
   }
 };
-var Parser2 = class {
+var Parser = class {
   constructor(getTagDefinition) {
     this.getTagDefinition = getTagDefinition;
   }
@@ -15373,6 +13240,2299 @@ function decodeEntity(match, entity) {
   return match;
 }
 
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/html_whitespaces.mjs
+var PRESERVE_WS_ATTR_NAME = "ngPreserveWhitespaces";
+var SKIP_WS_TRIM_TAGS = /* @__PURE__ */ new Set(["pre", "template", "textarea", "script", "style"]);
+var WS_CHARS = " \f\n\r	\v\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF";
+var NO_WS_REGEXP = new RegExp(`[^${WS_CHARS}]`);
+var WS_REPLACE_REGEXP = new RegExp(`[${WS_CHARS}]{2,}`, "g");
+function hasPreserveWhitespacesAttr(attrs) {
+  return attrs.some((attr) => attr.name === PRESERVE_WS_ATTR_NAME);
+}
+function replaceNgsp(value) {
+  return value.replace(new RegExp(NGSP_UNICODE, "g"), " ");
+}
+var WhitespaceVisitor = class {
+  constructor(preserveSignificantWhitespace, originalNodeMap, requireContext = true) {
+    this.preserveSignificantWhitespace = preserveSignificantWhitespace;
+    this.originalNodeMap = originalNodeMap;
+    this.requireContext = requireContext;
+    this.icuExpansionDepth = 0;
+  }
+  visitElement(element2, context) {
+    var _a2, _b2;
+    if (SKIP_WS_TRIM_TAGS.has(element2.name) || hasPreserveWhitespacesAttr(element2.attrs)) {
+      const newElement2 = new Element2(element2.name, visitAllWithSiblings(this, element2.attrs), element2.children, element2.sourceSpan, element2.startSourceSpan, element2.endSourceSpan, element2.i18n);
+      (_a2 = this.originalNodeMap) == null ? void 0 : _a2.set(newElement2, element2);
+      return newElement2;
+    }
+    const newElement = new Element2(element2.name, element2.attrs, visitAllWithSiblings(this, element2.children), element2.sourceSpan, element2.startSourceSpan, element2.endSourceSpan, element2.i18n);
+    (_b2 = this.originalNodeMap) == null ? void 0 : _b2.set(newElement, element2);
+    return newElement;
+  }
+  visitAttribute(attribute2, context) {
+    return attribute2.name !== PRESERVE_WS_ATTR_NAME ? attribute2 : null;
+  }
+  visitText(text2, context) {
+    var _a2;
+    const isNotBlank = text2.value.match(NO_WS_REGEXP);
+    const hasExpansionSibling = context && (context.prev instanceof Expansion || context.next instanceof Expansion);
+    const inIcuExpansion = this.icuExpansionDepth > 0;
+    if (inIcuExpansion && this.preserveSignificantWhitespace)
+      return text2;
+    if (isNotBlank || hasExpansionSibling) {
+      const tokens = text2.tokens.map((token) => token.type === 5 ? createWhitespaceProcessedTextToken(token) : token);
+      if (!this.preserveSignificantWhitespace && tokens.length > 0) {
+        const firstToken = tokens[0];
+        tokens.splice(0, 1, trimLeadingWhitespace(firstToken, context));
+        const lastToken = tokens[tokens.length - 1];
+        tokens.splice(tokens.length - 1, 1, trimTrailingWhitespace(lastToken, context));
+      }
+      const processed = processWhitespace(text2.value);
+      const value = this.preserveSignificantWhitespace ? processed : trimLeadingAndTrailingWhitespace(processed, context);
+      const result = new Text4(value, text2.sourceSpan, tokens, text2.i18n);
+      (_a2 = this.originalNodeMap) == null ? void 0 : _a2.set(result, text2);
+      return result;
+    }
+    return null;
+  }
+  visitComment(comment, context) {
+    return comment;
+  }
+  visitExpansion(expansion, context) {
+    var _a2;
+    this.icuExpansionDepth++;
+    let newExpansion;
+    try {
+      newExpansion = new Expansion(expansion.switchValue, expansion.type, visitAllWithSiblings(this, expansion.cases), expansion.sourceSpan, expansion.switchValueSourceSpan, expansion.i18n);
+    } finally {
+      this.icuExpansionDepth--;
+    }
+    (_a2 = this.originalNodeMap) == null ? void 0 : _a2.set(newExpansion, expansion);
+    return newExpansion;
+  }
+  visitExpansionCase(expansionCase, context) {
+    var _a2;
+    const newExpansionCase = new ExpansionCase(expansionCase.value, visitAllWithSiblings(this, expansionCase.expression), expansionCase.sourceSpan, expansionCase.valueSourceSpan, expansionCase.expSourceSpan);
+    (_a2 = this.originalNodeMap) == null ? void 0 : _a2.set(newExpansionCase, expansionCase);
+    return newExpansionCase;
+  }
+  visitBlock(block, context) {
+    var _a2;
+    const newBlock = new Block(block.name, block.parameters, visitAllWithSiblings(this, block.children), block.sourceSpan, block.nameSpan, block.startSourceSpan, block.endSourceSpan);
+    (_a2 = this.originalNodeMap) == null ? void 0 : _a2.set(newBlock, block);
+    return newBlock;
+  }
+  visitBlockParameter(parameter, context) {
+    return parameter;
+  }
+  visitLetDeclaration(decl, context) {
+    return decl;
+  }
+  visit(_node, context) {
+    if (this.requireContext && !context) {
+      throw new Error(`WhitespaceVisitor requires context. Visit via \`visitAllWithSiblings\` to get this context.`);
+    }
+    return false;
+  }
+};
+function trimLeadingWhitespace(token, context) {
+  if (token.type !== 5)
+    return token;
+  const isFirstTokenInTag = !(context == null ? void 0 : context.prev);
+  if (!isFirstTokenInTag)
+    return token;
+  return transformTextToken(token, (text2) => text2.trimStart());
+}
+function trimTrailingWhitespace(token, context) {
+  if (token.type !== 5)
+    return token;
+  const isLastTokenInTag = !(context == null ? void 0 : context.next);
+  if (!isLastTokenInTag)
+    return token;
+  return transformTextToken(token, (text2) => text2.trimEnd());
+}
+function trimLeadingAndTrailingWhitespace(text2, context) {
+  const isFirstTokenInTag = !(context == null ? void 0 : context.prev);
+  const isLastTokenInTag = !(context == null ? void 0 : context.next);
+  const maybeTrimmedStart = isFirstTokenInTag ? text2.trimStart() : text2;
+  const maybeTrimmed = isLastTokenInTag ? maybeTrimmedStart.trimEnd() : maybeTrimmedStart;
+  return maybeTrimmed;
+}
+function createWhitespaceProcessedTextToken({ type, parts, sourceSpan }) {
+  return { type, parts: [processWhitespace(parts[0])], sourceSpan };
+}
+function transformTextToken({ type, parts, sourceSpan }, transform2) {
+  return { type, parts: [transform2(parts[0])], sourceSpan };
+}
+function processWhitespace(text2) {
+  return replaceNgsp(text2).replace(WS_REPLACE_REGEXP, " ");
+}
+function visitAllWithSiblings(visitor, nodes) {
+  const result = [];
+  nodes.forEach((ast, i) => {
+    const context = { prev: nodes[i - 1], next: nodes[i + 1] };
+    const astResult = ast.visit(visitor, context);
+    if (astResult) {
+      result.push(astResult);
+    }
+  });
+  return result;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/expression_parser/lexer.mjs
+var TokenType;
+(function(TokenType2) {
+  TokenType2[TokenType2["Character"] = 0] = "Character";
+  TokenType2[TokenType2["Identifier"] = 1] = "Identifier";
+  TokenType2[TokenType2["PrivateIdentifier"] = 2] = "PrivateIdentifier";
+  TokenType2[TokenType2["Keyword"] = 3] = "Keyword";
+  TokenType2[TokenType2["String"] = 4] = "String";
+  TokenType2[TokenType2["Operator"] = 5] = "Operator";
+  TokenType2[TokenType2["Number"] = 6] = "Number";
+  TokenType2[TokenType2["Error"] = 7] = "Error";
+})(TokenType || (TokenType = {}));
+var KEYWORDS = ["var", "let", "as", "null", "undefined", "true", "false", "if", "else", "this"];
+var Lexer = class {
+  tokenize(text2) {
+    const scanner = new _Scanner(text2);
+    const tokens = [];
+    let token = scanner.scanToken();
+    while (token != null) {
+      tokens.push(token);
+      token = scanner.scanToken();
+    }
+    return tokens;
+  }
+};
+var Token = class {
+  constructor(index, end, type, numValue, strValue) {
+    this.index = index;
+    this.end = end;
+    this.type = type;
+    this.numValue = numValue;
+    this.strValue = strValue;
+  }
+  isCharacter(code) {
+    return this.type == TokenType.Character && this.numValue == code;
+  }
+  isNumber() {
+    return this.type == TokenType.Number;
+  }
+  isString() {
+    return this.type == TokenType.String;
+  }
+  isOperator(operator) {
+    return this.type == TokenType.Operator && this.strValue == operator;
+  }
+  isIdentifier() {
+    return this.type == TokenType.Identifier;
+  }
+  isPrivateIdentifier() {
+    return this.type == TokenType.PrivateIdentifier;
+  }
+  isKeyword() {
+    return this.type == TokenType.Keyword;
+  }
+  isKeywordLet() {
+    return this.type == TokenType.Keyword && this.strValue == "let";
+  }
+  isKeywordAs() {
+    return this.type == TokenType.Keyword && this.strValue == "as";
+  }
+  isKeywordNull() {
+    return this.type == TokenType.Keyword && this.strValue == "null";
+  }
+  isKeywordUndefined() {
+    return this.type == TokenType.Keyword && this.strValue == "undefined";
+  }
+  isKeywordTrue() {
+    return this.type == TokenType.Keyword && this.strValue == "true";
+  }
+  isKeywordFalse() {
+    return this.type == TokenType.Keyword && this.strValue == "false";
+  }
+  isKeywordThis() {
+    return this.type == TokenType.Keyword && this.strValue == "this";
+  }
+  isError() {
+    return this.type == TokenType.Error;
+  }
+  toNumber() {
+    return this.type == TokenType.Number ? this.numValue : -1;
+  }
+  toString() {
+    switch (this.type) {
+      case TokenType.Character:
+      case TokenType.Identifier:
+      case TokenType.Keyword:
+      case TokenType.Operator:
+      case TokenType.PrivateIdentifier:
+      case TokenType.String:
+      case TokenType.Error:
+        return this.strValue;
+      case TokenType.Number:
+        return this.numValue.toString();
+      default:
+        return null;
+    }
+  }
+};
+function newCharacterToken(index, end, code) {
+  return new Token(index, end, TokenType.Character, code, String.fromCharCode(code));
+}
+function newIdentifierToken(index, end, text2) {
+  return new Token(index, end, TokenType.Identifier, 0, text2);
+}
+function newPrivateIdentifierToken(index, end, text2) {
+  return new Token(index, end, TokenType.PrivateIdentifier, 0, text2);
+}
+function newKeywordToken(index, end, text2) {
+  return new Token(index, end, TokenType.Keyword, 0, text2);
+}
+function newOperatorToken(index, end, text2) {
+  return new Token(index, end, TokenType.Operator, 0, text2);
+}
+function newStringToken(index, end, text2) {
+  return new Token(index, end, TokenType.String, 0, text2);
+}
+function newNumberToken(index, end, n) {
+  return new Token(index, end, TokenType.Number, n, "");
+}
+function newErrorToken(index, end, message) {
+  return new Token(index, end, TokenType.Error, 0, message);
+}
+var EOF = new Token(-1, -1, TokenType.Character, 0, "");
+var _Scanner = class {
+  constructor(input) {
+    this.input = input;
+    this.peek = 0;
+    this.index = -1;
+    this.length = input.length;
+    this.advance();
+  }
+  advance() {
+    this.peek = ++this.index >= this.length ? $EOF : this.input.charCodeAt(this.index);
+  }
+  scanToken() {
+    const input = this.input, length = this.length;
+    let peek = this.peek, index = this.index;
+    while (peek <= $SPACE) {
+      if (++index >= length) {
+        peek = $EOF;
+        break;
+      } else {
+        peek = input.charCodeAt(index);
+      }
+    }
+    this.peek = peek;
+    this.index = index;
+    if (index >= length) {
+      return null;
+    }
+    if (isIdentifierStart(peek))
+      return this.scanIdentifier();
+    if (isDigit(peek))
+      return this.scanNumber(index);
+    const start = index;
+    switch (peek) {
+      case $PERIOD:
+        this.advance();
+        return isDigit(this.peek) ? this.scanNumber(start) : newCharacterToken(start, this.index, $PERIOD);
+      case $LPAREN:
+      case $RPAREN:
+      case $LBRACE:
+      case $RBRACE:
+      case $LBRACKET:
+      case $RBRACKET:
+      case $COMMA:
+      case $COLON:
+      case $SEMICOLON:
+        return this.scanCharacter(start, peek);
+      case $SQ:
+      case $DQ:
+        return this.scanString();
+      case $HASH:
+        return this.scanPrivateIdentifier();
+      case $PLUS:
+      case $MINUS:
+      case $STAR:
+      case $SLASH:
+      case $PERCENT:
+      case $CARET:
+        return this.scanOperator(start, String.fromCharCode(peek));
+      case $QUESTION:
+        return this.scanQuestion(start);
+      case $LT:
+      case $GT:
+        return this.scanComplexOperator(start, String.fromCharCode(peek), $EQ, "=");
+      case $BANG:
+      case $EQ:
+        return this.scanComplexOperator(start, String.fromCharCode(peek), $EQ, "=", $EQ, "=");
+      case $AMPERSAND:
+        return this.scanComplexOperator(start, "&", $AMPERSAND, "&");
+      case $BAR:
+        return this.scanComplexOperator(start, "|", $BAR, "|");
+      case $NBSP:
+        while (isWhitespace(this.peek))
+          this.advance();
+        return this.scanToken();
+    }
+    this.advance();
+    return this.error(`Unexpected character [${String.fromCharCode(peek)}]`, 0);
+  }
+  scanCharacter(start, code) {
+    this.advance();
+    return newCharacterToken(start, this.index, code);
+  }
+  scanOperator(start, str) {
+    this.advance();
+    return newOperatorToken(start, this.index, str);
+  }
+  scanComplexOperator(start, one, twoCode, two, threeCode, three) {
+    this.advance();
+    let str = one;
+    if (this.peek == twoCode) {
+      this.advance();
+      str += two;
+    }
+    if (threeCode != null && this.peek == threeCode) {
+      this.advance();
+      str += three;
+    }
+    return newOperatorToken(start, this.index, str);
+  }
+  scanIdentifier() {
+    const start = this.index;
+    this.advance();
+    while (isIdentifierPart(this.peek))
+      this.advance();
+    const str = this.input.substring(start, this.index);
+    return KEYWORDS.indexOf(str) > -1 ? newKeywordToken(start, this.index, str) : newIdentifierToken(start, this.index, str);
+  }
+  scanPrivateIdentifier() {
+    const start = this.index;
+    this.advance();
+    if (!isIdentifierStart(this.peek)) {
+      return this.error("Invalid character [#]", -1);
+    }
+    while (isIdentifierPart(this.peek))
+      this.advance();
+    const identifierName2 = this.input.substring(start, this.index);
+    return newPrivateIdentifierToken(start, this.index, identifierName2);
+  }
+  scanNumber(start) {
+    let simple = this.index === start;
+    let hasSeparators = false;
+    this.advance();
+    while (true) {
+      if (isDigit(this.peek)) {
+      } else if (this.peek === $_) {
+        if (!isDigit(this.input.charCodeAt(this.index - 1)) || !isDigit(this.input.charCodeAt(this.index + 1))) {
+          return this.error("Invalid numeric separator", 0);
+        }
+        hasSeparators = true;
+      } else if (this.peek === $PERIOD) {
+        simple = false;
+      } else if (isExponentStart(this.peek)) {
+        this.advance();
+        if (isExponentSign(this.peek))
+          this.advance();
+        if (!isDigit(this.peek))
+          return this.error("Invalid exponent", -1);
+        simple = false;
+      } else {
+        break;
+      }
+      this.advance();
+    }
+    let str = this.input.substring(start, this.index);
+    if (hasSeparators) {
+      str = str.replace(/_/g, "");
+    }
+    const value = simple ? parseIntAutoRadix(str) : parseFloat(str);
+    return newNumberToken(start, this.index, value);
+  }
+  scanString() {
+    const start = this.index;
+    const quote = this.peek;
+    this.advance();
+    let buffer = "";
+    let marker = this.index;
+    const input = this.input;
+    while (this.peek != quote) {
+      if (this.peek == $BACKSLASH) {
+        buffer += input.substring(marker, this.index);
+        let unescapedCode;
+        this.advance();
+        if (this.peek == $u) {
+          const hex = input.substring(this.index + 1, this.index + 5);
+          if (/^[0-9a-f]+$/i.test(hex)) {
+            unescapedCode = parseInt(hex, 16);
+          } else {
+            return this.error(`Invalid unicode escape [\\u${hex}]`, 0);
+          }
+          for (let i = 0; i < 5; i++) {
+            this.advance();
+          }
+        } else {
+          unescapedCode = unescape2(this.peek);
+          this.advance();
+        }
+        buffer += String.fromCharCode(unescapedCode);
+        marker = this.index;
+      } else if (this.peek == $EOF) {
+        return this.error("Unterminated quote", 0);
+      } else {
+        this.advance();
+      }
+    }
+    const last = input.substring(marker, this.index);
+    this.advance();
+    return newStringToken(start, this.index, buffer + last);
+  }
+  scanQuestion(start) {
+    this.advance();
+    let str = "?";
+    if (this.peek === $QUESTION || this.peek === $PERIOD) {
+      str += this.peek === $PERIOD ? "." : "?";
+      this.advance();
+    }
+    return newOperatorToken(start, this.index, str);
+  }
+  error(message, offset) {
+    const position = this.index + offset;
+    return newErrorToken(position, this.index, `Lexer Error: ${message} at column ${position} in expression [${this.input}]`);
+  }
+};
+function isIdentifierStart(code) {
+  return $a <= code && code <= $z || $A <= code && code <= $Z || code == $_ || code == $$;
+}
+function isIdentifierPart(code) {
+  return isAsciiLetter(code) || isDigit(code) || code == $_ || code == $$;
+}
+function isExponentStart(code) {
+  return code == $e || code == $E;
+}
+function isExponentSign(code) {
+  return code == $MINUS || code == $PLUS;
+}
+function unescape2(code) {
+  switch (code) {
+    case $n:
+      return $LF;
+    case $f:
+      return $FF;
+    case $r:
+      return $CR;
+    case $t:
+      return $TAB;
+    case $v:
+      return $VTAB;
+    default:
+      return code;
+  }
+}
+function parseIntAutoRadix(text2) {
+  const result = parseInt(text2);
+  if (isNaN(result)) {
+    throw new Error("Invalid integer literal when parsing " + text2);
+  }
+  return result;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/expression_parser/parser.mjs
+var SplitInterpolation = class {
+  constructor(strings, expressions, offsets) {
+    this.strings = strings;
+    this.expressions = expressions;
+    this.offsets = offsets;
+  }
+};
+var TemplateBindingParseResult = class {
+  constructor(templateBindings, warnings, errors) {
+    this.templateBindings = templateBindings;
+    this.warnings = warnings;
+    this.errors = errors;
+  }
+};
+var Parser2 = class {
+  constructor(_lexer) {
+    this._lexer = _lexer;
+    this.errors = [];
+  }
+  parseAction(input, location, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    this._checkNoInterpolation(input, location, interpolationConfig);
+    const sourceToLex = this._stripComments(input);
+    const tokens = this._lexer.tokenize(sourceToLex);
+    const ast = new _ParseAST(input, location, absoluteOffset, tokens, 1, this.errors, 0).parseChain();
+    return new ASTWithSource(ast, input, location, absoluteOffset, this.errors);
+  }
+  parseBinding(input, location, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    const ast = this._parseBindingAst(input, location, absoluteOffset, interpolationConfig);
+    return new ASTWithSource(ast, input, location, absoluteOffset, this.errors);
+  }
+  checkSimpleExpression(ast) {
+    const checker = new SimpleExpressionChecker();
+    ast.visit(checker);
+    return checker.errors;
+  }
+  parseSimpleBinding(input, location, absoluteOffset, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    const ast = this._parseBindingAst(input, location, absoluteOffset, interpolationConfig);
+    const errors = this.checkSimpleExpression(ast);
+    if (errors.length > 0) {
+      this._reportError(`Host binding expression cannot contain ${errors.join(" ")}`, input, location);
+    }
+    return new ASTWithSource(ast, input, location, absoluteOffset, this.errors);
+  }
+  _reportError(message, input, errLocation, ctxLocation) {
+    this.errors.push(new ParserError(message, input, errLocation, ctxLocation));
+  }
+  _parseBindingAst(input, location, absoluteOffset, interpolationConfig) {
+    this._checkNoInterpolation(input, location, interpolationConfig);
+    const sourceToLex = this._stripComments(input);
+    const tokens = this._lexer.tokenize(sourceToLex);
+    return new _ParseAST(input, location, absoluteOffset, tokens, 0, this.errors, 0).parseChain();
+  }
+  parseTemplateBindings(templateKey, templateValue, templateUrl, absoluteKeyOffset, absoluteValueOffset) {
+    const tokens = this._lexer.tokenize(templateValue);
+    const parser = new _ParseAST(templateValue, templateUrl, absoluteValueOffset, tokens, 0, this.errors, 0);
+    return parser.parseTemplateBindings({
+      source: templateKey,
+      span: new AbsoluteSourceSpan(absoluteKeyOffset, absoluteKeyOffset + templateKey.length)
+    });
+  }
+  parseInterpolation(input, location, absoluteOffset, interpolatedTokens, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    const { strings, expressions, offsets } = this.splitInterpolation(input, location, interpolatedTokens, interpolationConfig);
+    if (expressions.length === 0)
+      return null;
+    const expressionNodes = [];
+    for (let i = 0; i < expressions.length; ++i) {
+      const expressionText = expressions[i].text;
+      const sourceToLex = this._stripComments(expressionText);
+      const tokens = this._lexer.tokenize(sourceToLex);
+      const ast = new _ParseAST(input, location, absoluteOffset, tokens, 0, this.errors, offsets[i]).parseChain();
+      expressionNodes.push(ast);
+    }
+    return this.createInterpolationAst(strings.map((s) => s.text), expressionNodes, input, location, absoluteOffset);
+  }
+  parseInterpolationExpression(expression, location, absoluteOffset) {
+    const sourceToLex = this._stripComments(expression);
+    const tokens = this._lexer.tokenize(sourceToLex);
+    const ast = new _ParseAST(expression, location, absoluteOffset, tokens, 0, this.errors, 0).parseChain();
+    const strings = ["", ""];
+    return this.createInterpolationAst(strings, [ast], expression, location, absoluteOffset);
+  }
+  createInterpolationAst(strings, expressions, input, location, absoluteOffset) {
+    const span = new ParseSpan(0, input.length);
+    const interpolation = new Interpolation(span, span.toAbsolute(absoluteOffset), strings, expressions);
+    return new ASTWithSource(interpolation, input, location, absoluteOffset, this.errors);
+  }
+  splitInterpolation(input, location, interpolatedTokens, interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    var _a2;
+    const strings = [];
+    const expressions = [];
+    const offsets = [];
+    const inputToTemplateIndexMap = interpolatedTokens ? getIndexMapForOriginalTemplate(interpolatedTokens) : null;
+    let i = 0;
+    let atInterpolation = false;
+    let extendLastString = false;
+    let { start: interpStart, end: interpEnd } = interpolationConfig;
+    while (i < input.length) {
+      if (!atInterpolation) {
+        const start = i;
+        i = input.indexOf(interpStart, i);
+        if (i === -1) {
+          i = input.length;
+        }
+        const text2 = input.substring(start, i);
+        strings.push({ text: text2, start, end: i });
+        atInterpolation = true;
+      } else {
+        const fullStart = i;
+        const exprStart = fullStart + interpStart.length;
+        const exprEnd = this._getInterpolationEndIndex(input, interpEnd, exprStart);
+        if (exprEnd === -1) {
+          atInterpolation = false;
+          extendLastString = true;
+          break;
+        }
+        const fullEnd = exprEnd + interpEnd.length;
+        const text2 = input.substring(exprStart, exprEnd);
+        if (text2.trim().length === 0) {
+          this._reportError("Blank expressions are not allowed in interpolated strings", input, `at column ${i} in`, location);
+        }
+        expressions.push({ text: text2, start: fullStart, end: fullEnd });
+        const startInOriginalTemplate = (_a2 = inputToTemplateIndexMap == null ? void 0 : inputToTemplateIndexMap.get(fullStart)) != null ? _a2 : fullStart;
+        const offset = startInOriginalTemplate + interpStart.length;
+        offsets.push(offset);
+        i = fullEnd;
+        atInterpolation = false;
+      }
+    }
+    if (!atInterpolation) {
+      if (extendLastString) {
+        const piece = strings[strings.length - 1];
+        piece.text += input.substring(i);
+        piece.end = input.length;
+      } else {
+        strings.push({ text: input.substring(i), start: i, end: input.length });
+      }
+    }
+    return new SplitInterpolation(strings, expressions, offsets);
+  }
+  wrapLiteralPrimitive(input, location, absoluteOffset) {
+    const span = new ParseSpan(0, input == null ? 0 : input.length);
+    return new ASTWithSource(new LiteralPrimitive(span, span.toAbsolute(absoluteOffset), input), input, location, absoluteOffset, this.errors);
+  }
+  _stripComments(input) {
+    const i = this._commentStart(input);
+    return i != null ? input.substring(0, i) : input;
+  }
+  _commentStart(input) {
+    let outerQuote = null;
+    for (let i = 0; i < input.length - 1; i++) {
+      const char = input.charCodeAt(i);
+      const nextChar = input.charCodeAt(i + 1);
+      if (char === $SLASH && nextChar == $SLASH && outerQuote == null)
+        return i;
+      if (outerQuote === char) {
+        outerQuote = null;
+      } else if (outerQuote == null && isQuote(char)) {
+        outerQuote = char;
+      }
+    }
+    return null;
+  }
+  _checkNoInterpolation(input, location, { start, end }) {
+    let startIndex = -1;
+    let endIndex = -1;
+    for (const charIndex of this._forEachUnquotedChar(input, 0)) {
+      if (startIndex === -1) {
+        if (input.startsWith(start)) {
+          startIndex = charIndex;
+        }
+      } else {
+        endIndex = this._getInterpolationEndIndex(input, end, charIndex);
+        if (endIndex > -1) {
+          break;
+        }
+      }
+    }
+    if (startIndex > -1 && endIndex > -1) {
+      this._reportError(`Got interpolation (${start}${end}) where expression was expected`, input, `at column ${startIndex} in`, location);
+    }
+  }
+  _getInterpolationEndIndex(input, expressionEnd, start) {
+    for (const charIndex of this._forEachUnquotedChar(input, start)) {
+      if (input.startsWith(expressionEnd, charIndex)) {
+        return charIndex;
+      }
+      if (input.startsWith("//", charIndex)) {
+        return input.indexOf(expressionEnd, charIndex);
+      }
+    }
+    return -1;
+  }
+  *_forEachUnquotedChar(input, start) {
+    let currentQuote = null;
+    let escapeCount = 0;
+    for (let i = start; i < input.length; i++) {
+      const char = input[i];
+      if (isQuote(input.charCodeAt(i)) && (currentQuote === null || currentQuote === char) && escapeCount % 2 === 0) {
+        currentQuote = currentQuote === null ? char : null;
+      } else if (currentQuote === null) {
+        yield i;
+      }
+      escapeCount = char === "\\" ? escapeCount + 1 : 0;
+    }
+  }
+};
+var ParseContextFlags;
+(function(ParseContextFlags2) {
+  ParseContextFlags2[ParseContextFlags2["None"] = 0] = "None";
+  ParseContextFlags2[ParseContextFlags2["Writable"] = 1] = "Writable";
+})(ParseContextFlags || (ParseContextFlags = {}));
+var _ParseAST = class {
+  constructor(input, location, absoluteOffset, tokens, parseFlags, errors, offset) {
+    this.input = input;
+    this.location = location;
+    this.absoluteOffset = absoluteOffset;
+    this.tokens = tokens;
+    this.parseFlags = parseFlags;
+    this.errors = errors;
+    this.offset = offset;
+    this.rparensExpected = 0;
+    this.rbracketsExpected = 0;
+    this.rbracesExpected = 0;
+    this.context = ParseContextFlags.None;
+    this.sourceSpanCache = /* @__PURE__ */ new Map();
+    this.index = 0;
+  }
+  peek(offset) {
+    const i = this.index + offset;
+    return i < this.tokens.length ? this.tokens[i] : EOF;
+  }
+  get next() {
+    return this.peek(0);
+  }
+  get atEOF() {
+    return this.index >= this.tokens.length;
+  }
+  get inputIndex() {
+    return this.atEOF ? this.currentEndIndex : this.next.index + this.offset;
+  }
+  get currentEndIndex() {
+    if (this.index > 0) {
+      const curToken = this.peek(-1);
+      return curToken.end + this.offset;
+    }
+    if (this.tokens.length === 0) {
+      return this.input.length + this.offset;
+    }
+    return this.next.index + this.offset;
+  }
+  get currentAbsoluteOffset() {
+    return this.absoluteOffset + this.inputIndex;
+  }
+  span(start, artificialEndIndex) {
+    let endIndex = this.currentEndIndex;
+    if (artificialEndIndex !== void 0 && artificialEndIndex > this.currentEndIndex) {
+      endIndex = artificialEndIndex;
+    }
+    if (start > endIndex) {
+      const tmp = endIndex;
+      endIndex = start;
+      start = tmp;
+    }
+    return new ParseSpan(start, endIndex);
+  }
+  sourceSpan(start, artificialEndIndex) {
+    const serial = `${start}@${this.inputIndex}:${artificialEndIndex}`;
+    if (!this.sourceSpanCache.has(serial)) {
+      this.sourceSpanCache.set(serial, this.span(start, artificialEndIndex).toAbsolute(this.absoluteOffset));
+    }
+    return this.sourceSpanCache.get(serial);
+  }
+  advance() {
+    this.index++;
+  }
+  withContext(context, cb) {
+    this.context |= context;
+    const ret = cb();
+    this.context ^= context;
+    return ret;
+  }
+  consumeOptionalCharacter(code) {
+    if (this.next.isCharacter(code)) {
+      this.advance();
+      return true;
+    } else {
+      return false;
+    }
+  }
+  peekKeywordLet() {
+    return this.next.isKeywordLet();
+  }
+  peekKeywordAs() {
+    return this.next.isKeywordAs();
+  }
+  expectCharacter(code) {
+    if (this.consumeOptionalCharacter(code))
+      return;
+    this.error(`Missing expected ${String.fromCharCode(code)}`);
+  }
+  consumeOptionalOperator(op) {
+    if (this.next.isOperator(op)) {
+      this.advance();
+      return true;
+    } else {
+      return false;
+    }
+  }
+  expectOperator(operator) {
+    if (this.consumeOptionalOperator(operator))
+      return;
+    this.error(`Missing expected operator ${operator}`);
+  }
+  prettyPrintToken(tok) {
+    return tok === EOF ? "end of input" : `token ${tok}`;
+  }
+  expectIdentifierOrKeyword() {
+    const n = this.next;
+    if (!n.isIdentifier() && !n.isKeyword()) {
+      if (n.isPrivateIdentifier()) {
+        this._reportErrorForPrivateIdentifier(n, "expected identifier or keyword");
+      } else {
+        this.error(`Unexpected ${this.prettyPrintToken(n)}, expected identifier or keyword`);
+      }
+      return null;
+    }
+    this.advance();
+    return n.toString();
+  }
+  expectIdentifierOrKeywordOrString() {
+    const n = this.next;
+    if (!n.isIdentifier() && !n.isKeyword() && !n.isString()) {
+      if (n.isPrivateIdentifier()) {
+        this._reportErrorForPrivateIdentifier(n, "expected identifier, keyword or string");
+      } else {
+        this.error(`Unexpected ${this.prettyPrintToken(n)}, expected identifier, keyword, or string`);
+      }
+      return "";
+    }
+    this.advance();
+    return n.toString();
+  }
+  parseChain() {
+    const exprs = [];
+    const start = this.inputIndex;
+    while (this.index < this.tokens.length) {
+      const expr = this.parsePipe();
+      exprs.push(expr);
+      if (this.consumeOptionalCharacter($SEMICOLON)) {
+        if (!(this.parseFlags & 1)) {
+          this.error("Binding expression cannot contain chained expression");
+        }
+        while (this.consumeOptionalCharacter($SEMICOLON)) {
+        }
+      } else if (this.index < this.tokens.length) {
+        const errorIndex = this.index;
+        this.error(`Unexpected token '${this.next}'`);
+        if (this.index === errorIndex) {
+          break;
+        }
+      }
+    }
+    if (exprs.length === 0) {
+      const artificialStart = this.offset;
+      const artificialEnd = this.offset + this.input.length;
+      return new EmptyExpr(this.span(artificialStart, artificialEnd), this.sourceSpan(artificialStart, artificialEnd));
+    }
+    if (exprs.length == 1)
+      return exprs[0];
+    return new Chain(this.span(start), this.sourceSpan(start), exprs);
+  }
+  parsePipe() {
+    const start = this.inputIndex;
+    let result = this.parseExpression();
+    if (this.consumeOptionalOperator("|")) {
+      if (this.parseFlags & 1) {
+        this.error(`Cannot have a pipe in an action expression`);
+      }
+      do {
+        const nameStart = this.inputIndex;
+        let nameId = this.expectIdentifierOrKeyword();
+        let nameSpan;
+        let fullSpanEnd = void 0;
+        if (nameId !== null) {
+          nameSpan = this.sourceSpan(nameStart);
+        } else {
+          nameId = "";
+          fullSpanEnd = this.next.index !== -1 ? this.next.index : this.input.length + this.offset;
+          nameSpan = new ParseSpan(fullSpanEnd, fullSpanEnd).toAbsolute(this.absoluteOffset);
+        }
+        const args = [];
+        while (this.consumeOptionalCharacter($COLON)) {
+          args.push(this.parseExpression());
+        }
+        result = new BindingPipe(this.span(start), this.sourceSpan(start, fullSpanEnd), result, nameId, args, nameSpan);
+      } while (this.consumeOptionalOperator("|"));
+    }
+    return result;
+  }
+  parseExpression() {
+    return this.parseConditional();
+  }
+  parseConditional() {
+    const start = this.inputIndex;
+    const result = this.parseLogicalOr();
+    if (this.consumeOptionalOperator("?")) {
+      const yes = this.parsePipe();
+      let no;
+      if (!this.consumeOptionalCharacter($COLON)) {
+        const end = this.inputIndex;
+        const expression = this.input.substring(start, end);
+        this.error(`Conditional expression ${expression} requires all 3 expressions`);
+        no = new EmptyExpr(this.span(start), this.sourceSpan(start));
+      } else {
+        no = this.parsePipe();
+      }
+      return new Conditional(this.span(start), this.sourceSpan(start), result, yes, no);
+    } else {
+      return result;
+    }
+  }
+  parseLogicalOr() {
+    const start = this.inputIndex;
+    let result = this.parseLogicalAnd();
+    while (this.consumeOptionalOperator("||")) {
+      const right = this.parseLogicalAnd();
+      result = new Binary(this.span(start), this.sourceSpan(start), "||", result, right);
+    }
+    return result;
+  }
+  parseLogicalAnd() {
+    const start = this.inputIndex;
+    let result = this.parseNullishCoalescing();
+    while (this.consumeOptionalOperator("&&")) {
+      const right = this.parseNullishCoalescing();
+      result = new Binary(this.span(start), this.sourceSpan(start), "&&", result, right);
+    }
+    return result;
+  }
+  parseNullishCoalescing() {
+    const start = this.inputIndex;
+    let result = this.parseEquality();
+    while (this.consumeOptionalOperator("??")) {
+      const right = this.parseEquality();
+      result = new Binary(this.span(start), this.sourceSpan(start), "??", result, right);
+    }
+    return result;
+  }
+  parseEquality() {
+    const start = this.inputIndex;
+    let result = this.parseRelational();
+    while (this.next.type == TokenType.Operator) {
+      const operator = this.next.strValue;
+      switch (operator) {
+        case "==":
+        case "===":
+        case "!=":
+        case "!==":
+          this.advance();
+          const right = this.parseRelational();
+          result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
+          continue;
+      }
+      break;
+    }
+    return result;
+  }
+  parseRelational() {
+    const start = this.inputIndex;
+    let result = this.parseAdditive();
+    while (this.next.type == TokenType.Operator) {
+      const operator = this.next.strValue;
+      switch (operator) {
+        case "<":
+        case ">":
+        case "<=":
+        case ">=":
+          this.advance();
+          const right = this.parseAdditive();
+          result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
+          continue;
+      }
+      break;
+    }
+    return result;
+  }
+  parseAdditive() {
+    const start = this.inputIndex;
+    let result = this.parseMultiplicative();
+    while (this.next.type == TokenType.Operator) {
+      const operator = this.next.strValue;
+      switch (operator) {
+        case "+":
+        case "-":
+          this.advance();
+          let right = this.parseMultiplicative();
+          result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
+          continue;
+      }
+      break;
+    }
+    return result;
+  }
+  parseMultiplicative() {
+    const start = this.inputIndex;
+    let result = this.parsePrefix();
+    while (this.next.type == TokenType.Operator) {
+      const operator = this.next.strValue;
+      switch (operator) {
+        case "*":
+        case "%":
+        case "/":
+          this.advance();
+          let right = this.parsePrefix();
+          result = new Binary(this.span(start), this.sourceSpan(start), operator, result, right);
+          continue;
+      }
+      break;
+    }
+    return result;
+  }
+  parsePrefix() {
+    if (this.next.type == TokenType.Operator) {
+      const start = this.inputIndex;
+      const operator = this.next.strValue;
+      let result;
+      switch (operator) {
+        case "+":
+          this.advance();
+          result = this.parsePrefix();
+          return Unary.createPlus(this.span(start), this.sourceSpan(start), result);
+        case "-":
+          this.advance();
+          result = this.parsePrefix();
+          return Unary.createMinus(this.span(start), this.sourceSpan(start), result);
+        case "!":
+          this.advance();
+          result = this.parsePrefix();
+          return new PrefixNot(this.span(start), this.sourceSpan(start), result);
+      }
+    }
+    return this.parseCallChain();
+  }
+  parseCallChain() {
+    const start = this.inputIndex;
+    let result = this.parsePrimary();
+    while (true) {
+      if (this.consumeOptionalCharacter($PERIOD)) {
+        result = this.parseAccessMember(result, start, false);
+      } else if (this.consumeOptionalOperator("?.")) {
+        if (this.consumeOptionalCharacter($LPAREN)) {
+          result = this.parseCall(result, start, true);
+        } else {
+          result = this.consumeOptionalCharacter($LBRACKET) ? this.parseKeyedReadOrWrite(result, start, true) : this.parseAccessMember(result, start, true);
+        }
+      } else if (this.consumeOptionalCharacter($LBRACKET)) {
+        result = this.parseKeyedReadOrWrite(result, start, false);
+      } else if (this.consumeOptionalCharacter($LPAREN)) {
+        result = this.parseCall(result, start, false);
+      } else if (this.consumeOptionalOperator("!")) {
+        result = new NonNullAssert(this.span(start), this.sourceSpan(start), result);
+      } else {
+        return result;
+      }
+    }
+  }
+  parsePrimary() {
+    const start = this.inputIndex;
+    if (this.consumeOptionalCharacter($LPAREN)) {
+      this.rparensExpected++;
+      const result = this.parsePipe();
+      this.rparensExpected--;
+      this.expectCharacter($RPAREN);
+      return result;
+    } else if (this.next.isKeywordNull()) {
+      this.advance();
+      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), null);
+    } else if (this.next.isKeywordUndefined()) {
+      this.advance();
+      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), void 0);
+    } else if (this.next.isKeywordTrue()) {
+      this.advance();
+      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), true);
+    } else if (this.next.isKeywordFalse()) {
+      this.advance();
+      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), false);
+    } else if (this.next.isKeywordThis()) {
+      this.advance();
+      return new ThisReceiver(this.span(start), this.sourceSpan(start));
+    } else if (this.consumeOptionalCharacter($LBRACKET)) {
+      this.rbracketsExpected++;
+      const elements = this.parseExpressionList($RBRACKET);
+      this.rbracketsExpected--;
+      this.expectCharacter($RBRACKET);
+      return new LiteralArray(this.span(start), this.sourceSpan(start), elements);
+    } else if (this.next.isCharacter($LBRACE)) {
+      return this.parseLiteralMap();
+    } else if (this.next.isIdentifier()) {
+      return this.parseAccessMember(new ImplicitReceiver(this.span(start), this.sourceSpan(start)), start, false);
+    } else if (this.next.isNumber()) {
+      const value = this.next.toNumber();
+      this.advance();
+      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), value);
+    } else if (this.next.isString()) {
+      const literalValue = this.next.toString();
+      this.advance();
+      return new LiteralPrimitive(this.span(start), this.sourceSpan(start), literalValue);
+    } else if (this.next.isPrivateIdentifier()) {
+      this._reportErrorForPrivateIdentifier(this.next, null);
+      return new EmptyExpr(this.span(start), this.sourceSpan(start));
+    } else if (this.index >= this.tokens.length) {
+      this.error(`Unexpected end of expression: ${this.input}`);
+      return new EmptyExpr(this.span(start), this.sourceSpan(start));
+    } else {
+      this.error(`Unexpected token ${this.next}`);
+      return new EmptyExpr(this.span(start), this.sourceSpan(start));
+    }
+  }
+  parseExpressionList(terminator) {
+    const result = [];
+    do {
+      if (!this.next.isCharacter(terminator)) {
+        result.push(this.parsePipe());
+      } else {
+        break;
+      }
+    } while (this.consumeOptionalCharacter($COMMA));
+    return result;
+  }
+  parseLiteralMap() {
+    const keys = [];
+    const values = [];
+    const start = this.inputIndex;
+    this.expectCharacter($LBRACE);
+    if (!this.consumeOptionalCharacter($RBRACE)) {
+      this.rbracesExpected++;
+      do {
+        const keyStart = this.inputIndex;
+        const quoted = this.next.isString();
+        const key = this.expectIdentifierOrKeywordOrString();
+        const literalMapKey = { key, quoted };
+        keys.push(literalMapKey);
+        if (quoted) {
+          this.expectCharacter($COLON);
+          values.push(this.parsePipe());
+        } else if (this.consumeOptionalCharacter($COLON)) {
+          values.push(this.parsePipe());
+        } else {
+          literalMapKey.isShorthandInitialized = true;
+          const span = this.span(keyStart);
+          const sourceSpan = this.sourceSpan(keyStart);
+          values.push(new PropertyRead(span, sourceSpan, sourceSpan, new ImplicitReceiver(span, sourceSpan), key));
+        }
+      } while (this.consumeOptionalCharacter($COMMA) && !this.next.isCharacter($RBRACE));
+      this.rbracesExpected--;
+      this.expectCharacter($RBRACE);
+    }
+    return new LiteralMap(this.span(start), this.sourceSpan(start), keys, values);
+  }
+  parseAccessMember(readReceiver, start, isSafe) {
+    const nameStart = this.inputIndex;
+    const id = this.withContext(ParseContextFlags.Writable, () => {
+      var _a2;
+      const id2 = (_a2 = this.expectIdentifierOrKeyword()) != null ? _a2 : "";
+      if (id2.length === 0) {
+        this.error(`Expected identifier for property access`, readReceiver.span.end);
+      }
+      return id2;
+    });
+    const nameSpan = this.sourceSpan(nameStart);
+    let receiver;
+    if (isSafe) {
+      if (this.consumeOptionalOperator("=")) {
+        this.error("The '?.' operator cannot be used in the assignment");
+        receiver = new EmptyExpr(this.span(start), this.sourceSpan(start));
+      } else {
+        receiver = new SafePropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
+      }
+    } else {
+      if (this.consumeOptionalOperator("=")) {
+        if (!(this.parseFlags & 1)) {
+          this.error("Bindings cannot contain assignments");
+          return new EmptyExpr(this.span(start), this.sourceSpan(start));
+        }
+        const value = this.parseConditional();
+        receiver = new PropertyWrite(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id, value);
+      } else {
+        receiver = new PropertyRead(this.span(start), this.sourceSpan(start), nameSpan, readReceiver, id);
+      }
+    }
+    return receiver;
+  }
+  parseCall(receiver, start, isSafe) {
+    const argumentStart = this.inputIndex;
+    this.rparensExpected++;
+    const args = this.parseCallArguments();
+    const argumentSpan = this.span(argumentStart, this.inputIndex).toAbsolute(this.absoluteOffset);
+    this.expectCharacter($RPAREN);
+    this.rparensExpected--;
+    const span = this.span(start);
+    const sourceSpan = this.sourceSpan(start);
+    return isSafe ? new SafeCall(span, sourceSpan, receiver, args, argumentSpan) : new Call(span, sourceSpan, receiver, args, argumentSpan);
+  }
+  parseCallArguments() {
+    if (this.next.isCharacter($RPAREN))
+      return [];
+    const positionals = [];
+    do {
+      positionals.push(this.parsePipe());
+    } while (this.consumeOptionalCharacter($COMMA));
+    return positionals;
+  }
+  expectTemplateBindingKey() {
+    let result = "";
+    let operatorFound = false;
+    const start = this.currentAbsoluteOffset;
+    do {
+      result += this.expectIdentifierOrKeywordOrString();
+      operatorFound = this.consumeOptionalOperator("-");
+      if (operatorFound) {
+        result += "-";
+      }
+    } while (operatorFound);
+    return {
+      source: result,
+      span: new AbsoluteSourceSpan(start, start + result.length)
+    };
+  }
+  parseTemplateBindings(templateKey) {
+    const bindings = [];
+    bindings.push(...this.parseDirectiveKeywordBindings(templateKey));
+    while (this.index < this.tokens.length) {
+      const letBinding = this.parseLetBinding();
+      if (letBinding) {
+        bindings.push(letBinding);
+      } else {
+        const key = this.expectTemplateBindingKey();
+        const binding = this.parseAsBinding(key);
+        if (binding) {
+          bindings.push(binding);
+        } else {
+          key.source = templateKey.source + key.source.charAt(0).toUpperCase() + key.source.substring(1);
+          bindings.push(...this.parseDirectiveKeywordBindings(key));
+        }
+      }
+      this.consumeStatementTerminator();
+    }
+    return new TemplateBindingParseResult(bindings, [], this.errors);
+  }
+  parseKeyedReadOrWrite(receiver, start, isSafe) {
+    return this.withContext(ParseContextFlags.Writable, () => {
+      this.rbracketsExpected++;
+      const key = this.parsePipe();
+      if (key instanceof EmptyExpr) {
+        this.error(`Key access cannot be empty`);
+      }
+      this.rbracketsExpected--;
+      this.expectCharacter($RBRACKET);
+      if (this.consumeOptionalOperator("=")) {
+        if (isSafe) {
+          this.error("The '?.' operator cannot be used in the assignment");
+        } else {
+          const value = this.parseConditional();
+          return new KeyedWrite(this.span(start), this.sourceSpan(start), receiver, key, value);
+        }
+      } else {
+        return isSafe ? new SafeKeyedRead(this.span(start), this.sourceSpan(start), receiver, key) : new KeyedRead(this.span(start), this.sourceSpan(start), receiver, key);
+      }
+      return new EmptyExpr(this.span(start), this.sourceSpan(start));
+    });
+  }
+  parseDirectiveKeywordBindings(key) {
+    const bindings = [];
+    this.consumeOptionalCharacter($COLON);
+    const value = this.getDirectiveBoundTarget();
+    let spanEnd = this.currentAbsoluteOffset;
+    const asBinding = this.parseAsBinding(key);
+    if (!asBinding) {
+      this.consumeStatementTerminator();
+      spanEnd = this.currentAbsoluteOffset;
+    }
+    const sourceSpan = new AbsoluteSourceSpan(key.span.start, spanEnd);
+    bindings.push(new ExpressionBinding(sourceSpan, key, value));
+    if (asBinding) {
+      bindings.push(asBinding);
+    }
+    return bindings;
+  }
+  getDirectiveBoundTarget() {
+    if (this.next === EOF || this.peekKeywordAs() || this.peekKeywordLet()) {
+      return null;
+    }
+    const ast = this.parsePipe();
+    const { start, end } = ast.span;
+    const value = this.input.substring(start, end);
+    return new ASTWithSource(ast, value, this.location, this.absoluteOffset + start, this.errors);
+  }
+  parseAsBinding(value) {
+    if (!this.peekKeywordAs()) {
+      return null;
+    }
+    this.advance();
+    const key = this.expectTemplateBindingKey();
+    this.consumeStatementTerminator();
+    const sourceSpan = new AbsoluteSourceSpan(value.span.start, this.currentAbsoluteOffset);
+    return new VariableBinding(sourceSpan, key, value);
+  }
+  parseLetBinding() {
+    if (!this.peekKeywordLet()) {
+      return null;
+    }
+    const spanStart = this.currentAbsoluteOffset;
+    this.advance();
+    const key = this.expectTemplateBindingKey();
+    let value = null;
+    if (this.consumeOptionalOperator("=")) {
+      value = this.expectTemplateBindingKey();
+    }
+    this.consumeStatementTerminator();
+    const sourceSpan = new AbsoluteSourceSpan(spanStart, this.currentAbsoluteOffset);
+    return new VariableBinding(sourceSpan, key, value);
+  }
+  consumeStatementTerminator() {
+    this.consumeOptionalCharacter($SEMICOLON) || this.consumeOptionalCharacter($COMMA);
+  }
+  error(message, index = null) {
+    this.errors.push(new ParserError(message, this.input, this.locationText(index), this.location));
+    this.skip();
+  }
+  locationText(index = null) {
+    if (index == null)
+      index = this.index;
+    return index < this.tokens.length ? `at column ${this.tokens[index].index + 1} in` : `at the end of the expression`;
+  }
+  _reportErrorForPrivateIdentifier(token, extraMessage) {
+    let errorMessage = `Private identifiers are not supported. Unexpected private identifier: ${token}`;
+    if (extraMessage !== null) {
+      errorMessage += `, ${extraMessage}`;
+    }
+    this.error(errorMessage);
+  }
+  skip() {
+    let n = this.next;
+    while (this.index < this.tokens.length && !n.isCharacter($SEMICOLON) && !n.isOperator("|") && (this.rparensExpected <= 0 || !n.isCharacter($RPAREN)) && (this.rbracesExpected <= 0 || !n.isCharacter($RBRACE)) && (this.rbracketsExpected <= 0 || !n.isCharacter($RBRACKET)) && (!(this.context & ParseContextFlags.Writable) || !n.isOperator("="))) {
+      if (this.next.isError()) {
+        this.errors.push(new ParserError(this.next.toString(), this.input, this.locationText(), this.location));
+      }
+      this.advance();
+      n = this.next;
+    }
+  }
+};
+var SimpleExpressionChecker = class extends RecursiveAstVisitor {
+  constructor() {
+    super(...arguments);
+    this.errors = [];
+  }
+  visitPipe() {
+    this.errors.push("pipes");
+  }
+};
+function getIndexMapForOriginalTemplate(interpolatedTokens) {
+  let offsetMap = /* @__PURE__ */ new Map();
+  let consumedInOriginalTemplate = 0;
+  let consumedInInput = 0;
+  let tokenIndex = 0;
+  while (tokenIndex < interpolatedTokens.length) {
+    const currentToken = interpolatedTokens[tokenIndex];
+    if (currentToken.type === 9) {
+      const [decoded, encoded] = currentToken.parts;
+      consumedInOriginalTemplate += encoded.length;
+      consumedInInput += decoded.length;
+    } else {
+      const lengthOfParts = currentToken.parts.reduce((sum, current) => sum + current.length, 0);
+      consumedInInput += lengthOfParts;
+      consumedInOriginalTemplate += lengthOfParts;
+    }
+    offsetMap.set(consumedInInput, consumedInOriginalTemplate);
+    tokenIndex++;
+  }
+  return offsetMap;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/schema/dom_security_schema.mjs
+var _SECURITY_SCHEMA;
+function SECURITY_SCHEMA() {
+  if (!_SECURITY_SCHEMA) {
+    _SECURITY_SCHEMA = {};
+    registerContext(SecurityContext.HTML, ["iframe|srcdoc", "*|innerHTML", "*|outerHTML"]);
+    registerContext(SecurityContext.STYLE, ["*|style"]);
+    registerContext(SecurityContext.URL, [
+      "*|formAction",
+      "area|href",
+      "area|ping",
+      "audio|src",
+      "a|href",
+      "a|ping",
+      "blockquote|cite",
+      "body|background",
+      "del|cite",
+      "form|action",
+      "img|src",
+      "input|src",
+      "ins|cite",
+      "q|cite",
+      "source|src",
+      "track|src",
+      "video|poster",
+      "video|src"
+    ]);
+    registerContext(SecurityContext.RESOURCE_URL, [
+      "applet|code",
+      "applet|codebase",
+      "base|href",
+      "embed|src",
+      "frame|src",
+      "head|profile",
+      "html|manifest",
+      "iframe|src",
+      "link|href",
+      "media|src",
+      "object|codebase",
+      "object|data",
+      "script|src"
+    ]);
+  }
+  return _SECURITY_SCHEMA;
+}
+function registerContext(ctx, specs) {
+  for (const spec of specs)
+    _SECURITY_SCHEMA[spec.toLowerCase()] = ctx;
+}
+var IFRAME_SECURITY_SENSITIVE_ATTRS = /* @__PURE__ */ new Set([
+  "sandbox",
+  "allow",
+  "allowfullscreen",
+  "referrerpolicy",
+  "csp",
+  "fetchpriority"
+]);
+function isIframeSecuritySensitiveAttr(attrName) {
+  return IFRAME_SECURITY_SENSITIVE_ATTRS.has(attrName.toLowerCase());
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/schema/element_schema_registry.mjs
+var ElementSchemaRegistry = class {
+};
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/schema/dom_element_schema_registry.mjs
+var BOOLEAN = "boolean";
+var NUMBER = "number";
+var STRING = "string";
+var OBJECT = "object";
+var SCHEMA = [
+  "[Element]|textContent,%ariaAtomic,%ariaAutoComplete,%ariaBusy,%ariaChecked,%ariaColCount,%ariaColIndex,%ariaColSpan,%ariaCurrent,%ariaDescription,%ariaDisabled,%ariaExpanded,%ariaHasPopup,%ariaHidden,%ariaKeyShortcuts,%ariaLabel,%ariaLevel,%ariaLive,%ariaModal,%ariaMultiLine,%ariaMultiSelectable,%ariaOrientation,%ariaPlaceholder,%ariaPosInSet,%ariaPressed,%ariaReadOnly,%ariaRelevant,%ariaRequired,%ariaRoleDescription,%ariaRowCount,%ariaRowIndex,%ariaRowSpan,%ariaSelected,%ariaSetSize,%ariaSort,%ariaValueMax,%ariaValueMin,%ariaValueNow,%ariaValueText,%classList,className,elementTiming,id,innerHTML,*beforecopy,*beforecut,*beforepaste,*fullscreenchange,*fullscreenerror,*search,*webkitfullscreenchange,*webkitfullscreenerror,outerHTML,%part,#scrollLeft,#scrollTop,slot,*message,*mozfullscreenchange,*mozfullscreenerror,*mozpointerlockchange,*mozpointerlockerror,*webglcontextcreationerror,*webglcontextlost,*webglcontextrestored",
+  "[HTMLElement]^[Element]|accessKey,autocapitalize,!autofocus,contentEditable,dir,!draggable,enterKeyHint,!hidden,!inert,innerText,inputMode,lang,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,outerText,!spellcheck,%style,#tabIndex,title,!translate,virtualKeyboardPolicy",
+  "abbr,address,article,aside,b,bdi,bdo,cite,content,code,dd,dfn,dt,em,figcaption,figure,footer,header,hgroup,i,kbd,main,mark,nav,noscript,rb,rp,rt,rtc,ruby,s,samp,section,small,strong,sub,sup,u,var,wbr^[HTMLElement]|accessKey,autocapitalize,!autofocus,contentEditable,dir,!draggable,enterKeyHint,!hidden,innerText,inputMode,lang,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,outerText,!spellcheck,%style,#tabIndex,title,!translate,virtualKeyboardPolicy",
+  "media^[HTMLElement]|!autoplay,!controls,%controlsList,%crossOrigin,#currentTime,!defaultMuted,#defaultPlaybackRate,!disableRemotePlayback,!loop,!muted,*encrypted,*waitingforkey,#playbackRate,preload,!preservesPitch,src,%srcObject,#volume",
+  ":svg:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex",
+  ":svg:graphics^:svg:|",
+  ":svg:animation^:svg:|*begin,*end,*repeat",
+  ":svg:geometry^:svg:|",
+  ":svg:componentTransferFunction^:svg:|",
+  ":svg:gradient^:svg:|",
+  ":svg:textContent^:svg:graphics|",
+  ":svg:textPositioning^:svg:textContent|",
+  "a^[HTMLElement]|charset,coords,download,hash,host,hostname,href,hreflang,name,password,pathname,ping,port,protocol,referrerPolicy,rel,%relList,rev,search,shape,target,text,type,username",
+  "area^[HTMLElement]|alt,coords,download,hash,host,hostname,href,!noHref,password,pathname,ping,port,protocol,referrerPolicy,rel,%relList,search,shape,target,username",
+  "audio^media|",
+  "br^[HTMLElement]|clear",
+  "base^[HTMLElement]|href,target",
+  "body^[HTMLElement]|aLink,background,bgColor,link,*afterprint,*beforeprint,*beforeunload,*blur,*error,*focus,*hashchange,*languagechange,*load,*message,*messageerror,*offline,*online,*pagehide,*pageshow,*popstate,*rejectionhandled,*resize,*scroll,*storage,*unhandledrejection,*unload,text,vLink",
+  "button^[HTMLElement]|!disabled,formAction,formEnctype,formMethod,!formNoValidate,formTarget,name,type,value",
+  "canvas^[HTMLElement]|#height,#width",
+  "content^[HTMLElement]|select",
+  "dl^[HTMLElement]|!compact",
+  "data^[HTMLElement]|value",
+  "datalist^[HTMLElement]|",
+  "details^[HTMLElement]|!open",
+  "dialog^[HTMLElement]|!open,returnValue",
+  "dir^[HTMLElement]|!compact",
+  "div^[HTMLElement]|align",
+  "embed^[HTMLElement]|align,height,name,src,type,width",
+  "fieldset^[HTMLElement]|!disabled,name",
+  "font^[HTMLElement]|color,face,size",
+  "form^[HTMLElement]|acceptCharset,action,autocomplete,encoding,enctype,method,name,!noValidate,target",
+  "frame^[HTMLElement]|frameBorder,longDesc,marginHeight,marginWidth,name,!noResize,scrolling,src",
+  "frameset^[HTMLElement]|cols,*afterprint,*beforeprint,*beforeunload,*blur,*error,*focus,*hashchange,*languagechange,*load,*message,*messageerror,*offline,*online,*pagehide,*pageshow,*popstate,*rejectionhandled,*resize,*scroll,*storage,*unhandledrejection,*unload,rows",
+  "hr^[HTMLElement]|align,color,!noShade,size,width",
+  "head^[HTMLElement]|",
+  "h1,h2,h3,h4,h5,h6^[HTMLElement]|align",
+  "html^[HTMLElement]|version",
+  "iframe^[HTMLElement]|align,allow,!allowFullscreen,!allowPaymentRequest,csp,frameBorder,height,loading,longDesc,marginHeight,marginWidth,name,referrerPolicy,%sandbox,scrolling,src,srcdoc,width",
+  "img^[HTMLElement]|align,alt,border,%crossOrigin,decoding,#height,#hspace,!isMap,loading,longDesc,lowsrc,name,referrerPolicy,sizes,src,srcset,useMap,#vspace,#width",
+  "input^[HTMLElement]|accept,align,alt,autocomplete,!checked,!defaultChecked,defaultValue,dirName,!disabled,%files,formAction,formEnctype,formMethod,!formNoValidate,formTarget,#height,!incremental,!indeterminate,max,#maxLength,min,#minLength,!multiple,name,pattern,placeholder,!readOnly,!required,selectionDirection,#selectionEnd,#selectionStart,#size,src,step,type,useMap,value,%valueAsDate,#valueAsNumber,#width",
+  "li^[HTMLElement]|type,#value",
+  "label^[HTMLElement]|htmlFor",
+  "legend^[HTMLElement]|align",
+  "link^[HTMLElement]|as,charset,%crossOrigin,!disabled,href,hreflang,imageSizes,imageSrcset,integrity,media,referrerPolicy,rel,%relList,rev,%sizes,target,type",
+  "map^[HTMLElement]|name",
+  "marquee^[HTMLElement]|behavior,bgColor,direction,height,#hspace,#loop,#scrollAmount,#scrollDelay,!trueSpeed,#vspace,width",
+  "menu^[HTMLElement]|!compact",
+  "meta^[HTMLElement]|content,httpEquiv,media,name,scheme",
+  "meter^[HTMLElement]|#high,#low,#max,#min,#optimum,#value",
+  "ins,del^[HTMLElement]|cite,dateTime",
+  "ol^[HTMLElement]|!compact,!reversed,#start,type",
+  "object^[HTMLElement]|align,archive,border,code,codeBase,codeType,data,!declare,height,#hspace,name,standby,type,useMap,#vspace,width",
+  "optgroup^[HTMLElement]|!disabled,label",
+  "option^[HTMLElement]|!defaultSelected,!disabled,label,!selected,text,value",
+  "output^[HTMLElement]|defaultValue,%htmlFor,name,value",
+  "p^[HTMLElement]|align",
+  "param^[HTMLElement]|name,type,value,valueType",
+  "picture^[HTMLElement]|",
+  "pre^[HTMLElement]|#width",
+  "progress^[HTMLElement]|#max,#value",
+  "q,blockquote,cite^[HTMLElement]|",
+  "script^[HTMLElement]|!async,charset,%crossOrigin,!defer,event,htmlFor,integrity,!noModule,%referrerPolicy,src,text,type",
+  "select^[HTMLElement]|autocomplete,!disabled,#length,!multiple,name,!required,#selectedIndex,#size,value",
+  "slot^[HTMLElement]|name",
+  "source^[HTMLElement]|#height,media,sizes,src,srcset,type,#width",
+  "span^[HTMLElement]|",
+  "style^[HTMLElement]|!disabled,media,type",
+  "caption^[HTMLElement]|align",
+  "th,td^[HTMLElement]|abbr,align,axis,bgColor,ch,chOff,#colSpan,headers,height,!noWrap,#rowSpan,scope,vAlign,width",
+  "col,colgroup^[HTMLElement]|align,ch,chOff,#span,vAlign,width",
+  "table^[HTMLElement]|align,bgColor,border,%caption,cellPadding,cellSpacing,frame,rules,summary,%tFoot,%tHead,width",
+  "tr^[HTMLElement]|align,bgColor,ch,chOff,vAlign",
+  "tfoot,thead,tbody^[HTMLElement]|align,ch,chOff,vAlign",
+  "template^[HTMLElement]|",
+  "textarea^[HTMLElement]|autocomplete,#cols,defaultValue,dirName,!disabled,#maxLength,#minLength,name,placeholder,!readOnly,!required,#rows,selectionDirection,#selectionEnd,#selectionStart,value,wrap",
+  "time^[HTMLElement]|dateTime",
+  "title^[HTMLElement]|text",
+  "track^[HTMLElement]|!default,kind,label,src,srclang",
+  "ul^[HTMLElement]|!compact,type",
+  "unknown^[HTMLElement]|",
+  "video^media|!disablePictureInPicture,#height,*enterpictureinpicture,*leavepictureinpicture,!playsInline,poster,#width",
+  ":svg:a^:svg:graphics|",
+  ":svg:animate^:svg:animation|",
+  ":svg:animateMotion^:svg:animation|",
+  ":svg:animateTransform^:svg:animation|",
+  ":svg:circle^:svg:geometry|",
+  ":svg:clipPath^:svg:graphics|",
+  ":svg:defs^:svg:graphics|",
+  ":svg:desc^:svg:|",
+  ":svg:discard^:svg:|",
+  ":svg:ellipse^:svg:geometry|",
+  ":svg:feBlend^:svg:|",
+  ":svg:feColorMatrix^:svg:|",
+  ":svg:feComponentTransfer^:svg:|",
+  ":svg:feComposite^:svg:|",
+  ":svg:feConvolveMatrix^:svg:|",
+  ":svg:feDiffuseLighting^:svg:|",
+  ":svg:feDisplacementMap^:svg:|",
+  ":svg:feDistantLight^:svg:|",
+  ":svg:feDropShadow^:svg:|",
+  ":svg:feFlood^:svg:|",
+  ":svg:feFuncA^:svg:componentTransferFunction|",
+  ":svg:feFuncB^:svg:componentTransferFunction|",
+  ":svg:feFuncG^:svg:componentTransferFunction|",
+  ":svg:feFuncR^:svg:componentTransferFunction|",
+  ":svg:feGaussianBlur^:svg:|",
+  ":svg:feImage^:svg:|",
+  ":svg:feMerge^:svg:|",
+  ":svg:feMergeNode^:svg:|",
+  ":svg:feMorphology^:svg:|",
+  ":svg:feOffset^:svg:|",
+  ":svg:fePointLight^:svg:|",
+  ":svg:feSpecularLighting^:svg:|",
+  ":svg:feSpotLight^:svg:|",
+  ":svg:feTile^:svg:|",
+  ":svg:feTurbulence^:svg:|",
+  ":svg:filter^:svg:|",
+  ":svg:foreignObject^:svg:graphics|",
+  ":svg:g^:svg:graphics|",
+  ":svg:image^:svg:graphics|decoding",
+  ":svg:line^:svg:geometry|",
+  ":svg:linearGradient^:svg:gradient|",
+  ":svg:mpath^:svg:|",
+  ":svg:marker^:svg:|",
+  ":svg:mask^:svg:|",
+  ":svg:metadata^:svg:|",
+  ":svg:path^:svg:geometry|",
+  ":svg:pattern^:svg:|",
+  ":svg:polygon^:svg:geometry|",
+  ":svg:polyline^:svg:geometry|",
+  ":svg:radialGradient^:svg:gradient|",
+  ":svg:rect^:svg:geometry|",
+  ":svg:svg^:svg:graphics|#currentScale,#zoomAndPan",
+  ":svg:script^:svg:|type",
+  ":svg:set^:svg:animation|",
+  ":svg:stop^:svg:|",
+  ":svg:style^:svg:|!disabled,media,title,type",
+  ":svg:switch^:svg:graphics|",
+  ":svg:symbol^:svg:|",
+  ":svg:tspan^:svg:textPositioning|",
+  ":svg:text^:svg:textPositioning|",
+  ":svg:textPath^:svg:textContent|",
+  ":svg:title^:svg:|",
+  ":svg:use^:svg:graphics|",
+  ":svg:view^:svg:|#zoomAndPan",
+  "data^[HTMLElement]|value",
+  "keygen^[HTMLElement]|!autofocus,challenge,!disabled,form,keytype,name",
+  "menuitem^[HTMLElement]|type,label,icon,!disabled,!checked,radiogroup,!default",
+  "summary^[HTMLElement]|",
+  "time^[HTMLElement]|dateTime",
+  ":svg:cursor^:svg:|",
+  ":math:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforeinput,*beforematch,*beforetoggle,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contentvisibilityautostatechange,*contextlost,*contextmenu,*contextrestored,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*scrollend,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex",
+  ":math:math^:math:|",
+  ":math:maction^:math:|",
+  ":math:menclose^:math:|",
+  ":math:merror^:math:|",
+  ":math:mfenced^:math:|",
+  ":math:mfrac^:math:|",
+  ":math:mi^:math:|",
+  ":math:mmultiscripts^:math:|",
+  ":math:mn^:math:|",
+  ":math:mo^:math:|",
+  ":math:mover^:math:|",
+  ":math:mpadded^:math:|",
+  ":math:mphantom^:math:|",
+  ":math:mroot^:math:|",
+  ":math:mrow^:math:|",
+  ":math:ms^:math:|",
+  ":math:mspace^:math:|",
+  ":math:msqrt^:math:|",
+  ":math:mstyle^:math:|",
+  ":math:msub^:math:|",
+  ":math:msubsup^:math:|",
+  ":math:msup^:math:|",
+  ":math:mtable^:math:|",
+  ":math:mtd^:math:|",
+  ":math:mtext^:math:|",
+  ":math:mtr^:math:|",
+  ":math:munder^:math:|",
+  ":math:munderover^:math:|",
+  ":math:semantics^:math:|"
+];
+var _ATTR_TO_PROP = new Map(Object.entries({
+  "class": "className",
+  "for": "htmlFor",
+  "formaction": "formAction",
+  "innerHtml": "innerHTML",
+  "readonly": "readOnly",
+  "tabindex": "tabIndex"
+}));
+var _PROP_TO_ATTR = Array.from(_ATTR_TO_PROP).reduce((inverted, [propertyName, attributeName]) => {
+  inverted.set(propertyName, attributeName);
+  return inverted;
+}, /* @__PURE__ */ new Map());
+var DomElementSchemaRegistry = class extends ElementSchemaRegistry {
+  constructor() {
+    super();
+    this._schema = /* @__PURE__ */ new Map();
+    this._eventSchema = /* @__PURE__ */ new Map();
+    SCHEMA.forEach((encodedType) => {
+      const type = /* @__PURE__ */ new Map();
+      const events = /* @__PURE__ */ new Set();
+      const [strType, strProperties] = encodedType.split("|");
+      const properties = strProperties.split(",");
+      const [typeNames, superName] = strType.split("^");
+      typeNames.split(",").forEach((tag) => {
+        this._schema.set(tag.toLowerCase(), type);
+        this._eventSchema.set(tag.toLowerCase(), events);
+      });
+      const superType = superName && this._schema.get(superName.toLowerCase());
+      if (superType) {
+        for (const [prop, value] of superType) {
+          type.set(prop, value);
+        }
+        for (const superEvent of this._eventSchema.get(superName.toLowerCase())) {
+          events.add(superEvent);
+        }
+      }
+      properties.forEach((property2) => {
+        if (property2.length > 0) {
+          switch (property2[0]) {
+            case "*":
+              events.add(property2.substring(1));
+              break;
+            case "!":
+              type.set(property2.substring(1), BOOLEAN);
+              break;
+            case "#":
+              type.set(property2.substring(1), NUMBER);
+              break;
+            case "%":
+              type.set(property2.substring(1), OBJECT);
+              break;
+            default:
+              type.set(property2, STRING);
+          }
+        }
+      });
+    });
+  }
+  hasProperty(tagName, propName, schemaMetas) {
+    if (schemaMetas.some((schema) => schema.name === NO_ERRORS_SCHEMA.name)) {
+      return true;
+    }
+    if (tagName.indexOf("-") > -1) {
+      if (isNgContainer(tagName) || isNgContent(tagName)) {
+        return false;
+      }
+      if (schemaMetas.some((schema) => schema.name === CUSTOM_ELEMENTS_SCHEMA.name)) {
+        return true;
+      }
+    }
+    const elementProperties = this._schema.get(tagName.toLowerCase()) || this._schema.get("unknown");
+    return elementProperties.has(propName);
+  }
+  hasElement(tagName, schemaMetas) {
+    if (schemaMetas.some((schema) => schema.name === NO_ERRORS_SCHEMA.name)) {
+      return true;
+    }
+    if (tagName.indexOf("-") > -1) {
+      if (isNgContainer(tagName) || isNgContent(tagName)) {
+        return true;
+      }
+      if (schemaMetas.some((schema) => schema.name === CUSTOM_ELEMENTS_SCHEMA.name)) {
+        return true;
+      }
+    }
+    return this._schema.has(tagName.toLowerCase());
+  }
+  securityContext(tagName, propName, isAttribute) {
+    if (isAttribute) {
+      propName = this.getMappedPropName(propName);
+    }
+    tagName = tagName.toLowerCase();
+    propName = propName.toLowerCase();
+    let ctx = SECURITY_SCHEMA()[tagName + "|" + propName];
+    if (ctx) {
+      return ctx;
+    }
+    ctx = SECURITY_SCHEMA()["*|" + propName];
+    return ctx ? ctx : SecurityContext.NONE;
+  }
+  getMappedPropName(propName) {
+    var _a2;
+    return (_a2 = _ATTR_TO_PROP.get(propName)) != null ? _a2 : propName;
+  }
+  getDefaultComponentElementName() {
+    return "ng-component";
+  }
+  validateProperty(name) {
+    if (name.toLowerCase().startsWith("on")) {
+      const msg = `Binding to event property '${name}' is disallowed for security reasons, please use (${name.slice(2)})=...
+If '${name}' is a directive input, make sure the directive is imported by the current module.`;
+      return { error: true, msg };
+    } else {
+      return { error: false };
+    }
+  }
+  validateAttribute(name) {
+    if (name.toLowerCase().startsWith("on")) {
+      const msg = `Binding to event attribute '${name}' is disallowed for security reasons, please use (${name.slice(2)})=...`;
+      return { error: true, msg };
+    } else {
+      return { error: false };
+    }
+  }
+  allKnownElementNames() {
+    return Array.from(this._schema.keys());
+  }
+  allKnownAttributesOfElement(tagName) {
+    const elementProperties = this._schema.get(tagName.toLowerCase()) || this._schema.get("unknown");
+    return Array.from(elementProperties.keys()).map((prop) => {
+      var _a2;
+      return (_a2 = _PROP_TO_ATTR.get(prop)) != null ? _a2 : prop;
+    });
+  }
+  allKnownEventsOfElement(tagName) {
+    var _a2;
+    return Array.from((_a2 = this._eventSchema.get(tagName.toLowerCase())) != null ? _a2 : []);
+  }
+  normalizeAnimationStyleProperty(propName) {
+    return dashCaseToCamelCase(propName);
+  }
+  normalizeAnimationStyleValue(camelCaseProp, userProvidedProp, val) {
+    let unit = "";
+    const strVal = val.toString().trim();
+    let errorMsg = null;
+    if (_isPixelDimensionStyle(camelCaseProp) && val !== 0 && val !== "0") {
+      if (typeof val === "number") {
+        unit = "px";
+      } else {
+        const valAndSuffixMatch = val.match(/^[+-]?[\d\.]+([a-z]*)$/);
+        if (valAndSuffixMatch && valAndSuffixMatch[1].length == 0) {
+          errorMsg = `Please provide a CSS unit value for ${userProvidedProp}:${val}`;
+        }
+      }
+    }
+    return { error: errorMsg, value: strVal + unit };
+  }
+};
+function _isPixelDimensionStyle(prop) {
+  switch (prop) {
+    case "width":
+    case "height":
+    case "minWidth":
+    case "minHeight":
+    case "maxWidth":
+    case "maxHeight":
+    case "left":
+    case "top":
+    case "bottom":
+    case "right":
+    case "fontSize":
+    case "outlineWidth":
+    case "outlineOffset":
+    case "paddingTop":
+    case "paddingLeft":
+    case "paddingBottom":
+    case "paddingRight":
+    case "marginTop":
+    case "marginLeft":
+    case "marginBottom":
+    case "marginRight":
+    case "borderRadius":
+    case "borderWidth":
+    case "borderTopWidth":
+    case "borderLeftWidth":
+    case "borderRightWidth":
+    case "borderBottomWidth":
+    case "textIndent":
+      return true;
+    default:
+      return false;
+  }
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/html_tags.mjs
+var HtmlTagDefinition = class {
+  constructor({ closedByChildren, implicitNamespacePrefix, contentType = TagContentType.PARSABLE_DATA, closedByParent = false, isVoid = false, ignoreFirstLf = false, preventNamespaceInheritance = false, canSelfClose = false } = {}) {
+    this.closedByChildren = {};
+    this.closedByParent = false;
+    if (closedByChildren && closedByChildren.length > 0) {
+      closedByChildren.forEach((tagName) => this.closedByChildren[tagName] = true);
+    }
+    this.isVoid = isVoid;
+    this.closedByParent = closedByParent || isVoid;
+    this.implicitNamespacePrefix = implicitNamespacePrefix || null;
+    this.contentType = contentType;
+    this.ignoreFirstLf = ignoreFirstLf;
+    this.preventNamespaceInheritance = preventNamespaceInheritance;
+    this.canSelfClose = canSelfClose != null ? canSelfClose : isVoid;
+  }
+  isClosedByChild(name) {
+    return this.isVoid || name.toLowerCase() in this.closedByChildren;
+  }
+  getContentType(prefix) {
+    if (typeof this.contentType === "object") {
+      const overrideType = prefix === void 0 ? void 0 : this.contentType[prefix];
+      return overrideType != null ? overrideType : this.contentType.default;
+    }
+    return this.contentType;
+  }
+};
+var DEFAULT_TAG_DEFINITION;
+var TAG_DEFINITIONS;
+function getHtmlTagDefinition(tagName) {
+  var _a2, _b2;
+  if (!TAG_DEFINITIONS) {
+    DEFAULT_TAG_DEFINITION = new HtmlTagDefinition({ canSelfClose: true });
+    TAG_DEFINITIONS = Object.assign(/* @__PURE__ */ Object.create(null), {
+      "base": new HtmlTagDefinition({ isVoid: true }),
+      "meta": new HtmlTagDefinition({ isVoid: true }),
+      "area": new HtmlTagDefinition({ isVoid: true }),
+      "embed": new HtmlTagDefinition({ isVoid: true }),
+      "link": new HtmlTagDefinition({ isVoid: true }),
+      "img": new HtmlTagDefinition({ isVoid: true }),
+      "input": new HtmlTagDefinition({ isVoid: true }),
+      "param": new HtmlTagDefinition({ isVoid: true }),
+      "hr": new HtmlTagDefinition({ isVoid: true }),
+      "br": new HtmlTagDefinition({ isVoid: true }),
+      "source": new HtmlTagDefinition({ isVoid: true }),
+      "track": new HtmlTagDefinition({ isVoid: true }),
+      "wbr": new HtmlTagDefinition({ isVoid: true }),
+      "p": new HtmlTagDefinition({
+        closedByChildren: [
+          "address",
+          "article",
+          "aside",
+          "blockquote",
+          "div",
+          "dl",
+          "fieldset",
+          "footer",
+          "form",
+          "h1",
+          "h2",
+          "h3",
+          "h4",
+          "h5",
+          "h6",
+          "header",
+          "hgroup",
+          "hr",
+          "main",
+          "nav",
+          "ol",
+          "p",
+          "pre",
+          "section",
+          "table",
+          "ul"
+        ],
+        closedByParent: true
+      }),
+      "thead": new HtmlTagDefinition({ closedByChildren: ["tbody", "tfoot"] }),
+      "tbody": new HtmlTagDefinition({ closedByChildren: ["tbody", "tfoot"], closedByParent: true }),
+      "tfoot": new HtmlTagDefinition({ closedByChildren: ["tbody"], closedByParent: true }),
+      "tr": new HtmlTagDefinition({ closedByChildren: ["tr"], closedByParent: true }),
+      "td": new HtmlTagDefinition({ closedByChildren: ["td", "th"], closedByParent: true }),
+      "th": new HtmlTagDefinition({ closedByChildren: ["td", "th"], closedByParent: true }),
+      "col": new HtmlTagDefinition({ isVoid: true }),
+      "svg": new HtmlTagDefinition({ implicitNamespacePrefix: "svg" }),
+      "foreignObject": new HtmlTagDefinition({
+        implicitNamespacePrefix: "svg",
+        preventNamespaceInheritance: true
+      }),
+      "math": new HtmlTagDefinition({ implicitNamespacePrefix: "math" }),
+      "li": new HtmlTagDefinition({ closedByChildren: ["li"], closedByParent: true }),
+      "dt": new HtmlTagDefinition({ closedByChildren: ["dt", "dd"] }),
+      "dd": new HtmlTagDefinition({ closedByChildren: ["dt", "dd"], closedByParent: true }),
+      "rb": new HtmlTagDefinition({
+        closedByChildren: ["rb", "rt", "rtc", "rp"],
+        closedByParent: true
+      }),
+      "rt": new HtmlTagDefinition({
+        closedByChildren: ["rb", "rt", "rtc", "rp"],
+        closedByParent: true
+      }),
+      "rtc": new HtmlTagDefinition({ closedByChildren: ["rb", "rtc", "rp"], closedByParent: true }),
+      "rp": new HtmlTagDefinition({
+        closedByChildren: ["rb", "rt", "rtc", "rp"],
+        closedByParent: true
+      }),
+      "optgroup": new HtmlTagDefinition({ closedByChildren: ["optgroup"], closedByParent: true }),
+      "option": new HtmlTagDefinition({
+        closedByChildren: ["option", "optgroup"],
+        closedByParent: true
+      }),
+      "pre": new HtmlTagDefinition({ ignoreFirstLf: true }),
+      "listing": new HtmlTagDefinition({ ignoreFirstLf: true }),
+      "style": new HtmlTagDefinition({ contentType: TagContentType.RAW_TEXT }),
+      "script": new HtmlTagDefinition({ contentType: TagContentType.RAW_TEXT }),
+      "title": new HtmlTagDefinition({
+        contentType: {
+          default: TagContentType.ESCAPABLE_RAW_TEXT,
+          svg: TagContentType.PARSABLE_DATA
+        }
+      }),
+      "textarea": new HtmlTagDefinition({
+        contentType: TagContentType.ESCAPABLE_RAW_TEXT,
+        ignoreFirstLf: true
+      })
+    });
+    new DomElementSchemaRegistry().allKnownElementNames().forEach((knownTagName) => {
+      if (!TAG_DEFINITIONS[knownTagName] && getNsPrefix(knownTagName) === null) {
+        TAG_DEFINITIONS[knownTagName] = new HtmlTagDefinition({ canSelfClose: false });
+      }
+    });
+  }
+  return (_b2 = (_a2 = TAG_DEFINITIONS[tagName]) != null ? _a2 : TAG_DEFINITIONS[tagName.toLowerCase()]) != null ? _b2 : DEFAULT_TAG_DEFINITION;
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/serializers/placeholder.mjs
+var TAG_TO_PLACEHOLDER_NAMES = {
+  "A": "LINK",
+  "B": "BOLD_TEXT",
+  "BR": "LINE_BREAK",
+  "EM": "EMPHASISED_TEXT",
+  "H1": "HEADING_LEVEL1",
+  "H2": "HEADING_LEVEL2",
+  "H3": "HEADING_LEVEL3",
+  "H4": "HEADING_LEVEL4",
+  "H5": "HEADING_LEVEL5",
+  "H6": "HEADING_LEVEL6",
+  "HR": "HORIZONTAL_RULE",
+  "I": "ITALIC_TEXT",
+  "LI": "LIST_ITEM",
+  "LINK": "MEDIA_LINK",
+  "OL": "ORDERED_LIST",
+  "P": "PARAGRAPH",
+  "Q": "QUOTATION",
+  "S": "STRIKETHROUGH_TEXT",
+  "SMALL": "SMALL_TEXT",
+  "SUB": "SUBSTRIPT",
+  "SUP": "SUPERSCRIPT",
+  "TBODY": "TABLE_BODY",
+  "TD": "TABLE_CELL",
+  "TFOOT": "TABLE_FOOTER",
+  "TH": "TABLE_HEADER_CELL",
+  "THEAD": "TABLE_HEADER",
+  "TR": "TABLE_ROW",
+  "TT": "MONOSPACED_TEXT",
+  "U": "UNDERLINED_TEXT",
+  "UL": "UNORDERED_LIST"
+};
+var PlaceholderRegistry = class {
+  constructor() {
+    this._placeHolderNameCounts = {};
+    this._signatureToName = {};
+  }
+  getStartTagPlaceholderName(tag, attrs, isVoid) {
+    const signature = this._hashTag(tag, attrs, isVoid);
+    if (this._signatureToName[signature]) {
+      return this._signatureToName[signature];
+    }
+    const upperTag = tag.toUpperCase();
+    const baseName = TAG_TO_PLACEHOLDER_NAMES[upperTag] || `TAG_${upperTag}`;
+    const name = this._generateUniqueName(isVoid ? baseName : `START_${baseName}`);
+    this._signatureToName[signature] = name;
+    return name;
+  }
+  getCloseTagPlaceholderName(tag) {
+    const signature = this._hashClosingTag(tag);
+    if (this._signatureToName[signature]) {
+      return this._signatureToName[signature];
+    }
+    const upperTag = tag.toUpperCase();
+    const baseName = TAG_TO_PLACEHOLDER_NAMES[upperTag] || `TAG_${upperTag}`;
+    const name = this._generateUniqueName(`CLOSE_${baseName}`);
+    this._signatureToName[signature] = name;
+    return name;
+  }
+  getPlaceholderName(name, content) {
+    const upperName = name.toUpperCase();
+    const signature = `PH: ${upperName}=${content}`;
+    if (this._signatureToName[signature]) {
+      return this._signatureToName[signature];
+    }
+    const uniqueName = this._generateUniqueName(upperName);
+    this._signatureToName[signature] = uniqueName;
+    return uniqueName;
+  }
+  getUniquePlaceholder(name) {
+    return this._generateUniqueName(name.toUpperCase());
+  }
+  getStartBlockPlaceholderName(name, parameters) {
+    const signature = this._hashBlock(name, parameters);
+    if (this._signatureToName[signature]) {
+      return this._signatureToName[signature];
+    }
+    const placeholder = this._generateUniqueName(`START_BLOCK_${this._toSnakeCase(name)}`);
+    this._signatureToName[signature] = placeholder;
+    return placeholder;
+  }
+  getCloseBlockPlaceholderName(name) {
+    const signature = this._hashClosingBlock(name);
+    if (this._signatureToName[signature]) {
+      return this._signatureToName[signature];
+    }
+    const placeholder = this._generateUniqueName(`CLOSE_BLOCK_${this._toSnakeCase(name)}`);
+    this._signatureToName[signature] = placeholder;
+    return placeholder;
+  }
+  _hashTag(tag, attrs, isVoid) {
+    const start = `<${tag}`;
+    const strAttrs = Object.keys(attrs).sort().map((name) => ` ${name}=${attrs[name]}`).join("");
+    const end = isVoid ? "/>" : `></${tag}>`;
+    return start + strAttrs + end;
+  }
+  _hashClosingTag(tag) {
+    return this._hashTag(`/${tag}`, {}, false);
+  }
+  _hashBlock(name, parameters) {
+    const params = parameters.length === 0 ? "" : ` (${parameters.sort().join("; ")})`;
+    return `@${name}${params} {}`;
+  }
+  _hashClosingBlock(name) {
+    return this._hashBlock(`close_${name}`, []);
+  }
+  _toSnakeCase(name) {
+    return name.toUpperCase().replace(/[^A-Z0-9]/g, "_");
+  }
+  _generateUniqueName(base) {
+    const seen = this._placeHolderNameCounts.hasOwnProperty(base);
+    if (!seen) {
+      this._placeHolderNameCounts[base] = 1;
+      return base;
+    }
+    const id = this._placeHolderNameCounts[base];
+    this._placeHolderNameCounts[base] = id + 1;
+    return `${base}_${id}`;
+  }
+};
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/i18n_parser.mjs
+var _expParser = new Parser2(new Lexer());
+function createI18nMessageFactory(interpolationConfig, containerBlocks, retainEmptyTokens) {
+  const visitor = new _I18nVisitor(_expParser, interpolationConfig, containerBlocks, retainEmptyTokens);
+  return (nodes, meaning, description, customId, visitNodeFn) => visitor.toI18nMessage(nodes, meaning, description, customId, visitNodeFn);
+}
+function noopVisitNodeFn(_html, i18n2) {
+  return i18n2;
+}
+var _I18nVisitor = class {
+  constructor(_expressionParser, _interpolationConfig, _containerBlocks, _retainEmptyTokens) {
+    this._expressionParser = _expressionParser;
+    this._interpolationConfig = _interpolationConfig;
+    this._containerBlocks = _containerBlocks;
+    this._retainEmptyTokens = _retainEmptyTokens;
+  }
+  toI18nMessage(nodes, meaning = "", description = "", customId = "", visitNodeFn) {
+    const context = {
+      isIcu: nodes.length == 1 && nodes[0] instanceof Expansion,
+      icuDepth: 0,
+      placeholderRegistry: new PlaceholderRegistry(),
+      placeholderToContent: {},
+      placeholderToMessage: {},
+      visitNodeFn: visitNodeFn || noopVisitNodeFn
+    };
+    const i18nodes = visitAll2(this, nodes, context);
+    return new Message(i18nodes, context.placeholderToContent, context.placeholderToMessage, meaning, description, customId);
+  }
+  visitElement(el, context) {
+    var _a2;
+    const children = visitAll2(this, el.children, context);
+    const attrs = {};
+    el.attrs.forEach((attr) => {
+      attrs[attr.name] = attr.value;
+    });
+    const isVoid = getHtmlTagDefinition(el.name).isVoid;
+    const startPhName = context.placeholderRegistry.getStartTagPlaceholderName(el.name, attrs, isVoid);
+    context.placeholderToContent[startPhName] = {
+      text: el.startSourceSpan.toString(),
+      sourceSpan: el.startSourceSpan
+    };
+    let closePhName = "";
+    if (!isVoid) {
+      closePhName = context.placeholderRegistry.getCloseTagPlaceholderName(el.name);
+      context.placeholderToContent[closePhName] = {
+        text: `</${el.name}>`,
+        sourceSpan: (_a2 = el.endSourceSpan) != null ? _a2 : el.sourceSpan
+      };
+    }
+    const node = new TagPlaceholder(el.name, attrs, startPhName, closePhName, children, isVoid, el.sourceSpan, el.startSourceSpan, el.endSourceSpan);
+    return context.visitNodeFn(el, node);
+  }
+  visitAttribute(attribute2, context) {
+    const node = attribute2.valueTokens === void 0 || attribute2.valueTokens.length === 1 ? new Text2(attribute2.value, attribute2.valueSpan || attribute2.sourceSpan) : this._visitTextWithInterpolation(attribute2.valueTokens, attribute2.valueSpan || attribute2.sourceSpan, context, attribute2.i18n);
+    return context.visitNodeFn(attribute2, node);
+  }
+  visitText(text2, context) {
+    const node = text2.tokens.length === 1 ? new Text2(text2.value, text2.sourceSpan) : this._visitTextWithInterpolation(text2.tokens, text2.sourceSpan, context, text2.i18n);
+    return context.visitNodeFn(text2, node);
+  }
+  visitComment(comment, context) {
+    return null;
+  }
+  visitExpansion(icu, context) {
+    context.icuDepth++;
+    const i18nIcuCases = {};
+    const i18nIcu = new Icu2(icu.switchValue, icu.type, i18nIcuCases, icu.sourceSpan);
+    icu.cases.forEach((caze) => {
+      i18nIcuCases[caze.value] = new Container(caze.expression.map((node2) => node2.visit(this, context)), caze.expSourceSpan);
+    });
+    context.icuDepth--;
+    if (context.isIcu || context.icuDepth > 0) {
+      const expPh = context.placeholderRegistry.getUniquePlaceholder(`VAR_${icu.type}`);
+      i18nIcu.expressionPlaceholder = expPh;
+      context.placeholderToContent[expPh] = {
+        text: icu.switchValue,
+        sourceSpan: icu.switchValueSourceSpan
+      };
+      return context.visitNodeFn(icu, i18nIcu);
+    }
+    const phName = context.placeholderRegistry.getPlaceholderName("ICU", icu.sourceSpan.toString());
+    context.placeholderToMessage[phName] = this.toI18nMessage([icu], "", "", "", void 0);
+    const node = new IcuPlaceholder(i18nIcu, phName, icu.sourceSpan);
+    return context.visitNodeFn(icu, node);
+  }
+  visitExpansionCase(_icuCase, _context) {
+    throw new Error("Unreachable code");
+  }
+  visitBlock(block, context) {
+    var _a2;
+    const children = visitAll2(this, block.children, context);
+    if (this._containerBlocks.has(block.name)) {
+      return new Container(children, block.sourceSpan);
+    }
+    const parameters = block.parameters.map((param) => param.expression);
+    const startPhName = context.placeholderRegistry.getStartBlockPlaceholderName(block.name, parameters);
+    const closePhName = context.placeholderRegistry.getCloseBlockPlaceholderName(block.name);
+    context.placeholderToContent[startPhName] = {
+      text: block.startSourceSpan.toString(),
+      sourceSpan: block.startSourceSpan
+    };
+    context.placeholderToContent[closePhName] = {
+      text: block.endSourceSpan ? block.endSourceSpan.toString() : "}",
+      sourceSpan: (_a2 = block.endSourceSpan) != null ? _a2 : block.sourceSpan
+    };
+    const node = new BlockPlaceholder(block.name, parameters, startPhName, closePhName, children, block.sourceSpan, block.startSourceSpan, block.endSourceSpan);
+    return context.visitNodeFn(block, node);
+  }
+  visitBlockParameter(_parameter, _context) {
+    throw new Error("Unreachable code");
+  }
+  visitLetDeclaration(decl, context) {
+    return null;
+  }
+  _visitTextWithInterpolation(tokens, sourceSpan, context, previousI18n) {
+    const nodes = [];
+    let hasInterpolation = false;
+    for (const token of tokens) {
+      switch (token.type) {
+        case 8:
+        case 17:
+          hasInterpolation = true;
+          const expression = token.parts[1];
+          const baseName = extractPlaceholderName(expression) || "INTERPOLATION";
+          const phName = context.placeholderRegistry.getPlaceholderName(baseName, expression);
+          context.placeholderToContent[phName] = {
+            text: token.parts.join(""),
+            sourceSpan: token.sourceSpan
+          };
+          nodes.push(new Placeholder(expression, phName, token.sourceSpan));
+          break;
+        default:
+          if (token.parts[0].length > 0 || this._retainEmptyTokens) {
+            const previous = nodes[nodes.length - 1];
+            if (previous instanceof Text2) {
+              previous.value += token.parts[0];
+              previous.sourceSpan = new ParseSourceSpan(previous.sourceSpan.start, token.sourceSpan.end, previous.sourceSpan.fullStart, previous.sourceSpan.details);
+            } else {
+              nodes.push(new Text2(token.parts[0], token.sourceSpan));
+            }
+          } else {
+            if (this._retainEmptyTokens) {
+              nodes.push(new Text2(token.parts[0], token.sourceSpan));
+            }
+          }
+          break;
+      }
+    }
+    if (hasInterpolation) {
+      reusePreviousSourceSpans(nodes, previousI18n);
+      return new Container(nodes, sourceSpan);
+    } else {
+      return nodes[0];
+    }
+  }
+};
+function reusePreviousSourceSpans(nodes, previousI18n) {
+  if (previousI18n instanceof Message) {
+    assertSingleContainerMessage(previousI18n);
+    previousI18n = previousI18n.nodes[0];
+  }
+  if (previousI18n instanceof Container) {
+    assertEquivalentNodes(previousI18n.children, nodes);
+    for (let i = 0; i < nodes.length; i++) {
+      nodes[i].sourceSpan = previousI18n.children[i].sourceSpan;
+    }
+  }
+}
+function assertSingleContainerMessage(message) {
+  const nodes = message.nodes;
+  if (nodes.length !== 1 || !(nodes[0] instanceof Container)) {
+    throw new Error("Unexpected previous i18n message - expected it to consist of only a single `Container` node.");
+  }
+}
+function assertEquivalentNodes(previousNodes, nodes) {
+  if (previousNodes.length !== nodes.length) {
+    throw new Error(`
+The number of i18n message children changed between first and second pass.
+
+First pass (${previousNodes.length} tokens):
+${previousNodes.map((node) => `"${node.sourceSpan.toString()}"`).join("\n")}
+
+Second pass (${nodes.length} tokens):
+${nodes.map((node) => `"${node.sourceSpan.toString()}"`).join("\n")}
+    `.trim());
+  }
+  if (previousNodes.some((node, i) => nodes[i].constructor !== node.constructor)) {
+    throw new Error("The types of the i18n message children changed between first and second pass.");
+  }
+}
+var _CUSTOM_PH_EXP = /\/\/[\s\S]*i18n[\s\S]*\([\s\S]*ph[\s\S]*=[\s\S]*("|')([\s\S]*?)\1[\s\S]*\)/g;
+function extractPlaceholderName(input) {
+  return input.split(_CUSTOM_PH_EXP)[2];
+}
+
+// bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/parse_util.mjs
+var I18nError = class extends ParseError {
+  constructor(span, msg) {
+    super(span, msg);
+  }
+};
+
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/schema/trusted_types_sinks.mjs
 var TRUSTED_TYPES_SINKS = /* @__PURE__ */ new Set([
   "iframe|srcdoc",
@@ -15389,27 +15549,33 @@ function isTrustedTypesSink(tagName, propName) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/i18n/meta.mjs
-var setI18nRefs = (htmlNode, i18nNode) => {
-  if (htmlNode instanceof NodeWithI18n) {
-    if (i18nNode instanceof IcuPlaceholder && htmlNode.i18n instanceof Message) {
-      i18nNode.previousMessage = htmlNode.i18n;
+var setI18nRefs = (originalNodeMap) => {
+  return (trimmedNode, i18nNode) => {
+    var _a2;
+    const originalNode = (_a2 = originalNodeMap.get(trimmedNode)) != null ? _a2 : trimmedNode;
+    if (originalNode instanceof NodeWithI18n) {
+      if (i18nNode instanceof IcuPlaceholder && originalNode.i18n instanceof Message) {
+        i18nNode.previousMessage = originalNode.i18n;
+      }
+      originalNode.i18n = i18nNode;
     }
-    htmlNode.i18n = i18nNode;
-  }
-  return i18nNode;
+    return i18nNode;
+  };
 };
 var I18nMetaVisitor = class {
-  constructor(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, keepI18nAttrs = false, enableI18nLegacyMessageIdFormat = false, containerBlocks = DEFAULT_CONTAINER_BLOCKS) {
+  constructor(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, keepI18nAttrs = false, enableI18nLegacyMessageIdFormat = false, containerBlocks = DEFAULT_CONTAINER_BLOCKS, preserveSignificantWhitespace = true, retainEmptyTokens = !preserveSignificantWhitespace) {
     this.interpolationConfig = interpolationConfig;
     this.keepI18nAttrs = keepI18nAttrs;
     this.enableI18nLegacyMessageIdFormat = enableI18nLegacyMessageIdFormat;
     this.containerBlocks = containerBlocks;
+    this.preserveSignificantWhitespace = preserveSignificantWhitespace;
+    this.retainEmptyTokens = retainEmptyTokens;
     this.hasI18nMeta = false;
     this._errors = [];
   }
   _generateI18nMessage(nodes, meta = "", visitNodeFn) {
     const { meaning, description, customId } = this._parseMetadata(meta);
-    const createI18nMessage2 = createI18nMessageFactory(this.interpolationConfig, this.containerBlocks);
+    const createI18nMessage2 = createI18nMessageFactory(this.interpolationConfig, this.containerBlocks, this.retainEmptyTokens);
     const message = createI18nMessage2(nodes, meaning, description, customId, visitNodeFn);
     this._setMessageId(message, meta);
     this._setLegacyIds(message, meta);
@@ -15428,7 +15594,9 @@ var I18nMetaVisitor = class {
       for (const attr of element2.attrs) {
         if (attr.name === I18N_ATTR) {
           const i18n2 = element2.i18n || attr.value;
-          message = this._generateI18nMessage(element2.children, i18n2, setI18nRefs);
+          const originalNodeMap = /* @__PURE__ */ new Map();
+          const trimmedNodes = this.preserveSignificantWhitespace ? element2.children : visitAllWithSiblings(new WhitespaceVisitor(false, originalNodeMap), element2.children);
+          message = this._generateI18nMessage(trimmedNodes, i18n2, setI18nRefs(originalNodeMap));
           if (message.nodes.length === 0) {
             message = void 0;
           }
@@ -15504,12 +15672,18 @@ var I18nMetaVisitor = class {
   }
   _setMessageId(message, meta) {
     if (!message.id) {
-      message.id = meta instanceof Message && meta.id || decimalDigest(message);
+      message.id = meta instanceof Message && meta.id || decimalDigest(message, this.preserveSignificantWhitespace);
     }
   }
   _setLegacyIds(message, meta) {
     if (this.enableI18nLegacyMessageIdFormat) {
-      message.legacyIds = [computeDigest(message), computeDecimalDigest(message)];
+      message.legacyIds = [
+        computeDigest(message),
+        computeDecimalDigest(
+          message,
+          this.preserveSignificantWhitespace
+        )
+      ];
     } else if (typeof meta !== "string") {
       const previousMessage = meta instanceof Message ? meta : meta instanceof IcuPlaceholder ? meta.previousMessage : void 0;
       message.legacyIds = previousMessage ? previousMessage.legacyIds : [];
@@ -19819,7 +19993,7 @@ function createContentQueriesFunction(queries, constantPool, name) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/html_parser.mjs
-var HtmlParser = class extends Parser2 {
+var HtmlParser = class extends Parser {
   constructor() {
     super(getHtmlTagDefinition);
   }
@@ -19827,75 +20001,6 @@ var HtmlParser = class extends Parser2 {
     return super.parse(source, url, options);
   }
 };
-
-// bazel-out/k8-fastbuild/bin/packages/compiler/src/ml_parser/html_whitespaces.mjs
-var PRESERVE_WS_ATTR_NAME = "ngPreserveWhitespaces";
-var SKIP_WS_TRIM_TAGS = /* @__PURE__ */ new Set(["pre", "template", "textarea", "script", "style"]);
-var WS_CHARS = " \f\n\r	\v\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF";
-var NO_WS_REGEXP = new RegExp(`[^${WS_CHARS}]`);
-var WS_REPLACE_REGEXP = new RegExp(`[${WS_CHARS}]{2,}`, "g");
-function hasPreserveWhitespacesAttr(attrs) {
-  return attrs.some((attr) => attr.name === PRESERVE_WS_ATTR_NAME);
-}
-function replaceNgsp(value) {
-  return value.replace(new RegExp(NGSP_UNICODE, "g"), " ");
-}
-var WhitespaceVisitor = class {
-  visitElement(element2, context) {
-    if (SKIP_WS_TRIM_TAGS.has(element2.name) || hasPreserveWhitespacesAttr(element2.attrs)) {
-      return new Element2(element2.name, visitAll2(this, element2.attrs), element2.children, element2.sourceSpan, element2.startSourceSpan, element2.endSourceSpan, element2.i18n);
-    }
-    return new Element2(element2.name, element2.attrs, visitAllWithSiblings(this, element2.children), element2.sourceSpan, element2.startSourceSpan, element2.endSourceSpan, element2.i18n);
-  }
-  visitAttribute(attribute2, context) {
-    return attribute2.name !== PRESERVE_WS_ATTR_NAME ? attribute2 : null;
-  }
-  visitText(text2, context) {
-    const isNotBlank = text2.value.match(NO_WS_REGEXP);
-    const hasExpansionSibling = context && (context.prev instanceof Expansion || context.next instanceof Expansion);
-    if (isNotBlank || hasExpansionSibling) {
-      const tokens = text2.tokens.map((token) => token.type === 5 ? createWhitespaceProcessedTextToken(token) : token);
-      const value = processWhitespace(text2.value);
-      return new Text4(value, text2.sourceSpan, tokens, text2.i18n);
-    }
-    return null;
-  }
-  visitComment(comment, context) {
-    return comment;
-  }
-  visitExpansion(expansion, context) {
-    return expansion;
-  }
-  visitExpansionCase(expansionCase, context) {
-    return expansionCase;
-  }
-  visitBlock(block, context) {
-    return new Block(block.name, block.parameters, visitAllWithSiblings(this, block.children), block.sourceSpan, block.nameSpan, block.startSourceSpan, block.endSourceSpan);
-  }
-  visitBlockParameter(parameter, context) {
-    return parameter;
-  }
-  visitLetDeclaration(decl, context) {
-    return decl;
-  }
-};
-function createWhitespaceProcessedTextToken({ type, parts, sourceSpan }) {
-  return { type, parts: [processWhitespace(parts[0])], sourceSpan };
-}
-function processWhitespace(text2) {
-  return replaceNgsp(text2).replace(WS_REPLACE_REGEXP, " ");
-}
-function visitAllWithSiblings(visitor, nodes) {
-  const result = [];
-  nodes.forEach((ast, i) => {
-    const context = { prev: nodes[i - 1], next: nodes[i + 1] };
-    const astResult = ast.visit(visitor, context);
-    if (astResult) {
-      result.push(astResult);
-    }
-  });
-  return result;
-}
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/template_parser/binding_parser.mjs
 var PROPERTY_PARTS_SEPARATOR = ".";
@@ -21522,7 +21627,7 @@ function textContents(node) {
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/template.mjs
 var LEADING_TRIVIA_CHARS = [" ", "\n", "\r", "	"];
 function parseTemplate(template2, templateUrl, options = {}) {
-  var _a2, _b2;
+  var _a2, _b2, _c2;
   const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat, allowInvalidAssignmentEvents } = options;
   const bindingParser = makeBindingParser(interpolationConfig, allowInvalidAssignmentEvents);
   const htmlParser = new HtmlParser();
@@ -21549,10 +21654,14 @@ function parseTemplate(template2, templateUrl, options = {}) {
     return parsedTemplate2;
   }
   let rootNodes = parseResult.rootNodes;
+  const retainEmptyTokens = !((_c2 = options.preserveSignificantWhitespace) != null ? _c2 : true);
   const i18nMetaVisitor = new I18nMetaVisitor(
     interpolationConfig,
     !preserveWhitespaces,
-    enableI18nLegacyMessageIdFormat
+    enableI18nLegacyMessageIdFormat,
+    void 0,
+    options.preserveSignificantWhitespace,
+    retainEmptyTokens
   );
   const i18nMetaResult = i18nMetaVisitor.visitAllWithErrors(rootNodes);
   if (!options.alwaysAttemptHtmlToR3AstConversion && i18nMetaResult.errors && i18nMetaResult.errors.length > 0) {
@@ -21572,9 +21681,20 @@ function parseTemplate(template2, templateUrl, options = {}) {
   }
   rootNodes = i18nMetaResult.rootNodes;
   if (!preserveWhitespaces) {
-    rootNodes = visitAll2(new WhitespaceVisitor(), rootNodes);
+    rootNodes = visitAll2(new WhitespaceVisitor(
+      true,
+      void 0,
+      false
+    ), rootNodes);
     if (i18nMetaVisitor.hasI18nMeta) {
-      rootNodes = visitAll2(new I18nMetaVisitor(interpolationConfig, false), rootNodes);
+      rootNodes = visitAll2(new I18nMetaVisitor(
+        interpolationConfig,
+        false,
+        void 0,
+        void 0,
+        true,
+        retainEmptyTokens
+      ), rootNodes);
     }
   }
   const { nodes, errors, styleUrls, styles, ngContentSelectors, commentNodes } = htmlAstToRender3Ast(rootNodes, bindingParser, { collectCommentNodes: !!options.collectCommentNodes });
@@ -21595,7 +21715,7 @@ function parseTemplate(template2, templateUrl, options = {}) {
 }
 var elementRegistry = new DomElementSchemaRegistry();
 function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, allowInvalidAssignmentEvents = false) {
-  return new BindingParser(new Parser(new Lexer()), interpolationConfig, elementRegistry, [], allowInvalidAssignmentEvents);
+  return new BindingParser(new Parser2(new Lexer()), interpolationConfig, elementRegistry, [], allowInvalidAssignmentEvents);
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/render3/view/compiler.mjs
@@ -23195,7 +23315,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.1+sha-3067633");
+var VERSION2 = new Version("18.2.1+sha-5d2e243");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -27356,4 +27476,3 @@ function standaloneRoutesMigration(tree, tsconfigPath, basePath, pathToMigrate, 
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-//# sourceMappingURL=bundle.js.map
