@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.1+sha-76b9e2b
+ * @license Angular v19.0.0-next.1+sha-226a67d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6639,7 +6639,7 @@ function getOriginalError(error) {
     return error[ERROR_ORIGINAL_ERROR];
 }
 
-const SCHEDULE_IN_ROOT_ZONE_DEFAULT = true;
+const SCHEDULE_IN_ROOT_ZONE_DEFAULT = false;
 
 /**
  * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
@@ -16954,7 +16954,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.1+sha-76b9e2b']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.1+sha-226a67d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31044,7 +31044,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.1+sha-76b9e2b');
+const VERSION = new Version('19.0.0-next.1+sha-226a67d');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
