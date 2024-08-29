@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.2+sha-1853bbb
+ * @license Angular v18.2.2+sha-98c6c05
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1633,6 +1633,9 @@ if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
 /**
  * A multi-provider token for initialization functions that will run upon construction of an
  * environment injector.
+ *
+ * Note: As opposed to the `APP_INITIALIZER` token, the `ENVIRONMENT_INITIALIZER` functions are not awaited,
+ * hence they should not be `async`.
  *
  * @publicApi
  */
@@ -16943,7 +16946,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.2+sha-1853bbb']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.2+sha-98c6c05']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31033,7 +31036,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.2+sha-1853bbb');
+const VERSION = new Version('18.2.2+sha-98c6c05');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33049,7 +33052,7 @@ class Compiler {
         return Promise.resolve(this.compileModuleSync(moduleType));
     }
     /**
-     * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
+     * Same as {@link Compiler#compileModuleSync compileModuleSync} but also creates ComponentFactories for all components.
      */
     compileModuleAndAllComponentsSync(moduleType) {
         const ngModuleFactory = this.compileModuleSync(moduleType);
@@ -33062,7 +33065,7 @@ class Compiler {
         return new ModuleWithComponentFactories(ngModuleFactory, componentFactories);
     }
     /**
-     * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
+     * Same as {@link Compiler#compileModuleAsync compileModuleAsync} but also creates ComponentFactories for all components.
      */
     compileModuleAndAllComponentsAsync(moduleType) {
         return Promise.resolve(this.compileModuleAndAllComponentsSync(moduleType));
