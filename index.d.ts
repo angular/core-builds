@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.2+sha-d9c1004
+ * @license Angular v18.2.1+sha-5e9661d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1459,11 +1459,11 @@ export declare class Compiler {
      */
     compileModuleAsync<T>(moduleType: Type<T>): Promise<NgModuleFactory<T>>;
     /**
-     * Same as {@link Compiler#compileModuleSync compileModuleSync} but also creates ComponentFactories for all components.
+     * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
      */
     compileModuleAndAllComponentsSync<T>(moduleType: Type<T>): ModuleWithComponentFactories<T>;
     /**
-     * Same as {@link Compiler#compileModuleAsync compileModuleAsync} but also creates ComponentFactories for all components.
+     * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
      */
     compileModuleAndAllComponentsAsync<T>(moduleType: Type<T>): Promise<ModuleWithComponentFactories<T>>;
     /**
@@ -3962,9 +3962,6 @@ declare const ENVIRONMENT = 10;
 /**
  * A multi-provider token for initialization functions that will run upon construction of an
  * environment injector.
- *
- * Note: As opposed to the `APP_INITIALIZER` token, the `ENVIRONMENT_INITIALIZER` functions are not awaited,
- * hence they should not be `async`.
  *
  * @publicApi
  */
