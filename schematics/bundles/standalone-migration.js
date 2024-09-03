@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.2+sha-1f87cba
+ * @license Angular v19.0.0-next.2+sha-8da9fb4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,7 +11,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var schematics = require('@angular-devkit/schematics');
 require('os');
 var ts = require('typescript');
-var compiler_host = require('./compiler_host-cba78e2d.js');
+var compiler_host = require('./compiler_host-bbb5d8fd.js');
 var p = require('path');
 var fs = require('fs');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
@@ -873,7 +873,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new compiler_host.DefinitionMap();
     definitionMap.set('minVersion', compiler_host.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-1f87cba'));
+    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-8da9fb4'));
     definitionMap.set('ngImport', compiler_host.importExpr(compiler_host.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -891,7 +891,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? compiler_host.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? compiler_host.literal(null));
     definitionMap.set('minVersion', compiler_host.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-1f87cba'));
+    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-8da9fb4'));
     definitionMap.set('ngImport', compiler_host.importExpr(compiler_host.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -986,7 +986,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new compiler_host.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', compiler_host.literal(minVersion));
-    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-1f87cba'));
+    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-8da9fb4'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone) {
@@ -1405,7 +1405,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new compiler_host.DefinitionMap();
     definitionMap.set('minVersion', compiler_host.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-1f87cba'));
+    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-8da9fb4'));
     definitionMap.set('ngImport', compiler_host.importExpr(compiler_host.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1440,7 +1440,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new compiler_host.DefinitionMap();
     definitionMap.set('minVersion', compiler_host.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-1f87cba'));
+    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-8da9fb4'));
     definitionMap.set('ngImport', compiler_host.importExpr(compiler_host.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1491,7 +1491,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new compiler_host.DefinitionMap();
     definitionMap.set('minVersion', compiler_host.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-1f87cba'));
+    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-8da9fb4'));
     definitionMap.set('ngImport', compiler_host.importExpr(compiler_host.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1524,7 +1524,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', compiler_host.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-1f87cba'));
+    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-8da9fb4'));
     definitionMap.set('ngImport', compiler_host.importExpr(compiler_host.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1575,7 +1575,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new compiler_host.DefinitionMap();
     definitionMap.set('minVersion', compiler_host.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-1f87cba'));
+    definitionMap.set('version', compiler_host.literal('19.0.0-next.2+sha-8da9fb4'));
     definitionMap.set('ngImport', compiler_host.importExpr(compiler_host.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -2650,6 +2650,7 @@ class DtsMetadataReader {
             // Imports are tracked in metadata only for template type-checking purposes,
             // so standalone components from .d.ts files don't have any.
             imports: null,
+            rawImports: null,
             deferredImports: null,
             // The same goes for schemas.
             schemas: null,
@@ -7757,6 +7758,7 @@ class DirectiveDecoratorHandler {
             isStandalone: analysis.meta.isStandalone,
             isSignal: analysis.meta.isSignal,
             imports: null,
+            rawImports: null,
             deferredImports: null,
             schemas: null,
             ngContentSelectors: null,
@@ -10222,6 +10224,7 @@ class ComponentDecoratorHandler {
             isStandalone: analysis.meta.isStandalone,
             isSignal: analysis.meta.isSignal,
             imports: analysis.resolvedImports,
+            rawImports: analysis.rawImports,
             deferredImports: analysis.resolvedDeferredImports,
             animationTriggerNames: analysis.animationTriggerNames,
             schemas: analysis.schemas,
@@ -11532,7 +11535,7 @@ class PipeDecoratorHandler {
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new compiler_host.Version('19.0.0-next.2+sha-1f87cba');
+new compiler_host.Version('19.0.0-next.2+sha-8da9fb4');
 
 /**
  * Whether a given decorator should be treated as an Angular decorator.
@@ -16240,6 +16243,7 @@ const ALL_DIAGNOSTIC_FACTORIES = [
 ];
 const SUPPORTED_DIAGNOSTIC_NAMES = new Set([
     compiler_host.ExtendedTemplateDiagnosticName.CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION,
+    compiler_host.ExtendedTemplateDiagnosticName.UNUSED_STANDALONE_IMPORTS,
     ...ALL_DIAGNOSTIC_FACTORIES.map((factory) => factory.name),
 ]);
 
@@ -16419,11 +16423,92 @@ class InitializerApiUsageRule {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Rule that flags unused symbols inside of the `imports` array of a component.
+ */
+class UnusedStandaloneImportsRule {
+    constructor(templateTypeChecker, typeCheckingConfig, importedSymbolsTracker) {
+        this.templateTypeChecker = templateTypeChecker;
+        this.typeCheckingConfig = typeCheckingConfig;
+        this.importedSymbolsTracker = importedSymbolsTracker;
+    }
+    shouldCheck(sourceFile) {
+        return (this.typeCheckingConfig.unusedStandaloneImports !== 'suppress' &&
+            (this.importedSymbolsTracker.hasNamedImport(sourceFile, 'Component', '@angular/core') ||
+                this.importedSymbolsTracker.hasNamespaceImport(sourceFile, '@angular/core')));
+    }
+    checkNode(node) {
+        if (!ts__default["default"].isClassDeclaration(node)) {
+            return null;
+        }
+        const metadata = this.templateTypeChecker.getDirectiveMetadata(node);
+        if (!metadata ||
+            !metadata.isStandalone ||
+            metadata.rawImports === null ||
+            metadata.imports === null ||
+            metadata.imports.length === 0) {
+            return null;
+        }
+        const usedDirectives = this.templateTypeChecker.getUsedDirectives(node);
+        const usedPipes = this.templateTypeChecker.getUsedPipes(node);
+        // These will be null if the component is invalid for some reason.
+        if (!usedDirectives || !usedPipes) {
+            return null;
+        }
+        const unused = this.getUnusedSymbols(metadata, new Set(usedDirectives.map((dir) => dir.ref.node)), new Set(usedPipes));
+        if (unused === null) {
+            return null;
+        }
+        const category = this.typeCheckingConfig.unusedStandaloneImports === 'error'
+            ? ts__default["default"].DiagnosticCategory.Error
+            : ts__default["default"].DiagnosticCategory.Warning;
+        if (unused.length === metadata.imports.length) {
+            return compiler_host.makeDiagnostic(compiler_host.ErrorCode.UNUSED_STANDALONE_IMPORTS, metadata.rawImports, 'All imports are unused', undefined, category);
+        }
+        return compiler_host.makeDiagnostic(compiler_host.ErrorCode.UNUSED_STANDALONE_IMPORTS, metadata.rawImports, 'Imports array contains unused imports', unused.map(([ref, type, name]) => compiler_host.makeRelatedInformation(ref.getOriginForDiagnostics(metadata.rawImports), `${type} "${name}" is not used within the template`)), category);
+    }
+    getUnusedSymbols(metadata, usedDirectives, usedPipes) {
+        if (metadata.imports === null || metadata.rawImports === null) {
+            return null;
+        }
+        let unused = null;
+        for (const current of metadata.imports) {
+            const currentNode = current.node;
+            const dirMeta = this.templateTypeChecker.getDirectiveMetadata(currentNode);
+            if (dirMeta !== null) {
+                if (dirMeta.isStandalone && (usedDirectives === null || !usedDirectives.has(currentNode))) {
+                    unused ??= [];
+                    unused.push([current, dirMeta.isComponent ? 'Component' : 'Directive', dirMeta.name]);
+                }
+                continue;
+            }
+            const pipeMeta = this.templateTypeChecker.getPipeMetadata(currentNode);
+            if (pipeMeta !== null &&
+                pipeMeta.isStandalone &&
+                (usedPipes === null || !usedPipes.has(pipeMeta.name))) {
+                unused ??= [];
+                unused.push([current, 'Pipe', pipeMeta.ref.node.name.text]);
+            }
+        }
+        return unused;
+    }
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Validates that TypeScript files match a specific set of rules set by the Angular compiler.
  */
 class SourceFileValidator {
-    constructor(reflector, importedSymbolsTracker) {
+    constructor(reflector, importedSymbolsTracker, templateTypeChecker, typeCheckingConfig) {
         this.rules = [new InitializerApiUsageRule(reflector, importedSymbolsTracker)];
+        {
+            this.rules.push(new UnusedStandaloneImportsRule(templateTypeChecker, typeCheckingConfig, importedSymbolsTracker));
+        }
     }
     /**
      * Gets the diagnostics for a specific file, or null if the file is valid.
@@ -18808,7 +18893,7 @@ var semver$1 = /*@__PURE__*/getDefaultExportFromCjs(semver);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0-next.2+sha-1f87cba` usually means that core is at head so it supports
+    // A version of `19.0.0-next.2+sha-8da9fb4` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -19394,6 +19479,7 @@ class NgCompiler {
                 // mode, the user is in full control of type inference.
                 suggestionsForSuboptimalTypeInference: this.enableTemplateTypeChecker && !strictTemplates,
                 controlFlowPreventingContentProjection: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
+                unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
                 allowSignalsInTwoWayBindings,
             };
         }
@@ -19426,6 +19512,7 @@ class NgCompiler {
                 // not checked anyways.
                 suggestionsForSuboptimalTypeInference: false,
                 controlFlowPreventingContentProjection: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
+                unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
                 allowSignalsInTwoWayBindings,
             };
         }
@@ -19467,6 +19554,10 @@ class NgCompiler {
         if (this.options.extendedDiagnostics?.checks?.controlFlowPreventingContentProjection !== undefined) {
             typeCheckingConfig.controlFlowPreventingContentProjection =
                 this.options.extendedDiagnostics.checks.controlFlowPreventingContentProjection;
+        }
+        if (this.options.extendedDiagnostics?.checks?.unusedStandaloneImports !== undefined) {
+            typeCheckingConfig.unusedStandaloneImports =
+                this.options.extendedDiagnostics.checks.unusedStandaloneImports;
         }
         return typeCheckingConfig;
     }
@@ -19693,7 +19784,8 @@ class NgCompiler {
             this.incrementalStrategy.setIncrementalState(this.incrementalCompilation.state, program);
             this.currentProgram = program;
         });
-        const templateTypeChecker = new compiler_host.TemplateTypeCheckerImpl(this.inputProgram, notifyingDriver, traitCompiler, this.getTypeCheckingConfig(), refEmitter, reflector, this.adapter, this.incrementalCompilation, metaReader, localMetaReader, ngModuleIndex, scopeReader, typeCheckScopeRegistry, this.delegatingPerfRecorder);
+        const typeCheckingConfig = this.getTypeCheckingConfig();
+        const templateTypeChecker = new compiler_host.TemplateTypeCheckerImpl(this.inputProgram, notifyingDriver, traitCompiler, typeCheckingConfig, refEmitter, reflector, this.adapter, this.incrementalCompilation, metaReader, localMetaReader, ngModuleIndex, scopeReader, typeCheckScopeRegistry, this.delegatingPerfRecorder);
         // Only construct the extended template checker if the configuration is valid and usable.
         const extendedTemplateChecker = this.constructionDiagnostics.length === 0
             ? new ExtendedTemplateCheckerImpl(templateTypeChecker, checker, ALL_DIAGNOSTIC_FACTORIES, this.options)
@@ -19702,7 +19794,7 @@ class NgCompiler {
             ? new TemplateSemanticsCheckerImpl(templateTypeChecker)
             : null;
         const sourceFileValidator = this.constructionDiagnostics.length === 0
-            ? new SourceFileValidator(reflector, importTracker)
+            ? new SourceFileValidator(reflector, importTracker, templateTypeChecker, typeCheckingConfig)
             : null;
         return {
             isCore,

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.2+sha-1f87cba
+ * @license Angular v19.0.0-next.2+sha-8da9fb4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29070,7 +29070,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.2+sha-1f87cba');
+new Version('19.0.0-next.2+sha-8da9fb4');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -29941,6 +29941,10 @@ exports.ErrorCode = void 0;
      */
     ErrorCode[ErrorCode["UNUSED_LET_DECLARATION"] = 8112] = "UNUSED_LET_DECLARATION";
     /**
+     * A symbol referenced in `@Component.imports` isn't being used within the template.
+     */
+    ErrorCode[ErrorCode["UNUSED_STANDALONE_IMPORTS"] = 8113] = "UNUSED_STANDALONE_IMPORTS";
+    /**
      * The template type-checking engine would need to generate an inline type check block for a
      * component, but the current type-checking environment doesn't support it.
      */
@@ -30023,10 +30027,10 @@ class FatalDiagnosticError extends Error {
         return makeDiagnostic(this.code, this.node, this.diagnosticMessage, this.relatedInformation);
     }
 }
-function makeDiagnostic(code, node, messageText, relatedInformation) {
+function makeDiagnostic(code, node, messageText, relatedInformation, category = ts__default["default"].DiagnosticCategory.Error) {
     node = ts__default["default"].getOriginalNode(node);
     return {
-        category: ts__default["default"].DiagnosticCategory.Error,
+        category,
         code: ngErrorCode(code),
         file: ts__default["default"].getOriginalNode(node).getSourceFile(),
         start: node.getStart(undefined, false),
@@ -30093,6 +30097,7 @@ exports.ExtendedTemplateDiagnosticName = void 0;
     ExtendedTemplateDiagnosticName["INTERPOLATED_SIGNAL_NOT_INVOKED"] = "interpolatedSignalNotInvoked";
     ExtendedTemplateDiagnosticName["CONTROL_FLOW_PREVENTING_CONTENT_PROJECTION"] = "controlFlowPreventingContentProjection";
     ExtendedTemplateDiagnosticName["UNUSED_LET_DECLARATION"] = "unusedLetDeclaration";
+    ExtendedTemplateDiagnosticName["UNUSED_STANDALONE_IMPORTS"] = "unusedStandaloneImports";
 })(exports.ExtendedTemplateDiagnosticName || (exports.ExtendedTemplateDiagnosticName = {}));
 
 /**
@@ -30409,7 +30414,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('compiler_host-cba78e2d.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('compiler_host-bbb5d8fd.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
