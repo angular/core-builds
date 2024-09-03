@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.2+sha-aa8eb15
+ * @license Angular v19.0.0-next.2+sha-36d8d19
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6679,6 +6679,19 @@ function injectDestroyRef() {
 }
 
 /**
+ * Injectable that is notified when an `LView` is made aware of changes to application state.
+ */
+class ChangeDetectionScheduler {
+}
+/** Token used to indicate if zoneless was enabled via provideZonelessChangeDetection(). */
+const ZONELESS_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless enabled' : '', { providedIn: 'root', factory: () => false });
+/** Token used to indicate `provideExperimentalZonelessChangeDetection` was used. */
+const PROVIDED_ZONELESS = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless provided' : '', { providedIn: 'root', factory: () => false });
+const ZONELESS_SCHEDULER_DISABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'scheduler disabled' : '');
+// TODO(atscott): Remove in v19. Scheduler should be done with runOutsideAngular.
+const SCHEDULE_IN_ROOT_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'run changes outside zone in root' : '');
+
+/**
  * Internal implementation of the pending tasks service.
  */
 class PendingTasks {
@@ -6746,6 +6759,7 @@ class PendingTasks {
 class ExperimentalPendingTasks {
     constructor() {
         this.internalPendingTasks = inject(PendingTasks);
+        this.scheduler = inject(ChangeDetectionScheduler);
     }
     /**
      * Adds a new task that should block application's stability.
@@ -6753,7 +6767,11 @@ class ExperimentalPendingTasks {
      */
     add() {
         const taskId = this.internalPendingTasks.add();
-        return () => this.internalPendingTasks.remove(taskId);
+        return () => {
+            // Notifying the scheduler will hold application stability open until the next tick.
+            this.scheduler.notify(12 /* NotificationSource.PendingTaskRemoved */);
+            this.internalPendingTasks.remove(taskId);
+        };
     }
     /** @nocollapse */
     static { this.ɵprov = ɵɵdefineInjectable({
@@ -16134,19 +16152,6 @@ function findMatchingDehydratedView(lContainer, template) {
 }
 
 /**
- * Injectable that is notified when an `LView` is made aware of changes to application state.
- */
-class ChangeDetectionScheduler {
-}
-/** Token used to indicate if zoneless was enabled via provideZonelessChangeDetection(). */
-const ZONELESS_ENABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless enabled' : '', { providedIn: 'root', factory: () => false });
-/** Token used to indicate `provideExperimentalZonelessChangeDetection` was used. */
-const PROVIDED_ZONELESS = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless provided' : '', { providedIn: 'root', factory: () => false });
-const ZONELESS_SCHEDULER_DISABLED = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'scheduler disabled' : '');
-// TODO(atscott): Remove in v19. Scheduler should be done with runOutsideAngular.
-const SCHEDULE_IN_ROOT_ZONE = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'run changes outside zone in root' : '');
-
-/**
  * Represents a component created by a `ComponentFactory`.
  * Provides access to the component instance and related objects,
  * and provides the means of destroying the instance.
@@ -16957,7 +16962,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.2+sha-aa8eb15']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.2+sha-36d8d19']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31047,7 +31052,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.2+sha-aa8eb15');
+const VERSION = new Version('19.0.0-next.2+sha-36d8d19');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33441,6 +33446,15 @@ class ChangeDetectionSchedulerImpl {
                 force = true;
                 break;
             }
+            case 12 /* NotificationSource.PendingTaskRemoved */: {
+                // Removing a pending task via the public API forces a scheduled tick, ensuring that
+                // stability is async and delayed until there was at least an opportunity to run
+                // application synchronization. This prevents some footguns when working with the
+                // public API for pending tasks where developers attempt to update application state
+                // immediately after removing the last task.
+                force = true;
+                break;
+            }
             case 10 /* NotificationSource.ViewDetachedFromDOM */:
             case 9 /* NotificationSource.ViewAttached */:
             case 7 /* NotificationSource.RenderHook */:
@@ -33506,6 +33520,13 @@ class ChangeDetectionSchedulerImpl {
         // stable. We want to prevent double ticking so we track whether the tick is
         // already running and skip it if so.
         if (this.runningTick || this.appRef.destroyed) {
+            return;
+        }
+        // If we reach the tick and there is no work to be done in ApplicationRef.tick,
+        // skip it altogether and clean up. There may be no work if, for example, the only
+        // event that notified the scheduler was the removal of a pending task.
+        if (this.appRef.dirtyFlags === 0 /* ApplicationRefDirtyFlags.None */) {
+            this.cleanup();
             return;
         }
         // The scheduler used to pass "whether to check views" as a boolean flag instead of setting

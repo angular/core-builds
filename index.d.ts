@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.2+sha-aa8eb15
+ * @license Angular v19.0.0-next.2+sha-36d8d19
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4235,6 +4235,7 @@ export declare interface ExistingSansProvider {
  */
 export declare class ExperimentalPendingTasks {
     private internalPendingTasks;
+    private scheduler;
     /**
      * Adds a new task that should block application's stability.
      * @returns A cleanup function that removes a task when called.
@@ -13395,7 +13396,8 @@ export declare const enum ɵNotificationSource {
     DeferredRenderHook = 8,
     ViewAttached = 9,
     ViewDetachedFromDOM = 10,
-    AsyncAnimationsLoaded = 11
+    AsyncAnimationsLoaded = 11,
+    PendingTaskRemoved = 12
 }
 
 /**
