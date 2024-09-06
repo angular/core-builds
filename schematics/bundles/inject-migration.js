@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.3+sha-fc95a9a
+ * @license Angular v19.0.0-next.3+sha-6ea8e1e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,7 +12,8 @@ var schematics = require('@angular-devkit/schematics');
 var p = require('path');
 var compiler_host = require('./compiler_host-bbb5d8fd.js');
 var ts = require('typescript');
-var nodes = require('./nodes-ddfa1613.js');
+var nodes = require('./nodes-0e7d45ca.js');
+var imports = require('./imports-4ac08251.js');
 require('os');
 require('fs');
 require('module');
@@ -53,7 +54,7 @@ const DI_PARAM_SYMBOLS = new Set([
  * @param localTypeChecker Type checker scoped to the specific file.
  */
 function analyzeFile(sourceFile, localTypeChecker) {
-    const coreSpecifiers = nodes.getNamedImports(sourceFile, '@angular/core');
+    const coreSpecifiers = imports.getNamedImports(sourceFile, '@angular/core');
     // Exit early if there are no Angular imports.
     if (coreSpecifiers === null || coreSpecifiers.elements.length === 0) {
         return null;
@@ -748,7 +749,7 @@ function migrateInjectDecorator(firstArg, type, localTypeChecker) {
     else if (ts__default["default"].isCallExpression(firstArg) &&
         ts__default["default"].isIdentifier(firstArg.expression) &&
         firstArg.arguments.length === 1) {
-        const callImport = nodes.getImportOfIdentifier(localTypeChecker, firstArg.expression);
+        const callImport = imports.getImportOfIdentifier(localTypeChecker, firstArg.expression);
         const arrowFn = firstArg.arguments[0];
         // If the first parameter is a `forwardRef`, unwrap it for a more
         // accurate type and because it's no longer necessary.
