@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.3+sha-ffdcac4
+ * @license Angular v19.0.0-next.3+sha-cbec46a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -25639,7 +25639,7 @@ function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
         if (params.trackBy === null) {
             // TODO: We should not fail here, and instead try to produce some AST for the language
             // service.
-            errors.push(new ParseError(ast.sourceSpan, '@for loop must have a "track" expression'));
+            errors.push(new ParseError(ast.startSourceSpan, '@for loop must have a "track" expression'));
         }
         else {
             // The `for` block has a main span that includes the `empty` branch. For only the span of the
@@ -25690,7 +25690,7 @@ function createSwitchBlock(ast, visitor, bindingParser) {
 /** Parses the parameters of a `for` loop block. */
 function parseForLoopParameters(block, errors, bindingParser) {
     if (block.parameters.length === 0) {
-        errors.push(new ParseError(block.sourceSpan, '@for loop does not have an expression'));
+        errors.push(new ParseError(block.startSourceSpan, '@for loop does not have an expression'));
         return null;
     }
     const [expressionParam, ...secondaryParams] = block.parameters;
@@ -25734,7 +25734,7 @@ function parseForLoopParameters(block, errors, bindingParser) {
             else {
                 const expression = parseBlockParameterToBinding(param, bindingParser, trackMatch[1]);
                 if (expression.ast instanceof EmptyExpr$1) {
-                    errors.push(new ParseError(param.sourceSpan, '@for loop must have a "track" expression'));
+                    errors.push(new ParseError(block.startSourceSpan, '@for loop must have a "track" expression'));
                 }
                 const keywordSpan = new ParseSourceSpan(param.sourceSpan.start, param.sourceSpan.start.moveBy('track'.length));
                 result.trackBy = { expression, keywordSpan };
@@ -25799,18 +25799,18 @@ function validateIfConnectedBlocks(connectedBlocks) {
         const block = connectedBlocks[i];
         if (block.name === 'else') {
             if (hasElse) {
-                errors.push(new ParseError(block.sourceSpan, 'Conditional can only have one @else block'));
+                errors.push(new ParseError(block.startSourceSpan, 'Conditional can only have one @else block'));
             }
             else if (connectedBlocks.length > 1 && i < connectedBlocks.length - 1) {
-                errors.push(new ParseError(block.sourceSpan, '@else block must be last inside the conditional'));
+                errors.push(new ParseError(block.startSourceSpan, '@else block must be last inside the conditional'));
             }
             else if (block.parameters.length > 0) {
-                errors.push(new ParseError(block.sourceSpan, '@else block cannot have parameters'));
+                errors.push(new ParseError(block.startSourceSpan, '@else block cannot have parameters'));
             }
             hasElse = true;
         }
         else if (!ELSE_IF_PATTERN.test(block.name)) {
-            errors.push(new ParseError(block.sourceSpan, `Unrecognized conditional block @${block.name}`));
+            errors.push(new ParseError(block.startSourceSpan, `Unrecognized conditional block @${block.name}`));
         }
     }
     return errors;
@@ -25820,7 +25820,7 @@ function validateSwitchBlock(ast) {
     const errors = [];
     let hasDefault = false;
     if (ast.parameters.length !== 1) {
-        errors.push(new ParseError(ast.sourceSpan, '@switch block must have exactly one parameter'));
+        errors.push(new ParseError(ast.startSourceSpan, '@switch block must have exactly one parameter'));
         return errors;
     }
     for (const node of ast.children) {
@@ -25836,15 +25836,15 @@ function validateSwitchBlock(ast) {
         }
         if (node.name === 'default') {
             if (hasDefault) {
-                errors.push(new ParseError(node.sourceSpan, '@switch block can only have one @default block'));
+                errors.push(new ParseError(node.startSourceSpan, '@switch block can only have one @default block'));
             }
             else if (node.parameters.length > 0) {
-                errors.push(new ParseError(node.sourceSpan, '@default block cannot have parameters'));
+                errors.push(new ParseError(node.startSourceSpan, '@default block cannot have parameters'));
             }
             hasDefault = true;
         }
         else if (node.name === 'case' && node.parameters.length !== 1) {
-            errors.push(new ParseError(node.sourceSpan, '@case block must have exactly one parameter'));
+            errors.push(new ParseError(node.startSourceSpan, '@case block must have exactly one parameter'));
         }
     }
     return errors;
@@ -25876,7 +25876,7 @@ function parseBlockParameterToBinding(ast, bindingParser, part) {
 /** Parses the parameter of a conditional block (`if` or `else if`). */
 function parseConditionalBlockParameters(block, errors, bindingParser) {
     if (block.parameters.length === 0) {
-        errors.push(new ParseError(block.sourceSpan, 'Conditional block does not have an expression'));
+        errors.push(new ParseError(block.startSourceSpan, 'Conditional block does not have an expression'));
         return null;
     }
     const expression = parseBlockParameterToBinding(block.parameters[0], bindingParser);
@@ -29070,7 +29070,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.3+sha-ffdcac4');
+new Version('19.0.0-next.3+sha-cbec46a');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -30414,7 +30414,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('compiler_host-bbb5d8fd.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('compiler_host-ca7ba733.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
