@@ -23395,7 +23395,7 @@ function createForLoop(ast, connectedBlocks, visitor, bindingParser) {
   }
   if (params !== null) {
     if (params.trackBy === null) {
-      errors.push(new ParseError(ast.sourceSpan, '@for loop must have a "track" expression'));
+      errors.push(new ParseError(ast.startSourceSpan, '@for loop must have a "track" expression'));
     } else {
       const endSpan = (_a2 = empty == null ? void 0 : empty.endSourceSpan) != null ? _a2 : ast.endSourceSpan;
       const sourceSpan = new ParseSourceSpan(ast.sourceSpan.start, (_b2 = endSpan == null ? void 0 : endSpan.end) != null ? _b2 : ast.sourceSpan.end);
@@ -23437,7 +23437,7 @@ function createSwitchBlock(ast, visitor, bindingParser) {
 function parseForLoopParameters(block, errors, bindingParser) {
   var _a2;
   if (block.parameters.length === 0) {
-    errors.push(new ParseError(block.sourceSpan, "@for loop does not have an expression"));
+    errors.push(new ParseError(block.startSourceSpan, "@for loop does not have an expression"));
     return null;
   }
   const [expressionParam, ...secondaryParams] = block.parameters;
@@ -23475,7 +23475,7 @@ function parseForLoopParameters(block, errors, bindingParser) {
       } else {
         const expression = parseBlockParameterToBinding(param, bindingParser, trackMatch[1]);
         if (expression.ast instanceof EmptyExpr) {
-          errors.push(new ParseError(param.sourceSpan, '@for loop must have a "track" expression'));
+          errors.push(new ParseError(block.startSourceSpan, '@for loop must have a "track" expression'));
         }
         const keywordSpan = new ParseSourceSpan(param.sourceSpan.start, param.sourceSpan.start.moveBy("track".length));
         result.trackBy = { expression, keywordSpan };
@@ -23526,15 +23526,15 @@ function validateIfConnectedBlocks(connectedBlocks) {
     const block = connectedBlocks[i];
     if (block.name === "else") {
       if (hasElse) {
-        errors.push(new ParseError(block.sourceSpan, "Conditional can only have one @else block"));
+        errors.push(new ParseError(block.startSourceSpan, "Conditional can only have one @else block"));
       } else if (connectedBlocks.length > 1 && i < connectedBlocks.length - 1) {
-        errors.push(new ParseError(block.sourceSpan, "@else block must be last inside the conditional"));
+        errors.push(new ParseError(block.startSourceSpan, "@else block must be last inside the conditional"));
       } else if (block.parameters.length > 0) {
-        errors.push(new ParseError(block.sourceSpan, "@else block cannot have parameters"));
+        errors.push(new ParseError(block.startSourceSpan, "@else block cannot have parameters"));
       }
       hasElse = true;
     } else if (!ELSE_IF_PATTERN.test(block.name)) {
-      errors.push(new ParseError(block.sourceSpan, `Unrecognized conditional block @${block.name}`));
+      errors.push(new ParseError(block.startSourceSpan, `Unrecognized conditional block @${block.name}`));
     }
   }
   return errors;
@@ -23543,7 +23543,7 @@ function validateSwitchBlock(ast) {
   const errors = [];
   let hasDefault = false;
   if (ast.parameters.length !== 1) {
-    errors.push(new ParseError(ast.sourceSpan, "@switch block must have exactly one parameter"));
+    errors.push(new ParseError(ast.startSourceSpan, "@switch block must have exactly one parameter"));
     return errors;
   }
   for (const node of ast.children) {
@@ -23556,13 +23556,13 @@ function validateSwitchBlock(ast) {
     }
     if (node.name === "default") {
       if (hasDefault) {
-        errors.push(new ParseError(node.sourceSpan, "@switch block can only have one @default block"));
+        errors.push(new ParseError(node.startSourceSpan, "@switch block can only have one @default block"));
       } else if (node.parameters.length > 0) {
-        errors.push(new ParseError(node.sourceSpan, "@default block cannot have parameters"));
+        errors.push(new ParseError(node.startSourceSpan, "@default block cannot have parameters"));
       }
       hasDefault = true;
     } else if (node.name === "case" && node.parameters.length !== 1) {
-      errors.push(new ParseError(node.sourceSpan, "@case block must have exactly one parameter"));
+      errors.push(new ParseError(node.startSourceSpan, "@case block must have exactly one parameter"));
     }
   }
   return errors;
@@ -23581,7 +23581,7 @@ function parseBlockParameterToBinding(ast, bindingParser, part) {
 }
 function parseConditionalBlockParameters(block, errors, bindingParser) {
   if (block.parameters.length === 0) {
-    errors.push(new ParseError(block.sourceSpan, "Conditional block does not have an expression"));
+    errors.push(new ParseError(block.startSourceSpan, "Conditional block does not have an expression"));
     return null;
   }
   const expression = parseBlockParameterToBinding(block.parameters[0], bindingParser);
@@ -26226,7 +26226,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.3+sha-4cb07e6");
+var VERSION2 = new Version("18.2.3+sha-b619d69");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27343,7 +27343,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.2.3+sha-4cb07e6"));
+  definitionMap.set("version", literal("18.2.3+sha-b619d69"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27362,7 +27362,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.2.3+sha-4cb07e6"));
+  definitionMap.set("version", literal("18.2.3+sha-b619d69"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27430,7 +27430,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.2.3+sha-4cb07e6"));
+  definitionMap.set("version", literal("18.2.3+sha-b619d69"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27748,7 +27748,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.2.3+sha-4cb07e6"));
+  definitionMap.set("version", literal("18.2.3+sha-b619d69"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27771,7 +27771,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.2.3+sha-4cb07e6"));
+  definitionMap.set("version", literal("18.2.3+sha-b619d69"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27809,7 +27809,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.2.3+sha-4cb07e6"));
+  definitionMap.set("version", literal("18.2.3+sha-b619d69"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27833,7 +27833,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.2.3+sha-4cb07e6"));
+  definitionMap.set("version", literal("18.2.3+sha-b619d69"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27868,7 +27868,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.2.3+sha-4cb07e6"));
+  definitionMap.set("version", literal("18.2.3+sha-b619d69"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27885,7 +27885,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.2.3+sha-4cb07e6");
+var VERSION3 = new Version("18.2.3+sha-b619d69");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
