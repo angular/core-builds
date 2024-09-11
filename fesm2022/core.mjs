@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.4+sha-0ebb2be
+ * @license Angular v19.0.0-next.4+sha-c93b510
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3009,7 +3009,7 @@ class R3Injector extends EnvironmentInjector {
      * hook was found.
      */
     destroy() {
-        this.assertNotDestroyed();
+        assertNotDestroyed(this);
         // Set destroyed = true first, in case lifecycle hooks re-enter destroy().
         this._destroyed = true;
         const prevConsumer = setActiveConsumer$1(null);
@@ -3035,12 +3035,12 @@ class R3Injector extends EnvironmentInjector {
         }
     }
     onDestroy(callback) {
-        this.assertNotDestroyed();
+        assertNotDestroyed(this);
         this._onDestroyHooks.push(callback);
         return () => this.removeOnDestroy(callback);
     }
     runInContext(fn) {
-        this.assertNotDestroyed();
+        assertNotDestroyed(this);
         const previousInjector = setCurrentInjector(this);
         const previousInjectImplementation = setInjectImplementation(undefined);
         let prevInjectContext;
@@ -3057,7 +3057,7 @@ class R3Injector extends EnvironmentInjector {
         }
     }
     get(token, notFoundValue = THROW_IF_NOT_FOUND, flags = InjectFlags.Default) {
-        this.assertNotDestroyed();
+        assertNotDestroyed(this);
         if (token.hasOwnProperty(NG_ENV_ID)) {
             return token[NG_ENV_ID](this);
         }
@@ -3166,11 +3166,6 @@ class R3Injector extends EnvironmentInjector {
             tokens.push(stringify(token));
         }
         return `R3Injector[${tokens.join(', ')}]`;
-    }
-    assertNotDestroyed() {
-        if (this._destroyed) {
-            throw new RuntimeError(205 /* RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED */, ngDevMode && 'Injector has already been destroyed.');
-        }
     }
     /**
      * Process a `SingleProvider` and add it.
@@ -3357,6 +3352,11 @@ function providerToFactory(provider, ngModuleType, providers) {
     }
     return factory;
 }
+function assertNotDestroyed(injector) {
+    if (injector.destroyed) {
+        throw new RuntimeError(205 /* RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED */, ngDevMode && 'Injector has already been destroyed.');
+    }
+}
 function makeRecord(factory, value, multi = false) {
     return {
         factory: factory,
@@ -3405,7 +3405,7 @@ function forEachSingleProvider(providers, fn) {
  */
 function runInInjectionContext(injector, fn) {
     if (injector instanceof R3Injector) {
-        injector.assertNotDestroyed();
+        assertNotDestroyed(injector);
     }
     let prevInjectorProfilerContext;
     if (ngDevMode) {
@@ -16962,7 +16962,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.4+sha-0ebb2be']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.4+sha-c93b510']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31052,7 +31052,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.4+sha-0ebb2be');
+const VERSION = new Version('19.0.0-next.4+sha-c93b510');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
