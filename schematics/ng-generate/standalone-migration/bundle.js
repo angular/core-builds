@@ -26226,7 +26226,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.4+sha-156f0d0");
+var VERSION2 = new Version("18.2.4+sha-5c86694");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27343,7 +27343,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.2.4+sha-156f0d0"));
+  definitionMap.set("version", literal("18.2.4+sha-5c86694"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27362,7 +27362,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.2.4+sha-156f0d0"));
+  definitionMap.set("version", literal("18.2.4+sha-5c86694"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27430,7 +27430,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.2.4+sha-156f0d0"));
+  definitionMap.set("version", literal("18.2.4+sha-5c86694"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27748,7 +27748,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.2.4+sha-156f0d0"));
+  definitionMap.set("version", literal("18.2.4+sha-5c86694"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27771,7 +27771,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.2.4+sha-156f0d0"));
+  definitionMap.set("version", literal("18.2.4+sha-5c86694"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27809,7 +27809,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.2.4+sha-156f0d0"));
+  definitionMap.set("version", literal("18.2.4+sha-5c86694"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27833,7 +27833,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.2.4+sha-156f0d0"));
+  definitionMap.set("version", literal("18.2.4+sha-5c86694"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27868,7 +27868,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.2.4+sha-156f0d0"));
+  definitionMap.set("version", literal("18.2.4+sha-5c86694"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27885,7 +27885,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.2.4+sha-156f0d0");
+var VERSION3 = new Version("18.2.4+sha-5c86694");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
@@ -51205,10 +51205,10 @@ function convertNgModuleDeclarationToStandalone(decl, allDeclarations, tracker, 
       const importsToAdd = getComponentImportExpressions(decl, allDeclarations, tracker, typeChecker, importRemapper);
       if (importsToAdd.length > 0) {
         const hasTrailingComma = importsToAdd.length > 2 && !!((_a2 = extractMetadataLiteral(directiveMeta.decorator)) == null ? void 0 : _a2.properties.hasTrailingComma);
-        decorator = addPropertyToAngularDecorator(decorator, import_typescript135.default.factory.createPropertyAssignment("imports", import_typescript135.default.factory.createArrayLiteralExpression(
+        decorator = setPropertyOnAngularDecorator(decorator, "imports", import_typescript135.default.factory.createArrayLiteralExpression(
           import_typescript135.default.factory.createNodeArray(importsToAdd, hasTrailingComma),
           hasTrailingComma
-        )));
+        ));
       }
     }
     tracker.replaceNode(directiveMeta.decorator, decorator);
@@ -51317,19 +51317,29 @@ function moveDeclarationsToImports(literal3, allDeclarations, typeChecker, templ
   tracker.replaceNode(literal3, import_typescript135.default.factory.updateObjectLiteralExpression(literal3, import_typescript135.default.factory.createNodeArray(properties, literal3.properties.hasTrailingComma)), import_typescript135.default.EmitHint.Expression);
 }
 function addStandaloneToDecorator(node) {
-  return addPropertyToAngularDecorator(node, import_typescript135.default.factory.createPropertyAssignment("standalone", import_typescript135.default.factory.createToken(import_typescript135.default.SyntaxKind.TrueKeyword)));
+  return setPropertyOnAngularDecorator(node, "standalone", import_typescript135.default.factory.createToken(import_typescript135.default.SyntaxKind.TrueKeyword));
 }
-function addPropertyToAngularDecorator(node, property2) {
+function setPropertyOnAngularDecorator(node, name, initializer) {
   if (!import_typescript135.default.isCallExpression(node.expression) || node.expression.arguments.length > 1) {
     return node;
   }
   let literalProperties;
   let hasTrailingComma = false;
   if (node.expression.arguments.length === 0) {
-    literalProperties = [property2];
+    literalProperties = [import_typescript135.default.factory.createPropertyAssignment(name, initializer)];
   } else if (import_typescript135.default.isObjectLiteralExpression(node.expression.arguments[0])) {
-    hasTrailingComma = node.expression.arguments[0].properties.hasTrailingComma;
-    literalProperties = [...node.expression.arguments[0].properties, property2];
+    const literal3 = node.expression.arguments[0];
+    const existingProperty = findLiteralProperty(literal3, name);
+    hasTrailingComma = literal3.properties.hasTrailingComma;
+    if (existingProperty && import_typescript135.default.isPropertyAssignment(existingProperty)) {
+      literalProperties = literal3.properties.slice();
+      literalProperties[literalProperties.indexOf(existingProperty)] = import_typescript135.default.factory.updatePropertyAssignment(existingProperty, existingProperty.name, initializer);
+    } else {
+      literalProperties = [
+        ...literal3.properties,
+        import_typescript135.default.factory.createPropertyAssignment(name, initializer)
+      ];
+    }
   } else {
     return node;
   }
@@ -51466,7 +51476,7 @@ function migrateTestDeclarations(testObjects, declarationsOutsideOfTestFiles, tr
       if (importsToAdd && importsToAdd.size > 0) {
         const hasTrailingComma = importsToAdd.size > 2 && !!((_a2 = extractMetadataLiteral(decorator.node)) == null ? void 0 : _a2.properties.hasTrailingComma);
         const importsArray = import_typescript135.default.factory.createNodeArray(Array.from(importsToAdd), hasTrailingComma);
-        tracker.replaceNode(decorator.node, addPropertyToAngularDecorator(newDecorator, import_typescript135.default.factory.createPropertyAssignment("imports", import_typescript135.default.factory.createArrayLiteralExpression(importsArray))));
+        tracker.replaceNode(decorator.node, setPropertyOnAngularDecorator(newDecorator, "imports", import_typescript135.default.factory.createArrayLiteralExpression(importsArray)));
       } else {
         tracker.replaceNode(decorator.node, newDecorator);
       }
