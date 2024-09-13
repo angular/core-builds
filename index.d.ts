@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.5+sha-6144612
+ * @license Angular v19.0.0-next.5+sha-3ebe6b4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4339,6 +4339,27 @@ export declare class ExperimentalPendingTasks {
      * @returns A cleanup function that removes a task when called.
      */
     add(): () => void;
+    /**
+     * Runs an asynchronous function and blocks the application's stability until the function completes.
+     *
+     * ```
+     * pendingTasks.run(async () => {
+     *   const userData = await fetch('/api/user');
+     *   this.userData.set(userData);
+     * });
+     * ```
+     *
+     * Application stability is at least delayed until the next tick after the `run` method resolves
+     * so it is safe to make additional updates to application state that would require UI synchronization:
+     *
+     * ```
+     * const userData = await pendingTasks.run(() => fetch('/api/user'));
+     * this.userData.set(userData);
+     * ```
+     *
+     * @param fn The asynchronous function to execute
+     */
+    run<T>(fn: () => Promise<T>): Promise<T>;
     /** @nocollapse */
     static ɵprov: unknown;
 }

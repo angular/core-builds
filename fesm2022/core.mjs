@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.5+sha-6144612
+ * @license Angular v19.0.0-next.5+sha-3ebe6b4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6772,6 +6772,35 @@ class ExperimentalPendingTasks {
             this.scheduler.notify(12 /* NotificationSource.PendingTaskRemoved */);
             this.internalPendingTasks.remove(taskId);
         };
+    }
+    /**
+     * Runs an asynchronous function and blocks the application's stability until the function completes.
+     *
+     * ```
+     * pendingTasks.run(async () => {
+     *   const userData = await fetch('/api/user');
+     *   this.userData.set(userData);
+     * });
+     * ```
+     *
+     * Application stability is at least delayed until the next tick after the `run` method resolves
+     * so it is safe to make additional updates to application state that would require UI synchronization:
+     *
+     * ```
+     * const userData = await pendingTasks.run(() => fetch('/api/user'));
+     * this.userData.set(userData);
+     * ```
+     *
+     * @param fn The asynchronous function to execute
+     */
+    async run(fn) {
+        const removeTask = this.add();
+        try {
+            return await fn();
+        }
+        finally {
+            removeTask();
+        }
     }
     /** @nocollapse */
     static { this.ɵprov = ɵɵdefineInjectable({
@@ -16962,7 +16991,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.5+sha-6144612']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.5+sha-3ebe6b4']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31052,7 +31081,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.5+sha-6144612');
+const VERSION = new Version('19.0.0-next.5+sha-3ebe6b4');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
