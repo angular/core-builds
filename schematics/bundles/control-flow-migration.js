@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.5+sha-8e01734
+ * @license Angular v19.0.0-next.5+sha-59fe9bc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,8 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-ca7ba733.js');
+var compiler_host = require('./compiler_host-1abd95b0.js');
+var checker = require('./checker-c51281f9.js');
 var ts = require('typescript');
 require('os');
 require('fs');
@@ -278,7 +279,7 @@ class AnalyzedFile {
     }
 }
 /** Finds all non-control flow elements from common module. */
-class CommonCollector extends compiler_host.RecursiveVisitor {
+class CommonCollector extends checker.RecursiveVisitor {
     count = 0;
     visitElement(el) {
         if (el.attrs.length > 0) {
@@ -310,7 +311,7 @@ class CommonCollector extends compiler_host.RecursiveVisitor {
     }
 }
 /** Finds all elements that represent i18n blocks. */
-class i18nCollector extends compiler_host.RecursiveVisitor {
+class i18nCollector extends checker.RecursiveVisitor {
     elements = [];
     visitElement(el) {
         if (el.attrs.find((a) => a.name === 'i18n') !== undefined) {
@@ -320,7 +321,7 @@ class i18nCollector extends compiler_host.RecursiveVisitor {
     }
 }
 /** Finds all elements with ngif structural directives. */
-class ElementCollector extends compiler_host.RecursiveVisitor {
+class ElementCollector extends checker.RecursiveVisitor {
     _attributes;
     elements = [];
     constructor(_attributes = []) {
@@ -373,7 +374,7 @@ class ElementCollector extends compiler_host.RecursiveVisitor {
     }
 }
 /** Finds all elements with ngif structural directives. */
-class TemplateCollector extends compiler_host.RecursiveVisitor {
+class TemplateCollector extends checker.RecursiveVisitor {
     elements = [];
     templates = new Map();
     visitElement(el) {
@@ -587,7 +588,7 @@ function parseTemplate(template) {
         // interpolated text as text nodes containing a mixture of interpolation tokens and text tokens,
         // rather than turning them into `BoundText` nodes like the Ivy AST does. This allows us to
         // easily get the text-only ranges without having to reconstruct the original text.
-        parsed = new compiler_host.HtmlParser().parse(template, '', {
+        parsed = new checker.HtmlParser().parse(template, '', {
             // Allows for ICUs to be parsed.
             tokenizeExpansionForms: true,
             // Explicitly disable blocks so that their characters are treated as plain text.
@@ -625,7 +626,7 @@ function validateMigratedTemplate(migrated, fileName) {
 }
 function validateI18nStructure(parsed, fileName) {
     const visitor = new i18nCollector();
-    compiler_host.visitAll(visitor, parsed.rootNodes);
+    checker.visitAll(visitor, parsed.rootNodes);
     const parents = visitor.elements.filter((el) => el.children.length > 0);
     for (const p of parents) {
         for (const el of visitor.elements) {
@@ -708,7 +709,7 @@ function getTemplates(template) {
     const parsed = parseTemplate(template);
     if (parsed.tree !== undefined) {
         const visitor = new TemplateCollector();
-        compiler_host.visitAll(visitor, parsed.tree.rootNodes);
+        checker.visitAll(visitor, parsed.tree.rootNodes);
         // count usages of each ng-template
         for (let [key, tmpl] of visitor.templates) {
             const escapeKey = escapeRegExp(key.slice(1));
@@ -811,7 +812,7 @@ function canRemoveCommonModule(template) {
     let removeCommonModule = false;
     if (parsed.tree !== undefined) {
         const visitor = new CommonCollector();
-        compiler_host.visitAll(visitor, parsed.tree.rootNodes);
+        checker.visitAll(visitor, parsed.tree.rootNodes);
         removeCommonModule = visitor.count === 0;
     }
     return removeCommonModule;
@@ -934,7 +935,7 @@ function generateI18nMarkers(tmpl) {
     let parsed = parseTemplate(tmpl);
     if (parsed.tree !== undefined) {
         const visitor = new i18nCollector();
-        compiler_host.visitAll(visitor, parsed.tree.rootNodes);
+        checker.visitAll(visitor, parsed.tree.rootNodes);
         for (const [ix, el] of visitor.elements.entries()) {
             // we only care about elements with children and i18n tags
             // elements without children have nothing to translate
@@ -1136,7 +1137,7 @@ function migrateCase(template) {
     }
     let result = template;
     const visitor = new ElementCollector(cases);
-    compiler_host.visitAll(visitor, parsed.tree.rootNodes);
+    checker.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1233,7 +1234,7 @@ function migrateFor(template) {
     }
     let result = template;
     const visitor = new ElementCollector(fors);
-    compiler_host.visitAll(visitor, parsed.tree.rootNodes);
+    checker.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1438,7 +1439,7 @@ function migrateIf(template) {
     }
     let result = template;
     const visitor = new ElementCollector(ifs);
-    compiler_host.visitAll(visitor, parsed.tree.rootNodes);
+    checker.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1631,7 +1632,7 @@ function migrateSwitch(template) {
     }
     let result = template;
     const visitor = new ElementCollector(switches);
-    compiler_host.visitAll(visitor, parsed.tree.rootNodes);
+    checker.visitAll(visitor, parsed.tree.rootNodes);
     calculateNesting(visitor, hasLineBreaks(template));
     // this tracks the character shift from different lengths of blocks from
     // the prior directives so as to adjust for nested block replacement during
@@ -1662,11 +1663,11 @@ function migrateSwitch(template) {
 }
 function assertValidSwitchStructure(children) {
     for (const child of children) {
-        if (child instanceof compiler_host.Text && child.value.trim() !== '') {
+        if (child instanceof checker.Text && child.value.trim() !== '') {
             throw new Error(`Text node: "${child.value}" would result in invalid migrated @switch block structure. ` +
                 `@switch can only have @case or @default as children.`);
         }
-        else if (child instanceof compiler_host.Element) {
+        else if (child instanceof checker.Element) {
             let hasCase = false;
             for (const attr of child.attrs) {
                 if (cases.includes(attr.name)) {
