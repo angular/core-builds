@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.5+sha-6b066f3
+ * @license Angular v19.0.0-next.5+sha-e5adf92
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -70,11 +70,11 @@ function migrateFile(sourceFile, rewriteFn) {
                     // It's not a decorator to migrate
                     return;
             }
-            const [firstArg] = callExpression.arguments;
-            if (!firstArg || !ts__default["default"].isObjectLiteralExpression(firstArg)) {
+            const [decoratorArgument] = callExpression.arguments;
+            if (!decoratorArgument || !ts__default["default"].isObjectLiteralExpression(decoratorArgument)) {
                 return;
             }
-            const properties = firstArg.properties;
+            const properties = decoratorArgument.properties;
             const standaloneProp = getStandaloneProperty(properties);
             // Need to take care of 3 cases
             // - standalone: true  => remove the property
@@ -85,15 +85,13 @@ function migrateFile(sourceFile, rewriteFn) {
                 const standaloneFalseProperty = ts__default["default"].factory.createPropertyAssignment('standalone', ts__default["default"].factory.createFalse());
                 newProperties = [...properties, standaloneFalseProperty];
             }
-            else if (standaloneProp.value === ts__default["default"].SyntaxKind.TrueKeyword) {
-                newProperties = properties.filter((p) => p !== standaloneProp.property);
-            }
+            else if (standaloneProp.value === ts__default["default"].SyntaxKind.TrueKeyword) ;
             if (newProperties) {
                 // At this point we know that we need to add standalone: false or
                 // remove an existing standalone: true property.
                 const newPropsArr = ts__default["default"].factory.createNodeArray(newProperties);
                 const newFirstArg = ts__default["default"].factory.createObjectLiteralExpression(newPropsArr, true);
-                changeTracker.replaceNode(firstArg, newFirstArg);
+                changeTracker.replaceNode(decoratorArgument, newFirstArg);
             }
         });
     });
@@ -106,15 +104,23 @@ function migrateFile(sourceFile, rewriteFn) {
 }
 function getStandaloneProperty(properties) {
     for (const prop of properties) {
-        if (ts__default["default"].isPropertyAssignment(prop) &&
-            ts__default["default"].isIdentifier(prop.name) &&
-            prop.name.text === 'standalone' &&
-            (prop.initializer.kind === ts__default["default"].SyntaxKind.TrueKeyword ||
-                prop.initializer.kind === ts__default["default"].SyntaxKind.FalseKeyword)) {
-            return { property: prop, value: prop.initializer.kind };
+        if (ts__default["default"].isShorthandPropertyAssignment(prop) && prop.name.text) {
+            return { property: prop, value: prop.objectAssignmentInitializer };
+        }
+        if (isStandaloneProperty(prop)) {
+            if (prop.initializer.kind === ts__default["default"].SyntaxKind.TrueKeyword ||
+                prop.initializer.kind === ts__default["default"].SyntaxKind.FalseKeyword) {
+                return { property: prop, value: prop.initializer.kind };
+            }
+            else {
+                return { property: prop, value: prop.initializer };
+            }
         }
     }
     return undefined;
+}
+function isStandaloneProperty(prop) {
+    return (ts__default["default"].isPropertyAssignment(prop) && ts__default["default"].isIdentifier(prop.name) && prop.name.text === 'standalone');
 }
 
 function migrate() {
@@ -123,7 +129,7 @@ function migrate() {
         const basePath = process.cwd();
         const allPaths = [...buildPaths, ...testPaths];
         if (!allPaths.length) {
-            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the standalone:false migration.');
+            throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run the explicit-standalone-flag migration.');
         }
         for (const tsconfigPath of allPaths) {
             runMigration(tree, tsconfigPath, basePath);

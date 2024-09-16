@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.5+sha-6b066f3
+ * @license Angular v19.0.0-next.5+sha-e5adf92
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7481,7 +7481,7 @@ const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken(typeof ngDevMode =
  * <my-comp (valueChange)="processNewValue($event)" />
  * ```
  *
- * @developerPreview
+ * @publicAPI
  */
 class OutputEmitterRef {
     constructor() {
@@ -7582,9 +7582,8 @@ function getOutputDestroyRef(ref) {
  *   this.nameChange.emit(newName);
  * }
  * ```
- *
- * @developerPreview
  * @initializerApiFunction {"showTypesInSignaturePreview": true}
+ * @publicAPI
  */
 function output(opts) {
     ngDevMode && assertInInjectionContext(output);
@@ -7644,7 +7643,7 @@ function inputRequiredFunction(opts) {
  * <span>{{firstName()}}</span>
  * ```
  *
- * @developerPreview
+ * @publicAPI
  * @initializerApiFunction
  */
 const input = (() => {
@@ -16991,7 +16990,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.5+sha-6b066f3']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.5+sha-e5adf92']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18255,7 +18254,7 @@ function modelRequiredFunction() {
  * }
  * ```
  *
- * @developerPreview
+ * @publicAPI
  * @initializerApiFunction
  */
 const model = (() => {
@@ -31081,7 +31080,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.5+sha-6b066f3');
+const VERSION = new Version('19.0.0-next.5+sha-e5adf92');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

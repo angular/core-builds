@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.5+sha-6b066f3
+ * @license Angular v19.0.0-next.5+sha-e5adf92
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6120,7 +6120,7 @@ export declare const Input: InputDecorator;
  * <span>{{firstName()}}</span>
  * ```
  *
- * @developerPreview
+ * @publicAPI
  * @initializerApiFunction
  */
 export declare const input: InputFunction;
@@ -6200,7 +6200,7 @@ declare enum InputFlags {
  * The function exposes an API for also declaring required inputs via the
  * `input.required` function.
  *
- * @developerPreview
+ * @publicAPI
  * @docsPrivate Ignored because `input` is the canonical API entry.
  */
 export declare interface InputFunction {
@@ -6234,7 +6234,7 @@ export declare interface InputFunction {
      * Consumers of your directive/component need to bind to this
      * input. If unset, a compile time error will be reported.
      *
-     * @developerPreview
+     * @publicAPI
      */
     required: {
         /** Declares a required input of type `T`. */
@@ -6250,7 +6250,7 @@ export declare interface InputFunction {
 }
 
 /**
- * @developerPreview
+ * @publicAPI
  *
  * Options for signal inputs.
  */
@@ -6273,7 +6273,7 @@ export declare interface InputOptions<T, TransformT> {
 /**
  * Signal input options without the transform option.
  *
- * @developerPreview
+ * @publicAPI
  */
 export declare type InputOptionsWithoutTransform<T> = Omit<InputOptions<T, T>, 'transform'> & {
     transform?: undefined;
@@ -6282,7 +6282,7 @@ export declare type InputOptionsWithoutTransform<T> = Omit<InputOptions<T, T>, '
 /**
  * Signal input options with the transform option required.
  *
- * @developerPreview
+ * @publicAPI
  */
 export declare type InputOptionsWithTransform<T, TransformT> = Required<Pick<InputOptions<T, TransformT>, 'transform'>> & InputOptions<T, TransformT>;
 
@@ -6295,7 +6295,7 @@ export declare type InputOptionsWithTransform<T, TransformT> = Required<Pick<Inp
  *
  * @see {@link InputOptionsWithTransform} for inputs with transforms.
  *
- * @developerPreview
+ * @publicAPI
  */
 export declare interface InputSignal<T> extends InputSignalWithTransform<T, T> {
 }
@@ -6343,7 +6343,7 @@ declare interface InputSignalNode<T, TransformT> extends SignalNode<T> {
  *
  * @see {@link InputSignal} for additional information.
  *
- * @developerPreview
+ * @publicAPI
  */
 export declare interface InputSignalWithTransform<T, TransformT> extends Signal<T> {
     [SIGNAL]: InputSignalNode<T, TransformT>;
@@ -7339,7 +7339,7 @@ export declare enum MissingTranslationStrategy {
  * }
  * ```
  *
- * @developerPreview
+ * @publicAPI
  * @initializerApiFunction
  */
 export declare const model: ModelFunction;
@@ -7352,7 +7352,7 @@ export declare const model: ModelFunction;
  * The function exposes an API for also declaring required models via the
  * `model.required` function.
  *
- * @developerPreview
+ * @publicAPI
  * @docsPrivate Ignored because `model` is the canonical API entry.
  */
 export declare interface ModelFunction {
@@ -7375,7 +7375,7 @@ export declare interface ModelFunction {
 }
 
 /**
- * @developerPreview
+ * @publicAPI
  *
  * Options for model signals.
  */
@@ -7393,7 +7393,7 @@ export declare interface ModelOptions {
  * A model signal is a writeable signal that can be exposed as an output.
  * Whenever its value is updated, it emits to the output.
  *
- * @developerPreview
+ * @publicAPI
  */
 export declare interface ModelSignal<T> extends WritableSignal<T>, InputSignal<T>, OutputRef<T> {
     [SIGNAL]: InputSignalNode<T, T>;
@@ -8213,9 +8213,8 @@ export declare const Output: OutputDecorator;
  *   this.nameChange.emit(newName);
  * }
  * ```
- *
- * @developerPreview
  * @initializerApiFunction {"showTypesInSignaturePreview": true}
+ * @publicAPI
  */
 export declare function output<T = void>(opts?: OutputOptions): OutputEmitterRef<T>;
 
@@ -8257,7 +8256,7 @@ export declare interface OutputDecorator {
  * <my-comp (valueChange)="processNewValue($event)" />
  * ```
  *
- * @developerPreview
+ * @publicAPI
  */
 export declare class OutputEmitterRef<T> implements OutputRef<T> {
     private destroyed;
@@ -8272,7 +8271,7 @@ export declare class OutputEmitterRef<T> implements OutputRef<T> {
 /**
  * Options for declaring an output.
  *
- * @developerPreview
+ * @publicAPI
  */
 export declare interface OutputOptions {
     alias?: string;
@@ -8281,7 +8280,7 @@ export declare interface OutputOptions {
 /**
  * A reference to an Angular output.
  *
- * @developerPreview
+ * @publicAPI
  */
 export declare interface OutputRef<T> {
     /**
@@ -8302,7 +8301,7 @@ export declare interface OutputRef<T> {
  * Note: Angular will automatically clean up subscriptions
  * when the directive/component of the output is destroyed.
  *
- * @developerPreview
+ * @publicAPI
  */
 export declare interface OutputRefSubscription {
     unsubscribe(): void;
