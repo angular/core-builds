@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.4+sha-dbd697c
+ * @license Angular v18.2.4+sha-76709d5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5337,6 +5337,9 @@ function isTNodeShape(value) {
         (value.insertBeforeIndex === null ||
             typeof value.insertBeforeIndex === 'number' ||
             Array.isArray(value.insertBeforeIndex)));
+}
+function isLetDeclaration(tNode) {
+    return !!(tNode.type & 128 /* TNodeType.LetDeclaration */);
 }
 /**
  * Returns `true` if the `TNode` has a directive which has `@Input()` for `class` binding.
@@ -16946,7 +16949,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.4+sha-dbd697c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.4+sha-76709d5']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31036,7 +31039,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.4+sha-dbd697c');
+const VERSION = new Version('18.2.4+sha-76709d5');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -37542,8 +37545,10 @@ function serializeLView(lView, context) {
             ngh[CONTAINERS] ??= {};
             ngh[CONTAINERS][noOffsetIndex] = serializeLContainer(lView[i], context);
         }
-        else if (Array.isArray(lView[i])) {
+        else if (Array.isArray(lView[i]) && !isLetDeclaration(tNode)) {
             // This is a component, annotate the host node with an `ngh` attribute.
+            // Note: Let declarations that return an array are also storing an array in the LView,
+            // we need to exclude them.
             const targetNode = unwrapRNode(lView[i][HOST]);
             if (!targetNode.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
                 annotateHostElementForHydration(targetNode, lView[i], context);
