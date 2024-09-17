@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.5+sha-87e025a
+ * @license Angular v19.0.0-next.5+sha-4231e8f
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5337,6 +5337,9 @@ function isTNodeShape(value) {
         (value.insertBeforeIndex === null ||
             typeof value.insertBeforeIndex === 'number' ||
             Array.isArray(value.insertBeforeIndex)));
+}
+function isLetDeclaration(tNode) {
+    return !!(tNode.type & 128 /* TNodeType.LetDeclaration */);
 }
 /**
  * Returns `true` if the `TNode` has a directive which has `@Input()` for `class` binding.
@@ -16990,7 +16993,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.5+sha-87e025a']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.5+sha-4231e8f']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31097,7 +31100,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.5+sha-87e025a');
+const VERSION = new Version('19.0.0-next.5+sha-4231e8f');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -37626,8 +37629,10 @@ function serializeLView(lView, context) {
             ngh[CONTAINERS] ??= {};
             ngh[CONTAINERS][noOffsetIndex] = serializeLContainer(lView[i], context);
         }
-        else if (Array.isArray(lView[i])) {
+        else if (Array.isArray(lView[i]) && !isLetDeclaration(tNode)) {
             // This is a component, annotate the host node with an `ngh` attribute.
+            // Note: Let declarations that return an array are also storing an array in the LView,
+            // we need to exclude them.
             const targetNode = unwrapRNode(lView[i][HOST]);
             if (!targetNode.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
                 annotateHostElementForHydration(targetNode, lView[i], context);
