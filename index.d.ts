@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.5+sha-59fe9bc
+ * @license Angular v19.0.0-next.5+sha-8ecafce
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15248,6 +15248,22 @@ export declare function ɵɵdefer(index: number, primaryTmplIndex: number, depen
  * on the `@loading` or `@placeholder` blocks.
  */
 export declare function ɵɵdeferEnableTimerScheduling(tView: TView, tDetails: TDeferBlockDetails, placeholderConfigIndex?: number | null, loadingConfigIndex?: number | null): void;
+
+export declare function ɵɵdeferHydrateNever(): void;
+
+export declare function ɵɵdeferHydrateOnHover(): void;
+
+export declare function ɵɵdeferHydrateOnIdle(): void;
+
+export declare function ɵɵdeferHydrateOnImmediate(): void;
+
+export declare function ɵɵdeferHydrateOnInteraction(): void;
+
+export declare function ɵɵdeferHydrateOnTimer(): void;
+
+export declare function ɵɵdeferHydrateOnViewport(): void;
+
+export declare function ɵɵdeferHydrateWhen(): void;
 
 /**
  * Creates runtime data structures for the `on hover` deferred trigger.

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.5+sha-59fe9bc
+ * @license Angular v19.0.0-next.5+sha-8ecafce
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,8 +11,8 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var schematics = require('@angular-devkit/schematics');
 var ts = require('typescript');
 var os = require('os');
-var checker = require('./checker-c51281f9.js');
-var program = require('./program-42e535c0.js');
+var checker = require('./checker-dcf9a14e.js');
+var program = require('./program-39b5863c.js');
 require('path');
 var assert = require('assert');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
@@ -362,8 +362,6 @@ function createNgtscProgram(absoluteTsconfigPath, fs, optionOverrides = {}) {
     const tsHost = new NgtscCompilerHost(fs, tsconfig.options);
     const ngtscProgram = new program.NgtscProgram(tsconfig.rootNames, {
         ...tsconfig.options,
-        // Migrations commonly make use of TCB information.
-        _enableTemplateTypeChecker: true,
         // Avoid checking libraries to speed up migrations.
         skipLibCheck: true,
         skipDefaultLibCheck: true,
@@ -612,8 +610,12 @@ class KnownInputs {
             this.fieldNamesToConsiderForReferenceLookup.add(data.descriptor.node.name.text);
         }
     }
+    /** Whether the given input is incompatible for migration. */
+    isFieldIncompatible(descriptor) {
+        return !!this.get(descriptor)?.isIncompatible();
+    }
     /** Marks the given input as incompatible for migration. */
-    markInputAsIncompatible(input, incompatibility) {
+    markFieldIncompatible(input, incompatibility) {
         if (!this.knownInputIds.has(input.key)) {
             throw new Error(`Input cannot be marked as incompatible because it's not registered.`);
         }
@@ -622,7 +624,7 @@ class KnownInputs {
             .container.memberIncompatibility.set(input.key, incompatibility);
     }
     /** Marks the given class as incompatible for migration. */
-    markDirectiveAsIncompatible(clazz, incompatibility) {
+    markClassIncompatible(clazz, incompatibility) {
         if (!this._classToDirectiveInfo.has(clazz)) {
             throw new Error(`Class cannot be marked as incompatible because it's not known.`);
         }
@@ -631,7 +633,7 @@ class KnownInputs {
     attemptRetrieveDescriptorFromSymbol(symbol) {
         return attemptRetrieveInputFromSymbol(this.programInfo, symbol, this)?.descriptor ?? null;
     }
-    shouldTrackReferencesToClass(clazz) {
+    shouldTrackClassReference(clazz) {
         return this.isInputContainingClass(clazz);
     }
 }
@@ -643,11 +645,15 @@ class KnownInputs {
  * and can be used for integrations with e.g. the language service.
  */
 function prepareAnalysisInfo(userProgram, compiler, programAbsoluteRootPaths) {
-    // Get template type checker & analyze sync.
-    const templateTypeChecker = compiler.getTemplateTypeChecker();
+    // Analyze sync and retrieve necessary dependencies.
+    // Note: `getTemplateTypeChecker` requires the `enableTemplateTypeChecker` flag, but
+    // this has negative effects as it causes optional TCB operations to execute, which may
+    // error with unsuccessful reference emits that previously were ignored outside of the migration.
+    // The migration is resilient to TCB information missing, so this is fine, and all the information
+    // we need is part of required TCB operations anyway.
+    const { refEmitter, metaReader, templateTypeChecker } = compiler['ensureAnalyzed']();
     // Generate all type check blocks.
     templateTypeChecker.generateAllTypeCheckBlocks();
-    const { refEmitter, metaReader } = compiler['ensureAnalyzed']();
     const typeChecker = userProgram.getTypeChecker();
     const reflector = new checker.TypeScriptReflectionHost(typeChecker);
     const evaluator = new program.PartialEvaluator(reflector, typeChecker, null);
@@ -928,7 +934,7 @@ function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflec
             if (decoratorInput.inSourceFile && host.isSourceFileForCurrentMigration(sf)) {
                 const conversionPreparation = prepareAndCheckForConversion(node, decoratorInput, checker, host.compilerOptions);
                 if (isInputMemberIncompatibility(conversionPreparation)) {
-                    knownDecoratorInputs.markInputAsIncompatible(inputDescr, conversionPreparation);
+                    knownDecoratorInputs.markFieldIncompatible(inputDescr, conversionPreparation);
                     result.sourceInputs.set(inputDescr, null);
                 }
                 else {
@@ -961,11 +967,10 @@ function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflec
  * the input signal. There is no way to change the value inside the input signal,
  * and hence observing is not possible.
  */
-class SpyOnInputPattern {
-    constructor(host, checker, knownInputs) {
-        this.host = host;
+class SpyOnFieldPattern {
+    constructor(checker, fields) {
         this.checker = checker;
-        this.knownInputs = knownInputs;
+        this.fields = fields;
     }
     detect(node) {
         if (ts__default["default"].isCallExpression(node) &&
@@ -978,13 +983,13 @@ class SpyOnInputPattern {
             if (spyProperty === undefined) {
                 return;
             }
-            const inputTarget = this.knownInputs.attemptRetrieveDescriptorFromSymbol(spyProperty);
-            if (inputTarget === null) {
+            const fieldTarget = this.fields.attemptRetrieveDescriptorFromSymbol(spyProperty);
+            if (fieldTarget === null) {
                 return;
             }
-            this.knownInputs.markInputAsIncompatible(inputTarget, {
-                context: node,
+            this.fields.markFieldIncompatible(fieldTarget, {
                 reason: InputIncompatibilityReason.SpyOnThatOverwritesField,
+                context: node,
             });
         }
     }
@@ -1000,17 +1005,17 @@ class SpyOnInputPattern {
  * In addition, spying onto an input may be problematic- so we skip migrating
  * such.
  */
-function pass3__checkIncompatiblePatterns(host, inheritanceGraph, checker$1, groupedTsAstVisitor, knownInputs) {
+function checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisitor, fields, getAllClassesWithKnownFields) {
     const inputClassSymbolsToClass = new Map();
-    for (const input of knownInputs.getAllInputContainingClasses()) {
-        const classSymbol = checker$1.getTypeAtLocation(input).symbol;
-        assert__default["default"](classSymbol != null, 'Expected a symbol to exist for the container of input.');
-        assert__default["default"](classSymbol.valueDeclaration !== undefined, 'Expected declaration to exist for input.');
+    for (const knownFieldClass of getAllClassesWithKnownFields()) {
+        const classSymbol = checker$1.getTypeAtLocation(knownFieldClass).symbol;
+        assert__default["default"](classSymbol != null, 'Expected a symbol to exist for the container of known field class.');
+        assert__default["default"](classSymbol.valueDeclaration !== undefined, 'Expected declaration to exist for known field class.');
         assert__default["default"](ts__default["default"].isClassDeclaration(classSymbol.valueDeclaration), 'Expected declaration to be a class.');
         // track class symbol for derived class checks.
         inputClassSymbolsToClass.set(classSymbol, classSymbol.valueDeclaration);
     }
-    const incompatibilityPatterns = [new SpyOnInputPattern(host, checker$1, knownInputs)];
+    const spyOnPattern = new SpyOnFieldPattern(checker$1, fields);
     const visitor = (node) => {
         // Check for manual class instantiations.
         if (ts__default["default"].isNewExpression(node) && ts__default["default"].isIdentifier(checker.unwrapExpression(node.expression))) {
@@ -1020,11 +1025,11 @@ function pass3__checkIncompatiblePatterns(host, inheritanceGraph, checker$1, gro
                 newTarget = checker$1.getAliasedSymbol(newTarget);
             }
             if (newTarget && inputClassSymbolsToClass.has(newTarget)) {
-                knownInputs.markDirectiveAsIncompatible(inputClassSymbolsToClass.get(newTarget), ClassIncompatibilityReason.ClassManuallyInstantiated);
+                fields.markClassIncompatible(inputClassSymbolsToClass.get(newTarget), ClassIncompatibilityReason.ClassManuallyInstantiated);
             }
         }
-        // Detect possible problematic patterns.
-        incompatibilityPatterns.forEach((p) => p.detect(node));
+        // Detect `spyOn` problematic usages and record them.
+        spyOnPattern.detect(node);
         const insidePropertyDeclaration = groupedTsAstVisitor.state.insidePropertyDeclaration;
         // Check for problematic class references inside property declarations.
         // These are likely problematic, causing type conflicts, if the containing
@@ -1050,11 +1055,25 @@ function pass3__checkIncompatiblePatterns(host, inheritanceGraph, checker$1, gro
                 if (derivedMembers.length === 0 && inherited === undefined) {
                     break problematicReferencesCheck;
                 }
-                knownInputs.markDirectiveAsIncompatible(inputClassSymbolsToClass.get(newTarget), ClassIncompatibilityReason.InputOwningClassReferencedInClassProperty);
+                fields.markClassIncompatible(inputClassSymbolsToClass.get(newTarget), ClassIncompatibilityReason.InputOwningClassReferencedInClassProperty);
             }
         }
     };
     groupedTsAstVisitor.register(visitor);
+}
+
+/**
+ * Phase where problematic patterns are detected and advise
+ * the migration to skip certain inputs.
+ *
+ * For example, detects classes that are instantiated manually. Those
+ * cannot be migrated as `input()` requires an injection context.
+ *
+ * In addition, spying onto an input may be problematic- so we skip migrating
+ * such.
+ */
+function pass3__checkIncompatiblePatterns(inheritanceGraph, checker, groupedTsAstVisitor, knownInputs) {
+    checkIncompatiblePatterns(inheritanceGraph, checker, groupedTsAstVisitor, knownInputs, () => knownInputs.getAllInputContainingClasses());
 }
 
 /**
@@ -1154,7 +1173,7 @@ class PartialDirectiveTypeInCatalystTests {
         // but this is out of scope for now. We can expand if we see it's a common case.
         if (symbol?.valueDeclaration === undefined ||
             !ts__default["default"].isClassDeclaration(symbol.valueDeclaration) ||
-            !this.knownFields.shouldTrackReferencesToClass(symbol.valueDeclaration)) {
+            !this.knownFields.shouldTrackClassReference(symbol.valueDeclaration)) {
             return null;
         }
         return { referenceNode: node, targetClass: symbol.valueDeclaration };
@@ -3481,6 +3500,32 @@ class Identifiers {
         name: 'ɵɵdeferPrefetchOnViewport',
         moduleName: CORE,
     }; }
+    static { this.deferHydrateWhen = { name: 'ɵɵdeferHydrateWhen', moduleName: CORE }; }
+    static { this.deferHydrateNever = { name: 'ɵɵdeferHydrateNever', moduleName: CORE }; }
+    static { this.deferHydrateOnIdle = {
+        name: 'ɵɵdeferHydrateOnIdle',
+        moduleName: CORE,
+    }; }
+    static { this.deferHydrateOnImmediate = {
+        name: 'ɵɵdeferHydrateOnImmediate',
+        moduleName: CORE,
+    }; }
+    static { this.deferHydrateOnTimer = {
+        name: 'ɵɵdeferHydrateOnTimer',
+        moduleName: CORE,
+    }; }
+    static { this.deferHydrateOnHover = {
+        name: 'ɵɵdeferHydrateOnHover',
+        moduleName: CORE,
+    }; }
+    static { this.deferHydrateOnInteraction = {
+        name: 'ɵɵdeferHydrateOnInteraction',
+        moduleName: CORE,
+    }; }
+    static { this.deferHydrateOnViewport = {
+        name: 'ɵɵdeferHydrateOnViewport',
+        moduleName: CORE,
+    }; }
     static { this.deferEnableTimerScheduling = {
         name: 'ɵɵdeferEnableTimerScheduling',
         moduleName: CORE,
@@ -5398,49 +5443,52 @@ class Element$1 {
     }
 }
 class DeferredTrigger {
-    constructor(nameSpan, sourceSpan, prefetchSpan, whenOrOnSourceSpan) {
+    constructor(nameSpan, sourceSpan, prefetchSpan, whenOrOnSourceSpan, hydrateSpan) {
         this.nameSpan = nameSpan;
         this.sourceSpan = sourceSpan;
         this.prefetchSpan = prefetchSpan;
         this.whenOrOnSourceSpan = whenOrOnSourceSpan;
+        this.hydrateSpan = hydrateSpan;
     }
     visit(visitor) {
         return visitor.visitDeferredTrigger(this);
     }
 }
 class BoundDeferredTrigger extends DeferredTrigger {
-    constructor(value, sourceSpan, prefetchSpan, whenSourceSpan) {
+    constructor(value, sourceSpan, prefetchSpan, whenSourceSpan, hydrateSpan) {
         // BoundDeferredTrigger is for 'when' triggers. These aren't really "triggers" and don't have a
         // nameSpan. Trigger names are the built in event triggers like hover, interaction, etc.
-        super(/** nameSpan */ null, sourceSpan, prefetchSpan, whenSourceSpan);
+        super(/** nameSpan */ null, sourceSpan, prefetchSpan, whenSourceSpan, hydrateSpan);
         this.value = value;
     }
+}
+class NeverDeferredTrigger extends DeferredTrigger {
 }
 class IdleDeferredTrigger extends DeferredTrigger {
 }
 class ImmediateDeferredTrigger extends DeferredTrigger {
 }
 class HoverDeferredTrigger extends DeferredTrigger {
-    constructor(reference, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
-        super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+    constructor(reference, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
+        super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
         this.reference = reference;
     }
 }
 class TimerDeferredTrigger extends DeferredTrigger {
-    constructor(delay, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
-        super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+    constructor(delay, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
+        super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
         this.delay = delay;
     }
 }
 class InteractionDeferredTrigger extends DeferredTrigger {
-    constructor(reference, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
-        super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+    constructor(reference, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
+        super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
         this.reference = reference;
     }
 }
 class ViewportDeferredTrigger extends DeferredTrigger {
-    constructor(reference, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
-        super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+    constructor(reference, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
+        super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
         this.reference = reference;
     }
 }
@@ -5486,7 +5534,7 @@ class DeferredBlockError extends BlockNode {
     }
 }
 class DeferredBlock extends BlockNode {
-    constructor(children, triggers, prefetchTriggers, placeholder, loading, error, nameSpan, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan, i18n) {
+    constructor(children, triggers, prefetchTriggers, hydrateTriggers, placeholder, loading, error, nameSpan, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan, i18n) {
         super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
         this.children = children;
         this.placeholder = placeholder;
@@ -5496,15 +5544,19 @@ class DeferredBlock extends BlockNode {
         this.i18n = i18n;
         this.triggers = triggers;
         this.prefetchTriggers = prefetchTriggers;
+        this.hydrateTriggers = hydrateTriggers;
         // We cache the keys since we know that they won't change and we
         // don't want to enumarate them every time we're traversing the AST.
         this.definedTriggers = Object.keys(triggers);
         this.definedPrefetchTriggers = Object.keys(prefetchTriggers);
+        this.definedHydrateTriggers = Object.keys(hydrateTriggers);
     }
     visit(visitor) {
         return visitor.visitDeferredBlock(this);
     }
     visitAll(visitor) {
+        // Visit the hydrate triggers first to match their insertion order.
+        this.visitTriggers(this.definedHydrateTriggers, this.hydrateTriggers, visitor);
         this.visitTriggers(this.definedTriggers, this.triggers, visitor);
         this.visitTriggers(this.definedPrefetchTriggers, this.prefetchTriggers, visitor);
         visitAll$1(visitor, this.children);
@@ -8729,6 +8781,7 @@ var DeferTriggerKind;
     DeferTriggerKind[DeferTriggerKind["Hover"] = 3] = "Hover";
     DeferTriggerKind[DeferTriggerKind["Interaction"] = 4] = "Interaction";
     DeferTriggerKind[DeferTriggerKind["Viewport"] = 5] = "Viewport";
+    DeferTriggerKind[DeferTriggerKind["Never"] = 6] = "Never";
 })(DeferTriggerKind || (DeferTriggerKind = {}));
 /**
  * Kinds of i18n contexts. They can be created because of root i18n blocks, or ICUs.
@@ -9043,12 +9096,12 @@ function createRepeaterOp(repeaterCreate, targetSlot, collection, sourceSpan) {
         ...TRAIT_DEPENDS_ON_SLOT_CONTEXT,
     };
 }
-function createDeferWhenOp(target, expr, prefetch, sourceSpan) {
+function createDeferWhenOp(target, expr, modifier, sourceSpan) {
     return {
         kind: OpKind.DeferWhen,
         target,
         expr,
-        prefetch,
+        modifier,
         sourceSpan,
         ...NEW_OP,
         ...TRAIT_DEPENDS_ON_SLOT_CONTEXT,
@@ -10603,12 +10656,12 @@ function createDeferOp(xref, main, mainSlot, ownResolverFn, resolverFn, sourceSp
         numSlotsUsed: 2,
     };
 }
-function createDeferOnOp(defer, trigger, prefetch, sourceSpan) {
+function createDeferOnOp(defer, trigger, modifier, sourceSpan) {
     return {
         kind: OpKind.DeferOn,
         defer,
         trigger,
-        prefetch,
+        modifier,
         sourceSpan,
         ...NEW_OP,
     };
@@ -11968,6 +12021,7 @@ function resolveDeferTargetNames(job) {
     function resolveTrigger(deferOwnerView, op, placeholderView) {
         switch (op.trigger.kind) {
             case DeferTriggerKind.Idle:
+            case DeferTriggerKind.Never:
             case DeferTriggerKind.Immediate:
             case DeferTriggerKind.Timer:
                 return;
@@ -12027,7 +12081,9 @@ function resolveDeferTargetNames(job) {
                     break;
                 case OpKind.DeferOn:
                     const deferOp = defers.get(op.defer);
-                    resolveTrigger(unit, op, deferOp.placeholderView);
+                    resolveTrigger(unit, op, op.modifier === "hydrate" /* ir.DeferOpModifierKind.HYDRATE */
+                        ? deferOp.mainView
+                        : deferOp.placeholderView);
                     break;
             }
         }
@@ -21703,28 +21759,68 @@ function defer(selfSlot, primarySlot, dependencyResolverFn, loadingSlot, placeho
     return call(Identifiers.defer, args, sourceSpan);
 }
 const deferTriggerToR3TriggerInstructionsMap = new Map([
-    [DeferTriggerKind.Idle, [Identifiers.deferOnIdle, Identifiers.deferPrefetchOnIdle]],
+    [
+        DeferTriggerKind.Idle,
+        {
+            ["none" /* ir.DeferOpModifierKind.NONE */]: Identifiers.deferOnIdle,
+            ["prefetch" /* ir.DeferOpModifierKind.PREFETCH */]: Identifiers.deferPrefetchOnIdle,
+            ["hydrate" /* ir.DeferOpModifierKind.HYDRATE */]: Identifiers.deferHydrateOnIdle,
+        },
+    ],
     [
         DeferTriggerKind.Immediate,
-        [Identifiers.deferOnImmediate, Identifiers.deferPrefetchOnImmediate],
+        {
+            ["none" /* ir.DeferOpModifierKind.NONE */]: Identifiers.deferOnImmediate,
+            ["prefetch" /* ir.DeferOpModifierKind.PREFETCH */]: Identifiers.deferPrefetchOnImmediate,
+            ["hydrate" /* ir.DeferOpModifierKind.HYDRATE */]: Identifiers.deferHydrateOnImmediate,
+        },
     ],
-    [DeferTriggerKind.Timer, [Identifiers.deferOnTimer, Identifiers.deferPrefetchOnTimer]],
-    [DeferTriggerKind.Hover, [Identifiers.deferOnHover, Identifiers.deferPrefetchOnHover]],
+    [
+        DeferTriggerKind.Timer,
+        {
+            ["none" /* ir.DeferOpModifierKind.NONE */]: Identifiers.deferOnTimer,
+            ["prefetch" /* ir.DeferOpModifierKind.PREFETCH */]: Identifiers.deferPrefetchOnTimer,
+            ["hydrate" /* ir.DeferOpModifierKind.HYDRATE */]: Identifiers.deferHydrateOnTimer,
+        },
+    ],
+    [
+        DeferTriggerKind.Hover,
+        {
+            ["none" /* ir.DeferOpModifierKind.NONE */]: Identifiers.deferOnHover,
+            ["prefetch" /* ir.DeferOpModifierKind.PREFETCH */]: Identifiers.deferPrefetchOnHover,
+            ["hydrate" /* ir.DeferOpModifierKind.HYDRATE */]: Identifiers.deferHydrateOnHover,
+        },
+    ],
     [
         DeferTriggerKind.Interaction,
-        [Identifiers.deferOnInteraction, Identifiers.deferPrefetchOnInteraction],
+        {
+            ["none" /* ir.DeferOpModifierKind.NONE */]: Identifiers.deferOnInteraction,
+            ["prefetch" /* ir.DeferOpModifierKind.PREFETCH */]: Identifiers.deferPrefetchOnInteraction,
+            ["hydrate" /* ir.DeferOpModifierKind.HYDRATE */]: Identifiers.deferHydrateOnInteraction,
+        },
     ],
     [
         DeferTriggerKind.Viewport,
-        [Identifiers.deferOnViewport, Identifiers.deferPrefetchOnViewport],
+        {
+            ["none" /* ir.DeferOpModifierKind.NONE */]: Identifiers.deferOnViewport,
+            ["prefetch" /* ir.DeferOpModifierKind.PREFETCH */]: Identifiers.deferPrefetchOnViewport,
+            ["hydrate" /* ir.DeferOpModifierKind.HYDRATE */]: Identifiers.deferHydrateOnViewport,
+        },
+    ],
+    [
+        DeferTriggerKind.Never,
+        {
+            ["none" /* ir.DeferOpModifierKind.NONE */]: Identifiers.deferHydrateNever,
+            ["prefetch" /* ir.DeferOpModifierKind.PREFETCH */]: Identifiers.deferHydrateNever,
+            ["hydrate" /* ir.DeferOpModifierKind.HYDRATE */]: Identifiers.deferHydrateNever,
+        },
     ],
 ]);
-function deferOn(trigger, args, prefetch, sourceSpan) {
-    const instructions = deferTriggerToR3TriggerInstructionsMap.get(trigger);
-    if (instructions === undefined) {
+function deferOn(trigger, args, modifier, sourceSpan) {
+    const instructionToCall = deferTriggerToR3TriggerInstructionsMap.get(trigger)?.[modifier];
+    if (instructionToCall === undefined) {
         throw new Error(`Unable to determine instruction for trigger ${trigger}`);
     }
-    const instructionToCall = prefetch ? instructions[1] : instructions[0];
     return call(instructionToCall, args.map((a) => literal(a)), sourceSpan);
 }
 function projectionDef(def) {
@@ -21780,8 +21876,14 @@ function repeaterCreate(slot, viewFnName, decls, vars, tag, constIndex, trackByF
 function repeater(collection, sourceSpan) {
     return call(Identifiers.repeater, [collection], sourceSpan);
 }
-function deferWhen(prefetch, expr, sourceSpan) {
-    return call(prefetch ? Identifiers.deferPrefetchWhen : Identifiers.deferWhen, [expr], sourceSpan);
+function deferWhen(modifier, expr, sourceSpan) {
+    if (modifier === "prefetch" /* ir.DeferOpModifierKind.PREFETCH */) {
+        return call(Identifiers.deferPrefetchWhen, [expr], sourceSpan);
+    }
+    else if (modifier === "hydrate" /* ir.DeferOpModifierKind.HYDRATE */) {
+        return call(Identifiers.deferHydrateWhen, [expr], sourceSpan);
+    }
+    return call(Identifiers.deferWhen, [expr], sourceSpan);
 }
 function declareLet(slot, sourceSpan) {
     return call(Identifiers.declareLet, [literal(slot)], sourceSpan);
@@ -22245,6 +22347,7 @@ function reifyCreateOperations(unit, ops) {
             case OpKind.DeferOn:
                 let args = [];
                 switch (op.trigger.kind) {
+                    case DeferTriggerKind.Never:
                     case DeferTriggerKind.Idle:
                     case DeferTriggerKind.Immediate:
                         break;
@@ -22254,18 +22357,24 @@ function reifyCreateOperations(unit, ops) {
                     case DeferTriggerKind.Interaction:
                     case DeferTriggerKind.Hover:
                     case DeferTriggerKind.Viewport:
-                        if (op.trigger.targetSlot?.slot == null || op.trigger.targetSlotViewSteps === null) {
-                            throw new Error(`Slot or view steps not set in trigger reification for trigger kind ${op.trigger.kind}`);
+                        // `hydrate` triggers don't support targets.
+                        if (op.modifier === "hydrate" /* ir.DeferOpModifierKind.HYDRATE */) {
+                            args = [];
                         }
-                        args = [op.trigger.targetSlot.slot];
-                        if (op.trigger.targetSlotViewSteps !== 0) {
-                            args.push(op.trigger.targetSlotViewSteps);
+                        else {
+                            if (op.trigger.targetSlot?.slot == null || op.trigger.targetSlotViewSteps === null) {
+                                throw new Error(`Slot or view steps not set in trigger reification for trigger kind ${op.trigger.kind}`);
+                            }
+                            args = [op.trigger.targetSlot.slot];
+                            if (op.trigger.targetSlotViewSteps !== 0) {
+                                args.push(op.trigger.targetSlotViewSteps);
+                            }
                         }
                         break;
                     default:
                         throw new Error(`AssertionError: Unsupported reification of defer trigger kind ${op.trigger.kind}`);
                 }
-                OpList.replace(op, deferOn(op.trigger.kind, args, op.prefetch, op.sourceSpan));
+                OpList.replace(op, deferOn(op.trigger.kind, args, op.modifier, op.sourceSpan));
                 break;
             case OpKind.ProjectionDef:
                 OpList.replace(op, projectionDef(op.def));
@@ -22423,7 +22532,7 @@ function reifyUpdateOperations(_unit, ops) {
                 OpList.replace(op, repeater(op.collection, op.sourceSpan));
                 break;
             case OpKind.DeferWhen:
-                OpList.replace(op, deferWhen(op.prefetch, op.expr, op.sourceSpan));
+                OpList.replace(op, deferWhen(op.modifier, op.expr, op.sourceSpan));
                 break;
             case OpKind.StoreLet:
                 throw new Error(`AssertionError: unexpected storeLet ${op.declaredName}`);
@@ -24816,72 +24925,80 @@ function ingestDeferBlock(unit, deferBlock) {
     // Configure all defer `on` conditions.
     // TODO: refactor prefetch triggers to use a separate op type, with a shared superclass. This will
     // make it easier to refactor prefetch behavior in the future.
-    let prefetch = false;
-    let deferOnOps = [];
-    let deferWhenOps = [];
-    for (const triggers of [deferBlock.triggers, deferBlock.prefetchTriggers]) {
-        if (triggers.idle !== undefined) {
-            const deferOnOp = createDeferOnOp(deferXref, { kind: DeferTriggerKind.Idle }, prefetch, triggers.idle.sourceSpan);
-            deferOnOps.push(deferOnOp);
-        }
-        if (triggers.immediate !== undefined) {
-            const deferOnOp = createDeferOnOp(deferXref, { kind: DeferTriggerKind.Immediate }, prefetch, triggers.immediate.sourceSpan);
-            deferOnOps.push(deferOnOp);
-        }
-        if (triggers.timer !== undefined) {
-            const deferOnOp = createDeferOnOp(deferXref, { kind: DeferTriggerKind.Timer, delay: triggers.timer.delay }, prefetch, triggers.timer.sourceSpan);
-            deferOnOps.push(deferOnOp);
-        }
-        if (triggers.hover !== undefined) {
-            const deferOnOp = createDeferOnOp(deferXref, {
-                kind: DeferTriggerKind.Hover,
-                targetName: triggers.hover.reference,
-                targetXref: null,
-                targetSlot: null,
-                targetView: null,
-                targetSlotViewSteps: null,
-            }, prefetch, triggers.hover.sourceSpan);
-            deferOnOps.push(deferOnOp);
-        }
-        if (triggers.interaction !== undefined) {
-            const deferOnOp = createDeferOnOp(deferXref, {
-                kind: DeferTriggerKind.Interaction,
-                targetName: triggers.interaction.reference,
-                targetXref: null,
-                targetSlot: null,
-                targetView: null,
-                targetSlotViewSteps: null,
-            }, prefetch, triggers.interaction.sourceSpan);
-            deferOnOps.push(deferOnOp);
-        }
-        if (triggers.viewport !== undefined) {
-            const deferOnOp = createDeferOnOp(deferXref, {
-                kind: DeferTriggerKind.Viewport,
-                targetName: triggers.viewport.reference,
-                targetXref: null,
-                targetSlot: null,
-                targetView: null,
-                targetSlotViewSteps: null,
-            }, prefetch, triggers.viewport.sourceSpan);
-            deferOnOps.push(deferOnOp);
-        }
-        if (triggers.when !== undefined) {
-            if (triggers.when.value instanceof Interpolation$1) {
-                // TemplateDefinitionBuilder supports this case, but it's very strange to me. What would it
-                // even mean?
-                throw new Error(`Unexpected interpolation in defer block when trigger`);
-            }
-            const deferOnOp = createDeferWhenOp(deferXref, convertAst(triggers.when.value, unit.job, triggers.when.sourceSpan), prefetch, triggers.when.sourceSpan);
-            deferWhenOps.push(deferOnOp);
-        }
-        // If no (non-prefetching) defer triggers were provided, default to `idle`.
-        if (deferOnOps.length === 0 && deferWhenOps.length === 0) {
-            deferOnOps.push(createDeferOnOp(deferXref, { kind: DeferTriggerKind.Idle }, false, null));
-        }
-        prefetch = true;
+    const deferOnOps = [];
+    const deferWhenOps = [];
+    // Ingest the hydrate triggers first since they set up all the other triggers during SSR.
+    ingestDeferTriggers("hydrate" /* ir.DeferOpModifierKind.HYDRATE */, deferBlock.hydrateTriggers, deferOnOps, deferWhenOps, unit, deferXref);
+    ingestDeferTriggers("none" /* ir.DeferOpModifierKind.NONE */, deferBlock.triggers, deferOnOps, deferWhenOps, unit, deferXref);
+    ingestDeferTriggers("prefetch" /* ir.DeferOpModifierKind.PREFETCH */, deferBlock.prefetchTriggers, deferOnOps, deferWhenOps, unit, deferXref);
+    // If no (non-prefetching or hydrating) defer triggers were provided, default to `idle`.
+    const hasConcreteTrigger = deferOnOps.some((op) => op.modifier === "none" /* ir.DeferOpModifierKind.NONE */) ||
+        deferWhenOps.some((op) => op.modifier === "none" /* ir.DeferOpModifierKind.NONE */);
+    if (!hasConcreteTrigger) {
+        deferOnOps.push(createDeferOnOp(deferXref, { kind: DeferTriggerKind.Idle }, "none" /* ir.DeferOpModifierKind.NONE */, null));
     }
     unit.create.push(deferOnOps);
     unit.update.push(deferWhenOps);
+}
+function ingestDeferTriggers(modifier, triggers, onOps, whenOps, unit, deferXref) {
+    if (triggers.idle !== undefined) {
+        const deferOnOp = createDeferOnOp(deferXref, { kind: DeferTriggerKind.Idle }, modifier, triggers.idle.sourceSpan);
+        onOps.push(deferOnOp);
+    }
+    if (triggers.immediate !== undefined) {
+        const deferOnOp = createDeferOnOp(deferXref, { kind: DeferTriggerKind.Immediate }, modifier, triggers.immediate.sourceSpan);
+        onOps.push(deferOnOp);
+    }
+    if (triggers.timer !== undefined) {
+        const deferOnOp = createDeferOnOp(deferXref, { kind: DeferTriggerKind.Timer, delay: triggers.timer.delay }, modifier, triggers.timer.sourceSpan);
+        onOps.push(deferOnOp);
+    }
+    if (triggers.hover !== undefined) {
+        const deferOnOp = createDeferOnOp(deferXref, {
+            kind: DeferTriggerKind.Hover,
+            targetName: triggers.hover.reference,
+            targetXref: null,
+            targetSlot: null,
+            targetView: null,
+            targetSlotViewSteps: null,
+        }, modifier, triggers.hover.sourceSpan);
+        onOps.push(deferOnOp);
+    }
+    if (triggers.interaction !== undefined) {
+        const deferOnOp = createDeferOnOp(deferXref, {
+            kind: DeferTriggerKind.Interaction,
+            targetName: triggers.interaction.reference,
+            targetXref: null,
+            targetSlot: null,
+            targetView: null,
+            targetSlotViewSteps: null,
+        }, modifier, triggers.interaction.sourceSpan);
+        onOps.push(deferOnOp);
+    }
+    if (triggers.viewport !== undefined) {
+        const deferOnOp = createDeferOnOp(deferXref, {
+            kind: DeferTriggerKind.Viewport,
+            targetName: triggers.viewport.reference,
+            targetXref: null,
+            targetSlot: null,
+            targetView: null,
+            targetSlotViewSteps: null,
+        }, modifier, triggers.viewport.sourceSpan);
+        onOps.push(deferOnOp);
+    }
+    if (triggers.never !== undefined) {
+        const deferOnOp = createDeferOnOp(deferXref, { kind: DeferTriggerKind.Never }, modifier, triggers.never.sourceSpan);
+        onOps.push(deferOnOp);
+    }
+    if (triggers.when !== undefined) {
+        if (triggers.when.value instanceof Interpolation$1) {
+            // TemplateDefinitionBuilder supports this case, but it's very strange to me. What would it
+            // even mean?
+            throw new Error(`Unexpected interpolation in defer block when trigger`);
+        }
+        const deferOnOp = createDeferWhenOp(deferXref, convertAst(triggers.when.value, unit.job, triggers.when.sourceSpan), modifier, triggers.when.sourceSpan);
+        whenOps.push(deferOnOp);
+    }
 }
 function ingestIcu(unit, icu) {
     if (icu.i18n instanceof Message && isSingleI18nIcu(icu.i18n)) {
@@ -26626,12 +26743,29 @@ var OnTriggerType;
     OnTriggerType["IMMEDIATE"] = "immediate";
     OnTriggerType["HOVER"] = "hover";
     OnTriggerType["VIEWPORT"] = "viewport";
+    OnTriggerType["NEVER"] = "never";
 })(OnTriggerType || (OnTriggerType = {}));
+/** Parses a `when` deferred trigger. */
+function parseNeverTrigger({ expression, sourceSpan }, triggers, errors) {
+    const neverIndex = expression.indexOf('never');
+    const neverSourceSpan = new ParseSourceSpan(sourceSpan.start.moveBy(neverIndex), sourceSpan.start.moveBy(neverIndex + 'never'.length));
+    const prefetchSpan = getPrefetchSpan(expression, sourceSpan);
+    const hydrateSpan = getHydrateSpan(expression, sourceSpan);
+    // This is here just to be safe, we shouldn't enter this function
+    // in the first place if a block doesn't have the "on" keyword.
+    if (neverIndex === -1) {
+        errors.push(new ParseError(sourceSpan, `Could not find "never" keyword in expression`));
+    }
+    else {
+        trackTrigger('never', triggers, errors, new NeverDeferredTrigger(neverSourceSpan, sourceSpan, prefetchSpan, null, hydrateSpan));
+    }
+}
 /** Parses a `when` deferred trigger. */
 function parseWhenTrigger({ expression, sourceSpan }, bindingParser, triggers, errors) {
     const whenIndex = expression.indexOf('when');
     const whenSourceSpan = new ParseSourceSpan(sourceSpan.start.moveBy(whenIndex), sourceSpan.start.moveBy(whenIndex + 'when'.length));
     const prefetchSpan = getPrefetchSpan(expression, sourceSpan);
+    const hydrateSpan = getHydrateSpan(expression, sourceSpan);
     // This is here just to be safe, we shouldn't enter this function
     // in the first place if a block doesn't have the "when" keyword.
     if (whenIndex === -1) {
@@ -26640,7 +26774,7 @@ function parseWhenTrigger({ expression, sourceSpan }, bindingParser, triggers, e
     else {
         const start = getTriggerParametersStart(expression, whenIndex + 1);
         const parsed = bindingParser.parseBinding(expression.slice(start), false, sourceSpan, sourceSpan.start.offset + start);
-        trackTrigger('when', triggers, errors, new BoundDeferredTrigger(parsed, sourceSpan, prefetchSpan, whenSourceSpan));
+        trackTrigger('when', triggers, errors, new BoundDeferredTrigger(parsed, sourceSpan, prefetchSpan, whenSourceSpan, hydrateSpan));
     }
 }
 /** Parses an `on` trigger */
@@ -26648,6 +26782,7 @@ function parseOnTrigger({ expression, sourceSpan }, triggers, errors, placeholde
     const onIndex = expression.indexOf('on');
     const onSourceSpan = new ParseSourceSpan(sourceSpan.start.moveBy(onIndex), sourceSpan.start.moveBy(onIndex + 'on'.length));
     const prefetchSpan = getPrefetchSpan(expression, sourceSpan);
+    const hydrateSpan = getHydrateSpan(expression, sourceSpan);
     // This is here just to be safe, we shouldn't enter this function
     // in the first place if a block doesn't have the "on" keyword.
     if (onIndex === -1) {
@@ -26655,7 +26790,9 @@ function parseOnTrigger({ expression, sourceSpan }, triggers, errors, placeholde
     }
     else {
         const start = getTriggerParametersStart(expression, onIndex + 1);
-        const parser = new OnTriggerParser(expression, start, sourceSpan, triggers, errors, placeholder, prefetchSpan, onSourceSpan);
+        const parser = new OnTriggerParser(expression, start, sourceSpan, triggers, errors, expression.startsWith('hydrate')
+            ? validateHydrateReferenceBasedTrigger
+            : validatePlainReferenceBasedTrigger, placeholder, prefetchSpan, onSourceSpan, hydrateSpan);
         parser.parse();
     }
 }
@@ -26665,16 +26802,24 @@ function getPrefetchSpan(expression, sourceSpan) {
     }
     return new ParseSourceSpan(sourceSpan.start, sourceSpan.start.moveBy('prefetch'.length));
 }
+function getHydrateSpan(expression, sourceSpan) {
+    if (!expression.startsWith('hydrate')) {
+        return null;
+    }
+    return new ParseSourceSpan(sourceSpan.start, sourceSpan.start.moveBy('hydrate'.length));
+}
 class OnTriggerParser {
-    constructor(expression, start, span, triggers, errors, placeholder, prefetchSpan, onSourceSpan) {
+    constructor(expression, start, span, triggers, errors, validator, placeholder, prefetchSpan, onSourceSpan, hydrateSpan) {
         this.expression = expression;
         this.start = start;
         this.span = span;
         this.triggers = triggers;
         this.errors = errors;
+        this.validator = validator;
         this.placeholder = placeholder;
         this.prefetchSpan = prefetchSpan;
         this.onSourceSpan = onSourceSpan;
+        this.hydrateSpan = hydrateSpan;
         this.index = 0;
         this.tokens = new Lexer().tokenize(expression.slice(start));
     }
@@ -26729,26 +26874,27 @@ class OnTriggerParser {
         const isFirstTrigger = identifier.index === 0;
         const onSourceSpan = isFirstTrigger ? this.onSourceSpan : null;
         const prefetchSourceSpan = isFirstTrigger ? this.prefetchSpan : null;
+        const hydrateSourceSpan = isFirstTrigger ? this.hydrateSpan : null;
         const sourceSpan = new ParseSourceSpan(isFirstTrigger ? this.span.start : triggerNameStartSpan, endSpan);
         try {
             switch (identifier.toString()) {
                 case OnTriggerType.IDLE:
-                    this.trackTrigger('idle', createIdleTrigger(parameters, nameSpan, sourceSpan, prefetchSourceSpan, onSourceSpan));
+                    this.trackTrigger('idle', createIdleTrigger(parameters, nameSpan, sourceSpan, prefetchSourceSpan, onSourceSpan, hydrateSourceSpan));
                     break;
                 case OnTriggerType.TIMER:
-                    this.trackTrigger('timer', createTimerTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan));
+                    this.trackTrigger('timer', createTimerTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan));
                     break;
                 case OnTriggerType.INTERACTION:
-                    this.trackTrigger('interaction', createInteractionTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.placeholder));
+                    this.trackTrigger('interaction', createInteractionTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan, this.placeholder, this.validator));
                     break;
                 case OnTriggerType.IMMEDIATE:
-                    this.trackTrigger('immediate', createImmediateTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan));
+                    this.trackTrigger('immediate', createImmediateTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan));
                     break;
                 case OnTriggerType.HOVER:
-                    this.trackTrigger('hover', createHoverTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.placeholder));
+                    this.trackTrigger('hover', createHoverTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan, this.placeholder, this.validator));
                     break;
                 case OnTriggerType.VIEWPORT:
-                    this.trackTrigger('viewport', createViewportTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.placeholder));
+                    this.trackTrigger('viewport', createViewportTrigger(parameters, nameSpan, sourceSpan, this.prefetchSpan, this.onSourceSpan, this.hydrateSpan, this.placeholder, this.validator));
                     break;
                 default:
                     throw new Error(`Unrecognized trigger type "${identifier}"`);
@@ -26838,13 +26984,13 @@ function trackTrigger(name, allTriggers, errors, trigger) {
         allTriggers[name] = trigger;
     }
 }
-function createIdleTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
+function createIdleTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
     if (parameters.length > 0) {
         throw new Error(`"${OnTriggerType.IDLE}" trigger cannot have parameters`);
     }
-    return new IdleDeferredTrigger(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+    return new IdleDeferredTrigger(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
-function createTimerTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
+function createTimerTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
     if (parameters.length !== 1) {
         throw new Error(`"${OnTriggerType.TIMER}" trigger must have exactly one parameter`);
     }
@@ -26852,27 +26998,33 @@ function createTimerTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSo
     if (delay === null) {
         throw new Error(`Could not parse time value of trigger "${OnTriggerType.TIMER}"`);
     }
-    return new TimerDeferredTrigger(delay, nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+    return new TimerDeferredTrigger(delay, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
-function createImmediateTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan) {
+function createImmediateTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
     if (parameters.length > 0) {
         throw new Error(`"${OnTriggerType.IMMEDIATE}" trigger cannot have parameters`);
     }
-    return new ImmediateDeferredTrigger(nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+    return new ImmediateDeferredTrigger(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
-function createHoverTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, placeholder) {
-    validateReferenceBasedTrigger(OnTriggerType.HOVER, parameters, placeholder);
-    return new HoverDeferredTrigger(parameters[0] ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+function createHoverTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan, placeholder, validator) {
+    validator(OnTriggerType.HOVER, parameters, placeholder);
+    return new HoverDeferredTrigger(parameters[0] ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
-function createInteractionTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, placeholder) {
-    validateReferenceBasedTrigger(OnTriggerType.INTERACTION, parameters, placeholder);
-    return new InteractionDeferredTrigger(parameters[0] ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+function createInteractionTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan, placeholder, validator) {
+    validator(OnTriggerType.INTERACTION, parameters, placeholder);
+    return new InteractionDeferredTrigger(parameters[0] ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
-function createViewportTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, placeholder) {
-    validateReferenceBasedTrigger(OnTriggerType.VIEWPORT, parameters, placeholder);
-    return new ViewportDeferredTrigger(parameters[0] ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan);
+function createViewportTrigger(parameters, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan, placeholder, validator) {
+    validator(OnTriggerType.VIEWPORT, parameters, placeholder);
+    return new ViewportDeferredTrigger(parameters[0] ?? null, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
 }
-function validateReferenceBasedTrigger(type, parameters, placeholder) {
+/**
+ * Checks whether the structure of a non-hydrate reference-based trigger is valid.
+ * @param type Type of the trigger being validated.
+ * @param parameters Parameters of the trigger.
+ * @param placeholder Placeholder of the defer block.
+ */
+function validatePlainReferenceBasedTrigger(type, parameters, placeholder) {
     if (parameters.length > 1) {
         throw new Error(`"${type}" trigger can only have zero or one parameters`);
     }
@@ -26884,6 +27036,16 @@ function validateReferenceBasedTrigger(type, parameters, placeholder) {
             throw new Error(`"${type}" trigger with no parameters can only be placed on an @defer that has a ` +
                 `@placeholder block with exactly one root element node`);
         }
+    }
+}
+/**
+ * Checks whether the structure of a hydrate trigger is valid.
+ * @param type Type of the trigger being validated.
+ * @param parameters Parameters of the trigger.
+ */
+function validateHydrateReferenceBasedTrigger(type, parameters) {
+    if (parameters.length > 0) {
+        throw new Error(`Hydration trigger "${type}" cannot have parameters`);
     }
 }
 /** Gets the index within an expression at which the trigger parameters start. */
@@ -26916,6 +27078,12 @@ function parseDeferredTime(value) {
 const PREFETCH_WHEN_PATTERN = /^prefetch\s+when\s/;
 /** Pattern to identify a `prefetch on` trigger. */
 const PREFETCH_ON_PATTERN = /^prefetch\s+on\s/;
+/** Pattern to identify a `hydrate when` trigger. */
+const HYDRATE_WHEN_PATTERN = /^hydrate\s+when\s/;
+/** Pattern to identify a `hydrate on` trigger. */
+const HYDRATE_ON_PATTERN = /^hydrate\s+on\s/;
+/** Pattern to identify a `hydrate never` trigger. */
+const HYDRATE_NEVER_PATTERN = /^hydrate\s+never\s*/;
 /** Pattern to identify a `minimum` parameter in a block. */
 const MINIMUM_PARAMETER_PATTERN = /^minimum\s/;
 /** Pattern to identify a `after` parameter in a block. */
@@ -26935,7 +27103,7 @@ function isConnectedDeferLoopBlock(name) {
 function createDeferredBlock(ast, connectedBlocks, visitor, bindingParser) {
     const errors = [];
     const { placeholder, loading, error } = parseConnectedBlocks(connectedBlocks, errors, visitor);
-    const { triggers, prefetchTriggers } = parsePrimaryTriggers(ast.parameters, bindingParser, errors, placeholder);
+    const { triggers, prefetchTriggers, hydrateTriggers } = parsePrimaryTriggers(ast, bindingParser, errors, placeholder);
     // The `defer` block has a main span encompassing all of the connected branches as well.
     let lastEndSourceSpan = ast.endSourceSpan;
     let endOfLastSourceSpan = ast.sourceSpan.end;
@@ -26945,7 +27113,7 @@ function createDeferredBlock(ast, connectedBlocks, visitor, bindingParser) {
         endOfLastSourceSpan = lastConnectedBlock.sourceSpan.end;
     }
     const sourceSpanWithConnectedBlocks = new ParseSourceSpan(ast.sourceSpan.start, endOfLastSourceSpan);
-    const node = new DeferredBlock(visitAll(visitor, ast.children, ast.children), triggers, prefetchTriggers, placeholder, loading, error, ast.nameSpan, sourceSpanWithConnectedBlocks, ast.sourceSpan, ast.startSourceSpan, lastEndSourceSpan, ast.i18n);
+    const node = new DeferredBlock(visitAll(visitor, ast.children, ast.children), triggers, prefetchTriggers, hydrateTriggers, placeholder, loading, error, ast.nameSpan, sourceSpanWithConnectedBlocks, ast.sourceSpan, ast.startSourceSpan, lastEndSourceSpan, ast.i18n);
     return { node, errors };
 }
 function parseConnectedBlocks(connectedBlocks, errors, visitor) {
@@ -27046,10 +27214,11 @@ function parseErrorBlock(ast, visitor) {
     }
     return new DeferredBlockError(visitAll(visitor, ast.children, ast.children), ast.nameSpan, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan, ast.i18n);
 }
-function parsePrimaryTriggers(params, bindingParser, errors, placeholder) {
+function parsePrimaryTriggers(ast, bindingParser, errors, placeholder) {
     const triggers = {};
     const prefetchTriggers = {};
-    for (const param of params) {
+    const hydrateTriggers = {};
+    for (const param of ast.parameters) {
         // The lexer ignores the leading spaces so we can assume
         // that the expression starts with a keyword.
         if (WHEN_PARAMETER_PATTERN.test(param.expression)) {
@@ -27064,11 +27233,23 @@ function parsePrimaryTriggers(params, bindingParser, errors, placeholder) {
         else if (PREFETCH_ON_PATTERN.test(param.expression)) {
             parseOnTrigger(param, prefetchTriggers, errors, placeholder);
         }
+        else if (HYDRATE_WHEN_PATTERN.test(param.expression)) {
+            parseWhenTrigger(param, bindingParser, hydrateTriggers, errors);
+        }
+        else if (HYDRATE_ON_PATTERN.test(param.expression)) {
+            parseOnTrigger(param, hydrateTriggers, errors, placeholder);
+        }
+        else if (HYDRATE_NEVER_PATTERN.test(param.expression)) {
+            parseNeverTrigger(param, hydrateTriggers, errors);
+        }
         else {
             errors.push(new ParseError(param.sourceSpan, 'Unrecognized trigger'));
         }
     }
-    return { triggers, prefetchTriggers };
+    if (hydrateTriggers.never && Object.keys(hydrateTriggers).length > 1) {
+        errors.push(new ParseError(ast.startSourceSpan, 'Cannot specify additional `hydrate` triggers if `hydrate never` is present'));
+    }
+    return { triggers, prefetchTriggers, hydrateTriggers };
 }
 
 const BIND_NAME_REGEXP = /^(?:(bind-)|(let-)|(ref-|#)|(on-)|(bindon-)|(@))(.*)$/;
@@ -28746,6 +28927,8 @@ class TemplateBinder extends RecursiveAstVisitor {
         this.ingestScopedNode(deferred);
         deferred.triggers.when?.value.visit(this);
         deferred.prefetchTriggers.when?.value.visit(this);
+        deferred.hydrateTriggers.when?.value.visit(this);
+        deferred.hydrateTriggers.never?.visit(this);
         deferred.placeholder && this.visitNode(deferred.placeholder);
         deferred.loading && this.visitNode(deferred.loading);
         deferred.error && this.visitNode(deferred.error);
@@ -29691,7 +29874,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.5+sha-59fe9bc');
+new Version('19.0.0-next.5+sha-8ecafce');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30698,20 +30881,20 @@ function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProg
     // Register pass 2. Find all source file references.
     pass2_IdentifySourceFileReferences(host.programInfo, typeChecker, reflector, resourceLoader, evaluator, templateTypeChecker, pass2And3SourceFileVisitor, knownInputs, result);
     // Register pass 3. Check incompatible patterns pass.
-    pass3__checkIncompatiblePatterns(host, inheritanceGraph, typeChecker, pass2And3SourceFileVisitor, knownInputs);
+    pass3__checkIncompatiblePatterns(inheritanceGraph, typeChecker, pass2And3SourceFileVisitor, knownInputs);
     // Perform Pass 2 and Pass 3, efficiently in one pass.
     pass2And3SourceFileVisitor.execute();
     // Determine incompatible inputs based on resolved references.
     for (const reference of result.references) {
         if (isTsReference(reference) && reference.from.isWrite) {
-            knownInputs.markInputAsIncompatible(reference.target, {
+            knownInputs.markFieldIncompatible(reference.target, {
                 reason: InputIncompatibilityReason.WriteAssignment,
                 context: reference.from.node,
             });
         }
         if (isTemplateReference(reference) || isHostBindingReference(reference)) {
             if (reference.from.isWrite) {
-                knownInputs.markInputAsIncompatible(reference.target, {
+                knownInputs.markFieldIncompatible(reference.target, {
                     reason: InputIncompatibilityReason.WriteAssignment,
                     // No TS node context available for template or host bindings.
                     context: null,
@@ -30722,7 +30905,7 @@ function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProg
         // https://github.com/angular/angular/pull/55456.
         if (isTemplateReference(reference)) {
             if (reference.from.isLikelyPartOfNarrowing) {
-                knownInputs.markInputAsIncompatible(reference.target, {
+                knownInputs.markFieldIncompatible(reference.target, {
                     reason: InputIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet,
                     context: null,
                 });
@@ -30790,13 +30973,13 @@ function topologicalSort(graph) {
  * The logic here detects such cases and marks `bla` as incompatible. If `Derived`
  * would then have other derived classes as well, it would propagate the status.
  */
-function pass4__checkInheritanceOfInputs(host, inheritanceGraph, metaRegistry, knownInputs) {
+function checkInheritanceOfInputs(inheritanceGraph, metaRegistry, fields, opts) {
     // Sort topologically and iterate super classes first, so that we can trivially
     // propagate incompatibility statuses (and other checks) without having to check
     // in both directions (derived classes, or base classes). This simplifies the logic
     // further down in this function significantly.
     const topologicalSortedClasses = topologicalSort(inheritanceGraph)
-        .filter((t) => ts__default["default"].isClassDeclaration(t) && knownInputs.isInputContainingClass(t))
+        .filter((t) => ts__default["default"].isClassDeclaration(t) && opts.isClassWithKnownFields(t))
         .reverse();
     for (const inputClass of topologicalSortedClasses) {
         // Note: Class parents of `inputClass` were already checked by
@@ -30804,8 +30987,7 @@ function pass4__checkInheritanceOfInputs(host, inheritanceGraph, metaRegistry, k
         // hence it's safe to assume that incompatibility of parent classes will
         // not change again, at a later time.
         assert__default["default"](ts__default["default"].isClassDeclaration(inputClass), 'Expected input graph node to be always a class.');
-        const directiveInfo = knownInputs.getDirectiveInfoForClass(inputClass);
-        assert__default["default"](directiveInfo !== undefined, 'Expected directive info to exist for input class.');
+        const classFields = opts.getFieldsForClass(inputClass);
         // Iterate through derived class chains and determine all inputs that are overridden
         // via class metadata fields. e.g `@Component#inputs`. This is later used to mark a
         // potential similar class input as incompatible— because those cannot be migrated.
@@ -30819,25 +31001,27 @@ function pass4__checkInheritanceOfInputs(host, inheritanceGraph, metaRegistry, k
             }
         }
         // Check inheritance of every input in the given "directive class".
-        inputCheck: for (const info of directiveInfo.inputFields.values()) {
-            const inputNode = info.descriptor.node;
+        inputCheck: for (const fieldDescr of classFields) {
+            const inputNode = fieldDescr.node;
             const { derivedMembers, inherited } = inheritanceGraph.checkOverlappingMembers(inputClass, inputNode, getMemberName(inputNode));
             // If we discover a derived, input re-declared via class metadata, then it
             // will cause conflicts as we cannot migrate it/ nor mark it as signal-based.
-            if (inputFieldNamesFromMetadataArray.has(info.metadata.classPropertyName)) {
-                knownInputs.markInputAsIncompatible(info.descriptor, {
+            if (fieldDescr.node.name !== undefined &&
+                (ts__default["default"].isIdentifier(fieldDescr.node.name) || ts__default["default"].isStringLiteralLike(fieldDescr.node.name)) &&
+                inputFieldNamesFromMetadataArray.has(fieldDescr.node.name.text)) {
+                fields.markFieldIncompatible(fieldDescr, {
                     context: null,
                     reason: InputIncompatibilityReason.RedeclaredViaDerivedClassInputsArray,
                 });
             }
             for (const derived of derivedMembers) {
-                const derivedInput = attemptRetrieveInputFromSymbol(host.programInfo, derived, knownInputs);
+                const derivedInput = fields.attemptRetrieveDescriptorFromSymbol(derived);
                 if (derivedInput !== null) {
                     continue;
                 }
                 // If we discover a derived, non-input member, then it will cause
                 // conflicts, and we mark the current input as incompatible.
-                knownInputs.markInputAsIncompatible(info.descriptor, {
+                fields.markFieldIncompatible(fieldDescr, {
                     context: derived.valueDeclaration ?? inputNode,
                     reason: InputIncompatibilityReason.OverriddenByDerivedClass,
                 });
@@ -30848,10 +31032,10 @@ function pass4__checkInheritanceOfInputs(host, inheritanceGraph, metaRegistry, k
             if (inherited === undefined) {
                 continue;
             }
-            const { inheritedMemberInput } = analyzeInheritanceOfMember(inherited, inputNode, host, knownInputs);
+            const inheritedMemberInput = fields.attemptRetrieveDescriptorFromSymbol(inherited);
             // Parent is not an input, and hence will conflict..
-            if (inheritedMemberInput === undefined) {
-                knownInputs.markInputAsIncompatible(info.descriptor, {
+            if (inheritedMemberInput === null) {
+                fields.markFieldIncompatible(fieldDescr, {
                     context: inherited.valueDeclaration ?? inputNode,
                     reason: InputIncompatibilityReason.TypeConflictWithBaseClass,
                 });
@@ -30859,9 +31043,9 @@ function pass4__checkInheritanceOfInputs(host, inheritanceGraph, metaRegistry, k
             }
             // Parent is incompatible, so this input also needs to be.
             // It cannot be migrated.
-            if (inheritedMemberInput.isIncompatible()) {
-                knownInputs.markInputAsIncompatible(info.descriptor, {
-                    context: inheritedMemberInput.descriptor.node,
+            if (fields.isFieldIncompatible(inheritedMemberInput)) {
+                fields.markFieldIncompatible(fieldDescr, {
+                    context: inheritedMemberInput.node,
                     reason: InputIncompatibilityReason.ParentIsIncompatible,
                 });
                 continue;
@@ -30869,20 +31053,36 @@ function pass4__checkInheritanceOfInputs(host, inheritanceGraph, metaRegistry, k
         }
     }
 }
-function analyzeInheritanceOfMember(inheritedMember, member, host, knownInputs) {
-    // If the member itself is an input that is being migrated, we
-    // do not need to check, as overriding would be fine then— like before.
-    const memberInputDescr = isInputContainerNode(member) ? getInputDescriptor(host, member) : null;
-    const memberInput = memberInputDescr !== null ? knownInputs.get(memberInputDescr) : undefined;
-    const inheritedMemberInputId = inheritedMember.valueDeclaration !== undefined &&
-        isInputContainerNode(inheritedMember.valueDeclaration)
-        ? getInputDescriptor(host, inheritedMember.valueDeclaration)
-        : null;
-    const inheritedMemberInput = inheritedMemberInputId !== null ? knownInputs.get(inheritedMemberInputId) : undefined;
-    return {
-        inheritedMemberInput,
-        memberInput,
-    };
+
+/**
+ * Phase that propagates incompatibilities to derived classes or
+ * base classes. For example, consider:
+ *
+ * ```
+ * class Base {
+ *   bla = true;
+ * }
+ *
+ * class Derived extends Base {
+ *   @Input() bla = false;
+ * }
+ * ```
+ *
+ * Whenever we migrate `Derived`, the inheritance would fail
+ * and result in a build breakage because `Base#bla` is not an Angular input.
+ *
+ * The logic here detects such cases and marks `bla` as incompatible. If `Derived`
+ * would then have other derived classes as well, it would propagate the status.
+ */
+function pass4__checkInheritanceOfInputs(inheritanceGraph, metaRegistry, knownInputs) {
+    checkInheritanceOfInputs(inheritanceGraph, metaRegistry, knownInputs, {
+        isClassWithKnownFields: (clazz) => knownInputs.isInputContainingClass(clazz),
+        getFieldsForClass: (clazz) => {
+            const directiveInfo = knownInputs.getDirectiveInfoForClass(clazz);
+            assert__default["default"](directiveInfo !== undefined, 'Expected directive info to exist for input.');
+            return Array.from(directiveInfo.inputFields.values()).map((i) => i.descriptor);
+        },
+    });
 }
 
 /** Type of incompatibility. */
@@ -31026,10 +31226,10 @@ function populateKnownInputsFromGlobalData(knownInputs, globalData) {
         const inputMetadata = knownInputs.get({ key });
         if (!inputMetadata.isIncompatible() && info.isIncompatible) {
             if (info.isIncompatible.kind === IncompatibilityType.VIA_CLASS) {
-                knownInputs.markDirectiveAsIncompatible(inputMetadata.container.clazz, info.isIncompatible.reason);
+                knownInputs.markClassIncompatible(inputMetadata.container.clazz, info.isIncompatible.reason);
             }
             else {
-                knownInputs.markInputAsIncompatible(inputMetadata.descriptor, {
+                knownInputs.markFieldIncompatible(inputMetadata.descriptor, {
                     context: null, // No context serializable.
                     reason: info.isIncompatible.reason,
                 });
@@ -32195,7 +32395,6 @@ class SignalInputMigration extends TsurgeComplexMigration {
     // Override the default ngtsc program creation, to add extra flags.
     createProgram(tsconfigAbsPath, fs) {
         return createNgtscProgram(tsconfigAbsPath, fs, {
-            _enableTemplateTypeChecker: true,
             _compilePoisonedComponents: true,
             // We want to migrate non-exported classes too.
             compileNonExportedClasses: true,
@@ -32233,7 +32432,7 @@ class SignalInputMigration extends TsurgeComplexMigration {
         const { inheritanceGraph } = executeAnalysisPhase(host, knownInputs, result, analysisDeps);
         filterInputsViaConfig(result, knownInputs, this.config);
         this.config.reportProgressFn?.(40, 'Checking inheritance..');
-        pass4__checkInheritanceOfInputs(host, inheritanceGraph, metaRegistry, knownInputs);
+        pass4__checkInheritanceOfInputs(inheritanceGraph, metaRegistry, knownInputs);
         if (this.config.bestEffortMode) {
             filterIncompatibilitiesForBestEffortMode(knownInputs);
         }
@@ -32274,7 +32473,7 @@ class SignalInputMigration extends TsurgeComplexMigration {
             inheritanceGraph = analysisRes.inheritanceGraph;
             populateKnownInputsFromGlobalData(knownInputs, globalMetadata);
             filterInputsViaConfig(result, knownInputs, this.config);
-            pass4__checkInheritanceOfInputs(host, inheritanceGraph, analysisDeps.metaRegistry, knownInputs);
+            pass4__checkInheritanceOfInputs(inheritanceGraph, analysisDeps.metaRegistry, knownInputs);
             if (this.config.bestEffortMode) {
                 filterIncompatibilitiesForBestEffortMode(knownInputs);
             }
@@ -32296,7 +32495,7 @@ function filterInputsViaConfig(result, knownInputs, config) {
     for (const input of knownInputs.knownInputIds.values()) {
         if (!config.shouldMigrateInput(input)) {
             skippedInputs.add(input.descriptor.key);
-            knownInputs.markInputAsIncompatible(input.descriptor, {
+            knownInputs.markFieldIncompatible(input.descriptor, {
                 context: null,
                 reason: InputIncompatibilityReason.SkippedViaConfigFilter,
             });
