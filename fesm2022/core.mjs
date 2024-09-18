@@ -1,10 +1,10 @@
 /**
- * @license Angular v19.0.0-next.6+sha-c6039b5
+ * @license Angular v19.0.0-next.6+sha-4e890cc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1 } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createWatch as createWatch$1, isInNotificationPhase as isInNotificationPhase$1 } from '@angular/core/primitives/signals';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { map, first } from 'rxjs/operators';
 import { Attribute as Attribute$1, isEarlyEventType, getActionCache, EventContract, EventContractContainer, EventDispatcher, registerDispatcher, getAppScopedQueuedEventInfos, clearAppScopedEarlyEventContract, isCaptureEventType } from '@angular/core/primitives/event-dispatch';
@@ -3805,7 +3805,8 @@ const ID = 19;
 const EMBEDDED_VIEW_INJECTOR = 20;
 const ON_DESTROY_HOOKS = 21;
 const EFFECTS_TO_SCHEDULE = 22;
-const REACTIVE_TEMPLATE_CONSUMER = 23;
+const EFFECTS = 23;
+const REACTIVE_TEMPLATE_CONSUMER = 24;
 /**
  * Size of LView's header. Necessary to adjust for it when setting slots.
  *
@@ -4599,7 +4600,9 @@ function isRefreshingViews() {
     return _isRefreshingViews;
 }
 function setIsRefreshingViews(mode) {
+    const prev = _isRefreshingViews;
     _isRefreshingViews = mode;
+    return prev;
 }
 // top level variables should not be exported for performance reasons (PERF_NOTES.md)
 function getBindingRoot() {
@@ -11368,6 +11371,14 @@ function processCleanups(tView, lView) {
             destroyHooksFn();
         }
     }
+    // Destroy effects registered to the view. Many of these will have been processed above.
+    const effects = lView[EFFECTS];
+    if (effects !== null) {
+        lView[EFFECTS] = null;
+        for (const effect of effects) {
+            effect.destroy();
+        }
+    }
 }
 /** Calls onDestroy hooks for this view */
 function executeOnDestroys(tView, lView) {
@@ -13705,6 +13716,37 @@ function viewShouldHaveReactiveConsumer(tView) {
     return tView.type !== 2 /* TViewType.Embedded */;
 }
 
+function runEffectsInView(view) {
+    if (view[EFFECTS] === null) {
+        return;
+    }
+    // Since effects can make other effects dirty, we flush them in a loop until there are no more to
+    // flush.
+    let tryFlushEffects = true;
+    while (tryFlushEffects) {
+        let foundDirtyEffect = false;
+        for (const effect of view[EFFECTS]) {
+            if (!effect.dirty) {
+                continue;
+            }
+            foundDirtyEffect = true;
+            // `runEffectsInView` is called during change detection, and therefore runs
+            // in the Angular zone if it's available.
+            if (effect.zone === null || Zone.current === effect.zone) {
+                effect.run();
+            }
+            else {
+                effect.zone.run(() => effect.run());
+            }
+        }
+        // Check if we need to continue flushing. If we didn't find any dirty effects, then there's
+        // no need to loop back. Otherwise, check the view to see if it was marked for traversal
+        // again. If so, there's a chance that one of the effects we ran caused another effect to
+        // become dirty.
+        tryFlushEffects = foundDirtyEffect && !!(view[FLAGS] & 8192 /* LViewFlags.HasChildViewsToRefresh */);
+    }
+}
+
 /**
  * The maximum number of times the change detection traversal will rerun before throwing an error.
  */
@@ -13731,9 +13773,6 @@ function detectChangesInternal(lView, notifyErrorHandler = true, mode = 0 /* Cha
     finally {
         if (!checkNoChangesMode) {
             rendererFactory.end?.();
-            // One final flush of the effects queue to catch any effects created in `ngAfterViewInit` or
-            // other post-order hooks.
-            environment.inlineEffectRunner?.flush();
         }
     }
 }
@@ -13797,7 +13836,6 @@ function refreshView(tView, lView, templateFn, context) {
     // since they were assigned. We do not want to execute lifecycle hooks in that mode.
     const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
     const isInExhaustiveCheckNoChangesPass = ngDevMode && isExhaustiveCheckNoChanges();
-    !isInCheckNoChangesPass && lView[ENVIRONMENT].inlineEffectRunner?.flush();
     // Start component reactive context
     // - We might already be in a reactive context if this is an embedded view of the host.
     // - We might be descending into a view that needs a consumer.
@@ -13858,6 +13896,7 @@ function refreshView(tView, lView, templateFn, context) {
             // `LView` but its declaration appears after the insertion component.
             markTransplantedViewsForRefresh(lView);
         }
+        runEffectsInView(lView);
         detectChangesInEmbeddedViews(lView, 0 /* ChangeDetectionMode.Global */);
         // Content query results must be refreshed before content hooks are called.
         if (tView.contentQueries !== null) {
@@ -14049,6 +14088,7 @@ function detectChangesInView(lView, mode) {
         refreshView(tView, lView, tView.template, lView[CONTEXT]);
     }
     else if (flags & 8192 /* LViewFlags.HasChildViewsToRefresh */) {
+        runEffectsInView(lView);
         detectChangesInEmbeddedViews(lView, 1 /* ChangeDetectionMode.Targeted */);
         const components = tView.components;
         if (components !== null) {
@@ -16754,8 +16794,6 @@ class ComponentFactory extends ComponentFactory$1 {
             const environment = {
                 rendererFactory,
                 sanitizer,
-                // We don't use inline effects (yet).
-                inlineEffectRunner: null,
                 changeDetectionScheduler,
             };
             const hostRenderer = rendererFactory.createRenderer(null, this.componentDef);
@@ -16993,7 +17031,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.6+sha-c6039b5']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.6+sha-4e890cc']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31100,7 +31138,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.6+sha-c6039b5');
+const VERSION = new Version('19.0.0-next.6+sha-4e890cc');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -32479,6 +32517,79 @@ class ApplicationInitStatus {
     }], () => [], null); })();
 
 /**
+ * A scheduler which manages the execution of effects.
+ */
+class EffectScheduler {
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: EffectScheduler,
+        providedIn: 'root',
+        factory: () => new ZoneAwareEffectScheduler(),
+    }); }
+}
+/**
+ * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
+ * when.
+ */
+class ZoneAwareEffectScheduler {
+    constructor() {
+        this.queuedEffectCount = 0;
+        this.queues = new Map();
+        this.pendingTasks = inject(PendingTasks);
+        this.taskId = null;
+    }
+    schedule(handle) {
+        this.enqueue(handle);
+        if (this.taskId === null) {
+            this.taskId = this.pendingTasks.add();
+        }
+    }
+    enqueue(handle) {
+        const zone = handle.zone;
+        if (!this.queues.has(zone)) {
+            this.queues.set(zone, new Set());
+        }
+        const queue = this.queues.get(zone);
+        if (queue.has(handle)) {
+            return;
+        }
+        this.queuedEffectCount++;
+        queue.add(handle);
+    }
+    /**
+     * Run all scheduled effects.
+     *
+     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
+     * ordering guarantee between effects scheduled in different zones.
+     */
+    flush() {
+        while (this.queuedEffectCount > 0) {
+            for (const [zone, queue] of this.queues) {
+                // `zone` here must be defined.
+                if (zone === null) {
+                    this.flushQueue(queue);
+                }
+                else {
+                    zone.run(() => this.flushQueue(queue));
+                }
+            }
+        }
+        if (this.taskId !== null) {
+            this.pendingTasks.remove(this.taskId);
+            this.taskId = null;
+        }
+    }
+    flushQueue(queue) {
+        for (const handle of queue) {
+            queue.delete(handle);
+            this.queuedEffectCount--;
+            // TODO: what happens if this throws an error?
+            handle.run();
+        }
+    }
+}
+
+/**
  * A DI token that provides a set of callbacks to
  * be called for every component that is bootstrapped.
  *
@@ -32648,6 +32759,7 @@ class ApplicationRef {
         this.internalErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
         this.afterRenderManager = inject(AfterRenderManager);
         this.zonelessEnabled = inject(ZONELESS_ENABLED);
+        this.rootEffectScheduler = inject(EffectScheduler);
         /**
          * Current dirty state of the application across a number of dimensions (views, afterRender hooks,
          * etc).
@@ -32868,6 +32980,11 @@ class ApplicationRef {
         // If we happened to loop, deferred dirtiness can be processed as active dirtiness again.
         this.dirtyFlags |= this.deferredDirtyFlags;
         this.deferredDirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
+        // First, process any dirty root effects.
+        if (this.dirtyFlags & 16 /* ApplicationRefDirtyFlags.RootEffects */) {
+            this.dirtyFlags &= ~16 /* ApplicationRefDirtyFlags.RootEffects */;
+            this.rootEffectScheduler.flush();
+        }
         // First check dirty views, if there are any.
         if (this.dirtyFlags & 7 /* ApplicationRefDirtyFlags.ViewTreeAny */) {
             // Change detection on views starts in targeted mode (only check components if they're
@@ -32888,8 +33005,10 @@ class ApplicationRef {
             this.dirtyFlags &= ~4 /* ApplicationRefDirtyFlags.ViewTreeCheck */;
             // Check if any views are still dirty after checking and we need to loop back.
             this.syncDirtyFlagsWithViews();
-            if (this.dirtyFlags & 7 /* ApplicationRefDirtyFlags.ViewTreeAny */) {
-                // If any views are still dirty after checking, loop back before running render hooks.
+            if (this.dirtyFlags &
+                (7 /* ApplicationRefDirtyFlags.ViewTreeAny */ | 16 /* ApplicationRefDirtyFlags.RootEffects */)) {
+                // If any views or effects are still dirty after checking, loop back before running render
+                // hooks.
                 return;
             }
         }
@@ -33492,6 +33611,10 @@ class ChangeDetectionSchedulerImpl {
                 // `markForRefresh()` API which sends `NotificationSource.MarkAncestorsForTraversal` anyway.
                 this.appRef.dirtyFlags |= 2 /* ApplicationRefDirtyFlags.ViewTreeTraversal */;
                 force = true;
+                break;
+            }
+            case 13 /* NotificationSource.RootEffect */: {
+                this.appRef.dirtyFlags |= 16 /* ApplicationRefDirtyFlags.RootEffects */;
                 break;
             }
             case 12 /* NotificationSource.PendingTaskRemoved */: {
@@ -38246,99 +38369,53 @@ function untracked(nonReactiveReadsFn) {
     }
 }
 
-/**
- * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
- * injector.
- */
-const APP_EFFECT_SCHEDULER = new InjectionToken('', {
-    providedIn: 'root',
-    factory: () => inject(EffectScheduler),
-});
-/**
- * A scheduler which manages the execution of effects.
- */
-class EffectScheduler {
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: EffectScheduler,
-        providedIn: 'root',
-        factory: () => new ZoneAwareEffectScheduler(),
-    }); }
-}
-/**
- * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
- * when.
- */
-class ZoneAwareEffectScheduler {
-    constructor() {
-        this.queuedEffectCount = 0;
-        this.queues = new Map();
-        this.pendingTasks = inject(PendingTasks);
-        this.taskId = null;
-    }
-    scheduleEffect(handle) {
-        this.enqueue(handle);
-        if (this.taskId === null) {
-            const taskId = (this.taskId = this.pendingTasks.add());
-            queueMicrotask(() => {
-                this.flush();
-                this.pendingTasks.remove(taskId);
-                this.taskId = null;
-            });
-        }
-    }
-    enqueue(handle) {
-        const zone = handle.creationZone;
-        if (!this.queues.has(zone)) {
-            this.queues.set(zone, new Set());
-        }
-        const queue = this.queues.get(zone);
-        if (queue.has(handle)) {
-            return;
-        }
-        this.queuedEffectCount++;
-        queue.add(handle);
+class ViewContext {
+    constructor(view, node) {
+        this.view = view;
+        this.node = node;
     }
     /**
-     * Run all scheduled effects.
-     *
-     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
-     * ordering guarantee between effects scheduled in different zones.
+     * @internal
      */
-    flush() {
-        while (this.queuedEffectCount > 0) {
-            for (const [zone, queue] of this.queues) {
-                // `zone` here must be defined.
-                if (zone === null) {
-                    this.flushQueue(queue);
-                }
-                else {
-                    zone.run(() => this.flushQueue(queue));
-                }
-            }
+    static { this.__NG_ELEMENT_ID__ = injectViewContext; }
+}
+function injectViewContext() {
+    return new ViewContext(getLView(), getCurrentTNode());
+}
+
+/**
+ * Controls whether effects use the legacy `microtaskEffect` by default.
+ */
+const USE_MICROTASK_EFFECT_BY_DEFAULT = true;
+
+class MicrotaskEffectScheduler extends ZoneAwareEffectScheduler {
+    schedule(effect) {
+        // Check whether there are any pending effects _before_ queueing in the base class.
+        const needsScheduling = this.taskId === null;
+        super.schedule(effect);
+        if (needsScheduling) {
+            queueMicrotask(() => this.flush());
         }
     }
-    flushQueue(queue) {
-        for (const handle of queue) {
-            queue.delete(handle);
-            this.queuedEffectCount--;
-            // TODO: what happens if this throws an error?
-            handle.run();
-        }
-    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: MicrotaskEffectScheduler,
+        providedIn: 'root',
+        factory: () => new MicrotaskEffectScheduler(),
+    }); }
 }
 /**
  * Core reactive node for an Angular effect.
  *
  * `EffectHandle` combines the reactive graph's `Watch` base node for effects with the framework's
- * scheduling abstraction (`EffectScheduler`) as well as automatic cleanup via `DestroyRef` if
- * available/requested.
+ * scheduling abstraction (`MicrotaskEffectScheduler`) as well as automatic cleanup via `DestroyRef`
+ * if available/requested.
  */
 class EffectHandle {
-    constructor(scheduler, effectFn, creationZone, destroyRef, injector, allowSignalWrites) {
+    constructor(scheduler, effectFn, zone, destroyRef, injector, allowSignalWrites) {
         this.scheduler = scheduler;
         this.effectFn = effectFn;
-        this.creationZone = creationZone;
+        this.zone = zone;
         this.injector = injector;
         this.watcher = createWatch$1((onCleanup) => this.runEffect(onCleanup), () => this.schedule(), allowSignalWrites);
         this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
@@ -38358,7 +38435,7 @@ class EffectHandle {
         this.watcher.run();
     }
     schedule() {
-        this.scheduler.scheduleEffect(this);
+        this.scheduler.schedule(this);
     }
     destroy() {
         this.watcher.destroy();
@@ -38367,20 +38444,20 @@ class EffectHandle {
         // retain a reference to it. Attempting to execute it will be a no-op.
     }
 }
+// Just used for the name for the debug error below.
+function effect$1() { }
 /**
  * Create a global `Effect` for the given reactive function.
- *
- * @developerPreview
  */
-function effect(effectFn, options) {
+function microtaskEffect(effectFn, options) {
     performanceMarkFeature('NgSignals');
     ngDevMode &&
-        assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
+        assertNotInReactiveContext(effect$1, 'Call `effect` outside of a reactive context. For example, schedule the ' +
             'effect inside the component constructor.');
-    !options?.injector && assertInInjectionContext(effect);
+    !options?.injector && assertInInjectionContext(effect$1);
     const injector = options?.injector ?? inject(Injector);
     const destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
-    const handle = new EffectHandle(injector.get(APP_EFFECT_SCHEDULER), effectFn, typeof Zone === 'undefined' ? null : Zone.current, destroyRef, injector, options?.allowSignalWrites ?? false);
+    const handle = new EffectHandle(injector.get(MicrotaskEffectScheduler), effectFn, typeof Zone === 'undefined' ? null : Zone.current, destroyRef, injector, options?.allowSignalWrites ?? false);
     // Effects need to be marked dirty manually to trigger their initial run. The timing of this
     // marking matters, because the effects may read signals that track component inputs, which are
     // only available after those components have had their first update pass.
@@ -38401,6 +38478,180 @@ function effect(effectFn, options) {
         (cdr._lView[EFFECTS_TO_SCHEDULE] ??= []).push(handle.watcher.notify);
     }
     return handle;
+}
+
+let useMicrotaskEffectsByDefault = USE_MICROTASK_EFFECT_BY_DEFAULT;
+/**
+ * Toggle the flag on whether to use microtask effects (for testing).
+ */
+function setUseMicrotaskEffectsByDefault(value) {
+    const prev = useMicrotaskEffectsByDefault;
+    useMicrotaskEffectsByDefault = value;
+    return prev;
+}
+class EffectRefImpl {
+    constructor(node) {
+        this[SIGNAL$1] = node;
+    }
+    destroy() {
+        this[SIGNAL$1].destroy();
+    }
+}
+/**
+ * Registers an "effect" that will be scheduled & executed whenever the signals that it reads
+ * changes.
+ *
+ * Angular has two different kinds of effect: component effects and root effects. Component effects
+ * are created when `effect()` is called from a component, directive, or within a service of a
+ * component/directive. Root effects are created when `effect()` is called from outside the
+ * component tree, such as in a root service, or when the `forceRoot` option is provided.
+ *
+ * The two effect types differ in their timing. Component effects run as a component lifecycle
+ * event during Angular's synchronization (change detection) process, and can safely read input
+ * signals or create/destroy views that depend on component state. Root effects run as microtasks
+ * and have no connection to the component tree or change detection.
+ *
+ * `effect()` must be run in injection context, unless the `injector` option is manually specified.
+ *
+ * @developerPreview
+ */
+function effect(effectFn, options) {
+    if (useMicrotaskEffectsByDefault) {
+        if (ngDevMode && options?.forceRoot) {
+            throw new Error(`Cannot use 'forceRoot' option with microtask effects on`);
+        }
+        return microtaskEffect(effectFn, options);
+    }
+    performanceMarkFeature('NgSignals');
+    ngDevMode &&
+        assertNotInReactiveContext(effect, 'Call `effect` outside of a reactive context. For example, schedule the ' +
+            'effect inside the component constructor.');
+    !options?.injector && assertInInjectionContext(effect);
+    if (ngDevMode && options?.allowSignalWrites !== undefined) {
+        console.warn(`The 'allowSignalWrites' flag is deprecated & longer required for effect() (writes are allowed by default)`);
+    }
+    const injector = options?.injector ?? inject(Injector);
+    let destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
+    let node;
+    const viewContext = injector.get(ViewContext, null, { optional: true });
+    if (viewContext !== null && !options?.forceRoot) {
+        // This effect was created in the context of a view, and will be associated with the view.
+        node = createViewEffect(viewContext.view, effectFn);
+        if (destroyRef instanceof NodeInjectorDestroyRef && destroyRef._lView === viewContext.view) {
+            // The effect is being created in the same view as the `DestroyRef` references, so it will be
+            // automatically destroyed without the need for an explicit `DestroyRef` registration.
+            destroyRef = null;
+        }
+    }
+    else {
+        // This effect was created outside the context of a view, and will be scheduled independently.
+        node = createRootEffect(effectFn, injector.get(EffectScheduler), injector.get(ChangeDetectionScheduler));
+    }
+    node.injector = injector;
+    if (destroyRef !== null) {
+        // If we need to register for cleanup, do that here.
+        node.onDestroyFn = destroyRef.onDestroy(() => node.destroy());
+    }
+    return new EffectRefImpl(node);
+}
+/**
+ * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
+ * injector.
+ */
+const APP_EFFECT_SCHEDULER = new InjectionToken('', {
+    providedIn: 'root',
+    factory: () => inject(EffectScheduler),
+});
+const BASE_EFFECT_NODE = 
+/* @__PURE__ */ (() => ({
+    ...REACTIVE_NODE$1,
+    consumerIsAlwaysLive: true,
+    consumerAllowSignalWrites: true,
+    dirty: true,
+    hasRun: false,
+    cleanupFns: undefined,
+    zone: null,
+    onDestroyFn: noop,
+    run() {
+        this.dirty = false;
+        if (ngDevMode && isInNotificationPhase$1()) {
+            throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
+        }
+        if (this.hasRun && !consumerPollProducersForChange$1(this)) {
+            return;
+        }
+        this.hasRun = true;
+        const registerCleanupFn = (cleanupFn) => (this.cleanupFns ??= []).push(cleanupFn);
+        const prevNode = consumerBeforeComputation$1(this);
+        // We clear `setIsRefreshingViews` so that `markForCheck()` within the body of an effect will
+        // cause CD to reach the component in question.
+        const prevRefreshingViews = setIsRefreshingViews(false);
+        try {
+            this.maybeCleanup();
+            this.fn(registerCleanupFn);
+        }
+        catch (err) {
+            // We inject the error handler lazily, to prevent circular dependencies when an effect is
+            // created inside of an ErrorHandler.
+            this.injector.get(ErrorHandler, null, { optional: true })?.handleError(err);
+        }
+        finally {
+            setIsRefreshingViews(prevRefreshingViews);
+            consumerAfterComputation$1(this, prevNode);
+        }
+    },
+    maybeCleanup() {
+        while (this.cleanupFns?.length) {
+            this.cleanupFns.pop()();
+        }
+    },
+}))();
+const ROOT_EFFECT_NODE = 
+/* @__PURE__ */ (() => ({
+    ...BASE_EFFECT_NODE,
+    consumerMarkedDirty() {
+        this.scheduler.schedule(this);
+        this.notifier.notify(13 /* NotificationSource.RootEffect */);
+    },
+    destroy() {
+        consumerDestroy$1(this);
+        this.onDestroyFn();
+        this.maybeCleanup();
+    },
+}))();
+const VIEW_EFFECT_NODE = 
+/* @__PURE__ */ (() => ({
+    ...BASE_EFFECT_NODE,
+    consumerMarkedDirty() {
+        this.view[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
+        markAncestorsForTraversal(this.view);
+    },
+    destroy() {
+        consumerDestroy$1(this);
+        this.onDestroyFn();
+        this.maybeCleanup();
+        this.view[EFFECTS]?.delete(this);
+    },
+}))();
+function createViewEffect(view, fn) {
+    const node = Object.create(VIEW_EFFECT_NODE);
+    node.view = view;
+    node.zone = typeof Zone !== 'undefined' ? Zone.current : null;
+    node.fn = fn;
+    view[EFFECTS] ??= new Set();
+    view[EFFECTS].add(node);
+    node.consumerMarkedDirty(node);
+    return node;
+}
+function createRootEffect(fn, scheduler, notifier) {
+    const node = Object.create(ROOT_EFFECT_NODE);
+    node.fn = fn;
+    node.scheduler = scheduler;
+    node.notifier = notifier;
+    node.zone = typeof Zone !== 'undefined' ? Zone.current : null;
+    node.scheduler.schedule(node);
+    node.notifier.notify(13 /* NotificationSource.RootEffect */);
+    return node;
 }
 
 const NOT_SET = Symbol('NOT_SET');
@@ -38738,5 +38989,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, ExperimentalPendingTasks, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, GLOBAL_EVENT_DELEGATION as ɵGLOBAL_EVENT_DELEGATION, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasks as ɵPendingTasks, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, provideGlobalEventDelegation as ɵprovideGlobalEventDelegation, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, ExperimentalPendingTasks, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, GLOBAL_EVENT_DELEGATION as ɵGLOBAL_EVENT_DELEGATION, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, MicrotaskEffectScheduler as ɵMicrotaskEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasks as ɵPendingTasks, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, microtaskEffect as ɵmicrotaskEffect, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, provideGlobalEventDelegation as ɵprovideGlobalEventDelegation, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, ɵɵCopyDefinitionFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=core.mjs.map

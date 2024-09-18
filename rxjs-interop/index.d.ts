@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-c6039b5
+ * @license Angular v19.0.0-next.6+sha-4e890cc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -163,5 +163,7 @@ export declare interface ToSignalOptions<T> {
      */
     equal?: ValueEqualityFn<T>;
 }
+
+export declare function ɵtoObservableMicrotask<T>(source: Signal<T>, options?: ToObservableOptions): Observable<T>;
 
 export { }

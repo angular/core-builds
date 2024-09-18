@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-c6039b5
+ * @license Angular v19.0.0-next.6+sha-4e890cc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -69,6 +69,8 @@ export declare class ComponentFixture<T> {
     private readonly appErrorHandler;
     private readonly zonelessEnabled;
     private readonly scheduler;
+    private readonly rootEffectScheduler;
+    private readonly microtaskEffectScheduler;
     private readonly autoDetectDefault;
     private autoDetect;
     private subscriptions;

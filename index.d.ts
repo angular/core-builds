@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-c6039b5
+ * @license Angular v19.0.0-next.6+sha-4e890cc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -980,6 +980,7 @@ export declare class ApplicationRef {
     private readonly internalErrorHandler;
     private readonly afterRenderManager;
     private readonly zonelessEnabled;
+    private readonly rootEffectScheduler;
     private externalTestViews;
     /**
      * Indicates whether this instance was destroyed.
@@ -2614,10 +2615,12 @@ export declare interface CreateEffectOptions {
      */
     manualCleanup?: boolean;
     /**
-     * Whether the `effect` should allow writing to signals.
-     *
-     * Using effects to synchronize data by writing to signals can lead to confusing and potentially
-     * incorrect behavior, and should be enabled only when necessary.
+     * Always create a root effect (which is scheduled as a microtask) regardless of whether `effect`
+     * is called within a component.
+     */
+    forceRoot?: true;
+    /**
+     * @deprecated no longer required, signal writes are allowed by default.
      */
     allowSignalWrites?: boolean;
 }
@@ -3255,7 +3258,6 @@ declare type DestroyHookData = (HookEntry | HookData)[];
  */
 export declare function destroyPlatform(): void;
 
-
 /**
  * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
  * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
@@ -3892,7 +3894,20 @@ export declare interface DoCheck {
 }
 
 /**
- * Create a global `Effect` for the given reactive function.
+ * Registers an "effect" that will be scheduled & executed whenever the signals that it reads
+ * changes.
+ *
+ * Angular has two different kinds of effect: component effects and root effects. Component effects
+ * are created when `effect()` is called from a component, directive, or within a service of a
+ * component/directive. Root effects are created when `effect()` is called from outside the
+ * component tree, such as in a root service, or when the `forceRoot` option is provided.
+ *
+ * The two effect types differ in their timing. Component effects run as a component lifecycle
+ * event during Angular's synchronization (change detection) process, and can safely read input
+ * signals or create/destroy views that depend on component state. Root effects run as microtasks
+ * and have no connection to the component tree or change detection.
+ *
+ * `effect()` must be run in injection context, unless the `injector` option is manually specified.
  *
  * @developerPreview
  */
@@ -3914,6 +3929,17 @@ export declare type EffectCleanupFn = () => void;
  */
 export declare type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
 
+declare interface EffectNode extends ReactiveNode, SchedulableEffect {
+    hasRun: boolean;
+    cleanupFns: EffectCleanupFn[] | undefined;
+    injector: Injector;
+    onDestroyFn: () => void;
+    fn: (cleanupFn: EffectCleanupRegisterFn) => void;
+    run(): void;
+    destroy(): void;
+    maybeCleanup(): void;
+}
+
 /**
  * A global reactive effect, which can be manually destroyed.
  *
@@ -3925,6 +3951,8 @@ export declare interface EffectRef {
      */
     destroy(): void;
 }
+
+declare const EFFECTS = 23;
 
 declare const EFFECTS_TO_SCHEDULE = 22;
 
@@ -7143,6 +7171,7 @@ declare interface LView<T = unknown> extends Array<any> {
      * Effect scheduling operations that need to run during this views's update pass.
      */
     [EFFECTS_TO_SCHEDULE]: Array<() => void> | null;
+    [EFFECTS]: Set<ViewEffectNode> | null;
     /**
      * A collection of callbacks functions that are executed when a given LView is destroyed. Those
      * are user defined, LView-specific destroy callbacks that don't have any corresponding TView
@@ -7166,8 +7195,6 @@ declare interface LViewEnvironment {
     rendererFactory: RendererFactory;
     /** An optional custom sanitizer. */
     sanitizer: Sanitizer | null;
-    /** Container for reactivity system `effect`s. */
-    inlineEffectRunner: ɵEffectScheduler | null;
     /** Scheduler for change detection to notify when application state changes. */
     changeDetectionScheduler: ɵChangeDetectionScheduler | null;
 }
@@ -9030,7 +9057,7 @@ declare interface RDomTokenList {
     remove(token: string): void;
 }
 
-declare const REACTIVE_TEMPLATE_CONSUMER = 23;
+declare const REACTIVE_TEMPLATE_CONSUMER = 24;
 
 declare interface ReactiveLViewConsumer extends ReactiveNode {
     lView: LView | null;
@@ -9480,9 +9507,15 @@ export declare abstract class Sanitizer {
  */
 declare type SanitizerFn = (value: any, tagName?: string, propName?: string) => string | TrustedHTML | TrustedScript | TrustedScriptURL;
 
+
+/**
+ * Abstraction that encompasses any kind of effect that can be scheduled.
+ */
 declare interface SchedulableEffect {
     run(): void;
-    creationZone: unknown;
+    zone: {
+        run<T>(fn: () => T): T;
+    } | null;
 }
 
 
@@ -12064,6 +12097,10 @@ export declare abstract class ViewContainerRef {
     abstract detach(index?: number): ViewRef | null;
 }
 
+declare interface ViewEffectNode extends EffectNode {
+    view: LView;
+}
+
 
 /**
  * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
@@ -12168,6 +12205,27 @@ export declare interface WritableSignal<T> extends Signal<T> {
      * any built-in mechanism that would prevent deep-mutation of their value.
      */
     asReadonly(): Signal<T>;
+}
+
+/**
+ * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
+ * when.
+ */
+declare class ZoneAwareEffectScheduler implements ɵEffectScheduler {
+    private queuedEffectCount;
+    private queues;
+    private readonly pendingTasks;
+    protected taskId: number | null;
+    schedule(handle: SchedulableEffect): void;
+    private enqueue;
+    /**
+     * Run all scheduled effects.
+     *
+     * Execution order of effects within the same zone is guaranteed to be FIFO, but there is no
+     * ordering guarantee between effects scheduled in different zones.
+     */
+    flush(): void;
+    private flushQueue;
 }
 
 /**
@@ -12952,7 +13010,7 @@ export declare abstract class ɵEffectScheduler {
      *
      * It is an error to attempt to execute any effects synchronously during a scheduling operation.
      */
-    abstract scheduleEffect(e: SchedulableEffect): void;
+    abstract schedule(e: SchedulableEffect): void;
     /**
      * Run any scheduled effects.
      */
@@ -13385,6 +13443,17 @@ export declare enum ɵLocaleDataIndex {
     ExtraData = 21
 }
 
+/**
+ * Create a global `Effect` for the given reactive function.
+ */
+export declare function ɵmicrotaskEffect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, options?: CreateEffectOptions): EffectRef;
+
+export declare class ɵMicrotaskEffectScheduler extends ZoneAwareEffectScheduler {
+    schedule(effect: SchedulableEffect): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
+
 
 export declare const ɵNG_COMP_DEF: string;
 
@@ -13530,7 +13599,8 @@ export declare const enum ɵNotificationSource {
     ViewAttached = 9,
     ViewDetachedFromDOM = 10,
     AsyncAnimationsLoaded = 11,
-    PendingTaskRemoved = 12
+    PendingTaskRemoved = 12,
+    RootEffect = 13
 }
 
 /**

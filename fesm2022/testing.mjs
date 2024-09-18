@@ -1,11 +1,11 @@
 /**
- * @license Angular v19.0.0-next.6+sha-c6039b5
+ * @license Angular v19.0.0-next.6+sha-4e890cc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import * as i0 from '@angular/core';
-import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ɵEffectScheduler, ApplicationRef, ɵPendingTasks, ɵZONELESS_ENABLED, ɵChangeDetectionScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
+import { ɵDeferBlockState, ɵtriggerResourceLoading, ɵrenderDeferBlockState, ɵCONTAINER_HEADER_OFFSET, ɵgetDeferBlocks, ɵDeferBlockBehavior, InjectionToken, inject as inject$1, NgZone, ErrorHandler, Injectable, ɵNoopNgZone, ApplicationRef, ɵPendingTasks, ɵZONELESS_ENABLED, ɵChangeDetectionScheduler, ɵEffectScheduler, ɵMicrotaskEffectScheduler, getDebugNode, RendererFactory2, ɵstringify, ɵReflectionCapabilities, Directive, Component, Pipe, NgModule, ɵgetAsyncClassMetadataFn, ɵgenerateStandaloneInDeclarationsError, ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ɵdepsTracker, ɵgetInjectableDef, resolveForwardRef, ɵNG_COMP_DEF, ɵisComponentDefPendingResolution, ɵresolveComponentResources, ɵRender3NgModuleRef, ApplicationInitStatus, LOCALE_ID, ɵDEFAULT_LOCALE_ID, ɵsetLocaleId, ɵRender3ComponentFactory, ɵcompileComponent, ɵNG_DIR_DEF, ɵcompileDirective, ɵNG_PIPE_DEF, ɵcompilePipe, ɵNG_MOD_DEF, ɵtransitiveScopesFor, ɵpatchComponentDefWithScope, ɵNG_INJ_DEF, ɵcompileNgModuleDefs, ɵclearResolutionOfComponentResourcesQueue, ɵrestoreComponentResolutionQueue, ɵinternalProvideZoneChangeDetection, ɵChangeDetectionSchedulerImpl, Compiler, ɵDEFER_BLOCK_CONFIG, ɵINTERNAL_APPLICATION_ERROR_HANDLER, COMPILER_OPTIONS, Injector, ɵisEnvironmentProviders, ɵNgModuleFactory, ModuleWithComponentFactories, ɵconvertToBitFlags, InjectFlags, ɵsetAllowDuplicateNgModuleIdsForTest, ɵresetCompiledComponents, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, runInInjectionContext, EnvironmentInjector, ɵflushModuleScopingQueueAsMuchAsPossible } from '@angular/core';
 export { ɵDeferBlockBehavior as DeferBlockBehavior, ɵDeferBlockState as DeferBlockState } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ResourceLoader } from '@angular/compiler';
@@ -175,10 +175,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.0.0-next.6+sha-c6039b5", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
-    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.0.0-next.6+sha-c6039b5", ngImport: i0, type: TestBedApplicationErrorHandler }); }
+    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.0.0-next.6+sha-4e890cc", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
+    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.0.0-next.6+sha-4e890cc", ngImport: i0, type: TestBedApplicationErrorHandler }); }
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.0.0-next.6+sha-c6039b5", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.0.0-next.6+sha-4e890cc", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
@@ -196,8 +196,6 @@ class ComponentFixture {
         this._noZoneOptionIsSet = inject$1(ComponentFixtureNoNgZone, { optional: true });
         /** @internal */
         this._ngZone = this._noZoneOptionIsSet ? new ɵNoopNgZone() : inject$1(NgZone);
-        /** @internal */
-        this._effectRunner = inject$1(ɵEffectScheduler);
         // Inject ApplicationRef to ensure NgZone stableness causes after render hooks to run
         // This will likely happen as a result of fixture.detectChanges because it calls ngZone.run
         // This is a crazy way of doing things but hey, it's the world we live in.
@@ -211,6 +209,8 @@ class ComponentFixture {
         this.appErrorHandler = inject$1(TestBedApplicationErrorHandler);
         this.zonelessEnabled = inject$1(ɵZONELESS_ENABLED);
         this.scheduler = inject$1(ɵChangeDetectionScheduler);
+        this.rootEffectScheduler = inject$1(ɵEffectScheduler);
+        this.microtaskEffectScheduler = inject$1(ɵMicrotaskEffectScheduler);
         this.autoDetectDefault = this.zonelessEnabled ? true : false;
         this.autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? this.autoDetectDefault;
         this.subscriptions = new Subscription();
@@ -244,7 +244,7 @@ class ComponentFixture {
      * Trigger a change detection cycle for the component.
      */
     detectChanges(checkNoChanges = true) {
-        this._effectRunner.flush();
+        this.microtaskEffectScheduler.flush();
         const originalCheckNoChanges = this.componentRef.changeDetectorRef.checkNoChanges;
         try {
             if (!checkNoChanges) {
@@ -264,9 +264,9 @@ class ComponentFixture {
             else {
                 // Run the change detection inside the NgZone so that any async tasks as part of the change
                 // detection are captured by the zone and can be waited for in isStable.
-                // Run any effects that were created/dirtied during change detection. Such effects might become
-                // dirty in response to input signals changing.
                 this._ngZone.run(() => {
+                    // Flush root effects before `detectChanges()`, to emulate the sequencing of `tick()`.
+                    this.rootEffectScheduler.flush();
                     this.changeDetectorRef.detectChanges();
                     this.checkNoChanges();
                 });
@@ -275,7 +275,7 @@ class ComponentFixture {
         finally {
             this.componentRef.changeDetectorRef.checkNoChanges = originalCheckNoChanges;
         }
-        this._effectRunner.flush();
+        this.microtaskEffectScheduler.flush();
     }
     /**
      * Do a change detection run to make sure there were no changes.
@@ -2125,6 +2125,7 @@ class TestBedImpl {
      * @developerPreview
      */
     flushEffects() {
+        this.inject(ɵMicrotaskEffectScheduler).flush();
         this.inject(ɵEffectScheduler).flush();
     }
 }
