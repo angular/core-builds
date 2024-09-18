@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.5+sha-4231e8f
+ * @license Angular v19.0.0-next.5+sha-f611faa
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,7 +12,7 @@ var schematics = require('@angular-devkit/schematics');
 var ts = require('typescript');
 var os = require('os');
 var checker = require('./checker-dcf9a14e.js');
-var program = require('./program-39b5863c.js');
+var program = require('./program-734eb12d.js');
 require('path');
 var assert = require('assert');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
@@ -29874,7 +29874,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.5+sha-4231e8f');
+new Version('19.0.0-next.5+sha-f611faa');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30973,7 +30973,7 @@ function topologicalSort(graph) {
  * The logic here detects such cases and marks `bla` as incompatible. If `Derived`
  * would then have other derived classes as well, it would propagate the status.
  */
-function checkInheritanceOfInputs(inheritanceGraph, metaRegistry, fields, opts) {
+function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, opts) {
     // Sort topologically and iterate super classes first, so that we can trivially
     // propagate incompatibility statuses (and other checks) without having to check
     // in both directions (derived classes, or base classes). This simplifies the logic
@@ -31075,7 +31075,7 @@ function checkInheritanceOfInputs(inheritanceGraph, metaRegistry, fields, opts) 
  * would then have other derived classes as well, it would propagate the status.
  */
 function pass4__checkInheritanceOfInputs(inheritanceGraph, metaRegistry, knownInputs) {
-    checkInheritanceOfInputs(inheritanceGraph, metaRegistry, knownInputs, {
+    checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, knownInputs, {
         isClassWithKnownFields: (clazz) => knownInputs.isInputContainingClass(clazz),
         getFieldsForClass: (clazz) => {
             const directiveInfo = knownInputs.getDirectiveInfoForClass(clazz);
