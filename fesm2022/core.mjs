@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-cd24eaf
+ * @license Angular v19.0.0-next.6+sha-fc59e2a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17031,7 +17031,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.6+sha-cd24eaf']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.6+sha-fc59e2a']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31138,7 +31138,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.6+sha-cd24eaf');
+const VERSION = new Version('19.0.0-next.6+sha-fc59e2a');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -38386,7 +38386,7 @@ function injectViewContext() {
 /**
  * Controls whether effects use the legacy `microtaskEffect` by default.
  */
-const USE_MICROTASK_EFFECT_BY_DEFAULT = true;
+const USE_MICROTASK_EFFECT_BY_DEFAULT = false;
 
 class MicrotaskEffectScheduler extends ZoneAwareEffectScheduler {
     schedule(effect) {
