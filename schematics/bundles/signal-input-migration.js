@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-4112e6f
+ * @license Angular v19.0.0-next.6+sha-88f2fe4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -264,16 +264,17 @@ function getExtendedConfigPathWorker(configFile, extendsValue, host, fs) {
 /** Reasons why an input cannot be migrated. */
 var InputIncompatibilityReason;
 (function (InputIncompatibilityReason) {
-    InputIncompatibilityReason[InputIncompatibilityReason["SkippedViaConfigFilter"] = 0] = "SkippedViaConfigFilter";
-    InputIncompatibilityReason[InputIncompatibilityReason["Accessor"] = 1] = "Accessor";
-    InputIncompatibilityReason[InputIncompatibilityReason["WriteAssignment"] = 2] = "WriteAssignment";
-    InputIncompatibilityReason[InputIncompatibilityReason["OverriddenByDerivedClass"] = 3] = "OverriddenByDerivedClass";
-    InputIncompatibilityReason[InputIncompatibilityReason["RedeclaredViaDerivedClassInputsArray"] = 4] = "RedeclaredViaDerivedClassInputsArray";
-    InputIncompatibilityReason[InputIncompatibilityReason["TypeConflictWithBaseClass"] = 5] = "TypeConflictWithBaseClass";
-    InputIncompatibilityReason[InputIncompatibilityReason["ParentIsIncompatible"] = 6] = "ParentIsIncompatible";
-    InputIncompatibilityReason[InputIncompatibilityReason["SpyOnThatOverwritesField"] = 7] = "SpyOnThatOverwritesField";
-    InputIncompatibilityReason[InputIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 8] = "PotentiallyNarrowedInTemplateButNoSupportYet";
-    InputIncompatibilityReason[InputIncompatibilityReason["RequiredInputButNoGoodExplicitTypeExtractable"] = 9] = "RequiredInputButNoGoodExplicitTypeExtractable";
+    InputIncompatibilityReason[InputIncompatibilityReason["OutsideOfMigrationScope"] = 0] = "OutsideOfMigrationScope";
+    InputIncompatibilityReason[InputIncompatibilityReason["SkippedViaConfigFilter"] = 1] = "SkippedViaConfigFilter";
+    InputIncompatibilityReason[InputIncompatibilityReason["Accessor"] = 2] = "Accessor";
+    InputIncompatibilityReason[InputIncompatibilityReason["WriteAssignment"] = 3] = "WriteAssignment";
+    InputIncompatibilityReason[InputIncompatibilityReason["OverriddenByDerivedClass"] = 4] = "OverriddenByDerivedClass";
+    InputIncompatibilityReason[InputIncompatibilityReason["RedeclaredViaDerivedClassInputsArray"] = 5] = "RedeclaredViaDerivedClassInputsArray";
+    InputIncompatibilityReason[InputIncompatibilityReason["TypeConflictWithBaseClass"] = 6] = "TypeConflictWithBaseClass";
+    InputIncompatibilityReason[InputIncompatibilityReason["ParentIsIncompatible"] = 7] = "ParentIsIncompatible";
+    InputIncompatibilityReason[InputIncompatibilityReason["SpyOnThatOverwritesField"] = 8] = "SpyOnThatOverwritesField";
+    InputIncompatibilityReason[InputIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 9] = "PotentiallyNarrowedInTemplateButNoSupportYet";
+    InputIncompatibilityReason[InputIncompatibilityReason["RequiredInputButNoGoodExplicitTypeExtractable"] = 10] = "RequiredInputButNoGoodExplicitTypeExtractable";
 })(InputIncompatibilityReason || (InputIncompatibilityReason = {}));
 /** Reasons why a whole class and its inputs cannot be migrated. */
 var ClassIncompatibilityReason;
@@ -560,8 +561,6 @@ class KnownInputs {
          * Known inputs from the whole program.
          */
         this.knownInputIds = new Map();
-        // TODO: perf comment
-        this.fieldNamesToConsiderForReferenceLookup = new Set();
         /** Known container classes of inputs. */
         this._allClasses = new Set();
         /** Maps classes to their directive info. */
@@ -598,6 +597,7 @@ class KnownInputs {
             metadata: data.metadata,
             descriptor: data.descriptor,
             container: directiveInfo,
+            extendsFrom: null,
             isIncompatible: () => directiveInfo.isInputMemberIncompatible(data.descriptor),
         };
         directiveInfo.inputFields.set(data.descriptor.key, {
@@ -606,9 +606,6 @@ class KnownInputs {
         });
         this.knownInputIds.set(data.descriptor.key, inputInfo);
         this._allClasses.add(data.node.parent);
-        if (this.config.shouldMigrateInput?.(inputInfo) ?? true) {
-            this.fieldNamesToConsiderForReferenceLookup.add(data.descriptor.node.name.text);
-        }
     }
     /** Whether the given input is incompatible for migration. */
     isFieldIncompatible(descriptor) {
@@ -635,6 +632,24 @@ class KnownInputs {
     }
     shouldTrackClassReference(clazz) {
         return this.isInputContainingClass(clazz);
+    }
+    captureKnownFieldInheritanceRelationship(derived, parent) {
+        if (!this.has(derived)) {
+            throw new Error(`Expected input to exist in registry: ${derived.key}`);
+        }
+        this.get(derived).extendsFrom = parent;
+    }
+    captureUnknownDerivedField(field) {
+        this.markFieldIncompatible(field, {
+            context: null,
+            reason: InputIncompatibilityReason.OverriddenByDerivedClass,
+        });
+    }
+    captureUnknownParentField(field) {
+        this.markFieldIncompatible(field, {
+            context: null,
+            reason: InputIncompatibilityReason.TypeConflictWithBaseClass,
+        });
     }
 }
 
@@ -29874,7 +29889,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.6+sha-4112e6f');
+new Version('19.0.0-next.6+sha-88f2fe4');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30546,12 +30561,16 @@ const writeBinaryOperators = [
 /**
  * Checks whether given TypeScript reference refers to an Angular input, and captures
  * the reference if possible.
+ *
+ * @param fieldNamesToConsiderForReferenceLookup List of field names that should be
+ *   respected when expensively looking up references to known fields.
+ *   May be null if all identifiers should be inspected.
  */
-function identifyPotentialTypeScriptReference(node, programInfo, checker, knownFields, result, advisors) {
+function identifyPotentialTypeScriptReference(node, programInfo, checker, knownFields, result, fieldNamesToConsiderForReferenceLookup, advisors) {
     // Skip all identifiers that never can point to a migrated field.
     // TODO: Capture these assumptions and performance optimizations in the design doc.
-    if (knownFields.fieldNamesToConsiderForReferenceLookup !== null &&
-        !knownFields.fieldNamesToConsiderForReferenceLookup.has(node.text)) {
+    if (fieldNamesToConsiderForReferenceLookup !== null &&
+        !fieldNamesToConsiderForReferenceLookup.has(node.text)) {
         return;
     }
     let target = undefined;
@@ -30626,7 +30645,7 @@ function identifyPotentialTypeScriptReference(node, programInfo, checker, knownF
  *    - Angular templates (inline or external)
  *    - Host binding expressions.
  */
-function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflector, resourceLoader, evaluator, templateTypeChecker, knownFields, result) {
+function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflector, resourceLoader, evaluator, templateTypeChecker, knownFields, fieldNamesToConsiderForReferenceLookup, result) {
     const debugElComponentInstanceTracker = new DebugElementComponentInstance(checker);
     const partialDirectiveCatalystTracker = new PartialDirectiveTypeInCatalystTests(checker, knownFields);
     const perfCounters = {
@@ -30649,7 +30668,7 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
         // find references, but do not capture input declarations itself.
         if (ts__default["default"].isIdentifier(node) &&
             !(isInputContainerNode(node.parent) && node.parent.name === node)) {
-            identifyPotentialTypeScriptReference(node, programInfo, checker, knownFields, result, {
+            identifyPotentialTypeScriptReference(node, programInfo, checker, knownFields, result, fieldNamesToConsiderForReferenceLookup, {
                 debugElComponentInstanceTracker,
             });
         }
@@ -30692,8 +30711,8 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
  * In addition, spying onto an input may be problematic- so we skip migrating
  * such.
  */
-function pass2_IdentifySourceFileReferences(programInfo, checker, reflector, resourceLoader, evaluator, templateTypeChecker, groupedTsAstVisitor, knownInputs, result) {
-    groupedTsAstVisitor.register(createFindAllSourceFileReferencesVisitor(programInfo, checker, reflector, resourceLoader, evaluator, templateTypeChecker, knownInputs, result).visitor);
+function pass2_IdentifySourceFileReferences(programInfo, checker, reflector, resourceLoader, evaluator, templateTypeChecker, groupedTsAstVisitor, knownInputs, result, fieldNamesToConsiderForReferenceLookup) {
+    groupedTsAstVisitor.register(createFindAllSourceFileReferencesVisitor(programInfo, checker, reflector, resourceLoader, evaluator, templateTypeChecker, knownInputs, fieldNamesToConsiderForReferenceLookup, result).visitor);
 }
 
 /** Gets all types that are inherited (implemented or extended). */
@@ -30722,14 +30741,18 @@ class InheritanceGraph {
     constructor(checker) {
         this.checker = checker;
         /** Maps nodes to their parent nodes. */
-        this.classParents = new Map();
+        this.classToParents = new Map();
         /** Maps nodes to their derived nodes. */
         this.parentToChildren = new Map();
+        /** All classes seen participating in inheritance chains. */
+        this.allClassesInInheritance = new Set();
     }
     /** Registers a given class in the graph. */
     registerClass(clazz, parents) {
-        this.classParents.set(clazz, parents);
+        this.classToParents.set(clazz, parents);
+        this.allClassesInInheritance.add(clazz);
         for (const parent of parents) {
+            this.allClassesInInheritance.add(parent);
             if (!this.parentToChildren.has(parent)) {
                 this.parentToChildren.set(parent, []);
             }
@@ -30743,7 +30766,7 @@ class InheritanceGraph {
      * @returns Symbols of the inherited or derived members, if they exist.
      */
     checkOverlappingMembers(clazz, member, memberName) {
-        const inheritedTypes = (this.classParents.get(clazz) ?? []).map((c) => this.checker.getTypeAtLocation(c));
+        const inheritedTypes = (this.classToParents.get(clazz) ?? []).map((c) => this.checker.getTypeAtLocation(c));
         const derivedLeafs = this._traceDerivedChainToLeafs(clazz).map((c) => this.checker.getTypeAtLocation(c));
         const inheritedMember = inheritedTypes
             .map((t) => t.getProperty(memberName))
@@ -30874,12 +30897,19 @@ function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProg
     // e.g. `ngtypecheck` files.
     !checker.isShim(sf) &&
         pass1__IdentifySourceFileAndDeclarationInputs(sf, host, typeChecker, reflector, dtsMetadataReader, evaluator, refEmitter, knownInputs, result));
+    const fieldNamesToConsiderForReferenceLookup = new Set();
+    for (const input of knownInputs.knownInputIds.values()) {
+        if (host.config.shouldMigrateInput?.(input) === false) {
+            continue;
+        }
+        fieldNamesToConsiderForReferenceLookup.add(input.descriptor.node.name.text);
+    }
     // A graph starting with source files is sufficient. We will resolve into
     // declaration files if a source file depends on such.
     const inheritanceGraph = new InheritanceGraph(typeChecker).expensivePopulate(sourceFiles);
     const pass2And3SourceFileVisitor = new GroupedTsAstVisitor(sourceFiles);
     // Register pass 2. Find all source file references.
-    pass2_IdentifySourceFileReferences(host.programInfo, typeChecker, reflector, resourceLoader, evaluator, templateTypeChecker, pass2And3SourceFileVisitor, knownInputs, result);
+    pass2_IdentifySourceFileReferences(host.programInfo, typeChecker, reflector, resourceLoader, evaluator, templateTypeChecker, pass2And3SourceFileVisitor, knownInputs, result, fieldNamesToConsiderForReferenceLookup);
     // Register pass 3. Check incompatible patterns pass.
     pass3__checkIncompatiblePatterns(inheritanceGraph, typeChecker, pass2And3SourceFileVisitor, knownInputs);
     // Perform Pass 2 and Pass 3, efficiently in one pass.
@@ -30916,44 +30946,6 @@ function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProg
 }
 
 /**
- * Sorts the inheritance graph topologically, so that
- * classes without incoming edges are returned first.
- *
- * I.e. The returned list is sorted, so that dependencies
- * of a given class are guaranteed to be included at
- * an earlier position than the inspected class.
- *
- * This sort is helpful for detecting inheritance problems
- * for the migration in simpler ways, without having to
- * check in both directions (base classes, and derived classes).
- */
-function topologicalSort(graph) {
-    // All classes without incoming edges.
-    const S = Array.from(graph.classParents.keys()).filter((n) => !graph.parentToChildren.has(n) || graph.parentToChildren.get(n).length === 0);
-    const result = [];
-    const classParents = new Map(graph.classParents);
-    const parentToChildren = new Map(graph.parentToChildren);
-    while (S.length) {
-        const node = S.pop();
-        result.push(node);
-        for (const next of classParents.get(node) ?? []) {
-            // Remove edge from "node -> next".
-            classParents.set(node, classParents.get(node).filter((n) => n !== next));
-            // Remove edge from "next -> node". Do not modify original array as it might
-            // be the one from the original graph
-            const newParentToChildrenForNext = [...parentToChildren.get(next)];
-            newParentToChildrenForNext.splice(newParentToChildrenForNext.indexOf(node), 1);
-            parentToChildren.set(next, newParentToChildrenForNext);
-            // if there are no incoming edges for `next`. add it to `S`.
-            if (parentToChildren.get(next).length === 0) {
-                S.push(next);
-            }
-        }
-    }
-    return result;
-}
-
-/**
  * Phase that propagates incompatibilities to derived classes or
  * base classes. For example, consider:
  *
@@ -30974,14 +30966,8 @@ function topologicalSort(graph) {
  * would then have other derived classes as well, it would propagate the status.
  */
 function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, opts) {
-    // Sort topologically and iterate super classes first, so that we can trivially
-    // propagate incompatibility statuses (and other checks) without having to check
-    // in both directions (derived classes, or base classes). This simplifies the logic
-    // further down in this function significantly.
-    const topologicalSortedClasses = topologicalSort(inheritanceGraph)
-        .filter((t) => ts__default["default"].isClassDeclaration(t) && opts.isClassWithKnownFields(t))
-        .reverse();
-    for (const inputClass of topologicalSortedClasses) {
+    const allInputClasses = Array.from(inheritanceGraph.allClassesInInheritance).filter((t) => ts__default["default"].isClassDeclaration(t) && opts.isClassWithKnownFields(t));
+    for (const inputClass of allInputClasses) {
         // Note: Class parents of `inputClass` were already checked by
         // the previous iterations (given the reverse topological sort)—
         // hence it's safe to assume that incompatibility of parent classes will
@@ -31009,22 +30995,18 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
             if (fieldDescr.node.name !== undefined &&
                 (ts__default["default"].isIdentifier(fieldDescr.node.name) || ts__default["default"].isStringLiteralLike(fieldDescr.node.name)) &&
                 inputFieldNamesFromMetadataArray.has(fieldDescr.node.name.text)) {
-                fields.markFieldIncompatible(fieldDescr, {
-                    context: null,
-                    reason: InputIncompatibilityReason.RedeclaredViaDerivedClassInputsArray,
-                });
+                fields.captureUnknownDerivedField(fieldDescr);
             }
             for (const derived of derivedMembers) {
                 const derivedInput = fields.attemptRetrieveDescriptorFromSymbol(derived);
                 if (derivedInput !== null) {
+                    // Note: We always track dependencies from the child to the parent,
+                    // so skip here for now.
                     continue;
                 }
                 // If we discover a derived, non-input member, then it will cause
                 // conflicts, and we mark the current input as incompatible.
-                fields.markFieldIncompatible(fieldDescr, {
-                    context: derived.valueDeclaration ?? inputNode,
-                    reason: InputIncompatibilityReason.OverriddenByDerivedClass,
-                });
+                fields.captureUnknownDerivedField(fieldDescr);
                 continue inputCheck;
             }
             // If there is no parent, we are done. Otherwise, check the parent
@@ -31035,21 +31017,10 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
             const inheritedMemberInput = fields.attemptRetrieveDescriptorFromSymbol(inherited);
             // Parent is not an input, and hence will conflict..
             if (inheritedMemberInput === null) {
-                fields.markFieldIncompatible(fieldDescr, {
-                    context: inherited.valueDeclaration ?? inputNode,
-                    reason: InputIncompatibilityReason.TypeConflictWithBaseClass,
-                });
+                fields.captureUnknownParentField(fieldDescr);
                 continue;
             }
-            // Parent is incompatible, so this input also needs to be.
-            // It cannot be migrated.
-            if (fields.isFieldIncompatible(inheritedMemberInput)) {
-                fields.markFieldIncompatible(fieldDescr, {
-                    context: inheritedMemberInput.node,
-                    reason: InputIncompatibilityReason.ParentIsIncompatible,
-                });
-                continue;
-            }
+            fields.captureKnownFieldInheritanceRelationship(fieldDescr, inheritedMemberInput);
         }
     }
 }
@@ -31092,7 +31063,7 @@ var IncompatibilityType;
     IncompatibilityType[IncompatibilityType["VIA_INPUT"] = 1] = "VIA_INPUT";
 })(IncompatibilityType || (IncompatibilityType = {}));
 
-function getCompilationUnitMetadata(knownInputs, result) {
+function getCompilationUnitMetadata(knownInputs) {
     const struct = {
         knownInputs: Array.from(knownInputs.knownInputIds.entries()).reduce((res, [inputClassFieldIdStr, info]) => {
             const classIncompatibility = info.container.incompatible !== null
@@ -31110,109 +31081,129 @@ function getCompilationUnitMetadata(knownInputs, result) {
                 ...res,
                 [inputClassFieldIdStr]: {
                     isIncompatible: incompatibility,
+                    seenAsSourceInput: info.metadata.inSourceFile,
+                    extendsFrom: info.extendsFrom?.key ?? null,
                 },
             };
         }, {}),
-        references: result.references.map((r) => {
-            if (isTsReference(r)) {
-                return {
-                    kind: r.kind,
-                    target: r.target.key,
-                    from: {
-                        file: r.from.file,
-                        node: { positionEndInFile: r.from.node.getEnd() },
-                        isWrite: r.from.isWrite,
-                        isPartOfElementBinding: r.from.isPartOfElementBinding,
-                    },
-                };
-            }
-            else if (isHostBindingReference(r)) {
-                return {
-                    kind: r.kind,
-                    target: r.target.key,
-                    from: {
-                        file: r.from.file,
-                        hostPropertyNode: { positionEndInFile: r.from.hostPropertyNode.getEnd() },
-                        isObjectShorthandExpression: r.from.isObjectShorthandExpression,
-                        isWrite: r.from.isWrite,
-                        read: { positionEndInFile: r.from.read.sourceSpan.end },
-                    },
-                };
-            }
-            else if (isTsClassTypeReference(r)) {
-                return {
-                    kind: r.kind,
-                    target: { positionEndInFile: r.target.getEnd() },
-                    from: {
-                        file: r.from.file,
-                        node: { positionEndInFile: r.from.node.getEnd() },
-                    },
-                    isPartOfCatalystFile: r.isPartOfCatalystFile,
-                    isPartialReference: r.isPartialReference,
-                };
-            }
-            return {
-                kind: r.kind,
-                target: r.target.key,
-                from: {
-                    originatingTsFile: r.from.originatingTsFile,
-                    templateFile: r.from.templateFile,
-                    isObjectShorthandExpression: r.from.isObjectShorthandExpression,
-                    isLikelyPartOfNarrowing: r.from.isLikelyPartOfNarrowing,
-                    isWrite: r.from.isWrite,
-                    node: { positionEndInFile: r.from.node.sourceSpan.end.offset },
-                    read: { positionEndInFile: r.from.read.sourceSpan.end },
-                },
-            };
-        }),
     };
     return struct;
+}
+
+/**
+ * Sorts the inheritance graph topologically, so that
+ * nodes without incoming edges are returned first.
+ *
+ * I.e. The returned list is sorted, so that dependencies
+ * of a given class are guaranteed to be included at
+ * an earlier position than the inspected class.
+ *
+ * This sort is helpful for detecting inheritance problems
+ * for the migration in simpler ways, without having to
+ * check in both directions (base classes, and derived classes).
+ */
+function topologicalSort(graph) {
+    // All nodes without incoming edges.
+    const S = graph.filter((n) => n.incoming.size === 0);
+    const result = [];
+    const invalidatedEdges = new WeakMap();
+    const invalidateEdge = (from, to) => {
+        if (!invalidatedEdges.has(from)) {
+            invalidatedEdges.set(from, new Set());
+        }
+        invalidatedEdges.get(from).add(to);
+    };
+    const filterEdges = (from, edges) => {
+        return Array.from(edges).filter((e) => !invalidatedEdges.has(from) || !invalidatedEdges.get(from).has(e));
+    };
+    while (S.length) {
+        const node = S.pop();
+        result.push(node);
+        for (const next of filterEdges(node, node.outgoing)) {
+            // Remove edge from "node -> next".
+            invalidateEdge(node, next);
+            // Remove edge from "next -> node".
+            invalidateEdge(next, node);
+            // if there are no incoming edges for `next`. add it to `S`.
+            if (filterEdges(next, next.incoming).length === 0) {
+                S.push(next);
+            }
+        }
+    }
+    return result;
 }
 
 /** Merges a list of compilation units into a combined unit. */
 function mergeCompilationUnitData(metadataFiles) {
     const result = {
         knownInputs: {},
-        references: [],
     };
-    const seenReferenceFromIds = new Set();
+    const idToGraphNode = new Map();
+    const inheritanceGraph = [];
     for (const file of metadataFiles) {
         for (const [key, info] of Object.entries(file.knownInputs)) {
             const existing = result.knownInputs[key];
             if (existing === undefined) {
                 result.knownInputs[key] = info;
+                const node = {
+                    incoming: new Set(),
+                    outgoing: new Set(),
+                    data: { info, key },
+                };
+                inheritanceGraph.push(node);
+                idToGraphNode.set(key, node);
+                continue;
             }
-            else if (existing.isIncompatible === null && info.isIncompatible) {
+            if (existing.isIncompatible === null && info.isIncompatible) {
                 // input might not be incompatible in one target, but others might invalidate it.
                 // merge the incompatibility state.
                 existing.isIncompatible = info.isIncompatible;
             }
-        }
-        for (const reference of file.references) {
-            const referenceId = computeReferenceId(reference);
-            if (seenReferenceFromIds.has(referenceId)) {
-                continue;
+            if (existing.extendsFrom === null && info.extendsFrom !== null) {
+                existing.extendsFrom = info.extendsFrom;
             }
-            seenReferenceFromIds.add(referenceId);
-            result.references.push(reference);
+            if (!existing.seenAsSourceInput && info.seenAsSourceInput) {
+                existing.seenAsSourceInput = true;
+            }
         }
     }
+    for (const [key, info] of Object.entries(result.knownInputs)) {
+        if (info.extendsFrom !== null) {
+            const from = idToGraphNode.get(key);
+            const target = idToGraphNode.get(info.extendsFrom);
+            from.outgoing.add(target);
+            target.incoming.add(from);
+        }
+    }
+    // Sort topologically and iterate super classes first, so that we can trivially
+    // propagate incompatibility statuses (and other checks) without having to check
+    // in both directions (derived classes, or base classes). This simplifies the
+    // propagation.
+    for (const node of topologicalSort(inheritanceGraph).reverse()) {
+        for (const parent of node.outgoing) {
+            // If parent is incompatible and not migrated, then this input
+            // cannot be migrated either.
+            if (parent.data.info.isIncompatible !== null) {
+                node.data.info.isIncompatible = {
+                    kind: IncompatibilityType.VIA_INPUT,
+                    reason: InputIncompatibilityReason.ParentIsIncompatible,
+                };
+                break;
+            }
+        }
+    }
+    for (const info of Object.values(result.knownInputs)) {
+        // We never saw a source file for this input, globally. Mark it as incompatible,
+        // so that all references and inheritance checks can propagate accordingly.
+        if (!info.seenAsSourceInput) {
+            info.isIncompatible = {
+                kind: IncompatibilityType.VIA_INPUT,
+                reason: InputIncompatibilityReason.OutsideOfMigrationScope,
+            };
+        }
+    }
+    console.error(result);
     return result;
-}
-/** Computes a unique ID for the given reference. */
-function computeReferenceId(reference) {
-    if (reference.kind === ReferenceKind.InTemplate) {
-        return `${reference.from.templateFile.id}@@${reference.from.read.positionEndInFile}`;
-    }
-    else if (reference.kind === ReferenceKind.InHostBinding) {
-        // `read` position is commonly relative to the host property node position— so we need
-        // to make it absolute by incorporating the host node position.
-        return (`${reference.from.file.id}@@${reference.from.hostPropertyNode.positionEndInFile}` +
-            `@@${reference.from.read.positionEndInFile}`);
-    }
-    else {
-        return `${reference.from.file.id}@@${reference.from.node.positionEndInFile}`;
-    }
 }
 
 function populateKnownInputsFromGlobalData(knownInputs, globalData) {
@@ -32362,6 +32353,8 @@ function executeMigrationPhase(host, knownInputs, result, info) {
 
 /** Input reasons that cannot be ignored. */
 const nonIgnorableInputIncompatibilities = [
+    // Outside of scope inputs should not be migrated. E.g. references to inputs in `node_modules/`.
+    InputIncompatibilityReason.OutsideOfMigrationScope,
     // Explicitly filtered inputs cannot be skipped via best effort mode.
     InputIncompatibilityReason.SkippedViaConfigFilter,
     // There is no good output for accessor inputs.
@@ -32404,6 +32397,22 @@ class SignalInputMigration extends TsurgeComplexMigration {
             strictTemplates: true,
         });
     }
+    prepareProgram(baseInfo) {
+        const info = super.prepareProgram(baseInfo);
+        // Optional filter for testing. Allows for simulation of parallel execution
+        // even if some tsconfig's have overlap due to sharing of TS sources.
+        // (this is commonly not the case in g3 where deps are `.d.ts` files).
+        const limitToRootNamesOnly = process.env['LIMIT_TO_ROOT_NAMES_ONLY'] === '1';
+        const filteredSourceFiles = info.sourceFiles.filter((f) => 
+        // Optional replacement filter. Allows parallel execution in case
+        // some tsconfig's have overlap due to sharing of TS sources.
+        // (this is commonly not the case in g3 where deps are `.d.ts` files).
+        !limitToRootNamesOnly || info.programAbsoluteRootFileNames.includes(f.fileName));
+        return {
+            ...info,
+            sourceFiles: filteredSourceFiles,
+        };
+    }
     // Extend the program info with the analysis information we need in every phase.
     prepareAnalysisDeps(info) {
         assert__default["default"](info.ngCompiler !== null, 'Expected `NgCompiler` to be configured.');
@@ -32411,41 +32420,36 @@ class SignalInputMigration extends TsurgeComplexMigration {
             ...info,
             ...prepareAnalysisInfo(info.program, info.ngCompiler, info.programAbsoluteRootFileNames),
         };
-        // Optional filter for testing. Allows for simulation of parallel execution
-        // even if some tsconfig's have overlap due to sharing of TS sources.
-        // (this is commonly not the case in g3 where deps are `.d.ts` files).
-        const limitToRootNamesOnly = process.env['LIMIT_TO_ROOT_NAMES_ONLY'] === '1';
-        analysisInfo.sourceFiles = analysisInfo.sourceFiles.filter((f) => 
-        // Optional replacement filter. Allows parallel execution in case
-        // some tsconfig's have overlap due to sharing of TS sources.
-        // (this is commonly not the case in g3 where deps are `.d.ts` files).
-        !limitToRootNamesOnly || info.programAbsoluteRootFileNames.includes(f.fileName));
         return analysisInfo;
     }
     async analyze(info) {
         const analysisDeps = this.prepareAnalysisDeps(info);
-        const { metaRegistry } = analysisDeps;
         const knownInputs = new KnownInputs(info, this.config);
         const result = new MigrationResult();
         const host = createMigrationHost(info, this.config);
         this.config.reportProgressFn?.(10, 'Analyzing project (input usages)..');
         const { inheritanceGraph } = executeAnalysisPhase(host, knownInputs, result, analysisDeps);
+        // Mark filtered inputs before checking inheritance. This ensures filtered
+        // inputs properly influence e.g. inherited or derived inputs that now wouldn't
+        // be safe either (BUT can still be skipped via best effort mode later).
         filterInputsViaConfig(result, knownInputs, this.config);
+        // Analyze inheritance, track edges etc. and later propagate incompatibilities in
+        // the merge stage.
         this.config.reportProgressFn?.(40, 'Checking inheritance..');
-        pass4__checkInheritanceOfInputs(inheritanceGraph, metaRegistry, knownInputs);
+        pass4__checkInheritanceOfInputs(inheritanceGraph, analysisDeps.metaRegistry, knownInputs);
+        // Filter best effort incompatibilities, so that the new filtered ones can
+        // be accordingly respected in the merge phase.
         if (this.config.bestEffortMode) {
             filterIncompatibilitiesForBestEffortMode(knownInputs);
         }
-        const unitData = getCompilationUnitMetadata(knownInputs, result);
+        const unitData = getCompilationUnitMetadata(knownInputs);
         // Non-batch mode!
         if (this.config.upgradeAnalysisPhaseToAvoidBatch) {
             const merged = await this.merge([unitData]);
-            this.config.reportProgressFn?.(60, 'Collecting migration changes..');
             const replacements = await this.migrate(merged, info, {
                 knownInputs,
                 result,
                 host,
-                inheritanceGraph,
                 analysisDeps,
             });
             this.config.reportProgressFn?.(100, 'Completed migration.');
@@ -32466,18 +32470,16 @@ class SignalInputMigration extends TsurgeComplexMigration {
         const result = nonBatchData?.result ?? new MigrationResult();
         const host = nonBatchData?.host ?? createMigrationHost(info, this.config);
         const analysisDeps = nonBatchData?.analysisDeps ?? this.prepareAnalysisDeps(info);
-        let inheritanceGraph;
         // Can't re-use analysis structures, so re-build them.
         if (nonBatchData === undefined) {
-            const analysisRes = executeAnalysisPhase(host, knownInputs, result, analysisDeps);
-            inheritanceGraph = analysisRes.inheritanceGraph;
-            populateKnownInputsFromGlobalData(knownInputs, globalMetadata);
-            filterInputsViaConfig(result, knownInputs, this.config);
-            pass4__checkInheritanceOfInputs(inheritanceGraph, analysisDeps.metaRegistry, knownInputs);
-            if (this.config.bestEffortMode) {
-                filterIncompatibilitiesForBestEffortMode(knownInputs);
-            }
+            executeAnalysisPhase(host, knownInputs, result, analysisDeps);
         }
+        // Incorporate global metadata into known inputs.
+        populateKnownInputsFromGlobalData(knownInputs, globalMetadata);
+        if (this.config.bestEffortMode) {
+            filterIncompatibilitiesForBestEffortMode(knownInputs);
+        }
+        this.config.reportProgressFn?.(60, 'Collecting migration changes..');
         executeMigrationPhase(host, knownInputs, result, analysisDeps);
         return result.replacements;
     }
