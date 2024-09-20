@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-88f2fe4
+ * @license Angular v19.0.0-next.6+sha-ef5412c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -140,10 +140,7 @@ function createFileSystemTsReadDirectoryFn(fs) {
                 }
             }
             return { files, directories };
-        }, (p) => fs.resolve(p), (p) => {
-            const resolvedPath = fs.resolve(p);
-            return fs.exists(resolvedPath) && fs.stat(resolvedPath).isDirectory();
-        });
+        }, (p) => fs.resolve(p), (p) => directoryExists(p));
     };
 }
 
@@ -29889,7 +29886,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.6+sha-88f2fe4');
+new Version('19.0.0-next.6+sha-ef5412c');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -32562,7 +32559,7 @@ class DevkitMigrationFilesystem {
         return true;
     }
     exists(path) {
-        return this.tree.exists(path);
+        return statPath(this.tree, path) !== null;
     }
     readFile(path) {
         return this.tree.readText(path);
