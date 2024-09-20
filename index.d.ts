@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-a448f5a
+ * @license Angular v19.0.0-next.6+sha-a1f2298
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4334,65 +4334,6 @@ export declare interface ExistingSansProvider {
 }
 
 /**
- * Experimental service that keeps track of pending tasks contributing to the stableness of Angular
- * application. While several existing Angular services (ex.: `HttpClient`) will internally manage
- * tasks influencing stability, this API gives control over stability to library and application
- * developers for specific cases not covered by Angular internals.
- *
- * The concept of stability comes into play in several important scenarios:
- * - SSR process needs to wait for the application stability before serializing and sending rendered
- * HTML;
- * - tests might want to delay assertions until the application becomes stable;
- *
- * @usageNotes
- * ```typescript
- * const pendingTasks = inject(ExperimentalPendingTasks);
- * const taskCleanup = pendingTasks.add();
- * // do work that should block application's stability and then:
- * taskCleanup();
- * ```
- *
- * This API is experimental. Neither the shape, nor the underlying behavior is stable and can change
- * in patch versions. We will iterate on the exact API based on the feedback and our understanding
- * of the problem and solution space.
- *
- * @publicApi
- * @experimental
- */
-export declare class ExperimentalPendingTasks {
-    private internalPendingTasks;
-    private scheduler;
-    /**
-     * Adds a new task that should block application's stability.
-     * @returns A cleanup function that removes a task when called.
-     */
-    add(): () => void;
-    /**
-     * Runs an asynchronous function and blocks the application's stability until the function completes.
-     *
-     * ```
-     * pendingTasks.run(async () => {
-     *   const userData = await fetch('/api/user');
-     *   this.userData.set(userData);
-     * });
-     * ```
-     *
-     * Application stability is at least delayed until the next tick after the `run` method resolves
-     * so it is safe to make additional updates to application state that would require UI synchronization:
-     *
-     * ```
-     * const userData = await pendingTasks.run(() => fetch('/api/user'));
-     * this.userData.set(userData);
-     * ```
-     *
-     * @param fn The asynchronous function to execute
-     */
-    run<T>(fn: () => Promise<T>): Promise<T>;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
-
-/**
  * Definition of what a factory function should look like.
  */
 declare type FactoryFn<T> = {
@@ -8343,6 +8284,78 @@ export declare interface OutputRefSubscription {
 export declare const PACKAGE_ROOT_URL: InjectionToken<string>;
 
 declare const PARENT = 3;
+
+/**
+ * Service that keeps track of pending tasks contributing to the stableness of Angular
+ * application. While several existing Angular services (ex.: `HttpClient`) will internally manage
+ * tasks influencing stability, this API gives control over stability to library and application
+ * developers for specific cases not covered by Angular internals.
+ *
+ * The concept of stability comes into play in several important scenarios:
+ * - SSR process needs to wait for the application stability before serializing and sending rendered
+ * HTML;
+ * - tests might want to delay assertions until the application becomes stable;
+ *
+ * @usageNotes
+ * ```typescript
+ * const pendingTasks = inject(PendingTasks);
+ * const taskCleanup = pendingTasks.add();
+ * // do work that should block application's stability and then:
+ * taskCleanup();
+ * ```
+ *
+ * @publicApi
+ * @developerPreview
+ */
+export declare class PendingTasks {
+    private internalPendingTasks;
+    private scheduler;
+    /**
+     * Adds a new task that should block application's stability.
+     * @returns A cleanup function that removes a task when called.
+     */
+    add(): () => void;
+    /**
+     * Runs an asynchronous function and blocks the application's stability until the function completes.
+     *
+     * ```
+     * pendingTasks.run(async () => {
+     *   const userData = await fetch('/api/user');
+     *   this.userData.set(userData);
+     * });
+     * ```
+     *
+     * Application stability is at least delayed until the next tick after the `run` method resolves
+     * so it is safe to make additional updates to application state that would require UI synchronization:
+     *
+     * ```
+     * const userData = await pendingTasks.run(() => fetch('/api/user'));
+     * this.userData.set(userData);
+     * ```
+     *
+     * @param fn The asynchronous function to execute
+     */
+    run<T>(fn: () => Promise<T>): Promise<T>;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
+
+/**
+ * Internal implementation of the pending tasks service.
+ */
+declare class PendingTasksInternal implements OnDestroy {
+    private taskId;
+    private pendingTasks;
+    private get _hasPendingTasks();
+    hasPendingTasks: BehaviorSubject<boolean>;
+    add(): number;
+    remove(taskId: number): void;
+    ngOnDestroy(): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
+export { PendingTasksInternal as ɵPendingTasks }
+export { PendingTasksInternal as ɵPendingTasksInternal }
 
 /**
  * Type of the Pipe metadata.
@@ -13608,21 +13621,6 @@ export declare const enum ɵNotificationSource {
  * a given module.
  */
 export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
-
-/**
- * Internal implementation of the pending tasks service.
- */
-export declare class ɵPendingTasks implements OnDestroy {
-    private taskId;
-    private pendingTasks;
-    private get _hasPendingTasks();
-    hasPendingTasks: BehaviorSubject<boolean>;
-    add(): number;
-    remove(taskId: number): void;
-    ngOnDestroy(): void;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
 
 
 /**
