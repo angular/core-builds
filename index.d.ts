@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-4ff695c
+ * @license Angular v19.0.0-next.6+sha-7ecfd89
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1763,9 +1763,10 @@ export declare interface ComponentDecorator {
      * Unlike other directives, only one component can be instantiated for a given element in a
      * template.
      *
-     * A component must belong to an NgModule in order for it to be available
-     * to another component or application. To make it a member of an NgModule,
-     * list it in the `declarations` field of the `NgModule` metadata.
+     * Standalone components can be directly imported in any other standalone component or NgModule.
+     * NgModule based apps on the other hand require components to belong to an NgModule in
+     * order for them to be available to another component or application. To make a component a
+     * member of an NgModule, list it in the `declarations` field of the `NgModule` metadata.
      *
      * Note that, in addition to these options for configuring a directive,
      * you can control a component's runtime behavior by implementing
