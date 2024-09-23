@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-7ecfd89
+ * @license Angular v19.0.0-next.6+sha-d1391ce
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15,6 +15,7 @@ var checker = require('./checker-dcf9a14e.js');
 var program = require('./program-734eb12d.js');
 require('path');
 var assert = require('assert');
+var leading_space = require('./leading_space-d190b83b.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 var core = require('@angular-devkit/core');
 var path = require('node:path');
@@ -287,6 +288,94 @@ function isInputMemberIncompatibility(value) {
 }
 
 /**
+ * Gets human-readable message information for the given input incompatibility.
+ * This text will be used by the language service, or CLI-based migration.
+ */
+function getMessageForInputIncompatibility(reason) {
+    switch (reason) {
+        case InputIncompatibilityReason.Accessor:
+            return {
+                short: 'Accessor inputs cannot be migrated as they are too complex.',
+                extra: 'The migration potentially requires usage of `effect` or `computed`, but ' +
+                    'the intent is unclear. The migration cannot safely migrate.',
+            };
+        case InputIncompatibilityReason.OverriddenByDerivedClass:
+            return {
+                short: 'The input cannot be migrated because the field is overridden by a subclass.',
+                extra: 'The field in the subclass is not an input, so migrating would break your build.',
+            };
+        case InputIncompatibilityReason.ParentIsIncompatible:
+            return {
+                short: 'This input is inherited from a superclass, but the parent cannot be migrated.',
+                extra: 'Migrating this input would cause your build to fail.',
+            };
+        case InputIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet:
+            return {
+                short: 'This input is used in a control flow expression (e.g. `@if` or `*ngIf`) and ' +
+                    'migrating would break narrowing currently.',
+                extra: `In the future, Angular intends to support narrowing of signals.`,
+            };
+        case InputIncompatibilityReason.RedeclaredViaDerivedClassInputsArray:
+            return {
+                short: 'The input is overridden by a subclass that cannot be migrated.',
+                extra: 'The subclass re-declares this input via the `inputs` array in @Directive/@Component. ' +
+                    'Migrating this input would break your build because the subclass input cannot be migrated.',
+            };
+        case InputIncompatibilityReason.RequiredInputButNoGoodExplicitTypeExtractable:
+            return {
+                short: `Input is required, but the migration cannot determine a good type for the input.`,
+                extra: 'Consider adding an explicit type to make the migration possible.',
+            };
+        case InputIncompatibilityReason.SkippedViaConfigFilter:
+            return {
+                short: `This input is not part of the current migration scope.`,
+                extra: 'Skipped via migration config.',
+            };
+        case InputIncompatibilityReason.SpyOnThatOverwritesField:
+            return {
+                short: 'A jasmine `spyOn` call spies on this input. This breaks with signal inputs.',
+                extra: `Migration cannot safely migrate as "spyOn" writes to the input. Signal inputs are readonly.`,
+            };
+        case InputIncompatibilityReason.TypeConflictWithBaseClass:
+            return {
+                short: 'This input overrides a field from a superclass, while the superclass field is not migrated.',
+                extra: 'Migrating the input would break your build because of a type conflict then.',
+            };
+        case InputIncompatibilityReason.WriteAssignment:
+            return {
+                short: 'Your application code writes to the input. This prevents migration.',
+                extra: 'Signal inputs are readonly, so migrating would break your build.',
+            };
+        case InputIncompatibilityReason.OutsideOfMigrationScope:
+            return {
+                short: 'This input is not part of any source files in your project.',
+                extra: 'The migration excludes inputs if no source file declaring the input was seen.',
+            };
+    }
+}
+/**
+ * Gets human-readable message information for the given input class incompatibility.
+ * This text will be used by the language service, or CLI-based migration.
+ */
+function getMessageForClassIncompatibility(reason) {
+    switch (reason) {
+        case ClassIncompatibilityReason.InputOwningClassReferencedInClassProperty:
+            return {
+                short: 'Class of this input is referenced in the signature of another class.',
+                extra: 'The other class is likely typed to expect a non-migrated field, so ' +
+                    'migration is skipped to not break your build.',
+            };
+        case ClassIncompatibilityReason.ClassManuallyInstantiated:
+            return {
+                short: 'Class of this input is manually instantiated. ' +
+                    'This is discouraged and prevents migration',
+                extra: 'Signal inputs require a DI injection context. Manually instantiating ' +
+                    'breaks this requirement in some cases, so the migration is skipped.',
+            };
+    }
+}
+
+/**
  * Class that holds information about a given directive and its input fields.
  */
 class DirectiveInfo {
@@ -319,7 +408,11 @@ class DirectiveInfo {
      * then the member is as well.
      */
     isInputMemberIncompatible(input) {
-        return this.incompatible !== null || this.memberIncompatibility.has(input.key);
+        return this.getInputMemberIncompatibility(input) !== null;
+    }
+    /** Get incompatibility of the given member, if it's incompatible for migration. */
+    getInputMemberIncompatibility(input) {
+        return this.incompatible ?? this.memberIncompatibility.get(input.key) ?? null;
     }
 }
 
@@ -343,9 +436,11 @@ function isInputContainerNode(node) {
         getMemberName(node) !== null);
 }
 
+/** Code of the error raised by TypeScript when a tsconfig doesn't match any files. */
+const NO_INPUTS_ERROR_CODE = 18003;
 /**
  * Parses the configuration of the given TypeScript project and creates
- * an instance of the Angular compiler for for the project.
+ * an instance of the Angular compiler for the project.
  */
 function createNgtscProgram(absoluteTsconfigPath, fs, optionOverrides = {}) {
     if (fs === undefined) {
@@ -353,9 +448,11 @@ function createNgtscProgram(absoluteTsconfigPath, fs, optionOverrides = {}) {
         checker.setFileSystem(fs);
     }
     const tsconfig = readConfiguration(absoluteTsconfigPath, {}, fs);
-    if (tsconfig.errors.length > 0) {
-        throw new Error(`Tsconfig could not be parsed or is invalid:\n\n` +
-            `${tsconfig.errors.map((e) => e.messageText)}`);
+    // Skip the "No inputs found..." error since we don't want to interrupt the migration if a
+    // tsconfig doesn't match a file. This will result in an empty `Program` which is still valid.
+    const errors = tsconfig.errors.filter((diag) => diag.code !== NO_INPUTS_ERROR_CODE);
+    if (errors.length) {
+        throw new Error(`Tsconfig could not be parsed or is invalid:\n\n` + `${errors.map((e) => e.messageText)}`);
     }
     const tsHost = new NgtscCompilerHost(fs, tsconfig.options);
     const ngtscProgram = new program.NgtscProgram(tsconfig.rootNames, {
@@ -29886,7 +29983,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.6+sha-7ecfd89');
+new Version('19.0.0-next.6+sha-d1391ce');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30651,17 +30748,19 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
         tsReferences: 0,
         tsTypes: 0,
     };
+    // Schematic NodeJS execution may not have `global.performance` defined.
+    const currentTimeInMs = () => typeof global.performance !== 'undefined' ? global.performance.now() : Date.now();
     const visitor = (node) => {
-        let lastTime = performance.now();
+        let lastTime = currentTimeInMs();
         if (ts__default["default"].isClassDeclaration(node)) {
             identifyTemplateReferences(programInfo, node, reflector, checker, evaluator, templateTypeChecker, resourceLoader, programInfo.userOptions, result, knownFields);
-            perfCounters.template += (performance.now() - lastTime) / 1000;
-            lastTime = performance.now();
+            perfCounters.template += (currentTimeInMs() - lastTime) / 1000;
+            lastTime = currentTimeInMs();
             identifyHostBindingReferences(node, programInfo, checker, reflector, result, knownFields);
             perfCounters.hostBindings += (performance.now() - lastTime) / 1000;
-            lastTime = performance.now();
+            lastTime = currentTimeInMs();
         }
-        lastTime = performance.now();
+        lastTime = currentTimeInMs();
         // find references, but do not capture input declarations itself.
         if (ts__default["default"].isIdentifier(node) &&
             !(isInputContainerNode(node.parent) && node.parent.name === node)) {
@@ -30670,7 +30769,7 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
             });
         }
         perfCounters.tsReferences += (performance.now() - lastTime) / 1000;
-        lastTime = performance.now();
+        lastTime = currentTimeInMs();
         // Detect `Partial<T>` references.
         // Those are relevant to be tracked as they may be updated in Catalyst to
         // unwrap signal inputs. Commonly people use `Partial` in Catalyst to type
@@ -31199,7 +31298,6 @@ function mergeCompilationUnitData(metadataFiles) {
             };
         }
     }
-    console.error(result);
     return result;
 }
 
@@ -31339,19 +31437,81 @@ function extractTransformOfInput(transform, resolvedType, checker) {
 }
 
 /**
+ * Inserts a leading single-line TODO for the given node,
+ * returning a replacement.
+ */
+function insertPrecedingLine(node, info, todoText) {
+    const leadingSpace = leading_space.getLeadingLineWhitespaceOfNode(node);
+    return new Replacement(projectFile(node.getSourceFile(), info), new TextUpdate({
+        position: node.getStart(),
+        end: node.getStart(),
+        toInsert: `${todoText}\n${leadingSpace}`,
+    }));
+}
+
+/**
+ * Inserts a TODO for the incompatibility blocking the given node
+ * from being migrated.
+ */
+function insertTodoForIncompatibility(node, programInfo, input) {
+    const incompatibility = input.container.getInputMemberIncompatibility(input.descriptor);
+    if (incompatibility === null) {
+        return [];
+    }
+    const message = isInputMemberIncompatibility(incompatibility)
+        ? getMessageForInputIncompatibility(incompatibility.reason).short
+        : getMessageForClassIncompatibility(incompatibility).short;
+    const lines = cutStringToWordLimit(message, 70);
+    return [
+        insertPrecedingLine(node, programInfo, `// TODO: Skipped for migration because:`),
+        ...lines.map((line) => insertPrecedingLine(node, programInfo, `//  ${line}`)),
+    ];
+}
+/**
+ * Cuts the given string into lines basing around the specified
+ * line length limit. This function breaks the string on a per-word basis.
+ */
+function cutStringToWordLimit(str, limit) {
+    const words = str.split(' ');
+    const chunks = [];
+    let chunkIdx = 0;
+    while (words.length) {
+        // New line if we exceed limit.
+        if (chunks[chunkIdx] !== undefined && chunks[chunkIdx].length > limit) {
+            chunkIdx++;
+        }
+        // Ensure line is initialized for the given index.
+        if (chunks[chunkIdx] === undefined) {
+            chunks[chunkIdx] = '';
+        }
+        const word = words.shift();
+        const needsSpace = chunks[chunkIdx].length > 0;
+        // Insert word. Add space before, if the line already contains text.
+        chunks[chunkIdx] += `${needsSpace ? ' ' : ''}${word}`;
+    }
+    return chunks;
+}
+
+/**
  * Phase that migrates `@Input()` declarations to signal inputs and
  * manages imports within the given file.
  */
-function pass6__migrateInputDeclarations(checker, result, knownInputs, importManager, info) {
+function pass6__migrateInputDeclarations(host, checker, result, knownInputs, importManager, info) {
     let filesWithMigratedInputs = new Set();
     let filesWithIncompatibleInputs = new WeakSet();
     for (const [input, metadata] of result.sourceInputs) {
         const sf = input.node.getSourceFile();
+        const inputInfo = knownInputs.get(input);
         // Do not migrate incompatible inputs.
-        if (knownInputs.get(input).isIncompatible() || metadata === null) {
+        if (inputInfo.isIncompatible()) {
+            // Add a TODO for the incompatible input, if desired.
+            if (host.config.insertTodosForSkippedFields) {
+                result.replacements.push(...insertTodoForIncompatibility(input.node, info, inputInfo));
+            }
             filesWithIncompatibleInputs.add(sf);
             continue;
         }
+        assert__default["default"](metadata !== null, `Expected metadata to exist for input isn't marked incompatible.`);
         assert__default["default"](!ts__default["default"].isAccessor(input.node), 'Accessor inputs are incompatible.');
         filesWithMigratedInputs.add(sf);
         result.replacements.push(new Replacement(projectFile(sf, info), new TextUpdate({
@@ -32341,7 +32501,7 @@ function executeMigrationPhase(host, knownInputs, result, info) {
     };
     // Migrate passes.
     pass5__migrateTypeScriptReferences(referenceMigrationHost, result.references, typeChecker, info);
-    pass6__migrateInputDeclarations(typeChecker, result, knownInputs, importManager, info);
+    pass6__migrateInputDeclarations(host, typeChecker, result, knownInputs, importManager, info);
     pass7__migrateTemplateReferences(referenceMigrationHost, result.references);
     pass8__migrateHostBindings(referenceMigrationHost, result.references, info);
     pass9__migrateTypeScriptTypeReferences(referenceMigrationHost, result.references, importManager, info);
@@ -32682,6 +32842,7 @@ function migrate(options) {
         checker.setFileSystem(fs);
         const migration = new SignalInputMigration({
             bestEffortMode: options.bestEffortMode,
+            insertTodosForSkippedFields: options.insertTodos,
             shouldMigrateInput: (input) => {
                 return (input.file.rootRelativePath.startsWith(fs.normalize(options.path)) &&
                     !/(^|\/)node_modules\//.test(input.file.rootRelativePath));

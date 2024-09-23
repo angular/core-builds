@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-7ecfd89
+ * @license Angular v19.0.0-next.6+sha-d1391ce
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,6 +14,7 @@ var compiler_host = require('./compiler_host-f6d657a1.js');
 var ts = require('typescript');
 var nodes = require('./nodes-0e7d45ca.js');
 var imports = require('./imports-4ac08251.js');
+var leading_space = require('./leading_space-d190b83b.js');
 require('./checker-dcf9a14e.js');
 require('os');
 require('fs');
@@ -205,27 +206,6 @@ function getSuperParameters(declaration, superCall, localTypeChecker) {
         }
     });
     return usedParams;
-}
-/**
- * Gets the indentation text of a node. Can be used to
- * output text with the same level of indentation.
- * @param node Node for which to get the indentation level.
- */
-function getNodeIndentation(node) {
-    const fullText = node.getFullText();
-    const end = fullText.indexOf(node.getText());
-    let result = '';
-    for (let i = end - 1; i > -1; i--) {
-        // Note: LF line endings are `\n` while CRLF are `\r\n`. This logic should cover both, because
-        // we start from the beginning of the node and go backwards so will always hit `\n` first.
-        if (fullText[i] !== '\n') {
-            result = fullText[i] + result;
-        }
-        else {
-            break;
-        }
-    }
-    return result;
 }
 /** Checks whether a parameter node declares a property on its class. */
 function parameterDeclaresProperty(node) {
@@ -511,12 +491,12 @@ function migrateClass(node, constructor, superCall, options, removedStatements, 
     const superParameters = superCall
         ? getSuperParameters(constructor, superCall, localTypeChecker)
         : null;
-    const memberIndentation = getNodeIndentation(node.members[0]);
+    const memberIndentation = leading_space.getLeadingLineWhitespaceOfNode(node.members[0]);
     const removedStatementCount = removedStatements?.size || 0;
     const innerReference = superCall ||
         constructor.body?.statements.find((statement) => !removedStatements?.has(statement)) ||
         constructor;
-    const innerIndentation = getNodeIndentation(innerReference);
+    const innerIndentation = leading_space.getLeadingLineWhitespaceOfNode(innerReference);
     const propsToAdd = [];
     const prependToConstructor = [];
     const afterSuper = [];
