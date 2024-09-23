@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-d1391ce
+ * @license Angular v19.0.0-next.6+sha-04a4873
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -969,6 +969,7 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
             ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.UndefinedKeyword),
         ]);
     }
+    let leadingTodoText = null;
     // If the input does not have an initial value, and strict property initialization
     // is disabled, while strict null checks are enabled; then we know that `undefined`
     // cannot be used as initial value, nor do we want to expand the input's type magically.
@@ -981,6 +982,9 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
         node.exclamationToken === undefined &&
         metadata.required === false &&
         !checker.isTypeAssignableTo(checker.getUndefinedType(), checker.getTypeFromTypeNode(node.type))) {
+        leadingTodoText =
+            'Input is initialized to `undefined` but type does not allow this value. ' +
+                'This worked with `@Input` because your project uses `--strictPropertyInitialization=false`.';
         isUndefinedInitialValue = false;
         initialValue = ts__default["default"].factory.createNonNullExpression(ts__default["default"].factory.createIdentifier('undefined'));
     }
@@ -1023,6 +1027,7 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
         preferShorthandIfPossible,
         originalInputDecorator: metadata.inputDecorator,
         initialValue: isUndefinedInitialValue ? undefined : initialValue,
+        leadingTodoText,
     };
 }
 
@@ -29983,7 +29988,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.6+sha-d1391ce');
+new Version('19.0.0-next.6+sha-04a4873');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -31336,15 +31341,54 @@ function removeFromUnionIfPossible(union, filter) {
     return ts__default["default"].factory.updateUnionTypeNode(union, ts__default["default"].factory.createNodeArray(filtered));
 }
 
+/**
+ * Inserts a leading string for the given node, respecting
+ * indentation of the given anchor node.
+ *
+ * Useful for inserting TODOs.
+ */
+function insertPrecedingLine(node, info, text) {
+    const leadingSpace = leading_space.getLeadingLineWhitespaceOfNode(node);
+    return new Replacement(projectFile(node.getSourceFile(), info), new TextUpdate({
+        position: node.getStart(),
+        end: node.getStart(),
+        toInsert: `${text}\n${leadingSpace}`,
+    }));
+}
+
+/**
+ * Cuts the given string into lines basing around the specified
+ * line length limit. This function breaks the string on a per-word basis.
+ */
+function cutStringToLineLimit(str, limit) {
+    const words = str.split(' ');
+    const chunks = [];
+    let chunkIdx = 0;
+    while (words.length) {
+        // New line if we exceed limit.
+        if (chunks[chunkIdx] !== undefined && chunks[chunkIdx].length > limit) {
+            chunkIdx++;
+        }
+        // Ensure line is initialized for the given index.
+        if (chunks[chunkIdx] === undefined) {
+            chunks[chunkIdx] = '';
+        }
+        const word = words.shift();
+        const needsSpace = chunks[chunkIdx].length > 0;
+        // Insert word. Add space before, if the line already contains text.
+        chunks[chunkIdx] += `${needsSpace ? ' ' : ''}${word}`;
+    }
+    return chunks;
+}
+
 // TODO: Consider initializations inside the constructor. Those are not migrated right now
 // though, as they are writes.
 /**
- *
  * Converts an `@Input()` property declaration to a signal input.
  *
- * @returns The transformed property declaration, printed as a string.
+ * @returns Replacements for converting the input.
  */
-function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, preferShorthandIfPossible, originalInputDecorator, initialValue, }, checker, importManager, result) {
+function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, preferShorthandIfPossible, originalInputDecorator, initialValue, leadingTodoText, }, info, checker, importManager, result) {
     let optionsLiteral = null;
     // We need an options array for the input because:
     //   - the input is either aliased,
@@ -31355,7 +31399,13 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
             properties.push(ts__default["default"].factory.createPropertyAssignment('alias', ts__default["default"].factory.createStringLiteral(metadata.bindingPropertyName)));
         }
         if (metadata.transform !== null) {
-            properties.push(extractTransformOfInput(metadata.transform, resolvedType, checker));
+            const transformRes = extractTransformOfInput(metadata.transform, resolvedType, checker);
+            properties.push(transformRes.node);
+            // Propagate TODO if one was requested from the transform extraction/validation.
+            if (transformRes.leadingTodoText !== null) {
+                leadingTodoText =
+                    (leadingTodoText ? `${leadingTodoText} ` : '') + transformRes.leadingTodoText;
+            }
         }
         optionsLiteral = ts__default["default"].factory.createObjectLiteralExpression(properties);
     }
@@ -31409,7 +31459,17 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
         modifiersWithoutInputDecorator.push(ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.ReadonlyKeyword));
     }
     const newNode = ts__default["default"].factory.createPropertyDeclaration(modifiersWithoutInputDecorator, node.name, undefined, undefined, inputInitializer);
-    return result.printer.printNode(ts__default["default"].EmitHint.Unspecified, newNode, node.getSourceFile());
+    const newPropertyText = result.printer.printNode(ts__default["default"].EmitHint.Unspecified, newNode, node.getSourceFile());
+    const replacements = [];
+    if (leadingTodoText !== null) {
+        replacements.push(insertPrecedingLine(node, info, '// TODO: Notes from signal input migration:'), ...cutStringToLineLimit(leadingTodoText, 70).map((line) => insertPrecedingLine(node, info, `//  ${line}`)));
+    }
+    replacements.push(new Replacement(projectFile(node.getSourceFile(), info), new TextUpdate({
+        position: node.getStart(),
+        end: node.getEnd(),
+        toInsert: newPropertyText,
+    })));
+    return replacements;
 }
 /**
  * Extracts the transform for the given input and returns a property assignment
@@ -31418,10 +31478,11 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
 function extractTransformOfInput(transform, resolvedType, checker) {
     assert__default["default"](ts__default["default"].isExpression(transform.node), `Expected transform to be an expression.`);
     let transformFn = transform.node;
+    let leadingTodoText = null;
     // If there is an explicit type, check if the transform return type actually works.
     // In some cases, the transform function is not compatible because with decorator inputs,
     // those were not checked. We cast the transform to `any` and add a TODO.
-    // TODO: Insert a TODO and capture this in the design doc.
+    // TODO: Capture this in the design doc.
     if (resolvedType !== undefined && !ts__default["default"].isSyntheticExpression(resolvedType)) {
         // Note: If the type is synthetic, we cannot check, and we accept that in the worst case
         // we will create code that is not necessarily compiling. This is unlikely, but notably
@@ -31430,23 +31491,16 @@ function extractTransformOfInput(transform, resolvedType, checker) {
         const transformSignature = transformType.getCallSignatures()[0];
         assert__default["default"](transformSignature !== undefined, 'Expected transform to be an invoke-able.');
         if (!checker.isTypeAssignableTo(checker.getReturnTypeOfSignature(transformSignature), checker.getTypeFromTypeNode(resolvedType))) {
+            leadingTodoText =
+                'Input type is incompatible with transform. The migration added an `any` cast. ' +
+                    'This worked previously because Angular was unable to check transforms.';
             transformFn = ts__default["default"].factory.createAsExpression(ts__default["default"].factory.createParenthesizedExpression(transformFn), ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword));
         }
     }
-    return ts__default["default"].factory.createPropertyAssignment('transform', transformFn);
-}
-
-/**
- * Inserts a leading single-line TODO for the given node,
- * returning a replacement.
- */
-function insertPrecedingLine(node, info, todoText) {
-    const leadingSpace = leading_space.getLeadingLineWhitespaceOfNode(node);
-    return new Replacement(projectFile(node.getSourceFile(), info), new TextUpdate({
-        position: node.getStart(),
-        end: node.getStart(),
-        toInsert: `${todoText}\n${leadingSpace}`,
-    }));
+    return {
+        node: ts__default["default"].factory.createPropertyAssignment('transform', transformFn),
+        leadingTodoText,
+    };
 }
 
 /**
@@ -31461,35 +31515,11 @@ function insertTodoForIncompatibility(node, programInfo, input) {
     const message = isInputMemberIncompatibility(incompatibility)
         ? getMessageForInputIncompatibility(incompatibility.reason).short
         : getMessageForClassIncompatibility(incompatibility).short;
-    const lines = cutStringToWordLimit(message, 70);
+    const lines = cutStringToLineLimit(message, 70);
     return [
         insertPrecedingLine(node, programInfo, `// TODO: Skipped for migration because:`),
         ...lines.map((line) => insertPrecedingLine(node, programInfo, `//  ${line}`)),
     ];
-}
-/**
- * Cuts the given string into lines basing around the specified
- * line length limit. This function breaks the string on a per-word basis.
- */
-function cutStringToWordLimit(str, limit) {
-    const words = str.split(' ');
-    const chunks = [];
-    let chunkIdx = 0;
-    while (words.length) {
-        // New line if we exceed limit.
-        if (chunks[chunkIdx] !== undefined && chunks[chunkIdx].length > limit) {
-            chunkIdx++;
-        }
-        // Ensure line is initialized for the given index.
-        if (chunks[chunkIdx] === undefined) {
-            chunks[chunkIdx] = '';
-        }
-        const word = words.shift();
-        const needsSpace = chunks[chunkIdx].length > 0;
-        // Insert word. Add space before, if the line already contains text.
-        chunks[chunkIdx] += `${needsSpace ? ' ' : ''}${word}`;
-    }
-    return chunks;
 }
 
 /**
@@ -31514,11 +31544,7 @@ function pass6__migrateInputDeclarations(host, checker, result, knownInputs, imp
         assert__default["default"](metadata !== null, `Expected metadata to exist for input isn't marked incompatible.`);
         assert__default["default"](!ts__default["default"].isAccessor(input.node), 'Accessor inputs are incompatible.');
         filesWithMigratedInputs.add(sf);
-        result.replacements.push(new Replacement(projectFile(sf, info), new TextUpdate({
-            position: input.node.getStart(),
-            end: input.node.getEnd(),
-            toInsert: convertToSignalInput(input.node, metadata, checker, importManager, result),
-        })));
+        result.replacements.push(...convertToSignalInput(input.node, metadata, info, checker, importManager, result));
     }
     for (const file of filesWithMigratedInputs) {
         // All inputs were migrated, so we can safely remove the `Input` symbol.
@@ -32851,6 +32877,7 @@ function migrate(options) {
         const analysisPath = fs.resolve(options.analysisDir);
         const unitResults = [];
         const programInfos = [...buildPaths, ...testPaths].map((tsconfigPath) => {
+            context.logger.info(`Preparing analysis for: ${tsconfigPath}..`);
             const baseInfo = migration.createProgram(tsconfigPath, fs);
             const info = migration.prepareProgram(baseInfo);
             // Support restricting the analysis to subfolders for larger projects.
@@ -32863,7 +32890,7 @@ function migrate(options) {
         // Analyze phase. Treat all projects as compilation units as
         // this allows us to support references between those.
         for (const { info, tsconfigPath } of programInfos) {
-            context.logger.info(`Analyzing: ${tsconfigPath}..`);
+            context.logger.info(`Scanning for inputs: ${tsconfigPath}..`);
             unitResults.push(await migration.analyze(info));
         }
         context.logger.info(``);
