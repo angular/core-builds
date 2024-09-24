@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.5+sha-8f6c326
+ * @license Angular v18.2.5+sha-03ac3c2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6520,7 +6520,7 @@ class Injector {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Creates a token that can be used to inject static attributes of the host node.
@@ -16949,7 +16949,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.5+sha-8f6c326']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.5+sha-03ac3c2']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19469,7 +19469,7 @@ var DeferBlockBehavior;
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Registers a cleanup function associated with a prefetching trigger
@@ -19881,7 +19881,7 @@ function isTDeferBlockDetails(value) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /** Configuration object used to register passive and capturing events. */
 const eventListenerOptions = {
@@ -23602,7 +23602,7 @@ function ɵɵclassMapInterpolateV(values) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Instruction that returns the component instance in which the current instruction is executing.
@@ -28472,7 +28472,7 @@ function ɵɵtextInterpolateV(values) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Update a two-way bound property on a selected element.
@@ -28536,7 +28536,7 @@ function ɵɵtwoWayListener(eventName, listenerFn) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /** Object that indicates the value of a `@let` declaration that hasn't been initialized yet. */
 const UNINITIALIZED_LET = {};
@@ -31039,7 +31039,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.5+sha-8f6c326');
+const VERSION = new Version('18.2.5+sha-03ac3c2');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
