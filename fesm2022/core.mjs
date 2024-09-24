@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-9f5798e
+ * @license Angular v19.0.0-next.6+sha-5a04837
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7745,7 +7745,7 @@ class QueryList {
      * Returns `Observable` of `QueryList` notifying the subscriber of changes.
      */
     get changes() {
-        return (this._changes ??= new EventEmitter());
+        return (this._changes ??= new Subject());
     }
     /**
      * @param emitDistinctChangesOnly Whether `QueryList.changes` should fire only when actual change
@@ -7850,7 +7850,7 @@ class QueryList {
      */
     notifyOnChanges() {
         if (this._changes !== undefined && (this._changesDetected || !this._emitDistinctChangesOnly))
-            this._changes.emit(this);
+            this._changes.next(this);
     }
     /** @internal */
     onDirty(cb) {
@@ -17027,7 +17027,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.6+sha-9f5798e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.6+sha-5a04837']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31134,7 +31134,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.6+sha-9f5798e');
+const VERSION = new Version('19.0.0-next.6+sha-5a04837');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
