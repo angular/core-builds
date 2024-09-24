@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-7afa978
+ * @license Angular v19.0.0-next.6+sha-9dbe6fc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,11 +11,11 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var schematics = require('@angular-devkit/schematics');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-dcf9a14e.js');
+var checker = require('./checker-637eee78.js');
 var p = require('path');
-var program = require('./program-acd17fc1.js');
+var program = require('./program-893e3fe7.js');
 var fs = require('fs');
-var compiler_host = require('./compiler_host-f6d657a1.js');
+var compiler_host = require('./compiler_host-660689cf.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 var nodes = require('./nodes-0e7d45ca.js');
 var imports = require('./imports-4ac08251.js');
@@ -32,7 +32,7 @@ var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.0.0-next.6+sha-7afa978');
+new checker.Version('19.0.0-next.6+sha-9dbe6fc');
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
     return new program.NgtscProgram(rootNames, options, host, oldProgram);
@@ -53,7 +53,7 @@ checker.setFileSystem(new checker.NodeJSFileSystem());
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /** Utility class used to track a one-to-many relationship where all the items are unique. */
 class UniqueItemTracker {
@@ -314,7 +314,7 @@ function isReferenceToImport(typeChecker, node, importSpecifier) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Converts all declarations in the specified files to standalone.
@@ -903,7 +903,7 @@ function isStandaloneDeclaration(node, declarationsInMigration, templateTypeChec
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 function pruneNgModules(program, host, basePath, rootFileNames, sourceFiles, printer, importRemapper, referenceLookupExcludedFiles, componentImportRemapper) {
     const filesToRemove = new Set();
@@ -1325,7 +1325,7 @@ function isInImportsArray(closestAssignment, closestArray) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 function toStandaloneBootstrap(program, host, basePath, rootFileNames, sourceFiles, printer, importRemapper, referenceLookupExcludedFiles, componentImportRemapper) {
     const tracker = new compiler_host.ChangeTracker(printer, importRemapper);

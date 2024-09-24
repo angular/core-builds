@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-7afa978
+ * @license Angular v19.0.0-next.6+sha-9dbe6fc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -194,7 +194,7 @@ function toSignal(source, options) {
     const requiresCleanup = !options?.manualCleanup;
     requiresCleanup && !options?.injector && assertInInjectionContext(toSignal);
     const cleanupRef = requiresCleanup
-        ? options?.injector?.get(DestroyRef) ?? inject(DestroyRef)
+        ? (options?.injector?.get(DestroyRef) ?? inject(DestroyRef))
         : null;
     const equal = makeToSignalEqual(options?.equal);
     // Note: T is the Observable value type, and U is the initial value type. They don't have to be

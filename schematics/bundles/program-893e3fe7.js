@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-7afa978
+ * @license Angular v19.0.0-next.6+sha-9dbe6fc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-dcf9a14e.js');
+var checker = require('./checker-637eee78.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -864,7 +864,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-7afa978'));
+    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-9dbe6fc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -882,7 +882,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-7afa978'));
+    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-9dbe6fc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -977,7 +977,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-7afa978'));
+    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-9dbe6fc'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone) {
@@ -1396,7 +1396,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-7afa978'));
+    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-9dbe6fc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1431,7 +1431,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-7afa978'));
+    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-9dbe6fc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1482,7 +1482,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-7afa978'));
+    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-9dbe6fc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1515,7 +1515,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-7afa978'));
+    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-9dbe6fc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1566,7 +1566,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-7afa978'));
+    definitionMap.set('version', checker.literal('19.0.0-next.6+sha-9dbe6fc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -1981,7 +1981,7 @@ class DeferredSymbolTracker {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Tracks which symbols are imported in specific files and under what names. Allows for efficient
@@ -3074,7 +3074,7 @@ class ExportedProviderStatusResolver {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 const EMPTY_ARRAY$1 = [];
 /** Resolves the host directives of a directive to a flat array of matches. */
@@ -5275,7 +5275,7 @@ function extractSchemas(rawExpr, evaluator, context) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /** Generates additional fields to be added to a class that has inputs with transform functions. */
 function compileInputTransformFields(inputs) {
@@ -12803,7 +12803,7 @@ function extractJsDocDescription(node) {
         return ts__default["default"].isJSDoc(d) || ts__default["default"].isJSDocParameterTag(d);
     });
     const comment = commentOrTag?.comment ?? '';
-    const description = typeof comment === 'string' ? comment : ts__default["default"].getTextOfJSDocComment(comment) ?? '';
+    const description = typeof comment === 'string' ? comment : (ts__default["default"].getTextOfJSDocComment(comment) ?? '');
     return unescapeAngularDecorators(description);
 }
 /**
@@ -15432,7 +15432,7 @@ class StandaloneComponentScopeReader {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /** Names of known signal functions. */
 const SIGNAL_FNS = new Set([
@@ -16337,7 +16337,7 @@ function unwrapAstWithSource(ast) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /** APIs whose usages should be checked by the rule. */
 const APIS_TO_CHECK = [
@@ -16407,7 +16407,7 @@ class InitializerApiUsageRule {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Rule that flags unused symbols inside of the `imports` array of a component.
@@ -16485,7 +16485,7 @@ class UnusedStandaloneImportsRule {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Validates that TypeScript files match a specific set of rules set by the Angular compiler.
@@ -19214,7 +19214,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Whether a version of `@angular/core` supports a specific feature.
@@ -19222,7 +19222,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0-next.6+sha-7afa978` usually means that core is at head so it supports
+    // A version of `19.0.0-next.6+sha-9dbe6fc` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

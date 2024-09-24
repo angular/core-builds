@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-7afa978
+ * @license Angular v19.0.0-next.6+sha-9dbe6fc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11793,7 +11793,10 @@ function formatValue(value) {
     // Self-closing tags use a special form that concatenates the start and close tag values.
     if (value.flags & I18nParamValueFlags.OpenTag &&
         value.flags & I18nParamValueFlags.CloseTag) {
-        return `${formatValue({ ...value, flags: value.flags & ~I18nParamValueFlags.CloseTag })}${formatValue({ ...value, flags: value.flags & ~I18nParamValueFlags.OpenTag })}`;
+        return `${formatValue({
+            ...value,
+            flags: value.flags & ~I18nParamValueFlags.CloseTag,
+        })}${formatValue({ ...value, flags: value.flags & ~I18nParamValueFlags.OpenTag })}`;
     }
     // If there are no special flags, just return the raw value.
     if (value.flags === I18nParamValueFlags.None) {
@@ -12185,13 +12188,17 @@ class IcuSerializerVisitor {
     visitTagPlaceholder(ph) {
         return ph.isVoid
             ? this.formatPh(ph.startName)
-            : `${this.formatPh(ph.startName)}${ph.children.map((child) => child.visit(this)).join('')}${this.formatPh(ph.closeName)}`;
+            : `${this.formatPh(ph.startName)}${ph.children
+                .map((child) => child.visit(this))
+                .join('')}${this.formatPh(ph.closeName)}`;
     }
     visitPlaceholder(ph) {
         return this.formatPh(ph.name);
     }
     visitBlockPlaceholder(ph) {
-        return `${this.formatPh(ph.startName)}${ph.children.map((child) => child.visit(this)).join('')}${this.formatPh(ph.closeName)}`;
+        return `${this.formatPh(ph.startName)}${ph.children
+            .map((child) => child.visit(this))
+            .join('')}${this.formatPh(ph.closeName)}`;
     }
     visitIcuPlaceholder(ph, context) {
         return this.formatPh(ph.name);
@@ -19523,13 +19530,17 @@ class GetMsgSerializerVisitor {
     visitTagPlaceholder(ph) {
         return ph.isVoid
             ? this.formatPh(ph.startName)
-            : `${this.formatPh(ph.startName)}${ph.children.map((child) => child.visit(this)).join('')}${this.formatPh(ph.closeName)}`;
+            : `${this.formatPh(ph.startName)}${ph.children
+                .map((child) => child.visit(this))
+                .join('')}${this.formatPh(ph.closeName)}`;
     }
     visitPlaceholder(ph) {
         return this.formatPh(ph.name);
     }
     visitBlockPlaceholder(ph) {
-        return `${this.formatPh(ph.startName)}${ph.children.map((child) => child.visit(this)).join('')}${this.formatPh(ph.closeName)}`;
+        return `${this.formatPh(ph.startName)}${ph.children
+            .map((child) => child.visit(this))
+            .join('')}${this.formatPh(ph.closeName)}`;
     }
     visitIcuPlaceholder(ph, context) {
         return this.formatPh(ph.name);
@@ -23640,7 +23651,7 @@ function wrapI18nIcus(job) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Removes any `storeLet` calls that aren't referenced outside of the current view.
@@ -23723,7 +23734,7 @@ function generateLocalLetReferences(job) {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 const phases = [
     { kind: CompilationJobKind.Tmpl, fn: removeContentSelectors },
@@ -29234,7 +29245,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.6+sha-7afa978');
+new Version('19.0.0-next.6+sha-9dbe6fc');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -30578,7 +30589,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-dcf9a14e.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-637eee78.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -35383,7 +35394,7 @@ class TypeEmitter {
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 /**
  * Creates a TypeScript node representing a numeric value.
