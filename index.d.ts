@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-48216a2
+ * @license Angular v19.0.0-next.6+sha-030ffb2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2284,7 +2284,7 @@ export declare const ContentChild: ContentChildDecorator;
  * ```
  *
  * @initializerApiFunction
- * @developerPreview
+ * @publicAPI
  */
 export declare const contentChild: ContentChildFunction;
 
@@ -2371,7 +2371,7 @@ export declare interface ContentChildDecorator {
  * The contentChild function creates a singular content query. It is a special function that also
  * provides access to required query results via the `.required` property.
  *
- * @developerPreview
+ * @publicAPI
  * @docsPrivate Ignored because `contentChild` is the canonical API entry.
  */
 export declare interface ContentChildFunction {
@@ -2379,7 +2379,7 @@ export declare interface ContentChildFunction {
      * Initializes a content child query.
      *
      * Consider using `contentChild.required` for queries that should always match.
-     * @developerPreview
+     * @publicAPI
      */
     <LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
         descendants?: boolean;
@@ -11714,7 +11714,7 @@ export declare const ViewChild: ViewChildDecorator;
  * }
  * ```
  *
- * @developerPreview
+ * @publicAPI
  * @initializerApiFunction
  */
 export declare const viewChild: ViewChildFunction;
@@ -11796,7 +11796,7 @@ export declare interface ViewChildDecorator {
  * It is a special function that also provides access to required query results via the `.required`
  * property.
  *
- * @developerPreview
+ * @publicAPI
  * @docsPrivate Ignored because `viewChild` is the canonical API entry.
  */
 export declare interface ViewChildFunction {
@@ -11804,7 +11804,7 @@ export declare interface ViewChildFunction {
      * Initializes a view child query. Consider using `viewChild.required` for queries that should
      * always match.
      *
-     * @developerPreview
+     * @publicAPI
      */
     <LocatorT>(locator: ProviderToken<LocatorT> | string): Signal<LocatorT | undefined>;
     <LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
@@ -11813,7 +11813,7 @@ export declare interface ViewChildFunction {
     /**
      * Initializes a view child query that is expected to always match an element.
      *
-     * @developerPreview
+     * @publicAPI
      */
     required: {
         <LocatorT>(locator: ProviderToken<LocatorT> | string): Signal<LocatorT>;

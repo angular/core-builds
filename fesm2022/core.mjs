@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.6+sha-48216a2
+ * @license Angular v19.0.0-next.6+sha-030ffb2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17027,7 +17027,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.6+sha-48216a2']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.6+sha-030ffb2']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18102,7 +18102,7 @@ function viewChildRequiredFn(locator, opts) {
  * }
  * ```
  *
- * @developerPreview
+ * @publicAPI
  * @initializerApiFunction
  */
 const viewChild = (() => {
@@ -18130,7 +18130,7 @@ const viewChild = (() => {
  * ```
  *
  * @initializerApiFunction
- * @developerPreview
+ * @publicAPI
  */
 function viewChildren(locator, opts) {
     ngDevMode && assertInInjectionContext(viewChildren);
@@ -18163,7 +18163,7 @@ function contentChildRequiredFn(locator, opts) {
  * ```
  *
  * @initializerApiFunction
- * @developerPreview
+ * @publicAPI
  */
 const contentChild = (() => {
     // Note: This may be considered a side-effect, but nothing will depend on
@@ -18190,7 +18190,7 @@ const contentChild = (() => {
  * ```
  *
  * @initializerApiFunction
- * @developerPreview
+ * @publicAPI
  */
 function contentChildren(locator, opts) {
     return createMultiResultQuerySignalFn();
@@ -31134,7 +31134,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.6+sha-48216a2');
+const VERSION = new Version('19.0.0-next.6+sha-030ffb2');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
