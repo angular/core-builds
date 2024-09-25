@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-2c8449a
+ * @license Angular v19.0.0-next.6+sha-95e8fb4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -259,20 +259,25 @@ function getExtendedConfigPathWorker(configFile, extendsValue, host, fs) {
     return null;
 }
 
-/** Reasons why an input cannot be migrated. */
+/**
+ * Reasons why an input cannot be migrated.
+ *
+ * Higher values of incompatibility reasons indicate a more significant
+ * incompatibility reason. Lower ones may be overridden by higher ones.
+ * */
 var InputIncompatibilityReason;
 (function (InputIncompatibilityReason) {
-    InputIncompatibilityReason[InputIncompatibilityReason["OutsideOfMigrationScope"] = 0] = "OutsideOfMigrationScope";
-    InputIncompatibilityReason[InputIncompatibilityReason["SkippedViaConfigFilter"] = 1] = "SkippedViaConfigFilter";
-    InputIncompatibilityReason[InputIncompatibilityReason["Accessor"] = 2] = "Accessor";
-    InputIncompatibilityReason[InputIncompatibilityReason["WriteAssignment"] = 3] = "WriteAssignment";
-    InputIncompatibilityReason[InputIncompatibilityReason["OverriddenByDerivedClass"] = 4] = "OverriddenByDerivedClass";
-    InputIncompatibilityReason[InputIncompatibilityReason["RedeclaredViaDerivedClassInputsArray"] = 5] = "RedeclaredViaDerivedClassInputsArray";
-    InputIncompatibilityReason[InputIncompatibilityReason["TypeConflictWithBaseClass"] = 6] = "TypeConflictWithBaseClass";
-    InputIncompatibilityReason[InputIncompatibilityReason["ParentIsIncompatible"] = 7] = "ParentIsIncompatible";
-    InputIncompatibilityReason[InputIncompatibilityReason["SpyOnThatOverwritesField"] = 8] = "SpyOnThatOverwritesField";
-    InputIncompatibilityReason[InputIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 9] = "PotentiallyNarrowedInTemplateButNoSupportYet";
-    InputIncompatibilityReason[InputIncompatibilityReason["RequiredInputButNoGoodExplicitTypeExtractable"] = 10] = "RequiredInputButNoGoodExplicitTypeExtractable";
+    InputIncompatibilityReason[InputIncompatibilityReason["OverriddenByDerivedClass"] = 1] = "OverriddenByDerivedClass";
+    InputIncompatibilityReason[InputIncompatibilityReason["RedeclaredViaDerivedClassInputsArray"] = 2] = "RedeclaredViaDerivedClassInputsArray";
+    InputIncompatibilityReason[InputIncompatibilityReason["TypeConflictWithBaseClass"] = 3] = "TypeConflictWithBaseClass";
+    InputIncompatibilityReason[InputIncompatibilityReason["ParentIsIncompatible"] = 4] = "ParentIsIncompatible";
+    InputIncompatibilityReason[InputIncompatibilityReason["SpyOnThatOverwritesField"] = 5] = "SpyOnThatOverwritesField";
+    InputIncompatibilityReason[InputIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 6] = "PotentiallyNarrowedInTemplateButNoSupportYet";
+    InputIncompatibilityReason[InputIncompatibilityReason["RequiredInputButNoGoodExplicitTypeExtractable"] = 7] = "RequiredInputButNoGoodExplicitTypeExtractable";
+    InputIncompatibilityReason[InputIncompatibilityReason["WriteAssignment"] = 8] = "WriteAssignment";
+    InputIncompatibilityReason[InputIncompatibilityReason["Accessor"] = 9] = "Accessor";
+    InputIncompatibilityReason[InputIncompatibilityReason["OutsideOfMigrationScope"] = 10] = "OutsideOfMigrationScope";
+    InputIncompatibilityReason[InputIncompatibilityReason["SkippedViaConfigFilter"] = 11] = "SkippedViaConfigFilter";
 })(InputIncompatibilityReason || (InputIncompatibilityReason = {}));
 /** Reasons why a whole class and its inputs cannot be migrated. */
 var ClassIncompatibilityReason;
@@ -285,6 +290,16 @@ function isInputMemberIncompatibility(value) {
     return (value.reason !== undefined &&
         value.context !== undefined &&
         InputIncompatibilityReason.hasOwnProperty(value.reason));
+}
+/** Picks the more significant input compatibility. */
+function pickInputIncompatibility(a, b) {
+    if (b === null) {
+        return a;
+    }
+    if (a.reason < b.reason) {
+        return b;
+    }
+    return a;
 }
 
 /**
@@ -412,7 +427,7 @@ class DirectiveInfo {
     }
     /** Get incompatibility of the given member, if it's incompatible for migration. */
     getInputMemberIncompatibility(input) {
-        return this.incompatible ?? this.memberIncompatibility.get(input.key) ?? null;
+        return this.memberIncompatibility.get(input.key) ?? this.incompatible ?? null;
     }
 }
 
@@ -709,6 +724,12 @@ class KnownInputs {
     markFieldIncompatible(input, incompatibility) {
         if (!this.knownInputIds.has(input.key)) {
             throw new Error(`Input cannot be marked as incompatible because it's not registered.`);
+        }
+        const inputInfo = this.knownInputIds.get(input.key);
+        const existingIncompatibility = inputInfo.container.getInputMemberIncompatibility(input);
+        // Ensure an existing more significant incompatibility is not overridden.
+        if (existingIncompatibility !== null && isInputMemberIncompatibility(existingIncompatibility)) {
+            incompatibility = pickInputIncompatibility(existingIncompatibility, incompatibility);
         }
         this.knownInputIds
             .get(input.key)
@@ -29999,7 +30020,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.6+sha-2c8449a');
+new Version('19.0.0-next.6+sha-95e8fb4');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -31174,31 +31195,19 @@ function pass4__checkInheritanceOfInputs(inheritanceGraph, metaRegistry, knownIn
     });
 }
 
-/** Type of incompatibility. */
-var IncompatibilityType;
-(function (IncompatibilityType) {
-    IncompatibilityType[IncompatibilityType["VIA_CLASS"] = 0] = "VIA_CLASS";
-    IncompatibilityType[IncompatibilityType["VIA_INPUT"] = 1] = "VIA_INPUT";
-})(IncompatibilityType || (IncompatibilityType = {}));
-
 function getCompilationUnitMetadata(knownInputs) {
     const struct = {
         knownInputs: Array.from(knownInputs.knownInputIds.entries()).reduce((res, [inputClassFieldIdStr, info]) => {
-            const classIncompatibility = info.container.incompatible !== null
-                ? { kind: IncompatibilityType.VIA_CLASS, reason: info.container.incompatible }
-                : null;
+            const classIncompatibility = info.container.incompatible !== null ? info.container.incompatible : null;
             const memberIncompatibility = info.container.memberIncompatibility.has(inputClassFieldIdStr)
-                ? {
-                    kind: IncompatibilityType.VIA_INPUT,
-                    reason: info.container.memberIncompatibility.get(inputClassFieldIdStr).reason,
-                }
+                ? info.container.memberIncompatibility.get(inputClassFieldIdStr).reason
                 : null;
-            const incompatibility = classIncompatibility ?? memberIncompatibility ?? null;
             // Note: Trim off the `context` as it cannot be serialized with e.g. TS nodes.
             return {
                 ...res,
                 [inputClassFieldIdStr]: {
-                    isIncompatible: incompatibility,
+                    owningClassIncompatibility: classIncompatibility,
+                    memberIncompatibility,
                     seenAsSourceInput: info.metadata.inSourceFile,
                     extendsFrom: info.extendsFrom?.key ?? null,
                 },
@@ -31258,6 +31267,7 @@ function mergeCompilationUnitData(metadataFiles) {
     };
     const idToGraphNode = new Map();
     const inheritanceGraph = [];
+    const isNodeIncompatible = (node) => node.info.memberIncompatibility !== null || node.info.owningClassIncompatibility !== null;
     for (const file of metadataFiles) {
         for (const [key, info] of Object.entries(file.knownInputs)) {
             const existing = result.knownInputs[key];
@@ -31272,16 +31282,30 @@ function mergeCompilationUnitData(metadataFiles) {
                 idToGraphNode.set(key, node);
                 continue;
             }
-            if (existing.isIncompatible === null && info.isIncompatible) {
-                // input might not be incompatible in one target, but others might invalidate it.
-                // merge the incompatibility state.
-                existing.isIncompatible = info.isIncompatible;
-            }
+            // Merge metadata.
             if (existing.extendsFrom === null && info.extendsFrom !== null) {
                 existing.extendsFrom = info.extendsFrom;
             }
             if (!existing.seenAsSourceInput && info.seenAsSourceInput) {
                 existing.seenAsSourceInput = true;
+            }
+            // Merge member incompatibility.
+            if (info.memberIncompatibility !== null) {
+                if (existing.memberIncompatibility === null) {
+                    existing.memberIncompatibility = info.memberIncompatibility;
+                }
+                else {
+                    // Input might not be incompatible in one target, but others might invalidate it.
+                    // merge the incompatibility state.
+                    existing.memberIncompatibility = pickInputIncompatibility({ reason: info.memberIncompatibility, context: null }, { reason: existing.memberIncompatibility, context: null }).reason;
+                }
+            }
+            // Merge incompatibility of the class owning the input.
+            // Note: This metadata is stored per field for simplicity currently,
+            // but in practice it could be a separate field in the compilation data.
+            if (info.owningClassIncompatibility !== null &&
+                existing.owningClassIncompatibility === null) {
+                existing.owningClassIncompatibility = info.owningClassIncompatibility;
             }
         }
     }
@@ -31298,26 +31322,26 @@ function mergeCompilationUnitData(metadataFiles) {
     // in both directions (derived classes, or base classes). This simplifies the
     // propagation.
     for (const node of topologicalSort(inheritanceGraph).reverse()) {
+        const existingMemberIncompatibility = node.data.info.memberIncompatibility !== null
+            ? { reason: node.data.info.memberIncompatibility, context: null }
+            : null;
         for (const parent of node.outgoing) {
             // If parent is incompatible and not migrated, then this input
-            // cannot be migrated either.
-            if (parent.data.info.isIncompatible !== null) {
-                node.data.info.isIncompatible = {
-                    kind: IncompatibilityType.VIA_INPUT,
-                    reason: InputIncompatibilityReason.ParentIsIncompatible,
-                };
+            // cannot be migrated either. Try propagating parent incompatibility then.
+            if (isNodeIncompatible(parent.data)) {
+                node.data.info.memberIncompatibility = pickInputIncompatibility({ reason: InputIncompatibilityReason.ParentIsIncompatible, context: null }, existingMemberIncompatibility).reason;
                 break;
             }
         }
     }
     for (const info of Object.values(result.knownInputs)) {
-        // We never saw a source file for this input, globally. Mark it as incompatible,
+        // We never saw a source file for this input, globally. Try marking it as incompatible,
         // so that all references and inheritance checks can propagate accordingly.
         if (!info.seenAsSourceInput) {
-            info.isIncompatible = {
-                kind: IncompatibilityType.VIA_INPUT,
-                reason: InputIncompatibilityReason.OutsideOfMigrationScope,
-            };
+            const existingMemberIncompatibility = info.memberIncompatibility !== null
+                ? { reason: info.memberIncompatibility, context: null }
+                : null;
+            info.memberIncompatibility = pickInputIncompatibility({ reason: InputIncompatibilityReason.OutsideOfMigrationScope, context: null }, existingMemberIncompatibility).reason;
         }
     }
     return result;
@@ -31332,16 +31356,14 @@ function populateKnownInputsFromGlobalData(knownInputs, globalData) {
             continue;
         }
         const inputMetadata = knownInputs.get({ key });
-        if (!inputMetadata.isIncompatible() && info.isIncompatible) {
-            if (info.isIncompatible.kind === IncompatibilityType.VIA_CLASS) {
-                knownInputs.markClassIncompatible(inputMetadata.container.clazz, info.isIncompatible.reason);
-            }
-            else {
-                knownInputs.markFieldIncompatible(inputMetadata.descriptor, {
-                    context: null, // No context serializable.
-                    reason: info.isIncompatible.reason,
-                });
-            }
+        if (info.memberIncompatibility) {
+            knownInputs.markFieldIncompatible(inputMetadata.descriptor, {
+                context: null, // No context serializable.
+                reason: info.memberIncompatibility,
+            });
+        }
+        if (info.owningClassIncompatibility) {
+            knownInputs.markClassIncompatible(inputMetadata.container.clazz, info.owningClassIncompatibility);
         }
     }
 }
@@ -31527,6 +31549,13 @@ function extractTransformOfInput(transform, resolvedType, checker) {
 function insertTodoForIncompatibility(node, programInfo, input) {
     const incompatibility = input.container.getInputMemberIncompatibility(input.descriptor);
     if (incompatibility === null) {
+        return [];
+    }
+    // If an input is skipped via config filter or outside migration scope, do not
+    // insert TODOs, as this could results in lots of unnecessary comments.
+    if (isInputMemberIncompatibility(incompatibility) &&
+        (incompatibility.reason === InputIncompatibilityReason.SkippedViaConfigFilter ||
+            incompatibility.reason === InputIncompatibilityReason.OutsideOfMigrationScope)) {
         return [];
     }
     const message = isInputMemberIncompatibility(incompatibility)
