@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.6+sha-af66e24
+ * @license Angular v19.0.0-next.6+sha-2c8449a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29999,7 +29999,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.6+sha-af66e24');
+new Version('19.0.0-next.6+sha-2c8449a');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30204,8 +30204,11 @@ class TemplateExpressionReferenceVisitor extends RecursiveAstVisitor {
     checkTemplateExpression(activeNode, expressionNode) {
         this.detectedInputReferences = [];
         this.activeTmplAstNode = activeNode;
-        expressionNode.visit(this);
+        expressionNode.visit(this, []);
         return this.detectedInputReferences;
+    }
+    visit(ast, context) {
+        super.visit(ast, [...context, ast]);
     }
     // Keep track when we are inside an object shorthand expression. This is
     // necessary as we need to expand the shorthand to invoke a potential new signal.
@@ -30216,35 +30219,34 @@ class TemplateExpressionReferenceVisitor extends RecursiveAstVisitor {
             ast.values[idx].visit(this, context);
             this.isInsideObjectShorthandExpression = false;
         }
-        super.visitLiteralMap(ast, context);
     }
-    visitPropertyRead(ast) {
-        this._inspectPropertyAccess(ast);
-        super.visitPropertyRead(ast, null);
+    visitPropertyRead(ast, context) {
+        this._inspectPropertyAccess(ast, context);
+        super.visitPropertyRead(ast, context);
     }
-    visitSafePropertyRead(ast) {
-        this._inspectPropertyAccess(ast);
-        super.visitPropertyRead(ast, null);
+    visitSafePropertyRead(ast, context) {
+        this._inspectPropertyAccess(ast, context);
+        super.visitPropertyRead(ast, context);
     }
-    visitPropertyWrite(ast) {
-        this._inspectPropertyAccess(ast);
-        super.visitPropertyWrite(ast, null);
+    visitPropertyWrite(ast, context) {
+        this._inspectPropertyAccess(ast, context);
+        super.visitPropertyWrite(ast, context);
     }
     /**
      * Inspects the property access and attempts to resolve whether they access
      * a known field. If so, the result is captured.
      */
-    _inspectPropertyAccess(ast) {
+    _inspectPropertyAccess(ast, astPath) {
         const isWrite = !!(ast instanceof PropertyWrite ||
             (this.activeTmplAstNode && isTwoWayBindingNode(this.activeTmplAstNode)));
-        this._checkAccessViaTemplateTypeCheckBlock(ast, isWrite) ||
-            this._checkAccessViaOwningComponentClassType(ast, isWrite);
+        this._checkAccessViaTemplateTypeCheckBlock(ast, isWrite, astPath) ||
+            this._checkAccessViaOwningComponentClassType(ast, isWrite, astPath);
     }
     /**
      * Checks whether the node refers to an input using the TCB information.
      * Type check block may not exist for e.g. test components, so this can return `null`.
      */
-    _checkAccessViaTemplateTypeCheckBlock(ast, isWrite) {
+    _checkAccessViaTemplateTypeCheckBlock(ast, isWrite, astPath) {
         // There might be no template type checker. E.g. if we check host bindings.
         if (this.templateTypeChecker === null) {
             return false;
@@ -30264,6 +30266,7 @@ class TemplateExpressionReferenceVisitor extends RecursiveAstVisitor {
             targetNode: targetInput.node,
             targetField: targetInput,
             read: ast,
+            readAstPath: astPath,
             context: this.activeTmplAstNode,
             isLikelyNarrowed: false,
             isObjectShorthandExpression: this.isInsideObjectShorthandExpression,
@@ -30278,7 +30281,7 @@ class TemplateExpressionReferenceVisitor extends RecursiveAstVisitor {
      * It attempts to resolve references by traversing accesses of the "component class" type.
      * e.g. `this.bla` is resolved via `CompType#bla` and further.
      */
-    _checkAccessViaOwningComponentClassType(ast, isWrite) {
+    _checkAccessViaOwningComponentClassType(ast, isWrite, astPath) {
         // We might check host bindings, which can never point to template variables or local refs.
         const expressionTemplateTarget = this.templateTypeChecker === null
             ? null
@@ -30301,6 +30304,7 @@ class TemplateExpressionReferenceVisitor extends RecursiveAstVisitor {
             targetNode: matchingTarget.node,
             targetField: matchingTarget,
             read: ast,
+            readAstPath: astPath,
             context: this.activeTmplAstNode,
             isLikelyNarrowed: false,
             isObjectShorthandExpression: this.isInsideObjectShorthandExpression,
@@ -30451,6 +30455,7 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
             kind: ReferenceKind.InHostBinding,
             from: {
                 read: ref.read,
+                readAstPath: ref.readAstPath,
                 isObjectShorthandExpression: ref.isObjectShorthandExpression,
                 isWrite: ref.isWrite,
                 file: projectFile(ref.context.getSourceFile(), programInfo),
@@ -30550,6 +30555,7 @@ function identifyTemplateReferences(programInfo, node, reflector, checker$1, eva
                 kind: ReferenceKind.InTemplate,
                 from: {
                     read: res.read,
+                    readAstPath: res.readAstPath,
                     node: res.context,
                     isObjectShorthandExpression: res.isObjectShorthandExpression,
                     originatingTsFile: projectFile(node.getSourceFile(), programInfo),
@@ -30773,7 +30779,7 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
             perfCounters.template += (currentTimeInMs() - lastTime) / 1000;
             lastTime = currentTimeInMs();
             identifyHostBindingReferences(node, programInfo, checker, reflector, result, knownFields);
-            perfCounters.hostBindings += (performance.now() - lastTime) / 1000;
+            perfCounters.hostBindings += (currentTimeInMs() - lastTime) / 1000;
             lastTime = currentTimeInMs();
         }
         lastTime = currentTimeInMs();
@@ -30784,7 +30790,7 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
                 debugElComponentInstanceTracker,
             });
         }
-        perfCounters.tsReferences += (performance.now() - lastTime) / 1000;
+        perfCounters.tsReferences += (currentTimeInMs() - lastTime) / 1000;
         lastTime = currentTimeInMs();
         // Detect `Partial<T>` references.
         // Those are relevant to be tracked as they may be updated in Catalyst to
@@ -30803,7 +30809,7 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
                 target: partialDirectiveInCatalyst.targetClass,
             });
         }
-        perfCounters.tsTypes += (performance.now() - lastTime) / 1000;
+        perfCounters.tsTypes += (currentTimeInMs() - lastTime) / 1000;
     };
     return {
         visitor,
