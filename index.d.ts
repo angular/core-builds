@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.6+sha-1391928
+ * @license Angular v18.2.6+sha-2f347ef
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,12 +10,12 @@ import { EnvironmentProviders as EnvironmentProviders_2 } from '@angular/core';
 import { EventContract } from '@angular/core/primitives/event-dispatch';
 import { Observable } from 'rxjs';
 import { ReactiveNode } from '@angular/core/primitives/signals';
-import { SIGNAL } from '@angular/core/primitives/signals';
 import { SignalNode } from '@angular/core/primitives/signals';
 import { Subject } from 'rxjs';
 import { Subscribable } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { ɵProfiler as ɵProfiler_2 } from '@angular/core';
+import { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
 
 /**
  * @description
@@ -406,6 +406,13 @@ export declare interface AfterRenderOptions {
      */
     injector?: Injector;
     /**
+     * Whether the hook should require manual cleanup.
+     *
+     * If this is `false` (the default) the hook will automatically register itself to be cleaned up
+     * with the current `DestroyRef`.
+     */
+    manualCleanup?: boolean;
+    /**
      * The phase the callback should be invoked in.
      *
      * <div class="alert is-critical">
@@ -511,7 +518,7 @@ declare class AfterRenderSequence implements AfterRenderRef {
      */
     pipelinedValue: unknown;
     private unregisterOnDestroy;
-    constructor(impl: AfterRenderImpl, hooks: AfterRenderHooks, once: boolean, destroyRef: DestroyRef);
+    constructor(impl: AfterRenderImpl, hooks: AfterRenderHooks, once: boolean, destroyRef: DestroyRef | null);
     afterRun(): void;
     destroy(): void;
 }
@@ -4599,21 +4606,6 @@ export declare interface GetTestability {
 declare const GLOBAL_PUBLISH_EXPANDO_KEY = "ng";
 
 /**
- * This class is the delegate for `EventDelegationPlugin`. It represents the
- * noop version of this class, with the enabled version set when
- * `provideGlobalEventDelegation` is called.
- */
-declare class GlobalEventDelegation implements OnDestroy {
-    private eventContractDetails;
-    ngOnDestroy(): void;
-    supports(eventType: string): boolean;
-    addEventListener(element: HTMLElement, eventType: string, handler: Function): Function;
-    removeEventListener(element: HTMLElement, eventType: string, callback: Function): void;
-    static ɵfac: i0.ɵɵFactoryDeclaration<GlobalEventDelegation, never>;
-    static ɵprov: i0.ɵɵInjectableDeclaration<GlobalEventDelegation>;
-}
-
-/**
  * The goal here is to make sure that the browser DOM API is the Renderer.
  * We do this by defining a subset of DOM API to be the renderer and then
  * use that at runtime for rendering.
@@ -6174,27 +6166,6 @@ export declare interface InputSignal<T> extends InputSignalWithTransform<T, T> {
 }
 
 /**
- * Reactive node type for an input signal. An input signal extends a signal.
- * There are special properties to enable transforms and required inputs.
- */
-declare interface InputSignalNode<T, TransformT> extends SignalNode<T> {
-    /**
-     * User-configured transform that will run whenever a new value is applied
-     * to the input signal node.
-     */
-    transformFn: ((value: TransformT) => T) | undefined;
-    /**
-     * Applies a new value to the input signal. Expects transforms to be run
-     * manually before.
-     *
-     * This function is called by the framework runtime code whenever a binding
-     * changes. The value can in practice be anything at runtime, but for typing
-     * purposes we assume it's a valid `T` value. Type-checking will enforce that.
-     */
-    applyValueToInputSignal<T, TransformT>(node: InputSignalNode<T, TransformT>, value: T): void;
-}
-
-/**
  * `InputSignalWithTransform` represents a special `Signal` for a
  * directive/component input with a `transform` function.
  *
@@ -6219,7 +6190,7 @@ declare interface InputSignalNode<T, TransformT> extends SignalNode<T> {
  * @developerPreview
  */
 export declare interface InputSignalWithTransform<T, TransformT> extends Signal<T> {
-    [SIGNAL]: InputSignalNode<T, TransformT>;
+    [ɵSIGNAL]: ɵInputSignalNode<T, TransformT>;
     [ɵINPUT_SIGNAL_BRAND_READ_TYPE]: T;
     [ɵINPUT_SIGNAL_BRAND_WRITE_TYPE]: TransformT;
 }
@@ -7269,7 +7240,7 @@ export declare interface ModelOptions {
  * @developerPreview
  */
 export declare interface ModelSignal<T> extends WritableSignal<T>, InputSignal<T>, OutputRef<T> {
-    [SIGNAL]: InputSignalNode<T, T>;
+    [ɵSIGNAL]: ɵInputSignalNode<T, T>;
 }
 
 /**
@@ -9573,7 +9544,7 @@ export declare function setTestabilityGetter(getter: GetTestability): void;
  * Ordinary values can be turned into `Signal`s with the `signal` function.
  */
 export declare type Signal<T> = (() => T) & {
-    [SIGNAL]: unknown;
+    [ɵSIGNAL]: unknown;
 };
 
 /**
@@ -12805,7 +12776,7 @@ export declare interface ɵDirectiveDef<T> {
     findHostDirectiveDefs: ((currentDef: ɵDirectiveDef<unknown>, matchedDefs: ɵDirectiveDef<unknown>[], hostDirectiveDefs: HostDirectiveDefs) => void) | null;
     /** Additional directives to be applied whenever the directive has been matched. */
     hostDirectives: HostDirectiveDef[] | null;
-    setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, inputSignalNode: null | InputSignalNode<unknown, unknown>, value: any, publicName: string, privateName: string) => void) | null;
+    setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, inputSignalNode: null | ɵInputSignalNode<unknown, unknown>, value: any, publicName: string, privateName: string) => void) | null;
 }
 
 /**
@@ -12998,8 +12969,6 @@ export declare function ɵgetUnknownPropertyStrictMode(): boolean;
 
 export declare const ɵglobal: any;
 
-export declare const ɵGLOBAL_EVENT_DELEGATION: InjectionToken<GlobalEventDelegation>;
-
 /**
  * Default debug tools available under `window.ng`.
  */
@@ -13083,6 +13052,27 @@ export declare interface ɵInjectorProfilerContext {
 declare const ɵINPUT_SIGNAL_BRAND_READ_TYPE: unique symbol;
 
 export declare const ɵINPUT_SIGNAL_BRAND_WRITE_TYPE: unique symbol;
+
+/**
+ * Reactive node type for an input signal. An input signal extends a signal.
+ * There are special properties to enable transforms and required inputs.
+ */
+export declare interface ɵInputSignalNode<T, TransformT> extends SignalNode<T> {
+    /**
+     * User-configured transform that will run whenever a new value is applied
+     * to the input signal node.
+     */
+    transformFn: ((value: TransformT) => T) | undefined;
+    /**
+     * Applies a new value to the input signal. Expects transforms to be run
+     * manually before.
+     *
+     * This function is called by the framework runtime code whenever a binding
+     * changes. The value can in practice be anything at runtime, but for typing
+     * purposes we assume it's a valid `T` value. Type-checking will enforce that.
+     */
+    applyValueToInputSignal<T, TransformT>(node: ɵInputSignalNode<T, TransformT>, value: T): void;
+}
 
 /**
  * `InjectionToken` used to configure how to call the `ErrorHandler`.
@@ -13531,13 +13521,6 @@ export declare const enum ɵProfilerEvent {
 export declare const ɵPROVIDED_NG_ZONE: InjectionToken<boolean>;
 
 /**
- * Returns a set of providers required to setup support for event delegation.
- * @param multiContract - Experimental support to provide one event contract
- * when there are multiple binaries on the page.
- */
-export declare function ɵprovideGlobalEventDelegation(multiContract?: boolean): Provider[];
-
-/**
  * An object that contains information about a provider that has been configured
  *
  * TODO: rename to indicate that it is a debug structure eg. ProviderDebugInfo.
@@ -13971,6 +13954,8 @@ export declare function ɵsetUnknownElementStrictMode(shouldThrow: boolean): voi
  * (for AOT-compiled ones this check happens at build time).
  */
 export declare function ɵsetUnknownPropertyStrictMode(shouldThrow: boolean): void;
+
+export { ɵSIGNAL }
 
 /**
  * Marker used in a comment node to ensure hydration content integrity
