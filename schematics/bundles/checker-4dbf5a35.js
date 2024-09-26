@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.7+sha-1549afe
+ * @license Angular v19.0.0-next.7+sha-0aae371
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2539,6 +2539,7 @@ class Identifiers {
     }; }
     static { this.forwardRef = { name: 'forwardRef', moduleName: CORE }; }
     static { this.resolveForwardRef = { name: 'resolveForwardRef', moduleName: CORE }; }
+    static { this.replaceMetadata = { name: 'ɵɵreplaceMedata', moduleName: CORE }; }
     static { this.ɵɵdefineInjectable = { name: 'ɵɵdefineInjectable', moduleName: CORE }; }
     static { this.declareInjectable = { name: 'ɵɵngDeclareInjectable', moduleName: CORE }; }
     static { this.InjectableDeclaration = {
@@ -29245,7 +29246,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.7+sha-1549afe');
+new Version('19.0.0-next.7+sha-0aae371');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -29806,6 +29807,10 @@ exports.ErrorCode = void 0;
      * pipe.
      */
     ErrorCode[ErrorCode["COMPONENT_UNKNOWN_DEFERRED_IMPORT"] = 2022] = "COMPONENT_UNKNOWN_DEFERRED_IMPORT";
+    /**
+     * Raised when a `standalone: false` component is declared but `strictStandalone` is set.
+     */
+    ErrorCode[ErrorCode["NON_STANDALONE_NOT_ALLOWED"] = 2023] = "NON_STANDALONE_NOT_ALLOWED";
     ErrorCode[ErrorCode["SYMBOL_NOT_EXPORTED"] = 3001] = "SYMBOL_NOT_EXPORTED";
     /**
      * Raised when a relationship between directives and/or pipes would cause a cyclic import to be
@@ -30589,7 +30594,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-637eee78.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-4dbf5a35.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -43456,9 +43461,11 @@ class SymbolBuilder {
             return this.getSymbol(expressionTarget);
         }
         let withSpan = expression.sourceSpan;
-        // The `name` part of a `PropertyWrite` and a non-safe `Call` does not have its own
+        // The `name` part of a `PropertyWrite` and `ASTWithName` do not have their own
         // AST so there is no way to retrieve a `Symbol` for just the `name` via a specific node.
-        if (expression instanceof PropertyWrite) {
+        // Also skipping SafePropertyReads as it breaks nullish coalescing not nullable extended diagnostic
+        if (expression instanceof PropertyWrite ||
+            (expression instanceof ASTWithName && !(expression instanceof SafePropertyRead))) {
             withSpan = expression.nameSpan;
         }
         let node = null;
@@ -43510,6 +43517,9 @@ class SymbolBuilder {
         let tsSymbol;
         if (ts__default["default"].isPropertyAccessExpression(node)) {
             tsSymbol = this.getTypeChecker().getSymbolAtLocation(node.name);
+        }
+        else if (ts__default["default"].isCallExpression(node)) {
+            tsSymbol = this.getTypeChecker().getSymbolAtLocation(node.expression);
         }
         else {
             tsSymbol = this.getTypeChecker().getSymbolAtLocation(node);

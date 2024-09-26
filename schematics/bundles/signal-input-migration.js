@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.7+sha-1549afe
+ * @license Angular v19.0.0-next.7+sha-0aae371
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,8 +11,8 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var schematics = require('@angular-devkit/schematics');
 var ts = require('typescript');
 var os = require('os');
-var checker = require('./checker-637eee78.js');
-var program = require('./program-893e3fe7.js');
+var checker = require('./checker-4dbf5a35.js');
+var program = require('./program-860d62b5.js');
 require('path');
 var assert = require('assert');
 var leading_space = require('./leading_space-d190b83b.js');
@@ -3771,6 +3771,7 @@ class Identifiers {
     }; }
     static { this.forwardRef = { name: 'forwardRef', moduleName: CORE }; }
     static { this.resolveForwardRef = { name: 'resolveForwardRef', moduleName: CORE }; }
+    static { this.replaceMetadata = { name: 'ɵɵreplaceMedata', moduleName: CORE }; }
     static { this.ɵɵdefineInjectable = { name: 'ɵɵdefineInjectable', moduleName: CORE }; }
     static { this.declareInjectable = { name: 'ɵɵngDeclareInjectable', moduleName: CORE }; }
     static { this.InjectableDeclaration = {
@@ -30020,7 +30021,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.7+sha-1549afe');
+new Version('19.0.0-next.7+sha-0aae371');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -31356,13 +31357,13 @@ function populateKnownInputsFromGlobalData(knownInputs, globalData) {
             continue;
         }
         const inputMetadata = knownInputs.get({ key });
-        if (info.memberIncompatibility) {
+        if (info.memberIncompatibility !== null) {
             knownInputs.markFieldIncompatible(inputMetadata.descriptor, {
                 context: null, // No context serializable.
                 reason: info.memberIncompatibility,
             });
         }
-        if (info.owningClassIncompatibility) {
+        if (info.owningClassIncompatibility !== null) {
             knownInputs.markClassIncompatible(inputMetadata.container.clazz, info.owningClassIncompatibility);
         }
     }
