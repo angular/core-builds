@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.6+sha-add5c25
+ * @license Angular v18.2.6+sha-b9d846d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16946,7 +16946,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.6+sha-add5c25']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.6+sha-b9d846d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31037,7 +31037,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.6+sha-add5c25');
+const VERSION = new Version('18.2.6+sha-b9d846d');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33908,6 +33908,24 @@ class ImagePerformanceWarning {
         if (!this.window) {
             return false;
         }
+        // The `isOversized` check may not be applicable or may require adjustments
+        // for several types of image formats or scenarios. Currently, we specify only
+        // `svg`, but this may also include `gif` since their quality isn’t tied to
+        // dimensions in the same way as raster images.
+        const nonOversizedImageExtentions = [
+            // SVG images are vector-based, which means they can scale
+            // to any size without losing quality.
+            '.svg',
+        ];
+        // Convert it to lowercase because this may have uppercase
+        // extensions, such as `IMAGE.SVG`.
+        // We fallback to an empty string because `src` may be `undefined`
+        // if it is explicitly set to `null` by some third-party code
+        // (e.g., `image.src = null`).
+        const imageSource = (image.src || '').toLowerCase();
+        if (nonOversizedImageExtentions.some((extension) => imageSource.endsWith(extension))) {
+            return false;
+        }
         const computedStyle = this.window.getComputedStyle(image);
         let renderedWidth = parseFloat(computedStyle.getPropertyValue('width'));
         let renderedHeight = parseFloat(computedStyle.getPropertyValue('height'));
@@ -33919,6 +33937,8 @@ class ImagePerformanceWarning {
             return false;
         }
         if (boxSizing === 'border-box') {
+            // If the image `box-sizing` is set to `border-box`, we adjust the rendered
+            // dimensions by subtracting padding values.
             const paddingTop = computedStyle.getPropertyValue('padding-top');
             const paddingRight = computedStyle.getPropertyValue('padding-right');
             const paddingBottom = computedStyle.getPropertyValue('padding-bottom');

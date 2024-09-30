@@ -23314,7 +23314,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.6+sha-add5c25");
+var VERSION2 = new Version("18.2.6+sha-b9d846d");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -27475,7 +27475,7 @@ function migrateClass(node, constructor, superCall, options, removedStatements, 
       tracker.replaceText(sourceFile, member.getFullStart(), member.getFullWidth(), "");
     }
   }
-  if (!options.backwardsCompatibleConstructors && (!constructor.body || constructor.body.statements.length - removedStatementCount === 0)) {
+  if (canRemoveConstructor(options, constructor, removedStatementCount, superCall)) {
     removedMembers.add(constructor);
     tracker.replaceText(sourceFile, constructor.getFullStart(), constructor.getFullWidth(), "");
   } else {
@@ -27709,6 +27709,13 @@ function cloneName(node) {
     default:
       return node;
   }
+}
+function canRemoveConstructor(options, constructor, removedStatementCount, superCall) {
+  if (options.backwardsCompatibleConstructors) {
+    return false;
+  }
+  const statementCount = constructor.body ? constructor.body.statements.length - removedStatementCount : 0;
+  return statementCount === 0 || statementCount === 1 && superCall !== null && superCall.arguments.length === 0;
 }
 
 // bazel-out/k8-fastbuild/bin/packages/core/schematics/ng-generate/inject-migration/index.mjs
