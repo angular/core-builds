@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.7+sha-7d1998f
+ * @license Angular v19.0.0-next.7+sha-f2bea3b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9403,6 +9403,11 @@ export declare interface RendererType2 {
     data: {
         [kind: string]: any;
     };
+    /**
+     * A function added by the {@link ɵɵExternalStylesFeature} and used by the framework to create
+     * the list of external runtime style URLs.
+     */
+    getExternalStyles?: ((encapsulationId?: string) => string[]) | null;
 }
 
 /**
@@ -12668,6 +12673,11 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     getStandaloneInjector: ((parentInjector: EnvironmentInjector) => EnvironmentInjector | null) | null;
     /**
+     * A function added by the {@link ɵɵExternalStylesFeature} and used by the framework to create
+     * the list of external runtime style URLs.
+     */
+    getExternalStyles: ((encapsulationId?: string) => string[]) | null;
+    /**
      * Used to store the result of `noSideEffects` function so that it is not removed by closure
      * compiler. The property should never be read.
      */
@@ -15713,6 +15723,18 @@ export declare function ɵɵelementStart(index: number, name: string, attrsIndex
 export declare function ɵɵenableBindings(): void;
 
 /**
+ * A feature that adds support for external runtime styles for a component.
+ * An external runtime style is a URL to a CSS stylesheet that contains the styles
+ * for a given component. For browsers, this URL will be used in an appended `link` element
+ * when the component is rendered. This feature is typically used for Hot Module Replacement
+ * (HMR) of component stylesheets by leveraging preexisting global stylesheet HMR available
+ * in most development servers.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵExternalStylesFeature(styleUrls: string[]): ComponentDefFeature;
+
+/**
  * @publicApi
  */
 export declare type ɵɵFactoryDeclaration<T, CtorDependencies extends CtorDependency[]> = unknown;
@@ -17066,7 +17088,7 @@ export declare function ɵɵrepeaterTrackByIndex(index: number): number;
  * @param applyMetadata Callback that will apply a new set of metadata on the `type` when invoked.
  * @codeGenApi
  */
-export declare function ɵɵreplaceMedata(type: Type<unknown>, applyMetadata: () => void): void;
+export declare function ɵɵreplaceMetadata(type: Type<unknown>, applyMetadata: () => void): void;
 
 /**
  * Clears the view set in `ɵɵrestoreView` from memory. Returns the passed in

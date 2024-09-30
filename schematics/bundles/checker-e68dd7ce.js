@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.7+sha-7d1998f
+ * @license Angular v19.0.0-next.7+sha-f2bea3b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2539,7 +2539,7 @@ class Identifiers {
     }; }
     static { this.forwardRef = { name: 'forwardRef', moduleName: CORE }; }
     static { this.resolveForwardRef = { name: 'resolveForwardRef', moduleName: CORE }; }
-    static { this.replaceMetadata = { name: 'ɵɵreplaceMedata', moduleName: CORE }; }
+    static { this.replaceMetadata = { name: 'ɵɵreplaceMetadata', moduleName: CORE }; }
     static { this.ɵɵdefineInjectable = { name: 'ɵɵdefineInjectable', moduleName: CORE }; }
     static { this.declareInjectable = { name: 'ɵɵngDeclareInjectable', moduleName: CORE }; }
     static { this.InjectableDeclaration = {
@@ -29246,7 +29246,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.7+sha-7d1998f');
+new Version('19.0.0-next.7+sha-f2bea3b');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -30594,7 +30594,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-4dbf5a35.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-e68dd7ce.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.

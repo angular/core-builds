@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.7+sha-7d1998f
+ * @license Angular v19.0.0-next.7+sha-f2bea3b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-4dbf5a35.js');
+var checker = require('./checker-e68dd7ce.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -864,7 +864,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-7d1998f'));
+    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-f2bea3b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -882,7 +882,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-7d1998f'));
+    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-f2bea3b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -977,7 +977,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-7d1998f'));
+    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-f2bea3b'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone) {
@@ -1396,7 +1396,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-7d1998f'));
+    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-f2bea3b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1431,7 +1431,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-7d1998f'));
+    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-f2bea3b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1482,7 +1482,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-7d1998f'));
+    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-f2bea3b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1515,7 +1515,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-7d1998f'));
+    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-f2bea3b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1566,7 +1566,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-7d1998f'));
+    definitionMap.set('version', checker.literal('19.0.0-next.7+sha-f2bea3b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -16463,15 +16463,18 @@ class UnusedStandaloneImportsRule {
         return checker.makeDiagnostic(checker.ErrorCode.UNUSED_STANDALONE_IMPORTS, metadata.rawImports, 'Imports array contains unused imports', unused.map(([ref, type, name]) => checker.makeRelatedInformation(ref.getOriginForDiagnostics(metadata.rawImports), `${type} "${name}" is not used within the template`)), category);
     }
     getUnusedSymbols(metadata, usedDirectives, usedPipes) {
-        if (metadata.imports === null || metadata.rawImports === null) {
+        const { imports, rawImports } = metadata;
+        if (imports === null || rawImports === null) {
             return null;
         }
         let unused = null;
-        for (const current of metadata.imports) {
+        for (const current of imports) {
             const currentNode = current.node;
             const dirMeta = this.templateTypeChecker.getDirectiveMetadata(currentNode);
             if (dirMeta !== null) {
-                if (dirMeta.isStandalone && (usedDirectives === null || !usedDirectives.has(currentNode))) {
+                if (dirMeta.isStandalone &&
+                    !usedDirectives.has(currentNode) &&
+                    !this.isPotentialSharedReference(current, rawImports)) {
                     unused ??= [];
                     unused.push([current, dirMeta.isComponent ? 'Component' : 'Directive', dirMeta.name]);
                 }
@@ -16480,12 +16483,40 @@ class UnusedStandaloneImportsRule {
             const pipeMeta = this.templateTypeChecker.getPipeMetadata(currentNode);
             if (pipeMeta !== null &&
                 pipeMeta.isStandalone &&
-                (usedPipes === null || !usedPipes.has(pipeMeta.name))) {
+                !usedPipes.has(pipeMeta.name) &&
+                !this.isPotentialSharedReference(current, rawImports)) {
                 unused ??= [];
                 unused.push([current, 'Pipe', pipeMeta.ref.node.name.text]);
             }
         }
         return unused;
+    }
+    /**
+     * Determines if an import reference *might* be coming from a shared imports array.
+     * @param reference Reference to be checked.
+     * @param rawImports AST node that defines the `imports` array.
+     */
+    isPotentialSharedReference(reference, rawImports) {
+        // If the reference is defined directly in the `imports` array, it cannot be shared.
+        if (reference.getIdentityInExpression(rawImports) !== null) {
+            return false;
+        }
+        // The reference might be shared if it comes from an exported array. If the variable is local
+        /// to the file, then it likely isn't shared. Note that this has the potential for false
+        // positives if a non-exported array of imports is shared between components in the same
+        // file. This scenario is unlikely and even if we report the diagnostic for it, it would be
+        // okay since the user only has to refactor components within the same file, rather than the
+        // entire application.
+        let current = reference.getIdentityIn(rawImports.getSourceFile());
+        while (current !== null) {
+            if (ts__default["default"].isVariableStatement(current)) {
+                return !!current.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.ExportKeyword);
+            }
+            current = current.parent;
+        }
+        // Otherwise the reference likely comes from an imported
+        // symbol like an array of shared common components.
+        return true;
     }
 }
 
@@ -19231,7 +19262,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0-next.7+sha-7d1998f` usually means that core is at head so it supports
+    // A version of `19.0.0-next.7+sha-f2bea3b` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

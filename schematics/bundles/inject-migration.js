@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.7+sha-7d1998f
+ * @license Angular v19.0.0-next.7+sha-f2bea3b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,12 +10,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-8cb9ce60.js');
+var compiler_host = require('./compiler_host-9a4d0c2b.js');
 var ts = require('typescript');
 var nodes = require('./nodes-0e7d45ca.js');
 var imports = require('./imports-4ac08251.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./checker-4dbf5a35.js');
+require('./checker-e68dd7ce.js');
 require('os');
 require('fs');
 require('module');
@@ -514,8 +514,7 @@ function migrateClass(node, constructor, superCall, options, removedStatements, 
             tracker.replaceText(sourceFile, member.getFullStart(), member.getFullWidth(), '');
         }
     }
-    if (!options.backwardsCompatibleConstructors &&
-        (!constructor.body || constructor.body.statements.length - removedStatementCount === 0)) {
+    if (canRemoveConstructor(options, constructor, removedStatementCount, superCall)) {
         // Drop the constructor if it was empty.
         removedMembers.add(constructor);
         tracker.replaceText(sourceFile, constructor.getFullStart(), constructor.getFullWidth(), '');
@@ -860,6 +859,23 @@ function cloneName(node) {
         default:
             return node;
     }
+}
+/**
+ * Determines whether it's safe to delete a class constructor.
+ * @param options Options used to configure the migration.
+ * @param constructor Node representing the constructor.
+ * @param removedStatementCount Number of statements that were removed by the migration.
+ * @param superCall Node representing the `super()` call within the constructor.
+ */
+function canRemoveConstructor(options, constructor, removedStatementCount, superCall) {
+    if (options.backwardsCompatibleConstructors) {
+        return false;
+    }
+    const statementCount = constructor.body
+        ? constructor.body.statements.length - removedStatementCount
+        : 0;
+    return (statementCount === 0 ||
+        (statementCount === 1 && superCall !== null && superCall.arguments.length === 0));
 }
 
 function migrate(options) {
