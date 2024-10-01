@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.7+sha-e77a163
+ * @license Angular v19.0.0-next.7+sha-9ce839f
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -488,6 +488,8 @@ function createNgtscProgram(absoluteTsconfigPath, fs, optionOverrides = {}) {
 }
 
 /**
+ * @private
+ *
  * Base class for the possible Tsurge migration variants.
  *
  * For example, this class exposes methods to conveniently create
@@ -30021,7 +30023,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.7+sha-e77a163');
+new Version('19.0.0-next.7+sha-9ce839f');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -32712,6 +32714,43 @@ class SignalInputMigration extends TsurgeComplexMigration {
         this.config.reportProgressFn?.(60, 'Collecting migration changes..');
         executeMigrationPhase(host, knownInputs, result, analysisDeps);
         return result.replacements;
+    }
+    async stats(globalMetadata) {
+        let fullCompilationInputs = 0;
+        let sourceInputs = 0;
+        let incompatibleInputs = 0;
+        const fieldIncompatibleCounts = {};
+        const classIncompatibleCounts = {};
+        for (const [id, input] of Object.entries(globalMetadata.knownInputs)) {
+            fullCompilationInputs++;
+            if (input.seenAsSourceInput) {
+                sourceInputs++;
+            }
+            if (input.memberIncompatibility !== null || input.owningClassIncompatibility !== null) {
+                incompatibleInputs++;
+            }
+            if (input.memberIncompatibility !== null) {
+                const reasonName = InputIncompatibilityReason[input.memberIncompatibility];
+                const key = `input-field-incompatibility-${reasonName}`;
+                fieldIncompatibleCounts[key] ??= 0;
+                fieldIncompatibleCounts[key]++;
+            }
+            if (input.owningClassIncompatibility !== null) {
+                const reasonName = ClassIncompatibilityReason[input.owningClassIncompatibility];
+                const key = `input-owning-class-incompatibility-${reasonName}`;
+                classIncompatibleCounts[key] ??= 0;
+                classIncompatibleCounts[key]++;
+            }
+        }
+        return {
+            counters: {
+                fullCompilationInputs,
+                sourceInputs,
+                incompatibleInputs,
+                ...fieldIncompatibleCounts,
+                ...classIncompatibleCounts,
+            },
+        };
     }
 }
 /**
