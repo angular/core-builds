@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.7+sha-d60bb51
+ * @license Angular v19.0.0-next.7+sha-00a79d0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -274,10 +274,11 @@ var InputIncompatibilityReason;
     InputIncompatibilityReason[InputIncompatibilityReason["SpyOnThatOverwritesField"] = 5] = "SpyOnThatOverwritesField";
     InputIncompatibilityReason[InputIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 6] = "PotentiallyNarrowedInTemplateButNoSupportYet";
     InputIncompatibilityReason[InputIncompatibilityReason["RequiredInputButNoGoodExplicitTypeExtractable"] = 7] = "RequiredInputButNoGoodExplicitTypeExtractable";
-    InputIncompatibilityReason[InputIncompatibilityReason["WriteAssignment"] = 8] = "WriteAssignment";
-    InputIncompatibilityReason[InputIncompatibilityReason["Accessor"] = 9] = "Accessor";
-    InputIncompatibilityReason[InputIncompatibilityReason["OutsideOfMigrationScope"] = 10] = "OutsideOfMigrationScope";
-    InputIncompatibilityReason[InputIncompatibilityReason["SkippedViaConfigFilter"] = 11] = "SkippedViaConfigFilter";
+    InputIncompatibilityReason[InputIncompatibilityReason["InputWithQuestionMarkButNoGoodExplicitTypeExtractable"] = 8] = "InputWithQuestionMarkButNoGoodExplicitTypeExtractable";
+    InputIncompatibilityReason[InputIncompatibilityReason["WriteAssignment"] = 9] = "WriteAssignment";
+    InputIncompatibilityReason[InputIncompatibilityReason["Accessor"] = 10] = "Accessor";
+    InputIncompatibilityReason[InputIncompatibilityReason["OutsideOfMigrationScope"] = 11] = "OutsideOfMigrationScope";
+    InputIncompatibilityReason[InputIncompatibilityReason["SkippedViaConfigFilter"] = 12] = "SkippedViaConfigFilter";
 })(InputIncompatibilityReason || (InputIncompatibilityReason = {}));
 /** Reasons why a whole class and its inputs cannot be migrated. */
 var ClassIncompatibilityReason;
@@ -340,6 +341,12 @@ function getMessageForInputIncompatibility(reason) {
             return {
                 short: `Input is required, but the migration cannot determine a good type for the input.`,
                 extra: 'Consider adding an explicit type to make the migration possible.',
+            };
+        case InputIncompatibilityReason.InputWithQuestionMarkButNoGoodExplicitTypeExtractable:
+            return {
+                short: `Input is marked with a question mark. Migration could not determine a good type for the input.`,
+                extra: 'The migration needs to be able to resolve a type, so that it can include `undefined` in your type. ' +
+                    'Consider adding an explicit type to make the migration possible.',
             };
         case InputIncompatibilityReason.SkippedViaConfigFilter:
             return {
@@ -984,13 +991,27 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
     // If the input is using `@Input() bla?: string;` with the "optional question mark",
     // then we try to explicitly add `undefined` as type, if it's not part of the type already.
     // This is ensuring correctness, as `bla?` automatically includes `undefined` currently.
-    if (node.type !== undefined &&
-        node.questionToken !== undefined &&
-        !checker.isTypeAssignableTo(checker.getUndefinedType(), checker.getTypeFromTypeNode(node.type))) {
-        typeToAdd = ts__default["default"].factory.createUnionTypeNode([
-            node.type,
-            ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.UndefinedKeyword),
-        ]);
+    if (node.questionToken !== undefined) {
+        // If there is no type, but we have an initial value, try inferring
+        // it from the initializer.
+        if (typeToAdd === undefined && initialValue !== undefined) {
+            const inferredType = inferImportableTypeForInput(checker, node, initialValue);
+            if (inferredType !== null) {
+                typeToAdd = inferredType;
+            }
+        }
+        if (typeToAdd === undefined) {
+            return {
+                context: node,
+                reason: InputIncompatibilityReason.InputWithQuestionMarkButNoGoodExplicitTypeExtractable,
+            };
+        }
+        if (!checker.isTypeAssignableTo(checker.getUndefinedType(), checker.getTypeFromTypeNode(typeToAdd))) {
+            typeToAdd = ts__default["default"].factory.createUnionTypeNode([
+                typeToAdd,
+                ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.UndefinedKeyword),
+            ]);
+        }
     }
     let leadingTodoText = null;
     // If the input does not have an initial value, and strict property initialization
@@ -1014,25 +1035,9 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
     // Attempt to extract type from input initial value. No explicit type, but input is required.
     // Hence we need an explicit type, or fall back to `typeof`.
     if (typeToAdd === undefined && initialValue !== undefined && metadata.required) {
-        const propertyType = checker.getTypeAtLocation(node);
-        if (propertyType.flags & ts__default["default"].TypeFlags.Boolean) {
-            typeToAdd = ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.BooleanKeyword);
-        }
-        else if (propertyType.flags & ts__default["default"].TypeFlags.String) {
-            typeToAdd = ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.StringKeyword);
-        }
-        else if (propertyType.flags & ts__default["default"].TypeFlags.Number) {
-            typeToAdd = ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.NumberKeyword);
-        }
-        else if (ts__default["default"].isIdentifier(initialValue)) {
-            // @Input({required: true}) bla = SOME_DEFAULT;
-            typeToAdd = ts__default["default"].factory.createTypeQueryNode(initialValue);
-        }
-        else if (ts__default["default"].isPropertyAccessExpression(initialValue) &&
-            ts__default["default"].isIdentifier(initialValue.name) &&
-            ts__default["default"].isIdentifier(initialValue.expression)) {
-            // @Input({required: true}) bla = prop.SOME_DEFAULT;
-            typeToAdd = ts__default["default"].factory.createTypeQueryNode(ts__default["default"].factory.createQualifiedName(initialValue.name, initialValue.expression));
+        const inferredType = inferImportableTypeForInput(checker, node, initialValue);
+        if (inferredType !== null) {
+            typeToAdd = inferredType;
         }
         else {
             // Note that we could use `typeToTypeNode` here but it's likely breaking because
@@ -1052,6 +1057,35 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
         initialValue: isUndefinedInitialValue ? undefined : initialValue,
         leadingTodoText,
     };
+}
+function inferImportableTypeForInput(checker, node, initialValue) {
+    const propertyType = checker.getTypeAtLocation(node);
+    // If the resolved type is a primitive, or union of primitive types,
+    // return a type node fully derived from the resolved type.
+    if (isPrimitiveImportableTypeNode(propertyType) ||
+        (propertyType.isUnion() && propertyType.types.every(isPrimitiveImportableTypeNode))) {
+        return checker.typeToTypeNode(propertyType, node, ts__default["default"].NodeBuilderFlags.NoTypeReduction) ?? null;
+    }
+    // Alternatively, try to infer a simple importable type from\
+    // the initializer.
+    if (ts__default["default"].isIdentifier(initialValue)) {
+        // @Input({required: true}) bla = SOME_DEFAULT;
+        return ts__default["default"].factory.createTypeQueryNode(initialValue);
+    }
+    else if (ts__default["default"].isPropertyAccessExpression(initialValue) &&
+        ts__default["default"].isIdentifier(initialValue.name) &&
+        ts__default["default"].isIdentifier(initialValue.expression)) {
+        // @Input({required: true}) bla = prop.SOME_DEFAULT;
+        return ts__default["default"].factory.createTypeQueryNode(ts__default["default"].factory.createQualifiedName(initialValue.name, initialValue.expression));
+    }
+    return null;
+}
+function isPrimitiveImportableTypeNode(type) {
+    return !!(type.flags & ts__default["default"].TypeFlags.BooleanLike ||
+        type.flags & ts__default["default"].TypeFlags.StringLike ||
+        type.flags & ts__default["default"].TypeFlags.NumberLike ||
+        type.flags & ts__default["default"].TypeFlags.Undefined ||
+        type.flags & ts__default["default"].TypeFlags.Null);
 }
 
 /**
@@ -30023,7 +30057,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.7+sha-d60bb51');
+new Version('19.0.0-next.7+sha-00a79d0');
 
 var _VisitorMode;
 (function (_VisitorMode) {
