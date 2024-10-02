@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-d48aac8
+ * @license Angular v19.0.0-next.8+sha-326cca2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var group_replacements = require('./group_replacements-472b2387.js');
+var group_replacements = require('./group_replacements-54fcdc63.js');
 require('os');
 var ts = require('typescript');
 var checker = require('./checker-e68dd7ce.js');
@@ -94,48 +94,6 @@ function migrateTemplateReferences(host, references) {
             end: reference.from.read.sourceSpan.end,
             toInsert: appendText,
         })));
-    }
-}
-
-/**
- * Migrates TypeScript "ts.Type" references. E.g.
-
- *  - `Partial<MyComp>` will be converted to `UnwrapSignalInputs<Partial<MyComp>>`.
-      in Catalyst test files.
- */
-function migrateTypeScriptTypeReferences(host, references, importManager, info) {
-    const seenTypeNodes = new WeakSet();
-    for (const reference of references) {
-        // This pass only deals with TS input class type references.
-        if (!group_replacements.isTsClassTypeReference(reference)) {
-            continue;
-        }
-        // Skip references to classes that are not fully migrated.
-        if (!host.shouldMigrateReferencesToClass(reference.target)) {
-            continue;
-        }
-        // Skip duplicate references. E.g. in batching.
-        if (seenTypeNodes.has(reference.from.node)) {
-            continue;
-        }
-        seenTypeNodes.add(reference.from.node);
-        if (reference.isPartialReference && reference.isPartOfCatalystFile) {
-            assert__default["default"](reference.from.node.typeArguments, 'Expected type arguments for partial reference.');
-            assert__default["default"](reference.from.node.typeArguments.length === 1, 'Expected an argument for reference.');
-            const firstArg = reference.from.node.typeArguments[0];
-            const sf = firstArg.getSourceFile();
-            const unwrapImportExpr = importManager.addImport({
-                exportModuleSpecifier: 'google3/javascript/angular2/testing/catalyst',
-                exportSymbolName: 'UnwrapSignalInputs',
-                requestedFile: sf,
-            });
-            host.replacements.push(new group_replacements.Replacement(group_replacements.projectFile(sf, info), new group_replacements.TextUpdate({
-                position: firstArg.getStart(),
-                end: firstArg.getStart(),
-                toInsert: `${host.printer.printNode(ts__default["default"].EmitHint.Unspecified, unwrapImportExpr, sf)}<`,
-            })));
-            host.replacements.push(new group_replacements.Replacement(group_replacements.projectFile(sf, info), new group_replacements.TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
-        }
     }
 }
 
@@ -794,7 +752,7 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
         group_replacements.migrateTypeScriptReferences(referenceMigrationHost, referenceResult.references, checker$1, info);
         migrateTemplateReferences(referenceMigrationHost, referenceResult.references);
         migrateHostBindings(referenceMigrationHost, referenceResult.references, info);
-        migrateTypeScriptTypeReferences(referenceMigrationHost, referenceResult.references, importManager, info);
+        group_replacements.migrateTypeScriptTypeReferences(referenceMigrationHost, referenceResult.references, importManager, info);
         // Fix problematic calls, like `QueryList#toArray`, or `QueryList#get`.
         for (const ref of referenceResult.references) {
             removeQueryListToArrayCall(ref, info, globalMetadata, replacements);

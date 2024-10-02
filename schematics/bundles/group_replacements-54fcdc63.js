@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-d48aac8
+ * @license Angular v19.0.0-next.8+sha-326cca2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29368,7 +29368,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-d48aac8');
+new Version('19.0.0-next.8+sha-326cca2');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -31262,6 +31262,52 @@ function migrateTypeScriptReferences(host, references, checker, info) {
 }
 
 /**
+ * Migrates TypeScript "ts.Type" references. E.g.
+
+ *  - `Partial<MyComp>` will be converted to `UnwrapSignalInputs<Partial<MyComp>>`.
+      in Catalyst test files.
+ */
+function migrateTypeScriptTypeReferences(host, references, importManager, info) {
+    const seenTypeNodes = new WeakSet();
+    for (const reference of references) {
+        // This pass only deals with TS input class type references.
+        if (!isTsClassTypeReference(reference)) {
+            continue;
+        }
+        // Skip references to classes that are not fully migrated.
+        if (!host.shouldMigrateReferencesToClass(reference.target)) {
+            continue;
+        }
+        // Skip duplicate references. E.g. in batching.
+        if (seenTypeNodes.has(reference.from.node)) {
+            continue;
+        }
+        seenTypeNodes.add(reference.from.node);
+        if (reference.isPartialReference && reference.isPartOfCatalystFile) {
+            assert__default["default"](reference.from.node.typeArguments, 'Expected type arguments for partial reference.');
+            assert__default["default"](reference.from.node.typeArguments.length === 1, 'Expected an argument for reference.');
+            const firstArg = reference.from.node.typeArguments[0];
+            const sf = firstArg.getSourceFile();
+            // Naive detection of the import. Sufficient for this test file migration.
+            const catalystImport = sf.text.includes('google3/javascript/angular2/testing/catalyst/fake_async')
+                ? 'google3/javascript/angular2/testing/catalyst/fake_async'
+                : 'google3/javascript/angular2/testing/catalyst/async';
+            const unwrapImportExpr = importManager.addImport({
+                exportModuleSpecifier: catalystImport,
+                exportSymbolName: 'UnwrapSignalInputs',
+                requestedFile: sf,
+            });
+            host.replacements.push(new Replacement(projectFile(sf, info), new TextUpdate({
+                position: firstArg.getStart(),
+                end: firstArg.getStart(),
+                toInsert: `${host.printer.printNode(ts__default["default"].EmitHint.Unspecified, unwrapImportExpr, sf)}<`,
+            })));
+            host.replacements.push(new Replacement(projectFile(sf, info), new TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
+        }
+    }
+}
+
+/**
  * Angular compiler file system implementation that leverages an
  * CLI schematic virtual file tree.
  */
@@ -31436,9 +31482,9 @@ exports.isHostBindingReference = isHostBindingReference;
 exports.isInputContainerNode = isInputContainerNode;
 exports.isInputMemberIncompatibility = isInputMemberIncompatibility;
 exports.isTemplateReference = isTemplateReference;
-exports.isTsClassTypeReference = isTsClassTypeReference;
 exports.isTsReference = isTsReference;
 exports.migrateTypeScriptReferences = migrateTypeScriptReferences;
+exports.migrateTypeScriptTypeReferences = migrateTypeScriptTypeReferences;
 exports.pickInputIncompatibility = pickInputIncompatibility;
 exports.projectFile = projectFile;
 exports.removeFromUnionIfPossible = removeFromUnionIfPossible;

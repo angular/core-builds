@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-d48aac8
+ * @license Angular v19.0.0-next.8+sha-326cca2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,7 +9,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var group_replacements = require('./group_replacements-472b2387.js');
+var group_replacements = require('./group_replacements-54fcdc63.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-e68dd7ce.js');
@@ -145,11 +145,13 @@ class DirectiveInfo {
         this.incompatible = null;
     }
     /**
-     * Checks whether there are any incompatible inputs for the
+     * Checks whether there are any migrated inputs for the
      * given class.
+     *
+     * Returns `false` if all inputs are incompatible.
      */
-    hasIncompatibleMembers() {
-        return Array.from(this.inputFields.values()).some(({ descriptor }) => this.isInputMemberIncompatible(descriptor));
+    hasMigratedFields() {
+        return Array.from(this.inputFields.values()).some(({ descriptor }) => !this.isInputMemberIncompatible(descriptor));
     }
     /**
      * Whether the given input member is incompatible. If the class is incompatible,
@@ -1306,43 +1308,7 @@ function pass8__migrateHostBindings(host, references, info) {
       in Catalyst test files.
  */
 function pass9__migrateTypeScriptTypeReferences(host, references, importManager, info) {
-    const seenTypeNodes = new WeakSet();
-    for (const reference of references) {
-        // This pass only deals with TS input class type references.
-        if (!group_replacements.isTsClassTypeReference(reference)) {
-            continue;
-        }
-        // Skip references to classes that are not fully migrated.
-        if (!host.shouldMigrateReferencesToClass(reference.target)) {
-            continue;
-        }
-        // Skip duplicate references. E.g. in batching.
-        if (seenTypeNodes.has(reference.from.node)) {
-            continue;
-        }
-        seenTypeNodes.add(reference.from.node);
-        if (reference.isPartialReference && reference.isPartOfCatalystFile) {
-            assert__default["default"](reference.from.node.typeArguments, 'Expected type arguments for partial reference.');
-            assert__default["default"](reference.from.node.typeArguments.length === 1, 'Expected an argument for reference.');
-            const firstArg = reference.from.node.typeArguments[0];
-            const sf = firstArg.getSourceFile();
-            // Naive detection of the import. Sufficient for this test file migration.
-            const catalystImport = sf.text.includes('google3/javascript/angular2/testing/catalyst/fake_async')
-                ? 'google3/javascript/angular2/testing/catalyst/fake_async'
-                : 'google3/javascript/angular2/testing/catalyst/async';
-            const unwrapImportExpr = importManager.addImport({
-                exportModuleSpecifier: catalystImport,
-                exportSymbolName: 'UnwrapSignalInputs',
-                requestedFile: sf,
-            });
-            host.replacements.push(new group_replacements.Replacement(group_replacements.projectFile(sf, info), new group_replacements.TextUpdate({
-                position: firstArg.getStart(),
-                end: firstArg.getStart(),
-                toInsert: `${host.printer.printNode(ts__default["default"].EmitHint.Unspecified, unwrapImportExpr, sf)}<`,
-            })));
-            host.replacements.push(new group_replacements.Replacement(group_replacements.projectFile(sf, info), new group_replacements.TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
-        }
-    }
+    group_replacements.migrateTypeScriptTypeReferences(host, references, importManager, info);
 }
 
 /**
@@ -1366,7 +1332,7 @@ function executeMigrationPhase(host, knownInputs, result, info) {
         replacements: result.replacements,
         shouldMigrateReferencesToField: (inputDescr) => knownInputs.has(inputDescr) && knownInputs.get(inputDescr).isIncompatible() === false,
         shouldMigrateReferencesToClass: (clazz) => knownInputs.getDirectiveInfoForClass(clazz) !== undefined &&
-            knownInputs.getDirectiveInfoForClass(clazz).hasIncompatibleMembers() === false,
+            knownInputs.getDirectiveInfoForClass(clazz).hasMigratedFields(),
     };
     // Migrate passes.
     pass5__migrateTypeScriptReferences(referenceMigrationHost, result.references, typeChecker, info);
