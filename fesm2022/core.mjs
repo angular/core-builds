@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.6+sha-c48816e
+ * @license Angular v18.2.6+sha-46a2ad3
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16946,7 +16946,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.6+sha-c48816e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.6+sha-46a2ad3']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31037,7 +31037,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.6+sha-c48816e');
+const VERSION = new Version('18.2.6+sha-46a2ad3');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -33876,12 +33876,10 @@ class ImagePerformanceWarning {
         let lcpElementFound, lcpElementLoadedCorrectly = false;
         images.forEach((image) => {
             if (!this.options?.disableImageSizeWarning) {
-                for (const image of images) {
-                    // Image elements using the NgOptimizedImage directive are excluded,
-                    // as that directive has its own version of this check.
-                    if (!image.getAttribute('ng-img') && this.isOversized(image)) {
-                        logOversizedImageWarning(image.src);
-                    }
+                // Image elements using the NgOptimizedImage directive are excluded,
+                // as that directive has its own version of this check.
+                if (!image.getAttribute('ng-img') && this.isOversized(image)) {
+                    logOversizedImageWarning(image.src);
                 }
             }
             if (!this.options?.disableImageLazyLoadWarning && this.lcpImageUrl) {
