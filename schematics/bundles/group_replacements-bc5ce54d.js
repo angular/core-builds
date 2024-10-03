@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-5cbe02a
+ * @license Angular v19.0.0-next.8+sha-9213216
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29368,7 +29368,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-5cbe02a');
+new Version('19.0.0-next.8+sha-9213216');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30100,8 +30100,10 @@ function identifyPotentialTypeScriptReference(node, programInfo, checker, knownF
     if (targetInput === null) {
         return;
     }
-    const accessParent = unwrapParent(traverseAccess(node).parent);
+    const access = unwrapParent(traverseAccess(node));
+    const accessParent = access.parent;
     const isWriteReference = ts__default["default"].isBinaryExpression(accessParent) &&
+        accessParent.left === access &&
         writeBinaryOperators.includes(accessParent.operatorToken.kind);
     // track accesses from source files to known fields.
     result.references.push({
