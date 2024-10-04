@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.8+sha-58bfb4a
+ * @license Angular v19.0.0-next.8+sha-84b6896
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12993,6 +12993,8 @@ export declare interface ɵDirectiveType<T> extends Type<T> {
     ɵfac: unknown;
 }
 
+export declare function ɵdisableProfiling(): void;
+
 /**
  * A scheduler which manages the execution of effects.
  */
@@ -13010,6 +13012,13 @@ export declare abstract class ɵEffectScheduler {
     /** @nocollapse */
     static ɵprov: unknown;
 }
+
+/**
+ * This enables an internal performance profiler
+ *
+ * It should not be imported in application code
+ */
+export declare function ɵenableProfiling(): void;
 
 /**
  * Index of each type of locale data from the extra locale data array
@@ -13621,6 +13630,9 @@ export declare const enum ɵNotificationSource {
 export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
 
 
+export declare const ɵPERFORMANCE_MARK_PREFIX = "\uD83C\uDD70\uFE0F";
+
+
 /**
  * A guarded `performance.mark` for feature marking.
  *
@@ -14171,6 +14183,18 @@ export { ɵSIGNAL }
  * Marker used in a comment node to ensure hydration content integrity
  */
 export declare const ɵSSR_CONTENT_INTEGRITY_MARKER = "nghm";
+
+/**
+ * Function that will start measuring against the performance API
+ * Should be used in pair with stopMeasuring
+ */
+export declare function ɵstartMeasuring<T>(label: string): void;
+
+/**
+ * Function that will stop measuring against the performance API
+ * Should be used in pair with stopMeasuring
+ */
+export declare function ɵstopMeasuring(label: string): void;
 
 /** Store a value in the `data` at a given `index`. */
 export declare function ɵstore<T>(tView: TView, lView: LView, index: number, value: T): void;
