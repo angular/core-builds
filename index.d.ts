@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.8+sha-9213216
+ * @license Angular v19.0.0-next.8+sha-58bfb4a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6619,10 +6619,7 @@ export declare interface KeyValueDifferFactory {
 export declare class KeyValueDiffers {
     /** @nocollapse */
     static ɵprov: unknown;
-    /**
-     * @deprecated v4.0.0 - Should be private.
-     */
-    factories: KeyValueDifferFactory[];
+    private readonly factories;
     constructor(factories: KeyValueDifferFactory[]);
     static create<S>(factories: KeyValueDifferFactory[], parent?: KeyValueDiffers): KeyValueDiffers;
     /**

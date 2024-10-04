@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.8+sha-9213216
+ * @license Angular v19.0.0-next.8+sha-58bfb4a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17029,7 +17029,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.8+sha-9213216']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.8+sha-58bfb4a']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31314,7 +31314,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.8+sha-9213216');
+const VERSION = new Version('19.0.0-next.8+sha-58bfb4a');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -32784,9 +32784,7 @@ function publishDefaultGlobalUtils() {
  */
 function publishSignalConfiguration() {
     setThrowInvalidWriteToSignalError$1(() => {
-        throw new RuntimeError(600 /* RuntimeErrorCode.SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT */, ngDevMode &&
-            'Writing to signals is not allowed in a `computed` or an `effect` by default. ' +
-                'Use `allowSignalWrites` in the `CreateEffectOptions` to enable this inside effects.');
+        throw new RuntimeError(600 /* RuntimeErrorCode.SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT */, ngDevMode && 'Writing to signals is not allowed in a `computed`.');
     });
 }
 function isBoundToModule(cf) {
@@ -38906,6 +38904,9 @@ class AfterRenderEffectSequence extends AfterRenderSequence {
         }
     }
 }
+/**
+ * @experimental
+ */
 function afterRenderEffect(callbackOrSpec, options) {
     ngDevMode &&
         assertNotInReactiveContext(afterRenderEffect, 'Call `afterRenderEffect` outside of a reactive context. For example, create the render ' +
