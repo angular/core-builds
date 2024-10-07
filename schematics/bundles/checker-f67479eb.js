@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-a36744e
+ * @license Angular v19.0.0-next.8+sha-6976349
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2651,6 +2651,10 @@ class Identifiers {
     }; }
     static { this.InputTransformsFeatureFeature = {
         name: 'ɵɵInputTransformsFeature',
+        moduleName: CORE,
+    }; }
+    static { this.ExternalStylesFeature = {
+        name: 'ɵɵExternalStylesFeature',
         moduleName: CORE,
     }; }
     static { this.listener = { name: 'ɵɵlistener', moduleName: CORE }; }
@@ -27327,6 +27331,10 @@ function addFeatures(definitionMap, meta) {
     if (meta.hasOwnProperty('template') && meta.isStandalone) {
         features.push(importExpr(Identifiers.StandaloneFeature));
     }
+    if ('externalStyles' in meta && meta.externalStyles?.length) {
+        const externalStyleNodes = meta.externalStyles.map((externalStyle) => literal$1(externalStyle));
+        features.push(importExpr(Identifiers.ExternalStylesFeature).callFn([literalArr(externalStyleNodes)]));
+    }
     if (features.length) {
         definitionMap.set('features', literalArr(features));
     }
@@ -27402,8 +27410,10 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     if (meta.encapsulation === null) {
         meta.encapsulation = exports.ViewEncapsulation.Emulated;
     }
+    let hasStyles = !!meta.externalStyles?.length;
     // e.g. `styles: [str1, str2]`
     if (meta.styles && meta.styles.length) {
+        hasStyles = true;
         const styleValues = meta.encapsulation == exports.ViewEncapsulation.Emulated
             ? compileStyles(meta.styles, CONTENT_ATTR, HOST_ATTR)
             : meta.styles;
@@ -27417,7 +27427,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
             definitionMap.set('styles', literalArr(styleNodes));
         }
     }
-    else if (meta.encapsulation === exports.ViewEncapsulation.Emulated) {
+    if (!hasStyles && meta.encapsulation === exports.ViewEncapsulation.Emulated) {
         // If there is no style, don't generate css selectors on elements
         meta.encapsulation = exports.ViewEncapsulation.None;
     }
@@ -29246,7 +29256,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-a36744e');
+new Version('19.0.0-next.8+sha-6976349');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -30594,7 +30604,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-e68dd7ce.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-f67479eb.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.

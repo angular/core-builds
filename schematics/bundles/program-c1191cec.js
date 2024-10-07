@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-a36744e
+ * @license Angular v19.0.0-next.8+sha-6976349
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-e68dd7ce.js');
+var checker = require('./checker-f67479eb.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -864,7 +864,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-a36744e'));
+    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-6976349'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -882,7 +882,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-a36744e'));
+    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-6976349'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -977,7 +977,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-a36744e'));
+    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-6976349'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone) {
@@ -1396,7 +1396,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-a36744e'));
+    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-6976349'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1431,7 +1431,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-a36744e'));
+    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-6976349'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1482,7 +1482,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-a36744e'));
+    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-6976349'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1515,7 +1515,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-a36744e'));
+    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-6976349'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1566,7 +1566,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-a36744e'));
+    definitionMap.set('version', checker.literal('19.0.0-next.8+sha-6976349'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -1923,7 +1923,7 @@ class DeferredSymbolTracker {
             return false;
         }
         const symbolsMap = this.imports.get(importDecl);
-        for (const [symbol, refs] of symbolsMap) {
+        for (const refs of symbolsMap.values()) {
             if (refs === AssumeEager || refs.size > 0) {
                 // There may be still eager references to this symbol.
                 return false;
@@ -1947,8 +1947,9 @@ class DeferredSymbolTracker {
     lookupIdentifiersInSourceFile(name, importDecl) {
         const results = new Set();
         const visit = (node) => {
-            if (node === importDecl) {
-                // Don't record references from the declaration itself.
+            // Don't record references from the declaration itself or inside
+            // type nodes which will be stripped from the JS output.
+            if (node === importDecl || ts__default["default"].isTypeNode(node)) {
                 return;
             }
             if (ts__default["default"].isIdentifier(node) && node.text === name) {
@@ -8960,6 +8961,7 @@ function preloadAndParseTemplate(evaluator, resourceLoader, depTracker, preanaly
             const templatePromise = resourceLoader.preload(resourceUrl, {
                 type: 'template',
                 containingFile,
+                className: node.name.text,
             });
             // If the preload worked, then actually load and parse the template, and wait for any
             // style URLs to resolve.
@@ -9735,7 +9737,7 @@ const isUsedPipe = (decl) => decl.kind === checker.R3TemplateDependencyKind.Pipe
  * `DecoratorHandler` which handles the `@Component` annotation.
  */
 class ComponentDecoratorHandler {
-    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone) {
+    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone) {
         this.reflector = reflector;
         this.evaluator = evaluator;
         this.metaRegistry = metaRegistry;
@@ -9772,6 +9774,7 @@ class ComponentDecoratorHandler {
         this.forbidOrphanRendering = forbidOrphanRendering;
         this.enableBlockSyntax = enableBlockSyntax;
         this.enableLetSyntax = enableLetSyntax;
+        this.externalRuntimeStyles = externalRuntimeStyles;
         this.localCompilationExtraImportsTracker = localCompilationExtraImportsTracker;
         this.jitDeclarationRegistry = jitDeclarationRegistry;
         this.i18nPreserveSignificantWhitespace = i18nPreserveSignificantWhitespace;
@@ -9833,7 +9836,11 @@ class ComponentDecoratorHandler {
         const resolveStyleUrl = (styleUrl) => {
             try {
                 const resourceUrl = this.resourceLoader.resolve(styleUrl, containingFile);
-                return this.resourceLoader.preload(resourceUrl, { type: 'style', containingFile });
+                return this.resourceLoader.preload(resourceUrl, {
+                    type: 'style',
+                    containingFile,
+                    className: node.name.text,
+                });
             }
             catch {
                 // Don't worry about failures to preload. We can handle this problem during analysis by
@@ -9861,18 +9868,31 @@ class ComponentDecoratorHandler {
         return templateAndTemplateStyleResources.then(async (templateInfo) => {
             // Extract inline styles, process, and cache for use in synchronous analyze phase
             let styles = null;
+            // Order plus className allows inline styles to be identified per component by a preprocessor
+            let orderOffset = 0;
             const rawStyles = parseDirectiveStyles(component, this.evaluator, this.compilationMode);
             if (rawStyles?.length) {
-                styles = await Promise.all(rawStyles.map((style) => this.resourceLoader.preprocessInline(style, { type: 'style', containingFile })));
+                styles = await Promise.all(rawStyles.map((style) => this.resourceLoader.preprocessInline(style, {
+                    type: 'style',
+                    containingFile,
+                    order: orderOffset++,
+                    className: node.name.text,
+                })));
             }
             if (templateInfo.templateStyles) {
                 styles ??= [];
                 styles.push(...(await Promise.all(templateInfo.templateStyles.map((style) => this.resourceLoader.preprocessInline(style, {
                     type: 'style',
                     containingFile: templateInfo.templateUrl ?? containingFile,
+                    order: orderOffset++,
+                    className: node.name.text,
                 })))));
             }
             this.preanalyzeStylesCache.set(node, styles);
+            if (this.externalRuntimeStyles) {
+                // No preanalysis required for style URLs with external runtime styles
+                return;
+            }
             // Wait for both the template and all styleUrl resources to resolve.
             await Promise.all([
                 ...componentStyleUrls.map((styleUrl) => resolveStyleUrl(styleUrl.url)),
@@ -10048,6 +10068,7 @@ class ComponentDecoratorHandler {
         // precede inline styles, and styles defined in the template override styles defined in the
         // component.
         let styles = [];
+        const externalStyles = [];
         const styleResources = extractInlineStyleResources(component);
         const styleUrls = [
             ...extractComponentStyleUrls(this.evaluator, component),
@@ -10056,6 +10077,11 @@ class ComponentDecoratorHandler {
         for (const styleUrl of styleUrls) {
             try {
                 const resourceUrl = this.resourceLoader.resolve(styleUrl.url, containingFile);
+                if (this.externalRuntimeStyles) {
+                    // External runtime styles are not considered disk-based and may not actually exist on disk
+                    externalStyles.push(resourceUrl);
+                    continue;
+                }
                 if (styleUrl.source === 2 /* ResourceTypeForDiagnostics.StylesheetFromDecorator */ &&
                     ts__default["default"].isStringLiteralLike(styleUrl.expression)) {
                     // Only string literal values from the decorator are considered style resources
@@ -10100,8 +10126,14 @@ class ComponentDecoratorHandler {
         if (this.preanalyzeStylesCache.has(node)) {
             inlineStyles = this.preanalyzeStylesCache.get(node);
             this.preanalyzeStylesCache.delete(node);
-            if (inlineStyles !== null) {
-                styles.push(...inlineStyles);
+            if (inlineStyles?.length) {
+                if (this.externalRuntimeStyles) {
+                    // When external runtime styles is enabled, a list of URLs is provided
+                    externalStyles.push(...inlineStyles);
+                }
+                else {
+                    styles.push(...inlineStyles);
+                }
             }
         }
         else {
@@ -10155,6 +10187,7 @@ class ComponentDecoratorHandler {
                     changeDetection,
                     interpolation: template.interpolationConfig ?? checker.DEFAULT_INTERPOLATION_CONFIG,
                     styles,
+                    externalStyles,
                     // These will be replaced during the compilation step, after all `NgModule`s have been
                     // analyzed and the full compilation scope for the component can be realized.
                     animations,
@@ -15175,6 +15208,7 @@ class AdapterResourceLoader {
                 type: 'style',
                 containingFile: context.containingFile,
                 resourceFile: resolvedUrl,
+                className: context.className,
             };
             result = Promise.resolve(result).then(async (str) => {
                 const transformResult = await this.adapter.transformResource(str, resourceContext);
@@ -15210,6 +15244,8 @@ class AdapterResourceLoader {
             type: 'style',
             containingFile: context.containingFile,
             resourceFile: null,
+            order: context.order,
+            className: context.className,
         });
         if (transformResult === null) {
             return data;
@@ -19271,7 +19307,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0-next.8+sha-a36744e` usually means that core is at head so it supports
+    // A version of `19.0.0-next.8+sha-6976349` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -20127,6 +20163,7 @@ class NgCompiler {
         const strictCtorDeps = this.options.strictInjectionParameters || false;
         const supportJitMode = this.options['supportJitMode'] ?? true;
         const supportTestBed = this.options['supportTestBed'] ?? true;
+        const externalRuntimeStyles = this.options['externalRuntimeStyles'] ?? false;
         // Libraries compiled in partial mode could potentially be used with TestBed within an
         // application. Since this is not known at library compilation time, support is required to
         // prevent potential downstream application testing breakage.
@@ -20145,7 +20182,7 @@ class NgCompiler {
         const jitDeclarationRegistry = new JitDeclarationRegistry();
         // Set up the IvyCompilation, which manages state for the Ivy transformer.
         const handlers = [
-            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone),
+            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone),
             // TODO(alxhub): understand why the cast here is necessary (something to do with `null`
             // not being assignable to `unknown` when wrapped in `Readonly`).
             new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, importTracker, supportTestBed, compilationMode, jitDeclarationRegistry, !!this.options.strictStandalone),

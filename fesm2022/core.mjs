@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.8+sha-a36744e
+ * @license Angular v19.0.0-next.8+sha-6976349
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16518,7 +16518,7 @@ class DepsTracker {
                 }
                 else {
                     // The standalone thing is neither a component nor a directive nor a pipe ... (what?)
-                    throw new RuntimeError(1000 /* RuntimeErrorCode.RUNTIME_DEPS_INVALID_IMPORTED_TYPE */, 'The standalone imported type is neither a component nor a directive nor a pipe');
+                    throw new RuntimeError(980 /* RuntimeErrorCode.RUNTIME_DEPS_INVALID_IMPORTED_TYPE */, 'The standalone imported type is neither a component nor a directive nor a pipe');
                 }
             }
             else {
@@ -16772,7 +16772,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 (typeof ngJitMode === 'undefined' || ngJitMode) &&
                 this.componentDef.debugInfo?.forbidOrphanRendering) {
                 if (depsTracker.isOrphanComponent(this.componentType)) {
-                    throw new RuntimeError(1001 /* RuntimeErrorCode.RUNTIME_DEPS_ORPHAN_COMPONENT */, `Orphan component found! Trying to render the component ${debugStringifyTypeForError(this.componentType)} without first loading the NgModule that declares it. It is recommended to make this component standalone in order to avoid this error. If this is not possible now, import the component's NgModule in the appropriate NgModule, or the standalone component in which you are trying to render this component. If this is a lazy import, load the NgModule lazily as well and use its module injector.`);
+                    throw new RuntimeError(981 /* RuntimeErrorCode.RUNTIME_DEPS_ORPHAN_COMPONENT */, `Orphan component found! Trying to render the component ${debugStringifyTypeForError(this.componentType)} without first loading the NgModule that declares it. It is recommended to make this component standalone in order to avoid this error. If this is not possible now, import the component's NgModule in the appropriate NgModule, or the standalone component in which you are trying to render this component. If this is a lazy import, load the NgModule lazily as well and use its module injector.`);
                 }
             }
             environmentInjector = environmentInjector || this.ngModule;
@@ -17029,7 +17029,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.8+sha-a36744e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.8+sha-6976349']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31314,7 +31314,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.8+sha-a36744e');
+const VERSION = new Version('19.0.0-next.8+sha-6976349');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

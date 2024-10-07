@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-a36744e
+ * @license Angular v19.0.0-next.8+sha-6976349
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,8 +8,8 @@
 
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-e68dd7ce.js');
-var program = require('./program-921f9663.js');
+var checker = require('./checker-f67479eb.js');
+var program = require('./program-c1191cec.js');
 require('path');
 var assert = require('assert');
 var core = require('@angular-devkit/core');
@@ -3230,6 +3230,10 @@ class Identifiers {
     }; }
     static { this.InputTransformsFeatureFeature = {
         name: 'ɵɵInputTransformsFeature',
+        moduleName: CORE,
+    }; }
+    static { this.ExternalStylesFeature = {
+        name: 'ɵɵExternalStylesFeature',
         moduleName: CORE,
     }; }
     static { this.listener = { name: 'ɵɵlistener', moduleName: CORE }; }
@@ -27484,6 +27488,10 @@ function addFeatures(definitionMap, meta) {
     if (meta.hasOwnProperty('template') && meta.isStandalone) {
         features.push(importExpr(Identifiers.StandaloneFeature));
     }
+    if ('externalStyles' in meta && meta.externalStyles?.length) {
+        const externalStyleNodes = meta.externalStyles.map((externalStyle) => literal(externalStyle));
+        features.push(importExpr(Identifiers.ExternalStylesFeature).callFn([literalArr(externalStyleNodes)]));
+    }
     if (features.length) {
         definitionMap.set('features', literalArr(features));
     }
@@ -27559,8 +27567,10 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     if (meta.encapsulation === null) {
         meta.encapsulation = ViewEncapsulation.Emulated;
     }
+    let hasStyles = !!meta.externalStyles?.length;
     // e.g. `styles: [str1, str2]`
     if (meta.styles && meta.styles.length) {
+        hasStyles = true;
         const styleValues = meta.encapsulation == ViewEncapsulation.Emulated
             ? compileStyles(meta.styles, CONTENT_ATTR, HOST_ATTR)
             : meta.styles;
@@ -27574,7 +27584,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
             definitionMap.set('styles', literalArr(styleNodes));
         }
     }
-    else if (meta.encapsulation === ViewEncapsulation.Emulated) {
+    if (!hasStyles && meta.encapsulation === ViewEncapsulation.Emulated) {
         // If there is no style, don't generate css selectors on elements
         meta.encapsulation = ViewEncapsulation.None;
     }
@@ -29368,7 +29378,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-a36744e');
+new Version('19.0.0-next.8+sha-6976349');
 
 var _VisitorMode;
 (function (_VisitorMode) {

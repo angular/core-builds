@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.8+sha-a36744e
+ * @license Angular v19.0.0-next.8+sha-6976349
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14045,8 +14045,8 @@ export declare const enum ɵRuntimeErrorCode {
     OUTPUT_REF_DESTROYED = 953,
     LOOP_TRACK_DUPLICATE_KEYS = -955,
     LOOP_TRACK_RECREATE = -956,
-    RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,
-    RUNTIME_DEPS_ORPHAN_COMPONENT = 1001
+    RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 980,
+    RUNTIME_DEPS_ORPHAN_COMPONENT = 981
 }
 
 /**
