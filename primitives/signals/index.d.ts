@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.8+sha-6976349
+ * @license Angular v19.0.0-next.8+sha-837af44
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -213,6 +213,10 @@ export declare interface ReactiveNode {
      * Called when a signal is read within this consumer.
      */
     consumerOnSignalRead(node: unknown): void;
+    /**
+     * A debug name for the reactive node. Used in Angular DevTools to identify the node.
+     */
+    debugName?: string;
 }
 
 export declare function runPostSignalSetFn(): void;
