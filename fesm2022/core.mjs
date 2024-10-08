@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.7+sha-9f2726b
+ * @license Angular v18.2.7+sha-59394ee
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16946,7 +16946,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.7+sha-9f2726b']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.7+sha-59394ee']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19638,6 +19638,9 @@ class AfterRenderImpl {
             sequence.afterRun();
             if (sequence.once) {
                 this.sequences.delete(sequence);
+                // Destroy the sequence so its on destroy callbacks can be cleaned up
+                // immediately, instead of waiting until the injector is destroyed.
+                sequence.destroy();
             }
         }
         for (const sequence of this.deferredRegistrations) {
@@ -31037,7 +31040,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.7+sha-9f2726b');
+const VERSION = new Version('18.2.7+sha-59394ee');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

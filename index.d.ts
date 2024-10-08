@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.7+sha-9f2726b
+ * @license Angular v18.2.7+sha-59394ee
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11984,16 +11984,6 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
 }
 
 /**
- * Interface for tracking root `ViewRef`s in `ApplicationRef`.
- *
- * NOTE: Importing `ApplicationRef` here directly creates circular dependency, which is why we have
- * a subset of the `ApplicationRef` interface `ViewRefTracker` here.
- */
-declare interface ViewRefTracker {
-    detachView(viewRef: ViewRef): void;
-}
-
-/**
  * A `Signal` with a value that can be mutated via a setter interface.
  */
 export declare interface WritableSignal<T> extends Signal<T> {
@@ -14260,7 +14250,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
     checkNoChanges(): void;
     attachToViewContainerRef(): void;
     detachFromAppRef(): void;
-    attachToAppRef(appRef: ViewRefTracker): void;
+    attachToAppRef(appRef: ApplicationRef): void;
 }
 
 /**
