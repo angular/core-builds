@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-09f589f
+ * @license Angular v19.0.0-next.8+sha-97fb86d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -27393,7 +27393,6 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     let hasStyles = !!meta.externalStyles?.length;
     // e.g. `styles: [str1, str2]`
     if (meta.styles && meta.styles.length) {
-        hasStyles = true;
         const styleValues = meta.encapsulation == exports.ViewEncapsulation.Emulated
             ? compileStyles(meta.styles, CONTENT_ATTR, HOST_ATTR)
             : meta.styles;
@@ -27404,6 +27403,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
             return result;
         }, []);
         if (styleNodes.length > 0) {
+            hasStyles = true;
             definitionMap.set('styles', literalArr(styleNodes));
         }
     }
@@ -29230,7 +29230,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-09f589f');
+new Version('19.0.0-next.8+sha-97fb86d');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -30578,7 +30578,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-d588f785.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-7260fdd6.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.

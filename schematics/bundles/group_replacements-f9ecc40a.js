@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-09f589f
+ * @license Angular v19.0.0-next.8+sha-97fb86d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,8 +8,8 @@
 
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-d588f785.js');
-var program = require('./program-701a5740.js');
+var checker = require('./checker-7260fdd6.js');
+var program = require('./program-029d5158.js');
 require('path');
 var assert = require('assert');
 var core = require('@angular-devkit/core');
@@ -27550,7 +27550,6 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
     let hasStyles = !!meta.externalStyles?.length;
     // e.g. `styles: [str1, str2]`
     if (meta.styles && meta.styles.length) {
-        hasStyles = true;
         const styleValues = meta.encapsulation == ViewEncapsulation.Emulated
             ? compileStyles(meta.styles, CONTENT_ATTR, HOST_ATTR)
             : meta.styles;
@@ -27561,6 +27560,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
             return result;
         }, []);
         if (styleNodes.length > 0) {
+            hasStyles = true;
             definitionMap.set('styles', literalArr(styleNodes));
         }
     }
@@ -29352,7 +29352,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-09f589f');
+new Version('19.0.0-next.8+sha-97fb86d');
 
 var _VisitorMode;
 (function (_VisitorMode) {
