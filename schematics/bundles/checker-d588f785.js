@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-bc83fc1
+ * @license Angular v19.0.0-next.8+sha-09f589f
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -24460,29 +24460,9 @@ function convertAst(ast, job, baseSourceSpan) {
         return convertAst(ast.ast, job, baseSourceSpan);
     }
     else if (ast instanceof PropertyRead) {
-        const isThisReceiver = ast.receiver instanceof ThisReceiver;
         // Whether this is an implicit receiver, *excluding* explicit reads of `this`.
         const isImplicitReceiver = ast.receiver instanceof ImplicitReceiver && !(ast.receiver instanceof ThisReceiver);
-        // Whether the  name of the read is a node that should be never retain its explicit this
-        // receiver.
-        const isSpecialNode = ast.name === '$any' || ast.name === '$event';
-        // TODO: The most sensible condition here would be simply `isImplicitReceiver`, to convert only
-        // actual implicit `this` reads, and not explicit ones. However, TemplateDefinitionBuilder (and
-        // the Typecheck block!) both have the same bug, in which they also consider explicit `this`
-        // reads to be implicit. This causes problems when the explicit `this` read is inside a
-        // template with a context that also provides the variable name being read:
-        // ```
-        // <ng-template let-a>{{this.a}}</ng-template>
-        // ```
-        // The whole point of the explicit `this` was to access the class property, but TDB and the
-        // current TCB treat the read as implicit, and give you the context property instead!
-        //
-        // For now, we emulate this old behavior by aggressively converting explicit reads to to
-        // implicit reads, except for the special cases that TDB and the current TCB protect. However,
-        // it would be an improvement to fix this.
-        //
-        // See also the corresponding comment for the TCB, in `type_check_block.ts`.
-        if (isImplicitReceiver || (isThisReceiver && !isSpecialNode)) {
+        if (isImplicitReceiver) {
             return new LexicalReadExpr(ast.name);
         }
         else {
@@ -28388,18 +28368,12 @@ class TemplateBinder extends RecursiveAstVisitor {
     maybeMap(ast, name) {
         // If the receiver of the expression isn't the `ImplicitReceiver`, this isn't the root of an
         // `AST` expression that maps to a `Variable` or `Reference`.
-        if (!(ast.receiver instanceof ImplicitReceiver)) {
+        if (!(ast.receiver instanceof ImplicitReceiver) || ast.receiver instanceof ThisReceiver) {
             return;
         }
         // Check whether the name exists in the current scope. If so, map it. Otherwise, the name is
         // probably a property on the top-level component context.
         const target = this.scope.lookup(name);
-        // It's not allowed to read template entities via `this`, however it previously worked by
-        // accident (see #55115). Since `@let` declarations are new, we can fix it from the beginning,
-        // whereas pre-existing template entities will be fixed in #55115.
-        if (target instanceof LetDeclaration$1 && ast.receiver instanceof ThisReceiver) {
-            return;
-        }
         if (target !== null) {
             this.bindings.set(ast, target);
         }
@@ -29256,7 +29230,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-bc83fc1');
+new Version('19.0.0-next.8+sha-09f589f');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -30604,7 +30578,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-53691f1b.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-d588f785.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -41997,21 +41971,9 @@ class TcbExpressionTranslator {
      * context). This method assists in resolving those.
      */
     resolve(ast) {
-        // TODO: this is actually a bug, because `ImplicitReceiver` extends `ThisReceiver`. Consider a
-        // case when the explicit `this` read is inside a template with a context that also provides the
-        // variable name being read:
-        // ```
-        // <ng-template let-a>{{this.a}}</ng-template>
-        // ```
-        // Clearly, `this.a` should refer to the class property `a`. However, because of this code,
-        // `this.a` will refer to `let-a` on the template context.
-        //
-        // Note that the generated code is actually consistent with this bug. To fix it, we have to:
-        // - Check `!(ast.receiver instanceof ThisReceiver)` in this condition
-        // - Update `ingest.ts` in the Template Pipeline (see the corresponding comment)
-        // - Turn off legacy TemplateDefinitionBuilder
-        // - Fix g3, and release in a major version
-        if (ast instanceof PropertyRead && ast.receiver instanceof ImplicitReceiver) {
+        if (ast instanceof PropertyRead &&
+            ast.receiver instanceof ImplicitReceiver &&
+            !(ast.receiver instanceof ThisReceiver)) {
             // Try to resolve a bound target for this expression. If no such target is available, then
             // the expression is referencing the top-level component context. In that case, `null` is
             // returned here to let it fall through resolution so it will be caught when the
