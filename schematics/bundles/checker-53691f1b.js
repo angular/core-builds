@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-5c63fc4
+ * @license Angular v19.0.0-next.8+sha-bc83fc1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29256,7 +29256,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-5c63fc4');
+new Version('19.0.0-next.8+sha-bc83fc1');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -30604,7 +30604,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-f67479eb.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-53691f1b.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -43662,7 +43662,7 @@ class TemplateTypeCheckerImpl {
         this.elementTagCache = new Map();
         this.isComplete = false;
     }
-    getTemplate(component) {
+    getTemplate(component, optimizeFor) {
         const { data } = this.getLatestComponentState(component);
         if (data === null) {
             return null;
@@ -43675,8 +43675,15 @@ class TemplateTypeCheckerImpl {
     getUsedPipes(component) {
         return this.getLatestComponentState(component).data?.boundTarget.getUsedPipes() || null;
     }
-    getLatestComponentState(component) {
-        this.ensureShimForComponent(component);
+    getLatestComponentState(component, optimizeFor = exports.OptimizeFor.SingleFile) {
+        switch (optimizeFor) {
+            case exports.OptimizeFor.WholeProgram:
+                this.ensureAllShimsForAllFiles();
+                break;
+            case exports.OptimizeFor.SingleFile:
+                this.ensureShimForComponent(component);
+                break;
+        }
         const sf = component.getSourceFile();
         const sfPath = absoluteFromSourceFile(sf);
         const shimPath = TypeCheckShimGenerator.shimFor(sfPath);

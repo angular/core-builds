@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-5c63fc4
+ * @license Angular v19.0.0-next.8+sha-bc83fc1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,11 +9,11 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var group_replacements = require('./group_replacements-edfda3b8.js');
+var group_replacements = require('./group_replacements-eab37969.js');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-f67479eb.js');
-var program = require('./program-c1191cec.js');
+var checker = require('./checker-53691f1b.js');
+var program = require('./program-5c4b37fa.js');
 require('path');
 var assert = require('assert');
 var leading_space = require('./leading_space-d190b83b.js');
@@ -1438,7 +1438,7 @@ class SignalInputMigration extends group_replacements.TsurgeComplexMigration {
         // Non-batch mode!
         if (this.config.upgradeAnalysisPhaseToAvoidBatch) {
             const merged = await this.merge([unitData]);
-            const replacements = await this.migrate(merged, info, {
+            const { replacements } = await this.migrate(merged, info, {
                 knownInputs,
                 result,
                 host,
@@ -1473,7 +1473,7 @@ class SignalInputMigration extends group_replacements.TsurgeComplexMigration {
         }
         this.config.reportProgressFn?.(60, 'Collecting migration changes..');
         executeMigrationPhase(host, knownInputs, result, analysisDeps);
-        return result.replacements;
+        return { replacements: result.replacements };
     }
     async stats(globalMetadata) {
         let fullCompilationInputs = 0;
@@ -1588,7 +1588,7 @@ function migrate(options) {
         const replacementsPerFile = new Map();
         for (const { info, tsconfigPath } of programInfos) {
             context.logger.info(`Migrating: ${tsconfigPath}..`);
-            const replacements = await migration.migrate(merged, info);
+            const { replacements } = await migration.migrate(merged, info);
             const changesPerFile = group_replacements.groupReplacementsByFile(replacements);
             for (const [file, changes] of changesPerFile) {
                 if (!replacementsPerFile.has(file)) {

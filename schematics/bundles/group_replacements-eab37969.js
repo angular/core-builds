@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-5c63fc4
+ * @license Angular v19.0.0-next.8+sha-bc83fc1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,8 +8,8 @@
 
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-f67479eb.js');
-var program = require('./program-c1191cec.js');
+var checker = require('./checker-53691f1b.js');
+var program = require('./program-5c4b37fa.js');
 require('path');
 var assert = require('assert');
 var core = require('@angular-devkit/core');
@@ -29378,7 +29378,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-5c63fc4');
+new Version('19.0.0-next.8+sha-bc83fc1');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -29442,7 +29442,7 @@ function lookupPropertyAccess(checker, type, path, options = {}) {
  * that will be migrated to signal inputs.
  */
 class TemplateReferenceVisitor extends RecursiveVisitor {
-    constructor(typeChecker, templateTypeChecker, componentClass, knownFields) {
+    constructor(typeChecker, templateTypeChecker, componentClass, knownFields, fieldNamesToConsiderForReferenceLookup) {
         super();
         this.result = [];
         /**
@@ -29453,7 +29453,7 @@ class TemplateReferenceVisitor extends RecursiveVisitor {
          */
         this.templateAttributeReferencedFields = null;
         this.seenKnownFieldsCount = new Map();
-        this.expressionVisitor = new TemplateExpressionReferenceVisitor(typeChecker, templateTypeChecker, componentClass, knownFields);
+        this.expressionVisitor = new TemplateExpressionReferenceVisitor(typeChecker, templateTypeChecker, componentClass, knownFields, fieldNamesToConsiderForReferenceLookup);
     }
     checkExpressionForReferencedFields(activeNode, expressionNode) {
         const referencedFields = this.expressionVisitor.checkTemplateExpression(activeNode, expressionNode);
@@ -29569,12 +29569,13 @@ class TemplateReferenceVisitor extends RecursiveVisitor {
  * that will be migrated to signal inputs.
  */
 class TemplateExpressionReferenceVisitor extends RecursiveAstVisitor {
-    constructor(typeChecker, templateTypeChecker, componentClass, knownFields) {
+    constructor(typeChecker, templateTypeChecker, componentClass, knownFields, fieldNamesToConsiderForReferenceLookup) {
         super();
         this.typeChecker = typeChecker;
         this.templateTypeChecker = templateTypeChecker;
         this.componentClass = componentClass;
         this.knownFields = knownFields;
+        this.fieldNamesToConsiderForReferenceLookup = fieldNamesToConsiderForReferenceLookup;
         this.activeTmplAstNode = null;
         this.detectedInputReferences = [];
         this.isInsideObjectShorthandExpression = false;
@@ -29616,6 +29617,10 @@ class TemplateExpressionReferenceVisitor extends RecursiveAstVisitor {
      * a known field. If so, the result is captured.
      */
     _inspectPropertyAccess(ast, astPath) {
+        if (this.fieldNamesToConsiderForReferenceLookup !== null &&
+            !this.fieldNamesToConsiderForReferenceLookup.has(ast.name)) {
+            return;
+        }
         const isWrite = !!(ast instanceof PropertyWrite ||
             (this.activeTmplAstNode && isTwoWayBindingNode(this.activeTmplAstNode)));
         this._checkAccessViaTemplateTypeCheckBlock(ast, isWrite, astPath) ||
@@ -29750,7 +29755,7 @@ function isTsClassTypeReference(ref) {
  * Checks host bindings of the given class and tracks all
  * references to inputs within bindings.
  */
-function identifyHostBindingReferences(node, programInfo, checker$1, reflector, result, knownFields) {
+function identifyHostBindingReferences(node, programInfo, checker$1, reflector, result, knownFields, fieldNamesToConsiderForReferenceLookup) {
     if (node.name === undefined) {
         return;
     }
@@ -29796,7 +29801,7 @@ function identifyHostBindingReferences(node, programInfo, checker$1, reflector, 
     }
     const hostMap = checker.reflectObjectLiteral(hostField);
     const expressionResult = [];
-    const expressionVisitor = new TemplateExpressionReferenceVisitor(checker$1, null, node, knownFields);
+    const expressionVisitor = new TemplateExpressionReferenceVisitor(checker$1, null, node, knownFields, fieldNamesToConsiderForReferenceLookup);
     for (const [rawName, expression] of hostMap.entries()) {
         if (!ts__default["default"].isStringLiteralLike(expression)) {
             continue;
@@ -29908,14 +29913,14 @@ function attemptExtractTemplateDefinition(node, checker$1, reflector, resourceLo
  * Checks whether the given class has an Angular template, and resolves
  * all of the references to inputs.
  */
-function identifyTemplateReferences(programInfo, node, reflector, checker$1, evaluator, templateTypeChecker, resourceLoader, options, result, knownFields) {
-    const template = templateTypeChecker.getTemplate(node) ??
+function identifyTemplateReferences(programInfo, node, reflector, checker$1, evaluator, templateTypeChecker, resourceLoader, options, result, knownFields, fieldNamesToConsiderForReferenceLookup) {
+    const template = templateTypeChecker.getTemplate(node, checker.OptimizeFor.WholeProgram) ??
         // If there is no template registered in the TCB or compiler, the template may
         // be skipped due to an explicit `jit: true` setting. We try to detect this case
         // and parse the template manually.
         extractTemplateWithoutCompilerAnalysis(node, checker$1, reflector, resourceLoader, evaluator, options);
     if (template !== null) {
-        const visitor = new TemplateReferenceVisitor(checker$1, templateTypeChecker, node, knownFields);
+        const visitor = new TemplateReferenceVisitor(checker$1, templateTypeChecker, node, knownFields, fieldNamesToConsiderForReferenceLookup);
         template.forEach((node) => node.visit(visitor));
         for (const res of visitor.result) {
             const templateFilePath = res.context.sourceSpan.start.file.url;
@@ -29925,7 +29930,7 @@ function identifyTemplateReferences(programInfo, node, reflector, checker$1, eva
             // as those cannot be migrated, but print an error for now.
             if (templateFilePath === '') {
                 // TODO: Incorporate a TODO potentially.
-                console.error(`Found reference to input ${res.targetField.key} that cannot be ` +
+                console.error(`Found reference to field ${res.targetField.key} that cannot be ` +
                     `migrated because the template cannot be parsed with source map information ` +
                     `(in file: ${node.getSourceFile().fileName}).`);
                 continue;
@@ -30156,10 +30161,10 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
     const visitor = (node) => {
         let lastTime = currentTimeInMs();
         if (ts__default["default"].isClassDeclaration(node)) {
-            identifyTemplateReferences(programInfo, node, reflector, checker, evaluator, templateTypeChecker, resourceLoader, programInfo.userOptions, result, knownFields);
+            identifyTemplateReferences(programInfo, node, reflector, checker, evaluator, templateTypeChecker, resourceLoader, programInfo.userOptions, result, knownFields, fieldNamesToConsiderForReferenceLookup);
             perfCounters.template += (currentTimeInMs() - lastTime) / 1000;
             lastTime = currentTimeInMs();
-            identifyHostBindingReferences(node, programInfo, checker, reflector, result, knownFields);
+            identifyHostBindingReferences(node, programInfo, checker, reflector, result, knownFields, fieldNamesToConsiderForReferenceLookup);
             perfCounters.hostBindings += (currentTimeInMs() - lastTime) / 1000;
             lastTime = currentTimeInMs();
         }
@@ -30363,6 +30368,7 @@ class GroupedTsAstVisitor {
         for (const doneFn of this.doneFns) {
             doneFn();
         }
+        this.visitors = [];
     }
 }
 
