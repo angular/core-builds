@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.8+sha-97fb86d
+ * @license Angular v19.0.0-next.8+sha-306443d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4341,6 +4341,8 @@ export declare interface ExistingSansProvider {
     useExisting: any;
 }
 
+declare type ExternalGlobalUtilsFunctions = keyof NgGlobalPublishUtils;
+
 /**
  * Definition of what a factory function should look like.
  */
@@ -7374,6 +7376,10 @@ declare type Mutable<T extends {
 declare const NATIVE = 7;
 
 declare const NEXT = 4;
+
+declare interface NgGlobalPublishUtils {
+    ɵgetLoadedRoutes(route: any): any;
+}
 
 /**
  * A type describing supported iterable types.
@@ -12163,16 +12169,6 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
 }
 
 /**
- * Interface for tracking root `ViewRef`s in `ApplicationRef`.
- *
- * NOTE: Importing `ApplicationRef` here directly creates circular dependency, which is why we have
- * a subset of the `ApplicationRef` interface `ViewRefTracker` here.
- */
-declare interface ViewRefTracker {
-    detachView(viewRef: ViewRef): void;
-}
-
-/**
  * A `Signal` with a value that can be mutated via a setter interface.
  */
 export declare interface WritableSignal<T> extends Signal<T> {
@@ -13766,6 +13762,12 @@ export declare interface ɵProviderRecord {
     importPath?: Type<unknown>[];
 }
 
+/**
+ * Publishes the given function to `window.ng` from package other than @angular/core
+ * So that it can be used from the browser console when an application is not in production.
+ */
+export declare function ɵpublishExternalGlobalUtil<K extends ExternalGlobalUtilsFunctions>(name: K, fn: NgGlobalPublishUtils[K]): void;
+
 export declare function ɵreadHydrationInfo(node: RNode): ɵHydrationInfo | null;
 
 export declare class ɵReflectionCapabilities implements PlatformReflectionCapabilities {
@@ -14499,7 +14501,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
     checkNoChanges(): void;
     attachToViewContainerRef(): void;
     detachFromAppRef(): void;
-    attachToAppRef(appRef: ViewRefTracker): void;
+    attachToAppRef(appRef: ApplicationRef): void;
 }
 
 /**
