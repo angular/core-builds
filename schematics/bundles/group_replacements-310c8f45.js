@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-2d11314
+ * @license Angular v19.0.0-next.8+sha-95bee15
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -252,40 +252,40 @@ function getExtendedConfigPathWorker(configFile, extendsValue, host, fs) {
 }
 
 /**
- * Reasons why an input cannot be migrated.
+ * Reasons why a field cannot be migrated.
  *
  * Higher values of incompatibility reasons indicate a more significant
  * incompatibility reason. Lower ones may be overridden by higher ones.
  * */
-exports.InputIncompatibilityReason = void 0;
-(function (InputIncompatibilityReason) {
-    InputIncompatibilityReason[InputIncompatibilityReason["OverriddenByDerivedClass"] = 1] = "OverriddenByDerivedClass";
-    InputIncompatibilityReason[InputIncompatibilityReason["RedeclaredViaDerivedClassInputsArray"] = 2] = "RedeclaredViaDerivedClassInputsArray";
-    InputIncompatibilityReason[InputIncompatibilityReason["TypeConflictWithBaseClass"] = 3] = "TypeConflictWithBaseClass";
-    InputIncompatibilityReason[InputIncompatibilityReason["ParentIsIncompatible"] = 4] = "ParentIsIncompatible";
-    InputIncompatibilityReason[InputIncompatibilityReason["SpyOnThatOverwritesField"] = 5] = "SpyOnThatOverwritesField";
-    InputIncompatibilityReason[InputIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 6] = "PotentiallyNarrowedInTemplateButNoSupportYet";
-    InputIncompatibilityReason[InputIncompatibilityReason["RequiredInputButNoGoodExplicitTypeExtractable"] = 7] = "RequiredInputButNoGoodExplicitTypeExtractable";
-    InputIncompatibilityReason[InputIncompatibilityReason["InputWithQuestionMarkButNoGoodExplicitTypeExtractable"] = 8] = "InputWithQuestionMarkButNoGoodExplicitTypeExtractable";
-    InputIncompatibilityReason[InputIncompatibilityReason["WriteAssignment"] = 9] = "WriteAssignment";
-    InputIncompatibilityReason[InputIncompatibilityReason["Accessor"] = 10] = "Accessor";
-    InputIncompatibilityReason[InputIncompatibilityReason["OutsideOfMigrationScope"] = 11] = "OutsideOfMigrationScope";
-    InputIncompatibilityReason[InputIncompatibilityReason["SkippedViaConfigFilter"] = 12] = "SkippedViaConfigFilter";
-})(exports.InputIncompatibilityReason || (exports.InputIncompatibilityReason = {}));
-/** Reasons why a whole class and its inputs cannot be migrated. */
+exports.FieldIncompatibilityReason = void 0;
+(function (FieldIncompatibilityReason) {
+    FieldIncompatibilityReason[FieldIncompatibilityReason["OverriddenByDerivedClass"] = 1] = "OverriddenByDerivedClass";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["RedeclaredViaDerivedClassInputsArray"] = 2] = "RedeclaredViaDerivedClassInputsArray";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["TypeConflictWithBaseClass"] = 3] = "TypeConflictWithBaseClass";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["ParentIsIncompatible"] = 4] = "ParentIsIncompatible";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SpyOnThatOverwritesField"] = 5] = "SpyOnThatOverwritesField";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 6] = "PotentiallyNarrowedInTemplateButNoSupportYet";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__RequiredButNoGoodExplicitTypeExtractable"] = 7] = "SignalInput__RequiredButNoGoodExplicitTypeExtractable";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable"] = 8] = "SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["WriteAssignment"] = 9] = "WriteAssignment";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["Accessor"] = 10] = "Accessor";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 11] = "OutsideOfMigrationScope";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 12] = "SkippedViaConfigFilter";
+})(exports.FieldIncompatibilityReason || (exports.FieldIncompatibilityReason = {}));
+/** Reasons why a whole class and its fields cannot be migrated. */
 exports.ClassIncompatibilityReason = void 0;
 (function (ClassIncompatibilityReason) {
     ClassIncompatibilityReason[ClassIncompatibilityReason["ClassManuallyInstantiated"] = 0] = "ClassManuallyInstantiated";
-    ClassIncompatibilityReason[ClassIncompatibilityReason["InputOwningClassReferencedInClassProperty"] = 1] = "InputOwningClassReferencedInClassProperty";
+    ClassIncompatibilityReason[ClassIncompatibilityReason["OwningClassReferencedInClassProperty"] = 1] = "OwningClassReferencedInClassProperty";
 })(exports.ClassIncompatibilityReason || (exports.ClassIncompatibilityReason = {}));
-/** Whether the given value refers to an input member incompatibility. */
-function isInputMemberIncompatibility(value) {
+/** Whether the given value refers to an field incompatibility. */
+function isFieldIncompatibility(value) {
     return (value.reason !== undefined &&
         value.context !== undefined &&
-        exports.InputIncompatibilityReason.hasOwnProperty(value.reason));
+        exports.FieldIncompatibilityReason.hasOwnProperty(value.reason));
 }
-/** Picks the more significant input compatibility. */
-function pickInputIncompatibility(a, b) {
+/** Picks the more significant field compatibility. */
+function pickFieldIncompatibility(a, b) {
     if (b === null) {
         return a;
     }
@@ -484,7 +484,7 @@ class SpyOnFieldPattern {
                 return;
             }
             this.fields.markFieldIncompatible(fieldTarget, {
-                reason: exports.InputIncompatibilityReason.SpyOnThatOverwritesField,
+                reason: exports.FieldIncompatibilityReason.SpyOnThatOverwritesField,
                 context: node,
             });
         }
@@ -551,7 +551,7 @@ function checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisi
                 if (derivedMembers.length === 0 && inherited === undefined) {
                     break problematicReferencesCheck;
                 }
-                fields.markClassIncompatible(inputClassSymbolsToClass.get(newTarget), exports.ClassIncompatibilityReason.InputOwningClassReferencedInClassProperty);
+                fields.markClassIncompatible(inputClassSymbolsToClass.get(newTarget), exports.ClassIncompatibilityReason.OwningClassReferencedInClassProperty);
             }
         }
     };
@@ -29352,7 +29352,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-2d11314');
+new Version('19.0.0-next.8+sha-95bee15');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -31473,14 +31473,14 @@ exports.confirmAsSerializable = confirmAsSerializable;
 exports.createFindAllSourceFileReferencesVisitor = createFindAllSourceFileReferencesVisitor;
 exports.createNgtscProgram = createNgtscProgram;
 exports.groupReplacementsByFile = groupReplacementsByFile;
+exports.isFieldIncompatibility = isFieldIncompatibility;
 exports.isHostBindingReference = isHostBindingReference;
 exports.isInputContainerNode = isInputContainerNode;
-exports.isInputMemberIncompatibility = isInputMemberIncompatibility;
 exports.isTemplateReference = isTemplateReference;
 exports.isTsReference = isTsReference;
 exports.migrateTypeScriptReferences = migrateTypeScriptReferences;
 exports.migrateTypeScriptTypeReferences = migrateTypeScriptTypeReferences;
-exports.pickInputIncompatibility = pickInputIncompatibility;
+exports.pickFieldIncompatibility = pickFieldIncompatibility;
 exports.projectFile = projectFile;
 exports.removeFromUnionIfPossible = removeFromUnionIfPossible;
 exports.traverseAccess = traverseAccess;
