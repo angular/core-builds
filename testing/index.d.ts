@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.7+sha-59394ee
+ * @license Angular v18.2.7+sha-31fb9d0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -81,6 +81,8 @@ export declare abstract class ComponentFixture<T> {
      * Set whether the fixture should autodetect changes.
      *
      * Also runs detectChanges once so that any existing change is detected.
+     *
+     * @param autoDetect Whether to autodetect changes. By default, `true`.
      */
     abstract autoDetectChanges(autoDetect?: boolean): void;
     /**
