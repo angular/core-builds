@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-e00775a
+ * @license Angular v19.0.0-next.8+sha-2d11314
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,7 +9,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var group_replacements = require('./group_replacements-47e62bd0.js');
+var group_replacements = require('./group_replacements-392c48b2.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-7260fdd6.js');
@@ -19,7 +19,7 @@ var assert = require('assert');
 var leading_space = require('./leading_space-d190b83b.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 require('@angular-devkit/core');
-require('node:path');
+require('node:path/posix');
 require('fs');
 require('module');
 require('url');
@@ -1483,9 +1483,15 @@ class SignalInputMigration extends group_replacements.TsurgeComplexMigration {
         const classIncompatibleCounts = {};
         for (const [id, input] of Object.entries(globalMetadata.knownInputs)) {
             fullCompilationInputs++;
-            if (input.seenAsSourceInput) {
-                sourceInputs++;
+            const isConsideredSourceInput = input.seenAsSourceInput &&
+                input.memberIncompatibility !== group_replacements.InputIncompatibilityReason.OutsideOfMigrationScope &&
+                input.memberIncompatibility !== group_replacements.InputIncompatibilityReason.SkippedViaConfigFilter;
+            // We won't track incompatibilities to inputs that aren't considered source inputs.
+            // Tracking their statistics wouldn't provide any value.
+            if (!isConsideredSourceInput) {
+                continue;
             }
+            sourceInputs++;
             if (input.memberIncompatibility !== null || input.owningClassIncompatibility !== null) {
                 incompatibleInputs++;
             }

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-e00775a
+ * @license Angular v19.0.0-next.8+sha-2d11314
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13,7 +13,7 @@ var program = require('./program-029d5158.js');
 require('path');
 var assert = require('assert');
 var core = require('@angular-devkit/core');
-var path = require('node:path');
+var posixPath = require('node:path/posix');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -38,7 +38,7 @@ function _interopNamespace(e) {
 var os__namespace = /*#__PURE__*/_interopNamespace(os);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 var assert__default = /*#__PURE__*/_interopDefaultLegacy(assert);
-var path__namespace = /*#__PURE__*/_interopNamespace(path);
+var posixPath__namespace = /*#__PURE__*/_interopNamespace(posixPath);
 
 /// <reference types="node" />
 class NgtscCompilerHost {
@@ -29352,7 +29352,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-e00775a');
+new Version('19.0.0-next.8+sha-2d11314');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -31329,7 +31329,7 @@ class DevkitMigrationFilesystem {
         return this.normalize(core.relative(from, to));
     }
     basename(filePath, extension) {
-        return path__namespace.basename(filePath, extension);
+        return posixPath__namespace.basename(filePath, extension);
     }
     normalize(path) {
         return core.normalize(path);
@@ -31338,7 +31338,7 @@ class DevkitMigrationFilesystem {
         const normalizedPaths = paths.map((p) => core.normalize(p));
         // In dev-kit, the NodeJS working directory should never be
         // considered, so `/` is the last resort over `cwd`.
-        return this.normalize(path__namespace.resolve(core.normalize('/'), ...normalizedPaths));
+        return this.normalize(posixPath__namespace.resolve(core.normalize('/'), ...normalizedPaths));
     }
     pwd() {
         return '/';
