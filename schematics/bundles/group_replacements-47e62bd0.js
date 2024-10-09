@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.8+sha-306443d
+ * @license Angular v19.0.0-next.8+sha-2213263
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29352,7 +29352,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.8+sha-306443d');
+new Version('19.0.0-next.8+sha-2213263');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30501,6 +30501,8 @@ function isNodeDescendantOf(node, ancestor) {
     return false;
 }
 
+/** Symbol that can be used to mark a variable as reserved, synthetically. */
+const ReservedMarker = Symbol();
 /**
  * Gets whether the given identifier name is free for use in the
  * given location, avoiding shadowed variable names.
@@ -30546,8 +30548,8 @@ function isIdentifierFreeInContainer(name, container) {
     // Note: This check is similar to the check by the TypeScript emitter.
     // typescript/stable/src/compiler/emitter.ts;l=5436;rcl=651008033
     const local = container.locals.get(name);
-    return !(local.flags &
-        (ts__default["default"].SymbolFlags.Value | ts__default["default"].SymbolFlags.ExportValue | ts__default["default"].SymbolFlags.Alias));
+    return (local !== ReservedMarker &&
+        !(local.flags & (ts__default["default"].SymbolFlags.Value | ts__default["default"].SymbolFlags.ExportValue | ts__default["default"].SymbolFlags.Alias)));
 }
 /**
  * Whether the given node can contain local variables.
@@ -30611,7 +30613,8 @@ class UniqueNamesGenerator {
                 return false;
             }
             // Claim the locals to avoid conflicts with future generations.
-            freeInfo.container.locals?.set(name, null);
+            freeInfo.container.locals ??= new Map();
+            freeInfo.container.locals.set(name, ReservedMarker);
             return true;
         };
         // Check the base name. Ideally, we'd use this one.
