@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.8+sha-2213263
+ * @license Angular v19.0.0-next.8+sha-9e82559
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17029,7 +17029,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.8+sha-2213263']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.8+sha-9e82559']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31317,7 +31317,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.8+sha-2213263');
+const VERSION = new Version('19.0.0-next.8+sha-9e82559');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -34380,7 +34380,7 @@ function logOversizedImageWarning(src) {
 const PLATFORM_DESTROY_LISTENERS = new InjectionToken(ngDevMode ? 'PlatformDestroyListeners' : '');
 
 function isApplicationBootstrapConfig(config) {
-    return !!config.platformInjector;
+    return !config.moduleRef;
 }
 function bootstrap(config) {
     const envInjector = isApplicationBootstrapConfig(config)
@@ -34415,9 +34415,9 @@ function bootstrap(config) {
                 },
             });
         });
+        // If the whole platform is destroyed, invoke the `destroy` method
+        // for all bootstrapped applications as well.
         if (isApplicationBootstrapConfig(config)) {
-            // If the whole platform is destroyed, invoke the `destroy` method
-            // for all bootstrapped applications as well.
             const destroyListener = () => envInjector.destroy();
             const onPlatformDestroyListeners = config.platformInjector.get(PLATFORM_DESTROY_LISTENERS);
             onPlatformDestroyListeners.add(destroyListener);
@@ -34427,9 +34427,13 @@ function bootstrap(config) {
             });
         }
         else {
+            const destroyListener = () => config.moduleRef.destroy();
+            const onPlatformDestroyListeners = config.platformInjector.get(PLATFORM_DESTROY_LISTENERS);
+            onPlatformDestroyListeners.add(destroyListener);
             config.moduleRef.onDestroy(() => {
                 remove(config.allPlatformModules, config.moduleRef);
                 onErrorSubscription.unsubscribe();
+                onPlatformDestroyListeners.delete(destroyListener);
             });
         }
         return _callAndReportToErrorHandler(exceptionHandler, ngZone, () => {
@@ -34516,7 +34520,11 @@ class PlatformRef {
             { provide: ChangeDetectionScheduler, useExisting: ChangeDetectionSchedulerImpl },
         ];
         const moduleRef = createNgModuleRefWithProviders(moduleFactory.moduleType, this.injector, allAppProviders);
-        return bootstrap({ moduleRef, allPlatformModules: this._modules });
+        return bootstrap({
+            moduleRef,
+            allPlatformModules: this._modules,
+            platformInjector: this.injector,
+        });
     }
     /**
      * Creates an instance of an `@NgModule` for a given platform.
