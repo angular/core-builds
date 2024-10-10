@@ -8640,7 +8640,7 @@ var ShadowCss = class {
     });
   }
   _convertColonHostContext(cssText) {
-    return cssText.replace(_cssColonHostContextReGlobal, (selectorText) => {
+    return cssText.replace(_cssColonHostContextReGlobal, (selectorText, pseudoPrefix) => {
       var _a2;
       const contextSelectorGroups = [[]];
       let match;
@@ -8655,7 +8655,7 @@ var ShadowCss = class {
         }
         selectorText = match[2];
       }
-      return contextSelectorGroups.map((contextSelectors) => combineHostContextSelectors(contextSelectors, selectorText)).join(", ");
+      return contextSelectorGroups.map((contextSelectors) => _combineHostContextSelectors(contextSelectors, selectorText, pseudoPrefix)).join(", ");
     });
   }
   _convertShadowDOMSelectors(cssText) {
@@ -8666,7 +8666,12 @@ var ShadowCss = class {
       let selector = rule.selector;
       let content = rule.content;
       if (rule.selector[0] !== "@") {
-        selector = this._scopeSelector(rule.selector, scopeSelector, hostSelector);
+        selector = this._scopeSelector({
+          selector,
+          scopeSelector,
+          hostSelector,
+          isParentSelector: true
+        });
       } else if (scopedAtRuleIdentifiers.some((atRule) => rule.selector.startsWith(atRule))) {
         content = this._scopeSelectors(rule.content, scopeSelector, hostSelector);
       } else if (rule.selector.startsWith("@font-face") || rule.selector.startsWith("@page")) {
@@ -8681,12 +8686,18 @@ var ShadowCss = class {
       return new CssRule(selector, rule.content);
     });
   }
-  _scopeSelector(selector, scopeSelector, hostSelector) {
-    return selector.split(/ ?, ?/).map((part) => part.split(_shadowDeepSelectors)).map((deepParts) => {
+  _scopeSelector({ selector, scopeSelector, hostSelector, isParentSelector = false }) {
+    const selectorSplitRe = / ?,(?!(?:[^)(]*(?:\([^)(]*(?:\([^)(]*(?:\([^)(]*\)[^)(]*)*\)[^)(]*)*\)[^)(]*)*\))) ?/;
+    return selector.split(selectorSplitRe).map((part) => part.split(_shadowDeepSelectors)).map((deepParts) => {
       const [shallowPart, ...otherParts] = deepParts;
       const applyScope = (shallowPart2) => {
         if (this._selectorNeedsScoping(shallowPart2, scopeSelector)) {
-          return this._applySelectorScope(shallowPart2, scopeSelector, hostSelector);
+          return this._applySelectorScope({
+            selector: shallowPart2,
+            scopeSelector,
+            hostSelector,
+            isParentSelector
+          });
         } else {
           return shallowPart2;
         }
@@ -8708,15 +8719,15 @@ var ShadowCss = class {
     _polyfillHostRe.lastIndex = 0;
     if (_polyfillHostRe.test(selector)) {
       const replaceBy = `[${hostSelector}]`;
-      return selector.replace(_polyfillHostNoCombinatorRe, (hnc, selector2) => {
-        return selector2.replace(/([^:]*)(:*)(.*)/, (_, before, colon, after) => {
+      return selector.replace(_polyfillHostNoCombinatorReGlobal, (_hnc, selector2) => {
+        return selector2.replace(/([^:\)]*)(:*)(.*)/, (_, before, colon, after) => {
           return before + replaceBy + colon + after;
         });
       }).replace(_polyfillHostRe, replaceBy + " ");
     }
     return scopeSelector + " " + selector;
   }
-  _applySelectorScope(selector, scopeSelector, hostSelector) {
+  _applySelectorScope({ selector, scopeSelector, hostSelector, isParentSelector }) {
     var _a2;
     const isRe = /\[is=([^\]]*)\]/g;
     scopeSelector = scopeSelector.replace(isRe, (_, ...parts) => parts[0]);
@@ -8728,6 +8739,10 @@ var ShadowCss = class {
       }
       if (p2.includes(_polyfillHostNoCombinator)) {
         scopedP = this._applySimpleSelectorScope(p2, scopeSelector, hostSelector);
+        if (_polyfillHostNoCombinatorWithinPseudoFunction.test(p2)) {
+          const [_, before, colon, after] = scopedP.match(/([^:]*)(:*)(.*)/);
+          scopedP = before + attrName + colon + after;
+        }
       } else {
         const t = p2.replace(_polyfillHostRe, "");
         if (t.length > 0) {
@@ -8739,29 +8754,52 @@ var ShadowCss = class {
       }
       return scopedP;
     };
-    const safeContent = new SafeSelector(selector);
-    selector = safeContent.content();
+    const _pseudoFunctionAwareScopeSelectorPart = (selectorPart) => {
+      let scopedPart = "";
+      const cssPrefixWithPseudoSelectorFunctionMatch = selectorPart.match(_cssPrefixWithPseudoSelectorFunction);
+      if (cssPrefixWithPseudoSelectorFunctionMatch) {
+        const [cssPseudoSelectorFunction] = cssPrefixWithPseudoSelectorFunctionMatch;
+        const selectorToScope = selectorPart.slice(cssPseudoSelectorFunction.length, -1);
+        if (selectorToScope.includes(_polyfillHostNoCombinator)) {
+          this._shouldScopeIndicator = true;
+        }
+        const scopedInnerPart = this._scopeSelector({
+          selector: selectorToScope,
+          scopeSelector,
+          hostSelector
+        });
+        scopedPart = `${cssPseudoSelectorFunction}${scopedInnerPart})`;
+      } else {
+        this._shouldScopeIndicator = this._shouldScopeIndicator || selectorPart.includes(_polyfillHostNoCombinator);
+        scopedPart = this._shouldScopeIndicator ? _scopeSelectorPart(selectorPart) : selectorPart;
+      }
+      return scopedPart;
+    };
+    if (isParentSelector) {
+      this._safeSelector = new SafeSelector(selector);
+      selector = this._safeSelector.content();
+    }
     let scopedSelector = "";
     let startIndex = 0;
     let res;
-    const sep2 = /( |>|\+|~(?!=))\s*/g;
+    const sep2 = /( |>|\+|~(?!=))(?!([^)(]*(?:\([^)(]*(?:\([^)(]*(?:\([^)(]*\)[^)(]*)*\)[^)(]*)*\)[^)(]*)*\)))\s*/g;
     const hasHost = selector.includes(_polyfillHostNoCombinator);
-    let shouldScope = !hasHost;
+    if (isParentSelector || this._shouldScopeIndicator) {
+      this._shouldScopeIndicator = !hasHost;
+    }
     while ((res = sep2.exec(selector)) !== null) {
       const separator = res[1];
       const part2 = selector.slice(startIndex, res.index);
       if (part2.match(/__esc-ph-(\d+)__/) && ((_a2 = selector[res.index + 1]) == null ? void 0 : _a2.match(/[a-fA-F\d]/))) {
         continue;
       }
-      shouldScope = shouldScope || part2.includes(_polyfillHostNoCombinator);
-      const scopedPart = shouldScope ? _scopeSelectorPart(part2) : part2;
+      const scopedPart = _pseudoFunctionAwareScopeSelectorPart(part2);
       scopedSelector += `${scopedPart} ${separator} `;
       startIndex = sep2.lastIndex;
     }
     const part = selector.substring(startIndex);
-    shouldScope = shouldScope || part.includes(_polyfillHostNoCombinator);
-    scopedSelector += shouldScope ? _scopeSelectorPart(part) : part;
-    return safeContent.restore(scopedSelector);
+    scopedSelector += _pseudoFunctionAwareScopeSelectorPart(part);
+    return this._safeSelector.restore(scopedSelector);
   }
   _insertPolyfillHostInCssText(selector) {
     return selector.replace(_colonHostContextRe, _polyfillHostContext).replace(_colonHostRe, _polyfillHost);
@@ -8800,6 +8838,8 @@ var SafeSelector = class {
     });
   }
 };
+var _cssScopedPseudoFunctionPrefix = "(:(where|is)\\()?";
+var _cssPrefixWithPseudoSelectorFunction = /^:(where|is)\(/i;
 var _cssContentNextSelectorRe = /polyfill-next-selector[^}]*content:[\s]*?(['"])(.*?)\1[;\s]*}([^{]*?){/gim;
 var _cssContentRuleRe = /(polyfill-rule)[^}]*(content:[\s]*(['"])(.*?)\3)[;\s]*[^}]*}/gim;
 var _cssContentUnscopedRuleRe = /(polyfill-unscoped-rule)[^}]*(content:[\s]*(['"])(.*?)\3)[;\s]*[^}]*}/gim;
@@ -8807,10 +8847,12 @@ var _polyfillHost = "-shadowcsshost";
 var _polyfillHostContext = "-shadowcsscontext";
 var _parenSuffix = "(?:\\(((?:\\([^)(]*\\)|[^)(]*)+?)\\))?([^,{]*)";
 var _cssColonHostRe = new RegExp(_polyfillHost + _parenSuffix, "gim");
-var _cssColonHostContextReGlobal = new RegExp(_polyfillHostContext + _parenSuffix, "gim");
+var _cssColonHostContextReGlobal = new RegExp(_cssScopedPseudoFunctionPrefix + "(" + _polyfillHostContext + _parenSuffix + ")", "gim");
 var _cssColonHostContextRe = new RegExp(_polyfillHostContext + _parenSuffix, "im");
 var _polyfillHostNoCombinator = _polyfillHost + "-no-combinator";
+var _polyfillHostNoCombinatorWithinPseudoFunction = new RegExp(`:.*\\(.*${_polyfillHostNoCombinator}.*\\)`);
 var _polyfillHostNoCombinatorRe = /-shadowcsshost-no-combinator([^\s]*)/;
+var _polyfillHostNoCombinatorReGlobal = new RegExp(_polyfillHostNoCombinatorRe, "g");
 var _shadowDOMSelectorsRe = [
   /::shadow/g,
   /::content/g,
@@ -8945,7 +8987,7 @@ function unescapeInStrings(input) {
 function unescapeQuotes(str, isQuoted) {
   return !isQuoted ? str : str.replace(/((?:^|[^\\])(?:\\\\)*)\\(?=['"])/g, "$1");
 }
-function combineHostContextSelectors(contextSelectors, otherSelectors) {
+function _combineHostContextSelectors(contextSelectors, otherSelectors, pseudoPrefix = "") {
   const hostMarker = _polyfillHostNoCombinator;
   _polyfillHostRe.lastIndex = 0;
   const otherSelectorsHasHost = _polyfillHostRe.test(otherSelectors);
@@ -8963,7 +9005,7 @@ function combineHostContextSelectors(contextSelectors, otherSelectors) {
       combined[i] = contextSelector + previousSelectors;
     }
   }
-  return combined.map((s) => otherSelectorsHasHost ? `${s}${otherSelectors}` : `${s}${hostMarker}${otherSelectors}, ${s} ${hostMarker}${otherSelectors}`).join(",");
+  return combined.map((s) => otherSelectorsHasHost ? `${pseudoPrefix}${s}${otherSelectors}` : `${pseudoPrefix}${s}${hostMarker}${otherSelectors}, ${pseudoPrefix}${s} ${hostMarker}${otherSelectors}`).join(",");
 }
 function repeatGroups(groups, multiples) {
   const length = groups.length;
@@ -26226,7 +26268,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.7+sha-31fb9d0");
+var VERSION2 = new Version("18.2.7+sha-21be258");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _I18N_ATTR = "i18n";
@@ -27343,7 +27385,7 @@ var MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = "18.0.0";
 function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set("version", literal("18.2.7+sha-31fb9d0"));
+  definitionMap.set("version", literal("18.2.7+sha-21be258"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("decorators", metadata.decorators);
@@ -27362,7 +27404,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
   callbackReturnDefinitionMap.set("ctorParameters", (_a2 = metadata.ctorParameters) != null ? _a2 : literal(null));
   callbackReturnDefinitionMap.set("propDecorators", (_b2 = metadata.propDecorators) != null ? _b2 : literal(null));
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set("version", literal("18.2.7+sha-31fb9d0"));
+  definitionMap.set("version", literal("18.2.7+sha-21be258"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", metadata.type);
   definitionMap.set("resolveDeferredDeps", compileComponentMetadataAsyncResolver(dependencies));
@@ -27430,7 +27472,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set("minVersion", literal(minVersion));
-  definitionMap.set("version", literal("18.2.7+sha-31fb9d0"));
+  definitionMap.set("version", literal("18.2.7+sha-21be258"));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
     definitionMap.set("isStandalone", literal(meta.isStandalone));
@@ -27748,7 +27790,7 @@ var MINIMUM_PARTIAL_LINKER_VERSION2 = "12.0.0";
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION2));
-  definitionMap.set("version", literal("18.2.7+sha-31fb9d0"));
+  definitionMap.set("version", literal("18.2.7+sha-21be258"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("deps", compileDependencies(meta.deps));
@@ -27771,7 +27813,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION3));
-  definitionMap.set("version", literal("18.2.7+sha-31fb9d0"));
+  definitionMap.set("version", literal("18.2.7+sha-21be258"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.providedIn !== void 0) {
@@ -27809,7 +27851,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION4));
-  definitionMap.set("version", literal("18.2.7+sha-31fb9d0"));
+  definitionMap.set("version", literal("18.2.7+sha-21be258"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   definitionMap.set("providers", meta.providers);
@@ -27833,7 +27875,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error("Invalid path! Local compilation mode should not get into the partial compilation path");
   }
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION5));
-  definitionMap.set("version", literal("18.2.7+sha-31fb9d0"));
+  definitionMap.set("version", literal("18.2.7+sha-21be258"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -27868,7 +27910,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set("minVersion", literal(MINIMUM_PARTIAL_LINKER_VERSION6));
-  definitionMap.set("version", literal("18.2.7+sha-31fb9d0"));
+  definitionMap.set("version", literal("18.2.7+sha-21be258"));
   definitionMap.set("ngImport", importExpr(Identifiers.core));
   definitionMap.set("type", meta.type.value);
   if (meta.isStandalone) {
@@ -27885,7 +27927,7 @@ function createPipeDefinitionMap(meta) {
 publishFacade(_global);
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/version.mjs
-var VERSION3 = new Version("18.2.7+sha-31fb9d0");
+var VERSION3 = new Version("18.2.7+sha-21be258");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler-cli/src/ngtsc/imports/src/emitter.mjs
 var import_typescript5 = __toESM(require("typescript"), 1);
