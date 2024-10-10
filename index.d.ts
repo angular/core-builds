@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.9+sha-410ed69
+ * @license Angular v19.0.0-next.9+sha-57134dd
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7366,12 +7366,6 @@ export declare interface ModuleWithProviders<T> {
 declare const MOVED_VIEWS = 9;
 
 declare const MULTIPLIER = "x";
-
-declare type Mutable<T extends {
-    [x: string]: any;
-}, K extends string> = {
-    [P in K]: T[P];
-};
 
 declare const NATIVE = 7;
 
@@ -15466,7 +15460,7 @@ export declare function ɵɵdeferWhen(rawValue: unknown): void;
  * ```
  * @codeGenApi
  */
-export declare function ɵɵdefineComponent<T>(componentDefinition: ComponentDefinition<T>): Mutable<ɵComponentDef<any>, keyof ɵComponentDef<any>>;
+export declare function ɵɵdefineComponent<T>(componentDefinition: ComponentDefinition<T>): ɵComponentDef<any>;
 
 /**
  * Create a directive definition object.
@@ -15484,7 +15478,7 @@ export declare function ɵɵdefineComponent<T>(componentDefinition: ComponentDef
  *
  * @codeGenApi
  */
-export declare function ɵɵdefineDirective<T>(directiveDefinition: DirectiveDefinition<T>): Mutable<ɵDirectiveDef<any>, keyof ɵDirectiveDef<any>>;
+export declare function ɵɵdefineDirective<T>(directiveDefinition: DirectiveDefinition<T>): ɵDirectiveDef<any>;
 
 /**
  * Construct an injectable definition which defines how a token will be constructed by the DI
