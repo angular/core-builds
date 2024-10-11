@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-b198593
+ * @license Angular v19.0.0-next.9+sha-a59dbb7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -267,10 +267,11 @@ exports.FieldIncompatibilityReason = void 0;
     FieldIncompatibilityReason[FieldIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 6] = "PotentiallyNarrowedInTemplateButNoSupportYet";
     FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__RequiredButNoGoodExplicitTypeExtractable"] = 7] = "SignalInput__RequiredButNoGoodExplicitTypeExtractable";
     FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable"] = 8] = "SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["WriteAssignment"] = 9] = "WriteAssignment";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["Accessor"] = 10] = "Accessor";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 11] = "OutsideOfMigrationScope";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 12] = "SkippedViaConfigFilter";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__QueryListProblematicFieldAccessed"] = 9] = "SignalQueries__QueryListProblematicFieldAccessed";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["WriteAssignment"] = 10] = "WriteAssignment";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["Accessor"] = 11] = "Accessor";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 12] = "OutsideOfMigrationScope";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 13] = "SkippedViaConfigFilter";
 })(exports.FieldIncompatibilityReason || (exports.FieldIncompatibilityReason = {}));
 /** Reasons why a whole class and its fields cannot be migrated. */
 exports.ClassIncompatibilityReason = void 0;
@@ -29421,7 +29422,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.9+sha-b198593');
+new Version('19.0.0-next.9+sha-a59dbb7');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30524,6 +30525,107 @@ function removeFromUnionIfPossible(union, filter) {
 }
 
 /**
+ * Gets human-readable message information for the given field incompatibility.
+ * This text will be used by the language service, or CLI-based migration.
+ */
+function getMessageForFieldIncompatibility(reason, fieldName) {
+    switch (reason) {
+        case exports.FieldIncompatibilityReason.Accessor:
+            return {
+                short: `Accessor ${fieldName.plural} cannot be migrated as they are too complex.`,
+                extra: 'The migration potentially requires usage of `effect` or `computed`, but ' +
+                    'the intent is unclear. The migration cannot safely migrate.',
+            };
+        case exports.FieldIncompatibilityReason.OverriddenByDerivedClass:
+            return {
+                short: `The ${fieldName.single} cannot be migrated because the field is overridden by a subclass.`,
+                extra: 'The field in the subclass is not a signal, so migrating would break your build.',
+            };
+        case exports.FieldIncompatibilityReason.ParentIsIncompatible:
+            return {
+                short: `This ${fieldName.single} is inherited from a superclass, but the parent cannot be migrated.`,
+                extra: 'Migrating this field would cause your build to fail.',
+            };
+        case exports.FieldIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet:
+            return {
+                short: `This ${fieldName.single} is used in a control flow expression (e.g. \`@if\` or \`*ngIf\`) and ` +
+                    'migrating would break narrowing currently.',
+                extra: `In the future, Angular intends to support narrowing of signals.`,
+            };
+        case exports.FieldIncompatibilityReason.RedeclaredViaDerivedClassInputsArray:
+            return {
+                short: `The ${fieldName.single} is overridden by a subclass that cannot be migrated.`,
+                extra: `The subclass overrides this ${fieldName.single} via the \`inputs\` array in @Directive/@Component. ` +
+                    'Migrating the field would break your build because the subclass field cannot be a signal.',
+            };
+        case exports.FieldIncompatibilityReason.SignalInput__RequiredButNoGoodExplicitTypeExtractable:
+            return {
+                short: `Input is required, but the migration cannot determine a good type for the input.`,
+                extra: 'Consider adding an explicit type to make the migration possible.',
+            };
+        case exports.FieldIncompatibilityReason.SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable:
+            return {
+                short: `Input is marked with a question mark. Migration could not determine a good type for the input.`,
+                extra: 'The migration needs to be able to resolve a type, so that it can include `undefined` in your type. ' +
+                    'Consider adding an explicit type to make the migration possible.',
+            };
+        case exports.FieldIncompatibilityReason.SignalQueries__QueryListProblematicFieldAccessed:
+            return {
+                short: `There are references to this query that cannot be migrated automatically.`,
+                extra: "For example, it's not possible to migrate `.changes` or `.dirty` trivially.",
+            };
+        case exports.FieldIncompatibilityReason.SkippedViaConfigFilter:
+            return {
+                short: `This ${fieldName.single} is not part of the current migration scope.`,
+                extra: 'Skipped via migration config.',
+            };
+        case exports.FieldIncompatibilityReason.SpyOnThatOverwritesField:
+            return {
+                short: 'A jasmine `spyOn` call spies on this field. This breaks with signals.',
+                extra: `Migration cannot safely migrate as "spyOn" writes to the ${fieldName.single}. ` +
+                    `Signal ${fieldName.plural} are readonly.`,
+            };
+        case exports.FieldIncompatibilityReason.TypeConflictWithBaseClass:
+            return {
+                short: `This ${fieldName.single} overrides a field from a superclass, while the superclass ` +
+                    `field is not migrated.`,
+                extra: 'Migrating the field would break your build because of a type conflict.',
+            };
+        case exports.FieldIncompatibilityReason.WriteAssignment:
+            return {
+                short: `Your application code writes to the ${fieldName.single}. This prevents migration.`,
+                extra: `Signal ${fieldName.plural} are readonly, so migrating would break your build.`,
+            };
+        case exports.FieldIncompatibilityReason.OutsideOfMigrationScope:
+            return {
+                short: `This ${fieldName.single} is not part of any source files in your project.`,
+                extra: `The migration excludes ${fieldName.plural} if no source file declaring them was seen.`,
+            };
+    }
+}
+/**
+ * Gets human-readable message information for the given class incompatibility.
+ * This text will be used by the language service, or CLI-based migration.
+ */
+function getMessageForClassIncompatibility(reason, fieldName) {
+    switch (reason) {
+        case exports.ClassIncompatibilityReason.OwningClassReferencedInClassProperty:
+            return {
+                short: `Class of this ${fieldName.single} is referenced in the signature of another class.`,
+                extra: 'The other class is likely typed to expect a non-migrated field, so ' +
+                    'migration is skipped to not break your build.',
+            };
+        case exports.ClassIncompatibilityReason.ClassManuallyInstantiated:
+            return {
+                short: `Class of this ${fieldName.single} is manually instantiated. ` +
+                    'This is discouraged and prevents migration',
+                extra: `Signal ${fieldName.plural} require a DI injection context. Manually instantiating ` +
+                    'breaks this requirement in some cases, so the migration is skipped.',
+            };
+    }
+}
+
+/**
  * Applies import manager changes, and writes them as replacements the
  * given result array.
  */
@@ -31387,6 +31489,31 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
     }
 }
 
+/** Input reasons that cannot be ignored. */
+const nonIgnorableInputIncompatibilities = [
+    // Outside of scope inputs should not be migrated. E.g. references to inputs in `node_modules/`.
+    exports.FieldIncompatibilityReason.OutsideOfMigrationScope,
+    // Explicitly filtered inputs cannot be skipped via best effort mode.
+    exports.FieldIncompatibilityReason.SkippedViaConfigFilter,
+    // There is no good output for accessor inputs.
+    exports.FieldIncompatibilityReason.Accessor,
+    // There is no good output for such inputs. We can't perform "conversion".
+    exports.FieldIncompatibilityReason.SignalInput__RequiredButNoGoodExplicitTypeExtractable,
+    exports.FieldIncompatibilityReason.SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable,
+];
+/** Filters ignorable input incompatibilities when best effort mode is enabled. */
+function filterIncompatibilitiesForBestEffortMode(knownInputs) {
+    knownInputs.knownInputIds.forEach(({ container: c }) => {
+        // All class incompatibilities are "filterable" right now.
+        c.incompatible = null;
+        for (const [key, i] of c.memberIncompatibility.entries()) {
+            if (!nonIgnorableInputIncompatibilities.includes(i.reason)) {
+                c.memberIncompatibility.delete(key);
+            }
+        }
+    });
+}
+
 /**
  * Angular compiler file system implementation that leverages an
  * CLI schematic virtual file tree.
@@ -31557,6 +31684,9 @@ exports.checkInheritanceOfKnownFields = checkInheritanceOfKnownFields;
 exports.confirmAsSerializable = confirmAsSerializable;
 exports.createFindAllSourceFileReferencesVisitor = createFindAllSourceFileReferencesVisitor;
 exports.createNgtscProgram = createNgtscProgram;
+exports.filterIncompatibilitiesForBestEffortMode = filterIncompatibilitiesForBestEffortMode;
+exports.getMessageForClassIncompatibility = getMessageForClassIncompatibility;
+exports.getMessageForFieldIncompatibility = getMessageForFieldIncompatibility;
 exports.groupReplacementsByFile = groupReplacementsByFile;
 exports.isFieldIncompatibility = isFieldIncompatibility;
 exports.isHostBindingReference = isHostBindingReference;

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-b198593
+ * @license Angular v19.0.0-next.9+sha-a59dbb7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var group_replacements = require('./group_replacements-8c11682b.js');
+var group_replacements = require('./group_replacements-98198532.js');
 require('os');
 var ts = require('typescript');
 var checker = require('./checker-c62edf6c.js');
@@ -294,6 +294,22 @@ function extractSourceQueryDefinition(node, reflector, evaluator, info) {
     };
 }
 
+function markFieldIncompatibleInMetadata(data, id, reason) {
+    const existing = data.problematicQueries[id];
+    if (existing === undefined) {
+        data.problematicQueries[id] = {
+            fieldReason: reason,
+            classReason: null,
+        };
+    }
+    else if (existing.fieldReason === null) {
+        existing.fieldReason = reason;
+    }
+    else {
+        existing.fieldReason = group_replacements.pickFieldIncompatibility({ reason, context: null }, { reason: existing.fieldReason, context: null }).reason;
+    }
+}
+
 class KnownQueries {
     constructor(info, globalMetadata) {
         this.info = info;
@@ -302,14 +318,15 @@ class KnownQueries {
         this.knownQueryIDs = new Map();
     }
     isFieldIncompatible(descriptor) {
-        return this.globalMetadata.problematicQueries[descriptor.key] !== undefined;
+        return this.getIncompatibilityForField(descriptor) !== null;
     }
-    markFieldIncompatible(field) {
-        this.globalMetadata.problematicQueries[field.key] = true;
+    markFieldIncompatible(field, incompatibility) {
+        markFieldIncompatibleInMetadata(this.globalMetadata, field.key, incompatibility.reason);
     }
-    markClassIncompatible(node) {
+    markClassIncompatible(node, reason) {
         this.classToQueryFields.get(node)?.forEach((f) => {
-            this.globalMetadata.problematicQueries[f.key] = true;
+            this.globalMetadata.problematicQueries[f.key] ??= { classReason: null, fieldReason: null };
+            this.globalMetadata.problematicQueries[f.key].classReason = reason;
         });
     }
     registerQueryField(queryField, id) {
@@ -339,16 +356,48 @@ class KnownQueries {
         return Array.from(this.classToQueryFields.keys()).filter((c) => ts__default["default"].isClassDeclaration(c));
     }
     captureKnownFieldInheritanceRelationship(derived, parent) {
-        if (this.isFieldIncompatible(parent) || this.isFieldIncompatible(derived)) {
-            this.markFieldIncompatible(parent);
-            this.markFieldIncompatible(derived);
-        }
+        if (this.isFieldIncompatible(parent) || this.isFieldIncompatible(derived)) ;
     }
     captureUnknownDerivedField(field) {
-        this.markFieldIncompatible(field);
+        this.markFieldIncompatible(field, {
+            context: null,
+            reason: group_replacements.FieldIncompatibilityReason.OverriddenByDerivedClass,
+        });
     }
     captureUnknownParentField(field) {
-        this.markFieldIncompatible(field);
+        this.markFieldIncompatible(field, {
+            context: null,
+            reason: group_replacements.FieldIncompatibilityReason.TypeConflictWithBaseClass,
+        });
+    }
+    getIncompatibilityForField(descriptor) {
+        const problematicInfo = this.globalMetadata.problematicQueries[descriptor.key];
+        if (problematicInfo === undefined) {
+            return null;
+        }
+        if (problematicInfo.fieldReason !== null) {
+            return { context: null, reason: problematicInfo.fieldReason };
+        }
+        if (problematicInfo.classReason !== null) {
+            return problematicInfo.classReason;
+        }
+        return null;
+    }
+    getIncompatibilityTextForField(field) {
+        const incompatibilityInfo = this.globalMetadata.problematicQueries[field.key];
+        if (incompatibilityInfo.fieldReason !== null) {
+            return group_replacements.getMessageForFieldIncompatibility(incompatibilityInfo.fieldReason, {
+                single: 'query',
+                plural: 'queries',
+            });
+        }
+        if (incompatibilityInfo.classReason !== null) {
+            return group_replacements.getMessageForClassIncompatibility(incompatibilityInfo.classReason, {
+                single: 'query',
+                plural: 'queries',
+            });
+        }
+        return null;
     }
 }
 
@@ -670,15 +719,18 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
         // we saw in TS code, templates or host bindings.
         for (const ref of referenceResult.references) {
             if (group_replacements.isTsReference(ref) && ref.from.isWrite) {
-                res.potentialProblematicQueries[ref.target.key] = true;
+                res.potentialProblematicQueries[ref.target.key] =
+                    group_replacements.FieldIncompatibilityReason.WriteAssignment;
             }
             if ((group_replacements.isTemplateReference(ref) || group_replacements.isHostBindingReference(ref)) && ref.from.isWrite) {
-                res.potentialProblematicQueries[ref.target.key] = true;
+                res.potentialProblematicQueries[ref.target.key] =
+                    group_replacements.FieldIncompatibilityReason.WriteAssignment;
             }
             // TODO: Remove this when we support signal narrowing in templates.
             // https://github.com/angular/angular/pull/55456.
             if (group_replacements.isTemplateReference(ref) && ref.from.isLikelyPartOfNarrowing) {
-                res.potentialProblematicQueries[ref.target.key] = true;
+                res.potentialProblematicQueries[ref.target.key] =
+                    group_replacements.FieldIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet;
             }
             // Check for other incompatible query list accesses.
             checkForIncompatibleQueryListAccesses(ref, res);
@@ -698,8 +750,8 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
             for (const [id, value] of Object.entries(unit.knownQueryFields)) {
                 merged.knownQueryFields[id] = value;
             }
-            for (const id of Object.keys(unit.potentialProblematicQueries)) {
-                merged.problematicQueries[id] = true;
+            for (const [id, reason] of Object.entries(unit.potentialProblematicQueries)) {
+                markFieldIncompatibleInMetadata(merged, id, reason);
             }
             if (unit.reusableAnalysisReferences !== null) {
                 assert__default["default"](units.length === 1, 'Expected migration to not run in batch mode');
@@ -709,7 +761,7 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
         for (const unit of units) {
             for (const id of Object.keys(unit.potentialProblematicReferenceForMultiQueries)) {
                 if (merged.knownQueryFields[id]?.isMulti) {
-                    merged.problematicQueries[id] = true;
+                    markFieldIncompatibleInMetadata(merged, id, group_replacements.FieldIncompatibilityReason.SignalQueries__QueryListProblematicFieldAccessed);
                 }
             }
         }

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-b198593
+ * @license Angular v19.0.0-next.9+sha-a59dbb7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,7 +9,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var group_replacements = require('./group_replacements-8c11682b.js');
+var group_replacements = require('./group_replacements-98198532.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-c62edf6c.js');
@@ -1063,102 +1063,6 @@ function extractTransformOfInput(transform, resolvedType, checker) {
 }
 
 /**
- * Gets human-readable message information for the given field incompatibility.
- * This text will be used by the language service, or CLI-based migration.
- */
-function getMessageForFieldIncompatibility(reason, fieldName) {
-    switch (reason) {
-        case group_replacements.FieldIncompatibilityReason.Accessor:
-            return {
-                short: `Accessor ${fieldName.plural} cannot be migrated as they are too complex.`,
-                extra: 'The migration potentially requires usage of `effect` or `computed`, but ' +
-                    'the intent is unclear. The migration cannot safely migrate.',
-            };
-        case group_replacements.FieldIncompatibilityReason.OverriddenByDerivedClass:
-            return {
-                short: `The ${fieldName.single} cannot be migrated because the field is overridden by a subclass.`,
-                extra: 'The field in the subclass is not a signal, so migrating would break your build.',
-            };
-        case group_replacements.FieldIncompatibilityReason.ParentIsIncompatible:
-            return {
-                short: `This ${fieldName.single} is inherited from a superclass, but the parent cannot be migrated.`,
-                extra: 'Migrating this field would cause your build to fail.',
-            };
-        case group_replacements.FieldIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet:
-            return {
-                short: `This ${fieldName.single} is used in a control flow expression (e.g. \`@if\` or \`*ngIf\`) and ` +
-                    'migrating would break narrowing currently.',
-                extra: `In the future, Angular intends to support narrowing of signals.`,
-            };
-        case group_replacements.FieldIncompatibilityReason.RedeclaredViaDerivedClassInputsArray:
-            return {
-                short: `The ${fieldName.single} is overridden by a subclass that cannot be migrated.`,
-                extra: `The subclass overrides this ${fieldName.single} via the \`inputs\` array in @Directive/@Component. ` +
-                    'Migrating the field would break your build because the subclass field cannot be a signal.',
-            };
-        case group_replacements.FieldIncompatibilityReason.SignalInput__RequiredButNoGoodExplicitTypeExtractable:
-            return {
-                short: `Input is required, but the migration cannot determine a good type for the input.`,
-                extra: 'Consider adding an explicit type to make the migration possible.',
-            };
-        case group_replacements.FieldIncompatibilityReason.SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable:
-            return {
-                short: `Input is marked with a question mark. Migration could not determine a good type for the input.`,
-                extra: 'The migration needs to be able to resolve a type, so that it can include `undefined` in your type. ' +
-                    'Consider adding an explicit type to make the migration possible.',
-            };
-        case group_replacements.FieldIncompatibilityReason.SkippedViaConfigFilter:
-            return {
-                short: `This ${fieldName.single} is not part of the current migration scope.`,
-                extra: 'Skipped via migration config.',
-            };
-        case group_replacements.FieldIncompatibilityReason.SpyOnThatOverwritesField:
-            return {
-                short: 'A jasmine `spyOn` call spies on this field. This breaks with signals.',
-                extra: `Migration cannot safely migrate as "spyOn" writes to the ${fieldName.single}. ` +
-                    `Signal ${fieldName.plural} are readonly.`,
-            };
-        case group_replacements.FieldIncompatibilityReason.TypeConflictWithBaseClass:
-            return {
-                short: `This ${fieldName.single} overrides a field from a superclass, while the superclass ` +
-                    `field is not migrated.`,
-                extra: 'Migrating the field would break your build because of a type conflict.',
-            };
-        case group_replacements.FieldIncompatibilityReason.WriteAssignment:
-            return {
-                short: `Your application code writes to the ${fieldName.single}. This prevents migration.`,
-                extra: `Signal ${fieldName.plural} are readonly, so migrating would break your build.`,
-            };
-        case group_replacements.FieldIncompatibilityReason.OutsideOfMigrationScope:
-            return {
-                short: `This ${fieldName.single} is not part of any source files in your project.`,
-                extra: `The migration excludes ${fieldName.plural} if no source file declaring them was seen.`,
-            };
-    }
-}
-/**
- * Gets human-readable message information for the given class incompatibility.
- * This text will be used by the language service, or CLI-based migration.
- */
-function getMessageForClassIncompatibility(reason, fieldName) {
-    switch (reason) {
-        case group_replacements.ClassIncompatibilityReason.OwningClassReferencedInClassProperty:
-            return {
-                short: `Class of this ${fieldName.single} is referenced in the signature of another class.`,
-                extra: 'The other class is likely typed to expect a non-migrated field, so ' +
-                    'migration is skipped to not break your build.',
-            };
-        case group_replacements.ClassIncompatibilityReason.ClassManuallyInstantiated:
-            return {
-                short: `Class of this ${fieldName.single} is manually instantiated. ` +
-                    'This is discouraged and prevents migration',
-                extra: `Signal ${fieldName.plural} require a DI injection context. Manually instantiating ` +
-                    'breaks this requirement in some cases, so the migration is skipped.',
-            };
-    }
-}
-
-/**
  * Inserts a TODO for the incompatibility blocking the given node
  * from being migrated.
  */
@@ -1175,9 +1079,9 @@ function insertTodoForIncompatibility(node, programInfo, input) {
         return [];
     }
     const message = group_replacements.isFieldIncompatibility(incompatibility)
-        ? getMessageForFieldIncompatibility(incompatibility.reason, { single: 'input', plural: 'inputs' })
+        ? group_replacements.getMessageForFieldIncompatibility(incompatibility.reason, { single: 'input', plural: 'inputs' })
             .short
-        : getMessageForClassIncompatibility(incompatibility, { single: 'input', plural: 'inputs' }).short;
+        : group_replacements.getMessageForClassIncompatibility(incompatibility, { single: 'input', plural: 'inputs' }).short;
     const lines = cutStringToLineLimit(message, 70);
     return [
         insertPrecedingLine(node, programInfo, `// TODO: Skipped for migration because:`),
@@ -1346,31 +1250,6 @@ function executeMigrationPhase(host, knownInputs, result, info) {
     pass10_applyImportManager(importManager, result, sourceFiles, info);
 }
 
-/** Input reasons that cannot be ignored. */
-const nonIgnorableInputIncompatibilities = [
-    // Outside of scope inputs should not be migrated. E.g. references to inputs in `node_modules/`.
-    group_replacements.FieldIncompatibilityReason.OutsideOfMigrationScope,
-    // Explicitly filtered inputs cannot be skipped via best effort mode.
-    group_replacements.FieldIncompatibilityReason.SkippedViaConfigFilter,
-    // There is no good output for accessor inputs.
-    group_replacements.FieldIncompatibilityReason.Accessor,
-    // There is no good output for such inputs. We can't perform "conversion".
-    group_replacements.FieldIncompatibilityReason.SignalInput__RequiredButNoGoodExplicitTypeExtractable,
-    group_replacements.FieldIncompatibilityReason.SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable,
-];
-/** Filters ignorable input incompatibilities when best effort mode is enabled. */
-function filterIncompatibilitiesForBestEffortMode(knownInputs) {
-    knownInputs.knownInputIds.forEach(({ container: c }) => {
-        // All class incompatibilities are "filterable" right now.
-        c.incompatible = null;
-        for (const [key, i] of c.memberIncompatibility.entries()) {
-            if (!nonIgnorableInputIncompatibilities.includes(i.reason)) {
-                c.memberIncompatibility.delete(key);
-            }
-        }
-    });
-}
-
 /**
  * Tsurge migration for migrating Angular `@Input()` declarations to
  * signal inputs, with support for batch execution.
@@ -1436,7 +1315,7 @@ class SignalInputMigration extends group_replacements.TsurgeComplexMigration {
         // Filter best effort incompatibilities, so that the new filtered ones can
         // be accordingly respected in the merge phase.
         if (this.config.bestEffortMode) {
-            filterIncompatibilitiesForBestEffortMode(knownInputs);
+            group_replacements.filterIncompatibilitiesForBestEffortMode(knownInputs);
         }
         const unitData = getCompilationUnitMetadata(knownInputs);
         // Non-batch mode!
@@ -1473,7 +1352,7 @@ class SignalInputMigration extends group_replacements.TsurgeComplexMigration {
         // Incorporate global metadata into known inputs.
         populateKnownInputsFromGlobalData(knownInputs, globalMetadata);
         if (this.config.bestEffortMode) {
-            filterIncompatibilitiesForBestEffortMode(knownInputs);
+            group_replacements.filterIncompatibilitiesForBestEffortMode(knownInputs);
         }
         this.config.reportProgressFn?.(60, 'Collecting migration changes..');
         executeMigrationPhase(host, knownInputs, result, analysisDeps);
