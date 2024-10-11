@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-08b4a8a
+ * @license Angular v19.0.0-next.9+sha-fc6c76a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,11 +9,11 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var group_replacements = require('./group_replacements-e1b5cbf8.js');
+var group_replacements = require('./group_replacements-8c11682b.js');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-3b2ea20f.js');
-var program = require('./program-6534a30a.js');
+var checker = require('./checker-c62edf6c.js');
+var program = require('./program-74419e15.js');
 require('path');
 var assert = require('assert');
 var leading_space = require('./leading_space-d190b83b.js');

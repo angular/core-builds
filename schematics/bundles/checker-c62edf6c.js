@@ -1,14 +1,14 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-08b4a8a
+ * @license Angular v19.0.0-next.9+sha-fc6c76a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
 var ts = require('typescript');
-require('os');
 var p = require('path');
+require('os');
 var fs$1 = require('fs');
 var module$1 = require('module');
 var url = require('url');
@@ -29299,7 +29299,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.9+sha-08b4a8a');
+new Version('19.0.0-next.9+sha-fc6c76a');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -30647,7 +30647,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-3b2ea20f.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-c62edf6c.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -32797,13 +32797,16 @@ function createSourceSpan(node) {
 /**
  * Collate the factory and definition compiled results into an array of CompileResult objects.
  */
-function compileResults(fac, def, metadataStmt, propName, additionalFields, deferrableImports, debugInfo = null) {
+function compileResults(fac, def, metadataStmt, propName, additionalFields, deferrableImports, debugInfo = null, hmrInitializer = null) {
     const statements = def.statements;
     if (metadataStmt !== null) {
         statements.push(metadataStmt);
     }
     if (debugInfo !== null) {
         statements.push(debugInfo);
+    }
+    if (hmrInitializer !== null) {
+        statements.push(hmrInitializer);
     }
     const results = [
         fac,
@@ -32865,6 +32868,27 @@ function isAbstractClassDeclaration(clazz) {
     return ts__default["default"].canHaveModifiers(clazz) && clazz.modifiers !== undefined
         ? clazz.modifiers.some((mod) => mod.kind === ts__default["default"].SyntaxKind.AbstractKeyword)
         : false;
+}
+/**
+ * Attempts to generate a project-relative path
+ * @param sourceFile
+ * @param rootDirs
+ * @param compilerHost
+ * @returns
+ */
+function getProjectRelativePath(sourceFile, rootDirs, compilerHost) {
+    // Note: we need to pass both the file name and the root directories through getCanonicalFileName,
+    // because the root directories might've been passed through it already while the source files
+    // definitely have not. This can break the relative return value, because in some platforms
+    // getCanonicalFileName lowercases the path.
+    const filePath = compilerHost.getCanonicalFileName(sourceFile.fileName);
+    for (const rootDir of rootDirs) {
+        const rel = p.relative(compilerHost.getCanonicalFileName(rootDir), filePath);
+        if (!rel.startsWith('..')) {
+            return rel;
+        }
+    }
+    return null;
 }
 
 /**
@@ -44589,6 +44613,7 @@ exports.getContainingImportDeclaration = getContainingImportDeclaration;
 exports.getDefaultImportDeclaration = getDefaultImportDeclaration;
 exports.getFileSystem = getFileSystem;
 exports.getOriginNodeForDiagnostics = getOriginNodeForDiagnostics;
+exports.getProjectRelativePath = getProjectRelativePath;
 exports.getRootDirs = getRootDirs;
 exports.getSafePropertyAccessString = getSafePropertyAccessString;
 exports.getSourceFile = getSourceFile;
@@ -44597,6 +44622,7 @@ exports.getTemplateDiagnostics = getTemplateDiagnostics;
 exports.getXmlTagDefinition = getXmlTagDefinition;
 exports.hasInjectableFields = hasInjectableFields;
 exports.identifierOfNode = identifierOfNode;
+exports.ifStmt = ifStmt;
 exports.importExpr = importExpr;
 exports.isAbstractClassDeclaration = isAbstractClassDeclaration;
 exports.isAliasImportDeclaration = isAliasImportDeclaration;

@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-08b4a8a
+ * @license Angular v19.0.0-next.9+sha-fc6c76a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-3b2ea20f.js');
+var checker = require('./checker-c62edf6c.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -849,6 +849,40 @@ function compileClassDebugInfo(debugInfo) {
     return iife.callFn([]);
 }
 
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/** Compiles the HMR initializer expression. */
+function compileClassHmrInitializer(meta) {
+    const id = encodeURIComponent(`${meta.filePath}@${meta.className}`);
+    const timestamp = encodeURIComponent(meta.timestamp);
+    const url = `/@ng/component?c=${id}&t=${timestamp}`;
+    const moduleName = 'm';
+    const dataName = 'd';
+    // ɵɵreplaceMetadata(Comp, m.default);
+    const replaceMetadata = checker.importExpr(checker.Identifiers.replaceMetadata)
+        .callFn([meta.type, checker.variable(moduleName).prop('default')]);
+    // (m) => ɵɵreplaceMetadata(...)
+    const replaceCallback = checker.arrowFn([new checker.FnParam(moduleName)], replaceMetadata);
+    // import(url).then(() => replaceMetadata(...));
+    const dynamicImport = new checker.DynamicImportExpr(url).prop('then').callFn([replaceCallback]);
+    // (d) => { if (d.id === <id>) { replaceMetadata(...) } }
+    const listenerCallback = checker.arrowFn([new checker.FnParam(dataName)], [checker.ifStmt(checker.variable(dataName).prop('id').equals(checker.literal(id)), [dynamicImport.toStmt()])]);
+    // import.meta.hot
+    const hotRead = checker.variable('import').prop('meta').prop('hot');
+    // import.meta.hot.on('angular:component-update', () => ...);
+    const hotListener = hotRead
+        .clone()
+        .prop('on')
+        .callFn([checker.literal('angular:component-update'), listenerCallback]);
+    // import.meta.hot && import.meta.hot.on(...)
+    return checker.arrowFn([], [checker.devOnlyGuardedExpression(hotRead.and(hotListener)).toStmt()]).callFn([]);
+}
+
 /**
  * Every time we make a breaking change to the declaration interface or partial-linker behavior, we
  * must update this constant to prevent old partial-linkers from incorrectly processing the
@@ -864,7 +898,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-08b4a8a'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-fc6c76a'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -882,7 +916,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-08b4a8a'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-fc6c76a'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -977,7 +1011,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-08b4a8a'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-fc6c76a'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone) {
@@ -1396,7 +1430,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-08b4a8a'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-fc6c76a'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1431,7 +1465,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-08b4a8a'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-fc6c76a'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1482,7 +1516,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-08b4a8a'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-fc6c76a'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1515,7 +1549,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-08b4a8a'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-fc6c76a'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1566,7 +1600,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-08b4a8a'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-fc6c76a'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -5205,12 +5239,12 @@ function removeIdentifierReferences(node, names) {
     return result.transformed[0];
 }
 
-function extractClassDebugInfo(clazz, reflection, rootDirs, forbidOrphanRendering) {
+function extractClassDebugInfo(clazz, reflection, compilerHost, rootDirs, forbidOrphanRendering) {
     if (!reflection.isClass(clazz)) {
         return null;
     }
     const srcFile = clazz.getSourceFile();
-    const srcFileMaybeRelativePath = computeRelativePathIfPossible(srcFile.fileName, rootDirs);
+    const srcFileMaybeRelativePath = checker.getProjectRelativePath(srcFile, rootDirs, compilerHost);
     return {
         type: new checker.WrappedNodeExpr(clazz.name),
         className: checker.literal(clazz.name.getText()),
@@ -5218,19 +5252,6 @@ function extractClassDebugInfo(clazz, reflection, rootDirs, forbidOrphanRenderin
         lineNumber: checker.literal(srcFile.getLineAndCharacterOfPosition(clazz.name.pos).line + 1),
         forbidOrphanRendering,
     };
-}
-/**
- * Computes a source file path relative to the project root folder if possible, otherwise returns
- * null.
- */
-function computeRelativePathIfPossible(filePath, rootDirs) {
-    for (const rootDir of rootDirs) {
-        const rel = p__namespace.relative(rootDir, filePath);
-        if (!rel.startsWith('..')) {
-            return rel;
-        }
-    }
-    return null;
 }
 
 /**
@@ -9730,6 +9751,32 @@ class TsCreateProgramDriver {
     }
 }
 
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Extracts the metadata necessary to generate an HMR initializer.
+ */
+function extractHmrInitializerMeta(clazz, reflection, compilerHost, rootDirs) {
+    if (!reflection.isClass(clazz)) {
+        return null;
+    }
+    const sourceFile = clazz.getSourceFile();
+    const filePath = checker.getProjectRelativePath(sourceFile, rootDirs, compilerHost) ||
+        compilerHost.getCanonicalFileName(sourceFile.fileName);
+    const meta = {
+        type: new checker.WrappedNodeExpr(clazz.name),
+        className: clazz.name.text,
+        timestamp: Date.now() + '',
+        filePath,
+    };
+    return meta;
+}
+
 const EMPTY_ARRAY = [];
 const isUsedDirective = (decl) => decl.kind === checker.R3TemplateDependencyKind.Directive;
 const isUsedPipe = (decl) => decl.kind === checker.R3TemplateDependencyKind.Pipe;
@@ -9737,13 +9784,13 @@ const isUsedPipe = (decl) => decl.kind === checker.R3TemplateDependencyKind.Pipe
  * `DecoratorHandler` which handles the `@Component` annotation.
  */
 class ComponentDecoratorHandler {
-    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, dtsScopeReader, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone) {
+    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, compilerHost, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone, enableHmr) {
         this.reflector = reflector;
         this.evaluator = evaluator;
         this.metaRegistry = metaRegistry;
         this.metaReader = metaReader;
         this.scopeReader = scopeReader;
-        this.dtsScopeReader = dtsScopeReader;
+        this.compilerHost = compilerHost;
         this.scopeRegistry = scopeRegistry;
         this.typeCheckScopeRegistry = typeCheckScopeRegistry;
         this.resourceRegistry = resourceRegistry;
@@ -9779,6 +9826,7 @@ class ComponentDecoratorHandler {
         this.jitDeclarationRegistry = jitDeclarationRegistry;
         this.i18nPreserveSignificantWhitespace = i18nPreserveSignificantWhitespace;
         this.strictStandalone = strictStandalone;
+        this.enableHmr = enableHmr;
         this.literalCache = new Map();
         this.elementSchemaRegistry = new checker.DomElementSchemaRegistry();
         /**
@@ -10200,8 +10248,11 @@ class ComponentDecoratorHandler {
                 classMetadata: this.includeClassMetadata
                     ? extractClassMetadata(node, this.reflector, this.isCore, this.annotateForClosureCompiler, (dec) => transformDecoratorResources(dec, component, styles, template))
                     : null,
-                classDebugInfo: extractClassDebugInfo(node, this.reflector, this.rootDirs, 
+                classDebugInfo: extractClassDebugInfo(node, this.reflector, this.compilerHost, this.rootDirs, 
                 /* forbidOrphanRenderering */ this.forbidOrphanRendering),
+                hmrInitializerMeta: this.enableHmr
+                    ? extractHmrInitializerMeta(node, this.reflector, this.compilerHost, this.rootDirs)
+                    : null,
                 template,
                 providersRequiringFactory,
                 viewProvidersRequiringFactory,
@@ -10731,8 +10782,11 @@ class ComponentDecoratorHandler {
         const debugInfo = analysis.classDebugInfo !== null
             ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
+        const hmrInitializer = analysis.hmrInitializerMeta !== null
+            ? compileClassHmrInitializer(analysis.hmrInitializerMeta).toStmt()
+            : null;
         const deferrableImports = this.deferredSymbolTracker.getDeferrableImportDecls();
-        return checker.compileResults(fac, def, classMetadata, 'ɵcmp', inputTransformFields, deferrableImports, debugInfo);
+        return checker.compileResults(fac, def, classMetadata, 'ɵcmp', inputTransformFields, deferrableImports, debugInfo, hmrInitializer);
     }
     compilePartial(node, analysis, resolution) {
         if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
@@ -10783,8 +10837,11 @@ class ComponentDecoratorHandler {
         const debugInfo = analysis.classDebugInfo !== null
             ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
+        const hmrInitializer = analysis.hmrInitializerMeta !== null
+            ? compileClassHmrInitializer(analysis.hmrInitializerMeta).toStmt()
+            : null;
         const deferrableImports = this.deferredSymbolTracker.getDeferrableImportDecls();
-        return checker.compileResults(fac, def, classMetadata, 'ɵcmp', inputTransformFields, deferrableImports, debugInfo);
+        return checker.compileResults(fac, def, classMetadata, 'ɵcmp', inputTransformFields, deferrableImports, debugInfo, hmrInitializer);
     }
     /**
      * Locates defer blocks in case scope information is not available.
@@ -19307,7 +19364,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0-next.9+sha-08b4a8a` usually means that core is at head so it supports
+    // A version of `19.0.0-next.9+sha-fc6c76a` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -19437,6 +19494,7 @@ class NgCompiler {
         this.enableBlockSyntax = options['_enableBlockSyntax'] ?? true;
         this.enableLetSyntax = options['_enableLetSyntax'] ?? true;
         this.angularCoreVersion = options['_angularCoreVersion'] ?? null;
+        this.enableHmr = !!options['_enableHmr'];
         this.constructionDiagnostics.push(...this.adapter.constructionDiagnostics, ...verifyCompatibleTypeCheckOptions(this.options));
         this.currentProgram = inputProgram;
         this.closureCompilerEnabled = !!this.options.annotateForClosureCompiler;
@@ -20182,7 +20240,7 @@ class NgCompiler {
         const jitDeclarationRegistry = new JitDeclarationRegistry();
         // Set up the IvyCompilation, which manages state for the Ivy transformer.
         const handlers = [
-            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, depScopeReader, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone),
+            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, this.adapter, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone, this.enableHmr),
             // TODO(alxhub): understand why the cast here is necessary (something to do with `null`
             // not being assignable to `unknown` when wrapped in `Readonly`).
             new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, importTracker, supportTestBed, compilationMode, jitDeclarationRegistry, !!this.options.strictStandalone),

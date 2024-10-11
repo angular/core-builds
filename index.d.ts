@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.9+sha-08b4a8a
+ * @license Angular v19.0.0-next.9+sha-fc6c76a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13061,6 +13061,14 @@ export declare function ɵgenerateStandaloneInDeclarationsError(type: Type<any>,
  * dependencies. Otherwise - this function returns `null`.
  */
 export declare function ɵgetAsyncClassMetadataFn(type: Type<unknown>): (() => Promise<Array<Type<unknown>>>) | null;
+
+/**
+ * Gets the class name of the closest component to a node.
+ * Warning! this function will return minified names if the name of the component is minified. The
+ * consumer of the function is responsible for resolving the minified name to its original name.
+ * @param node Node from which to start the search.
+ */
+export declare function ɵgetClosestComponentName(node: Node): string | null;
 
 /**
  * Retrieves all defer blocks in a given LView.
