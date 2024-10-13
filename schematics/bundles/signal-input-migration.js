@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-f84e8dd
+ * @license Angular v19.0.0-next.9+sha-ba43408
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,15 +9,15 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var group_replacements = require('./group_replacements-98198532.js');
+var group_replacements = require('./group_replacements-c1e7bc14.js');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-c62edf6c.js');
-var program = require('./program-74419e15.js');
+var checker = require('./checker-f05fd74f.js');
+var program = require('./program-bfad8882.js');
 require('path');
 var assert = require('assert');
-var leading_space = require('./leading_space-d190b83b.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
+require('./leading_space-d190b83b.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -109,11 +109,6 @@ function getInputDescriptor(hostOrInfo, node) {
         key: `${id}@@${className}@@${node.name.text}`,
         node,
     };
-}
-/** Whether the given value is an input descriptor. */
-function isInputDescriptor(v) {
-    return (v.key !== undefined &&
-        v.node !== undefined);
 }
 
 /**
@@ -442,7 +437,12 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
     let initialValue = node.initializer;
     let isUndefinedInitialValue = node.initializer === undefined ||
         (ts__default["default"].isIdentifier(node.initializer) && node.initializer.text === 'undefined');
-    const loosePropertyInitializationWithStrictNullChecks = options.strict !== true && options.strictPropertyInitialization !== true;
+    const strictNullChecksEnabled = options.strict === true || options.strictNullChecks === true;
+    const strictPropertyInitialization = options.strict === true || options.strictPropertyInitialization === true;
+    // Shorthand should never be used, as would expand the type of `T` to be `T|undefined`.
+    // This wouldn't matter with strict null checks disabled, but it can break if this is
+    // a library that is later consumed with strict null checks enabled.
+    const avoidTypeExpansion = !strictNullChecksEnabled;
     // If an input can be required, due to the non-null assertion on the property,
     // make it required if there is no initializer.
     if (node.exclamationToken !== undefined && initialValue === undefined) {
@@ -456,7 +456,7 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
     if (!metadata.required &&
         node.type !== undefined &&
         isUndefinedInitialValue &&
-        !loosePropertyInitializationWithStrictNullChecks) {
+        !avoidTypeExpansion) {
         preferShorthandIfPossible = { originalType: node.type };
     }
     // If the input is using `@Input() bla?: string;` with the "optional question mark",
@@ -489,8 +489,8 @@ function prepareAndCheckForConversion(node, metadata, checker, options) {
     // is disabled, while strict null checks are enabled; then we know that `undefined`
     // cannot be used as initial value, nor do we want to expand the input's type magically.
     // Instead, we detect this case and migrate to `undefined!` which leaves the behavior unchanged.
-    // TODO: This would be a good spot for a clean-up TODO.
-    if (loosePropertyInitializationWithStrictNullChecks &&
+    if (strictNullChecksEnabled &&
+        !strictPropertyInitialization &&
         node.initializer === undefined &&
         node.type !== undefined &&
         node.questionToken === undefined &&
@@ -900,46 +900,6 @@ function populateKnownInputsFromGlobalData(knownInputs, globalData) {
     }
 }
 
-/**
- * Inserts a leading string for the given node, respecting
- * indentation of the given anchor node.
- *
- * Useful for inserting TODOs.
- */
-function insertPrecedingLine(node, info, text) {
-    const leadingSpace = leading_space.getLeadingLineWhitespaceOfNode(node);
-    return new group_replacements.Replacement(group_replacements.projectFile(node.getSourceFile(), info), new group_replacements.TextUpdate({
-        position: node.getStart(),
-        end: node.getStart(),
-        toInsert: `${text}\n${leadingSpace}`,
-    }));
-}
-
-/**
- * Cuts the given string into lines basing around the specified
- * line length limit. This function breaks the string on a per-word basis.
- */
-function cutStringToLineLimit(str, limit) {
-    const words = str.split(' ');
-    const chunks = [];
-    let chunkIdx = 0;
-    while (words.length) {
-        // New line if we exceed limit.
-        if (chunks[chunkIdx] !== undefined && chunks[chunkIdx].length > limit) {
-            chunkIdx++;
-        }
-        // Ensure line is initialized for the given index.
-        if (chunks[chunkIdx] === undefined) {
-            chunks[chunkIdx] = '';
-        }
-        const word = words.shift();
-        const needsSpace = chunks[chunkIdx].length > 0;
-        // Insert word. Add space before, if the line already contains text.
-        chunks[chunkIdx] += `${needsSpace ? ' ' : ''}${word}`;
-    }
-    return chunks;
-}
-
 // TODO: Consider initializations inside the constructor. Those are not migrated right now
 // though, as they are writes.
 /**
@@ -1021,7 +981,7 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
     const newPropertyText = result.printer.printNode(ts__default["default"].EmitHint.Unspecified, newNode, node.getSourceFile());
     const replacements = [];
     if (leadingTodoText !== null) {
-        replacements.push(insertPrecedingLine(node, info, '// TODO: Notes from signal input migration:'), ...cutStringToLineLimit(leadingTodoText, 70).map((line) => insertPrecedingLine(node, info, `//  ${line}`)));
+        replacements.push(group_replacements.insertPrecedingLine(node, info, '// TODO: Notes from signal input migration:'), ...group_replacements.cutStringToLineLimit(leadingTodoText, 70).map((line) => group_replacements.insertPrecedingLine(node, info, `//  ${line}`)));
     }
     replacements.push(new group_replacements.Replacement(group_replacements.projectFile(node.getSourceFile(), info), new group_replacements.TextUpdate({
         position: node.getStart(),
@@ -1063,33 +1023,6 @@ function extractTransformOfInput(transform, resolvedType, checker) {
 }
 
 /**
- * Inserts a TODO for the incompatibility blocking the given node
- * from being migrated.
- */
-function insertTodoForIncompatibility(node, programInfo, input) {
-    const incompatibility = input.container.getInputMemberIncompatibility(input.descriptor);
-    if (incompatibility === null) {
-        return [];
-    }
-    // If an input is skipped via config filter or outside migration scope, do not
-    // insert TODOs, as this could results in lots of unnecessary comments.
-    if (group_replacements.isFieldIncompatibility(incompatibility) &&
-        (incompatibility.reason === group_replacements.FieldIncompatibilityReason.SkippedViaConfigFilter ||
-            incompatibility.reason === group_replacements.FieldIncompatibilityReason.OutsideOfMigrationScope)) {
-        return [];
-    }
-    const message = group_replacements.isFieldIncompatibility(incompatibility)
-        ? group_replacements.getMessageForFieldIncompatibility(incompatibility.reason, { single: 'input', plural: 'inputs' })
-            .short
-        : group_replacements.getMessageForClassIncompatibility(incompatibility, { single: 'input', plural: 'inputs' }).short;
-    const lines = cutStringToLineLimit(message, 70);
-    return [
-        insertPrecedingLine(node, programInfo, `// TODO: Skipped for migration because:`),
-        ...lines.map((line) => insertPrecedingLine(node, programInfo, `//  ${line}`)),
-    ];
-}
-
-/**
  * Phase that migrates `@Input()` declarations to signal inputs and
  * manages imports within the given file.
  */
@@ -1101,9 +1034,13 @@ function pass6__migrateInputDeclarations(host, checker, result, knownInputs, imp
         const inputInfo = knownInputs.get(input);
         // Do not migrate incompatible inputs.
         if (inputInfo.isIncompatible()) {
+            const incompatibilityReason = inputInfo.container.getInputMemberIncompatibility(input);
             // Add a TODO for the incompatible input, if desired.
-            if (host.config.insertTodosForSkippedFields) {
-                result.replacements.push(...insertTodoForIncompatibility(input.node, info, inputInfo));
+            if (incompatibilityReason !== null && host.config.insertTodosForSkippedFields) {
+                result.replacements.push(...group_replacements.insertTodoForIncompatibility(input.node, info, incompatibilityReason, {
+                    single: 'input',
+                    plural: 'inputs',
+                }));
             }
             filesWithIncompatibleInputs.add(sf);
             continue;
@@ -1250,6 +1187,19 @@ function executeMigrationPhase(host, knownInputs, result, info) {
     pass10_applyImportManager(importManager, result, sourceFiles, info);
 }
 
+/** Filters ignorable input incompatibilities when best effort mode is enabled. */
+function filterIncompatibilitiesForBestEffortMode(knownInputs) {
+    knownInputs.knownInputIds.forEach(({ container: c }) => {
+        // All class incompatibilities are "filterable" right now.
+        c.incompatible = null;
+        for (const [key, i] of c.memberIncompatibility.entries()) {
+            if (!group_replacements.nonIgnorableFieldIncompatibilities.includes(i.reason)) {
+                c.memberIncompatibility.delete(key);
+            }
+        }
+    });
+}
+
 /**
  * Tsurge migration for migrating Angular `@Input()` declarations to
  * signal inputs, with support for batch execution.
@@ -1315,7 +1265,7 @@ class SignalInputMigration extends group_replacements.TsurgeComplexMigration {
         // Filter best effort incompatibilities, so that the new filtered ones can
         // be accordingly respected in the merge phase.
         if (this.config.bestEffortMode) {
-            group_replacements.filterIncompatibilitiesForBestEffortMode(knownInputs);
+            filterIncompatibilitiesForBestEffortMode(knownInputs);
         }
         const unitData = getCompilationUnitMetadata(knownInputs);
         // Non-batch mode!
@@ -1352,7 +1302,7 @@ class SignalInputMigration extends group_replacements.TsurgeComplexMigration {
         // Incorporate global metadata into known inputs.
         populateKnownInputsFromGlobalData(knownInputs, globalMetadata);
         if (this.config.bestEffortMode) {
-            group_replacements.filterIncompatibilitiesForBestEffortMode(knownInputs);
+            filterIncompatibilitiesForBestEffortMode(knownInputs);
         }
         this.config.reportProgressFn?.(60, 'Collecting migration changes..');
         executeMigrationPhase(host, knownInputs, result, analysisDeps);
@@ -1421,15 +1371,6 @@ function filterInputsViaConfig(result, knownInputs, config) {
             });
         }
     }
-    result.references = result.references.filter((reference) => {
-        if (isInputDescriptor(reference.target)) {
-            // Only migrate the reference if the target is NOT skipped.
-            return !skippedInputs.has(reference.target.key);
-        }
-        // Class references may be migrated. This is up to the logic handling
-        // the class reference. E.g. it may not migrate if any member is incompatible.
-        return true;
-    });
 }
 function createMigrationHost(info, config) {
     return new MigrationHost(/* isMigratingCore */ false, info, config, info.sourceFiles);

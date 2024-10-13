@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-f84e8dd
+ * @license Angular v19.0.0-next.9+sha-ba43408
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,14 +10,15 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var group_replacements = require('./group_replacements-98198532.js');
+var group_replacements = require('./group_replacements-c1e7bc14.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-c62edf6c.js');
+var checker = require('./checker-f05fd74f.js');
 require('path');
-var program = require('./program-74419e15.js');
+var program = require('./program-bfad8882.js');
 var assert = require('assert');
 require('@angular-devkit/core');
+require('./leading_space-d190b83b.js');
 require('node:path/posix');
 require('fs');
 require('module');
@@ -238,6 +239,9 @@ function getUniqueIDForClassProperty(property, info) {
     if (!ts__default["default"].isClassDeclaration(property.parent) || property.parent.name === undefined) {
         return null;
     }
+    if (property.name === undefined) {
+        return null;
+    }
     const id = group_replacements.projectFile(property.getSourceFile(), info).id.replace(/\.d\.ts$/, '.ts');
     // Note: If a class is nested, there could be an ID clash.
     // This is highly unlikely though, and this is not a problem because
@@ -252,7 +256,7 @@ function getUniqueIDForClassProperty(property, info) {
  * returns its resolved metadata if possible.
  */
 function extractSourceQueryDefinition(node, reflector, evaluator, info) {
-    if (!ts__default["default"].isPropertyDeclaration(node) ||
+    if ((!ts__default["default"].isPropertyDeclaration(node) && !ts__default["default"].isAccessor(node)) ||
         !ts__default["default"].isClassDeclaration(node.parent) ||
         node.parent.name === undefined ||
         !ts__default["default"].isIdentifier(node.name)) {
@@ -284,13 +288,23 @@ function extractSourceQueryDefinition(node, reflector, evaluator, info) {
     else {
         throw new Error('Unexpected query decorator detected.');
     }
-    const queryInfo = program.extractDecoratorQueryMetadata(node, decorator.name, decorator.args ?? [], node.name.text, reflector, evaluator);
+    let queryInfo = null;
+    try {
+        queryInfo = program.extractDecoratorQueryMetadata(node, decorator.name, decorator.args ?? [], node.name.text, reflector, evaluator);
+    }
+    catch (e) {
+        if (!(e instanceof checker.FatalDiagnosticError)) {
+            throw e;
+        }
+        console.error(`Skipping query: ${e.node.getSourceFile().fileName}: ${e.toString()}`);
+        return null;
+    }
     return {
         id,
         kind,
         args: decorator.args ?? [],
         queryInfo,
-        node,
+        node: node,
     };
 }
 
@@ -309,10 +323,19 @@ function markFieldIncompatibleInMetadata(data, id, reason) {
         existing.fieldReason = group_replacements.pickFieldIncompatibility({ reason, context: null }, { reason: existing.fieldReason, context: null }).reason;
     }
 }
+function filterBestEffortIncompatibilities(knownQueries) {
+    for (const query of Object.values(knownQueries.globalMetadata.problematicQueries)) {
+        if (query.fieldReason !== null &&
+            !group_replacements.nonIgnorableFieldIncompatibilities.includes(query.fieldReason)) {
+            query.fieldReason = null;
+        }
+    }
+}
 
 class KnownQueries {
-    constructor(info, globalMetadata) {
+    constructor(info, config, globalMetadata) {
         this.info = info;
+        this.config = config;
         this.globalMetadata = globalMetadata;
         this.classToQueryFields = new Map();
         this.knownQueryIDs = new Map();
@@ -338,6 +361,15 @@ class KnownQueries {
             node: queryField,
         });
         this.knownQueryIDs.set(id, { key: id, node: queryField });
+        const descriptor = { key: id, node: queryField };
+        const file = group_replacements.projectFile(queryField.getSourceFile(), this.info);
+        if (this.config.shouldMigrateQuery !== undefined &&
+            !this.config.shouldMigrateQuery(descriptor, file)) {
+            this.markFieldIncompatible(descriptor, {
+                context: null,
+                reason: group_replacements.FieldIncompatibilityReason.SkippedViaConfigFilter,
+            });
+        }
     }
     attemptRetrieveDescriptorFromSymbol(symbol) {
         const descriptor = getClassFieldDescriptorForSymbol(symbol, this.info);
@@ -493,8 +525,11 @@ function checkNonTsReferenceCallsField(ref, fieldName) {
     return potentialCall;
 }
 
-function removeQueryListToArrayCall(ref, info, globalMetadata, replacements) {
+function removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, replacements) {
     if (!group_replacements.isHostBindingReference(ref) && !group_replacements.isTemplateReference(ref) && !group_replacements.isTsReference(ref)) {
+        return;
+    }
+    if (knownQueries.isFieldIncompatible(ref.target)) {
         return;
     }
     if (!globalMetadata.knownQueryFields[ref.target.key]?.isMulti) {
@@ -530,8 +565,11 @@ function removeQueryListToArrayCall(ref, info, globalMetadata, replacements) {
     })));
 }
 
-function replaceQueryListGetCall(ref, info, globalMetadata, replacements) {
+function replaceQueryListGetCall(ref, info, globalMetadata, knownQueries, replacements) {
     if (!group_replacements.isHostBindingReference(ref) && !group_replacements.isTemplateReference(ref) && !group_replacements.isTsReference(ref)) {
+        return;
+    }
+    if (knownQueries.isFieldIncompatible(ref.target)) {
         return;
     }
     if (!globalMetadata.knownQueryFields[ref.target.key]?.isMulti) {
@@ -597,8 +635,11 @@ const mapping = new Map([
     ['first', 'at(0)!'],
     ['last', 'at(-1)!'],
 ]);
-function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, replacements) {
+function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, knownQueries, replacements) {
     if (!group_replacements.isHostBindingReference(ref) && !group_replacements.isTemplateReference(ref) && !group_replacements.isTsReference(ref)) {
+        return;
+    }
+    if (knownQueries.isFieldIncompatible(ref.target)) {
         return;
     }
     if (!globalMetadata.knownQueryFields[ref.target.key]?.isMulti) {
@@ -661,6 +702,8 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
                     node: extractedQuery.node,
                 };
                 const containingFile = group_replacements.projectFile(descriptor.node.getSourceFile(), info);
+                // If we have a config filter function, use it here for later
+                // perf-boosted reference lookups. Useful in non-batch mode.
                 if (this.config.shouldMigrateQuery === undefined ||
                     this.config.shouldMigrateQuery(descriptor, containingFile)) {
                     classesWithFilteredQueries.add(extractedQuery.node.parent);
@@ -672,6 +715,9 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
                     fieldName: extractedQuery.queryInfo.propertyName,
                     isMulti: extractedQuery.queryInfo.first === false,
                 };
+                if (ts__default["default"].isAccessor(extractedQuery.node)) {
+                    res.potentialProblematicQueries[extractedQuery.id] = group_replacements.FieldIncompatibilityReason.Accessor;
+                }
             }
         };
         groupedAstVisitor.register(findQueryDefinitionsVisitor);
@@ -781,13 +827,9 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
         const filesWithSourceQueries = new Map();
         const filesWithIncompleteMigration = new Map();
         const filesWithQueryListOutsideOfDeclarations = new WeakSet();
-        const knownQueries = new KnownQueries(info, globalMetadata);
+        const knownQueries = new KnownQueries(info, this.config, globalMetadata);
         const referenceResult = { references: [] };
         const sourceQueries = [];
-        const isMigratedQuery = (descriptor) => globalMetadata.knownQueryFields[descriptor.key] !== undefined &&
-            globalMetadata.problematicQueries[descriptor.key] === undefined &&
-            (this.config.shouldMigrateQuery === undefined ||
-                this.config.shouldMigrateQuery(descriptor, group_replacements.projectFile(descriptor.node.getSourceFile(), info)));
         // Detect all queries in this unit.
         const queryWholeProgramVisitor = (node) => {
             // Detect all SOURCE queries and migrate them, if possible.
@@ -798,7 +840,8 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
                 return;
             }
             // Detect OTHER queries, inside `.d.ts`. Needed for reference resolution below.
-            if (ts__default["default"].isPropertyDeclaration(node)) {
+            if (ts__default["default"].isPropertyDeclaration(node) ||
+                (ts__default["default"].isAccessor(node) && ts__default["default"].isClassDeclaration(node.parent))) {
                 const classFieldID = getUniqueIDForClassProperty(node, info);
                 if (classFieldID !== null && globalMetadata.knownQueryFields[classFieldID] !== undefined) {
                     knownQueries.registerQueryField(node, classFieldID);
@@ -842,25 +885,37 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
             isClassWithKnownFields: (clazz) => knownQueries.getQueryFieldsOfClass(clazz) !== undefined,
         });
         this.config.reportProgressFn?.(80, 'Migrating queries..');
+        if (this.config.bestEffortMode) {
+            filterBestEffortIncompatibilities(knownQueries);
+        }
         // Migrate declarations.
         for (const extractedQuery of sourceQueries) {
             const node = extractedQuery.node;
             const sf = node.getSourceFile();
             const descriptor = { key: extractedQuery.id, node: extractedQuery.node };
-            if (!isMigratedQuery(descriptor)) {
-                updateFileState(filesWithSourceQueries, sf, extractedQuery.kind);
+            const incompatibility = knownQueries.getIncompatibilityForField(descriptor);
+            updateFileState(filesWithSourceQueries, sf, extractedQuery.kind);
+            if (incompatibility !== null) {
+                // Add a TODO for the incompatible query, if desired.
+                if (this.config.insertTodosForSkippedFields) {
+                    replacements.push(...group_replacements.insertTodoForIncompatibility(node, info, incompatibility, {
+                        single: 'query',
+                        plural: 'queries',
+                    }));
+                }
                 updateFileState(filesWithIncompleteMigration, sf, extractedQuery.kind);
                 continue;
             }
-            updateFileState(filesWithSourceQueries, sf, extractedQuery.kind);
             replacements.push(...computeReplacementsToMigrateQuery(node, extractedQuery, importManager, info, printer));
         }
         // Migrate references.
         const referenceMigrationHost = {
             printer,
             replacements,
-            shouldMigrateReferencesToField: (field) => isMigratedQuery(field),
-            shouldMigrateReferencesToClass: (clazz) => !!knownQueries.getQueryFieldsOfClass(clazz)?.some((q) => isMigratedQuery(q)),
+            shouldMigrateReferencesToField: (field) => !knownQueries.isFieldIncompatible(field),
+            shouldMigrateReferencesToClass: (clazz) => !!knownQueries
+                .getQueryFieldsOfClass(clazz)
+                ?.some((q) => !knownQueries.isFieldIncompatible(q)),
         };
         group_replacements.migrateTypeScriptReferences(referenceMigrationHost, referenceResult.references, checker$1, info);
         migrateTemplateReferences(referenceMigrationHost, referenceResult.references);
@@ -868,9 +923,9 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
         group_replacements.migrateTypeScriptTypeReferences(referenceMigrationHost, referenceResult.references, importManager, info);
         // Fix problematic calls, like `QueryList#toArray`, or `QueryList#get`.
         for (const ref of referenceResult.references) {
-            removeQueryListToArrayCall(ref, info, globalMetadata, replacements);
-            replaceQueryListGetCall(ref, info, globalMetadata, replacements);
-            replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, replacements);
+            removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, replacements);
+            replaceQueryListGetCall(ref, info, globalMetadata, knownQueries, replacements);
+            replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, knownQueries, replacements);
         }
         // Remove imports if possible.
         for (const [file, types] of filesWithSourceQueries) {

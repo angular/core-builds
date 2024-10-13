@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-f84e8dd
+ * @license Angular v19.0.0-next.9+sha-ba43408
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8,10 +8,11 @@
 
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-c62edf6c.js');
-var program = require('./program-74419e15.js');
+var checker = require('./checker-f05fd74f.js');
+var program = require('./program-bfad8882.js');
 require('path');
 var assert = require('assert');
+var leading_space = require('./leading_space-d190b83b.js');
 var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 
@@ -273,6 +274,18 @@ exports.FieldIncompatibilityReason = void 0;
     FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 12] = "OutsideOfMigrationScope";
     FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 13] = "SkippedViaConfigFilter";
 })(exports.FieldIncompatibilityReason || (exports.FieldIncompatibilityReason = {}));
+/** Field reasons that cannot be ignored. */
+const nonIgnorableFieldIncompatibilities = [
+    // Outside of scope fields should not be migrated. E.g. references to inputs in `node_modules/`.
+    exports.FieldIncompatibilityReason.OutsideOfMigrationScope,
+    // Explicitly filtered fields cannot be skipped via best effort mode.
+    exports.FieldIncompatibilityReason.SkippedViaConfigFilter,
+    // There is no good output for accessor fields.
+    exports.FieldIncompatibilityReason.Accessor,
+    // There is no good output for such inputs. We can't perform "conversion".
+    exports.FieldIncompatibilityReason.SignalInput__RequiredButNoGoodExplicitTypeExtractable,
+    exports.FieldIncompatibilityReason.SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable,
+];
 /** Reasons why a whole class and its fields cannot be migrated. */
 exports.ClassIncompatibilityReason = void 0;
 (function (ClassIncompatibilityReason) {
@@ -29422,7 +29435,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.9+sha-f84e8dd');
+new Version('19.0.0-next.9+sha-ba43408');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30525,6 +30538,46 @@ function removeFromUnionIfPossible(union, filter) {
 }
 
 /**
+ * Inserts a leading string for the given node, respecting
+ * indentation of the given anchor node.
+ *
+ * Useful for inserting TODOs.
+ */
+function insertPrecedingLine(node, info, text) {
+    const leadingSpace = leading_space.getLeadingLineWhitespaceOfNode(node);
+    return new Replacement(projectFile(node.getSourceFile(), info), new TextUpdate({
+        position: node.getStart(),
+        end: node.getStart(),
+        toInsert: `${text}\n${leadingSpace}`,
+    }));
+}
+
+/**
+ * Cuts the given string into lines basing around the specified
+ * line length limit. This function breaks the string on a per-word basis.
+ */
+function cutStringToLineLimit(str, limit) {
+    const words = str.split(' ');
+    const chunks = [];
+    let chunkIdx = 0;
+    while (words.length) {
+        // New line if we exceed limit.
+        if (chunks[chunkIdx] !== undefined && chunks[chunkIdx].length > limit) {
+            chunkIdx++;
+        }
+        // Ensure line is initialized for the given index.
+        if (chunks[chunkIdx] === undefined) {
+            chunks[chunkIdx] = '';
+        }
+        const word = words.shift();
+        const needsSpace = chunks[chunkIdx].length > 0;
+        // Insert word. Add space before, if the line already contains text.
+        chunks[chunkIdx] += `${needsSpace ? ' ' : ''}${word}`;
+    }
+    return chunks;
+}
+
+/**
  * Gets human-readable message information for the given field incompatibility.
  * This text will be used by the language service, or CLI-based migration.
  */
@@ -30623,6 +30676,28 @@ function getMessageForClassIncompatibility(reason, fieldName) {
                     'breaks this requirement in some cases, so the migration is skipped.',
             };
     }
+}
+
+/**
+ * Inserts a TODO for the incompatibility blocking the given node
+ * from being migrated.
+ */
+function insertTodoForIncompatibility(node, programInfo, incompatibility, fieldName) {
+    // If a field is skipped via config filter or outside migration scope, do not
+    // insert TODOs, as this could results in lots of unnecessary comments.
+    if (isFieldIncompatibility(incompatibility) &&
+        (incompatibility.reason === exports.FieldIncompatibilityReason.SkippedViaConfigFilter ||
+            incompatibility.reason === exports.FieldIncompatibilityReason.OutsideOfMigrationScope)) {
+        return [];
+    }
+    const message = isFieldIncompatibility(incompatibility)
+        ? getMessageForFieldIncompatibility(incompatibility.reason, fieldName).short
+        : getMessageForClassIncompatibility(incompatibility, fieldName).short;
+    const lines = cutStringToLineLimit(message, 70);
+    return [
+        insertPrecedingLine(node, programInfo, `// TODO: Skipped for migration because:`),
+        ...lines.map((line) => insertPrecedingLine(node, programInfo, `//  ${line}`)),
+    ];
 }
 
 /**
@@ -31489,31 +31564,6 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
     }
 }
 
-/** Input reasons that cannot be ignored. */
-const nonIgnorableInputIncompatibilities = [
-    // Outside of scope inputs should not be migrated. E.g. references to inputs in `node_modules/`.
-    exports.FieldIncompatibilityReason.OutsideOfMigrationScope,
-    // Explicitly filtered inputs cannot be skipped via best effort mode.
-    exports.FieldIncompatibilityReason.SkippedViaConfigFilter,
-    // There is no good output for accessor inputs.
-    exports.FieldIncompatibilityReason.Accessor,
-    // There is no good output for such inputs. We can't perform "conversion".
-    exports.FieldIncompatibilityReason.SignalInput__RequiredButNoGoodExplicitTypeExtractable,
-    exports.FieldIncompatibilityReason.SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable,
-];
-/** Filters ignorable input incompatibilities when best effort mode is enabled. */
-function filterIncompatibilitiesForBestEffortMode(knownInputs) {
-    knownInputs.knownInputIds.forEach(({ container: c }) => {
-        // All class incompatibilities are "filterable" right now.
-        c.incompatible = null;
-        for (const [key, i] of c.memberIncompatibility.entries()) {
-            if (!nonIgnorableInputIncompatibilities.includes(i.reason)) {
-                c.memberIncompatibility.delete(key);
-            }
-        }
-    });
-}
-
 /**
  * Angular compiler file system implementation that leverages an
  * CLI schematic virtual file tree.
@@ -31684,10 +31734,12 @@ exports.checkInheritanceOfKnownFields = checkInheritanceOfKnownFields;
 exports.confirmAsSerializable = confirmAsSerializable;
 exports.createFindAllSourceFileReferencesVisitor = createFindAllSourceFileReferencesVisitor;
 exports.createNgtscProgram = createNgtscProgram;
-exports.filterIncompatibilitiesForBestEffortMode = filterIncompatibilitiesForBestEffortMode;
+exports.cutStringToLineLimit = cutStringToLineLimit;
 exports.getMessageForClassIncompatibility = getMessageForClassIncompatibility;
 exports.getMessageForFieldIncompatibility = getMessageForFieldIncompatibility;
 exports.groupReplacementsByFile = groupReplacementsByFile;
+exports.insertPrecedingLine = insertPrecedingLine;
+exports.insertTodoForIncompatibility = insertTodoForIncompatibility;
 exports.isFieldIncompatibility = isFieldIncompatibility;
 exports.isHostBindingReference = isHostBindingReference;
 exports.isInputContainerNode = isInputContainerNode;
@@ -31695,6 +31747,7 @@ exports.isTemplateReference = isTemplateReference;
 exports.isTsReference = isTsReference;
 exports.migrateTypeScriptReferences = migrateTypeScriptReferences;
 exports.migrateTypeScriptTypeReferences = migrateTypeScriptTypeReferences;
+exports.nonIgnorableFieldIncompatibilities = nonIgnorableFieldIncompatibilities;
 exports.pickFieldIncompatibility = pickFieldIncompatibility;
 exports.projectFile = projectFile;
 exports.removeFromUnionIfPossible = removeFromUnionIfPossible;

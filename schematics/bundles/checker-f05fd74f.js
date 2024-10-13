@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-f84e8dd
+ * @license Angular v19.0.0-next.9+sha-ba43408
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29299,7 +29299,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.9+sha-f84e8dd');
+new Version('19.0.0-next.9+sha-ba43408');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -29546,7 +29546,9 @@ class _Visitor {
     // add a translatable message
     _addMessage(ast, msgMeta) {
         if (ast.length == 0 ||
-            (ast.length == 1 && ast[0] instanceof Attribute && !ast[0].value)) {
+            this._isEmptyAttributeValue(ast) ||
+            this._isPlaceholderOnlyAttributeValue(ast) ||
+            this._isPlaceholderOnlyMessage(ast)) {
             // Do not create empty messages
             return null;
         }
@@ -29554,6 +29556,41 @@ class _Visitor {
         const message = this._createI18nMessage(ast, meaning, description, id);
         this._messages.push(message);
         return message;
+    }
+    // Check for cases like `<div i18n-title title="">`.
+    _isEmptyAttributeValue(ast) {
+        if (!isAttrNode(ast))
+            return false;
+        const node = ast[0];
+        return node.value.trim() === '';
+    }
+    // Check for cases like `<div i18n-title title="{{ name }}">`.
+    _isPlaceholderOnlyAttributeValue(ast) {
+        if (!isAttrNode(ast))
+            return false;
+        const tokens = ast[0].valueTokens ?? [];
+        const interpolations = tokens.filter((token) => token.type === 17 /* TokenType.ATTR_VALUE_INTERPOLATION */);
+        const plainText = tokens
+            .filter((token) => token.type === 16 /* TokenType.ATTR_VALUE_TEXT */)
+            // `AttributeValueTextToken` always has exactly one part per its type.
+            .map((token) => token.parts[0].trim())
+            .join('');
+        // Check if there is a single interpolation and all text around it is empty.
+        return interpolations.length === 1 && plainText === '';
+    }
+    // Check for cases like `<div i18n>{{ name }}</div>`.
+    _isPlaceholderOnlyMessage(ast) {
+        if (!isTextNode(ast))
+            return false;
+        const tokens = ast[0].tokens;
+        const interpolations = tokens.filter((token) => token.type === 8 /* TokenType.INTERPOLATION */);
+        const plainText = tokens
+            .filter((token) => token.type === 5 /* TokenType.TEXT */)
+            // `TextToken` always has exactly one part per its type.
+            .map((token) => token.parts[0].trim())
+            .join('');
+        // Check if there is a single interpolation and all text around it is empty.
+        return interpolations.length === 1 && plainText === '';
     }
     // Translates the given message given the `TranslationBundle`
     // This is used for translating elements / blocks - see `_translateAttributes` for attributes
@@ -29696,6 +29733,12 @@ function _parseMessageMeta(i18n) {
         ? [meaningAndDesc.slice(0, descIndex), meaningAndDesc.slice(descIndex + 1)]
         : ['', meaningAndDesc];
     return { meaning, description, id: id.trim() };
+}
+function isTextNode(ast) {
+    return ast.length === 1 && ast[0] instanceof Text;
+}
+function isAttrNode(ast) {
+    return ast.length === 1 && ast[0] instanceof Attribute;
 }
 
 class XmlTagDefinition {
@@ -30647,7 +30690,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-c62edf6c.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-f05fd74f.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
