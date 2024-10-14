@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.9+sha-517da95
+ * @license Angular v19.0.0-next.9+sha-9224f9b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17029,7 +17029,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.9+sha-517da95']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.9+sha-9224f9b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19981,7 +19981,7 @@ const viewportTriggers = new WeakMap();
 /** Names of the events considered as interaction events. */
 const interactionEventNames = ['click', 'keydown'];
 /** Names of the events considered as hover events. */
-const hoverEventNames = ['mouseenter', 'focusin'];
+const hoverEventNames = ['mouseenter', 'mouseover', 'focusin'];
 /** `IntersectionObserver` used to observe `viewport` triggers. */
 let intersectionObserver = null;
 /** Number of elements currently observed with `viewport` triggers. */
@@ -20212,10 +20212,9 @@ function registerDomTrigger(initialLView, tNode, triggerIndex, walkUpTimes, regi
  * Helper function to schedule a callback to be invoked when a browser becomes idle.
  *
  * @param callback A function to be invoked when a browser becomes idle.
- * @param lView LView that hosts an instance of a defer block.
+ * @param injector injector for the app
  */
-function onIdle(callback, lView) {
-    const injector = lView[INJECTOR];
+function onIdle(callback, injector) {
     const scheduler = injector.get(IdleScheduler);
     const cleanupFn = () => scheduler.remove(callback);
     scheduler.add(callback);
@@ -20315,17 +20314,16 @@ class IdleScheduler {
  * Invoking the returned function schedules a trigger.
  */
 function onTimer(delay) {
-    return (callback, lView) => scheduleTimerTrigger(delay, callback, lView);
+    return (callback, injector) => scheduleTimerTrigger(delay, callback, injector);
 }
 /**
  * Schedules a callback to be invoked after a given timeout.
  *
  * @param delay A number of ms to wait until firing a callback.
  * @param callback A function to be invoked after a timeout.
- * @param lView LView that hosts an instance of a defer block.
+ * @param injector injector for the app.
  */
-function scheduleTimerTrigger(delay, callback, lView) {
-    const injector = lView[INJECTOR];
+function scheduleTimerTrigger(delay, callback, injector) {
     const scheduler = injector.get(TimerScheduler);
     const cleanupFn = () => scheduler.remove(callback);
     scheduler.add(delay, callback);
@@ -20826,11 +20824,12 @@ function ɵɵdeferHydrateOnViewport() { }
 function scheduleDelayedTrigger(scheduleFn) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    const injector = lView[INJECTOR];
     renderPlaceholder(lView, tNode);
     // Only trigger the scheduled trigger on the browser
     // since we don't want to delay the server response.
-    if (isPlatformBrowser(lView[INJECTOR])) {
-        const cleanupFn = scheduleFn(() => triggerDeferBlock(lView, tNode), lView);
+    if (isPlatformBrowser(injector)) {
+        const cleanupFn = scheduleFn(() => triggerDeferBlock(lView, tNode), injector);
         const lDetails = getLDeferBlockDetails(lView, tNode);
         storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, cleanupFn);
     }
@@ -20842,16 +20841,17 @@ function scheduleDelayedTrigger(scheduleFn) {
  */
 function scheduleDelayedPrefetching(scheduleFn) {
     const lView = getLView();
+    const injector = lView[INJECTOR];
     // Only trigger the scheduled trigger on the browser
     // since we don't want to delay the server response.
-    if (isPlatformBrowser(lView[INJECTOR])) {
+    if (isPlatformBrowser(injector)) {
         const tNode = getCurrentTNode();
         const tView = lView[TVIEW];
         const tDetails = getTDeferBlockDetails(tView, tNode);
         if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
             const lDetails = getLDeferBlockDetails(lView, tNode);
             const prefetch = () => triggerPrefetching(tDetails, lView, tNode);
-            const cleanupFn = scheduleFn(prefetch, lView);
+            const cleanupFn = scheduleFn(prefetch, injector);
             storeTriggerCleanupFn(1 /* TriggerType.Prefetch */, lDetails, cleanupFn);
         }
     }
@@ -21049,7 +21049,7 @@ function scheduleDeferBlockUpdate(timeout, lDetails, tNode, lContainer, hostLVie
             renderDeferBlockState(nextState, tNode, lContainer);
         }
     };
-    return scheduleTimerTrigger(timeout, callback, hostLView);
+    return scheduleTimerTrigger(timeout, callback, hostLView[INJECTOR]);
 }
 /**
  * Checks whether we can transition to the next state.
@@ -31323,7 +31323,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.9+sha-517da95');
+const VERSION = new Version('19.0.0-next.9+sha-9224f9b');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
