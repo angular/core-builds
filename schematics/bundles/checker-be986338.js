@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-c42759b
+ * @license Angular v19.0.0-next.9+sha-bbca205
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1455,12 +1455,13 @@ class ConditionalExpr extends Expression {
     }
 }
 class DynamicImportExpr extends Expression {
-    constructor(url, sourceSpan) {
+    constructor(url, sourceSpan, urlComment) {
         super(null, sourceSpan);
         this.url = url;
+        this.urlComment = urlComment;
     }
     isEquivalent(e) {
-        return e instanceof DynamicImportExpr && this.url === e.url;
+        return e instanceof DynamicImportExpr && this.url === e.url && this.urlComment === e.urlComment;
     }
     isConstant() {
         return false;
@@ -1469,7 +1470,7 @@ class DynamicImportExpr extends Expression {
         return visitor.visitDynamicImportExpr(this, context);
     }
     clone() {
-        return new DynamicImportExpr(this.url, this.sourceSpan);
+        return new DynamicImportExpr(typeof this.url === 'string' ? this.url : this.url.clone(), this.sourceSpan, this.urlComment);
     }
 }
 class NotExpr extends Expression {
@@ -1829,6 +1830,9 @@ class IfStmt extends Statement {
     visitStatement(visitor, context) {
         return visitor.visitIfStmt(this, context);
     }
+}
+function leadingComment(text, multiline = false, trailingNewline = true) {
+    return new LeadingComment(text, multiline, trailingNewline);
 }
 function jsDocComment(tags = []) {
     return new JSDocComment(tags);
@@ -29299,7 +29303,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.9+sha-c42759b');
+new Version('19.0.0-next.9+sha-bbca205');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -30690,7 +30694,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-f05fd74f.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-be986338.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -35280,7 +35284,13 @@ class ExpressionTranslatorVisitor {
         return this.factory.createConditional(cond, ast.trueCase.visitExpression(this, context), ast.falseCase.visitExpression(this, context));
     }
     visitDynamicImportExpr(ast, context) {
-        return this.factory.createDynamicImport(ast.url);
+        const urlExpression = typeof ast.url === 'string'
+            ? this.factory.createLiteral(ast.url)
+            : ast.url.visitExpression(this, context);
+        if (ast.urlComment) {
+            this.factory.attachComments(urlExpression, [leadingComment(ast.urlComment, true)]);
+        }
+        return this.factory.createDynamicImport(urlExpression);
     }
     visitNotExpr(ast, context) {
         return this.factory.createUnaryExpression('!', ast.condition.visitExpression(this, context));
@@ -35844,7 +35854,7 @@ class TypeScriptAstFactory {
     }
     createDynamicImport(url) {
         return ts__default["default"].factory.createCallExpression(ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.ImportKeyword), 
-        /* type */ undefined, [ts__default["default"].factory.createStringLiteral(url)]);
+        /* type */ undefined, [typeof url === 'string' ? ts__default["default"].factory.createStringLiteral(url) : url]);
     }
     createFunctionDeclaration(functionName, parameters, body) {
         if (!ts__default["default"].isBlock(body)) {
