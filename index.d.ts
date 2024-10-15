@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.9+sha-d760cbe
+ * @license Angular v19.0.0-next.9+sha-7f0b49d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3941,6 +3941,7 @@ declare interface EffectNode extends ReactiveNode, SchedulableEffect {
     hasRun: boolean;
     cleanupFns: EffectCleanupFn[] | undefined;
     injector: Injector;
+    notifier: ɵChangeDetectionScheduler;
     onDestroyFn: () => void;
     fn: (cleanupFn: EffectCleanupRegisterFn) => void;
     run(): void;
@@ -12193,8 +12194,6 @@ export declare interface WritableSignal<T> extends Signal<T> {
 declare class ZoneAwareEffectScheduler implements ɵEffectScheduler {
     private queuedEffectCount;
     private queues;
-    private readonly pendingTasks;
-    protected taskId: number | null;
     schedule(handle: SchedulableEffect): void;
     private enqueue;
     /**
@@ -13469,7 +13468,10 @@ export declare enum ɵLocaleDataIndex {
 export declare function ɵmicrotaskEffect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, options?: CreateEffectOptions): EffectRef;
 
 export declare class ɵMicrotaskEffectScheduler extends ZoneAwareEffectScheduler {
+    private readonly pendingTasks;
+    private taskId;
     schedule(effect: SchedulableEffect): void;
+    flush(): void;
     /** @nocollapse */
     static ɵprov: unknown;
 }
@@ -13626,7 +13628,8 @@ export declare const enum ɵNotificationSource {
     ViewDetachedFromDOM = 10,
     AsyncAnimationsLoaded = 11,
     PendingTaskRemoved = 12,
-    RootEffect = 13
+    RootEffect = 13,
+    ViewEffect = 14
 }
 
 /**

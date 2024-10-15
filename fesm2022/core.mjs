@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.9+sha-d760cbe
+ * @license Angular v19.0.0-next.9+sha-7f0b49d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17031,7 +17031,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.9+sha-d760cbe']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.9+sha-7f0b49d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31353,7 +31353,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.9+sha-d760cbe');
+const VERSION = new Version('19.0.0-next.9+sha-7f0b49d');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -32760,14 +32760,9 @@ class ZoneAwareEffectScheduler {
     constructor() {
         this.queuedEffectCount = 0;
         this.queues = new Map();
-        this.pendingTasks = inject(PendingTasksInternal);
-        this.taskId = null;
     }
     schedule(handle) {
         this.enqueue(handle);
-        if (this.taskId === null) {
-            this.taskId = this.pendingTasks.add();
-        }
     }
     enqueue(handle) {
         const zone = handle.zone;
@@ -32798,10 +32793,6 @@ class ZoneAwareEffectScheduler {
                     zone.run(() => this.flushQueue(queue));
                 }
             }
-        }
-        if (this.taskId !== null) {
-            this.pendingTasks.remove(this.taskId);
-            this.taskId = null;
         }
     }
     flushQueue(queue) {
@@ -33838,6 +33829,20 @@ class ChangeDetectionSchedulerImpl {
             }
             case 13 /* NotificationSource.RootEffect */: {
                 this.appRef.dirtyFlags |= 16 /* ApplicationRefDirtyFlags.RootEffects */;
+                // Root effects still force a CD, even if the scheduler is disabled. This ensures that
+                // effects always run, even when triggered from outside the zone when the scheduler is
+                // otherwise disabled.
+                force = true;
+                break;
+            }
+            case 14 /* NotificationSource.ViewEffect */: {
+                // This is technically a no-op, since view effects will also send a
+                // `MarkAncestorsForTraversal` notification. Still, we set this for logical consistency.
+                this.appRef.dirtyFlags |= 2 /* ApplicationRefDirtyFlags.ViewTreeTraversal */;
+                // View effects still force a CD, even if the scheduler is disabled. This ensures that
+                // effects always run, even when triggered from outside the zone when the scheduler is
+                // otherwise disabled.
+                force = true;
                 break;
             }
             case 12 /* NotificationSource.PendingTaskRemoved */: {
@@ -38662,12 +38667,28 @@ function injectViewContext() {
 const USE_MICROTASK_EFFECT_BY_DEFAULT = false;
 
 class MicrotaskEffectScheduler extends ZoneAwareEffectScheduler {
+    constructor() {
+        super(...arguments);
+        this.pendingTasks = inject(PendingTasksInternal);
+        this.taskId = null;
+    }
     schedule(effect) {
         // Check whether there are any pending effects _before_ queueing in the base class.
-        const needsScheduling = this.taskId === null;
         super.schedule(effect);
-        if (needsScheduling) {
+        if (this.taskId === null) {
+            this.taskId = this.pendingTasks.add();
             queueMicrotask(() => this.flush());
+        }
+    }
+    flush() {
+        try {
+            super.flush();
+        }
+        finally {
+            if (this.taskId !== null) {
+                this.pendingTasks.remove(this.taskId);
+                this.taskId = null;
+            }
         }
     }
     /** @nocollapse */
@@ -38807,9 +38828,10 @@ function effect(effectFn, options) {
     let destroyRef = options?.manualCleanup !== true ? injector.get(DestroyRef) : null;
     let node;
     const viewContext = injector.get(ViewContext, null, { optional: true });
+    const notifier = injector.get(ChangeDetectionScheduler);
     if (viewContext !== null && !options?.forceRoot) {
         // This effect was created in the context of a view, and will be associated with the view.
-        node = createViewEffect(viewContext.view, effectFn);
+        node = createViewEffect(viewContext.view, notifier, effectFn);
         if (destroyRef instanceof NodeInjectorDestroyRef && destroyRef._lView === viewContext.view) {
             // The effect is being created in the same view as the `DestroyRef` references, so it will be
             // automatically destroyed without the need for an explicit `DestroyRef` registration.
@@ -38818,7 +38840,7 @@ function effect(effectFn, options) {
     }
     else {
         // This effect was created outside the context of a view, and will be scheduled independently.
-        node = createRootEffect(effectFn, injector.get(EffectScheduler), injector.get(ChangeDetectionScheduler));
+        node = createRootEffect(effectFn, injector.get(EffectScheduler), notifier);
     }
     node.injector = injector;
     if (destroyRef !== null) {
@@ -38863,19 +38885,25 @@ const BASE_EFFECT_NODE =
             this.maybeCleanup();
             this.fn(registerCleanupFn);
         }
-        catch (err) {
-            // We inject the error handler lazily, to prevent circular dependencies when an effect is
-            // created inside of an ErrorHandler.
-            this.injector.get(ErrorHandler, null, { optional: true })?.handleError(err);
-        }
         finally {
             setIsRefreshingViews(prevRefreshingViews);
             consumerAfterComputation$1(this, prevNode);
         }
     },
     maybeCleanup() {
-        while (this.cleanupFns?.length) {
-            this.cleanupFns.pop()();
+        if (!this.cleanupFns?.length) {
+            return;
+        }
+        try {
+            // Attempt to run the cleanup functions. Regardless of failure or success, we consider
+            // cleanup "completed" and clear the list for the next run of the effect. Note that an error
+            // from the cleanup function will still crash the current run of the effect.
+            while (this.cleanupFns.length) {
+                this.cleanupFns.pop()();
+            }
+        }
+        finally {
+            this.cleanupFns = [];
         }
     },
 }))();
@@ -38898,6 +38926,7 @@ const VIEW_EFFECT_NODE =
     consumerMarkedDirty() {
         this.view[FLAGS] |= 8192 /* LViewFlags.HasChildViewsToRefresh */;
         markAncestorsForTraversal(this.view);
+        this.notifier.notify(14 /* NotificationSource.ViewEffect */);
     },
     destroy() {
         consumerDestroy$1(this);
@@ -38906,10 +38935,11 @@ const VIEW_EFFECT_NODE =
         this.view[EFFECTS]?.delete(this);
     },
 }))();
-function createViewEffect(view, fn) {
+function createViewEffect(view, notifier, fn) {
     const node = Object.create(VIEW_EFFECT_NODE);
     node.view = view;
     node.zone = typeof Zone !== 'undefined' ? Zone.current : null;
+    node.notifier = notifier;
     node.fn = fn;
     view[EFFECTS] ??= new Set();
     view[EFFECTS].add(node);
