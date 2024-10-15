@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.9+sha-bf9fd31
+ * @license Angular v19.0.0-next.9+sha-9ab663e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8911,6 +8911,7 @@ declare interface R3DeclareDirectiveDependencyFacade {
 declare interface R3DeclareDirectiveFacade {
     selector?: string;
     type: Type_2;
+    version: string;
     inputs?: {
         [fieldName: string]: {
             classPropertyName: string;
@@ -8993,6 +8994,7 @@ declare interface R3DeclarePipeDependencyFacade {
 declare interface R3DeclarePipeFacade {
     type: Type_2;
     name: string;
+    version: string;
     pure?: boolean;
     isStandalone?: boolean;
 }
@@ -13496,7 +13498,7 @@ export declare const ɵNG_PROV_DEF: string;
  * A constant defining the default value for the standalone attribute in Directive and Pipes decorators.
  * Extracted to a separate file to facilitate G3 patches.
  */
-export declare const ɵNG_STANDALONE_DEFAULT_VALUE = false;
+export declare const ɵNG_STANDALONE_DEFAULT_VALUE = true;
 
 /**
  * Runtime link information for NgModules.
