@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-97c44a1
+ * @license Angular v19.0.0-next.9+sha-bf9fd31
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -264,15 +264,17 @@ exports.FieldIncompatibilityReason = void 0;
     FieldIncompatibilityReason[FieldIncompatibilityReason["RedeclaredViaDerivedClassInputsArray"] = 2] = "RedeclaredViaDerivedClassInputsArray";
     FieldIncompatibilityReason[FieldIncompatibilityReason["TypeConflictWithBaseClass"] = 3] = "TypeConflictWithBaseClass";
     FieldIncompatibilityReason[FieldIncompatibilityReason["ParentIsIncompatible"] = 4] = "ParentIsIncompatible";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SpyOnThatOverwritesField"] = 5] = "SpyOnThatOverwritesField";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 6] = "PotentiallyNarrowedInTemplateButNoSupportYet";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__RequiredButNoGoodExplicitTypeExtractable"] = 7] = "SignalInput__RequiredButNoGoodExplicitTypeExtractable";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable"] = 8] = "SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__QueryListProblematicFieldAccessed"] = 9] = "SignalQueries__QueryListProblematicFieldAccessed";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["WriteAssignment"] = 10] = "WriteAssignment";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["Accessor"] = 11] = "Accessor";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 12] = "OutsideOfMigrationScope";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 13] = "SkippedViaConfigFilter";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["DerivedIsIncompatible"] = 5] = "DerivedIsIncompatible";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SpyOnThatOverwritesField"] = 6] = "SpyOnThatOverwritesField";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 7] = "PotentiallyNarrowedInTemplateButNoSupportYet";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__RequiredButNoGoodExplicitTypeExtractable"] = 8] = "SignalInput__RequiredButNoGoodExplicitTypeExtractable";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable"] = 9] = "SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__QueryListProblematicFieldAccessed"] = 10] = "SignalQueries__QueryListProblematicFieldAccessed";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__IncompatibleMultiUnionType"] = 11] = "SignalQueries__IncompatibleMultiUnionType";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["WriteAssignment"] = 12] = "WriteAssignment";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["Accessor"] = 13] = "Accessor";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 14] = "OutsideOfMigrationScope";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 15] = "SkippedViaConfigFilter";
 })(exports.FieldIncompatibilityReason || (exports.FieldIncompatibilityReason = {}));
 /** Field reasons that cannot be ignored. */
 const nonIgnorableFieldIncompatibilities = [
@@ -29443,7 +29445,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.9+sha-97c44a1');
+new Version('19.0.0-next.9+sha-bf9fd31');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30607,6 +30609,12 @@ function getMessageForFieldIncompatibility(reason, fieldName) {
                 short: `This ${fieldName.single} is inherited from a superclass, but the parent cannot be migrated.`,
                 extra: 'Migrating this field would cause your build to fail.',
             };
+        case exports.FieldIncompatibilityReason.DerivedIsIncompatible:
+            return {
+                short: `This ${fieldName.single} cannot be migrated because the field is overridden by a subclass.`,
+                extra: 'The field in the subclass is incompatible for migration, so migrating this field would ' +
+                    'break your build.',
+            };
         case exports.FieldIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet:
             return {
                 short: `This ${fieldName.single} is used in a control flow expression (e.g. \`@if\` or \`*ngIf\`) and ` +
@@ -30634,6 +30642,11 @@ function getMessageForFieldIncompatibility(reason, fieldName) {
             return {
                 short: `There are references to this query that cannot be migrated automatically.`,
                 extra: "For example, it's not possible to migrate `.changes` or `.dirty` trivially.",
+            };
+        case exports.FieldIncompatibilityReason.SignalQueries__IncompatibleMultiUnionType:
+            return {
+                short: `Query type is too complex to automatically migrate.`,
+                extra: "The new query API doesn't allow us to migrate safely without breaking your app.",
             };
         case exports.FieldIncompatibilityReason.SkippedViaConfigFilter:
             return {
