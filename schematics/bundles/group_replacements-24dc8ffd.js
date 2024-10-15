@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-6782acb
+ * @license Angular v19.0.0-next.9+sha-b4de7ac
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -597,7 +597,7 @@ class DebugElementComponentInstance {
         if (!ts__default["default"].isIdentifier(node.name) || node.name.text !== 'componentInstance') {
             return null;
         }
-        // Check for `<>.query(..).componentInstance`.
+        // Check for `<>.query(..).<>`.
         if (!ts__default["default"].isCallExpression(node.expression) ||
             !ts__default["default"].isPropertyAccessExpression(node.expression.expression) ||
             !ts__default["default"].isIdentifier(node.expression.expression.name) ||
@@ -609,13 +609,21 @@ class DebugElementComponentInstance {
             return null;
         }
         const queryArg = queryCall.arguments[0];
-        // Only detect simple references to directives in `query(...)`.
-        if (!ts__default["default"].isCallExpression(queryArg) ||
-            queryArg.arguments.length !== 1 ||
-            !ts__default["default"].isIdentifier(queryArg.arguments[0])) {
+        let typeExpr;
+        if (ts__default["default"].isCallExpression(queryArg) &&
+            queryArg.arguments.length === 1 &&
+            ts__default["default"].isIdentifier(queryArg.arguments[0])) {
+            // Detect references, like: `query(By.directive(T))`.
+            typeExpr = queryArg.arguments[0];
+        }
+        else if (ts__default["default"].isIdentifier(queryArg)) {
+            // Detect references, like: `harness.query(T)`.
+            typeExpr = queryArg;
+        }
+        else {
             return null;
         }
-        const symbol = this.checker.getSymbolAtLocation(queryArg.arguments[0]);
+        const symbol = this.checker.getSymbolAtLocation(typeExpr);
         if (symbol?.valueDeclaration === undefined ||
             !ts__default["default"].isClassDeclaration(symbol?.valueDeclaration)) {
             // Cache this as we use the expensive type checker.
@@ -29435,7 +29443,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.9+sha-6782acb');
+new Version('19.0.0-next.9+sha-b4de7ac');
 
 var _VisitorMode;
 (function (_VisitorMode) {
