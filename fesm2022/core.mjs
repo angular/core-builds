@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.9+sha-9ab663e
+ * @license Angular v19.0.0-next.9+sha-d760cbe
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17031,7 +17031,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.9+sha-9ab663e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.9+sha-d760cbe']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19528,6 +19528,10 @@ const STATE_IS_FROZEN_UNTIL = 2;
 const LOADING_AFTER_CLEANUP_FN = 3;
 const TRIGGER_CLEANUP_FNS = 4;
 const PREFETCH_TRIGGER_CLEANUP_FNS = 5;
+const UNIQUE_SSR_ID = 6;
+const SSR_STATE = 7;
+const ON_COMPLETE_FNS = 8;
+const HYDRATE_TRIGGER_CLEANUP_FNS = 9;
 /**
  * Options for configuring defer blocks behavior.
  * @publicApi
@@ -20605,6 +20609,10 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
         null, // LOADING_AFTER_CLEANUP_FN
         null, // TRIGGER_CLEANUP_FNS
         null, // PREFETCH_TRIGGER_CLEANUP_FNS
+        null, // UNIQUE_SSR_ID
+        null, // SSR_STATE
+        null, // ON_COMPLETE_FNS
+        null, // HYDRATE_TRIGGER_CLEANUP_FNS
     ];
     setLDeferBlockDetails(lView, adjustedIndex, lDetails);
     const cleanupTriggersFn = () => invokeAllTriggerCleanupFns(lDetails);
@@ -20993,6 +21001,12 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
         addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(activeBlockTNode, dehydratedView));
         markViewDirty(embeddedLView, 2 /* NotificationSource.DeferBlockStateUpdate */);
     }
+    if (newState === DeferBlockState.Complete && Array.isArray(lDetails[ON_COMPLETE_FNS])) {
+        for (const callback of lDetails[ON_COMPLETE_FNS]) {
+            callback();
+        }
+        lDetails[ON_COMPLETE_FNS] = null;
+    }
 }
 /**
  * Extends the `applyDeferBlockState` with timer-based scheduling.
@@ -21248,6 +21262,20 @@ function triggerDeferBlock(lView, tNode) {
                 throwError('Unknown defer block state');
             }
     }
+}
+function triggerAndWaitForCompletion(deferBlock) {
+    const lDetails = getLDeferBlockDetails(deferBlock.lView, deferBlock.tNode);
+    const promise = new Promise((resolve) => {
+        onDeferBlockCompletion(lDetails, resolve);
+    });
+    triggerDeferBlock(deferBlock.lView, deferBlock.tNode);
+    return promise;
+}
+function onDeferBlockCompletion(lDetails, callback) {
+    if (!Array.isArray(lDetails[ON_COMPLETE_FNS])) {
+        lDetails[ON_COMPLETE_FNS] = [];
+    }
+    lDetails[ON_COMPLETE_FNS].push(callback);
 }
 
 /**
@@ -31325,7 +31353,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.9+sha-9ab663e');
+const VERSION = new Version('19.0.0-next.9+sha-d760cbe');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
