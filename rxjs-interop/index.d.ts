@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.9+sha-b4de7ac
+ * @license Angular v19.0.0-next.9+sha-97c44a1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -59,7 +59,7 @@ export declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
  *     passed explicitly to use `takeUntilDestroyed` outside of an [injection
  * context](guide/di/dependency-injection-context). Otherwise, the current `DestroyRef` is injected.
  *
- * @developerPreview
+ * @publicApi
  */
 export declare function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoTypeOperatorFunction<T>;
 
