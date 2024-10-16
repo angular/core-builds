@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.9+sha-4288ea8
+ * @license Angular v19.0.0-next.9+sha-231e6ff
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17031,7 +17031,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.9+sha-4288ea8']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.9+sha-231e6ff']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -29835,21 +29835,27 @@ function ɵsetClassDebugInfo(type, debugInfo) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.dev/license
  */
+/** Cached environment for all HMR calls. */
+let hmrEnvironment = null;
 /**
  * Replaces the metadata of a component type and re-renders all live instances of the component.
  * @param type Class whose metadata will be replaced.
  * @param applyMetadata Callback that will apply a new set of metadata on the `type` when invoked.
+ * @param locals Local symbols from the source location that have to be exposed to the callback.
  * @codeGenApi
  */
-function ɵɵreplaceMetadata(type, applyMetadata) {
+function ɵɵreplaceMetadata(type, applyMetadata, locals) {
     ngDevMode && assertComponentDef(type);
     const oldDef = getComponentDef(type);
+    if (hmrEnvironment === null) {
+        hmrEnvironment = getHmrEnv();
+    }
     // The reason `applyMetadata` is a callback that is invoked (almost) immediately is because
     // the compiler usually produces more code than just the component definition, e.g. there
     // can be functions for embedded views, the variables for the constant pool and `setClassMetadata`
     // calls. The callback allows us to keep them isolate from the rest of the app and to invoke
     // them at the right time.
-    applyMetadata();
+    applyMetadata.apply(null, [type, hmrEnvironment, ...locals]);
     // If a `tView` hasn't been created yet, it means that this component hasn't been instantianted
     // before. In this case there's nothing left for us to do aside from patching it in.
     if (oldDef.tView) {
@@ -29975,6 +29981,211 @@ function resetProjectionState(tNode) {
         }
         tNode.projection = null;
     }
+}
+/**
+ * The HMR replacement function needs access to all of `core`. This is similar to the
+ * `angularCoreEnv`, but without `replaceMetadata` to avoid circular dependencies. Furthermore,
+ * we can't something like a `nonHmrEnv` that is then combined with `replaceMetadata` to form the
+ * full environment, because it seems to break tree shaking internally.
+ *
+ * TODO(crisbeto): this is a temporary solution, we should be able to pass this in directly.
+ */
+function getHmrEnv() {
+    return {
+        'ɵɵattribute': ɵɵattribute,
+        'ɵɵattributeInterpolate1': ɵɵattributeInterpolate1,
+        'ɵɵattributeInterpolate2': ɵɵattributeInterpolate2,
+        'ɵɵattributeInterpolate3': ɵɵattributeInterpolate3,
+        'ɵɵattributeInterpolate4': ɵɵattributeInterpolate4,
+        'ɵɵattributeInterpolate5': ɵɵattributeInterpolate5,
+        'ɵɵattributeInterpolate6': ɵɵattributeInterpolate6,
+        'ɵɵattributeInterpolate7': ɵɵattributeInterpolate7,
+        'ɵɵattributeInterpolate8': ɵɵattributeInterpolate8,
+        'ɵɵattributeInterpolateV': ɵɵattributeInterpolateV,
+        'ɵɵdefineComponent': ɵɵdefineComponent,
+        'ɵɵdefineDirective': ɵɵdefineDirective,
+        'ɵɵdefineInjectable': ɵɵdefineInjectable,
+        'ɵɵdefineInjector': ɵɵdefineInjector,
+        'ɵɵdefineNgModule': ɵɵdefineNgModule,
+        'ɵɵdefinePipe': ɵɵdefinePipe,
+        'ɵɵdirectiveInject': ɵɵdirectiveInject,
+        'ɵɵgetInheritedFactory': ɵɵgetInheritedFactory,
+        'ɵɵinject': ɵɵinject,
+        'ɵɵinjectAttribute': ɵɵinjectAttribute,
+        'ɵɵinvalidFactory': ɵɵinvalidFactory,
+        'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
+        'ɵɵtemplateRefExtractor': ɵɵtemplateRefExtractor,
+        'ɵɵresetView': ɵɵresetView,
+        'ɵɵHostDirectivesFeature': ɵɵHostDirectivesFeature,
+        'ɵɵNgOnChangesFeature': ɵɵNgOnChangesFeature,
+        'ɵɵProvidersFeature': ɵɵProvidersFeature,
+        'ɵɵCopyDefinitionFeature': ɵɵCopyDefinitionFeature,
+        'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
+        'ɵɵInputTransformsFeature': ɵɵInputTransformsFeature,
+        'ɵɵStandaloneFeature': ɵɵStandaloneFeature,
+        'ɵɵExternalStylesFeature': ɵɵExternalStylesFeature,
+        'ɵɵnextContext': ɵɵnextContext,
+        'ɵɵnamespaceHTML': ɵɵnamespaceHTML,
+        'ɵɵnamespaceMathML': ɵɵnamespaceMathML,
+        'ɵɵnamespaceSVG': ɵɵnamespaceSVG,
+        'ɵɵenableBindings': ɵɵenableBindings,
+        'ɵɵdisableBindings': ɵɵdisableBindings,
+        'ɵɵelementStart': ɵɵelementStart,
+        'ɵɵelementEnd': ɵɵelementEnd,
+        'ɵɵelement': ɵɵelement,
+        'ɵɵelementContainerStart': ɵɵelementContainerStart,
+        'ɵɵelementContainerEnd': ɵɵelementContainerEnd,
+        'ɵɵelementContainer': ɵɵelementContainer,
+        'ɵɵpureFunction0': ɵɵpureFunction0,
+        'ɵɵpureFunction1': ɵɵpureFunction1,
+        'ɵɵpureFunction2': ɵɵpureFunction2,
+        'ɵɵpureFunction3': ɵɵpureFunction3,
+        'ɵɵpureFunction4': ɵɵpureFunction4,
+        'ɵɵpureFunction5': ɵɵpureFunction5,
+        'ɵɵpureFunction6': ɵɵpureFunction6,
+        'ɵɵpureFunction7': ɵɵpureFunction7,
+        'ɵɵpureFunction8': ɵɵpureFunction8,
+        'ɵɵpureFunctionV': ɵɵpureFunctionV,
+        'ɵɵgetCurrentView': ɵɵgetCurrentView,
+        'ɵɵrestoreView': ɵɵrestoreView,
+        'ɵɵlistener': ɵɵlistener,
+        'ɵɵprojection': ɵɵprojection,
+        'ɵɵsyntheticHostProperty': ɵɵsyntheticHostProperty,
+        'ɵɵsyntheticHostListener': ɵɵsyntheticHostListener,
+        'ɵɵpipeBind1': ɵɵpipeBind1,
+        'ɵɵpipeBind2': ɵɵpipeBind2,
+        'ɵɵpipeBind3': ɵɵpipeBind3,
+        'ɵɵpipeBind4': ɵɵpipeBind4,
+        'ɵɵpipeBindV': ɵɵpipeBindV,
+        'ɵɵprojectionDef': ɵɵprojectionDef,
+        'ɵɵhostProperty': ɵɵhostProperty,
+        'ɵɵproperty': ɵɵproperty,
+        'ɵɵpropertyInterpolate': ɵɵpropertyInterpolate,
+        'ɵɵpropertyInterpolate1': ɵɵpropertyInterpolate1,
+        'ɵɵpropertyInterpolate2': ɵɵpropertyInterpolate2,
+        'ɵɵpropertyInterpolate3': ɵɵpropertyInterpolate3,
+        'ɵɵpropertyInterpolate4': ɵɵpropertyInterpolate4,
+        'ɵɵpropertyInterpolate5': ɵɵpropertyInterpolate5,
+        'ɵɵpropertyInterpolate6': ɵɵpropertyInterpolate6,
+        'ɵɵpropertyInterpolate7': ɵɵpropertyInterpolate7,
+        'ɵɵpropertyInterpolate8': ɵɵpropertyInterpolate8,
+        'ɵɵpropertyInterpolateV': ɵɵpropertyInterpolateV,
+        'ɵɵpipe': ɵɵpipe,
+        'ɵɵqueryRefresh': ɵɵqueryRefresh,
+        'ɵɵqueryAdvance': ɵɵqueryAdvance,
+        'ɵɵviewQuery': ɵɵviewQuery,
+        'ɵɵviewQuerySignal': ɵɵviewQuerySignal,
+        'ɵɵloadQuery': ɵɵloadQuery,
+        'ɵɵcontentQuery': ɵɵcontentQuery,
+        'ɵɵcontentQuerySignal': ɵɵcontentQuerySignal,
+        'ɵɵreference': ɵɵreference,
+        'ɵɵclassMap': ɵɵclassMap,
+        'ɵɵclassMapInterpolate1': ɵɵclassMapInterpolate1,
+        'ɵɵclassMapInterpolate2': ɵɵclassMapInterpolate2,
+        'ɵɵclassMapInterpolate3': ɵɵclassMapInterpolate3,
+        'ɵɵclassMapInterpolate4': ɵɵclassMapInterpolate4,
+        'ɵɵclassMapInterpolate5': ɵɵclassMapInterpolate5,
+        'ɵɵclassMapInterpolate6': ɵɵclassMapInterpolate6,
+        'ɵɵclassMapInterpolate7': ɵɵclassMapInterpolate7,
+        'ɵɵclassMapInterpolate8': ɵɵclassMapInterpolate8,
+        'ɵɵclassMapInterpolateV': ɵɵclassMapInterpolateV,
+        'ɵɵstyleMap': ɵɵstyleMap,
+        'ɵɵstyleMapInterpolate1': ɵɵstyleMapInterpolate1,
+        'ɵɵstyleMapInterpolate2': ɵɵstyleMapInterpolate2,
+        'ɵɵstyleMapInterpolate3': ɵɵstyleMapInterpolate3,
+        'ɵɵstyleMapInterpolate4': ɵɵstyleMapInterpolate4,
+        'ɵɵstyleMapInterpolate5': ɵɵstyleMapInterpolate5,
+        'ɵɵstyleMapInterpolate6': ɵɵstyleMapInterpolate6,
+        'ɵɵstyleMapInterpolate7': ɵɵstyleMapInterpolate7,
+        'ɵɵstyleMapInterpolate8': ɵɵstyleMapInterpolate8,
+        'ɵɵstyleMapInterpolateV': ɵɵstyleMapInterpolateV,
+        'ɵɵstyleProp': ɵɵstyleProp,
+        'ɵɵstylePropInterpolate1': ɵɵstylePropInterpolate1,
+        'ɵɵstylePropInterpolate2': ɵɵstylePropInterpolate2,
+        'ɵɵstylePropInterpolate3': ɵɵstylePropInterpolate3,
+        'ɵɵstylePropInterpolate4': ɵɵstylePropInterpolate4,
+        'ɵɵstylePropInterpolate5': ɵɵstylePropInterpolate5,
+        'ɵɵstylePropInterpolate6': ɵɵstylePropInterpolate6,
+        'ɵɵstylePropInterpolate7': ɵɵstylePropInterpolate7,
+        'ɵɵstylePropInterpolate8': ɵɵstylePropInterpolate8,
+        'ɵɵstylePropInterpolateV': ɵɵstylePropInterpolateV,
+        'ɵɵclassProp': ɵɵclassProp,
+        'ɵɵadvance': ɵɵadvance,
+        'ɵɵtemplate': ɵɵtemplate,
+        'ɵɵconditional': ɵɵconditional,
+        'ɵɵdefer': ɵɵdefer,
+        'ɵɵdeferWhen': ɵɵdeferWhen,
+        'ɵɵdeferOnIdle': ɵɵdeferOnIdle,
+        'ɵɵdeferOnImmediate': ɵɵdeferOnImmediate,
+        'ɵɵdeferOnTimer': ɵɵdeferOnTimer,
+        'ɵɵdeferOnHover': ɵɵdeferOnHover,
+        'ɵɵdeferOnInteraction': ɵɵdeferOnInteraction,
+        'ɵɵdeferOnViewport': ɵɵdeferOnViewport,
+        'ɵɵdeferPrefetchWhen': ɵɵdeferPrefetchWhen,
+        'ɵɵdeferPrefetchOnIdle': ɵɵdeferPrefetchOnIdle,
+        'ɵɵdeferPrefetchOnImmediate': ɵɵdeferPrefetchOnImmediate,
+        'ɵɵdeferPrefetchOnTimer': ɵɵdeferPrefetchOnTimer,
+        'ɵɵdeferPrefetchOnHover': ɵɵdeferPrefetchOnHover,
+        'ɵɵdeferPrefetchOnInteraction': ɵɵdeferPrefetchOnInteraction,
+        'ɵɵdeferPrefetchOnViewport': ɵɵdeferPrefetchOnViewport,
+        'ɵɵdeferHydrateWhen': ɵɵdeferHydrateWhen,
+        'ɵɵdeferHydrateNever': ɵɵdeferHydrateNever,
+        'ɵɵdeferHydrateOnIdle': ɵɵdeferHydrateOnIdle,
+        'ɵɵdeferHydrateOnImmediate': ɵɵdeferHydrateOnImmediate,
+        'ɵɵdeferHydrateOnTimer': ɵɵdeferHydrateOnTimer,
+        'ɵɵdeferHydrateOnHover': ɵɵdeferHydrateOnHover,
+        'ɵɵdeferHydrateOnInteraction': ɵɵdeferHydrateOnInteraction,
+        'ɵɵdeferHydrateOnViewport': ɵɵdeferHydrateOnViewport,
+        'ɵɵdeferEnableTimerScheduling': ɵɵdeferEnableTimerScheduling,
+        'ɵɵrepeater': ɵɵrepeater,
+        'ɵɵrepeaterCreate': ɵɵrepeaterCreate,
+        'ɵɵrepeaterTrackByIndex': ɵɵrepeaterTrackByIndex,
+        'ɵɵrepeaterTrackByIdentity': ɵɵrepeaterTrackByIdentity,
+        'ɵɵcomponentInstance': ɵɵcomponentInstance,
+        'ɵɵtext': ɵɵtext,
+        'ɵɵtextInterpolate': ɵɵtextInterpolate,
+        'ɵɵtextInterpolate1': ɵɵtextInterpolate1,
+        'ɵɵtextInterpolate2': ɵɵtextInterpolate2,
+        'ɵɵtextInterpolate3': ɵɵtextInterpolate3,
+        'ɵɵtextInterpolate4': ɵɵtextInterpolate4,
+        'ɵɵtextInterpolate5': ɵɵtextInterpolate5,
+        'ɵɵtextInterpolate6': ɵɵtextInterpolate6,
+        'ɵɵtextInterpolate7': ɵɵtextInterpolate7,
+        'ɵɵtextInterpolate8': ɵɵtextInterpolate8,
+        'ɵɵtextInterpolateV': ɵɵtextInterpolateV,
+        'ɵɵi18n': ɵɵi18n,
+        'ɵɵi18nAttributes': ɵɵi18nAttributes,
+        'ɵɵi18nExp': ɵɵi18nExp,
+        'ɵɵi18nStart': ɵɵi18nStart,
+        'ɵɵi18nEnd': ɵɵi18nEnd,
+        'ɵɵi18nApply': ɵɵi18nApply,
+        'ɵɵi18nPostprocess': ɵɵi18nPostprocess,
+        'ɵɵresolveWindow': ɵɵresolveWindow,
+        'ɵɵresolveDocument': ɵɵresolveDocument,
+        'ɵɵresolveBody': ɵɵresolveBody,
+        'ɵɵsetComponentScope': ɵɵsetComponentScope,
+        'ɵɵsetNgModuleScope': ɵɵsetNgModuleScope,
+        'ɵɵregisterNgModuleType': registerNgModuleType,
+        'ɵɵgetComponentDepsFactory': ɵɵgetComponentDepsFactory,
+        'ɵsetClassDebugInfo': ɵsetClassDebugInfo,
+        'ɵɵdeclareLet': ɵɵdeclareLet,
+        'ɵɵstoreLet': ɵɵstoreLet,
+        'ɵɵreadContextLet': ɵɵreadContextLet,
+        'ɵɵsanitizeHtml': ɵɵsanitizeHtml,
+        'ɵɵsanitizeStyle': ɵɵsanitizeStyle,
+        'ɵɵsanitizeResourceUrl': ɵɵsanitizeResourceUrl,
+        'ɵɵsanitizeScript': ɵɵsanitizeScript,
+        'ɵɵsanitizeUrl': ɵɵsanitizeUrl,
+        'ɵɵsanitizeUrlOrResourceUrl': ɵɵsanitizeUrlOrResourceUrl,
+        'ɵɵtrustConstantHtml': ɵɵtrustConstantHtml,
+        'ɵɵtrustConstantResourceUrl': ɵɵtrustConstantResourceUrl,
+        'ɵɵvalidateIframeAttribute': ɵɵvalidateIframeAttribute,
+        'forwardRef': forwardRef,
+        'resolveForwardRef': resolveForwardRef,
+        'ɵɵtwoWayProperty': ɵɵtwoWayProperty,
+        'ɵɵtwoWayBindingSet': ɵɵtwoWayBindingSet,
+        'ɵɵtwoWayListener': ɵɵtwoWayListener,
+    };
 }
 
 /**
@@ -31353,7 +31564,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.9+sha-4288ea8');
+const VERSION = new Version('19.0.0-next.9+sha-231e6ff');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

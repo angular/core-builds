@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-4288ea8
+ * @license Angular v19.0.0-next.9+sha-231e6ff
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-5b32f0fd.js');
+var checker = require('./checker-2ad132ae.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -856,15 +856,19 @@ function compileClassDebugInfo(debugInfo) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.dev/license
  */
-/** Compiles the HMR initializer expression. */
-function compileClassHmrInitializer(meta) {
+/**
+ * Compiles the expression that initializes HMR for a class.
+ * @param meta HMR metadata extracted from the class.
+ */
+function compileHmrInitializer(meta) {
     const id = encodeURIComponent(`${meta.filePath}@${meta.className}`);
     const urlPartial = `/@ng/component?c=${id}&t=`;
     const moduleName = 'm';
     const dataName = 'd';
-    // ɵɵreplaceMetadata(Comp, m.default);
+    const locals = meta.locals.map((localName) => checker.variable(localName));
+    // ɵɵreplaceMetadata(Comp, m.default, [...]);
     const replaceMetadata = checker.importExpr(checker.Identifiers.replaceMetadata)
-        .callFn([meta.type, checker.variable(moduleName).prop('default')]);
+        .callFn([meta.type, checker.variable(moduleName).prop('default'), checker.literalArr(locals)]);
     // (m) => ɵɵreplaceMetadata(...)
     const replaceCallback = checker.arrowFn([new checker.FnParam(moduleName)], replaceMetadata);
     // '<urlPartial>' + encodeURIComponent(d.timestamp)
@@ -889,6 +893,27 @@ function compileClassHmrInitializer(meta) {
     // import.meta.hot && import.meta.hot.on(...)
     return checker.arrowFn([], [checker.devOnlyGuardedExpression(hotRead.and(hotListener)).toStmt()]).callFn([]);
 }
+/**
+ * Compiles the HMR update callback for a class.
+ * @param definitions Compiled definitions for the class (e.g. `defineComponent` calls).
+ * @param constantStatements Supporting constants statements that were generated alongside
+ *  the definition.
+ * @param meta HMR metadata extracted from the class.
+ */
+function compileHmrUpdateCallback(definitions, constantStatements, meta) {
+    // The class name should always be first and core should be second.
+    const params = [meta.className, meta.coreName, ...meta.locals].map((name) => new checker.FnParam(name, checker.DYNAMIC_TYPE));
+    const body = [...constantStatements];
+    for (const field of definitions) {
+        if (field.initializer !== null) {
+            body.push(checker.variable(meta.className).prop(field.name).set(field.initializer).toStmt());
+            for (const stmt of field.statements) {
+                body.push(stmt);
+            }
+        }
+    }
+    return new checker.DeclareFunctionStmt(`${meta.className}_UpdateMetadata`, params, body, null, checker.StmtModifier.Final);
+}
 
 /**
  * Every time we make a breaking change to the declaration interface or partial-linker behavior, we
@@ -905,7 +930,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-4288ea8'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-231e6ff'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -923,7 +948,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-4288ea8'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-231e6ff'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1018,7 +1043,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-4288ea8'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-231e6ff'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1437,7 +1462,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-4288ea8'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-231e6ff'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1472,7 +1497,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-4288ea8'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-231e6ff'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1523,7 +1548,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-4288ea8'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-231e6ff'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1556,7 +1581,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-4288ea8'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-231e6ff'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1607,7 +1632,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-4288ea8'));
+    definitionMap.set('version', checker.literal('19.0.0-next.9+sha-231e6ff'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -1772,6 +1797,27 @@ function normalizeSeparators(path) {
     // TODO: normalize path only for OS that need it.
     return path.replace(/\\/g, '/');
 }
+/**
+ * Attempts to generate a project-relative path
+ * @param sourceFile
+ * @param rootDirs
+ * @param compilerHost
+ * @returns
+ */
+function getProjectRelativePath(sourceFile, rootDirs, compilerHost) {
+    // Note: we need to pass both the file name and the root directories through getCanonicalFileName,
+    // because the root directories might've been passed through it already while the source files
+    // definitely have not. This can break the relative return value, because in some platforms
+    // getCanonicalFileName lowercases the path.
+    const filePath = compilerHost.getCanonicalFileName(sourceFile.fileName);
+    for (const rootDir of rootDirs) {
+        const rel = checker.relative(compilerHost.getCanonicalFileName(rootDir), filePath);
+        if (!rel.startsWith('..')) {
+            return rel;
+        }
+    }
+    return null;
+}
 
 /**
  * `ImportRewriter` that does no rewriting.
@@ -1781,6 +1827,9 @@ class NoopImportRewriter {
         return symbol;
     }
     rewriteSpecifier(specifier, inContextOfFile) {
+        return specifier;
+    }
+    rewriteNamespaceImportIdentifier(specifier) {
         return specifier;
     }
 }
@@ -1829,6 +1878,9 @@ class R3SymbolsImportRewriter {
             throw new Error(`Failed to rewrite import inside ${CORE_MODULE}: ${inContextOfFile} -> ${this.r3SymbolsPath}`);
         }
         return relativePathToR3Symbols;
+    }
+    rewriteNamespaceImportIdentifier(specifier) {
+        return specifier;
     }
 }
 function validateAndRewriteCoreSymbol(name) {
@@ -4067,6 +4119,25 @@ class TraitCompiler {
         // Return the instruction to the transformer so the fields will be added.
         return res.length > 0 ? res : null;
     }
+    compileHmrUpdateCallback(clazz) {
+        const original = ts__default["default"].getOriginalNode(clazz);
+        if (!this.reflector.isClass(clazz) ||
+            !this.reflector.isClass(original) ||
+            !this.classes.has(original)) {
+            return null;
+        }
+        const record = this.classes.get(original);
+        for (const trait of record.traits) {
+            // Cannot compile a trait that is not resolved, or had any errors in its declaration.
+            if (trait.state === checker.TraitState.Resolved &&
+                trait.handler.compileHmrUpdateDeclaration !== undefined &&
+                !containsErrors(trait.analysisDiagnostics) &&
+                !containsErrors(trait.resolveDiagnostics)) {
+                return trait.handler.compileHmrUpdateDeclaration(clazz, trait.analysis, trait.resolution);
+            }
+        }
+        return null;
+    }
     decoratorsFor(node) {
         const original = ts__default["default"].getOriginalNode(node);
         if (!this.reflector.isClass(original) || !this.classes.has(original)) {
@@ -5253,7 +5324,7 @@ function extractClassDebugInfo(clazz, reflection, compilerHost, rootDirs, forbid
         return null;
     }
     const srcFile = clazz.getSourceFile();
-    const srcFileMaybeRelativePath = checker.getProjectRelativePath(srcFile, rootDirs, compilerHost);
+    const srcFileMaybeRelativePath = getProjectRelativePath(srcFile, rootDirs, compilerHost);
     return {
         type: new checker.WrappedNodeExpr(clazz.name),
         className: checker.literal(clazz.name.getText()),
@@ -9774,21 +9845,267 @@ class TsCreateProgramDriver {
  * found in the LICENSE file at https://angular.dev/license
  */
 /**
- * Extracts the metadata necessary to generate an HMR initializer.
+ * Determines the names of the file-level locals that the HMR
+ * initializer needs to capture and pass along.
+ * @param sourceFile File in which the file is being compiled.
+ * @param definition Compiled component definition.
+ * @param factory Compiled component factory.
+ * @param classMetadata Compiled `setClassMetadata` expression, if any.
+ * @param debugInfo Compiled `setClassDebugInfo` expression, if any.
  */
-function extractHmrInitializerMeta(clazz, reflection, compilerHost, rootDirs) {
+function extractHmrLocals(node, definition, factory, classMetadata, debugInfo) {
+    const name = ts__default["default"].isClassDeclaration(node) && node.name ? node.name.text : null;
+    const visitor = new PotentialTopLevelReadsVisitor();
+    const sourceFile = node.getSourceFile();
+    // Visit all of the compiled expression to look for potential
+    // local references that would have to be retained.
+    definition.expression.visitExpression(visitor, null);
+    definition.statements.forEach((statement) => statement.visitStatement(visitor, null));
+    factory.initializer?.visitExpression(visitor, null);
+    factory.statements.forEach((statement) => statement.visitStatement(visitor, null));
+    classMetadata?.visitStatement(visitor, null);
+    debugInfo?.visitStatement(visitor, null);
+    // Filter out only the references to defined top-level symbols. This allows us to ignore local
+    // variables inside of functions. Note that we filter out the class name since it is always
+    // defined and it saves us having to repeat this logic wherever the locals are consumed.
+    const availableTopLevel = getTopLevelDeclarationNames(sourceFile);
+    return Array.from(visitor.allReads).filter((r) => r !== name && availableTopLevel.has(r));
+}
+/**
+ * Gets the names of all top-level declarations within the file (imports, declared classes etc).
+ * @param sourceFile File in which to search for locals.
+ */
+function getTopLevelDeclarationNames(sourceFile) {
+    const results = new Set();
+    // Only look through the top-level statements.
+    for (const node of sourceFile.statements) {
+        // Class, function and const enum declarations need to be captured since they correspond
+        // to runtime code. Intentionally excludes interfaces and type declarations.
+        if (ts__default["default"].isClassDeclaration(node) ||
+            ts__default["default"].isFunctionDeclaration(node) ||
+            (ts__default["default"].isEnumDeclaration(node) &&
+                !node.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.ConstKeyword))) {
+            if (node.name) {
+                results.add(node.name.text);
+            }
+            continue;
+        }
+        // Variable declarations.
+        if (ts__default["default"].isVariableStatement(node)) {
+            for (const decl of node.declarationList.declarations) {
+                trackBindingName(decl.name, results);
+            }
+            continue;
+        }
+        // Import declarations.
+        if (ts__default["default"].isImportDeclaration(node) && node.importClause) {
+            const importClause = node.importClause;
+            // Skip over type-only imports since they won't be emitted to JS.
+            if (importClause.isTypeOnly) {
+                continue;
+            }
+            // import foo from 'foo'
+            if (importClause.name) {
+                results.add(importClause.name.text);
+            }
+            if (importClause.namedBindings) {
+                const namedBindings = importClause.namedBindings;
+                if (ts__default["default"].isNamespaceImport(namedBindings)) {
+                    // import * as foo from 'foo';
+                    results.add(namedBindings.name.text);
+                }
+                else {
+                    // import {foo} from 'foo';
+                    namedBindings.elements.forEach((el) => {
+                        if (!el.isTypeOnly) {
+                            results.add(el.name.text);
+                        }
+                    });
+                }
+            }
+            continue;
+        }
+    }
+    return results;
+}
+/**
+ * Adds all the variables declared through a `ts.BindingName` to a set of results.
+ * @param node Node from which to start searching for variables.
+ * @param results Set to which to add the matches.
+ */
+function trackBindingName(node, results) {
+    if (ts__default["default"].isIdentifier(node)) {
+        results.add(node.text);
+    }
+    else {
+        for (const el of node.elements) {
+            if (!ts__default["default"].isOmittedExpression(el)) {
+                trackBindingName(el.name, results);
+            }
+        }
+    }
+}
+/**
+ * Visitor that will traverse an AST looking for potential top-level variable reads.
+ * The reads are "potential", because the visitor doesn't account for local variables
+ * inside functions.
+ */
+class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
+    constructor() {
+        super(...arguments);
+        this.allReads = new Set();
+        /**
+         * Traverses a TypeScript AST and tracks all the top-level reads.
+         * @param node Node from which to start the traversal.
+         */
+        this.addAllTopLevelIdentifiers = (node) => {
+            if (ts__default["default"].isIdentifier(node) && this.isTopLevelIdentifierReference(node)) {
+                this.allReads.add(node.text);
+            }
+            else {
+                ts__default["default"].forEachChild(node, this.addAllTopLevelIdentifiers);
+            }
+        };
+    }
+    visitReadVarExpr(ast, context) {
+        this.allReads.add(ast.name);
+        super.visitReadVarExpr(ast, context);
+    }
+    visitWrappedNodeExpr(ast, context) {
+        if (this.isTypeScriptNode(ast.node)) {
+            this.addAllTopLevelIdentifiers(ast.node);
+        }
+        super.visitWrappedNodeExpr(ast, context);
+    }
+    /**
+     * TypeScript identifiers are used both when referring to a variable (e.g. `console.log(foo)`)
+     * and for names (e.g. `{foo: 123}`). This function determines if the identifier is a top-level
+     * variable read, rather than a nested name.
+     * @param node Identifier to check.
+     */
+    isTopLevelIdentifierReference(node) {
+        const parent = node.parent;
+        // The parent might be undefined for a synthetic node or if `setParentNodes` is set to false
+        // when the SourceFile was created. We can account for such cases using the type checker, at
+        // the expense of performance. At the moment of writing, we're keeping it simple since the
+        // compiler sets `setParentNodes: true`.
+        if (!parent) {
+            return false;
+        }
+        // Identifier referenced at the top level. Unlikely.
+        if (ts__default["default"].isSourceFile(parent) ||
+            (ts__default["default"].isExpressionStatement(parent) && parent.expression === node)) {
+            return true;
+        }
+        // Identifier used inside a call is only top-level if it's an argument.
+        // This also covers decorators since their expression is usually a call.
+        if (ts__default["default"].isCallExpression(parent)) {
+            return parent.expression === node || parent.arguments.includes(node);
+        }
+        // Identifier used in a property read is only top-level if it's the expression.
+        if (ts__default["default"].isPropertyAccessExpression(parent)) {
+            return parent.expression === node;
+        }
+        // Identifier used in an array is only top-level if it's one of the elements.
+        if (ts__default["default"].isArrayLiteralExpression(parent)) {
+            return parent.elements.includes(node);
+        }
+        // Identifier in a property assignment is only top level if it's the initializer.
+        if (ts__default["default"].isPropertyAssignment(parent)) {
+            return parent.initializer === node;
+        }
+        // Identifier in a class is only top level if it's the name.
+        if (ts__default["default"].isClassDeclaration(parent)) {
+            return parent.name === node;
+        }
+        // Otherwise it's not top-level.
+        return false;
+    }
+    /** Checks if a value is a TypeScript AST node. */
+    isTypeScriptNode(value) {
+        // If this is too permissive, we can also check for `getSourceFile`. This code runs
+        // on a narrow set of use cases so checking for `kind` should be enough.
+        return !!value && typeof value.kind === 'number';
+    }
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Extracts the HMR metadata for a class declaration.
+ * @param clazz Class being analyzed.
+ * @param reflection Reflection host.
+ * @param compilerHost Compiler host to use when resolving file names.
+ * @param rootDirs Root directories configured by the user.
+ * @param definition Analyzed component definition.
+ * @param factory Analyzed component factory.
+ * @param classMetadata Analyzed `setClassMetadata` expression, if any.
+ * @param debugInfo Analyzed `setClassDebugInfo` expression, if any.
+ */
+function extractHmrMetatadata(clazz, reflection, compilerHost, rootDirs, definition, factory, classMetadata, debugInfo) {
     if (!reflection.isClass(clazz)) {
         return null;
     }
     const sourceFile = clazz.getSourceFile();
-    const filePath = checker.getProjectRelativePath(sourceFile, rootDirs, compilerHost) ||
+    const filePath = getProjectRelativePath(sourceFile, rootDirs, compilerHost) ||
         compilerHost.getCanonicalFileName(sourceFile.fileName);
     const meta = {
         type: new checker.WrappedNodeExpr(clazz.name),
         className: clazz.name.text,
         filePath,
+        locals: extractHmrLocals(clazz, definition, factory, classMetadata, debugInfo),
+        coreName: '__ngCore__',
     };
     return meta;
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Gets the declaration for the function that replaces the metadata of a class during HMR.
+ * @param compilationResults Code generated for the class during compilation.
+ * @param meta HMR metadata about the class.
+ * @param sourceFile File in which the class is defined.
+ */
+function getHmrUpdateDeclaration(compilationResults, constantStatements, meta, sourceFile) {
+    const importRewriter = new HmrModuleImportRewriter(meta.coreName);
+    const importManager = new checker.ImportManager({
+        ...checker.presetImportManagerForceNamespaceImports,
+        rewriter: importRewriter,
+    });
+    const callback = compileHmrUpdateCallback(compilationResults, constantStatements, meta);
+    const node = checker.translateStatement(sourceFile, callback, importManager);
+    // The output AST doesn't support modifiers so we have to emit to
+    // TS and then update the declaration to add `export default`.
+    return ts__default["default"].factory.updateFunctionDeclaration(node, [
+        ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.ExportKeyword),
+        ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.DefaultKeyword),
+    ], node.asteriskToken, node.name, node.typeParameters, node.parameters, node.type, node.body);
+}
+/** Rewriter that replaces namespace imports to `@angular/core` with a specifier identifier. */
+class HmrModuleImportRewriter {
+    constructor(coreName) {
+        this.coreName = coreName;
+    }
+    rewriteNamespaceImportIdentifier(specifier, moduleName) {
+        return moduleName === '@angular/core' ? this.coreName : specifier;
+    }
+    rewriteSymbol(symbol) {
+        return symbol;
+    }
+    rewriteSpecifier(specifier) {
+        return specifier;
+    }
 }
 
 const EMPTY_ARRAY = [];
@@ -9860,6 +10177,10 @@ class ComponentDecoratorHandler {
             enableLetSyntax: this.enableLetSyntax,
             preserveSignificantWhitespace: this.i18nPreserveSignificantWhitespace,
         };
+        // Dependencies can't be deferred during HMR, because the HMR update module can't have
+        // dynamic imports and its dependencies need to be passed in directly. If dependencies
+        // are deferred, their imports will be deleted so we won't may lose the reference to them.
+        this.canDeferDeps = !enableHmr;
     }
     detect(node, decorators) {
         if (!decorators) {
@@ -10264,9 +10585,6 @@ class ComponentDecoratorHandler {
                     : null,
                 classDebugInfo: extractClassDebugInfo(node, this.reflector, this.compilerHost, this.rootDirs, 
                 /* forbidOrphanRenderering */ this.forbidOrphanRendering),
-                hmrInitializerMeta: this.enableHmr
-                    ? extractHmrInitializerMeta(node, this.reflector, this.compilerHost, this.rootDirs)
-                    : null,
                 template,
                 providersRequiringFactory,
                 viewProvidersRequiringFactory,
@@ -10780,14 +11098,18 @@ class ComponentDecoratorHandler {
         if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
             return [];
         }
-        const perComponentDeferredDeps = this.resolveAllDeferredDependencies(resolution);
+        const perComponentDeferredDeps = this.canDeferDeps
+            ? this.resolveAllDeferredDependencies(resolution)
+            : null;
         const meta = {
             ...analysis.meta,
             ...resolution,
             defer: this.compileDeferBlocks(resolution),
         };
         const fac = compileNgFactoryDefField(checker.toFactoryMetadata(meta, checker.FactoryTarget.Component));
-        removeDeferrableTypesFromComponentDecorator(analysis, perComponentDeferredDeps);
+        if (perComponentDeferredDeps !== null) {
+            removeDeferrableTypesFromComponentDecorator(analysis, perComponentDeferredDeps);
+        }
         const def = checker.compileComponentFromMetadata(meta, pool, checker.makeBindingParser());
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
         const classMetadata = analysis.classMetadata !== null
@@ -10796,10 +11118,13 @@ class ComponentDecoratorHandler {
         const debugInfo = analysis.classDebugInfo !== null
             ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
-        const hmrInitializer = analysis.hmrInitializerMeta !== null
-            ? compileClassHmrInitializer(analysis.hmrInitializerMeta).toStmt()
+        const hmrMeta = this.enableHmr
+            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, classMetadata, debugInfo)
             : null;
-        const deferrableImports = this.deferredSymbolTracker.getDeferrableImportDecls();
+        const hmrInitializer = hmrMeta ? compileHmrInitializer(hmrMeta).toStmt() : null;
+        const deferrableImports = this.canDeferDeps
+            ? this.deferredSymbolTracker.getDeferrableImportDecls()
+            : null;
         return checker.compileResults(fac, def, classMetadata, 'ɵcmp', inputTransformFields, deferrableImports, debugInfo, hmrInitializer);
     }
     compilePartial(node, analysis, resolution) {
@@ -10814,7 +11139,9 @@ class ComponentDecoratorHandler {
                 ? new checker.WrappedNodeExpr(analysis.template.sourceMapping.node)
                 : null,
         };
-        const perComponentDeferredDeps = this.resolveAllDeferredDependencies(resolution);
+        const perComponentDeferredDeps = this.canDeferDeps
+            ? this.resolveAllDeferredDependencies(resolution)
+            : null;
         const meta = {
             ...analysis.meta,
             ...resolution,
@@ -10826,21 +11153,27 @@ class ComponentDecoratorHandler {
         const classMetadata = analysis.classMetadata !== null
             ? compileComponentDeclareClassMetadata(analysis.classMetadata, perComponentDeferredDeps).toStmt()
             : null;
-        const deferrableImports = this.deferredSymbolTracker.getDeferrableImportDecls();
-        return checker.compileResults(fac, def, classMetadata, 'ɵcmp', inputTransformFields, deferrableImports);
+        const hmrMeta = this.enableHmr
+            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, classMetadata, null)
+            : null;
+        const hmrInitializer = hmrMeta ? compileHmrInitializer(hmrMeta).toStmt() : null;
+        const deferrableImports = this.canDeferDeps
+            ? this.deferredSymbolTracker.getDeferrableImportDecls()
+            : null;
+        return checker.compileResults(fac, def, classMetadata, 'ɵcmp', inputTransformFields, deferrableImports, null, hmrInitializer);
     }
     compileLocal(node, analysis, resolution, pool) {
         // In the local compilation mode we can only rely on the information available
         // within the `@Component.deferredImports` array, because in this mode compiler
         // doesn't have information on which dependencies belong to which defer blocks.
-        const deferrableTypes = analysis.explicitlyDeferredTypes;
+        const deferrableTypes = this.canDeferDeps ? analysis.explicitlyDeferredTypes : null;
         const meta = {
             ...analysis.meta,
             ...resolution,
             defer: this.compileDeferBlocks(resolution),
         };
-        if (analysis.explicitlyDeferredTypes !== null) {
-            removeDeferrableTypesFromComponentDecorator(analysis, analysis.explicitlyDeferredTypes);
+        if (deferrableTypes !== null) {
+            removeDeferrableTypesFromComponentDecorator(analysis, deferrableTypes);
         }
         const fac = compileNgFactoryDefField(checker.toFactoryMetadata(meta, checker.FactoryTarget.Component));
         const def = checker.compileComponentFromMetadata(meta, pool, checker.makeBindingParser());
@@ -10851,11 +11184,41 @@ class ComponentDecoratorHandler {
         const debugInfo = analysis.classDebugInfo !== null
             ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
-        const hmrInitializer = analysis.hmrInitializerMeta !== null
-            ? compileClassHmrInitializer(analysis.hmrInitializerMeta).toStmt()
+        const hmrMeta = this.enableHmr
+            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, classMetadata, debugInfo)
             : null;
-        const deferrableImports = this.deferredSymbolTracker.getDeferrableImportDecls();
+        const hmrInitializer = hmrMeta ? compileHmrInitializer(hmrMeta).toStmt() : null;
+        const deferrableImports = this.canDeferDeps
+            ? this.deferredSymbolTracker.getDeferrableImportDecls()
+            : null;
         return checker.compileResults(fac, def, classMetadata, 'ɵcmp', inputTransformFields, deferrableImports, debugInfo, hmrInitializer);
+    }
+    compileHmrUpdateDeclaration(node, analysis, resolution) {
+        if (analysis.template.errors !== null && analysis.template.errors.length > 0) {
+            return null;
+        }
+        // Create a brand-new constant pool since there shouldn't be any constant sharing.
+        const pool = new checker.ConstantPool();
+        const meta = {
+            ...analysis.meta,
+            ...resolution,
+            defer: this.compileDeferBlocks(resolution),
+        };
+        const fac = compileNgFactoryDefField(checker.toFactoryMetadata(meta, checker.FactoryTarget.Component));
+        const def = checker.compileComponentFromMetadata(meta, pool, checker.makeBindingParser());
+        const classMetadata = analysis.classMetadata !== null
+            ? compileComponentClassMetadata(analysis.classMetadata, null).toStmt()
+            : null;
+        const debugInfo = analysis.classDebugInfo !== null
+            ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
+            : null;
+        const hmrMeta = this.enableHmr
+            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, classMetadata, debugInfo)
+            : null;
+        const res = checker.compileResults(fac, def, classMetadata, 'ɵcmp', null, null, debugInfo, null);
+        return hmrMeta === null || res.length === 0
+            ? null
+            : getHmrUpdateDeclaration(res, pool.statements, hmrMeta, node.getSourceFile());
     }
     /**
      * Locates defer blocks in case scope information is not available.
@@ -14686,7 +15049,7 @@ class IndexingContext {
  * Visiting `text {{prop}}` will return
  * `[TopLevelIdentifier {name: 'prop', span: {start: 7, end: 11}}]`.
  */
-class ExpressionVisitor extends checker.RecursiveAstVisitor {
+class ExpressionVisitor extends checker.RecursiveAstVisitor$1 {
     constructor(expressionStr, absoluteOffset, boundTemplate, targetToIdentifier) {
         super();
         this.expressionStr = expressionStr;
@@ -15612,7 +15975,7 @@ class TemplateCheckWithVisitor {
 /**
  * Visits all nodes in a template (TmplAstNode and AST) and calls `visitNode` for each one.
  */
-class TemplateVisitor extends checker.RecursiveAstVisitor {
+class TemplateVisitor extends checker.RecursiveAstVisitor$1 {
     constructor(ctx, component, check) {
         super();
         this.ctx = ctx;
@@ -16384,7 +16747,7 @@ class TemplateSemanticsVisitor extends checker.RecursiveVisitor$1 {
     }
 }
 /** Visitor that verifies the semantics of the expressions within a template. */
-class ExpressionsSemanticsVisitor extends checker.RecursiveAstVisitor {
+class ExpressionsSemanticsVisitor extends checker.RecursiveAstVisitor$1 {
     constructor(templateTypeChecker, component, diagnostics) {
         super();
         this.templateTypeChecker = templateTypeChecker;
@@ -19373,7 +19736,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0-next.9+sha-4288ea8` usually means that core is at head so it supports
+    // A version of `19.0.0-next.9+sha-231e6ff` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -19870,6 +20233,28 @@ class NgCompiler {
         // optimized.
         const compilation = this.ensureAnalyzed();
         compilation.traitCompiler.xi18n(ctx);
+    }
+    /**
+     * Emits the JavaScript module that can be used to replace the metadata of a class during HMR.
+     * @param node Class for which to generate the update module.
+     */
+    emitHmrUpdateModule(node) {
+        const { traitCompiler, reflector } = this.ensureAnalyzed();
+        if (!reflector.isClass(node)) {
+            return null;
+        }
+        const callback = traitCompiler.compileHmrUpdateCallback(node);
+        if (callback === null) {
+            return null;
+        }
+        const sourceFile = node.getSourceFile();
+        const printer = ts__default["default"].createPrinter();
+        const nodeText = printer.printNode(ts__default["default"].EmitHint.Unspecified, callback, sourceFile);
+        return ts__default["default"].transpileModule(nodeText, {
+            compilerOptions: this.options,
+            fileName: sourceFile.fileName,
+            reportDiagnostics: false,
+        }).outputText;
     }
     ensureAnalyzed() {
         if (this.compilation === null) {
