@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-5971037
+ * @license Angular v19.0.0-next.9+sha-61ba230
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32,7 +32,7 @@ var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.0.0-next.9+sha-5971037');
+new checker.Version('19.0.0-next.9+sha-61ba230');
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
     return new program.NgtscProgram(rootNames, options, host, oldProgram);
@@ -365,7 +365,7 @@ function toStandalone(sourceFiles, program, printer, fileImportRemapper, compone
 function convertNgModuleDeclarationToStandalone(decl, allDeclarations, tracker, typeChecker, importRemapper) {
     const directiveMeta = typeChecker.getDirectiveMetadata(decl);
     if (directiveMeta && directiveMeta.decorator && !directiveMeta.isStandalone) {
-        let decorator = removeStandaloneFalseFromDecorator(directiveMeta.decorator);
+        let decorator = markDecoratorAsStandalone(directiveMeta.decorator);
         if (directiveMeta.isComponent) {
             const importsToAdd = getComponentImportExpressions(decl, allDeclarations, tracker, typeChecker, importRemapper);
             if (importsToAdd.length > 0) {
@@ -381,7 +381,7 @@ function convertNgModuleDeclarationToStandalone(decl, allDeclarations, tracker, 
     else {
         const pipeMeta = typeChecker.getPipeMetadata(decl);
         if (pipeMeta && pipeMeta.decorator && !pipeMeta.isStandalone) {
-            tracker.replaceNode(pipeMeta.decorator, removeStandaloneFalseFromDecorator(pipeMeta.decorator));
+            tracker.replaceNode(pipeMeta.decorator, markDecoratorAsStandalone(pipeMeta.decorator));
         }
     }
 }
@@ -540,23 +540,25 @@ function moveDeclarationsToImports(literal, allDeclarations, typeChecker, templa
     }
     tracker.replaceNode(literal, ts__default["default"].factory.updateObjectLiteralExpression(literal, ts__default["default"].factory.createNodeArray(properties, literal.properties.hasTrailingComma)), ts__default["default"].EmitHint.Expression);
 }
-/** Adds `standalone: true` to a decorator node. */
-function removeStandaloneFalseFromDecorator(node) {
-    // Invalid decorator.
-    if (!ts__default["default"].isCallExpression(node.expression) || node.expression.arguments.length !== 1) {
+/** Sets a decorator node to be standalone. */
+function markDecoratorAsStandalone(node) {
+    const metadata = extractMetadataLiteral(node);
+    if (metadata === null || !ts__default["default"].isCallExpression(node.expression)) {
         return node;
     }
-    if (!ts__default["default"].isObjectLiteralExpression(node.expression.arguments[0])) {
-        // Unsupported case (e.g. `@Component(SOME_CONST)`). Return the original node.
+    const standaloneProp = metadata.properties.find((prop) => {
+        return isNamedPropertyAssignment(prop) && prop.name.text === 'standalone';
+    });
+    // In v19 standalone is the default so don't do anything if there's no `standalone`
+    // property or it's initialized to anything other than `false`.
+    if (!standaloneProp || standaloneProp.initializer.kind !== ts__default["default"].SyntaxKind.FalseKeyword) {
         return node;
     }
-    const hasTrailingComma = node.expression.arguments[0].properties.hasTrailingComma;
-    const properties = node.expression.arguments[0].properties;
-    const literalProperties = properties.filter((element) => !isStandaloneProperty(element));
+    const newProperties = metadata.properties.filter((element) => element !== standaloneProp);
     // Use `createDecorator` instead of `updateDecorator`, because
     // the latter ends up duplicating the node's leading comment.
     return ts__default["default"].factory.createDecorator(ts__default["default"].factory.createCallExpression(node.expression.expression, node.expression.typeArguments, [
-        ts__default["default"].factory.createObjectLiteralExpression(ts__default["default"].factory.createNodeArray(literalProperties, hasTrailingComma), literalProperties.length > 1),
+        ts__default["default"].factory.createObjectLiteralExpression(ts__default["default"].factory.createNodeArray(newProperties, metadata.properties.hasTrailingComma), newProperties.length > 1),
     ]));
 }
 /**
@@ -601,9 +603,6 @@ function setPropertyOnAngularDecorator(node, name, initializer) {
     return ts__default["default"].factory.createDecorator(ts__default["default"].factory.createCallExpression(node.expression.expression, node.expression.typeArguments, [
         ts__default["default"].factory.createObjectLiteralExpression(ts__default["default"].factory.createNodeArray(literalProperties, hasTrailingComma), literalProperties.length > 1),
     ]));
-}
-function isStandaloneProperty(prop) {
-    return (ts__default["default"].isPropertyAssignment(prop) && ts__default["default"].isIdentifier(prop.name) && prop.name.text === 'standalone');
 }
 /** Checks if a node is a `PropertyAssignment` with a name. */
 function isNamedPropertyAssignment(node) {
@@ -792,13 +791,13 @@ function migrateTestDeclarations(testObjects, declarationsOutsideOfTestFiles, tr
     for (const decorator of decorators) {
         const closestClass = nodes.closestNode(decorator.node, ts__default["default"].isClassDeclaration);
         if (decorator.name === 'Pipe' || decorator.name === 'Directive') {
-            tracker.replaceNode(decorator.node, removeStandaloneFalseFromDecorator(decorator.node));
+            tracker.replaceNode(decorator.node, markDecoratorAsStandalone(decorator.node));
             if (closestClass) {
                 allDeclarations.add(closestClass);
             }
         }
         else if (decorator.name === 'Component') {
-            const newDecorator = removeStandaloneFalseFromDecorator(decorator.node);
+            const newDecorator = markDecoratorAsStandalone(decorator.node);
             const importsToAdd = componentImports.get(decorator.node);
             if (closestClass) {
                 allDeclarations.add(closestClass);
