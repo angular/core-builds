@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-7f0b49d
+ * @license Angular v19.0.0-next.9+sha-4288ea8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -532,14 +532,14 @@ function computeDigest(message) {
 /**
  * Return the message id or compute it using the XLIFF2/XMB/$localize digest.
  */
-function decimalDigest(message, preservePlaceholders) {
-    return message.id || computeDecimalDigest(message, preservePlaceholders);
+function decimalDigest(message) {
+    return message.id || computeDecimalDigest(message);
 }
 /**
  * Compute the message id using the XLIFF2/XMB/$localize digest.
  */
-function computeDecimalDigest(message, preservePlaceholders) {
-    const visitor = new _SerializerIgnoreExpVisitor(preservePlaceholders);
+function computeDecimalDigest(message) {
+    const visitor = new _SerializerIgnoreIcuExpVisitor();
     const parts = message.nodes.map((a) => a.visit(visitor, null));
     return computeMsgId(parts.join(''), message.meaning);
 }
@@ -587,21 +587,11 @@ function serializeNodes(nodes) {
 /**
  * Serialize the i18n ast to something xml-like in order to generate an UID.
  *
- * Ignore the expressions so that message IDs stays identical if only the expression changes.
+ * Ignore the ICU expressions so that message IDs stays identical if only the expression changes.
  *
  * @internal
  */
-class _SerializerIgnoreExpVisitor extends _SerializerVisitor {
-    constructor(preservePlaceholders) {
-        super();
-        this.preservePlaceholders = preservePlaceholders;
-    }
-    visitPlaceholder(ph, context) {
-        // Do not take the expression into account when `preservePlaceholders` is disabled.
-        return this.preservePlaceholders
-            ? super.visitPlaceholder(ph, context)
-            : `<ph name="${ph.name}"/>`;
-    }
+class _SerializerIgnoreIcuExpVisitor extends _SerializerVisitor {
     visitIcu(icu) {
         let strCases = Object.keys(icu.cases).map((k) => `${k} {${icu.cases[k].visit(this)}}`);
         // Do not take the expression into account
@@ -5047,7 +5037,7 @@ class _Visitor$2 {
     }
 }
 const _visitor = new _Visitor$2();
-function serialize(nodes) {
+function serialize$1(nodes) {
     return nodes.map((node) => node.visit(_visitor)).join('');
 }
 class Declaration {
@@ -5141,10 +5131,6 @@ const _DOCTYPE = `<!ELEMENT messagebundle (msg)*>
 
 <!ELEMENT ex (#PCDATA)>`;
 class Xmb extends Serializer {
-    constructor(preservePlaceholders = true) {
-        super();
-        this.preservePlaceholders = preservePlaceholders;
-    }
     write(messages, locale) {
         const exampleVisitor = new ExampleVisitor();
         const visitor = new _Visitor$1();
@@ -5167,7 +5153,7 @@ class Xmb extends Serializer {
             rootNode.children.push(new CR(2), new Tag(_MESSAGE_TAG, attrs, [...sourceTags, ...visitor.serialize(message.nodes)]));
         });
         rootNode.children.push(new CR());
-        return serialize([
+        return serialize$1([
             new Declaration({ version: '1.0', encoding: 'UTF-8' }),
             new CR(),
             new Doctype(_MESSAGES_TAG, _DOCTYPE),
@@ -5180,7 +5166,7 @@ class Xmb extends Serializer {
         throw new Error('Unsupported');
     }
     digest(message) {
-        return digest(message, this.preservePlaceholders);
+        return digest(message);
     }
     createNameMapper(message) {
         return new SimplePlaceholderMapper(message, toPublicName);
@@ -5261,8 +5247,8 @@ class _Visitor$1 {
         return [].concat(...nodes.map((node) => node.visit(this)));
     }
 }
-function digest(message, preservePlaceholders) {
-    return decimalDigest(message, preservePlaceholders);
+function digest(message) {
+    return decimalDigest(message);
 }
 // TC requires at least one non-empty example on placeholders
 class ExampleVisitor {
@@ -18118,6 +18104,128 @@ function getIndexMapForOriginalTemplate(interpolatedTokens) {
     return offsetMap;
 }
 
+/** Serializes the given AST into a normalized string format. */
+function serialize(expression) {
+    return expression.visit(new SerializeExpressionVisitor());
+}
+class SerializeExpressionVisitor {
+    visitUnary(ast, context) {
+        return `${ast.operator}${ast.expr.visit(this, context)}`;
+    }
+    visitBinary(ast, context) {
+        return `${ast.left.visit(this, context)} ${ast.operation} ${ast.right.visit(this, context)}`;
+    }
+    visitChain(ast, context) {
+        return ast.expressions.map((e) => e.visit(this, context)).join('; ');
+    }
+    visitConditional(ast, context) {
+        return `${ast.condition.visit(this, context)} ? ${ast.trueExp.visit(this, context)} : ${ast.falseExp.visit(this, context)}`;
+    }
+    visitThisReceiver() {
+        return 'this';
+    }
+    visitImplicitReceiver() {
+        return '';
+    }
+    visitInterpolation(ast, context) {
+        return interleave(ast.strings, ast.expressions.map((e) => e.visit(this, context))).join('');
+    }
+    visitKeyedRead(ast, context) {
+        return `${ast.receiver.visit(this, context)}[${ast.key.visit(this, context)}]`;
+    }
+    visitKeyedWrite(ast, context) {
+        return `${ast.receiver.visit(this, context)}[${ast.key.visit(this, context)}] = ${ast.value.visit(this, context)}`;
+    }
+    visitLiteralArray(ast, context) {
+        return `[${ast.expressions.map((e) => e.visit(this, context)).join(', ')}]`;
+    }
+    visitLiteralMap(ast, context) {
+        return `{${zip(ast.keys.map((literal) => (literal.quoted ? `'${literal.key}'` : literal.key)), ast.values.map((value) => value.visit(this, context)))
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(', ')}}`;
+    }
+    visitLiteralPrimitive(ast) {
+        if (ast.value === null)
+            return 'null';
+        switch (typeof ast.value) {
+            case 'number':
+            case 'boolean':
+                return ast.value.toString();
+            case 'undefined':
+                return 'undefined';
+            case 'string':
+                return `'${ast.value.replace(/'/g, `\\'`)}'`;
+            default:
+                throw new Error(`Unsupported primitive type: ${ast.value}`);
+        }
+    }
+    visitPipe(ast, context) {
+        return `${ast.exp.visit(this, context)} | ${ast.name}`;
+    }
+    visitPrefixNot(ast, context) {
+        return `!${ast.expression.visit(this, context)}`;
+    }
+    visitNonNullAssert(ast, context) {
+        return `${ast.expression.visit(this, context)}!`;
+    }
+    visitPropertyRead(ast, context) {
+        if (ast.receiver instanceof ImplicitReceiver) {
+            return ast.name;
+        }
+        else {
+            return `${ast.receiver.visit(this, context)}.${ast.name}`;
+        }
+    }
+    visitPropertyWrite(ast, context) {
+        if (ast.receiver instanceof ImplicitReceiver) {
+            return `${ast.name} = ${ast.value.visit(this, context)}`;
+        }
+        else {
+            return `${ast.receiver.visit(this, context)}.${ast.name} = ${ast.value.visit(this, context)}`;
+        }
+    }
+    visitSafePropertyRead(ast, context) {
+        return `${ast.receiver.visit(this, context)}?.${ast.name}`;
+    }
+    visitSafeKeyedRead(ast, context) {
+        return `${ast.receiver.visit(this, context)}?.[${ast.key.visit(this, context)}]`;
+    }
+    visitCall(ast, context) {
+        return `${ast.receiver.visit(this, context)}(${ast.args
+            .map((e) => e.visit(this, context))
+            .join(', ')})`;
+    }
+    visitSafeCall(ast, context) {
+        return `${ast.receiver.visit(this, context)}?.(${ast.args
+            .map((e) => e.visit(this, context))
+            .join(', ')})`;
+    }
+    visitASTWithSource(ast, context) {
+        return ast.ast.visit(this, context);
+    }
+}
+/** Zips the two input arrays into a single array of pairs of elements at the same index. */
+function zip(left, right) {
+    if (left.length !== right.length)
+        throw new Error('Array lengths must match');
+    return left.map((l, i) => [l, right[i]]);
+}
+/**
+ * Interleaves the two arrays, starting with the first item on the left, then the first item
+ * on the right, second item from the left, and so on. When the first array's items are exhausted,
+ * the remaining items from the other array are included with no interleaving.
+ */
+function interleave(left, right) {
+    const result = [];
+    for (let index = 0; index < Math.max(left.length, right.length); index++) {
+        if (index < left.length)
+            result.push(left[index]);
+        if (index < right.length)
+            result.push(right[index]);
+    }
+    return result;
+}
+
 // =================================================================================================
 // =================================================================================================
 // =========== S T O P   -  S T O P   -  S T O P   -  S T O P   -  S T O P   -  S T O P  ===========
@@ -18951,19 +19059,20 @@ const _expParser = new Parser(new Lexer());
 /**
  * Returns a function converting html nodes to an i18n Message given an interpolationConfig
  */
-function createI18nMessageFactory(interpolationConfig, containerBlocks, retainEmptyTokens) {
-    const visitor = new _I18nVisitor(_expParser, interpolationConfig, containerBlocks, retainEmptyTokens);
+function createI18nMessageFactory(interpolationConfig, containerBlocks, retainEmptyTokens, preserveExpressionWhitespace) {
+    const visitor = new _I18nVisitor(_expParser, interpolationConfig, containerBlocks, retainEmptyTokens, preserveExpressionWhitespace);
     return (nodes, meaning, description, customId, visitNodeFn) => visitor.toI18nMessage(nodes, meaning, description, customId, visitNodeFn);
 }
 function noopVisitNodeFn(_html, i18n) {
     return i18n;
 }
 class _I18nVisitor {
-    constructor(_expressionParser, _interpolationConfig, _containerBlocks, _retainEmptyTokens) {
+    constructor(_expressionParser, _interpolationConfig, _containerBlocks, _retainEmptyTokens, _preserveExpressionWhitespace) {
         this._expressionParser = _expressionParser;
         this._interpolationConfig = _interpolationConfig;
         this._containerBlocks = _containerBlocks;
         this._retainEmptyTokens = _retainEmptyTokens;
+        this._preserveExpressionWhitespace = _preserveExpressionWhitespace;
     }
     toI18nMessage(nodes, meaning = '', description = '', customId = '', visitNodeFn) {
         const context = {
@@ -19092,14 +19201,24 @@ class _I18nVisitor {
                 case 8 /* TokenType.INTERPOLATION */:
                 case 17 /* TokenType.ATTR_VALUE_INTERPOLATION */:
                     hasInterpolation = true;
-                    const expression = token.parts[1];
+                    const [startMarker, expression, endMarker] = token.parts;
                     const baseName = extractPlaceholderName(expression) || 'INTERPOLATION';
                     const phName = context.placeholderRegistry.getPlaceholderName(baseName, expression);
-                    context.placeholderToContent[phName] = {
-                        text: token.parts.join(''),
-                        sourceSpan: token.sourceSpan,
-                    };
-                    nodes.push(new Placeholder(expression, phName, token.sourceSpan));
+                    if (this._preserveExpressionWhitespace) {
+                        context.placeholderToContent[phName] = {
+                            text: token.parts.join(''),
+                            sourceSpan: token.sourceSpan,
+                        };
+                        nodes.push(new Placeholder(expression, phName, token.sourceSpan));
+                    }
+                    else {
+                        const normalized = this.normalizeExpression(token);
+                        context.placeholderToContent[phName] = {
+                            text: `${startMarker}${normalized}${endMarker}`,
+                            sourceSpan: token.sourceSpan,
+                        };
+                        nodes.push(new Placeholder(normalized, phName, token.sourceSpan));
+                    }
                     break;
                 default:
                     // Try to merge text tokens with previous tokens. We do this even for all tokens
@@ -19145,6 +19264,15 @@ class _I18nVisitor {
         else {
             return nodes[0];
         }
+    }
+    // Normalize expression whitespace by parsing and re-serializing it. This makes
+    // message IDs more durable to insignificant whitespace changes.
+    normalizeExpression(token) {
+        const expression = token.parts[1];
+        const expr = this._expressionParser.parseBinding(expression, 
+        /* location */ token.sourceSpan.start.toString(), 
+        /* absoluteOffset */ token.sourceSpan.start.offset, this._interpolationConfig);
+        return serialize(expr);
     }
 }
 /**
@@ -19298,7 +19426,8 @@ class I18nMetaVisitor {
     }
     _generateI18nMessage(nodes, meta = '', visitNodeFn) {
         const { meaning, description, customId } = this._parseMetadata(meta);
-        const createI18nMessage = createI18nMessageFactory(this.interpolationConfig, this.containerBlocks, this.retainEmptyTokens);
+        const createI18nMessage = createI18nMessageFactory(this.interpolationConfig, this.containerBlocks, this.retainEmptyTokens, 
+        /* preserveExpressionWhitespace */ this.preserveSignificantWhitespace);
         const message = createI18nMessage(nodes, meaning, description, customId, visitNodeFn);
         this._setMessageId(message, meta);
         this._setLegacyIds(message, meta);
@@ -19447,9 +19576,7 @@ class I18nMetaVisitor {
      */
     _setMessageId(message, meta) {
         if (!message.id) {
-            message.id =
-                (meta instanceof Message && meta.id) ||
-                    decimalDigest(message, /* preservePlaceholders */ this.preserveSignificantWhitespace);
+            message.id = (meta instanceof Message && meta.id) || decimalDigest(message);
         }
     }
     /**
@@ -19460,11 +19587,7 @@ class I18nMetaVisitor {
      */
     _setLegacyIds(message, meta) {
         if (this.enableI18nLegacyMessageIdFormat) {
-            message.legacyIds = [
-                computeDigest(message),
-                computeDecimalDigest(message, 
-                /* preservePlaceholders */ this.preserveSignificantWhitespace),
-            ];
+            message.legacyIds = [computeDigest(message), computeDecimalDigest(message)];
         }
         else if (typeof meta !== 'string') {
             // This occurs if we are doing the 2nd pass after whitespace removal (see `parseTemplate()` in
@@ -29317,7 +29440,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.9+sha-7f0b49d');
+new Version('19.0.0-next.9+sha-4288ea8');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -29543,7 +29666,8 @@ class _Visitor {
         // When dropping significant whitespace we need to retain whitespace tokens or
         // else we won't be able to reuse source spans because empty tokens would be
         // removed and cause a mismatch.
-        !this._preserveSignificantWhitespace /* retainEmptyTokens */);
+        /* retainEmptyTokens */ !this._preserveSignificantWhitespace, 
+        /* preserveExpressionWhitespace */ this._preserveSignificantWhitespace);
     }
     // looks for translatable attributes
     _visitAttributesOf(el) {
@@ -30708,7 +30832,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-745aec03.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-5b32f0fd.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -44735,7 +44859,7 @@ exports.resolveImportedFile = resolveImportedFile;
 exports.resolveModuleName = resolveModuleName;
 exports.resolveProvidersRequiringFactory = resolveProvidersRequiringFactory;
 exports.retagAllTsFiles = retagAllTsFiles;
-exports.serialize = serialize;
+exports.serialize = serialize$1;
 exports.setFileSystem = setFileSystem;
 exports.sfExtensionData = sfExtensionData;
 exports.stripExtension = stripExtension;
