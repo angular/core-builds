@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.9+sha-231e6ff
+ * @license Angular v19.0.0-next.9+sha-5971037
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,10 +11,10 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var schematics = require('@angular-devkit/schematics');
 var fs = require('fs');
 var p = require('path');
-var compiler_host = require('./compiler_host-a661c202.js');
+var compiler_host = require('./compiler_host-81f430d9.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 var ts = require('typescript');
-require('./checker-2ad132ae.js');
+require('./checker-77660732.js');
 require('os');
 require('module');
 require('url');
