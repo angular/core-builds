@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-a8d4eb8
+ * @license Angular v19.0.0-next.10+sha-94bc69a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,7 +9,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var group_replacements = require('./group_replacements-1f48eff7.js');
+var group_replacements = require('./group_replacements-4e9ae895.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-77660732.js');
@@ -340,6 +340,8 @@ function extractDtsInput(node, metadataReader) {
             ...inputMapping,
             inputDecorator: null,
             inSourceFile: false,
+            // Inputs from `.d.ts` cannot have any field decorators applied.
+            fieldDecorators: [],
         };
 }
 /**
@@ -391,6 +393,7 @@ function extractSourceCodeInput(node, host, reflector, evaluator, refEmitter) {
         inSourceFile: true,
         transform: transformResult,
         inputDecorator,
+        fieldDecorators: decorators,
     };
 }
 /**
@@ -614,8 +617,17 @@ function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflec
  * In addition, spying onto an input may be problematic- so we skip migrating
  * such.
  */
-function pass3__checkIncompatiblePatterns(inheritanceGraph, checker, groupedTsAstVisitor, knownInputs) {
-    group_replacements.checkIncompatiblePatterns(inheritanceGraph, checker, groupedTsAstVisitor, knownInputs, () => knownInputs.getAllInputContainingClasses());
+function pass3__checkIncompatiblePatterns(host, inheritanceGraph, checker$1, groupedTsAstVisitor, knownInputs) {
+    group_replacements.checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisitor, knownInputs, () => knownInputs.getAllInputContainingClasses());
+    for (const input of knownInputs.knownInputIds.values()) {
+        const hostBindingDecorators = checker.getAngularDecorators(input.metadata.fieldDecorators, ['HostBinding'], host.isMigratingCore);
+        if (hostBindingDecorators.length > 0) {
+            knownInputs.markFieldIncompatible(input.descriptor, {
+                context: hostBindingDecorators[0].node,
+                reason: group_replacements.FieldIncompatibilityReason.SignalIncompatibleWithHostBinding,
+            });
+        }
+    }
 }
 
 /**
@@ -662,7 +674,7 @@ function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProg
     // Register pass 2. Find all source file references.
     pass2_IdentifySourceFileReferences(host.programInfo, typeChecker, reflector, resourceLoader, evaluator, templateTypeChecker, pass2And3SourceFileVisitor, knownInputs, result, fieldNamesToConsiderForReferenceLookup);
     // Register pass 3. Check incompatible patterns pass.
-    pass3__checkIncompatiblePatterns(inheritanceGraph, typeChecker, pass2And3SourceFileVisitor, knownInputs);
+    pass3__checkIncompatiblePatterns(host, inheritanceGraph, typeChecker, pass2And3SourceFileVisitor, knownInputs);
     // Perform Pass 2 and Pass 3, efficiently in one pass.
     pass2And3SourceFileVisitor.execute();
     // Determine incompatible inputs based on resolved references.

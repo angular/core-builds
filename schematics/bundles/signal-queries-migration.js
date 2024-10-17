@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-a8d4eb8
+ * @license Angular v19.0.0-next.10+sha-94bc69a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var group_replacements = require('./group_replacements-1f48eff7.js');
+var group_replacements = require('./group_replacements-4e9ae895.js');
 require('os');
 var ts = require('typescript');
 var checker = require('./checker-77660732.js');
@@ -305,6 +305,7 @@ function extractSourceQueryDefinition(node, reflector, evaluator, info) {
         args: decorator.args ?? [],
         queryInfo,
         node: node,
+        fieldDecorators: decorators,
     };
 }
 
@@ -747,6 +748,13 @@ class SignalQueriesMigration extends group_replacements.TsurgeComplexMigration {
                     (queryNode.type.types.length > 2 ||
                         !queryNode.type.types.some((t) => t.kind === ts__default["default"].SyntaxKind.UndefinedKeyword))) {
                     markFieldIncompatibleInMetadata(res.potentialProblematicQueries, extractedQuery.id, group_replacements.FieldIncompatibilityReason.SignalQueries__IncompatibleMultiUnionType);
+                }
+                // Migrating fields with `@HostBinding` is incompatible as
+                // the host binding decorator does not invoke the signal.
+                const hostBindingDecorators = checker.getAngularDecorators(extractedQuery.fieldDecorators, ['HostBinding'], 
+                /* isCore */ false);
+                if (hostBindingDecorators.length > 0) {
+                    markFieldIncompatibleInMetadata(res.potentialProblematicQueries, extractedQuery.id, group_replacements.FieldIncompatibilityReason.SignalIncompatibleWithHostBinding);
                 }
             }
         };

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-a8d4eb8
+ * @license Angular v19.0.0-next.10+sha-94bc69a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -267,14 +267,15 @@ exports.FieldIncompatibilityReason = void 0;
     FieldIncompatibilityReason[FieldIncompatibilityReason["DerivedIsIncompatible"] = 5] = "DerivedIsIncompatible";
     FieldIncompatibilityReason[FieldIncompatibilityReason["SpyOnThatOverwritesField"] = 6] = "SpyOnThatOverwritesField";
     FieldIncompatibilityReason[FieldIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 7] = "PotentiallyNarrowedInTemplateButNoSupportYet";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__RequiredButNoGoodExplicitTypeExtractable"] = 8] = "SignalInput__RequiredButNoGoodExplicitTypeExtractable";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable"] = 9] = "SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__QueryListProblematicFieldAccessed"] = 10] = "SignalQueries__QueryListProblematicFieldAccessed";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__IncompatibleMultiUnionType"] = 11] = "SignalQueries__IncompatibleMultiUnionType";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["WriteAssignment"] = 12] = "WriteAssignment";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["Accessor"] = 13] = "Accessor";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 14] = "OutsideOfMigrationScope";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 15] = "SkippedViaConfigFilter";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalIncompatibleWithHostBinding"] = 8] = "SignalIncompatibleWithHostBinding";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__RequiredButNoGoodExplicitTypeExtractable"] = 9] = "SignalInput__RequiredButNoGoodExplicitTypeExtractable";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable"] = 10] = "SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__QueryListProblematicFieldAccessed"] = 11] = "SignalQueries__QueryListProblematicFieldAccessed";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__IncompatibleMultiUnionType"] = 12] = "SignalQueries__IncompatibleMultiUnionType";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["WriteAssignment"] = 13] = "WriteAssignment";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["Accessor"] = 14] = "Accessor";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 15] = "OutsideOfMigrationScope";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 16] = "SkippedViaConfigFilter";
 })(exports.FieldIncompatibilityReason || (exports.FieldIncompatibilityReason = {}));
 /** Field reasons that cannot be ignored. */
 const nonIgnorableFieldIncompatibilities = [
@@ -29625,7 +29626,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.10+sha-a8d4eb8');
+new Version('19.0.0-next.10+sha-94bc69a');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30794,6 +30795,13 @@ function getMessageForFieldIncompatibility(reason, fieldName) {
                 short: `This ${fieldName.single} cannot be migrated because the field is overridden by a subclass.`,
                 extra: 'The field in the subclass is incompatible for migration, so migrating this field would ' +
                     'break your build.',
+            };
+        case exports.FieldIncompatibilityReason.SignalIncompatibleWithHostBinding:
+            return {
+                short: `This ${fieldName.single} is used in combination with \`@HostBinding\` and ` +
+                    `migrating would break.`,
+                extra: `\`@HostBinding\` does not invoke the signal automatically and your code would. ` +
+                    `break after migration. Use \`host\` of \`@Directive\`/\`@Component\`for host bindings.`,
             };
         case exports.FieldIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet:
             return {
