@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-141f310
+ * @license Angular v19.0.0-next.10+sha-dd407a7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -95,6 +95,8 @@ export declare function producerAccessed(node: ReactiveNode): void;
  * Called by source producers (that is, not computeds) whenever their values change.
  */
 export declare function producerIncrementEpoch(): void;
+
+export declare function producerMarkClean(node: ReactiveNode): void;
 
 /**
  * Propagate a dirty notification to live consumers of this producer.

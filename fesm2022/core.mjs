@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-141f310
+ * @license Angular v19.0.0-next.10+sha-dd407a7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17034,7 +17034,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-141f310']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-dd407a7']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31567,7 +31567,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.10+sha-141f310');
+const VERSION = new Version('19.0.0-next.10+sha-dd407a7');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -37091,14 +37091,12 @@ function producerUpdateValueVersion(node) {
     if (!node.producerMustRecompute(node) && !consumerPollProducersForChange(node)) {
         // None of our producers report a change since the last time they were read, so no
         // recomputation of our value is necessary, and we can consider ourselves clean.
-        node.dirty = false;
-        node.lastCleanEpoch = epoch;
+        producerMarkClean(node);
         return;
     }
     node.producerRecomputeValue(node);
     // After recomputing the value, we're no longer dirty.
-    node.dirty = false;
-    node.lastCleanEpoch = epoch;
+    producerMarkClean(node);
 }
 /**
  * Propagate a dirty notification to live consumers of this producer.
@@ -37132,6 +37130,10 @@ function consumerMarkDirty(node) {
     node.dirty = true;
     producerNotifyConsumers(node);
     node.consumerMarkedDirty?.(node);
+}
+function producerMarkClean(node) {
+    node.dirty = false;
+    node.lastCleanEpoch = epoch;
 }
 /**
  * Prepare this consumer to run a computation in its reactive context.
