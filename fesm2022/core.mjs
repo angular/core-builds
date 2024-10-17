@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-94bc69a
+ * @license Angular v19.0.0-next.10+sha-141f310
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17034,7 +17034,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-94bc69a']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-141f310']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31068,7 +31068,7 @@ function compileComponent(type, metadata) {
                         addDirectiveDefToUndecoratedParents(type);
                     }
                     ngComponentDef = compiler.compileComponent(angularCoreEnv, templateUrl, meta);
-                    if (metadata.standalone) {
+                    if (meta.isStandalone) {
                         // Patch the component definition for standalone components with `directiveDefs` and
                         // `pipeDefs` functions which lazily compute the directives/pipes available in the
                         // standalone component. Also set `dependencies` to the lazily resolved list of imports.
@@ -31100,14 +31100,14 @@ function compileComponent(type, metadata) {
                     patchComponentDefWithScope(ngComponentDef, scopes);
                 }
                 if (metadata.schemas) {
-                    if (metadata.standalone) {
+                    if (meta.isStandalone) {
                         ngComponentDef.schemas = metadata.schemas;
                     }
                     else {
                         throw new Error(`The 'schemas' was specified for the ${stringifyForError(type)} but is only valid on a component that is standalone.`);
                     }
                 }
-                else if (metadata.standalone) {
+                else if (meta.isStandalone) {
                     ngComponentDef.schemas = [];
                 }
             }
@@ -31567,7 +31567,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.10+sha-94bc69a');
+const VERSION = new Version('19.0.0-next.10+sha-141f310');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
