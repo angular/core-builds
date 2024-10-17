@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-4b9accd
+ * @license Angular v19.0.0-next.10+sha-a8d4eb8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6825,6 +6825,9 @@ class EventEmitter_ extends Subject {
         // Attempt to retrieve a `DestroyRef` and `PendingTasks` optionally.
         // For backwards compatibility reasons, this cannot be required.
         if (isInInjectionContext()) {
+            // `DestroyRef` is optional because it is not available in all contexts.
+            // But it is useful to properly complete the `EventEmitter` if used with `outputToObservable`
+            // when the component/directive is destroyed. (See `outputToObservable` for more details.)
             this.destroyRef = inject(DestroyRef, { optional: true }) ?? undefined;
             this.pendingTasks = inject(PendingTasksInternal, { optional: true }) ?? undefined;
         }
@@ -17031,7 +17034,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-4b9accd']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-a8d4eb8']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31564,7 +31567,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.10+sha-4b9accd');
+const VERSION = new Version('19.0.0-next.10+sha-a8d4eb8');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
