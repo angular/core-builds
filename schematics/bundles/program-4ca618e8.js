@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-8311f00
+ * @license Angular v19.0.0-next.10+sha-d0c74f3
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -930,7 +930,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-8311f00'));
+    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-d0c74f3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -948,7 +948,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-8311f00'));
+    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-d0c74f3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1043,7 +1043,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-8311f00'));
+    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-d0c74f3'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1462,7 +1462,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-8311f00'));
+    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-d0c74f3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1497,7 +1497,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-8311f00'));
+    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-d0c74f3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1548,7 +1548,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-8311f00'));
+    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-d0c74f3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1581,7 +1581,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-8311f00'));
+    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-d0c74f3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1632,7 +1632,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-8311f00'));
+    definitionMap.set('version', checker.literal('19.0.0-next.10+sha-d0c74f3'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -5951,6 +5951,8 @@ function makeUnknownComponentDeferredImportDiagnostic(ref, rawExpr) {
     return checker.makeDiagnostic(checker.ErrorCode.COMPONENT_UNKNOWN_DEFERRED_IMPORT, getDiagnosticNode(ref, rawExpr), `Component deferred imports must be standalone components, directives or pipes.`);
 }
 
+/** Value used to mark a module whose scope is in the process of being resolved. */
+const IN_PROGRESS_RESOLUTION = {};
 /**
  * A registry which collects information about NgModules, Directives, Components, and Pipes which
  * are local (declared in the ts.Program being compiled), and can produce `LocalModuleScope`s
@@ -6122,8 +6124,12 @@ class LocalModuleScopeRegistry {
      */
     getScopeOfModuleReference(ref) {
         if (this.cache.has(ref.node)) {
-            return this.cache.get(ref.node);
+            const cachedValue = this.cache.get(ref.node);
+            if (cachedValue !== IN_PROGRESS_RESOLUTION) {
+                return cachedValue;
+            }
         }
+        this.cache.set(ref.node, IN_PROGRESS_RESOLUTION);
         // Seal the registry to protect the integrity of the `LocalModuleScope` cache.
         this.sealed = true;
         // `ref` should be an NgModule previously added to the registry. If not, a scope for it
@@ -6168,13 +6174,18 @@ class LocalModuleScopeRegistry {
         for (const decl of ngModule.imports) {
             const importScope = this.getExportedScope(decl, diagnostics, ref.node, 'import');
             if (importScope !== null) {
-                if (importScope === 'invalid' || importScope.exported.isPoisoned) {
+                if (importScope === 'invalid' ||
+                    importScope === 'cycle' ||
+                    importScope.exported.isPoisoned) {
                     // An import was an NgModule but contained errors of its own. Record this as an error too,
                     // because this scope is always going to be incorrect if one of its imports could not be
                     // read.
-                    diagnostics.push(invalidTransitiveNgModuleRef(decl, ngModule.rawImports, 'import'));
                     isPoisoned = true;
-                    if (importScope === 'invalid') {
+                    // Prevent the module from reporting a diagnostic about itself when there's a cycle.
+                    if (importScope !== 'cycle') {
+                        diagnostics.push(invalidTransitiveNgModuleRef(decl, ngModule.rawImports, 'import'));
+                    }
+                    if (importScope === 'invalid' || importScope === 'cycle') {
                         continue;
                     }
                 }
@@ -6260,13 +6271,18 @@ class LocalModuleScopeRegistry {
         for (const decl of ngModule.exports) {
             // Attempt to resolve decl as an NgModule.
             const exportScope = this.getExportedScope(decl, diagnostics, ref.node, 'export');
-            if (exportScope === 'invalid' || (exportScope !== null && exportScope.exported.isPoisoned)) {
+            if (exportScope === 'invalid' ||
+                exportScope === 'cycle' ||
+                (exportScope !== null && exportScope.exported.isPoisoned)) {
                 // An export was an NgModule but contained errors of its own. Record this as an error too,
                 // because this scope is always going to be incorrect if one of its exports could not be
                 // read.
-                diagnostics.push(invalidTransitiveNgModuleRef(decl, ngModule.rawExports, 'export'));
                 isPoisoned = true;
-                if (exportScope === 'invalid') {
+                // Prevent the module from reporting a diagnostic about itself when there's a cycle.
+                if (exportScope !== 'cycle') {
+                    diagnostics.push(invalidTransitiveNgModuleRef(decl, ngModule.rawExports, 'export'));
+                }
+                if (exportScope === 'invalid' || exportScope === 'cycle') {
                     continue;
                 }
             }
@@ -6371,6 +6387,12 @@ class LocalModuleScopeRegistry {
             return this.dependencyScopeReader.resolve(ref);
         }
         else {
+            if (this.cache.get(ref.node) === IN_PROGRESS_RESOLUTION) {
+                diagnostics.push(checker.makeDiagnostic(type === 'import'
+                    ? checker.ErrorCode.NGMODULE_INVALID_IMPORT
+                    : checker.ErrorCode.NGMODULE_INVALID_EXPORT, checker.identifierOfNode(ref.node) || ref.node, `NgModule "${type}" field contains a cycle`));
+                return 'cycle';
+            }
             // The NgModule is declared locally in the current program. Resolve it from the registry.
             return this.getScopeOfModuleReference(ref);
         }
@@ -19749,7 +19771,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0-next.10+sha-8311f00` usually means that core is at head so it supports
+    // A version of `19.0.0-next.10+sha-d0c74f3` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

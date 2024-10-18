@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-8311f00
+ * @license Angular v19.0.0-next.10+sha-d0c74f3
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,7 +9,7 @@
 var os = require('os');
 var ts = require('typescript');
 var checker = require('./checker-77660732.js');
-var program = require('./program-1413936a.js');
+var program = require('./program-4ca618e8.js');
 require('path');
 var assert = require('assert');
 var leading_space = require('./leading_space-d190b83b.js');
@@ -29626,7 +29626,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.10+sha-8311f00');
+new Version('19.0.0-next.10+sha-d0c74f3');
 
 var _VisitorMode;
 (function (_VisitorMode) {
