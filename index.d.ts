@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-e603e56
+ * @license Angular v19.0.0-next.10+sha-8311f00
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6729,6 +6729,22 @@ declare enum LContainerFlags {
 }
 
 declare type LegacyInputPartialMapping = string | [bindingPropertyName: string, classPropertyName: string, transformFunction?: Function];
+
+/**
+ * @experimental
+ */
+export declare function linkedSignal<D>(computation: () => D, options?: {
+    equal?: ValueEqualityFn<NoInfer<D>>;
+}): WritableSignal<D>;
+
+export declare function linkedSignal<S, D>(options: {
+    source: () => S;
+    computation: (source: NoInfer<S>, previous?: {
+        source: NoInfer<S>;
+        value: NoInfer<D>;
+    }) => D;
+    equal?: ValueEqualityFn<NoInfer<D>>;
+}): WritableSignal<D>;
 
 /**
  * Event listener configuration returned from `getListeners`.
