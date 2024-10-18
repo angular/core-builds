@@ -1,11 +1,13 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-b542f15
+ * @license Angular v19.0.0-next.10+sha-dff4de0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
+var core = require('@angular-devkit/core');
+var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
 var checker = require('./checker-77660732.js');
@@ -13,8 +15,6 @@ var program = require('./program-4ca618e8.js');
 require('path');
 var assert = require('assert');
 var leading_space = require('./leading_space-d190b83b.js');
-var core = require('@angular-devkit/core');
-var posixPath = require('node:path/posix');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -36,10 +36,10 @@ function _interopNamespace(e) {
     return Object.freeze(n);
 }
 
+var posixPath__namespace = /*#__PURE__*/_interopNamespace(posixPath);
 var os__namespace = /*#__PURE__*/_interopNamespace(os);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 var assert__default = /*#__PURE__*/_interopDefaultLegacy(assert);
-var posixPath__namespace = /*#__PURE__*/_interopNamespace(posixPath);
 
 /// <reference types="node" />
 class NgtscCompilerHost {
@@ -253,83 +253,161 @@ function getExtendedConfigPathWorker(configFile, extendsValue, host, fs) {
 }
 
 /**
- * Reasons why a field cannot be migrated.
- *
- * Higher values of incompatibility reasons indicate a more significant
- * incompatibility reason. Lower ones may be overridden by higher ones.
- * */
-exports.FieldIncompatibilityReason = void 0;
-(function (FieldIncompatibilityReason) {
-    FieldIncompatibilityReason[FieldIncompatibilityReason["OverriddenByDerivedClass"] = 1] = "OverriddenByDerivedClass";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["RedeclaredViaDerivedClassInputsArray"] = 2] = "RedeclaredViaDerivedClassInputsArray";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["TypeConflictWithBaseClass"] = 3] = "TypeConflictWithBaseClass";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["ParentIsIncompatible"] = 4] = "ParentIsIncompatible";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["DerivedIsIncompatible"] = 5] = "DerivedIsIncompatible";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SpyOnThatOverwritesField"] = 6] = "SpyOnThatOverwritesField";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 7] = "PotentiallyNarrowedInTemplateButNoSupportYet";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalIncompatibleWithHostBinding"] = 8] = "SignalIncompatibleWithHostBinding";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__RequiredButNoGoodExplicitTypeExtractable"] = 9] = "SignalInput__RequiredButNoGoodExplicitTypeExtractable";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable"] = 10] = "SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__QueryListProblematicFieldAccessed"] = 11] = "SignalQueries__QueryListProblematicFieldAccessed";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__IncompatibleMultiUnionType"] = 12] = "SignalQueries__IncompatibleMultiUnionType";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["WriteAssignment"] = 13] = "WriteAssignment";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["Accessor"] = 14] = "Accessor";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 15] = "OutsideOfMigrationScope";
-    FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 16] = "SkippedViaConfigFilter";
-})(exports.FieldIncompatibilityReason || (exports.FieldIncompatibilityReason = {}));
-/** Field reasons that cannot be ignored. */
-const nonIgnorableFieldIncompatibilities = [
-    // Outside of scope fields should not be migrated. E.g. references to inputs in `node_modules/`.
-    exports.FieldIncompatibilityReason.OutsideOfMigrationScope,
-    // Explicitly filtered fields cannot be skipped via best effort mode.
-    exports.FieldIncompatibilityReason.SkippedViaConfigFilter,
-    // There is no good output for accessor fields.
-    exports.FieldIncompatibilityReason.Accessor,
-    // There is no good output for such inputs. We can't perform "conversion".
-    exports.FieldIncompatibilityReason.SignalInput__RequiredButNoGoodExplicitTypeExtractable,
-    exports.FieldIncompatibilityReason.SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable,
-];
-/** Reasons why a whole class and its fields cannot be migrated. */
-exports.ClassIncompatibilityReason = void 0;
-(function (ClassIncompatibilityReason) {
-    ClassIncompatibilityReason[ClassIncompatibilityReason["ClassManuallyInstantiated"] = 0] = "ClassManuallyInstantiated";
-    ClassIncompatibilityReason[ClassIncompatibilityReason["OwningClassReferencedInClassProperty"] = 1] = "OwningClassReferencedInClassProperty";
-})(exports.ClassIncompatibilityReason || (exports.ClassIncompatibilityReason = {}));
-/** Whether the given value refers to an field incompatibility. */
-function isFieldIncompatibility(value) {
-    return (value.reason !== undefined &&
-        value.context !== undefined &&
-        exports.FieldIncompatibilityReason.hasOwnProperty(value.reason));
+ * Angular compiler file system implementation that leverages an
+ * CLI schematic virtual file tree.
+ */
+class DevkitMigrationFilesystem {
+    constructor(tree) {
+        this.tree = tree;
+    }
+    extname(path) {
+        return core.extname(path);
+    }
+    isRoot(path) {
+        return path === core.normalize('/');
+    }
+    isRooted(path) {
+        return this.normalize(path).startsWith('/');
+    }
+    dirname(file) {
+        return this.normalize(core.dirname(file));
+    }
+    join(basePath, ...paths) {
+        return this.normalize(core.join(basePath, ...paths));
+    }
+    relative(from, to) {
+        return this.normalize(core.relative(from, to));
+    }
+    basename(filePath, extension) {
+        return posixPath__namespace.basename(filePath, extension);
+    }
+    normalize(path) {
+        return core.normalize(path);
+    }
+    resolve(...paths) {
+        const normalizedPaths = paths.map((p) => core.normalize(p));
+        // In dev-kit, the NodeJS working directory should never be
+        // considered, so `/` is the last resort over `cwd`.
+        return this.normalize(posixPath__namespace.resolve(core.normalize('/'), ...normalizedPaths));
+    }
+    pwd() {
+        return '/';
+    }
+    isCaseSensitive() {
+        return true;
+    }
+    exists(path) {
+        return statPath(this.tree, path) !== null;
+    }
+    readFile(path) {
+        return this.tree.readText(path);
+    }
+    readFileBuffer(path) {
+        const buffer = this.tree.read(path);
+        if (buffer === null) {
+            throw new Error(`File does not exist: ${path}`);
+        }
+        return buffer;
+    }
+    readdir(path) {
+        const dir = this.tree.getDir(path);
+        return [
+            ...dir.subdirs,
+            ...dir.subfiles,
+        ];
+    }
+    lstat(path) {
+        const stat = statPath(this.tree, path);
+        if (stat === null) {
+            throw new Error(`File does not exist for "lstat": ${path}`);
+        }
+        return stat;
+    }
+    stat(path) {
+        const stat = statPath(this.tree, path);
+        if (stat === null) {
+            throw new Error(`File does not exist for "stat": ${path}`);
+        }
+        return stat;
+    }
+    realpath(filePath) {
+        return filePath;
+    }
+    getDefaultLibLocation() {
+        return 'node_modules/typescript/lib';
+    }
+    ensureDir(path) {
+        // Migrations should compute replacements and not write directly.
+        throw new Error('DevkitFilesystem#ensureDir is not supported.');
+    }
+    writeFile(path, data) {
+        // Migrations should compute replacements and not write directly.
+        throw new Error('DevkitFilesystem#writeFile is not supported.');
+    }
+    removeFile(path) {
+        // Migrations should compute replacements and not write directly.
+        throw new Error('DevkitFilesystem#removeFile is not supported.');
+    }
+    copyFile(from, to) {
+        // Migrations should compute replacements and not write directly.
+        throw new Error('DevkitFilesystem#copyFile is not supported.');
+    }
+    moveFile(from, to) {
+        // Migrations should compute replacements and not write directly.
+        throw new Error('DevkitFilesystem#moveFile is not supported.');
+    }
+    removeDeep(path) {
+        // Migrations should compute replacements and not write directly.
+        throw new Error('DevkitFilesystem#removeDeep is not supported.');
+    }
+    chdir(_path) {
+        throw new Error('FileSystem#chdir is not supported.');
+    }
+    symlink() {
+        throw new Error('FileSystem#symlink is not supported.');
+    }
 }
-/** Picks the more significant field compatibility. */
-function pickFieldIncompatibility(a, b) {
-    if (b === null) {
-        return a;
+/** Stats the given path in the virtual tree. */
+function statPath(tree, path) {
+    let fileInfo = null;
+    let dirInfo = null;
+    try {
+        fileInfo = tree.get(path);
     }
-    if (a.reason < b.reason) {
-        return b;
+    catch (e) {
+        if (e.constructor.name === 'PathIsDirectoryException') {
+            dirInfo = tree.getDir(path);
+        }
+        else {
+            throw e;
+        }
     }
-    return a;
-}
-
-function getMemberName(member) {
-    if (member.name === undefined) {
-        return null;
-    }
-    if (ts__default["default"].isIdentifier(member.name) || ts__default["default"].isStringLiteralLike(member.name)) {
-        return member.name.text;
-    }
-    if (ts__default["default"].isPrivateIdentifier(member.name)) {
-        return `#${member.name.text}`;
+    if (fileInfo !== null || dirInfo !== null) {
+        return {
+            isDirectory: () => dirInfo !== null,
+            isFile: () => fileInfo !== null,
+            isSymbolicLink: () => false,
+        };
     }
     return null;
 }
 
-/** Checks whether the given node can be an `@Input()` declaration node. */
-function isInputContainerNode(node) {
-    return (((ts__default["default"].isAccessor(node) && ts__default["default"].isClassDeclaration(node.parent)) ||
-        ts__default["default"].isPropertyDeclaration(node)) &&
-        getMemberName(node) !== null);
+/**
+ * Groups the given replacements per project relative
+ * file path.
+ *
+ * This allows for simple execution of the replacements
+ * against a given file. E.g. via {@link applyTextUpdates}.
+ */
+function groupReplacementsByFile(replacements) {
+    const result = new Map();
+    for (const { projectFile, update } of replacements) {
+        if (!result.has(projectFile.rootRelativePath)) {
+            result.set(projectFile.rootRelativePath, []);
+        }
+        result.get(projectFile.rootRelativePath).push(update);
+    }
+    return result;
 }
 
 /** Code of the error raised by TypeScript when a tsconfig doesn't match any files. */
@@ -473,6 +551,139 @@ function projectFile(file, { sortedRootDirs, projectRoot }) {
  */
 function isWithinBasePath(fs, base, path) {
     return checker.isLocalRelativePath(fs.relative(base, path));
+}
+
+/**
+ * Applies import manager changes, and writes them as replacements the
+ * given result array.
+ */
+function applyImportManagerChanges(importManager, replacements, sourceFiles, info) {
+    const { newImports, updatedImports, deletedImports } = importManager.finalize();
+    const printer = ts__default["default"].createPrinter({});
+    const pathToFile = new Map(sourceFiles.map((s) => [s.fileName, s]));
+    // Capture new imports
+    newImports.forEach((newImports, fileName) => {
+        newImports.forEach((newImport) => {
+            const printedImport = printer.printNode(ts__default["default"].EmitHint.Unspecified, newImport, pathToFile.get(fileName));
+            replacements.push(new Replacement(projectFile(checker.absoluteFrom(fileName), info), new TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
+        });
+    });
+    // Capture updated imports
+    for (const [oldBindings, newBindings] of updatedImports.entries()) {
+        // The import will be generated as multi-line if it already is multi-line,
+        // or if the number of elements significantly increased and it previously
+        // consisted of very few specifiers.
+        const isMultiline = oldBindings.getText().includes('\n') ||
+            (newBindings.elements.length >= 6 && oldBindings.elements.length <= 3);
+        const hasSpaceBetweenBraces = oldBindings.getText().startsWith('{ ');
+        let formatFlags = ts__default["default"].ListFormat.NamedImportsOrExportsElements |
+            ts__default["default"].ListFormat.Indented |
+            ts__default["default"].ListFormat.Braces |
+            ts__default["default"].ListFormat.PreserveLines |
+            (isMultiline ? ts__default["default"].ListFormat.MultiLine : ts__default["default"].ListFormat.SingleLine);
+        if (hasSpaceBetweenBraces) {
+            formatFlags |= ts__default["default"].ListFormat.SpaceBetweenBraces;
+        }
+        else {
+            formatFlags &= ~ts__default["default"].ListFormat.SpaceBetweenBraces;
+        }
+        const printedBindings = printer.printList(formatFlags, newBindings.elements, oldBindings.getSourceFile());
+        replacements.push(new Replacement(projectFile(oldBindings.getSourceFile(), info), new TextUpdate({
+            position: oldBindings.getStart(),
+            end: oldBindings.getEnd(),
+            // TS uses four spaces as indent. We migrate to two spaces as we
+            // assume this to be more common.
+            toInsert: printedBindings.replace(/^ {4}/gm, '  '),
+        })));
+    }
+    // Update removed imports
+    for (const removedImport of deletedImports) {
+        replacements.push(new Replacement(projectFile(removedImport.getSourceFile(), info), new TextUpdate({
+            position: removedImport.getStart(),
+            end: removedImport.getEnd(),
+            toInsert: '',
+        })));
+    }
+}
+
+/**
+ * Reasons why a field cannot be migrated.
+ *
+ * Higher values of incompatibility reasons indicate a more significant
+ * incompatibility reason. Lower ones may be overridden by higher ones.
+ * */
+exports.FieldIncompatibilityReason = void 0;
+(function (FieldIncompatibilityReason) {
+    FieldIncompatibilityReason[FieldIncompatibilityReason["OverriddenByDerivedClass"] = 1] = "OverriddenByDerivedClass";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["RedeclaredViaDerivedClassInputsArray"] = 2] = "RedeclaredViaDerivedClassInputsArray";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["TypeConflictWithBaseClass"] = 3] = "TypeConflictWithBaseClass";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["ParentIsIncompatible"] = 4] = "ParentIsIncompatible";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["DerivedIsIncompatible"] = 5] = "DerivedIsIncompatible";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SpyOnThatOverwritesField"] = 6] = "SpyOnThatOverwritesField";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["PotentiallyNarrowedInTemplateButNoSupportYet"] = 7] = "PotentiallyNarrowedInTemplateButNoSupportYet";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalIncompatibleWithHostBinding"] = 8] = "SignalIncompatibleWithHostBinding";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__RequiredButNoGoodExplicitTypeExtractable"] = 9] = "SignalInput__RequiredButNoGoodExplicitTypeExtractable";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable"] = 10] = "SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__QueryListProblematicFieldAccessed"] = 11] = "SignalQueries__QueryListProblematicFieldAccessed";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SignalQueries__IncompatibleMultiUnionType"] = 12] = "SignalQueries__IncompatibleMultiUnionType";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["WriteAssignment"] = 13] = "WriteAssignment";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["Accessor"] = 14] = "Accessor";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["OutsideOfMigrationScope"] = 15] = "OutsideOfMigrationScope";
+    FieldIncompatibilityReason[FieldIncompatibilityReason["SkippedViaConfigFilter"] = 16] = "SkippedViaConfigFilter";
+})(exports.FieldIncompatibilityReason || (exports.FieldIncompatibilityReason = {}));
+/** Field reasons that cannot be ignored. */
+const nonIgnorableFieldIncompatibilities = [
+    // Outside of scope fields should not be migrated. E.g. references to inputs in `node_modules/`.
+    exports.FieldIncompatibilityReason.OutsideOfMigrationScope,
+    // Explicitly filtered fields cannot be skipped via best effort mode.
+    exports.FieldIncompatibilityReason.SkippedViaConfigFilter,
+    // There is no good output for accessor fields.
+    exports.FieldIncompatibilityReason.Accessor,
+    // There is no good output for such inputs. We can't perform "conversion".
+    exports.FieldIncompatibilityReason.SignalInput__RequiredButNoGoodExplicitTypeExtractable,
+    exports.FieldIncompatibilityReason.SignalInput__QuestionMarkButNoGoodExplicitTypeExtractable,
+];
+/** Reasons why a whole class and its fields cannot be migrated. */
+exports.ClassIncompatibilityReason = void 0;
+(function (ClassIncompatibilityReason) {
+    ClassIncompatibilityReason[ClassIncompatibilityReason["ClassManuallyInstantiated"] = 0] = "ClassManuallyInstantiated";
+    ClassIncompatibilityReason[ClassIncompatibilityReason["OwningClassReferencedInClassProperty"] = 1] = "OwningClassReferencedInClassProperty";
+})(exports.ClassIncompatibilityReason || (exports.ClassIncompatibilityReason = {}));
+/** Whether the given value refers to an field incompatibility. */
+function isFieldIncompatibility(value) {
+    return (value.reason !== undefined &&
+        value.context !== undefined &&
+        exports.FieldIncompatibilityReason.hasOwnProperty(value.reason));
+}
+/** Picks the more significant field compatibility. */
+function pickFieldIncompatibility(a, b) {
+    if (b === null) {
+        return a;
+    }
+    if (a.reason < b.reason) {
+        return b;
+    }
+    return a;
+}
+
+function getMemberName(member) {
+    if (member.name === undefined) {
+        return null;
+    }
+    if (ts__default["default"].isIdentifier(member.name) || ts__default["default"].isStringLiteralLike(member.name)) {
+        return member.name.text;
+    }
+    if (ts__default["default"].isPrivateIdentifier(member.name)) {
+        return `#${member.name.text}`;
+    }
+    return null;
+}
+
+/** Checks whether the given node can be an `@Input()` declaration node. */
+function isInputContainerNode(node) {
+    return (((ts__default["default"].isAccessor(node) && ts__default["default"].isClassDeclaration(node.parent)) ||
+        ts__default["default"].isPropertyDeclaration(node)) &&
+        getMemberName(node) !== null);
 }
 
 /**
@@ -29626,7 +29837,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.10+sha-b542f15');
+new Version('19.0.0-next.10+sha-dff4de0');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30909,59 +31120,6 @@ function insertTodoForIncompatibility(node, programInfo, incompatibility, fieldN
     ];
 }
 
-/**
- * Applies import manager changes, and writes them as replacements the
- * given result array.
- */
-function applyImportManagerChanges(importManager, replacements, sourceFiles, info) {
-    const { newImports, updatedImports, deletedImports } = importManager.finalize();
-    const printer = ts__default["default"].createPrinter({});
-    const pathToFile = new Map(sourceFiles.map((s) => [s.fileName, s]));
-    // Capture new imports
-    newImports.forEach((newImports, fileName) => {
-        newImports.forEach((newImport) => {
-            const printedImport = printer.printNode(ts__default["default"].EmitHint.Unspecified, newImport, pathToFile.get(fileName));
-            replacements.push(new Replacement(projectFile(checker.absoluteFrom(fileName), info), new TextUpdate({ position: 0, end: 0, toInsert: `${printedImport}\n` })));
-        });
-    });
-    // Capture updated imports
-    for (const [oldBindings, newBindings] of updatedImports.entries()) {
-        // The import will be generated as multi-line if it already is multi-line,
-        // or if the number of elements significantly increased and it previously
-        // consisted of very few specifiers.
-        const isMultiline = oldBindings.getText().includes('\n') ||
-            (newBindings.elements.length >= 6 && oldBindings.elements.length <= 3);
-        const hasSpaceBetweenBraces = oldBindings.getText().startsWith('{ ');
-        let formatFlags = ts__default["default"].ListFormat.NamedImportsOrExportsElements |
-            ts__default["default"].ListFormat.Indented |
-            ts__default["default"].ListFormat.Braces |
-            ts__default["default"].ListFormat.PreserveLines |
-            (isMultiline ? ts__default["default"].ListFormat.MultiLine : ts__default["default"].ListFormat.SingleLine);
-        if (hasSpaceBetweenBraces) {
-            formatFlags |= ts__default["default"].ListFormat.SpaceBetweenBraces;
-        }
-        else {
-            formatFlags &= ~ts__default["default"].ListFormat.SpaceBetweenBraces;
-        }
-        const printedBindings = printer.printList(formatFlags, newBindings.elements, oldBindings.getSourceFile());
-        replacements.push(new Replacement(projectFile(oldBindings.getSourceFile(), info), new TextUpdate({
-            position: oldBindings.getStart(),
-            end: oldBindings.getEnd(),
-            // TS uses four spaces as indent. We migrate to two spaces as we
-            // assume this to be more common.
-            toInsert: printedBindings.replace(/^ {4}/gm, '  '),
-        })));
-    }
-    // Update removed imports
-    for (const removedImport of deletedImports) {
-        replacements.push(new Replacement(projectFile(removedImport.getSourceFile(), info), new TextUpdate({
-            position: removedImport.getStart(),
-            end: removedImport.getEnd(),
-            toInsert: '',
-        })));
-    }
-}
-
 /** Whether the given node is a descendant of the given ancestor. */
 function isNodeDescendantOf(node, ancestor) {
     while (node) {
@@ -31771,164 +31929,6 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
             host.replacements.push(new Replacement(projectFile(sf, info), new TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
         }
     }
-}
-
-/**
- * Angular compiler file system implementation that leverages an
- * CLI schematic virtual file tree.
- */
-class DevkitMigrationFilesystem {
-    constructor(tree) {
-        this.tree = tree;
-    }
-    extname(path) {
-        return core.extname(path);
-    }
-    isRoot(path) {
-        return path === core.normalize('/');
-    }
-    isRooted(path) {
-        return this.normalize(path).startsWith('/');
-    }
-    dirname(file) {
-        return this.normalize(core.dirname(file));
-    }
-    join(basePath, ...paths) {
-        return this.normalize(core.join(basePath, ...paths));
-    }
-    relative(from, to) {
-        return this.normalize(core.relative(from, to));
-    }
-    basename(filePath, extension) {
-        return posixPath__namespace.basename(filePath, extension);
-    }
-    normalize(path) {
-        return core.normalize(path);
-    }
-    resolve(...paths) {
-        const normalizedPaths = paths.map((p) => core.normalize(p));
-        // In dev-kit, the NodeJS working directory should never be
-        // considered, so `/` is the last resort over `cwd`.
-        return this.normalize(posixPath__namespace.resolve(core.normalize('/'), ...normalizedPaths));
-    }
-    pwd() {
-        return '/';
-    }
-    isCaseSensitive() {
-        return true;
-    }
-    exists(path) {
-        return statPath(this.tree, path) !== null;
-    }
-    readFile(path) {
-        return this.tree.readText(path);
-    }
-    readFileBuffer(path) {
-        const buffer = this.tree.read(path);
-        if (buffer === null) {
-            throw new Error(`File does not exist: ${path}`);
-        }
-        return buffer;
-    }
-    readdir(path) {
-        const dir = this.tree.getDir(path);
-        return [
-            ...dir.subdirs,
-            ...dir.subfiles,
-        ];
-    }
-    lstat(path) {
-        const stat = statPath(this.tree, path);
-        if (stat === null) {
-            throw new Error(`File does not exist for "lstat": ${path}`);
-        }
-        return stat;
-    }
-    stat(path) {
-        const stat = statPath(this.tree, path);
-        if (stat === null) {
-            throw new Error(`File does not exist for "stat": ${path}`);
-        }
-        return stat;
-    }
-    realpath(filePath) {
-        return filePath;
-    }
-    getDefaultLibLocation() {
-        return 'node_modules/typescript/lib';
-    }
-    ensureDir(path) {
-        // Migrations should compute replacements and not write directly.
-        throw new Error('DevkitFilesystem#ensureDir is not supported.');
-    }
-    writeFile(path, data) {
-        // Migrations should compute replacements and not write directly.
-        throw new Error('DevkitFilesystem#writeFile is not supported.');
-    }
-    removeFile(path) {
-        // Migrations should compute replacements and not write directly.
-        throw new Error('DevkitFilesystem#removeFile is not supported.');
-    }
-    copyFile(from, to) {
-        // Migrations should compute replacements and not write directly.
-        throw new Error('DevkitFilesystem#copyFile is not supported.');
-    }
-    moveFile(from, to) {
-        // Migrations should compute replacements and not write directly.
-        throw new Error('DevkitFilesystem#moveFile is not supported.');
-    }
-    removeDeep(path) {
-        // Migrations should compute replacements and not write directly.
-        throw new Error('DevkitFilesystem#removeDeep is not supported.');
-    }
-    chdir(_path) {
-        throw new Error('FileSystem#chdir is not supported.');
-    }
-    symlink() {
-        throw new Error('FileSystem#symlink is not supported.');
-    }
-}
-/** Stats the given path in the virtual tree. */
-function statPath(tree, path) {
-    let fileInfo = null;
-    let dirInfo = null;
-    try {
-        fileInfo = tree.get(path);
-    }
-    catch (e) {
-        if (e.constructor.name === 'PathIsDirectoryException') {
-            dirInfo = tree.getDir(path);
-        }
-        else {
-            throw e;
-        }
-    }
-    if (fileInfo !== null || dirInfo !== null) {
-        return {
-            isDirectory: () => dirInfo !== null,
-            isFile: () => fileInfo !== null,
-            isSymbolicLink: () => false,
-        };
-    }
-    return null;
-}
-
-/**
- * Groups the given replacements per project relative
- * file path.
- *
- * This allows for simple execution of the replacements
- * against a given file. E.g. via {@link applyTextUpdates}.
- */
-function groupReplacementsByFile(replacements) {
-    const result = new Map();
-    for (const { projectFile, update } of replacements) {
-        if (!result.has(projectFile.rootRelativePath)) {
-            result.set(projectFile.rootRelativePath, []);
-        }
-        result.get(projectFile.rootRelativePath).push(update);
-    }
-    return result;
 }
 
 exports.DevkitMigrationFilesystem = DevkitMigrationFilesystem;
