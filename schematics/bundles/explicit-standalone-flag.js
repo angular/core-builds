@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-01e6fc1
+ * @license Angular v19.0.0-next.10+sha-3924a70
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -86,7 +86,9 @@ function migrateFile(sourceFile, rewriteFn) {
                 const standaloneFalseProperty = ts__default["default"].factory.createPropertyAssignment('standalone', ts__default["default"].factory.createFalse());
                 newProperties = [...properties, standaloneFalseProperty];
             }
-            else if (standaloneProp.value === ts__default["default"].SyntaxKind.TrueKeyword) ;
+            else if (standaloneProp.value === ts__default["default"].SyntaxKind.TrueKeyword) {
+                newProperties = properties.filter((p) => p !== standaloneProp.property);
+            }
             if (newProperties) {
                 // At this point we know that we need to add standalone: false or
                 // remove an existing standalone: true property.

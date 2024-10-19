@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-01e6fc1
+ * @license Angular v19.0.0-next.10+sha-3924a70
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -138,7 +138,7 @@ function extractQueryListType(node) {
  *       --> read stays
  *       --> emitDistinctChangesOnly is gone!
  */
-function computeReplacementsToMigrateQuery(node, metadata, importManager, info, printer) {
+function computeReplacementsToMigrateQuery(node, metadata, importManager, info, printer, options, checker$1) {
     const sf = node.getSourceFile();
     let newQueryFn = importManager.addImport({
         requestedFile: sf,
@@ -172,33 +172,53 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     if (optionProperties.length > 0) {
         args.push(ts__default["default"].factory.createObjectLiteralExpression(optionProperties));
     }
-    // TODO: Can we consult, based on references and non-null assertions?
-    const isIndicatedAsRequired = node.exclamationToken !== undefined;
-    // If the query is required already via some indicators, and this is a "single"
-    // query, use the available `.required` method.
-    if (isIndicatedAsRequired && metadata.queryInfo.first) {
+    const strictNullChecksEnabled = options.strict === true || options.strictNullChecks === true;
+    const strictPropertyInitialization = options.strict === true || options.strictPropertyInitialization === true;
+    let isRequired = node.exclamationToken !== undefined;
+    // If we come across an application with strict null checks enabled, but strict
+    // property initialization is disabled, there are two options:
+    //   - Either the query is already typed to include `undefined` explicitly,
+    //     in which case an option query makes sense.
+    //   - OR, the query is not typed to include `undefined`. In which case, the query
+    //     should be marked as required to not break the app. The user-code throughout
+    //     the application (given strict null checks) already assumes non-nullable!
+    if (strictNullChecksEnabled &&
+        !strictPropertyInitialization &&
+        node.initializer === undefined &&
+        node.questionToken === undefined &&
+        type !== undefined &&
+        !checker$1.isTypeAssignableTo(checker$1.getUndefinedType(), checker$1.getTypeFromTypeNode(type))) {
+        isRequired = true;
+    }
+    if (isRequired && metadata.queryInfo.first) {
+        // If the query is required already via some indicators, and this is a "single"
+        // query, use the available `.required` method.
         newQueryFn = ts__default["default"].factory.createPropertyAccessExpression(newQueryFn, 'required');
     }
     // If this query is still nullable (i.e. not required), attempt to remove
     // explicit `undefined` types if possible.
-    if (!isIndicatedAsRequired && type !== undefined && ts__default["default"].isUnionTypeNode(type)) {
+    if (!isRequired && type !== undefined && ts__default["default"].isUnionTypeNode(type)) {
         type = migrate_ts_type_references.removeFromUnionIfPossible(type, (v) => v.kind !== ts__default["default"].SyntaxKind.UndefinedKeyword);
     }
-    const locatorType = Array.isArray(metadata.queryInfo.predicate)
+    let locatorType = Array.isArray(metadata.queryInfo.predicate)
         ? null
         : metadata.queryInfo.predicate.expression;
-    const readType = metadata.queryInfo.read ?? locatorType;
-    // If the type and the read type are matching, we can rely on the TS generic
-    // signature rather than repeating e.g. `viewChild<Button>(Button)`.
+    let resolvedReadType = metadata.queryInfo.read ?? locatorType;
+    // If the original property type and the read type are matching, we can rely
+    // on the TS inference, instead of repeating types, like in `viewChild<Button>(Button)`.
     if (type !== undefined &&
-        readType instanceof checker.WrappedNodeExpr &&
-        ts__default["default"].isIdentifier(readType.node) &&
+        resolvedReadType instanceof checker.WrappedNodeExpr &&
+        ts__default["default"].isIdentifier(resolvedReadType.node) &&
         ts__default["default"].isTypeReferenceNode(type) &&
         ts__default["default"].isIdentifier(type.typeName) &&
-        type.typeName.text === readType.node.text) {
-        type = undefined;
+        type.typeName.text === resolvedReadType.node.text) {
+        locatorType = null;
     }
-    const call = ts__default["default"].factory.createCallExpression(newQueryFn, type ? [type] : undefined, args);
+    const call = ts__default["default"].factory.createCallExpression(newQueryFn, 
+    // If there is no resolved `ReadT` (e.g. string predicate), we use the
+    // original type explicitly as generic. Otherwise, query API is smart
+    // enough to always infer.
+    resolvedReadType === null && type !== undefined ? [type] : undefined, args);
     const updated = ts__default["default"].factory.createPropertyDeclaration([ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.ReadonlyKeyword)], node.name, undefined, undefined, call);
     return [
         new migrate_ts_type_references.Replacement(migrate_ts_type_references.projectFile(node.getSourceFile(), info), new migrate_ts_type_references.TextUpdate({
@@ -959,7 +979,7 @@ class SignalQueriesMigration extends migrate_ts_type_references.TsurgeComplexMig
                 updateFileState(filesWithIncompleteMigration, sf, extractedQuery.kind);
                 continue;
             }
-            replacements.push(...computeReplacementsToMigrateQuery(node, extractedQuery, importManager, info, printer));
+            replacements.push(...computeReplacementsToMigrateQuery(node, extractedQuery, importManager, info, printer, info.userOptions, checker$1));
         }
         // Migrate references.
         const referenceMigrationHost = {
