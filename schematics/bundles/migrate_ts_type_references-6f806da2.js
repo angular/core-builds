@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-2e3e9b1
+ * @license Angular v19.0.0-next.10+sha-9544930
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29837,7 +29837,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.10+sha-2e3e9b1');
+new Version('19.0.0-next.10+sha-9544930');
 
 var _VisitorMode;
 (function (_VisitorMode) {

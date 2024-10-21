@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-2e3e9b1
+ * @license Angular v19.0.0-next.10+sha-9544930
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3012,6 +3012,40 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     private _addToRemovals;
 }
 
+declare const DEFER_BLOCK_ID = "di";
+
+declare const DEFER_BLOCK_STATE = "s";
+
+declare const DEFER_HYDRATE_TRIGGERS = "t";
+
+declare const DEFER_PARENT_BLOCK_ID = "p";
+
+declare const DEFER_PREFETCH_TRIGGERS = "pt";
+
+/**
+ * Basic set of data structures used for identifying a defer block
+ * and triggering defer blocks
+ */
+declare interface DeferBlock {
+    lView: LView;
+    tNode: TNode;
+    lContainer: LContainer;
+}
+
+/**
+ * Represents defer trigger types.
+ */
+declare const enum DeferBlockTrigger {
+    Idle = 0,
+    Immediate = 1,
+    Viewport = 2,
+    Interaction = 3,
+    Hover = 4,
+    Timer = 5,
+    When = 6,
+    Never = 7
+}
+
 /**
  * Describes the state of defer block dependency loading.
  */
@@ -3131,6 +3165,10 @@ declare interface DehydratedView {
      * removed from the DOM during hydration cleanup.
      */
     dehydratedIcuData?: Map<number, DehydratedIcuData>;
+    /**
+     * A mapping of defer block unique ids to the defer block data
+     */
+    dehydratedDeferBlockData?: Record<string, SerializedDeferBlock>;
 }
 
 /**
@@ -5113,6 +5151,15 @@ export declare interface HostListenerDecorator {
      */
     (eventName: string, args?: string[]): any;
     new (eventName: string, args?: string[]): any;
+}
+
+/**
+ * Describes hydration specific details for triggers that are necessary
+ * for invoking incremental hydration with the proper timing.
+ */
+declare interface HydrateTriggerDetails {
+    trigger: DeferBlockTrigger;
+    delay?: number;
 }
 
 declare const HYDRATION = 6;
@@ -9664,6 +9711,38 @@ declare interface SerializedContainerView extends SerializedView {
 }
 
 /**
+ * Serialized data structure that contains relevant defer block
+ * information that describes a given incremental hydration boundary
+ */
+declare interface SerializedDeferBlock {
+    /**
+     * This contains the unique id of this defer block's parent, if it exists.
+     */
+    [DEFER_PARENT_BLOCK_ID]: string | null;
+    /**
+     * This field represents a status, based on the `DeferBlockState` enum.
+     */
+    [DEFER_BLOCK_STATE]?: number;
+    /**
+     * Number of root nodes that belong to this defer block's template.
+     * This information is needed to effectively traverse the DOM tree
+     * and add jsaction attributes to root nodes appropriately for
+     * incremental hydration.
+     */
+    [NUM_ROOT_NODES]: number;
+    /**
+     * The list of triggers that exist for incremental hydration, based on the
+     * `Trigger` enum.
+     */
+    [DEFER_HYDRATE_TRIGGERS]: (DeferBlockTrigger | HydrateTriggerDetails)[] | null;
+    /**
+     * The list of triggers that exist for prefetching, based on the
+     * `Trigger` enum.
+     */
+    [DEFER_PREFETCH_TRIGGERS]: DeferBlockTrigger[] | null;
+}
+
+/**
  * Represents element containers within this view, stored as key-value pairs
  * where key is an index of a container in an LView (also used in the
  * `elementContainerStart` instruction), the value is the number of root nodes
@@ -9721,6 +9800,15 @@ declare interface SerializedView {
      * active ICU cases.
      */
     [I18N_DATA]?: Record<number, number[]>;
+    /**
+     * If this view represents a `@defer` block, this field contains
+     * unique id of the block.
+     */
+    [DEFER_BLOCK_ID]?: string;
+    /**
+     * This field represents a status, based on the `DeferBlockState` enum.
+     */
+    [DEFER_BLOCK_STATE]?: number;
 }
 
 /**
@@ -10056,6 +10144,14 @@ declare interface TDeferBlockDetails {
      * standalone components used within this defer block.
      */
     providers: Provider[] | null;
+    /**
+     * List of hydrate triggers for a given block
+     */
+    hydrateTriggers: Set<DeferBlockTrigger | HydrateTriggerDetails> | null;
+    /**
+     * List of prefetch triggers for a given block
+     */
+    prefetchTriggers: Set<DeferBlockTrigger> | null;
 }
 
 /** Static data for an <ng-container> */
@@ -12808,10 +12904,7 @@ export declare interface ɵDeferBlockDependencyInterceptor {
 /**
  * Defer block instance for testing.
  */
-export declare interface ɵDeferBlockDetails {
-    lContainer: LContainer;
-    lView: LView;
-    tNode: TNode;
+export declare interface ɵDeferBlockDetails extends DeferBlock {
     tDetails: TDeferBlockDetails;
 }
 
@@ -13355,6 +13448,12 @@ export declare function ɵinternalProvideZoneChangeDetection({ ngZoneFactory, ig
  * during hydration is enabled.
  */
 export declare const ɵIS_HYDRATION_DOM_REUSE_ENABLED: InjectionToken<boolean>;
+
+/**
+ * Internal token that indicates whether incremental hydration support
+ * is enabled.
+ */
+export declare const ɵIS_INCREMENTAL_HYDRATION_ENABLED: InjectionToken<boolean>;
 
 export declare function ɵisBoundToModule<C>(cf: ComponentFactory<C>): boolean;
 
@@ -14564,6 +14663,12 @@ export declare function ɵwithEventReplay(): Provider[];
 export declare function ɵwithI18nSupport(): Provider[];
 
 /**
+ * Returns a set of providers required to setup support for i18n hydration.
+ * Requires hydration to be enabled separately.
+ */
+export declare function ɵwithIncrementalHydration(): Provider[];
+
+/**
  * Returns a writable type version of type.
  *
  * USAGE:
@@ -15365,21 +15470,54 @@ export declare function ɵɵdefer(index: number, primaryTmplIndex: number, depen
  */
 export declare function ɵɵdeferEnableTimerScheduling(tView: TView, tDetails: TDeferBlockDetails, placeholderConfigIndex?: number | null, loadingConfigIndex?: number | null): void;
 
+/**
+ * Specifies that hydration never occurs.
+ * @codeGenApi
+ */
 export declare function ɵɵdeferHydrateNever(): void;
 
+/**
+ * Creates runtime data structures for the `on hover` hydrate trigger.
+ * @codeGenApi
+ */
 export declare function ɵɵdeferHydrateOnHover(): void;
 
+/**
+ * Sets up logic to handle the `on idle` deferred trigger.
+ * @codeGenApi
+ */
 export declare function ɵɵdeferHydrateOnIdle(): void;
 
+/**
+ * Sets up logic to handle the `on immediate` hydrate trigger.
+ * @codeGenApi
+ */
 export declare function ɵɵdeferHydrateOnImmediate(): void;
 
+/**
+ * Creates runtime data structures for the `on interaction` hydrate trigger.
+ * @codeGenApi
+ */
 export declare function ɵɵdeferHydrateOnInteraction(): void;
 
-export declare function ɵɵdeferHydrateOnTimer(): void;
+/**
+ * Creates runtime data structures for the `on timer` hydrate trigger.
+ * @param delay Amount of time to wait before loading the content.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferHydrateOnTimer(delay: number): void;
 
+/**
+ * Creates runtime data structures for the `on viewport` hydrate trigger.
+ * @codeGenApi
+ */
 export declare function ɵɵdeferHydrateOnViewport(): void;
 
-export declare function ɵɵdeferHydrateWhen(): void;
+/**
+ * Hydrates the deferred content when a value becomes truthy.
+ * @codeGenApi
+ */
+export declare function ɵɵdeferHydrateWhen(rawValue: unknown): void;
 
 /**
  * Creates runtime data structures for the `on hover` deferred trigger.
