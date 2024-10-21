@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-9544930
+ * @license Angular v19.0.0-next.10+sha-9762b24
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,6 +11,9 @@ import { MonoTypeOperatorFunction } from 'rxjs';
 import { Observable } from 'rxjs';
 import { OutputOptions } from '@angular/core';
 import { OutputRef } from '@angular/core';
+import { ResourceLoaderParams } from '@angular/core';
+import { ResourceOptions } from '@angular/core';
+import { ResourceRef } from '@angular/core';
 import { Signal } from '@angular/core';
 import { Subscribable } from 'rxjs';
 import { ValueEqualityFn } from '@angular/core/primitives/signals';
@@ -50,6 +53,23 @@ export declare function outputFromObservable<T>(observable: Observable<T>, opts?
  * @publicApi
  */
 export declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
+
+/**
+ * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
+ * resource's value. Like `firstValueFrom`, only the first emission of the Observable is considered.
+ *
+ * @experimental
+ */
+export declare function rxResource<T, R>(opts: RxResourceOptions<T, R>): ResourceRef<T>;
+
+/**
+ * Like `ResourceOptions` but uses an RxJS-based `loader`.
+ *
+ * @experimental
+ */
+export declare interface RxResourceOptions<T, R> extends Omit<ResourceOptions<T, R>, 'loader'> {
+    loader: (params: ResourceLoaderParams<R>) => Observable<T>;
+}
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,

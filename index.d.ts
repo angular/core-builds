@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-9544930
+ * @license Angular v19.0.0-next.10+sha-9762b24
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8382,6 +8382,7 @@ declare class PendingTasksInternal implements OnDestroy {
     private get _hasPendingTasks();
     hasPendingTasks: BehaviorSubject<boolean>;
     add(): number;
+    has(taskId: number): boolean;
     remove(taskId: number): void;
     ngOnDestroy(): void;
     /** @nocollapse */
@@ -9487,6 +9488,164 @@ export declare interface RendererType2 {
  * @publicApi
  */
 export declare function resolveForwardRef<T>(type: T): T;
+
+/**
+ * A Resource is an asynchronous dependency (for example, the results of an API call) that is
+ * managed and delivered through signals.
+ *
+ * The usual way of creating a `Resource` is through the `resource` function, but various other APIs
+ * may present `Resource` instances to describe their own concepts.
+ *
+ * @experimental
+ */
+export declare interface Resource<T> {
+    /**
+     * The current value of the `Resource`, or `undefined` if there is no current value.
+     */
+    readonly value: Signal<T | undefined>;
+    /**
+     * The current status of the `Resource`, which describes what the resource is currently doing and
+     * what can be expected of its `value`.
+     */
+    readonly status: Signal<ResourceStatus>;
+    /**
+     * When in the `error` state, this returns the last known error from the `Resource`.
+     */
+    readonly error: Signal<unknown>;
+    /**
+     * Whether this resource is loading a new value (or reloading the existing one).
+     */
+    readonly isLoading: Signal<boolean>;
+    /**
+     * Whether this resource has a valid current value.
+     *
+     * This function is reactive.
+     */
+    hasValue(): this is Resource<T> & {
+        value: Signal<T>;
+    };
+    /**
+     * Instructs the resource to re-load any asynchronous dependency it may have.
+     *
+     * Note that the resource will not enter its reloading state until the actual backend request is
+     * made.
+     *
+     * @returns true if a reload was initiated, false if a reload was unnecessary or unsupported
+     */
+    reload(): boolean;
+}
+
+/**
+ * Constructs a `Resource` that projects a reactive request to an asynchronous operation defined by
+ * a loader function, which exposes the result of the loading operation via signals.
+ *
+ * Note that `resource` is intended for _read_ operations, not operations which perform mutations.
+ * `resource` will cancel in-progress loads via the `AbortSignal` when destroyed or when a new
+ * request object becomes available, which could prematurely abort mutations.
+ *
+ * @experimental
+ */
+export declare function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T>;
+
+/**
+ * Loading function for a `Resource`.
+ *
+ * @experimental
+ */
+export declare type ResourceLoader<T, R> = (param: ResourceLoaderParams<R>) => PromiseLike<T>;
+
+/**
+ * Parameter to a `ResourceLoader` which gives the request and other options for the current loading
+ * operation.
+ *
+ * @experimental
+ */
+export declare interface ResourceLoaderParams<R> {
+    request: Exclude<NoInfer<R>, undefined>;
+    abortSignal: AbortSignal;
+    previous: {
+        status: ResourceStatus;
+    };
+}
+
+/**
+ * Options to the `resource` function, for creating a resource.
+ *
+ * @experimental
+ */
+export declare interface ResourceOptions<T, R> {
+    /**
+     * A reactive function which determines the request to be made. Whenever the request changes, the
+     * loader will be triggered to fetch a new value for the resource.
+     *
+     * If a request function isn't provided, the loader won't rerun unless the resource is reloaded.
+     */
+    request?: () => R;
+    /**
+     * Loading function which returns a `Promise` of the resource's value for a given request.
+     */
+    loader: ResourceLoader<T, R>;
+    /**
+     * Equality function used to compare the return value of the loader.
+     */
+    equal?: ValueEqualityFn<T>;
+    /**
+     * Overrides the `Injector` used by `resource`.
+     */
+    injector?: Injector;
+}
+
+/**
+ * A `WritableResource` created through the `resource` function.
+ *
+ * @experimental
+ */
+export declare interface ResourceRef<T> extends WritableResource<T> {
+    /**
+     * Manually destroy the resource, which cancels pending requests and returns it to `idle` state.
+     */
+    destroy(): void;
+}
+
+/**
+ * Status of a `Resource`.
+ *
+ * @experimental
+ */
+export declare enum ResourceStatus {
+    /**
+     * The resource has no valid request and will not perform any loading.
+     *
+     * `value()` will be `undefined`.
+     */
+    Idle = 0,
+    /**
+     * Loading failed with an error.
+     *
+     * `value()` will be `undefined`.
+     */
+    Error = 1,
+    /**
+     * The resource is currently loading a new value as a result of a change in its `request`.
+     *
+     * `value()` will be `undefined`.
+     */
+    Loading = 2,
+    /**
+     * The resource is currently reloading a fresh value for the same request.
+     *
+     * `value()` will continue to return the previously fetched value during the reloading operation.
+     */
+    Reloading = 3,
+    /**
+     * Loading has completed and the resource has the value returned from the loader.
+     */
+    Resolved = 4,
+    /**
+     * The resource's value was set locally via `.set()` or `.update()`.
+     */
+    Local = 5
+}
 
 /**
  * The goal here is to make sure that the browser DOM API is the Renderer.
@@ -12275,6 +12434,29 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
      * associated with a view. Called when the `destroy()` method is invoked.
      */
     abstract onDestroy(callback: Function): void;
+}
+
+/**
+ * A `Resource` with a mutable value.
+ *
+ * Overwriting the value of a resource sets it to the 'local' state.
+ *
+ * @experimental
+ */
+export declare interface WritableResource<T> extends Resource<T> {
+    readonly value: WritableSignal<T | undefined>;
+    hasValue(): this is WritableResource<T> & {
+        value: WritableSignal<T>;
+    };
+    /**
+     * Convenience wrapper for `value.set`.
+     */
+    set(value: T | undefined): void;
+    /**
+     * Convenience wrapper for `value.update`.
+     */
+    update(updater: (value: T | undefined) => T | undefined): void;
+    asReadonly(): Resource<T>;
 }
 
 /**

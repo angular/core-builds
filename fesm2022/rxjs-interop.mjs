@@ -1,11 +1,11 @@
 /**
- * @license Angular v19.0.0-next.10+sha-9544930
+ * @license Angular v19.0.0-next.10+sha-9762b24
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, ɵmicrotaskEffect, assertNotInReactiveContext, signal, computed } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
+import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, ɵmicrotaskEffect, assertNotInReactiveContext, signal, computed, resource } from '@angular/core';
+import { Observable, ReplaySubject, Subject, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 /**
@@ -254,8 +254,26 @@ function makeToSignalEqual(userEquality = Object.is) {
 }
 
 /**
+ * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
+ * resource's value. Like `firstValueFrom`, only the first emission of the Observable is considered.
+ *
+ * @experimental
+ */
+function rxResource(opts) {
+    opts?.injector || assertInInjectionContext(rxResource);
+    return resource({
+        ...opts,
+        loader: (params) => {
+            const cancelled = new Subject();
+            params.abortSignal.addEventListener('abort', () => cancelled.next());
+            return firstValueFrom(opts.loader(params).pipe(takeUntil(cancelled)));
+        },
+    });
+}
+
+/**
  * Generated bundle index. Do not edit.
  */
 
-export { outputFromObservable, outputToObservable, takeUntilDestroyed, toObservable, toSignal, toObservableMicrotask as ɵtoObservableMicrotask };
+export { outputFromObservable, outputToObservable, rxResource, takeUntilDestroyed, toObservable, toSignal, toObservableMicrotask as ɵtoObservableMicrotask };
 //# sourceMappingURL=rxjs-interop.mjs.map
