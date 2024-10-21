@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-3924a70
+ * @license Angular v19.0.0-next.10+sha-2e3e9b1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17034,7 +17034,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-3924a70']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-2e3e9b1']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31567,7 +31567,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.10+sha-3924a70');
+const VERSION = new Version('19.0.0-next.10+sha-2e3e9b1');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -39294,7 +39294,7 @@ function createRootEffect(fn, scheduler, notifier) {
 
 const NOT_SET = Symbol('NOT_SET');
 const EMPTY_CLEANUP_SET = new Set();
-const AFTER_RENDER_PHASE_EFFECT_NODE = {
+const AFTER_RENDER_PHASE_EFFECT_NODE = /* @__PURE__ */ (() => ({
     ...SIGNAL_NODE$1,
     consumerIsAlwaysLive: true,
     consumerAllowSignalWrites: true,
@@ -39360,7 +39360,7 @@ const AFTER_RENDER_PHASE_EFFECT_NODE = {
         }
         return this.signal;
     },
-};
+}))();
 /**
  * An `AfterRenderSequence` that manages an `afterRenderEffect`'s phase effects.
  */
