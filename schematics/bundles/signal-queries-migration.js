@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-9762b24
+ * @license Angular v19.0.0-next.10+sha-8ddce80
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,19 +10,20 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var migrate_ts_type_references = require('./migrate_ts_type_references-6f806da2.js');
+var index = require('./index-f7b283e6.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-77660732.js');
-var program = require('./program-4ca618e8.js');
+var checker = require('./checker-51c08a1b.js');
+var program = require('./program-6e6520d8.js');
 var assert = require('assert');
 require('path');
+var migrate_ts_type_references = require('./migrate_ts_type_references-b2b55f62.js');
 require('@angular-devkit/core');
 require('node:path/posix');
-require('./leading_space-d190b83b.js');
 require('fs');
 require('module');
 require('url');
+require('./leading_space-d190b83b.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -37,7 +38,7 @@ function migrateHostBindings(host, references, info) {
     const seenReferences = new WeakMap();
     for (const reference of references) {
         // This pass only deals with host binding references.
-        if (!migrate_ts_type_references.isHostBindingReference(reference)) {
+        if (!index.isHostBindingReference(reference)) {
             continue;
         }
         // Skip references to incompatible inputs.
@@ -61,7 +62,7 @@ function migrateHostBindings(host, references, info) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new migrate_ts_type_references.Replacement(migrate_ts_type_references.projectFile(bindingField.getSourceFile(), info), new migrate_ts_type_references.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
+        host.replacements.push(new index.Replacement(index.projectFile(bindingField.getSourceFile(), info), new index.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
     }
 }
 
@@ -73,7 +74,7 @@ function migrateTemplateReferences(host, references) {
     const seenFileReferences = new Set();
     for (const reference of references) {
         // This pass only deals with HTML template references.
-        if (!migrate_ts_type_references.isTemplateReference(reference)) {
+        if (!index.isTemplateReference(reference)) {
             continue;
         }
         // Skip references to incompatible inputs.
@@ -90,7 +91,7 @@ function migrateTemplateReferences(host, references) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new migrate_ts_type_references.Replacement(reference.from.templateFile, new migrate_ts_type_references.TextUpdate({
+        host.replacements.push(new index.Replacement(reference.from.templateFile, new index.TextUpdate({
             position: reference.from.read.sourceSpan.end,
             end: reference.from.read.sourceSpan.end,
             toInsert: appendText,
@@ -221,7 +222,7 @@ function computeReplacementsToMigrateQuery(node, metadata, importManager, info, 
     resolvedReadType === null && type !== undefined ? [type] : undefined, args);
     const updated = ts__default["default"].factory.createPropertyDeclaration([ts__default["default"].factory.createModifier(ts__default["default"].SyntaxKind.ReadonlyKeyword)], node.name, undefined, undefined, call);
     return [
-        new migrate_ts_type_references.Replacement(migrate_ts_type_references.projectFile(node.getSourceFile(), info), new migrate_ts_type_references.TextUpdate({
+        new index.Replacement(index.projectFile(node.getSourceFile(), info), new index.TextUpdate({
             position: node.getStart(),
             end: node.getEnd(),
             toInsert: printer.printNode(ts__default["default"].EmitHint.Unspecified, updated, sf),
@@ -262,7 +263,7 @@ function getUniqueIDForClassProperty(property, info) {
     if (property.name === undefined) {
         return null;
     }
-    const id = migrate_ts_type_references.projectFile(property.getSourceFile(), info).id.replace(/\.d\.ts$/, '.ts');
+    const id = index.projectFile(property.getSourceFile(), info).id.replace(/\.d\.ts$/, '.ts');
     // Note: If a class is nested, there could be an ID clash.
     // This is highly unlikely though, and this is not a problem because
     // in such cases, there is even less chance there are any references to
@@ -383,7 +384,7 @@ class KnownQueries {
         });
         this.knownQueryIDs.set(id, { key: id, node: queryField });
         const descriptor = { key: id, node: queryField };
-        const file = migrate_ts_type_references.projectFile(queryField.getSourceFile(), this.info);
+        const file = index.projectFile(queryField.getSourceFile(), this.info);
         if (this.config.shouldMigrateQuery !== undefined &&
             !this.config.shouldMigrateQuery(descriptor, file)) {
             this.markFieldIncompatible(descriptor, {
@@ -497,7 +498,7 @@ function queryFunctionNameToDecorator(name) {
  * E.g. whether `<my-read>.toArray` is detected.
  */
 function checkTsReferenceAccessesField(ref, fieldName) {
-    const accessNode = migrate_ts_type_references.traverseAccess(ref.from.node);
+    const accessNode = index.traverseAccess(ref.from.node);
     // Check if the reference is part of a property access.
     if (!ts__default["default"].isPropertyAccessExpression(accessNode.parent) ||
         !ts__default["default"].isIdentifier(accessNode.parent.name)) {
@@ -566,7 +567,7 @@ function checkNonTsReferenceCallsField(ref, fieldName) {
 }
 
 function removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, replacements) {
-    if (!migrate_ts_type_references.isHostBindingReference(ref) && !migrate_ts_type_references.isTemplateReference(ref) && !migrate_ts_type_references.isTsReference(ref)) {
+    if (!index.isHostBindingReference(ref) && !index.isTemplateReference(ref) && !index.isTsReference(ref)) {
         return;
     }
     if (knownQueries.isFieldIncompatible(ref.target)) {
@@ -576,13 +577,13 @@ function removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, rep
         return;
     }
     // TS references.
-    if (migrate_ts_type_references.isTsReference(ref)) {
+    if (index.isTsReference(ref)) {
         const toArrayCallExpr = checkTsReferenceCallsField(ref, 'toArray');
         if (toArrayCallExpr === null) {
             return;
         }
         const toArrayExpr = toArrayCallExpr.expression;
-        replacements.push(new migrate_ts_type_references.Replacement(migrate_ts_type_references.projectFile(toArrayExpr.getSourceFile(), info), new migrate_ts_type_references.TextUpdate({
+        replacements.push(new index.Replacement(index.projectFile(toArrayExpr.getSourceFile(), info), new index.TextUpdate({
             // Delete from expression end to call end. E.g. `.toArray(<..>)`.
             position: toArrayExpr.expression.getEnd(),
             end: toArrayCallExpr.getEnd(),
@@ -595,9 +596,9 @@ function removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, rep
     if (callExpr === null) {
         return;
     }
-    const file = migrate_ts_type_references.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
-    const offset = migrate_ts_type_references.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
-    replacements.push(new migrate_ts_type_references.Replacement(file, new migrate_ts_type_references.TextUpdate({
+    const file = index.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
+    const offset = index.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
+    replacements.push(new index.Replacement(file, new index.TextUpdate({
         // Delete from expression end to call end. E.g. `.toArray(<..>)`.
         position: offset + callExpr.receiver.receiver.sourceSpan.end,
         end: offset + callExpr.sourceSpan.end,
@@ -606,7 +607,7 @@ function removeQueryListToArrayCall(ref, info, globalMetadata, knownQueries, rep
 }
 
 function replaceQueryListGetCall(ref, info, globalMetadata, knownQueries, replacements) {
-    if (!migrate_ts_type_references.isHostBindingReference(ref) && !migrate_ts_type_references.isTemplateReference(ref) && !migrate_ts_type_references.isTsReference(ref)) {
+    if (!index.isHostBindingReference(ref) && !index.isTemplateReference(ref) && !index.isTsReference(ref)) {
         return;
     }
     if (knownQueries.isFieldIncompatible(ref.target)) {
@@ -615,13 +616,13 @@ function replaceQueryListGetCall(ref, info, globalMetadata, knownQueries, replac
     if (!globalMetadata.knownQueryFields[ref.target.key]?.isMulti) {
         return;
     }
-    if (migrate_ts_type_references.isTsReference(ref)) {
+    if (index.isTsReference(ref)) {
         const getCallExpr = checkTsReferenceCallsField(ref, 'get');
         if (getCallExpr === null) {
             return;
         }
         const getExpr = getCallExpr.expression;
-        replacements.push(new migrate_ts_type_references.Replacement(migrate_ts_type_references.projectFile(getExpr.getSourceFile(), info), new migrate_ts_type_references.TextUpdate({
+        replacements.push(new index.Replacement(index.projectFile(getExpr.getSourceFile(), info), new index.TextUpdate({
             position: getExpr.name.getStart(),
             end: getExpr.name.getEnd(),
             toInsert: 'at',
@@ -633,9 +634,9 @@ function replaceQueryListGetCall(ref, info, globalMetadata, knownQueries, replac
     if (callExpr === null) {
         return;
     }
-    const file = migrate_ts_type_references.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
-    const offset = migrate_ts_type_references.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
-    replacements.push(new migrate_ts_type_references.Replacement(file, new migrate_ts_type_references.TextUpdate({
+    const file = index.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
+    const offset = index.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
+    replacements.push(new index.Replacement(file, new index.TextUpdate({
         position: offset + callExpr.receiver.nameSpan.start,
         end: offset + callExpr.receiver.nameSpan.end,
         toInsert: 'at',
@@ -651,7 +652,7 @@ const problematicQueryListMethods = [
     'destroy',
 ];
 function checkForIncompatibleQueryListAccesses(ref, result) {
-    if (migrate_ts_type_references.isTsReference(ref)) {
+    if (index.isTsReference(ref)) {
         for (const problematicFn of problematicQueryListMethods) {
             const access = checkTsReferenceAccessesField(ref, problematicFn);
             if (access !== null) {
@@ -660,7 +661,7 @@ function checkForIncompatibleQueryListAccesses(ref, result) {
             }
         }
     }
-    if (migrate_ts_type_references.isHostBindingReference(ref) || migrate_ts_type_references.isTemplateReference(ref)) {
+    if (index.isHostBindingReference(ref) || index.isTemplateReference(ref)) {
         for (const problematicFn of problematicQueryListMethods) {
             const access = checkNonTsReferenceAccessesField(ref, problematicFn);
             if (access !== null) {
@@ -676,7 +677,7 @@ const mapping = new Map([
     ['last', 'at(-1)!'],
 ]);
 function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, knownQueries, replacements) {
-    if (!migrate_ts_type_references.isHostBindingReference(ref) && !migrate_ts_type_references.isTemplateReference(ref) && !migrate_ts_type_references.isTsReference(ref)) {
+    if (!index.isHostBindingReference(ref) && !index.isTemplateReference(ref) && !index.isTsReference(ref)) {
         return;
     }
     if (knownQueries.isFieldIncompatible(ref.target)) {
@@ -685,12 +686,12 @@ function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, known
     if (!globalMetadata.knownQueryFields[ref.target.key]?.isMulti) {
         return;
     }
-    if (migrate_ts_type_references.isTsReference(ref)) {
+    if (index.isTsReference(ref)) {
         const expr = checkTsReferenceAccessesField(ref, 'first') ?? checkTsReferenceAccessesField(ref, 'last');
         if (expr === null) {
             return;
         }
-        replacements.push(new migrate_ts_type_references.Replacement(migrate_ts_type_references.projectFile(expr.getSourceFile(), info), new migrate_ts_type_references.TextUpdate({
+        replacements.push(new index.Replacement(index.projectFile(expr.getSourceFile(), info), new index.TextUpdate({
             position: expr.name.getStart(),
             end: expr.name.getEnd(),
             toInsert: mapping.get(expr.name.text),
@@ -702,16 +703,16 @@ function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, known
     if (expr === null) {
         return;
     }
-    const file = migrate_ts_type_references.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
-    const offset = migrate_ts_type_references.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
-    replacements.push(new migrate_ts_type_references.Replacement(file, new migrate_ts_type_references.TextUpdate({
+    const file = index.isHostBindingReference(ref) ? ref.from.file : ref.from.templateFile;
+    const offset = index.isHostBindingReference(ref) ? ref.from.hostPropertyNode.getStart() + 1 : 0;
+    replacements.push(new index.Replacement(file, new index.TextUpdate({
         position: offset + expr.nameSpan.start,
         end: offset + expr.nameSpan.end,
         toInsert: mapping.get(expr.name),
     })));
 }
 
-class SignalQueriesMigration extends migrate_ts_type_references.TsurgeComplexMigration {
+class SignalQueriesMigration extends index.TsurgeComplexMigration {
     constructor(config = {}) {
         super();
         this.config = config;
@@ -742,7 +743,7 @@ class SignalQueriesMigration extends migrate_ts_type_references.TsurgeComplexMig
                     key: extractedQuery.id,
                     node: queryNode,
                 };
-                const containingFile = migrate_ts_type_references.projectFile(queryNode.getSourceFile(), info);
+                const containingFile = index.projectFile(queryNode.getSourceFile(), info);
                 // If we have a config filter function, use it here for later
                 // perf-boosted reference lookups. Useful in non-batch mode.
                 if (this.config.shouldMigrateQuery === undefined ||
@@ -802,7 +803,7 @@ class SignalQueriesMigration extends migrate_ts_type_references.TsurgeComplexMig
                 return descriptor;
             },
         };
-        groupedAstVisitor.register(migrate_ts_type_references.createFindAllSourceFileReferencesVisitor(info, checker$1, reflector, info.ngCompiler['resourceManager'], evaluator, templateTypeChecker, allFieldsOrKnownQueries, 
+        groupedAstVisitor.register(index.createFindAllSourceFileReferencesVisitor(info, checker$1, reflector, info.ngCompiler['resourceManager'], evaluator, templateTypeChecker, allFieldsOrKnownQueries, 
         // In non-batch mode, we know what inputs exist and can optimize the reference
         // resolution significantly (for e.g. VSCode integration)— as we know what
         // field names may be used to reference potential queries.
@@ -830,15 +831,15 @@ class SignalQueriesMigration extends migrate_ts_type_references.TsurgeComplexMig
         // Determine incompatible queries based on problematic references
         // we saw in TS code, templates or host bindings.
         for (const ref of referenceResult.references) {
-            if (migrate_ts_type_references.isTsReference(ref) && ref.from.isWrite) {
+            if (index.isTsReference(ref) && ref.from.isWrite) {
                 markFieldIncompatibleInMetadata(res.potentialProblematicQueries, ref.target.key, migrate_ts_type_references.FieldIncompatibilityReason.WriteAssignment);
             }
-            if ((migrate_ts_type_references.isTemplateReference(ref) || migrate_ts_type_references.isHostBindingReference(ref)) && ref.from.isWrite) {
+            if ((index.isTemplateReference(ref) || index.isHostBindingReference(ref)) && ref.from.isWrite) {
                 markFieldIncompatibleInMetadata(res.potentialProblematicQueries, ref.target.key, migrate_ts_type_references.FieldIncompatibilityReason.WriteAssignment);
             }
             // TODO: Remove this when we support signal narrowing in templates.
             // https://github.com/angular/angular/pull/55456.
-            if (migrate_ts_type_references.isTemplateReference(ref) && ref.from.isLikelyPartOfNarrowing) {
+            if (index.isTemplateReference(ref) && ref.from.isLikelyPartOfNarrowing) {
                 markFieldIncompatibleInMetadata(res.potentialProblematicQueries, ref.target.key, migrate_ts_type_references.FieldIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet);
             }
             // Check for other incompatible query list accesses.
@@ -847,7 +848,7 @@ class SignalQueriesMigration extends migrate_ts_type_references.TsurgeComplexMig
         if (this.config.assumeNonBatch) {
             res.reusableAnalysisReferences = referenceResult.references;
         }
-        return migrate_ts_type_references.confirmAsSerializable(res);
+        return index.confirmAsSerializable(res);
     }
     async merge(units) {
         const merged = {
@@ -883,7 +884,7 @@ class SignalQueriesMigration extends migrate_ts_type_references.TsurgeComplexMig
                 }
             }
         }
-        return migrate_ts_type_references.confirmAsSerializable(merged);
+        return index.confirmAsSerializable(merged);
     }
     async migrate(globalMetadata, info) {
         assert__default["default"](info.ngCompiler !== null, 'Expected queries migration to have an Angular program.');
@@ -944,7 +945,7 @@ class SignalQueriesMigration extends migrate_ts_type_references.TsurgeComplexMig
             referenceResult.references = globalMetadata.reusableAnalysisReferences;
         }
         else {
-            groupedAstVisitor.register(migrate_ts_type_references.createFindAllSourceFileReferencesVisitor(info, checker$1, reflector, info.ngCompiler['resourceManager'], evaluator, templateTypeChecker, knownQueries, fieldNamesToConsiderForReferenceLookup, referenceResult).visitor);
+            groupedAstVisitor.register(index.createFindAllSourceFileReferencesVisitor(info, checker$1, reflector, info.ngCompiler['resourceManager'], evaluator, templateTypeChecker, knownQueries, fieldNamesToConsiderForReferenceLookup, referenceResult).visitor);
         }
         // Check inheritance.
         // NOTE: Inheritance is only checked in the migrate stage as we cannot reliably
@@ -1017,7 +1018,7 @@ class SignalQueriesMigration extends migrate_ts_type_references.TsurgeComplexMig
                 importManager.removeImport(file, 'QueryList', '@angular/core');
             }
         }
-        migrate_ts_type_references.applyImportManagerChanges(importManager, replacements, sourceFiles, info);
+        index.applyImportManagerChanges(importManager, replacements, sourceFiles, info);
         return { replacements, knownQueries };
     }
     async stats(globalMetadata) {
@@ -1080,7 +1081,7 @@ function migrate(options) {
         if (!buildPaths.length && !testPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run signal queries migration.');
         }
-        const fs = new migrate_ts_type_references.DevkitMigrationFilesystem(tree);
+        const fs = new index.DevkitMigrationFilesystem(tree);
         checker.setFileSystem(fs);
         const migration = new SignalQueriesMigration({
             bestEffortMode: options.bestEffortMode,
@@ -1117,7 +1118,7 @@ function migrate(options) {
         for (const { info, tsconfigPath } of programInfos) {
             context.logger.info(`Migrating: ${tsconfigPath}..`);
             const { replacements } = await migration.migrate(merged, info);
-            const changesPerFile = migrate_ts_type_references.groupReplacementsByFile(replacements);
+            const changesPerFile = index.groupReplacementsByFile(replacements);
             for (const [file, changes] of changesPerFile) {
                 if (!replacementsPerFile.has(file)) {
                     replacementsPerFile.set(file, changes);

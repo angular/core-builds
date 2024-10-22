@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-9762b24
+ * @license Angular v19.0.0-next.10+sha-8ddce80
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8404,7 +8404,7 @@ function getNearestLContainer(viewOrContainer) {
  * @publicApi
  * @globalApi ng
  */
-function getComponent$1(element) {
+function getComponent(element) {
     ngDevMode && assertDomElement(element);
     const context = getLContext(element);
     if (context === null)
@@ -9391,7 +9391,7 @@ function markRNodeAsHavingHydrationMismatch(node, expectedNodeDetails = null, ac
     // The RNode can be a standard HTMLElement (not an Angular component or directive)
     // The devtools component tree only displays Angular components & directives
     // Therefore we attach the debug info to the closest component/directive
-    while (node && !getComponent$1(node)) {
+    while (node && !getComponent(node)) {
         node = node?.parentNode;
     }
     if (node) {
@@ -16306,18 +16306,9 @@ class ComponentRef$1 {
 class ComponentFactory$1 {
 }
 
-function noComponentFactoryError(component) {
-    const error = Error(`No component factory found for ${stringify(component)}.`);
-    error[ERROR_COMPONENT] = component;
-    return error;
-}
-const ERROR_COMPONENT = 'ngComponent';
-function getComponent(error) {
-    return error[ERROR_COMPONENT];
-}
 class _NullComponentFactoryResolver {
     resolveComponentFactory(component) {
-        throw noComponentFactoryError(component);
+        throw Error(`No component factory found for ${stringify(component)}.`);
     }
 }
 /**
@@ -17086,7 +17077,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-9762b24']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-8ddce80']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -21636,7 +21627,7 @@ const globalUtilsFunctions = {
     'ɵgetInjectorMetadata': getInjectorMetadata,
     'ɵsetProfiler': setProfiler,
     'getDirectiveMetadata': getDirectiveMetadata$1,
-    'getComponent': getComponent$1,
+    'getComponent': getComponent,
     'getContext': getContext,
     'getListeners': getListeners,
     'getOwningComponent': getOwningComponent,
@@ -34171,7 +34162,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.10+sha-9762b24');
+const VERSION = new Version('19.0.0-next.10+sha-8ddce80');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -35913,7 +35904,7 @@ class DebugNode {
      */
     get componentInstance() {
         const nativeElement = this.nativeNode;
-        return (nativeElement && (getComponent$1(nativeElement) || getOwningComponent(nativeElement)));
+        return (nativeElement && (getComponent(nativeElement) || getOwningComponent(nativeElement)));
     }
     /**
      * An object that provides parent context for this element. Often an ancestor component instance
@@ -35924,7 +35915,7 @@ class DebugNode {
      * of heroes"`.
      */
     get context() {
-        return getComponent$1(this.nativeNode) || getContext(this.nativeNode);
+        return getComponent(this.nativeNode) || getContext(this.nativeNode);
     }
     /**
      * The callbacks attached to the component's @Output properties and/or the element's event
