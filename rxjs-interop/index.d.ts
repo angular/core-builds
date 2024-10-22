@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-888657a
+ * @license Angular v19.0.0-next.10+sha-1f45338
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -53,6 +53,17 @@ export declare function outputFromObservable<T>(observable: Observable<T>, opts?
  * @publicApi
  */
 export declare function outputToObservable<T>(ref: OutputRef<T>): Observable<T>;
+
+/**
+ * Operator which makes the application unstable until the observable emits, complets, errors, or is unsubscribed.
+ *
+ * Use this operator in observables whose subscriptions are important for rendering and should be included in SSR serialization.
+ *
+ * @param injector The `Injector` to use during creation. If this is not provided, the current injection context will be used instead (via `inject`).
+ *
+ * @experimental
+ */
+export declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOperatorFunction<T>;
 
 /**
  * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the

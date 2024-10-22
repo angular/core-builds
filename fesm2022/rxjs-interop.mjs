@@ -1,10 +1,10 @@
 /**
- * @license Angular v19.0.0-next.10+sha-888657a
+ * @license Angular v19.0.0-next.10+sha-1f45338
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, ɵmicrotaskEffect, assertNotInReactiveContext, signal, computed, resource } from '@angular/core';
+import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, ɵmicrotaskEffect, assertNotInReactiveContext, signal, computed, PendingTasks, resource } from '@angular/core';
 import { Observable, ReplaySubject, Subject, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -254,6 +254,56 @@ function makeToSignalEqual(userEquality = Object.is) {
 }
 
 /**
+ * Operator which makes the application unstable until the observable emits, complets, errors, or is unsubscribed.
+ *
+ * Use this operator in observables whose subscriptions are important for rendering and should be included in SSR serialization.
+ *
+ * @param injector The `Injector` to use during creation. If this is not provided, the current injection context will be used instead (via `inject`).
+ *
+ * @experimental
+ */
+function pendingUntilEvent(injector) {
+    if (injector === undefined) {
+        assertInInjectionContext(pendingUntilEvent);
+        injector = inject(Injector);
+    }
+    const taskService = injector.get(PendingTasks);
+    return (sourceObservable) => {
+        return new Observable((originalSubscriber) => {
+            // create a new task on subscription
+            const removeTask = taskService.add();
+            let cleanedUp = false;
+            function cleanupTask() {
+                if (cleanedUp) {
+                    return;
+                }
+                removeTask();
+                cleanedUp = true;
+            }
+            const innerSubscription = sourceObservable.subscribe({
+                next: (v) => {
+                    originalSubscriber.next(v);
+                    cleanupTask();
+                },
+                complete: () => {
+                    originalSubscriber.complete();
+                    cleanupTask();
+                },
+                error: (e) => {
+                    originalSubscriber.error(e);
+                    cleanupTask();
+                },
+            });
+            innerSubscription.add(() => {
+                originalSubscriber.unsubscribe();
+                cleanupTask();
+            });
+            return innerSubscription;
+        });
+    };
+}
+
+/**
  * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
  * resource's value. Like `firstValueFrom`, only the first emission of the Observable is considered.
  *
@@ -275,5 +325,5 @@ function rxResource(opts) {
  * Generated bundle index. Do not edit.
  */
 
-export { outputFromObservable, outputToObservable, rxResource, takeUntilDestroyed, toObservable, toSignal, toObservableMicrotask as ɵtoObservableMicrotask };
+export { outputFromObservable, outputToObservable, pendingUntilEvent, rxResource, takeUntilDestroyed, toObservable, toSignal, toObservableMicrotask as ɵtoObservableMicrotask };
 //# sourceMappingURL=rxjs-interop.mjs.map
