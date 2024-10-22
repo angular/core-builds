@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-1e9328e
+ * @license Angular v19.0.0-next.10+sha-888657a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -103,6 +103,7 @@ function createInputSignal(initialValue, options) {
     inputValueFn[SIGNAL$1] = node;
     if (ngDevMode) {
         inputValueFn.toString = () => `[Input Signal: ${inputValueFn()}]`;
+        node.debugName = options?.debugName;
     }
     return inputValueFn;
 }
@@ -17099,7 +17100,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-1e9328e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.10+sha-888657a']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18045,6 +18046,7 @@ function signal(initialValue, options) {
     signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
     if (ngDevMode) {
         signalFn.toString = () => `[Signal: ${signalFn()}]`;
+        node.debugName = options?.debugName;
     }
     return signalFn;
 }
@@ -18073,7 +18075,7 @@ function isWritableSignal(value) {
  * @param required indicates if at least one result is required
  * @returns a read-only signal with query results
  */
-function createQuerySignalFn(firstOnly, required) {
+function createQuerySignalFn(firstOnly, required, opts) {
     let node;
     const signalFn = createComputed$1(() => {
         // A dedicated signal that increments its value every time a query changes its dirty status. By
@@ -18094,17 +18096,18 @@ function createQuerySignalFn(firstOnly, required) {
     node._flatValue = undefined;
     if (ngDevMode) {
         signalFn.toString = () => `[Query Signal]`;
+        node.debugName = opts?.debugName;
     }
     return signalFn;
 }
-function createSingleResultOptionalQuerySignalFn() {
-    return createQuerySignalFn(/* firstOnly */ true, /* required */ false);
+function createSingleResultOptionalQuerySignalFn(opts) {
+    return createQuerySignalFn(/* firstOnly */ true, /* required */ false, opts);
 }
-function createSingleResultRequiredQuerySignalFn() {
-    return createQuerySignalFn(/* firstOnly */ true, /* required */ true);
+function createSingleResultRequiredQuerySignalFn(opts) {
+    return createQuerySignalFn(/* firstOnly */ true, /* required */ true, opts);
 }
-function createMultiResultQuerySignalFn() {
-    return createQuerySignalFn(/* firstOnly */ false, /* required */ false);
+function createMultiResultQuerySignalFn(opts) {
+    return createQuerySignalFn(/* firstOnly */ false, /* required */ false, opts);
 }
 function bindQueryToSignal(target, queryIndex) {
     const node = target[SIGNAL$1];
@@ -18149,11 +18152,11 @@ function refreshSignalQuery(node, firstOnly) {
 
 function viewChildFn(locator, opts) {
     ngDevMode && assertInInjectionContext(viewChild);
-    return createSingleResultOptionalQuerySignalFn();
+    return createSingleResultOptionalQuerySignalFn(opts);
 }
 function viewChildRequiredFn(locator, opts) {
     ngDevMode && assertInInjectionContext(viewChild);
-    return createSingleResultRequiredQuerySignalFn();
+    return createSingleResultRequiredQuerySignalFn(opts);
 }
 /**
  * Initializes a view child query.
@@ -18206,15 +18209,15 @@ const viewChild = (() => {
  */
 function viewChildren(locator, opts) {
     ngDevMode && assertInInjectionContext(viewChildren);
-    return createMultiResultQuerySignalFn();
+    return createMultiResultQuerySignalFn(opts);
 }
 function contentChildFn(locator, opts) {
     ngDevMode && assertInInjectionContext(contentChild);
-    return createSingleResultOptionalQuerySignalFn();
+    return createSingleResultOptionalQuerySignalFn(opts);
 }
 function contentChildRequiredFn(locator, opts) {
     ngDevMode && assertInInjectionContext(contentChildren);
-    return createSingleResultRequiredQuerySignalFn();
+    return createSingleResultRequiredQuerySignalFn(opts);
 }
 /**
  * Initializes a content child query. Consider using `contentChild.required` for queries that should
@@ -18265,7 +18268,7 @@ const contentChild = (() => {
  * @publicAPI
  */
 function contentChildren(locator, opts) {
-    return createMultiResultQuerySignalFn();
+    return createMultiResultQuerySignalFn(opts);
 }
 
 /**
@@ -18275,7 +18278,7 @@ function contentChildren(locator, opts) {
  *   Can be set to {@link REQUIRED_UNSET_VALUE} for required model signals.
  * @param options Additional options for the model.
  */
-function createModelSignal(initialValue) {
+function createModelSignal(initialValue, opts) {
     const node = Object.create(INPUT_SIGNAL_NODE);
     const emitterRef = new OutputEmitterRef();
     node.value = initialValue;
@@ -18301,6 +18304,7 @@ function createModelSignal(initialValue) {
     getter.destroyRef = emitterRef.destroyRef;
     if (ngDevMode) {
         getter.toString = () => `[Model Signal: ${getter()}]`;
+        node.debugName = opts?.debugName;
     }
     return getter;
 }
@@ -18311,13 +18315,13 @@ function assertModelSet(value) {
     }
 }
 
-function modelFunction(initialValue) {
+function modelFunction(initialValue, opts) {
     ngDevMode && assertInInjectionContext(model);
-    return createModelSignal(initialValue);
+    return createModelSignal(initialValue, opts);
 }
-function modelRequiredFunction() {
+function modelRequiredFunction(opts) {
     ngDevMode && assertInInjectionContext(model);
-    return createModelSignal(REQUIRED_UNSET_VALUE);
+    return createModelSignal(REQUIRED_UNSET_VALUE, opts);
 }
 /**
  * `model` declares a writeable signal that is exposed as an input/output
@@ -34241,7 +34245,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.10+sha-1e9328e');
+const VERSION = new Version('19.0.0-next.10+sha-888657a');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39543,8 +39547,10 @@ function withI18nSupport() {
     ];
 }
 /**
- * Returns a set of providers required to setup support for i18n hydration.
+ * Returns a set of providers required to setup support for incremental hydration.
  * Requires hydration to be enabled separately.
+ *
+ * @developerPreview
  */
 function withIncrementalHydration() {
     return [
@@ -39884,6 +39890,7 @@ function computed(computation, options) {
     }
     if (ngDevMode) {
         getter.toString = () => `[Computed: ${getter()}]`;
+        getter[SIGNAL$1].debugName = options?.debugName;
     }
     return getter;
 }
@@ -40223,6 +40230,9 @@ function effect(effectFn, options) {
     if (destroyRef !== null) {
         // If we need to register for cleanup, do that here.
         node.onDestroyFn = destroyRef.onDestroy(() => node.destroy());
+    }
+    if (ngDevMode) {
+        node.debugName = options?.debugName ?? '';
     }
     return new EffectRefImpl(node);
 }

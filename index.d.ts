@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-1e9328e
+ * @license Angular v19.0.0-next.10+sha-888657a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2400,10 +2400,12 @@ export declare interface ContentChildFunction {
     <LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
         descendants?: boolean;
         read?: undefined;
+        debugName?: string;
     }): Signal<LocatorT | undefined>;
     <LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
         descendants?: boolean;
         read: ProviderToken<ReadT>;
+        debugName?: string;
     }): Signal<ReadT | undefined>;
     /**
      * Initializes a content child query that is always expected to match.
@@ -2412,10 +2414,12 @@ export declare interface ContentChildFunction {
         <LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
             descendants?: boolean;
             read?: undefined;
+            debugName?: string;
         }): Signal<LocatorT>;
         <LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
             descendants?: boolean;
             read: ProviderToken<ReadT>;
+            debugName?: string;
         }): Signal<ReadT>;
     };
 }
@@ -2441,11 +2445,13 @@ export declare const ContentChildren: ContentChildrenDecorator;
 export declare function contentChildren<LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
     descendants?: boolean;
     read?: undefined;
+    debugName?: string;
 }): Signal<ReadonlyArray<LocatorT>>;
 
 export declare function contentChildren<LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
     descendants?: boolean;
     read: ProviderToken<ReadT>;
+    debugName?: string;
 }): Signal<ReadonlyArray<ReadT>>;
 
 /**
@@ -2609,6 +2615,10 @@ export declare interface CreateComputedOptions<T> {
      * A comparison function which defines equality for computed values.
      */
     equal?: ValueEqualityFn<T>;
+    /**
+     * A debug name for the computed signal. Used in Angular DevTools to identify the signal.
+     */
+    debugName?: string;
 }
 
 /**
@@ -2640,6 +2650,10 @@ export declare interface CreateEffectOptions {
      * @deprecated no longer required, signal writes are allowed by default.
      */
     allowSignalWrites?: boolean;
+    /**
+     * A debug name for the effect. Used in Angular DevTools to identify the effect.
+     */
+    debugName?: string;
 }
 
 /**
@@ -2703,6 +2717,10 @@ export declare interface CreateSignalOptions<T> {
      * A comparison function which defines equality for signal values.
      */
     equal?: ValueEqualityFn<T>;
+    /**
+     * A debug name for the signal. Used in Angular DevTools to identify the signal.
+     */
+    debugName?: string;
 }
 
 /**
@@ -6290,6 +6308,10 @@ export declare interface InputOptions<T, TransformT> {
      * handle such string values and convert them to `boolean`. See: {@link booleanAttribute}.
      */
     transform?: (v: TransformT) => T;
+    /**
+     * A debug name for the input signal. Used in Angular DevTools to identify the signal.
+     */
+    debugName?: string;
 }
 
 /**
@@ -7398,6 +7420,10 @@ export declare interface ModelOptions {
      * name as the input, but suffixed with `Change`. By default, the class field name is used.
      */
     alias?: string;
+    /**
+     * A debug name for the model signal. Used in Angular DevTools to identify the signal.
+     */
+    debugName?: string;
 }
 
 /**
@@ -12152,19 +12178,25 @@ export declare interface ViewChildFunction {
      *
      * @publicAPI
      */
-    <LocatorT>(locator: ProviderToken<LocatorT> | string): Signal<LocatorT | undefined>;
     <LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
         read: ProviderToken<ReadT>;
+        debugName?: string;
     }): Signal<ReadT | undefined>;
+    <LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
+        debugName?: string;
+    }): Signal<LocatorT | undefined>;
     /**
      * Initializes a view child query that is expected to always match an element.
      *
      * @publicAPI
      */
     required: {
-        <LocatorT>(locator: ProviderToken<LocatorT> | string): Signal<LocatorT>;
+        <LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
+            debugName?: string;
+        }): Signal<LocatorT>;
         <LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
             read: ProviderToken<ReadT>;
+            debugName?: string;
         }): Signal<ReadT>;
     };
 }
@@ -12184,10 +12216,13 @@ export declare type ViewChildren = Query;
  */
 export declare const ViewChildren: ViewChildrenDecorator;
 
-export declare function viewChildren<LocatorT>(locator: ProviderToken<LocatorT> | string): Signal<ReadonlyArray<LocatorT>>;
+export declare function viewChildren<LocatorT>(locator: ProviderToken<LocatorT> | string, opts?: {
+    debugName?: string;
+}): Signal<ReadonlyArray<LocatorT>>;
 
 export declare function viewChildren<LocatorT, ReadT>(locator: ProviderToken<LocatorT> | string, opts: {
     read: ProviderToken<ReadT>;
+    debugName?: string;
 }): Signal<ReadonlyArray<ReadT>>;
 
 /**
@@ -13681,6 +13716,10 @@ export declare interface ɵInputSignalNode<T, TransformT> extends SignalNode<T> 
      * purposes we assume it's a valid `T` value. Type-checking will enforce that.
      */
     applyValueToInputSignal<T, TransformT>(node: ɵInputSignalNode<T, TransformT>, value: T): void;
+    /**
+     * A debug name for the input signal. Used in Angular DevTools to identify the signal.
+     */
+    debugName?: string;
 }
 
 /**
@@ -14944,8 +14983,10 @@ export declare function ɵwithEventReplay(): Provider[];
 export declare function ɵwithI18nSupport(): Provider[];
 
 /**
- * Returns a set of providers required to setup support for i18n hydration.
+ * Returns a set of providers required to setup support for incremental hydration.
  * Requires hydration to be enabled separately.
+ *
+ * @developerPreview
  */
 export declare function ɵwithIncrementalHydration(): Provider[];
 
