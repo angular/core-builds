@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-8ddce80
+ * @license Angular v19.0.0-next.10+sha-1e9328e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -738,7 +738,12 @@ export declare const APP_ID: InjectionToken<string>;
  * The function is executed during the application bootstrap process,
  * and the needed data is available on startup.
  *
+ * Note that the provided initializer is run in the injection context.
+ *
+ * @deprecated from v18.1.0, use provideAppInitializer instead
+ *
  * @see {@link ApplicationInitStatus}
+ * @see {@link provideAppInitializer}
  *
  * @usageNotes
  *
@@ -747,10 +752,12 @@ export declare const APP_ID: InjectionToken<string>;
  * ### Example with NgModule-based application
  * ```
  *  function initializeApp(): Promise<any> {
- *    return new Promise((resolve, reject) => {
- *      // Do some asynchronous stuff
- *      resolve();
- *    });
+ *    const http = inject(HttpClient);
+ *    return firstValueFrom(
+ *      http
+ *        .get("https://someUrl.com/api/user")
+ *        .pipe(tap(user => { ... }))
+ *    );
  *  }
  *
  *  @NgModule({
@@ -759,8 +766,8 @@ export declare const APP_ID: InjectionToken<string>;
  *   bootstrap: [AppComponent],
  *   providers: [{
  *     provide: APP_INITIALIZER,
- *     useFactory: () => initializeApp,
- *     multi: true
+ *     useValue: initializeApp,
+ *     multi: true,
  *    }]
  *   })
  *  export class AppModule {}
@@ -768,13 +775,13 @@ export declare const APP_ID: InjectionToken<string>;
  *
  * ### Example with standalone application
  * ```
- * export function initializeApp(http: HttpClient) {
- *   return (): Promise<any> =>
- *     firstValueFrom(
- *       http
- *         .get("https://someUrl.com/api/user")
- *         .pipe(tap(user => { ... }))
- *     );
+ * function initializeApp() {
+ *   const http = inject(HttpClient);
+ *   return firstValueFrom(
+ *     http
+ *       .get("https://someUrl.com/api/user")
+ *       .pipe(tap(user => { ... }))
+ *   );
  * }
  *
  * bootstrapApplication(App, {
@@ -782,9 +789,8 @@ export declare const APP_ID: InjectionToken<string>;
  *     provideHttpClient(),
  *     {
  *       provide: APP_INITIALIZER,
- *       useFactory: initializeApp,
+ *       useValue: initializeApp,
  *       multi: true,
- *       deps: [HttpClient],
  *     },
  *   ],
  * });
@@ -799,44 +805,46 @@ export declare const APP_ID: InjectionToken<string>;
  *
  * ### Example with NgModule-based application
  * ```
- *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
- *   return () => httpClient.get("https://someUrl.com/api/user")
- *     .pipe(
- *        tap(user => { ... })
- *     );
- *  }
+ * function initializeApp() {
+ *   const http = inject(HttpClient);
+ *   return firstValueFrom(
+ *     http
+ *       .get("https://someUrl.com/api/user")
+ *       .pipe(tap(user => { ... }))
+ *   );
+ * }
  *
- *  @NgModule({
- *    imports: [BrowserModule, HttpClientModule],
- *    declarations: [AppComponent],
- *    bootstrap: [AppComponent],
- *    providers: [{
- *      provide: APP_INITIALIZER,
- *      useFactory: initializeAppFactory,
- *      deps: [HttpClient],
- *      multi: true
- *    }]
- *  })
- *  export class AppModule {}
+ * @NgModule({
+ *   imports: [BrowserModule, HttpClientModule],
+ *   declarations: [AppComponent],
+ *   bootstrap: [AppComponent],
+ *   providers: [{
+ *     provide: APP_INITIALIZER,
+ *     useValue: initializeApp,
+ *     multi: true,
+ *   }]
+ * })
+ * export class AppModule {}
  * ```
  *
  * ### Example with standalone application
  * ```
- *  function initializeAppFactory(httpClient: HttpClient): () => Observable<any> {
- *   return () => httpClient.get("https://someUrl.com/api/user")
- *     .pipe(
- *        tap(user => { ... })
- *     );
- *  }
+ * function initializeApp() {
+ *   const http = inject(HttpClient);
+ *   return firstValueFrom(
+ *     http
+ *       .get("https://someUrl.com/api/user")
+ *       .pipe(tap(user => { ... }))
+ *   );
+ * }
  *
  * bootstrapApplication(App, {
  *   providers: [
  *     provideHttpClient(),
  *     {
  *       provide: APP_INITIALIZER,
- *       useFactory: initializeAppFactory,
+ *       useValue: initializeApp,
  *       multi: true,
- *       deps: [HttpClient],
  *     },
  *   ],
  * });
@@ -870,6 +878,7 @@ export declare class ApplicationInitStatus {
     readonly done = false;
     readonly donePromise: Promise<any>;
     private readonly appInits;
+    private readonly injector;
     constructor();
     static ɵfac: i0.ɵɵFactoryDeclaration<ApplicationInitStatus, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<ApplicationInitStatus>;
@@ -3020,8 +3029,6 @@ declare const DEFER_HYDRATE_TRIGGERS = "t";
 
 declare const DEFER_PARENT_BLOCK_ID = "p";
 
-declare const DEFER_PREFETCH_TRIGGERS = "pt";
-
 /**
  * Basic set of data structures used for identifying a defer block
  * and triggering defer blocks
@@ -4135,6 +4142,10 @@ declare const ENVIRONMENT = 10;
  * A multi-provider token for initialization functions that will run upon construction of an
  * environment injector.
  *
+ * @deprecated from v19.0.0, use provideEnvironmentInitializer instead
+ *
+ * @see {@link provideEnvironmentInitializer}
+ *
  * Note: As opposed to the `APP_INITIALIZER` token, the `ENVIRONMENT_INITIALIZER` functions are not awaited,
  * hence they should not be `async`.
  *
@@ -5153,14 +5164,13 @@ export declare interface HostListenerDecorator {
     new (eventName: string, args?: string[]): any;
 }
 
-/**
- * Describes hydration specific details for triggers that are necessary
- * for invoking incremental hydration with the proper timing.
- */
-declare interface HydrateTriggerDetails {
-    trigger: DeferBlockTrigger;
-    delay?: number;
+/** * Describes specified delay (in ms) in the `hydrate on timer()` trigger. */
+declare interface HydrateTimerTriggerDetails {
+    delay: number;
 }
+
+/** * Describes all possible hydration trigger details specified in a template. */
+declare type HydrateTriggerDetails = HydrateTimerTriggerDetails;
 
 declare const HYDRATION = 6;
 
@@ -8517,6 +8527,11 @@ export declare const PLATFORM_ID: InjectionToken<Object>;
 
 /**
  * A function that is executed when a platform is initialized.
+ *
+ * @deprecated from v18.1.0, use providePlatformInitializer instead
+ *
+ * @see {@link providePlatformInitializer}
+ *
  * @publicApi
  */
 export declare const PLATFORM_INITIALIZER: InjectionToken<readonly (() => void)[]>;
@@ -8649,6 +8664,75 @@ declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
 declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
 
 /**
+ * @description
+ * The provided function is injected at application startup and executed during
+ * app initialization. If the function returns a Promise or an Observable, initialization
+ * does not complete until the Promise is resolved or the Observable is completed.
+ *
+ * You can, for example, create a function that loads language data
+ * or an external configuration, and provide that function using `provideAppInitializer()`.
+ * The function is executed during the application bootstrap process,
+ * and the needed data is available on startup.
+ *
+ * Note that the provided initializer is run in the injection context.
+ *
+ * Previously, this was achieved using the `APP_INITIALIZER` token which is now deprecated.
+ *
+ * @see {@link APP_INITIALIZER}
+ *
+ * @usageNotes
+ * The following example illustrates how to configure an initialization function using
+ * `provideAppInitializer()`
+ * ```
+ * bootstrapApplication(App, {
+ *   providers: [
+ *     provideAppInitializer(() => {
+ *       const http = inject(HttpClient);
+ *       return firstValueFrom(
+ *         http
+ *           .get("https://someUrl.com/api/user")
+ *           .pipe(tap(user => { ... }))
+ *       );
+ *     }),
+ *     provideHttpClient(),
+ *   ],
+ * });
+ * ```
+ *
+ * @publicApi
+ */
+export declare function provideAppInitializer(initializerFn: () => Observable<unknown> | Promise<unknown> | void): EnvironmentProviders;
+
+/**
+ * @description
+ * This function is used to provide initialization functions that will be executed upon construction
+ * of an environment injector.
+ *
+ * Note that the provided initializer is run in the injection context.
+ *
+ * Previously, this was achieved using the `ENVIRONMENT_INITIALIZER` token which is now deprecated.
+ *
+ * @see {@link ENVIRONMENT_INITIALIZER}
+ *
+ * @usageNotes
+ * The following example illustrates how to configure an initialization function using
+ * `provideEnvironmentInitializer()`
+ * ```
+ * createEnvironmentInjector(
+ *   [
+ *     provideEnvironmentInjector(() => {
+ *       console.log('environment initialized');
+ *     }),
+ *   ],
+ *   parentInjector
+ * );
+ * ```
+ *
+ * @publicApi
+ */
+export declare function provideEnvironmentInitializer(initializerFn: () => void): EnvironmentProviders;
+
+/**
  * Used to periodically verify no expressions have changed after they were checked.
  *
  * @param options Used to configure when the check will execute.
@@ -8714,6 +8798,21 @@ export declare function provideExperimentalCheckNoChangesForDebug(options: {
  * @see [bootstrapApplication](/api/platform-browser/bootstrapApplication)
  */
 export declare function provideExperimentalZonelessChangeDetection(): EnvironmentProviders;
+
+/**
+ * @description
+ * This function is used to provide initialization functions that will be executed upon
+ * initialization of the platform injector.
+ *
+ * Note that the provided initializer is run in the injection context.
+ *
+ * Previously, this was achieved using the `PLATFORM_INITIALIZER` token which is now deprecated.
+ *
+ * @see {@link PLATFORM_INITIALIZER}
+ *
+ * @publicApi
+ */
+export declare function providePlatformInitializer(initializerFn: () => void): EnvironmentProviders;
 
 /**
  * Describes how the `Injector` should be configured.
@@ -9893,12 +9992,7 @@ declare interface SerializedDeferBlock {
      * The list of triggers that exist for incremental hydration, based on the
      * `Trigger` enum.
      */
-    [DEFER_HYDRATE_TRIGGERS]: (DeferBlockTrigger | HydrateTriggerDetails)[] | null;
-    /**
-     * The list of triggers that exist for prefetching, based on the
-     * `Trigger` enum.
-     */
-    [DEFER_PREFETCH_TRIGGERS]: DeferBlockTrigger[] | null;
+    [DEFER_HYDRATE_TRIGGERS]: (DeferBlockTrigger | SerializedTriggerDetails)[] | null;
 }
 
 /**
@@ -9910,6 +10004,11 @@ declare interface SerializedDeferBlock {
  */
 declare interface SerializedElementContainers {
     [key: number]: number;
+}
+
+declare interface SerializedTriggerDetails {
+    trigger: DeferBlockTrigger;
+    delay?: number;
 }
 
 /**
@@ -10306,7 +10405,7 @@ declare interface TDeferBlockDetails {
     /**
      * List of hydrate triggers for a given block
      */
-    hydrateTriggers: Set<DeferBlockTrigger | HydrateTriggerDetails> | null;
+    hydrateTriggers: Map<DeferBlockTrigger, HydrateTriggerDetails | null> | null;
     /**
      * List of prefetch triggers for a given block
      */

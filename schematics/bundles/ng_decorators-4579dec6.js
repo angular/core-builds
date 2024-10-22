@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-8ddce80
+ * @license Angular v19.0.0-next.10+sha-1e9328e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -40,17 +40,4 @@ function getAngularDecorators(typeChecker, decorators) {
     }));
 }
 
-/** Find the closest parent node of a particular kind. */
-function closestNode(node, predicate) {
-    let current = node.parent;
-    while (current && !ts__default["default"].isSourceFile(current)) {
-        if (predicate(current)) {
-            return current;
-        }
-        current = current.parent;
-    }
-    return null;
-}
-
-exports.closestNode = closestNode;
 exports.getAngularDecorators = getAngularDecorators;
