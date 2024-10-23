@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.10+sha-1f45338
+ * @license Angular v19.0.0-next.10+sha-65de20c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6782,20 +6782,6 @@ var InliningMode;
 
 new checker.DomElementSchemaRegistry();
 
-/**
- * Determines if the given node refers to a decorator-based output, and
- * returns its resolved metadata if possible.
- */
-function extractSourceOutputDefinition(node, reflector, info) {
-    const outputDecorator = getOutputDecorator(node, reflector);
-    if (outputDecorator !== null && isOutputDeclarationEligibleForMigration(node)) {
-        return {
-            id: getUniqueIdForProperty(info, node),
-            aliasParam: outputDecorator.args?.at(0),
-        };
-    }
-    return null;
-}
 function isOutputDeclarationEligibleForMigration(node) {
     return (node.initializer !== undefined &&
         ts__default["default"].isNewExpression(node.initializer) &&
@@ -7016,6 +7002,7 @@ class OutputMigration extends index.TsurgeFunnelMigration {
         const { sourceFiles, program: program$1 } = info;
         const outputFieldReplacements = {};
         const problematicUsages = {};
+        let problematicDeclarationCount = 0;
         const filesWithOutputDeclarations = new Set();
         const checker = program$1.getTypeChecker();
         const reflector = new TypeScriptReflectionHost(checker);
@@ -7048,16 +7035,25 @@ class OutputMigration extends index.TsurgeFunnelMigration {
         const outputMigrationVisitor = (node) => {
             // detect output declarations
             if (ts__default["default"].isPropertyDeclaration(node)) {
-                const outputDef = extractSourceOutputDefinition(node, reflector, info);
-                if (outputDef !== null) {
-                    const outputFile = index.projectFile(node.getSourceFile(), info);
-                    if (this.config.shouldMigrate === undefined ||
-                        this.config.shouldMigrate({
-                            key: outputDef.id,
-                            node: node,
-                        }, outputFile)) {
-                        filesWithOutputDeclarations.add(node.getSourceFile());
-                        addOutputReplacement(outputFieldReplacements, outputDef.id, outputFile, calculateDeclarationReplacement(info, node, outputDef.aliasParam));
+                const outputDecorator = getOutputDecorator(node, reflector);
+                if (outputDecorator !== null) {
+                    if (isOutputDeclarationEligibleForMigration(node)) {
+                        const outputDef = {
+                            id: getUniqueIdForProperty(info, node),
+                            aliasParam: outputDecorator.args?.at(0),
+                        };
+                        const outputFile = index.projectFile(node.getSourceFile(), info);
+                        if (this.config.shouldMigrate === undefined ||
+                            this.config.shouldMigrate({
+                                key: outputDef.id,
+                                node: node,
+                            }, outputFile)) {
+                            filesWithOutputDeclarations.add(node.getSourceFile());
+                            addOutputReplacement(outputFieldReplacements, outputDef.id, outputFile, calculateDeclarationReplacement(info, node, outputDef.aliasParam));
+                        }
+                    }
+                    else {
+                        problematicDeclarationCount++;
                     }
                 }
             }
@@ -7135,6 +7131,7 @@ class OutputMigration extends index.TsurgeFunnelMigration {
         // calculate import replacements but do so only for files that have output declarations
         const importReplacements = calculateImportReplacements(info, filesWithOutputDeclarations);
         return index.confirmAsSerializable({
+            problematicDeclarationCount,
             outputFields: outputFieldReplacements,
             importReplacements,
             problematicUsages,
@@ -7144,6 +7141,7 @@ class OutputMigration extends index.TsurgeFunnelMigration {
         const outputFields = {};
         const importReplacements = {};
         const problematicUsages = {};
+        let problematicDeclarationCount = 0;
         for (const unit of units) {
             for (const declIdStr of Object.keys(unit.outputFields)) {
                 const declId = declIdStr;
@@ -7154,20 +7152,37 @@ class OutputMigration extends index.TsurgeFunnelMigration {
                 const fileID = fileIDStr;
                 importReplacements[fileID] = unit.importReplacements[fileID];
             }
+            problematicDeclarationCount += unit.problematicDeclarationCount;
+        }
+        for (const unit of units) {
             for (const declIdStr of Object.keys(unit.problematicUsages)) {
                 const declId = declIdStr;
-                problematicUsages[declId] = unit.problematicUsages[declId];
+                // it might happen that a problematic usage is detected but we didn't see the declaration - skipping those
+                if (outputFields[declId] !== undefined) {
+                    problematicUsages[declId] = unit.problematicUsages[declId];
+                }
             }
         }
         return index.confirmAsSerializable({
+            problematicDeclarationCount,
             outputFields,
             importReplacements,
             problematicUsages,
         });
     }
     async stats(globalMetadata) {
-        // TODO: Add statistics.
-        return { counters: {} };
+        const detectedOutputs = new Set(Object.keys(globalMetadata.outputFields)).size +
+            globalMetadata.problematicDeclarationCount;
+        const problematicOutputs = new Set(Object.keys(globalMetadata.problematicUsages)).size +
+            globalMetadata.problematicDeclarationCount;
+        const successRate = detectedOutputs > 0 ? (detectedOutputs - problematicOutputs) / detectedOutputs : 1;
+        return {
+            counters: {
+                detectedOutputs,
+                problematicOutputs,
+                successRate,
+            },
+        };
     }
     async migrate(globalData) {
         const migratedFiles = new Set();
@@ -7268,8 +7283,12 @@ function migrate(options) {
             }
             tree.commitUpdate(recorder);
         }
+        const { counters: { detectedOutputs, problematicOutputs, successRate }, } = await migration.stats(merged);
+        const migratedOutputs = detectedOutputs - problematicOutputs;
+        const successRatePercent = (successRate * 100).toFixed(2);
         context.logger.info('');
         context.logger.info(`Successfully migrated to outputs as functions 🎉`);
+        context.logger.info(`  -> Migrated ${migratedOutputs} out of ${detectedOutputs} detected outputs (${successRatePercent} %).`);
     };
 }
 

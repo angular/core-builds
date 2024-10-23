@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.10+sha-1f45338
+ * @license Angular v19.0.0-next.10+sha-65de20c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -740,7 +740,7 @@ export declare const APP_ID: InjectionToken<string>;
  *
  * Note that the provided initializer is run in the injection context.
  *
- * @deprecated from v18.1.0, use provideAppInitializer instead
+ * @deprecated from v19.0.0, use provideAppInitializer instead
  *
  * @see {@link ApplicationInitStatus}
  * @see {@link provideAppInitializer}
@@ -8554,7 +8554,7 @@ export declare const PLATFORM_ID: InjectionToken<Object>;
 /**
  * A function that is executed when a platform is initialized.
  *
- * @deprecated from v18.1.0, use providePlatformInitializer instead
+ * @deprecated from v19.0.0, use providePlatformInitializer instead
  *
  * @see {@link providePlatformInitializer}
  *
