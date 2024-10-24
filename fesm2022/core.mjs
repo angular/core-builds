@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-f3a028c
+ * @license Angular v19.1.0-next.0+sha-8af71c0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2382,6 +2382,12 @@ function extractAttrsAndClassesFromSelector(selector) {
 }
 
 /**
+ * A constant defining the default value for the standalone attribute in Directive and Pipes decorators.
+ * Extracted to a separate file to facilitate G3 patches.
+ */
+const NG_STANDALONE_DEFAULT_VALUE = true;
+
+/**
  * Create a component definition object.
  *
  *
@@ -2535,7 +2541,7 @@ function ɵɵdefinePipe(pipeDef) {
         name: pipeDef.name,
         factory: null,
         pure: pipeDef.pure !== false,
-        standalone: pipeDef.standalone === true,
+        standalone: pipeDef.standalone ?? NG_STANDALONE_DEFAULT_VALUE,
         onDestroy: pipeDef.type.prototype.ngOnDestroy || null,
     };
 }
@@ -2563,7 +2569,6 @@ function getPipeDef$1(type) {
  */
 function isStandalone(type) {
     const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
-    // TODO: standalone as default value (invert the condition)
     return def !== null ? def.standalone : false;
 }
 function getNgModuleDef(type, throwNotFound) {
@@ -2587,8 +2592,7 @@ function getNgDirectiveDef(directiveDefinition) {
         inputTransforms: null,
         inputConfig: directiveDefinition.inputs || EMPTY_OBJ,
         exportAs: directiveDefinition.exportAs || null,
-        // TODO: standalone as default value (invert the condition)
-        standalone: directiveDefinition.standalone === true,
+        standalone: directiveDefinition.standalone ?? NG_STANDALONE_DEFAULT_VALUE,
         signals: directiveDefinition.signals === true,
         selectors: directiveDefinition.selectors || EMPTY_ARRAY,
         viewQuery: directiveDefinition.viewQuery || null,
@@ -17100,7 +17104,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-f3a028c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-8af71c0']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -33635,12 +33639,6 @@ function expandModuleWithProviders(value) {
 }
 
 /**
- * A constant defining the default value for the standalone attribute in Directive and Pipes decorators.
- * Extracted to a separate file to facilitate G3 patches.
- */
-const NG_STANDALONE_DEFAULT_VALUE = true;
-
-/**
  * Keep track of the compilation depth to avoid reentrancy issues during JIT compilation. This
  * matters in the following scenario:
  *
@@ -34245,7 +34243,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-f3a028c');
+const VERSION = new Version('19.1.0-next.0+sha-8af71c0');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
