@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-8af71c0
+ * @license Angular v19.1.0-next.0+sha-2f1f525
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2812,7 +2812,6 @@ class Identifiers {
         name: 'ɵɵCopyDefinitionFeature',
         moduleName: CORE,
     }; }
-    static { this.StandaloneFeature = { name: 'ɵɵStandaloneFeature', moduleName: CORE }; }
     static { this.ProvidersFeature = { name: 'ɵɵProvidersFeature', moduleName: CORE }; }
     static { this.HostDirectivesFeature = {
         name: 'ɵɵHostDirectivesFeature',
@@ -27730,10 +27729,6 @@ function addFeatures(definitionMap, meta) {
     if (meta.lifecycle.usesOnChanges) {
         features.push(importExpr(Identifiers.NgOnChangesFeature));
     }
-    // TODO: better way of differentiating component vs directive metadata.
-    if (meta.hasOwnProperty('template') && meta.isStandalone) {
-        features.push(importExpr(Identifiers.StandaloneFeature));
-    }
     if ('externalStyles' in meta && meta.externalStyles?.length) {
         const externalStyleNodes = meta.externalStyles.map((externalStyle) => literal$1(externalStyle));
         features.push(importExpr(Identifiers.ExternalStylesFeature).callFn([literalArr(externalStyleNodes)]));
@@ -29653,7 +29648,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.0-next.0+sha-8af71c0');
+new Version('19.1.0-next.0+sha-2f1f525');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31045,7 +31040,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-4e178501.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-d4a34401.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.

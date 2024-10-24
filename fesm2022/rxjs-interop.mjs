@@ -1,12 +1,12 @@
 /**
- * @license Angular v19.1.0-next.0+sha-8af71c0
+ * @license Angular v19.1.0-next.0+sha-2f1f525
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, ɵmicrotaskEffect, assertNotInReactiveContext, signal, computed, PendingTasks, resource } from '@angular/core';
-import { Observable, ReplaySubject, Subject, firstValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { takeUntil, take } from 'rxjs/operators';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
@@ -316,7 +316,18 @@ function rxResource(opts) {
         loader: (params) => {
             const cancelled = new Subject();
             params.abortSignal.addEventListener('abort', () => cancelled.next());
-            return firstValueFrom(opts.loader(params).pipe(takeUntil(cancelled)));
+            // Note: this is identical to `firstValueFrom` which we can't use,
+            // because at the time of writing, `core` still supports rxjs 6.x.
+            return new Promise((resolve, reject) => {
+                opts
+                    .loader(params)
+                    .pipe(take(1), takeUntil(cancelled))
+                    .subscribe({
+                    next: resolve,
+                    error: reject,
+                    complete: () => reject(new Error('Resource completed before producing a value')),
+                });
+            });
         },
     });
 }
