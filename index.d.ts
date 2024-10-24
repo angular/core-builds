@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.11+sha-aadcfda
+ * @license Angular v19.0.0-next.11+sha-486c5a9
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13084,8 +13084,7 @@ export declare interface ɵComponentDef<T> extends ɵDirectiveDef<T> {
      */
     tView: TView | null;
     /**
-     * A function added by the {@link ɵɵStandaloneFeature} and used by the framework to create
-     * standalone injectors.
+     * A function used by the framework to create standalone injectors.
      */
     getStandaloneInjector: ((parentInjector: EnvironmentInjector) => EnvironmentInjector | null) | null;
     /**
@@ -17763,18 +17762,6 @@ export declare function ɵɵsetComponentScope(type: ɵComponentType<any>, direct
  * @codeGenApi
  */
 export declare function ɵɵsetNgModuleScope(type: any, scope: NgModuleScopeInfoFromDecorator): unknown;
-
-/**
- * A feature that acts as a setup code for the {@link StandaloneService}.
- *
- * The most important responsibility of this feature is to expose the "getStandaloneInjector"
- * function (an entry points to a standalone injector creation) on a component definition object. We
- * go through the features infrastructure to make sure that the standalone injector creation logic
- * is tree-shakable and not included in applications that don't use standalone components.
- *
- * @codeGenApi
- */
-export declare function ɵɵStandaloneFeature(definition: ɵComponentDef<unknown>): void;
 
 /**
  * Instruction that stores the value of a `@let` declaration on the current view.

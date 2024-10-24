@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.11+sha-aadcfda
+ * @license Angular v19.0.0-next.11+sha-486c5a9
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,8 +10,8 @@ var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-4e178501.js');
-var program = require('./program-3e6d4d52.js');
+var checker = require('./checker-d4a34401.js');
+var program = require('./program-c7e430d2.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -3299,7 +3299,6 @@ class Identifiers {
         name: 'ɵɵCopyDefinitionFeature',
         moduleName: CORE,
     }; }
-    static { this.StandaloneFeature = { name: 'ɵɵStandaloneFeature', moduleName: CORE }; }
     static { this.ProvidersFeature = { name: 'ɵɵProvidersFeature', moduleName: CORE }; }
     static { this.HostDirectivesFeature = {
         name: 'ɵɵHostDirectivesFeature',
@@ -27799,10 +27798,6 @@ function addFeatures(definitionMap, meta) {
     if (meta.lifecycle.usesOnChanges) {
         features.push(importExpr(Identifiers.NgOnChangesFeature));
     }
-    // TODO: better way of differentiating component vs directive metadata.
-    if (meta.hasOwnProperty('template') && meta.isStandalone) {
-        features.push(importExpr(Identifiers.StandaloneFeature));
-    }
     if ('externalStyles' in meta && meta.externalStyles?.length) {
         const externalStyleNodes = meta.externalStyles.map((externalStyle) => literal(externalStyle));
         features.push(importExpr(Identifiers.ExternalStylesFeature).callFn([literalArr(externalStyleNodes)]));
@@ -29687,7 +29682,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.11+sha-aadcfda');
+new Version('19.0.0-next.11+sha-486c5a9');
 
 var _VisitorMode;
 (function (_VisitorMode) {

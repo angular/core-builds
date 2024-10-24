@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.11+sha-aadcfda
+ * @license Angular v19.0.0-next.11+sha-486c5a9
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1673,877 +1673,12 @@ class NullInjector {
     }
 }
 
-/**
- * The strategy that the default change detector uses to detect changes.
- * When set, takes effect the next time change detection is triggered.
- *
- * @see [Change detection usage](/api/core/ChangeDetectorRef?tab=usage-notes)
- * @see [Skipping component subtrees](/best-practices/skipping-subtrees)
- *
- * @publicApi
- */
-var ChangeDetectionStrategy;
-(function (ChangeDetectionStrategy) {
-    /**
-     * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
-     * until reactivated by setting the strategy to `Default` (`CheckAlways`).
-     * Change detection can still be explicitly invoked.
-     * This strategy applies to all child directives and cannot be overridden.
-     */
-    ChangeDetectionStrategy[ChangeDetectionStrategy["OnPush"] = 0] = "OnPush";
-    /**
-     * Use the default `CheckAlways` strategy, in which change detection is automatic until
-     * explicitly deactivated.
-     */
-    ChangeDetectionStrategy[ChangeDetectionStrategy["Default"] = 1] = "Default";
-})(ChangeDetectionStrategy || (ChangeDetectionStrategy = {}));
-
-/**
- * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
- * `encapsulation` option.
- *
- * See {@link Component#encapsulation encapsulation}.
- *
- * @usageNotes
- * ### Example
- *
- * {@example core/ts/metadata/encapsulation.ts region='longform'}
- *
- * @publicApi
- */
-var ViewEncapsulation$1;
-(function (ViewEncapsulation) {
-    // TODO: consider making `ViewEncapsulation` a `const enum` instead. See
-    // https://github.com/angular/angular/issues/44119 for additional information.
-    /**
-     * Emulates a native Shadow DOM encapsulation behavior by adding a specific attribute to the
-     * component's host element and applying the same attribute to all the CSS selectors provided
-     * via {@link Component#styles styles} or {@link Component#styleUrls styleUrls}.
-     *
-     * This is the default option.
-     */
-    ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
-    // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
-    /**
-     * Doesn't provide any sort of CSS style encapsulation, meaning that all the styles provided
-     * via {@link Component#styles styles} or {@link Component#styleUrls styleUrls} are applicable
-     * to any HTML element of the application regardless of their host Component.
-     */
-    ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
-    /**
-     * Uses the browser's native Shadow DOM API to encapsulate CSS styles, meaning that it creates
-     * a ShadowRoot for the component's host element which is then used to encapsulate
-     * all the Component's styling.
-     */
-    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-})(ViewEncapsulation$1 || (ViewEncapsulation$1 = {}));
-
-/** Flags describing an input for a directive. */
-var InputFlags;
-(function (InputFlags) {
-    InputFlags[InputFlags["None"] = 0] = "None";
-    InputFlags[InputFlags["SignalBased"] = 1] = "SignalBased";
-    InputFlags[InputFlags["HasDecoratorInputTransform"] = 2] = "HasDecoratorInputTransform";
-})(InputFlags || (InputFlags = {}));
-
-/**
- * Returns an index of `classToSearch` in `className` taking token boundaries into account.
- *
- * `classIndexOf('AB A', 'A', 0)` will be 3 (not 0 since `AB!==A`)
- *
- * @param className A string containing classes (whitespace separated)
- * @param classToSearch A class name to locate
- * @param startingIndex Starting location of search
- * @returns an index of the located class (or -1 if not found)
- */
-function classIndexOf(className, classToSearch, startingIndex) {
-    ngDevMode && assertNotEqual(classToSearch, '', 'can not look for "" string.');
-    let end = className.length;
-    while (true) {
-        const foundIndex = className.indexOf(classToSearch, startingIndex);
-        if (foundIndex === -1)
-            return foundIndex;
-        if (foundIndex === 0 || className.charCodeAt(foundIndex - 1) <= 32 /* CharCode.SPACE */) {
-            // Ensure that it has leading whitespace
-            const length = classToSearch.length;
-            if (foundIndex + length === end ||
-                className.charCodeAt(foundIndex + length) <= 32 /* CharCode.SPACE */) {
-                // Ensure that it has trailing whitespace
-                return foundIndex;
-            }
-        }
-        // False positive, keep searching from where we left off.
-        startingIndex = foundIndex + 1;
+function getNgModuleDef(type, throwNotFound) {
+    const ngModuleDef = type[NG_MOD_DEF] || null;
+    if (!ngModuleDef && throwNotFound === true) {
+        throw new Error(`Type ${stringify(type)} does not have 'ɵmod' property.`);
     }
-}
-
-/**
- * Assigns all attribute values to the provided element via the inferred renderer.
- *
- * This function accepts two forms of attribute entries:
- *
- * default: (key, value):
- *  attrs = [key1, value1, key2, value2]
- *
- * namespaced: (NAMESPACE_MARKER, uri, name, value)
- *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
- *
- * The `attrs` array can contain a mix of both the default and namespaced entries.
- * The "default" values are set without a marker, but if the function comes across
- * a marker value then it will attempt to set a namespaced value. If the marker is
- * not of a namespaced value then the function will quit and return the index value
- * where it stopped during the iteration of the attrs array.
- *
- * See [AttributeMarker] to understand what the namespace marker value is.
- *
- * Note that this instruction does not support assigning style and class values to
- * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
- * are applied to an element.
- * @param renderer The renderer to be used
- * @param native The element that the attributes will be assigned to
- * @param attrs The attribute array of values that will be assigned to the element
- * @returns the index value that was last accessed in the attributes array
- */
-function setUpAttributes(renderer, native, attrs) {
-    let i = 0;
-    while (i < attrs.length) {
-        const value = attrs[i];
-        if (typeof value === 'number') {
-            // only namespaces are supported. Other value types (such as style/class
-            // entries) are not supported in this function.
-            if (value !== 0 /* AttributeMarker.NamespaceURI */) {
-                break;
-            }
-            // we just landed on the marker value ... therefore
-            // we should skip to the next entry
-            i++;
-            const namespaceURI = attrs[i++];
-            const attrName = attrs[i++];
-            const attrVal = attrs[i++];
-            ngDevMode && ngDevMode.rendererSetAttribute++;
-            renderer.setAttribute(native, attrName, attrVal, namespaceURI);
-        }
-        else {
-            // attrName is string;
-            const attrName = value;
-            const attrVal = attrs[++i];
-            // Standard attributes
-            ngDevMode && ngDevMode.rendererSetAttribute++;
-            if (isAnimationProp(attrName)) {
-                renderer.setProperty(native, attrName, attrVal);
-            }
-            else {
-                renderer.setAttribute(native, attrName, attrVal);
-            }
-            i++;
-        }
-    }
-    // another piece of code may iterate over the same attributes array. Therefore
-    // it may be helpful to return the exact spot where the attributes array exited
-    // whether by running into an unsupported marker or if all the static values were
-    // iterated over.
-    return i;
-}
-/**
- * Test whether the given value is a marker that indicates that the following
- * attribute values in a `TAttributes` array are only the names of attributes,
- * and not name-value pairs.
- * @param marker The attribute marker to test.
- * @returns true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
- */
-function isNameOnlyAttributeMarker(marker) {
-    return (marker === 3 /* AttributeMarker.Bindings */ ||
-        marker === 4 /* AttributeMarker.Template */ ||
-        marker === 6 /* AttributeMarker.I18n */);
-}
-function isAnimationProp(name) {
-    // Perf note: accessing charCodeAt to check for the first character of a string is faster as
-    // compared to accessing a character at index 0 (ex. name[0]). The main reason for this is that
-    // charCodeAt doesn't allocate memory to return a substring.
-    return name.charCodeAt(0) === 64 /* CharCode.AT_SIGN */;
-}
-/**
- * Merges `src` `TAttributes` into `dst` `TAttributes` removing any duplicates in the process.
- *
- * This merge function keeps the order of attrs same.
- *
- * @param dst Location of where the merged `TAttributes` should end up.
- * @param src `TAttributes` which should be appended to `dst`
- */
-function mergeHostAttrs(dst, src) {
-    if (src === null || src.length === 0) {
-        // do nothing
-    }
-    else if (dst === null || dst.length === 0) {
-        // We have source, but dst is empty, just make a copy.
-        dst = src.slice();
-    }
-    else {
-        let srcMarker = -1 /* AttributeMarker.ImplicitAttributes */;
-        for (let i = 0; i < src.length; i++) {
-            const item = src[i];
-            if (typeof item === 'number') {
-                srcMarker = item;
-            }
-            else {
-                if (srcMarker === 0 /* AttributeMarker.NamespaceURI */) {
-                    // Case where we need to consume `key1`, `key2`, `value` items.
-                }
-                else if (srcMarker === -1 /* AttributeMarker.ImplicitAttributes */ ||
-                    srcMarker === 2 /* AttributeMarker.Styles */) {
-                    // Case where we have to consume `key1` and `value` only.
-                    mergeHostAttribute(dst, srcMarker, item, null, src[++i]);
-                }
-                else {
-                    // Case where we have to consume `key1` only.
-                    mergeHostAttribute(dst, srcMarker, item, null, null);
-                }
-            }
-        }
-    }
-    return dst;
-}
-/**
- * Append `key`/`value` to existing `TAttributes` taking region marker and duplicates into account.
- *
- * @param dst `TAttributes` to append to.
- * @param marker Region where the `key`/`value` should be added.
- * @param key1 Key to add to `TAttributes`
- * @param key2 Key to add to `TAttributes` (in case of `AttributeMarker.NamespaceURI`)
- * @param value Value to add or to overwrite to `TAttributes` Only used if `marker` is not Class.
- */
-function mergeHostAttribute(dst, marker, key1, key2, value) {
-    let i = 0;
-    // Assume that new markers will be inserted at the end.
-    let markerInsertPosition = dst.length;
-    // scan until correct type.
-    if (marker === -1 /* AttributeMarker.ImplicitAttributes */) {
-        markerInsertPosition = -1;
-    }
-    else {
-        while (i < dst.length) {
-            const dstValue = dst[i++];
-            if (typeof dstValue === 'number') {
-                if (dstValue === marker) {
-                    markerInsertPosition = -1;
-                    break;
-                }
-                else if (dstValue > marker) {
-                    // We need to save this as we want the markers to be inserted in specific order.
-                    markerInsertPosition = i - 1;
-                    break;
-                }
-            }
-        }
-    }
-    // search until you find place of insertion
-    while (i < dst.length) {
-        const item = dst[i];
-        if (typeof item === 'number') {
-            // since `i` started as the index after the marker, we did not find it if we are at the next
-            // marker
-            break;
-        }
-        else if (item === key1) {
-            // We already have same token
-            if (key2 === null) {
-                if (value !== null) {
-                    dst[i + 1] = value;
-                }
-                return;
-            }
-            else if (key2 === dst[i + 1]) {
-                dst[i + 2] = value;
-                return;
-            }
-        }
-        // Increment counter.
-        i++;
-        if (key2 !== null)
-            i++;
-        if (value !== null)
-            i++;
-    }
-    // insert at location.
-    if (markerInsertPosition !== -1) {
-        dst.splice(markerInsertPosition, 0, marker);
-        i = markerInsertPosition + 1;
-    }
-    dst.splice(i++, 0, key1);
-    if (key2 !== null) {
-        dst.splice(i++, 0, key2);
-    }
-    if (value !== null) {
-        dst.splice(i++, 0, value);
-    }
-}
-
-const NG_TEMPLATE_SELECTOR = 'ng-template';
-/**
- * Search the `TAttributes` to see if it contains `cssClassToMatch` (case insensitive)
- *
- * @param tNode static data of the node to match
- * @param attrs `TAttributes` to search through.
- * @param cssClassToMatch class to match (lowercase)
- * @param isProjectionMode Whether or not class matching should look into the attribute `class` in
- *    addition to the `AttributeMarker.Classes`.
- */
-function isCssClassMatching(tNode, attrs, cssClassToMatch, isProjectionMode) {
-    ngDevMode &&
-        assertEqual(cssClassToMatch, cssClassToMatch.toLowerCase(), 'Class name expected to be lowercase.');
-    let i = 0;
-    if (isProjectionMode) {
-        for (; i < attrs.length && typeof attrs[i] === 'string'; i += 2) {
-            // Search for an implicit `class` attribute and check if its value matches `cssClassToMatch`.
-            if (attrs[i] === 'class' &&
-                classIndexOf(attrs[i + 1].toLowerCase(), cssClassToMatch, 0) !== -1) {
-                return true;
-            }
-        }
-    }
-    else if (isInlineTemplate(tNode)) {
-        // Matching directives (i.e. when not matching for projection mode) should not consider the
-        // class bindings that are present on inline templates, as those class bindings only target
-        // the root node of the template, not the template itself.
-        return false;
-    }
-    // Resume the search for classes after the `Classes` marker.
-    i = attrs.indexOf(1 /* AttributeMarker.Classes */, i);
-    if (i > -1) {
-        // We found the classes section. Start searching for the class.
-        let item;
-        while (++i < attrs.length && typeof (item = attrs[i]) === 'string') {
-            if (item.toLowerCase() === cssClassToMatch) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-/**
- * Checks whether the `tNode` represents an inline template (e.g. `*ngFor`).
- *
- * @param tNode current TNode
- */
-function isInlineTemplate(tNode) {
-    return tNode.type === 4 /* TNodeType.Container */ && tNode.value !== NG_TEMPLATE_SELECTOR;
-}
-/**
- * Function that checks whether a given tNode matches tag-based selector and has a valid type.
- *
- * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
- * directive matching mode:
- * - in the "directive matching" mode we do _not_ take TContainer's tagName into account if it is
- * different from NG_TEMPLATE_SELECTOR (value different from NG_TEMPLATE_SELECTOR indicates that a
- * tag name was extracted from * syntax so we would match the same directive twice);
- * - in the "projection" mode, we use a tag name potentially extracted from the * syntax processing
- * (applicable to TNodeType.Container only).
- */
-function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
-    const tagNameToCompare = tNode.type === 4 /* TNodeType.Container */ && !isProjectionMode ? NG_TEMPLATE_SELECTOR : tNode.value;
-    return currentSelector === tagNameToCompare;
-}
-/**
- * A utility function to match an Ivy node static data against a simple CSS selector
- *
- * @param tNode static data of the node to match
- * @param selector The selector to try matching against the node.
- * @param isProjectionMode if `true` we are matching for content projection, otherwise we are doing
- * directive matching.
- * @returns true if node matches the selector.
- */
-function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
-    ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
-    let mode = 4 /* SelectorFlags.ELEMENT */;
-    const nodeAttrs = tNode.attrs;
-    // Find the index of first attribute that has no value, only a name.
-    const nameOnlyMarkerIdx = nodeAttrs !== null ? getNameOnlyMarkerIndex(nodeAttrs) : 0;
-    // When processing ":not" selectors, we skip to the next ":not" if the
-    // current one doesn't match
-    let skipToNextSelector = false;
-    for (let i = 0; i < selector.length; i++) {
-        const current = selector[i];
-        if (typeof current === 'number') {
-            // If we finish processing a :not selector and it hasn't failed, return false
-            if (!skipToNextSelector && !isPositive(mode) && !isPositive(current)) {
-                return false;
-            }
-            // If we are skipping to the next :not() and this mode flag is positive,
-            // it's a part of the current :not() selector, and we should keep skipping
-            if (skipToNextSelector && isPositive(current))
-                continue;
-            skipToNextSelector = false;
-            mode = current | (mode & 1 /* SelectorFlags.NOT */);
-            continue;
-        }
-        if (skipToNextSelector)
-            continue;
-        if (mode & 4 /* SelectorFlags.ELEMENT */) {
-            mode = 2 /* SelectorFlags.ATTRIBUTE */ | (mode & 1 /* SelectorFlags.NOT */);
-            if ((current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode)) ||
-                (current === '' && selector.length === 1)) {
-                if (isPositive(mode))
-                    return false;
-                skipToNextSelector = true;
-            }
-        }
-        else if (mode & 8 /* SelectorFlags.CLASS */) {
-            if (nodeAttrs === null || !isCssClassMatching(tNode, nodeAttrs, current, isProjectionMode)) {
-                if (isPositive(mode))
-                    return false;
-                skipToNextSelector = true;
-            }
-        }
-        else {
-            const selectorAttrValue = selector[++i];
-            const attrIndexInNode = findAttrIndexInNode(current, nodeAttrs, isInlineTemplate(tNode), isProjectionMode);
-            if (attrIndexInNode === -1) {
-                if (isPositive(mode))
-                    return false;
-                skipToNextSelector = true;
-                continue;
-            }
-            if (selectorAttrValue !== '') {
-                let nodeAttrValue;
-                if (attrIndexInNode > nameOnlyMarkerIdx) {
-                    nodeAttrValue = '';
-                }
-                else {
-                    ngDevMode &&
-                        assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* AttributeMarker.NamespaceURI */, 'We do not match directives on namespaced attributes');
-                    // we lowercase the attribute value to be able to match
-                    // selectors without case-sensitivity
-                    // (selectors are already in lowercase when generated)
-                    nodeAttrValue = nodeAttrs[attrIndexInNode + 1].toLowerCase();
-                }
-                if (mode & 2 /* SelectorFlags.ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
-                    if (isPositive(mode))
-                        return false;
-                    skipToNextSelector = true;
-                }
-            }
-        }
-    }
-    return isPositive(mode) || skipToNextSelector;
-}
-function isPositive(mode) {
-    return (mode & 1 /* SelectorFlags.NOT */) === 0;
-}
-/**
- * Examines the attribute's definition array for a node to find the index of the
- * attribute that matches the given `name`.
- *
- * NOTE: This will not match namespaced attributes.
- *
- * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
- * The following table summarizes which types of attributes we attempt to match:
- *
- * ===========================================================================================================
- * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes | I18n
- * Attributes
- * ===========================================================================================================
- * Inline + Projection     | YES               | YES                 | NO                  | YES
- * -----------------------------------------------------------------------------------------------------------
- * Inline + Directive      | NO                | NO                  | YES                 | NO
- * -----------------------------------------------------------------------------------------------------------
- * Non-inline + Projection | YES               | YES                 | NO                  | YES
- * -----------------------------------------------------------------------------------------------------------
- * Non-inline + Directive  | YES               | YES                 | NO                  | YES
- * ===========================================================================================================
- *
- * @param name the name of the attribute to find
- * @param attrs the attribute array to examine
- * @param isInlineTemplate true if the node being matched is an inline template (e.g. `*ngFor`)
- * rather than a manually expanded template node (e.g `<ng-template>`).
- * @param isProjectionMode true if we are matching against content projection otherwise we are
- * matching against directives.
- */
-function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
-    if (attrs === null)
-        return -1;
-    let i = 0;
-    if (isProjectionMode || !isInlineTemplate) {
-        let bindingsMode = false;
-        while (i < attrs.length) {
-            const maybeAttrName = attrs[i];
-            if (maybeAttrName === name) {
-                return i;
-            }
-            else if (maybeAttrName === 3 /* AttributeMarker.Bindings */ ||
-                maybeAttrName === 6 /* AttributeMarker.I18n */) {
-                bindingsMode = true;
-            }
-            else if (maybeAttrName === 1 /* AttributeMarker.Classes */ ||
-                maybeAttrName === 2 /* AttributeMarker.Styles */) {
-                let value = attrs[++i];
-                // We should skip classes here because we have a separate mechanism for
-                // matching classes in projection mode.
-                while (typeof value === 'string') {
-                    value = attrs[++i];
-                }
-                continue;
-            }
-            else if (maybeAttrName === 4 /* AttributeMarker.Template */) {
-                // We do not care about Template attributes in this scenario.
-                break;
-            }
-            else if (maybeAttrName === 0 /* AttributeMarker.NamespaceURI */) {
-                // Skip the whole namespaced attribute and value. This is by design.
-                i += 4;
-                continue;
-            }
-            // In binding mode there are only names, rather than name-value pairs.
-            i += bindingsMode ? 1 : 2;
-        }
-        // We did not match the attribute
-        return -1;
-    }
-    else {
-        return matchTemplateAttribute(attrs, name);
-    }
-}
-function isNodeMatchingSelectorList(tNode, selector, isProjectionMode = false) {
-    for (let i = 0; i < selector.length; i++) {
-        if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
-            return true;
-        }
-    }
-    return false;
-}
-function getProjectAsAttrValue(tNode) {
-    const nodeAttrs = tNode.attrs;
-    if (nodeAttrs != null) {
-        const ngProjectAsAttrIdx = nodeAttrs.indexOf(5 /* AttributeMarker.ProjectAs */);
-        // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
-        // (attribute names are stored at even indexes)
-        if ((ngProjectAsAttrIdx & 1) === 0) {
-            return nodeAttrs[ngProjectAsAttrIdx + 1];
-        }
-    }
-    return null;
-}
-function getNameOnlyMarkerIndex(nodeAttrs) {
-    for (let i = 0; i < nodeAttrs.length; i++) {
-        const nodeAttr = nodeAttrs[i];
-        if (isNameOnlyAttributeMarker(nodeAttr)) {
-            return i;
-        }
-    }
-    return nodeAttrs.length;
-}
-function matchTemplateAttribute(attrs, name) {
-    let i = attrs.indexOf(4 /* AttributeMarker.Template */);
-    if (i > -1) {
-        i++;
-        while (i < attrs.length) {
-            const attr = attrs[i];
-            // Return in case we checked all template attrs and are switching to the next section in the
-            // attrs array (that starts with a number that represents an attribute marker).
-            if (typeof attr === 'number')
-                return -1;
-            if (attr === name)
-                return i;
-            i++;
-        }
-    }
-    return -1;
-}
-/**
- * Checks whether a selector is inside a CssSelectorList
- * @param selector Selector to be checked.
- * @param list List in which to look for the selector.
- */
-function isSelectorInSelectorList(selector, list) {
-    selectorListLoop: for (let i = 0; i < list.length; i++) {
-        const currentSelectorInList = list[i];
-        if (selector.length !== currentSelectorInList.length) {
-            continue;
-        }
-        for (let j = 0; j < selector.length; j++) {
-            if (selector[j] !== currentSelectorInList[j]) {
-                continue selectorListLoop;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-function maybeWrapInNotSelector(isNegativeMode, chunk) {
-    return isNegativeMode ? ':not(' + chunk.trim() + ')' : chunk;
-}
-function stringifyCSSSelector(selector) {
-    let result = selector[0];
-    let i = 1;
-    let mode = 2 /* SelectorFlags.ATTRIBUTE */;
-    let currentChunk = '';
-    let isNegativeMode = false;
-    while (i < selector.length) {
-        let valueOrMarker = selector[i];
-        if (typeof valueOrMarker === 'string') {
-            if (mode & 2 /* SelectorFlags.ATTRIBUTE */) {
-                const attrValue = selector[++i];
-                currentChunk +=
-                    '[' + valueOrMarker + (attrValue.length > 0 ? '="' + attrValue + '"' : '') + ']';
-            }
-            else if (mode & 8 /* SelectorFlags.CLASS */) {
-                currentChunk += '.' + valueOrMarker;
-            }
-            else if (mode & 4 /* SelectorFlags.ELEMENT */) {
-                currentChunk += ' ' + valueOrMarker;
-            }
-        }
-        else {
-            //
-            // Append current chunk to the final result in case we come across SelectorFlag, which
-            // indicates that the previous section of a selector is over. We need to accumulate content
-            // between flags to make sure we wrap the chunk later in :not() selector if needed, e.g.
-            // ```
-            //  ['', Flags.CLASS, '.classA', Flags.CLASS | Flags.NOT, '.classB', '.classC']
-            // ```
-            // should be transformed to `.classA :not(.classB .classC)`.
-            //
-            // Note: for negative selector part, we accumulate content between flags until we find the
-            // next negative flag. This is needed to support a case where `:not()` rule contains more than
-            // one chunk, e.g. the following selector:
-            // ```
-            //  ['', Flags.ELEMENT | Flags.NOT, 'p', Flags.CLASS, 'foo', Flags.CLASS | Flags.NOT, 'bar']
-            // ```
-            // should be stringified to `:not(p.foo) :not(.bar)`
-            //
-            if (currentChunk !== '' && !isPositive(valueOrMarker)) {
-                result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
-                currentChunk = '';
-            }
-            mode = valueOrMarker;
-            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
-            // mode is maintained for remaining chunks of a selector.
-            isNegativeMode = isNegativeMode || !isPositive(mode);
-        }
-        i++;
-    }
-    if (currentChunk !== '') {
-        result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
-    }
-    return result;
-}
-/**
- * Generates string representation of CSS selector in parsed form.
- *
- * ComponentDef and DirectiveDef are generated with the selector in parsed form to avoid doing
- * additional parsing at runtime (for example, for directive matching). However in some cases (for
- * example, while bootstrapping a component), a string version of the selector is required to query
- * for the host element on the page. This function takes the parsed form of a selector and returns
- * its string representation.
- *
- * @param selectorList selector in parsed form
- * @returns string representation of a given selector
- */
-function stringifyCSSSelectorList(selectorList) {
-    return selectorList.map(stringifyCSSSelector).join(',');
-}
-/**
- * Extracts attributes and classes information from a given CSS selector.
- *
- * This function is used while creating a component dynamically. In this case, the host element
- * (that is created dynamically) should contain attributes and classes specified in component's CSS
- * selector.
- *
- * @param selector CSS selector in parsed form (in a form of array)
- * @returns object with `attrs` and `classes` fields that contain extracted information
- */
-function extractAttrsAndClassesFromSelector(selector) {
-    const attrs = [];
-    const classes = [];
-    let i = 1;
-    let mode = 2 /* SelectorFlags.ATTRIBUTE */;
-    while (i < selector.length) {
-        let valueOrMarker = selector[i];
-        if (typeof valueOrMarker === 'string') {
-            if (mode === 2 /* SelectorFlags.ATTRIBUTE */) {
-                if (valueOrMarker !== '') {
-                    attrs.push(valueOrMarker, selector[++i]);
-                }
-            }
-            else if (mode === 8 /* SelectorFlags.CLASS */) {
-                classes.push(valueOrMarker);
-            }
-        }
-        else {
-            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
-            // mode is maintained for remaining chunks of a selector. Since attributes and classes are
-            // extracted only for "positive" part of the selector, we can stop here.
-            if (!isPositive(mode))
-                break;
-            mode = valueOrMarker;
-        }
-        i++;
-    }
-    return { attrs, classes };
-}
-
-/**
- * A constant defining the default value for the standalone attribute in Directive and Pipes decorators.
- * Extracted to a separate file to facilitate G3 patches.
- */
-const NG_STANDALONE_DEFAULT_VALUE = true;
-
-/**
- * Create a component definition object.
- *
- *
- * # Example
- * ```
- * class MyComponent {
- *   // Generated by Angular Template Compiler
- *   // [Symbol] syntax will not be supported by TypeScript until v2.7
- *   static ɵcmp = defineComponent({
- *     ...
- *   });
- * }
- * ```
- * @codeGenApi
- */
-function ɵɵdefineComponent(componentDefinition) {
-    return noSideEffects(() => {
-        // Initialize ngDevMode. This must be the first statement in ɵɵdefineComponent.
-        // See the `initNgDevMode` docstring for more information.
-        (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
-        const baseDef = getNgDirectiveDef(componentDefinition);
-        const def = {
-            ...baseDef,
-            decls: componentDefinition.decls,
-            vars: componentDefinition.vars,
-            template: componentDefinition.template,
-            consts: componentDefinition.consts || null,
-            ngContentSelectors: componentDefinition.ngContentSelectors,
-            onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
-            directiveDefs: null, // assigned in noSideEffects
-            pipeDefs: null, // assigned in noSideEffects
-            dependencies: (baseDef.standalone && componentDefinition.dependencies) || null,
-            getStandaloneInjector: null,
-            getExternalStyles: null,
-            signals: componentDefinition.signals ?? false,
-            data: componentDefinition.data || {},
-            encapsulation: componentDefinition.encapsulation || ViewEncapsulation$1.Emulated,
-            styles: componentDefinition.styles || EMPTY_ARRAY,
-            _: null,
-            schemas: componentDefinition.schemas || null,
-            tView: null,
-            id: '',
-        };
-        initFeatures(def);
-        const dependencies = componentDefinition.dependencies;
-        def.directiveDefs = extractDefListOrFactory(dependencies, /* pipeDef */ false);
-        def.pipeDefs = extractDefListOrFactory(dependencies, /* pipeDef */ true);
-        def.id = getComponentId(def);
-        return def;
-    });
-}
-function extractDirectiveDef(type) {
-    return getComponentDef(type) || getDirectiveDef(type);
-}
-function nonNull(value) {
-    return value !== null;
-}
-/**
- * @codeGenApi
- */
-function ɵɵdefineNgModule(def) {
-    return noSideEffects(() => {
-        const res = {
-            type: def.type,
-            bootstrap: def.bootstrap || EMPTY_ARRAY,
-            declarations: def.declarations || EMPTY_ARRAY,
-            imports: def.imports || EMPTY_ARRAY,
-            exports: def.exports || EMPTY_ARRAY,
-            transitiveCompileScopes: null,
-            schemas: def.schemas || null,
-            id: def.id || null,
-        };
-        return res;
-    });
-}
-function parseAndConvertBindingsForDefinition(obj, declaredInputs) {
-    if (obj == null)
-        return EMPTY_OBJ;
-    const newLookup = {};
-    for (const minifiedKey in obj) {
-        if (obj.hasOwnProperty(minifiedKey)) {
-            const value = obj[minifiedKey];
-            let publicName;
-            let declaredName;
-            let inputFlags = InputFlags.None;
-            if (Array.isArray(value)) {
-                inputFlags = value[0];
-                publicName = value[1];
-                declaredName = value[2] ?? publicName; // declared name might not be set to save bytes.
-            }
-            else {
-                publicName = value;
-                declaredName = value;
-            }
-            // For inputs, capture the declared name, or if some flags are set.
-            if (declaredInputs) {
-                // Perf note: An array is only allocated for the input if there are flags.
-                newLookup[publicName] =
-                    inputFlags !== InputFlags.None ? [minifiedKey, inputFlags] : minifiedKey;
-                declaredInputs[publicName] = declaredName;
-            }
-            else {
-                newLookup[publicName] = minifiedKey;
-            }
-        }
-    }
-    return newLookup;
-}
-/**
- * Create a directive definition object.
- *
- * # Example
- * ```ts
- * class MyDirective {
- *   // Generated by Angular Template Compiler
- *   // [Symbol] syntax will not be supported by TypeScript until v2.7
- *   static ɵdir = ɵɵdefineDirective({
- *     ...
- *   });
- * }
- * ```
- *
- * @codeGenApi
- */
-function ɵɵdefineDirective(directiveDefinition) {
-    return noSideEffects(() => {
-        const def = getNgDirectiveDef(directiveDefinition);
-        initFeatures(def);
-        return def;
-    });
-}
-/**
- * Create a pipe definition object.
- *
- * # Example
- * ```
- * class MyPipe implements PipeTransform {
- *   // Generated by Angular Template Compiler
- *   static ɵpipe = definePipe({
- *     ...
- *   });
- * }
- * ```
- * @param pipeDef Pipe definition generated by the compiler
- *
- * @codeGenApi
- */
-function ɵɵdefinePipe(pipeDef) {
-    return {
-        type: pipeDef.type,
-        name: pipeDef.name,
-        factory: null,
-        pure: pipeDef.pure !== false,
-        standalone: pipeDef.standalone ?? NG_STANDALONE_DEFAULT_VALUE,
-        onDestroy: pipeDef.type.prototype.ngOnDestroy || null,
-    };
+    return ngModuleDef;
 }
 /**
  * The following getter methods retrieve the definition from the type. Currently the retrieval
@@ -2569,112 +1704,8 @@ function getPipeDef$1(type) {
  */
 function isStandalone(type) {
     const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
+    // TODO: standalone as default value (invert the condition)
     return def !== null ? def.standalone : false;
-}
-function getNgModuleDef(type, throwNotFound) {
-    const ngModuleDef = type[NG_MOD_DEF] || null;
-    if (!ngModuleDef && throwNotFound === true) {
-        throw new Error(`Type ${stringify(type)} does not have 'ɵmod' property.`);
-    }
-    return ngModuleDef;
-}
-function getNgDirectiveDef(directiveDefinition) {
-    const declaredInputs = {};
-    return {
-        type: directiveDefinition.type,
-        providersResolver: null,
-        factory: null,
-        hostBindings: directiveDefinition.hostBindings || null,
-        hostVars: directiveDefinition.hostVars || 0,
-        hostAttrs: directiveDefinition.hostAttrs || null,
-        contentQueries: directiveDefinition.contentQueries || null,
-        declaredInputs: declaredInputs,
-        inputTransforms: null,
-        inputConfig: directiveDefinition.inputs || EMPTY_OBJ,
-        exportAs: directiveDefinition.exportAs || null,
-        standalone: directiveDefinition.standalone ?? NG_STANDALONE_DEFAULT_VALUE,
-        signals: directiveDefinition.signals === true,
-        selectors: directiveDefinition.selectors || EMPTY_ARRAY,
-        viewQuery: directiveDefinition.viewQuery || null,
-        features: directiveDefinition.features || null,
-        setInput: null,
-        findHostDirectiveDefs: null,
-        hostDirectives: null,
-        inputs: parseAndConvertBindingsForDefinition(directiveDefinition.inputs, declaredInputs),
-        outputs: parseAndConvertBindingsForDefinition(directiveDefinition.outputs),
-        debugInfo: null,
-    };
-}
-function initFeatures(definition) {
-    definition.features?.forEach((fn) => fn(definition));
-}
-function extractDefListOrFactory(dependencies, pipeDef) {
-    if (!dependencies) {
-        return null;
-    }
-    const defExtractor = pipeDef ? getPipeDef$1 : extractDirectiveDef;
-    return () => (typeof dependencies === 'function' ? dependencies() : dependencies)
-        .map((dep) => defExtractor(dep))
-        .filter(nonNull);
-}
-/**
- * A map that contains the generated component IDs and type.
- */
-const GENERATED_COMP_IDS = new Map();
-/**
- * A method can returns a component ID from the component definition using a variant of DJB2 hash
- * algorithm.
- */
-function getComponentId(componentDef) {
-    let hash = 0;
-    // We cannot rely solely on the component selector as the same selector can be used in different
-    // modules.
-    //
-    // `componentDef.style` is not used, due to it causing inconsistencies. Ex: when server
-    // component styles has no sourcemaps and browsers do.
-    //
-    // Example:
-    // https://github.com/angular/components/blob/d9f82c8f95309e77a6d82fd574c65871e91354c2/src/material/core/option/option.ts#L248
-    // https://github.com/angular/components/blob/285f46dc2b4c5b127d356cb7c4714b221f03ce50/src/material/legacy-core/option/option.ts#L32
-    const hashSelectors = [
-        componentDef.selectors,
-        componentDef.ngContentSelectors,
-        componentDef.hostVars,
-        componentDef.hostAttrs,
-        componentDef.consts,
-        componentDef.vars,
-        componentDef.decls,
-        componentDef.encapsulation,
-        componentDef.standalone,
-        componentDef.signals,
-        componentDef.exportAs,
-        JSON.stringify(componentDef.inputs),
-        JSON.stringify(componentDef.outputs),
-        // We cannot use 'componentDef.type.name' as the name of the symbol will change and will not
-        // match in the server and browser bundles.
-        Object.getOwnPropertyNames(componentDef.type.prototype),
-        !!componentDef.contentQueries,
-        !!componentDef.viewQuery,
-    ].join('|');
-    for (const char of hashSelectors) {
-        hash = (Math.imul(31, hash) + char.charCodeAt(0)) << 0;
-    }
-    // Force positive number hash.
-    // 2147483647 = equivalent of Integer.MAX_VALUE.
-    hash += 2147483647 + 1;
-    const compId = 'c' + hash;
-    if (typeof ngDevMode === 'undefined' || ngDevMode) {
-        if (GENERATED_COMP_IDS.has(compId)) {
-            const previousCompDefType = GENERATED_COMP_IDS.get(compId);
-            if (previousCompDefType !== componentDef.type) {
-                console.warn(formatRuntimeError(-912 /* RuntimeErrorCode.COMPONENT_ID_COLLISION */, `Component ID generation collision detected. Components '${previousCompDefType.name}' and '${componentDef.type.name}' with selector '${stringifyCSSSelectorList(componentDef.selectors)}' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID.`));
-            }
-        }
-        else {
-            GENERATED_COMP_IDS.set(compId, componentDef.type);
-        }
-    }
-    return compId;
 }
 
 /**
@@ -3509,13 +2540,13 @@ var R3TemplateDependencyKind;
     R3TemplateDependencyKind[R3TemplateDependencyKind["Pipe"] = 1] = "Pipe";
     R3TemplateDependencyKind[R3TemplateDependencyKind["NgModule"] = 2] = "NgModule";
 })(R3TemplateDependencyKind || (R3TemplateDependencyKind = {}));
-var ViewEncapsulation;
+var ViewEncapsulation$1;
 (function (ViewEncapsulation) {
     ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
     // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
     ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
     ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
-})(ViewEncapsulation || (ViewEncapsulation = {}));
+})(ViewEncapsulation$1 || (ViewEncapsulation$1 = {}));
 
 function getCompilerFacade(request) {
     const globalNg = _global['ng'];
@@ -5459,6 +4490,207 @@ function assertPureTNodeType(type) {
         type === 64 /* TNodeType.Placeholder */ ||
         type === 128 /* TNodeType.LetDeclaration */)) {
         throwError(`Expected TNodeType to have only a single type selected, but got ${toTNodeTypeAsString(type)}.`);
+    }
+}
+
+/**
+ * Assigns all attribute values to the provided element via the inferred renderer.
+ *
+ * This function accepts two forms of attribute entries:
+ *
+ * default: (key, value):
+ *  attrs = [key1, value1, key2, value2]
+ *
+ * namespaced: (NAMESPACE_MARKER, uri, name, value)
+ *  attrs = [NAMESPACE_MARKER, uri, name, value, NAMESPACE_MARKER, uri, name, value]
+ *
+ * The `attrs` array can contain a mix of both the default and namespaced entries.
+ * The "default" values are set without a marker, but if the function comes across
+ * a marker value then it will attempt to set a namespaced value. If the marker is
+ * not of a namespaced value then the function will quit and return the index value
+ * where it stopped during the iteration of the attrs array.
+ *
+ * See [AttributeMarker] to understand what the namespace marker value is.
+ *
+ * Note that this instruction does not support assigning style and class values to
+ * an element. See `elementStart` and `elementHostAttrs` to learn how styling values
+ * are applied to an element.
+ * @param renderer The renderer to be used
+ * @param native The element that the attributes will be assigned to
+ * @param attrs The attribute array of values that will be assigned to the element
+ * @returns the index value that was last accessed in the attributes array
+ */
+function setUpAttributes(renderer, native, attrs) {
+    let i = 0;
+    while (i < attrs.length) {
+        const value = attrs[i];
+        if (typeof value === 'number') {
+            // only namespaces are supported. Other value types (such as style/class
+            // entries) are not supported in this function.
+            if (value !== 0 /* AttributeMarker.NamespaceURI */) {
+                break;
+            }
+            // we just landed on the marker value ... therefore
+            // we should skip to the next entry
+            i++;
+            const namespaceURI = attrs[i++];
+            const attrName = attrs[i++];
+            const attrVal = attrs[i++];
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            renderer.setAttribute(native, attrName, attrVal, namespaceURI);
+        }
+        else {
+            // attrName is string;
+            const attrName = value;
+            const attrVal = attrs[++i];
+            // Standard attributes
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            if (isAnimationProp(attrName)) {
+                renderer.setProperty(native, attrName, attrVal);
+            }
+            else {
+                renderer.setAttribute(native, attrName, attrVal);
+            }
+            i++;
+        }
+    }
+    // another piece of code may iterate over the same attributes array. Therefore
+    // it may be helpful to return the exact spot where the attributes array exited
+    // whether by running into an unsupported marker or if all the static values were
+    // iterated over.
+    return i;
+}
+/**
+ * Test whether the given value is a marker that indicates that the following
+ * attribute values in a `TAttributes` array are only the names of attributes,
+ * and not name-value pairs.
+ * @param marker The attribute marker to test.
+ * @returns true if the marker is a "name-only" marker (e.g. `Bindings`, `Template` or `I18n`).
+ */
+function isNameOnlyAttributeMarker(marker) {
+    return (marker === 3 /* AttributeMarker.Bindings */ ||
+        marker === 4 /* AttributeMarker.Template */ ||
+        marker === 6 /* AttributeMarker.I18n */);
+}
+function isAnimationProp(name) {
+    // Perf note: accessing charCodeAt to check for the first character of a string is faster as
+    // compared to accessing a character at index 0 (ex. name[0]). The main reason for this is that
+    // charCodeAt doesn't allocate memory to return a substring.
+    return name.charCodeAt(0) === 64 /* CharCode.AT_SIGN */;
+}
+/**
+ * Merges `src` `TAttributes` into `dst` `TAttributes` removing any duplicates in the process.
+ *
+ * This merge function keeps the order of attrs same.
+ *
+ * @param dst Location of where the merged `TAttributes` should end up.
+ * @param src `TAttributes` which should be appended to `dst`
+ */
+function mergeHostAttrs(dst, src) {
+    if (src === null || src.length === 0) {
+        // do nothing
+    }
+    else if (dst === null || dst.length === 0) {
+        // We have source, but dst is empty, just make a copy.
+        dst = src.slice();
+    }
+    else {
+        let srcMarker = -1 /* AttributeMarker.ImplicitAttributes */;
+        for (let i = 0; i < src.length; i++) {
+            const item = src[i];
+            if (typeof item === 'number') {
+                srcMarker = item;
+            }
+            else {
+                if (srcMarker === 0 /* AttributeMarker.NamespaceURI */) {
+                    // Case where we need to consume `key1`, `key2`, `value` items.
+                }
+                else if (srcMarker === -1 /* AttributeMarker.ImplicitAttributes */ ||
+                    srcMarker === 2 /* AttributeMarker.Styles */) {
+                    // Case where we have to consume `key1` and `value` only.
+                    mergeHostAttribute(dst, srcMarker, item, null, src[++i]);
+                }
+                else {
+                    // Case where we have to consume `key1` only.
+                    mergeHostAttribute(dst, srcMarker, item, null, null);
+                }
+            }
+        }
+    }
+    return dst;
+}
+/**
+ * Append `key`/`value` to existing `TAttributes` taking region marker and duplicates into account.
+ *
+ * @param dst `TAttributes` to append to.
+ * @param marker Region where the `key`/`value` should be added.
+ * @param key1 Key to add to `TAttributes`
+ * @param key2 Key to add to `TAttributes` (in case of `AttributeMarker.NamespaceURI`)
+ * @param value Value to add or to overwrite to `TAttributes` Only used if `marker` is not Class.
+ */
+function mergeHostAttribute(dst, marker, key1, key2, value) {
+    let i = 0;
+    // Assume that new markers will be inserted at the end.
+    let markerInsertPosition = dst.length;
+    // scan until correct type.
+    if (marker === -1 /* AttributeMarker.ImplicitAttributes */) {
+        markerInsertPosition = -1;
+    }
+    else {
+        while (i < dst.length) {
+            const dstValue = dst[i++];
+            if (typeof dstValue === 'number') {
+                if (dstValue === marker) {
+                    markerInsertPosition = -1;
+                    break;
+                }
+                else if (dstValue > marker) {
+                    // We need to save this as we want the markers to be inserted in specific order.
+                    markerInsertPosition = i - 1;
+                    break;
+                }
+            }
+        }
+    }
+    // search until you find place of insertion
+    while (i < dst.length) {
+        const item = dst[i];
+        if (typeof item === 'number') {
+            // since `i` started as the index after the marker, we did not find it if we are at the next
+            // marker
+            break;
+        }
+        else if (item === key1) {
+            // We already have same token
+            if (key2 === null) {
+                if (value !== null) {
+                    dst[i + 1] = value;
+                }
+                return;
+            }
+            else if (key2 === dst[i + 1]) {
+                dst[i + 2] = value;
+                return;
+            }
+        }
+        // Increment counter.
+        i++;
+        if (key2 !== null)
+            i++;
+        if (value !== null)
+            i++;
+    }
+    // insert at location.
+    if (markerInsertPosition !== -1) {
+        dst.splice(markerInsertPosition, 0, marker);
+        i = markerInsertPosition + 1;
+    }
+    dst.splice(i++, 0, key1);
+    if (key2 !== null) {
+        dst.splice(i++, 0, key2);
+    }
+    if (value !== null) {
+        dst.splice(i++, 0, value);
     }
 }
 
@@ -7975,6 +7207,31 @@ function isI18nInSkipHydrationBlock(parentTNode) {
         isInSkipHydrationBlock(parentTNode));
 }
 
+/**
+ * The strategy that the default change detector uses to detect changes.
+ * When set, takes effect the next time change detection is triggered.
+ *
+ * @see [Change detection usage](/api/core/ChangeDetectorRef?tab=usage-notes)
+ * @see [Skipping component subtrees](/best-practices/skipping-subtrees)
+ *
+ * @publicApi
+ */
+var ChangeDetectionStrategy;
+(function (ChangeDetectionStrategy) {
+    /**
+     * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
+     * until reactivated by setting the strategy to `Default` (`CheckAlways`).
+     * Change detection can still be explicitly invoked.
+     * This strategy applies to all child directives and cannot be overridden.
+     */
+    ChangeDetectionStrategy[ChangeDetectionStrategy["OnPush"] = 0] = "OnPush";
+    /**
+     * Use the default `CheckAlways` strategy, in which change detection is automatic until
+     * explicitly deactivated.
+     */
+    ChangeDetectionStrategy[ChangeDetectionStrategy["Default"] = 1] = "Default";
+})(ChangeDetectionStrategy || (ChangeDetectionStrategy = {}));
+
 // Keeps track of the currently-active LViews.
 const TRACKED_LVIEWS = new Map();
 // Used for generating unique IDs for LViews.
@@ -9552,6 +8809,46 @@ function processTextNodeBeforeSerialization(context, node) {
 }
 
 /**
+ * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
+ * `encapsulation` option.
+ *
+ * See {@link Component#encapsulation encapsulation}.
+ *
+ * @usageNotes
+ * ### Example
+ *
+ * {@example core/ts/metadata/encapsulation.ts region='longform'}
+ *
+ * @publicApi
+ */
+var ViewEncapsulation;
+(function (ViewEncapsulation) {
+    // TODO: consider making `ViewEncapsulation` a `const enum` instead. See
+    // https://github.com/angular/angular/issues/44119 for additional information.
+    /**
+     * Emulates a native Shadow DOM encapsulation behavior by adding a specific attribute to the
+     * component's host element and applying the same attribute to all the CSS selectors provided
+     * via {@link Component#styles styles} or {@link Component#styleUrls styleUrls}.
+     *
+     * This is the default option.
+     */
+    ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
+    // Historically the 1 value was for `Native` encapsulation which has been removed as of v11.
+    /**
+     * Doesn't provide any sort of CSS style encapsulation, meaning that all the styles provided
+     * via {@link Component#styles styles} or {@link Component#styleUrls styleUrls} are applicable
+     * to any HTML element of the application regardless of their host Component.
+     */
+    ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
+    /**
+     * Uses the browser's native Shadow DOM API to encapsulate CSS styles, meaning that it creates
+     * a ShadowRoot for the component's host element which is then used to encapsulate
+     * all the Component's styling.
+     */
+    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
+})(ViewEncapsulation || (ViewEncapsulation = {}));
+
+/**
  * @fileoverview
  * A module to facilitate use of a Trusted Types policy internally within
  * Angular. It lazily constructs the Trusted Types policy, providing helper
@@ -11003,6 +10300,14 @@ function getExpressionChangedErrorDetails(lView, bindingIndex, oldValue, newValu
     return { propName: undefined, oldValue, newValue };
 }
 
+/** Flags describing an input for a directive. */
+var InputFlags;
+(function (InputFlags) {
+    InputFlags[InputFlags["None"] = 0] = "None";
+    InputFlags[InputFlags["SignalBased"] = 1] = "SignalBased";
+    InputFlags[InputFlags["HasDecoratorInputTransform"] = 2] = "HasDecoratorInputTransform";
+})(InputFlags || (InputFlags = {}));
+
 /**
  * Flags for renderer-specific style modifiers.
  * @publicApi
@@ -11552,8 +10857,8 @@ function getClosestRElement(tView, tNode, lView) {
             // Since the projection would then move it to its final destination. Note that we can't
             // make this assumption when using the Shadow DOM, because the native projection placeholders
             // (<content> or <slot>) have to be in place as elements are being inserted.
-            if (encapsulation === ViewEncapsulation$1.None ||
-                encapsulation === ViewEncapsulation$1.Emulated) {
+            if (encapsulation === ViewEncapsulation.None ||
+                encapsulation === ViewEncapsulation.Emulated) {
                 return null;
             }
         }
@@ -12001,6 +11306,440 @@ function setupStaticAttributes(renderer, element, tNode) {
     if (styles !== null) {
         writeDirectStyle(renderer, element, styles);
     }
+}
+
+/**
+ * Returns an index of `classToSearch` in `className` taking token boundaries into account.
+ *
+ * `classIndexOf('AB A', 'A', 0)` will be 3 (not 0 since `AB!==A`)
+ *
+ * @param className A string containing classes (whitespace separated)
+ * @param classToSearch A class name to locate
+ * @param startingIndex Starting location of search
+ * @returns an index of the located class (or -1 if not found)
+ */
+function classIndexOf(className, classToSearch, startingIndex) {
+    ngDevMode && assertNotEqual(classToSearch, '', 'can not look for "" string.');
+    let end = className.length;
+    while (true) {
+        const foundIndex = className.indexOf(classToSearch, startingIndex);
+        if (foundIndex === -1)
+            return foundIndex;
+        if (foundIndex === 0 || className.charCodeAt(foundIndex - 1) <= 32 /* CharCode.SPACE */) {
+            // Ensure that it has leading whitespace
+            const length = classToSearch.length;
+            if (foundIndex + length === end ||
+                className.charCodeAt(foundIndex + length) <= 32 /* CharCode.SPACE */) {
+                // Ensure that it has trailing whitespace
+                return foundIndex;
+            }
+        }
+        // False positive, keep searching from where we left off.
+        startingIndex = foundIndex + 1;
+    }
+}
+
+const NG_TEMPLATE_SELECTOR = 'ng-template';
+/**
+ * Search the `TAttributes` to see if it contains `cssClassToMatch` (case insensitive)
+ *
+ * @param tNode static data of the node to match
+ * @param attrs `TAttributes` to search through.
+ * @param cssClassToMatch class to match (lowercase)
+ * @param isProjectionMode Whether or not class matching should look into the attribute `class` in
+ *    addition to the `AttributeMarker.Classes`.
+ */
+function isCssClassMatching(tNode, attrs, cssClassToMatch, isProjectionMode) {
+    ngDevMode &&
+        assertEqual(cssClassToMatch, cssClassToMatch.toLowerCase(), 'Class name expected to be lowercase.');
+    let i = 0;
+    if (isProjectionMode) {
+        for (; i < attrs.length && typeof attrs[i] === 'string'; i += 2) {
+            // Search for an implicit `class` attribute and check if its value matches `cssClassToMatch`.
+            if (attrs[i] === 'class' &&
+                classIndexOf(attrs[i + 1].toLowerCase(), cssClassToMatch, 0) !== -1) {
+                return true;
+            }
+        }
+    }
+    else if (isInlineTemplate(tNode)) {
+        // Matching directives (i.e. when not matching for projection mode) should not consider the
+        // class bindings that are present on inline templates, as those class bindings only target
+        // the root node of the template, not the template itself.
+        return false;
+    }
+    // Resume the search for classes after the `Classes` marker.
+    i = attrs.indexOf(1 /* AttributeMarker.Classes */, i);
+    if (i > -1) {
+        // We found the classes section. Start searching for the class.
+        let item;
+        while (++i < attrs.length && typeof (item = attrs[i]) === 'string') {
+            if (item.toLowerCase() === cssClassToMatch) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+/**
+ * Checks whether the `tNode` represents an inline template (e.g. `*ngFor`).
+ *
+ * @param tNode current TNode
+ */
+function isInlineTemplate(tNode) {
+    return tNode.type === 4 /* TNodeType.Container */ && tNode.value !== NG_TEMPLATE_SELECTOR;
+}
+/**
+ * Function that checks whether a given tNode matches tag-based selector and has a valid type.
+ *
+ * Matching can be performed in 2 modes: projection mode (when we project nodes) and regular
+ * directive matching mode:
+ * - in the "directive matching" mode we do _not_ take TContainer's tagName into account if it is
+ * different from NG_TEMPLATE_SELECTOR (value different from NG_TEMPLATE_SELECTOR indicates that a
+ * tag name was extracted from * syntax so we would match the same directive twice);
+ * - in the "projection" mode, we use a tag name potentially extracted from the * syntax processing
+ * (applicable to TNodeType.Container only).
+ */
+function hasTagAndTypeMatch(tNode, currentSelector, isProjectionMode) {
+    const tagNameToCompare = tNode.type === 4 /* TNodeType.Container */ && !isProjectionMode ? NG_TEMPLATE_SELECTOR : tNode.value;
+    return currentSelector === tagNameToCompare;
+}
+/**
+ * A utility function to match an Ivy node static data against a simple CSS selector
+ *
+ * @param tNode static data of the node to match
+ * @param selector The selector to try matching against the node.
+ * @param isProjectionMode if `true` we are matching for content projection, otherwise we are doing
+ * directive matching.
+ * @returns true if node matches the selector.
+ */
+function isNodeMatchingSelector(tNode, selector, isProjectionMode) {
+    ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
+    let mode = 4 /* SelectorFlags.ELEMENT */;
+    const nodeAttrs = tNode.attrs;
+    // Find the index of first attribute that has no value, only a name.
+    const nameOnlyMarkerIdx = nodeAttrs !== null ? getNameOnlyMarkerIndex(nodeAttrs) : 0;
+    // When processing ":not" selectors, we skip to the next ":not" if the
+    // current one doesn't match
+    let skipToNextSelector = false;
+    for (let i = 0; i < selector.length; i++) {
+        const current = selector[i];
+        if (typeof current === 'number') {
+            // If we finish processing a :not selector and it hasn't failed, return false
+            if (!skipToNextSelector && !isPositive(mode) && !isPositive(current)) {
+                return false;
+            }
+            // If we are skipping to the next :not() and this mode flag is positive,
+            // it's a part of the current :not() selector, and we should keep skipping
+            if (skipToNextSelector && isPositive(current))
+                continue;
+            skipToNextSelector = false;
+            mode = current | (mode & 1 /* SelectorFlags.NOT */);
+            continue;
+        }
+        if (skipToNextSelector)
+            continue;
+        if (mode & 4 /* SelectorFlags.ELEMENT */) {
+            mode = 2 /* SelectorFlags.ATTRIBUTE */ | (mode & 1 /* SelectorFlags.NOT */);
+            if ((current !== '' && !hasTagAndTypeMatch(tNode, current, isProjectionMode)) ||
+                (current === '' && selector.length === 1)) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+            }
+        }
+        else if (mode & 8 /* SelectorFlags.CLASS */) {
+            if (nodeAttrs === null || !isCssClassMatching(tNode, nodeAttrs, current, isProjectionMode)) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+            }
+        }
+        else {
+            const selectorAttrValue = selector[++i];
+            const attrIndexInNode = findAttrIndexInNode(current, nodeAttrs, isInlineTemplate(tNode), isProjectionMode);
+            if (attrIndexInNode === -1) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+                continue;
+            }
+            if (selectorAttrValue !== '') {
+                let nodeAttrValue;
+                if (attrIndexInNode > nameOnlyMarkerIdx) {
+                    nodeAttrValue = '';
+                }
+                else {
+                    ngDevMode &&
+                        assertNotEqual(nodeAttrs[attrIndexInNode], 0 /* AttributeMarker.NamespaceURI */, 'We do not match directives on namespaced attributes');
+                    // we lowercase the attribute value to be able to match
+                    // selectors without case-sensitivity
+                    // (selectors are already in lowercase when generated)
+                    nodeAttrValue = nodeAttrs[attrIndexInNode + 1].toLowerCase();
+                }
+                if (mode & 2 /* SelectorFlags.ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                }
+            }
+        }
+    }
+    return isPositive(mode) || skipToNextSelector;
+}
+function isPositive(mode) {
+    return (mode & 1 /* SelectorFlags.NOT */) === 0;
+}
+/**
+ * Examines the attribute's definition array for a node to find the index of the
+ * attribute that matches the given `name`.
+ *
+ * NOTE: This will not match namespaced attributes.
+ *
+ * Attribute matching depends upon `isInlineTemplate` and `isProjectionMode`.
+ * The following table summarizes which types of attributes we attempt to match:
+ *
+ * ===========================================================================================================
+ * Modes                   | Normal Attributes | Bindings Attributes | Template Attributes | I18n
+ * Attributes
+ * ===========================================================================================================
+ * Inline + Projection     | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Inline + Directive      | NO                | NO                  | YES                 | NO
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Projection | YES               | YES                 | NO                  | YES
+ * -----------------------------------------------------------------------------------------------------------
+ * Non-inline + Directive  | YES               | YES                 | NO                  | YES
+ * ===========================================================================================================
+ *
+ * @param name the name of the attribute to find
+ * @param attrs the attribute array to examine
+ * @param isInlineTemplate true if the node being matched is an inline template (e.g. `*ngFor`)
+ * rather than a manually expanded template node (e.g `<ng-template>`).
+ * @param isProjectionMode true if we are matching against content projection otherwise we are
+ * matching against directives.
+ */
+function findAttrIndexInNode(name, attrs, isInlineTemplate, isProjectionMode) {
+    if (attrs === null)
+        return -1;
+    let i = 0;
+    if (isProjectionMode || !isInlineTemplate) {
+        let bindingsMode = false;
+        while (i < attrs.length) {
+            const maybeAttrName = attrs[i];
+            if (maybeAttrName === name) {
+                return i;
+            }
+            else if (maybeAttrName === 3 /* AttributeMarker.Bindings */ ||
+                maybeAttrName === 6 /* AttributeMarker.I18n */) {
+                bindingsMode = true;
+            }
+            else if (maybeAttrName === 1 /* AttributeMarker.Classes */ ||
+                maybeAttrName === 2 /* AttributeMarker.Styles */) {
+                let value = attrs[++i];
+                // We should skip classes here because we have a separate mechanism for
+                // matching classes in projection mode.
+                while (typeof value === 'string') {
+                    value = attrs[++i];
+                }
+                continue;
+            }
+            else if (maybeAttrName === 4 /* AttributeMarker.Template */) {
+                // We do not care about Template attributes in this scenario.
+                break;
+            }
+            else if (maybeAttrName === 0 /* AttributeMarker.NamespaceURI */) {
+                // Skip the whole namespaced attribute and value. This is by design.
+                i += 4;
+                continue;
+            }
+            // In binding mode there are only names, rather than name-value pairs.
+            i += bindingsMode ? 1 : 2;
+        }
+        // We did not match the attribute
+        return -1;
+    }
+    else {
+        return matchTemplateAttribute(attrs, name);
+    }
+}
+function isNodeMatchingSelectorList(tNode, selector, isProjectionMode = false) {
+    for (let i = 0; i < selector.length; i++) {
+        if (isNodeMatchingSelector(tNode, selector[i], isProjectionMode)) {
+            return true;
+        }
+    }
+    return false;
+}
+function getProjectAsAttrValue(tNode) {
+    const nodeAttrs = tNode.attrs;
+    if (nodeAttrs != null) {
+        const ngProjectAsAttrIdx = nodeAttrs.indexOf(5 /* AttributeMarker.ProjectAs */);
+        // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
+        // (attribute names are stored at even indexes)
+        if ((ngProjectAsAttrIdx & 1) === 0) {
+            return nodeAttrs[ngProjectAsAttrIdx + 1];
+        }
+    }
+    return null;
+}
+function getNameOnlyMarkerIndex(nodeAttrs) {
+    for (let i = 0; i < nodeAttrs.length; i++) {
+        const nodeAttr = nodeAttrs[i];
+        if (isNameOnlyAttributeMarker(nodeAttr)) {
+            return i;
+        }
+    }
+    return nodeAttrs.length;
+}
+function matchTemplateAttribute(attrs, name) {
+    let i = attrs.indexOf(4 /* AttributeMarker.Template */);
+    if (i > -1) {
+        i++;
+        while (i < attrs.length) {
+            const attr = attrs[i];
+            // Return in case we checked all template attrs and are switching to the next section in the
+            // attrs array (that starts with a number that represents an attribute marker).
+            if (typeof attr === 'number')
+                return -1;
+            if (attr === name)
+                return i;
+            i++;
+        }
+    }
+    return -1;
+}
+/**
+ * Checks whether a selector is inside a CssSelectorList
+ * @param selector Selector to be checked.
+ * @param list List in which to look for the selector.
+ */
+function isSelectorInSelectorList(selector, list) {
+    selectorListLoop: for (let i = 0; i < list.length; i++) {
+        const currentSelectorInList = list[i];
+        if (selector.length !== currentSelectorInList.length) {
+            continue;
+        }
+        for (let j = 0; j < selector.length; j++) {
+            if (selector[j] !== currentSelectorInList[j]) {
+                continue selectorListLoop;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+function maybeWrapInNotSelector(isNegativeMode, chunk) {
+    return isNegativeMode ? ':not(' + chunk.trim() + ')' : chunk;
+}
+function stringifyCSSSelector(selector) {
+    let result = selector[0];
+    let i = 1;
+    let mode = 2 /* SelectorFlags.ATTRIBUTE */;
+    let currentChunk = '';
+    let isNegativeMode = false;
+    while (i < selector.length) {
+        let valueOrMarker = selector[i];
+        if (typeof valueOrMarker === 'string') {
+            if (mode & 2 /* SelectorFlags.ATTRIBUTE */) {
+                const attrValue = selector[++i];
+                currentChunk +=
+                    '[' + valueOrMarker + (attrValue.length > 0 ? '="' + attrValue + '"' : '') + ']';
+            }
+            else if (mode & 8 /* SelectorFlags.CLASS */) {
+                currentChunk += '.' + valueOrMarker;
+            }
+            else if (mode & 4 /* SelectorFlags.ELEMENT */) {
+                currentChunk += ' ' + valueOrMarker;
+            }
+        }
+        else {
+            //
+            // Append current chunk to the final result in case we come across SelectorFlag, which
+            // indicates that the previous section of a selector is over. We need to accumulate content
+            // between flags to make sure we wrap the chunk later in :not() selector if needed, e.g.
+            // ```
+            //  ['', Flags.CLASS, '.classA', Flags.CLASS | Flags.NOT, '.classB', '.classC']
+            // ```
+            // should be transformed to `.classA :not(.classB .classC)`.
+            //
+            // Note: for negative selector part, we accumulate content between flags until we find the
+            // next negative flag. This is needed to support a case where `:not()` rule contains more than
+            // one chunk, e.g. the following selector:
+            // ```
+            //  ['', Flags.ELEMENT | Flags.NOT, 'p', Flags.CLASS, 'foo', Flags.CLASS | Flags.NOT, 'bar']
+            // ```
+            // should be stringified to `:not(p.foo) :not(.bar)`
+            //
+            if (currentChunk !== '' && !isPositive(valueOrMarker)) {
+                result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
+                currentChunk = '';
+            }
+            mode = valueOrMarker;
+            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
+            // mode is maintained for remaining chunks of a selector.
+            isNegativeMode = isNegativeMode || !isPositive(mode);
+        }
+        i++;
+    }
+    if (currentChunk !== '') {
+        result += maybeWrapInNotSelector(isNegativeMode, currentChunk);
+    }
+    return result;
+}
+/**
+ * Generates string representation of CSS selector in parsed form.
+ *
+ * ComponentDef and DirectiveDef are generated with the selector in parsed form to avoid doing
+ * additional parsing at runtime (for example, for directive matching). However in some cases (for
+ * example, while bootstrapping a component), a string version of the selector is required to query
+ * for the host element on the page. This function takes the parsed form of a selector and returns
+ * its string representation.
+ *
+ * @param selectorList selector in parsed form
+ * @returns string representation of a given selector
+ */
+function stringifyCSSSelectorList(selectorList) {
+    return selectorList.map(stringifyCSSSelector).join(',');
+}
+/**
+ * Extracts attributes and classes information from a given CSS selector.
+ *
+ * This function is used while creating a component dynamically. In this case, the host element
+ * (that is created dynamically) should contain attributes and classes specified in component's CSS
+ * selector.
+ *
+ * @param selector CSS selector in parsed form (in a form of array)
+ * @returns object with `attrs` and `classes` fields that contain extracted information
+ */
+function extractAttrsAndClassesFromSelector(selector) {
+    const attrs = [];
+    const classes = [];
+    let i = 1;
+    let mode = 2 /* SelectorFlags.ATTRIBUTE */;
+    while (i < selector.length) {
+        let valueOrMarker = selector[i];
+        if (typeof valueOrMarker === 'string') {
+            if (mode === 2 /* SelectorFlags.ATTRIBUTE */) {
+                if (valueOrMarker !== '') {
+                    attrs.push(valueOrMarker, selector[++i]);
+                }
+            }
+            else if (mode === 8 /* SelectorFlags.CLASS */) {
+                classes.push(valueOrMarker);
+            }
+        }
+        else {
+            // According to CssSelector spec, once we come across `SelectorFlags.NOT` flag, the negative
+            // mode is maintained for remaining chunks of a selector. Since attributes and classes are
+            // extracted only for "positive" part of the selector, we can stop here.
+            if (!isPositive(mode))
+                break;
+            mode = valueOrMarker;
+        }
+        i++;
+    }
+    return { attrs, classes };
 }
 
 /** A special value which designates that a value has not changed. */
@@ -12465,7 +12204,7 @@ function locateHostElement(renderer, elementOrSelector, encapsulation, injector)
     const preserveHostContent = injector.get(PRESERVE_HOST_CONTENT, PRESERVE_HOST_CONTENT_DEFAULT);
     // When using native Shadow DOM, do not clear host element to allow native slot
     // projection.
-    const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation$1.ShadowDom;
+    const preserveContent = preserveHostContent || encapsulation === ViewEncapsulation.ShadowDom;
     const rootElement = renderer.selectRootElement(elementOrSelector, preserveContent);
     applyRootElementTransform(rootElement);
     return rootElement;
@@ -17104,7 +16843,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.11+sha-aadcfda']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.11+sha-486c5a9']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18658,6 +18397,468 @@ function ɵɵvalidateIframeAttribute(attrValue, tagName, attrName) {
     return attrValue;
 }
 
+/**
+ * A constant defining the default value for the standalone attribute in Directive and Pipes decorators.
+ * Extracted to a separate file to facilitate G3 patches.
+ */
+const NG_STANDALONE_DEFAULT_VALUE = true;
+
+/**
+ * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
+ * Provides access to the `NgModule` instance and related objects.
+ *
+ * @publicApi
+ */
+class NgModuleRef$1 {
+}
+/**
+ * @publicApi
+ *
+ * @deprecated
+ * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
+ * JIT mode. Angular provides APIs that accept NgModule classes directly (such as
+ * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
+ * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
+ * using factory-based ones.
+ */
+class NgModuleFactory$1 {
+}
+
+/**
+ * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
+ *
+ * @param ngModule NgModule class.
+ * @param parentInjector Optional injector instance to use as a parent for the module injector. If
+ *     not provided, `NullInjector` will be used instead.
+ * @returns NgModuleRef that represents an NgModule instance.
+ *
+ * @publicApi
+ */
+function createNgModule(ngModule, parentInjector) {
+    return new NgModuleRef(ngModule, parentInjector ?? null, []);
+}
+/**
+ * The `createNgModule` function alias for backwards-compatibility.
+ * Please avoid using it directly and use `createNgModule` instead.
+ *
+ * @deprecated Use `createNgModule` instead.
+ */
+const createNgModuleRef = createNgModule;
+class NgModuleRef extends NgModuleRef$1 {
+    constructor(ngModuleType, _parent, additionalProviders, runInjectorInitializers = true) {
+        super();
+        this.ngModuleType = ngModuleType;
+        this._parent = _parent;
+        // tslint:disable-next-line:require-internal-with-underscore
+        this._bootstrapComponents = [];
+        this.destroyCbs = [];
+        // When bootstrapping a module we have a dependency graph that looks like this:
+        // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
+        // module being resolved tries to inject the ComponentFactoryResolver, it'll create a
+        // circular dependency which will result in a runtime error, because the injector doesn't
+        // exist yet. We work around the issue by creating the ComponentFactoryResolver ourselves
+        // and providing it, rather than letting the injector resolve it.
+        this.componentFactoryResolver = new ComponentFactoryResolver(this);
+        const ngModuleDef = getNgModuleDef(ngModuleType);
+        ngDevMode &&
+            assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
+        this._bootstrapComponents = maybeUnwrapFn(ngModuleDef.bootstrap);
+        this._r3Injector = createInjectorWithoutInjectorInstances(ngModuleType, _parent, [
+            { provide: NgModuleRef$1, useValue: this },
+            {
+                provide: ComponentFactoryResolver$1,
+                useValue: this.componentFactoryResolver,
+            },
+            ...additionalProviders,
+        ], stringify(ngModuleType), new Set(['environment']));
+        // We need to resolve the injector types separately from the injector creation, because
+        // the module might be trying to use this ref in its constructor for DI which will cause a
+        // circular error that will eventually error out, because the injector isn't created yet.
+        if (runInjectorInitializers) {
+            this.resolveInjectorInitializers();
+        }
+    }
+    resolveInjectorInitializers() {
+        this._r3Injector.resolveInjectorInitializers();
+        this.instance = this._r3Injector.get(this.ngModuleType);
+    }
+    get injector() {
+        return this._r3Injector;
+    }
+    destroy() {
+        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+        const injector = this._r3Injector;
+        !injector.destroyed && injector.destroy();
+        this.destroyCbs.forEach((fn) => fn());
+        this.destroyCbs = null;
+    }
+    onDestroy(callback) {
+        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
+        this.destroyCbs.push(callback);
+    }
+}
+class NgModuleFactory extends NgModuleFactory$1 {
+    constructor(moduleType) {
+        super();
+        this.moduleType = moduleType;
+    }
+    create(parentInjector) {
+        return new NgModuleRef(this.moduleType, parentInjector, []);
+    }
+}
+function createNgModuleRefWithProviders(moduleType, parentInjector, additionalProviders) {
+    return new NgModuleRef(moduleType, parentInjector, additionalProviders, false);
+}
+class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
+    constructor(config) {
+        super();
+        this.componentFactoryResolver = new ComponentFactoryResolver(this);
+        this.instance = null;
+        const injector = new R3Injector([
+            ...config.providers,
+            { provide: NgModuleRef$1, useValue: this },
+            { provide: ComponentFactoryResolver$1, useValue: this.componentFactoryResolver },
+        ], config.parent || getNullInjector(), config.debugName, new Set(['environment']));
+        this.injector = injector;
+        if (config.runEnvironmentInitializers) {
+            injector.resolveInjectorInitializers();
+        }
+    }
+    destroy() {
+        this.injector.destroy();
+    }
+    onDestroy(callback) {
+        this.injector.onDestroy(callback);
+    }
+}
+/**
+ * Create a new environment injector.
+ *
+ * @param providers An array of providers.
+ * @param parent A parent environment injector.
+ * @param debugName An optional name for this injector instance, which will be used in error
+ *     messages.
+ *
+ * @publicApi
+ */
+function createEnvironmentInjector(providers, parent, debugName = null) {
+    const adapter = new EnvironmentNgModuleRefAdapter({
+        providers,
+        parent,
+        debugName,
+        runEnvironmentInitializers: true,
+    });
+    return adapter.injector;
+}
+
+/**
+ * A service used by the framework to create instances of standalone injectors. Those injectors are
+ * created on demand in case of dynamic component instantiation and contain ambient providers
+ * collected from the imports graph rooted at a given standalone component.
+ */
+class StandaloneService {
+    constructor(_injector) {
+        this._injector = _injector;
+        this.cachedInjectors = new Map();
+    }
+    getOrCreateStandaloneInjector(componentDef) {
+        if (!componentDef.standalone) {
+            return null;
+        }
+        if (!this.cachedInjectors.has(componentDef)) {
+            const providers = internalImportProvidersFrom(false, componentDef.type);
+            const standaloneInjector = providers.length > 0
+                ? createEnvironmentInjector([providers], this._injector, `Standalone[${componentDef.type.name}]`)
+                : null;
+            this.cachedInjectors.set(componentDef, standaloneInjector);
+        }
+        return this.cachedInjectors.get(componentDef);
+    }
+    ngOnDestroy() {
+        try {
+            for (const injector of this.cachedInjectors.values()) {
+                if (injector !== null) {
+                    injector.destroy();
+                }
+            }
+        }
+        finally {
+            this.cachedInjectors.clear();
+        }
+    }
+    /** @nocollapse */
+    static { this.ɵprov = ɵɵdefineInjectable({
+        token: StandaloneService,
+        providedIn: 'environment',
+        factory: () => new StandaloneService(ɵɵinject(EnvironmentInjector)),
+    }); }
+}
+
+/**
+ * Create a component definition object.
+ *
+ *
+ * # Example
+ * ```
+ * class MyComponent {
+ *   // Generated by Angular Template Compiler
+ *   // [Symbol] syntax will not be supported by TypeScript until v2.7
+ *   static ɵcmp = defineComponent({
+ *     ...
+ *   });
+ * }
+ * ```
+ * @codeGenApi
+ */
+function ɵɵdefineComponent(componentDefinition) {
+    return noSideEffects(() => {
+        // Initialize ngDevMode. This must be the first statement in ɵɵdefineComponent.
+        // See the `initNgDevMode` docstring for more information.
+        (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
+        const baseDef = getNgDirectiveDef(componentDefinition);
+        const def = {
+            ...baseDef,
+            decls: componentDefinition.decls,
+            vars: componentDefinition.vars,
+            template: componentDefinition.template,
+            consts: componentDefinition.consts || null,
+            ngContentSelectors: componentDefinition.ngContentSelectors,
+            onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
+            directiveDefs: null, // assigned in noSideEffects
+            pipeDefs: null, // assigned in noSideEffects
+            dependencies: (baseDef.standalone && componentDefinition.dependencies) || null,
+            getStandaloneInjector: baseDef.standalone
+                ? (parentInjector) => {
+                    return parentInjector.get(StandaloneService).getOrCreateStandaloneInjector(def);
+                }
+                : null,
+            getExternalStyles: null,
+            signals: componentDefinition.signals ?? false,
+            data: componentDefinition.data || {},
+            encapsulation: componentDefinition.encapsulation || ViewEncapsulation.Emulated,
+            styles: componentDefinition.styles || EMPTY_ARRAY,
+            _: null,
+            schemas: componentDefinition.schemas || null,
+            tView: null,
+            id: '',
+        };
+        // TODO: Do we still need/want this ?
+        if (baseDef.standalone) {
+            performanceMarkFeature('NgStandalone');
+        }
+        initFeatures(def);
+        const dependencies = componentDefinition.dependencies;
+        def.directiveDefs = extractDefListOrFactory(dependencies, /* pipeDef */ false);
+        def.pipeDefs = extractDefListOrFactory(dependencies, /* pipeDef */ true);
+        def.id = getComponentId(def);
+        return def;
+    });
+}
+function extractDirectiveDef(type) {
+    return getComponentDef(type) || getDirectiveDef(type);
+}
+function nonNull(value) {
+    return value !== null;
+}
+/**
+ * @codeGenApi
+ */
+function ɵɵdefineNgModule(def) {
+    return noSideEffects(() => {
+        const res = {
+            type: def.type,
+            bootstrap: def.bootstrap || EMPTY_ARRAY,
+            declarations: def.declarations || EMPTY_ARRAY,
+            imports: def.imports || EMPTY_ARRAY,
+            exports: def.exports || EMPTY_ARRAY,
+            transitiveCompileScopes: null,
+            schemas: def.schemas || null,
+            id: def.id || null,
+        };
+        return res;
+    });
+}
+function parseAndConvertBindingsForDefinition(obj, declaredInputs) {
+    if (obj == null)
+        return EMPTY_OBJ;
+    const newLookup = {};
+    for (const minifiedKey in obj) {
+        if (obj.hasOwnProperty(minifiedKey)) {
+            const value = obj[minifiedKey];
+            let publicName;
+            let declaredName;
+            let inputFlags = InputFlags.None;
+            if (Array.isArray(value)) {
+                inputFlags = value[0];
+                publicName = value[1];
+                declaredName = value[2] ?? publicName; // declared name might not be set to save bytes.
+            }
+            else {
+                publicName = value;
+                declaredName = value;
+            }
+            // For inputs, capture the declared name, or if some flags are set.
+            if (declaredInputs) {
+                // Perf note: An array is only allocated for the input if there are flags.
+                newLookup[publicName] =
+                    inputFlags !== InputFlags.None ? [minifiedKey, inputFlags] : minifiedKey;
+                declaredInputs[publicName] = declaredName;
+            }
+            else {
+                newLookup[publicName] = minifiedKey;
+            }
+        }
+    }
+    return newLookup;
+}
+/**
+ * Create a directive definition object.
+ *
+ * # Example
+ * ```ts
+ * class MyDirective {
+ *   // Generated by Angular Template Compiler
+ *   // [Symbol] syntax will not be supported by TypeScript until v2.7
+ *   static ɵdir = ɵɵdefineDirective({
+ *     ...
+ *   });
+ * }
+ * ```
+ *
+ * @codeGenApi
+ */
+function ɵɵdefineDirective(directiveDefinition) {
+    return noSideEffects(() => {
+        const def = getNgDirectiveDef(directiveDefinition);
+        initFeatures(def);
+        return def;
+    });
+}
+/**
+ * Create a pipe definition object.
+ *
+ * # Example
+ * ```
+ * class MyPipe implements PipeTransform {
+ *   // Generated by Angular Template Compiler
+ *   static ɵpipe = definePipe({
+ *     ...
+ *   });
+ * }
+ * ```
+ * @param pipeDef Pipe definition generated by the compiler
+ *
+ * @codeGenApi
+ */
+function ɵɵdefinePipe(pipeDef) {
+    return {
+        type: pipeDef.type,
+        name: pipeDef.name,
+        factory: null,
+        pure: pipeDef.pure !== false,
+        standalone: pipeDef.standalone ?? NG_STANDALONE_DEFAULT_VALUE,
+        onDestroy: pipeDef.type.prototype.ngOnDestroy || null,
+    };
+}
+function getNgDirectiveDef(directiveDefinition) {
+    const declaredInputs = {};
+    return {
+        type: directiveDefinition.type,
+        providersResolver: null,
+        factory: null,
+        hostBindings: directiveDefinition.hostBindings || null,
+        hostVars: directiveDefinition.hostVars || 0,
+        hostAttrs: directiveDefinition.hostAttrs || null,
+        contentQueries: directiveDefinition.contentQueries || null,
+        declaredInputs: declaredInputs,
+        inputTransforms: null,
+        inputConfig: directiveDefinition.inputs || EMPTY_OBJ,
+        exportAs: directiveDefinition.exportAs || null,
+        standalone: directiveDefinition.standalone ?? NG_STANDALONE_DEFAULT_VALUE,
+        signals: directiveDefinition.signals === true,
+        selectors: directiveDefinition.selectors || EMPTY_ARRAY,
+        viewQuery: directiveDefinition.viewQuery || null,
+        features: directiveDefinition.features || null,
+        setInput: null,
+        findHostDirectiveDefs: null,
+        hostDirectives: null,
+        inputs: parseAndConvertBindingsForDefinition(directiveDefinition.inputs, declaredInputs),
+        outputs: parseAndConvertBindingsForDefinition(directiveDefinition.outputs),
+        debugInfo: null,
+    };
+}
+function initFeatures(definition) {
+    definition.features?.forEach((fn) => fn(definition));
+}
+function extractDefListOrFactory(dependencies, pipeDef) {
+    if (!dependencies) {
+        return null;
+    }
+    const defExtractor = pipeDef ? getPipeDef$1 : extractDirectiveDef;
+    return () => (typeof dependencies === 'function' ? dependencies() : dependencies)
+        .map((dep) => defExtractor(dep))
+        .filter(nonNull);
+}
+/**
+ * A map that contains the generated component IDs and type.
+ */
+const GENERATED_COMP_IDS = new Map();
+/**
+ * A method can returns a component ID from the component definition using a variant of DJB2 hash
+ * algorithm.
+ */
+function getComponentId(componentDef) {
+    let hash = 0;
+    // We cannot rely solely on the component selector as the same selector can be used in different
+    // modules.
+    //
+    // `componentDef.style` is not used, due to it causing inconsistencies. Ex: when server
+    // component styles has no sourcemaps and browsers do.
+    //
+    // Example:
+    // https://github.com/angular/components/blob/d9f82c8f95309e77a6d82fd574c65871e91354c2/src/material/core/option/option.ts#L248
+    // https://github.com/angular/components/blob/285f46dc2b4c5b127d356cb7c4714b221f03ce50/src/material/legacy-core/option/option.ts#L32
+    const hashSelectors = [
+        componentDef.selectors,
+        componentDef.ngContentSelectors,
+        componentDef.hostVars,
+        componentDef.hostAttrs,
+        componentDef.consts,
+        componentDef.vars,
+        componentDef.decls,
+        componentDef.encapsulation,
+        componentDef.standalone,
+        componentDef.signals,
+        componentDef.exportAs,
+        JSON.stringify(componentDef.inputs),
+        JSON.stringify(componentDef.outputs),
+        // We cannot use 'componentDef.type.name' as the name of the symbol will change and will not
+        // match in the server and browser bundles.
+        Object.getOwnPropertyNames(componentDef.type.prototype),
+        !!componentDef.contentQueries,
+        !!componentDef.viewQuery,
+    ].join('|');
+    for (const char of hashSelectors) {
+        hash = (Math.imul(31, hash) + char.charCodeAt(0)) << 0;
+    }
+    // Force positive number hash.
+    // 2147483647 = equivalent of Integer.MAX_VALUE.
+    hash += 2147483647 + 1;
+    const compId = 'c' + hash;
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        if (GENERATED_COMP_IDS.has(compId)) {
+            const previousCompDefType = GENERATED_COMP_IDS.get(compId);
+            if (previousCompDefType !== componentDef.type) {
+                console.warn(formatRuntimeError(-912 /* RuntimeErrorCode.COMPONENT_ID_COLLISION */, `Component ID generation collision detected. Components '${previousCompDefType.name}' and '${componentDef.type.name}' with selector '${stringifyCSSSelectorList(componentDef.selectors)}' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID.`));
+            }
+        }
+        else {
+            GENERATED_COMP_IDS.set(compId, componentDef.type);
+        }
+    }
+    return compId;
+}
+
 function getSuperType(type) {
     return Object.getPrototypeOf(type.prototype).constructor;
 }
@@ -19082,154 +19283,6 @@ function ɵɵInputTransformsFeature(definition) {
         }
     }
     definition.inputTransforms = inputTransforms;
-}
-
-/**
- * Represents an instance of an `NgModule` created by an `NgModuleFactory`.
- * Provides access to the `NgModule` instance and related objects.
- *
- * @publicApi
- */
-class NgModuleRef$1 {
-}
-/**
- * @publicApi
- *
- * @deprecated
- * This class was mostly used as a part of ViewEngine-based JIT API and is no longer needed in Ivy
- * JIT mode. Angular provides APIs that accept NgModule classes directly (such as
- * [PlatformRef.bootstrapModule](api/core/PlatformRef#bootstrapModule) and
- * [createNgModule](api/core/createNgModule)), consider switching to those APIs instead of
- * using factory-based ones.
- */
-class NgModuleFactory$1 {
-}
-
-/**
- * Returns a new NgModuleRef instance based on the NgModule class and parent injector provided.
- *
- * @param ngModule NgModule class.
- * @param parentInjector Optional injector instance to use as a parent for the module injector. If
- *     not provided, `NullInjector` will be used instead.
- * @returns NgModuleRef that represents an NgModule instance.
- *
- * @publicApi
- */
-function createNgModule(ngModule, parentInjector) {
-    return new NgModuleRef(ngModule, parentInjector ?? null, []);
-}
-/**
- * The `createNgModule` function alias for backwards-compatibility.
- * Please avoid using it directly and use `createNgModule` instead.
- *
- * @deprecated Use `createNgModule` instead.
- */
-const createNgModuleRef = createNgModule;
-class NgModuleRef extends NgModuleRef$1 {
-    constructor(ngModuleType, _parent, additionalProviders, runInjectorInitializers = true) {
-        super();
-        this.ngModuleType = ngModuleType;
-        this._parent = _parent;
-        // tslint:disable-next-line:require-internal-with-underscore
-        this._bootstrapComponents = [];
-        this.destroyCbs = [];
-        // When bootstrapping a module we have a dependency graph that looks like this:
-        // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
-        // module being resolved tries to inject the ComponentFactoryResolver, it'll create a
-        // circular dependency which will result in a runtime error, because the injector doesn't
-        // exist yet. We work around the issue by creating the ComponentFactoryResolver ourselves
-        // and providing it, rather than letting the injector resolve it.
-        this.componentFactoryResolver = new ComponentFactoryResolver(this);
-        const ngModuleDef = getNgModuleDef(ngModuleType);
-        ngDevMode &&
-            assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
-        this._bootstrapComponents = maybeUnwrapFn(ngModuleDef.bootstrap);
-        this._r3Injector = createInjectorWithoutInjectorInstances(ngModuleType, _parent, [
-            { provide: NgModuleRef$1, useValue: this },
-            {
-                provide: ComponentFactoryResolver$1,
-                useValue: this.componentFactoryResolver,
-            },
-            ...additionalProviders,
-        ], stringify(ngModuleType), new Set(['environment']));
-        // We need to resolve the injector types separately from the injector creation, because
-        // the module might be trying to use this ref in its constructor for DI which will cause a
-        // circular error that will eventually error out, because the injector isn't created yet.
-        if (runInjectorInitializers) {
-            this.resolveInjectorInitializers();
-        }
-    }
-    resolveInjectorInitializers() {
-        this._r3Injector.resolveInjectorInitializers();
-        this.instance = this._r3Injector.get(this.ngModuleType);
-    }
-    get injector() {
-        return this._r3Injector;
-    }
-    destroy() {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        const injector = this._r3Injector;
-        !injector.destroyed && injector.destroy();
-        this.destroyCbs.forEach((fn) => fn());
-        this.destroyCbs = null;
-    }
-    onDestroy(callback) {
-        ngDevMode && assertDefined(this.destroyCbs, 'NgModule already destroyed');
-        this.destroyCbs.push(callback);
-    }
-}
-class NgModuleFactory extends NgModuleFactory$1 {
-    constructor(moduleType) {
-        super();
-        this.moduleType = moduleType;
-    }
-    create(parentInjector) {
-        return new NgModuleRef(this.moduleType, parentInjector, []);
-    }
-}
-function createNgModuleRefWithProviders(moduleType, parentInjector, additionalProviders) {
-    return new NgModuleRef(moduleType, parentInjector, additionalProviders, false);
-}
-class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
-    constructor(config) {
-        super();
-        this.componentFactoryResolver = new ComponentFactoryResolver(this);
-        this.instance = null;
-        const injector = new R3Injector([
-            ...config.providers,
-            { provide: NgModuleRef$1, useValue: this },
-            { provide: ComponentFactoryResolver$1, useValue: this.componentFactoryResolver },
-        ], config.parent || getNullInjector(), config.debugName, new Set(['environment']));
-        this.injector = injector;
-        if (config.runEnvironmentInitializers) {
-            injector.resolveInjectorInitializers();
-        }
-    }
-    destroy() {
-        this.injector.destroy();
-    }
-    onDestroy(callback) {
-        this.injector.onDestroy(callback);
-    }
-}
-/**
- * Create a new environment injector.
- *
- * @param providers An array of providers.
- * @param parent A parent environment injector.
- * @param debugName An optional name for this injector instance, which will be used in error
- *     messages.
- *
- * @publicApi
- */
-function createEnvironmentInjector(providers, parent, debugName = null) {
-    const adapter = new EnvironmentNgModuleRefAdapter({
-        providers,
-        parent,
-        debugName,
-        runEnvironmentInitializers: true,
-    });
-    return adapter.injector;
 }
 
 /**
@@ -31776,65 +31829,6 @@ function ɵɵProvidersFeature(providers, viewProviders = []) {
 }
 
 /**
- * A service used by the framework to create instances of standalone injectors. Those injectors are
- * created on demand in case of dynamic component instantiation and contain ambient providers
- * collected from the imports graph rooted at a given standalone component.
- */
-class StandaloneService {
-    constructor(_injector) {
-        this._injector = _injector;
-        this.cachedInjectors = new Map();
-    }
-    getOrCreateStandaloneInjector(componentDef) {
-        if (!componentDef.standalone) {
-            return null;
-        }
-        if (!this.cachedInjectors.has(componentDef)) {
-            const providers = internalImportProvidersFrom(false, componentDef.type);
-            const standaloneInjector = providers.length > 0
-                ? createEnvironmentInjector([providers], this._injector, `Standalone[${componentDef.type.name}]`)
-                : null;
-            this.cachedInjectors.set(componentDef, standaloneInjector);
-        }
-        return this.cachedInjectors.get(componentDef);
-    }
-    ngOnDestroy() {
-        try {
-            for (const injector of this.cachedInjectors.values()) {
-                if (injector !== null) {
-                    injector.destroy();
-                }
-            }
-        }
-        finally {
-            this.cachedInjectors.clear();
-        }
-    }
-    /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
-        token: StandaloneService,
-        providedIn: 'environment',
-        factory: () => new StandaloneService(ɵɵinject(EnvironmentInjector)),
-    }); }
-}
-/**
- * A feature that acts as a setup code for the {@link StandaloneService}.
- *
- * The most important responsibility of this feature is to expose the "getStandaloneInjector"
- * function (an entry points to a standalone injector creation) on a component definition object. We
- * go through the features infrastructure to make sure that the standalone injector creation logic
- * is tree-shakable and not included in applications that don't use standalone components.
- *
- * @codeGenApi
- */
-function ɵɵStandaloneFeature(definition) {
-    performanceMarkFeature('NgStandalone');
-    definition.getStandaloneInjector = (parentInjector) => {
-        return parentInjector.get(StandaloneService).getOrCreateStandaloneInjector(definition);
-    };
-}
-
-/**
  * A feature that adds support for external runtime styles for a component.
  * An external runtime style is a URL to a CSS stylesheet that contains the styles
  * for a given component. For browsers, this URL will be used in an appended `link` element
@@ -32707,7 +32701,6 @@ function getHmrEnv() {
         'ɵɵCopyDefinitionFeature': ɵɵCopyDefinitionFeature,
         'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
         'ɵɵInputTransformsFeature': ɵɵInputTransformsFeature,
-        'ɵɵStandaloneFeature': ɵɵStandaloneFeature,
         'ɵɵExternalStylesFeature': ɵɵExternalStylesFeature,
         'ɵɵnextContext': ɵɵnextContext,
         'ɵɵnamespaceHTML': ɵɵnamespaceHTML,
@@ -32909,7 +32902,6 @@ const angularCoreEnv = (() => ({
     'ɵɵCopyDefinitionFeature': ɵɵCopyDefinitionFeature,
     'ɵɵInheritDefinitionFeature': ɵɵInheritDefinitionFeature,
     'ɵɵInputTransformsFeature': ɵɵInputTransformsFeature,
-    'ɵɵStandaloneFeature': ɵɵStandaloneFeature,
     'ɵɵExternalStylesFeature': ɵɵExternalStylesFeature,
     'ɵɵnextContext': ɵɵnextContext,
     'ɵɵnamespaceHTML': ɵɵnamespaceHTML,
@@ -33714,7 +33706,7 @@ function compileComponent(type, metadata) {
                         encapsulation = options.defaultEncapsulation;
                     }
                     else {
-                        encapsulation = ViewEncapsulation$1.Emulated;
+                        encapsulation = ViewEncapsulation.Emulated;
                     }
                 }
                 const templateUrl = metadata.templateUrl || `ng:///${type.name}/template.html`;
@@ -34243,7 +34235,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.11+sha-aadcfda');
+const VERSION = new Version('19.0.0-next.11+sha-486c5a9');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38553,17 +38545,6 @@ function getSsrId(tView) {
     return tView.ssrId;
 }
 /**
- * Global counter that is used to generate a unique id for Defer Blocks
- * during the serialization process.
- */
-let deferBlockSsrId = 0;
-/**
- * Generates a unique id for a Defer Block.
- */
-function getDeferBlockId() {
-    return `d${deferBlockSsrId++}`;
-}
-/**
  * Computes the number of root nodes in a given view
  * (or child nodes in a given container if a tNode is provided).
  */
@@ -38750,14 +38731,18 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                 [TEMPLATE_ID]: template,
                 [NUM_ROOT_NODES]: numRootNodes,
             };
+            let isHydrateNeverBlock = false;
             // If this is a defer block, serialize extra info.
             if (isDeferBlock(lView[TVIEW], tNode)) {
                 const lDetails = getLDeferBlockDetails(lView, tNode);
                 if (context.isIncrementalHydrationEnabled) {
                     const deferBlockId = `d${context.deferBlocks.size}`;
+                    const tDetails = getTDeferBlockDetails(lView[TVIEW], tNode);
+                    if (tDetails.hydrateTriggers?.has(7 /* DeferBlockTrigger.Never */)) {
+                        isHydrateNeverBlock = true;
+                    }
                     let rootNodes = [];
                     collectNativeNodesInLContainer(lContainer, rootNodes);
-                    const tDetails = getTDeferBlockDetails(lView[TVIEW], tNode);
                     // Add defer block into info context.deferBlocks
                     const deferBlockInfo = {
                         [DEFER_PARENT_BLOCK_ID]: parentDeferBlockId,
@@ -38777,7 +38762,9 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                     for (let et of actionList) {
                         context.eventTypesToReplay.regular.add(et);
                     }
-                    annotateDeferBlockRootNodesWithJsAction(actionList, rootNodes, deferBlockId);
+                    if (!isHydrateNeverBlock) {
+                        annotateDeferBlockRootNodesWithJsAction(actionList, rootNodes, deferBlockId);
+                    }
                     // Use current block id as parent for nested routes.
                     parentDeferBlockId = deferBlockId;
                     // Serialize extra info into the view object.
@@ -38787,11 +38774,13 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                 }
                 serializedView[DEFER_BLOCK_STATE$1] = lDetails[DEFER_BLOCK_STATE];
             }
-            // TODO(incremental-hydration): avoid copying of an object here
-            serializedView = {
-                ...serializedView,
-                ...serializeLView(lContainer[i], parentDeferBlockId, context, injector),
-            };
+            if (!isHydrateNeverBlock) {
+                // TODO(incremental-hydration): avoid copying of an object here
+                serializedView = {
+                    ...serializedView,
+                    ...serializeLView(lContainer[i], parentDeferBlockId, context, injector),
+                };
+            }
         }
         // Check if the previous view has the same shape (for example, it was
         // produced by the *ngFor), in which case bump the counter on the previous
@@ -38920,14 +38909,6 @@ function serializeLView(lView, parentDeferBlockId = null, context, injector) {
             appendDisconnectedNodeIndex(ngh, tNode);
             continue;
         }
-        // Attach `jsaction` attribute to elements that have registered listeners,
-        // thus potentially having a need to do an event replay.
-        if (nativeElementsToEventTypes && tNode.type & 2 /* TNodeType.Element */) {
-            const nativeElement = unwrapRNode(lView[i]);
-            if (nativeElementsToEventTypes.has(nativeElement)) {
-                setJSActionAttributes(nativeElement, nativeElementsToEventTypes.get(nativeElement), parentDeferBlockId);
-            }
-        }
         if (Array.isArray(tNode.projection)) {
             for (const projectionHeadTNode of tNode.projection) {
                 // We may have `null`s in slots with no projected content.
@@ -39026,6 +39007,14 @@ function serializeLView(lView, parentDeferBlockId = null, context, injector) {
                 processTextNodeBeforeSerialization(context, rNode);
             }
         }
+        // Attach `jsaction` attribute to elements that have registered listeners,
+        // thus potentially having a need to do an event replay.
+        if (nativeElementsToEventTypes && tNode.type & 2 /* TNodeType.Element */) {
+            const nativeElement = unwrapRNode(lView[i]);
+            if (nativeElementsToEventTypes.has(nativeElement)) {
+                setJSActionAttributes(nativeElement, nativeElementsToEventTypes.get(nativeElement), parentDeferBlockId);
+            }
+        }
     }
     return ngh;
 }
@@ -39071,7 +39060,7 @@ function conditionallyAnnotateNodePath(ngh, tNode, lView, excludedParentNodes) {
 function componentUsesShadowDomEncapsulation(lView) {
     const instance = lView[CONTEXT];
     return instance?.constructor
-        ? getComponentDef(instance.constructor)?.encapsulation === ViewEncapsulation$1.ShadowDom
+        ? getComponentDef(instance.constructor)?.encapsulation === ViewEncapsulation.ShadowDom
         : false;
 }
 /**
@@ -40911,5 +40900,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation$1 as ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, MicrotaskEffectScheduler as ɵMicrotaskEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NG_STANDALONE_DEFAULT_VALUE as ɵNG_STANDALONE_DEFAULT_VALUE, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasks, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, microtaskEffect as ɵmicrotaskEffect, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵStandaloneFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, MicrotaskEffectScheduler as ɵMicrotaskEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NG_STANDALONE_DEFAULT_VALUE as ɵNG_STANDALONE_DEFAULT_VALUE, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasks, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, microtaskEffect as ɵmicrotaskEffect, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, whenStable as ɵwhenStable, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=core.mjs.map
