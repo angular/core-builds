@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-2aa9f8b
+ * @license Angular v19.1.0-next.0+sha-35d7ca5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,13 +9,13 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var migrate_ts_type_references = require('./migrate_ts_type_references-aa4ee896.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-301df4a0.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-d4a34401.js');
 var program = require('./program-c7e430d2.js');
 require('path');
-var index = require('./index-b90223bb.js');
+var combine_units = require('./combine_units-63a5b7e8.js');
 var assert = require('assert');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 require('./leading_space-d190b83b.js');
@@ -101,7 +101,7 @@ function getInputDescriptor(hostOrInfo, node) {
         className = node.parent.name?.text ?? '<anonymous>';
     }
     const info = hostOrInfo instanceof MigrationHost ? hostOrInfo.programInfo : hostOrInfo;
-    const file = index.projectFile(node.getSourceFile(), info);
+    const file = combine_units.projectFile(node.getSourceFile(), info);
     // Inputs may be detected in `.d.ts` files. Ensure that if the file IDs
     // match regardless of extension. E.g. `/google3/blaze-out/bin/my_file.ts` should
     // have the same ID as `/google3/my_file.ts`.
@@ -120,11 +120,11 @@ function attemptRetrieveInputFromSymbol(programInfo, memberSymbol, knownInputs) 
     // Even for declared classes from `.d.ts`, the value declaration
     // should exist and point to the property declaration.
     if (memberSymbol.valueDeclaration !== undefined &&
-        index.isInputContainerNode(memberSymbol.valueDeclaration)) {
+        combine_units.isInputContainerNode(memberSymbol.valueDeclaration)) {
         const member = memberSymbol.valueDeclaration;
         // If the member itself is an input that is being migrated, we
         // do not need to check, as overriding would be fine then— like before.
-        const memberInputDescr = index.isInputContainerNode(member)
+        const memberInputDescr = combine_units.isInputContainerNode(member)
             ? getInputDescriptor(programInfo, member)
             : null;
         return memberInputDescr !== null ? (knownInputs.get(memberInputDescr) ?? null) : null;
@@ -178,7 +178,7 @@ class KnownInputs {
         }
         const directiveInfo = this._classToDirectiveInfo.get(data.node.parent);
         const inputInfo = {
-            file: index.projectFile(data.node.getSourceFile(), this.programInfo),
+            file: combine_units.projectFile(data.node.getSourceFile(), this.programInfo),
             metadata: data.metadata,
             descriptor: data.descriptor,
             container: directiveInfo,
@@ -318,7 +318,7 @@ function extractDecoratorInput(node, host, reflector, metadataReader, evaluator,
  * part of a `.d.ts` file.
  */
 function extractDtsInput(node, metadataReader) {
-    if (!index.isInputContainerNode(node) ||
+    if (!combine_units.isInputContainerNode(node) ||
         !ts__default["default"].isIdentifier(node.name) ||
         !node.getSourceFile().isDeclarationFile) {
         return null;
@@ -350,7 +350,7 @@ function extractDtsInput(node, metadataReader) {
  * directly defined inside a source file (`.ts`).
  */
 function extractSourceCodeInput(node, host, reflector, evaluator, refEmitter) {
-    if (!index.isInputContainerNode(node) ||
+    if (!combine_units.isInputContainerNode(node) ||
         !ts__default["default"].isIdentifier(node.name) ||
         node.getSourceFile().isDeclarationFile) {
         return null;
@@ -571,7 +571,7 @@ function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflec
     const visitor = (node) => {
         const decoratorInput = extractDecoratorInput(node, host, reflector, dtsMetadataReader, evaluator, refEmitter);
         if (decoratorInput !== null) {
-            assert__default["default"](index.isInputContainerNode(node), 'Expected input to be declared on accessor or property.');
+            assert__default["default"](combine_units.isInputContainerNode(node), 'Expected input to be declared on accessor or property.');
             const inputDescr = getInputDescriptor(host, node);
             // track all inputs, even from declarations for reference resolution.
             knownDecoratorInputs.register({ descriptor: inputDescr, metadata: decoratorInput, node });
@@ -642,7 +642,7 @@ function pass3__checkIncompatiblePatterns(host, inheritanceGraph, checker$1, gro
  * such.
  */
 function pass2_IdentifySourceFileReferences(programInfo, checker, reflector, resourceLoader, evaluator, templateTypeChecker, groupedTsAstVisitor, knownInputs, result, fieldNamesToConsiderForReferenceLookup) {
-    groupedTsAstVisitor.register(index.createFindAllSourceFileReferencesVisitor(programInfo, checker, reflector, resourceLoader, evaluator, templateTypeChecker, knownInputs, fieldNamesToConsiderForReferenceLookup, result).visitor);
+    groupedTsAstVisitor.register(combine_units.createFindAllSourceFileReferencesVisitor(programInfo, checker, reflector, resourceLoader, evaluator, templateTypeChecker, knownInputs, fieldNamesToConsiderForReferenceLookup, result).visitor);
 }
 
 /**
@@ -680,13 +680,13 @@ function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProg
     pass2And3SourceFileVisitor.execute();
     // Determine incompatible inputs based on resolved references.
     for (const reference of result.references) {
-        if (index.isTsReference(reference) && reference.from.isWrite) {
+        if (combine_units.isTsReference(reference) && reference.from.isWrite) {
             knownInputs.markFieldIncompatible(reference.target, {
                 reason: migrate_ts_type_references.FieldIncompatibilityReason.WriteAssignment,
                 context: reference.from.node,
             });
         }
-        if (index.isTemplateReference(reference) || index.isHostBindingReference(reference)) {
+        if (combine_units.isTemplateReference(reference) || combine_units.isHostBindingReference(reference)) {
             if (reference.from.isWrite) {
                 knownInputs.markFieldIncompatible(reference.target, {
                     reason: migrate_ts_type_references.FieldIncompatibilityReason.WriteAssignment,
@@ -697,7 +697,7 @@ function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProg
         }
         // TODO: Remove this when we support signal narrowing in templates.
         // https://github.com/angular/angular/pull/55456.
-        if (index.isTemplateReference(reference)) {
+        if (combine_units.isTemplateReference(reference)) {
             if (reference.from.isLikelyPartOfNarrowing) {
                 knownInputs.markFieldIncompatible(reference.target, {
                     reason: migrate_ts_type_references.FieldIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet,
@@ -806,25 +806,15 @@ function topologicalSort(graph) {
 }
 
 /** Merges a list of compilation units into a combined unit. */
-function mergeCompilationUnitData(metadataFiles) {
+function combineCompilationUnitData(unitA, unitB) {
     const result = {
         knownInputs: {},
     };
-    const idToGraphNode = new Map();
-    const inheritanceGraph = [];
-    const isNodeIncompatible = (node) => node.info.memberIncompatibility !== null || node.info.owningClassIncompatibility !== null;
-    for (const file of metadataFiles) {
+    for (const file of [unitA, unitB]) {
         for (const [key, info] of Object.entries(file.knownInputs)) {
             const existing = result.knownInputs[key];
             if (existing === undefined) {
                 result.knownInputs[key] = info;
-                const node = {
-                    incoming: new Set(),
-                    outgoing: new Set(),
-                    data: { info, key },
-                };
-                inheritanceGraph.push(node);
-                idToGraphNode.set(key, node);
                 continue;
             }
             // Merge metadata.
@@ -854,7 +844,30 @@ function mergeCompilationUnitData(metadataFiles) {
             }
         }
     }
-    for (const [key, info] of Object.entries(result.knownInputs)) {
+    return result;
+}
+function convertToGlobalMeta(combinedData) {
+    const globalMeta = {
+        knownInputs: {},
+    };
+    const idToGraphNode = new Map();
+    const inheritanceGraph = [];
+    const isNodeIncompatible = (node) => node.info.memberIncompatibility !== null || node.info.owningClassIncompatibility !== null;
+    for (const [key, info] of Object.entries(combinedData.knownInputs)) {
+        const existing = globalMeta.knownInputs[key];
+        if (existing !== undefined) {
+            continue;
+        }
+        const node = {
+            incoming: new Set(),
+            outgoing: new Set(),
+            data: { info, key },
+        };
+        inheritanceGraph.push(node);
+        idToGraphNode.set(key, node);
+        globalMeta.knownInputs[key] = info;
+    }
+    for (const [key, info] of Object.entries(globalMeta.knownInputs)) {
         if (info.extendsFrom !== null) {
             const from = idToGraphNode.get(key);
             const target = idToGraphNode.get(info.extendsFrom);
@@ -879,7 +892,7 @@ function mergeCompilationUnitData(metadataFiles) {
             }
         }
     }
-    for (const info of Object.values(result.knownInputs)) {
+    for (const info of Object.values(combinedData.knownInputs)) {
         // We never saw a source file for this input, globally. Try marking it as incompatible,
         // so that all references and inheritance checks can propagate accordingly.
         if (!info.seenAsSourceInput) {
@@ -889,7 +902,7 @@ function mergeCompilationUnitData(metadataFiles) {
             info.memberIncompatibility = migrate_ts_type_references.pickFieldIncompatibility({ reason: migrate_ts_type_references.FieldIncompatibilityReason.OutsideOfMigrationScope, context: null }, existingMemberIncompatibility).reason;
         }
     }
-    return result;
+    return globalMeta;
 }
 
 function populateKnownInputsFromGlobalData(knownInputs, globalData) {
@@ -996,7 +1009,7 @@ function convertToSignalInput(node, { resolvedMetadata: metadata, resolvedType, 
     if (leadingTodoText !== null) {
         replacements.push(migrate_ts_type_references.insertPrecedingLine(node, info, '// TODO: Notes from signal input migration:'), ...migrate_ts_type_references.cutStringToLineLimit(leadingTodoText, 70).map((line) => migrate_ts_type_references.insertPrecedingLine(node, info, `//  ${line}`)));
     }
-    replacements.push(new index.Replacement(index.projectFile(node.getSourceFile(), info), new index.TextUpdate({
+    replacements.push(new combine_units.Replacement(combine_units.projectFile(node.getSourceFile(), info), new combine_units.TextUpdate({
         position: node.getStart(),
         end: node.getEnd(),
         toInsert: newPropertyText,
@@ -1076,7 +1089,7 @@ function pass6__migrateInputDeclarations(host, checker, result, knownInputs, imp
  * previous migrate phases.
  */
 function pass10_applyImportManager(importManager, result, sourceFiles, info) {
-    index.applyImportManagerChanges(importManager, result.replacements, sourceFiles, info);
+    combine_units.applyImportManagerChanges(importManager, result.replacements, sourceFiles, info);
 }
 
 /**
@@ -1097,7 +1110,7 @@ function pass7__migrateTemplateReferences(host, references) {
     const seenFileReferences = new Set();
     for (const reference of references) {
         // This pass only deals with HTML template references.
-        if (!index.isTemplateReference(reference)) {
+        if (!combine_units.isTemplateReference(reference)) {
             continue;
         }
         // Skip references to incompatible inputs.
@@ -1114,7 +1127,7 @@ function pass7__migrateTemplateReferences(host, references) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new index.Replacement(reference.from.templateFile, new index.TextUpdate({
+        host.replacements.push(new combine_units.Replacement(reference.from.templateFile, new combine_units.TextUpdate({
             position: reference.from.read.sourceSpan.end,
             end: reference.from.read.sourceSpan.end,
             toInsert: appendText,
@@ -1130,7 +1143,7 @@ function pass8__migrateHostBindings(host, references, info) {
     const seenReferences = new WeakMap();
     for (const reference of references) {
         // This pass only deals with host binding references.
-        if (!index.isHostBindingReference(reference)) {
+        if (!combine_units.isHostBindingReference(reference)) {
             continue;
         }
         // Skip references to incompatible inputs.
@@ -1154,7 +1167,7 @@ function pass8__migrateHostBindings(host, references, info) {
         const appendText = reference.from.isObjectShorthandExpression
             ? `: ${reference.from.read.name}()`
             : `()`;
-        host.replacements.push(new index.Replacement(index.projectFile(bindingField.getSourceFile(), info), new index.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
+        host.replacements.push(new combine_units.Replacement(combine_units.projectFile(bindingField.getSourceFile(), info), new combine_units.TextUpdate({ position: readEndPos, end: readEndPos, toInsert: appendText })));
     }
 }
 
@@ -1217,7 +1230,7 @@ function filterIncompatibilitiesForBestEffortMode(knownInputs) {
  * Tsurge migration for migrating Angular `@Input()` declarations to
  * signal inputs, with support for batch execution.
  */
-class SignalInputMigration extends index.TsurgeComplexMigration {
+class SignalInputMigration extends combine_units.TsurgeComplexMigration {
     constructor(config = {}) {
         super();
         this.config = config;
@@ -1225,7 +1238,7 @@ class SignalInputMigration extends index.TsurgeComplexMigration {
     }
     // Override the default ngtsc program creation, to add extra flags.
     createProgram(tsconfigAbsPath, fs) {
-        return index.createNgtscProgram(tsconfigAbsPath, fs, {
+        return combine_units.createNgtscProgram(tsconfigAbsPath, fs, {
             _compilePoisonedComponents: true,
             // We want to migrate non-exported classes too.
             compileNonExportedClasses: true,
@@ -1283,8 +1296,8 @@ class SignalInputMigration extends index.TsurgeComplexMigration {
         const unitData = getCompilationUnitMetadata(knownInputs);
         // Non-batch mode!
         if (this.config.upgradeAnalysisPhaseToAvoidBatch) {
-            const merged = await this.merge([unitData]);
-            const { replacements } = await this.migrate(merged, info, {
+            const globalMeta = await this.globalMeta(unitData);
+            const { replacements } = await this.migrate(globalMeta, info, {
                 knownInputs,
                 result,
                 host,
@@ -1298,10 +1311,13 @@ class SignalInputMigration extends index.TsurgeComplexMigration {
                 knownInputs,
             };
         }
-        return index.confirmAsSerializable(unitData);
+        return combine_units.confirmAsSerializable(unitData);
     }
-    async merge(units) {
-        return index.confirmAsSerializable(mergeCompilationUnitData(units));
+    async combine(unitA, unitB) {
+        return combine_units.confirmAsSerializable(combineCompilationUnitData(unitA, unitB));
+    }
+    async globalMeta(combinedData) {
+        return combine_units.confirmAsSerializable(convertToGlobalMeta(combinedData));
     }
     async migrate(globalMetadata, info, nonBatchData) {
         const knownInputs = nonBatchData?.knownInputs ?? new KnownInputs(info, this.config);
@@ -1395,7 +1411,7 @@ function migrate(options) {
         if (!buildPaths.length && !testPaths.length) {
             throw new schematics.SchematicsException('Could not find any tsconfig file. Cannot run signal input migration.');
         }
-        const fs = new index.DevkitMigrationFilesystem(tree);
+        const fs = new combine_units.DevkitMigrationFilesystem(tree);
         checker.setFileSystem(fs);
         const migration = new SignalInputMigration({
             bestEffortMode: options.bestEffortMode,
@@ -1427,12 +1443,17 @@ function migrate(options) {
         context.logger.info(``);
         context.logger.info(`Processing analysis data between targets..`);
         context.logger.info(``);
-        const merged = await migration.merge(unitResults);
+        const combined = await combine_units.synchronouslyCombineUnitData(migration, unitResults);
+        if (combined === null) {
+            context.logger.error('Migration failed unexpectedly with no analysis data');
+            return;
+        }
+        const globalMeta = await migration.globalMeta(combined);
         const replacementsPerFile = new Map();
         for (const { info, tsconfigPath } of programInfos) {
             context.logger.info(`Migrating: ${tsconfigPath}..`);
-            const { replacements } = await migration.migrate(merged, info);
-            const changesPerFile = index.groupReplacementsByFile(replacements);
+            const { replacements } = await migration.migrate(globalMeta, info);
+            const changesPerFile = combine_units.groupReplacementsByFile(replacements);
             for (const [file, changes] of changesPerFile) {
                 if (!replacementsPerFile.has(file)) {
                     replacementsPerFile.set(file, changes);
@@ -1449,7 +1470,7 @@ function migrate(options) {
             }
             tree.commitUpdate(recorder);
         }
-        const { counters } = await migration.stats(merged);
+        const { counters } = await migration.stats(globalMeta);
         const migratedInputs = counters.sourceInputs - counters.incompatibleInputs;
         context.logger.info('');
         context.logger.info(`Successfully migrated to signal inputs 🎉`);

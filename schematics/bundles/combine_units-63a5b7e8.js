@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-2aa9f8b
+ * @license Angular v19.1.0-next.0+sha-35d7ca5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -29682,7 +29682,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.0-next.0+sha-2aa9f8b');
+new Version('19.1.0-next.0+sha-35d7ca5');
 
 var _VisitorMode;
 (function (_VisitorMode) {
@@ -30525,6 +30525,28 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
     };
 }
 
+/**
+ * Synchronously combines unit data for the given migration.
+ *
+ * Note: This helper is useful for testing and execution of
+ * Tsurge migrations in non-batchable environments. In general,
+ * prefer parallel execution of combining via e.g. Beam combiners.
+ */
+async function synchronouslyCombineUnitData(migration, unitDatas) {
+    if (unitDatas.length === 0) {
+        return null;
+    }
+    if (unitDatas.length === 1) {
+        return unitDatas[0];
+    }
+    let combined = unitDatas[0];
+    for (let i = 1; i < unitDatas.length; i++) {
+        const other = unitDatas[i];
+        combined = await migration.combine(combined, other);
+    }
+    return combined;
+}
+
 exports.DevkitMigrationFilesystem = DevkitMigrationFilesystem;
 exports.Replacement = Replacement;
 exports.TextUpdate = TextUpdate;
@@ -30543,5 +30565,6 @@ exports.isTemplateReference = isTemplateReference;
 exports.isTsClassTypeReference = isTsClassTypeReference;
 exports.isTsReference = isTsReference;
 exports.projectFile = projectFile;
+exports.synchronouslyCombineUnitData = synchronouslyCombineUnitData;
 exports.traverseAccess = traverseAccess;
 exports.unwrapParent = unwrapParent;
