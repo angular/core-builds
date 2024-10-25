@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-7ed5e6c
+ * @license Angular v19.1.0-next.0+sha-2aa9f8b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -455,9 +455,11 @@ function getBrowserEventType(eventType) {
  * @param element The element.
  * @param eventType The event type.
  * @param handler The handler function to install.
+ * @param passive A boolean value that, if `true`, indicates that the function
+ *     specified by `handler` will never call `preventDefault()`.
  * @return Information needed to uninstall the event handler eventually.
  */
-function addEventListener(element, eventType, handler) {
+function addEventListener(element, eventType, handler, passive) {
     // All event handlers are registered in the bubbling
     // phase.
     //
@@ -476,8 +478,9 @@ function addEventListener(element, eventType, handler) {
     if (isCaptureEventType(eventType)) {
         capture = true;
     }
-    element.addEventListener(eventType, handler, capture);
-    return { eventType, handler, capture };
+    const options = typeof passive === 'boolean' ? { capture, passive } : capture;
+    element.addEventListener(eventType, handler, options);
+    return { eventType, handler, capture, passive };
 }
 /**
  * Removes the event handler for the given event from the element.
@@ -489,7 +492,11 @@ function addEventListener(element, eventType, handler) {
  */
 function removeEventListener(element, info) {
     if (element.removeEventListener) {
-        element.removeEventListener(info.eventType, info.handler, info.capture);
+        // It's worth noting that some browser releases have been inconsistent on this, and unless
+        // you have specific reasons otherwise, it's probably wise to use the same values used for
+        // the call to addEventListener() when calling removeEventListener().
+        const options = typeof info.passive === 'boolean' ? { capture: info.capture } : info.capture;
+        element.removeEventListener(info.eventType, info.handler, options);
         // `detachEvent` is an old DOM API.
         // tslint:disable-next-line:no-any
     }
@@ -1076,7 +1083,7 @@ class EventContractContainer {
      * and maintains a reference to resulting handler in order to remove it
      * later if desired.
      */
-    addEventListener(eventType, getHandler) {
+    addEventListener(eventType, getHandler, passive) {
         // In iOS, event bubbling doesn't happen automatically in any DOM element,
         // unless it has an onclick attribute or DOM event handler attached to it.
         // This breaks JsAction in some cases. See "Making Elements Clickable"
@@ -1091,7 +1098,7 @@ class EventContractContainer {
         if (isIos) {
             this.element.style.cursor = 'pointer';
         }
-        this.handlerInfos.push(addEventListener(this.element, eventType, getHandler(this.element)));
+        this.handlerInfos.push(addEventListener(this.element, eventType, getHandler(this.element), passive));
     }
     /**
      * Removes all the handlers installed on this container.
@@ -1969,8 +1976,11 @@ class EventContract {
      *     to subscribe to jsaction="transitionEnd:foo" while the underlying
      *     event is webkitTransitionEnd in one browser and mozTransitionEnd
      *     in another.
+     *
+     * @param passive A boolean value that, if `true`, indicates that the event
+     *     handler will never call `preventDefault()`.
      */
-    addEvent(eventType, prefixedEventType) {
+    addEvent(eventType, prefixedEventType, passive) {
         if (eventType in this.eventHandlers || !this.containerManager) {
             return;
         }
@@ -1992,7 +2002,7 @@ class EventContract {
             return (event) => {
                 eventHandler(eventType, event, element);
             };
-        });
+        }, passive);
     }
     /**
      * Gets the queued early events and replay them using the appropriate handler
