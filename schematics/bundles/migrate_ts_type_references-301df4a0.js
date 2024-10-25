@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.11+sha-d7283bf
+ * @license Angular v19.0.0-next.11+sha-00b79f8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,7 @@ var checker = require('./checker-d4a34401.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var index = require('./index-b90223bb.js');
+var combine_units = require('./combine_units-63a5b7e8.js');
 var leading_space = require('./leading_space-d190b83b.js');
 require('./program-c7e430d2.js');
 require('path');
@@ -162,7 +162,7 @@ function checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisi
                 newTarget = checker$1.getAliasedSymbol(newTarget);
             }
             if (newTarget && inputClassSymbolsToClass.has(newTarget)) {
-                const memberName = index.getMemberName(insidePropertyDeclaration);
+                const memberName = combine_units.getMemberName(insidePropertyDeclaration);
                 if (memberName === null) {
                     break problematicReferencesCheck;
                 }
@@ -391,7 +391,7 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
         // Check inheritance of every input in the given "directive class".
         inputCheck: for (const fieldDescr of classFields) {
             const inputNode = fieldDescr.node;
-            const { derivedMembers, inherited } = inheritanceGraph.checkOverlappingMembers(inputClass, inputNode, index.getMemberName(inputNode));
+            const { derivedMembers, inherited } = inheritanceGraph.checkOverlappingMembers(inputClass, inputNode, combine_units.getMemberName(inputNode));
             // If we discover a derived, input re-declared via class metadata, then it
             // will cause conflicts as we cannot migrate it/ nor mark it as signal-based.
             if (fieldDescr.node.name !== undefined &&
@@ -447,7 +447,7 @@ function removeFromUnionIfPossible(union, filter) {
  */
 function insertPrecedingLine(node, info, text) {
     const leadingSpace = leading_space.getLeadingLineWhitespaceOfNode(node);
-    return new index.Replacement(index.projectFile(node.getSourceFile(), info), new index.TextUpdate({
+    return new combine_units.Replacement(combine_units.projectFile(node.getSourceFile(), info), new combine_units.TextUpdate({
         position: node.getStart(),
         end: node.getStart(),
         toInsert: `${text}\n${leadingSpace}`,
@@ -787,20 +787,20 @@ function createNewBlockToInsertVariable(node, file, toInsert) {
     const contentSpace = ' '.repeat(character + 2);
     return [
         // Delete leading whitespace of the concise body.
-        new index.Replacement(file, new index.TextUpdate({
+        new combine_units.Replacement(file, new combine_units.TextUpdate({
             position: node.body.getFullStart(),
             end: node.body.getStart(),
             toInsert: '',
         })),
         // Insert leading block braces, and `toInsert` content.
         // Wrap the previous expression in a return now.
-        new index.Replacement(file, new index.TextUpdate({
+        new combine_units.Replacement(file, new combine_units.TextUpdate({
             position: node.body.getStart(),
             end: node.body.getStart(),
             toInsert: ` {\n${contentSpace}${toInsert}\n${contentSpace}return `,
         })),
         // Add trailing brace.
-        new index.Replacement(file, new index.TextUpdate({
+        new combine_units.Replacement(file, new combine_units.TextUpdate({
             position: node.body.getEnd(),
             end: node.body.getEnd(),
             toInsert: `;\n${blockSpace}}`,
@@ -828,9 +828,9 @@ function migrateBindingElementInputReference(tsReferencesInBindingElements, info
     const nameGenerator = new UniqueNamesGenerator(['Input', 'Signal', 'Ref']);
     for (const reference of tsReferencesInBindingElements) {
         const bindingElement = reference.parent;
-        const bindingDecl = index.getBindingElementDeclaration(bindingElement);
+        const bindingDecl = combine_units.getBindingElementDeclaration(bindingElement);
         const sourceFile = bindingElement.getSourceFile();
-        const file = index.projectFile(sourceFile, info);
+        const file = combine_units.projectFile(sourceFile, info);
         const inputFieldName = bindingElement.propertyName ?? bindingElement.name;
         assert__default["default"](!ts__default["default"].isObjectBindingPattern(inputFieldName) && !ts__default["default"].isArrayBindingPattern(inputFieldName), 'Property of binding element cannot be another pattern.');
         const tmpName = nameGenerator.generate(reference.text, bindingElement);
@@ -848,7 +848,7 @@ function migrateBindingElementInputReference(tsReferencesInBindingElements, info
             console.error(`Could not migrate reference ${reference.text} in ${file.rootRelativePath}`);
             continue;
         }
-        replacements.push(new index.Replacement(file, new index.TextUpdate({
+        replacements.push(new combine_units.Replacement(file, new combine_units.TextUpdate({
             position: bindingElement.getStart(),
             end: bindingElement.getEnd(),
             toInsert: printer.printNode(ts__default["default"].EmitHint.Unspecified, newBindingToAccessInputField, sourceFile),
@@ -873,7 +873,7 @@ function insertTemporaryVariableForBindingElement(expansionDecl, file, toInsert)
         const leadingSpace = ' '.repeat(leadingSpaceCount);
         const statement = parent.parent;
         return [
-            new index.Replacement(file, new index.TextUpdate({
+            new combine_units.Replacement(file, new combine_units.TextUpdate({
                 position: statement.getEnd(),
                 end: statement.getEnd(),
                 toInsert: `\n${leadingSpace}${toInsert}`,
@@ -891,7 +891,7 @@ function insertTemporaryVariableForBindingElement(expansionDecl, file, toInsert)
         const leadingSpaceCount = ts__default["default"].getLineAndCharacterOfPosition(sf, spaceReferenceNode.getStart()).character + spaceOffset;
         const leadingSpace = ' '.repeat(leadingSpaceCount);
         return [
-            new index.Replacement(file, new index.TextUpdate({
+            new combine_units.Replacement(file, new combine_units.TextUpdate({
                 position: bodyBlock.getStart() + 1,
                 end: bodyBlock.getStart() + 1,
                 toInsert: `\n${leadingSpace}${toInsert}`,
@@ -1233,7 +1233,7 @@ function findSimilarReferenceNode(start, reference, referenceToMetadata, restrai
  * e.g. checks that they have similar property receiver accesses.
  */
 function isLexicalSameReference(checker, sharePartner, reference) {
-    const aParent = index.unwrapParent(reference.parent);
+    const aParent = combine_units.unwrapParent(reference.parent);
     // If the reference is not part a property access, return true. The references
     // are guaranteed symbol matches.
     if (!ts__default["default"].isPropertyAccessExpression(aParent) && !ts__default["default"].isElementAccessExpression(aParent)) {
@@ -1241,7 +1241,7 @@ function isLexicalSameReference(checker, sharePartner, reference) {
     }
     // If reference parent is part of a property expression, but the share
     // partner not, then this cannot be shared.
-    const bParent = index.unwrapParent(sharePartner.parent);
+    const bParent = combine_units.unwrapParent(sharePartner.parent);
     if (aParent.kind !== bParent.kind) {
         return false;
     }
@@ -1262,7 +1262,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             // Unwrap the signal directly.
             if (recommendedNode === 'preserve') {
                 // Append `()` to unwrap the signal.
-                replacements.push(new index.Replacement(index.projectFile(sf, info), new index.TextUpdate({
+                replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
                     position: originalNode.getEnd(),
                     end: originalNode.getEnd(),
                     toInsert: '()',
@@ -1272,8 +1272,8 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             // This reference is shared with a previous reference. Replace the access
             // with the temporary variable.
             if (typeof recommendedNode === 'number') {
-                const replaceNode = index.traverseAccess(originalNode);
-                replacements.push(new index.Replacement(index.projectFile(sf, info), new index.TextUpdate({
+                const replaceNode = combine_units.traverseAccess(originalNode);
+                replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
                     position: replaceNode.getStart(),
                     end: replaceNode.getEnd(),
                     // Extract the shared field name.
@@ -1293,9 +1293,9 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
                 referenceNodeInBlock = parent;
                 parent = parent.parent;
             }
-            const replaceNode = index.traverseAccess(originalNode);
+            const replaceNode = combine_units.traverseAccess(originalNode);
             const fieldName = nameGenerator.generate(originalNode.text, referenceNodeInBlock);
-            const filePath = index.projectFile(sf, info);
+            const filePath = combine_units.projectFile(sf, info);
             const temporaryVariableStr = `const ${fieldName} = ${replaceNode.getText()}();`;
             idToSharedField.set(id, fieldName);
             // If the common ancestor block of all shared references is an arrow function
@@ -1306,13 +1306,13 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             }
             else {
                 const leadingSpace = ts__default["default"].getLineAndCharacterOfPosition(sf, referenceNodeInBlock.getStart());
-                replacements.push(new index.Replacement(filePath, new index.TextUpdate({
+                replacements.push(new combine_units.Replacement(filePath, new combine_units.TextUpdate({
                     position: referenceNodeInBlock.getStart(),
                     end: referenceNodeInBlock.getStart(),
                     toInsert: `${temporaryVariableStr}\n${' '.repeat(leadingSpace.character)}`,
                 })));
             }
-            replacements.push(new index.Replacement(index.projectFile(sf, info), new index.TextUpdate({
+            replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
                 position: replaceNode.getStart(),
                 end: replaceNode.getEnd(),
                 toInsert: fieldName,
@@ -1352,7 +1352,7 @@ function migrateTypeScriptReferences(host, references, checker, info) {
     const seenIdentifiers = new WeakSet();
     for (const reference of references) {
         // This pass only deals with TS references.
-        if (!index.isTsReference(reference)) {
+        if (!combine_units.isTsReference(reference)) {
             continue;
         }
         // Skip references to incompatible inputs.
@@ -1395,7 +1395,7 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
     const seenTypeNodes = new WeakSet();
     for (const reference of references) {
         // This pass only deals with TS input class type references.
-        if (!index.isTsClassTypeReference(reference)) {
+        if (!combine_units.isTsClassTypeReference(reference)) {
             continue;
         }
         // Skip references to classes that are not fully migrated.
@@ -1421,12 +1421,12 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
                 exportSymbolName: 'UnwrapSignalInputs',
                 requestedFile: sf,
             });
-            host.replacements.push(new index.Replacement(index.projectFile(sf, info), new index.TextUpdate({
+            host.replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
                 position: firstArg.getStart(),
                 end: firstArg.getStart(),
                 toInsert: `${host.printer.printNode(ts__default["default"].EmitHint.Unspecified, unwrapImportExpr, sf)}<`,
             })));
-            host.replacements.push(new index.Replacement(index.projectFile(sf, info), new index.TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
+            host.replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
         }
     }
 }
