@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.11+sha-395cb34
+ * @license Angular v19.0.0-next.11+sha-f815d7b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,13 +10,13 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-8ffa8f26.js');
+var compiler_host = require('./compiler_host-88d98fef.js');
 var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-4579dec6.js');
 var imports = require('./imports-4ac08251.js');
 var nodes = require('./nodes-a535b2be.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./checker-d4a34401.js');
+require('./checker-2451e7c5.js');
 require('os');
 require('fs');
 require('module');
@@ -146,7 +146,7 @@ function getConstructorUnusedParameters(declaration, localTypeChecker, removedSt
     }
     declaration.body.forEachChild(function walk(node) {
         // Don't descend into statements that were removed already.
-        if (removedStatements && ts__default["default"].isStatement(node) && removedStatements.has(node)) {
+        if (ts__default["default"].isStatement(node) && removedStatements.has(node)) {
             return;
         }
         if (!ts__default["default"].isIdentifier(node) || !topLevelParameterNames.has(node.text)) {
@@ -287,7 +287,8 @@ function findSuperCall(root) {
  * @param localTypeChecker Type checker scoped to the current file.
  */
 function findUninitializedPropertiesToCombine(node, constructor, localTypeChecker) {
-    let result = null;
+    let toCombine = null;
+    let toHoist = [];
     const membersToDeclarations = new Map();
     for (const member of node.members) {
         if (ts__default["default"].isPropertyDeclaration(member) &&
@@ -297,20 +298,40 @@ function findUninitializedPropertiesToCombine(node, constructor, localTypeChecke
         }
     }
     if (membersToDeclarations.size === 0) {
-        return result;
+        return null;
     }
     const memberInitializers = getMemberInitializers(constructor);
     if (memberInitializers === null) {
-        return result;
+        return null;
     }
-    for (const [name, initializer] of memberInitializers.entries()) {
-        if (membersToDeclarations.has(name) &&
-            !hasLocalReferences(initializer, constructor, localTypeChecker)) {
-            result = result || new Map();
-            result.set(membersToDeclarations.get(name), initializer);
+    for (const [name, decl] of membersToDeclarations.entries()) {
+        if (memberInitializers.has(name)) {
+            const initializer = memberInitializers.get(name);
+            if (!hasLocalReferences(initializer, constructor, localTypeChecker)) {
+                toCombine = toCombine || new Map();
+                toCombine.set(membersToDeclarations.get(name), initializer);
+            }
+        }
+        else {
+            // Mark members that have no initializers and can't be combined to be hoisted above the
+            // injected members. This is either a no-op or it allows us to avoid some patterns internally
+            // like the following:
+            // ```
+            // class Foo {
+            //   publicFoo: Foo;
+            //   private privateFoo: Foo;
+            //
+            //   constructor() {
+            //     this.initializePrivateFooSomehow();
+            //     this.publicFoo = this.privateFoo;
+            //   }
+            // }
+            // ```
+            toHoist.push(decl);
         }
     }
-    return result;
+    // If no members need to be combined, none need to be hoisted either.
+    return toCombine === null ? null : { toCombine, toHoist };
 }
 /**
  * Finds the expressions from the constructor that initialize class members, for example:
@@ -367,7 +388,7 @@ function getMemberInitializers(constructor) {
 function hasLocalReferences(root, constructor, localTypeChecker) {
     const sourceFile = root.getSourceFile();
     let hasLocalRefs = false;
-    root.forEachChild(function walk(node) {
+    const walk = (node) => {
         // Stop searching if we know that it has local references.
         if (hasLocalRefs) {
             return;
@@ -397,7 +418,8 @@ function hasLocalReferences(root, constructor, localTypeChecker) {
         if (!hasLocalRefs) {
             node.forEachChild(walk);
         }
-    });
+    };
+    walk(root);
     return hasLocalRefs;
 }
 /**
@@ -445,21 +467,13 @@ function migrateFile(sourceFile, options) {
     const printer = ts__default["default"].createPrinter();
     const tracker = new compiler_host.ChangeTracker(printer);
     analysis.classes.forEach(({ node, constructor, superCall }) => {
-        let removedStatements = null;
+        const memberIndentation = leading_space.getLeadingLineWhitespaceOfNode(node.members[0]);
+        const prependToClass = [];
+        const removedStatements = new Set();
         if (options._internalCombineMemberInitializers) {
-            findUninitializedPropertiesToCombine(node, constructor, localTypeChecker)?.forEach((initializer, property) => {
-                const statement = nodes.closestNode(initializer, ts__default["default"].isStatement);
-                if (!statement) {
-                    return;
-                }
-                const newProperty = ts__default["default"].factory.createPropertyDeclaration(cloneModifiers(property.modifiers), cloneName(property.name), property.questionToken, property.type, initializer);
-                tracker.replaceText(statement.getSourceFile(), statement.getFullStart(), statement.getFullWidth(), '');
-                tracker.replaceNode(property, newProperty);
-                removedStatements = removedStatements || new Set();
-                removedStatements.add(statement);
-            });
+            applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, prependToClass, memberIndentation);
         }
-        migrateClass(node, constructor, superCall, options, removedStatements, localTypeChecker, printer, tracker);
+        migrateClass(node, constructor, superCall, options, memberIndentation, prependToClass, removedStatements, localTypeChecker, printer, tracker);
     });
     DI_PARAM_SYMBOLS.forEach((name) => {
         // Both zero and undefined are fine here.
@@ -475,12 +489,14 @@ function migrateFile(sourceFile, options) {
  * @param constructor Reference to the class' constructor node.
  * @param superCall Reference to the constructor's `super()` call, if any.
  * @param options Options used to configure the migration.
+ * @param memberIndentation Indentation string of the members of the class.
+ * @param prependToClass Text that should be prepended to the class.
  * @param removedStatements Statements that have been removed from the constructor already.
  * @param localTypeChecker Type checker set up for the specific file.
  * @param printer Printer used to output AST nodes as strings.
  * @param tracker Object keeping track of the changes made to the file.
  */
-function migrateClass(node, constructor, superCall, options, removedStatements, localTypeChecker, printer, tracker) {
+function migrateClass(node, constructor, superCall, options, memberIndentation, prependToClass, removedStatements, localTypeChecker, printer, tracker) {
     const isAbstract = !!node.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.AbstractKeyword);
     // Don't migrate abstract classes by default, because
     // their parameters aren't guaranteed to be injectable.
@@ -492,20 +508,17 @@ function migrateClass(node, constructor, superCall, options, removedStatements, 
     const superParameters = superCall
         ? getSuperParameters(constructor, superCall, localTypeChecker)
         : null;
-    const memberIndentation = leading_space.getLeadingLineWhitespaceOfNode(node.members[0]);
-    const removedStatementCount = removedStatements?.size || 0;
-    const innerReference = superCall ||
-        constructor.body?.statements.find((statement) => !removedStatements?.has(statement)) ||
-        constructor;
+    const removedStatementCount = removedStatements.size;
+    const firstConstructorStatement = constructor.body?.statements.find((statement) => !removedStatements.has(statement));
+    const innerReference = superCall || firstConstructorStatement || constructor;
     const innerIndentation = leading_space.getLeadingLineWhitespaceOfNode(innerReference);
-    const propsToAdd = [];
     const prependToConstructor = [];
     const afterSuper = [];
     const removedMembers = new Set();
     for (const param of constructor.parameters) {
         const usedInSuper = superParameters !== null && superParameters.has(param);
         const usedInConstructor = !unusedParameters.has(param);
-        migrateParameter(param, options, localTypeChecker, printer, tracker, superCall, usedInSuper, usedInConstructor, memberIndentation, innerIndentation, prependToConstructor, propsToAdd, afterSuper);
+        migrateParameter(param, options, localTypeChecker, printer, tracker, superCall, usedInSuper, usedInConstructor, memberIndentation, innerIndentation, prependToConstructor, prependToClass, afterSuper);
     }
     // Delete all of the constructor overloads since below we're either going to
     // remove the implementation, or we're going to delete all of the parameters.
@@ -525,11 +538,16 @@ function migrateClass(node, constructor, superCall, options, removedStatements, 
         // We always do this no matter what is passed into `backwardsCompatibleConstructors`.
         stripConstructorParameters(constructor, tracker);
         if (prependToConstructor.length > 0) {
-            tracker.insertText(sourceFile, innerReference.getFullStart(), `\n${prependToConstructor.join('\n')}\n`);
+            tracker.insertText(sourceFile, (firstConstructorStatement || innerReference).getFullStart(), `\n${prependToConstructor.join('\n')}\n`);
         }
     }
     if (afterSuper.length > 0 && superCall !== null) {
-        tracker.insertText(sourceFile, superCall.getEnd() + 1, `\n${afterSuper.join('\n')}\n`);
+        // Note that if we can, we should insert before the next statement after the `super` call,
+        // rather than after the end of it. Otherwise the string buffering implementation may drop
+        // the text if the statement after the `super` call is being deleted. This appears to be because
+        // the full start of the next statement appears to always be the end of the `super` call plus 1.
+        const nextStatement = getNextPreservedStatement(superCall, removedStatements);
+        tracker.insertText(sourceFile, nextStatement ? nextStatement.getFullStart() : superCall.getEnd() + 1, `\n${afterSuper.join('\n')}\n`);
     }
     // Need to resolve this once all constructor signatures have been removed.
     const memberReference = node.members.find((m) => !removedMembers.has(m)) || node.members[0];
@@ -540,19 +558,19 @@ function migrateClass(node, constructor, superCall, options, removedStatements, 
             `${memberIndentation}constructor(...args: unknown[]);`;
         // The new signature always has to be right before the constructor implementation.
         if (memberReference === constructor) {
-            propsToAdd.push(extraSignature);
+            prependToClass.push(extraSignature);
         }
         else {
             tracker.insertText(sourceFile, constructor.getFullStart(), '\n' + extraSignature);
         }
     }
-    if (propsToAdd.length > 0) {
+    if (prependToClass.length > 0) {
         if (removedMembers.size === node.members.length) {
-            tracker.insertText(sourceFile, constructor.getEnd() + 1, `${propsToAdd.join('\n')}\n`);
+            tracker.insertText(sourceFile, constructor.getEnd() + 1, `${prependToClass.join('\n')}\n`);
         }
         else {
             // Insert the new properties after the first member that hasn't been deleted.
-            tracker.insertText(sourceFile, memberReference.getFullStart(), `\n${propsToAdd.join('\n')}\n`);
+            tracker.insertText(sourceFile, memberReference.getFullStart(), `\n${prependToClass.join('\n')}\n`);
         }
     }
 }
@@ -877,6 +895,61 @@ function canRemoveConstructor(options, constructor, removedStatementCount, super
         : 0;
     return (statementCount === 0 ||
         (statementCount === 1 && superCall !== null && superCall.arguments.length === 0));
+}
+/**
+ * Gets the next statement after a node that *won't* be deleted by the migration.
+ * @param startNode Node from which to start the search.
+ * @param removedStatements Statements that have been removed by the migration.
+ * @returns
+ */
+function getNextPreservedStatement(startNode, removedStatements) {
+    const body = nodes.closestNode(startNode, ts__default["default"].isBlock);
+    const closestStatement = nodes.closestNode(startNode, ts__default["default"].isStatement);
+    if (body === null || closestStatement === null) {
+        return null;
+    }
+    const index = body.statements.indexOf(closestStatement);
+    if (index === -1) {
+        return null;
+    }
+    for (let i = index + 1; i < body.statements.length; i++) {
+        if (!removedStatements.has(body.statements[i])) {
+            return body.statements[i];
+        }
+    }
+    return null;
+}
+/**
+ * Applies the internal-specific migrations to a class.
+ * @param node Class being migrated.
+ * @param constructor The migrated class' constructor.
+ * @param localTypeChecker File-specific type checker.
+ * @param tracker Object keeping track of the changes.
+ * @param printer Printer used to output AST nodes as text.
+ * @param removedStatements Statements that have been removed by the migration.
+ * @param prependToClass Text that will be prepended to a class.
+ * @param memberIndentation Indentation string of the class' members.
+ */
+function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, prependToClass, memberIndentation) {
+    const result = findUninitializedPropertiesToCombine(node, constructor, localTypeChecker);
+    result?.toCombine.forEach((initializer, property) => {
+        const statement = nodes.closestNode(initializer, ts__default["default"].isStatement);
+        if (!statement) {
+            return;
+        }
+        const newProperty = ts__default["default"].factory.createPropertyDeclaration(cloneModifiers(property.modifiers), cloneName(property.name), property.questionToken, property.type, initializer);
+        tracker.replaceText(statement.getSourceFile(), statement.getFullStart(), statement.getFullWidth(), '');
+        tracker.replaceNode(property, newProperty);
+        removedStatements.add(statement);
+    });
+    result?.toHoist.forEach((decl) => {
+        prependToClass.push(memberIndentation + printer.printNode(ts__default["default"].EmitHint.Unspecified, decl, decl.getSourceFile()));
+        tracker.replaceText(decl.getSourceFile(), decl.getFullStart(), decl.getFullWidth(), '');
+    });
+    // If we added any hoisted properties, separate them visually with a new line.
+    if (prependToClass.length > 0) {
+        prependToClass.push('');
+    }
 }
 
 function migrate(options) {

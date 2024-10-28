@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.11+sha-395cb34
+ * @license Angular v19.0.0-next.11+sha-f815d7b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -40,6 +40,7 @@ const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
  * logic.
  */
 class RuntimeError extends Error {
+    code;
     constructor(code, message) {
         super(formatRuntimeError(code, message));
         this.code = code;
@@ -729,6 +730,10 @@ const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafePr
  * @publicApi
  */
 class InjectionToken {
+    _desc;
+    /** @internal */
+    ngMetadataName = 'InjectionToken';
+    ɵprov;
     /**
      * @param _desc   Description for the token,
      *                used only for debugging purposes,
@@ -737,8 +742,6 @@ class InjectionToken {
      */
     constructor(_desc, options) {
         this._desc = _desc;
-        /** @internal */
-        this.ngMetadataName = 'InjectionToken';
         this.ɵprov = undefined;
         if (typeof options == 'number') {
             (typeof ngDevMode === 'undefined' || ngDevMode) &&
@@ -1734,7 +1737,7 @@ function makeEnvironmentProviders(providers) {
  * ```
  * createEnvironmentInjector(
  *   [
- *     provideEnvironmentInjector(() => {
+ *     provideEnvironmentInitializer(() => {
  *       console.log('environment initialized');
  *     }),
  *   ],
@@ -2043,29 +2046,33 @@ function getNullInjector() {
 class EnvironmentInjector {
 }
 class R3Injector extends EnvironmentInjector {
+    parent;
+    source;
+    scopes;
+    /**
+     * Map of tokens to records which contain the instances of those tokens.
+     * - `null` value implies that we don't have the record. Used by tree-shakable injectors
+     * to prevent further searches.
+     */
+    records = new Map();
+    /**
+     * Set of values instantiated by this injector which contain `ngOnDestroy` lifecycle hooks.
+     */
+    _ngOnDestroyHooks = new Set();
+    _onDestroyHooks = [];
     /**
      * Flag indicating that this injector was previously destroyed.
      */
     get destroyed() {
         return this._destroyed;
     }
+    _destroyed = false;
+    injectorDefTypes;
     constructor(providers, parent, source, scopes) {
         super();
         this.parent = parent;
         this.source = source;
         this.scopes = scopes;
-        /**
-         * Map of tokens to records which contain the instances of those tokens.
-         * - `null` value implies that we don't have the record. Used by tree-shakable injectors
-         * to prevent further searches.
-         */
-        this.records = new Map();
-        /**
-         * Set of values instantiated by this injector which contain `ngOnDestroy` lifecycle hooks.
-         */
-        this._ngOnDestroyHooks = new Set();
-        this._onDestroyHooks = [];
-        this._destroyed = false;
         // Start off by creating Records for every provider.
         forEachSingleProvider(providers, (provider) => this.processProvider(provider));
         // Make sure the INJECTOR token provides this injector.
@@ -2661,6 +2668,7 @@ function isDelegateCtor(typeStr) {
         (ES2015_INHERITED_CLASS.test(typeStr) && !ES2015_INHERITED_CLASS_WITH_CTOR.test(typeStr)));
 }
 class ReflectionCapabilities {
+    _reflect;
     constructor(reflect) {
         this._reflect = reflect || _global['Reflect'];
     }
@@ -3107,6 +3115,9 @@ function assertNodeInjector(lView, injectorIndex) {
  * @publicApi
  */
 class SimpleChange {
+    previousValue;
+    currentValue;
+    firstChange;
     constructor(previousValue, currentValue, firstChange) {
         this.previousValue = previousValue;
         this.currentValue = currentValue;
@@ -3151,20 +3162,20 @@ function applyValueToInputField(instance, inputSignalNode, privateName, value) {
  *
  * @codeGenApi
  */
-function ɵɵNgOnChangesFeature() {
-    return NgOnChangesFeatureImpl;
-}
+const ɵɵNgOnChangesFeature = /* @__PURE__ */ (() => {
+    const ɵɵNgOnChangesFeatureImpl = () => NgOnChangesFeatureImpl;
+    // This option ensures that the ngOnChanges lifecycle hook will be inherited
+    // from superclasses (in InheritDefinitionFeature).
+    /** @nocollapse */
+    ɵɵNgOnChangesFeatureImpl.ngInherit = true;
+    return ɵɵNgOnChangesFeatureImpl;
+})();
 function NgOnChangesFeatureImpl(definition) {
     if (definition.type.prototype.ngOnChanges) {
         definition.setInput = ngOnChangesSetInput;
     }
     return rememberChangeHistoryAndInvokeOnChangesHook;
 }
-// This option ensures that the ngOnChanges lifecycle hook will be inherited
-// from superclasses (in InheritDefinitionFeature).
-/** @nocollapse */
-// tslint:disable-next-line:no-toplevel-property-access
-ɵɵNgOnChangesFeature.ngInherit = true;
 /**
  * This is a synthetic lifecycle hook which gets inserted into `TView.preOrderHooks` to simulate
  * `ngOnChanges`.
@@ -4364,6 +4375,81 @@ const NO_PARENT_INJECTOR = -1;
  * - `viewProviders` factory: `componentProviders` is a number and `index` points to `providers`.
  */
 class NodeInjectorFactory {
+    factory;
+    /**
+     * The inject implementation to be activated when using the factory.
+     */
+    injectImpl;
+    /**
+     * Marker set to true during factory invocation to see if we get into recursive loop.
+     * Recursive loop causes an error to be displayed.
+     */
+    resolving = false;
+    /**
+     * Marks that the token can see other Tokens declared in `viewProviders` on the same node.
+     */
+    canSeeViewProviders;
+    /**
+     * An array of factories to use in case of `multi` provider.
+     */
+    multi;
+    /**
+     * Number of `multi`-providers which belong to the component.
+     *
+     * This is needed because when multiple components and directives declare the `multi` provider
+     * they have to be concatenated in the correct order.
+     *
+     * Example:
+     *
+     * If we have a component and directive active an a single element as declared here
+     * ```
+     * component:
+     *   providers: [ {provide: String, useValue: 'component', multi: true} ],
+     *   viewProviders: [ {provide: String, useValue: 'componentView', multi: true} ],
+     *
+     * directive:
+     *   providers: [ {provide: String, useValue: 'directive', multi: true} ],
+     * ```
+     *
+     * Then the expected results are:
+     *
+     * ```
+     * providers: ['component', 'directive']
+     * viewProviders: ['component', 'componentView', 'directive']
+     * ```
+     *
+     * The way to think about it is that the `viewProviders` have been inserted after the component
+     * but before the directives, which is why we need to know how many `multi`s have been declared by
+     * the component.
+     */
+    componentProviders;
+    /**
+     * Current index of the Factory in the `data`. Needed for `viewProviders` and `providers` merging.
+     * See `providerFactory`.
+     */
+    index;
+    /**
+     * Because the same `multi` provider can be declared in `providers` and `viewProviders` it is
+     * possible for `viewProviders` to shadow the `providers`. For this reason we store the
+     * `provideFactory` of the `providers` so that `providers` can be extended with `viewProviders`.
+     *
+     * Example:
+     *
+     * Given:
+     * ```
+     * providers: [ {provide: String, useValue: 'all', multi: true} ],
+     * viewProviders: [ {provide: String, useValue: 'viewOnly', multi: true} ],
+     * ```
+     *
+     * We have to return `['all']` in case of content injection, but `['all', 'viewOnly']` in case
+     * of view injection. We further have to make sure that the shared instances (in our case
+     * `all`) are the exact same instance in both the content as well as the view injection. (We
+     * have to make sure that we don't double instantiate.) For this reason the `viewProviders`
+     * `Factory` has a pointer to the shadowed `providers` factory so that it can instantiate the
+     * `providers` (`['all']`) and then extend it with `viewProviders` (`['all'] + ['viewOnly'] =
+     * ['all', 'viewOnly']`).
+     */
+    providerFactory;
     constructor(
     /**
      * Factory to invoke in order to create a new instance.
@@ -4374,11 +4460,6 @@ class NodeInjectorFactory {
      */
     isViewProvider, injectImplementation) {
         this.factory = factory;
-        /**
-         * Marker set to true during factory invocation to see if we get into recursive loop.
-         * Recursive loop causes an error to be displayed.
-         */
-        this.resolving = false;
         ngDevMode && assertDefined(factory, 'Factory not specified');
         ngDevMode && assertEqual(typeof factory, 'function', 'Expected factory function.');
         this.canSeeViewProviders = isViewProvider;
@@ -4718,6 +4799,8 @@ const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
  * injector. Used primarily when creating components or embedded views dynamically.
  */
 class ChainedInjector {
+    injector;
+    parentInjector;
     constructor(injector, parentInjector) {
         this.injector = injector;
         this.parentInjector = parentInjector;
@@ -5430,6 +5513,8 @@ function getNodeInjectorTNode(nodeInjector) {
     return nodeInjector._tNode;
 }
 class NodeInjector {
+    _tNode;
+    _lView;
     constructor(_tNode, _lView) {
         this._tNode = _tNode;
         this._lView = _lView;
@@ -5775,8 +5860,8 @@ function createInjectorWithoutInjectorInstances(defType, parent = null, addition
  * @publicApi
  */
 class Injector {
-    static { this.THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND; }
-    static { this.NULL = new NullInjector(); }
+    static THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
+    static NULL = new NullInjector();
     static create(options, parent) {
         if (Array.isArray(options)) {
             return createInjector({ name: '' }, parent, options, '');
@@ -5787,16 +5872,16 @@ class Injector {
         }
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: Injector,
         providedIn: 'any',
         factory: () => ɵɵinject(INJECTOR$1),
-    }); }
+    });
     /**
      * @internal
      * @nocollapse
      */
-    static { this.__NG_ELEMENT_ID__ = -1 /* InjectorMarkers.Injector */; }
+    static __NG_ELEMENT_ID__ = -1 /* InjectorMarkers.Injector */;
 }
 
 /*!
@@ -5828,11 +5913,12 @@ class Injector {
  * @publicApi
  */
 class HostAttributeToken {
+    attributeName;
     constructor(attributeName) {
         this.attributeName = attributeName;
-        /** @internal */
-        this.__NG_ELEMENT_ID__ = () => ɵɵinjectAttribute(this.attributeName);
     }
+    /** @internal */
+    __NG_ELEMENT_ID__ = () => ɵɵinjectAttribute(this.attributeName);
     toString() {
         return `HostAttributeToken ${this.attributeName}`;
     }
@@ -5933,14 +6019,15 @@ class DestroyRef {
      * @internal
      * @nocollapse
      */
-    static { this.__NG_ELEMENT_ID__ = injectDestroyRef; }
+    static __NG_ELEMENT_ID__ = injectDestroyRef;
     /**
      * @internal
      * @nocollapse
      */
-    static { this.__NG_ENV_ID__ = (injector) => injector; }
+    static __NG_ENV_ID__ = (injector) => injector;
 }
 class NodeInjectorDestroyRef extends DestroyRef {
+    _lView;
     constructor(_lView) {
         super();
         this._lView = _lView;
@@ -5971,14 +6058,12 @@ const SCHEDULE_IN_ROOT_ZONE = new InjectionToken(typeof ngDevMode === 'undefined
  * Internal implementation of the pending tasks service.
  */
 class PendingTasksInternal {
-    constructor() {
-        this.taskId = 0;
-        this.pendingTasks = new Set();
-        this.hasPendingTasks = new BehaviorSubject(false);
-    }
+    taskId = 0;
+    pendingTasks = new Set();
     get _hasPendingTasks() {
         return this.hasPendingTasks.value;
     }
+    hasPendingTasks = new BehaviorSubject(false);
     add() {
         if (!this._hasPendingTasks) {
             this.hasPendingTasks.next(true);
@@ -6003,11 +6088,11 @@ class PendingTasksInternal {
         }
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: PendingTasksInternal,
         providedIn: 'root',
         factory: () => new PendingTasksInternal(),
-    }); }
+    });
 }
 /**
  * Service that keeps track of pending tasks contributing to the stableness of Angular
@@ -6032,10 +6117,8 @@ class PendingTasksInternal {
  * @developerPreview
  */
 class PendingTasks {
-    constructor() {
-        this.internalPendingTasks = inject(PendingTasksInternal);
-        this.scheduler = inject(ChangeDetectionScheduler);
-    }
+    internalPendingTasks = inject(PendingTasksInternal);
+    scheduler = inject(ChangeDetectionScheduler);
     /**
      * Adds a new task that should block application's stability.
      * @returns A cleanup function that removes a task when called.
@@ -6082,18 +6165,19 @@ class PendingTasks {
         }
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: PendingTasks,
         providedIn: 'root',
         factory: () => new PendingTasks(),
-    }); }
+    });
 }
 
 class EventEmitter_ extends Subject {
+    __isAsync; // tslint:disable-line
+    destroyRef = undefined;
+    pendingTasks = undefined;
     constructor(isAsync = false) {
         super();
-        this.destroyRef = undefined;
-        this.pendingTasks = undefined;
         this.__isAsync = isAsync;
         // Attempt to retrieve a `DestroyRef` and `PendingTasks` optionally.
         // For backwards compatibility reasons, this cannot be required.
@@ -6224,10 +6308,13 @@ function scheduleCallbackWithMicrotask(callback) {
 }
 
 class AsyncStackTaggingZoneSpec {
+    createTask;
     constructor(namePrefix, consoleAsyncStackTaggingImpl = console) {
         this.name = 'asyncStackTagging for ' + namePrefix;
         this.createTask = consoleAsyncStackTaggingImpl?.createTask ?? (() => null);
     }
+    // ZoneSpec implementation below.
+    name;
     onScheduleTask(delegate, _current, target, task) {
         task.consoleTask = this.createTask(`Zone - ${task.source || task.type}`);
         return delegate.scheduleTask(target, task);
@@ -6322,33 +6409,33 @@ let ngZoneInstanceId = 0;
  * @publicApi
  */
 class NgZone {
+    hasPendingMacrotasks = false;
+    hasPendingMicrotasks = false;
+    /**
+     * Whether there are no outstanding microtasks or macrotasks.
+     */
+    isStable = true;
+    /**
+     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+     */
+    onUnstable = new EventEmitter(false);
+    /**
+     * Notifies when there is no more microtasks enqueued in the current VM Turn.
+     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+     * For this reason this event can fire multiple times per VM Turn.
+     */
+    onMicrotaskEmpty = new EventEmitter(false);
+    /**
+     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+     * implies we are about to relinquish VM turn.
+     * This event gets called just once.
+     */
+    onStable = new EventEmitter(false);
+    /**
+     * Notifies that an error has been delivered.
+     */
+    onError = new EventEmitter(false);
     constructor(options) {
-        this.hasPendingMacrotasks = false;
-        this.hasPendingMicrotasks = false;
-        /**
-         * Whether there are no outstanding microtasks or macrotasks.
-         */
-        this.isStable = true;
-        /**
-         * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
-         */
-        this.onUnstable = new EventEmitter(false);
-        /**
-         * Notifies when there is no more microtasks enqueued in the current VM Turn.
-         * This is a hint for Angular to do change detection, which may enqueue more microtasks.
-         * For this reason this event can fire multiple times per VM Turn.
-         */
-        this.onMicrotaskEmpty = new EventEmitter(false);
-        /**
-         * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
-         * implies we are about to relinquish VM turn.
-         * This event gets called just once.
-         */
-        this.onStable = new EventEmitter(false);
-        /**
-         * Notifies that an error has been delivered.
-         */
-        this.onError = new EventEmitter(false);
         const { enableLongStackTrace = false, shouldCoalesceEventChangeDetection = false, shouldCoalesceRunChangeDetection = false, scheduleInRootZone = SCHEDULE_IN_ROOT_ZONE_DEFAULT, } = options;
         if (typeof Zone == 'undefined') {
             throw new RuntimeError(908 /* RuntimeErrorCode.MISSING_ZONEJS */, ngDevMode && `In this configuration Angular requires Zone.js`);
@@ -6638,15 +6725,13 @@ function onLeave(zone) {
  * to framework to perform rendering.
  */
 class NoopNgZone {
-    constructor() {
-        this.hasPendingMicrotasks = false;
-        this.hasPendingMacrotasks = false;
-        this.isStable = true;
-        this.onUnstable = new EventEmitter();
-        this.onMicrotaskEmpty = new EventEmitter();
-        this.onStable = new EventEmitter();
-        this.onError = new EventEmitter();
-    }
+    hasPendingMicrotasks = false;
+    hasPendingMacrotasks = false;
+    isStable = true;
+    onUnstable = new EventEmitter();
+    onMicrotaskEmpty = new EventEmitter();
+    onStable = new EventEmitter();
+    onError = new EventEmitter();
     run(fn, applyThis, applyArgs) {
         return fn.apply(applyThis, applyArgs);
     }
@@ -6715,12 +6800,10 @@ function getNgZone(ngZoneToUse = 'zone.js', options) {
  * @publicApi
  */
 class ErrorHandler {
-    constructor() {
-        /**
-         * @internal
-         */
-        this._console = console;
-    }
+    /**
+     * @internal
+     */
+    _console = console;
     handleError(error) {
         this._console.error('ERROR', error);
     }
@@ -6754,12 +6837,12 @@ const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken(typeof ngDevMode =
  * @publicAPI
  */
 class OutputEmitterRef {
+    destroyed = false;
+    listeners = null;
+    errorHandler = inject(ErrorHandler, { optional: true });
+    /** @internal */
+    destroyRef = inject(DestroyRef);
     constructor() {
-        this.destroyed = false;
-        this.listeners = null;
-        this.errorHandler = inject(ErrorHandler, { optional: true });
-        /** @internal */
-        this.destroyRef = inject(DestroyRef);
         // Clean-up all listeners and mark as destroyed upon destroy.
         this.destroyRef.onDestroy(() => {
             this.destroyed = true;
@@ -6958,6 +7041,17 @@ function createElementRef(tNode, lView) {
 // i.e. users have to ask for what they need. With that, we can build better analysis tools
 // and could do better codegen in the future.
 class ElementRef {
+    /**
+     * <div class="callout is-critical">
+     *   <header>Use with caution</header>
+     *   <p>
+     *    Use this API as the last resort when direct access to DOM is needed. Use templating and
+     *    data-binding provided by Angular instead. Alternatively you can take a look at
+     *    {@link Renderer2} which provides an API that can be safely used.
+     *   </p>
+     * </div>
+     */
+    nativeElement;
     constructor(nativeElement) {
         this.nativeElement = nativeElement;
     }
@@ -6965,7 +7059,7 @@ class ElementRef {
      * @internal
      * @nocollapse
      */
-    static { this.__NG_ELEMENT_ID__ = injectElementRef; }
+    static __NG_ELEMENT_ID__ = injectElementRef;
 }
 /**
  * Unwraps `ElementRef` and return the `nativeElement`.
@@ -7008,7 +7102,15 @@ function symbolIterator() {
  * @publicApi
  */
 class QueryList {
-    static { Symbol.iterator; }
+    _emitDistinctChangesOnly;
+    dirty = true;
+    _onDirty = undefined;
+    _results = [];
+    _changesDetected = false;
+    _changes = undefined;
+    length = 0;
+    first = undefined;
+    last = undefined;
     /**
      * Returns `Observable` of `QueryList` notifying the subscriber of changes.
      */
@@ -7022,21 +7124,6 @@ class QueryList {
      */
     constructor(_emitDistinctChangesOnly = false) {
         this._emitDistinctChangesOnly = _emitDistinctChangesOnly;
-        this.dirty = true;
-        this._onDirty = undefined;
-        this._results = [];
-        this._changesDetected = false;
-        this._changes = undefined;
-        this.length = 0;
-        this.first = undefined;
-        this.last = undefined;
-        // This function should be declared on the prototype, but doing so there will cause the class
-        // declaration to have side-effects and become not tree-shakable. For this reason we do it in
-        // the constructor.
-        // [Symbol.iterator](): Iterator<T> { ... }
-        const proto = QueryList.prototype;
-        if (!proto[Symbol.iterator])
-            proto[Symbol.iterator] = symbolIterator;
     }
     /**
      * Returns the QueryList entry at `index`.
@@ -7136,6 +7223,7 @@ class QueryList {
             this._changes.unsubscribe();
         }
     }
+    [Symbol.iterator] = (() => symbolIterator)();
 }
 
 /**
@@ -7271,6 +7359,22 @@ function getTrackedLViews() {
  * of the context.
  */
 class LContext {
+    lViewId;
+    nodeIndex;
+    native;
+    /**
+     * The instance of the Component node.
+     */
+    component;
+    /**
+     * The list of active directives that exist on this element.
+     */
+    directives;
+    /**
+     * The map of local references (local reference name => element or directive instance) that
+     * exist on this element.
+     */
+    localRefs;
     /** Component's parent view data. */
     get lView() {
         return getLViewById(this.lViewId);
@@ -7681,7 +7785,6 @@ function getNearestLContainer(viewOrContainer) {
  *    is no component associated with it.
  *
  * @publicApi
- * @globalApi ng
  */
 function getComponent(element) {
     ngDevMode && assertDomElement(element);
@@ -7707,7 +7810,6 @@ function getComponent(element) {
  *    inside any component.
  *
  * @publicApi
- * @globalApi ng
  */
 function getContext(element) {
     assertDomElement(element);
@@ -7728,7 +7830,6 @@ function getContext(element) {
  *    part of a component view.
  *
  * @publicApi
- * @globalApi ng
  */
 function getOwningComponent(elementOrDir) {
     const context = getLContext(elementOrDir);
@@ -7750,7 +7851,6 @@ function getOwningComponent(elementOrDir) {
  * @returns Root components associated with the target object.
  *
  * @publicApi
- * @globalApi ng
  */
 function getRootComponents(elementOrDir) {
     const lView = readPatchedLView(elementOrDir);
@@ -7764,7 +7864,6 @@ function getRootComponents(elementOrDir) {
  * @returns Injector associated with the element, component or directive instance.
  *
  * @publicApi
- * @globalApi ng
  */
 function getInjector(elementOrDir) {
     const context = getLContext(elementOrDir);
@@ -7825,7 +7924,6 @@ function getInjectionTokens(element) {
  * @returns Array of directives associated with the node.
  *
  * @publicApi
- * @globalApi ng
  */
 function getDirectives(node) {
     // Skip text nodes because we can't have directives associated with them.
@@ -7858,7 +7956,6 @@ function getDirectives(node) {
  * @returns metadata of the passed directive or component
  *
  * @publicApi
- * @globalApi ng
  */
 function getDirectiveMetadata$1(directiveOrComponentInstance) {
     const { constructor } = directiveOrComponentInstance;
@@ -7916,7 +8013,6 @@ function getLocalRefs(target) {
  * @returns Host element of the target.
  *
  * @publicApi
- * @globalApi ng
  */
 function getHostElement(componentOrDirective) {
     return getLContext(componentOrDirective).native;
@@ -7964,7 +8060,6 @@ function getRenderedText(component) {
  * @returns Array of event listeners on the DOM element.
  *
  * @publicApi
- * @globalApi ng
  */
 function getListeners(element) {
     ngDevMode && assertDomElement(element);
@@ -8278,17 +8373,15 @@ function initTransferState() {
  * @publicApi
  */
 class TransferState {
-    constructor() {
-        /** @internal */
-        this.store = {};
-        this.onSerializeCallbacks = {};
-    }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: TransferState,
         providedIn: 'root',
         factory: initTransferState,
-    }); }
+    });
+    /** @internal */
+    store = {};
+    onSerializeCallbacks = {};
     /**
      * Get the value corresponding to a key. Return `defaultValue` if key is not found.
      */
@@ -9045,6 +9138,7 @@ function trustedScriptURLFromStringBypass(url) {
 }
 
 class SafeValueImpl {
+    changingThisBreaksApplicationSecurity;
     constructor(changingThisBreaksApplicationSecurity) {
         this.changingThisBreaksApplicationSecurity = changingThisBreaksApplicationSecurity;
     }
@@ -9173,6 +9267,7 @@ function getInertBodyHelper(defaultDoc) {
  * This is the default strategy used in browsers that support it.
  */
 class DOMParserHelper {
+    inertDocumentHelper;
     constructor(inertDocumentHelper) {
         this.inertDocumentHelper = inertDocumentHelper;
     }
@@ -9203,6 +9298,8 @@ class DOMParserHelper {
  * This is the fallback strategy if the browser does not support DOMParser.
  */
 class InertDocumentHelper {
+    defaultDoc;
+    inertDocument;
     constructor(defaultDoc) {
         this.defaultDoc = defaultDoc;
         this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
@@ -9336,12 +9433,10 @@ const SKIP_TRAVERSING_CONTENT_IF_INVALID_ELEMENTS = tagSet('script,style,templat
  * attributes.
  */
 class SanitizingHtmlSerializer {
-    constructor() {
-        // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
-        // because characters were re-encoded.
-        this.sanitizedSomething = false;
-        this.buf = [];
-    }
+    // Explicitly track if something was stripped, to avoid accidentally warning of sanitization just
+    // because characters were re-encoded.
+    sanitizedSomething = false;
+    buf = [];
     sanitizeChildren(el) {
         // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
         // However this code never accesses properties off of `document` before deleting its contents
@@ -13958,6 +14053,11 @@ function markViewDirty(lView, source) {
 }
 
 class ViewRef$1 {
+    _lView;
+    _cdRefInjectingView;
+    notifyErrorHandler;
+    _appRef = null;
+    _attachedToViewContainer = false;
     get rootNodes() {
         const lView = this._lView;
         const tView = lView[TVIEW];
@@ -13986,8 +14086,6 @@ class ViewRef$1 {
         this._lView = _lView;
         this._cdRefInjectingView = _cdRefInjectingView;
         this.notifyErrorHandler = notifyErrorHandler;
-        this._appRef = null;
-        this._attachedToViewContainer = false;
     }
     get context() {
         return this._lView[CONTEXT];
@@ -14283,12 +14381,15 @@ class TemplateRef {
      * @internal
      * @nocollapse
      */
-    static { this.__NG_ELEMENT_ID__ = injectTemplateRef; }
+    static __NG_ELEMENT_ID__ = injectTemplateRef;
 }
 const ViewEngineTemplateRef = TemplateRef;
 // TODO(alxhub): combine interface and implementation. Currently this is challenging since something
 // in g3 depends on them being separate.
 const R3TemplateRef = class TemplateRef extends ViewEngineTemplateRef {
+    _declarationLView;
+    _declarationTContainer;
+    elementRef;
     constructor(_declarationLView, _declarationTContainer, elementRef) {
         super();
         this._declarationLView = _declarationLView;
@@ -16093,7 +16194,7 @@ class _NullComponentFactoryResolver {
  *     Component class can be used directly.
  */
 class ComponentFactoryResolver$1 {
-    static { this.NULL = new _NullComponentFactoryResolver(); }
+    static NULL = new _NullComponentFactoryResolver();
 }
 
 /**
@@ -16119,18 +16220,16 @@ class RendererFactory2 {
  * @publicApi
  */
 class Renderer2 {
-    constructor() {
-        /**
-         * If null or undefined, the view engine won't call it.
-         * This is used as a performance optimization for production mode.
-         */
-        this.destroyNode = null;
-    }
+    /**
+     * If null or undefined, the view engine won't call it.
+     * This is used as a performance optimization for production mode.
+     */
+    destroyNode = null;
     /**
      * @internal
      * @nocollapse
      */
-    static { this.__NG_ELEMENT_ID__ = () => injectRenderer2(); }
+    static __NG_ELEMENT_ID__ = () => injectRenderer2();
 }
 /** Injects a Renderer2 for the current component. */
 function injectRenderer2() {
@@ -16149,11 +16248,11 @@ function injectRenderer2() {
  */
 class Sanitizer {
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: Sanitizer,
         providedIn: 'root',
         factory: () => null,
-    }); }
+    });
 }
 
 function isModuleWithProviders(value) {
@@ -16219,12 +16318,10 @@ const USE_RUNTIME_DEPS_TRACKER_FOR_JIT = true;
  * An implementation of DepsTrackerApi which will be used for JIT and local compilation.
  */
 class DepsTracker {
-    constructor() {
-        this.ownerNgModule = new Map();
-        this.ngModulesWithSomeUnresolvedDecls = new Set();
-        this.ngModulesScopeCache = new Map();
-        this.standaloneComponentsScopeCache = new Map();
-    }
+    ownerNgModule = new Map();
+    ngModulesWithSomeUnresolvedDecls = new Set();
+    ngModulesScopeCache = new Map();
+    standaloneComponentsScopeCache = new Map();
     /**
      * Attempts to resolve ng module's forward ref declarations as much as possible and add them to
      * the `ownerNgModule` map. This method normally should be called after the initial parsing when
@@ -16497,6 +16594,7 @@ function computeStaticStyling(tNode, attrs, writeToHost) {
 }
 
 class ComponentFactoryResolver extends ComponentFactoryResolver$1 {
+    ngModule;
     /**
      * @param ngModule The NgModuleRef to which all resolved factories are bound.
      */
@@ -16547,6 +16645,12 @@ function getNamespace(elementName) {
  * ComponentFactory interface implementation.
  */
 class ComponentFactory extends ComponentFactory$1 {
+    componentDef;
+    ngModule;
+    selector;
+    componentType;
+    ngContentSelectors;
+    isBoundToModule;
     get inputs() {
         const componentDef = this.componentDef;
         const inputTransforms = componentDef.inputTransforms;
@@ -16705,12 +16809,19 @@ class ComponentFactory extends ComponentFactory$1 {
  *
  */
 class ComponentRef extends ComponentRef$1 {
+    location;
+    _rootLView;
+    _tNode;
+    instance;
+    hostView;
+    changeDetectorRef;
+    componentType;
+    previousInputValues = null;
     constructor(componentType, instance, location, _rootLView, _tNode) {
         super();
         this.location = location;
         this._rootLView = _rootLView;
         this._tNode = _tNode;
-        this.previousInputValues = null;
         this.instance = instance;
         this.hostView = this.changeDetectorRef = new ViewRef$1(_rootLView, undefined /* _cdRefInjectingView */, false /* notifyErrorHandler */);
         this.componentType = componentType;
@@ -16843,7 +16954,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.11+sha-395cb34']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.11+sha-f815d7b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -16944,7 +17055,7 @@ class ViewContainerRef {
      * @internal
      * @nocollapse
      */
-    static { this.__NG_ELEMENT_ID__ = injectViewContainerRef; }
+    static __NG_ELEMENT_ID__ = injectViewContainerRef;
 }
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
@@ -16960,6 +17071,9 @@ const VE_ViewContainerRef = ViewContainerRef;
 // TODO(alxhub): cleaning up this indirection triggers a subtle bug in Closure in g3. Once the fix
 // for that lands, this can be cleaned up.
 const R3ViewContainerRef = class ViewContainerRef extends VE_ViewContainerRef {
+    _lContainer;
+    _hostTNode;
+    _hostLView;
     constructor(_lContainer, _hostTNode, _hostLView) {
         super();
         this._lContainer = _lContainer;
@@ -17311,9 +17425,10 @@ function enableLocateOrCreateContainerRefImpl() {
 }
 
 class LQuery_ {
+    queryList;
+    matches = null;
     constructor(queryList) {
         this.queryList = queryList;
-        this.matches = null;
     }
     clone() {
         return new LQuery_(this.queryList);
@@ -17323,6 +17438,7 @@ class LQuery_ {
     }
 }
 class LQueries_ {
+    queries;
     constructor(queries = []) {
         this.queries = queries;
     }
@@ -17362,6 +17478,9 @@ class LQueries_ {
     }
 }
 class TQueryMetadata_ {
+    flags;
+    read;
+    predicate;
     constructor(predicate, flags, read = null) {
         this.flags = flags;
         this.read = read;
@@ -17375,6 +17494,7 @@ class TQueryMetadata_ {
     }
 }
 class TQueries_ {
+    queries;
     constructor(queries = []) {
         this.queries = queries;
     }
@@ -17426,17 +17546,24 @@ class TQueries_ {
     }
 }
 class TQuery_ {
+    metadata;
+    matches = null;
+    indexInDeclarationView = -1;
+    crossesNgTemplate = false;
+    /**
+     * A node index on which a query was declared (-1 for view queries and ones inherited from the
+     * declaration template). We use this index (alongside with _appliesToNextNode flag) to know
+     * when to apply content queries to elements in a template.
+     */
+    _declarationNodeIndex;
+    /**
+     * A flag indicating if a given query still applies to nodes it is crossing. We use this flag
+     * (alongside with _declarationNodeIndex) to know when to stop applying content queries to
+     * elements in a template.
+     */
+    _appliesToNextNode = true;
     constructor(metadata, nodeIndex = -1) {
         this.metadata = metadata;
-        this.matches = null;
-        this.indexInDeclarationView = -1;
-        this.crossesNgTemplate = false;
-        /**
-         * A flag indicating if a given query still applies to nodes it is crossing. We use this flag
-         * (alongside with _declarationNodeIndex) to know when to stop applying content queries to
-         * elements in a template.
-         */
-        this._appliesToNextNode = true;
         this._declarationNodeIndex = nodeIndex;
     }
     elementStart(tView, tNode) {
@@ -18445,20 +18572,25 @@ function createNgModule(ngModule, parentInjector) {
  */
 const createNgModuleRef = createNgModule;
 class NgModuleRef extends NgModuleRef$1 {
+    ngModuleType;
+    _parent;
+    // tslint:disable-next-line:require-internal-with-underscore
+    _bootstrapComponents = [];
+    // tslint:disable-next-line:require-internal-with-underscore
+    _r3Injector;
+    instance;
+    destroyCbs = [];
+    // When bootstrapping a module we have a dependency graph that looks like this:
+    // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
+    // module being resolved tries to inject the ComponentFactoryResolver, it'll create a
+    // circular dependency which will result in a runtime error, because the injector doesn't
+    // exist yet. We work around the issue by creating the ComponentFactoryResolver ourselves
+    // and providing it, rather than letting the injector resolve it.
+    componentFactoryResolver = new ComponentFactoryResolver(this);
     constructor(ngModuleType, _parent, additionalProviders, runInjectorInitializers = true) {
         super();
         this.ngModuleType = ngModuleType;
         this._parent = _parent;
-        // tslint:disable-next-line:require-internal-with-underscore
-        this._bootstrapComponents = [];
-        this.destroyCbs = [];
-        // When bootstrapping a module we have a dependency graph that looks like this:
-        // ApplicationRef -> ComponentFactoryResolver -> NgModuleRef. The problem is that if the
-        // module being resolved tries to inject the ComponentFactoryResolver, it'll create a
-        // circular dependency which will result in a runtime error, because the injector doesn't
-        // exist yet. We work around the issue by creating the ComponentFactoryResolver ourselves
-        // and providing it, rather than letting the injector resolve it.
-        this.componentFactoryResolver = new ComponentFactoryResolver(this);
         const ngModuleDef = getNgModuleDef(ngModuleType);
         ngDevMode &&
             assertDefined(ngModuleDef, `NgModule '${stringify(ngModuleType)}' is not a subtype of 'NgModuleType'.`);
@@ -18498,6 +18630,7 @@ class NgModuleRef extends NgModuleRef$1 {
     }
 }
 class NgModuleFactory extends NgModuleFactory$1 {
+    moduleType;
     constructor(moduleType) {
         super();
         this.moduleType = moduleType;
@@ -18510,10 +18643,11 @@ function createNgModuleRefWithProviders(moduleType, parentInjector, additionalPr
     return new NgModuleRef(moduleType, parentInjector, additionalProviders, false);
 }
 class EnvironmentNgModuleRefAdapter extends NgModuleRef$1 {
+    injector;
+    componentFactoryResolver = new ComponentFactoryResolver(this);
+    instance = null;
     constructor(config) {
         super();
-        this.componentFactoryResolver = new ComponentFactoryResolver(this);
-        this.instance = null;
         const injector = new R3Injector([
             ...config.providers,
             { provide: NgModuleRef$1, useValue: this },
@@ -18557,9 +18691,10 @@ function createEnvironmentInjector(providers, parent, debugName = null) {
  * collected from the imports graph rooted at a given standalone component.
  */
 class StandaloneService {
+    _injector;
+    cachedInjectors = new Map();
     constructor(_injector) {
         this._injector = _injector;
-        this.cachedInjectors = new Map();
     }
     getOrCreateStandaloneInjector(componentDef) {
         if (!componentDef.standalone) {
@@ -18587,11 +18722,11 @@ class StandaloneService {
         }
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: StandaloneService,
         providedIn: 'environment',
         factory: () => new StandaloneService(ɵɵinject(EnvironmentInjector)),
-    }); }
+    });
 }
 
 /**
@@ -19293,9 +19428,7 @@ function ɵɵInputTransformsFeature(definition) {
  * of a certain type.
  */
 class CachedInjectorService {
-    constructor() {
-        this.cachedInjectors = new Map();
-    }
+    cachedInjectors = new Map();
     getOrCreateInjector(key, parentInjector, providers, debugName) {
         if (!this.cachedInjectors.has(key)) {
             const injector = providers.length > 0
@@ -19318,11 +19451,11 @@ class CachedInjectorService {
         }
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: CachedInjectorService,
         providedIn: 'environment',
         factory: () => new CachedInjectorService(),
-    }); }
+    });
 }
 
 function isIterable(obj) {
@@ -19814,37 +19947,33 @@ var AfterRenderPhase;
 })(AfterRenderPhase || (AfterRenderPhase = {}));
 
 class AfterRenderManager {
-    constructor() {
-        this.impl = null;
-    }
+    impl = null;
     execute() {
         this.impl?.execute();
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: AfterRenderManager,
         providedIn: 'root',
         factory: () => new AfterRenderManager(),
-    }); }
+    });
 }
 class AfterRenderImpl {
-    constructor() {
-        this.ngZone = inject(NgZone);
-        this.scheduler = inject(ChangeDetectionScheduler);
-        this.errorHandler = inject(ErrorHandler, { optional: true });
-        /** Current set of active sequences. */
-        this.sequences = new Set();
-        /** Tracks registrations made during the current set of executions. */
-        this.deferredRegistrations = new Set();
-        /** Whether the `AfterRenderManager` is currently executing hooks. */
-        this.executing = false;
-    }
-    static { this.PHASES = [
+    static PHASES = /* @__PURE__ **/ (() => [
         AfterRenderPhase.EarlyRead,
         AfterRenderPhase.Write,
         AfterRenderPhase.MixedReadWrite,
         AfterRenderPhase.Read,
-    ]; }
+    ])();
+    ngZone = inject(NgZone);
+    scheduler = inject(ChangeDetectionScheduler);
+    errorHandler = inject(ErrorHandler, { optional: true });
+    /** Current set of active sequences. */
+    sequences = new Set();
+    /** Tracks registrations made during the current set of executions. */
+    deferredRegistrations = new Set();
+    /** Whether the `AfterRenderManager` is currently executing hooks. */
+    executing = false;
     /**
      * Run the sequence of phases of hooks, once through. As a result of executing some hooks, more
      * might be scheduled.
@@ -19911,27 +20040,31 @@ class AfterRenderImpl {
         }
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: AfterRenderImpl,
         providedIn: 'root',
         factory: () => new AfterRenderImpl(),
-    }); }
+    });
 }
 class AfterRenderSequence {
+    impl;
+    hooks;
+    once;
+    /**
+     * Whether this sequence errored or was destroyed during this execution, and hooks should no
+     * longer run for it.
+     */
+    erroredOrDestroyed = false;
+    /**
+     * The value returned by the last hook execution (if any), ready to be pipelined into the next
+     * one.
+     */
+    pipelinedValue = undefined;
+    unregisterOnDestroy;
     constructor(impl, hooks, once, destroyRef) {
         this.impl = impl;
         this.hooks = hooks;
         this.once = once;
-        /**
-         * Whether this sequence errored or was destroyed during this execution, and hooks should no
-         * longer run for it.
-         */
-        this.erroredOrDestroyed = false;
-        /**
-         * The value returned by the last hook execution (if any), ready to be pipelined into the next
-         * one.
-         */
-        this.pipelinedValue = undefined;
         this.unregisterOnDestroy = destroyRef?.onDestroy(() => this.destroy());
     }
     afterRun() {
@@ -20109,6 +20242,20 @@ function isTDeferBlockDetails(value) {
         typeof value === 'object' &&
         typeof value.primaryTmplIndex === 'number');
 }
+/**
+ * Whether a given TNode represents a defer block.
+ */
+function isDeferBlock(tView, tNode) {
+    let tDetails = null;
+    const slotIndex = getDeferBlockDataIndex(tNode.index);
+    // Check if a slot index is in the reasonable range.
+    // Note: we do `-1` on the right border, since defer block details are stored
+    // in the `n+1` slot, see `getDeferBlockDataIndex` for more info.
+    if (HEADER_OFFSET < slotIndex && slotIndex < tView.bindingStartIndex) {
+        tDetails = getTDeferBlockDetails(tView, tNode);
+    }
+    return !!tDetails && isTDeferBlockDetails(tDetails);
+}
 
 /*!
  * @license
@@ -20138,14 +20285,12 @@ let intersectionObserver = null;
 let observedViewportElements = 0;
 /** Object keeping track of registered callbacks for a deferred block trigger. */
 class DeferEventEntry {
-    constructor() {
-        this.callbacks = new Set();
-        this.listener = () => {
-            for (const callback of this.callbacks) {
-                callback();
-            }
-        };
-    }
+    callbacks = new Set();
+    listener = () => {
+        for (const callback of this.callbacks) {
+            callback();
+        }
+    };
 }
 /**
  * Registers an interaction trigger.
@@ -20385,20 +20530,18 @@ const _cancelIdleCallback = () => typeof requestIdleCallback !== 'undefined' ? c
  * defer blocks are defined inside a for loop).
  */
 class IdleScheduler {
-    constructor() {
-        // Indicates whether current callbacks are being invoked.
-        this.executingCallbacks = false;
-        // Currently scheduled idle callback id.
-        this.idleId = null;
-        // Set of callbacks to be invoked next.
-        this.current = new Set();
-        // Set of callbacks collected while invoking current set of callbacks.
-        // Those callbacks are scheduled for the next idle period.
-        this.deferred = new Set();
-        this.ngZone = inject(NgZone);
-        this.requestIdleCallbackFn = _requestIdleCallback().bind(globalThis);
-        this.cancelIdleCallbackFn = _cancelIdleCallback().bind(globalThis);
-    }
+    // Indicates whether current callbacks are being invoked.
+    executingCallbacks = false;
+    // Currently scheduled idle callback id.
+    idleId = null;
+    // Set of callbacks to be invoked next.
+    current = new Set();
+    // Set of callbacks collected while invoking current set of callbacks.
+    // Those callbacks are scheduled for the next idle period.
+    deferred = new Set();
+    ngZone = inject(NgZone);
+    requestIdleCallbackFn = _requestIdleCallback().bind(globalThis);
+    cancelIdleCallbackFn = _cancelIdleCallback().bind(globalThis);
     add(callback) {
         const target = this.executingCallbacks ? this.deferred : this.current;
         target.add(callback);
@@ -20452,11 +20595,11 @@ class IdleScheduler {
         this.deferred.clear();
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: IdleScheduler,
         providedIn: 'root',
         factory: () => new IdleScheduler(),
-    }); }
+    });
 }
 
 /**
@@ -20485,25 +20628,23 @@ function scheduleTimerTrigger(delay, callback, injector) {
  * are created inside a for loop).
  */
 class TimerScheduler {
-    constructor() {
-        // Indicates whether current callbacks are being invoked.
-        this.executingCallbacks = false;
-        // Currently scheduled `setTimeout` id.
-        this.timeoutId = null;
-        // When currently scheduled timer would fire.
-        this.invokeTimerAt = null;
-        // List of callbacks to be invoked.
-        // For each callback we also store a timestamp on when the callback
-        // should be invoked. We store timestamps and callback functions
-        // in a flat array to avoid creating new objects for each entry.
-        // [timestamp1, callback1, timestamp2, callback2, ...]
-        this.current = [];
-        // List of callbacks collected while invoking current set of callbacks.
-        // Those callbacks are added to the "current" queue at the end of
-        // the current callback invocation. The shape of this list is the same
-        // as the shape of the `current` list.
-        this.deferred = [];
-    }
+    // Indicates whether current callbacks are being invoked.
+    executingCallbacks = false;
+    // Currently scheduled `setTimeout` id.
+    timeoutId = null;
+    // When currently scheduled timer would fire.
+    invokeTimerAt = null;
+    // List of callbacks to be invoked.
+    // For each callback we also store a timestamp on when the callback
+    // should be invoked. We store timestamps and callback functions
+    // in a flat array to avoid creating new objects for each entry.
+    // [timestamp1, callback1, timestamp2, callback2, ...]
+    current = [];
+    // List of callbacks collected while invoking current set of callbacks.
+    // Those callbacks are added to the "current" queue at the end of
+    // the current callback invocation. The shape of this list is the same
+    // as the shape of the `current` list.
+    deferred = [];
     add(delay, callback) {
         const target = this.executingCallbacks ? this.deferred : this.current;
         this.addToQueue(target, Date.now() + delay, callback);
@@ -20642,11 +20783,11 @@ class TimerScheduler {
         this.deferred.length = 0;
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: TimerScheduler,
         providedIn: 'root',
         factory: () => new TimerScheduler(),
-    }); }
+    });
 }
 
 // TODO(incremental-hydration): refactor this so that it's not used in CSR cases
@@ -20657,14 +20798,8 @@ class TimerScheduler {
  * functions post hydration.
  */
 class DeferBlockRegistry {
-    constructor() {
-        this.registry = new Map();
-        this.cleanupFns = new Map();
-        // Blocks that are being hydrated.
-        // TODO(incremental-hydration): cleanup task - we currently retain ids post hydration
-        // and need to determine when we can remove them.
-        this.hydrating = new Set();
-    }
+    registry = new Map();
+    cleanupFns = new Map();
     add(blockId, info) {
         this.registry.set(blockId, info);
     }
@@ -20696,12 +20831,16 @@ class DeferBlockRegistry {
             fn();
         }
     }
+    // Blocks that are being hydrated.
+    // TODO(incremental-hydration): cleanup task - we currently retain ids post hydration
+    // and need to determine when we can remove them.
+    hydrating = new Set();
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: DeferBlockRegistry,
         providedIn: 'root',
         factory: () => new DeferBlockRegistry(),
-    }); }
+    });
 }
 
 const DEFER_BLOCK_SSR_ID_ATTRIBUTE = 'ngb';
@@ -20878,8 +21017,8 @@ class Console {
         // tslint:disable-next-line:no-console
         console.warn(message);
     }
-    static { this.ɵfac = function Console_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || Console)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac, providedIn: 'platform' }); }
+    static ɵfac = function Console_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || Console)(); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Console, factory: Console.ɵfac, providedIn: 'platform' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Console, [{
         type: Injectable,
@@ -20922,11 +21061,9 @@ class Console {
  *
  */
 class DIDebugData {
-    constructor() {
-        this.resolverToTokenToDependencies = new WeakMap();
-        this.resolverToProviders = new WeakMap();
-        this.standaloneInjectorToComponent = new WeakMap();
-    }
+    resolverToTokenToDependencies = new WeakMap();
+    resolverToProviders = new WeakMap();
+    standaloneInjectorToComponent = new WeakMap();
     reset() {
         this.resolverToTokenToDependencies = new WeakMap();
         this.resolverToProviders = new WeakMap();
@@ -21130,7 +21267,6 @@ function canBeHeldWeakly(value) {
  * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
  *
  * @publicApi
- * @globalApi ng
  */
 function applyChanges(component) {
     ngDevMode && assertDefined(component, 'component');
@@ -21814,12 +21950,14 @@ const TESTABILITY_GETTER = new InjectionToken('');
  * @publicApi
  */
 class Testability {
+    _ngZone;
+    registry;
+    _isZoneStable = true;
+    _callbacks = [];
+    taskTrackingZone = null;
     constructor(_ngZone, registry, testabilityGetter) {
         this._ngZone = _ngZone;
         this.registry = registry;
-        this._isZoneStable = true;
-        this._callbacks = [];
-        this.taskTrackingZone = null;
         // If there was no Testability logic registered in the global scope
         // before, register the current testability getter as a global one.
         if (!_testabilityGetter) {
@@ -21952,8 +22090,8 @@ class Testability {
         // TODO(juliemr): implement.
         return [];
     }
-    static { this.ɵfac = function Testability_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || Testability)(ɵɵinject(NgZone), ɵɵinject(TestabilityRegistry), ɵɵinject(TESTABILITY_GETTER)); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac }); }
+    static ɵfac = function Testability_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || Testability)(ɵɵinject(NgZone), ɵɵinject(TestabilityRegistry), ɵɵinject(TESTABILITY_GETTER)); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Testability, [{
         type: Injectable
@@ -21966,10 +22104,8 @@ class Testability {
  * @publicApi
  */
 class TestabilityRegistry {
-    constructor() {
-        /** @internal */
-        this._applications = new Map();
-    }
+    /** @internal */
+    _applications = new Map();
     /**
      * Registers an application with a testability hook so that it can be tracked
      * @param token token of application, root element
@@ -22019,8 +22155,8 @@ class TestabilityRegistry {
     findTestabilityInTree(elem, findInAncestors = true) {
         return _testabilityGetter?.findTestabilityInTree(this, elem, findInAncestors) ?? null;
     }
-    static { this.ɵfac = function TestabilityRegistry_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || TestabilityRegistry)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac, providedIn: 'platform' }); }
+    static ɵfac = function TestabilityRegistry_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || TestabilityRegistry)(); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: TestabilityRegistry, factory: TestabilityRegistry.ɵfac, providedIn: 'platform' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(TestabilityRegistry, [{
         type: Injectable,
@@ -22231,15 +22367,19 @@ function provideAppInitializer(initializerFn) {
  * @publicApi
  */
 class ApplicationInitStatus {
+    // Using non null assertion, these fields are defined below
+    // within the `new Promise` callback (synchronously).
+    resolve;
+    reject;
+    initialized = false;
+    done = false;
+    donePromise = new Promise((res, rej) => {
+        this.resolve = res;
+        this.reject = rej;
+    });
+    appInits = inject(APP_INITIALIZER, { optional: true }) ?? [];
+    injector = inject(Injector);
     constructor() {
-        this.initialized = false;
-        this.done = false;
-        this.donePromise = new Promise((res, rej) => {
-            this.resolve = res;
-            this.reject = rej;
-        });
-        this.appInits = inject(APP_INITIALIZER, { optional: true }) ?? [];
-        this.injector = inject(Injector);
         if ((typeof ngDevMode === 'undefined' || ngDevMode) && !Array.isArray(this.appInits)) {
             throw new RuntimeError(-209 /* RuntimeErrorCode.INVALID_MULTI_PROVIDER */, 'Unexpected type of the `APP_INITIALIZER` token value ' +
                 `(expected an array, but got ${typeof this.appInits}). ` +
@@ -22282,8 +22422,8 @@ class ApplicationInitStatus {
         }
         this.initialized = true;
     }
-    static { this.ɵfac = function ApplicationInitStatus_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ApplicationInitStatus)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac, providedIn: 'root' }); }
+    static ɵfac = function ApplicationInitStatus_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ApplicationInitStatus)(); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationInitStatus, factory: ApplicationInitStatus.ɵfac, providedIn: 'root' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationInitStatus, [{
         type: Injectable,
@@ -22295,21 +22435,19 @@ class ApplicationInitStatus {
  */
 class EffectScheduler {
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: EffectScheduler,
         providedIn: 'root',
         factory: () => new ZoneAwareEffectScheduler(),
-    }); }
+    });
 }
 /**
  * A wrapper around `ZoneAwareQueueingScheduler` that schedules flushing via the microtask queue
  * when.
  */
 class ZoneAwareEffectScheduler {
-    constructor() {
-        this.queuedEffectCount = 0;
-        this.queues = new Map();
-    }
+    queuedEffectCount = 0;
+    queues = new Map();
     schedule(handle) {
         this.enqueue(handle);
     }
@@ -22386,6 +22524,8 @@ function isBoundToModule(cf) {
  * @publicApi
  */
 class NgProbeToken {
+    name;
+    token;
     constructor(name, token) {
         this.name = name;
         this.token = token;
@@ -22510,54 +22650,38 @@ function optionsReducer(dst, objs) {
  * @publicApi
  */
 class ApplicationRef {
-    constructor() {
-        /** @internal */
-        this._bootstrapListeners = [];
-        /** @internal */
-        this._runningTick = false;
-        this._destroyed = false;
-        this._destroyListeners = [];
-        /** @internal */
-        this._views = [];
-        this.internalErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
-        this.afterRenderManager = inject(AfterRenderManager);
-        this.zonelessEnabled = inject(ZONELESS_ENABLED);
-        this.rootEffectScheduler = inject(EffectScheduler);
-        /**
-         * Current dirty state of the application across a number of dimensions (views, afterRender hooks,
-         * etc).
-         *
-         * A flag set here means that `tick()` will attempt to resolve the dirtiness when executed.
-         *
-         * @internal
-         */
-        this.dirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
-        /**
-         * Like `dirtyFlags` but don't cause `tick()` to loop.
-         *
-         * @internal
-         */
-        this.deferredDirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
-        // Needed for ComponentFixture temporarily during migration of autoDetect behavior
-        // Eventually the hostView of the fixture should just attach to ApplicationRef.
-        this.externalTestViews = new Set();
-        /** @internal */
-        this.afterTick = new Subject();
-        /**
-         * Get a list of component types registered to this application.
-         * This list is populated even before the component is created.
-         */
-        this.componentTypes = [];
-        /**
-         * Get a list of components registered to this application.
-         */
-        this.components = [];
-        /**
-         * Returns an Observable that indicates when the application is stable or unstable.
-         */
-        this.isStable = inject(PendingTasksInternal).hasPendingTasks.pipe(map((pending) => !pending));
-        this._injector = inject(EnvironmentInjector);
-    }
+    /** @internal */
+    _bootstrapListeners = [];
+    /** @internal */
+    _runningTick = false;
+    _destroyed = false;
+    _destroyListeners = [];
+    /** @internal */
+    _views = [];
+    internalErrorHandler = inject(INTERNAL_APPLICATION_ERROR_HANDLER);
+    afterRenderManager = inject(AfterRenderManager);
+    zonelessEnabled = inject(ZONELESS_ENABLED);
+    rootEffectScheduler = inject(EffectScheduler);
+    /**
+     * Current dirty state of the application across a number of dimensions (views, afterRender hooks,
+     * etc).
+     *
+     * A flag set here means that `tick()` will attempt to resolve the dirtiness when executed.
+     *
+     * @internal
+     */
+    dirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
+    /**
+     * Like `dirtyFlags` but don't cause `tick()` to loop.
+     *
+     * @internal
+     */
+    deferredDirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
+    // Needed for ComponentFixture temporarily during migration of autoDetect behavior
+    // Eventually the hostView of the fixture should just attach to ApplicationRef.
+    externalTestViews = new Set();
+    /** @internal */
+    afterTick = new Subject();
     /** @internal */
     get allViews() {
         return [...this.externalTestViews.keys(), ...this._views];
@@ -22568,6 +22692,19 @@ class ApplicationRef {
     get destroyed() {
         return this._destroyed;
     }
+    /**
+     * Get a list of component types registered to this application.
+     * This list is populated even before the component is created.
+     */
+    componentTypes = [];
+    /**
+     * Get a list of components registered to this application.
+     */
+    components = [];
+    /**
+     * Returns an Observable that indicates when the application is stable or unstable.
+     */
+    isStable = inject(PendingTasksInternal).hasPendingTasks.pipe(map((pending) => !pending));
     /**
      * @returns A promise that resolves when the application becomes stable
      */
@@ -22585,6 +22722,7 @@ class ApplicationRef {
             subscription.unsubscribe();
         });
     }
+    _injector = inject(EnvironmentInjector);
     /**
      * The `EnvironmentInjector` used to create this application.
      */
@@ -22907,8 +23045,8 @@ class ApplicationRef {
             console.warn(formatRuntimeError(406 /* RuntimeErrorCode.APPLICATION_REF_ALREADY_DESTROYED */, 'This instance of the `ApplicationRef` has already been destroyed.'));
         }
     }
-    static { this.ɵfac = function ApplicationRef_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ApplicationRef)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' }); }
+    static ɵfac = function ApplicationRef_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ApplicationRef)(); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationRef, [{
         type: Injectable,
@@ -22957,14 +23095,18 @@ function detectChangesInViewIfRequired(lView, notifyErrorHandler, isFirstPass, z
  * Finds first hydrated parent `@defer` block for a given block id.
  * If there are any dehydrated `@defer` blocks found along the way,
  * they are also stored and returned from the function (as a list of ids).
+ * Note: This is utilizing serialized information to navigate up the tree
  */
 function findFirstHydratedParentDeferBlock(deferBlockId, injector) {
     const deferBlockRegistry = injector.get(DeferBlockRegistry);
     const transferState = injector.get(TransferState);
     const deferBlockParents = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
     const dehydratedBlocks = [];
-    let deferBlock = deferBlockRegistry.get(deferBlockId) ?? null;
+    let deferBlock = deferBlockRegistry.get(deferBlockId);
     let currentBlockId = deferBlockId;
+    // at each level we check if the registry has the given defer block id
+    // - if it does, we know it was already hydrated and can stop here
+    // - if it does not, we continue on
     while (!deferBlock) {
         dehydratedBlocks.unshift(currentBlockId);
         currentBlockId = deferBlockParents[currentBlockId][DEFER_PARENT_BLOCK_ID];
@@ -22975,33 +23117,38 @@ function findFirstHydratedParentDeferBlock(deferBlockId, injector) {
     return { blockId: currentBlockId, deferBlock, dehydratedBlocks };
 }
 /**
- * Hydrates a defer block by block name through jsaction code paths
+ * The core mechanism for incremental hydration. This recursively triggers
+ * hydration for all the blocks in the tree that need to be hydrated and keeps
+ * track of all those blocks that were hydrated along the way.
+ *
+ * @param injector
+ * @param blockName
+ * @param onTriggerFn The function that triggers the block and fetches deps
+ * @param hydratedBlocks The set of blocks currently being hydrated in the tree
+ * @returns
  */
-let _hydrateFromBlockNameImpl = () => {
-    return Promise.resolve({ deferBlock: null, hydratedBlocks: new Set() });
-};
-/**
- * Hydrates a defer block by block name using non jsaction code paths
- */
-let _incrementallyHydrateFromBlockNameImpl = () => {
-    return Promise.resolve();
-};
-async function hydrateFromBlockNameImpl(injector, blockName, onTriggerFn, hydratedBlocks) {
+async function hydrateFromBlockName(injector, blockName, onTriggerFn, hydratedBlocks = new Set()) {
     const deferBlockRegistry = injector.get(DeferBlockRegistry);
     // Make sure we don't hydrate/trigger the same thing multiple times
     if (deferBlockRegistry.hydrating.has(blockName))
         return { deferBlock: null, hydratedBlocks };
     const { blockId, deferBlock, dehydratedBlocks } = findFirstHydratedParentDeferBlock(blockName, injector);
     if (deferBlock && blockId) {
+        // Step 2: Add the current block to the tracking sets to prevent
+        // attempting to trigger hydration on a block more than once
+        // simulataneously.
         hydratedBlocks.add(blockId);
         deferBlockRegistry.hydrating.add(blockId);
+        // Step 3: Run the actual trigger function to fetch dependencies
         await onTriggerFn(deferBlock);
+        // Step 4: Recursively trigger, fetch, and hydrate from the top of the hierarchy down
         let hydratedBlock = deferBlock;
         for (const dehydratedBlock of dehydratedBlocks) {
-            const hydratedInfo = await hydrateFromBlockNameImpl(injector, dehydratedBlock, onTriggerFn, hydratedBlocks);
+            const hydratedInfo = await hydrateFromBlockName(injector, dehydratedBlock, onTriggerFn, hydratedBlocks);
             hydratedBlock = hydratedInfo.deferBlock;
         }
-        // this is going to be the wrong defer block. We need to get the final one.
+        // TODO(incremental-hydration): this is likely where we want to do Step 5: some cleanup work in the
+        // DeferBlockRegistry.
         return { deferBlock: hydratedBlock, hydratedBlocks };
     }
     else {
@@ -23009,41 +23156,17 @@ async function hydrateFromBlockNameImpl(injector, blockName, onTriggerFn, hydrat
         return { deferBlock: null, hydratedBlocks };
     }
 }
-/**
- * Sets the implementation for the `retrieveDeferBlockData` function.
- */
-function enableHydrateFromBlockNameImpl() {
-    _hydrateFromBlockNameImpl = hydrateFromBlockNameImpl;
-    _incrementallyHydrateFromBlockNameImpl = incrementallyHydrateFromBlockNameImpl;
-}
-async function hydrateFromBlockName(injector, blockName, onTriggerFn) {
-    return await _hydrateFromBlockNameImpl(injector, blockName, onTriggerFn, new Set());
-}
-async function incrementallyHydrateFromBlockNameImpl(injector, blockName, triggerFn) {
+async function incrementallyHydrateFromBlockName(injector, blockName, triggerFn) {
     const { deferBlock, hydratedBlocks } = await hydrateFromBlockName(injector, blockName, triggerFn);
-    removeListenersFromBlocks([...hydratedBlocks], injector);
     if (deferBlock !== null) {
+        // hydratedBlocks is a set, and needs to be converted to an array
+        // for removing listeners
+        removeListenersFromBlocks([...hydratedBlocks], injector);
         cleanupLContainer(deferBlock.lContainer);
-        const appRef = injector.get(ApplicationRef);
-        await whenStable(appRef);
+        // we need to wait for app stability here so we don't continue before
+        // the hydration process has finished, which could result in problems
+        await whenStable(injector.get(ApplicationRef));
     }
-}
-function incrementallyHydrateFromBlockName(injector, blockName, triggerFn) {
-    return _incrementallyHydrateFromBlockNameImpl(injector, blockName, triggerFn);
-}
-/**
- * Whether a given TNode represents a defer block.
- */
-function isDeferBlock(tView, tNode) {
-    let tDetails = null;
-    const slotIndex = getDeferBlockDataIndex(tNode.index);
-    // Check if a slot index is in the reasonable range.
-    // Note: we do `-1` on the right border, since defer block details are stored
-    // in the `n+1` slot, see `getDeferBlockDataIndex` for more info.
-    if (HEADER_OFFSET < slotIndex && slotIndex < tView.bindingStartIndex) {
-        tDetails = getTDeferBlockDetails(tView, tNode);
-    }
-    return !!tDetails && isTDeferBlockDetails(tDetails);
 }
 
 /**
@@ -26856,14 +26979,12 @@ function initLiveItemsInTheFuture(liveCollection, start, end, trackByFn) {
  * values (in the entire collection) are unique.
  */
 class UniqueValueMultiKeyMap {
-    constructor() {
-        // A map from a key to the first value corresponding to this key.
-        this.kvMap = new Map();
-        // A map that acts as a linked list of values - each value maps to the next value in this "linked
-        // list" (this only works if values are unique). Allocated lazily to avoid memory consumption when
-        // there are no duplicated values.
-        this._vMap = undefined;
-    }
+    // A map from a key to the first value corresponding to this key.
+    kvMap = new Map();
+    // A map that acts as a linked list of values - each value maps to the next value in this "linked
+    // list" (this only works if values are unique). Allocated lazily to avoid memory consumption when
+    // there are no duplicated values.
+    _vMap = undefined;
     has(key) {
         return this.kvMap.has(key);
     }
@@ -26969,6 +27090,9 @@ function ɵɵconditional(matchingTemplateIndex, contextValue) {
     }
 }
 class RepeaterContext {
+    lContainer;
+    $implicit;
+    $index;
     constructor(lContainer, $implicit, $index) {
         this.lContainer = lContainer;
         this.$implicit = $implicit;
@@ -27000,6 +27124,9 @@ function ɵɵrepeaterTrackByIdentity(_, value) {
     return value;
 }
 class RepeaterMetadata {
+    hasEmptyBlock;
+    trackByFn;
+    liveCollection;
     constructor(hasEmptyBlock, trackByFn, liveCollection) {
         this.hasEmptyBlock = hasEmptyBlock;
         this.trackByFn = trackByFn;
@@ -27061,10 +27188,8 @@ function isViewExpensiveToRecreate(lView) {
     return lView.length - HEADER_OFFSET > 2;
 }
 class OperationsCounter {
-    constructor() {
-        this.created = 0;
-        this.destroyed = 0;
-    }
+    created = 0;
+    destroyed = 0;
     reset() {
         this.created = 0;
         this.destroyed = 0;
@@ -27087,18 +27212,21 @@ class OperationsCounter {
     }
 }
 class LiveCollectionLContainerImpl extends LiveCollection {
+    lContainer;
+    hostLView;
+    templateTNode;
+    operationsCounter = ngDevMode ? new OperationsCounter() : undefined;
+    /**
+     Property indicating if indexes in the repeater context need to be updated following the live
+     collection changes. Index updates are necessary if and only if views are inserted / removed in
+     the middle of LContainer. Adds and removals at the end don't require index updates.
+   */
+    needsIndexUpdate = false;
     constructor(lContainer, hostLView, templateTNode) {
         super();
         this.lContainer = lContainer;
         this.hostLView = hostLView;
         this.templateTNode = templateTNode;
-        this.operationsCounter = ngDevMode ? new OperationsCounter() : undefined;
-        /**
-         Property indicating if indexes in the repeater context need to be updated following the live
-         collection changes. Index updates are necessary if and only if views are inserted / removed in
-         the middle of LContainer. Adds and removals at the end don't require index updates.
-       */
-        this.needsIndexUpdate = false;
     }
     get length() {
         return this.lContainer.length - CONTAINER_HEADER_OFFSET;
@@ -28458,8 +28586,9 @@ function i18nRemoveOpCodesToString(opcodes) {
     return lines;
 }
 class OpCodeParser {
+    i = 0;
+    codes;
     constructor(codes) {
-        this.i = 0;
         this.codes = codes;
     }
     hasMore() {
@@ -34240,6 +34369,10 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
  * @publicApi
  */
 class Version {
+    full;
+    major;
+    minor;
+    patch;
     constructor(full) {
         this.full = full;
         const parts = full.split('.');
@@ -34251,7 +34384,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.11+sha-395cb34');
+const VERSION = new Version('19.0.0-next.11+sha-f815d7b');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -34262,6 +34395,8 @@ const VERSION = new Version('19.0.0-next.11+sha-395cb34');
  * Ivy JIT mode doesn't require accessing this symbol.
  */
 class ModuleWithComponentFactories {
+    ngModuleFactory;
+    componentFactories;
     constructor(ngModuleFactory, componentFactories) {
         this.ngModuleFactory = ngModuleFactory;
         this.componentFactories = componentFactories;
@@ -34328,8 +34463,8 @@ class Compiler {
     getModuleId(moduleType) {
         return undefined;
     }
-    static { this.ɵfac = function Compiler_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || Compiler)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: 'root' }); }
+    static ɵfac = function Compiler_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || Compiler)(); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Compiler, factory: Compiler.ɵfac, providedIn: 'root' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Compiler, [{
         type: Injectable,
@@ -34399,11 +34534,10 @@ function _lastDefined(args) {
 }
 
 class NgZoneChangeDetectionScheduler {
-    constructor() {
-        this.zone = inject(NgZone);
-        this.changeDetectionScheduler = inject(ChangeDetectionScheduler);
-        this.applicationRef = inject(ApplicationRef);
-    }
+    zone = inject(NgZone);
+    changeDetectionScheduler = inject(ChangeDetectionScheduler);
+    applicationRef = inject(ApplicationRef);
+    _onMicrotaskEmptySubscription;
     initialize() {
         if (this._onMicrotaskEmptySubscription) {
             return;
@@ -34425,8 +34559,8 @@ class NgZoneChangeDetectionScheduler {
     ngOnDestroy() {
         this._onMicrotaskEmptySubscription?.unsubscribe();
     }
-    static { this.ɵfac = function NgZoneChangeDetectionScheduler_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || NgZoneChangeDetectionScheduler)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: NgZoneChangeDetectionScheduler, factory: NgZoneChangeDetectionScheduler.ɵfac, providedIn: 'root' }); }
+    static ɵfac = function NgZoneChangeDetectionScheduler_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || NgZoneChangeDetectionScheduler)(); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: NgZoneChangeDetectionScheduler, factory: NgZoneChangeDetectionScheduler.ɵfac, providedIn: 'root' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(NgZoneChangeDetectionScheduler, [{
         type: Injectable,
@@ -34527,12 +34661,10 @@ function getNgZoneOptions(options) {
     };
 }
 class ZoneStablePendingTask {
-    constructor() {
-        this.subscription = new Subscription();
-        this.initialized = false;
-        this.zone = inject(NgZone);
-        this.pendingTasks = inject(PendingTasksInternal);
-    }
+    subscription = new Subscription();
+    initialized = false;
+    zone = inject(NgZone);
+    pendingTasks = inject(PendingTasksInternal);
     initialize() {
         if (this.initialized) {
             return;
@@ -34565,8 +34697,8 @@ class ZoneStablePendingTask {
     ngOnDestroy() {
         this.subscription.unsubscribe();
     }
-    static { this.ɵfac = function ZoneStablePendingTask_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ZoneStablePendingTask)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ZoneStablePendingTask, factory: ZoneStablePendingTask.ɵfac, providedIn: 'root' }); }
+    static ɵfac = function ZoneStablePendingTask_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ZoneStablePendingTask)(); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ZoneStablePendingTask, factory: ZoneStablePendingTask.ɵfac, providedIn: 'root' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ZoneStablePendingTask, [{
         type: Injectable,
@@ -34591,25 +34723,25 @@ function trackMicrotaskNotificationForDebugging() {
     }
 }
 class ChangeDetectionSchedulerImpl {
+    appRef = inject(ApplicationRef);
+    taskService = inject(PendingTasksInternal);
+    ngZone = inject(NgZone);
+    zonelessEnabled = inject(ZONELESS_ENABLED);
+    disableScheduling = inject(ZONELESS_SCHEDULER_DISABLED, { optional: true }) ?? false;
+    zoneIsDefined = typeof Zone !== 'undefined' && !!Zone.root.run;
+    schedulerTickApplyArgs = [{ data: { '__scheduler_tick__': true } }];
+    subscriptions = new Subscription();
+    angularZoneId = this.zoneIsDefined
+        ? this.ngZone._inner?.get(angularZoneInstanceIdProperty)
+        : null;
+    scheduleInRootZone = !this.zonelessEnabled &&
+        this.zoneIsDefined &&
+        (inject(SCHEDULE_IN_ROOT_ZONE, { optional: true }) ?? false);
+    cancelScheduledCallback = null;
+    useMicrotaskScheduler = false;
+    runningTick = false;
+    pendingRenderTaskId = null;
     constructor() {
-        this.appRef = inject(ApplicationRef);
-        this.taskService = inject(PendingTasksInternal);
-        this.ngZone = inject(NgZone);
-        this.zonelessEnabled = inject(ZONELESS_ENABLED);
-        this.disableScheduling = inject(ZONELESS_SCHEDULER_DISABLED, { optional: true }) ?? false;
-        this.zoneIsDefined = typeof Zone !== 'undefined' && !!Zone.root.run;
-        this.schedulerTickApplyArgs = [{ data: { '__scheduler_tick__': true } }];
-        this.subscriptions = new Subscription();
-        this.angularZoneId = this.zoneIsDefined
-            ? this.ngZone._inner?.get(angularZoneInstanceIdProperty)
-            : null;
-        this.scheduleInRootZone = !this.zonelessEnabled &&
-            this.zoneIsDefined &&
-            (inject(SCHEDULE_IN_ROOT_ZONE, { optional: true }) ?? false);
-        this.cancelScheduledCallback = null;
-        this.useMicrotaskScheduler = false;
-        this.runningTick = false;
-        this.pendingRenderTaskId = null;
         this.subscriptions.add(this.appRef.afterTick.subscribe(() => {
             // If the scheduler isn't running a tick but the application ticked, that means
             // someone called ApplicationRef.tick manually. In this case, we should cancel
@@ -34838,8 +34970,8 @@ class ChangeDetectionSchedulerImpl {
             this.taskService.remove(taskId);
         }
     }
-    static { this.ɵfac = function ChangeDetectionSchedulerImpl_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ChangeDetectionSchedulerImpl)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ChangeDetectionSchedulerImpl, factory: ChangeDetectionSchedulerImpl.ɵfac, providedIn: 'root' }); }
+    static ɵfac = function ChangeDetectionSchedulerImpl_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ChangeDetectionSchedulerImpl)(); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ChangeDetectionSchedulerImpl, factory: ChangeDetectionSchedulerImpl.ɵfac, providedIn: 'root' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ChangeDetectionSchedulerImpl, [{
         type: Injectable,
@@ -35084,13 +35216,12 @@ var MissingTranslationStrategy;
 const SCAN_DELAY = 200;
 const OVERSIZED_IMAGE_TOLERANCE = 1200;
 class ImagePerformanceWarning {
-    constructor() {
-        // Map of full image URLs -> original `ngSrc` values.
-        this.window = null;
-        this.observer = null;
-        this.options = inject(IMAGE_CONFIG);
-        this.isBrowser = inject(PLATFORM_ID) === 'browser';
-    }
+    // Map of full image URLs -> original `ngSrc` values.
+    window = null;
+    observer = null;
+    options = inject(IMAGE_CONFIG);
+    isBrowser = inject(PLATFORM_ID) === 'browser';
+    lcpImageUrl;
     start() {
         if (!this.isBrowser ||
             typeof PerformanceObserver === 'undefined' ||
@@ -35238,8 +35369,8 @@ class ImagePerformanceWarning {
         const oversizedHeight = intrinsicHeight - recommendedHeight >= OVERSIZED_IMAGE_TOLERANCE;
         return oversizedWidth || oversizedHeight;
     }
-    static { this.ɵfac = function ImagePerformanceWarning_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ImagePerformanceWarning)(); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ImagePerformanceWarning, factory: ImagePerformanceWarning.ɵfac, providedIn: 'root' }); }
+    static ɵfac = function ImagePerformanceWarning_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ImagePerformanceWarning)(); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ImagePerformanceWarning, factory: ImagePerformanceWarning.ɵfac, providedIn: 'root' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ImagePerformanceWarning, [{
         type: Injectable,
@@ -35379,12 +35510,13 @@ function moduleDoBootstrap(moduleRef, allPlatformModules) {
  * @publicApi
  */
 class PlatformRef {
+    _injector;
+    _modules = [];
+    _destroyListeners = [];
+    _destroyed = false;
     /** @internal */
     constructor(_injector) {
         this._injector = _injector;
-        this._modules = [];
-        this._destroyListeners = [];
-        this._destroyed = false;
     }
     /**
      * Creates an instance of an `@NgModule` for the given platform.
@@ -35472,8 +35604,8 @@ class PlatformRef {
     get destroyed() {
         return this._destroyed;
     }
-    static { this.ɵfac = function PlatformRef_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || PlatformRef)(ɵɵinject(Injector)); }; }
-    static { this.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: 'platform' }); }
+    static ɵfac = function PlatformRef_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || PlatformRef)(ɵɵinject(Injector)); };
+    static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: PlatformRef, factory: PlatformRef.ɵfac, providedIn: 'platform' });
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PlatformRef, [{
         type: Injectable,
@@ -35681,6 +35813,11 @@ function provideExperimentalCheckNoChangesForDebug(options) {
     }
 }
 class DebugNgZoneForCheckNoChanges extends NgZone {
+    checkNoChangesMode;
+    applicationRef;
+    scheduler;
+    errorHandler;
+    injector = inject(EnvironmentInjector);
     constructor(checkNoChangesMode) {
         const zonelessEnabled = inject(ZONELESS_ENABLED);
         // Use coalescing to ensure we aren't ever running this check synchronously
@@ -35689,7 +35826,6 @@ class DebugNgZoneForCheckNoChanges extends NgZone {
             shouldCoalesceRunChangeDetection: zonelessEnabled,
         });
         this.checkNoChangesMode = checkNoChangesMode;
-        this.injector = inject(EnvironmentInjector);
         if (zonelessEnabled) {
             // prevent emits to ensure code doesn't rely on these
             this.onMicrotaskEmpty.emit = () => { };
@@ -35876,7 +36012,7 @@ class ChangeDetectorRef {
      * @internal
      * @nocollapse
      */
-    static { this.__NG_ELEMENT_ID__ = injectChangeDetectorRef; }
+    static __NG_ELEMENT_ID__ = injectChangeDetectorRef;
 }
 /** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
 function injectChangeDetectorRef(flags) {
@@ -35981,6 +36117,8 @@ var ng_module_factory_loader_impl = {};
  * @publicApi
  */
 class DebugEventListener {
+    name;
+    callback;
     constructor(name, callback) {
         this.name = name;
         this.callback = callback;
@@ -35996,6 +36134,10 @@ function asNativeElements(debugEls) {
  * @publicApi
  */
 class DebugNode {
+    /**
+     * The underlying DOM node.
+     */
+    nativeNode;
     constructor(nativeNode) {
         this.nativeNode = nativeNode;
     }
@@ -36558,24 +36700,27 @@ const trackByIdentity = (index, item) => item;
  * @publicApi
  */
 class DefaultIterableDiffer {
+    length = 0;
+    // TODO: confirm the usage of `collection` as it's unused, readonly and on a non public API.
+    collection;
+    // Keeps track of the used records at any point in time (during & across `_check()` calls)
+    _linkedRecords = null;
+    // Keeps track of the removed records at any point in time during `_check()` calls.
+    _unlinkedRecords = null;
+    _previousItHead = null;
+    _itHead = null;
+    _itTail = null;
+    _additionsHead = null;
+    _additionsTail = null;
+    _movesHead = null;
+    _movesTail = null;
+    _removalsHead = null;
+    _removalsTail = null;
+    // Keeps track of records where custom track by is the same, but item identity has changed
+    _identityChangesHead = null;
+    _identityChangesTail = null;
+    _trackByFn;
     constructor(trackByFn) {
-        this.length = 0;
-        // Keeps track of the used records at any point in time (during & across `_check()` calls)
-        this._linkedRecords = null;
-        // Keeps track of the removed records at any point in time during `_check()` calls.
-        this._unlinkedRecords = null;
-        this._previousItHead = null;
-        this._itHead = null;
-        this._itTail = null;
-        this._additionsHead = null;
-        this._additionsTail = null;
-        this._movesHead = null;
-        this._movesTail = null;
-        this._removalsHead = null;
-        this._removalsTail = null;
-        // Keeps track of records where custom track by is the same, but item identity has changed
-        this._identityChangesHead = null;
-        this._identityChangesTail = null;
         this._trackByFn = trackByFn || trackByIdentity;
     }
     forEachItem(fn) {
@@ -37045,41 +37190,41 @@ class DefaultIterableDiffer {
     }
 }
 class IterableChangeRecord_ {
+    item;
+    trackById;
+    currentIndex = null;
+    previousIndex = null;
+    /** @internal */
+    _nextPrevious = null;
+    /** @internal */
+    _prev = null;
+    /** @internal */
+    _next = null;
+    /** @internal */
+    _prevDup = null;
+    /** @internal */
+    _nextDup = null;
+    /** @internal */
+    _prevRemoved = null;
+    /** @internal */
+    _nextRemoved = null;
+    /** @internal */
+    _nextAdded = null;
+    /** @internal */
+    _nextMoved = null;
+    /** @internal */
+    _nextIdentityChange = null;
     constructor(item, trackById) {
         this.item = item;
         this.trackById = trackById;
-        this.currentIndex = null;
-        this.previousIndex = null;
-        /** @internal */
-        this._nextPrevious = null;
-        /** @internal */
-        this._prev = null;
-        /** @internal */
-        this._next = null;
-        /** @internal */
-        this._prevDup = null;
-        /** @internal */
-        this._nextDup = null;
-        /** @internal */
-        this._prevRemoved = null;
-        /** @internal */
-        this._nextRemoved = null;
-        /** @internal */
-        this._nextAdded = null;
-        /** @internal */
-        this._nextMoved = null;
-        /** @internal */
-        this._nextIdentityChange = null;
     }
 }
 // A linked list of IterableChangeRecords with the same IterableChangeRecord_.item
 class _DuplicateItemRecordList {
-    constructor() {
-        /** @internal */
-        this._head = null;
-        /** @internal */
-        this._tail = null;
-    }
+    /** @internal */
+    _head = null;
+    /** @internal */
+    _tail = null;
     /**
      * Append the record to the list of duplicates.
      *
@@ -37145,9 +37290,7 @@ class _DuplicateItemRecordList {
     }
 }
 class _DuplicateMap {
-    constructor() {
-        this.map = new Map();
-    }
+    map = new Map();
     put(record) {
         const key = record.trackById;
         let duplicates = this.map.get(key);
@@ -37211,19 +37354,17 @@ class DefaultKeyValueDifferFactory {
     }
 }
 class DefaultKeyValueDiffer {
-    constructor() {
-        this._records = new Map();
-        this._mapHead = null;
-        // _appendAfter is used in the check loop
-        this._appendAfter = null;
-        this._previousMapHead = null;
-        this._changesHead = null;
-        this._changesTail = null;
-        this._additionsHead = null;
-        this._additionsTail = null;
-        this._removalsHead = null;
-        this._removalsTail = null;
-    }
+    _records = new Map();
+    _mapHead = null;
+    // _appendAfter is used in the check loop
+    _appendAfter = null;
+    _previousMapHead = null;
+    _changesHead = null;
+    _changesTail = null;
+    _additionsHead = null;
+    _additionsTail = null;
+    _removalsHead = null;
+    _removalsTail = null;
     get isDirty() {
         return (this._additionsHead !== null || this._changesHead !== null || this._removalsHead !== null);
     }
@@ -37425,22 +37566,23 @@ class DefaultKeyValueDiffer {
     }
 }
 class KeyValueChangeRecord_ {
+    key;
+    previousValue = null;
+    currentValue = null;
+    /** @internal */
+    _nextPrevious = null;
+    /** @internal */
+    _next = null;
+    /** @internal */
+    _prev = null;
+    /** @internal */
+    _nextAdded = null;
+    /** @internal */
+    _nextRemoved = null;
+    /** @internal */
+    _nextChanged = null;
     constructor(key) {
         this.key = key;
-        this.previousValue = null;
-        this.currentValue = null;
-        /** @internal */
-        this._nextPrevious = null;
-        /** @internal */
-        this._next = null;
-        /** @internal */
-        this._prev = null;
-        /** @internal */
-        this._nextAdded = null;
-        /** @internal */
-        this._nextRemoved = null;
-        /** @internal */
-        this._nextChanged = null;
     }
 }
 
@@ -37453,12 +37595,13 @@ function defaultIterableDiffersFactory() {
  * @publicApi
  */
 class IterableDiffers {
+    factories;
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: IterableDiffers,
         providedIn: 'root',
         factory: defaultIterableDiffersFactory,
-    }); }
+    });
     constructor(factories) {
         this.factories = factories;
     }
@@ -37527,11 +37670,12 @@ function defaultKeyValueDiffersFactory() {
  */
 class KeyValueDiffers {
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: KeyValueDiffers,
         providedIn: 'root',
         factory: defaultKeyValueDiffersFactory,
-    }); }
+    });
+    factories;
     constructor(factories) {
         this.factories = factories;
     }
@@ -37618,9 +37762,9 @@ const platformCore = createPlatformFactory(null, 'core', []);
 class ApplicationModule {
     // Inject ApplicationRef to make it eager...
     constructor(appRef) { }
-    static { this.ɵfac = function ApplicationModule_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ApplicationModule)(ɵɵinject(ApplicationRef)); }; }
-    static { this.ɵmod = /*@__PURE__*/ ɵɵdefineNgModule({ type: ApplicationModule }); }
-    static { this.ɵinj = /*@__PURE__*/ ɵɵdefineInjector({}); }
+    static ɵfac = function ApplicationModule_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ApplicationModule)(ɵɵinject(ApplicationRef)); };
+    static ɵmod = /*@__PURE__*/ ɵɵdefineNgModule({ type: ApplicationModule });
+    static ɵinj = /*@__PURE__*/ ɵɵdefineInjector({});
 }
 (() => { (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ApplicationModule, [{
         type: NgModule
@@ -38269,10 +38413,6 @@ function getDeferBlocks(lView, deferBlocks) {
  */
 const appsWithEventReplay = new WeakSet();
 /**
- * A set of in progress hydrating blocks
- */
-let hydratingBlocks = new Set();
-/**
  * A list of block events that need to be replayed
  */
 let blockEventQueue = [];
@@ -38309,6 +38449,9 @@ function withEventReplay() {
             provide: ENVIRONMENT_INITIALIZER,
             useValue: () => {
                 const injector = inject(Injector);
+                // We have to check for the appRef here due to the possibility of multiple apps
+                // being present on the same page. We only want to enable event replay for the
+                // apps that actually want it.
                 const appRef = injector.get(ApplicationRef);
                 if (!appsWithEventReplay.has(appRef)) {
                     const jsActionMap = inject(BLOCK_ELEMENT_MAP);
@@ -38332,6 +38475,9 @@ function withEventReplay() {
                         if (!shouldEnableEventReplay(injector)) {
                             return;
                         }
+                        // We have to check for the appRef here due to the possibility of multiple apps
+                        // being present on the same page. We only want to enable event replay for the
+                        // apps that actually want it.
                         if (!appsWithEventReplay.has(appRef)) {
                             appsWithEventReplay.add(appRef);
                             appRef.onDestroy(() => appsWithEventReplay.delete(appRef));
@@ -38437,30 +38583,22 @@ function invokeRegisteredReplayListeners(injector, event, currentTarget) {
 }
 async function hydrateAndInvokeBlockListeners(blockName, injector, event, currentTarget) {
     blockEventQueue.push({ event, currentTarget });
-    if (!hydratingBlocks.has(blockName)) {
-        hydratingBlocks.add(blockName);
-        await triggerBlockHydration(injector, blockName, fetchAndRenderDeferBlock);
-        hydratingBlocks.delete(blockName);
-    }
-}
-async function fetchAndRenderDeferBlock(deferBlock) {
-    await triggerAndWaitForCompletion(deferBlock);
-    return deferBlock;
-}
-async function triggerBlockHydration(injector, blockName, onTriggerFn) {
-    // grab the list of dehydrated blocks and queue them up
-    const { dehydratedBlocks } = findFirstHydratedParentDeferBlock(blockName, injector);
-    for (let block of dehydratedBlocks) {
-        hydratingBlocks.add(block);
-    }
-    const { deferBlock, hydratedBlocks } = await hydrateFromBlockName(injector, blockName, onTriggerFn);
+    const { deferBlock, hydratedBlocks } = await hydrateFromBlockName(injector, blockName, fetchAndRenderDeferBlock);
     if (deferBlock !== null) {
+        // TODO(incremental-hydration): extract this work into a post
+        // hydration cleanup function
+        const deferBlockRegistry = injector.get(DeferBlockRegistry);
+        deferBlockRegistry.hydrating.delete(blockName);
         hydratedBlocks.add(blockName);
         const appRef = injector.get(ApplicationRef);
         await appRef.whenStable();
         replayQueuedBlockEvents(hydratedBlocks, injector);
         cleanupLContainer(deferBlock.lContainer);
     }
+}
+async function fetchAndRenderDeferBlock(deferBlock) {
+    await triggerAndWaitForCompletion(deferBlock);
+    return deferBlock;
 }
 function replayQueuedBlockEvents(hydratedBlocks, injector) {
     // clone the queue
@@ -38523,10 +38661,8 @@ function appendDeferBlocksToJSActionMap(doc, injector) {
  * This reduces the number of annotations needed for a given page.
  */
 class SerializedViewCollection {
-    constructor() {
-        this.views = [];
-        this.indexByContent = new Map();
-    }
+    views = [];
+    indexByContent = new Map();
     add(serializedView) {
         const viewAsString = JSON.stringify(serializedView);
         if (!this.indexByContent.has(viewAsString)) {
@@ -39399,7 +39535,6 @@ function enableIncrementalHydrationRuntimeSupport() {
     if (!isIncrementalHydrationRuntimeSupportEnabled) {
         isIncrementalHydrationRuntimeSupportEnabled = true;
         enableRetrieveDeferBlockDataImpl();
-        enableHydrateFromBlockNameImpl();
     }
 }
 /**
@@ -39764,7 +39899,15 @@ function getClosestComponentName(node) {
                 const tNode = getTNode(tView, i);
                 if (isComponentHost(tNode)) {
                     const def = tView.data[tNode.directiveStart + tNode.componentOffset];
-                    return def.debugInfo?.className || def.type.name;
+                    const name = def.debugInfo?.className || def.type.name;
+                    // Note: the name may be an empty string if the class name is
+                    // dropped due to minification. In such cases keep going up the tree.
+                    if (name) {
+                        return name;
+                    }
+                    else {
+                        break;
+                    }
                 }
             }
         }
@@ -40052,6 +40195,8 @@ function untracked(nonReactiveReadsFn) {
 }
 
 class ViewContext {
+    view;
+    node;
     constructor(view, node) {
         this.view = view;
         this.node = node;
@@ -40060,7 +40205,7 @@ class ViewContext {
      * @internal
      * @nocollapse
      */
-    static { this.__NG_ELEMENT_ID__ = injectViewContext; }
+    static __NG_ELEMENT_ID__ = injectViewContext;
 }
 function injectViewContext() {
     return new ViewContext(getLView(), getCurrentTNode());
@@ -40072,11 +40217,8 @@ function injectViewContext() {
 const USE_MICROTASK_EFFECT_BY_DEFAULT = false;
 
 class MicrotaskEffectScheduler extends ZoneAwareEffectScheduler {
-    constructor() {
-        super(...arguments);
-        this.pendingTasks = inject(PendingTasksInternal);
-        this.taskId = null;
-    }
+    pendingTasks = inject(PendingTasksInternal);
+    taskId = null;
     schedule(effect) {
         // Check whether there are any pending effects _before_ queueing in the base class.
         super.schedule(effect);
@@ -40097,11 +40239,11 @@ class MicrotaskEffectScheduler extends ZoneAwareEffectScheduler {
         }
     }
     /** @nocollapse */
-    static { this.ɵprov = ɵɵdefineInjectable({
+    static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: MicrotaskEffectScheduler,
         providedIn: 'root',
         factory: () => new MicrotaskEffectScheduler(),
-    }); }
+    });
 }
 /**
  * Core reactive node for an Angular effect.
@@ -40111,6 +40253,12 @@ class MicrotaskEffectScheduler extends ZoneAwareEffectScheduler {
  * if available/requested.
  */
 class EffectHandle {
+    scheduler;
+    effectFn;
+    zone;
+    injector;
+    unregisterOnDestroy;
+    watcher;
     constructor(scheduler, effectFn, zone, destroyRef, injector, allowSignalWrites) {
         this.scheduler = scheduler;
         this.effectFn = effectFn;
@@ -40189,6 +40337,7 @@ function setUseMicrotaskEffectsByDefault(value) {
     return prev;
 }
 class EffectRefImpl {
+    [SIGNAL$1];
     constructor(node) {
         this[SIGNAL$1] = node;
     }
@@ -40261,7 +40410,7 @@ function effect(effectFn, options) {
  * Not public API, which guarantees `EffectScheduler` only ever comes from the application root
  * injector.
  */
-const APP_EFFECT_SCHEDULER = new InjectionToken('', {
+const APP_EFFECT_SCHEDULER = /* @__PURE__ */ new InjectionToken('', {
     providedIn: 'root',
     factory: () => inject(EffectScheduler),
 });
@@ -40438,24 +40587,25 @@ const AFTER_RENDER_PHASE_EFFECT_NODE = /* @__PURE__ */ (() => ({
  * An `AfterRenderSequence` that manages an `afterRenderEffect`'s phase effects.
  */
 class AfterRenderEffectSequence extends AfterRenderSequence {
+    scheduler;
+    /**
+     * While this sequence is executing, this tracks the last phase which was called by the
+     * `afterRender` machinery.
+     *
+     * When a phase effect is marked dirty, this is used to determine whether it's already run or not.
+     */
+    lastPhase = null;
+    /**
+     * The reactive nodes for each phase, if a phase effect is defined for that phase.
+     *
+     * These are initialized to `undefined` but set in the constructor.
+     */
+    nodes = [undefined, undefined, undefined, undefined];
     constructor(impl, effectHooks, scheduler, destroyRef) {
         // Note that we also initialize the underlying `AfterRenderSequence` hooks to `undefined` and
         // populate them as we create reactive nodes below.
         super(impl, [undefined, undefined, undefined, undefined], false, destroyRef);
         this.scheduler = scheduler;
-        /**
-         * While this sequence is executing, this tracks the last phase which was called by the
-         * `afterRender` machinery.
-         *
-         * When a phase effect is marked dirty, this is used to determine whether it's already run or not.
-         */
-        this.lastPhase = null;
-        /**
-         * The reactive nodes for each phase, if a phase effect is defined for that phase.
-         *
-         * These are initialized to `undefined` but set in the constructor.
-         */
-        this.nodes = [undefined, undefined, undefined, undefined];
         // Setup a reactive node for each phase.
         for (const phase of AfterRenderImpl.PHASES) {
             const effectHook = effectHooks[phase];
@@ -40582,10 +40732,11 @@ function resource(options) {
  * Mainly factored out for better readability.
  */
 class BaseWritableResource {
+    value;
+    status = signal(ResourceStatus.Idle);
+    error = signal(undefined);
+    rawSetValue;
     constructor(equal) {
-        this.status = signal(ResourceStatus.Idle);
-        this.error = signal(undefined);
-        this.isLoading = computed(() => this.status() === ResourceStatus.Loading || this.status() === ResourceStatus.Reloading);
         this.value = signal(undefined, {
             equal: equal ? wrapEqualityFn(equal) : undefined,
         });
@@ -40611,6 +40762,7 @@ class BaseWritableResource {
     update(updater) {
         this.value.update(updater);
     }
+    isLoading = computed(() => this.status() === ResourceStatus.Loading || this.status() === ResourceStatus.Reloading);
     hasValue() {
         return (this.status() === ResourceStatus.Resolved ||
             this.status() === ResourceStatus.Local ||
@@ -40637,10 +40789,15 @@ class BaseWritableResource {
     }
 }
 class WritableResourceImpl extends BaseWritableResource {
+    loaderFn;
+    request;
+    pendingTasks;
+    effectRef;
+    pendingController;
+    resolvePendingTask = undefined;
     constructor(requestFn, loaderFn, equal, injector) {
         super(equal);
         this.loaderFn = loaderFn;
-        this.resolvePendingTask = undefined;
         injector = injector ?? inject(Injector);
         this.pendingTasks = injector.get(PendingTasks);
         this.request = computed(() => ({

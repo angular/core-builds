@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.11+sha-395cb34
+ * @license Angular v19.0.0-next.11+sha-f815d7b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,12 +10,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var combine_units = require('./combine_units-63a5b7e8.js');
+var combine_units = require('./combine_units-187f833f.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-d4a34401.js');
+var checker = require('./checker-2451e7c5.js');
 var assert = require('assert');
-var program = require('./program-c7e430d2.js');
+var program = require('./program-b1e71725.js');
 require('path');
 require('fs');
 require('module');
@@ -1051,6 +1051,8 @@ function isIdentifier(node) {
  * reflector.ts implements static reflection of declarations using the TypeScript `ts.TypeChecker`.
  */
 class TypeScriptReflectionHost {
+    checker;
+    isLocalCompilation;
     constructor(checker, isLocalCompilation = false) {
         this.checker = checker;
         this.isLocalCompilation = isLocalCompilation;
@@ -1664,17 +1666,32 @@ const LocalExportedDeclarations = Symbol('LocalExportedDeclarations');
  * imports.
  */
 class Reference {
+    node;
+    /**
+     * The compiler's best guess at an absolute module specifier which owns this `Reference`.
+     *
+     * This is usually determined by tracking the import statements which led the compiler to a given
+     * node. If any of these imports are absolute, it's an indication that the node being imported
+     * might come from that module.
+     *
+     * It is not _guaranteed_ that the node in question is exported from its `bestGuessOwningModule` -
+     * that is mostly a convention that applies in certain package formats.
+     *
+     * If `bestGuessOwningModule` is `null`, then it's likely the node came from the current program.
+     */
+    bestGuessOwningModule;
+    identifiers = [];
+    /**
+     * Indicates that the Reference was created synthetically, not as a result of natural value
+     * resolution.
+     *
+     * This is used to avoid misinterpreting the Reference in certain contexts.
+     */
+    synthetic = false;
+    _alias = null;
+    isAmbient;
     constructor(node, bestGuessOwningModule = null) {
         this.node = node;
-        this.identifiers = [];
-        /**
-         * Indicates that the Reference was created synthetically, not as a result of natural value
-         * resolution.
-         *
-         * This is used to avoid misinterpreting the Reference in certain contexts.
-         */
-        this.synthetic = false;
-        this._alias = null;
         if (bestGuessOwningModule === AmbientImport) {
             this.isAmbient = true;
             this.bestGuessOwningModule = null;
@@ -1799,6 +1816,14 @@ class Reference {
  * property name, or mapping from a specific class property to its binding property name.
  */
 class ClassPropertyMapping {
+    /**
+     * Mapping from class property names to the single `InputOrOutput` for that class property.
+     */
+    forwardMap;
+    /**
+     * Mapping from property names to one or more `InputOrOutput`s which share that name.
+     */
+    reverseMap;
     constructor(forwardMap) {
         this.forwardMap = forwardMap;
         this.reverseMap = reverseMapFromForwardMap(forwardMap);
@@ -2106,6 +2131,8 @@ function afterUnderscore(str) {
  * from an upstream compilation already.
  */
 class DtsMetadataReader {
+    checker;
+    reflector;
     constructor(checker, reflector) {
         this.checker = checker;
         this.reflector = reflector;
@@ -3013,21 +3040,23 @@ function attemptToReuseExistingSourceFileImports(tracker, sourceFile, request) {
  * manipulation using e.g. `magic-string`.
  */
 class ImportManager {
+    /** List of new imports that will be inserted into given source files. */
+    newImports = new Map();
+    /**
+     * Keeps track of imports marked for removal. The root-level key is the file from which the
+     * import should be removed, the inner map key is the name of the module from which the symbol
+     * is being imported. The value of the inner map is a set of symbol names that should be removed.
+     * Note! the inner map tracks the original names of the imported symbols, not their local aliases.
+     */
+    removedImports = new Map();
+    nextUniqueIndex = 0;
+    config;
+    reuseSourceFileImportsTracker;
+    reuseGeneratedImportsTracker = {
+        directReuseCache: new Map(),
+        namespaceImportReuseCache: new Map(),
+    };
     constructor(config = {}) {
-        /** List of new imports that will be inserted into given source files. */
-        this.newImports = new Map();
-        /**
-         * Keeps track of imports marked for removal. The root-level key is the file from which the
-         * import should be removed, the inner map key is the name of the module from which the symbol
-         * is being imported. The value of the inner map is a set of symbol names that should be removed.
-         * Note! the inner map tracks the original names of the imported symbols, not their local aliases.
-         */
-        this.removedImports = new Map();
-        this.nextUniqueIndex = 0;
-        this.reuseGeneratedImportsTracker = {
-            directReuseCache: new Map(),
-            namespaceImportReuseCache: new Map(),
-        };
         this.config = {
             shouldUseSingleQuotes: config.shouldUseSingleQuotes ?? (() => false),
             rewriter: config.rewriter ?? null,
@@ -3402,6 +3431,7 @@ function canEmitType(type, canEmit) {
  * referring to the namespace import that was created.
  */
 class TypeEmitter {
+    translator;
     constructor(translator) {
         this.translator = translator;
     }
@@ -3833,6 +3863,8 @@ function tsNumericExpression(value) {
  * See `TypeEmitter` for more information on the emitting process.
  */
 class TypeParameterEmitter {
+    typeParameters;
+    reflector;
     constructor(typeParameters, reflector) {
         this.typeParameters = typeParameters;
         this.reflector = reflector;
@@ -4042,6 +4074,8 @@ function astToTypescript(ast, maybeResolve, config) {
     return translator.translate(ast);
 }
 class AstTranslator {
+    maybeResolve;
+    config;
     constructor(maybeResolve, config) {
         this.maybeResolve = maybeResolve;
         this.config = config;
@@ -4354,7 +4388,7 @@ class AstTranslator {
  * Ivy checker can emulate this bug when needed.
  */
 class VeSafeLhsInferenceBugDetector {
-    static { this.SINGLETON = new VeSafeLhsInferenceBugDetector(); }
+    static SINGLETON = new VeSafeLhsInferenceBugDetector();
     static veWillInferAnyFor(ast) {
         const visitor = VeSafeLhsInferenceBugDetector.SINGLETON;
         return ast instanceof checker.Call ? ast.visit(visitor) : ast.receiver.visit(visitor);
@@ -4490,6 +4524,9 @@ class TcbOp {
  * Executing this operation returns a reference to the element variable.
  */
 class TcbElementOp extends TcbOp {
+    tcb;
+    scope;
+    element;
     constructor(tcb, scope, element) {
         super();
         this.tcb = tcb;
@@ -4518,6 +4555,10 @@ class TcbElementOp extends TcbOp {
  * Executing this operation returns a reference to the variable variable (lol).
  */
 class TcbTemplateVariableOp extends TcbOp {
+    tcb;
+    scope;
+    template;
+    variable;
     constructor(tcb, scope, template, variable) {
         super();
         this.tcb = tcb;
@@ -4558,13 +4599,15 @@ class TcbTemplateVariableOp extends TcbOp {
  * Executing this operation returns a reference to the template's context variable.
  */
 class TcbTemplateContextOp extends TcbOp {
+    tcb;
+    scope;
     constructor(tcb, scope) {
         super();
         this.tcb = tcb;
         this.scope = scope;
-        // The declaration of the context variable is only needed when the context is actually referenced.
-        this.optional = true;
     }
+    // The declaration of the context variable is only needed when the context is actually referenced.
+    optional = true;
     execute() {
         // Allocate a template ctx variable and declare it with an 'any' type. The type of this variable
         // may be narrowed as a result of template guard conditions.
@@ -4580,17 +4623,20 @@ class TcbTemplateContextOp extends TcbOp {
  * Executing this operation returns a reference to the `@let` declaration.
  */
 class TcbLetDeclarationOp extends TcbOp {
+    tcb;
+    scope;
+    node;
     constructor(tcb, scope, node) {
         super();
         this.tcb = tcb;
         this.scope = scope;
         this.node = node;
-        /**
-         * `@let` declarations are mandatory, because their expressions
-         * should be checked even if they aren't referenced anywhere.
-         */
-        this.optional = false;
     }
+    /**
+     * `@let` declarations are mandatory, because their expressions
+     * should be checked even if they aren't referenced anywhere.
+     */
+    optional = false;
     execute() {
         const id = this.tcb.allocateId();
         addParseSpanInfo(id, this.node.nameSpan);
@@ -4611,6 +4657,9 @@ class TcbLetDeclarationOp extends TcbOp {
  * or more type guard conditions that narrow types within the template body.
  */
 class TcbTemplateBodyOp extends TcbOp {
+    tcb;
+    scope;
+    template;
     constructor(tcb, scope, template) {
         super();
         this.tcb = tcb;
@@ -4724,6 +4773,9 @@ class TcbTemplateBodyOp extends TcbOp {
  * Executing this operation returns nothing.
  */
 class TcbExpressionOp extends TcbOp {
+    tcb;
+    scope;
+    expression;
     constructor(tcb, scope, expression) {
         super();
         this.tcb = tcb;
@@ -4744,6 +4796,10 @@ class TcbExpressionOp extends TcbOp {
  * parameters are set to `any` type.
  */
 class TcbDirectiveTypeOpBase extends TcbOp {
+    tcb;
+    scope;
+    node;
+    dir;
     constructor(tcb, scope, node, dir) {
         super();
         this.tcb = tcb;
@@ -4838,6 +4894,11 @@ class TcbGenericDirectiveTypeWithAnyParamsOp extends TcbDirectiveTypeOpBase {
  * type.
  */
 class TcbReferenceOp extends TcbOp {
+    tcb;
+    scope;
+    node;
+    host;
+    target;
     constructor(tcb, scope, node, host, target) {
         super();
         this.tcb = tcb;
@@ -4845,10 +4906,10 @@ class TcbReferenceOp extends TcbOp {
         this.node = node;
         this.host = host;
         this.target = target;
-        // The statement generated by this operation is only used to for the Type Checker
-        // so it can map a reference variable in the template directly to a node in the TCB.
-        this.optional = true;
     }
+    // The statement generated by this operation is only used to for the Type Checker
+    // so it can map a reference variable in the template directly to a node in the TCB.
+    optional = true;
     execute() {
         const id = this.tcb.allocateId();
         let initializer = this.target instanceof checker.Template || this.target instanceof checker.Element$1
@@ -4883,13 +4944,15 @@ class TcbReferenceOp extends TcbOp {
  * itself is recorded out-of-band.
  */
 class TcbInvalidReferenceOp extends TcbOp {
+    tcb;
+    scope;
     constructor(tcb, scope) {
         super();
         this.tcb = tcb;
         this.scope = scope;
-        // The declaration of a missing reference is only needed when the reference is resolved.
-        this.optional = true;
     }
+    // The declaration of a missing reference is only needed when the reference is resolved.
+    optional = true;
     execute() {
         const id = this.tcb.allocateId();
         this.scope.addStatement(tsCreateVariable(id, ANY_EXPRESSION));
@@ -4909,6 +4972,10 @@ class TcbInvalidReferenceOp extends TcbOp {
  * type.
  */
 class TcbDirectiveCtorOp extends TcbOp {
+    tcb;
+    scope;
+    node;
+    dir;
     constructor(tcb, scope, node, dir) {
         super();
         this.tcb = tcb;
@@ -4973,6 +5040,10 @@ class TcbDirectiveCtorOp extends TcbOp {
  * Executing this operation returns nothing.
  */
 class TcbDirectiveInputsOp extends TcbOp {
+    tcb;
+    scope;
+    node;
+    dir;
     constructor(tcb, scope, node, dir) {
         super();
         this.tcb = tcb;
@@ -5119,6 +5190,10 @@ class TcbDirectiveInputsOp extends TcbOp {
  * resolve any recursive references required to infer the real type.
  */
 class TcbDirectiveCtorCircularFallbackOp extends TcbOp {
+    tcb;
+    scope;
+    node;
+    dir;
     constructor(tcb, scope, node, dir) {
         super();
         this.tcb = tcb;
@@ -5149,6 +5224,10 @@ class TcbDirectiveCtorCircularFallbackOp extends TcbOp {
  * the `TcbDomSchemaCheckerOp`.
  */
 class TcbDomSchemaCheckerOp extends TcbOp {
+    tcb;
+    element;
+    checkElement;
+    claimedInputs;
     constructor(tcb, element, checkElement, claimedInputs) {
         super();
         this.tcb = tcb;
@@ -5192,13 +5271,17 @@ class TcbDomSchemaCheckerOp extends TcbOp {
  * flow node didn't exist.
  */
 class TcbControlFlowContentProjectionOp extends TcbOp {
+    tcb;
+    element;
+    ngContentSelectors;
+    componentName;
+    category;
     constructor(tcb, element, ngContentSelectors, componentName) {
         super();
         this.tcb = tcb;
         this.element = element;
         this.ngContentSelectors = ngContentSelectors;
         this.componentName = componentName;
-        this.optional = false;
         // We only need to account for `error` and `warning` since
         // this check won't be enabled for `suppress`.
         this.category =
@@ -5206,6 +5289,7 @@ class TcbControlFlowContentProjectionOp extends TcbOp {
                 ? ts__default["default"].DiagnosticCategory.Error
                 : ts__default["default"].DiagnosticCategory.Warning;
     }
+    optional = false;
     execute() {
         const controlFlowToCheck = this.findPotentialControlFlowNodes();
         if (controlFlowToCheck.length > 0) {
@@ -5306,6 +5390,10 @@ const ATTR_TO_PROP = new Map(Object.entries({
  * Executing this operation returns nothing.
  */
 class TcbUnclaimedInputsOp extends TcbOp {
+    tcb;
+    scope;
+    element;
+    claimedInputs;
     constructor(tcb, scope, element, claimedInputs) {
         super();
         this.tcb = tcb;
@@ -5361,6 +5449,10 @@ class TcbUnclaimedInputsOp extends TcbOp {
  * Executing this operation returns nothing.
  */
 class TcbDirectiveOutputsOp extends TcbOp {
+    tcb;
+    scope;
+    node;
+    dir;
     constructor(tcb, scope, node, dir) {
         super();
         this.tcb = tcb;
@@ -5425,6 +5517,10 @@ class TcbDirectiveOutputsOp extends TcbOp {
  * Executing this operation returns nothing.
  */
 class TcbUnclaimedOutputsOp extends TcbOp {
+    tcb;
+    scope;
+    element;
+    claimedOutputs;
     constructor(tcb, scope, element, claimedOutputs) {
         super();
         this.tcb = tcb;
@@ -5495,11 +5591,12 @@ class TcbUnclaimedOutputsOp extends TcbOp {
  * autocompletion results of properties and methods from the template's component context.
  */
 class TcbComponentContextCompletionOp extends TcbOp {
+    scope;
     constructor(scope) {
         super();
         this.scope = scope;
-        this.optional = false;
     }
+    optional = false;
     execute() {
         const ctx = ts__default["default"].factory.createThis();
         const ctxDot = ts__default["default"].factory.createPropertyAccessExpression(ctx, '');
@@ -5515,6 +5612,10 @@ class TcbComponentContextCompletionOp extends TcbOp {
  * Executing this operation returns the identifier which can be used to refer to the variable.
  */
 class TcbBlockVariableOp extends TcbOp {
+    tcb;
+    scope;
+    initializer;
+    variable;
     constructor(tcb, scope, initializer, variable) {
         super();
         this.tcb = tcb;
@@ -5541,14 +5642,18 @@ class TcbBlockVariableOp extends TcbOp {
  * Executing this operation returns the identifier which can be used to refer to the variable.
  */
 class TcbBlockImplicitVariableOp extends TcbOp {
+    tcb;
+    scope;
+    type;
+    variable;
     constructor(tcb, scope, type, variable) {
         super();
         this.tcb = tcb;
         this.scope = scope;
         this.type = type;
         this.variable = variable;
-        this.optional = true;
     }
+    optional = true;
     execute() {
         const id = this.tcb.allocateId();
         addParseSpanInfo(id, this.variable.keySpan);
@@ -5564,12 +5669,15 @@ class TcbBlockImplicitVariableOp extends TcbOp {
  * Executing this operation returns nothing.
  */
 class TcbIfOp extends TcbOp {
+    tcb;
+    scope;
+    block;
+    expressionScopes = new Map();
     constructor(tcb, scope, block) {
         super();
         this.tcb = tcb;
         this.scope = scope;
         this.block = block;
-        this.expressionScopes = new Map();
     }
     get optional() {
         return false;
@@ -5656,6 +5764,9 @@ class TcbIfOp extends TcbOp {
  * Executing this operation returns nothing.
  */
 class TcbSwitchOp extends TcbOp {
+    tcb;
+    scope;
+    block;
     constructor(tcb, scope, block) {
         super();
         this.tcb = tcb;
@@ -5720,6 +5831,9 @@ class TcbSwitchOp extends TcbOp {
  * Executing this operation returns nothing.
  */
 class TcbForOfOp extends TcbOp {
+    tcb;
+    scope;
+    block;
     constructor(tcb, scope, block) {
         super();
         this.tcb = tcb;
@@ -5772,71 +5886,74 @@ const INFER_TYPE_FOR_CIRCULAR_OP_EXPR = ts__default["default"].factory.createNon
  * If a `TcbOp` requires the output of another, it can call `resolve()`.
  */
 class Scope {
+    tcb;
+    parent;
+    guard;
+    /**
+     * A queue of operations which need to be performed to generate the TCB code for this scope.
+     *
+     * This array can contain either a `TcbOp` which has yet to be executed, or a `ts.Expression|null`
+     * representing the memoized result of executing the operation. As operations are executed, their
+     * results are written into the `opQueue`, overwriting the original operation.
+     *
+     * If an operation is in the process of being executed, it is temporarily overwritten here with
+     * `INFER_TYPE_FOR_CIRCULAR_OP_EXPR`. This way, if a cycle is encountered where an operation
+     * depends transitively on its own result, the inner operation will infer the least narrow type
+     * that fits instead. This has the same semantics as TypeScript itself when types are referenced
+     * circularly.
+     */
+    opQueue = [];
+    /**
+     * A map of `TmplAstElement`s to the index of their `TcbElementOp` in the `opQueue`
+     */
+    elementOpMap = new Map();
+    /**
+     * A map of maps which tracks the index of `TcbDirectiveCtorOp`s in the `opQueue` for each
+     * directive on a `TmplAstElement` or `TmplAstTemplate` node.
+     */
+    directiveOpMap = new Map();
+    /**
+     * A map of `TmplAstReference`s to the index of their `TcbReferenceOp` in the `opQueue`
+     */
+    referenceOpMap = new Map();
+    /**
+     * Map of immediately nested <ng-template>s (within this `Scope`) represented by `TmplAstTemplate`
+     * nodes to the index of their `TcbTemplateContextOp`s in the `opQueue`.
+     */
+    templateCtxOpMap = new Map();
+    /**
+     * Map of variables declared on the template that created this `Scope` (represented by
+     * `TmplAstVariable` nodes) to the index of their `TcbVariableOp`s in the `opQueue`, or to
+     * pre-resolved variable identifiers.
+     */
+    varMap = new Map();
+    /**
+     * A map of the names of `TmplAstLetDeclaration`s to the index of their op in the `opQueue`.
+     *
+     * Assumes that there won't be duplicated `@let` declarations within the same scope.
+     */
+    letDeclOpMap = new Map();
+    /**
+     * Statements for this template.
+     *
+     * Executing the `TcbOp`s in the `opQueue` populates this array.
+     */
+    statements = [];
     /**
      * Names of the for loop context variables and their types.
      */
-    static { this.forLoopContextVariableTypes = new Map([
+    static forLoopContextVariableTypes = new Map([
         ['$first', ts__default["default"].SyntaxKind.BooleanKeyword],
         ['$last', ts__default["default"].SyntaxKind.BooleanKeyword],
         ['$even', ts__default["default"].SyntaxKind.BooleanKeyword],
         ['$odd', ts__default["default"].SyntaxKind.BooleanKeyword],
         ['$index', ts__default["default"].SyntaxKind.NumberKeyword],
         ['$count', ts__default["default"].SyntaxKind.NumberKeyword],
-    ]); }
+    ]);
     constructor(tcb, parent = null, guard = null) {
         this.tcb = tcb;
         this.parent = parent;
         this.guard = guard;
-        /**
-         * A queue of operations which need to be performed to generate the TCB code for this scope.
-         *
-         * This array can contain either a `TcbOp` which has yet to be executed, or a `ts.Expression|null`
-         * representing the memoized result of executing the operation. As operations are executed, their
-         * results are written into the `opQueue`, overwriting the original operation.
-         *
-         * If an operation is in the process of being executed, it is temporarily overwritten here with
-         * `INFER_TYPE_FOR_CIRCULAR_OP_EXPR`. This way, if a cycle is encountered where an operation
-         * depends transitively on its own result, the inner operation will infer the least narrow type
-         * that fits instead. This has the same semantics as TypeScript itself when types are referenced
-         * circularly.
-         */
-        this.opQueue = [];
-        /**
-         * A map of `TmplAstElement`s to the index of their `TcbElementOp` in the `opQueue`
-         */
-        this.elementOpMap = new Map();
-        /**
-         * A map of maps which tracks the index of `TcbDirectiveCtorOp`s in the `opQueue` for each
-         * directive on a `TmplAstElement` or `TmplAstTemplate` node.
-         */
-        this.directiveOpMap = new Map();
-        /**
-         * A map of `TmplAstReference`s to the index of their `TcbReferenceOp` in the `opQueue`
-         */
-        this.referenceOpMap = new Map();
-        /**
-         * Map of immediately nested <ng-template>s (within this `Scope`) represented by `TmplAstTemplate`
-         * nodes to the index of their `TcbTemplateContextOp`s in the `opQueue`.
-         */
-        this.templateCtxOpMap = new Map();
-        /**
-         * Map of variables declared on the template that created this `Scope` (represented by
-         * `TmplAstVariable` nodes) to the index of their `TcbVariableOp`s in the `opQueue`, or to
-         * pre-resolved variable identifiers.
-         */
-        this.varMap = new Map();
-        /**
-         * A map of the names of `TmplAstLetDeclaration`s to the index of their op in the `opQueue`.
-         *
-         * Assumes that there won't be duplicated `@let` declarations within the same scope.
-         */
-        this.letDeclOpMap = new Map();
-        /**
-         * Statements for this template.
-         *
-         * Executing the `TcbOp`s in the `opQueue` populates this array.
-         */
-        this.statements = [];
     }
     /**
      * Constructs a `Scope` given either a `TmplAstTemplate` or a list of `TmplAstNode`s.
@@ -6370,6 +6487,8 @@ function tcbExpression(ast, tcb, scope) {
     return translator.translate(ast);
 }
 class TcbExpressionTranslator {
+    tcb;
+    scope;
     constructor(tcb, scope) {
         this.tcb = tcb;
         this.scope = scope;
@@ -6741,6 +6860,8 @@ class TcbEventHandlerTranslator extends TcbExpressionTranslator {
     }
 }
 class TcbForLoopTrackTranslator extends TcbExpressionTranslator {
+    block;
+    allowedVariables;
     constructor(tcb, scope, block) {
         super(tcb, scope);
         this.block = block;
@@ -6994,6 +7115,7 @@ function prepareTextReplacement(file, replacement, start, end) {
 }
 
 class OutputMigration extends combine_units.TsurgeFunnelMigration {
+    config;
     constructor(config = {}) {
         super();
         this.config = config;
