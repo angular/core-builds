@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.9+sha-3b989ac
+ * @license Angular v18.2.9+sha-ddda355
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1072,7 +1072,6 @@ export declare class ApplicationRef {
  * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
  *
  * @publicApi
- * @globalApi ng
  */
 declare function applyChanges(component: {}): void;
 
@@ -4400,7 +4399,6 @@ export declare interface ForwardRefFn {
  *    is no component associated with it.
  *
  * @publicApi
- * @globalApi ng
  */
 declare function getComponent<T>(element: Element): T | null;
 
@@ -4414,7 +4412,6 @@ declare function getComponent<T>(element: Element): T | null;
  *    inside any component.
  *
  * @publicApi
- * @globalApi ng
  */
 declare function getContext<T extends {}>(element: Element): T | null;
 
@@ -4449,7 +4446,6 @@ declare function getDependenciesFromInjectable<T>(injector: Injector, token: Typ
  * @returns metadata of the passed directive or component
  *
  * @publicApi
- * @globalApi ng
  */
 declare function getDirectiveMetadata(directiveOrComponentInstance: any): ɵComponentDebugMetadata | DirectiveDebugMetadata | null;
 
@@ -4461,7 +4457,6 @@ declare function getDirectiveMetadata(directiveOrComponentInstance: any): ɵComp
  * @returns Injector associated with the element, component or directive instance.
  *
  * @publicApi
- * @globalApi ng
  */
 declare function getInjector(elementOrDir: Element | {}): Injector;
 
@@ -4530,7 +4525,6 @@ declare function getInjectorResolutionPath(injector: Injector): Injector[];
  * @returns Array of event listeners on the DOM element.
  *
  * @publicApi
- * @globalApi ng
  */
 declare function getListeners(element: Element): Listener[];
 
@@ -4564,7 +4558,6 @@ export declare function getNgModuleById<T>(id: string): Type<T>;
  *    part of a component view.
  *
  * @publicApi
- * @globalApi ng
  */
 declare function getOwningComponent<T>(elementOrDir: Element | {}): T | null;
 
@@ -4584,7 +4577,6 @@ export declare function getPlatform(): PlatformRef | null;
  * @returns Root components associated with the target object.
  *
  * @publicApi
- * @globalApi ng
  */
 declare function getRootComponents(elementOrDir: Element | {}): {}[];
 
@@ -12867,7 +12859,6 @@ export declare function ɵgetDeferBlocks(lView: LView, deferBlocks: ɵDeferBlock
  * @returns Array of directives associated with the node.
  *
  * @publicApi
- * @globalApi ng
  */
 export declare function ɵgetDirectives(node: Node): {}[];
 
@@ -12880,7 +12871,6 @@ export declare function ɵgetDirectives(node: Node): {}[];
  * @returns Host element of the target.
  *
  * @publicApi
- * @globalApi ng
  */
 export declare function ɵgetHostElement(componentOrDirective: {}): Element;
 

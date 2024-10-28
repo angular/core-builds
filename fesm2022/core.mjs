@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.9+sha-3b989ac
+ * @license Angular v18.2.9+sha-ddda355
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8343,7 +8343,6 @@ function getNearestLContainer(viewOrContainer) {
  *    is no component associated with it.
  *
  * @publicApi
- * @globalApi ng
  */
 function getComponent$1(element) {
     ngDevMode && assertDomElement(element);
@@ -8369,7 +8368,6 @@ function getComponent$1(element) {
  *    inside any component.
  *
  * @publicApi
- * @globalApi ng
  */
 function getContext(element) {
     assertDomElement(element);
@@ -8390,7 +8388,6 @@ function getContext(element) {
  *    part of a component view.
  *
  * @publicApi
- * @globalApi ng
  */
 function getOwningComponent(elementOrDir) {
     const context = getLContext(elementOrDir);
@@ -8412,7 +8409,6 @@ function getOwningComponent(elementOrDir) {
  * @returns Root components associated with the target object.
  *
  * @publicApi
- * @globalApi ng
  */
 function getRootComponents(elementOrDir) {
     const lView = readPatchedLView(elementOrDir);
@@ -8426,7 +8422,6 @@ function getRootComponents(elementOrDir) {
  * @returns Injector associated with the element, component or directive instance.
  *
  * @publicApi
- * @globalApi ng
  */
 function getInjector(elementOrDir) {
     const context = getLContext(elementOrDir);
@@ -8487,7 +8482,6 @@ function getInjectionTokens(element) {
  * @returns Array of directives associated with the node.
  *
  * @publicApi
- * @globalApi ng
  */
 function getDirectives(node) {
     // Skip text nodes because we can't have directives associated with them.
@@ -8520,7 +8514,6 @@ function getDirectives(node) {
  * @returns metadata of the passed directive or component
  *
  * @publicApi
- * @globalApi ng
  */
 function getDirectiveMetadata$1(directiveOrComponentInstance) {
     const { constructor } = directiveOrComponentInstance;
@@ -8578,7 +8571,6 @@ function getLocalRefs(target) {
  * @returns Host element of the target.
  *
  * @publicApi
- * @globalApi ng
  */
 function getHostElement(componentOrDirective) {
     return getLContext(componentOrDirective).native;
@@ -8626,7 +8618,6 @@ function getRenderedText(component) {
  * @returns Array of event listeners on the DOM element.
  *
  * @publicApi
- * @globalApi ng
  */
 function getListeners(element) {
     ngDevMode && assertDomElement(element);
@@ -16949,7 +16940,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.9+sha-3b989ac']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.9+sha-ddda355']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -31043,7 +31034,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.9+sha-3b989ac');
+const VERSION = new Version('18.2.9+sha-ddda355');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.
@@ -31327,7 +31318,6 @@ function canBeHeldWeakly(value) {
  * @param component Component to {@link ChangeDetectorRef#markForCheck mark for check}.
  *
  * @publicApi
- * @globalApi ng
  */
 function applyChanges(component) {
     ngDevMode && assertDefined(component, 'component');
