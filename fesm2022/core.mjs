@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.11+sha-00b79f8
+ * @license Angular v19.0.0-next.11+sha-395cb34
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16843,7 +16843,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.11+sha-00b79f8']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.11+sha-395cb34']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19657,8 +19657,8 @@ const STATE_IS_FROZEN_UNTIL = 2;
 const LOADING_AFTER_CLEANUP_FN = 3;
 const TRIGGER_CLEANUP_FNS = 4;
 const PREFETCH_TRIGGER_CLEANUP_FNS = 5;
-const UNIQUE_SSR_ID = 6;
-const SSR_STATE = 7;
+const SSR_UNIQUE_ID = 6;
+const SSR_BLOCK_STATE = 7;
 const ON_COMPLETE_FNS = 8;
 const HYDRATE_TRIGGER_CLEANUP_FNS = 9;
 /**
@@ -19717,7 +19717,7 @@ function invokeAllTriggerCleanupFns(lDetails, registry) {
     // TODO(incremental-hydration): cleanup functions are invoked in multiple places
     // should we centralize where cleanup functions are invoked to this registry?
     if (registry !== null) {
-        registry.invokeCleanupFns(lDetails[UNIQUE_SSR_ID]);
+        registry.invokeCleanupFns(lDetails[SSR_UNIQUE_ID]);
     }
     invokeTriggerCleanupFns(1 /* TriggerType.Prefetch */, lDetails);
     invokeTriggerCleanupFns(0 /* TriggerType.Regular */, lDetails);
@@ -20650,11 +20650,19 @@ class TimerScheduler {
 }
 
 // TODO(incremental-hydration): refactor this so that it's not used in CSR cases
+/**
+ * The DeferBlockRegistry is used for incremental hydration purposes. It keeps
+ * track of the Defer Blocks that need hydration so we can effectively
+ * navigate up to the top dehydrated defer block and fire appropriate cleanup
+ * functions post hydration.
+ */
 class DeferBlockRegistry {
     constructor() {
         this.registry = new Map();
         this.cleanupFns = new Map();
         // Blocks that are being hydrated.
+        // TODO(incremental-hydration): cleanup task - we currently retain ids post hydration
+        // and need to determine when we can remove them.
         this.hydrating = new Set();
     }
     add(blockId, info) {
@@ -20681,7 +20689,8 @@ class DeferBlockRegistry {
     }
     invokeCleanupFns(blockId) {
         // TODO(incremental-hydration): determine if we can safely remove entries from
-        // the cleanupFns after they've been invoked
+        // the cleanupFns after they've been invoked. Can we reset
+        // `this.cleanupFns.get(blockId)`?
         const fns = this.cleanupFns.get(blockId) ?? [];
         for (let fn of fns) {
             fn();
@@ -20695,7 +20704,7 @@ class DeferBlockRegistry {
     }); }
 }
 
-const BLOCKNAME_ATTRIBUTE = 'ngb';
+const DEFER_BLOCK_SSR_ID_ATTRIBUTE = 'ngb';
 function invokeRegisteredDelegationListeners(event) {
     const handlerFns = event.currentTarget?.__jsaction_fns?.get(event.type);
     if (!handlerFns) {
@@ -20706,7 +20715,9 @@ function invokeRegisteredDelegationListeners(event) {
     }
 }
 function setJSActionAttributes(nativeElement, eventTypes, parentDeferBlockId = null) {
-    if (!eventTypes.length || nativeElement.nodeType !== Node.ELEMENT_NODE) {
+    // jsaction attributes specifically should be applied to elements and not comment nodes.
+    // Comment nodes also have no setAttribute function. So this avoids errors.
+    if (eventTypes.length === 0 || nativeElement.nodeType !== Node.ELEMENT_NODE) {
         return;
     }
     const existingAttr = nativeElement.getAttribute(Attribute$1.JSACTION);
@@ -20721,7 +20732,7 @@ function setJSActionAttributes(nativeElement, eventTypes, parentDeferBlockId = n
     nativeElement.setAttribute(Attribute$1.JSACTION, `${existingAttr ?? ''}${parts}`);
     const blockName = parentDeferBlockId ?? '';
     if (blockName !== '' && parts.length > 0) {
-        nativeElement.setAttribute(BLOCKNAME_ATTRIBUTE, blockName);
+        nativeElement.setAttribute(DEFER_BLOCK_SSR_ID_ATTRIBUTE, blockName);
     }
 }
 const sharedStashFunction = (rEl, eventType, listenerFn) => {
@@ -20733,7 +20744,7 @@ const sharedStashFunction = (rEl, eventType, listenerFn) => {
     el.__jsaction_fns = eventListenerMap;
 };
 const sharedMapFunction = (rEl, jsActionMap) => {
-    let blockName = rEl.getAttribute(BLOCKNAME_ATTRIBUTE) ?? '';
+    let blockName = rEl.getAttribute(DEFER_BLOCK_SSR_ID_ATTRIBUTE) ?? '';
     const el = rEl;
     const blockSet = jsActionMap.get(blockName) ?? new Set();
     if (!blockSet.has(el)) {
@@ -20754,7 +20765,7 @@ function removeListenersFromBlocks(blockNames, injector) {
 }
 const removeListeners = (el) => {
     el.removeAttribute(Attribute$1.JSACTION);
-    el.removeAttribute(BLOCKNAME_ATTRIBUTE);
+    el.removeAttribute(DEFER_BLOCK_SSR_ID_ATTRIBUTE);
     el.__jsaction_fns = undefined;
 };
 const JSACTION_EVENT_CONTRACT = new InjectionToken(ngDevMode ? 'EVENT_CONTRACT_DETAILS' : '', {
@@ -22947,7 +22958,7 @@ function detectChangesInViewIfRequired(lView, notifyErrorHandler, isFirstPass, z
  * If there are any dehydrated `@defer` blocks found along the way,
  * they are also stored and returned from the function (as a list of ids).
  */
-function findFirstKnownParentDeferBlock(deferBlockId, injector) {
+function findFirstHydratedParentDeferBlock(deferBlockId, injector) {
     const deferBlockRegistry = injector.get(DeferBlockRegistry);
     const transferState = injector.get(TransferState);
     const deferBlockParents = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
@@ -22980,7 +22991,7 @@ async function hydrateFromBlockNameImpl(injector, blockName, onTriggerFn, hydrat
     // Make sure we don't hydrate/trigger the same thing multiple times
     if (deferBlockRegistry.hydrating.has(blockName))
         return { deferBlock: null, hydratedBlocks };
-    const { blockId, deferBlock, dehydratedBlocks } = findFirstKnownParentDeferBlock(blockName, injector);
+    const { blockId, deferBlock, dehydratedBlocks } = findFirstHydratedParentDeferBlock(blockName, injector);
     if (deferBlock && blockId) {
         hydratedBlocks.add(blockId);
         deferBlockRegistry.hydrating.add(blockId);
@@ -23065,7 +23076,7 @@ function shouldTriggerWhenOnClient(injector, lDetails, tDetails) {
     if (!isPlatformBrowser(injector)) {
         return false;
     }
-    const isServerRendered = lDetails[SSR_STATE] && lDetails[SSR_STATE] === DeferBlockState.Complete;
+    const isServerRendered = lDetails[SSR_BLOCK_STATE] && lDetails[SSR_BLOCK_STATE] === DeferBlockState.Complete;
     const hasHydrateTriggers = tDetails.hydrateTriggers && tDetails.hydrateTriggers.size > 0;
     if (hasHydrateTriggers && isServerRendered && isIncrementalHydrationEnabled(injector)) {
         return false;
@@ -23165,13 +23176,12 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
     // using hydration annotation info and stores those views on LContainer.
     // In client-only mode, this function is a noop.
     populateDehydratedViewsInLContainer(lContainer, tNode, lView);
-    let ssrState = null;
-    let uniqueId = null;
+    let ssrBlockState = null;
+    let ssrUniqueId = null;
     if (lContainer[DEHYDRATED_VIEWS]?.length > 0) {
-        // TODO(incremental-hydration): this is a hack, we should serialize defer
         const info = lContainer[DEHYDRATED_VIEWS][0].data;
-        uniqueId = info[DEFER_BLOCK_ID] ?? null;
-        ssrState = info[DEFER_BLOCK_STATE$1];
+        ssrUniqueId = info[DEFER_BLOCK_ID] ?? null;
+        ssrBlockState = info[DEFER_BLOCK_STATE$1];
     }
     // Init instance-specific defer details and store it.
     const lDetails = [
@@ -23181,19 +23191,19 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
         null, // LOADING_AFTER_CLEANUP_FN
         null, // TRIGGER_CLEANUP_FNS
         null, // PREFETCH_TRIGGER_CLEANUP_FNS
-        uniqueId, // UNIQUE_ID
-        ssrState, // SSR_STATE
+        ssrUniqueId, // SSR_UNIQUE_ID
+        ssrBlockState, // SSR_BLOCK_STATE
         null, // ON_COMPLETE_FNS
         null, // HYDRATE_TRIGGER_CLEANUP_FNS
     ];
     setLDeferBlockDetails(lView, adjustedIndex, lDetails);
     let registry = null;
-    if (uniqueId !== null) {
+    if (ssrUniqueId !== null) {
         // TODO(incremental-hydration): explore how we can make
         // `DeferBlockRegistry` tree-shakable for client-only cases.
         registry = injector.get(DeferBlockRegistry);
         // Also store this defer block in the registry.
-        registry.add(uniqueId, { lView, tNode, lContainer });
+        registry.add(ssrUniqueId, { lView, tNode, lContainer });
     }
     const cleanupTriggersFn = () => invokeAllTriggerCleanupFns(lDetails, registry);
     // When defer block is triggered - unsubscribe from LView destroy cleanup.
@@ -23287,7 +23297,7 @@ function ɵɵdeferHydrateWhen(rawValue) {
                     // The `when` condition has changed to `true`, trigger defer block loading
                     // if the block is either in initial (nothing is rendered) or a placeholder
                     // state.
-                    incrementallyHydrateFromBlockName(injector, getLDeferBlockDetails(lView, tNode)[UNIQUE_SSR_ID], (deferBlock) => triggerAndWaitForCompletion(deferBlock));
+                    incrementallyHydrateFromBlockName(injector, getLDeferBlockDetails(lView, tNode)[SSR_UNIQUE_ID], (deferBlock) => triggerAndWaitForCompletion(deferBlock));
                 }
             }
             finally {
@@ -23393,7 +23403,7 @@ function ɵɵdeferHydrateOnImmediate() {
         triggerDeferBlock(lView, tNode);
     }
     else {
-        incrementallyHydrateFromBlockName(injector, lDetails[UNIQUE_SSR_ID], (deferBlock) => triggerAndWaitForCompletion(deferBlock));
+        incrementallyHydrateFromBlockName(injector, lDetails[SSR_UNIQUE_ID], (deferBlock) => triggerAndWaitForCompletion(deferBlock));
     }
 }
 /**
@@ -23476,6 +23486,8 @@ function ɵɵdeferHydrateOnHover() {
         // We are on the server and SSR for defer blocks is enabled.
         triggerDeferBlock(lView, tNode);
     }
+    // The actual triggering of hydration on hover is handled by JSAction in
+    // event_replay.ts.
 }
 /**
  * Creates runtime data structures for the `on interaction` deferred trigger.
@@ -23523,6 +23535,8 @@ function ɵɵdeferHydrateOnInteraction() {
         // We are on the server and SSR for defer blocks is enabled.
         triggerDeferBlock(lView, tNode);
     }
+    // The actual triggering of hydration on interaction is handled by JSAction in
+    // event_replay.ts.
 }
 /**
  * Creates runtime data structures for the `on viewport` deferred trigger.
@@ -23571,6 +23585,8 @@ function ɵɵdeferHydrateOnViewport() {
         // We are on the server and SSR for defer blocks is enabled.
         triggerDeferBlock(lView, tNode);
     }
+    // The actual triggering of hydration on viewport happens in incremental.ts,
+    // since these instructions won't exist for dehydrated content.
 }
 /********** Helper functions **********/
 /**
@@ -23623,7 +23639,7 @@ function scheduleDelayedHydrating(scheduleFn, lView, tNode) {
     const injector = lView[INJECTOR];
     if (isPlatformBrowser(injector)) {
         const lDetails = getLDeferBlockDetails(lView, tNode);
-        const cleanupFn = scheduleFn(() => incrementallyHydrateFromBlockName(injector, lDetails[UNIQUE_SSR_ID], (deferBlock) => triggerAndWaitForCompletion(deferBlock)), injector);
+        const cleanupFn = scheduleFn(() => incrementallyHydrateFromBlockName(injector, lDetails[SSR_UNIQUE_ID], (deferBlock) => triggerAndWaitForCompletion(deferBlock)), injector);
         storeTriggerCleanupFn(2 /* TriggerType.Hydrate */, lDetails, cleanupFn);
     }
 }
@@ -23651,7 +23667,7 @@ function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling 
     const lDetails = getLDeferBlockDetails(hostLView, tNode);
     ngDevMode && assertDefined(lDetails, 'Expected a defer block state defined');
     const currentState = lDetails[DEFER_BLOCK_STATE];
-    const ssrState = lDetails[SSR_STATE];
+    const ssrState = lDetails[SSR_BLOCK_STATE];
     if (ssrState !== null && newState < ssrState) {
         return; // trying to render a previous state, exit
     }
@@ -34235,7 +34251,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.11+sha-00b79f8');
+const VERSION = new Version('19.0.0-next.11+sha-395cb34');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38411,7 +38427,7 @@ function invokeListeners(event, currentTarget) {
     }
 }
 function invokeRegisteredReplayListeners(injector, event, currentTarget) {
-    const blockName = (currentTarget && currentTarget.getAttribute(BLOCKNAME_ATTRIBUTE)) ?? '';
+    const blockName = (currentTarget && currentTarget.getAttribute(DEFER_BLOCK_SSR_ID_ATTRIBUTE)) ?? '';
     if (/d\d+/.test(blockName)) {
         hydrateAndInvokeBlockListeners(blockName, injector, event, currentTarget);
     }
@@ -38433,7 +38449,7 @@ async function fetchAndRenderDeferBlock(deferBlock) {
 }
 async function triggerBlockHydration(injector, blockName, onTriggerFn) {
     // grab the list of dehydrated blocks and queue them up
-    const { dehydratedBlocks } = findFirstKnownParentDeferBlock(blockName, injector);
+    const { dehydratedBlocks } = findFirstHydratedParentDeferBlock(blockName, injector);
     for (let block of dehydratedBlocks) {
         hydratingBlocks.add(block);
     }
@@ -38452,7 +38468,7 @@ function replayQueuedBlockEvents(hydratedBlocks, injector) {
     // empty it
     blockEventQueue = [];
     for (let { event, currentTarget } of queue) {
-        const blockName = currentTarget.getAttribute(BLOCKNAME_ATTRIBUTE);
+        const blockName = currentTarget.getAttribute(DEFER_BLOCK_SSR_ID_ATTRIBUTE);
         if (hydratedBlocks.has(blockName)) {
             invokeListeners(event, currentTarget);
         }
@@ -38570,7 +38586,7 @@ function annotateComponentLViewForHydration(lView, context, injector) {
     // Root elements might also be annotated with the `ngSkipHydration` attribute,
     // check if it's present before starting the serialization process.
     if (hostElement && !hostElement.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
-        return annotateHostElementForHydration(hostElement, lView, null, context, injector);
+        return annotateHostElementForHydration(hostElement, lView, null, context);
     }
     return null;
 }
@@ -38594,7 +38610,7 @@ function annotateLContainerForHydration(lContainer, context, injector) {
     const hostElement = unwrapRNode(componentLView[HOST]);
     // Serialize all views within this view container.
     const rootLView = lContainer[PARENT];
-    const rootLViewNghIndex = annotateHostElementForHydration(hostElement, rootLView, null, context, injector);
+    const rootLViewNghIndex = annotateHostElementForHydration(hostElement, rootLView, null, context);
     const renderer = componentLView[RENDERER];
     // For cases when a root component also acts as an anchor node for a ViewContainerRef
     // (for example, when ViewContainerRef is injected in a root component), there is a need
@@ -38685,7 +38701,7 @@ function annotateForHydration(appRef, doc) {
  * @param context the hydration context
  * @returns an array of the `SerializedView` objects
  */
-function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, context, injector) {
+function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, context) {
     const views = [];
     let lastViewAsString = '';
     for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
@@ -38707,7 +38723,7 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                 // `<app-root /><#VIEW1><#VIEW2>...<!--container-->`
                 // The `+1` is to capture the `<app-root />` element.
                 numRootNodes = calcNumRootNodesInLContainer(childLView) + 1;
-                annotateLContainerForHydration(childLView, context, injector);
+                annotateLContainerForHydration(childLView, context, lView[INJECTOR]);
                 const componentLView = unwrapLView(childLView[HOST]);
                 serializedView = {
                     [TEMPLATE_ID]: componentLView[TVIEW].ssrId,
@@ -38757,13 +38773,15 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                             annotateDeferBlockAnchorForHydration(node, deferBlockId);
                         }
                     }
-                    // Add JSAction attributes for root nodes that use some hydration triggers
-                    const actionList = convertHydrateTriggersToJsAction(tDetails.hydrateTriggers);
-                    for (let et of actionList) {
-                        context.eventTypesToReplay.regular.add(et);
+                    else {
+                        ngDevMode && validateNodeExists(node, childLView, tNode);
+                        ngDevMode &&
+                            validateMatchingNode(node, Node.COMMENT_NODE, null, childLView, tNode, true);
+                        annotateDeferBlockAnchorForHydration(node, deferBlockId);
                     }
                     if (!isHydrateNeverBlock) {
-                        annotateDeferBlockRootNodesWithJsAction(actionList, rootNodes, deferBlockId);
+                        // Add JSAction attributes for root nodes that use some hydration triggers
+                        annotateDeferBlockRootNodesWithJsAction(tDetails, rootNodes, deferBlockId, context);
                     }
                     // Use current block id as parent for nested routes.
                     parentDeferBlockId = deferBlockId;
@@ -38772,13 +38790,16 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                     // (not at the view level).
                     serializedView[DEFER_BLOCK_ID] = deferBlockId;
                 }
+                // DEFER_BLOCK_STATE is used for reconciliation in hydration, both regular and incremental.
+                // We need to know which template is rendered when hydrating. So we serialize this state
+                // regardless of hydration type.
                 serializedView[DEFER_BLOCK_STATE$1] = lDetails[DEFER_BLOCK_STATE];
             }
             if (!isHydrateNeverBlock) {
                 // TODO(incremental-hydration): avoid copying of an object here
                 serializedView = {
                     ...serializedView,
-                    ...serializeLView(lContainer[i], parentDeferBlockId, context, injector),
+                    ...serializeLView(lContainer[i], parentDeferBlockId, context),
                 };
             }
         }
@@ -38856,7 +38877,7 @@ function appendDisconnectedNodeIndex(ngh, tNodeOrNoOffsetIndex) {
  * @param context the hydration context
  * @returns the `SerializedView` object containing the data to be added to the host node
  */
-function serializeLView(lView, parentDeferBlockId = null, context, injector) {
+function serializeLView(lView, parentDeferBlockId = null, context) {
     const ngh = {};
     const tView = lView[TVIEW];
     const i18nChildren = getOrComputeI18nChildren(tView, context);
@@ -38963,11 +38984,11 @@ function serializeLView(lView, parentDeferBlockId = null, context, injector) {
                 // This is a component, serialize info about it.
                 const targetNode = unwrapRNode(hostNode);
                 if (!targetNode.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
-                    annotateHostElementForHydration(targetNode, hostNode, parentDeferBlockId, context, injector);
+                    annotateHostElementForHydration(targetNode, hostNode, parentDeferBlockId, context);
                 }
             }
             ngh[CONTAINERS] ??= {};
-            ngh[CONTAINERS][noOffsetIndex] = serializeLContainer(lView[i], tNode, lView, parentDeferBlockId, context, injector);
+            ngh[CONTAINERS][noOffsetIndex] = serializeLContainer(lView[i], tNode, lView, parentDeferBlockId, context);
         }
         else if (Array.isArray(lView[i]) && !isLetDeclaration(tNode)) {
             // This is a component, annotate the host node with an `ngh` attribute.
@@ -38975,7 +38996,7 @@ function serializeLView(lView, parentDeferBlockId = null, context, injector) {
             // we need to exclude them.
             const targetNode = unwrapRNode(lView[i][HOST]);
             if (!targetNode.hasAttribute(SKIP_HYDRATION_ATTR_NAME)) {
-                annotateHostElementForHydration(targetNode, lView[i], parentDeferBlockId, context, injector);
+                annotateHostElementForHydration(targetNode, lView[i], parentDeferBlockId, context);
             }
         }
         else {
@@ -39076,7 +39097,7 @@ function componentUsesShadowDomEncapsulation(lView) {
  * @returns An index of serialized view from the transfer state object
  *          or `null` when a given component can not be serialized.
  */
-function annotateHostElementForHydration(element, lView, parentDeferBlockId, context, injector) {
+function annotateHostElementForHydration(element, lView, parentDeferBlockId, context) {
     const renderer = lView[RENDERER];
     if ((hasI18n(lView) && !isI18nHydrationSupportEnabled()) ||
         componentUsesShadowDomEncapsulation(lView)) {
@@ -39089,7 +39110,7 @@ function annotateHostElementForHydration(element, lView, parentDeferBlockId, con
         return null;
     }
     else {
-        const ngh = serializeLView(lView, parentDeferBlockId, context, injector);
+        const ngh = serializeLView(lView, parentDeferBlockId, context);
         const index = context.serializedViewCollection.add(ngh);
         renderer.setAttribute(element, NGH_ATTR_NAME, index.toString());
         return index;
@@ -39134,7 +39155,18 @@ function isContentProjectedNode(tNode) {
     }
     return false;
 }
-function annotateDeferBlockRootNodesWithJsAction(actionList, rootNodes, parentDeferBlockId) {
+/**
+ * Incremental hydration requires that any defer block root node
+ * with interaction or hover triggers have all of their root nodes
+ * trigger hydration with those events. So we need to make sure all
+ * the root nodes of that block have the proper jsaction attribute
+ * to ensure hydration is triggered, since the content is dehydrated
+ */
+function annotateDeferBlockRootNodesWithJsAction(tDetails, rootNodes, parentDeferBlockId, context) {
+    const actionList = convertHydrateTriggersToJsAction(tDetails.hydrateTriggers);
+    for (let et of actionList) {
+        context.eventTypesToReplay.regular.add(et);
+    }
     if (actionList.length > 0) {
         const elementNodes = rootNodes.filter((rn) => rn.nodeType === Node.ELEMENT_NODE);
         for (let rNode of elementNodes) {
@@ -39536,6 +39568,7 @@ function withI18nSupport() {
 /**
  * Returns a set of providers required to setup support for incremental hydration.
  * Requires hydration to be enabled separately.
+ * Enabling incremental hydration also enables event replay for the entire app.
  *
  * @developerPreview
  */
@@ -39558,9 +39591,10 @@ function withIncrementalHydration() {
             useFactory: () => {
                 if (isPlatformBrowser()) {
                     const injector = inject(Injector);
+                    const doc = getDocument();
                     return () => {
-                        bootstrapIncrementalHydration(getDocument(), injector);
-                        appendDeferBlocksToJSActionMap(getDocument(), injector);
+                        bootstrapIncrementalHydration(doc, injector);
+                        appendDeferBlocksToJSActionMap(doc, injector);
                     };
                 }
                 return () => { }; // noop for the server code
