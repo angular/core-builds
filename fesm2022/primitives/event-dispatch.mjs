@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-0f2f7ec
+ * @license Angular v19.1.0-next.0+sha-db467e1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1066,17 +1066,18 @@ const isIos = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(naviga
  * container is removed from the contract.
  */
 class EventContractContainer {
+    element;
+    /**
+     * Array of event handlers and their corresponding event types that are
+     * installed on this container.
+     *
+     */
+    handlerInfos = [];
     /**
      * @param element The container Element.
      */
     constructor(element) {
         this.element = element;
-        /**
-         * Array of event handlers and their corresponding event types that are
-         * installed on this container.
-         *
-         */
-        this.handlerInfos = [];
     }
     /**
      * Installs the provided installer on the element owned by this container,
@@ -1265,6 +1266,7 @@ function createEventInfo({ eventType, event, targetElement, container, timestamp
  * size.
  */
 class EventInfoWrapper {
+    eventInfo;
     constructor(eventInfo) {
         this.eventInfo = eventInfo;
     }
@@ -1344,12 +1346,13 @@ const REGEXP_SEMICOLON = /\s*;\s*/;
 const DEFAULT_EVENT_TYPE = EventType.CLICK;
 /** Resolves actions for Events. */
 class ActionResolver {
+    a11yClickSupport = false;
+    clickModSupport = true;
+    syntheticMouseEventSupport;
+    updateEventInfoForA11yClick = undefined;
+    preventDefaultForA11yClick = undefined;
+    populateClickOnlyAction = undefined;
     constructor({ syntheticMouseEventSupport = false, clickModSupport = true, } = {}) {
-        this.a11yClickSupport = false;
-        this.clickModSupport = true;
-        this.updateEventInfoForA11yClick = undefined;
-        this.preventDefaultForA11yClick = undefined;
-        this.populateClickOnlyAction = undefined;
         this.syntheticMouseEventSupport = syntheticMouseEventSupport;
         this.clickModSupport = clickModSupport;
     }
@@ -1575,6 +1578,15 @@ var Restriction;
  * jsaction.
  */
 class Dispatcher {
+    dispatchDelegate;
+    // The ActionResolver to use to resolve actions.
+    actionResolver;
+    /** The replayer function to be called when there are queued events. */
+    eventReplayer;
+    /** Whether the event replay is scheduled. */
+    eventReplayScheduled = false;
+    /** The queue of events. */
+    replayEventInfoWrappers = [];
     /**
      * Options are:
      *   - `eventReplayer`: When the event contract dispatches replay events
@@ -1584,10 +1596,6 @@ class Dispatcher {
      */
     constructor(dispatchDelegate, { actionResolver, eventReplayer, } = {}) {
         this.dispatchDelegate = dispatchDelegate;
-        /** Whether the event replay is scheduled. */
-        this.eventReplayScheduled = false;
-        /** The queue of events. */
-        this.replayEventInfoWrappers = [];
         this.actionResolver = actionResolver;
         this.eventReplayer = eventReplayer;
     }
@@ -1695,6 +1703,10 @@ const COMPOSED_PATH_ERROR_MESSAGE = `\`composedPath\` called during event replay
  * `currentTarget`, etc.
  */
 class EventDispatcher {
+    dispatchDelegate;
+    clickModSupport;
+    actionResolver;
+    dispatcher;
     constructor(dispatchDelegate, clickModSupport = true) {
         this.dispatchDelegate = dispatchDelegate;
         this.clickModSupport = clickModSupport;
@@ -1810,6 +1822,7 @@ function registerDispatcher$1(eventContract, dispatcher) {
  * late-loaded EventContract.
  */
 class EarlyEventContract {
+    dataContainer;
     constructor(dataContainer = window, container = window.document.documentElement) {
         this.dataContainer = dataContainer;
         dataContainer._ejsa = createEarlyJsactionData(container);
@@ -1917,30 +1930,31 @@ const MOUSE_SPECIAL_SUPPORT = false;
  * be delay loaded in a generic way.
  */
 class EventContract {
-    static { this.MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT; }
+    static MOUSE_SPECIAL_SUPPORT = MOUSE_SPECIAL_SUPPORT;
+    containerManager;
+    /**
+     * The DOM events which this contract covers. Used to prevent double
+     * registration of event types. The value of the map is the
+     * internally created DOM event handler function that handles the
+     * DOM events. See addEvent().
+     *
+     */
+    eventHandlers = {};
+    browserEventTypeToExtraEventTypes = {};
+    /**
+     * The dispatcher function. Events are passed to this function for
+     * handling once it was set using the registerDispatcher() method. This is
+     * done because the function is passed from another jsbinary, so passing the
+     * instance and invoking the method here would require to leave the method
+     * unobfuscated.
+     */
+    dispatcher = null;
+    /**
+     * The list of suspended `EventInfo` that will be dispatched
+     * as soon as the `Dispatcher` is registered.
+     */
+    queuedEventInfos = [];
     constructor(containerManager) {
-        /**
-         * The DOM events which this contract covers. Used to prevent double
-         * registration of event types. The value of the map is the
-         * internally created DOM event handler function that handles the
-         * DOM events. See addEvent().
-         *
-         */
-        this.eventHandlers = {};
-        this.browserEventTypeToExtraEventTypes = {};
-        /**
-         * The dispatcher function. Events are passed to this function for
-         * handling once it was set using the registerDispatcher() method. This is
-         * done because the function is passed from another jsbinary, so passing the
-         * instance and invoking the method here would require to leave the method
-         * unobfuscated.
-         */
-        this.dispatcher = null;
-        /**
-         * The list of suspended `EventInfo` that will be dispatched
-         * as soon as the `Dispatcher` is registered.
-         */
-        this.queuedEventInfos = [];
         this.containerManager = containerManager;
     }
     handleEvent(eventType, event, container) {

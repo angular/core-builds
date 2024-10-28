@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-0f2f7ec
+ * @license Angular v19.1.0-next.0+sha-db467e1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-d4a34401.js');
+var checker = require('./checker-2451e7c5.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -34,9 +34,31 @@ function _interopNamespace(e) {
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 var p__namespace = /*#__PURE__*/_interopNamespace(p);
 
+class XmlTagDefinition {
+    closedByParent = false;
+    implicitNamespacePrefix = null;
+    isVoid = false;
+    ignoreFirstLf = false;
+    canSelfClose = true;
+    preventNamespaceInheritance = false;
+    requireExtraParent(currentParent) {
+        return false;
+    }
+    isClosedByChild(name) {
+        return false;
+    }
+    getContentType() {
+        return checker.TagContentType.PARSABLE_DATA;
+    }
+}
+const _TAG_DEFINITION = new XmlTagDefinition();
+function getXmlTagDefinition(tagName) {
+    return _TAG_DEFINITION;
+}
+
 class XmlParser extends checker.Parser {
     constructor() {
-        super(checker.getXmlTagDefinition);
+        super(getXmlTagDefinition);
     }
     parse(source, url, options = {}) {
         // Blocks and let declarations aren't supported in an XML context.
@@ -190,9 +212,11 @@ class _WriteVisitor$1 {
 // TODO(vicb): add error management (structure)
 // Extract messages as xml nodes from the xliff file
 class XliffParser {
-    constructor() {
-        this._locale = null;
-    }
+    // using non-null assertions because they're re(set) by parse()
+    _unitMlString;
+    _errors;
+    _msgIdToHtml;
+    _locale = null;
     parse(xliff, url) {
         this._unitMlString = null;
         this._msgIdToHtml = {};
@@ -268,6 +292,8 @@ class XliffParser {
 }
 // Convert ml nodes (xliff syntax) to i18n nodes
 class XmlToI18n$1 {
+    // using non-null assertion because it's re(set) by convert()
+    _errors;
     convert(message, url) {
         const xmlIcu = new XmlParser().parse(message, url, { tokenizeExpansionForms: true });
         this._errors = xmlIcu.errors;
@@ -403,9 +429,7 @@ class Xliff2 extends checker.Serializer {
     }
 }
 class _WriteVisitor {
-    constructor() {
-        this._nextPlaceholderId = 0;
-    }
+    _nextPlaceholderId = 0;
     visitText(text, context) {
         return [new checker.Text$1(text.value)];
     }
@@ -498,9 +522,11 @@ class _WriteVisitor {
 }
 // Extract messages as xml nodes from the xliff file
 class Xliff2Parser {
-    constructor() {
-        this._locale = null;
-    }
+    // using non-null assertions because they're all (re)set by parse()
+    _unitMlString;
+    _errors;
+    _msgIdToHtml;
+    _locale = null;
     parse(xliff, url) {
         this._unitMlString = null;
         this._msgIdToHtml = {};
@@ -581,6 +607,8 @@ class Xliff2Parser {
 }
 // Convert ml nodes (xliff syntax) to i18n nodes
 class XmlToI18n {
+    // using non-null assertion because re(set) by convert()
+    _errors;
     convert(message, url) {
         const xmlIcu = new XmlParser().parse(message, url, { tokenizeExpansionForms: true });
         this._errors = xmlIcu.errors;
@@ -669,13 +697,18 @@ function getTypeForTag(tag) {
  * A container for message extracted from the templates.
  */
 class MessageBundle {
+    _htmlParser;
+    _implicitTags;
+    _implicitAttrs;
+    _locale;
+    _preserveWhitespace;
+    _messages = [];
     constructor(_htmlParser, _implicitTags, _implicitAttrs, _locale = null, _preserveWhitespace = true) {
         this._htmlParser = _htmlParser;
         this._implicitTags = _implicitTags;
         this._implicitAttrs = _implicitAttrs;
         this._locale = _locale;
         this._preserveWhitespace = _preserveWhitespace;
-        this._messages = [];
     }
     updateFromTemplate(source, url, interpolationConfig) {
         const htmlParserResult = this._htmlParser.parse(source, url, {
@@ -930,7 +963,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-0f2f7ec'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db467e1'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -948,7 +981,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-0f2f7ec'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db467e1'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1043,7 +1076,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-0f2f7ec'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db467e1'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1415,10 +1448,7 @@ function compileUsedDependenciesMetadata(meta) {
     });
 }
 class BlockPresenceVisitor extends checker.RecursiveVisitor$1 {
-    constructor() {
-        super(...arguments);
-        this.hasBlocks = false;
-    }
+    hasBlocks = false;
     visitDeferredBlock() {
         this.hasBlocks = true;
     }
@@ -1462,7 +1492,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-0f2f7ec'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db467e1'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1497,7 +1527,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-0f2f7ec'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db467e1'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1548,7 +1578,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-0f2f7ec'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db467e1'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1581,7 +1611,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-0f2f7ec'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db467e1'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1632,7 +1662,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-0f2f7ec'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db467e1'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -1667,14 +1697,15 @@ const CHARS_TO_ESCAPE = /[^a-zA-Z0-9/_]/g;
  * README.md for more details.
  */
 class UnifiedModulesAliasingHost {
+    unifiedModulesHost;
     constructor(unifiedModulesHost) {
         this.unifiedModulesHost = unifiedModulesHost;
-        /**
-         * With a `UnifiedModulesHost`, aliases are chosen automatically without the need to look through
-         * the exports present in a .d.ts file, so we can avoid cluttering the .d.ts files.
-         */
-        this.aliasExportsInDts = false;
     }
+    /**
+     * With a `UnifiedModulesHost`, aliases are chosen automatically without the need to look through
+     * the exports present in a .d.ts file, so we can avoid cluttering the .d.ts files.
+     */
+    aliasExportsInDts = false;
     maybeAliasSymbolAs(ref, context, ngModuleName, isReExport) {
         if (!isReExport) {
             // Aliasing is used with a UnifiedModulesHost to prevent transitive dependencies. Thus,
@@ -1720,16 +1751,17 @@ class UnifiedModulesAliasingHost {
  * more details.
  */
 class PrivateExportAliasingHost {
+    host;
     constructor(host) {
         this.host = host;
-        /**
-         * Under private export aliasing, the `AbsoluteModuleStrategy` used for emitting references will
-         * will select aliased exports that it finds in the .d.ts file for an NgModule's file. Thus,
-         * emitting these exports in .d.ts is a requirement for the `PrivateExportAliasingHost` to
-         * function correctly.
-         */
-        this.aliasExportsInDts = true;
     }
+    /**
+     * Under private export aliasing, the `AbsoluteModuleStrategy` used for emitting references will
+     * will select aliased exports that it finds in the .d.ts file for an NgModule's file. Thus,
+     * emitting these exports in .d.ts is a requirement for the `PrivateExportAliasingHost` to
+     * function correctly.
+     */
+    aliasExportsInDts = true;
     maybeAliasSymbolAs(ref, context, ngModuleName) {
         if (ref.hasOwningModuleGuess) {
             // Skip nodes that already have an associated absolute module specifier, since they can be
@@ -1858,6 +1890,7 @@ const CORE_MODULE = '@angular/core';
  * file instead.
  */
 class R3SymbolsImportRewriter {
+    r3SymbolsPath;
     constructor(r3SymbolsPath) {
         this.r3SymbolsPath = r3SymbolsPath;
     }
@@ -1899,15 +1932,17 @@ const AssumeEager = 'AssumeEager';
  * in favor of using a dynamic import for cases when defer blocks are used.
  */
 class DeferredSymbolTracker {
+    typeChecker;
+    onlyExplicitDeferDependencyImports;
+    imports = new Map();
+    /**
+     * Map of a component class -> all import declarations that bring symbols
+     * used within `@Component.deferredImports` field.
+     */
+    explicitlyDeferredImports = new Map();
     constructor(typeChecker, onlyExplicitDeferDependencyImports) {
         this.typeChecker = typeChecker;
         this.onlyExplicitDeferDependencyImports = onlyExplicitDeferDependencyImports;
-        this.imports = new Map();
-        /**
-         * Map of a component class -> all import declarations that bring symbols
-         * used within `@Component.deferredImports` field.
-         */
-        this.explicitlyDeferredImports = new Map();
     }
     /**
      * Given an import declaration node, extract the names of all imported symbols
@@ -2086,10 +2121,8 @@ class DeferredSymbolTracker {
  * type checker may be necessary, depending on the context. Also does not track dynamic imports.
  */
 class ImportedSymbolsTracker {
-    constructor() {
-        this.fileToNamedImports = new WeakMap();
-        this.fileToNamespaceImports = new WeakMap();
-    }
+    fileToNamedImports = new WeakMap();
+    fileToNamespaceImports = new WeakMap();
     /**
      * Checks if an identifier is a potential reference to a specific named import within the same
      * file.
@@ -2205,12 +2238,13 @@ class ImportedSymbolsTracker {
  *
  */
 class LocalCompilationExtraImportsTracker {
+    typeChecker;
+    localImportsMap = new Map();
+    globalImportsSet = new Set();
+    /** Names of the files marked for extra import generation. */
+    markedFilesSet = new Set();
     constructor(typeChecker) {
         this.typeChecker = typeChecker;
-        this.localImportsMap = new Map();
-        this.globalImportsSet = new Set();
-        /** Names of the files marked for extra import generation. */
-        this.markedFilesSet = new Set();
     }
     /**
      * Marks the source file for extra imports generation.
@@ -2285,6 +2319,10 @@ function removeQuotations(s) {
  * definitions).
  */
 class ModuleResolver {
+    program;
+    compilerOptions;
+    host;
+    moduleResolutionCache;
     constructor(program, compilerOptions, host, moduleResolutionCache) {
         this.program = program;
         this.compilerOptions = compilerOptions;
@@ -2494,6 +2532,14 @@ function createUnsuitableInjectionTokenError(clazz, error) {
  * property name, or mapping from a specific class property to its binding property name.
  */
 class ClassPropertyMapping {
+    /**
+     * Mapping from class property names to the single `InputOrOutput` for that class property.
+     */
+    forwardMap;
+    /**
+     * Mapping from property names to one or more `InputOrOutput`s which share that name.
+     */
+    reverseMap;
     constructor(forwardMap) {
         this.forwardMap = forwardMap;
         this.reverseMap = reverseMapFromForwardMap(forwardMap);
@@ -2623,6 +2669,8 @@ function reverseMapFromForwardMap(forwardMap) {
  * from an upstream compilation already.
  */
 class DtsMetadataReader {
+    checker;
+    reflector;
     constructor(checker, reflector) {
         this.checker = checker;
         this.reflector = reflector;
@@ -2962,11 +3010,9 @@ function flattenInheritedDirectiveMetadata(reader, dir) {
  * unit, which supports both reading and registering.
  */
 class LocalMetadataRegistry {
-    constructor() {
-        this.directives = new Map();
-        this.ngModules = new Map();
-        this.pipes = new Map();
-    }
+    directives = new Map();
+    ngModules = new Map();
+    pipes = new Map();
     getDirectiveMetadata(ref) {
         return this.directives.has(ref.node) ? this.directives.get(ref.node) : null;
     }
@@ -3001,6 +3047,7 @@ class LocalMetadataRegistry {
  * instances.
  */
 class CompoundMetadataRegistry {
+    registries;
     constructor(registries) {
         this.registries = registries;
     }
@@ -3029,12 +3076,10 @@ class CompoundMetadataRegistry {
  * assistance.
  */
 class ResourceRegistry {
-    constructor() {
-        this.externalTemplateToComponentsMap = new Map();
-        this.componentToTemplateMap = new Map();
-        this.componentToStylesMap = new Map();
-        this.externalStyleToComponentsMap = new Map();
-    }
+    externalTemplateToComponentsMap = new Map();
+    componentToTemplateMap = new Map();
+    componentToStylesMap = new Map();
+    externalStyleToComponentsMap = new Map();
     getComponentsWithTemplate(template) {
         if (!this.externalTemplateToComponentsMap.has(template)) {
             return new Set();
@@ -3097,14 +3142,15 @@ class ResourceRegistry {
  * the NgModule & standalone import graph.
  */
 class ExportedProviderStatusResolver {
+    metaReader;
+    /**
+     * `ClassDeclaration`s that we are in the process of determining the provider status for.
+     *
+     * This is used to detect cycles in the import graph and avoid getting stuck in them.
+     */
+    calculating = new Set();
     constructor(metaReader) {
         this.metaReader = metaReader;
-        /**
-         * `ClassDeclaration`s that we are in the process of determining the provider status for.
-         *
-         * This is used to detect cycles in the import graph and avoid getting stuck in them.
-         */
-        this.calculating = new Set();
     }
     /**
      * Determines whether `ref` may or may not export providers to NgModules which import it.
@@ -3175,9 +3221,10 @@ class ExportedProviderStatusResolver {
 const EMPTY_ARRAY$1 = [];
 /** Resolves the host directives of a directive to a flat array of matches. */
 class HostDirectivesResolver {
+    metaReader;
+    cache = new Map();
     constructor(metaReader) {
         this.metaReader = metaReader;
-        this.cache = new Map();
     }
     /** Resolves all of the host directives that apply to a directive. */
     resolve(metadata) {
@@ -3321,9 +3368,10 @@ function traceDynamicValue(node, value) {
     return value.accept(new TraceDynamicValueVisitor(node));
 }
 class TraceDynamicValueVisitor {
+    node;
+    currentContainerNode = null;
     constructor(node) {
         this.node = node;
-        this.currentContainerNode = null;
     }
     visitDynamicInput(value) {
         const trace = value.reason.accept(this);
@@ -3421,6 +3469,9 @@ function getContainerNode(node) {
 }
 
 class PartialEvaluator {
+    host;
+    checker;
+    dependencyTracker;
     constructor(host, checker, dependencyTracker) {
         this.host = host;
         this.checker = checker;
@@ -3475,6 +3526,12 @@ function timeSinceInMicros(mark) {
  * A `PerfRecorder` that actively tracks performance statistics.
  */
 class ActivePerfRecorder {
+    zeroTime;
+    counters;
+    phaseTime;
+    bytes;
+    currentPhase = checker.PerfPhase.Unaccounted;
+    currentPhaseEntered;
     /**
      * Creates an `ActivePerfRecorder` with its zero point set to the current time.
      */
@@ -3483,7 +3540,6 @@ class ActivePerfRecorder {
     }
     constructor(zeroTime) {
         this.zeroTime = zeroTime;
-        this.currentPhase = checker.PerfPhase.Unaccounted;
         this.currentPhaseEntered = this.zeroTime;
         this.counters = Array(checker.PerfEvent.LAST).fill(0);
         this.phaseTime = Array(checker.PerfPhase.LAST).fill(0);
@@ -3558,6 +3614,7 @@ class ActivePerfRecorder {
  * the same `NgCompiler` for a new compilation.
  */
 class DelegatingPerfRecorder {
+    target;
     constructor(target) {
         this.target = target;
     }
@@ -3598,6 +3655,32 @@ class DelegatingPerfRecorder {
  * class (like adding fields or type declarations).
  */
 class TraitCompiler {
+    handlers;
+    reflector;
+    perf;
+    incrementalBuild;
+    compileNonExportedClasses;
+    compilationMode;
+    dtsTransforms;
+    semanticDepGraphUpdater;
+    sourceFileTypeIdentifier;
+    /**
+     * Maps class declarations to their `ClassRecord`, which tracks the Ivy traits being applied to
+     * those classes.
+     */
+    classes = new Map();
+    /**
+     * Maps source files to any class declaration(s) within them which have been discovered to contain
+     * Ivy traits.
+     */
+    fileToClasses = new Map();
+    /**
+     * Tracks which source files have been analyzed but did not contain any traits. This set allows
+     * the compiler to skip analyzing these files in an incremental rebuild.
+     */
+    filesWithoutTraits = new Set();
+    reexportMap = new Map();
+    handlersByName = new Map();
     constructor(handlers, reflector, perf, incrementalBuild, compileNonExportedClasses, compilationMode, dtsTransforms, semanticDepGraphUpdater, sourceFileTypeIdentifier) {
         this.handlers = handlers;
         this.reflector = reflector;
@@ -3608,23 +3691,6 @@ class TraitCompiler {
         this.dtsTransforms = dtsTransforms;
         this.semanticDepGraphUpdater = semanticDepGraphUpdater;
         this.sourceFileTypeIdentifier = sourceFileTypeIdentifier;
-        /**
-         * Maps class declarations to their `ClassRecord`, which tracks the Ivy traits being applied to
-         * those classes.
-         */
-        this.classes = new Map();
-        /**
-         * Maps source files to any class declaration(s) within them which have been discovered to contain
-         * Ivy traits.
-         */
-        this.fileToClasses = new Map();
-        /**
-         * Tracks which source files have been analyzed but did not contain any traits. This set allows
-         * the compiler to skip analyzing these files in an incremental rebuild.
-         */
-        this.filesWithoutTraits = new Set();
-        this.reexportMap = new Map();
-        this.handlersByName = new Map();
         for (const handler of handlers) {
             this.handlersByName.set(handler.name, handler);
         }
@@ -4189,9 +4255,7 @@ function containsErrors(diagnostics) {
  * have their declaration file transformed.
  */
 class DtsTransformRegistry {
-    constructor() {
-        this.ivyDeclarationTransforms = new Map();
-    }
+    ivyDeclarationTransforms = new Map();
     getIvyDeclarationTransform(sf) {
         if (!this.ivyDeclarationTransforms.has(sf)) {
             this.ivyDeclarationTransforms.set(sf, new IvyDeclarationDtsTransform());
@@ -4239,6 +4303,10 @@ function declarationTransformFactory(transformRegistry, reflector, refEmitter, i
  * Processes .d.ts file text and adds static field declarations, with types.
  */
 class DtsTransformer {
+    ctx;
+    reflector;
+    refEmitter;
+    importRewriter;
     constructor(ctx, reflector, refEmitter, importRewriter) {
         this.ctx = ctx;
         this.reflector = reflector;
@@ -4320,9 +4388,7 @@ class DtsTransformer {
     }
 }
 class IvyDeclarationDtsTransform {
-    constructor() {
-        this.declarationFields = new Map();
-    }
+    declarationFields = new Map();
     addFields(decl, fields) {
         this.declarationFields.set(decl, fields);
     }
@@ -4368,16 +4434,14 @@ function visit(node, visitor, context) {
  * of other nodes before them.
  */
 class Visitor {
-    constructor() {
-        /**
-         * Maps statements to an array of statements that should be inserted before them.
-         */
-        this._before = new Map();
-        /**
-         * Maps statements to an array of statements that should be inserted after them.
-         */
-        this._after = new Map();
-    }
+    /**
+     * Maps statements to an array of statements that should be inserted before them.
+     */
+    _before = new Map();
+    /**
+     * Maps statements to an array of statements that should be inserted after them.
+     */
+    _after = new Map();
     _visitListEntryNode(node, visitor) {
         const result = visitor(node);
         if (result.before !== undefined) {
@@ -4463,12 +4527,14 @@ function ivyTransformFactory(compilation, reflector, importRewriter, defaultImpo
  * does NOT perform any TS transformations.
  */
 class IvyCompilationVisitor extends Visitor {
+    compilation;
+    constantPool;
+    classCompilationMap = new Map();
+    deferrableImports = new Set();
     constructor(compilation, constantPool) {
         super();
         this.compilation = compilation;
         this.constantPool = constantPool;
-        this.classCompilationMap = new Map();
-        this.deferrableImports = new Set();
     }
     visitClassDeclaration(node) {
         // Determine if this class has an Ivy field that needs to be added, and compile the field
@@ -4493,6 +4559,14 @@ class IvyCompilationVisitor extends Visitor {
  * compilation results (provided as an argument).
  */
 class IvyTransformationVisitor extends Visitor {
+    compilation;
+    classCompilationMap;
+    reflector;
+    importManager;
+    recordWrappedNodeExpr;
+    isClosureCompilerEnabled;
+    isCore;
+    deferrableImports;
     constructor(compilation, classCompilationMap, reflector, importManager, recordWrappedNodeExpr, isClosureCompilerEnabled, isCore, deferrableImports) {
         super();
         this.compilation = compilation;
@@ -5150,10 +5224,12 @@ function compileDeclareFactory(metadata) {
  * injectables, directives, pipes).
  */
 class InjectableClassRegistry {
+    host;
+    isCore;
+    classes = new Map();
     constructor(host, isCore) {
         this.host = host;
         this.isCore = isCore;
-        this.classes = new Map();
     }
     registerInjectable(declaration, meta) {
         this.classes.set(declaration, meta);
@@ -5403,9 +5479,7 @@ function compileInputTransformFields(inputs) {
  * marked for JIT compilation and are skipping compilation by trait handlers.
  */
 class JitDeclarationRegistry {
-    constructor() {
-        this.jitDeclarations = new Set();
-    }
+    jitDeclarations = new Set();
 }
 
 /**
@@ -5415,6 +5489,21 @@ class JitDeclarationRegistry {
  * from the prior compilation.
  */
 class SemanticSymbol {
+    decl;
+    /**
+     * The path of the file that declares this symbol.
+     */
+    path;
+    /**
+     * The identifier of this symbol, or null if no identifier could be determined. It should
+     * uniquely identify the symbol relative to `file`. This is typically just the name of a
+     * top-level class declaration, as that uniquely identifies the class within the file.
+     *
+     * If the identifier is null, then this symbol cannot be recognized across rebuilds. In that
+     * case, the symbol is always assumed to have semantically changed to guarantee a proper
+     * rebuild.
+     */
+    identifier;
     constructor(
     /**
      * The declaration for this symbol.
@@ -5453,14 +5542,12 @@ class OpaqueSymbol extends SemanticSymbol {
  * The semantic dependency graph of a single compilation.
  */
 class SemanticDepGraph {
-    constructor() {
-        this.files = new Map();
-        // Note: the explicit type annotation is used to work around a CI failure on Windows:
-        // error TS2742: The inferred type of 'symbolByDecl' cannot be named without a reference to
-        // '../../../../../../../external/npm/node_modules/typescript/lib/typescript'. This is likely
-        // not portable. A type annotation is necessary.
-        this.symbolByDecl = new Map();
-    }
+    files = new Map();
+    // Note: the explicit type annotation is used to work around a CI failure on Windows:
+    // error TS2742: The inferred type of 'symbolByDecl' cannot be named without a reference to
+    // '../../../../../../../external/npm/node_modules/typescript/lib/typescript'. This is likely
+    // not portable. A type annotation is necessary.
+    symbolByDecl = new Map();
     /**
      * Registers a symbol in the graph. The symbol is given a unique identifier if possible, such that
      * its equivalent symbol can be obtained from a prior graph even if its declaration node has
@@ -5527,6 +5614,13 @@ class SemanticDepGraph {
  * on which files have been affected.
  */
 class SemanticDepGraphUpdater {
+    priorGraph;
+    newGraph = new SemanticDepGraph();
+    /**
+     * Contains opaque symbols that were created for declarations for which there was no symbol
+     * registered, which happens for e.g. external declarations.
+     */
+    opaqueSymbols = new Map();
     constructor(
     /**
      * The semantic dependency graph of the most recently succeeded compilation, or null if this
@@ -5534,12 +5628,6 @@ class SemanticDepGraphUpdater {
      */
     priorGraph) {
         this.priorGraph = priorGraph;
-        this.newGraph = new SemanticDepGraph();
-        /**
-         * Contains opaque symbols that were created for declarations for which there was no symbol
-         * registered, which happens for e.g. external declarations.
-         */
-        this.opaqueSymbols = new Map();
     }
     /**
      * Registers the symbol in the new graph that is being created.
@@ -5777,6 +5865,7 @@ function isTypeParameterEqual(a, b) {
  * registry and from the incremental state).
  */
 class CompoundComponentScopeReader {
+    readers;
     constructor(readers) {
         this.readers = readers;
     }
@@ -5808,16 +5897,18 @@ class CompoundComponentScopeReader {
  * fields on directives, components, pipes, and NgModules.
  */
 class MetadataDtsModuleScopeResolver {
+    dtsMetaReader;
+    aliasingHost;
+    /**
+     * Cache which holds fully resolved scopes for NgModule classes from .d.ts files.
+     */
+    cache = new Map();
     /**
      * @param dtsMetaReader a `MetadataReader` which can read metadata from `.d.ts` files.
      */
     constructor(dtsMetaReader, aliasingHost) {
         this.dtsMetaReader = dtsMetaReader;
         this.aliasingHost = aliasingHost;
-        /**
-         * Cache which holds fully resolved scopes for NgModule classes from .d.ts files.
-         */
-        this.cache = new Map();
     }
     /**
      * Resolve a `Reference`'d NgModule from a .d.ts file and produce a transitive `ExportScope`
@@ -5973,54 +6064,59 @@ const IN_PROGRESS_RESOLUTION = {};
  * semantics are violated.
  */
 class LocalModuleScopeRegistry {
+    localReader;
+    fullReader;
+    dependencyScopeReader;
+    refEmitter;
+    aliasingHost;
+    /**
+     * Tracks whether the registry has been asked to produce scopes for a module or component. Once
+     * this is true, the registry cannot accept registrations of new directives/pipes/modules as it
+     * would invalidate the cached scope data.
+     */
+    sealed = false;
+    /**
+     * A map of components from the current compilation unit to the NgModule which declared them.
+     *
+     * As components and directives are not distinguished at the NgModule level, this map may also
+     * contain directives. This doesn't cause any problems but isn't useful as there is no concept of
+     * a directive's compilation scope.
+     */
+    declarationToModule = new Map();
+    /**
+     * This maps from the directive/pipe class to a map of data for each NgModule that declares the
+     * directive/pipe. This data is needed to produce an error for the given class.
+     */
+    duplicateDeclarations = new Map();
+    moduleToRef = new Map();
+    /**
+     * A cache of calculated `LocalModuleScope`s for each NgModule declared in the current program.
+  
+     */
+    cache = new Map();
+    /**
+     * Tracks the `RemoteScope` for components requiring "remote scoping".
+     *
+     * Remote scoping is when the set of directives which apply to a given component is set in the
+     * NgModule's file instead of directly on the component def (which is sometimes needed to get
+     * around cyclic import issues). This is not used in calculation of `LocalModuleScope`s, but is
+     * tracked here for convenience.
+     */
+    remoteScoping = new Map();
+    /**
+     * Tracks errors accumulated in the processing of scopes for each module declaration.
+     */
+    scopeErrors = new Map();
+    /**
+     * Tracks which NgModules have directives/pipes that are declared in more than one module.
+     */
+    modulesWithStructuralErrors = new Set();
     constructor(localReader, fullReader, dependencyScopeReader, refEmitter, aliasingHost) {
         this.localReader = localReader;
         this.fullReader = fullReader;
         this.dependencyScopeReader = dependencyScopeReader;
         this.refEmitter = refEmitter;
         this.aliasingHost = aliasingHost;
-        /**
-         * Tracks whether the registry has been asked to produce scopes for a module or component. Once
-         * this is true, the registry cannot accept registrations of new directives/pipes/modules as it
-         * would invalidate the cached scope data.
-         */
-        this.sealed = false;
-        /**
-         * A map of components from the current compilation unit to the NgModule which declared them.
-         *
-         * As components and directives are not distinguished at the NgModule level, this map may also
-         * contain directives. This doesn't cause any problems but isn't useful as there is no concept of
-         * a directive's compilation scope.
-         */
-        this.declarationToModule = new Map();
-        /**
-         * This maps from the directive/pipe class to a map of data for each NgModule that declares the
-         * directive/pipe. This data is needed to produce an error for the given class.
-         */
-        this.duplicateDeclarations = new Map();
-        this.moduleToRef = new Map();
-        /**
-         * A cache of calculated `LocalModuleScope`s for each NgModule declared in the current program.
-      
-         */
-        this.cache = new Map();
-        /**
-         * Tracks the `RemoteScope` for components requiring "remote scoping".
-         *
-         * Remote scoping is when the set of directives which apply to a given component is set in the
-         * NgModule's file instead of directly on the component def (which is sometimes needed to get
-         * around cyclic import issues). This is not used in calculation of `LocalModuleScope`s, but is
-         * tracked here for convenience.
-         */
-        this.remoteScoping = new Map();
-        /**
-         * Tracks errors accumulated in the processing of scopes for each module declaration.
-         */
-        this.scopeErrors = new Map();
-        /**
-         * Tracks which NgModules have directives/pipes that are declared in more than one module.
-         */
-        this.modulesWithStructuralErrors = new Set();
     }
     /**
      * Add an NgModule's data to the registry.
@@ -6546,19 +6642,22 @@ function reexportCollision(module, refA, refB) {
  * Computes scope information to be used in template type checking.
  */
 class TypeCheckScopeRegistry {
+    scopeReader;
+    metaReader;
+    hostDirectivesResolver;
+    /**
+     * Cache of flattened directive metadata. Because flattened metadata is scope-invariant it's
+     * cached individually, such that all scopes refer to the same flattened metadata.
+     */
+    flattenedDirectiveMetaCache = new Map();
+    /**
+     * Cache of the computed type check scope per NgModule declaration.
+     */
+    scopeCache = new Map();
     constructor(scopeReader, metaReader, hostDirectivesResolver) {
         this.scopeReader = scopeReader;
         this.metaReader = metaReader;
         this.hostDirectivesResolver = hostDirectivesResolver;
-        /**
-         * Cache of flattened directive metadata. Because flattened metadata is scope-invariant it's
-         * cached individually, such that all scopes refer to the same flattened metadata.
-         */
-        this.flattenedDirectiveMetaCache = new Map();
-        /**
-         * Cache of the computed type check scope per NgModule declaration.
-         */
-        this.scopeCache = new Map();
     }
     /**
      * Computes the type-check scope information for the component declaration. If the NgModule
@@ -7642,6 +7741,13 @@ function toR3InputMetadata(mapping) {
  * from this symbol.
  */
 class DirectiveSymbol extends SemanticSymbol {
+    selector;
+    inputs;
+    outputs;
+    exportAs;
+    typeCheckMeta;
+    typeParameters;
+    baseClass = null;
     constructor(decl, selector, inputs, outputs, exportAs, typeCheckMeta, typeParameters) {
         super(decl);
         this.selector = selector;
@@ -7650,7 +7756,6 @@ class DirectiveSymbol extends SemanticSymbol {
         this.exportAs = exportAs;
         this.typeCheckMeta = typeCheckMeta;
         this.typeParameters = typeParameters;
-        this.baseClass = null;
     }
     isPublicApiAffected(previousSymbol) {
         // Note: since components and directives have exactly the same items contributing to their
@@ -7769,6 +7874,24 @@ const LIFECYCLE_HOOKS = new Set([
     'ngAfterContentChecked',
 ]);
 class DirectiveDecoratorHandler {
+    reflector;
+    evaluator;
+    metaRegistry;
+    scopeRegistry;
+    metaReader;
+    injectableRegistry;
+    refEmitter;
+    referencesRegistry;
+    isCore;
+    strictCtorDeps;
+    semanticDepGraphUpdater;
+    annotateForClosureCompiler;
+    perf;
+    importTracker;
+    includeClassMetadata;
+    compilationMode;
+    jitDeclarationRegistry;
+    strictStandalone;
     constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, perf, importTracker, includeClassMetadata, compilationMode, jitDeclarationRegistry, strictStandalone) {
         this.reflector = reflector;
         this.evaluator = evaluator;
@@ -7788,9 +7911,9 @@ class DirectiveDecoratorHandler {
         this.compilationMode = compilationMode;
         this.jitDeclarationRegistry = jitDeclarationRegistry;
         this.strictStandalone = strictStandalone;
-        this.precedence = checker.HandlerPrecedence.PRIMARY;
-        this.name = 'DirectiveDecoratorHandler';
     }
+    precedence = checker.HandlerPrecedence.PRIMARY;
+    name = 'DirectiveDecoratorHandler';
     detect(node, decorators) {
         // If a class is undecorated but uses Angular features, we detect it as an
         // abstract directive. This is an unsupported pattern as of v10, but we want
@@ -8084,20 +8207,21 @@ function isResolvedModuleWithProviders(sv) {
  * Represents an Angular NgModule.
  */
 class NgModuleSymbol extends SemanticSymbol {
+    hasProviders;
+    remotelyScopedComponents = [];
+    /**
+     * `SemanticSymbol`s of the transitive imports of this NgModule which came from imported
+     * standalone components.
+     *
+     * Standalone components are excluded/included in the `InjectorDef` emit output of the NgModule
+     * based on whether the compiler can prove that their transitive imports may contain exported
+     * providers, so a change in this set of symbols may affect the compilation output of this
+     * NgModule.
+     */
+    transitiveImportsFromStandaloneComponents = new Set();
     constructor(decl, hasProviders) {
         super(decl);
         this.hasProviders = hasProviders;
-        this.remotelyScopedComponents = [];
-        /**
-         * `SemanticSymbol`s of the transitive imports of this NgModule which came from imported
-         * standalone components.
-         *
-         * Standalone components are excluded/included in the `InjectorDef` emit output of the NgModule
-         * based on whether the compiler can prove that their transitive imports may contain exported
-         * providers, so a change in this set of symbols may affect the compilation output of this
-         * NgModule.
-         */
-        this.transitiveImportsFromStandaloneComponents = new Set();
     }
     isPublicApiAffected(previousSymbol) {
         if (!(previousSymbol instanceof NgModuleSymbol)) {
@@ -8172,6 +8296,25 @@ class NgModuleSymbol extends SemanticSymbol {
  * Compiles @NgModule annotations to ngModuleDef fields.
  */
 class NgModuleDecoratorHandler {
+    reflector;
+    evaluator;
+    metaReader;
+    metaRegistry;
+    scopeRegistry;
+    referencesRegistry;
+    exportedProviderStatusResolver;
+    semanticDepGraphUpdater;
+    isCore;
+    refEmitter;
+    annotateForClosureCompiler;
+    onlyPublishPublicTypings;
+    injectableRegistry;
+    perf;
+    includeClassMetadata;
+    includeSelectorScope;
+    compilationMode;
+    localCompilationExtraImportsTracker;
+    jitDeclarationRegistry;
     constructor(reflector, evaluator, metaReader, metaRegistry, scopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, annotateForClosureCompiler, onlyPublishPublicTypings, injectableRegistry, perf, includeClassMetadata, includeSelectorScope, compilationMode, localCompilationExtraImportsTracker, jitDeclarationRegistry) {
         this.reflector = reflector;
         this.evaluator = evaluator;
@@ -8192,9 +8335,9 @@ class NgModuleDecoratorHandler {
         this.compilationMode = compilationMode;
         this.localCompilationExtraImportsTracker = localCompilationExtraImportsTracker;
         this.jitDeclarationRegistry = jitDeclarationRegistry;
-        this.precedence = checker.HandlerPrecedence.PRIMARY;
-        this.name = 'NgModuleDecoratorHandler';
     }
+    precedence = checker.HandlerPrecedence.PRIMARY;
+    name = 'NgModuleDecoratorHandler';
     detect(node, decorators) {
         if (!decorators) {
             return undefined;
@@ -9295,12 +9438,9 @@ function _extractTemplateStyleUrls(template) {
  * Represents an Angular component.
  */
 class ComponentSymbol extends DirectiveSymbol {
-    constructor() {
-        super(...arguments);
-        this.usedDirectives = [];
-        this.usedPipes = [];
-        this.isRemotelyScoped = false;
-    }
+    usedDirectives = [];
+    usedPipes = [];
+    isRemotelyScoped = false;
     isEmitAffected(previousSymbol, publicApiAffected) {
         if (!(previousSymbol instanceof ComponentSymbol)) {
             return true;
@@ -9475,39 +9615,47 @@ function makeShimFileName(fileName, suffix) {
  * (which already may contain shim files and thus have a different creation flow).
  */
 class ShimAdapter {
+    delegate;
+    /**
+     * A map of shim file names to the `ts.SourceFile` generated for those shims.
+     */
+    shims = new Map();
+    /**
+     * A map of shim file names to existing shims which were part of a previous iteration of this
+     * program.
+     *
+     * Not all of these shims will be inherited into this program.
+     */
+    priorShims = new Map();
+    /**
+     * File names which are already known to not be shims.
+     *
+     * This allows for short-circuit returns without the expense of running regular expressions
+     * against the filename repeatedly.
+     */
+    notShims = new Set();
+    /**
+     * The shim generators supported by this adapter as well as extra precalculated data facilitating
+     * their use.
+     */
+    generators = [];
+    /**
+     * A `Set` of shim `ts.SourceFile`s which should not be emitted.
+     */
+    ignoreForEmit = new Set();
+    /**
+     * A list of extra filenames which should be considered inputs to program creation.
+     *
+     * This includes any top-level shims generated for the program, as well as per-file shim names for
+     * those files which are included in the root files of the program.
+     */
+    extraInputFiles;
+    /**
+     * Extension prefixes of all installed per-file shims.
+     */
+    extensionPrefixes = [];
     constructor(delegate, tsRootFiles, topLevelGenerators, perFileGenerators, oldProgram) {
         this.delegate = delegate;
-        /**
-         * A map of shim file names to the `ts.SourceFile` generated for those shims.
-         */
-        this.shims = new Map();
-        /**
-         * A map of shim file names to existing shims which were part of a previous iteration of this
-         * program.
-         *
-         * Not all of these shims will be inherited into this program.
-         */
-        this.priorShims = new Map();
-        /**
-         * File names which are already known to not be shims.
-         *
-         * This allows for short-circuit returns without the expense of running regular expressions
-         * against the filename repeatedly.
-         */
-        this.notShims = new Set();
-        /**
-         * The shim generators supported by this adapter as well as extra precalculated data facilitating
-         * their use.
-         */
-        this.generators = [];
-        /**
-         * A `Set` of shim `ts.SourceFile`s which should not be emitted.
-         */
-        this.ignoreForEmit = new Set();
-        /**
-         * Extension prefixes of all installed per-file shims.
-         */
-        this.extensionPrefixes = [];
         // Initialize `this.generators` with a regex that matches each generator's paths.
         for (const gen of perFileGenerators) {
             // This regex matches paths for shims from this generator. The first (and only) capture group
@@ -9645,17 +9793,18 @@ class ShimAdapter {
  * `ShimReferenceTagger`s are intended to operate during program creation only.
  */
 class ShimReferenceTagger {
+    suffixes;
+    /**
+     * Tracks which original files have been processed and had shims generated if necessary.
+     *
+     * This is used to avoid generating shims twice for the same file.
+     */
+    tagged = new Set();
+    /**
+     * Whether shim tagging is currently being performed.
+     */
+    enabled = true;
     constructor(shimExtensions) {
-        /**
-         * Tracks which original files have been processed and had shims generated if necessary.
-         *
-         * This is used to avoid generating shims twice for the same file.
-         */
-        this.tagged = new Set();
-        /**
-         * Whether shim tagging is currently being performed.
-         */
-        this.enabled = true;
         this.suffixes = shimExtensions.map((extension) => `.${extension}.ts`);
     }
     /**
@@ -9705,6 +9854,30 @@ class ShimReferenceTagger {
  * generated for this class.
  */
 class DelegatingCompilerHost$1 {
+    delegate;
+    createHash;
+    directoryExists;
+    getCancellationToken;
+    getCanonicalFileName;
+    getCurrentDirectory;
+    getDefaultLibFileName;
+    getDefaultLibLocation;
+    getDirectories;
+    getEnvironmentVariable;
+    getNewLine;
+    getParsedCommandLine;
+    getSourceFileByPath;
+    readDirectory;
+    readFile;
+    realpath;
+    resolveModuleNames;
+    resolveTypeReferenceDirectives;
+    trace;
+    useCaseSensitiveFileNames;
+    getModuleResolutionCache;
+    hasInvalidatedResolutions;
+    resolveModuleNameLiterals;
+    resolveTypeReferenceDirectiveReferences;
     // jsDocParsingMode is not a method like the other elements above
     // TODO: ignore usage can be dropped once 5.2 support is dropped
     get jsDocParsingMode() {
@@ -9753,6 +9926,23 @@ class DelegatingCompilerHost$1 {
  * A `ts.CompilerHost` which augments source files.
  */
 class UpdatedProgramHost extends DelegatingCompilerHost$1 {
+    originalProgram;
+    shimExtensionPrefixes;
+    /**
+     * Map of source file names to `ts.SourceFile` instances.
+     */
+    sfMap;
+    /**
+     * The `ShimReferenceTagger` responsible for tagging `ts.SourceFile`s loaded via this host.
+     *
+     * The `UpdatedProgramHost` is used in the creation of a new `ts.Program`. Even though this new
+     * program is based on a prior one, TypeScript will still start from the root files and enumerate
+     * all source files to include in the new program.  This means that just like during the original
+     * program's creation, these source files must be tagged with references to per-file shims in
+     * order for those shims to be loaded, and then cleaned up afterwards. Thus the
+     * `UpdatedProgramHost` has its own `ShimReferenceTagger` to perform this function.
+     */
+    shimTagger;
     constructor(sfMap, originalProgram, delegate, shimExtensionPrefixes) {
         super(delegate);
         this.originalProgram = originalProgram;
@@ -9802,21 +9992,26 @@ class UpdatedProgramHost extends DelegatingCompilerHost$1 {
  * TypeScript compiler APIs for incremental program creation.
  */
 class TsCreateProgramDriver {
+    originalProgram;
+    originalHost;
+    options;
+    shimExtensionPrefixes;
+    /**
+     * A map of source file paths to replacement `ts.SourceFile`s for those paths.
+     *
+     * Effectively, this tracks the delta between the user's program (represented by the
+     * `originalHost`) and the template type-checking program being managed.
+     */
+    sfMap = new Map();
+    program;
     constructor(originalProgram, originalHost, options, shimExtensionPrefixes) {
         this.originalProgram = originalProgram;
         this.originalHost = originalHost;
         this.options = options;
         this.shimExtensionPrefixes = shimExtensionPrefixes;
-        /**
-         * A map of source file paths to replacement `ts.SourceFile`s for those paths.
-         *
-         * Effectively, this tracks the delta between the user's program (represented by the
-         * `originalHost`) and the template type-checking program being managed.
-         */
-        this.sfMap = new Map();
-        this.supportsInlineOperations = true;
         this.program = this.originalProgram;
     }
+    supportsInlineOperations = true;
     getProgram() {
         return this.program;
     }
@@ -9973,22 +10168,7 @@ function trackBindingName(node, results) {
  * inside functions.
  */
 class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
-    constructor() {
-        super(...arguments);
-        this.allReads = new Set();
-        /**
-         * Traverses a TypeScript AST and tracks all the top-level reads.
-         * @param node Node from which to start the traversal.
-         */
-        this.addAllTopLevelIdentifiers = (node) => {
-            if (ts__default["default"].isIdentifier(node) && this.isTopLevelIdentifierReference(node)) {
-                this.allReads.add(node.text);
-            }
-            else {
-                ts__default["default"].forEachChild(node, this.addAllTopLevelIdentifiers);
-            }
-        };
-    }
+    allReads = new Set();
     visitReadVarExpr(ast, context) {
         this.allReads.add(ast.name);
         super.visitReadVarExpr(ast, context);
@@ -9999,6 +10179,18 @@ class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
         }
         super.visitWrappedNodeExpr(ast, context);
     }
+    /**
+     * Traverses a TypeScript AST and tracks all the top-level reads.
+     * @param node Node from which to start the traversal.
+     */
+    addAllTopLevelIdentifiers = (node) => {
+        if (ts__default["default"].isIdentifier(node) && this.isTopLevelIdentifierReference(node)) {
+            this.allReads.add(node.text);
+        }
+        else {
+            ts__default["default"].forEachChild(node, this.addAllTopLevelIdentifiers);
+        }
+    };
     /**
      * TypeScript identifiers are used both when referring to a variable (e.g. `console.log(foo)`)
      * and for names (e.g. `{foo: 123}`). This function determines if the identifier is a top-level
@@ -10116,6 +10308,7 @@ function getHmrUpdateDeclaration(compilationResults, constantStatements, meta, s
 }
 /** Rewriter that replaces namespace imports to `@angular/core` with a specifier identifier. */
 class HmrModuleImportRewriter {
+    coreName;
     constructor(coreName) {
         this.coreName = coreName;
     }
@@ -10137,6 +10330,48 @@ const isUsedPipe = (decl) => decl.kind === checker.R3TemplateDependencyKind.Pipe
  * `DecoratorHandler` which handles the `@Component` annotation.
  */
 class ComponentDecoratorHandler {
+    reflector;
+    evaluator;
+    metaRegistry;
+    metaReader;
+    scopeReader;
+    compilerHost;
+    scopeRegistry;
+    typeCheckScopeRegistry;
+    resourceRegistry;
+    isCore;
+    strictCtorDeps;
+    resourceLoader;
+    rootDirs;
+    defaultPreserveWhitespaces;
+    i18nUseExternalIds;
+    enableI18nLegacyMessageIdFormat;
+    usePoisonedData;
+    i18nNormalizeLineEndingsInICUs;
+    moduleResolver;
+    cycleAnalyzer;
+    cycleHandlingStrategy;
+    refEmitter;
+    referencesRegistry;
+    depTracker;
+    injectableRegistry;
+    semanticDepGraphUpdater;
+    annotateForClosureCompiler;
+    perf;
+    hostDirectivesResolver;
+    importTracker;
+    includeClassMetadata;
+    compilationMode;
+    deferredSymbolTracker;
+    forbidOrphanRendering;
+    enableBlockSyntax;
+    enableLetSyntax;
+    externalRuntimeStyles;
+    localCompilationExtraImportsTracker;
+    jitDeclarationRegistry;
+    i18nPreserveSignificantWhitespace;
+    strictStandalone;
+    enableHmr;
     constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, compilerHost, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone, enableHmr) {
         this.reflector = reflector;
         this.evaluator = evaluator;
@@ -10180,17 +10415,6 @@ class ComponentDecoratorHandler {
         this.i18nPreserveSignificantWhitespace = i18nPreserveSignificantWhitespace;
         this.strictStandalone = strictStandalone;
         this.enableHmr = enableHmr;
-        this.literalCache = new Map();
-        this.elementSchemaRegistry = new checker.DomElementSchemaRegistry();
-        /**
-         * During the asynchronous preanalyze phase, it's necessary to parse the template to extract
-         * any potential <link> tags which might need to be loaded. This cache ensures that work is not
-         * thrown away, and the parsed template is reused during the analyze phase.
-         */
-        this.preanalyzeTemplateCache = new Map();
-        this.preanalyzeStylesCache = new Map();
-        this.precedence = checker.HandlerPrecedence.PRIMARY;
-        this.name = 'ComponentDecoratorHandler';
         this.extractTemplateOptions = {
             enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
             i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
@@ -10204,6 +10428,20 @@ class ComponentDecoratorHandler {
         // are deferred, their imports will be deleted so we won't may lose the reference to them.
         this.canDeferDeps = !enableHmr;
     }
+    literalCache = new Map();
+    elementSchemaRegistry = new checker.DomElementSchemaRegistry();
+    /**
+     * During the asynchronous preanalyze phase, it's necessary to parse the template to extract
+     * any potential <link> tags which might need to be loaded. This cache ensures that work is not
+     * thrown away, and the parsed template is reused during the analyze phase.
+     */
+    preanalyzeTemplateCache = new Map();
+    preanalyzeStylesCache = new Map();
+    /** Whether generated code for a component can defer its dependencies. */
+    canDeferDeps;
+    extractTemplateOptions;
+    precedence = checker.HandlerPrecedence.PRIMARY;
+    name = 'ComponentDecoratorHandler';
     detect(node, decorators) {
         if (!decorators) {
             return undefined;
@@ -11566,6 +11804,15 @@ function isDefaultImport(node) {
  * Adapts the `compileInjectable` compiler for `@Injectable` decorators to the Ivy compiler.
  */
 class InjectableDecoratorHandler {
+    reflector;
+    evaluator;
+    isCore;
+    strictCtorDeps;
+    injectableRegistry;
+    perf;
+    includeClassMetadata;
+    compilationMode;
+    errorOnDuplicateProv;
     constructor(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, perf, includeClassMetadata, compilationMode, 
     /**
      * What to do if the injectable already contains a ɵprov property.
@@ -11583,9 +11830,9 @@ class InjectableDecoratorHandler {
         this.includeClassMetadata = includeClassMetadata;
         this.compilationMode = compilationMode;
         this.errorOnDuplicateProv = errorOnDuplicateProv;
-        this.precedence = checker.HandlerPrecedence.SHARED;
-        this.name = 'InjectableDecoratorHandler';
     }
+    precedence = checker.HandlerPrecedence.SHARED;
+    name = 'InjectableDecoratorHandler';
     detect(node, decorators) {
         if (!decorators) {
             return undefined;
@@ -11853,6 +12100,7 @@ function getDep(dep, reflector) {
  * Represents an Angular pipe.
  */
 class PipeSymbol extends SemanticSymbol {
+    name;
     constructor(decl, name) {
         super(decl);
         this.name = name;
@@ -11868,6 +12116,17 @@ class PipeSymbol extends SemanticSymbol {
     }
 }
 class PipeDecoratorHandler {
+    reflector;
+    evaluator;
+    metaRegistry;
+    scopeRegistry;
+    injectableRegistry;
+    isCore;
+    perf;
+    includeClassMetadata;
+    compilationMode;
+    generateExtraImportsInLocalMode;
+    strictStandalone;
     constructor(reflector, evaluator, metaRegistry, scopeRegistry, injectableRegistry, isCore, perf, includeClassMetadata, compilationMode, generateExtraImportsInLocalMode, strictStandalone) {
         this.reflector = reflector;
         this.evaluator = evaluator;
@@ -11880,9 +12139,9 @@ class PipeDecoratorHandler {
         this.compilationMode = compilationMode;
         this.generateExtraImportsInLocalMode = generateExtraImportsInLocalMode;
         this.strictStandalone = strictStandalone;
-        this.precedence = checker.HandlerPrecedence.PRIMARY;
-        this.name = 'PipeDecoratorHandler';
     }
+    precedence = checker.HandlerPrecedence.PRIMARY;
+    name = 'PipeDecoratorHandler';
     detect(node, decorators) {
         if (!decorators) {
             return undefined;
@@ -12945,15 +13204,16 @@ function verifySupportedTypeScriptVersion() {
  * Analyzes a `ts.Program` for cycles.
  */
 class CycleAnalyzer {
+    importGraph;
+    /**
+     * Cycle detection is requested with the same `from` source file for all used directives and pipes
+     * within a component, which makes it beneficial to cache the results as long as the `from` source
+     * file has not changed. This avoids visiting the import graph that is reachable from multiple
+     * directives/pipes more than once.
+     */
+    cachedResults = null;
     constructor(importGraph) {
         this.importGraph = importGraph;
-        /**
-         * Cycle detection is requested with the same `from` source file for all used directives and pipes
-         * within a component, which makes it beneficial to cache the results as long as the `from` source
-         * file has not changed. This avoids visiting the import graph that is reachable from multiple
-         * directives/pipes more than once.
-         */
-        this.cachedResults = null;
     }
     /**
      * Check for a cycle to be created in the `ts.Program` by adding an import between `from` and
@@ -12990,11 +13250,13 @@ const NgCyclicResult = Symbol('NgCyclicResult');
  * on the source file) as earlier executions.
  */
 class CycleResults {
+    from;
+    importGraph;
+    cyclic = {};
+    acyclic = {};
     constructor(from, importGraph) {
         this.from = from;
         this.importGraph = importGraph;
-        this.cyclic = {};
-        this.acyclic = {};
     }
     wouldBeCyclic(sf) {
         const cached = this.getCachedResult(sf);
@@ -13051,6 +13313,9 @@ class CycleResults {
  * needed.
  */
 class Cycle {
+    importGraph;
+    from;
+    to;
     constructor(importGraph, from, to) {
         this.importGraph = importGraph;
         this.from = from;
@@ -13074,10 +13339,12 @@ class Cycle {
  * dependencies within the same program are tracked; imports into packages on NPM are not.
  */
 class ImportGraph {
+    checker;
+    perf;
+    imports = new Map();
     constructor(checker, perf) {
         this.checker = checker;
         this.perf = perf;
-        this.imports = new Map();
     }
     /**
      * List the direct (not transitive) imports of a given `ts.SourceFile`.
@@ -13186,6 +13453,8 @@ function isTypeOnlyImportClause(node) {
  * `getPath()` above.
  */
 class Found {
+    sourceFile;
+    parent;
     constructor(sourceFile, parent) {
         this.sourceFile = sourceFile;
         this.parent = parent;
@@ -13340,6 +13609,9 @@ function extractResolvedTypeString(node, checker) {
 }
 
 class FunctionExtractor {
+    name;
+    exportDeclaration;
+    typeChecker;
     constructor(name, exportDeclaration, typeChecker) {
         this.name = name;
         this.exportDeclaration = exportDeclaration;
@@ -13451,6 +13723,8 @@ function hasLeadingInternalComment(member) {
 
 /** Extractor to pull info for API reference documentation for a TypeScript class or interface. */
 class ClassExtractor {
+    declaration;
+    typeChecker;
     constructor(declaration, typeChecker) {
         this.declaration = declaration;
         this.typeChecker = typeChecker;
@@ -13723,6 +13997,8 @@ class ClassExtractor {
 }
 /** Extractor to pull info for API reference documentation for an Angular directive. */
 class DirectiveExtractor extends ClassExtractor {
+    reference;
+    metadata;
     constructor(declaration, reference, metadata, checker) {
         super(declaration, checker);
         this.reference = reference;
@@ -13767,6 +14043,8 @@ class DirectiveExtractor extends ClassExtractor {
 }
 /** Extractor to pull info for API reference documentation for an Angular pipe. */
 class PipeExtractor extends ClassExtractor {
+    reference;
+    metadata;
     constructor(declaration, reference, metadata, typeChecker) {
         super(declaration, typeChecker);
         this.reference = reference;
@@ -13783,6 +14061,8 @@ class PipeExtractor extends ClassExtractor {
 }
 /** Extractor to pull info for API reference documentation for an Angular pipe. */
 class NgModuleExtractor extends ClassExtractor {
+    reference;
+    metadata;
     constructor(declaration, reference, metadata, typeChecker) {
         super(declaration, typeChecker);
         this.reference = reference;
@@ -14234,6 +14514,8 @@ function getImportedSymbols(sourceFile) {
  * public API documentation.
  */
 class DocsExtractor {
+    typeChecker;
+    metadataReader;
     constructor(typeChecker, metadataReader) {
         this.typeChecker = typeChecker;
         this.metadataReader = metadataReader;
@@ -14367,10 +14649,13 @@ function getRelativeFilePath(sourceFile, rootDir) {
 
 /// <reference types="node" />
 class FlatIndexGenerator {
+    entryPoint;
+    moduleName;
+    flatIndexPath;
+    shouldEmit = true;
     constructor(entryPoint, relativeFlatIndexPath, moduleName) {
         this.entryPoint = entryPoint;
         this.moduleName = moduleName;
-        this.shouldEmit = true;
         this.flatIndexPath =
             checker.join(checker.dirname(entryPoint), relativeFlatIndexPath).replace(/\.js$/, '') + '.ts';
     }
@@ -14538,9 +14823,7 @@ function getDescriptorOfDeclaration(decl) {
 }
 
 class ReferenceGraph {
-    constructor() {
-        this.references = new Map();
-    }
+    references = new Map();
     add(from, to) {
         if (!this.references.has(from)) {
             this.references.set(from, new Set());
@@ -14616,9 +14899,7 @@ class ReferenceGraph {
  * 3. One of its resource dependencies has physically changed.
  */
 class FileDependencyGraph {
-    constructor() {
-        this.nodes = new Map();
-    }
+    nodes = new Map();
     addDependency(from, on) {
         this.nodeFor(from).dependsOn.add(checker.absoluteFromSourceFile(on));
     }
@@ -14736,6 +15017,17 @@ var PhaseKind;
  * future one.
  */
 class IncrementalCompilation {
+    depGraph;
+    versions;
+    step;
+    phase;
+    /**
+     * `IncrementalState` of this compilation if it were to be reused in a subsequent incremental
+     * compilation at the current moment.
+     *
+     * Exposed via the `state` read-only getter.
+     */
+    _state;
     constructor(state, depGraph, versions, step) {
         this.depGraph = depGraph;
         this.versions = versions;
@@ -15014,10 +15306,8 @@ function toOriginalSourceFile(sf) {
  * Tracks an `IncrementalState` within the strategy itself.
  */
 class TrackedIncrementalBuildStrategy {
-    constructor() {
-        this.state = null;
-        this.isSet = false;
-    }
+    state = null;
+    isSet = false;
     getIncrementalState() {
         return this.state;
     }
@@ -15051,6 +15341,8 @@ var IdentifierKind;
  * Describes the absolute byte offsets of a text anchor in a source code.
  */
 class AbsoluteSourceSpan {
+    start;
+    end;
     constructor(start, end) {
         this.start = start;
         this.end = end;
@@ -15064,9 +15356,7 @@ class AbsoluteSourceSpan {
  * `DecoratorHandler`s and exposes them to be indexed.
  */
 class IndexingContext {
-    constructor() {
-        this.components = new Set();
-    }
+    components = new Set();
     /**
      * Adds a component to the context.
      */
@@ -15085,14 +15375,18 @@ class IndexingContext {
  * `[TopLevelIdentifier {name: 'prop', span: {start: 7, end: 11}}]`.
  */
 class ExpressionVisitor extends checker.RecursiveAstVisitor$1 {
+    expressionStr;
+    absoluteOffset;
+    boundTemplate;
+    targetToIdentifier;
+    identifiers = [];
+    errors = [];
     constructor(expressionStr, absoluteOffset, boundTemplate, targetToIdentifier) {
         super();
         this.expressionStr = expressionStr;
         this.absoluteOffset = absoluteOffset;
         this.boundTemplate = boundTemplate;
         this.targetToIdentifier = targetToIdentifier;
-        this.identifiers = [];
-        this.errors = [];
     }
     /**
      * Returns identifiers discovered in an expression.
@@ -15166,6 +15460,14 @@ class ExpressionVisitor extends checker.RecursiveAstVisitor$1 {
  * identifiers of interest, deferring to an `ExpressionVisitor` as needed.
  */
 class TemplateVisitor$1 extends checker.RecursiveVisitor$1 {
+    boundTemplate;
+    // Identifiers of interest found in the template.
+    identifiers = new Set();
+    errors = [];
+    // Map of targets in a template to their identifiers.
+    targetIdentifierCache = new Map();
+    // Map of elements and templates to their identifiers.
+    elementAndTemplateIdentifierCache = new Map();
     /**
      * Creates a template visitor for a bound template target. The bound target can be used when
      * deferred to the expression visitor to get information about the target of an expression.
@@ -15175,13 +15477,6 @@ class TemplateVisitor$1 extends checker.RecursiveVisitor$1 {
     constructor(boundTemplate) {
         super();
         this.boundTemplate = boundTemplate;
-        // Identifiers of interest found in the template.
-        this.identifiers = new Set();
-        this.errors = [];
-        // Map of targets in a template to their identifiers.
-        this.targetIdentifierCache = new Map();
-        // Map of elements and templates to their identifiers.
-        this.elementAndTemplateIdentifierCache = new Map();
     }
     /**
      * Visits a node in the template.
@@ -15507,17 +15802,19 @@ function generateAnalysis(context) {
  * An index of all NgModules that export or re-export a given trait.
  */
 class NgModuleIndexImpl {
+    metaReader;
+    localReader;
     constructor(metaReader, localReader) {
         this.metaReader = metaReader;
         this.localReader = localReader;
-        // A map from an NgModule's Class Declaration to the "main" reference to that module, aka the one
-        // present in the reader metadata object
-        this.ngModuleAuthoritativeReference = new Map();
-        // A map from a Directive/Pipe's class declaration to the class declarations of all re-exporting
-        // NgModules
-        this.typeToExportingModules = new Map();
-        this.indexed = false;
     }
+    // A map from an NgModule's Class Declaration to the "main" reference to that module, aka the one
+    // present in the reader metadata object
+    ngModuleAuthoritativeReference = new Map();
+    // A map from a Directive/Pipe's class declaration to the class declarations of all re-exporting
+    // NgModules
+    typeToExportingModules = new Map();
+    indexed = false;
     updateWith(cache, key, elem) {
         if (cache.has(key)) {
             cache.get(key).add(elem);
@@ -15610,11 +15907,16 @@ const RESOURCE_MARKER_TS = RESOURCE_MARKER + '.ts';
  * `ResourceLoader` which delegates to an `NgCompilerAdapter`'s resource loading methods.
  */
 class AdapterResourceLoader {
+    adapter;
+    options;
+    cache = new Map();
+    fetching = new Map();
+    lookupResolutionHost;
+    canPreload;
+    canPreprocess;
     constructor(adapter, options) {
         this.adapter = adapter;
         this.options = options;
-        this.cache = new Map();
-        this.fetching = new Map();
         this.lookupResolutionHost = createLookupResolutionHost(this.adapter);
         this.canPreload = !!this.adapter.readResource;
         this.canPreprocess = !!this.adapter.transformResource;
@@ -15846,11 +16148,14 @@ function createLookupResolutionHost(adapter) {
  * scopes where necessary.
  */
 class StandaloneComponentScopeReader {
+    metaReader;
+    localModuleReader;
+    dtsModuleReader;
+    cache = new Map();
     constructor(metaReader, localModuleReader, dtsModuleReader) {
         this.metaReader = metaReader;
         this.localModuleReader = localModuleReader;
         this.dtsModuleReader = dtsModuleReader;
-        this.cache = new Map();
     }
     getScopeForComponent(clazz) {
         if (!this.cache.has(clazz)) {
@@ -15986,18 +16291,16 @@ function isSignalSymbol(symbol) {
  * This abstract class provides a base implementation for the run method.
  */
 class TemplateCheckWithVisitor {
-    constructor() {
-        /**
-         * When extended diagnostics were first introduced, the visitor wasn't implemented correctly
-         * which meant that it wasn't visiting the `templateAttrs` of structural directives (e.g.
-         * the expression of `*ngIf`). Fixing the issue causes a lot of internal breakages and will likely
-         * need to be done in a major version to avoid external breakages. This flag is used to opt out
-         * pre-existing diagnostics from the correct behavior until the breakages have been fixed while
-         * ensuring that newly-written diagnostics are correct from the beginning.
-         * TODO(crisbeto): remove this flag and fix the internal brekages.
-         */
-        this.canVisitStructuralAttributes = true;
-    }
+    /**
+     * When extended diagnostics were first introduced, the visitor wasn't implemented correctly
+     * which meant that it wasn't visiting the `templateAttrs` of structural directives (e.g.
+     * the expression of `*ngIf`). Fixing the issue causes a lot of internal breakages and will likely
+     * need to be done in a major version to avoid external breakages. This flag is used to opt out
+     * pre-existing diagnostics from the correct behavior until the breakages have been fixed while
+     * ensuring that newly-written diagnostics are correct from the beginning.
+     * TODO(crisbeto): remove this flag and fix the internal brekages.
+     */
+    canVisitStructuralAttributes = true;
     /**
      * Base implementation for run function, visits all nodes in template and calls
      * `visitNode()` for each one.
@@ -16011,12 +16314,15 @@ class TemplateCheckWithVisitor {
  * Visits all nodes in a template (TmplAstNode and AST) and calls `visitNode` for each one.
  */
 class TemplateVisitor extends checker.RecursiveAstVisitor$1 {
+    ctx;
+    component;
+    check;
+    diagnostics = [];
     constructor(ctx, component, check) {
         super();
         this.ctx = ctx;
         this.component = component;
         this.check = check;
-        this.diagnostics = [];
     }
     visit(node, context) {
         this.diagnostics.push(...this.check.visitNode(this.ctx, this.component, node));
@@ -16144,10 +16450,7 @@ const FUNCTION_INSTANCE_PROPERTIES = new Set(['name', 'length', 'prototype']);
  * Ensures Signals are invoked when used in template interpolations.
  */
 class InterpolatedSignalCheck extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.code = checker.ErrorCode.INTERPOLATED_SIGNAL_NOT_INVOKED;
-    }
+    code = checker.ErrorCode.INTERPOLATED_SIGNAL_NOT_INVOKED;
     visitNode(ctx, component, node) {
         // interpolations like `{{ mySignal }}`
         if (node instanceof checker.Interpolation) {
@@ -16227,10 +16530,7 @@ const factory$9 = {
  * Will return diagnostic information when "([])" is found.
  */
 class InvalidBananaInBoxCheck extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.code = checker.ErrorCode.INVALID_BANANA_IN_BOX;
-    }
+    code = checker.ErrorCode.INVALID_BANANA_IN_BOX;
     visitNode(ctx, component, node) {
         if (!(node instanceof checker.BoundEvent))
             return [];
@@ -16275,10 +16575,7 @@ const KNOWN_CONTROL_FLOW_DIRECTIVES = new Map([
  * hard error instead of a warning.
  */
 class MissingControlFlowDirectiveCheck extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.code = checker.ErrorCode.MISSING_CONTROL_FLOW_DIRECTIVE;
-    }
+    code = checker.ErrorCode.MISSING_CONTROL_FLOW_DIRECTIVE;
     run(ctx, component, template) {
         const componentMetadata = ctx.templateTypeChecker.getDirectiveMetadata(component);
         // Avoid running this check for non-standalone components.
@@ -16321,10 +16618,7 @@ const factory$7 = {
  * Will return diagnostic information when `let` is missing.
  */
 class MissingNgForOfLetCheck extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.code = checker.ErrorCode.MISSING_NGFOROF_LET;
-    }
+    code = checker.ErrorCode.MISSING_NGFOROF_LET;
     visitNode(ctx, component, node) {
         if (!(node instanceof checker.Template)) {
             return [];
@@ -16357,11 +16651,8 @@ const factory$6 = {
  * otherwise it would produce inaccurate results.
  */
 class NullishCoalescingNotNullableCheck extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.canVisitStructuralAttributes = false;
-        this.code = checker.ErrorCode.NULLISH_COALESCING_NOT_NULLABLE;
-    }
+    canVisitStructuralAttributes = false;
+    code = checker.ErrorCode.NULLISH_COALESCING_NOT_NULLABLE;
     visitNode(ctx, component, node) {
         if (!(node instanceof checker.Binary) || node.operation !== '??')
             return [];
@@ -16412,11 +16703,8 @@ const factory$5 = {
  * otherwise it would produce inaccurate results.
  */
 class OptionalChainNotNullableCheck extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.canVisitStructuralAttributes = false;
-        this.code = checker.ErrorCode.OPTIONAL_CHAIN_NOT_NULLABLE;
-    }
+    canVisitStructuralAttributes = false;
+    code = checker.ErrorCode.OPTIONAL_CHAIN_NOT_NULLABLE;
     visitNode(ctx, component, node) {
         if (!(node instanceof checker.SafeCall) &&
             !(node instanceof checker.SafePropertyRead) &&
@@ -16471,10 +16759,7 @@ const STYLE_SUFFIXES = ['px', '%', 'em'];
  * binding. These suffixes are only available for style bindings.
  */
 class SuffixNotSupportedCheck extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.code = checker.ErrorCode.SUFFIX_NOT_SUPPORTED;
-    }
+    code = checker.ErrorCode.SUFFIX_NOT_SUPPORTED;
     visitNode(ctx, component, node) {
         if (!(node instanceof checker.BoundAttribute))
             return [];
@@ -16500,10 +16785,7 @@ const factory$3 = {
  * to 'my-id'.
  */
 class TextAttributeNotBindingSpec extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.code = checker.ErrorCode.TEXT_ATTRIBUTE_NOT_BINDING;
-    }
+    code = checker.ErrorCode.TEXT_ATTRIBUTE_NOT_BINDING;
     visitNode(ctx, component, node) {
         if (!(node instanceof checker.TextAttribute))
             return [];
@@ -16546,10 +16828,7 @@ const factory$2 = {
  * This is likely not the intent of the developer. Instead, the intent is likely to call `myFunc`.
  */
 class UninvokedFunctionInEventBindingSpec extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.code = checker.ErrorCode.UNINVOKED_FUNCTION_IN_EVENT_BINDING;
-    }
+    code = checker.ErrorCode.UNINVOKED_FUNCTION_IN_EVENT_BINDING;
     visitNode(ctx, component, node) {
         // If the node is not a bound event, skip it.
         if (!(node instanceof checker.BoundEvent))
@@ -16607,11 +16886,8 @@ const factory$1 = {
  * Ensures that all `@let` declarations in a template are used.
  */
 class UnusedLetDeclarationCheck extends TemplateCheckWithVisitor {
-    constructor() {
-        super(...arguments);
-        this.code = checker.ErrorCode.UNUSED_LET_DECLARATION;
-        this.analysis = new Map();
-    }
+    code = checker.ErrorCode.UNUSED_LET_DECLARATION;
+    analysis = new Map();
     run(ctx, component, template) {
         super.run(ctx, component, template);
         const diagnostics = [];
@@ -16667,6 +16943,8 @@ var DiagnosticCategoryLabel;
 })(DiagnosticCategoryLabel || (DiagnosticCategoryLabel = {}));
 
 class ExtendedTemplateCheckerImpl {
+    partialCtx;
+    templateChecks;
     constructor(templateTypeChecker, typeChecker, templateCheckFactories, options) {
         this.partialCtx = { templateTypeChecker, typeChecker };
         this.templateChecks = new Map();
@@ -16753,6 +17031,7 @@ const SUPPORTED_DIAGNOSTIC_NAMES = new Set([
 ]);
 
 class TemplateSemanticsCheckerImpl {
+    templateTypeChecker;
     constructor(templateTypeChecker) {
         this.templateTypeChecker = templateTypeChecker;
     }
@@ -16765,6 +17044,7 @@ class TemplateSemanticsCheckerImpl {
 }
 /** Visitor that verifies the semantics of a template. */
 class TemplateSemanticsVisitor extends checker.RecursiveVisitor$1 {
+    expressionVisitor;
     constructor(expressionVisitor) {
         super();
         this.expressionVisitor = expressionVisitor;
@@ -16783,6 +17063,9 @@ class TemplateSemanticsVisitor extends checker.RecursiveVisitor$1 {
 }
 /** Visitor that verifies the semantics of the expressions within a template. */
 class ExpressionsSemanticsVisitor extends checker.RecursiveAstVisitor$1 {
+    templateTypeChecker;
+    component;
+    diagnostics;
     constructor(templateTypeChecker, component, diagnostics) {
         super();
         this.templateTypeChecker = templateTypeChecker;
@@ -16868,6 +17151,8 @@ const APIS_TO_CHECK = [
  * Rule that flags any initializer APIs that are used outside of an initializer.
  */
 class InitializerApiUsageRule {
+    reflector;
+    importedSymbolsTracker;
     constructor(reflector, importedSymbolsTracker) {
         this.reflector = reflector;
         this.importedSymbolsTracker = importedSymbolsTracker;
@@ -16931,6 +17216,9 @@ class InitializerApiUsageRule {
  * Rule that flags unused symbols inside of the `imports` array of a component.
  */
 class UnusedStandaloneImportsRule {
+    templateTypeChecker;
+    typeCheckingConfig;
+    importedSymbolsTracker;
     constructor(templateTypeChecker, typeCheckingConfig, importedSymbolsTracker) {
         this.templateTypeChecker = templateTypeChecker;
         this.typeCheckingConfig = typeCheckingConfig;
@@ -17040,6 +17328,7 @@ class UnusedStandaloneImportsRule {
  * Validates that TypeScript files match a specific set of rules set by the Angular compiler.
  */
 class SourceFileValidator {
+    rules;
     constructor(reflector, importedSymbolsTracker, templateTypeChecker, typeCheckingConfig) {
         this.rules = [new InitializerApiUsageRule(reflector, importedSymbolsTracker)];
         {
@@ -19771,7 +20060,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.1.0-next.0+sha-0f2f7ec` usually means that core is at head so it supports
+    // A version of `19.1.0-next.0+sha-db467e1` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -19845,6 +20134,53 @@ function incrementalFromCompilerTicket(oldCompiler, newProgram, incrementalBuild
  * See the README.md for more information.
  */
 class NgCompiler {
+    adapter;
+    options;
+    inputProgram;
+    programDriver;
+    incrementalStrategy;
+    incrementalCompilation;
+    usePoisonedData;
+    livePerfRecorder;
+    /**
+     * Lazily evaluated state of the compilation.
+     *
+     * This is created on demand by calling `ensureAnalyzed`.
+     */
+    compilation = null;
+    /**
+     * Any diagnostics related to the construction of the compilation.
+     *
+     * These are diagnostics which arose during setup of the host and/or program.
+     */
+    constructionDiagnostics = [];
+    /**
+     * Non-template diagnostics related to the program itself. Does not include template
+     * diagnostics because the template type checker memoizes them itself.
+     *
+     * This is set by (and memoizes) `getNonTemplateDiagnostics`.
+     */
+    nonTemplateDiagnostics = null;
+    closureCompilerEnabled;
+    currentProgram;
+    entryPoint;
+    moduleResolver;
+    resourceManager;
+    cycleAnalyzer;
+    ignoreForDiagnostics;
+    ignoreForEmit;
+    enableTemplateTypeChecker;
+    enableBlockSyntax;
+    enableLetSyntax;
+    angularCoreVersion;
+    enableHmr;
+    /**
+     * `NgCompiler` can be reused for multiple compilations (for resource-only changes), and each
+     * new compilation uses a fresh `PerfRecorder`. Thus, classes created with a lifespan of the
+     * `NgCompiler` use a `DelegatingPerfRecorder` so the `PerfRecorder` they write to can be updated
+     * with each fresh compilation.
+     */
+    delegatingPerfRecorder;
     /**
      * Convert a `CompilationTicket` into an `NgCompiler` instance for the requested compilation.
      *
@@ -19874,25 +20210,6 @@ class NgCompiler {
         this.incrementalCompilation = incrementalCompilation;
         this.usePoisonedData = usePoisonedData;
         this.livePerfRecorder = livePerfRecorder;
-        /**
-         * Lazily evaluated state of the compilation.
-         *
-         * This is created on demand by calling `ensureAnalyzed`.
-         */
-        this.compilation = null;
-        /**
-         * Any diagnostics related to the construction of the compilation.
-         *
-         * These are diagnostics which arose during setup of the host and/or program.
-         */
-        this.constructionDiagnostics = [];
-        /**
-         * Non-template diagnostics related to the program itself. Does not include template
-         * diagnostics because the template type checker memoizes them itself.
-         *
-         * This is set by (and memoizes) `getNonTemplateDiagnostics`.
-         */
-        this.nonTemplateDiagnostics = null;
         this.delegatingPerfRecorder = new DelegatingPerfRecorder(this.perfRecorder);
         this.usePoisonedData = usePoisonedData || !!options._compilePoisonedComponents;
         this.enableTemplateTypeChecker =
@@ -20854,6 +21171,7 @@ function makeConfigDiagnostic({ category, code, messageText, }) {
     };
 }
 class ReferenceGraphAdapter {
+    graph;
     constructor(graph) {
         this.graph = graph;
     }
@@ -20871,6 +21189,9 @@ class ReferenceGraphAdapter {
     }
 }
 class NotifyingProgramDriverWrapper {
+    delegate;
+    notifyNewProgram;
+    getSourceFileVersion;
     constructor(delegate, notifyNewProgram) {
         this.delegate = delegate;
         this.notifyNewProgram = notifyNewProgram;
@@ -20911,6 +21232,36 @@ function versionMapFromProgram(program, driver) {
  * generated for this class.
  */
 class DelegatingCompilerHost {
+    delegate;
+    createHash;
+    directoryExists;
+    fileNameToModuleName;
+    getCancellationToken;
+    getCanonicalFileName;
+    getCurrentDirectory;
+    getDefaultLibFileName;
+    getDefaultLibLocation;
+    getDirectories;
+    getEnvironmentVariable;
+    getModifiedResourceFiles;
+    getNewLine;
+    getParsedCommandLine;
+    getSourceFileByPath;
+    readDirectory;
+    readFile;
+    readResource;
+    transformResource;
+    realpath;
+    resolveModuleNames;
+    resolveTypeReferenceDirectives;
+    resourceNameToFileName;
+    trace;
+    useCaseSensitiveFileNames;
+    writeFile;
+    getModuleResolutionCache;
+    hasInvalidatedResolutions;
+    resolveModuleNameLiterals;
+    resolveTypeReferenceDirectiveReferences;
     // jsDocParsingMode is not a method like the other elements above
     // TODO: ignore usage can be dropped once 5.2 support is dropped
     get jsDocParsingMode() {
@@ -20974,11 +21325,16 @@ class DelegatingCompilerHost {
  * `ExtendedTsCompilerHost` methods whenever present.
  */
 class NgCompilerHost extends DelegatingCompilerHost {
+    shimAdapter;
+    shimTagger;
+    entryPoint = null;
+    constructionDiagnostics;
+    inputFiles;
+    rootDirs;
     constructor(delegate, inputFiles, rootDirs, shimAdapter, shimTagger, entryPoint, diagnostics) {
         super(delegate);
         this.shimAdapter = shimAdapter;
         this.shimTagger = shimTagger;
-        this.entryPoint = null;
         this.entryPoint = entryPoint;
         this.constructionDiagnostics = diagnostics;
         this.inputFiles = [...inputFiles, ...shimAdapter.extraInputFiles];
@@ -21123,6 +21479,14 @@ class NgCompilerHost extends DelegatingCompilerHost {
  * command-line main() function or the Angular CLI.
  */
 class NgtscProgram {
+    options;
+    compiler;
+    /**
+     * The primary TypeScript program, which is used for analysis and emit.
+     */
+    tsProgram;
+    host;
+    incrementalStrategy;
     constructor(rootNames, options, delegateHost, oldProgram) {
         this.options = options;
         const perfRecorder = ActivePerfRecorder.zeroedToNow();

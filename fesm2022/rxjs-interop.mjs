@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-0f2f7ec
+ * @license Angular v19.1.0-next.0+sha-db467e1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -39,10 +39,11 @@ function takeUntilDestroyed(destroyRef) {
  * @internal
  */
 class OutputFromObservableRef {
+    source;
+    destroyed = false;
+    destroyRef = inject(DestroyRef);
     constructor(source) {
         this.source = source;
-        this.destroyed = false;
-        this.destroyRef = inject(DestroyRef);
         this.destroyRef.onDestroy(() => {
             this.destroyed = true;
         });

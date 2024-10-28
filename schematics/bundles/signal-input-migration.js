@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-0f2f7ec
+ * @license Angular v19.1.0-next.0+sha-db467e1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,13 +9,13 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var migrate_ts_type_references = require('./migrate_ts_type_references-301df4a0.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-502358a8.js');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-d4a34401.js');
-var program = require('./program-c7e430d2.js');
+var checker = require('./checker-2451e7c5.js');
+var program = require('./program-b1e71725.js');
 require('path');
-var combine_units = require('./combine_units-63a5b7e8.js');
+var combine_units = require('./combine_units-187f833f.js');
 var assert = require('assert');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 require('./leading_space-d190b83b.js');
@@ -34,22 +34,23 @@ var assert__default = /*#__PURE__*/_interopDefaultLegacy(assert);
  * Class that holds information about a given directive and its input fields.
  */
 class DirectiveInfo {
+    clazz;
+    /**
+     * Map of inputs detected in the given class.
+     * Maps string-based input ids to the detailed input metadata.
+     */
+    inputFields = new Map();
+    /** Map of input IDs and their incompatibilities. */
+    memberIncompatibility = new Map();
+    /**
+     * Whether the whole class is incompatible.
+     *
+     * Class incompatibility precedes individual member incompatibility.
+     * All members in the class are considered incompatible.
+     */
+    incompatible = null;
     constructor(clazz) {
         this.clazz = clazz;
-        /**
-         * Map of inputs detected in the given class.
-         * Maps string-based input ids to the detailed input metadata.
-         */
-        this.inputFields = new Map();
-        /** Map of input IDs and their incompatibilities. */
-        this.memberIncompatibility = new Map();
-        /**
-         * Whether the whole class is incompatible.
-         *
-         * Class incompatibility precedes individual member incompatibility.
-         * All members in the class are considered incompatible.
-         */
-        this.incompatible = null;
     }
     /**
      * Checks whether there are any migrated inputs for the
@@ -79,6 +80,11 @@ class DirectiveInfo {
  * the whole migration.
  */
 class MigrationHost {
+    isMigratingCore;
+    programInfo;
+    config;
+    _sourceFiles;
+    compilerOptions;
     constructor(isMigratingCore, programInfo, config, sourceFiles) {
         this.isMigratingCore = isMigratingCore;
         this.programInfo = programInfo;
@@ -139,17 +145,19 @@ function attemptRetrieveInputFromSymbol(programInfo, memberSymbol, knownInputs) 
  * loaded into the program.
  */
 class KnownInputs {
+    programInfo;
+    config;
+    /**
+     * Known inputs from the whole program.
+     */
+    knownInputIds = new Map();
+    /** Known container classes of inputs. */
+    _allClasses = new Set();
+    /** Maps classes to their directive info. */
+    _classToDirectiveInfo = new Map();
     constructor(programInfo, config) {
         this.programInfo = programInfo;
         this.config = config;
-        /**
-         * Known inputs from the whole program.
-         */
-        this.knownInputIds = new Map();
-        /** Known container classes of inputs. */
-        this._allClasses = new Set();
-        /** Maps classes to their directive info. */
-        this._classToDirectiveInfo = new Map();
     }
     /** Whether the given input exists. */
     has(descr) {
@@ -295,17 +303,15 @@ function prepareAnalysisInfo(userProgram, compiler, programAbsoluteRootPaths) {
  *    - imports that may need to be updated.
  */
 class MigrationResult {
-    constructor() {
-        this.printer = ts__default["default"].createPrinter({ newLine: ts__default["default"].NewLineKind.LineFeed });
-        // May be `null` if the input cannot be converted. This is also
-        // signified by an incompatibility- but the input is tracked here as it
-        // still is a "source input".
-        this.sourceInputs = new Map();
-        this.references = [];
-        // Execution data
-        this.replacements = [];
-        this.inputDecoratorSpecifiers = new Map();
-    }
+    printer = ts__default["default"].createPrinter({ newLine: ts__default["default"].NewLineKind.LineFeed });
+    // May be `null` if the input cannot be converted. This is also
+    // signified by an incompatibility- but the input is tracked here as it
+    // still is a "source input".
+    sourceInputs = new Map();
+    references = [];
+    // Execution data
+    replacements = [];
+    inputDecoratorSpecifiers = new Map();
 }
 
 /** Attempts to extract metadata of a potential TypeScript `@Input()` declaration. */
@@ -1231,10 +1237,11 @@ function filterIncompatibilitiesForBestEffortMode(knownInputs) {
  * signal inputs, with support for batch execution.
  */
 class SignalInputMigration extends combine_units.TsurgeComplexMigration {
+    config;
+    upgradedAnalysisPhaseResults = null;
     constructor(config = {}) {
         super();
         this.config = config;
-        this.upgradedAnalysisPhaseResults = null;
     }
     // Override the default ngtsc program creation, to add extra flags.
     createProgram(tsconfigAbsPath, fs) {

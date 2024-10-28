@@ -1,18 +1,18 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-0f2f7ec
+ * @license Angular v19.1.0-next.0+sha-db467e1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-d4a34401.js');
+var checker = require('./checker-2451e7c5.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var combine_units = require('./combine_units-63a5b7e8.js');
+var combine_units = require('./combine_units-187f833f.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-c7e430d2.js');
+require('./program-b1e71725.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -86,6 +86,8 @@ function pickFieldIncompatibility(a, b) {
  * and hence observing is not possible.
  */
 class SpyOnFieldPattern {
+    checker;
+    fields;
     constructor(checker, fields) {
         this.checker = checker;
         this.fields = fields;
@@ -203,14 +205,15 @@ function getInheritedTypes(node, checker) {
  * and propagating input incompatibility statuses.
  */
 class InheritanceGraph {
+    checker;
+    /** Maps nodes to their parent nodes. */
+    classToParents = new Map();
+    /** Maps nodes to their derived nodes. */
+    parentToChildren = new Map();
+    /** All classes seen participating in inheritance chains. */
+    allClassesInInheritance = new Set();
     constructor(checker) {
         this.checker = checker;
-        /** Maps nodes to their parent nodes. */
-        this.classToParents = new Map();
-        /** Maps nodes to their derived nodes. */
-        this.parentToChildren = new Map();
-        /** All classes seen participating in inheritance chains. */
-        this.allClassesInInheritance = new Set();
     }
     /** Registers a given class in the graph. */
     registerClass(clazz, parents) {
@@ -309,14 +312,15 @@ class InheritanceGraph {
  * children of source files.
  */
 class GroupedTsAstVisitor {
+    files;
+    visitors = [];
+    doneFns = [];
     constructor(files) {
         this.files = files;
-        this.visitors = [];
-        this.doneFns = [];
-        this.state = {
-            insidePropertyDeclaration: null,
-        };
     }
+    state = {
+        insidePropertyDeclaration: null,
+    };
     register(visitor, done) {
         this.visitors.push(visitor);
         if (done !== undefined) {
@@ -732,6 +736,7 @@ function isLocalsContainer(node) {
  * to support narrowing.
  */
 class UniqueNamesGenerator {
+    fallbackSuffixes;
     constructor(fallbackSuffixes) {
         this.fallbackSuffixes = fallbackSuffixes;
     }

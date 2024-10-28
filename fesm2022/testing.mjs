@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-0f2f7ec
+ * @license Angular v19.1.0-next.0+sha-db467e1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -51,6 +51,8 @@ function waitForAsync(fn) {
  * @publicApi
  */
 class DeferBlockFixture {
+    block;
+    componentFixture;
     /** @nodoc */
     constructor(block, componentFixture) {
         this.block = block;
@@ -150,11 +152,9 @@ const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 
 const RETHROW_APPLICATION_ERRORS_DEFAULT = true;
 class TestBedApplicationErrorHandler {
-    constructor() {
-        this.zone = inject$1(NgZone);
-        this.userErrorHandler = inject$1(ErrorHandler);
-        this.whenStableRejectFunctions = new Set();
-    }
+    zone = inject$1(NgZone);
+    userErrorHandler = inject$1(ErrorHandler);
+    whenStableRejectFunctions = new Set();
     handleError(e) {
         try {
             this.zone.runOutsideAngular(() => this.userErrorHandler.handleError(e));
@@ -175,10 +175,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static { this.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.1.0-next.0+sha-0f2f7ec", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable }); }
-    static { this.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.1.0-next.0+sha-0f2f7ec", ngImport: i0, type: TestBedApplicationErrorHandler }); }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.1.0-next.0+sha-db467e1", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable });
+    static ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.1.0-next.0+sha-db467e1", ngImport: i0, type: TestBedApplicationErrorHandler });
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.1.0-next.0+sha-0f2f7ec", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.1.0-next.0+sha-db467e1", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
@@ -188,34 +188,56 @@ i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.1.0-next.0+sh
  * @publicApi
  */
 class ComponentFixture {
+    componentRef;
+    /**
+     * The DebugElement associated with the root element of this component.
+     */
+    debugElement;
+    /**
+     * The instance of the root component class.
+     */
+    componentInstance;
+    /**
+     * The native element at the root of the component.
+     */
+    nativeElement;
+    /**
+     * The ElementRef for the element at the root of the component.
+     */
+    elementRef;
+    /**
+     * The ChangeDetectorRef for the component
+     */
+    changeDetectorRef;
+    _renderer;
+    _isDestroyed = false;
+    /** @internal */
+    _noZoneOptionIsSet = inject$1(ComponentFixtureNoNgZone, { optional: true });
+    /** @internal */
+    _ngZone = this._noZoneOptionIsSet ? new ɵNoopNgZone() : inject$1(NgZone);
+    // Inject ApplicationRef to ensure NgZone stableness causes after render hooks to run
+    // This will likely happen as a result of fixture.detectChanges because it calls ngZone.run
+    // This is a crazy way of doing things but hey, it's the world we live in.
+    // The zoneless scheduler should instead do this more imperatively by attaching
+    // the `ComponentRef` to `ApplicationRef` and calling `appRef.tick` as the `detectChanges`
+    // behavior.
+    /** @internal */
+    _appRef = inject$1(ApplicationRef);
+    _testAppRef = this._appRef;
+    pendingTasks = inject$1(ɵPendingTasks);
+    appErrorHandler = inject$1(TestBedApplicationErrorHandler);
+    zonelessEnabled = inject$1(ɵZONELESS_ENABLED);
+    scheduler = inject$1(ɵChangeDetectionScheduler);
+    rootEffectScheduler = inject$1(ɵEffectScheduler);
+    microtaskEffectScheduler = inject$1(ɵMicrotaskEffectScheduler);
+    autoDetectDefault = this.zonelessEnabled ? true : false;
+    autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? this.autoDetectDefault;
+    subscriptions = new Subscription();
+    // TODO(atscott): Remove this from public API
+    ngZone = this._noZoneOptionIsSet ? null : this._ngZone;
     /** @nodoc */
     constructor(componentRef) {
         this.componentRef = componentRef;
-        this._isDestroyed = false;
-        /** @internal */
-        this._noZoneOptionIsSet = inject$1(ComponentFixtureNoNgZone, { optional: true });
-        /** @internal */
-        this._ngZone = this._noZoneOptionIsSet ? new ɵNoopNgZone() : inject$1(NgZone);
-        // Inject ApplicationRef to ensure NgZone stableness causes after render hooks to run
-        // This will likely happen as a result of fixture.detectChanges because it calls ngZone.run
-        // This is a crazy way of doing things but hey, it's the world we live in.
-        // The zoneless scheduler should instead do this more imperatively by attaching
-        // the `ComponentRef` to `ApplicationRef` and calling `appRef.tick` as the `detectChanges`
-        // behavior.
-        /** @internal */
-        this._appRef = inject$1(ApplicationRef);
-        this._testAppRef = this._appRef;
-        this.pendingTasks = inject$1(ɵPendingTasks);
-        this.appErrorHandler = inject$1(TestBedApplicationErrorHandler);
-        this.zonelessEnabled = inject$1(ɵZONELESS_ENABLED);
-        this.scheduler = inject$1(ɵChangeDetectionScheduler);
-        this.rootEffectScheduler = inject$1(ɵEffectScheduler);
-        this.microtaskEffectScheduler = inject$1(ɵMicrotaskEffectScheduler);
-        this.autoDetectDefault = this.zonelessEnabled ? true : false;
-        this.autoDetect = inject$1(ComponentFixtureAutoDetect, { optional: true }) ?? this.autoDetectDefault;
-        this.subscriptions = new Subscription();
-        // TODO(atscott): Remove this from public API
-        this.ngZone = this._noZoneOptionIsSet ? null : this._ngZone;
         this.changeDetectorRef = componentRef.changeDetectorRef;
         this.elementRef = componentRef.location;
         this.debugElement = getDebugNode(this.elementRef.nativeElement);
@@ -537,9 +559,7 @@ function flushMicrotasks() {
 
 let _nextReferenceId = 0;
 class MetadataOverrider {
-    constructor() {
-        this._references = new Map();
-    }
+    _references = new Map();
     /**
      * Creates a new instance for the given metadata class
      * based on an old instance and overrides.
@@ -661,10 +681,8 @@ const reflection = new ɵReflectionCapabilities();
  * Allows to override ivy metadata for tests (via the `TestBed`).
  */
 class OverrideResolver {
-    constructor() {
-        this.overrides = new Map();
-        this.resolved = new Map();
-    }
+    overrides = new Map();
+    resolved = new Map();
     addOverride(type, override) {
         const overrides = this.overrides.get(type) || [];
         overrides.push(override);
@@ -754,60 +772,63 @@ function assertNoStandaloneComponents(types, resolver, location) {
     });
 }
 class TestBedCompiler {
+    platform;
+    additionalModuleTypes;
+    originalComponentResolutionQueue = null;
+    // Testing module configuration
+    declarations = [];
+    imports = [];
+    providers = [];
+    schemas = [];
+    // Queues of components/directives/pipes that should be recompiled.
+    pendingComponents = new Set();
+    pendingDirectives = new Set();
+    pendingPipes = new Set();
+    // Set of components with async metadata, i.e. components with `@defer` blocks
+    // in their templates.
+    componentsWithAsyncMetadata = new Set();
+    // Keep track of all components and directives, so we can patch Providers onto defs later.
+    seenComponents = new Set();
+    seenDirectives = new Set();
+    // Keep track of overridden modules, so that we can collect all affected ones in the module tree.
+    overriddenModules = new Set();
+    // Store resolved styles for Components that have template overrides present and `styleUrls`
+    // defined at the same time.
+    existingComponentStyles = new Map();
+    resolvers = initResolvers();
+    // Map of component type to an NgModule that declares it.
+    //
+    // There are a couple special cases:
+    // - for standalone components, the module scope value is `null`
+    // - when a component is declared in `TestBed.configureTestingModule()` call or
+    //   a component's template is overridden via `TestBed.overrideTemplateUsingTestingModule()`.
+    //   we use a special value from the `TestingModuleOverride` enum.
+    componentToModuleScope = new Map();
+    // Map that keeps initial version of component/directive/pipe defs in case
+    // we compile a Type again, thus overriding respective static fields. This is
+    // required to make sure we restore defs to their initial states between test runs.
+    // Note: one class may have multiple defs (for example: ɵmod and ɵinj in case of an
+    // NgModule), store all of them in a map.
+    initialNgDefs = new Map();
+    // Array that keeps cleanup operations for initial versions of component/directive/pipe/module
+    // defs in case TestBed makes changes to the originals.
+    defCleanupOps = [];
+    _injector = null;
+    compilerProviders = null;
+    providerOverrides = [];
+    rootProviderOverrides = [];
+    // Overrides for injectables with `{providedIn: SomeModule}` need to be tracked and added to that
+    // module's provider list.
+    providerOverridesByModule = new Map();
+    providerOverridesByToken = new Map();
+    scopesWithOverriddenProviders = new Set();
+    testModuleType;
+    testModuleRef = null;
+    deferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
+    rethrowApplicationTickErrors = RETHROW_APPLICATION_ERRORS_DEFAULT;
     constructor(platform, additionalModuleTypes) {
         this.platform = platform;
         this.additionalModuleTypes = additionalModuleTypes;
-        this.originalComponentResolutionQueue = null;
-        // Testing module configuration
-        this.declarations = [];
-        this.imports = [];
-        this.providers = [];
-        this.schemas = [];
-        // Queues of components/directives/pipes that should be recompiled.
-        this.pendingComponents = new Set();
-        this.pendingDirectives = new Set();
-        this.pendingPipes = new Set();
-        // Set of components with async metadata, i.e. components with `@defer` blocks
-        // in their templates.
-        this.componentsWithAsyncMetadata = new Set();
-        // Keep track of all components and directives, so we can patch Providers onto defs later.
-        this.seenComponents = new Set();
-        this.seenDirectives = new Set();
-        // Keep track of overridden modules, so that we can collect all affected ones in the module tree.
-        this.overriddenModules = new Set();
-        // Store resolved styles for Components that have template overrides present and `styleUrls`
-        // defined at the same time.
-        this.existingComponentStyles = new Map();
-        this.resolvers = initResolvers();
-        // Map of component type to an NgModule that declares it.
-        //
-        // There are a couple special cases:
-        // - for standalone components, the module scope value is `null`
-        // - when a component is declared in `TestBed.configureTestingModule()` call or
-        //   a component's template is overridden via `TestBed.overrideTemplateUsingTestingModule()`.
-        //   we use a special value from the `TestingModuleOverride` enum.
-        this.componentToModuleScope = new Map();
-        // Map that keeps initial version of component/directive/pipe defs in case
-        // we compile a Type again, thus overriding respective static fields. This is
-        // required to make sure we restore defs to their initial states between test runs.
-        // Note: one class may have multiple defs (for example: ɵmod and ɵinj in case of an
-        // NgModule), store all of them in a map.
-        this.initialNgDefs = new Map();
-        // Array that keeps cleanup operations for initial versions of component/directive/pipe/module
-        // defs in case TestBed makes changes to the originals.
-        this.defCleanupOps = [];
-        this._injector = null;
-        this.compilerProviders = null;
-        this.providerOverrides = [];
-        this.rootProviderOverrides = [];
-        // Overrides for injectables with `{providedIn: SomeModule}` need to be tracked and added to that
-        // module's provider list.
-        this.providerOverridesByModule = new Map();
-        this.providerOverridesByToken = new Map();
-        this.scopesWithOverriddenProviders = new Set();
-        this.testModuleRef = null;
-        this.deferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
-        this.rethrowApplicationTickErrors = RETHROW_APPLICATION_ERRORS_DEFAULT;
         class DynamicTestModule {
         }
         this.testModuleType = DynamicTestModule;
@@ -1634,6 +1655,7 @@ function invalidTypeError(name, expectedType) {
     return new Error(`${name} class doesn't have @${expectedType} decorator or is missing metadata.`);
 }
 class R3TestCompiler {
+    testBed;
     constructor(testBed) {
         this.testBed = testBed;
     }
@@ -1681,29 +1703,55 @@ function getTestBed() {
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  */
 class TestBedImpl {
-    constructor() {
-        /**
-         * Defer block behavior option that specifies whether defer blocks will be triggered manually
-         * or set to play through.
-         */
-        this._instanceDeferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
-        // Properties
-        this.platform = null;
-        this.ngModule = null;
-        this._compiler = null;
-        this._testModuleRef = null;
-        this._activeFixtures = [];
-        /**
-         * Internal-only flag to indicate whether a module
-         * scoping queue has been checked and flushed already.
-         * @nodoc
-         */
-        this.globalCompilationChecked = false;
-    }
-    static { this._INSTANCE = null; }
+    static _INSTANCE = null;
     static get INSTANCE() {
         return (TestBedImpl._INSTANCE = TestBedImpl._INSTANCE || new TestBedImpl());
     }
+    /**
+     * Teardown options that have been configured at the environment level.
+     * Used as a fallback if no instance-level options have been provided.
+     */
+    static _environmentTeardownOptions;
+    /**
+     * "Error on unknown elements" option that has been configured at the environment level.
+     * Used as a fallback if no instance-level option has been provided.
+     */
+    static _environmentErrorOnUnknownElementsOption;
+    /**
+     * "Error on unknown properties" option that has been configured at the environment level.
+     * Used as a fallback if no instance-level option has been provided.
+     */
+    static _environmentErrorOnUnknownPropertiesOption;
+    /**
+     * Teardown options that have been configured at the `TestBed` instance level.
+     * These options take precedence over the environment-level ones.
+     */
+    _instanceTeardownOptions;
+    /**
+     * Defer block behavior option that specifies whether defer blocks will be triggered manually
+     * or set to play through.
+     */
+    _instanceDeferBlockBehavior = DEFER_BLOCK_DEFAULT_BEHAVIOR;
+    /**
+     * "Error on unknown elements" option that has been configured at the `TestBed` instance level.
+     * This option takes precedence over the environment-level one.
+     */
+    _instanceErrorOnUnknownElementsOption;
+    /**
+     * "Error on unknown properties" option that has been configured at the `TestBed` instance level.
+     * This option takes precedence over the environment-level one.
+     */
+    _instanceErrorOnUnknownPropertiesOption;
+    /**
+     * Stores the previous "Error on unknown elements" option value,
+     * allowing to restore it in the reset testing module logic.
+     */
+    _previousErrorOnUnknownElementsOption;
+    /**
+     * Stores the previous "Error on unknown properties" option value,
+     * allowing to restore it in the reset testing module logic.
+     */
+    _previousErrorOnUnknownPropertiesOption;
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -1808,6 +1856,18 @@ class TestBedImpl {
     static flushEffects() {
         return TestBedImpl.INSTANCE.flushEffects();
     }
+    // Properties
+    platform = null;
+    ngModule = null;
+    _compiler = null;
+    _testModuleRef = null;
+    _activeFixtures = [];
+    /**
+     * Internal-only flag to indicate whether a module
+     * scoping queue has been checked and flushed already.
+     * @nodoc
+     */
+    globalCompilationChecked = false;
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -2174,6 +2234,7 @@ function inject(tokens, fn) {
  * @publicApi
  */
 class InjectSetupWrapper {
+    _moduleDef;
     constructor(_moduleDef) {
         this._moduleDef = _moduleDef;
     }

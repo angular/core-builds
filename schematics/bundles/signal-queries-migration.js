@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-0f2f7ec
+ * @license Angular v19.1.0-next.0+sha-db467e1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,14 +10,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var combine_units = require('./combine_units-63a5b7e8.js');
+var combine_units = require('./combine_units-187f833f.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-d4a34401.js');
-var program = require('./program-c7e430d2.js');
+var checker = require('./checker-2451e7c5.js');
+var program = require('./program-b1e71725.js');
 var assert = require('assert');
 require('path');
-var migrate_ts_type_references = require('./migrate_ts_type_references-301df4a0.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-502358a8.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -355,12 +355,15 @@ function filterBestEffortIncompatibilities(knownQueries) {
 }
 
 class KnownQueries {
+    info;
+    config;
+    globalMetadata;
+    classToQueryFields = new Map();
+    knownQueryIDs = new Map();
     constructor(info, config, globalMetadata) {
         this.info = info;
         this.config = config;
         this.globalMetadata = globalMetadata;
-        this.classToQueryFields = new Map();
-        this.knownQueryIDs = new Map();
     }
     isFieldIncompatible(descriptor) {
         return this.getIncompatibilityForField(descriptor) !== null;
@@ -713,6 +716,7 @@ function replaceQueryListFirstAndLastReferences(ref, info, globalMetadata, known
 }
 
 class SignalQueriesMigration extends combine_units.TsurgeComplexMigration {
+    config;
     constructor(config = {}) {
         super();
         this.config = config;
