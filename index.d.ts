@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-35d7ca5
+ * @license Angular v19.1.0-next.0+sha-0f2f7ec
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14984,6 +14984,7 @@ export declare function ɵwithI18nSupport(): Provider[];
 /**
  * Returns a set of providers required to setup support for incremental hydration.
  * Requires hydration to be enabled separately.
+ * Enabling incremental hydration also enables event replay for the entire app.
  *
  * @developerPreview
  */
