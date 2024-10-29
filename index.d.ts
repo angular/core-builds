@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.11+sha-98f54cb
+ * @license Angular v19.0.0-next.11+sha-3d918de
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -470,7 +470,6 @@ AfterRenderHook | undefined
 ];
 
 declare class AfterRenderImpl {
-    static readonly PHASES: readonly [AfterRenderPhase.EarlyRead, AfterRenderPhase.Write, AfterRenderPhase.MixedReadWrite, AfterRenderPhase.Read];
     private readonly ngZone;
     private readonly scheduler;
     private readonly errorHandler;
