@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-929db81
+ * @license Angular v19.1.0-next.0+sha-db7ed20
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -963,7 +963,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-929db81'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db7ed20'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -981,7 +981,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-929db81'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db7ed20'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1076,7 +1076,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-929db81'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db7ed20'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1492,7 +1492,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-929db81'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db7ed20'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1527,7 +1527,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-929db81'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db7ed20'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1578,7 +1578,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-929db81'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db7ed20'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1611,7 +1611,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-929db81'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db7ed20'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1662,7 +1662,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-929db81'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-db7ed20'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -6740,12 +6740,6 @@ class TypeCheckScopeRegistry {
     }
 }
 
-/**
- * A constant defining the default value for the standalone attribute in Directive and Pipes decorators.
- * Extracted to a separate file to facilitate G3 patches.
- */
-const NG_STANDALONE_DEFAULT_VALUE = true;
-
 const EMPTY_OBJECT = {};
 const queryDecoratorNames = [
     'ViewChild',
@@ -6760,7 +6754,7 @@ const QUERY_TYPES = new Set(queryDecoratorNames);
  * appear in the declarations of an `NgModule` and additional verification is done when processing
  * the module.
  */
-function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, evaluator, refEmitter, referencesRegistry, isCore, annotateForClosureCompiler, compilationMode, defaultSelector, strictStandalone) {
+function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, evaluator, refEmitter, referencesRegistry, isCore, annotateForClosureCompiler, compilationMode, defaultSelector, strictStandalone, implicitStandaloneValue) {
     let directive;
     if (decorator.args === null || decorator.args.length === 0) {
         directive = new Map();
@@ -6864,7 +6858,7 @@ function extractDirectiveMetadata(clazz, decorator, reflector, importTracker, ev
         ctorDeps.some((dep) => dep.token instanceof checker.ExternalExpr &&
             dep.token.value.moduleName === '@angular/core' &&
             dep.token.value.name === 'TemplateRef');
-    let isStandalone = NG_STANDALONE_DEFAULT_VALUE;
+    let isStandalone = implicitStandaloneValue;
     if (directive.has('standalone')) {
         const expr = directive.get('standalone');
         const resolved = evaluator.evaluate(expr);
@@ -7892,7 +7886,8 @@ class DirectiveDecoratorHandler {
     compilationMode;
     jitDeclarationRegistry;
     strictStandalone;
-    constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, perf, importTracker, includeClassMetadata, compilationMode, jitDeclarationRegistry, strictStandalone) {
+    implicitStandaloneValue;
+    constructor(reflector, evaluator, metaRegistry, scopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, annotateForClosureCompiler, perf, importTracker, includeClassMetadata, compilationMode, jitDeclarationRegistry, strictStandalone, implicitStandaloneValue) {
         this.reflector = reflector;
         this.evaluator = evaluator;
         this.metaRegistry = metaRegistry;
@@ -7911,6 +7906,7 @@ class DirectiveDecoratorHandler {
         this.compilationMode = compilationMode;
         this.jitDeclarationRegistry = jitDeclarationRegistry;
         this.strictStandalone = strictStandalone;
+        this.implicitStandaloneValue = implicitStandaloneValue;
     }
     precedence = checker.HandlerPrecedence.PRIMARY;
     name = 'DirectiveDecoratorHandler';
@@ -7944,7 +7940,7 @@ class DirectiveDecoratorHandler {
         }
         this.perf.eventCount(checker.PerfEvent.AnalyzeDirective);
         const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.importTracker, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, 
-        /* defaultSelector */ null, this.strictStandalone);
+        /* defaultSelector */ null, this.strictStandalone, this.implicitStandaloneValue);
         // `extractDirectiveMetadata` returns `jitForced = true` when the `@Directive` has
         // set `jit: true`. In this case, compilation of the decorator is skipped. Returning
         // an empty object signifies that no analysis was produced.
@@ -10372,7 +10368,8 @@ class ComponentDecoratorHandler {
     i18nPreserveSignificantWhitespace;
     strictStandalone;
     enableHmr;
-    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, compilerHost, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone, enableHmr) {
+    implicitStandaloneValue;
+    constructor(reflector, evaluator, metaRegistry, metaReader, scopeReader, compilerHost, scopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, resourceLoader, rootDirs, defaultPreserveWhitespaces, i18nUseExternalIds, enableI18nLegacyMessageIdFormat, usePoisonedData, i18nNormalizeLineEndingsInICUs, moduleResolver, cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, depTracker, injectableRegistry, semanticDepGraphUpdater, annotateForClosureCompiler, perf, hostDirectivesResolver, importTracker, includeClassMetadata, compilationMode, deferredSymbolTracker, forbidOrphanRendering, enableBlockSyntax, enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, i18nPreserveSignificantWhitespace, strictStandalone, enableHmr, implicitStandaloneValue) {
         this.reflector = reflector;
         this.evaluator = evaluator;
         this.metaRegistry = metaRegistry;
@@ -10415,6 +10412,7 @@ class ComponentDecoratorHandler {
         this.i18nPreserveSignificantWhitespace = i18nPreserveSignificantWhitespace;
         this.strictStandalone = strictStandalone;
         this.enableHmr = enableHmr;
+        this.implicitStandaloneValue = implicitStandaloneValue;
         this.extractTemplateOptions = {
             enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
             i18nNormalizeLineEndingsInICUs: this.i18nNormalizeLineEndingsInICUs,
@@ -10551,7 +10549,7 @@ class ComponentDecoratorHandler {
         let isPoisoned = false;
         // @Component inherits @Directive, so begin by extracting the @Directive metadata and building
         // on it.
-        const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.importTracker, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, this.elementSchemaRegistry.getDefaultComponentElementName(), this.strictStandalone);
+        const directiveResult = extractDirectiveMetadata(node, decorator, this.reflector, this.importTracker, this.evaluator, this.refEmitter, this.referencesRegistry, this.isCore, this.annotateForClosureCompiler, this.compilationMode, this.elementSchemaRegistry.getDefaultComponentElementName(), this.strictStandalone, this.implicitStandaloneValue);
         // `extractDirectiveMetadata` returns `jitForced = true` when the `@Component` has
         // set `jit: true`. In this case, compilation of the decorator is skipped. Returning
         // an empty object signifies that no analysis was produced.
@@ -12127,7 +12125,8 @@ class PipeDecoratorHandler {
     compilationMode;
     generateExtraImportsInLocalMode;
     strictStandalone;
-    constructor(reflector, evaluator, metaRegistry, scopeRegistry, injectableRegistry, isCore, perf, includeClassMetadata, compilationMode, generateExtraImportsInLocalMode, strictStandalone) {
+    implicitStandaloneValue;
+    constructor(reflector, evaluator, metaRegistry, scopeRegistry, injectableRegistry, isCore, perf, includeClassMetadata, compilationMode, generateExtraImportsInLocalMode, strictStandalone, implicitStandaloneValue) {
         this.reflector = reflector;
         this.evaluator = evaluator;
         this.metaRegistry = metaRegistry;
@@ -12139,6 +12138,7 @@ class PipeDecoratorHandler {
         this.compilationMode = compilationMode;
         this.generateExtraImportsInLocalMode = generateExtraImportsInLocalMode;
         this.strictStandalone = strictStandalone;
+        this.implicitStandaloneValue = implicitStandaloneValue;
     }
     precedence = checker.HandlerPrecedence.PRIMARY;
     name = 'PipeDecoratorHandler';
@@ -12190,7 +12190,7 @@ class PipeDecoratorHandler {
             }
             pure = pureValue;
         }
-        let isStandalone = NG_STANDALONE_DEFAULT_VALUE;
+        let isStandalone = this.implicitStandaloneValue;
         if (pipe.has('standalone')) {
             const expr = pipe.get('standalone');
             const resolved = this.evaluator.evaluate(expr);
@@ -20060,7 +20060,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.1.0-next.0+sha-929db81` usually means that core is at head so it supports
+    // A version of `19.1.0-next.0+sha-db7ed20` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -20174,6 +20174,7 @@ class NgCompiler {
     enableLetSyntax;
     angularCoreVersion;
     enableHmr;
+    implicitStandaloneValue;
     /**
      * `NgCompiler` can be reused for multiple compilations (for resource-only changes), and each
      * new compilation uses a fresh `PerfRecorder`. Thus, classes created with a lifespan of the
@@ -20210,6 +20211,7 @@ class NgCompiler {
         this.incrementalCompilation = incrementalCompilation;
         this.usePoisonedData = usePoisonedData;
         this.livePerfRecorder = livePerfRecorder;
+        this.angularCoreVersion = options['_angularCoreVersion'] ?? null;
         this.delegatingPerfRecorder = new DelegatingPerfRecorder(this.perfRecorder);
         this.usePoisonedData = usePoisonedData || !!options._compilePoisonedComponents;
         this.enableTemplateTypeChecker =
@@ -20217,7 +20219,12 @@ class NgCompiler {
         // TODO(crisbeto): remove this flag and base `enableBlockSyntax` on the `angularCoreVersion`.
         this.enableBlockSyntax = options['_enableBlockSyntax'] ?? true;
         this.enableLetSyntax = options['_enableLetSyntax'] ?? true;
-        this.angularCoreVersion = options['_angularCoreVersion'] ?? null;
+        // Standalone by default is enabled since v19. We need to toggle it here,
+        // because the language service extension may be running with the latest
+        // version of the compiler against an older version of Angular.
+        this.implicitStandaloneValue =
+            this.angularCoreVersion === null ||
+                coreVersionSupportsFeature(this.angularCoreVersion, '>= 19.0.0-0');
         this.enableHmr = !!options['_enableHmr'];
         this.constructionDiagnostics.push(...this.adapter.constructionDiagnostics, ...verifyCompatibleTypeCheckOptions(this.options));
         this.currentProgram = inputProgram;
@@ -20986,13 +20993,13 @@ class NgCompiler {
         const jitDeclarationRegistry = new JitDeclarationRegistry();
         // Set up the IvyCompilation, which manages state for the Ivy transformer.
         const handlers = [
-            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, this.adapter, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone, this.enableHmr),
+            new ComponentDecoratorHandler(reflector, evaluator, metaRegistry, metaReader, scopeReader, this.adapter, ngModuleScopeRegistry, typeCheckScopeRegistry, resourceRegistry, isCore, strictCtorDeps, this.resourceManager, this.adapter.rootDirs, this.options.preserveWhitespaces || false, this.options.i18nUseExternalIds !== false, this.options.enableI18nLegacyMessageIdFormat !== false, this.usePoisonedData, this.options.i18nNormalizeLineEndingsInICUs === true, this.moduleResolver, this.cycleAnalyzer, cycleHandlingStrategy, refEmitter, referencesRegistry, this.incrementalCompilation.depGraph, injectableRegistry, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, hostDirectivesResolver, importTracker, supportTestBed, compilationMode, deferredSymbolsTracker, !!this.options.forbidOrphanComponents, this.enableBlockSyntax, this.enableLetSyntax, externalRuntimeStyles, localCompilationExtraImportsTracker, jitDeclarationRegistry, this.options.i18nPreserveWhitespaceForLegacyExtraction ?? true, !!this.options.strictStandalone, this.enableHmr, this.implicitStandaloneValue),
             // TODO(alxhub): understand why the cast here is necessary (something to do with `null`
             // not being assignable to `unknown` when wrapped in `Readonly`).
-            new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, importTracker, supportTestBed, compilationMode, jitDeclarationRegistry, !!this.options.strictStandalone),
+            new DirectiveDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, metaReader, injectableRegistry, refEmitter, referencesRegistry, isCore, strictCtorDeps, semanticDepGraphUpdater, this.closureCompilerEnabled, this.delegatingPerfRecorder, importTracker, supportTestBed, compilationMode, jitDeclarationRegistry, !!this.options.strictStandalone, this.implicitStandaloneValue),
             // Pipe handler must be before injectable handler in list so pipe factories are printed
             // before injectable factories (so injectable factories can delegate to them)
-            new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder, supportTestBed, compilationMode, !!this.options.generateExtraImportsInLocalMode, !!this.options.strictStandalone),
+            new PipeDecoratorHandler(reflector, evaluator, metaRegistry, ngModuleScopeRegistry, injectableRegistry, isCore, this.delegatingPerfRecorder, supportTestBed, compilationMode, !!this.options.generateExtraImportsInLocalMode, !!this.options.strictStandalone, this.implicitStandaloneValue),
             new InjectableDecoratorHandler(reflector, evaluator, isCore, strictCtorDeps, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, compilationMode),
             new NgModuleDecoratorHandler(reflector, evaluator, metaReader, metaRegistry, ngModuleScopeRegistry, referencesRegistry, exportedProviderStatusResolver, semanticDepGraphUpdater, isCore, refEmitter, this.closureCompilerEnabled, this.options.onlyPublishPublicTypingsForNgModules ?? false, injectableRegistry, this.delegatingPerfRecorder, supportTestBed, supportJitMode, compilationMode, localCompilationExtraImportsTracker, jitDeclarationRegistry),
         ];

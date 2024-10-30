@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-929db81
+ * @license Angular v19.1.0-next.0+sha-db7ed20
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,9 +10,9 @@ var checker = require('./checker-2451e7c5.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var combine_units = require('./combine_units-187f833f.js');
+var combine_units = require('./combine_units-11b76063.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-b1e71725.js');
+require('./program-58424797.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -1159,6 +1159,7 @@ function connectSharedReferences(result, flowPartners, refId) {
     // the reference and the earliest partner. References in between can also
     // use the shared flow node and not preserve their original reference— as
     // this would be rather unreadable and inefficient.
+    const seenBlocks = new Set();
     let highestBlock = null;
     for (let i = earliestPartnerId; i <= refId; i++) {
         // Different flow container captured sequentially in result. Ignore.
@@ -1166,12 +1167,21 @@ function connectSharedReferences(result, flowPartners, refId) {
             continue;
         }
         // Iterate up the block, find the highest block within the flow container.
-        let block = result[i].originalNode.parent;
-        while (!isBlockLikeAncestor(block)) {
-            block = block.parent;
-        }
-        if (highestBlock === null || block.getStart() < highestBlock.getStart()) {
-            highestBlock = block;
+        let current = result[i].originalNode.parent;
+        while (current !== undefined && !ts__default["default"].isSourceFile(current)) {
+            if (isBlockLikeAncestor(current)) {
+                // If we saw this block already, it is a common ancestor from another
+                // partner. Check if it would be higher than the current highest block;
+                // and choose it accordingly.
+                if (seenBlocks.has(current)) {
+                    if (highestBlock === null || current.getStart() < highestBlock.getStart()) {
+                        highestBlock = current;
+                    }
+                    break;
+                }
+                seenBlocks.add(current);
+            }
+            current = current.parent;
         }
         if (i !== earliestPartnerId) {
             result[i].recommendedNode = earliestPartnerId;

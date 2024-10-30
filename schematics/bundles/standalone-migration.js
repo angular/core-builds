@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-929db81
+ * @license Angular v19.1.0-next.0+sha-db7ed20
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,7 +12,7 @@ var schematics = require('@angular-devkit/schematics');
 require('os');
 var ts = require('typescript');
 var checker = require('./checker-2451e7c5.js');
-var program = require('./program-b1e71725.js');
+var program = require('./program-58424797.js');
 var p = require('path');
 var fs = require('fs');
 var compiler_host = require('./compiler_host-88d98fef.js');
@@ -33,7 +33,7 @@ var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.1.0-next.0+sha-929db81');
+new checker.Version('19.1.0-next.0+sha-db7ed20');
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
     return new program.NgtscProgram(rootNames, options, host, oldProgram);
