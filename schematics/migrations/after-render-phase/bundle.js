@@ -5889,7 +5889,7 @@ var ShadowCss = class {
     });
   }
   _convertColonHostContext(cssText) {
-    return cssText.replace(_cssColonHostContextReGlobal, (selectorText, pseudoPrefix) => {
+    return cssText.replace(_cssColonHostContextReGlobal, (selectorText) => {
       var _a2;
       const contextSelectorGroups = [[]];
       let match;
@@ -5904,7 +5904,7 @@ var ShadowCss = class {
         }
         selectorText = match[2];
       }
-      return contextSelectorGroups.map((contextSelectors) => _combineHostContextSelectors(contextSelectors, selectorText, pseudoPrefix)).join(", ");
+      return contextSelectorGroups.map((contextSelectors) => combineHostContextSelectors(contextSelectors, selectorText)).join(", ");
     });
   }
   _convertShadowDOMSelectors(cssText) {
@@ -5915,12 +5915,7 @@ var ShadowCss = class {
       let selector = rule.selector;
       let content = rule.content;
       if (rule.selector[0] !== "@") {
-        selector = this._scopeSelector({
-          selector,
-          scopeSelector,
-          hostSelector,
-          isParentSelector: true
-        });
+        selector = this._scopeSelector(rule.selector, scopeSelector, hostSelector);
       } else if (scopedAtRuleIdentifiers.some((atRule) => rule.selector.startsWith(atRule))) {
         content = this._scopeSelectors(rule.content, scopeSelector, hostSelector);
       } else if (rule.selector.startsWith("@font-face") || rule.selector.startsWith("@page")) {
@@ -5935,18 +5930,12 @@ var ShadowCss = class {
       return new CssRule(selector, rule.content);
     });
   }
-  _scopeSelector({ selector, scopeSelector, hostSelector, isParentSelector = false }) {
-    const selectorSplitRe = / ?,(?!(?:[^)(]*(?:\([^)(]*(?:\([^)(]*(?:\([^)(]*\)[^)(]*)*\)[^)(]*)*\)[^)(]*)*\))) ?/;
-    return selector.split(selectorSplitRe).map((part) => part.split(_shadowDeepSelectors)).map((deepParts) => {
+  _scopeSelector(selector, scopeSelector, hostSelector) {
+    return selector.split(/ ?, ?/).map((part) => part.split(_shadowDeepSelectors)).map((deepParts) => {
       const [shallowPart, ...otherParts] = deepParts;
       const applyScope = (shallowPart2) => {
         if (this._selectorNeedsScoping(shallowPart2, scopeSelector)) {
-          return this._applySelectorScope({
-            selector: shallowPart2,
-            scopeSelector,
-            hostSelector,
-            isParentSelector
-          });
+          return this._applySelectorScope(shallowPart2, scopeSelector, hostSelector);
         } else {
           return shallowPart2;
         }
@@ -5968,15 +5957,15 @@ var ShadowCss = class {
     _polyfillHostRe.lastIndex = 0;
     if (_polyfillHostRe.test(selector)) {
       const replaceBy = `[${hostSelector}]`;
-      return selector.replace(_polyfillHostNoCombinatorReGlobal, (_hnc, selector2) => {
-        return selector2.replace(/([^:\)]*)(:*)(.*)/, (_, before, colon, after) => {
+      return selector.replace(_polyfillHostNoCombinatorRe, (hnc, selector2) => {
+        return selector2.replace(/([^:]*)(:*)(.*)/, (_, before, colon, after) => {
           return before + replaceBy + colon + after;
         });
       }).replace(_polyfillHostRe, replaceBy + " ");
     }
     return scopeSelector + " " + selector;
   }
-  _applySelectorScope({ selector, scopeSelector, hostSelector, isParentSelector }) {
+  _applySelectorScope(selector, scopeSelector, hostSelector) {
     var _a2;
     const isRe = /\[is=([^\]]*)\]/g;
     scopeSelector = scopeSelector.replace(isRe, (_, ...parts) => parts[0]);
@@ -5988,10 +5977,6 @@ var ShadowCss = class {
       }
       if (p.includes(_polyfillHostNoCombinator)) {
         scopedP = this._applySimpleSelectorScope(p, scopeSelector, hostSelector);
-        if (_polyfillHostNoCombinatorWithinPseudoFunction.test(p)) {
-          const [_, before, colon, after] = scopedP.match(/([^:]*)(:*)(.*)/);
-          scopedP = before + attrName + colon + after;
-        }
       } else {
         const t = p.replace(_polyfillHostRe, "");
         if (t.length > 0) {
@@ -6003,52 +5988,29 @@ var ShadowCss = class {
       }
       return scopedP;
     };
-    const _pseudoFunctionAwareScopeSelectorPart = (selectorPart) => {
-      let scopedPart = "";
-      const cssPrefixWithPseudoSelectorFunctionMatch = selectorPart.match(_cssPrefixWithPseudoSelectorFunction);
-      if (cssPrefixWithPseudoSelectorFunctionMatch) {
-        const [cssPseudoSelectorFunction] = cssPrefixWithPseudoSelectorFunctionMatch;
-        const selectorToScope = selectorPart.slice(cssPseudoSelectorFunction.length, -1);
-        if (selectorToScope.includes(_polyfillHostNoCombinator)) {
-          this._shouldScopeIndicator = true;
-        }
-        const scopedInnerPart = this._scopeSelector({
-          selector: selectorToScope,
-          scopeSelector,
-          hostSelector
-        });
-        scopedPart = `${cssPseudoSelectorFunction}${scopedInnerPart})`;
-      } else {
-        this._shouldScopeIndicator = this._shouldScopeIndicator || selectorPart.includes(_polyfillHostNoCombinator);
-        scopedPart = this._shouldScopeIndicator ? _scopeSelectorPart(selectorPart) : selectorPart;
-      }
-      return scopedPart;
-    };
-    if (isParentSelector) {
-      this._safeSelector = new SafeSelector(selector);
-      selector = this._safeSelector.content();
-    }
+    const safeContent = new SafeSelector(selector);
+    selector = safeContent.content();
     let scopedSelector = "";
     let startIndex = 0;
     let res;
-    const sep = /( |>|\+|~(?!=))(?!([^)(]*(?:\([^)(]*(?:\([^)(]*(?:\([^)(]*\)[^)(]*)*\)[^)(]*)*\)[^)(]*)*\)))\s*/g;
+    const sep = /( |>|\+|~(?!=))\s*/g;
     const hasHost = selector.includes(_polyfillHostNoCombinator);
-    if (isParentSelector || this._shouldScopeIndicator) {
-      this._shouldScopeIndicator = !hasHost;
-    }
+    let shouldScope = !hasHost;
     while ((res = sep.exec(selector)) !== null) {
       const separator = res[1];
       const part2 = selector.slice(startIndex, res.index);
       if (part2.match(/__esc-ph-(\d+)__/) && ((_a2 = selector[res.index + 1]) == null ? void 0 : _a2.match(/[a-fA-F\d]/))) {
         continue;
       }
-      const scopedPart = _pseudoFunctionAwareScopeSelectorPart(part2);
+      shouldScope = shouldScope || part2.includes(_polyfillHostNoCombinator);
+      const scopedPart = shouldScope ? _scopeSelectorPart(part2) : part2;
       scopedSelector += `${scopedPart} ${separator} `;
       startIndex = sep.lastIndex;
     }
     const part = selector.substring(startIndex);
-    scopedSelector += _pseudoFunctionAwareScopeSelectorPart(part);
-    return this._safeSelector.restore(scopedSelector);
+    shouldScope = shouldScope || part.includes(_polyfillHostNoCombinator);
+    scopedSelector += shouldScope ? _scopeSelectorPart(part) : part;
+    return safeContent.restore(scopedSelector);
   }
   _insertPolyfillHostInCssText(selector) {
     return selector.replace(_colonHostContextRe, _polyfillHostContext).replace(_colonHostRe, _polyfillHost);
@@ -6087,8 +6049,6 @@ var SafeSelector = class {
     });
   }
 };
-var _cssScopedPseudoFunctionPrefix = "(:(where|is)\\()?";
-var _cssPrefixWithPseudoSelectorFunction = /^:(where|is)\(/i;
 var _cssContentNextSelectorRe = /polyfill-next-selector[^}]*content:[\s]*?(['"])(.*?)\1[;\s]*}([^{]*?){/gim;
 var _cssContentRuleRe = /(polyfill-rule)[^}]*(content:[\s]*(['"])(.*?)\3)[;\s]*[^}]*}/gim;
 var _cssContentUnscopedRuleRe = /(polyfill-unscoped-rule)[^}]*(content:[\s]*(['"])(.*?)\3)[;\s]*[^}]*}/gim;
@@ -6096,12 +6056,10 @@ var _polyfillHost = "-shadowcsshost";
 var _polyfillHostContext = "-shadowcsscontext";
 var _parenSuffix = "(?:\\(((?:\\([^)(]*\\)|[^)(]*)+?)\\))?([^,{]*)";
 var _cssColonHostRe = new RegExp(_polyfillHost + _parenSuffix, "gim");
-var _cssColonHostContextReGlobal = new RegExp(_cssScopedPseudoFunctionPrefix + "(" + _polyfillHostContext + _parenSuffix + ")", "gim");
+var _cssColonHostContextReGlobal = new RegExp(_polyfillHostContext + _parenSuffix, "gim");
 var _cssColonHostContextRe = new RegExp(_polyfillHostContext + _parenSuffix, "im");
 var _polyfillHostNoCombinator = _polyfillHost + "-no-combinator";
-var _polyfillHostNoCombinatorWithinPseudoFunction = new RegExp(`:.*\\(.*${_polyfillHostNoCombinator}.*\\)`);
 var _polyfillHostNoCombinatorRe = /-shadowcsshost-no-combinator([^\s]*)/;
-var _polyfillHostNoCombinatorReGlobal = new RegExp(_polyfillHostNoCombinatorRe, "g");
 var _shadowDOMSelectorsRe = [
   /::shadow/g,
   /::content/g,
@@ -6236,7 +6194,7 @@ function unescapeInStrings(input) {
 function unescapeQuotes(str, isQuoted) {
   return !isQuoted ? str : str.replace(/((?:^|[^\\])(?:\\\\)*)\\(?=['"])/g, "$1");
 }
-function _combineHostContextSelectors(contextSelectors, otherSelectors, pseudoPrefix = "") {
+function combineHostContextSelectors(contextSelectors, otherSelectors) {
   const hostMarker = _polyfillHostNoCombinator;
   _polyfillHostRe.lastIndex = 0;
   const otherSelectorsHasHost = _polyfillHostRe.test(otherSelectors);
@@ -6254,7 +6212,7 @@ function _combineHostContextSelectors(contextSelectors, otherSelectors, pseudoPr
       combined[i] = contextSelector + previousSelectors;
     }
   }
-  return combined.map((s) => otherSelectorsHasHost ? `${pseudoPrefix}${s}${otherSelectors}` : `${pseudoPrefix}${s}${hostMarker}${otherSelectors}, ${pseudoPrefix}${s} ${hostMarker}${otherSelectors}`).join(",");
+  return combined.map((s) => otherSelectorsHasHost ? `${s}${otherSelectors}` : `${s}${hostMarker}${otherSelectors}, ${s} ${hostMarker}${otherSelectors}`).join(",");
 }
 function repeatGroups(groups, multiples) {
   const length = groups.length;
@@ -23493,7 +23451,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.9+sha-1f13a5e");
+var VERSION2 = new Version("18.2.9+sha-69dce38");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
