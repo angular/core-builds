@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-next.11+sha-616b411
+ * @license Angular v19.0.0-next.11+sha-3230d78
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10281,14 +10281,6 @@ function maybeUnwrapFn(value) {
         return value;
     }
 }
-/**
- * Detects whether the code is invoked in a browser.
- * Later on, this check should be replaced with a tree-shakable
- * flag (e.g. `!isServer`).
- */
-function isPlatformBrowser(injector) {
-    return (injector ?? inject(Injector)).get(PLATFORM_ID) === 'browser';
-}
 
 /**
  * The max length of the string representation of a value in an error message
@@ -16954,7 +16946,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.11+sha-616b411']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-next.11+sha-3230d78']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -20083,7 +20075,7 @@ function afterRender(callbackOrSpec, options) {
             'callback inside the component constructor`.');
     !options?.injector && assertInInjectionContext(afterRender);
     const injector = options?.injector ?? inject(Injector);
-    if (!isPlatformBrowser(injector)) {
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
         return NOOP_AFTER_RENDER_REF;
     }
     performanceMarkFeature('NgAfterRender');
@@ -20092,7 +20084,7 @@ function afterRender(callbackOrSpec, options) {
 function afterNextRender(callbackOrSpec, options) {
     !options?.injector && assertInInjectionContext(afterNextRender);
     const injector = options?.injector ?? inject(Injector);
-    if (!isPlatformBrowser(injector)) {
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
         return NOOP_AFTER_RENDER_REF;
     }
     performanceMarkFeature('NgAfterNextRender');
@@ -23196,7 +23188,7 @@ function shouldActivateHydrateTrigger(lView, tNode) {
     // TODO(incremental-hydration): ideally, this check should only happen once and then stored on
     // LDeferBlockDetails as a flag. This would make subsequent lookups very cheap.
     return (isIncrementalHydrationEnabled(injector) &&
-        (!isPlatformBrowser(injector) || lDetails[SSR_UNIQUE_ID] !== null));
+        ((typeof ngServerMode !== 'undefined' && ngServerMode) || lDetails[SSR_UNIQUE_ID] !== null));
 }
 // TODO(incremental-hydration): Optimize this further by moving the calculation to earlier
 // in the process. Consider a flag we can check similar to LView[FLAGS].
@@ -23205,7 +23197,7 @@ function shouldActivateHydrateTrigger(lView, tNode) {
  * and whether incremental hydration is enabled. Hydrate triggers are invoked elsewhere.
  */
 function shouldTriggerWhenOnClient(injector, lDetails, tDetails) {
-    if (!isPlatformBrowser(injector)) {
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
         return false;
     }
     const isServerRendered = lDetails[SSR_BLOCK_STATE] && lDetails[SSR_BLOCK_STATE] === DeferBlockState.Complete;
@@ -23226,7 +23218,9 @@ function shouldTriggerDeferBlock(injector, tDeferBlockDetails) {
     if (config?.behavior === DeferBlockBehavior.Manual) {
         return false;
     }
-    return isPlatformBrowser(injector) || tDeferBlockDetails.hydrateTriggers !== null;
+    return (typeof ngServerMode === 'undefined' ||
+        !ngServerMode ||
+        tDeferBlockDetails.hydrateTriggers !== null);
 }
 function getHydrateTriggers(tView, tNode) {
     const tDetails = getTDeferBlockDetails(tView, tNode);
@@ -23418,7 +23412,7 @@ function ɵɵdeferHydrateWhen(rawValue) {
     hydrateTriggers.set(6 /* DeferBlockTrigger.When */, null);
     if (bindingUpdated(lView, bindingIndex, rawValue)) {
         const injector = lView[INJECTOR];
-        if (!isPlatformBrowser(injector)) {
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
             // We are on the server and SSR for defer blocks is enabled.
             triggerDeferBlock(lView, tNode);
         }
@@ -23449,7 +23443,7 @@ function ɵɵdeferHydrateNever() {
     if (shouldActivateHydrateTrigger(lView, tNode)) {
         const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
         hydrateTriggers.set(7 /* DeferBlockTrigger.Never */, null);
-        if (!isPlatformBrowser(lView[INJECTOR])) {
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
             // We are on the server and SSR for defer blocks is enabled.
             triggerDeferBlock(lView, tNode);
         }
@@ -23479,7 +23473,7 @@ function ɵɵdeferHydrateOnIdle() {
     if (shouldActivateHydrateTrigger(lView, tNode)) {
         const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
         hydrateTriggers.set(0 /* DeferBlockTrigger.Idle */, null);
-        if (!isPlatformBrowser(lView[INJECTOR])) {
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
             // We are on the server and SSR for defer blocks is enabled.
             triggerDeferBlock(lView, tNode);
         }
@@ -23536,7 +23530,7 @@ function ɵɵdeferHydrateOnImmediate() {
         const lDetails = getLDeferBlockDetails(lView, tNode);
         const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
         hydrateTriggers.set(1 /* DeferBlockTrigger.Immediate */, null);
-        if (!isPlatformBrowser(injector)) {
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
             triggerDeferBlock(lView, tNode);
         }
         else {
@@ -23574,7 +23568,7 @@ function ɵɵdeferHydrateOnTimer(delay) {
     if (shouldActivateHydrateTrigger(lView, tNode)) {
         const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
         hydrateTriggers.set(5 /* DeferBlockTrigger.Timer */, delay);
-        if (!isPlatformBrowser(lView[INJECTOR])) {
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
             // We are on the server and SSR for defer blocks is enabled.
             triggerDeferBlock(lView, tNode);
         }
@@ -23626,7 +23620,7 @@ function ɵɵdeferHydrateOnHover() {
     if (shouldActivateHydrateTrigger(lView, tNode)) {
         const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
         hydrateTriggers.set(4 /* DeferBlockTrigger.Hover */, null);
-        if (!isPlatformBrowser(lView[INJECTOR])) {
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
             // We are on the server and SSR for defer blocks is enabled.
             triggerDeferBlock(lView, tNode);
         }
@@ -23677,7 +23671,7 @@ function ɵɵdeferHydrateOnInteraction() {
     if (shouldActivateHydrateTrigger(lView, tNode)) {
         const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
         hydrateTriggers.set(3 /* DeferBlockTrigger.Interaction */, null);
-        if (!isPlatformBrowser(lView[INJECTOR])) {
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
             // We are on the server and SSR for defer blocks is enabled.
             triggerDeferBlock(lView, tNode);
         }
@@ -23729,7 +23723,7 @@ function ɵɵdeferHydrateOnViewport() {
         const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
         hydrateTriggers.set(2 /* DeferBlockTrigger.Viewport */, null);
         const injector = lView[INJECTOR];
-        if (!isPlatformBrowser(injector)) {
+        if (typeof ngServerMode !== 'undefined' && ngServerMode) {
             // We are on the server and SSR for defer blocks is enabled.
             triggerDeferBlock(lView, tNode);
         }
@@ -23761,36 +23755,38 @@ function scheduleDelayedTrigger(scheduleFn) {
  * @param scheduleFn A function that does the scheduling.
  */
 function scheduleDelayedPrefetching(scheduleFn, trigger) {
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+        return;
+    }
     const lView = getLView();
     const injector = lView[INJECTOR];
     // Only trigger the scheduled trigger on the browser
     // since we don't want to delay the server response.
-    if (isPlatformBrowser(injector)) {
-        const tNode = getCurrentTNode();
-        const tView = lView[TVIEW];
-        const tDetails = getTDeferBlockDetails(tView, tNode);
-        const prefetchTriggers = getPrefetchTriggers(tDetails);
-        prefetchTriggers.add(trigger);
-        if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
-            const lDetails = getLDeferBlockDetails(lView, tNode);
-            const prefetch = () => triggerPrefetching(tDetails, lView, tNode);
-            const cleanupFn = scheduleFn(prefetch, injector);
-            storeTriggerCleanupFn(1 /* TriggerType.Prefetch */, lDetails, cleanupFn);
-        }
+    const tNode = getCurrentTNode();
+    const tView = lView[TVIEW];
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    const prefetchTriggers = getPrefetchTriggers(tDetails);
+    prefetchTriggers.add(trigger);
+    if (tDetails.loadingState === DeferDependenciesLoadingState.NOT_STARTED) {
+        const lDetails = getLDeferBlockDetails(lView, tNode);
+        const prefetch = () => triggerPrefetching(tDetails, lView, tNode);
+        const cleanupFn = scheduleFn(prefetch, injector);
+        storeTriggerCleanupFn(1 /* TriggerType.Prefetch */, lDetails, cleanupFn);
     }
 }
 /**
  * Schedules hydration triggering of a defer block for `on idle` and `on timer` conditions.
  */
 function scheduleDelayedHydrating(scheduleFn, lView, tNode) {
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
+        return;
+    }
     // Only trigger the scheduled trigger on the browser
     // since we don't want to delay the server response.
     const injector = lView[INJECTOR];
-    if (isPlatformBrowser(injector)) {
-        const lDetails = getLDeferBlockDetails(lView, tNode);
-        const cleanupFn = scheduleFn(() => incrementallyHydrateFromBlockName(injector, lDetails[SSR_UNIQUE_ID], (deferBlock) => triggerAndWaitForCompletion(deferBlock)), injector);
-        storeTriggerCleanupFn(2 /* TriggerType.Hydrate */, lDetails, cleanupFn);
-    }
+    const lDetails = getLDeferBlockDetails(lView, tNode);
+    const cleanupFn = scheduleFn(() => incrementallyHydrateFromBlockName(injector, lDetails[SSR_UNIQUE_ID], (deferBlock) => triggerAndWaitForCompletion(deferBlock)), injector);
+    storeTriggerCleanupFn(2 /* TriggerType.Hydrate */, lDetails, cleanupFn);
 }
 /**
  * Transitions a defer block to the new state. Updates the  necessary
@@ -23822,11 +23818,10 @@ function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling 
     }
     if (isValidStateChange(currentState, newState) &&
         isValidStateChange(lDetails[NEXT_DEFER_BLOCK_STATE] ?? -1, newState)) {
-        const injector = hostLView[INJECTOR];
         const tDetails = getTDeferBlockDetails(hostTView, tNode);
         // Skips scheduling on the server since it can delay the server response.
         const needsScheduling = !skipTimerScheduling &&
-            isPlatformBrowser(injector) &&
+            (typeof ngServerMode === 'undefined' || !ngServerMode) &&
             (getLoadingBlockAfter(tDetails) !== null ||
                 getMinimumDurationForState(tDetails, DeferBlockState.Loading) !== null ||
                 getMinimumDurationForState(tDetails, DeferBlockState.Placeholder));
@@ -34410,7 +34405,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-next.11+sha-616b411');
+const VERSION = new Version('19.0.0-next.11+sha-3230d78');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38453,12 +38448,12 @@ function shouldEnableEventReplay(injector) {
  * Requires hydration to be enabled separately.
  */
 function withEventReplay() {
-    return [
+    const providers = [
         {
             provide: IS_EVENT_REPLAY_ENABLED,
             useFactory: () => {
                 let isEnabled = true;
-                if (isPlatformBrowser()) {
+                if (typeof ngServerMode === 'undefined' || !ngServerMode) {
                     // Note: globalThis[CONTRACT_PROPERTY] may be undefined in case Event Replay feature
                     // is enabled, but there are no events configured in this application, in which case
                     // we don't activate this feature, since there are no events to replay.
@@ -38471,17 +38466,19 @@ function withEventReplay() {
                 return isEnabled;
             },
         },
-        {
+    ];
+    if (typeof ngServerMode === 'undefined' || !ngServerMode) {
+        providers.push({
             provide: ENVIRONMENT_INITIALIZER,
             useValue: () => {
                 const injector = inject(Injector);
+                const appRef = injector.get(ApplicationRef);
                 // We have to check for the appRef here due to the possibility of multiple apps
                 // being present on the same page. We only want to enable event replay for the
                 // apps that actually want it.
-                const appRef = injector.get(ApplicationRef);
                 if (!appsWithEventReplay.has(appRef)) {
                     const jsActionMap = inject(BLOCK_ELEMENT_MAP);
-                    if (isPlatformBrowser(injector) && shouldEnableEventReplay(injector)) {
+                    if (shouldEnableEventReplay(injector)) {
                         setStashFn((rEl, eventName, listenerFn) => {
                             sharedStashFunction(rEl, eventName, listenerFn);
                             sharedMapFunction(rEl, jsActionMap);
@@ -38490,39 +38487,36 @@ function withEventReplay() {
                 }
             },
             multi: true,
-        },
-        {
+        }, {
             provide: APP_BOOTSTRAP_LISTENER,
             useFactory: () => {
-                if (isPlatformBrowser()) {
-                    const injector = inject(Injector);
-                    const appRef = inject(ApplicationRef);
-                    return () => {
-                        if (!shouldEnableEventReplay(injector)) {
-                            return;
-                        }
-                        // We have to check for the appRef here due to the possibility of multiple apps
-                        // being present on the same page. We only want to enable event replay for the
-                        // apps that actually want it.
-                        if (!appsWithEventReplay.has(appRef)) {
-                            appsWithEventReplay.add(appRef);
-                            appRef.onDestroy(() => appsWithEventReplay.delete(appRef));
-                            // Kick off event replay logic once hydration for the initial part
-                            // of the application is completed. This timing is similar to the unclaimed
-                            // dehydrated views cleanup timing.
-                            whenStable(appRef).then(() => {
-                                const eventContractDetails = injector.get(JSACTION_EVENT_CONTRACT);
-                                initEventReplay(eventContractDetails, injector);
-                                removeListenersFromBlocks([''], injector);
-                            });
-                        }
-                    };
-                }
-                return () => { }; // noop for the server code
+                const injector = inject(Injector);
+                const appRef = inject(ApplicationRef);
+                return () => {
+                    if (!shouldEnableEventReplay(injector)) {
+                        return;
+                    }
+                    // We have to check for the appRef here due to the possibility of multiple apps
+                    // being present on the same page. We only want to enable event replay for the
+                    // apps that actually want it.
+                    if (!appsWithEventReplay.has(appRef)) {
+                        appsWithEventReplay.add(appRef);
+                        appRef.onDestroy(() => appsWithEventReplay.delete(appRef));
+                        // Kick off event replay logic once hydration for the initial part
+                        // of the application is completed. This timing is similar to the unclaimed
+                        // dehydrated views cleanup timing.
+                        whenStable(appRef).then(() => {
+                            const eventContractDetails = injector.get(JSACTION_EVENT_CONTRACT);
+                            initEventReplay(eventContractDetails, injector);
+                            removeListenersFromBlocks([''], injector);
+                        });
+                    }
+                };
             },
             multi: true,
-        },
-    ];
+        });
+    }
+    return providers;
 }
 const initEventReplay = (eventDelegation, injector) => {
     const appId = injector.get(APP_ID);
@@ -39605,7 +39599,8 @@ const CLIENT_RENDER_MODE_FLAG = 'ngcm';
  */
 function isClientRenderModeEnabled() {
     const doc = getDocument();
-    return isPlatformBrowser() && doc.body.hasAttribute(CLIENT_RENDER_MODE_FLAG);
+    return ((typeof ngServerMode === 'undefined' || !ngServerMode) &&
+        doc.body.hasAttribute(CLIENT_RENDER_MODE_FLAG));
 }
 /**
  * Returns a set of providers required to setup hydration support
@@ -39618,12 +39613,12 @@ function isClientRenderModeEnabled() {
  * configure or change anything in NgUniversal to enable the feature.
  */
 function withDomHydration() {
-    return makeEnvironmentProviders([
+    const providers = [
         {
             provide: IS_HYDRATION_DOM_REUSE_ENABLED,
             useFactory: () => {
                 let isEnabled = true;
-                if (isPlatformBrowser()) {
+                if (typeof ngServerMode === 'undefined' || !ngServerMode) {
                     // On the client, verify that the server response contains
                     // hydration annotations. Otherwise, keep hydration disabled.
                     const transferState = inject(TransferState, { optional: true });
@@ -39641,7 +39636,7 @@ function withDomHydration() {
                 // i18n support is enabled by calling withI18nSupport(), but there's
                 // no way to turn it off (e.g. for tests), so we turn it off by default.
                 setIsI18nHydrationSupportEnabled(false);
-                if (!isPlatformBrowser()) {
+                if (typeof ngServerMode !== 'undefined' && ngServerMode) {
                     // Since this function is used across both server and client,
                     // make sure that the runtime code is only added when invoked
                     // on the client (see the `enableHydrationRuntimeSupport` function
@@ -39665,20 +39660,21 @@ function withDomHydration() {
             },
             multi: true,
         },
-        {
+    ];
+    if (typeof ngServerMode === 'undefined' || !ngServerMode) {
+        providers.push({
             provide: PRESERVE_HOST_CONTENT,
             useFactory: () => {
                 // Preserve host element content only in a browser
                 // environment and when hydration is configured properly.
                 // On a server, an application is rendered from scratch,
                 // so the host content needs to be empty.
-                return isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED);
+                return inject(IS_HYDRATION_DOM_REUSE_ENABLED);
             },
-        },
-        {
+        }, {
             provide: APP_BOOTSTRAP_LISTENER,
             useFactory: () => {
-                if (isPlatformBrowser() && inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
+                if (inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
                     const appRef = inject(ApplicationRef);
                     const injector = inject(Injector);
                     return () => {
@@ -39700,8 +39696,9 @@ function withDomHydration() {
                 return () => { }; // noop
             },
             multi: true,
-        },
-    ]);
+        });
+    }
+    return makeEnvironmentProviders(providers);
 }
 /**
  * Returns a set of providers required to setup support for i18n hydration.
@@ -39734,7 +39731,7 @@ function withI18nSupport() {
  * @developerPreview
  */
 function withIncrementalHydration() {
-    return [
+    const providers = [
         withEventReplay(),
         {
             provide: IS_INCREMENTAL_HYDRATION_ENABLED,
@@ -39747,22 +39744,22 @@ function withIncrementalHydration() {
             },
             multi: true,
         },
-        {
+    ];
+    if (typeof ngServerMode === 'undefined' || !ngServerMode) {
+        providers.push({
             provide: APP_BOOTSTRAP_LISTENER,
             useFactory: () => {
-                if (isPlatformBrowser()) {
-                    const injector = inject(Injector);
-                    const doc = getDocument();
-                    return () => {
-                        bootstrapIncrementalHydration(doc, injector);
-                        appendDeferBlocksToJSActionMap(doc, injector);
-                    };
-                }
-                return () => { }; // noop for the server code
+                const injector = inject(Injector);
+                const doc = getDocument();
+                return () => {
+                    bootstrapIncrementalHydration(doc, injector);
+                    appendDeferBlocksToJSActionMap(doc, injector);
+                };
             },
             multi: true,
-        },
-    ];
+        });
+    }
+    return providers;
 }
 /**
  *
@@ -40677,10 +40674,10 @@ function afterRenderEffect(callbackOrSpec, options) {
         assertNotInReactiveContext(afterRenderEffect, 'Call `afterRenderEffect` outside of a reactive context. For example, create the render ' +
             'effect inside the component constructor`.');
     !options?.injector && assertInInjectionContext(afterRenderEffect);
-    const injector = options?.injector ?? inject(Injector);
-    if (!isPlatformBrowser(injector)) {
+    if (typeof ngServerMode !== 'undefined' && ngServerMode) {
         return NOOP_AFTER_RENDER_REF;
     }
+    const injector = options?.injector ?? inject(Injector);
     const scheduler = injector.get(ChangeDetectionScheduler);
     const manager = injector.get(AfterRenderManager);
     manager.impl ??= injector.get(AfterRenderImpl);
