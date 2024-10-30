@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.11+sha-d504452
+ * @license Angular v19.0.0-next.11+sha-616b411
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7028,7 +7028,13 @@ function calculateDeclarationReplacement(info, node, aliasParam) {
     const payloadTypes = node.initializer !== undefined && ts__default["default"].isNewExpression(node.initializer)
         ? node.initializer?.typeArguments
         : undefined;
-    const outputCall = ts__default["default"].factory.createCallExpression(ts__default["default"].factory.createIdentifier('output'), payloadTypes, aliasParam ? [aliasParam] : []);
+    const outputCall = ts__default["default"].factory.createCallExpression(ts__default["default"].factory.createIdentifier('output'), payloadTypes, aliasParam !== undefined
+        ? [
+            ts__default["default"].factory.createObjectLiteralExpression([
+                ts__default["default"].factory.createPropertyAssignment('alias', ts__default["default"].factory.createStringLiteral(aliasParam, true)),
+            ], false),
+        ]
+        : []);
     const existingModifiers = (node.modifiers ?? []).filter((modifier) => !ts__default["default"].isDecorator(modifier) && modifier.kind !== ts__default["default"].SyntaxKind.ReadonlyKeyword);
     const updatedOutputDeclaration = ts__default["default"].factory.createPropertyDeclaration(
     // Think: this logic of dealing with modifiers is applicable to all signal-based migrations
@@ -7170,8 +7176,16 @@ class OutputMigration extends combine_units.TsurgeFunnelMigration {
                                 key: outputDef.id,
                                 node: node,
                             }, outputFile)) {
-                            filesWithOutputDeclarations.add(node.getSourceFile());
-                            addOutputReplacement(outputFieldReplacements, outputDef.id, outputFile, calculateDeclarationReplacement(info, node, outputDef.aliasParam));
+                            const aliasParam = outputDef.aliasParam;
+                            const aliasOptionValue = aliasParam ? evaluator.evaluate(aliasParam) : undefined;
+                            if (aliasOptionValue == undefined || typeof aliasOptionValue === 'string') {
+                                filesWithOutputDeclarations.add(node.getSourceFile());
+                                addOutputReplacement(outputFieldReplacements, outputDef.id, outputFile, calculateDeclarationReplacement(info, node, aliasOptionValue?.toString()));
+                            }
+                            else {
+                                problematicUsages[outputDef.id] = true;
+                                problematicDeclarationCount++;
+                            }
                         }
                     }
                     else {
