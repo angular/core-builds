@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.11+sha-3d918de
+ * @license Angular v19.0.0-next.11+sha-d504452
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,12 +10,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var combine_units = require('./combine_units-187f833f.js');
+var combine_units = require('./combine_units-11b76063.js');
 require('os');
 var ts = require('typescript');
 var checker = require('./checker-2451e7c5.js');
 var assert = require('assert');
-var program = require('./program-b1e71725.js');
+var program = require('./program-58424797.js');
 require('path');
 require('fs');
 require('module');
@@ -7040,8 +7040,8 @@ function calculateDeclarationReplacement(info, node, aliasParam) {
 }
 function calculateImportReplacements(info, sourceFiles) {
     const importReplacements = {};
-    const importManager = new ImportManager();
     for (const sf of sourceFiles) {
+        const importManager = new ImportManager();
         const addOnly = [];
         const addRemove = [];
         const file = combine_units.projectFile(sf, info);

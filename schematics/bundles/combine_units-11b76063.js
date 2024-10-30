@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-next.11+sha-3d918de
+ * @license Angular v19.0.0-next.11+sha-d504452
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,7 +11,7 @@ var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
 var checker = require('./checker-2451e7c5.js');
-var program = require('./program-b1e71725.js');
+var program = require('./program-58424797.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -30308,7 +30308,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-next.11+sha-3d918de');
+new Version('19.0.0-next.11+sha-d504452');
 
 var _VisitorMode;
 (function (_VisitorMode) {
