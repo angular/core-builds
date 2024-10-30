@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-378284f
+ * @license Angular v19.1.0-next.0+sha-183af09
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -77,16 +77,21 @@ function migrateFile(sourceFile, rewriteFn) {
             }
             const properties = decoratorArgument.properties;
             const standaloneProp = getStandaloneProperty(properties);
-            // Need to take care of 3 cases
-            // - standalone: true  => remove the property
+            const hasImports = decoratorHasImports(decoratorArgument);
+            // We'll use the presence of imports to keep the migration idempotent
+            // We need to take care of 3 cases
+            // - standalone: true  => remove the property if we have imports
             // - standalone: false => nothing
-            // - No standalone property => add a standalone: false property
+            // - No standalone property => add a standalone: false property if there are no imports
             let newProperties;
             if (!standaloneProp) {
-                const standaloneFalseProperty = ts__default["default"].factory.createPropertyAssignment('standalone', ts__default["default"].factory.createFalse());
-                newProperties = [...properties, standaloneFalseProperty];
+                if (!hasImports) {
+                    const standaloneFalseProperty = ts__default["default"].factory.createPropertyAssignment('standalone', ts__default["default"].factory.createFalse());
+                    newProperties = [...properties, standaloneFalseProperty];
+                }
             }
-            else if (standaloneProp.value === ts__default["default"].SyntaxKind.TrueKeyword) {
+            else if (standaloneProp.value === ts__default["default"].SyntaxKind.TrueKeyword && hasImports) {
+                // To keep the migration idempotent, we'll only remove the standalone prop when there are imports
                 newProperties = properties.filter((p) => p !== standaloneProp.property);
             }
             if (newProperties) {
@@ -124,6 +129,19 @@ function getStandaloneProperty(properties) {
 }
 function isStandaloneProperty(prop) {
     return (ts__default["default"].isPropertyAssignment(prop) && ts__default["default"].isIdentifier(prop.name) && prop.name.text === 'standalone');
+}
+function decoratorHasImports(decoratorArgument) {
+    for (const prop of decoratorArgument.properties) {
+        if (ts__default["default"].isPropertyAssignment(prop) &&
+            ts__default["default"].isIdentifier(prop.name) &&
+            prop.name.text === 'imports') {
+            if (prop.initializer.kind === ts__default["default"].SyntaxKind.ArrayLiteralExpression ||
+                prop.initializer.kind === ts__default["default"].SyntaxKind.Identifier) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function migrate() {
