@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-d8829fb
+ * @license Angular v19.1.0-next.0+sha-94eae78
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-88d98fef.js');
+var compiler_host = require('./compiler_host-3744a013.js');
 var ts = require('typescript');
 var ng_decorators = require('./ng_decorators-4579dec6.js');
 var imports = require('./imports-4ac08251.js');
@@ -56,7 +56,7 @@ const DI_PARAM_SYMBOLS = new Set([
  * @param sourceFile File which to analyze.
  * @param localTypeChecker Type checker scoped to the specific file.
  */
-function analyzeFile(sourceFile, localTypeChecker) {
+function analyzeFile(sourceFile, localTypeChecker, options) {
     const coreSpecifiers = imports.getNamedImports(sourceFile, '@angular/core');
     // Exit early if there are no Angular imports.
     if (coreSpecifiers === null || coreSpecifiers.elements.length === 0) {
@@ -107,11 +107,14 @@ function analyzeFile(sourceFile, localTypeChecker) {
         }
         else if (ts__default["default"].isClassDeclaration(node)) {
             const decorators = ng_decorators.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(node) || []);
+            const isAbstract = !!node.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.AbstractKeyword);
             const supportsDI = decorators.some((dec) => DECORATORS_SUPPORTING_DI.has(dec.name));
             const constructorNode = node.members.find((member) => ts__default["default"].isConstructorDeclaration(member) &&
                 member.body != null &&
                 member.parameters.length > 0);
-            if (supportsDI && constructorNode) {
+            // Don't migrate abstract classes by default, because
+            // their parameters aren't guaranteed to be injectable.
+            if (supportsDI && constructorNode && (!isAbstract || options.migrateAbstractClasses)) {
                 classes.push({
                     node,
                     constructor: constructorNode,
@@ -308,8 +311,8 @@ function findUninitializedPropertiesToCombine(node, constructor, localTypeChecke
         if (memberInitializers.has(name)) {
             const initializer = memberInitializers.get(name);
             if (!hasLocalReferences(initializer, constructor, localTypeChecker)) {
-                toCombine = toCombine || new Map();
-                toCombine.set(membersToDeclarations.get(name), initializer);
+                toCombine ??= [];
+                toCombine.push({ declaration: membersToDeclarations.get(name), initializer });
             }
         }
         else {
@@ -332,6 +335,76 @@ function findUninitializedPropertiesToCombine(node, constructor, localTypeChecke
     }
     // If no members need to be combined, none need to be hoisted either.
     return toCombine === null ? null : { toCombine, toHoist };
+}
+/**
+ * In some cases properties may be declared out of order, but initialized in the correct order.
+ * The internal-specific migration will combine such properties which will result in a compilation
+ * error, for example:
+ *
+ * ```
+ * class MyClass {
+ *   foo: Foo;
+ *   bar: Bar;
+ *
+ *   constructor(bar: Bar) {
+ *     this.bar = bar;
+ *     this.foo = this.bar.getFoo();
+ *   }
+ * }
+ * ```
+ *
+ * Will become:
+ *
+ * ```
+ * class MyClass {
+ *   foo: Foo = this.bar.getFoo();
+ *   bar: Bar = inject(Bar);
+ * }
+ * ```
+ *
+ * This function determines if cases like this can be saved by reordering the properties so their
+ * declaration order matches the order in which they're initialized.
+ *
+ * @param toCombine Properties that are candidates to be combined.
+ * @param constructor
+ */
+function shouldCombineInInitializationOrder(toCombine, constructor) {
+    let combinedMemberReferenceCount = 0;
+    let otherMemberReferenceCount = 0;
+    const injectedMemberNames = new Set();
+    const combinedMemberNames = new Set();
+    // Collect the name of constructor parameters that declare new properties.
+    // These can be ignored since they'll be hoisted above other properties.
+    constructor.parameters.forEach((param) => {
+        if (parameterDeclaresProperty(param) && ts__default["default"].isIdentifier(param.name)) {
+            injectedMemberNames.add(param.name.text);
+        }
+    });
+    // Collect the names of the properties being combined. We should only reorder
+    // the properties if at least one of them refers to another one.
+    toCombine.forEach(({ declaration: { name } }) => {
+        if (ts__default["default"].isStringLiteralLike(name) || ts__default["default"].isIdentifier(name)) {
+            combinedMemberNames.add(name.text);
+        }
+    });
+    // Visit all the initializers and check all the property reads in the form of `this.<name>`.
+    // Skip over the ones referring to injected parameters since they're going to be hoisted.
+    const walkInitializer = (node) => {
+        if (ts__default["default"].isPropertyAccessExpression(node) && node.expression.kind === ts__default["default"].SyntaxKind.ThisKeyword) {
+            if (combinedMemberNames.has(node.name.text)) {
+                combinedMemberReferenceCount++;
+            }
+            else if (!injectedMemberNames.has(node.name.text)) {
+                otherMemberReferenceCount++;
+            }
+        }
+        node.forEachChild(walkInitializer);
+    };
+    toCombine.forEach((candidate) => walkInitializer(candidate.initializer));
+    // If at the end there is at least one reference between a combined member and another,
+    // and there are no references to any other class members, we can safely reorder the
+    // properties based on how they were initialized.
+    return combinedMemberReferenceCount > 0 && otherMemberReferenceCount === 0;
 }
 /**
  * Finds the expressions from the constructor that initialize class members, for example:
@@ -460,7 +533,7 @@ function migrateFile(sourceFile, options) {
     // 2. All the necessary information for this migration is local so using a file-specific type
     //    checker should speed up the lookups.
     const localTypeChecker = getLocalTypeChecker(sourceFile);
-    const analysis = analyzeFile(sourceFile, localTypeChecker);
+    const analysis = analyzeFile(sourceFile, localTypeChecker, options);
     if (analysis === null || analysis.classes.length === 0) {
         return [];
     }
@@ -469,11 +542,13 @@ function migrateFile(sourceFile, options) {
     analysis.classes.forEach(({ node, constructor, superCall }) => {
         const memberIndentation = leading_space.getLeadingLineWhitespaceOfNode(node.members[0]);
         const prependToClass = [];
+        const afterInjectCalls = [];
         const removedStatements = new Set();
+        const removedMembers = new Set();
         if (options._internalCombineMemberInitializers) {
-            applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, prependToClass, memberIndentation);
+            applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, removedMembers, prependToClass, afterInjectCalls, memberIndentation);
         }
-        migrateClass(node, constructor, superCall, options, memberIndentation, prependToClass, removedStatements, localTypeChecker, printer, tracker);
+        migrateClass(node, constructor, superCall, options, memberIndentation, prependToClass, afterInjectCalls, removedStatements, removedMembers, localTypeChecker, printer, tracker);
     });
     DI_PARAM_SYMBOLS.forEach((name) => {
         // Both zero and undefined are fine here.
@@ -491,18 +566,14 @@ function migrateFile(sourceFile, options) {
  * @param options Options used to configure the migration.
  * @param memberIndentation Indentation string of the members of the class.
  * @param prependToClass Text that should be prepended to the class.
+ * @param afterInjectCalls Text that will be inserted after the newly-added `inject` calls.
  * @param removedStatements Statements that have been removed from the constructor already.
+ * @param removedMembers Class members that have been removed by the migration.
  * @param localTypeChecker Type checker set up for the specific file.
  * @param printer Printer used to output AST nodes as strings.
  * @param tracker Object keeping track of the changes made to the file.
  */
-function migrateClass(node, constructor, superCall, options, memberIndentation, prependToClass, removedStatements, localTypeChecker, printer, tracker) {
-    const isAbstract = !!node.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.AbstractKeyword);
-    // Don't migrate abstract classes by default, because
-    // their parameters aren't guaranteed to be injectable.
-    if (isAbstract && !options.migrateAbstractClasses) {
-        return;
-    }
+function migrateClass(node, constructor, superCall, options, memberIndentation, prependToClass, afterInjectCalls, removedStatements, removedMembers, localTypeChecker, printer, tracker) {
     const sourceFile = node.getSourceFile();
     const unusedParameters = getConstructorUnusedParameters(constructor, localTypeChecker, removedStatements);
     const superParameters = superCall
@@ -514,7 +585,6 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
     const innerIndentation = leading_space.getLeadingLineWhitespaceOfNode(innerReference);
     const prependToConstructor = [];
     const afterSuper = [];
-    const removedMembers = new Set();
     for (const param of constructor.parameters) {
         const usedInSuper = superParameters !== null && superParameters.has(param);
         const usedInConstructor = !unusedParameters.has(param);
@@ -525,13 +595,13 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
     for (const member of node.members) {
         if (ts__default["default"].isConstructorDeclaration(member) && member !== constructor) {
             removedMembers.add(member);
-            tracker.replaceText(sourceFile, member.getFullStart(), member.getFullWidth(), '');
+            tracker.removeNode(member, true);
         }
     }
     if (canRemoveConstructor(options, constructor, removedStatementCount, superCall)) {
         // Drop the constructor if it was empty.
         removedMembers.add(constructor);
-        tracker.replaceText(sourceFile, constructor.getFullStart(), constructor.getFullWidth(), '');
+        tracker.removeNode(constructor, true);
     }
     else {
         // If the constructor contains any statements, only remove the parameters.
@@ -564,6 +634,9 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
             tracker.insertText(sourceFile, constructor.getFullStart(), '\n' + extraSignature);
         }
     }
+    // Push the block of code that should appear after the `inject`
+    // calls now once all the members have been generated.
+    prependToClass.push(...afterInjectCalls);
     if (prependToClass.length > 0) {
         if (removedMembers.size === node.members.length) {
             tracker.insertText(sourceFile, constructor.getEnd() + 1, `${prependToClass.join('\n')}\n`);
@@ -927,24 +1000,46 @@ function getNextPreservedStatement(startNode, removedStatements) {
  * @param tracker Object keeping track of the changes.
  * @param printer Printer used to output AST nodes as text.
  * @param removedStatements Statements that have been removed by the migration.
+ * @param removedMembers Class members that have been removed by the migration.
  * @param prependToClass Text that will be prepended to a class.
+ * @param afterInjectCalls Text that will be inserted after the newly-added `inject` calls.
  * @param memberIndentation Indentation string of the class' members.
  */
-function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, prependToClass, memberIndentation) {
+function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, printer, removedStatements, removedMembers, prependToClass, afterInjectCalls, memberIndentation) {
     const result = findUninitializedPropertiesToCombine(node, constructor, localTypeChecker);
-    result?.toCombine.forEach((initializer, property) => {
-        const statement = nodes.closestNode(initializer, ts__default["default"].isStatement);
-        if (!statement) {
-            return;
+    if (result === null) {
+        return;
+    }
+    const preserveInitOrder = shouldCombineInInitializationOrder(result.toCombine, constructor);
+    // Sort the combined members based on the declaration order of their initializers, only if
+    // we've determined that would be safe. Note that `Array.prototype.sort` is in-place so we
+    // can just call it conditionally here.
+    if (preserveInitOrder) {
+        result.toCombine.sort((a, b) => a.initializer.getStart() - b.initializer.getStart());
+    }
+    result.toCombine.forEach(({ declaration, initializer }) => {
+        const initializerStatement = nodes.closestNode(initializer, ts__default["default"].isStatement);
+        const newProperty = ts__default["default"].factory.createPropertyDeclaration(cloneModifiers(declaration.modifiers), cloneName(declaration.name), declaration.questionToken, declaration.type, initializer);
+        // If the initialization order is being preserved, we have to remove the original
+        // declaration and re-declare it. Otherwise we can do the replacement in-place.
+        if (preserveInitOrder) {
+            tracker.removeNode(declaration, true);
+            removedMembers.add(declaration);
+            afterInjectCalls.push(memberIndentation +
+                printer.printNode(ts__default["default"].EmitHint.Unspecified, newProperty, declaration.getSourceFile()));
         }
-        const newProperty = ts__default["default"].factory.createPropertyDeclaration(cloneModifiers(property.modifiers), cloneName(property.name), property.questionToken, property.type, initializer);
-        tracker.replaceText(statement.getSourceFile(), statement.getFullStart(), statement.getFullWidth(), '');
-        tracker.replaceNode(property, newProperty);
-        removedStatements.add(statement);
+        else {
+            tracker.replaceNode(declaration, newProperty);
+        }
+        // This should always be defined, but null check it just in case.
+        if (initializerStatement) {
+            tracker.removeNode(initializerStatement, true);
+            removedStatements.add(initializerStatement);
+        }
     });
-    result?.toHoist.forEach((decl) => {
+    result.toHoist.forEach((decl) => {
         prependToClass.push(memberIndentation + printer.printNode(ts__default["default"].EmitHint.Unspecified, decl, decl.getSourceFile()));
-        tracker.replaceText(decl.getSourceFile(), decl.getFullStart(), decl.getFullWidth(), '');
+        tracker.removeNode(decl, true);
     });
     // If we added any hoisted properties, separate them visually with a new line.
     if (prependToClass.length > 0) {
