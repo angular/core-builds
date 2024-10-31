@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.0+sha-600ef5e
+ * @license Angular v19.0.0-rc.0+sha-1a91903
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,12 +10,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var combine_units = require('./combine_units-11b76063.js');
+var combine_units = require('./combine_units-68069e7e.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-2451e7c5.js');
+var checker = require('./checker-8778ee3b.js');
 var assert = require('assert');
-var program = require('./program-58424797.js');
+var program = require('./program-888c571e.js');
 require('path');
 require('fs');
 require('module');
@@ -577,7 +577,7 @@ var ExtendedTemplateDiagnosticName;
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('output-migration.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('output-migration.js', document.baseURI).href));
 isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 
 function getSourceFile(node) {

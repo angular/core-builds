@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.0+sha-600ef5e
+ * @license Angular v19.0.0-rc.0+sha-1a91903
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30277,7 +30277,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-rc.0+sha-600ef5e');
+new Version('19.0.0-rc.0+sha-1a91903');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31685,7 +31685,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.src || new URL('checker-2451e7c5.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-8778ee3b.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -38580,27 +38580,6 @@ class Mappings {
 		let charInHiresBoundary = false;
 
 		while (originalCharIndex < chunk.end) {
-			if (this.hires || first || sourcemapLocations.has(originalCharIndex)) {
-				const segment = [this.generatedCodeColumn, sourceIndex, loc.line, loc.column];
-
-				if (this.hires === 'boundary') {
-					// in hires "boundary", group segments per word boundary than per char
-					if (wordRegex.test(original[originalCharIndex])) {
-						// for first char in the boundary found, start the boundary by pushing a segment
-						if (!charInHiresBoundary) {
-							this.rawSegments.push(segment);
-							charInHiresBoundary = true;
-						}
-					} else {
-						// for non-word char, end the boundary by pushing a segment
-						this.rawSegments.push(segment);
-						charInHiresBoundary = false;
-					}
-				} else {
-					this.rawSegments.push(segment);
-				}
-			}
-
 			if (original[originalCharIndex] === '\n') {
 				loc.line += 1;
 				loc.column = 0;
@@ -38609,6 +38588,27 @@ class Mappings {
 				this.generatedCodeColumn = 0;
 				first = true;
 			} else {
+				if (this.hires || first || sourcemapLocations.has(originalCharIndex)) {
+					const segment = [this.generatedCodeColumn, sourceIndex, loc.line, loc.column];
+
+					if (this.hires === 'boundary') {
+						// in hires "boundary", group segments per word boundary than per char
+						if (wordRegex.test(original[originalCharIndex])) {
+							// for first char in the boundary found, start the boundary by pushing a segment
+							if (!charInHiresBoundary) {
+								this.rawSegments.push(segment);
+								charInHiresBoundary = true;
+							}
+						} else {
+							// for non-word char, end the boundary by pushing a segment
+							this.rawSegments.push(segment);
+							charInHiresBoundary = false;
+						}
+					} else {
+						this.rawSegments.push(segment);
+					}
+				}
+
 				loc.column += 1;
 				this.generatedCodeColumn += 1;
 				first = false;
