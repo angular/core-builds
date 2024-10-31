@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.0+sha-ea9bfff
+ * @license Angular v19.0.0-rc.0+sha-0ca14e2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3041,10 +3041,6 @@ declare const DEFER_BLOCK_ID = "di";
 
 declare const DEFER_BLOCK_STATE = "s";
 
-declare const DEFER_HYDRATE_TRIGGERS = "t";
-
-declare const DEFER_PARENT_BLOCK_ID = "p";
-
 /**
  * Basic set of data structures used for identifying a defer block
  * and triggering defer blocks
@@ -3188,10 +3184,6 @@ declare interface DehydratedView {
      * removed from the DOM during hydration cleanup.
      */
     dehydratedIcuData?: Map<number, DehydratedIcuData>;
-    /**
-     * A mapping of defer block unique ids to the defer block data
-     */
-    dehydratedDeferBlockData?: Record<string, SerializedDeferBlock>;
 }
 
 /**
@@ -9986,33 +9978,6 @@ declare interface SerializedContainerView extends SerializedView {
 }
 
 /**
- * Serialized data structure that contains relevant defer block
- * information that describes a given incremental hydration boundary
- */
-declare interface SerializedDeferBlock {
-    /**
-     * This contains the unique id of this defer block's parent, if it exists.
-     */
-    [DEFER_PARENT_BLOCK_ID]: string | null;
-    /**
-     * This field represents a status, based on the `DeferBlockState` enum.
-     */
-    [DEFER_BLOCK_STATE]?: number;
-    /**
-     * Number of root nodes that belong to this defer block's template.
-     * This information is needed to effectively traverse the DOM tree
-     * and add jsaction attributes to root nodes appropriately for
-     * incremental hydration.
-     */
-    [NUM_ROOT_NODES]: number;
-    /**
-     * The list of triggers that exist for incremental hydration, based on the
-     * `Trigger` enum.
-     */
-    [DEFER_HYDRATE_TRIGGERS]: (DeferBlockTrigger | SerializedTriggerDetails)[] | null;
-}
-
-/**
  * Represents element containers within this view, stored as key-value pairs
  * where key is an index of a container in an LView (also used in the
  * `elementContainerStart` instruction), the value is the number of root nodes
@@ -10021,11 +9986,6 @@ declare interface SerializedDeferBlock {
  */
 declare interface SerializedElementContainers {
     [key: number]: number;
-}
-
-declare interface SerializedTriggerDetails {
-    trigger: DeferBlockTrigger;
-    delay?: number;
 }
 
 /**
