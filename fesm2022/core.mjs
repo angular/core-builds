@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-94eae78
+ * @license Angular v19.1.0-next.0+sha-32a5388
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8523,7 +8523,7 @@ const IS_INCREMENTAL_HYDRATION_ENABLED = new InjectionToken(typeof ngDevMode ===
 /**
  * A map of DOM elements with `jsaction` attributes grouped by action names.
  */
-const BLOCK_ELEMENT_MAP = new InjectionToken(ngDevMode ? 'BLOCK_ELEMENT_MAP' : '', {
+const JSACTION_BLOCK_ELEMENT_MAP = new InjectionToken(ngDevMode ? 'JSACTION_BLOCK_ELEMENT_MAP' : '', {
     providedIn: 'root',
     factory: () => new Map(),
 });
@@ -8611,9 +8611,6 @@ function retrieveHydrationInfoImpl(rNode, injector, isRootView = false) {
         data,
         firstChild: rNode.firstChild ?? null,
     };
-    if (nghDeferData) {
-        dehydratedView.dehydratedDeferBlockData = nghDeferData;
-    }
     if (isRootView) {
         // If there is hydration info present for the root view, it means that there was
         // a ViewContainerRef injected in the root component. The root component host element
@@ -16946,7 +16943,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-94eae78']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-32a5388']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19836,7 +19833,7 @@ function invokeTriggerCleanupFns(type, lDetails) {
     }
 }
 /**
- * Invokes registered cleanup functions for both prefetch and regular triggers.
+ * Invokes registered cleanup functions for prefetch, hydrate, and regular triggers.
  */
 function invokeAllTriggerCleanupFns(lDetails, registry) {
     // TODO(incremental-hydration): cleanup functions are invoked in multiple places
@@ -20798,14 +20795,22 @@ class DeferBlockRegistry {
     get(blockId) {
         return this.registry.get(blockId) ?? null;
     }
-    // TODO(incremental-hydration): we need to determine when this should be invoked
-    // to prevent leaking memory in SSR cases
+    has(blockId) {
+        return this.registry.has(blockId);
+    }
     remove(blockId) {
         this.registry.delete(blockId);
     }
     get size() {
         return this.registry.size;
     }
+    removeBlocks(blocks) {
+        for (let blockId of blocks) {
+            this.remove(blockId);
+        }
+    }
+    // we have to leave the lowest block Id in the registry
+    // unless that block has no children
     addCleanupFn(blockId, fn) {
         let cleanupFunctions = [];
         if (this.cleanupFns.has(blockId)) {
@@ -20822,6 +20827,8 @@ class DeferBlockRegistry {
         for (let fn of fns) {
             fn();
         }
+        // We can safely clear these out now that they've fired.
+        this.cleanupFns.delete(blockId);
     }
     // Blocks that are being hydrated.
     // TODO(incremental-hydration): cleanup task - we currently retain ids post hydration
@@ -20886,10 +20893,11 @@ const sharedMapFunction = (rEl, jsActionMap) => {
 function removeListenersFromBlocks(blockNames, injector) {
     if (blockNames.length > 0) {
         let blockList = [];
-        const jsActionMap = injector.get(BLOCK_ELEMENT_MAP);
+        const jsActionMap = injector.get(JSACTION_BLOCK_ELEMENT_MAP);
         for (let blockName of blockNames) {
             if (jsActionMap.has(blockName)) {
                 blockList = [...blockList, ...jsActionMap.get(blockName)];
+                jsActionMap.delete(blockName);
             }
         }
         const replayList = new Set(blockList);
@@ -20905,6 +20913,10 @@ const JSACTION_EVENT_CONTRACT = new InjectionToken(ngDevMode ? 'EVENT_CONTRACT_D
     providedIn: 'root',
     factory: () => ({}),
 });
+function cleanupContracts(injector) {
+    const eventContractDetails = injector.get(JSACTION_EVENT_CONTRACT);
+    eventContractDetails.instance.cleanUp();
+}
 
 /**
  * The name of a field that Angular monkey-patches onto a component
@@ -23086,29 +23098,27 @@ function detectChangesInViewIfRequired(lView, notifyErrorHandler, isFirstPass, z
 }
 
 /**
- * Finds first hydrated parent `@defer` block for a given block id.
- * If there are any dehydrated `@defer` blocks found along the way,
- * they are also stored and returned from the function (as a list of ids).
+ * Builds a queue of blocks that need to be hydrated, looking up the
+ * tree to the topmost defer block that exists in the tree that hasn't
+ * been hydrated, but exists in the registry. This queue is in top down
+ * heirarchical order as a list of defer block ids.
  * Note: This is utilizing serialized information to navigate up the tree
  */
-function findFirstHydratedParentDeferBlock(deferBlockId, injector) {
+function getParentBlockHydrationQueue(deferBlockId, injector) {
     const deferBlockRegistry = injector.get(DeferBlockRegistry);
     const transferState = injector.get(TransferState);
     const deferBlockParents = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
-    const dehydratedBlocks = [];
-    let deferBlock = deferBlockRegistry.get(deferBlockId);
+    let isTopMostDeferBlock = false;
     let currentBlockId = deferBlockId;
-    // at each level we check if the registry has the given defer block id
-    // - if it does, we know it was already hydrated and can stop here
-    // - if it does not, we continue on
-    while (!deferBlock) {
-        dehydratedBlocks.unshift(currentBlockId);
+    const deferBlockQueue = [];
+    while (!isTopMostDeferBlock && currentBlockId) {
+        ngDevMode &&
+            assertEqual(deferBlockQueue.indexOf(currentBlockId), -1, 'Internal error: defer block hierarchy has a cycle.');
+        deferBlockQueue.unshift(currentBlockId);
+        isTopMostDeferBlock = deferBlockRegistry.has(currentBlockId);
         currentBlockId = deferBlockParents[currentBlockId][DEFER_PARENT_BLOCK_ID];
-        if (!currentBlockId)
-            break;
-        deferBlock = deferBlockRegistry.get(currentBlockId);
     }
-    return { blockId: currentBlockId, deferBlock, dehydratedBlocks };
+    return deferBlockQueue;
 }
 /**
  * The core mechanism for incremental hydration. This recursively triggers
@@ -23118,37 +23128,38 @@ function findFirstHydratedParentDeferBlock(deferBlockId, injector) {
  * @param injector
  * @param blockName
  * @param onTriggerFn The function that triggers the block and fetches deps
- * @param hydratedBlocks The set of blocks currently being hydrated in the tree
  * @returns
  */
-async function hydrateFromBlockName(injector, blockName, onTriggerFn, hydratedBlocks = new Set()) {
+async function hydrateFromBlockName(injector, blockName, onTriggerFn) {
     const deferBlockRegistry = injector.get(DeferBlockRegistry);
     // Make sure we don't hydrate/trigger the same thing multiple times
     if (deferBlockRegistry.hydrating.has(blockName))
-        return { deferBlock: null, hydratedBlocks };
-    const { blockId, deferBlock, dehydratedBlocks } = findFirstHydratedParentDeferBlock(blockName, injector);
-    if (deferBlock && blockId) {
-        // Step 2: Add the current block to the tracking sets to prevent
-        // attempting to trigger hydration on a block more than once
-        // simulataneously.
-        hydratedBlocks.add(blockId);
-        deferBlockRegistry.hydrating.add(blockId);
-        // Step 3: Run the actual trigger function to fetch dependencies
+        return { deferBlock: null, hydratedBlocks: new Set() };
+    // Step 1: Get the queue of items that needs to be hydrated
+    const hydrationQueue = getParentBlockHydrationQueue(blockName, injector);
+    // Step 2: Add all the items in the queue to the registry at once so we don't trigger hydration on them while
+    // the sequence of triggers fires.
+    hydrationQueue.forEach((id) => deferBlockRegistry.hydrating.add(id));
+    // Step 3: hydrate each block in the queue. It will be in descending order from the top down.
+    for (const dehydratedBlockId of hydrationQueue) {
+        // The registry will have the item in the queue after each loop.
+        const deferBlock = deferBlockRegistry.get(dehydratedBlockId);
+        // Step 4: Run the actual trigger function to fetch dependencies.
+        // Triggering a block adds any of its child defer blocks to the registry.
         await onTriggerFn(deferBlock);
-        // Step 4: Recursively trigger, fetch, and hydrate from the top of the hierarchy down
-        let hydratedBlock = deferBlock;
-        for (const dehydratedBlock of dehydratedBlocks) {
-            const hydratedInfo = await hydrateFromBlockName(injector, dehydratedBlock, onTriggerFn, hydratedBlocks);
-            hydratedBlock = hydratedInfo.deferBlock;
-        }
-        // TODO(incremental-hydration): this is likely where we want to do Step 5: some cleanup work in the
-        // DeferBlockRegistry.
-        return { deferBlock: hydratedBlock, hydratedBlocks };
+        // Step 5: Remove the defer block from the list of hydrating blocks now that it's done hydrating
+        deferBlockRegistry.hydrating.delete(dehydratedBlockId);
     }
-    else {
-        // TODO(incremental-hydration): this is likely an error, consider producing a `console.error`.
-        return { deferBlock: null, hydratedBlocks };
+    const hydratedBlocks = new Set(hydrationQueue);
+    // The last item in the queue was the original target block;
+    const hydratedBlockId = hydrationQueue.slice(-1)[0];
+    const hydratedBlock = deferBlockRegistry.get(hydratedBlockId);
+    // Step 6: remove all hydrated blocks from the registry
+    deferBlockRegistry.removeBlocks(hydratedBlocks);
+    if (deferBlockRegistry.size === 0) {
+        cleanupContracts(injector);
     }
+    return { deferBlock: hydratedBlock, hydratedBlocks };
 }
 async function incrementallyHydrateFromBlockName(injector, blockName, triggerFn) {
     const { deferBlock, hydratedBlocks } = await hydrateFromBlockName(injector, blockName, triggerFn);
@@ -34405,7 +34416,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-94eae78');
+const VERSION = new Version('19.1.0-next.0+sha-32a5388');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38477,7 +38488,7 @@ function withEventReplay() {
                 // being present on the same page. We only want to enable event replay for the
                 // apps that actually want it.
                 if (!appsWithEventReplay.has(appRef)) {
-                    const jsActionMap = inject(BLOCK_ELEMENT_MAP);
+                    const jsActionMap = inject(JSACTION_BLOCK_ELEMENT_MAP);
                     if (shouldEnableEventReplay(injector)) {
                         setStashFn((rEl, eventName, listenerFn) => {
                             sharedStashFunction(rEl, eventName, listenerFn);
@@ -38605,11 +38616,6 @@ async function hydrateAndInvokeBlockListeners(blockName, injector, event, curren
     blockEventQueue.push({ event, currentTarget });
     const { deferBlock, hydratedBlocks } = await hydrateFromBlockName(injector, blockName, fetchAndRenderDeferBlock);
     if (deferBlock !== null) {
-        // TODO(incremental-hydration): extract this work into a post
-        // hydration cleanup function
-        const deferBlockRegistry = injector.get(DeferBlockRegistry);
-        deferBlockRegistry.hydrating.delete(blockName);
-        hydratedBlocks.add(blockName);
         const appRef = injector.get(ApplicationRef);
         await appRef.whenStable();
         replayQueuedBlockEvents(hydratedBlocks, injector);
@@ -38651,7 +38657,7 @@ function convertHydrateTriggersToJsAction(triggers) {
     return actionList;
 }
 function appendBlocksToJSActionMap(el, injector) {
-    const jsActionMap = injector.get(BLOCK_ELEMENT_MAP);
+    const jsActionMap = injector.get(JSACTION_BLOCK_ELEMENT_MAP);
     sharedMapFunction(el, jsActionMap);
 }
 function gatherDeferBlocksByJSActionAttribute(doc) {
@@ -39331,6 +39337,11 @@ function annotateDeferBlockRootNodesWithJsAction(tDetails, rootNodes, parentDefe
     }
 }
 
+/**
+ * Initializes incremental hydration for non-JSAction triggers. This gathers up
+ * all the parent / child relationships of defer blocks and identifies all the
+ * serialized defer blocks that would need to be potentially hydrated later.
+ */
 function bootstrapIncrementalHydration(doc, injector) {
     const deferBlockData = processBlockData(injector);
     const commentsByBlockId = gatherDeferBlocksCommentNodes(doc, doc.body);
@@ -39339,23 +39350,31 @@ function bootstrapIncrementalHydration(doc, injector) {
 function isTimerTrigger(triggerInfo) {
     return typeof triggerInfo === 'object' && triggerInfo.trigger === 5 /* DeferBlockTrigger.Timer */;
 }
-function hasHydrateTimerTrigger(blockData) {
-    return (blockData[DEFER_HYDRATE_TRIGGERS]?.filter((t) => isTimerTrigger(t)) ?? []).length > 0;
+function getHydrateTimerTrigger(blockData) {
+    const trigger = blockData[DEFER_HYDRATE_TRIGGERS]?.find((t) => isTimerTrigger(t));
+    return trigger?.delay ?? null;
 }
 function hasHydrateTrigger(blockData, trigger) {
     return blockData[DEFER_HYDRATE_TRIGGERS]?.includes(trigger) ?? false;
 }
+/**
+ * Creates a summary of the given serialized defer block, which is used later to properly initialize
+ * specific triggers.
+ */
 function createBlockSummary(blockInfo) {
     return {
         data: blockInfo,
         hydrate: {
             idle: hasHydrateTrigger(blockInfo, 0 /* DeferBlockTrigger.Idle */),
             immediate: hasHydrateTrigger(blockInfo, 1 /* DeferBlockTrigger.Immediate */),
-            timer: hasHydrateTimerTrigger(blockInfo),
+            timer: getHydrateTimerTrigger(blockInfo),
             viewport: hasHydrateTrigger(blockInfo, 2 /* DeferBlockTrigger.Viewport */),
         },
     };
 }
+/**
+ * Processes all of the defer block data in the transfer state and creates a map of the summaries
+ */
 function processBlockData(injector) {
     const blockData = retrieveDeferBlockData(injector);
     let blockDetails = new Map();
@@ -39364,26 +39383,32 @@ function processBlockData(injector) {
     }
     return blockDetails;
 }
+/**
+ * Retrieves all comments nodes that contain ngh comments referring to a defer block
+ */
 function gatherDeferBlocksCommentNodes(doc, node) {
-    const commentNodesIterator = doc.createNodeIterator(node ?? doc.body, NodeFilter.SHOW_COMMENT, {
-        acceptNode(node) {
-            return node.textContent?.match('ngh=') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-        },
-    });
+    const commentNodesIterator = doc.createNodeIterator(node, NodeFilter.SHOW_COMMENT, { acceptNode });
     let currentNode;
     const nodesByBlockId = new Map();
     while ((currentNode = commentNodesIterator.nextNode())) {
-        const result = currentNode?.textContent?.match('d[0-9]+');
-        if (result?.length === 1) {
-            nodesByBlockId.set(result[0], currentNode);
+        // TODO(incremental-hydration: convert this to use string parsing rather than regex
+        const regex = new RegExp(/^\s*ngh=(d[0-9]+)/g);
+        const result = regex.exec(currentNode?.textContent ?? '');
+        if (result && result?.length > 0) {
+            nodesByBlockId.set(result[1], currentNode);
         }
     }
     return nodesByBlockId;
 }
-function getTimerDelay(summary) {
-    const hydrateTrigger = summary.data[DEFER_HYDRATE_TRIGGERS].find((t) => isTimerTrigger(t));
-    return hydrateTrigger.delay;
+function acceptNode(node) {
+    return node.textContent?.trimStart().startsWith('ngh=')
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_REJECT;
 }
+/**
+ * Loops through all defer block summaries and ensures all the blocks triggers are
+ * properly initialized
+ */
 function processAndInitTriggers(injector, blockData, nodes) {
     const idleElements = [];
     const timerElements = [];
@@ -39399,20 +39424,20 @@ function processAndInitTriggers(injector, blockData, nodes) {
                 if (currentNode.nodeType !== Node.ELEMENT_NODE) {
                     continue;
                 }
-                const et = { el: currentNode, blockName: blockId };
+                const elementTrigger = { el: currentNode, blockName: blockId };
                 // hydrate
                 if (blockSummary.hydrate.idle) {
-                    idleElements.push(et);
+                    idleElements.push(elementTrigger);
                 }
                 if (blockSummary.hydrate.immediate) {
-                    immediateElements.push(et);
+                    immediateElements.push(elementTrigger);
                 }
-                if (blockSummary.hydrate.timer) {
-                    et.delay = getTimerDelay(blockSummary);
-                    timerElements.push(et);
+                if (blockSummary.hydrate.timer !== null) {
+                    elementTrigger.delay = blockSummary.hydrate.timer;
+                    timerElements.push(elementTrigger);
                 }
                 if (blockSummary.hydrate.viewport) {
-                    viewportElements.push(et);
+                    viewportElements.push(elementTrigger);
                 }
             }
         }
@@ -39422,23 +39447,23 @@ function processAndInitTriggers(injector, blockData, nodes) {
     setViewportTriggers(injector, viewportElements);
     setTimerTriggers(injector, timerElements);
 }
-async function setIdleTriggers(injector, ets) {
-    for (const elementTrigger of ets) {
+async function setIdleTriggers(injector, elementTriggers) {
+    for (const elementTrigger of elementTriggers) {
         const registry = injector.get(DeferBlockRegistry);
         const onInvoke = () => incrementallyHydrateFromBlockName(injector, elementTrigger.blockName, fetchAndRenderDeferBlock);
         const cleanupFn = onIdle(onInvoke, injector);
         registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
     }
 }
-async function setViewportTriggers(injector, ets) {
-    for (let et of ets) {
-        onViewport(et.el, async () => {
-            await incrementallyHydrateFromBlockName(injector, et.blockName, fetchAndRenderDeferBlock);
+async function setViewportTriggers(injector, elementTriggers) {
+    for (let elementTrigger of elementTriggers) {
+        onViewport(elementTrigger.el, async () => {
+            await incrementallyHydrateFromBlockName(injector, elementTrigger.blockName, fetchAndRenderDeferBlock);
         }, injector);
     }
 }
-async function setTimerTriggers(injector, ets) {
-    for (const elementTrigger of ets) {
+async function setTimerTriggers(injector, elementTriggers) {
+    for (const elementTrigger of elementTriggers) {
         const registry = injector.get(DeferBlockRegistry);
         const onInvoke = async () => await incrementallyHydrateFromBlockName(injector, elementTrigger.blockName, fetchAndRenderDeferBlock);
         const timerFn = onTimer(elementTrigger.delay);
@@ -39446,8 +39471,8 @@ async function setTimerTriggers(injector, ets) {
         registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
     }
 }
-async function setImmediateTriggers(injector, ets) {
-    for (const elementTrigger of ets) {
+async function setImmediateTriggers(injector, elementTriggers) {
+    for (const elementTrigger of elementTriggers) {
         await incrementallyHydrateFromBlockName(injector, elementTrigger.blockName, fetchAndRenderDeferBlock);
     }
 }
@@ -39463,9 +39488,6 @@ function retrieveDeferBlockDataImpl(injector) {
     const transferState = injector.get(TransferState, null, { optional: true });
     if (transferState !== null) {
         const nghDeferData = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
-        // If the `ngh` attribute exists and has a non-empty value,
-        // the hydration info *must* be present in the TransferState.
-        // If there is no data for some reasons, this is an error.
         ngDevMode &&
             assertDefined(nghDeferData, 'Unable to retrieve defer block info from the TransferState.');
         return nghDeferData;
