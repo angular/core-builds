@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.0+sha-0ca14e2
+ * @license Angular v19.0.0-rc.0+sha-600ef5e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14415,6 +14415,7 @@ export declare const enum ɵRuntimeErrorCode {
     MISSING_HYDRATION_ANNOTATIONS = -505,
     HYDRATION_STABLE_TIMEDOUT = -506,
     MISSING_SSR_CONTENT_INTEGRITY_MARKER = -507,
+    MISCONFIGURED_INCREMENTAL_HYDRATION = 508,
     SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
     REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
     ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT = -602,
