@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-32a5388
+ * @license Angular v19.1.0-next.0+sha-89db5f7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16943,7 +16943,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-32a5388']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-89db5f7']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -20245,6 +20245,15 @@ function isDeferBlock(tView, tNode) {
     }
     return !!tDetails && isTDeferBlockDetails(tDetails);
 }
+/** Throws an error if the incremental hydration is not enabled */
+function assertIncrementalHydrationIsConfigured(injector) {
+    if (!isIncrementalHydrationEnabled(injector)) {
+        throw new RuntimeError(508 /* RuntimeErrorCode.MISCONFIGURED_INCREMENTAL_HYDRATION */, 'Angular has detected that some `@defer` blocks use `hydrate` triggers, ' +
+            'but incremental hydration was not enabled. Please ensure that the `withIncrementalHydration()` ' +
+            'call is added as an argument for the `provideClientHydration()` function call ' +
+            'in your application config.');
+    }
+}
 
 /*!
  * @license
@@ -20779,7 +20788,11 @@ class TimerScheduler {
     });
 }
 
-// TODO(incremental-hydration): refactor this so that it's not used in CSR cases
+/**
+ * An internal injection token to reference `DeferBlockRegistry` implementation
+ * in a tree-shakable way.
+ */
+const DEFER_BLOCK_REGISTRY = new InjectionToken(ngDevMode ? 'DEFER_BLOCK_REGISTRY' : '');
 /**
  * The DeferBlockRegistry is used for incremental hydration purposes. It keeps
  * track of the Defer Blocks that need hydration so we can effectively
@@ -20837,7 +20850,7 @@ class DeferBlockRegistry {
     /** @nocollapse */
     static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
         token: DeferBlockRegistry,
-        providedIn: 'root',
+        providedIn: null,
         factory: () => new DeferBlockRegistry(),
     });
 }
@@ -23105,7 +23118,7 @@ function detectChangesInViewIfRequired(lView, notifyErrorHandler, isFirstPass, z
  * Note: This is utilizing serialized information to navigate up the tree
  */
 function getParentBlockHydrationQueue(deferBlockId, injector) {
-    const deferBlockRegistry = injector.get(DeferBlockRegistry);
+    const deferBlockRegistry = injector.get(DEFER_BLOCK_REGISTRY);
     const transferState = injector.get(TransferState);
     const deferBlockParents = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
     let isTopMostDeferBlock = false;
@@ -23131,7 +23144,7 @@ function getParentBlockHydrationQueue(deferBlockId, injector) {
  * @returns
  */
 async function hydrateFromBlockName(injector, blockName, onTriggerFn) {
-    const deferBlockRegistry = injector.get(DeferBlockRegistry);
+    const deferBlockRegistry = injector.get(DEFER_BLOCK_REGISTRY);
     // Make sure we don't hydrate/trigger the same thing multiple times
     if (deferBlockRegistry.hydrating.has(blockName))
         return { deferBlock: null, hydratedBlocks: new Set() };
@@ -23336,10 +23349,10 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
     setLDeferBlockDetails(lView, adjustedIndex, lDetails);
     let registry = null;
     if (ssrUniqueId !== null) {
-        // TODO(incremental-hydration): explore how we can make
-        // `DeferBlockRegistry` tree-shakable for client-only cases.
-        registry = injector.get(DeferBlockRegistry);
-        // Also store this defer block in the registry.
+        ngDevMode && assertIncrementalHydrationIsConfigured(injector);
+        // Store this defer block in the registry, to have an access to
+        // internal data structures from hydration runtime code.
+        registry = injector.get(DEFER_BLOCK_REGISTRY);
         registry.add(ssrUniqueId, { lView, tNode, lContainer });
     }
     const cleanupTriggersFn = () => invokeAllTriggerCleanupFns(lDetails, registry);
@@ -24208,7 +24221,7 @@ function triggerDeferBlock(lView, tNode) {
         return;
     let registry = null;
     if (isIncrementalHydrationEnabled(injector)) {
-        registry = injector.get(DeferBlockRegistry);
+        registry = injector.get(DEFER_BLOCK_REGISTRY);
     }
     // Defer block is triggered, cleanup all registered trigger functions.
     invokeAllTriggerCleanupFns(lDetails, registry);
@@ -34416,7 +34429,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-32a5388');
+const VERSION = new Version('19.1.0-next.0+sha-89db5f7');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39449,7 +39462,7 @@ function processAndInitTriggers(injector, blockData, nodes) {
 }
 async function setIdleTriggers(injector, elementTriggers) {
     for (const elementTrigger of elementTriggers) {
-        const registry = injector.get(DeferBlockRegistry);
+        const registry = injector.get(DEFER_BLOCK_REGISTRY);
         const onInvoke = () => incrementallyHydrateFromBlockName(injector, elementTrigger.blockName, fetchAndRenderDeferBlock);
         const cleanupFn = onIdle(onInvoke, injector);
         registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
@@ -39464,7 +39477,7 @@ async function setViewportTriggers(injector, elementTriggers) {
 }
 async function setTimerTriggers(injector, elementTriggers) {
     for (const elementTrigger of elementTriggers) {
-        const registry = injector.get(DeferBlockRegistry);
+        const registry = injector.get(DEFER_BLOCK_REGISTRY);
         const onInvoke = async () => await incrementallyHydrateFromBlockName(injector, elementTrigger.blockName, fetchAndRenderDeferBlock);
         const timerFn = onTimer(elementTrigger.delay);
         const cleanupFn = timerFn(onInvoke, injector);
@@ -39758,6 +39771,10 @@ function withIncrementalHydration() {
         {
             provide: IS_INCREMENTAL_HYDRATION_ENABLED,
             useValue: true,
+        },
+        {
+            provide: DEFER_BLOCK_REGISTRY,
+            useClass: DeferBlockRegistry,
         },
         {
             provide: ENVIRONMENT_INITIALIZER,
