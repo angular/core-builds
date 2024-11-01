@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.0+sha-5278f19
+ * @license Angular v19.0.0-rc.0+sha-86d8f6b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-ffe4eb64.js');
+var checker = require('./checker-22d55b06.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -898,38 +898,57 @@ function compileHmrInitializer(meta) {
     const urlPartial = `/@ng/component?c=${id}&t=`;
     const moduleName = 'm';
     const dataName = 'd';
+    const timestampName = 't';
+    const importCallbackName = `${meta.className}_HmrLoad`;
     const locals = meta.locals.map((localName) => checker.variable(localName));
-    // ɵɵreplaceMetadata(Comp, m.default, core, [...]);
-    const replaceMetadata = checker.importExpr(checker.Identifiers.replaceMetadata)
-        .callFn([
-        meta.type,
-        checker.variable(moduleName).prop('default'),
-        new checker.ExternalExpr(checker.Identifiers.core),
-        checker.literalArr(locals),
-    ]);
-    // (m) => ɵɵreplaceMetadata(...)
-    const replaceCallback = checker.arrowFn([new checker.FnParam(moduleName)], replaceMetadata);
-    // '<urlPartial>' + encodeURIComponent(d.timestamp)
+    // m.default
+    const defaultRead = checker.variable(moduleName).prop('default');
+    // ɵɵreplaceMetadata(Comp, m.default, [...]);
+    const replaceCall = checker.importExpr(checker.Identifiers.replaceMetadata)
+        .callFn([meta.type, defaultRead, new checker.ExternalExpr(checker.Identifiers.core), checker.literalArr(locals)]);
+    // (m) => m.default && ɵɵreplaceMetadata(...)
+    const replaceCallback = checker.arrowFn([new checker.FnParam(moduleName)], defaultRead.and(replaceCall));
+    // '<urlPartial>' + encodeURIComponent(t)
     const urlValue = checker.literal(urlPartial)
-        .plus(checker.variable('encodeURIComponent').callFn([checker.variable(dataName).prop('timestamp')]));
-    // import(/* @vite-ignore */ url).then(() => replaceMetadata(...));
-    // The vite-ignore special comment is required to avoid Vite from generating a superfluous
-    // warning for each usage within the development code. If Vite provides a method to
-    // programmatically avoid this warning in the future, this added comment can be removed here.
-    const dynamicImport = new checker.DynamicImportExpr(urlValue, null, '@vite-ignore')
-        .prop('then')
-        .callFn([replaceCallback]);
-    // (d) => { if (d.id === <id>) { replaceMetadata(...) } }
-    const listenerCallback = checker.arrowFn([new checker.FnParam(dataName)], [checker.ifStmt(checker.variable(dataName).prop('id').equals(checker.literal(id)), [dynamicImport.toStmt()])]);
+        .plus(checker.variable('encodeURIComponent').callFn([checker.variable(timestampName)]));
+    // function Cmp_HmrLoad(t) {
+    //   import(/* @vite-ignore */ url).then((m) => m.default && replaceMetadata(...));
+    // }
+    const importCallback = new checker.DeclareFunctionStmt(importCallbackName, [new checker.FnParam(timestampName)], [
+        // The vite-ignore special comment is required to prevent Vite from generating a superfluous
+        // warning for each usage within the development code. If Vite provides a method to
+        // programmatically avoid this warning in the future, this added comment can be removed here.
+        new checker.DynamicImportExpr(urlValue, null, '@vite-ignore')
+            .prop('then')
+            .callFn([replaceCallback])
+            .toStmt(),
+    ], null, checker.StmtModifier.Final);
+    // (d) => d.id === <id> && Cmp_HmrLoad(d.timestamp)
+    const updateCallback = checker.arrowFn([new checker.FnParam(dataName)], checker.variable(dataName)
+        .prop('id')
+        .identical(checker.literal(id))
+        .and(checker.variable(importCallbackName).callFn([checker.variable(dataName).prop('timestamp')])));
+    // Cmp_HmrLoad(Date.now());
+    // Initial call to kick off the loading in order to avoid edge cases with components
+    // coming from lazy chunks that change before the chunk has loaded.
+    const initialCall = checker.variable(importCallbackName)
+        .callFn([checker.variable('Date').prop('now').callFn([])]);
     // import.meta.hot
     const hotRead = checker.variable('import').prop('meta').prop('hot');
     // import.meta.hot.on('angular:component-update', () => ...);
     const hotListener = hotRead
         .clone()
         .prop('on')
-        .callFn([checker.literal('angular:component-update'), listenerCallback]);
-    // import.meta.hot && import.meta.hot.on(...)
-    return checker.arrowFn([], [checker.devOnlyGuardedExpression(hotRead.and(hotListener)).toStmt()]).callFn([]);
+        .callFn([checker.literal('angular:component-update'), updateCallback]);
+    return checker.arrowFn([], [
+        // function Cmp_HmrLoad() {...}.
+        importCallback,
+        // ngDevMode && Cmp_HmrLoad(Date.now());
+        checker.devOnlyGuardedExpression(initialCall).toStmt(),
+        // ngDevMode && import.meta.hot && import.meta.hot.on(...)
+        checker.devOnlyGuardedExpression(hotRead.and(hotListener)).toStmt(),
+    ])
+        .callFn([]);
 }
 /**
  * Compiles the HMR update callback for a class.
@@ -968,7 +987,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-5278f19'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-86d8f6b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -986,7 +1005,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-5278f19'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-86d8f6b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1081,7 +1100,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-5278f19'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-86d8f6b'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1497,7 +1516,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-5278f19'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-86d8f6b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1532,7 +1551,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-5278f19'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-86d8f6b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1583,7 +1602,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-5278f19'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-86d8f6b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1616,7 +1635,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-5278f19'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-86d8f6b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1667,7 +1686,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-5278f19'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-86d8f6b'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -20088,7 +20107,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0-rc.0+sha-5278f19` usually means that core is at head so it supports
+    // A version of `19.0.0-rc.0+sha-86d8f6b` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
