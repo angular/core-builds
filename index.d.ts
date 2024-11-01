@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.0+sha-d7a7c80
+ * @license Angular v19.0.0-rc.0+sha-8a38b68
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17548,10 +17548,11 @@ export declare function ɵɵrepeaterTrackByIndex(index: number): number;
  * Replaces the metadata of a component type and re-renders all live instances of the component.
  * @param type Class whose metadata will be replaced.
  * @param applyMetadata Callback that will apply a new set of metadata on the `type` when invoked.
+ * @param environment Core runtime environment to use when applying the HMR update.
  * @param locals Local symbols from the source location that have to be exposed to the callback.
  * @codeGenApi
  */
-export declare function ɵɵreplaceMetadata(type: Type<unknown>, applyMetadata: (...args: [Type<unknown>, Record<string, unknown>, ...unknown[]]) => void, locals: unknown[]): void;
+export declare function ɵɵreplaceMetadata(type: Type<unknown>, applyMetadata: (...args: [Type<unknown>, Record<string, unknown>, ...unknown[]]) => void, environment: Record<string, unknown>, locals: unknown[]): void;
 
 /**
  * Clears the view set in `ɵɵrestoreView` from memory. Returns the passed in

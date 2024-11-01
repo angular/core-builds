@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.0+sha-d7a7c80
+ * @license Angular v19.0.0-rc.0+sha-8a38b68
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,8 +10,8 @@ var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-8778ee3b.js');
-var program = require('./program-888c571e.js');
+var checker = require('./checker-ffe4eb64.js');
+var program = require('./program-df97e8f7.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -2146,8 +2146,7 @@ class ExternalExpr extends Expression {
     isEquivalent(e) {
         return (e instanceof ExternalExpr &&
             this.value.name === e.value.name &&
-            this.value.moduleName === e.value.moduleName &&
-            this.value.runtime === e.value.runtime);
+            this.value.moduleName === e.value.moduleName);
     }
     isConstant() {
         return false;
@@ -30308,7 +30307,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-rc.0+sha-d7a7c80');
+new Version('19.0.0-rc.0+sha-8a38b68');
 
 var _VisitorMode;
 (function (_VisitorMode) {
