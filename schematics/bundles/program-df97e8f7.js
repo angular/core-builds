@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-9514624
+ * @license Angular v19.1.0-next.0+sha-3e2bc69
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-8778ee3b.js');
+var checker = require('./checker-ffe4eb64.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -899,9 +899,14 @@ function compileHmrInitializer(meta) {
     const moduleName = 'm';
     const dataName = 'd';
     const locals = meta.locals.map((localName) => checker.variable(localName));
-    // ɵɵreplaceMetadata(Comp, m.default, [...]);
+    // ɵɵreplaceMetadata(Comp, m.default, core, [...]);
     const replaceMetadata = checker.importExpr(checker.Identifiers.replaceMetadata)
-        .callFn([meta.type, checker.variable(moduleName).prop('default'), checker.literalArr(locals)]);
+        .callFn([
+        meta.type,
+        checker.variable(moduleName).prop('default'),
+        new checker.ExternalExpr(checker.Identifiers.core),
+        checker.literalArr(locals),
+    ]);
     // (m) => ɵɵreplaceMetadata(...)
     const replaceCallback = checker.arrowFn([new checker.FnParam(moduleName)], replaceMetadata);
     // '<urlPartial>' + encodeURIComponent(d.timestamp)
@@ -963,7 +968,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-9514624'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-3e2bc69'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -981,7 +986,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-9514624'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-3e2bc69'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1076,7 +1081,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-9514624'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-3e2bc69'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1492,7 +1497,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-9514624'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-3e2bc69'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1527,7 +1532,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-9514624'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-3e2bc69'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1578,7 +1583,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-9514624'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-3e2bc69'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1611,7 +1616,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-9514624'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-3e2bc69'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1662,7 +1667,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-9514624'));
+    definitionMap.set('version', checker.literal('19.1.0-next.0+sha-3e2bc69'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -17255,9 +17260,17 @@ class UnusedStandaloneImportsRule {
             ? ts__default["default"].DiagnosticCategory.Error
             : ts__default["default"].DiagnosticCategory.Warning;
         if (unused.length === metadata.imports.length) {
-            return checker.makeDiagnostic(checker.ErrorCode.UNUSED_STANDALONE_IMPORTS, metadata.rawImports, 'All imports are unused', undefined, category);
+            return checker.makeDiagnostic(checker.ErrorCode.UNUSED_STANDALONE_IMPORTS, this.getDiagnosticNode(metadata.rawImports), 'All imports are unused', undefined, category);
         }
-        return checker.makeDiagnostic(checker.ErrorCode.UNUSED_STANDALONE_IMPORTS, metadata.rawImports, 'Imports array contains unused imports', unused.map(([ref, type, name]) => checker.makeRelatedInformation(ref.getOriginForDiagnostics(metadata.rawImports), `${type} "${name}" is not used within the template`)), category);
+        return checker.makeDiagnostic(checker.ErrorCode.UNUSED_STANDALONE_IMPORTS, this.getDiagnosticNode(metadata.rawImports), 'Imports array contains unused imports', unused.map((ref) => {
+            return checker.makeRelatedInformation(
+            // Intentionally don't pass a message to `makeRelatedInformation` to make the diagnostic
+            // less noisy. The node will already be highlighted so the user can see which node is
+            // unused. Note that in the case where an origin can't be resolved, we fall back to
+            // the original node's identifier so the user can still see the name. This can happen
+            // when the unused is coming from an imports array within the same file.
+            ref.getOriginForDiagnostics(metadata.rawImports, ref.node.name), '');
+        }), category);
     }
     getUnusedSymbols(metadata, usedDirectives, usedPipes) {
         const { imports, rawImports } = metadata;
@@ -17273,7 +17286,7 @@ class UnusedStandaloneImportsRule {
                     !usedDirectives.has(currentNode) &&
                     !this.isPotentialSharedReference(current, rawImports)) {
                     unused ??= [];
-                    unused.push([current, dirMeta.isComponent ? 'Component' : 'Directive', dirMeta.name]);
+                    unused.push(current);
                 }
                 continue;
             }
@@ -17283,7 +17296,7 @@ class UnusedStandaloneImportsRule {
                 !usedPipes.has(pipeMeta.name) &&
                 !this.isPotentialSharedReference(current, rawImports)) {
                 unused ??= [];
-                unused.push([current, 'Pipe', pipeMeta.ref.node.name.text]);
+                unused.push(current);
             }
         }
         return unused;
@@ -17314,6 +17327,21 @@ class UnusedStandaloneImportsRule {
         // Otherwise the reference likely comes from an imported
         // symbol like an array of shared common components.
         return true;
+    }
+    /** Gets the node on which to report the diagnostic. */
+    getDiagnosticNode(importsExpression) {
+        let current = importsExpression.parent;
+        while (current) {
+            // Highlight the `imports:` part of the node instead of the entire node, because
+            // imports arrays can be long which makes the diagnostic harder to scan visually.
+            if (ts__default["default"].isPropertyAssignment(current)) {
+                return current.name;
+            }
+            else {
+                current = current.parent;
+            }
+        }
+        return importsExpression;
     }
 }
 
@@ -20060,7 +20088,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.1.0-next.0+sha-9514624` usually means that core is at head so it supports
+    // A version of `19.1.0-next.0+sha-3e2bc69` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
