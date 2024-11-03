@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.0+sha-86d8f6b
+ * @license Angular v19.0.0-rc.0+sha-c5e676b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -61,7 +61,12 @@ function isStandaloneComponent(node) {
         const arg = decorator.expression.arguments[0];
         if (ts__default["default"].isObjectLiteralExpression(arg)) {
             const property = findLiteralProperty(arg, 'standalone');
-            return property ? property.initializer.getText() === 'true' : false;
+            if (property) {
+                return property.initializer.getText() === 'true';
+            }
+            else {
+                return true; // standalone is true by default in v19
+            }
         }
     }
     return false;
