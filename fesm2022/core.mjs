@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.10+sha-adbc27c
+ * @license Angular v18.2.10+sha-3aa45a2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16940,7 +16940,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.10+sha-adbc27c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '18.2.10+sha-3aa45a2']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18764,21 +18764,18 @@ function ɵɵCopyDefinitionFeature(definition) {
  */
 function ɵɵHostDirectivesFeature(rawHostDirectives) {
     const feature = (definition) => {
-        const resolved = (Array.isArray(rawHostDirectives) ? rawHostDirectives : rawHostDirectives()).map((dir) => {
-            return typeof dir === 'function'
-                ? { directive: resolveForwardRef(dir), inputs: EMPTY_OBJ, outputs: EMPTY_OBJ }
-                : {
-                    directive: resolveForwardRef(dir.directive),
-                    inputs: bindingArrayToMap(dir.inputs),
-                    outputs: bindingArrayToMap(dir.outputs),
-                };
-        });
+        const isEager = Array.isArray(rawHostDirectives);
         if (definition.hostDirectives === null) {
             definition.findHostDirectiveDefs = findHostDirectiveDefs;
-            definition.hostDirectives = resolved;
+            definition.hostDirectives = isEager
+                ? rawHostDirectives.map(createHostDirectiveDef)
+                : [rawHostDirectives];
+        }
+        else if (isEager) {
+            definition.hostDirectives.unshift(...rawHostDirectives.map(createHostDirectiveDef));
         }
         else {
-            definition.hostDirectives.unshift(...resolved);
+            definition.hostDirectives.unshift(rawHostDirectives);
         }
     };
     feature.ngInherit = true;
@@ -18786,20 +18783,42 @@ function ɵɵHostDirectivesFeature(rawHostDirectives) {
 }
 function findHostDirectiveDefs(currentDef, matchedDefs, hostDirectiveDefs) {
     if (currentDef.hostDirectives !== null) {
-        for (const hostDirectiveConfig of currentDef.hostDirectives) {
-            const hostDirectiveDef = getDirectiveDef(hostDirectiveConfig.directive);
-            if (typeof ngDevMode === 'undefined' || ngDevMode) {
-                validateHostDirective(hostDirectiveConfig, hostDirectiveDef);
+        for (const configOrFn of currentDef.hostDirectives) {
+            if (typeof configOrFn === 'function') {
+                const resolved = configOrFn();
+                for (const config of resolved) {
+                    trackHostDirectiveDef(createHostDirectiveDef(config), matchedDefs, hostDirectiveDefs);
+                }
             }
-            // We need to patch the `declaredInputs` so that
-            // `ngOnChanges` can map the properties correctly.
-            patchDeclaredInputs(hostDirectiveDef.declaredInputs, hostDirectiveConfig.inputs);
-            // Host directives execute before the host so that its host bindings can be overwritten.
-            findHostDirectiveDefs(hostDirectiveDef, matchedDefs, hostDirectiveDefs);
-            hostDirectiveDefs.set(hostDirectiveDef, hostDirectiveConfig);
-            matchedDefs.push(hostDirectiveDef);
+            else {
+                trackHostDirectiveDef(configOrFn, matchedDefs, hostDirectiveDefs);
+            }
         }
     }
+}
+/** Tracks a single host directive during directive matching. */
+function trackHostDirectiveDef(def, matchedDefs, hostDirectiveDefs) {
+    const hostDirectiveDef = getDirectiveDef(def.directive);
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        validateHostDirective(def, hostDirectiveDef);
+    }
+    // We need to patch the `declaredInputs` so that
+    // `ngOnChanges` can map the properties correctly.
+    patchDeclaredInputs(hostDirectiveDef.declaredInputs, def.inputs);
+    // Host directives execute before the host so that its host bindings can be overwritten.
+    findHostDirectiveDefs(hostDirectiveDef, matchedDefs, hostDirectiveDefs);
+    hostDirectiveDefs.set(hostDirectiveDef, def);
+    matchedDefs.push(hostDirectiveDef);
+}
+/** Creates a `HostDirectiveDef` from a used-defined host directive configuration. */
+function createHostDirectiveDef(config) {
+    return typeof config === 'function'
+        ? { directive: resolveForwardRef(config), inputs: EMPTY_OBJ, outputs: EMPTY_OBJ }
+        : {
+            directive: resolveForwardRef(config.directive),
+            inputs: bindingArrayToMap(config.inputs),
+            outputs: bindingArrayToMap(config.outputs),
+        };
 }
 /**
  * Converts an array in the form of `['publicName', 'alias', 'otherPublicName', 'otherAlias']` into
@@ -31034,7 +31053,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('18.2.10+sha-adbc27c');
+const VERSION = new Version('18.2.10+sha-3aa45a2');
 
 /*
  * This file exists to support compilation of @angular/core in Ivy mode.

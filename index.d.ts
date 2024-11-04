@@ -1,5 +1,5 @@
 /**
- * @license Angular v18.2.10+sha-adbc27c
+ * @license Angular v18.2.10+sha-3aa45a2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4898,7 +4898,7 @@ declare type HostDirectiveBindingMap = {
     [publicName: string]: string;
 };
 
-/** Values that can be used to define a host directive through the `HostDirectivesFeature`. */
+/** Value that can be used to configure a host directive. */
 declare type HostDirectiveConfig = Type<unknown> | {
     directive: Type<unknown>;
     inputs?: string[];
@@ -12750,8 +12750,17 @@ export declare interface ɵDirectiveDef<T> {
      * configuration. Host directives will be added to the map as they're being matched to the node.
      */
     findHostDirectiveDefs: ((currentDef: ɵDirectiveDef<unknown>, matchedDefs: ɵDirectiveDef<unknown>[], hostDirectiveDefs: HostDirectiveDefs) => void) | null;
-    /** Additional directives to be applied whenever the directive has been matched. */
-    hostDirectives: HostDirectiveDef[] | null;
+    /**
+     * Additional directives to be applied whenever the directive has been matched.
+     *
+     * `HostDirectiveConfig` objects represent a host directive that can be resolved eagerly and were
+     * already pre-processed when the definition was created. A function needs to be resolved lazily
+     * during directive matching, because it's a forward reference.
+     *
+     * **Note:** we can't `HostDirectiveConfig` in the array, because there's no way to distinguish if
+     * a function in the array is a `Type` or a `() => HostDirectiveConfig[]`.
+     */
+    hostDirectives: (HostDirectiveDef | (() => HostDirectiveConfig[]))[] | null;
     setInput: (<U extends T>(this: ɵDirectiveDef<U>, instance: U, inputSignalNode: null | ɵInputSignalNode<unknown, unknown>, value: any, publicName: string, privateName: string) => void) | null;
 }
 
