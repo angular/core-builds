@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.0+sha-e6b05c7
+ * @license Angular v19.0.0-rc.0+sha-11f86a0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12,9 +12,8 @@ var schematics = require('@angular-devkit/schematics');
 var p = require('path');
 var compiler_host = require('./compiler_host-cca384c2.js');
 var ts = require('typescript');
-var ng_decorators = require('./ng_decorators-4579dec6.js');
+var nodes = require('./nodes-0e7d45ca.js');
 var imports = require('./imports-4ac08251.js');
-var nodes = require('./nodes-a535b2be.js');
 var leading_space = require('./leading_space-d190b83b.js');
 require('./checker-22d55b06.js');
 require('os');
@@ -106,7 +105,7 @@ function analyzeFile(sourceFile, localTypeChecker, options) {
             }
         }
         else if (ts__default["default"].isClassDeclaration(node)) {
-            const decorators = ng_decorators.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(node) || []);
+            const decorators = nodes.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(node) || []);
             const isAbstract = !!node.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.AbstractKeyword);
             const supportsDI = decorators.some((dec) => DECORATORS_SUPPORTING_DI.has(dec.name));
             const constructorNode = node.members.find((member) => ts__default["default"].isConstructorDeclaration(member) &&
@@ -727,7 +726,7 @@ function migrateParameter(node, options, localTypeChecker, printer, tracker, sup
 function createInjectReplacementCall(param, options, localTypeChecker, printer, tracker) {
     const moduleName = '@angular/core';
     const sourceFile = param.getSourceFile();
-    const decorators = ng_decorators.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(param) || []);
+    const decorators = nodes.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(param) || []);
     const literalProps = [];
     const type = param.type;
     let injectedType = '';

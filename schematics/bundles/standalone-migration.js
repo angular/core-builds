@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.0+sha-e6b05c7
+ * @license Angular v19.0.0-rc.0+sha-11f86a0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17,8 +17,7 @@ var p = require('path');
 var fs = require('fs');
 var compiler_host = require('./compiler_host-cca384c2.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var ng_decorators = require('./ng_decorators-4579dec6.js');
-var nodes = require('./nodes-a535b2be.js');
+var nodes = require('./nodes-0e7d45ca.js');
 var imports = require('./imports-4ac08251.js');
 require('module');
 require('url');
@@ -33,7 +32,7 @@ var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.0.0-rc.0+sha-e6b05c7');
+new checker.Version('19.0.0-rc.0+sha-11f86a0');
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
     return new program.NgtscProgram(rootNames, options, host, oldProgram);
@@ -653,7 +652,7 @@ function findNgModuleClassesToMigrate(sourceFile, typeChecker) {
     if (imports.getImportSpecifier(sourceFile, '@angular/core', 'NgModule')) {
         sourceFile.forEachChild(function walk(node) {
             if (ts__default["default"].isClassDeclaration(node)) {
-                const decorator = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []).find((current) => current.name === 'NgModule');
+                const decorator = nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []).find((current) => current.name === 'NgModule');
                 const metadata = decorator ? extractMetadataLiteral(decorator.node) : null;
                 if (metadata) {
                     const declarations = findLiteralProperty(metadata, 'declarations');
@@ -850,7 +849,7 @@ function analyzeTestingModules(testObjects, typeChecker) {
             if (seenDeclarations.has(decl)) {
                 continue;
             }
-            const [decorator] = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(decl) || []);
+            const [decorator] = nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(decl) || []);
             if (decorator) {
                 seenDeclarations.add(decl);
                 decorators.push(decorator);
@@ -1324,7 +1323,7 @@ function addRemovalTodos(nodes, tracker) {
 }
 /** Finds the `NgModule` decorator in a class, if it exists. */
 function findNgModuleDecorator(node, typeChecker) {
-    const decorators = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []);
+    const decorators = nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(node) || []);
     return decorators.find((decorator) => decorator.name === 'NgModule') || null;
 }
 /**
@@ -1400,7 +1399,7 @@ function analyzeBootstrapCall(call, typeChecker, templateTypeChecker) {
     if (!declaration) {
         return null;
     }
-    const decorator = ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(declaration) || []).find((decorator) => decorator.name === 'NgModule');
+    const decorator = nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(declaration) || []).find((decorator) => decorator.name === 'NgModule');
     if (!decorator ||
         decorator.node.expression.arguments.length === 0 ||
         !ts__default["default"].isObjectLiteralExpression(decorator.node.expression.arguments[0])) {
@@ -1589,7 +1588,7 @@ function migrateImportsForBootstrapCall(sourceFile, imports, nodeLookup, imports
             : element;
         const classDeclaration = findClassDeclaration(target, typeChecker);
         const decorators = classDeclaration
-            ? ng_decorators.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(classDeclaration) || [])
+            ? nodes.getAngularDecorators(typeChecker, ts__default["default"].getDecorators(classDeclaration) || [])
             : undefined;
         if (!decorators ||
             decorators.length === 0 ||
