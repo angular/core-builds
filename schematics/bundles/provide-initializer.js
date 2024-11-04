@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-536ee2b
+ * @license Angular v19.1.0-next.0+sha-a116a64
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -135,7 +135,7 @@ function tryParseProviderExpression(node) {
         return {
             ...info,
             importInject: deps.length > 0,
-            initializerCode: `() => { return (${useFactory.getText()})(${args.join(', ')}); }`,
+            initializerCode: `(${useFactory.getText()})(${args.join(', ')})`,
         };
     }
     if (useValue) {
