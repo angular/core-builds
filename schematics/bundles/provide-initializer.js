@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-31430a6
+ * @license Angular v19.1.0-next.0+sha-01f8628
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,7 +14,6 @@ var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 var compiler_host = require('./compiler_host-cca384c2.js');
 var ts = require('typescript');
 var imports = require('./imports-4ac08251.js');
-var nodes = require('./nodes-a535b2be.js');
 require('@angular-devkit/core');
 require('./checker-22d55b06.js');
 require('os');
@@ -32,9 +31,9 @@ function migrateFile(sourceFile, rewriteFn) {
         const provider = tryParseProviderExpression(node);
         if (provider) {
             replaceProviderWithNewApi({
-                sourceFile: sourceFile,
-                node: node,
-                provider: provider,
+                sourceFile,
+                node,
+                provider,
                 changeTracker,
             });
             return;
@@ -55,24 +54,14 @@ function replaceProviderWithNewApi({ sourceFile, node, provider, changeTracker, 
     }
     // Replace the provider with the new provide function.
     changeTracker.replaceText(sourceFile, node.getStart(), node.getWidth(), `${provideInitializerFunctionName}(${initializerCode})`);
-    // Import declaration and named imports are necessarily there.
-    const namedImports = nodes.closestNode(initializerTokenSpecifier, ts__default["default"].isNamedImports);
-    // `provide*Initializer` function is already imported.
-    const hasProvideInitializeFunction = namedImports.elements.some((element) => element.name.getText() === provideInitializerFunctionName);
-    const newNamedImports = ts__default["default"].factory.updateNamedImports(namedImports, [
-        // Remove the `*_INITIALIZER` token from imports.
-        ...namedImports.elements.filter((element) => element !== initializerTokenSpecifier),
-        // Add the `inject` function to imports if needed.
-        ...(importInject ? [createImportSpecifier('inject')] : []),
-        // Add the `provide*Initializer` function to imports.
-        ...(!hasProvideInitializeFunction
-            ? [createImportSpecifier(provideInitializerFunctionName)]
-            : []),
-    ]);
-    changeTracker.replaceNode(namedImports, newNamedImports);
-}
-function createImportSpecifier(name) {
-    return ts__default["default"].factory.createImportSpecifier(false, undefined, ts__default["default"].factory.createIdentifier(name));
+    // Remove the `*_INITIALIZER` token from imports.
+    changeTracker.removeImport(sourceFile, initializerToken, angularCoreModule);
+    // Add the `inject` function to imports if needed.
+    if (importInject) {
+        changeTracker.addImport(sourceFile, 'inject', angularCoreModule);
+    }
+    // Add the `provide*Initializer` function to imports.
+    changeTracker.addImport(sourceFile, provideInitializerFunctionName, angularCoreModule);
 }
 function tryParseProviderExpression(node) {
     if (!ts__default["default"].isObjectLiteralExpression(node)) {
