@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-9b8a2c3
+ * @license Angular v19.1.0-next.0+sha-c22b5ac
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16943,7 +16943,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-9b8a2c3']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-c22b5ac']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -32053,8 +32053,13 @@ function ɵɵExternalStylesFeature(styleUrls) {
             return;
         }
         definition.getExternalStyles = (encapsulationId) => {
-            // Add encapsulation ID search parameter `component` to support external style encapsulation
-            const urls = styleUrls.map((value) => value + '?ngcomp' + (encapsulationId ? '=' + encodeURIComponent(encapsulationId) : ''));
+            // Add encapsulation ID search parameter `ngcomp` to support external style encapsulation as well as the encapsulation mode
+            // for usage tracking.
+            const urls = styleUrls.map((value) => value +
+                '?ngcomp' +
+                (encapsulationId ? '=' + encodeURIComponent(encapsulationId) : '') +
+                '&e=' +
+                definition.encapsulation);
             return urls;
         };
     };
@@ -34240,7 +34245,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-9b8a2c3');
+const VERSION = new Version('19.1.0-next.0+sha-c22b5ac');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
