@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.0+sha-b0711d7
+ * @license Angular v19.0.0-rc.0+sha-4a0dc3c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16943,7 +16943,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.0+sha-b0711d7']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.0+sha-4a0dc3c']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -27065,8 +27065,11 @@ class UniqueValueMultiKeyMap {
     set(key, value) {
         if (this.kvMap.has(key)) {
             let prevValue = this.kvMap.get(key);
-            ngDevMode &&
-                assertNotSame(prevValue, value, `Detected a duplicated value ${value} for the key ${key}`);
+            // Note: we don't use `assertNotSame`, because the value needs to be stringified even if
+            // there is no error which can freeze the browser for large values (see #58509).
+            if (ngDevMode && prevValue === value) {
+                throw new Error(`Detected a duplicated value ${value} for the key ${key}`);
+            }
             if (this._vMap === undefined) {
                 this._vMap = new Map();
             }
@@ -34239,7 +34242,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-rc.0+sha-b0711d7');
+const VERSION = new Version('19.0.0-rc.0+sha-4a0dc3c');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

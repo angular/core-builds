@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.0+sha-b0711d7
+ * @license Angular v19.0.0-rc.0+sha-4a0dc3c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -896,12 +896,12 @@ const STRING_TYPE = new BuiltinType(BuiltinTypeName.String);
 new BuiltinType(BuiltinTypeName.Function);
 const NONE_TYPE = new BuiltinType(BuiltinTypeName.None);
 ///// Expressions
-exports.UnaryOperator = void 0;
+var UnaryOperator;
 (function (UnaryOperator) {
     UnaryOperator[UnaryOperator["Minus"] = 0] = "Minus";
     UnaryOperator[UnaryOperator["Plus"] = 1] = "Plus";
-})(exports.UnaryOperator || (exports.UnaryOperator = {}));
-exports.BinaryOperator = void 0;
+})(UnaryOperator || (UnaryOperator = {}));
+var BinaryOperator;
 (function (BinaryOperator) {
     BinaryOperator[BinaryOperator["Equals"] = 0] = "Equals";
     BinaryOperator[BinaryOperator["NotEquals"] = 1] = "NotEquals";
@@ -921,7 +921,7 @@ exports.BinaryOperator = void 0;
     BinaryOperator[BinaryOperator["Bigger"] = 15] = "Bigger";
     BinaryOperator[BinaryOperator["BiggerEquals"] = 16] = "BiggerEquals";
     BinaryOperator[BinaryOperator["NullishCoalesce"] = 17] = "NullishCoalesce";
-})(exports.BinaryOperator || (exports.BinaryOperator = {}));
+})(BinaryOperator || (BinaryOperator = {}));
 function nullSafeIsEquivalent(base, other) {
     if (base == null || other == null) {
         return base == other;
@@ -966,55 +966,55 @@ class Expression {
         return new ConditionalExpr(this, trueCase, falseCase, null, sourceSpan);
     }
     equals(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Equals, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Equals, this, rhs, null, sourceSpan);
     }
     notEquals(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.NotEquals, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.NotEquals, this, rhs, null, sourceSpan);
     }
     identical(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Identical, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Identical, this, rhs, null, sourceSpan);
     }
     notIdentical(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.NotIdentical, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.NotIdentical, this, rhs, null, sourceSpan);
     }
     minus(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Minus, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Minus, this, rhs, null, sourceSpan);
     }
     plus(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Plus, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Plus, this, rhs, null, sourceSpan);
     }
     divide(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Divide, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Divide, this, rhs, null, sourceSpan);
     }
     multiply(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Multiply, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Multiply, this, rhs, null, sourceSpan);
     }
     modulo(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Modulo, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Modulo, this, rhs, null, sourceSpan);
     }
     and(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.And, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.And, this, rhs, null, sourceSpan);
     }
     bitwiseOr(rhs, sourceSpan, parens = true) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.BitwiseOr, this, rhs, null, sourceSpan, parens);
+        return new BinaryOperatorExpr(BinaryOperator.BitwiseOr, this, rhs, null, sourceSpan, parens);
     }
     bitwiseAnd(rhs, sourceSpan, parens = true) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.BitwiseAnd, this, rhs, null, sourceSpan, parens);
+        return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, this, rhs, null, sourceSpan, parens);
     }
     or(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Or, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Or, this, rhs, null, sourceSpan);
     }
     lower(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Lower, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Lower, this, rhs, null, sourceSpan);
     }
     lowerEquals(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.LowerEquals, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.LowerEquals, this, rhs, null, sourceSpan);
     }
     bigger(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.Bigger, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.Bigger, this, rhs, null, sourceSpan);
     }
     biggerEquals(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.BiggerEquals, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.BiggerEquals, this, rhs, null, sourceSpan);
     }
     isBlank(sourceSpan) {
         // Note: We use equals by purpose here to compare to null and undefined in JS.
@@ -1022,7 +1022,7 @@ class Expression {
         return this.equals(TYPED_NULL_EXPR, sourceSpan);
     }
     nullishCoalesce(rhs, sourceSpan) {
-        return new BinaryOperatorExpr(exports.BinaryOperator.NullishCoalesce, this, rhs, null, sourceSpan);
+        return new BinaryOperatorExpr(BinaryOperator.NullishCoalesce, this, rhs, null, sourceSpan);
     }
     toStmt() {
         return new ExpressionStatement(this, null);
@@ -3533,10 +3533,10 @@ class AbstractEmitterVisitor {
     visitUnaryOperatorExpr(ast, ctx) {
         let opStr;
         switch (ast.operator) {
-            case exports.UnaryOperator.Plus:
+            case UnaryOperator.Plus:
                 opStr = '+';
                 break;
-            case exports.UnaryOperator.Minus:
+            case UnaryOperator.Minus:
                 opStr = '-';
                 break;
             default:
@@ -3553,58 +3553,58 @@ class AbstractEmitterVisitor {
     visitBinaryOperatorExpr(ast, ctx) {
         let opStr;
         switch (ast.operator) {
-            case exports.BinaryOperator.Equals:
+            case BinaryOperator.Equals:
                 opStr = '==';
                 break;
-            case exports.BinaryOperator.Identical:
+            case BinaryOperator.Identical:
                 opStr = '===';
                 break;
-            case exports.BinaryOperator.NotEquals:
+            case BinaryOperator.NotEquals:
                 opStr = '!=';
                 break;
-            case exports.BinaryOperator.NotIdentical:
+            case BinaryOperator.NotIdentical:
                 opStr = '!==';
                 break;
-            case exports.BinaryOperator.And:
+            case BinaryOperator.And:
                 opStr = '&&';
                 break;
-            case exports.BinaryOperator.BitwiseOr:
+            case BinaryOperator.BitwiseOr:
                 opStr = '|';
                 break;
-            case exports.BinaryOperator.BitwiseAnd:
+            case BinaryOperator.BitwiseAnd:
                 opStr = '&';
                 break;
-            case exports.BinaryOperator.Or:
+            case BinaryOperator.Or:
                 opStr = '||';
                 break;
-            case exports.BinaryOperator.Plus:
+            case BinaryOperator.Plus:
                 opStr = '+';
                 break;
-            case exports.BinaryOperator.Minus:
+            case BinaryOperator.Minus:
                 opStr = '-';
                 break;
-            case exports.BinaryOperator.Divide:
+            case BinaryOperator.Divide:
                 opStr = '/';
                 break;
-            case exports.BinaryOperator.Multiply:
+            case BinaryOperator.Multiply:
                 opStr = '*';
                 break;
-            case exports.BinaryOperator.Modulo:
+            case BinaryOperator.Modulo:
                 opStr = '%';
                 break;
-            case exports.BinaryOperator.Lower:
+            case BinaryOperator.Lower:
                 opStr = '<';
                 break;
-            case exports.BinaryOperator.LowerEquals:
+            case BinaryOperator.LowerEquals:
                 opStr = '<=';
                 break;
-            case exports.BinaryOperator.Bigger:
+            case BinaryOperator.Bigger:
                 opStr = '>';
                 break;
-            case exports.BinaryOperator.BiggerEquals:
+            case BinaryOperator.BiggerEquals:
                 opStr = '>=';
                 break;
-            case exports.BinaryOperator.NullishCoalesce:
+            case BinaryOperator.NullishCoalesce:
                 opStr = '??';
                 break;
             default:
@@ -3736,11 +3736,11 @@ function devOnlyGuardedExpression(expr) {
 }
 function guardedExpression(guard, expr) {
     const guardExpr = new ExternalExpr({ name: guard, moduleName: null });
-    const guardNotDefined = new BinaryOperatorExpr(exports.BinaryOperator.Identical, new TypeofExpr(guardExpr), literal$1('undefined'));
-    const guardUndefinedOrTrue = new BinaryOperatorExpr(exports.BinaryOperator.Or, guardNotDefined, guardExpr, 
+    const guardNotDefined = new BinaryOperatorExpr(BinaryOperator.Identical, new TypeofExpr(guardExpr), literal$1('undefined'));
+    const guardUndefinedOrTrue = new BinaryOperatorExpr(BinaryOperator.Or, guardNotDefined, guardExpr, 
     /* type */ undefined, 
     /* sourceSpan */ undefined, true);
-    return new BinaryOperatorExpr(exports.BinaryOperator.And, guardUndefinedOrTrue, expr);
+    return new BinaryOperatorExpr(BinaryOperator.And, guardUndefinedOrTrue, expr);
 }
 function wrapReference(value) {
     const wrapped = new WrappedNodeExpr(value);
@@ -3809,7 +3809,7 @@ function compileFactoryFunction(meta) {
     // delegated factory (which is used to create the current type) then this is only the type-to-
     // create parameter (t).
     const typeForCtor = !isDelegatedFactoryMetadata(meta)
-        ? new BinaryOperatorExpr(exports.BinaryOperator.Or, t, meta.type.value)
+        ? new BinaryOperatorExpr(BinaryOperator.Or, t, meta.type.value)
         : t;
     let ctorExpr = null;
     if (meta.deps !== null) {
@@ -3857,7 +3857,7 @@ function compileFactoryFunction(meta) {
         // This factory uses a base factory, so call `ɵɵgetInheritedFactory()` to compute it.
         const getInheritedFactoryCall = importExpr(Identifiers.getInheritedFactory).callFn([meta.type.value]);
         // Memoize the base factoryFn: `baseFactory || (baseFactory = ɵɵgetInheritedFactory(...))`
-        const baseFactory = new BinaryOperatorExpr(exports.BinaryOperator.Or, baseFactoryVar, baseFactoryVar.set(getInheritedFactoryCall));
+        const baseFactory = new BinaryOperatorExpr(BinaryOperator.Or, baseFactoryVar, baseFactoryVar.set(getInheritedFactoryCall));
         body.push(new ReturnStatement(baseFactory.callFn([typeForCtor])));
     }
     else {
@@ -11515,7 +11515,7 @@ function generateConditionalExpressions(job) {
                 }
                 if (tmp !== null) {
                     const useTmp = i === 0 ? tmp : new ReadTemporaryExpr(tmp.xref);
-                    conditionalCase.expr = new BinaryOperatorExpr(exports.BinaryOperator.Identical, useTmp, conditionalCase.expr);
+                    conditionalCase.expr = new BinaryOperatorExpr(BinaryOperator.Identical, useTmp, conditionalCase.expr);
                 }
                 else if (conditionalCase.alias !== null) {
                     const caseExpressionTemporaryXref = job.allocateXrefId();
@@ -11534,24 +11534,24 @@ function generateConditionalExpressions(job) {
 }
 
 const BINARY_OPERATORS$3 = new Map([
-    ['&&', exports.BinaryOperator.And],
-    ['>', exports.BinaryOperator.Bigger],
-    ['>=', exports.BinaryOperator.BiggerEquals],
-    ['|', exports.BinaryOperator.BitwiseOr],
-    ['&', exports.BinaryOperator.BitwiseAnd],
-    ['/', exports.BinaryOperator.Divide],
-    ['==', exports.BinaryOperator.Equals],
-    ['===', exports.BinaryOperator.Identical],
-    ['<', exports.BinaryOperator.Lower],
-    ['<=', exports.BinaryOperator.LowerEquals],
-    ['-', exports.BinaryOperator.Minus],
-    ['%', exports.BinaryOperator.Modulo],
-    ['*', exports.BinaryOperator.Multiply],
-    ['!=', exports.BinaryOperator.NotEquals],
-    ['!==', exports.BinaryOperator.NotIdentical],
-    ['??', exports.BinaryOperator.NullishCoalesce],
-    ['||', exports.BinaryOperator.Or],
-    ['+', exports.BinaryOperator.Plus],
+    ['&&', BinaryOperator.And],
+    ['>', BinaryOperator.Bigger],
+    ['>=', BinaryOperator.BiggerEquals],
+    ['|', BinaryOperator.BitwiseOr],
+    ['&', BinaryOperator.BitwiseAnd],
+    ['/', BinaryOperator.Divide],
+    ['==', BinaryOperator.Equals],
+    ['===', BinaryOperator.Identical],
+    ['<', BinaryOperator.Lower],
+    ['<=', BinaryOperator.LowerEquals],
+    ['-', BinaryOperator.Minus],
+    ['%', BinaryOperator.Modulo],
+    ['*', BinaryOperator.Multiply],
+    ['!=', BinaryOperator.NotEquals],
+    ['!==', BinaryOperator.NotIdentical],
+    ['??', BinaryOperator.NullishCoalesce],
+    ['||', BinaryOperator.Or],
+    ['+', BinaryOperator.Plus],
 ]);
 function namespaceForKey(namespacePrefixKey) {
     const NAMESPACES = new Map([
@@ -12327,7 +12327,7 @@ function ternaryTransform(e) {
     if (!(e instanceof SafeTernaryExpr)) {
         return e;
     }
-    return new ConditionalExpr(new BinaryOperatorExpr(exports.BinaryOperator.Equals, e.guard, NULL_EXPR), NULL_EXPR, e.expr);
+    return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.Equals, e.guard, NULL_EXPR), NULL_EXPR, e.expr);
 }
 
 /**
@@ -21521,14 +21521,14 @@ function generateNullishCoalesceExpressions(job) {
         for (const op of unit.ops()) {
             transformExpressionsInOp(op, (expr) => {
                 if (!(expr instanceof BinaryOperatorExpr) ||
-                    expr.operator !== exports.BinaryOperator.NullishCoalesce) {
+                    expr.operator !== BinaryOperator.NullishCoalesce) {
                     return expr;
                 }
                 const assignment = new AssignTemporaryExpr(expr.lhs.clone(), job.allocateXrefId());
                 const read = new ReadTemporaryExpr(assignment.xref);
                 // TODO: When not in compatibility mode for TemplateDefinitionBuilder, we can just emit
                 // `t != null` instead of including an undefined check as well.
-                return new ConditionalExpr(new BinaryOperatorExpr(exports.BinaryOperator.And, new BinaryOperatorExpr(exports.BinaryOperator.NotIdentical, assignment, NULL_EXPR), new BinaryOperatorExpr(exports.BinaryOperator.NotIdentical, read, new LiteralExpr(undefined))), read.clone(), expr.rhs);
+                return new ConditionalExpr(new BinaryOperatorExpr(BinaryOperator.And, new BinaryOperatorExpr(BinaryOperator.NotIdentical, assignment, NULL_EXPR), new BinaryOperatorExpr(BinaryOperator.NotIdentical, read, new LiteralExpr(undefined))), read.clone(), expr.rhs);
             }, VisitorContextFlag.None);
         }
     }
@@ -24859,7 +24859,7 @@ function maybeGenerateRfBlock(flag, statements) {
         return [];
     }
     return [
-        ifStmt(new BinaryOperatorExpr(exports.BinaryOperator.BitwiseAnd, variable('rf'), literal$1(flag)), statements),
+        ifStmt(new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, variable('rf'), literal$1(flag)), statements),
     ];
 }
 function emitHostBindingFunction(job) {
@@ -25480,9 +25480,9 @@ function convertAst(ast, job, baseSourceSpan) {
     else if (ast instanceof Unary) {
         switch (ast.operator) {
             case '+':
-                return new UnaryOperatorExpr(exports.UnaryOperator.Plus, convertAst(ast.expr, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
+                return new UnaryOperatorExpr(UnaryOperator.Plus, convertAst(ast.expr, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
             case '-':
-                return new UnaryOperatorExpr(exports.UnaryOperator.Minus, convertAst(ast.expr, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
+                return new UnaryOperatorExpr(UnaryOperator.Minus, convertAst(ast.expr, job, baseSourceSpan), undefined, convertSourceSpan(ast.span, baseSourceSpan));
             default:
                 throw new Error(`AssertionError: unknown unary operator ${ast.operator}`);
         }
@@ -30274,7 +30274,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-rc.0+sha-b0711d7');
+new Version('19.0.0-rc.0+sha-4a0dc3c');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31682,7 +31682,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-22d55b06.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-206faaa9.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -33173,10 +33173,16 @@ class TypeScriptReflectionHost {
             : null;
     }
 }
+class TypeEntityToDeclarationError extends Error {
+}
+/**
+ * @throws {TypeEntityToDeclarationError} if the type cannot be converted
+ *   to a declaration.
+ */
 function reflectTypeEntityToDeclaration(type, checker) {
     let realSymbol = checker.getSymbolAtLocation(type);
     if (realSymbol === undefined) {
-        throw new Error(`Cannot resolve type entity ${type.getText()} to symbol`);
+        throw new TypeEntityToDeclarationError(`Cannot resolve type entity ${type.getText()} to symbol`);
     }
     while (realSymbol.flags & ts__default["default"].SymbolFlags.Alias) {
         realSymbol = checker.getAliasedSymbol(realSymbol);
@@ -33189,24 +33195,24 @@ function reflectTypeEntityToDeclaration(type, checker) {
         node = realSymbol.declarations[0];
     }
     else {
-        throw new Error(`Cannot resolve type entity symbol to declaration`);
+        throw new TypeEntityToDeclarationError(`Cannot resolve type entity symbol to declaration`);
     }
     if (ts__default["default"].isQualifiedName(type)) {
         if (!ts__default["default"].isIdentifier(type.left)) {
-            throw new Error(`Cannot handle qualified name with non-identifier lhs`);
+            throw new TypeEntityToDeclarationError(`Cannot handle qualified name with non-identifier lhs`);
         }
         const symbol = checker.getSymbolAtLocation(type.left);
         if (symbol === undefined ||
             symbol.declarations === undefined ||
             symbol.declarations.length !== 1) {
-            throw new Error(`Cannot resolve qualified type entity lhs to symbol`);
+            throw new TypeEntityToDeclarationError(`Cannot resolve qualified type entity lhs to symbol`);
         }
         const decl = symbol.declarations[0];
         if (ts__default["default"].isNamespaceImport(decl)) {
             const clause = decl.parent;
             const importDecl = clause.parent;
             if (!ts__default["default"].isStringLiteral(importDecl.moduleSpecifier)) {
-                throw new Error(`Module specifier is not a string`);
+                throw new TypeEntityToDeclarationError(`Module specifier is not a string`);
             }
             return { node, from: importDecl.moduleSpecifier.text };
         }
@@ -33214,7 +33220,7 @@ function reflectTypeEntityToDeclaration(type, checker) {
             return { node, from: null };
         }
         else {
-            throw new Error(`Unknown import type?`);
+            throw new TypeEntityToDeclarationError(`Unknown import type?`);
         }
     }
     else {
@@ -33950,18 +33956,43 @@ exports.MatchSource = void 0;
 
 function extractReferencesFromType(checker, def, bestGuessOwningModule) {
     if (!ts__default["default"].isTupleTypeNode(def)) {
-        return [];
+        return { result: [], isIncomplete: false };
     }
-    return def.elements.map((element) => {
+    const result = [];
+    let isIncomplete = false;
+    for (const element of def.elements) {
         if (!ts__default["default"].isTypeQueryNode(element)) {
             throw new Error(`Expected TypeQueryNode: ${nodeDebugInfo(element)}`);
         }
-        return extraReferenceFromTypeQuery(checker, element, def, bestGuessOwningModule);
-    });
+        const ref = extraReferenceFromTypeQuery(checker, element, def, bestGuessOwningModule);
+        // Note: Sometimes a reference inside the type tuple/array
+        // may not be resolvable/existent. We proceed with incomplete data.
+        if (ref === null) {
+            isIncomplete = true;
+        }
+        else {
+            result.push(ref);
+        }
+    }
+    return { result, isIncomplete };
 }
 function extraReferenceFromTypeQuery(checker, typeNode, origin, bestGuessOwningModule) {
     const type = typeNode.exprName;
-    const { node, from } = reflectTypeEntityToDeclaration(type, checker);
+    let node;
+    let from;
+    // Gracefully handle when the type entity could not be converted or
+    // resolved to its declaration node.
+    try {
+        const result = reflectTypeEntityToDeclaration(type, checker);
+        node = result.node;
+        from = result.from;
+    }
+    catch (e) {
+        if (e instanceof TypeEntityToDeclarationError) {
+            return null;
+        }
+        throw e;
+    }
     if (!isNamedClassDeclaration(node)) {
         throw new Error(`Expected named ClassDeclaration: ${nodeDebugInfo(node)}`);
     }
@@ -36091,28 +36122,28 @@ function createImportReference(asTypeReference, ref) {
 }
 
 const UNARY_OPERATORS$1 = new Map([
-    [exports.UnaryOperator.Minus, '-'],
-    [exports.UnaryOperator.Plus, '+'],
+    [UnaryOperator.Minus, '-'],
+    [UnaryOperator.Plus, '+'],
 ]);
 const BINARY_OPERATORS$1 = new Map([
-    [exports.BinaryOperator.And, '&&'],
-    [exports.BinaryOperator.Bigger, '>'],
-    [exports.BinaryOperator.BiggerEquals, '>='],
-    [exports.BinaryOperator.BitwiseAnd, '&'],
-    [exports.BinaryOperator.BitwiseOr, '|'],
-    [exports.BinaryOperator.Divide, '/'],
-    [exports.BinaryOperator.Equals, '=='],
-    [exports.BinaryOperator.Identical, '==='],
-    [exports.BinaryOperator.Lower, '<'],
-    [exports.BinaryOperator.LowerEquals, '<='],
-    [exports.BinaryOperator.Minus, '-'],
-    [exports.BinaryOperator.Modulo, '%'],
-    [exports.BinaryOperator.Multiply, '*'],
-    [exports.BinaryOperator.NotEquals, '!='],
-    [exports.BinaryOperator.NotIdentical, '!=='],
-    [exports.BinaryOperator.Or, '||'],
-    [exports.BinaryOperator.Plus, '+'],
-    [exports.BinaryOperator.NullishCoalesce, '??'],
+    [BinaryOperator.And, '&&'],
+    [BinaryOperator.Bigger, '>'],
+    [BinaryOperator.BiggerEquals, '>='],
+    [BinaryOperator.BitwiseAnd, '&'],
+    [BinaryOperator.BitwiseOr, '|'],
+    [BinaryOperator.Divide, '/'],
+    [BinaryOperator.Equals, '=='],
+    [BinaryOperator.Identical, '==='],
+    [BinaryOperator.Lower, '<'],
+    [BinaryOperator.LowerEquals, '<='],
+    [BinaryOperator.Minus, '-'],
+    [BinaryOperator.Modulo, '%'],
+    [BinaryOperator.Multiply, '*'],
+    [BinaryOperator.NotEquals, '!='],
+    [BinaryOperator.NotIdentical, '!=='],
+    [BinaryOperator.Or, '||'],
+    [BinaryOperator.Plus, '+'],
+    [BinaryOperator.NullishCoalesce, '??'],
 ]);
 class ExpressionTranslatorVisitor {
     factory;
@@ -36325,7 +36356,7 @@ class ExpressionTranslatorVisitor {
     }
     visitBinaryOperatorExpr(ast, context) {
         if (!BINARY_OPERATORS$1.has(ast.operator)) {
-            throw new Error(`Unknown binary operator: ${exports.BinaryOperator[ast.operator]}`);
+            throw new Error(`Unknown binary operator: ${BinaryOperator[ast.operator]}`);
         }
         return this.factory.createBinaryExpression(ast.lhs.visitExpression(this, context), BINARY_OPERATORS$1.get(ast.operator), ast.rhs.visitExpression(this, context));
     }
@@ -36360,7 +36391,7 @@ class ExpressionTranslatorVisitor {
     }
     visitUnaryOperatorExpr(ast, context) {
         if (!UNARY_OPERATORS$1.has(ast.operator)) {
-            throw new Error(`Unknown unary operator: ${exports.UnaryOperator[ast.operator]}`);
+            throw new Error(`Unknown unary operator: ${UnaryOperator[ast.operator]}`);
         }
         return this.factory.createUnaryExpression(UNARY_OPERATORS$1.get(ast.operator), ast.expr.visitExpression(this, context));
     }
@@ -45705,16 +45736,13 @@ class SingleShimTypeCheckingHost extends SingleFileTypeCheckingHost {
 exports.AST = AST;
 exports.ASTWithSource = ASTWithSource;
 exports.AbsoluteModuleStrategy = AbsoluteModuleStrategy;
-exports.AbsoluteSourceSpan = AbsoluteSourceSpan;
 exports.AmbientImport = AmbientImport;
 exports.ArrowFunctionExpr = ArrowFunctionExpr;
 exports.Binary = Binary;
-exports.BindingPipe = BindingPipe;
 exports.BlockPlaceholder = BlockPlaceholder;
 exports.BoundAttribute = BoundAttribute;
 exports.BoundDeferredTrigger = BoundDeferredTrigger;
 exports.BoundEvent = BoundEvent;
-exports.BoundText = BoundText;
 exports.COMPILER_ERRORS_WITH_GUIDES = COMPILER_ERRORS_WITH_GUIDES;
 exports.CR = CR;
 exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
@@ -45725,36 +45753,29 @@ exports.CompoundMetadataReader = CompoundMetadataReader;
 exports.Conditional = Conditional;
 exports.ConstantPool = ConstantPool;
 exports.Container = Container;
-exports.Content = Content;
 exports.CssSelector = CssSelector;
 exports.DEFAULT_INTERPOLATION_CONFIG = DEFAULT_INTERPOLATION_CONFIG;
 exports.DYNAMIC_TYPE = DYNAMIC_TYPE;
 exports.Declaration = Declaration;
 exports.DeclareFunctionStmt = DeclareFunctionStmt;
 exports.DefaultImportTracker = DefaultImportTracker;
-exports.DeferredBlock = DeferredBlock;
 exports.DefinitionMap = DefinitionMap;
 exports.DomElementSchemaRegistry = DomElementSchemaRegistry;
 exports.DynamicImportExpr = DynamicImportExpr;
 exports.DynamicValue = DynamicValue;
 exports.Element = Element;
 exports.Element$1 = Element$1;
-exports.EmptyExpr = EmptyExpr$1;
 exports.EnumValue = EnumValue;
 exports.ExternalExpr = ExternalExpr;
 exports.FatalDiagnosticError = FatalDiagnosticError;
 exports.FnParam = FnParam;
-exports.ForLoopBlock = ForLoopBlock;
 exports.FunctionExpr = FunctionExpr;
 exports.HtmlParser = HtmlParser;
 exports.I18nError = I18nError;
 exports.INPUT_INITIALIZER_FN = INPUT_INITIALIZER_FN;
 exports.Icu = Icu;
-exports.Icu$1 = Icu$1;
 exports.IcuPlaceholder = IcuPlaceholder;
 exports.Identifiers = Identifiers;
-exports.IfBlock = IfBlock;
-exports.IfBlockBranch = IfBlockBranch;
 exports.ImplicitReceiver = ImplicitReceiver;
 exports.ImportManager = ImportManager;
 exports.Interpolation = Interpolation$1;
@@ -45799,7 +45820,6 @@ exports.SafePropertyRead = SafePropertyRead;
 exports.SelectorMatcher = SelectorMatcher;
 exports.Serializer = Serializer;
 exports.StaticInterpreter = StaticInterpreter;
-exports.SwitchBlock = SwitchBlock;
 exports.SyntheticValue = SyntheticValue;
 exports.Tag = Tag;
 exports.TagPlaceholder = TagPlaceholder;
@@ -45808,11 +45828,9 @@ exports.TemplateTypeCheckerImpl = TemplateTypeCheckerImpl;
 exports.Text = Text;
 exports.Text$1 = Text$1;
 exports.Text$2 = Text$2;
-exports.Text$3 = Text$3;
 exports.TextAttribute = TextAttribute;
 exports.ThisReceiver = ThisReceiver;
 exports.Trait = Trait;
-exports.TransplantedType = TransplantedType;
 exports.TypeCheckShimGenerator = TypeCheckShimGenerator;
 exports.TypeScriptReflectionHost = TypeScriptReflectionHost;
 exports.UNSAFE_OBJECT_KEY_NAME_REGEXP = UNSAFE_OBJECT_KEY_NAME_REGEXP;
@@ -45841,7 +45859,6 @@ exports.conditionallyCreateDirectiveBindingLiteral = conditionallyCreateDirectiv
 exports.convertFromMaybeForwardRefExpression = convertFromMaybeForwardRefExpression;
 exports.copyFileShimData = copyFileShimData;
 exports.createComponentType = createComponentType;
-exports.createCssSelectorFromNode = createCssSelectorFromNode;
 exports.createDirectiveType = createDirectiveType;
 exports.createFactoryType = createFactoryType;
 exports.createHostDirectivesMappingArray = createHostDirectivesMappingArray;

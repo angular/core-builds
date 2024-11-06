@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.0+sha-b0711d7
+ * @license Angular v19.0.0-rc.0+sha-4a0dc3c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-22d55b06.js');
+var checker = require('./checker-206faaa9.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -987,7 +987,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-b0711d7'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-4a0dc3c'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1005,7 +1005,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-b0711d7'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-4a0dc3c'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1100,7 +1100,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-b0711d7'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-4a0dc3c'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1516,7 +1516,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-b0711d7'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-4a0dc3c'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1551,7 +1551,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-b0711d7'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-4a0dc3c'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1602,7 +1602,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-b0711d7'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-4a0dc3c'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1635,7 +1635,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-b0711d7'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-4a0dc3c'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1686,7 +1686,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-b0711d7'));
+    definitionMap.set('version', checker.literal('19.0.0-rc.0+sha-4a0dc3c'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -2725,12 +2725,21 @@ class DtsMetadataReader {
         }
         // Read the ModuleData out of the type arguments.
         const [_, declarationMetadata, importMetadata, exportMetadata] = ngModuleDef.type.typeArguments;
+        const declarations = checker.extractReferencesFromType(this.checker, declarationMetadata, ref.bestGuessOwningModule);
+        const exports = checker.extractReferencesFromType(this.checker, exportMetadata, ref.bestGuessOwningModule);
+        const imports = checker.extractReferencesFromType(this.checker, importMetadata, ref.bestGuessOwningModule);
+        // The module is considered poisoned if it's exports couldn't be
+        // resolved completely. This would make the module not necessarily
+        // usable for scope computation relying on this module; so we propagate
+        // this "incompleteness" information to the caller.
+        const isPoisoned = exports.isIncomplete;
         return {
             kind: checker.MetaKind.NgModule,
             ref,
-            declarations: checker.extractReferencesFromType(this.checker, declarationMetadata, ref.bestGuessOwningModule),
-            exports: checker.extractReferencesFromType(this.checker, exportMetadata, ref.bestGuessOwningModule),
-            imports: checker.extractReferencesFromType(this.checker, importMetadata, ref.bestGuessOwningModule),
+            declarations: declarations.result,
+            isPoisoned,
+            exports: exports.result,
+            imports: imports.result,
             schemas: [],
             rawDeclarations: null,
             rawImports: null,
@@ -2782,6 +2791,10 @@ class DtsMetadataReader {
             ? readHostDirectivesType(this.checker, def.type.typeArguments[8], ref.bestGuessOwningModule)
             : null;
         const isSignal = def.type.typeArguments.length > 9 && (checker.readBooleanType(def.type.typeArguments[9]) ?? false);
+        // At this point in time, the `.d.ts` may not be fully extractable when
+        // trying to resolve host directive types to their declarations.
+        // If this cannot be done completely, the metadata is incomplete and "poisoned".
+        const isPoisoned = hostDirectives !== null && hostDirectives?.isIncomplete;
         return {
             kind: checker.MetaKind.Directive,
             matchSource: checker.MatchSource.Selector,
@@ -2792,11 +2805,11 @@ class DtsMetadataReader {
             exportAs: checker.readStringArrayType(def.type.typeArguments[2]),
             inputs,
             outputs,
-            hostDirectives,
+            hostDirectives: hostDirectives?.result ?? null,
             queries: checker.readStringArrayType(def.type.typeArguments[5]),
             ...checker.extractDirectiveTypeCheckMeta(clazz, inputs, this.reflector),
             baseClass: readBaseClass(clazz, this.checker, this.reflector),
-            isPoisoned: false,
+            isPoisoned,
             isStructural,
             animationTriggerNames: null,
             ngContentSelectors,
@@ -2938,21 +2951,27 @@ function readHostDirectivesType(checker$1, type, bestGuessOwningModule) {
         return null;
     }
     const result = [];
+    let isIncomplete = false;
     for (const hostDirectiveType of type.elements) {
         const { directive, inputs, outputs } = checker.readMapType(hostDirectiveType, (type) => type);
         if (directive) {
             if (!ts__default["default"].isTypeQueryNode(directive)) {
                 throw new Error(`Expected TypeQueryNode: ${checker.nodeDebugInfo(directive)}`);
             }
+            const ref = checker.extraReferenceFromTypeQuery(checker$1, directive, type, bestGuessOwningModule);
+            if (ref === null) {
+                isIncomplete = true;
+                continue;
+            }
             result.push({
-                directive: checker.extraReferenceFromTypeQuery(checker$1, directive, type, bestGuessOwningModule),
+                directive: ref,
                 isForwardReference: false,
                 inputs: checker.readMapType(inputs, checker.readStringType),
                 outputs: checker.readMapType(outputs, checker.readStringType),
             });
         }
     }
-    return result.length > 0 ? result : null;
+    return result.length > 0 ? { result, isIncomplete } : null;
 }
 
 /**
@@ -6009,7 +6028,7 @@ class MetadataDtsModuleScopeResolver {
         const exportScope = {
             exported: {
                 dependencies,
-                isPoisoned: false,
+                isPoisoned: meta.isPoisoned,
             },
         };
         this.cache.set(clazz, exportScope);
@@ -8680,6 +8699,7 @@ class NgModuleDecoratorHandler {
             rawExports: analysis.rawExports,
             decorator: analysis.decorator,
             mayDeclareProviders: analysis.providers !== null,
+            isPoisoned: false,
         });
         this.injectableRegistry.registerInjectable(node, {
             ctorDeps: analysis.fac.deps,
@@ -20107,7 +20127,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0-rc.0+sha-b0711d7` usually means that core is at head so it supports
+    // A version of `19.0.0-rc.0+sha-4a0dc3c` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
