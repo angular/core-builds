@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-121b340
+ * @license Angular v19.1.0-next.0+sha-8919c80
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,14 +10,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var combine_units = require('./combine_units-b060800f.js');
+var combine_units = require('./combine_units-a16385aa.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-206faaa9.js');
-var program = require('./program-3b6ea9bc.js');
+var checker = require('./checker-9ca42e51.js');
+var program = require('./program-71beec0b.js');
 var assert = require('assert');
 require('path');
-var migrate_ts_type_references = require('./migrate_ts_type_references-1b2df110.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-b2a28742.js');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -725,6 +725,8 @@ class SignalQueriesMigration extends combine_units.TsurgeComplexMigration {
         assert__default["default"](info.ngCompiler !== null, 'Expected queries migration to have an Angular program.');
         // Pre-Analyze the program and get access to the template type checker.
         const { templateTypeChecker } = info.ngCompiler['ensureAnalyzed']();
+        // Generate all type check blocks.
+        templateTypeChecker.generateAllTypeCheckBlocks();
         const { sourceFiles, program: program$1 } = info;
         const checker$1 = program$1.getTypeChecker();
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
@@ -796,8 +798,7 @@ class SignalQueriesMigration extends combine_units.TsurgeComplexMigration {
                 // of the queries since there aren't any other compilation units.
                 // Ignore references to non-query class fields.
                 if (this.config.assumeNonBatch &&
-                    descriptor !== null &&
-                    !filteredQueriesForCompilationUnit.has(descriptor.key)) {
+                    (descriptor === null || !filteredQueriesForCompilationUnit.has(descriptor.key))) {
                     return null;
                 }
                 // In batch mode, we eagerly, rather expensively, track all references.
@@ -951,7 +952,6 @@ class SignalQueriesMigration extends combine_units.TsurgeComplexMigration {
             }
             ts__default["default"].forEachChild(node, queryWholeProgramVisitor);
         };
-        this.config.reportProgressFn?.(40, 'Tracking query declarations..');
         for (const sf of info.fullProgramSourceFiles) {
             ts__default["default"].forEachChild(sf, queryWholeProgramVisitor);
         }
@@ -977,12 +977,12 @@ class SignalQueriesMigration extends combine_units.TsurgeComplexMigration {
             getFieldsForClass: (n) => knownQueries.getQueryFieldsOfClass(n) ?? [],
             isClassWithKnownFields: (clazz) => knownQueries.getQueryFieldsOfClass(clazz) !== undefined,
         });
-        this.config.reportProgressFn?.(70, 'Checking inheritance..');
+        this.config.reportProgressFn?.(80, 'Checking inheritance..');
         groupedAstVisitor.execute();
         if (this.config.bestEffortMode) {
             filterBestEffortIncompatibilities(knownQueries);
         }
-        this.config.reportProgressFn?.(80, 'Migrating queries..');
+        this.config.reportProgressFn?.(90, 'Migrating queries..');
         // Migrate declarations.
         for (const extractedQuery of sourceQueries) {
             const node = extractedQuery.node;
