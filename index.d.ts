@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.0+sha-85fa27d
+ * @license Angular v19.0.0-rc.0+sha-b0711d7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13887,12 +13887,6 @@ export declare const ɵNG_MOD_DEF: string;
 export declare const ɵNG_PIPE_DEF: string;
 
 export declare const ɵNG_PROV_DEF: string;
-
-/**
- * A constant defining the default value for the standalone attribute in Directive and Pipes decorators.
- * Extracted to a separate file to facilitate G3 patches.
- */
-export declare const ɵNG_STANDALONE_DEFAULT_VALUE = true;
 
 /**
  * Runtime link information for NgModules.
