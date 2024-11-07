@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-9aff978
+ * @license Angular v19.1.0-next.0+sha-48be715
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,9 +10,9 @@ var checker = require('./checker-9ca42e51.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var combine_units = require('./combine_units-a16385aa.js');
+var combine_units = require('./combine_units-5477f99d.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-71beec0b.js');
+require('./program-ae4ebe51.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
