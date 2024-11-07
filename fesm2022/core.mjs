@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.1+sha-10e6a25
+ * @license Angular v19.0.0-rc.1+sha-0ec9533
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16943,7 +16943,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.1+sha-10e6a25']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.1+sha-0ec9533']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -32784,6 +32784,18 @@ function recreateMatchingLViews(def, rootLView) {
     }
 }
 /**
+ * Removes any cached renderers from the factory for the provided type.
+ * This is currently used by the HMR logic to ensure Renderers are kept
+ * synchronized with any definition metadata updates.
+ * @param factory A RendererFactory2 instance.
+ * @param def A ComponentDef instance.
+ */
+function clearRendererCache(factory, def) {
+    // Cast to `any` to read a private field.
+    // NOTE: This must be kept synchronized with the renderer factory implementation in platform-browser.
+    factory.rendererByCompId?.remove(def.id);
+}
+/**
  * Recreates an LView in-place from a new component definition.
  * @param def Definition from which to recreate the view.
  * @param lView View to be recreated.
@@ -32799,8 +32811,12 @@ function recreateLView(def, lView) {
     ngDevMode && assertTNodeType(tNode, 2 /* TNodeType.Element */);
     // Recreate the TView since the template might've changed.
     const newTView = getOrCreateComponentTView(def);
+    // Always force the creation of a new renderer to ensure state captured during construction
+    // stays consistent with the new component definition by clearing any old cached factories.
+    const rendererFactory = lView[ENVIRONMENT].rendererFactory;
+    clearRendererCache(rendererFactory, def);
     // Create a new LView from the new TView, but reusing the existing TNode and DOM node.
-    const newLView = createLView(parentLView, newTView, instance, getInitialLViewFlagsFromDef(def), host, tNode, null, lView[ENVIRONMENT].rendererFactory.createRenderer(host, def), null, null, null);
+    const newLView = createLView(parentLView, newTView, instance, getInitialLViewFlagsFromDef(def), host, tNode, null, rendererFactory.createRenderer(host, def), null, null, null);
     // Detach the LView from its current place in the tree so we don't
     // start traversing any siblings and modifying their structure.
     replaceLViewInTree(parentLView, lView, newLView, tNode.index);
@@ -34242,7 +34258,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-rc.1+sha-10e6a25');
+const VERSION = new Version('19.0.0-rc.1+sha-0ec9533');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
