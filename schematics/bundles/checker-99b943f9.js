@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.1+sha-a314878
+ * @license Angular v19.0.0-rc.1+sha-e1c7327
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30274,7 +30274,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-rc.1+sha-a314878');
+new Version('19.0.0-rc.1+sha-e1c7327');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31682,7 +31682,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-9ca42e51.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-99b943f9.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -31948,6 +31948,11 @@ exports.ImportFlags = void 0;
      */
     ImportFlags[ImportFlags["AllowAmbientReferences"] = 16] = "AllowAmbientReferences";
 })(exports.ImportFlags || (exports.ImportFlags = {}));
+exports.ReferenceEmitKind = void 0;
+(function (ReferenceEmitKind) {
+    ReferenceEmitKind[ReferenceEmitKind["Success"] = 0] = "Success";
+    ReferenceEmitKind[ReferenceEmitKind["Failed"] = 1] = "Failed";
+})(exports.ReferenceEmitKind || (exports.ReferenceEmitKind = {}));
 /**
  * Verifies that a reference was emitted successfully, or raises a `FatalDiagnosticError` otherwise.
  * @param result The emit result that should have been successful.
@@ -31956,7 +31961,7 @@ exports.ImportFlags = void 0;
  *     'class'.
  */
 function assertSuccessfulReferenceEmit(result, origin, typeKind) {
-    if (result.kind === 0 /* ReferenceEmitKind.Success */) {
+    if (result.kind === exports.ReferenceEmitKind.Success) {
         return;
     }
     const message = makeDiagnosticChain(`Unable to import ${typeKind} ${nodeNameForError(result.ref.node)}.`, [makeDiagnosticChain(result.reason)]);
@@ -31983,7 +31988,7 @@ class ReferenceEmitter {
             }
         }
         return {
-            kind: 1 /* ReferenceEmitKind.Failed */,
+            kind: exports.ReferenceEmitKind.Failed,
             ref,
             context,
             reason: `Unable to write a reference to ${nodeNameForError(ref.node)}.`,
@@ -32009,7 +32014,7 @@ class LocalIdentifierStrategy {
         // invalid emission of a free-standing `foo` identifier, rather than `exports.foo`.
         if (!isDeclaration(ref.node) && refSf === context) {
             return {
-                kind: 0 /* ReferenceEmitKind.Success */,
+                kind: exports.ReferenceEmitKind.Success,
                 expression: new WrappedNodeExpr(ref.node),
                 importedFile: null,
             };
@@ -32019,7 +32024,7 @@ class LocalIdentifierStrategy {
             const identifier = identifierOfNode(ref.node);
             if (identifier !== null) {
                 return {
-                    kind: 0 /* ReferenceEmitKind.Success */,
+                    kind: exports.ReferenceEmitKind.Success,
                     expression: new WrappedNodeExpr(identifier),
                     importedFile: null,
                 };
@@ -32033,7 +32038,7 @@ class LocalIdentifierStrategy {
         const identifier = ref.getIdentityIn(context);
         if (identifier !== null) {
             return {
-                kind: 0 /* ReferenceEmitKind.Success */,
+                kind: exports.ReferenceEmitKind.Success,
                 expression: new WrappedNodeExpr(identifier),
                 importedFile: null,
             };
@@ -32086,7 +32091,7 @@ class AbsoluteModuleStrategy {
         const exports$1 = this.getExportsOfModule(specifier, resolutionContext);
         if (exports$1.module === null) {
             return {
-                kind: 1 /* ReferenceEmitKind.Failed */,
+                kind: exports.ReferenceEmitKind.Failed,
                 ref,
                 context,
                 reason: `The module '${specifier}' could not be found.`,
@@ -32094,7 +32099,7 @@ class AbsoluteModuleStrategy {
         }
         else if (exports$1.exportMap === null || !exports$1.exportMap.has(ref.node)) {
             return {
-                kind: 1 /* ReferenceEmitKind.Failed */,
+                kind: exports.ReferenceEmitKind.Failed,
                 ref,
                 context,
                 reason: `The symbol is not exported from ${exports$1.module.fileName} (module '${specifier}').`,
@@ -32102,7 +32107,7 @@ class AbsoluteModuleStrategy {
         }
         const symbolName = exports$1.exportMap.get(ref.node);
         return {
-            kind: 0 /* ReferenceEmitKind.Success */,
+            kind: exports.ReferenceEmitKind.Success,
             expression: new ExternalExpr(new ExternalReference(specifier, symbolName)),
             importedFile: exports$1.module,
         };
@@ -32173,7 +32178,7 @@ class LogicalProjectStrategy {
             // Note: this error is analogous to `TS6059: File is not under 'rootDir'` that TypeScript
             // reports.
             return {
-                kind: 1 /* ReferenceEmitKind.Failed */,
+                kind: exports.ReferenceEmitKind.Failed,
                 ref,
                 context,
                 reason: `The file ${destSf.fileName} is outside of the configured 'rootDir'.`,
@@ -32191,7 +32196,7 @@ class LogicalProjectStrategy {
         if (name === null) {
             // The target declaration isn't exported from the file it's declared in. This is an issue!
             return {
-                kind: 1 /* ReferenceEmitKind.Failed */,
+                kind: exports.ReferenceEmitKind.Failed,
                 ref,
                 context,
                 reason: `The symbol is not exported from ${destSf.fileName}.`,
@@ -32201,7 +32206,7 @@ class LogicalProjectStrategy {
         // path is now straightforward.
         const moduleName = LogicalProjectPath.relativePathBetween(originPath, destPath);
         return {
-            kind: 0 /* ReferenceEmitKind.Success */,
+            kind: exports.ReferenceEmitKind.Success,
             expression: new ExternalExpr({ moduleName, name }),
             importedFile: destSf,
         };
@@ -32225,14 +32230,14 @@ class RelativePathStrategy {
         const name = findExportedNameOfNode(ref.node, destSf, this.reflector);
         if (name === null) {
             return {
-                kind: 1 /* ReferenceEmitKind.Failed */,
+                kind: exports.ReferenceEmitKind.Failed,
                 ref,
                 context,
                 reason: `The symbol is not exported from ${destSf.fileName}.`,
             };
         }
         return {
-            kind: 0 /* ReferenceEmitKind.Success */,
+            kind: exports.ReferenceEmitKind.Success,
             expression: new ExternalExpr({ moduleName, name }),
             importedFile: destSf,
         };
@@ -32257,7 +32262,7 @@ class UnifiedModulesStrategy {
         }
         const moduleName = this.unifiedModulesHost.fileNameToModuleName(destSf.fileName, context.fileName);
         return {
-            kind: 0 /* ReferenceEmitKind.Success */,
+            kind: exports.ReferenceEmitKind.Success,
             expression: new ExternalExpr({ moduleName, name }),
             importedFile: destSf,
         };
@@ -39583,7 +39588,7 @@ class ReferenceEmitEnvironment {
         exports.ImportFlags.AllowTypeImports |
         exports.ImportFlags.AllowRelativeDtsImports) {
         const result = this.refEmitter.emit(ref, this.contextFile, flags);
-        return result.kind === 0 /* ReferenceEmitKind.Success */;
+        return result.kind === exports.ReferenceEmitKind.Success;
     }
     /**
      * Generate a `ts.TypeNode` that references the given node as a type.
@@ -45489,7 +45494,7 @@ class TemplateTypeCheckerImpl {
     }
     emit(kind, refTo, inContext) {
         const emittedRef = this.refEmitter.emit(refTo, inContext.getSourceFile());
-        if (emittedRef.kind === 1 /* ReferenceEmitKind.Failed */) {
+        if (emittedRef.kind === exports.ReferenceEmitKind.Failed) {
             return null;
         }
         const emitted = emittedRef.expression;

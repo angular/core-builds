@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.1+sha-a314878
+ * @license Angular v19.0.0-rc.1+sha-e1c7327
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,12 +10,11 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var combine_units = require('./combine_units-5477f99d.js');
+var combine_units = require('./combine_units-33ad8e99.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-9ca42e51.js');
-var assert = require('assert');
-var program = require('./program-ae4ebe51.js');
+var checker = require('./checker-99b943f9.js');
+var program = require('./program-6262ff57.js');
 require('path');
 require('@angular-devkit/core');
 require('node:path/posix');
@@ -26,7 +25,6 @@ require('url');
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-var assert__default = /*#__PURE__*/_interopDefaultLegacy(assert);
 
 function isOutputDeclarationEligibleForMigration(node) {
     return (node.initializer !== undefined &&
@@ -261,11 +259,12 @@ class OutputMigration extends combine_units.TsurgeFunnelMigration {
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
         const dtsReader = new program.DtsMetadataReader(checker$1, reflector);
         const evaluator = new program.PartialEvaluator(reflector, checker$1, null);
-        const ngCompiler = info.ngCompiler;
-        assert__default["default"](ngCompiler !== null, 'Requires ngCompiler to run the migration');
-        const resourceLoader = ngCompiler['resourceManager'];
-        // Pre-Analyze the program and get access to the template type checker.
-        const { templateTypeChecker } = ngCompiler['ensureAnalyzed']();
+        const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
+        // Pre-analyze the program and get access to the template type checker.
+        // If we are processing a non-Angular target, there is no template info.
+        const { templateTypeChecker } = info.ngCompiler?.['ensureAnalyzed']() ?? {
+            templateTypeChecker: null,
+        };
         const knownFields = {
             // Note: We don't support cross-target migration of `Partial<T>` usages.
             // This is an acceptable limitation for performance reasons.

@@ -1,18 +1,18 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.1+sha-a314878
+ * @license Angular v19.0.0-rc.1+sha-e1c7327
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-9ca42e51.js');
+var checker = require('./checker-99b943f9.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var combine_units = require('./combine_units-5477f99d.js');
+var combine_units = require('./combine_units-33ad8e99.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-ae4ebe51.js');
+require('./program-6262ff57.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -78,6 +78,467 @@ function pickFieldIncompatibility(a, b) {
         return b;
     }
     return a;
+}
+
+/**
+ * A lazily created TextEncoder instance for converting strings into UTF-8 bytes
+ */
+// Utils
+var Endian;
+(function (Endian) {
+    Endian[Endian["Little"] = 0] = "Little";
+    Endian[Endian["Big"] = 1] = "Big";
+})(Endian || (Endian = {}));
+
+//// Types
+var TypeModifier;
+(function (TypeModifier) {
+    TypeModifier[TypeModifier["None"] = 0] = "None";
+    TypeModifier[TypeModifier["Const"] = 1] = "Const";
+})(TypeModifier || (TypeModifier = {}));
+class Type {
+    modifiers;
+    constructor(modifiers = TypeModifier.None) {
+        this.modifiers = modifiers;
+    }
+    hasModifier(modifier) {
+        return (this.modifiers & modifier) !== 0;
+    }
+}
+var BuiltinTypeName;
+(function (BuiltinTypeName) {
+    BuiltinTypeName[BuiltinTypeName["Dynamic"] = 0] = "Dynamic";
+    BuiltinTypeName[BuiltinTypeName["Bool"] = 1] = "Bool";
+    BuiltinTypeName[BuiltinTypeName["String"] = 2] = "String";
+    BuiltinTypeName[BuiltinTypeName["Int"] = 3] = "Int";
+    BuiltinTypeName[BuiltinTypeName["Number"] = 4] = "Number";
+    BuiltinTypeName[BuiltinTypeName["Function"] = 5] = "Function";
+    BuiltinTypeName[BuiltinTypeName["Inferred"] = 6] = "Inferred";
+    BuiltinTypeName[BuiltinTypeName["None"] = 7] = "None";
+})(BuiltinTypeName || (BuiltinTypeName = {}));
+class BuiltinType extends Type {
+    name;
+    constructor(name, modifiers) {
+        super(modifiers);
+        this.name = name;
+    }
+    visitType(visitor, context) {
+        return visitor.visitBuiltinType(this, context);
+    }
+}
+new BuiltinType(BuiltinTypeName.Dynamic);
+const INFERRED_TYPE = new BuiltinType(BuiltinTypeName.Inferred);
+new BuiltinType(BuiltinTypeName.Bool);
+new BuiltinType(BuiltinTypeName.Int);
+new BuiltinType(BuiltinTypeName.Number);
+new BuiltinType(BuiltinTypeName.String);
+new BuiltinType(BuiltinTypeName.Function);
+new BuiltinType(BuiltinTypeName.None);
+///// Expressions
+var UnaryOperator;
+(function (UnaryOperator) {
+    UnaryOperator[UnaryOperator["Minus"] = 0] = "Minus";
+    UnaryOperator[UnaryOperator["Plus"] = 1] = "Plus";
+})(UnaryOperator || (UnaryOperator = {}));
+var BinaryOperator;
+(function (BinaryOperator) {
+    BinaryOperator[BinaryOperator["Equals"] = 0] = "Equals";
+    BinaryOperator[BinaryOperator["NotEquals"] = 1] = "NotEquals";
+    BinaryOperator[BinaryOperator["Identical"] = 2] = "Identical";
+    BinaryOperator[BinaryOperator["NotIdentical"] = 3] = "NotIdentical";
+    BinaryOperator[BinaryOperator["Minus"] = 4] = "Minus";
+    BinaryOperator[BinaryOperator["Plus"] = 5] = "Plus";
+    BinaryOperator[BinaryOperator["Divide"] = 6] = "Divide";
+    BinaryOperator[BinaryOperator["Multiply"] = 7] = "Multiply";
+    BinaryOperator[BinaryOperator["Modulo"] = 8] = "Modulo";
+    BinaryOperator[BinaryOperator["And"] = 9] = "And";
+    BinaryOperator[BinaryOperator["Or"] = 10] = "Or";
+    BinaryOperator[BinaryOperator["BitwiseOr"] = 11] = "BitwiseOr";
+    BinaryOperator[BinaryOperator["BitwiseAnd"] = 12] = "BitwiseAnd";
+    BinaryOperator[BinaryOperator["Lower"] = 13] = "Lower";
+    BinaryOperator[BinaryOperator["LowerEquals"] = 14] = "LowerEquals";
+    BinaryOperator[BinaryOperator["Bigger"] = 15] = "Bigger";
+    BinaryOperator[BinaryOperator["BiggerEquals"] = 16] = "BiggerEquals";
+    BinaryOperator[BinaryOperator["NullishCoalesce"] = 17] = "NullishCoalesce";
+})(BinaryOperator || (BinaryOperator = {}));
+function nullSafeIsEquivalent(base, other) {
+    if (base == null || other == null) {
+        return base == other;
+    }
+    return base.isEquivalent(other);
+}
+function areAllEquivalentPredicate(base, other, equivalentPredicate) {
+    const len = base.length;
+    if (len !== other.length) {
+        return false;
+    }
+    for (let i = 0; i < len; i++) {
+        if (!equivalentPredicate(base[i], other[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+function areAllEquivalent(base, other) {
+    return areAllEquivalentPredicate(base, other, (baseElement, otherElement) => baseElement.isEquivalent(otherElement));
+}
+class Expression {
+    type;
+    sourceSpan;
+    constructor(type, sourceSpan) {
+        this.type = type || null;
+        this.sourceSpan = sourceSpan || null;
+    }
+    prop(name, sourceSpan) {
+        return new ReadPropExpr(this, name, null, sourceSpan);
+    }
+    key(index, type, sourceSpan) {
+        return new ReadKeyExpr(this, index, type, sourceSpan);
+    }
+    callFn(params, sourceSpan, pure) {
+        return new InvokeFunctionExpr(this, params, null, sourceSpan, pure);
+    }
+    instantiate(params, type, sourceSpan) {
+        return new InstantiateExpr(this, params, type, sourceSpan);
+    }
+    conditional(trueCase, falseCase = null, sourceSpan) {
+        return new ConditionalExpr(this, trueCase, falseCase, null, sourceSpan);
+    }
+    equals(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Equals, this, rhs, null, sourceSpan);
+    }
+    notEquals(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.NotEquals, this, rhs, null, sourceSpan);
+    }
+    identical(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Identical, this, rhs, null, sourceSpan);
+    }
+    notIdentical(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.NotIdentical, this, rhs, null, sourceSpan);
+    }
+    minus(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Minus, this, rhs, null, sourceSpan);
+    }
+    plus(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Plus, this, rhs, null, sourceSpan);
+    }
+    divide(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Divide, this, rhs, null, sourceSpan);
+    }
+    multiply(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Multiply, this, rhs, null, sourceSpan);
+    }
+    modulo(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Modulo, this, rhs, null, sourceSpan);
+    }
+    and(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.And, this, rhs, null, sourceSpan);
+    }
+    bitwiseOr(rhs, sourceSpan, parens = true) {
+        return new BinaryOperatorExpr(BinaryOperator.BitwiseOr, this, rhs, null, sourceSpan, parens);
+    }
+    bitwiseAnd(rhs, sourceSpan, parens = true) {
+        return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, this, rhs, null, sourceSpan, parens);
+    }
+    or(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Or, this, rhs, null, sourceSpan);
+    }
+    lower(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Lower, this, rhs, null, sourceSpan);
+    }
+    lowerEquals(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.LowerEquals, this, rhs, null, sourceSpan);
+    }
+    bigger(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.Bigger, this, rhs, null, sourceSpan);
+    }
+    biggerEquals(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.BiggerEquals, this, rhs, null, sourceSpan);
+    }
+    isBlank(sourceSpan) {
+        // Note: We use equals by purpose here to compare to null and undefined in JS.
+        // We use the typed null to allow strictNullChecks to narrow types.
+        return this.equals(TYPED_NULL_EXPR, sourceSpan);
+    }
+    nullishCoalesce(rhs, sourceSpan) {
+        return new BinaryOperatorExpr(BinaryOperator.NullishCoalesce, this, rhs, null, sourceSpan);
+    }
+    toStmt() {
+        return new ExpressionStatement(this, null);
+    }
+}
+class WriteKeyExpr extends Expression {
+    receiver;
+    index;
+    value;
+    constructor(receiver, index, value, type, sourceSpan) {
+        super(type || value.type, sourceSpan);
+        this.receiver = receiver;
+        this.index = index;
+        this.value = value;
+    }
+    isEquivalent(e) {
+        return (e instanceof WriteKeyExpr &&
+            this.receiver.isEquivalent(e.receiver) &&
+            this.index.isEquivalent(e.index) &&
+            this.value.isEquivalent(e.value));
+    }
+    isConstant() {
+        return false;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitWriteKeyExpr(this, context);
+    }
+    clone() {
+        return new WriteKeyExpr(this.receiver.clone(), this.index.clone(), this.value.clone(), this.type, this.sourceSpan);
+    }
+}
+class WritePropExpr extends Expression {
+    receiver;
+    name;
+    value;
+    constructor(receiver, name, value, type, sourceSpan) {
+        super(type || value.type, sourceSpan);
+        this.receiver = receiver;
+        this.name = name;
+        this.value = value;
+    }
+    isEquivalent(e) {
+        return (e instanceof WritePropExpr &&
+            this.receiver.isEquivalent(e.receiver) &&
+            this.name === e.name &&
+            this.value.isEquivalent(e.value));
+    }
+    isConstant() {
+        return false;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitWritePropExpr(this, context);
+    }
+    clone() {
+        return new WritePropExpr(this.receiver.clone(), this.name, this.value.clone(), this.type, this.sourceSpan);
+    }
+}
+class InvokeFunctionExpr extends Expression {
+    fn;
+    args;
+    pure;
+    constructor(fn, args, type, sourceSpan, pure = false) {
+        super(type, sourceSpan);
+        this.fn = fn;
+        this.args = args;
+        this.pure = pure;
+    }
+    // An alias for fn, which allows other logic to handle calls and property reads together.
+    get receiver() {
+        return this.fn;
+    }
+    isEquivalent(e) {
+        return (e instanceof InvokeFunctionExpr &&
+            this.fn.isEquivalent(e.fn) &&
+            areAllEquivalent(this.args, e.args) &&
+            this.pure === e.pure);
+    }
+    isConstant() {
+        return false;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitInvokeFunctionExpr(this, context);
+    }
+    clone() {
+        return new InvokeFunctionExpr(this.fn.clone(), this.args.map((arg) => arg.clone()), this.type, this.sourceSpan, this.pure);
+    }
+}
+class InstantiateExpr extends Expression {
+    classExpr;
+    args;
+    constructor(classExpr, args, type, sourceSpan) {
+        super(type, sourceSpan);
+        this.classExpr = classExpr;
+        this.args = args;
+    }
+    isEquivalent(e) {
+        return (e instanceof InstantiateExpr &&
+            this.classExpr.isEquivalent(e.classExpr) &&
+            areAllEquivalent(this.args, e.args));
+    }
+    isConstant() {
+        return false;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitInstantiateExpr(this, context);
+    }
+    clone() {
+        return new InstantiateExpr(this.classExpr.clone(), this.args.map((arg) => arg.clone()), this.type, this.sourceSpan);
+    }
+}
+class LiteralExpr extends Expression {
+    value;
+    constructor(value, type, sourceSpan) {
+        super(type, sourceSpan);
+        this.value = value;
+    }
+    isEquivalent(e) {
+        return e instanceof LiteralExpr && this.value === e.value;
+    }
+    isConstant() {
+        return true;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitLiteralExpr(this, context);
+    }
+    clone() {
+        return new LiteralExpr(this.value, this.type, this.sourceSpan);
+    }
+}
+class ConditionalExpr extends Expression {
+    condition;
+    falseCase;
+    trueCase;
+    constructor(condition, trueCase, falseCase = null, type, sourceSpan) {
+        super(type || trueCase.type, sourceSpan);
+        this.condition = condition;
+        this.falseCase = falseCase;
+        this.trueCase = trueCase;
+    }
+    isEquivalent(e) {
+        return (e instanceof ConditionalExpr &&
+            this.condition.isEquivalent(e.condition) &&
+            this.trueCase.isEquivalent(e.trueCase) &&
+            nullSafeIsEquivalent(this.falseCase, e.falseCase));
+    }
+    isConstant() {
+        return false;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitConditionalExpr(this, context);
+    }
+    clone() {
+        return new ConditionalExpr(this.condition.clone(), this.trueCase.clone(), this.falseCase?.clone(), this.type, this.sourceSpan);
+    }
+}
+class BinaryOperatorExpr extends Expression {
+    operator;
+    rhs;
+    parens;
+    lhs;
+    constructor(operator, lhs, rhs, type, sourceSpan, parens = true) {
+        super(type || lhs.type, sourceSpan);
+        this.operator = operator;
+        this.rhs = rhs;
+        this.parens = parens;
+        this.lhs = lhs;
+    }
+    isEquivalent(e) {
+        return (e instanceof BinaryOperatorExpr &&
+            this.operator === e.operator &&
+            this.lhs.isEquivalent(e.lhs) &&
+            this.rhs.isEquivalent(e.rhs));
+    }
+    isConstant() {
+        return false;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitBinaryOperatorExpr(this, context);
+    }
+    clone() {
+        return new BinaryOperatorExpr(this.operator, this.lhs.clone(), this.rhs.clone(), this.type, this.sourceSpan, this.parens);
+    }
+}
+class ReadPropExpr extends Expression {
+    receiver;
+    name;
+    constructor(receiver, name, type, sourceSpan) {
+        super(type, sourceSpan);
+        this.receiver = receiver;
+        this.name = name;
+    }
+    // An alias for name, which allows other logic to handle property reads and keyed reads together.
+    get index() {
+        return this.name;
+    }
+    isEquivalent(e) {
+        return (e instanceof ReadPropExpr && this.receiver.isEquivalent(e.receiver) && this.name === e.name);
+    }
+    isConstant() {
+        return false;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitReadPropExpr(this, context);
+    }
+    set(value) {
+        return new WritePropExpr(this.receiver, this.name, value, null, this.sourceSpan);
+    }
+    clone() {
+        return new ReadPropExpr(this.receiver.clone(), this.name, this.type, this.sourceSpan);
+    }
+}
+class ReadKeyExpr extends Expression {
+    receiver;
+    index;
+    constructor(receiver, index, type, sourceSpan) {
+        super(type, sourceSpan);
+        this.receiver = receiver;
+        this.index = index;
+    }
+    isEquivalent(e) {
+        return (e instanceof ReadKeyExpr &&
+            this.receiver.isEquivalent(e.receiver) &&
+            this.index.isEquivalent(e.index));
+    }
+    isConstant() {
+        return false;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitReadKeyExpr(this, context);
+    }
+    set(value) {
+        return new WriteKeyExpr(this.receiver, this.index, value, null, this.sourceSpan);
+    }
+    clone() {
+        return new ReadKeyExpr(this.receiver.clone(), this.index.clone(), this.type, this.sourceSpan);
+    }
+}
+const NULL_EXPR = new LiteralExpr(null, null, null);
+const TYPED_NULL_EXPR = new LiteralExpr(null, INFERRED_TYPE, null);
+//// Statements
+var StmtModifier;
+(function (StmtModifier) {
+    StmtModifier[StmtModifier["None"] = 0] = "None";
+    StmtModifier[StmtModifier["Final"] = 1] = "Final";
+    StmtModifier[StmtModifier["Private"] = 2] = "Private";
+    StmtModifier[StmtModifier["Exported"] = 4] = "Exported";
+    StmtModifier[StmtModifier["Static"] = 8] = "Static";
+})(StmtModifier || (StmtModifier = {}));
+class Statement {
+    modifiers;
+    sourceSpan;
+    leadingComments;
+    constructor(modifiers = StmtModifier.None, sourceSpan = null, leadingComments) {
+        this.modifiers = modifiers;
+        this.sourceSpan = sourceSpan;
+        this.leadingComments = leadingComments;
+    }
+    hasModifier(modifier) {
+        return (this.modifiers & modifier) !== 0;
+    }
+    addLeadingComment(leadingComment) {
+        this.leadingComments = this.leadingComments ?? [];
+        this.leadingComments.push(leadingComment);
+    }
+}
+class ExpressionStatement extends Statement {
+    expr;
+    constructor(expr, sourceSpan, leadingComments) {
+        super(StmtModifier.None, sourceSpan, leadingComments);
+        this.expr = expr;
+    }
+    isEquivalent(stmt) {
+        return stmt instanceof ExpressionStatement && this.expr.isEquivalent(stmt.expr);
+    }
+    visitStatement(visitor, context) {
+        return visitor.visitExpressionStmt(this, context);
+    }
 }
 
 /**
@@ -380,16 +841,18 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
         // not change again, at a later time.
         assert__default["default"](ts__default["default"].isClassDeclaration(inputClass), 'Expected input graph node to be always a class.');
         const classFields = opts.getFieldsForClass(inputClass);
+        const inputFieldNamesFromMetadataArray = new Set();
         // Iterate through derived class chains and determine all inputs that are overridden
         // via class metadata fields. e.g `@Component#inputs`. This is later used to mark a
         // potential similar class input as incompatible— because those cannot be migrated.
-        const inputFieldNamesFromMetadataArray = new Set();
-        for (const derivedClasses of inheritanceGraph.traceDerivedClasses(inputClass)) {
-            const derivedMeta = ts__default["default"].isClassDeclaration(derivedClasses) && derivedClasses.name !== undefined
-                ? metaRegistry.getDirectiveMetadata(new checker.Reference(derivedClasses))
-                : null;
-            if (derivedMeta !== null && derivedMeta.inputFieldNamesFromMetadataArray !== null) {
-                derivedMeta.inputFieldNamesFromMetadataArray.forEach((b) => inputFieldNamesFromMetadataArray.add(b));
+        if (metaRegistry !== null) {
+            for (const derivedClasses of inheritanceGraph.traceDerivedClasses(inputClass)) {
+                const derivedMeta = ts__default["default"].isClassDeclaration(derivedClasses) && derivedClasses.name !== undefined
+                    ? metaRegistry.getDirectiveMetadata(new checker.Reference(derivedClasses))
+                    : null;
+                if (derivedMeta !== null && derivedMeta.inputFieldNamesFromMetadataArray !== null) {
+                    derivedMeta.inputFieldNamesFromMetadataArray.forEach((b) => inputFieldNamesFromMetadataArray.add(b));
+                }
             }
         }
         // Check inheritance of every input in the given "directive class".
@@ -1448,6 +1911,7 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
 
 exports.GroupedTsAstVisitor = GroupedTsAstVisitor;
 exports.InheritanceGraph = InheritanceGraph;
+exports.NULL_EXPR = NULL_EXPR;
 exports.checkIncompatiblePatterns = checkIncompatiblePatterns;
 exports.checkInheritanceOfKnownFields = checkInheritanceOfKnownFields;
 exports.cutStringToLineLimit = cutStringToLineLimit;

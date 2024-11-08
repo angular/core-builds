@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.1+sha-a314878
+ * @license Angular v19.0.0-rc.1+sha-e1c7327
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,13 +9,13 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var migrate_ts_type_references = require('./migrate_ts_type_references-78c70f00.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-0fb10cf9.js');
 var ts = require('typescript');
 require('os');
-var checker = require('./checker-9ca42e51.js');
-var program = require('./program-ae4ebe51.js');
+var checker = require('./checker-99b943f9.js');
+var program = require('./program-6262ff57.js');
 require('path');
-var combine_units = require('./combine_units-5477f99d.js');
+var combine_units = require('./combine_units-33ad8e99.js');
 var assert = require('assert');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 require('./leading_space-d190b83b.js');
@@ -259,27 +259,29 @@ class KnownInputs {
  * and can be used for integrations with e.g. the language service.
  */
 function prepareAnalysisInfo(userProgram, compiler, programAbsoluteRootPaths) {
-    // Analyze sync and retrieve necessary dependencies.
-    // Note: `getTemplateTypeChecker` requires the `enableTemplateTypeChecker` flag, but
-    // this has negative effects as it causes optional TCB operations to execute, which may
-    // error with unsuccessful reference emits that previously were ignored outside of the migration.
-    // The migration is resilient to TCB information missing, so this is fine, and all the information
-    // we need is part of required TCB operations anyway.
-    const { refEmitter, metaReader, templateTypeChecker } = compiler['ensureAnalyzed']();
-    // Generate all type check blocks.
-    templateTypeChecker.generateAllTypeCheckBlocks();
+    let refEmitter = null;
+    let metaReader = null;
+    let templateTypeChecker = null;
+    let resourceLoader = null;
+    if (compiler !== null) {
+        // Analyze sync and retrieve necessary dependencies.
+        // Note: `getTemplateTypeChecker` requires the `enableTemplateTypeChecker` flag, but
+        // this has negative effects as it causes optional TCB operations to execute, which may
+        // error with unsuccessful reference emits that previously were ignored outside of the migration.
+        // The migration is resilient to TCB information missing, so this is fine, and all the information
+        // we need is part of required TCB operations anyway.
+        const state = compiler['ensureAnalyzed']();
+        resourceLoader = compiler['resourceManager'];
+        refEmitter = state.refEmitter;
+        metaReader = state.metaReader;
+        templateTypeChecker = state.templateTypeChecker;
+        // Generate all type check blocks.
+        state.templateTypeChecker.generateAllTypeCheckBlocks();
+    }
     const typeChecker = userProgram.getTypeChecker();
     const reflector = new checker.TypeScriptReflectionHost(typeChecker);
     const evaluator = new program.PartialEvaluator(reflector, typeChecker, null);
     const dtsMetadataReader = new program.DtsMetadataReader(typeChecker, reflector);
-    const resourceLoader = compiler['resourceManager'];
-    // Optional filter for testing. Allows for simulation of parallel execution
-    // even if some tsconfig's have overlap due to sharing of TS sources.
-    // (this is commonly not the case in g3 where deps are `.d.ts` files).
-    const limitToRootNamesOnly = process.env['LIMIT_TO_ROOT_NAMES_ONLY'] === '1';
-    if (limitToRootNamesOnly) {
-        assert__default["default"](programAbsoluteRootPaths !== undefined, 'Expected absolute root paths when limiting to root names.');
-    }
     return {
         metaRegistry: metaReader,
         dtsMetadataReader,
@@ -315,8 +317,8 @@ class MigrationResult {
 }
 
 /** Attempts to extract metadata of a potential TypeScript `@Input()` declaration. */
-function extractDecoratorInput(node, host, reflector, metadataReader, evaluator, refEmitter) {
-    return (extractSourceCodeInput(node, host, reflector, evaluator, refEmitter) ??
+function extractDecoratorInput(node, host, reflector, metadataReader, evaluator) {
+    return (extractSourceCodeInput(node, host, reflector, evaluator) ??
         extractDtsInput(node, metadataReader));
 }
 /**
@@ -366,7 +368,7 @@ function extractDtsInput(node, metadataReader) {
  * Attempts to extract `@Input()` information for the given node, assuming it's
  * directly defined inside a source file (`.ts`).
  */
-function extractSourceCodeInput(node, host, reflector, evaluator, refEmitter) {
+function extractSourceCodeInput(node, host, reflector, evaluator) {
     if (!combine_units.isInputContainerNode(node) ||
         !ts__default["default"].isIdentifier(node.name) ||
         node.getSourceFile().isDeclarationFile) {
@@ -399,7 +401,7 @@ function extractSourceCodeInput(node, host, reflector, evaluator, refEmitter) {
                 isRequired = !!evaluatedInputOpts.get('required');
             }
             if (evaluatedInputOpts.has('transform') && evaluatedInputOpts.get('transform') != null) {
-                transformResult = parseTransformOfInput(evaluatedInputOpts, node, reflector, refEmitter);
+                transformResult = parseTransformOfInput(evaluatedInputOpts, node, reflector);
             }
         }
     }
@@ -418,13 +420,25 @@ function extractSourceCodeInput(node, host, reflector, evaluator, refEmitter) {
  * Gracefully attempts to parse the `transform` option of an `@Input()`
  * and extracts its metadata.
  */
-function parseTransformOfInput(evaluatedInputOpts, node, reflector, refEmitter) {
+function parseTransformOfInput(evaluatedInputOpts, node, reflector) {
     const transformValue = evaluatedInputOpts.get('transform');
     if (!(transformValue instanceof checker.DynamicValue) && !(transformValue instanceof checker.Reference)) {
         return null;
     }
+    // For parsing the transform, we don't need a real reference emitter, as
+    // the emitter is only used for verifying that the transform type could be
+    // copied into e.g. an `ngInputAccept` class member.
+    const noopRefEmitter = new checker.ReferenceEmitter([
+        {
+            emit: () => ({
+                kind: checker.ReferenceEmitKind.Success,
+                expression: migrate_ts_type_references.NULL_EXPR,
+                importedFile: null,
+            }),
+        },
+    ]);
     try {
-        return program.parseDecoratorInputTransformFunction(node.parent, node.name.text, transformValue, reflector, refEmitter, checker.CompilationMode.FULL);
+        return program.parseDecoratorInputTransformFunction(node.parent, node.name.text, transformValue, reflector, noopRefEmitter, checker.CompilationMode.FULL);
     }
     catch (e) {
         if (!(e instanceof checker.FatalDiagnosticError)) {
@@ -584,9 +598,9 @@ function isPrimitiveImportableTypeNode(type) {
  * Phase where we iterate through all source files of the program (including `.d.ts`)
  * and keep track of all `@Input`'s we discover.
  */
-function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflector, dtsMetadataReader, evaluator, refEmitter, knownDecoratorInputs, result) {
+function pass1__IdentifySourceFileAndDeclarationInputs(sf, host, checker, reflector, dtsMetadataReader, evaluator, knownDecoratorInputs, result) {
     const visitor = (node) => {
-        const decoratorInput = extractDecoratorInput(node, host, reflector, dtsMetadataReader, evaluator, refEmitter);
+        const decoratorInput = extractDecoratorInput(node, host, reflector, dtsMetadataReader, evaluator);
         if (decoratorInput !== null) {
             assert__default["default"](combine_units.isInputContainerNode(node), 'Expected input to be declared on accessor or property.');
             const inputDescr = getInputDescriptor(host, node);
@@ -671,13 +685,13 @@ function pass2_IdentifySourceFileReferences(programInfo, checker, reflector, res
  *   - determining incompatible inputs
  *   - checking inheritance
  */
-function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProgramSourceFiles, reflector, dtsMetadataReader, typeChecker, templateTypeChecker, resourceLoader, evaluator, refEmitter, }) {
+function executeAnalysisPhase(host, knownInputs, result, { sourceFiles, fullProgramSourceFiles, reflector, dtsMetadataReader, typeChecker, templateTypeChecker, resourceLoader, evaluator, }) {
     // Pass 1
     fullProgramSourceFiles.forEach((sf) => 
     // Shim shim files. Those are unnecessary and might cause unexpected slowness.
     // e.g. `ngtypecheck` files.
     !checker.isShim(sf) &&
-        pass1__IdentifySourceFileAndDeclarationInputs(sf, host, typeChecker, reflector, dtsMetadataReader, evaluator, refEmitter, knownInputs, result));
+        pass1__IdentifySourceFileAndDeclarationInputs(sf, host, typeChecker, reflector, dtsMetadataReader, evaluator, knownInputs, result));
     const fieldNamesToConsiderForReferenceLookup = new Set();
     for (const input of knownInputs.knownInputIds.values()) {
         if (host.config.shouldMigrateInput?.(input) === false) {
@@ -1254,9 +1268,9 @@ class SignalInputMigration extends combine_units.TsurgeComplexMigration {
         super();
         this.config = config;
     }
-    // Override the default ngtsc program creation, to add extra flags.
+    // Override the default program creation, to add extra flags.
     createProgram(tsconfigAbsPath, fs) {
-        return combine_units.createNgtscProgram(tsconfigAbsPath, fs, {
+        return combine_units.createBaseProgramInfo(tsconfigAbsPath, fs, {
             _compilePoisonedComponents: true,
             // We want to migrate non-exported classes too.
             compileNonExportedClasses: true,
@@ -1284,7 +1298,6 @@ class SignalInputMigration extends combine_units.TsurgeComplexMigration {
     }
     // Extend the program info with the analysis information we need in every phase.
     prepareAnalysisDeps(info) {
-        assert__default["default"](info.ngCompiler !== null, 'Expected `NgCompiler` to be configured.');
         const analysisInfo = {
             ...info,
             ...prepareAnalysisInfo(info.program, info.ngCompiler, info.programAbsoluteRootFileNames),

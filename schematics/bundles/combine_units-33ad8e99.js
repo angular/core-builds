@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.1+sha-a314878
+ * @license Angular v19.0.0-rc.1+sha-e1c7327
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,8 +10,8 @@ var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-9ca42e51.js');
-var program = require('./program-ae4ebe51.js');
+var checker = require('./checker-99b943f9.js');
+var program = require('./program-6262ff57.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -410,32 +410,56 @@ function groupReplacementsByFile(replacements) {
     return result;
 }
 
-/** Code of the error raised by TypeScript when a tsconfig doesn't match any files. */
-const NO_INPUTS_ERROR_CODE = 18003;
+/**
+ * By default, Tsurge will always create an Angular compiler program
+ * for projects analyzed and migrated. This works perfectly fine in
+ * third-party where Tsurge migrations run in Angular CLI projects.
+ *
+ * In first party, when running against full Google3, creating an Angular
+ * program for e.g. plain `ts_library` targets is overly expensive and
+ * can result in out of memory issues for large TS targets. In 1P we can
+ * reliably distinguish between TS and Angular targets via the `angularCompilerOptions`.
+ */
+function google3UsePlainTsProgramIfNoKnownAngularOption() {
+    return process.env['GOOGLE3_TSURGE'] === '1';
+}
+
+/** Options that are good defaults for Tsurge migrations. */
+const defaultMigrationTsOptions = {
+    // Avoid checking libraries to speed up migrations.
+    skipLibCheck: true,
+    skipDefaultLibCheck: true,
+    noEmit: true,
+};
+/**
+ * Creates an instance of a TypeScript program for the given project.
+ */
+function createPlainTsProgram(tsHost, tsconfig, optionOverrides) {
+    const program = ts__default["default"].createProgram({
+        rootNames: tsconfig.rootNames,
+        options: {
+            ...tsconfig.options,
+            ...defaultMigrationTsOptions,
+            ...optionOverrides,
+        },
+    });
+    return {
+        ngCompiler: null,
+        program,
+        userOptions: tsconfig.options,
+        programAbsoluteRootFileNames: tsconfig.rootNames,
+        host: tsHost,
+    };
+}
+
 /**
  * Parses the configuration of the given TypeScript project and creates
  * an instance of the Angular compiler for the project.
  */
-function createNgtscProgram(absoluteTsconfigPath, fs, optionOverrides = {}) {
-    if (fs === undefined) {
-        fs = new checker.NodeJSFileSystem();
-        checker.setFileSystem(fs);
-    }
-    const tsconfig = readConfiguration(absoluteTsconfigPath, {}, fs);
-    // Skip the "No inputs found..." error since we don't want to interrupt the migration if a
-    // tsconfig doesn't match a file. This will result in an empty `Program` which is still valid.
-    const errors = tsconfig.errors.filter((diag) => diag.code !== NO_INPUTS_ERROR_CODE);
-    if (errors.length) {
-        throw new Error(`Tsconfig could not be parsed or is invalid:\n\n` + `${errors.map((e) => e.messageText)}`);
-    }
-    const tsHost = new NgtscCompilerHost(fs, tsconfig.options);
+function createNgtscProgram(tsHost, tsconfig, optionOverrides) {
     const ngtscProgram = new program.NgtscProgram(tsconfig.rootNames, {
         ...tsconfig.options,
-        // Avoid checking libraries to speed up migrations.
-        skipLibCheck: true,
-        skipDefaultLibCheck: true,
-        noEmit: true,
-        // Additional override options.
+        ...defaultMigrationTsOptions,
         ...optionOverrides,
     }, tsHost);
     // Expose an easy way to debug-print ng semantic diagnostics.
@@ -451,6 +475,37 @@ function createNgtscProgram(absoluteTsconfigPath, fs, optionOverrides = {}) {
     };
 }
 
+/** Code of the error raised by TypeScript when a tsconfig doesn't match any files. */
+const NO_INPUTS_ERROR_CODE = 18003;
+/** Parses the given tsconfig file, supporting Angular compiler options. */
+function parseTsconfigOrDie(absoluteTsconfigPath, fs) {
+    const tsconfig = readConfiguration(absoluteTsconfigPath, {}, fs);
+    // Skip the "No inputs found..." error since we don't want to interrupt the migration if a
+    // tsconfig doesn't match a file. This will result in an empty `Program` which is still valid.
+    const errors = tsconfig.errors.filter((diag) => diag.code !== NO_INPUTS_ERROR_CODE);
+    if (errors.length) {
+        throw new Error(`Tsconfig could not be parsed or is invalid:\n\n` + `${errors.map((e) => e.messageText)}`);
+    }
+    return tsconfig;
+}
+
+/** Creates the base program info for the given tsconfig path. */
+function createBaseProgramInfo(absoluteTsconfigPath, fs, optionOverrides = {}) {
+    if (fs === undefined) {
+        fs = new checker.NodeJSFileSystem();
+        checker.setFileSystem(fs);
+    }
+    const tsconfig = parseTsconfigOrDie(absoluteTsconfigPath, fs);
+    const tsHost = new NgtscCompilerHost(fs, tsconfig.options);
+    // When enabled, use a plain TS program if we are sure it's not
+    // an Angular project based on the `tsconfig.json`.
+    if (google3UsePlainTsProgramIfNoKnownAngularOption() &&
+        tsconfig.options['_useHostForImportGeneration'] === undefined) {
+        return createPlainTsProgram(tsHost, tsconfig, optionOverrides);
+    }
+    return createNgtscProgram(tsHost, tsconfig, optionOverrides);
+}
+
 /**
  * @private
  *
@@ -460,9 +515,16 @@ function createNgtscProgram(absoluteTsconfigPath, fs, optionOverrides = {}) {
  * TypeScript programs, while also allowing migration authors to override.
  */
 class TsurgeBaseMigration {
-    // By default, ngtsc programs are being created.
+    /**
+     * Advanced Tsurge users can override this method, but most of the time,
+     * overriding {@link prepareProgram} is more desirable.
+     *
+     * By default:
+     *  - In 3P: Ngtsc programs are being created.
+     *  - In 1P: Ngtsc or TS programs are created based on the Blaze target.
+     */
     createProgram(tsconfigAbsPath, fs) {
-        return createNgtscProgram(tsconfigAbsPath, fs);
+        return createBaseProgramInfo(tsconfigAbsPath, fs);
     }
     // Optional function to prepare the base `ProgramInfo` even further,
     // for the analyze and migrate phases. E.g. determining source files.
@@ -1544,7 +1606,9 @@ function createFindAllSourceFileReferencesVisitor(programInfo, checker, reflecto
     const currentTimeInMs = () => typeof global.performance !== 'undefined' ? global.performance.now() : Date.now();
     const visitor = (node) => {
         let lastTime = currentTimeInMs();
-        if (ts__default["default"].isClassDeclaration(node)) {
+        // Note: If there is no template type checker and resource loader, we aren't processing
+        // an Angular program, and can skip template detection.
+        if (ts__default["default"].isClassDeclaration(node) && templateTypeChecker !== null && resourceLoader !== null) {
             identifyTemplateReferences(programInfo, node, reflector, checker, evaluator, templateTypeChecker, resourceLoader, programInfo.userOptions, result, knownFields, fieldNamesToConsiderForReferenceLookup);
             perfCounters.template += (currentTimeInMs() - lastTime) / 1000;
             lastTime = currentTimeInMs();
@@ -1618,8 +1682,8 @@ exports.TsurgeComplexMigration = TsurgeComplexMigration;
 exports.TsurgeFunnelMigration = TsurgeFunnelMigration;
 exports.applyImportManagerChanges = applyImportManagerChanges;
 exports.confirmAsSerializable = confirmAsSerializable;
+exports.createBaseProgramInfo = createBaseProgramInfo;
 exports.createFindAllSourceFileReferencesVisitor = createFindAllSourceFileReferencesVisitor;
-exports.createNgtscProgram = createNgtscProgram;
 exports.getBindingElementDeclaration = getBindingElementDeclaration;
 exports.getMemberName = getMemberName;
 exports.groupReplacementsByFile = groupReplacementsByFile;
