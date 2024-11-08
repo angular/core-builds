@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-4c3e1a9
+ * @license Angular v19.1.0-next.0+sha-ff11551
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,14 +10,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
-var combine_units = require('./combine_units-5477f99d.js');
+var combine_units = require('./combine_units-33ad8e99.js');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-9ca42e51.js');
-var program = require('./program-ae4ebe51.js');
-var assert = require('assert');
+var checker = require('./checker-99b943f9.js');
+var program = require('./program-6262ff57.js');
 require('path');
-var migrate_ts_type_references = require('./migrate_ts_type_references-78c70f00.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-0fb10cf9.js');
+var assert = require('assert');
 require('@angular-devkit/core');
 require('node:path/posix');
 require('fs');
@@ -722,11 +722,15 @@ class SignalQueriesMigration extends combine_units.TsurgeComplexMigration {
         this.config = config;
     }
     async analyze(info) {
-        assert__default["default"](info.ngCompiler !== null, 'Expected queries migration to have an Angular program.');
         // Pre-Analyze the program and get access to the template type checker.
-        const { templateTypeChecker } = info.ngCompiler['ensureAnalyzed']();
-        // Generate all type check blocks.
-        templateTypeChecker.generateAllTypeCheckBlocks();
+        const { templateTypeChecker } = info.ngCompiler?.['ensureAnalyzed']() ?? {
+            templateTypeChecker: null,
+        };
+        const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
+        // Generate all type check blocks, if we have Angular template information.
+        if (templateTypeChecker !== null) {
+            templateTypeChecker.generateAllTypeCheckBlocks();
+        }
         const { sourceFiles, program: program$1 } = info;
         const checker$1 = program$1.getTypeChecker();
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
@@ -808,7 +812,7 @@ class SignalQueriesMigration extends combine_units.TsurgeComplexMigration {
                 return descriptor;
             },
         };
-        groupedAstVisitor.register(combine_units.createFindAllSourceFileReferencesVisitor(info, checker$1, reflector, info.ngCompiler['resourceManager'], evaluator, templateTypeChecker, allFieldsOrKnownQueries, 
+        groupedAstVisitor.register(combine_units.createFindAllSourceFileReferencesVisitor(info, checker$1, reflector, resourceLoader, evaluator, templateTypeChecker, allFieldsOrKnownQueries, 
         // In non-batch mode, we know what inputs exist and can optimize the reference
         // resolution significantly (for e.g. VSCode integration)— as we know what
         // field names may be used to reference potential queries.
@@ -909,9 +913,12 @@ class SignalQueriesMigration extends combine_units.TsurgeComplexMigration {
         return combine_units.confirmAsSerializable(globalUnitData);
     }
     async migrate(globalMetadata, info) {
-        assert__default["default"](info.ngCompiler !== null, 'Expected queries migration to have an Angular program.');
         // Pre-Analyze the program and get access to the template type checker.
-        const { templateTypeChecker, metaReader } = info.ngCompiler['ensureAnalyzed']();
+        const { templateTypeChecker, metaReader } = info.ngCompiler?.['ensureAnalyzed']() ?? {
+            templateTypeChecker: null,
+            metaReader: null,
+        };
+        const resourceLoader = info.ngCompiler?.['resourceManager'] ?? null;
         const { program: program$1, sourceFiles } = info;
         const checker$1 = program$1.getTypeChecker();
         const reflector = new checker.TypeScriptReflectionHost(checker$1);
@@ -966,7 +973,7 @@ class SignalQueriesMigration extends combine_units.TsurgeComplexMigration {
             referenceResult.references = globalMetadata.reusableAnalysisReferences;
         }
         else {
-            groupedAstVisitor.register(combine_units.createFindAllSourceFileReferencesVisitor(info, checker$1, reflector, info.ngCompiler['resourceManager'], evaluator, templateTypeChecker, knownQueries, fieldNamesToConsiderForReferenceLookup, referenceResult).visitor);
+            groupedAstVisitor.register(combine_units.createFindAllSourceFileReferencesVisitor(info, checker$1, reflector, resourceLoader, evaluator, templateTypeChecker, knownQueries, fieldNamesToConsiderForReferenceLookup, referenceResult).visitor);
         }
         // Check inheritance.
         // NOTE: Inheritance is only checked in the migrate stage as we cannot reliably
