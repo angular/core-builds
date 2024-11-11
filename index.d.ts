@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.1+sha-9395aae
+ * @license Angular v19.0.0-rc.1+sha-b6a998b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3042,16 +3042,6 @@ declare const DEFER_BLOCK_ID = "di";
 declare const DEFER_BLOCK_STATE = "s";
 
 /**
- * Basic set of data structures used for identifying a defer block
- * and triggering defer blocks
- */
-declare interface DeferBlock {
-    lView: LView;
-    tNode: TNode;
-    lContainer: LContainer;
-}
-
-/**
  * Represents defer trigger types.
  */
 declare const enum DeferBlockTrigger {
@@ -3108,6 +3098,16 @@ declare const DEHYDRATED_VIEWS = 6;
  */
 declare interface DehydratedContainerView extends DehydratedView {
     data: Readonly<SerializedContainerView>;
+}
+
+/**
+ * Basic set of data structures used for identifying a defer block
+ * and triggering defer blocks
+ */
+declare interface DehydratedDeferBlock {
+    lView: LView;
+    tNode: TNode;
+    lContainer: LContainer;
 }
 
 /**
@@ -13170,7 +13170,7 @@ export declare interface ɵDeferBlockDependencyInterceptor {
 /**
  * Defer block instance for testing.
  */
-export declare interface ɵDeferBlockDetails extends DeferBlock {
+export declare interface ɵDeferBlockDetails extends DehydratedDeferBlock {
     tDetails: TDeferBlockDetails;
 }
 
