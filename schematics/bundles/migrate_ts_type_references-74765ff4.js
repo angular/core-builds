@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.1+sha-64661dd
+ * @license Angular v19.0.0-rc.1+sha-9bbb01c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,9 +10,9 @@ var checker = require('./checker-99b943f9.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var combine_units = require('./combine_units-33ad8e99.js');
+var combine_units = require('./combine_units-7d289916.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-6262ff57.js');
+require('./program-f681627e.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -1576,9 +1576,16 @@ function analyzeControlFlow(entries, checker) {
     const referenceToMetadata = new Map();
     // Prepare easy lookups for reference nodes to flow info.
     for (const [idx, entry] of entries.entries()) {
+        const flowContainer = getControlFlowContainer(entry);
         referenceToMetadata.set(entry, {
-            flowContainer: getControlFlowContainer(entry),
+            flowContainer,
             resultIndex: idx,
+        });
+        result.push({
+            flowContainer,
+            id: idx,
+            originalNode: entry,
+            recommendedNode: 'preserve',
         });
     }
     for (const entry of entries) {
@@ -1586,12 +1593,6 @@ function analyzeControlFlow(entries, checker) {
         const flowPathInterestingNodes = traverseFlowForInterestingNodes(getFlowNode(entry));
         assert__default["default"](flowContainer !== null && flowPathInterestingNodes !== null, 'Expected a flow container to exist.');
         const narrowPartners = getAllMatchingReferencesInFlowPath(flowPathInterestingNodes, entry, referenceToMetadata, flowContainer, checker);
-        result.push({
-            id: resultIndex,
-            originalNode: entry,
-            flowContainer,
-            recommendedNode: 'preserve',
-        });
         if (narrowPartners.length !== 0) {
             connectSharedReferences(result, narrowPartners, resultIndex);
         }
@@ -1618,21 +1619,26 @@ function connectSharedReferences(result, flowPartners, refId) {
     }
     assert__default["default"](earliestPartner !== null, 'Expected an earliest partner to be found.');
     assert__default["default"](earliestPartnerId !== null, 'Expected an earliest partner to be found.');
+    // Earliest partner ID could be higher than `refId` in cyclic
+    // situations like `loop` flow nodes. We need to find the minimum
+    // and maximum to iterate through partners in between.
+    const min = Math.min(earliestPartnerId, refId);
+    const max = Math.max(earliestPartnerId, refId);
     // Then, incorporate all similar references (or flow nodes) in between
     // the reference and the earliest partner. References in between can also
     // use the shared flow node and not preserve their original reference— as
     // this would be rather unreadable and inefficient.
     const seenBlocks = new Set();
     let highestBlock = null;
-    for (let i = earliestPartnerId; i <= refId; i++) {
+    for (let i = min; i <= max; i++) {
         // Different flow container captured sequentially in result. Ignore.
         if (result[i].flowContainer !== refFlowContainer) {
             continue;
         }
         // Iterate up the block, find the highest block within the flow container.
         let current = result[i].originalNode.parent;
-        while (current !== undefined && !ts__default["default"].isSourceFile(current)) {
-            if (isBlockLikeAncestor(current)) {
+        while (current !== undefined) {
+            if (isPotentialInsertionAncestor(current)) {
                 // If we saw this block already, it is a common ancestor from another
                 // partner. Check if it would be higher than the current highest block;
                 // and choose it accordingly.
@@ -1650,14 +1656,17 @@ function connectSharedReferences(result, flowPartners, refId) {
             result[i].recommendedNode = earliestPartnerId;
         }
     }
+    if (!highestBlock) {
+        console.error(earliestPartnerId, refId, refFlowContainer.getText(), seenBlocks);
+    }
     assert__default["default"](highestBlock, 'Expected a block anchor to be found');
     result[earliestPartnerId].recommendedNode = highestBlock;
 }
-function isBlockLikeAncestor(node) {
+function isPotentialInsertionAncestor(node) {
     // Note: Arrow functions may not have a block, but instead use an expression
     // directly. This still signifies a "block" as we can convert the concise body
     // to a block.
-    return ts__default["default"].isSourceFile(node) || ts__default["default"].isBlock(node) || ts__default["default"].isArrowFunction(node);
+    return (ts__default["default"].isSourceFile(node) || ts__default["default"].isBlock(node) || ts__default["default"].isArrowFunction(node) || ts__default["default"].isClassLike(node));
 }
 /**
  * Looks through the flow path and interesting nodes to determine which
@@ -1734,6 +1743,17 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
     for (const reference of tsReferencesWithNarrowing.values()) {
         const controlFlowResult = analyzeControlFlow(reference.accesses, checker);
         const idToSharedField = new Map();
+        const isSharePartnerRef = (val) => {
+            return val !== 'preserve' && typeof val !== 'number';
+        };
+        // Ensure we generate shared fields before reference entries.
+        // This allows us to safely make use of `idToSharedField` whenever we come
+        // across a referenced pointing to a share partner.
+        controlFlowResult.sort((a, b) => {
+            const aPriority = isSharePartnerRef(a.recommendedNode) ? 1 : 0;
+            const bPriority = isSharePartnerRef(b.recommendedNode) ? 1 : 0;
+            return bPriority - aPriority;
+        });
         for (const { id, originalNode, recommendedNode } of controlFlowResult) {
             const sf = originalNode.getSourceFile();
             // Original node is preserved. No narrowing, and hence not shared.
@@ -1750,12 +1770,14 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             // This reference is shared with a previous reference. Replace the access
             // with the temporary variable.
             if (typeof recommendedNode === 'number') {
+                // Extract the shared field name.
+                const toInsert = idToSharedField.get(recommendedNode);
                 const replaceNode = combine_units.traverseAccess(originalNode);
+                assert__default["default"](toInsert, 'no shared variable yet available');
                 replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
                     position: replaceNode.getStart(),
                     end: replaceNode.getEnd(),
-                    // Extract the shared field name.
-                    toInsert: idToSharedField.get(recommendedNode),
+                    toInsert,
                 })));
                 continue;
             }
@@ -1772,10 +1794,20 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
                 parent = parent.parent;
             }
             const replaceNode = combine_units.traverseAccess(originalNode);
-            const fieldName = nameGenerator.generate(originalNode.text, referenceNodeInBlock);
             const filePath = combine_units.projectFile(sf, info);
-            const temporaryVariableStr = `const ${fieldName} = ${replaceNode.getText()}();`;
-            idToSharedField.set(id, fieldName);
+            const initializer = `${replaceNode.getText()}()`;
+            const fieldName = nameGenerator.generate(originalNode.text, referenceNodeInBlock);
+            let sharedValueAccessExpr;
+            let temporaryVariableStr;
+            if (ts__default["default"].isClassLike(recommendedNode)) {
+                sharedValueAccessExpr = `this.${fieldName}`;
+                temporaryVariableStr = `private readonly ${fieldName} = ${initializer};`;
+            }
+            else {
+                sharedValueAccessExpr = fieldName;
+                temporaryVariableStr = `const ${fieldName} = ${initializer};`;
+            }
+            idToSharedField.set(id, sharedValueAccessExpr);
             // If the common ancestor block of all shared references is an arrow function
             // without a block, convert the arrow function to a block and insert the temporary
             // variable at the beginning.
@@ -1793,7 +1825,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
                 position: replaceNode.getStart(),
                 end: replaceNode.getEnd(),
-                toInsert: fieldName,
+                toInsert: sharedValueAccessExpr,
             })));
         }
     }
