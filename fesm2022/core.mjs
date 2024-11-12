@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.1+sha-c77b53b
+ * @license Angular v19.0.0-rc.1+sha-d190f82
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9378,10 +9378,6 @@ const JSACTION_EVENT_CONTRACT = new InjectionToken(ngDevMode ? 'EVENT_CONTRACT_D
     providedIn: 'root',
     factory: () => ({}),
 });
-function cleanupContracts(injector) {
-    const eventContractDetails = injector.get(JSACTION_EVENT_CONTRACT);
-    eventContractDetails.instance.cleanUp();
-}
 function invokeListeners(event, currentTarget) {
     const handlerFns = currentTarget?.__jsaction_fns?.get(event.type);
     if (!handlerFns) {
@@ -9407,6 +9403,7 @@ class DehydratedBlockRegistry {
     registry = new Map();
     cleanupFns = new Map();
     jsActionMap = inject(JSACTION_BLOCK_ELEMENT_MAP);
+    contract = inject(JSACTION_EVENT_CONTRACT);
     add(blockId, info) {
         this.registry.set(blockId, info);
     }
@@ -9423,6 +9420,9 @@ class DehydratedBlockRegistry {
             this.jsActionMap.delete(blockId);
             this.invokeTriggerCleanupFns(blockId);
             this.hydrating.delete(blockId);
+        }
+        if (this.size === 0) {
+            this.contract.instance?.cleanUp();
         }
     }
     get size() {
@@ -16621,7 +16621,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.1+sha-c77b53b']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.1+sha-d190f82']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23793,9 +23793,6 @@ async function triggerBlockTreeHydrationByName(injector, blockName) {
     // The last item in the queue was the original target block;
     const hydratedBlockId = hydrationQueue.slice(-1)[0];
     const hydratedBlock = dehydratedBlockRegistry.get(hydratedBlockId);
-    if (dehydratedBlockRegistry.size === 0) {
-        cleanupContracts(injector);
-    }
     return { deferBlock: hydratedBlock, hydratedBlocks };
 }
 /**
@@ -34312,7 +34309,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-rc.1+sha-c77b53b');
+const VERSION = new Version('19.0.0-rc.1+sha-d190f82');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
