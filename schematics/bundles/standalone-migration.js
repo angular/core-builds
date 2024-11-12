@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-9fced64
+ * @license Angular v19.1.0-next.0+sha-f3d9316
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -32,7 +32,7 @@ var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.1.0-next.0+sha-9fced64');
+new checker.Version('19.1.0-next.0+sha-f3d9316');
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
     return new program.NgtscProgram(rootNames, options, host, oldProgram);
