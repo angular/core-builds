@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.1+sha-26602fc
+ * @license Angular v19.0.0-rc.1+sha-a5e7a02
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9892,6 +9892,72 @@ function appendDeferBlocksToJSActionMap(doc, injector) {
         sharedMapFunction(rNode, jsActionMap);
     }
 }
+/**
+ * Retrieves defer block hydration information from the TransferState.
+ *
+ * @param injector Injector that this component has access to.
+ */
+let _retrieveDeferBlockDataImpl = () => {
+    return {};
+};
+function retrieveDeferBlockDataImpl(injector) {
+    const transferState = injector.get(TransferState, null, { optional: true });
+    if (transferState !== null) {
+        const nghDeferData = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
+        ngDevMode &&
+            assertDefined(nghDeferData, 'Unable to retrieve defer block info from the TransferState.');
+        return nghDeferData;
+    }
+    return {};
+}
+/**
+ * Sets the implementation for the `retrieveDeferBlockData` function.
+ */
+function enableRetrieveDeferBlockDataImpl() {
+    _retrieveDeferBlockDataImpl = retrieveDeferBlockDataImpl;
+}
+/**
+ * Retrieves defer block data from TransferState storage
+ */
+function retrieveDeferBlockData(injector) {
+    return _retrieveDeferBlockDataImpl(injector);
+}
+function isTimerTrigger(triggerInfo) {
+    return typeof triggerInfo === 'object' && triggerInfo.trigger === 5 /* DeferBlockTrigger.Timer */;
+}
+function getHydrateTimerTrigger(blockData) {
+    const trigger = blockData[DEFER_HYDRATE_TRIGGERS]?.find((t) => isTimerTrigger(t));
+    return trigger?.delay ?? null;
+}
+function hasHydrateTrigger(blockData, trigger) {
+    return blockData[DEFER_HYDRATE_TRIGGERS]?.includes(trigger) ?? false;
+}
+/**
+ * Creates a summary of the given serialized defer block, which is used later to properly initialize
+ * specific triggers.
+ */
+function createBlockSummary(blockInfo) {
+    return {
+        data: blockInfo,
+        hydrate: {
+            idle: hasHydrateTrigger(blockInfo, 0 /* DeferBlockTrigger.Idle */),
+            immediate: hasHydrateTrigger(blockInfo, 1 /* DeferBlockTrigger.Immediate */),
+            timer: getHydrateTimerTrigger(blockInfo),
+            viewport: hasHydrateTrigger(blockInfo, 2 /* DeferBlockTrigger.Viewport */),
+        },
+    };
+}
+/**
+ * Processes all of the defer block data in the transfer state and creates a map of the summaries
+ */
+function processBlockData(injector) {
+    const blockData = retrieveDeferBlockData(injector);
+    let blockDetails = new Map();
+    for (let blockId in blockData) {
+        blockDetails.set(blockId, createBlockSummary(blockData[blockId]));
+    }
+    return blockDetails;
+}
 
 /**
  * Defines the CSS styles encapsulation policies for the {@link Component} decorator's
@@ -16621,7 +16687,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.1+sha-26602fc']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.1+sha-a5e7a02']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -20008,6 +20074,28 @@ function calcPathForNode(tNode, lView, excludedParentNodes) {
         }
     }
     return path;
+}
+/**
+ * Retrieves all comments nodes that contain ngh comments referring to a defer block
+ */
+function gatherDeferBlocksCommentNodes(doc, node) {
+    const commentNodesIterator = doc.createNodeIterator(node, NodeFilter.SHOW_COMMENT, { acceptNode });
+    let currentNode;
+    const nodesByBlockId = new Map();
+    while ((currentNode = commentNodesIterator.nextNode())) {
+        // TODO(incremental-hydration: convert this to use string parsing rather than regex
+        const regex = new RegExp(/^\s*ngh=(d[0-9]+)/g);
+        const result = regex.exec(currentNode?.textContent ?? '');
+        if (result && result?.length > 0) {
+            nodesByBlockId.set(result[1], currentNode);
+        }
+    }
+    return nodesByBlockId;
+}
+function acceptNode(node) {
+    return node.textContent?.trimStart().startsWith('ngh=')
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_REJECT;
 }
 
 let _isI18nHydrationSupportEnabled = false;
@@ -23852,6 +23940,81 @@ function getHydrateTriggers(tView, tNode) {
  */
 function getPrefetchTriggers(tDetails) {
     return (tDetails.prefetchTriggers ??= new Set());
+}
+/**
+ * Loops through all defer block summaries and ensures all the blocks triggers are
+ * properly initialized
+ */
+function processAndInitTriggers(injector, blockData, nodes) {
+    const idleElements = [];
+    const timerElements = [];
+    const viewportElements = [];
+    const immediateElements = [];
+    for (let [blockId, blockSummary] of blockData) {
+        const commentNode = nodes.get(blockId);
+        if (commentNode !== undefined) {
+            const numRootNodes = blockSummary.data[NUM_ROOT_NODES];
+            let currentNode = commentNode;
+            for (let i = 0; i < numRootNodes; i++) {
+                currentNode = currentNode.previousSibling;
+                if (currentNode.nodeType !== Node.ELEMENT_NODE) {
+                    continue;
+                }
+                const elementTrigger = { el: currentNode, blockName: blockId };
+                // hydrate
+                if (blockSummary.hydrate.idle) {
+                    idleElements.push(elementTrigger);
+                }
+                if (blockSummary.hydrate.immediate) {
+                    immediateElements.push(elementTrigger);
+                }
+                if (blockSummary.hydrate.timer !== null) {
+                    elementTrigger.delay = blockSummary.hydrate.timer;
+                    timerElements.push(elementTrigger);
+                }
+                if (blockSummary.hydrate.viewport) {
+                    viewportElements.push(elementTrigger);
+                }
+            }
+        }
+    }
+    setIdleTriggers(injector, idleElements);
+    setImmediateTriggers(injector, immediateElements);
+    setViewportTriggers(injector, viewportElements);
+    setTimerTriggers(injector, timerElements);
+}
+async function setIdleTriggers(injector, elementTriggers) {
+    for (const elementTrigger of elementTriggers) {
+        const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
+        const onInvoke = () => triggerHydrationFromBlockName(injector, elementTrigger.blockName);
+        const cleanupFn = onIdle(onInvoke, injector);
+        registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
+    }
+}
+async function setViewportTriggers(injector, elementTriggers) {
+    if (elementTriggers.length > 0) {
+        const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
+        for (let elementTrigger of elementTriggers) {
+            const cleanupFn = onViewport(elementTrigger.el, async () => {
+                await triggerHydrationFromBlockName(injector, elementTrigger.blockName);
+            }, injector);
+            registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
+        }
+    }
+}
+async function setTimerTriggers(injector, elementTriggers) {
+    for (const elementTrigger of elementTriggers) {
+        const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
+        const onInvoke = async () => await triggerHydrationFromBlockName(injector, elementTrigger.blockName);
+        const timerFn = onTimer(elementTrigger.delay);
+        const cleanupFn = timerFn(onInvoke, injector);
+        registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
+    }
+}
+async function setImmediateTriggers(injector, elementTriggers) {
+    for (const elementTrigger of elementTriggers) {
+        await triggerHydrationFromBlockName(injector, elementTrigger.blockName);
+    }
 }
 
 /**
@@ -34309,7 +34472,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-rc.1+sha-26602fc');
+const VERSION = new Version('19.0.0-rc.1+sha-a5e7a02');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39193,180 +39356,6 @@ function annotateDeferBlockRootNodesWithJsAction(tDetails, rootNodes, parentDefe
 }
 
 /**
- * Initializes incremental hydration for non-JSAction triggers. This gathers up
- * all the parent / child relationships of defer blocks and identifies all the
- * serialized defer blocks that would need to be potentially hydrated later.
- */
-function bootstrapIncrementalHydration(doc, injector) {
-    const deferBlockData = processBlockData(injector);
-    const commentsByBlockId = gatherDeferBlocksCommentNodes(doc, doc.body);
-    processAndInitTriggers(injector, deferBlockData, commentsByBlockId);
-}
-function isTimerTrigger(triggerInfo) {
-    return typeof triggerInfo === 'object' && triggerInfo.trigger === 5 /* DeferBlockTrigger.Timer */;
-}
-function getHydrateTimerTrigger(blockData) {
-    const trigger = blockData[DEFER_HYDRATE_TRIGGERS]?.find((t) => isTimerTrigger(t));
-    return trigger?.delay ?? null;
-}
-function hasHydrateTrigger(blockData, trigger) {
-    return blockData[DEFER_HYDRATE_TRIGGERS]?.includes(trigger) ?? false;
-}
-/**
- * Creates a summary of the given serialized defer block, which is used later to properly initialize
- * specific triggers.
- */
-function createBlockSummary(blockInfo) {
-    return {
-        data: blockInfo,
-        hydrate: {
-            idle: hasHydrateTrigger(blockInfo, 0 /* DeferBlockTrigger.Idle */),
-            immediate: hasHydrateTrigger(blockInfo, 1 /* DeferBlockTrigger.Immediate */),
-            timer: getHydrateTimerTrigger(blockInfo),
-            viewport: hasHydrateTrigger(blockInfo, 2 /* DeferBlockTrigger.Viewport */),
-        },
-    };
-}
-/**
- * Processes all of the defer block data in the transfer state and creates a map of the summaries
- */
-function processBlockData(injector) {
-    const blockData = retrieveDeferBlockData(injector);
-    let blockDetails = new Map();
-    for (let blockId in blockData) {
-        blockDetails.set(blockId, createBlockSummary(blockData[blockId]));
-    }
-    return blockDetails;
-}
-/**
- * Retrieves all comments nodes that contain ngh comments referring to a defer block
- */
-function gatherDeferBlocksCommentNodes(doc, node) {
-    const commentNodesIterator = doc.createNodeIterator(node, NodeFilter.SHOW_COMMENT, { acceptNode });
-    let currentNode;
-    const nodesByBlockId = new Map();
-    while ((currentNode = commentNodesIterator.nextNode())) {
-        // TODO(incremental-hydration: convert this to use string parsing rather than regex
-        const regex = new RegExp(/^\s*ngh=(d[0-9]+)/g);
-        const result = regex.exec(currentNode?.textContent ?? '');
-        if (result && result?.length > 0) {
-            nodesByBlockId.set(result[1], currentNode);
-        }
-    }
-    return nodesByBlockId;
-}
-function acceptNode(node) {
-    return node.textContent?.trimStart().startsWith('ngh=')
-        ? NodeFilter.FILTER_ACCEPT
-        : NodeFilter.FILTER_REJECT;
-}
-/**
- * Loops through all defer block summaries and ensures all the blocks triggers are
- * properly initialized
- */
-function processAndInitTriggers(injector, blockData, nodes) {
-    const idleElements = [];
-    const timerElements = [];
-    const viewportElements = [];
-    const immediateElements = [];
-    for (let [blockId, blockSummary] of blockData) {
-        const commentNode = nodes.get(blockId);
-        if (commentNode !== undefined) {
-            const numRootNodes = blockSummary.data[NUM_ROOT_NODES];
-            let currentNode = commentNode;
-            for (let i = 0; i < numRootNodes; i++) {
-                currentNode = currentNode.previousSibling;
-                if (currentNode.nodeType !== Node.ELEMENT_NODE) {
-                    continue;
-                }
-                const elementTrigger = { el: currentNode, blockName: blockId };
-                // hydrate
-                if (blockSummary.hydrate.idle) {
-                    idleElements.push(elementTrigger);
-                }
-                if (blockSummary.hydrate.immediate) {
-                    immediateElements.push(elementTrigger);
-                }
-                if (blockSummary.hydrate.timer !== null) {
-                    elementTrigger.delay = blockSummary.hydrate.timer;
-                    timerElements.push(elementTrigger);
-                }
-                if (blockSummary.hydrate.viewport) {
-                    viewportElements.push(elementTrigger);
-                }
-            }
-        }
-    }
-    setIdleTriggers(injector, idleElements);
-    setImmediateTriggers(injector, immediateElements);
-    setViewportTriggers(injector, viewportElements);
-    setTimerTriggers(injector, timerElements);
-}
-async function setIdleTriggers(injector, elementTriggers) {
-    for (const elementTrigger of elementTriggers) {
-        const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
-        const onInvoke = () => triggerHydrationFromBlockName(injector, elementTrigger.blockName);
-        const cleanupFn = onIdle(onInvoke, injector);
-        registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
-    }
-}
-async function setViewportTriggers(injector, elementTriggers) {
-    if (elementTriggers.length > 0) {
-        const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
-        for (let elementTrigger of elementTriggers) {
-            const cleanupFn = onViewport(elementTrigger.el, async () => {
-                await triggerHydrationFromBlockName(injector, elementTrigger.blockName);
-            }, injector);
-            registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
-        }
-    }
-}
-async function setTimerTriggers(injector, elementTriggers) {
-    for (const elementTrigger of elementTriggers) {
-        const registry = injector.get(DEHYDRATED_BLOCK_REGISTRY);
-        const onInvoke = async () => await triggerHydrationFromBlockName(injector, elementTrigger.blockName);
-        const timerFn = onTimer(elementTrigger.delay);
-        const cleanupFn = timerFn(onInvoke, injector);
-        registry.addCleanupFn(elementTrigger.blockName, cleanupFn);
-    }
-}
-async function setImmediateTriggers(injector, elementTriggers) {
-    for (const elementTrigger of elementTriggers) {
-        await triggerHydrationFromBlockName(injector, elementTrigger.blockName);
-    }
-}
-/**
- * Retrieves defer block hydration information from the TransferState.
- *
- * @param injector Injector that this component has access to.
- */
-let _retrieveDeferBlockDataImpl = () => {
-    return {};
-};
-function retrieveDeferBlockDataImpl(injector) {
-    const transferState = injector.get(TransferState, null, { optional: true });
-    if (transferState !== null) {
-        const nghDeferData = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
-        ngDevMode &&
-            assertDefined(nghDeferData, 'Unable to retrieve defer block info from the TransferState.');
-        return nghDeferData;
-    }
-    return {};
-}
-/**
- * Sets the implementation for the `retrieveDeferBlockData` function.
- */
-function enableRetrieveDeferBlockDataImpl() {
-    _retrieveDeferBlockDataImpl = retrieveDeferBlockDataImpl;
-}
-/**
- * Retrieves defer block data from TransferState storage
- */
-function retrieveDeferBlockData(injector) {
-    return _retrieveDeferBlockDataImpl(injector);
-}
-
-/**
  * Indicates whether the hydration-related code was added,
  * prevents adding it multiple times.
  */
@@ -39637,7 +39626,9 @@ function withIncrementalHydration() {
                 const injector = inject(Injector);
                 const doc = getDocument();
                 return () => {
-                    bootstrapIncrementalHydration(doc, injector);
+                    const deferBlockData = processBlockData(injector);
+                    const commentsByBlockId = gatherDeferBlocksCommentNodes(doc, doc.body);
+                    processAndInitTriggers(injector, deferBlockData, commentsByBlockId);
                     appendDeferBlocksToJSActionMap(doc, injector);
                 };
             },
