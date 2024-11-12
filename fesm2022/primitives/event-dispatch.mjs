@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-4df352b
+ * @license Angular v19.1.0-next.0+sha-f2bda8e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2078,7 +2078,7 @@ class EventContract {
      * after it has been cleaned up.
      */
     cleanUp() {
-        this.containerManager.cleanUp();
+        this.containerManager?.cleanUp();
         this.containerManager = null;
         this.eventHandlers = {};
         this.browserEventTypeToExtraEventTypes = {};
