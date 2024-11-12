@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.1+sha-51933ef
+ * @license Angular v19.0.0-rc.1+sha-560282a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -25876,15 +25876,16 @@ function convertSourceSpan(span, baseSourceSpan) {
  *    workaround, because it'll include an additional text node as the first child. We can work
  *    around it here, but in a discussion it was decided not to, because the user explicitly opted
  *    into preserving the whitespace and we would have to drop it from the generated code.
- *    The diagnostic mentioned point #1 will flag such cases to users.
+ *    The diagnostic mentioned point in #1 will flag such cases to users.
  *
  * @returns Tag name to be used for the control flow template.
  */
 function ingestControlFlowInsertionPoint(unit, xref, node) {
     let root = null;
     for (const child of node.children) {
-        // Skip over comment nodes.
-        if (child instanceof Comment$1) {
+        // Skip over comment nodes and @let declarations since
+        // it doesn't matter where they end up in the DOM.
+        if (child instanceof Comment$1 || child instanceof LetDeclaration$1) {
             continue;
         }
         // We can only infer the tag name/attributes if there's a single root node.
@@ -25894,6 +25895,9 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
         // Root nodes can only elements or templates with a tag name (e.g. `<div *foo></div>`).
         if (child instanceof Element$1 || (child instanceof Template && child.tagName !== null)) {
             root = child;
+        }
+        else {
+            return null;
         }
     }
     // If we've found a single root node, its tag name and attributes can be
@@ -30274,7 +30278,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0-rc.1+sha-51933ef');
+new Version('19.0.0-rc.1+sha-560282a');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31682,7 +31686,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-99b943f9.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-cd95ebda.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
