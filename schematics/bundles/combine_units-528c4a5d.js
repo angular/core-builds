@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0-rc.1+sha-45537eb
+ * @license Angular v19.0.0-rc.1+sha-5fe57d4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -155,9 +155,14 @@ function readConfiguration(project, existingOptions, host = checker.getFileSyste
                 // Errors are handled later on by 'parseJsonConfigFileContent'
                 return parentOptions;
             }
+            // Note: In Google, `angularCompilerOptions` are stored in `bazelOptions`.
+            // This function typically doesn't run for actual Angular compilations, but
+            // tooling like Tsurge, or schematics may leverage this helper, so we account
+            // for this here.
+            const angularCompilerOptions = config.angularCompilerOptions ?? config.bazelOptions?.angularCompilerOptions;
             // we are only interested into merging 'angularCompilerOptions' as
             // other options like 'compilerOptions' are merged by TS
-            let existingNgCompilerOptions = { ...config.angularCompilerOptions, ...parentOptions };
+            let existingNgCompilerOptions = { ...angularCompilerOptions, ...parentOptions };
             if (!config.extends) {
                 return existingNgCompilerOptions;
             }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.1+sha-45537eb
+ * @license Angular v19.0.0-rc.1+sha-5fe57d4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16687,7 +16687,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.1+sha-45537eb']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0-rc.1+sha-5fe57d4']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23836,12 +23836,34 @@ async function triggerHydrationFromBlockName(injector, blockName, replayFn = () 
  * Triggers the resource loading for a defer block and passes back a promise
  * to handle cleanup on completion
  */
-function triggerAndWaitForCompletion(deferBlock) {
-    const lDetails = getLDeferBlockDetails(deferBlock.lView, deferBlock.tNode);
-    const promise = new Promise((resolve) => {
-        onDeferBlockCompletion(lDetails, resolve);
+function triggerAndWaitForCompletion(dehydratedBlockId, dehydratedBlockRegistry, injector) {
+    // TODO(incremental-hydration): This is a temporary fix to resolve control flow
+    // cases where nested defer blocks are inside control flow. We wait for each nested
+    // defer block to load and render before triggering the next one in a sequence. This is
+    // needed to ensure that corresponding LViews & LContainers are available for a block
+    // before we trigger it. We need to investigate how to get rid of the `afterNextRender`
+    // calls (in the nearest future) and do loading of all dependencies of nested defer blocks
+    // in parallel (later).
+    let resolve;
+    const promise = new Promise((resolveFn) => {
+        resolve = resolveFn;
     });
-    triggerDeferBlock(deferBlock.lView, deferBlock.tNode);
+    afterNextRender(() => {
+        const deferBlock = dehydratedBlockRegistry.get(dehydratedBlockId);
+        // Since we trigger hydration for nested defer blocks in a sequence (parent -> child),
+        // there is a chance that a defer block may not be present at hydration time. For example,
+        // when a nested block was in an `@if` condition, which has changed.
+        // TODO(incremental-hydration): add tests to verify the behavior mentioned above.
+        if (deferBlock !== null) {
+            const { tNode, lView } = deferBlock;
+            const lDetails = getLDeferBlockDetails(lView, tNode);
+            onDeferBlockCompletion(lDetails, resolve);
+            triggerDeferBlock(lView, tNode);
+            // TODO(incremental-hydration): handle the cleanup for cases when
+            // defer block is no longer present during hydration (e.g. `@if` condition
+            // has changed during hydration/rendering).
+        }
+    }, { injector });
     return promise;
 }
 /**
@@ -23871,11 +23893,9 @@ async function triggerBlockTreeHydrationByName(injector, blockName) {
     hydrationQueue.forEach((id) => dehydratedBlockRegistry.hydrating.add(id));
     // Step 3: hydrate each block in the queue. It will be in descending order from the top down.
     for (const dehydratedBlockId of hydrationQueue) {
-        // The registry will have the item in the queue after each loop.
-        const deferBlock = dehydratedBlockRegistry.get(dehydratedBlockId);
         // Step 4: Run the actual trigger function to fetch dependencies.
         // Triggering a block adds any of its child defer blocks to the registry.
-        await triggerAndWaitForCompletion(deferBlock);
+        await triggerAndWaitForCompletion(dehydratedBlockId, dehydratedBlockRegistry, injector);
     }
     const hydratedBlocks = new Set(hydrationQueue);
     // The last item in the queue was the original target block;
@@ -34472,7 +34492,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0-rc.1+sha-45537eb');
+const VERSION = new Version('19.0.0-rc.1+sha-5fe57d4');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
