@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-190b4d7
+ * @license Angular v19.1.0-next.0+sha-292d819
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,7 +10,7 @@ var checker = require('./checker-cd95ebda.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var combine_units = require('./combine_units-48a09ac2.js');
+var combine_units = require('./combine_units-528c4a5d.js');
 var leading_space = require('./leading_space-d190b83b.js');
 require('./program-8f30df93.js');
 require('path');
@@ -978,7 +978,7 @@ function getMessageForFieldIncompatibility(reason, fieldName) {
             return {
                 short: `This ${fieldName.single} is used in combination with \`@HostBinding\` and ` +
                     `migrating would break.`,
-                extra: `\`@HostBinding\` does not invoke the signal automatically and your code would. ` +
+                extra: `\`@HostBinding\` does not invoke the signal automatically and your code would ` +
                     `break after migration. Use \`host\` of \`@Directive\`/\`@Component\`for host bindings.`,
             };
         case exports.FieldIncompatibilityReason.PotentiallyNarrowedInTemplateButNoSupportYet:
@@ -1058,7 +1058,7 @@ function getMessageForClassIncompatibility(reason, fieldName) {
         case exports.ClassIncompatibilityReason.ClassManuallyInstantiated:
             return {
                 short: `Class of this ${fieldName.single} is manually instantiated. ` +
-                    'This is discouraged and prevents migration',
+                    'This is discouraged and prevents migration.',
                 extra: `Signal ${fieldName.plural} require a DI injection context. Manually instantiating ` +
                     'breaks this requirement in some cases, so the migration is skipped.',
             };
