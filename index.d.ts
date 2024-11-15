@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0-rc.2+sha-e33b195
+ * @license Angular v19.0.0-rc.2+sha-df210a4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6793,12 +6793,20 @@ declare enum LContainerFlags {
 declare type LegacyInputPartialMapping = string | [bindingPropertyName: string, classPropertyName: string, transformFunction?: Function];
 
 /**
- * @experimental
+ * Creates a writable signals whose value is initialized and reset by the linked, reactive computation.
+ *
+ * @developerPreview
  */
 export declare function linkedSignal<D>(computation: () => D, options?: {
     equal?: ValueEqualityFn<NoInfer<D>>;
 }): WritableSignal<D>;
 
+/**
+ * Creates a writable signals whose value is initialized and reset by the linked, reactive computation.
+ * This is an advanced API form where the computation has access to the previous value of the signal and the computation result.
+ *
+ * @developerPreview
+ */
 export declare function linkedSignal<S, D>(options: {
     source: () => S;
     computation: (source: NoInfer<S>, previous?: {
