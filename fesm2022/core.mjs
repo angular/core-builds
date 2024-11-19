@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-b69b16c
+ * @license Angular v19.1.0-next.0+sha-dcd27d7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16687,7 +16687,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-b69b16c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-dcd27d7']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -33025,9 +33025,9 @@ function recreateMatchingLViews(def, rootLView) {
  * @param def A ComponentDef instance.
  */
 function clearRendererCache(factory, def) {
-    // Cast to `any` to read a private field.
+    // Cast to read a private field.
     // NOTE: This must be kept synchronized with the renderer factory implementation in platform-browser.
-    factory.rendererByCompId?.remove(def.id);
+    factory.rendererByCompId?.delete(def.id);
 }
 /**
  * Recreates an LView in-place from a new component definition.
@@ -34492,7 +34492,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-b69b16c');
+const VERSION = new Version('19.1.0-next.0+sha-dcd27d7');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
