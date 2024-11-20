@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0+sha-baedea7
+ * @license Angular v19.0.0+sha-ac52ce8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16687,7 +16687,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0+sha-baedea7']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0+sha-ac52ce8']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34492,7 +34492,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0+sha-baedea7');
+const VERSION = new Version('19.0.0+sha-ac52ce8');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -40881,7 +40881,10 @@ function wrapEqualityFn(equal) {
  *  * `elementInjector` (optional): An `ElementInjector` instance, see additional info about it
  * [here](guide/di/hierarchical-dependency-injection#elementinjector).
  *  * `projectableNodes` (optional): A list of DOM nodes that should be projected through
- *                      [`<ng-content>`](api/core/ng-content) of the new component instance.
+ * [`<ng-content>`](api/core/ng-content) of the new component instance, e.g.,
+ * `[[element1, element2]]`: projects `element1` and `element2` into the same `<ng-content>`.
+ * `[[element1, element2], [element3]]`: projects `element1` and `element2` into one `<ng-content>`,
+ * and `element3` into a separate `<ng-content>`.
  * @returns ComponentRef instance that represents a given Component.
  *
  * @publicApi
