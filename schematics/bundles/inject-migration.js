@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-466d557
+ * @license Angular v19.1.0-next.0+sha-6ad3059
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -146,13 +146,13 @@ function getConstructorUnusedParameters(declaration, localTypeChecker, removedSt
     if (!declaration.body) {
         return topLevelParameters;
     }
-    declaration.body.forEachChild(function walk(node) {
+    const analyze = (node) => {
         // Don't descend into statements that were removed already.
         if (ts__default["default"].isStatement(node) && removedStatements.has(node)) {
             return;
         }
         if (!ts__default["default"].isIdentifier(node) || !topLevelParameterNames.has(node.text)) {
-            node.forEachChild(walk);
+            node.forEachChild(analyze);
             return;
         }
         // Don't consider `this.<name>` accesses as being references to
@@ -171,7 +171,13 @@ function getConstructorUnusedParameters(declaration, localTypeChecker, removedSt
                 }
             }
         });
+    };
+    declaration.parameters.forEach((param) => {
+        if (param.initializer) {
+            analyze(param.initializer);
+        }
     });
+    declaration.body.forEachChild(analyze);
     for (const param of topLevelParameters) {
         if (!accessedTopLevelParameters.has(param)) {
             unusedParams.add(param);
@@ -209,6 +215,41 @@ function getSuperParameters(declaration, superCall, localTypeChecker) {
         }
     });
     return usedParams;
+}
+/**
+ * Determines if a specific parameter has references to other parameters.
+ * @param param Parameter to check.
+ * @param allParameters All parameters of the containing function.
+ * @param localTypeChecker Type checker scoped to the current file.
+ */
+function parameterReferencesOtherParameters(param, allParameters, localTypeChecker) {
+    // A parameter can only reference other parameters through its initializer.
+    if (!param.initializer || allParameters.length < 2) {
+        return false;
+    }
+    const paramNames = new Set();
+    for (const current of allParameters) {
+        if (current !== param && ts__default["default"].isIdentifier(current.name)) {
+            paramNames.add(current.name.text);
+        }
+    }
+    let result = false;
+    const analyze = (node) => {
+        if (ts__default["default"].isIdentifier(node) && paramNames.has(node.text) && !isAccessedViaThis(node)) {
+            const symbol = localTypeChecker.getSymbolAtLocation(node);
+            const referencesOtherParam = symbol?.declarations?.some((decl) => {
+                return allParameters.includes(decl);
+            });
+            if (referencesOtherParam) {
+                result = true;
+            }
+        }
+        if (!result) {
+            node.forEachChild(analyze);
+        }
+    };
+    analyze(param.initializer);
+    return result;
 }
 /** Checks whether a parameter node declares a property on its class. */
 function parameterDeclaresProperty(node) {
@@ -587,7 +628,8 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
     for (const param of constructor.parameters) {
         const usedInSuper = superParameters !== null && superParameters.has(param);
         const usedInConstructor = !unusedParameters.has(param);
-        migrateParameter(param, options, localTypeChecker, printer, tracker, superCall, usedInSuper, usedInConstructor, memberIndentation, innerIndentation, prependToConstructor, prependToClass, afterSuper);
+        const usesOtherParams = parameterReferencesOtherParameters(param, constructor.parameters, localTypeChecker);
+        migrateParameter(param, options, localTypeChecker, printer, tracker, superCall, usedInSuper, usedInConstructor, usesOtherParams, memberIndentation, innerIndentation, prependToConstructor, prependToClass, afterSuper);
     }
     // Delete all of the constructor overloads since below we're either going to
     // remove the implementation, or we're going to delete all of the parameters.
@@ -597,7 +639,7 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
             tracker.removeNode(member, true);
         }
     }
-    if (canRemoveConstructor(options, constructor, removedStatementCount, superCall)) {
+    if (canRemoveConstructor(options, constructor, removedStatementCount, prependToConstructor, superCall)) {
         // Drop the constructor if it was empty.
         removedMembers.add(constructor);
         tracker.removeNode(constructor, true);
@@ -607,7 +649,15 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
         // We always do this no matter what is passed into `backwardsCompatibleConstructors`.
         stripConstructorParameters(constructor, tracker);
         if (prependToConstructor.length > 0) {
-            tracker.insertText(sourceFile, (firstConstructorStatement || innerReference).getFullStart(), `\n${prependToConstructor.join('\n')}\n`);
+            if (firstConstructorStatement ||
+                (innerReference !== constructor &&
+                    innerReference.getStart() >= constructor.getStart() &&
+                    innerReference.getEnd() <= constructor.getEnd())) {
+                tracker.insertText(sourceFile, (firstConstructorStatement || innerReference).getFullStart(), `\n${prependToConstructor.join('\n')}\n`);
+            }
+            else {
+                tracker.insertText(sourceFile, constructor.body.getStart() + 1, `\n${prependToConstructor.map((p) => innerIndentation + p).join('\n')}\n${innerIndentation}`);
+            }
         }
     }
     if (afterSuper.length > 0 && superCall !== null) {
@@ -662,7 +712,7 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
  * @param propsToAdd Properties to be added to the class.
  * @param afterSuper Statements to be added after the `super` call.
  */
-function migrateParameter(node, options, localTypeChecker, printer, tracker, superCall, usedInSuper, usedInConstructor, memberIndentation, innerIndentation, prependToConstructor, propsToAdd, afterSuper) {
+function migrateParameter(node, options, localTypeChecker, printer, tracker, superCall, usedInSuper, usedInConstructor, usesOtherParams, memberIndentation, innerIndentation, prependToConstructor, propsToAdd, afterSuper) {
     if (!ts__default["default"].isIdentifier(node.name)) {
         return;
     }
@@ -671,6 +721,9 @@ function migrateParameter(node, options, localTypeChecker, printer, tracker, sup
     const declaresProp = parameterDeclaresProperty(node);
     // If the parameter declares a property, we need to declare it (e.g. `private foo: Foo`).
     if (declaresProp) {
+        // We can't initialize the property if it's referenced within a `super` call or  it references
+        // other parameters. See the logic further below for the initialization.
+        const canInitialize = !usedInSuper && !usesOtherParams;
         const prop = ts__default["default"].factory.createPropertyDeclaration(cloneModifiers(node.modifiers?.filter((modifier) => {
             // Strip out the DI decorators, as well as `public` which is redundant.
             return !ts__default["default"].isDecorator(modifier) && modifier.kind !== ts__default["default"].SyntaxKind.PublicKeyword;
@@ -678,10 +731,7 @@ function migrateParameter(node, options, localTypeChecker, printer, tracker, sup
         // Don't add the question token to private properties since it won't affect interface implementation.
         node.modifiers?.some((modifier) => modifier.kind === ts__default["default"].SyntaxKind.PrivateKeyword)
             ? undefined
-            : node.questionToken, 
-        // We can't initialize the property if it's referenced within a `super` call.
-        // See the logic further below for the initialization.
-        usedInSuper ? node.type : undefined, usedInSuper ? undefined : ts__default["default"].factory.createIdentifier(PLACEHOLDER));
+            : node.questionToken, canInitialize ? undefined : node.type, canInitialize ? ts__default["default"].factory.createIdentifier(PLACEHOLDER) : undefined);
         propsToAdd.push(memberIndentation +
             replaceNodePlaceholder(node.getSourceFile(), prop, replacementCall, printer));
     }
@@ -712,6 +762,15 @@ function migrateParameter(node, options, localTypeChecker, printer, tracker, sup
             // If the parameter is only referenced in the constructor, we
             // don't need to declare any new properties.
             prependToConstructor.push(`${innerIndentation}const ${name} = ${replacementCall};`);
+        }
+    }
+    else if (usesOtherParams && declaresProp) {
+        const toAdd = `${innerIndentation}this.${name} = ${replacementCall};`;
+        if (superCall === null) {
+            prependToConstructor.push(toAdd);
+        }
+        else {
+            afterSuper.push(toAdd);
         }
     }
 }
@@ -799,6 +858,10 @@ function createInjectReplacementCall(param, options, localTypeChecker, printer, 
         if (!hasNullableType) {
             expression = ts__default["default"].factory.createNonNullExpression(expression);
         }
+    }
+    // If the parameter is initialized, add the initializer as a fallback.
+    if (param.initializer) {
+        expression = ts__default["default"].factory.createBinaryExpression(expression, ts__default["default"].SyntaxKind.QuestionQuestionToken, param.initializer);
     }
     return replaceNodePlaceholder(param.getSourceFile(), expression, injectedType, printer);
 }
@@ -956,10 +1019,11 @@ function cloneName(node) {
  * @param options Options used to configure the migration.
  * @param constructor Node representing the constructor.
  * @param removedStatementCount Number of statements that were removed by the migration.
+ * @param prependToConstructor Statements that should be prepended to the constructor.
  * @param superCall Node representing the `super()` call within the constructor.
  */
-function canRemoveConstructor(options, constructor, removedStatementCount, superCall) {
-    if (options.backwardsCompatibleConstructors) {
+function canRemoveConstructor(options, constructor, removedStatementCount, prependToConstructor, superCall) {
+    if (options.backwardsCompatibleConstructors || prependToConstructor.length > 0) {
         return false;
     }
     const statementCount = constructor.body
