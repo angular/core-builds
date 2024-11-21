@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-cebf255
+ * @license Angular v19.1.0-next.0+sha-3e7cb2c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,11 +14,11 @@ var p = require('path');
 var compiler_host = require('./compiler_host-d642e87e.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 var ts = require('typescript');
-require('./checker-e3da3b0a.js');
+var checker = require('./checker-e3da3b0a.js');
 require('os');
+require('@angular-devkit/core');
 require('module');
 require('url');
-require('@angular-devkit/core');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -51,22 +51,25 @@ function findLiteralProperty(literal, name) {
 /**
  * Checks whether a component is standalone.
  * @param node Class being checked.
+ * @param reflector The reflection host to use.
  */
-function isStandaloneComponent(node) {
-    const decorator = node.modifiers?.find((m) => m.kind === ts__default["default"].SyntaxKind.Decorator);
-    if (!decorator) {
+function isStandaloneComponent(node, reflector) {
+    const decorators = reflector.getDecoratorsOfDeclaration(node);
+    if (decorators === null) {
         return false;
     }
-    if (ts__default["default"].isCallExpression(decorator.expression)) {
-        const arg = decorator.expression.arguments[0];
-        if (ts__default["default"].isObjectLiteralExpression(arg)) {
-            const property = findLiteralProperty(arg, 'standalone');
-            if (property) {
-                return property.initializer.getText() === 'true';
-            }
-            else {
-                return true; // standalone is true by default in v19
-            }
+    const decorator = checker.findAngularDecorator(decorators, 'Component', false);
+    if (decorator === undefined || decorator.args === null || decorator.args.length !== 1) {
+        return false;
+    }
+    const arg = decorator.args[0];
+    if (ts__default["default"].isObjectLiteralExpression(arg)) {
+        const property = findLiteralProperty(arg, 'standalone');
+        if (property) {
+            return property.initializer.getText() === 'true';
+        }
+        else {
+            return true; // standalone is true by default in v19
         }
     }
     return false;
@@ -161,13 +164,14 @@ function isProvideRoutesCallExpression(node, typeChecker) {
  */
 function migrateFileToLazyRoutes(sourceFile, program) {
     const typeChecker = program.getTypeChecker();
+    const reflector = new checker.TypeScriptReflectionHost(typeChecker);
     const printer = ts__default["default"].createPrinter();
     const tracker = new compiler_host.ChangeTracker(printer);
     const routeArraysToMigrate = findRoutesArrayToMigrate(sourceFile, typeChecker);
     if (routeArraysToMigrate.length === 0) {
         return { pendingChanges: [], skippedRoutes: [], migratedRoutes: [] };
     }
-    const { skippedRoutes, migratedRoutes } = migrateRoutesArray(routeArraysToMigrate, typeChecker, tracker);
+    const { skippedRoutes, migratedRoutes } = migrateRoutesArray(routeArraysToMigrate, typeChecker, reflector, tracker);
     return {
         pendingChanges: tracker.recordChanges().get(sourceFile) || [],
         skippedRoutes,
@@ -239,14 +243,14 @@ function findRoutesArrayToMigrate(sourceFile, typeChecker) {
     return routesArrays;
 }
 /** Migrate a routes object standalone components to be lazy loaded. */
-function migrateRoutesArray(routesArray, typeChecker, tracker) {
+function migrateRoutesArray(routesArray, typeChecker, reflector, tracker) {
     const migratedRoutes = [];
     const skippedRoutes = [];
     const importsToRemove = [];
     for (const route of routesArray) {
         route.array.elements.forEach((element) => {
             if (ts__default["default"].isObjectLiteralExpression(element)) {
-                const { migratedRoutes: migrated, skippedRoutes: toBeSkipped, importsToRemove: toBeRemoved, } = migrateRoute(element, route, typeChecker, tracker);
+                const { migratedRoutes: migrated, skippedRoutes: toBeSkipped, importsToRemove: toBeRemoved, } = migrateRoute(element, route, typeChecker, reflector, tracker);
                 migratedRoutes.push(...migrated);
                 skippedRoutes.push(...toBeSkipped);
                 importsToRemove.push(...toBeRemoved);
@@ -262,7 +266,7 @@ function migrateRoutesArray(routesArray, typeChecker, tracker) {
  * Migrates a single route object and returns the results of the migration
  * It recursively migrates the children routes if they exist
  */
-function migrateRoute(element, route, typeChecker, tracker) {
+function migrateRoute(element, route, typeChecker, reflector, tracker) {
     const skippedRoutes = [];
     const migratedRoutes = [];
     const importsToRemove = [];
@@ -274,7 +278,7 @@ function migrateRoute(element, route, typeChecker, tracker) {
     if (children && ts__default["default"].isArrayLiteralExpression(children.initializer)) {
         for (const childRoute of children.initializer.elements) {
             if (ts__default["default"].isObjectLiteralExpression(childRoute)) {
-                const { migratedRoutes: migrated, skippedRoutes: toBeSkipped, importsToRemove: toBeRemoved, } = migrateRoute(childRoute, route, typeChecker, tracker);
+                const { migratedRoutes: migrated, skippedRoutes: toBeSkipped, importsToRemove: toBeRemoved, } = migrateRoute(childRoute, route, typeChecker, reflector, tracker);
                 migratedRoutes.push(...migrated);
                 skippedRoutes.push(...toBeSkipped);
                 importsToRemove.push(...toBeRemoved);
@@ -290,7 +294,7 @@ function migrateRoute(element, route, typeChecker, tracker) {
         return routeMigrationResults;
     }
     // if component is not a standalone component, skip it
-    if (!isStandaloneComponent(componentDeclaration)) {
+    if (!isStandaloneComponent(componentDeclaration, reflector)) {
         skippedRoutes.push({ path: routePath, file: route.routeFilePath });
         return routeMigrationResults;
     }
