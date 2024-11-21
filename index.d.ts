@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-d646d8b
+ * @license Angular v19.1.0-next.0+sha-cebf255
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -479,6 +479,7 @@ declare class AfterRenderImpl {
     private readonly deferredRegistrations;
     /** Whether the `AfterRenderManager` is currently executing hooks. */
     executing: boolean;
+    constructor();
     /**
      * Run the sequence of phases of hooks, once through. As a result of executing some hooks, more
      * might be scheduled.
@@ -486,6 +487,7 @@ declare class AfterRenderImpl {
     execute(): void;
     register(sequence: AfterRenderSequence): void;
     unregister(sequence: AfterRenderSequence): void;
+    protected maybeTrace<T>(fn: () => T, snapshot: ɵTracingSnapshot | null): T;
     /** @nocollapse */
     static ɵprov: unknown;
 }
@@ -604,6 +606,7 @@ declare class AfterRenderSequence implements AfterRenderRef {
     readonly impl: AfterRenderImpl;
     readonly hooks: AfterRenderHooks;
     once: boolean;
+    snapshot: ɵTracingSnapshot | null;
     /**
      * Whether this sequence errored or was destroyed during this execution, and hooks should no
      * longer run for it.
@@ -615,7 +618,7 @@ declare class AfterRenderSequence implements AfterRenderRef {
      */
     pipelinedValue: unknown;
     private unregisterOnDestroy;
-    constructor(impl: AfterRenderImpl, hooks: AfterRenderHooks, once: boolean, destroyRef: DestroyRef | null);
+    constructor(impl: AfterRenderImpl, hooks: AfterRenderHooks, once: boolean, destroyRef: DestroyRef | null, snapshot?: ɵTracingSnapshot | null);
     afterRun(): void;
     destroy(): void;
 }
@@ -1014,6 +1017,7 @@ export declare class ApplicationRef {
      * Returns an Observable that indicates when the application is stable or unstable.
      */
     readonly isStable: Observable<boolean>;
+    constructor();
     /**
      * @returns A promise that resolves when the application becomes stable
      */
@@ -12912,6 +12916,7 @@ export declare class ɵChangeDetectionSchedulerImpl implements ɵChangeDetection
     private readonly taskService;
     private readonly ngZone;
     private readonly zonelessEnabled;
+    private readonly tracing;
     private readonly disableScheduling;
     private readonly zoneIsDefined;
     private readonly schedulerTickApplyArgs;
@@ -14683,6 +14688,39 @@ export declare const ɵTESTABILITY: InjectionToken<Testability>;
  * Internal injection token to retrieve Testability getter class instance.
  */
 export declare const ɵTESTABILITY_GETTER: InjectionToken<GetTestability>;
+
+/** Actions that are supported by the tracing framework. */
+export declare enum ɵTracingAction {
+    CHANGE_DETECTION = 0,
+    AFTER_NEXT_RENDER = 1
+}
+
+/**
+ * Injection token for a `TracingService`, optionally provided.
+ */
+export declare const ɵTracingService: InjectionToken<ɵTracingService<ɵTracingSnapshot>>;
+
+/**
+ * Tracing mechanism which can associate causes (snapshots) with runs of
+ * subsequent operations.
+ *
+ * Not defined by Angular directly, but defined in contexts where tracing is
+ * desired.
+ */
+export declare interface ɵTracingService<T extends ɵTracingSnapshot> {
+    /**
+     * Take a snapshot of the current context which will be stored by Angular and
+     * used when additional work is performed that was scheduled in this context.
+     *
+     * @param linkedSnapshot Optional snapshot to use link to the current context.
+     */
+    snapshot(linkedSnapshot: T | null): T;
+}
+
+/** A single tracing snapshot. */
+export declare interface ɵTracingSnapshot {
+    run<T>(action: ɵTracingAction, fn: () => T): T;
+}
 
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given type
