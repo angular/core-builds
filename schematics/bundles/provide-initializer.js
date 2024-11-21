@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-3e7cb2c
+ * @license Angular v19.1.0-next.0+sha-1fe001e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -70,34 +70,38 @@ function tryParseProviderExpression(node) {
     let deps = [];
     let initializerToken;
     let useExisting;
-    let useFactory;
+    let useFactoryCode;
     let useValue;
     let multi = false;
     for (const property of node.properties) {
-        if (!ts__default["default"].isPropertyAssignment(property) || !ts__default["default"].isIdentifier(property.name)) {
-            continue;
+        if (ts__default["default"].isPropertyAssignment(property) && ts__default["default"].isIdentifier(property.name)) {
+            switch (property.name.text) {
+                case 'deps':
+                    if (ts__default["default"].isArrayLiteralExpression(property.initializer)) {
+                        deps = property.initializer.elements.map((el) => el.getText());
+                    }
+                    break;
+                case 'provide':
+                    initializerToken = property.initializer.getText();
+                    break;
+                case 'useExisting':
+                    useExisting = property.initializer;
+                    break;
+                case 'useFactory':
+                    useFactoryCode = property.initializer.getText();
+                    break;
+                case 'useValue':
+                    useValue = property.initializer;
+                    break;
+                case 'multi':
+                    multi = property.initializer.kind === ts__default["default"].SyntaxKind.TrueKeyword;
+                    break;
+            }
         }
-        switch (property.name.text) {
-            case 'deps':
-                if (ts__default["default"].isArrayLiteralExpression(property.initializer)) {
-                    deps = property.initializer.elements.map((el) => el.getText());
-                }
-                break;
-            case 'provide':
-                initializerToken = property.initializer.getText();
-                break;
-            case 'useExisting':
-                useExisting = property.initializer;
-                break;
-            case 'useFactory':
-                useFactory = property.initializer;
-                break;
-            case 'useValue':
-                useValue = property.initializer;
-                break;
-            case 'multi':
-                multi = property.initializer.kind === ts__default["default"].SyntaxKind.TrueKeyword;
-                break;
+        // Handle the `useFactory() {}` shorthand case.
+        if (ts__default["default"].isMethodDeclaration(property) && property.name.getText() === 'useFactory') {
+            const params = property.parameters.map((param) => param.getText()).join(', ');
+            useFactoryCode = `(${params}) => ${property.body?.getText()}`;
         }
     }
     if (!initializerToken || !multi) {
@@ -119,12 +123,15 @@ function tryParseProviderExpression(node) {
             initializerCode: `() => inject(${useExisting.getText()})()`,
         };
     }
-    if (useFactory) {
+    if (useFactoryCode) {
         const args = deps.map((dep) => `inject(${dep})`);
         return {
             ...info,
             importInject: deps.length > 0,
-            initializerCode: `(${useFactory.getText()})(${args.join(', ')})`,
+            initializerCode: `() => {
+        const initializerFn = (${useFactoryCode})(${args.join(', ')});
+        return initializerFn();
+      }`,
         };
     }
     if (useValue) {

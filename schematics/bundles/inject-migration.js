@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-3e7cb2c
+ * @license Angular v19.1.0-next.0+sha-1fe001e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1103,6 +1103,7 @@ function applyInternalOnlyChanges(node, constructor, localTypeChecker, tracker, 
     result.toHoist.forEach((decl) => {
         prependToClass.push(memberIndentation + printer.printNode(ts__default["default"].EmitHint.Unspecified, decl, decl.getSourceFile()));
         tracker.removeNode(decl, true);
+        removedMembers.add(decl);
     });
     // If we added any hoisted properties, separate them visually with a new line.
     if (prependToClass.length > 0) {
