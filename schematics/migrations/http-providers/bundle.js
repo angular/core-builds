@@ -23451,7 +23451,7 @@ function publishFacade(global) {
 }
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/version.mjs
-var VERSION2 = new Version("18.2.12+sha-88072c8");
+var VERSION2 = new Version("18.2.12+sha-06d70a2");
 
 // bazel-out/k8-fastbuild/bin/packages/compiler/src/i18n/extractor_merger.mjs
 var _VisitorMode;
@@ -27394,32 +27394,13 @@ function migrateTestingModuleImports(node, commonHttpIdentifiers, commonHttpTest
   }
   const commonHttpAddedImports = addedImports.get(COMMON_HTTP);
   const httpClient = importsArray.elements.find((elt) => elt.getText() === HTTP_CLIENT_MODULE);
-  if (httpClient && commonHttpIdentifiers.has(HTTP_CLIENT_MODULE)) {
-    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(PROVIDE_HTTP_CLIENT);
-    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_INTERCEPTORS_FROM_DI);
-    const newImports = import_typescript96.default.factory.createArrayLiteralExpression([
-      ...importsArray.elements.filter((item) => item !== httpClient)
-    ]);
-    const provideHttpClient = createCallExpression(PROVIDE_HTTP_CLIENT, [
-      createCallExpression(WITH_INTERCEPTORS_FROM_DI)
-    ]);
-    const providers = getProvidersFromLiteralExpr(configureTestingModuleArgs);
-    let newProviders;
-    if (!providers) {
-      newProviders = import_typescript96.default.factory.createArrayLiteralExpression([provideHttpClient]);
-    } else {
-      newProviders = import_typescript96.default.factory.updateArrayLiteralExpression(providers, import_typescript96.default.factory.createNodeArray([...providers.elements, provideHttpClient], providers.elements.hasTrailingComma));
-    }
-    const newTestingModuleArgs = updateTestBedConfiguration(configureTestingModuleArgs, newImports, newProviders);
-    changeTracker.replaceNode(configureTestingModuleArgs, newTestingModuleArgs);
-  }
   const httpClientTesting = importsArray.elements.find((elt) => elt.getText() === HTTP_CLIENT_TESTING_MODULE);
   if (httpClientTesting && commonHttpTestingIdentifiers.has(HTTP_CLIENT_TESTING_MODULE)) {
     commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(PROVIDE_HTTP_CLIENT);
     commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_INTERCEPTORS_FROM_DI);
     (_a2 = addedImports.get(COMMON_HTTP_TESTING)) == null ? void 0 : _a2.add(PROVIDE_HTTP_CLIENT_TESTING);
     const newImports = import_typescript96.default.factory.createArrayLiteralExpression([
-      ...importsArray.elements.filter((item) => item !== httpClientTesting)
+      ...importsArray.elements.filter((item) => item !== httpClientTesting && item !== httpClient)
     ]);
     const provideHttpClient = createCallExpression(PROVIDE_HTTP_CLIENT, [
       createCallExpression(WITH_INTERCEPTORS_FROM_DI)
@@ -27434,6 +27415,24 @@ function migrateTestingModuleImports(node, commonHttpIdentifiers, commonHttpTest
       ]);
     } else {
       newProviders = import_typescript96.default.factory.updateArrayLiteralExpression(providers, import_typescript96.default.factory.createNodeArray([...providers.elements, provideHttpClient, provideHttpClientTesting], providers.elements.hasTrailingComma));
+    }
+    const newTestingModuleArgs = updateTestBedConfiguration(configureTestingModuleArgs, newImports, newProviders);
+    changeTracker.replaceNode(configureTestingModuleArgs, newTestingModuleArgs);
+  } else if (httpClient && commonHttpIdentifiers.has(HTTP_CLIENT_MODULE)) {
+    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(PROVIDE_HTTP_CLIENT);
+    commonHttpAddedImports == null ? void 0 : commonHttpAddedImports.add(WITH_INTERCEPTORS_FROM_DI);
+    const newImports = import_typescript96.default.factory.createArrayLiteralExpression([
+      ...importsArray.elements.filter((item) => item !== httpClient)
+    ]);
+    const provideHttpClient = createCallExpression(PROVIDE_HTTP_CLIENT, [
+      createCallExpression(WITH_INTERCEPTORS_FROM_DI)
+    ]);
+    const providers = getProvidersFromLiteralExpr(configureTestingModuleArgs);
+    let newProviders;
+    if (!providers) {
+      newProviders = import_typescript96.default.factory.createArrayLiteralExpression([provideHttpClient]);
+    } else {
+      newProviders = import_typescript96.default.factory.updateArrayLiteralExpression(providers, import_typescript96.default.factory.createNodeArray([...providers.elements, provideHttpClient], providers.elements.hasTrailingComma));
     }
     const newTestingModuleArgs = updateTestBedConfiguration(configureTestingModuleArgs, newImports, newProviders);
     changeTracker.replaceNode(configureTestingModuleArgs, newTestingModuleArgs);
