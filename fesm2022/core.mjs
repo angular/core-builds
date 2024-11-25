@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-901fd1c
+ * @license Angular v19.1.0-next.0+sha-c56ec5e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18078,7 +18078,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-901fd1c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-c56ec5e']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23209,8 +23209,6 @@ function optionsReducer(dst, objs) {
  */
 class ApplicationRef {
     /** @internal */
-    _bootstrapListeners = [];
-    /** @internal */
     _runningTick = false;
     _destroyed = false;
     _destroyListeners = [];
@@ -23558,7 +23556,7 @@ class ApplicationRef {
                 'Please check that the `APP_BOOTSTRAP_LISTENER` token is configured as a ' +
                 '`multi: true` provider.');
         }
-        [...this._bootstrapListeners, ...listeners].forEach((listener) => listener(componentRef));
+        listeners.forEach((listener) => listener(componentRef));
     }
     /** @internal */
     ngOnDestroy() {
@@ -23575,7 +23573,6 @@ class ApplicationRef {
             this._destroyed = true;
             // Release all references.
             this._views = [];
-            this._bootstrapListeners = [];
             this._destroyListeners = [];
         }
     }
@@ -24291,6 +24288,7 @@ function ɵɵdeferHydrateWhen(rawValue) {
             triggerDeferBlock(lView, tNode);
         }
         else {
+            const prevConsumer = setActiveConsumer$1(null);
             try {
                 const value = Boolean(rawValue); // handle truthy or falsy values
                 if (value === true) {
@@ -24304,7 +24302,6 @@ function ɵɵdeferHydrateWhen(rawValue) {
                 }
             }
             finally {
-                const prevConsumer = setActiveConsumer$1(null);
                 setActiveConsumer$1(prevConsumer);
             }
         }
@@ -34578,7 +34575,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-901fd1c');
+const VERSION = new Version('19.1.0-next.0+sha-c56ec5e');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
