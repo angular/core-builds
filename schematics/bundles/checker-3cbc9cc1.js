@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0+sha-a41ac83
+ * @license Angular v19.0.0+sha-08b9452
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6466,10 +6466,23 @@ class ParseError {
     span;
     msg;
     level;
-    constructor(span, msg, level = ParseErrorLevel.ERROR) {
+    relatedError;
+    constructor(
+    /** Location of the error. */
+    span, 
+    /** Error message. */
+    msg, 
+    /** Severity level of the error. */
+    level = ParseErrorLevel.ERROR, 
+    /**
+     * Error that caused the error to be surfaced. For example, an error in a sub-expression that
+     * couldn't be parsed. Not guaranteed to be defined, but can be used to provide more context.
+     */
+    relatedError) {
         this.span = span;
         this.msg = msg;
         this.level = level;
+        this.relatedError = relatedError;
     }
     contextualMessage() {
         const ctx = this.span.start.getContext(100, 3);
@@ -26503,12 +26516,12 @@ class BindingParser {
             return this._exprParser.wrapLiteralPrimitive('ERROR', sourceInfo, absoluteOffset);
         }
     }
-    _reportError(message, sourceSpan, level = ParseErrorLevel.ERROR) {
-        this.errors.push(new ParseError(sourceSpan, message, level));
+    _reportError(message, sourceSpan, level = ParseErrorLevel.ERROR, relatedError) {
+        this.errors.push(new ParseError(sourceSpan, message, level, relatedError));
     }
     _reportExpressionParserErrors(errors, sourceSpan) {
         for (const error of errors) {
-            this._reportError(error.message, sourceSpan);
+            this._reportError(error.message, sourceSpan, undefined, error);
         }
     }
     /**
@@ -30310,7 +30323,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.0+sha-a41ac83');
+new Version('19.0.0+sha-08b9452');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31718,7 +31731,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-8326aad1.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-3cbc9cc1.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -45843,6 +45856,7 @@ exports.ParseLocation = ParseLocation;
 exports.ParseSourceFile = ParseSourceFile;
 exports.ParseSourceSpan = ParseSourceSpan;
 exports.Parser = Parser$1;
+exports.ParserError = ParserError;
 exports.Placeholder = Placeholder;
 exports.PropertyRead = PropertyRead;
 exports.PropertyWrite = PropertyWrite;

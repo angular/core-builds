@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.0.0+sha-a41ac83
+ * @license Angular v19.0.0+sha-08b9452
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-8326aad1.js');
+var checker = require('./checker-3cbc9cc1.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -987,7 +987,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.0+sha-a41ac83'));
+    definitionMap.set('version', checker.literal('19.0.0+sha-08b9452'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1005,7 +1005,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0+sha-a41ac83'));
+    definitionMap.set('version', checker.literal('19.0.0+sha-08b9452'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1100,7 +1100,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.0+sha-a41ac83'));
+    definitionMap.set('version', checker.literal('19.0.0+sha-08b9452'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1516,7 +1516,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.0+sha-a41ac83'));
+    definitionMap.set('version', checker.literal('19.0.0+sha-08b9452'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1551,7 +1551,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.0+sha-a41ac83'));
+    definitionMap.set('version', checker.literal('19.0.0+sha-08b9452'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1602,7 +1602,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.0+sha-a41ac83'));
+    definitionMap.set('version', checker.literal('19.0.0+sha-08b9452'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1635,7 +1635,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.0+sha-a41ac83'));
+    definitionMap.set('version', checker.literal('19.0.0+sha-08b9452'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1686,7 +1686,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.0+sha-a41ac83'));
+    definitionMap.set('version', checker.literal('19.0.0+sha-08b9452'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -7670,12 +7670,30 @@ function evaluateHostExpressionBindings(hostExpr, evaluator) {
     const bindings = checker.parseHostBindings(hostMetadata);
     const errors = checker.verifyHostBindings(bindings, checker.createSourceSpan(hostExpr));
     if (errors.length > 0) {
-        throw new checker.FatalDiagnosticError(
-        // TODO: provide more granular diagnostic and output specific host expression that
-        // triggered an error instead of the whole host object.
-        checker.ErrorCode.HOST_BINDING_PARSE_ERROR, hostExpr, errors.map((error) => error.msg).join('\n'));
+        throw new checker.FatalDiagnosticError(checker.ErrorCode.HOST_BINDING_PARSE_ERROR, getHostBindingErrorNode(errors[0], hostExpr), errors.map((error) => error.msg).join('\n'));
     }
     return bindings;
+}
+/**
+ * Attempts to match a parser error to the host binding expression that caused it.
+ * @param error Error to match.
+ * @param hostExpr Expression declaring the host bindings.
+ */
+function getHostBindingErrorNode(error, hostExpr) {
+    // In the most common case the `host` object is an object literal with string values. We can
+    // confidently match the error to its expression by looking at the string value that the parser
+    // failed to parse and the initializers for each of the properties. If we fail to match, we fall
+    // back to the old behavior where the error is reported on the entire `host` object.
+    if (ts__default["default"].isObjectLiteralExpression(hostExpr) && error.relatedError instanceof checker.ParserError) {
+        for (const prop of hostExpr.properties) {
+            if (ts__default["default"].isPropertyAssignment(prop) &&
+                ts__default["default"].isStringLiteralLike(prop.initializer) &&
+                prop.initializer.text === error.relatedError.input) {
+                return prop.initializer;
+            }
+        }
+    }
+    return hostExpr;
 }
 /**
  * Extracts and prepares the host directives metadata from an array literal expression.
@@ -20120,7 +20138,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.0+sha-a41ac83` usually means that core is at head so it supports
+    // A version of `19.0.0+sha-08b9452` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

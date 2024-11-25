@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.0+sha-a41ac83
+ * @license Angular v19.0.0+sha-08b9452
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,8 +10,8 @@ var core = require('@angular-devkit/core');
 var posixPath = require('node:path/posix');
 var os = require('os');
 var ts = require('typescript');
-var checker = require('./checker-8326aad1.js');
-var program = require('./program-103ecc0e.js');
+var checker = require('./checker-3cbc9cc1.js');
+var program = require('./program-561595c4.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -435,6 +435,8 @@ const defaultMigrationTsOptions = {
     skipLibCheck: true,
     skipDefaultLibCheck: true,
     noEmit: true,
+    // Does not apply to g3 and externally is enforced when the app is built by the compiler.
+    disableTypeScriptVersionCheck: true,
 };
 /**
  * Creates an instance of a TypeScript program for the given project.

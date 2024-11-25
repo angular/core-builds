@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0+sha-a41ac83
+ * @license Angular v19.0.0+sha-08b9452
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6791,6 +6791,12 @@ function getNgZone(ngZoneToUse = 'zone.js', options) {
  *   }
  * }
  *
+ * // Provide in standalone apps
+ * bootstrapApplication(AppComponent, {
+ *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+ * })
+ *
+ * // Provide in module-based apps
  * @NgModule({
  *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
  * })
@@ -18072,7 +18078,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0+sha-a41ac83']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0+sha-08b9452']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23629,6 +23635,10 @@ let whenStableStore;
 /**
  * Returns a Promise that resolves when the application becomes stable after this method is called
  * the first time.
+ *
+ * Note: this function is unused in the FW code, but it's still present since the CLI code relies
+ * on it currently (see https://github.com/angular/angular-cli/blob/20411f696eb52c500e096e3dfc5e195185794edc/packages/angular/ssr/src/routes/ng-routes.ts#L435).
+ * Remove this function once CLI code is updated to use `ApplicationRef.whenStable` instead.
  */
 function whenStable(applicationRef) {
     whenStableStore ??= new WeakMap();
@@ -34568,7 +34578,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0+sha-a41ac83');
+const VERSION = new Version('19.0.0+sha-08b9452');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38676,7 +38686,7 @@ function withEventReplay() {
                     // Kick off event replay logic once hydration for the initial part
                     // of the application is completed. This timing is similar to the unclaimed
                     // dehydrated views cleanup timing.
-                    whenStable(appRef).then(() => {
+                    appRef.whenStable().then(() => {
                         const eventContractDetails = injector.get(JSACTION_EVENT_CONTRACT);
                         initEventReplay(eventContractDetails, injector);
                         const jsActionMap = injector.get(JSACTION_BLOCK_ELEMENT_MAP);
@@ -39545,7 +39555,7 @@ function printHydrationStats(injector) {
  * Returns a Promise that is resolved when an application becomes stable.
  */
 function whenStableWithTimeout(appRef, injector) {
-    const whenStablePromise = whenStable(appRef);
+    const whenStablePromise = appRef.whenStable();
     if (typeof ngDevMode !== 'undefined' && ngDevMode) {
         const timeoutTime = APPLICATION_IS_STABLE_TIMEOUT;
         const console = injector.get(Console);
@@ -40786,8 +40796,9 @@ class BaseWritableResource {
      * Put the resource into the error state.
      */
     setErrorState(err) {
-        this.status.set(ResourceStatus.Error);
         this.value.set(undefined);
+        // The previous line will set the status to `Local`, so we need to update it.
+        this.status.set(ResourceStatus.Error);
         this.error.set(err);
     }
 }
