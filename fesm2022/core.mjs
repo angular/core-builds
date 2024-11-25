@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-cc40237
+ * @license Angular v19.1.0-next.0+sha-3e2851b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18078,7 +18078,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-cc40237']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-3e2851b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23392,12 +23392,19 @@ class ApplicationRef {
         if (!this.zonelessEnabled) {
             this.dirtyFlags |= 1 /* ApplicationRefDirtyFlags.ViewTreeGlobal */;
         }
-        // Run `_tick()` in the context of the most recent snapshot, if one exists.
-        this.tracingSnapshot?.run(TracingAction.CHANGE_DETECTION, this._tick) ?? this._tick();
+        this._tick();
     }
     /** @internal */
     _tick = () => {
-        this.tracingSnapshot = null;
+        if (this.tracingSnapshot !== null) {
+            const snapshot = this.tracingSnapshot;
+            this.tracingSnapshot = null;
+            // Ensure we always run `_tick()` in the context of the most recent snapshot,
+            // if one exists. Snapshots may be reference counted by the implementation so
+            // we want to ensure that if we request a snapshot that we use it.
+            snapshot.run(TracingAction.CHANGE_DETECTION, this._tick);
+            return;
+        }
         (typeof ngDevMode === 'undefined' || ngDevMode) && this.warnIfDestroyed();
         if (this._runningTick) {
             throw new RuntimeError(101 /* RuntimeErrorCode.RECURSIVE_APPLICATION_REF_TICK */, ngDevMode && 'ApplicationRef.tick is called recursively');
@@ -34575,7 +34582,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-cc40237');
+const VERSION = new Version('19.1.0-next.0+sha-3e2851b');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
