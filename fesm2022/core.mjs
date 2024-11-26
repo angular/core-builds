@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.0+sha-4c1abc4
+ * @license Angular v19.0.1+sha-18091e7
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18078,7 +18078,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.0+sha-4c1abc4']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.1+sha-18091e7']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34582,7 +34582,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.0+sha-4c1abc4');
+const VERSION = new Version('19.0.1+sha-18091e7');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
