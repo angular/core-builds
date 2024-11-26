@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.1+sha-18091e7
+ * @license Angular v19.0.1+sha-552092d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15011,16 +15011,6 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
     detachFromAppRef(): void;
     attachToAppRef(appRef: ApplicationRef): void;
 }
-
-/**
- * Returns a Promise that resolves when the application becomes stable after this method is called
- * the first time.
- *
- * Note: this function is unused in the FW code, but it's still present since the CLI code relies
- * on it currently (see https://github.com/angular/angular-cli/blob/20411f696eb52c500e096e3dfc5e195185794edc/packages/angular/ssr/src/routes/ng-routes.ts#L435).
- * Remove this function once CLI code is updated to use `ApplicationRef.whenStable` instead.
- */
-export declare function ɵwhenStable(applicationRef: ApplicationRef): Promise<void>;
 
 /**
  * Returns a set of providers required to setup hydration support
