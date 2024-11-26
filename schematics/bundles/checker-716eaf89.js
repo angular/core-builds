@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-fcccb4d
+ * @license Angular v19.1.0-next.0+sha-0f1c718
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30323,7 +30323,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.0-next.0+sha-fcccb4d');
+new Version('19.1.0-next.0+sha-0f1c718');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31731,7 +31731,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-3cbc9cc1.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-716eaf89.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -32340,7 +32340,7 @@ const patchedReferencedAliasesSymbol = Symbol('patchedReferencedAliases');
  * results in a slow-down due to the type checker being involved multiple times. The CLI worked
  * around this import preserving issue by having another complex post-process step that detects and
  * elides unused imports. Note that these unused imports could cause unused chunks being generated
- * by Webpack if the application or library is not marked as side-effect free.
+ * by webpack if the application or library is not marked as side-effect free.
  *
  * This is not ideal though, as we basically re-implement the complex import usage resolution
  * from TypeScript. We can do better by letting TypeScript do the import eliding, but providing
