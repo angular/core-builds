@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.0+sha-4a874bf
+ * @license Angular v19.1.0-next.0+sha-30891d8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -11,11 +11,11 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var schematics = require('@angular-devkit/schematics');
 require('os');
 var ts = require('typescript');
-var checker = require('./checker-716eaf89.js');
-var program = require('./program-d48dbeb4.js');
+var checker = require('./checker-bef908ad.js');
+var program = require('./program-51b19964.js');
 var p = require('path');
 var fs = require('fs');
-var compiler_host = require('./compiler_host-5f54ba31.js');
+var compiler_host = require('./compiler_host-b694301f.js');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 var nodes = require('./nodes-0e7d45ca.js');
 var imports = require('./imports-4ac08251.js');
@@ -32,7 +32,7 @@ var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.1.0-next.0+sha-4a874bf');
+new checker.Version('19.1.0-next.0+sha-30891d8');
 
 function createProgram({ rootNames, options, host, oldProgram, }) {
     return new program.NgtscProgram(rootNames, options, host, oldProgram);

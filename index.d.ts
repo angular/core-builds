@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-4a874bf
+ * @license Angular v19.1.0-next.0+sha-30891d8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10460,6 +10460,25 @@ declare interface TDeferBlockDetails {
      * List of prefetch triggers for a given block
      */
     prefetchTriggers: Set<DeferBlockTrigger> | null;
+    /**
+     * Defer block flags, which should be used for all
+     * instances of a given defer block (the flags that should be
+     * placed into the `TDeferDetails` at runtime).
+     */
+    flags: TDeferDetailsFlags;
+}
+
+/**
+ * Specifies defer block flags, which should be used for all
+ * instances of a given defer block (the flags that should be
+ * placed into the `TDeferDetails` at runtime).
+ */
+declare const enum TDeferDetailsFlags {
+    Default = 0,
+    /**
+     * Whether or not the defer block has hydrate triggers.
+     */
+    HasHydrateTriggers = 1
 }
 
 /** Static data for an <ng-container> */
@@ -15836,10 +15855,13 @@ export declare function ɵɵdeclareLet(index: number): typeof ɵɵdeclareLet;
  *     placeholder block.
  * @param enableTimerScheduling Function that enables timer-related scheduling if `after`
  *     or `minimum` parameters are setup on the `@loading` or `@placeholder` blocks.
+ * @param flags A set of flags to define a particular behavior (e.g. to indicate that
+ *              hydrate triggers are present and regular triggers should be deactivated
+ *              in certain scenarios).
  *
  * @codeGenApi
  */
-export declare function ɵɵdefer(index: number, primaryTmplIndex: number, dependencyResolverFn?: DependencyResolverFn | null, loadingTmplIndex?: number | null, placeholderTmplIndex?: number | null, errorTmplIndex?: number | null, loadingConfigIndex?: number | null, placeholderConfigIndex?: number | null, enableTimerScheduling?: typeof ɵɵdeferEnableTimerScheduling): void;
+export declare function ɵɵdefer(index: number, primaryTmplIndex: number, dependencyResolverFn?: DependencyResolverFn | null, loadingTmplIndex?: number | null, placeholderTmplIndex?: number | null, errorTmplIndex?: number | null, loadingConfigIndex?: number | null, placeholderConfigIndex?: number | null, enableTimerScheduling?: typeof ɵɵdeferEnableTimerScheduling, flags?: TDeferDetailsFlags | null): void;
 
 /**
  * Enables timer-related scheduling if `after` or `minimum` parameters are setup
