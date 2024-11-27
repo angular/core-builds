@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.1+sha-c64f0d8
+ * @license Angular v19.0.1+sha-d23a5d5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10693,6 +10693,7 @@ function createDeferOp(xref, main, mainSlot, ownResolverFn, resolverFn, sourceSp
         errorSlot: null,
         ownResolverFn,
         resolverFn,
+        flags: null,
         sourceSpan,
         ...NEW_OP,
         ...TRAIT_CONSUMES_SLOT,
@@ -22110,7 +22111,7 @@ function text(slot, initialValue, sourceSpan) {
     }
     return call(Identifiers.text, args, sourceSpan);
 }
-function defer(selfSlot, primarySlot, dependencyResolverFn, loadingSlot, placeholderSlot, errorSlot, loadingConfig, placeholderConfig, enableTimerScheduling, sourceSpan) {
+function defer(selfSlot, primarySlot, dependencyResolverFn, loadingSlot, placeholderSlot, errorSlot, loadingConfig, placeholderConfig, enableTimerScheduling, sourceSpan, flags) {
     const args = [
         literal$1(selfSlot),
         literal$1(primarySlot),
@@ -22121,6 +22122,7 @@ function defer(selfSlot, primarySlot, dependencyResolverFn, loadingSlot, placeho
         loadingConfig ?? literal$1(null),
         placeholderConfig ?? literal$1(null),
         enableTimerScheduling ? importExpr(Identifiers.deferEnableTimerScheduling) : literal$1(null),
+        literal$1(flags),
     ];
     let expr;
     while ((expr = args[args.length - 1]) !== null &&
@@ -22714,7 +22716,7 @@ function reifyCreateOperations(unit, ops) {
                 break;
             case OpKind.Defer:
                 const timerScheduling = !!op.loadingMinimumTime || !!op.loadingAfterTime || !!op.placeholderMinimumTime;
-                OpList.replace(op, defer(op.handle.slot, op.mainSlot.slot, op.resolverFn, op.loadingSlot?.slot ?? null, op.placeholderSlot?.slot ?? null, op.errorSlot?.slot ?? null, op.loadingConfig, op.placeholderConfig, timerScheduling, op.sourceSpan));
+                OpList.replace(op, defer(op.handle.slot, op.mainSlot.slot, op.resolverFn, op.loadingSlot?.slot ?? null, op.placeholderSlot?.slot ?? null, op.errorSlot?.slot ?? null, op.loadingConfig, op.placeholderConfig, timerScheduling, op.sourceSpan, op.flags));
                 break;
             case OpKind.DeferOn:
                 let args = [];
@@ -25293,6 +25295,7 @@ function ingestDeferBlock(unit, deferBlock) {
     deferOp.placeholderMinimumTime = deferBlock.placeholder?.minimumTime ?? null;
     deferOp.loadingMinimumTime = deferBlock.loading?.minimumTime ?? null;
     deferOp.loadingAfterTime = deferBlock.loading?.afterTime ?? null;
+    deferOp.flags = calcDeferBlockFlags(deferBlock);
     unit.create.push(deferOp);
     // Configure all defer `on` conditions.
     // TODO: refactor prefetch triggers to use a separate op type, with a shared superclass. This will
@@ -25311,6 +25314,12 @@ function ingestDeferBlock(unit, deferBlock) {
     }
     unit.create.push(deferOnOps);
     unit.update.push(deferWhenOps);
+}
+function calcDeferBlockFlags(deferBlockDetails) {
+    if (Object.keys(deferBlockDetails.hydrateTriggers).length > 0) {
+        return 1 /* ir.TDeferDetailsFlags.HasHydrateTriggers */;
+    }
+    return null;
 }
 function ingestDeferTriggers(modifier, triggers, onOps, whenOps, unit, deferXref) {
     if (triggers.idle !== undefined) {
@@ -30323,7 +30332,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.1+sha-c64f0d8');
+new Version('19.0.1+sha-d23a5d5');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31731,7 +31740,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-716eaf89.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-bef908ad.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
