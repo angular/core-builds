@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-30891d8
+ * @license Angular v19.1.0-next.0+sha-3b76536
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8780,6 +8780,7 @@ class AfterRenderSequence {
         // associates the initial run of the hook with the context that created it.
         // Follow-up runs are independent of that initial context and have different
         // triggers.
+        this.snapshot?.dispose();
         this.snapshot = null;
     }
     destroy() {
@@ -18078,7 +18079,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-30891d8']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-3b76536']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23403,6 +23404,7 @@ class ApplicationRef {
             // if one exists. Snapshots may be reference counted by the implementation so
             // we want to ensure that if we request a snapshot that we use it.
             snapshot.run(TracingAction.CHANGE_DETECTION, this._tick);
+            snapshot.dispose();
             return;
         }
         (typeof ngDevMode === 'undefined' || ngDevMode) && this.warnIfDestroyed();
@@ -34571,7 +34573,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-30891d8');
+const VERSION = new Version('19.1.0-next.0+sha-3b76536');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

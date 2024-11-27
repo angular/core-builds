@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-30891d8
+ * @license Angular v19.1.0-next.0+sha-3b76536
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14738,6 +14738,10 @@ export declare interface ɵTracingService<T extends ɵTracingSnapshot> {
      * used when additional work is performed that was scheduled in this context.
      *
      * @param linkedSnapshot Optional snapshot to use link to the current context.
+     * The caller is no longer responsible for calling dispose on the linkedSnapshot.
+     *
+     * @return The tracing snapshot. The caller is responsible for diposing of the
+     * snapshot.
      */
     snapshot(linkedSnapshot: T | null): T;
 }
@@ -14745,6 +14749,8 @@ export declare interface ɵTracingService<T extends ɵTracingSnapshot> {
 /** A single tracing snapshot. */
 export declare interface ɵTracingSnapshot {
     run<T>(action: ɵTracingAction, fn: () => T): T;
+    /** Disposes of the tracing snapshot. Must be run exactly once per TracingSnapshot. */
+    dispose(): void;
 }
 
 /**
