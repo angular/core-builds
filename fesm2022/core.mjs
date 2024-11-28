@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.1+sha-d6f4b10
+ * @license Angular v19.0.1+sha-9f99196
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18079,7 +18079,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.1+sha-d6f4b10']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.1+sha-9f99196']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -33044,11 +33044,11 @@ function ɵsetClassDebugInfo(type, debugInfo) {
  * Replaces the metadata of a component type and re-renders all live instances of the component.
  * @param type Class whose metadata will be replaced.
  * @param applyMetadata Callback that will apply a new set of metadata on the `type` when invoked.
- * @param environment Core runtime environment to use when applying the HMR update.
+ * @param environment Syntehtic namespace imports that need to be passed along to the callback.
  * @param locals Local symbols from the source location that have to be exposed to the callback.
  * @codeGenApi
  */
-function ɵɵreplaceMetadata(type, applyMetadata, environment, locals) {
+function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals) {
     ngDevMode && assertComponentDef(type);
     const oldDef = getComponentDef(type);
     // The reason `applyMetadata` is a callback that is invoked (almost) immediately is because
@@ -33056,7 +33056,7 @@ function ɵɵreplaceMetadata(type, applyMetadata, environment, locals) {
     // can be functions for embedded views, the variables for the constant pool and `setClassMetadata`
     // calls. The callback allows us to keep them isolate from the rest of the app and to invoke
     // them at the right time.
-    applyMetadata.apply(null, [type, environment, ...locals]);
+    applyMetadata.apply(null, [type, namespaces, ...locals]);
     // If a `tView` hasn't been created yet, it means that this component hasn't been instantianted
     // before. In this case there's nothing left for us to do aside from patching it in.
     if (oldDef.tView) {
@@ -34573,7 +34573,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.1+sha-d6f4b10');
+const VERSION = new Version('19.0.1+sha-9f99196');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

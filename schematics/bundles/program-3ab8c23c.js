@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.0.1+sha-d6f4b10
+ * @license Angular v19.0.1+sha-9f99196
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-bef908ad.js');
+var checker = require('./checker-1bb21b34.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -900,12 +900,15 @@ function compileHmrInitializer(meta) {
     const dataName = 'd';
     const timestampName = 't';
     const importCallbackName = `${meta.className}_HmrLoad`;
-    const locals = meta.locals.map((localName) => checker.variable(localName));
+    const locals = meta.localDependencies.map((localName) => checker.variable(localName));
+    const namespaces = meta.namespaceDependencies.map((dep) => {
+        return new checker.ExternalExpr({ moduleName: dep.moduleName, name: null });
+    });
     // m.default
     const defaultRead = checker.variable(moduleName).prop('default');
-    // ɵɵreplaceMetadata(Comp, m.default, [...]);
+    // ɵɵreplaceMetadata(Comp, m.default, [...namespaces], [...locals]);
     const replaceCall = checker.importExpr(checker.Identifiers.replaceMetadata)
-        .callFn([meta.type, defaultRead, new checker.ExternalExpr(checker.Identifiers.core), checker.literalArr(locals)]);
+        .callFn([meta.type, defaultRead, checker.literalArr(namespaces), checker.literalArr(locals)]);
     // (m) => m.default && ɵɵreplaceMetadata(...)
     const replaceCallback = checker.arrowFn([new checker.FnParam(moduleName)], defaultRead.and(replaceCall));
     // '<urlPartial>' + encodeURIComponent(t)
@@ -958,9 +961,14 @@ function compileHmrInitializer(meta) {
  * @param meta HMR metadata extracted from the class.
  */
 function compileHmrUpdateCallback(definitions, constantStatements, meta) {
-    // The class name should always be first and core should be second.
-    const params = [meta.className, meta.coreName, ...meta.locals].map((name) => new checker.FnParam(name, checker.DYNAMIC_TYPE));
-    const body = [...constantStatements];
+    const namespaces = 'ɵɵnamespaces';
+    const params = [meta.className, namespaces, ...meta.localDependencies].map((name) => new checker.FnParam(name, checker.DYNAMIC_TYPE));
+    const body = [];
+    // Declare variables that read out the individual namespaces.
+    for (let i = 0; i < meta.namespaceDependencies.length; i++) {
+        body.push(new checker.DeclareVarStmt(meta.namespaceDependencies[i].assignedName, checker.variable(namespaces).key(checker.literal(i)), checker.DYNAMIC_TYPE, checker.StmtModifier.Final));
+    }
+    body.push(...constantStatements);
     for (const field of definitions) {
         if (field.initializer !== null) {
             body.push(checker.variable(meta.className).prop(field.name).set(field.initializer).toStmt());
@@ -987,7 +995,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.1+sha-d6f4b10'));
+    definitionMap.set('version', checker.literal('19.0.1+sha-9f99196'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1005,7 +1013,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.1+sha-d6f4b10'));
+    definitionMap.set('version', checker.literal('19.0.1+sha-9f99196'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1100,7 +1108,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.1+sha-d6f4b10'));
+    definitionMap.set('version', checker.literal('19.0.1+sha-9f99196'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1516,7 +1524,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.1+sha-d6f4b10'));
+    definitionMap.set('version', checker.literal('19.0.1+sha-9f99196'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1551,7 +1559,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.1+sha-d6f4b10'));
+    definitionMap.set('version', checker.literal('19.0.1+sha-9f99196'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1602,7 +1610,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.1+sha-d6f4b10'));
+    definitionMap.set('version', checker.literal('19.0.1+sha-9f99196'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1635,7 +1643,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.1+sha-d6f4b10'));
+    definitionMap.set('version', checker.literal('19.0.1+sha-9f99196'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1686,7 +1694,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.1+sha-d6f4b10'));
+    definitionMap.set('version', checker.literal('19.0.1+sha-9f99196'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -10120,15 +10128,14 @@ class TsCreateProgramDriver {
  * found in the LICENSE file at https://angular.dev/license
  */
 /**
- * Determines the names of the file-level locals that the HMR
- * initializer needs to capture and pass along.
+ * Determines the file-level dependencies that the HMR initializer needs to capture and pass along.
  * @param sourceFile File in which the file is being compiled.
  * @param definition Compiled component definition.
  * @param factory Compiled component factory.
  * @param classMetadata Compiled `setClassMetadata` expression, if any.
  * @param debugInfo Compiled `setClassDebugInfo` expression, if any.
  */
-function extractHmrLocals(node, definition, factory, classMetadata, debugInfo) {
+function extractHmrDependencies(node, definition, factory, classMetadata, debugInfo) {
     const name = ts__default["default"].isClassDeclaration(node) && node.name ? node.name.text : null;
     const visitor = new PotentialTopLevelReadsVisitor();
     const sourceFile = node.getSourceFile();
@@ -10144,7 +10151,13 @@ function extractHmrLocals(node, definition, factory, classMetadata, debugInfo) {
     // variables inside of functions. Note that we filter out the class name since it is always
     // defined and it saves us having to repeat this logic wherever the locals are consumed.
     const availableTopLevel = getTopLevelDeclarationNames(sourceFile);
-    return Array.from(visitor.allReads).filter((r) => r !== name && availableTopLevel.has(r));
+    return {
+        local: Array.from(visitor.allReads).filter((r) => r !== name && availableTopLevel.has(r)),
+        external: Array.from(visitor.namespaceReads, (name, index) => ({
+            moduleName: name,
+            assignedName: `ɵhmr${index}`,
+        })),
+    };
 }
 /**
  * Gets the names of all top-level declarations within the file (imports, declared classes etc).
@@ -10227,6 +10240,13 @@ function trackBindingName(node, results) {
  */
 class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
     allReads = new Set();
+    namespaceReads = new Set();
+    visitExternalExpr(ast, context) {
+        if (ast.value.moduleName !== null) {
+            this.namespaceReads.add(ast.value.moduleName);
+        }
+        super.visitExternalExpr(ast, context);
+    }
     visitReadVarExpr(ast, context) {
         this.allReads.add(ast.name);
         super.visitReadVarExpr(ast, context);
@@ -10326,12 +10346,13 @@ function extractHmrMetatadata(clazz, reflection, compilerHost, rootDirs, definit
     const sourceFile = clazz.getSourceFile();
     const filePath = getProjectRelativePath(sourceFile, rootDirs, compilerHost) ||
         compilerHost.getCanonicalFileName(sourceFile.fileName);
+    const dependencies = extractHmrDependencies(clazz, definition, factory, classMetadata, debugInfo);
     const meta = {
         type: new checker.WrappedNodeExpr(clazz.name),
         className: clazz.name.text,
         filePath,
-        locals: extractHmrLocals(clazz, definition, factory, classMetadata, debugInfo),
-        coreName: '__ngCore__',
+        localDependencies: dependencies.local,
+        namespaceDependencies: dependencies.external,
     };
     return meta;
 }
@@ -10350,7 +10371,11 @@ function extractHmrMetatadata(clazz, reflection, compilerHost, rootDirs, definit
  * @param sourceFile File in which the class is defined.
  */
 function getHmrUpdateDeclaration(compilationResults, constantStatements, meta, sourceFile) {
-    const importRewriter = new HmrModuleImportRewriter(meta.coreName);
+    const namespaceSpecifiers = meta.namespaceDependencies.reduce((result, current) => {
+        result.set(current.moduleName, current.assignedName);
+        return result;
+    }, new Map());
+    const importRewriter = new HmrModuleImportRewriter(namespaceSpecifiers);
     const importManager = new checker.ImportManager({
         ...checker.presetImportManagerForceNamespaceImports,
         rewriter: importRewriter,
@@ -10364,14 +10389,13 @@ function getHmrUpdateDeclaration(compilationResults, constantStatements, meta, s
         ts__default["default"].factory.createToken(ts__default["default"].SyntaxKind.DefaultKeyword),
     ], node.asteriskToken, node.name, node.typeParameters, node.parameters, node.type, node.body);
 }
-/** Rewriter that replaces namespace imports to `@angular/core` with a specifier identifier. */
 class HmrModuleImportRewriter {
-    coreName;
-    constructor(coreName) {
-        this.coreName = coreName;
+    lookup;
+    constructor(lookup) {
+        this.lookup = lookup;
     }
     rewriteNamespaceImportIdentifier(specifier, moduleName) {
-        return moduleName === '@angular/core' ? this.coreName : specifier;
+        return this.lookup.has(moduleName) ? this.lookup.get(moduleName) : specifier;
     }
     rewriteSymbol(symbol) {
         return symbol;
@@ -20138,7 +20162,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.1+sha-d6f4b10` usually means that core is at head so it supports
+    // A version of `19.0.1+sha-9f99196` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
