@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-4315b87
+ * @license Angular v19.1.0-next.0+sha-a4b86b2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18079,7 +18079,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-4315b87']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-a4b86b2']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23293,6 +23293,7 @@ class ApplicationRef {
         });
     }
     _injector = inject(EnvironmentInjector);
+    _rendererFactory = null;
     /**
      * The `EnvironmentInjector` used to create this application.
      */
@@ -23436,16 +23437,15 @@ class ApplicationRef {
      * pending dirtiness (potentially in a loop).
      */
     synchronize() {
-        let rendererFactory = null;
-        if (!this._injector.destroyed) {
-            rendererFactory = this._injector.get(RendererFactory2, null, { optional: true });
+        if (this._rendererFactory === null && !this._injector.destroyed) {
+            this._rendererFactory = this._injector.get(RendererFactory2, null, { optional: true });
         }
         // When beginning synchronization, all deferred dirtiness becomes active dirtiness.
         this.dirtyFlags |= this.deferredDirtyFlags;
         this.deferredDirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
         let runs = 0;
         while (this.dirtyFlags !== 0 /* ApplicationRefDirtyFlags.None */ && runs++ < MAXIMUM_REFRESH_RERUNS) {
-            this.synchronizeOnce(rendererFactory);
+            this.synchronizeOnce();
         }
         if ((typeof ngDevMode === 'undefined' || ngDevMode) && runs >= MAXIMUM_REFRESH_RERUNS) {
             throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
@@ -23457,7 +23457,7 @@ class ApplicationRef {
     /**
      * Perform a single synchronization pass.
      */
-    synchronizeOnce(rendererFactory) {
+    synchronizeOnce() {
         // If we happened to loop, deferred dirtiness can be processed as active dirtiness again.
         this.dirtyFlags |= this.deferredDirtyFlags;
         this.deferredDirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
@@ -23496,8 +23496,8 @@ class ApplicationRef {
         else {
             // If we skipped refreshing views above, there might still be unflushed animations
             // because we never called `detectChangesInternal` on the views.
-            rendererFactory?.begin?.();
-            rendererFactory?.end?.();
+            this._rendererFactory?.begin?.();
+            this._rendererFactory?.end?.();
         }
         // Even if there were no dirty views, afterRender hooks might still be dirty.
         if (this.dirtyFlags & 8 /* ApplicationRefDirtyFlags.AfterRender */) {
@@ -34573,7 +34573,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-4315b87');
+const VERSION = new Version('19.1.0-next.0+sha-a4b86b2');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
