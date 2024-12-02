@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.1+sha-db7ea92
+ * @license Angular v19.0.1+sha-4392cce
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,12 +10,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-807fecb5.js');
+var compiler_host = require('./compiler_host-0a0a30bb.js');
 var ts = require('typescript');
 var nodes = require('./nodes-0e7d45ca.js');
 var imports = require('./imports-4ac08251.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./checker-1bb21b34.js');
+require('./checker-a00b735e.js');
 require('os');
 require('fs');
 require('module');
@@ -50,6 +50,15 @@ const DI_PARAM_SYMBOLS = new Set([
     'Host',
     'forwardRef',
 ]);
+/** Kinds of nodes which aren't injectable when set as a type of a parameter. */
+const UNINJECTABLE_TYPE_KINDS = new Set([
+    ts__default["default"].SyntaxKind.TrueKeyword,
+    ts__default["default"].SyntaxKind.FalseKeyword,
+    ts__default["default"].SyntaxKind.NumberKeyword,
+    ts__default["default"].SyntaxKind.StringKeyword,
+    ts__default["default"].SyntaxKind.NullKeyword,
+    ts__default["default"].SyntaxKind.VoidKeyword,
+]);
 /**
  * Finds the necessary information for the `inject` migration in a file.
  * @param sourceFile File which to analyze.
@@ -76,11 +85,22 @@ function analyzeFile(sourceFile, localTypeChecker, options) {
         if (ts__default["default"].isImportDeclaration(node)) {
             return;
         }
-        // Only visit the initializer of parameters, because we won't exclude
-        // their decorators from the identifier counting result below.
         if (ts__default["default"].isParameter(node)) {
+            const closestConstructor = nodes.closestNode(node, ts__default["default"].isConstructorDeclaration);
+            // Visiting the same parameters that we're about to remove can throw off the reference
+            // counting logic below. If we run into an initializer, we always visit its initializer
+            // and optionally visit the modifiers/decorators if it's not due to be deleted. Note that
+            // here we technically aren't dealing with the the full list of classes, but the parent class
+            // will have been visited by the time we reach the parameters.
             if (node.initializer) {
                 walk(node.initializer);
+            }
+            if (closestConstructor === null ||
+                // This is meant to avoid the case where this is a
+                // parameter inside a function placed in a constructor.
+                !closestConstructor.parameters.includes(node) ||
+                !classes.some((c) => c.constructor === closestConstructor)) {
+                node.modifiers?.forEach(walk);
             }
             return;
         }
@@ -111,9 +131,21 @@ function analyzeFile(sourceFile, localTypeChecker, options) {
             const constructorNode = node.members.find((member) => ts__default["default"].isConstructorDeclaration(member) &&
                 member.body != null &&
                 member.parameters.length > 0);
+            // Basic check to determine if all parameters are injectable. This isn't exhaustive, but it
+            // should catch the majority of cases. An exhaustive check would require a full type checker
+            // which we don't have in this migration.
+            const allParamsInjectable = !!constructorNode?.parameters.every((param) => {
+                if (!param.type || !UNINJECTABLE_TYPE_KINDS.has(param.type.kind)) {
+                    return true;
+                }
+                return nodes.getAngularDecorators(localTypeChecker, ts__default["default"].getDecorators(param) || []).some((dec) => dec.name === 'Inject' || dec.name === 'Attribute');
+            });
             // Don't migrate abstract classes by default, because
             // their parameters aren't guaranteed to be injectable.
-            if (supportsDI && constructorNode && (!isAbstract || options.migrateAbstractClasses)) {
+            if (supportsDI &&
+                constructorNode &&
+                allParamsInjectable &&
+                (!isAbstract || options.migrateAbstractClasses)) {
                 classes.push({
                     node,
                     constructor: constructorNode,
@@ -666,7 +698,7 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
         // the text if the statement after the `super` call is being deleted. This appears to be because
         // the full start of the next statement appears to always be the end of the `super` call plus 1.
         const nextStatement = getNextPreservedStatement(superCall, removedStatements);
-        tracker.insertText(sourceFile, nextStatement ? nextStatement.getFullStart() : superCall.getEnd() + 1, `\n${afterSuper.join('\n')}\n`);
+        tracker.insertText(sourceFile, nextStatement ? nextStatement.getFullStart() : constructor.getEnd() - 1, `\n${afterSuper.join('\n')}\n` + (nextStatement ? '' : memberIndentation));
     }
     // Need to resolve this once all constructor signatures have been removed.
     const memberReference = node.members.find((m) => !removedMembers.has(m)) || node.members[0];
@@ -688,7 +720,12 @@ function migrateClass(node, constructor, superCall, options, memberIndentation, 
     prependToClass.push(...afterInjectCalls);
     if (prependToClass.length > 0) {
         if (removedMembers.size === node.members.length) {
-            tracker.insertText(sourceFile, constructor.getEnd() + 1, `${prependToClass.join('\n')}\n`);
+            tracker.insertText(sourceFile, 
+            // If all members were deleted, insert after the last one.
+            // This allows us to preserve the indentation.
+            node.members.length > 0
+                ? node.members[node.members.length - 1].getEnd() + 1
+                : node.getEnd() - 1, `${prependToClass.join('\n')}\n`);
         }
         else {
             // Insert the new properties after the first member that hasn't been deleted.
@@ -902,15 +939,10 @@ function migrateInjectDecorator(firstArg, type, localTypeChecker) {
             }
         }
     }
-    else if (
-    // Pass the type for cases like `@Inject(FOO_TOKEN) foo: Foo`, because:
-    // 1. It guarantees that the type stays the same as before.
-    // 2. Avoids leaving unused imports behind.
-    // We only do this for type references since the `@Inject` pattern above is fairly common and
-    // apps don't necessarily type their injection tokens correctly, whereas doing it for literal
-    // types will add a lot of noise to the generated code.
-    type &&
+    else if (type &&
         (ts__default["default"].isTypeReferenceNode(type) ||
+            ts__default["default"].isTypeLiteralNode(type) ||
+            ts__default["default"].isTupleTypeNode(type) ||
             (ts__default["default"].isUnionTypeNode(type) && type.types.some(ts__default["default"].isTypeReferenceNode)))) {
         typeArguments = [type];
     }
@@ -932,28 +964,17 @@ function stripConstructorParameters(node, tracker) {
     const constructorText = node.getText();
     const lastParamText = node.parameters[node.parameters.length - 1].getText();
     const lastParamStart = constructorText.indexOf(lastParamText);
-    const whitespacePattern = /\s/;
-    let trailingCharacters = 0;
-    if (lastParamStart > -1) {
-        let lastParamEnd = lastParamStart + lastParamText.length;
-        let closeParenIndex = -1;
-        for (let i = lastParamEnd; i < constructorText.length; i++) {
-            const char = constructorText[i];
-            if (char === ')') {
-                closeParenIndex = i;
-                break;
-            }
-            else if (!whitespacePattern.test(char)) {
-                // The end of the last parameter won't include
-                // any trailing commas which we need to account for.
-                lastParamEnd = i + 1;
-            }
-        }
-        if (closeParenIndex > -1) {
-            trailingCharacters = closeParenIndex - lastParamEnd;
+    // This shouldn't happen, but bail out just in case so we don't mangle the code.
+    if (lastParamStart === -1) {
+        return;
+    }
+    for (let i = lastParamStart + lastParamText.length; i < constructorText.length; i++) {
+        const char = constructorText[i];
+        if (char === ')') {
+            tracker.replaceText(node.getSourceFile(), node.parameters.pos, node.getStart() + i - node.parameters.pos, '');
+            break;
         }
     }
-    tracker.replaceText(node.getSourceFile(), node.parameters.pos, node.parameters.end - node.parameters.pos + trailingCharacters, '');
 }
 /**
  * Creates a type checker scoped to a specific file.

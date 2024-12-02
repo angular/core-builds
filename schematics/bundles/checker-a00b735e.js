@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.1+sha-db7ea92
+ * @license Angular v19.0.1+sha-4392cce
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26170,13 +26170,11 @@ class BindingParser {
     _interpolationConfig;
     _schemaRegistry;
     errors;
-    _allowInvalidAssignmentEvents;
-    constructor(_exprParser, _interpolationConfig, _schemaRegistry, errors, _allowInvalidAssignmentEvents = false) {
+    constructor(_exprParser, _interpolationConfig, _schemaRegistry, errors) {
         this._exprParser = _exprParser;
         this._interpolationConfig = _interpolationConfig;
         this._schemaRegistry = _schemaRegistry;
         this.errors = errors;
-        this._allowInvalidAssignmentEvents = _allowInvalidAssignmentEvents;
     }
     get interpolationConfig() {
         return this._interpolationConfig;
@@ -26560,16 +26558,7 @@ class BindingParser {
         if (ast instanceof PropertyRead || ast instanceof KeyedRead) {
             return true;
         }
-        // TODO(crisbeto): this logic is only here to support the automated migration away
-        // from invalid bindings. It should be removed once the migration is deleted.
-        if (!this._allowInvalidAssignmentEvents) {
-            return false;
-        }
-        if (ast instanceof Binary) {
-            return ((ast.operation === '&&' || ast.operation === '||' || ast.operation === '??') &&
-                (ast.right instanceof PropertyRead || ast.right instanceof KeyedRead));
-        }
-        return ast instanceof Conditional || ast instanceof PrefixNot;
+        return false;
     }
 }
 function isAnimationLabel(name) {
@@ -28193,8 +28182,8 @@ const LEADING_TRIVIA_CHARS = [' ', '\n', '\r', '\t'];
  * @param options options to modify how the template is parsed
  */
 function parseTemplate(template, templateUrl, options = {}) {
-    const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat, allowInvalidAssignmentEvents, } = options;
-    const bindingParser = makeBindingParser(interpolationConfig, allowInvalidAssignmentEvents);
+    const { interpolationConfig, preserveWhitespaces, enableI18nLegacyMessageIdFormat } = options;
+    const bindingParser = makeBindingParser(interpolationConfig);
     const htmlParser = new HtmlParser();
     const parseResult = htmlParser.parse(template, templateUrl, {
         leadingTriviaChars: LEADING_TRIVIA_CHARS,
@@ -28300,8 +28289,8 @@ const elementRegistry = new DomElementSchemaRegistry();
 /**
  * Construct a `BindingParser` with a default configuration.
  */
-function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG, allowInvalidAssignmentEvents = false) {
-    return new BindingParser(new Parser(new Lexer()), interpolationConfig, elementRegistry, [], allowInvalidAssignmentEvents);
+function makeBindingParser(interpolationConfig = DEFAULT_INTERPOLATION_CONFIG) {
+    return new BindingParser(new Parser(new Lexer()), interpolationConfig, elementRegistry, []);
 }
 
 const COMPONENT_VARIABLE = '%COMP%';
@@ -30332,7 +30321,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.1+sha-db7ea92');
+new Version('19.0.1+sha-4392cce');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31740,7 +31729,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-1bb21b34.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-a00b735e.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
