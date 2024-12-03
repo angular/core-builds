@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-392c036
+ * @license Angular v19.1.0-next.0+sha-fa0a9a5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18079,7 +18079,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-392c036']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-fa0a9a5']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34573,7 +34573,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-392c036');
+const VERSION = new Version('19.1.0-next.0+sha-fa0a9a5');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38014,6 +38014,7 @@ const REACTIVE_NODE = {
     liveConsumerIndexOfThis: undefined,
     consumerAllowSignalWrites: false,
     consumerIsAlwaysLive: false,
+    kind: 'unknown',
     producerMustRecompute: () => false,
     producerRecomputeValue: () => { },
     consumerMarkedDirty: () => { },
@@ -38330,6 +38331,7 @@ const COMPUTED_NODE = /* @__PURE__ */ (() => {
         dirty: true,
         error: null,
         equal: defaultEquals,
+        kind: 'computed',
         producerMustRecompute(node) {
             // Force a recomputation if there's no current value, or if the current value is in the
             // process of being calculated (which should throw an error).
@@ -38435,6 +38437,7 @@ const SIGNAL_NODE = /* @__PURE__ */ (() => {
         ...REACTIVE_NODE,
         equal: defaultEquals,
         value: undefined,
+        kind: 'signal',
     };
 })();
 function signalValueChanged(node) {
