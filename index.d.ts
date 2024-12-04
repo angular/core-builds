@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.2+sha-5f3ba06
+ * @license Angular v19.0.2+sha-7ad1f27
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1408,8 +1408,7 @@ declare type ChangeDetectionStrategy_2 = number;
  * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
  * after an interval.
  *
- * <code-example path="core/ts/change_detect/change-detection.ts"
- * region="mark-for-check"></code-example>
+ * {@example core/ts/change_detect/change-detection.ts region='mark-for-check'}
  *
  * ### Detach change detector to limit how often check occurs
  *
@@ -1419,7 +1418,7 @@ declare type ChangeDetectionStrategy_2 = number;
  * less often than the changes actually occur. To do that, we detach
  * the component's change detector and perform an explicit local check every five seconds.
  *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+ * {@example core/ts/change_detect/change-detection.ts region='detach'}
  *
  *
  * ### Reattaching a detached component
@@ -1429,7 +1428,7 @@ declare type ChangeDetectionStrategy_2 = number;
  * when the `live` property is set to false, and reattaches it when the property
  * becomes true.
  *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
+ * {@example core/ts/change_detect/change-detection.ts region='reattach'}
  *
  * @publicApi
  */
@@ -1799,7 +1798,7 @@ export declare interface ComponentDecorator {
      * The following example creates a component with two data-bound properties,
      * specified by the `inputs` value.
      *
-     * <code-example path="core/ts/metadata/directives.ts" region="component-input"></code-example>
+     * {@example core/ts/metadata/directives.ts region='component-input'}
      *
      *
      * ### Setting component outputs
@@ -5042,8 +5041,7 @@ export declare interface HostDecorator {
      *
      * The following shows use with the `@Optional` decorator, and allows for a `null` result.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Host">
-     * </code-example>
+     * {@example core/di/ts/metadata_spec.ts region='Host'}
      *
      * For an extended example, see ["Dependency Injection
      * Guide"](guide/di/di-in-action#optional).
@@ -5748,7 +5746,7 @@ export declare interface InjectableDecorator {
      * The following example shows how a service class is properly
      *  marked so that a supporting service can be injected upon creation.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Injectable"></code-example>
+     * {@example core/di/ts/metadata_spec.ts region='Injectable'}
      *
      */
     (): TypeDecorator;
@@ -5801,8 +5799,7 @@ export declare interface InjectDecorator {
      * When `@Inject()` is not present, the injector uses the type annotation of the
      * parameter as the provider.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="InjectWithoutDecorator">
-     * </code-example>
+     * {@example core/di/ts/metadata_spec.ts region='InjectWithoutDecorator'}
      *
      * @see [Dependency Injection Guide](guide/di/dependency-injection
      *
@@ -5882,8 +5879,7 @@ export declare enum InjectFlags {
  *
  * </div>
  *
- * <code-example format="typescript" language="typescript" path="injection-token/src/main.ts"
- * region="InjectionToken"></code-example>
+ * {@example injection-token/src/main.ts region='InjectionToken'}
  *
  * When creating an `InjectionToken`, you can optionally specify a factory function which returns
  * (possibly by creating) a default value of the parameterized type `T`. This sets up the
@@ -8188,8 +8184,7 @@ export declare interface OptionalDecorator {
      *
      * The following code allows the possibility of a `null` result:
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
-     * </code-example>
+     * {@example core/di/ts/metadata_spec.ts region='Optional'}
      *
      * @see [Dependency Injection Guide](guide/di/dependency-injection.
      */
@@ -10011,8 +10006,7 @@ export declare interface SelfDecorator {
      * by the local injector when instantiating the class itself, but not
      * when instantiating a child.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="Self">
-     * </code-example>
+     * {@example core/di/ts/metadata_spec.ts region='Self'}
      *
      * @see {@link SkipSelf}
      * @see {@link Optional}
@@ -10214,8 +10208,7 @@ export declare interface SkipSelfDecorator {
      * In the following example, the dependency can be resolved when
      * instantiating a child, but not when instantiating the class itself.
      *
-     * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf">
-     * </code-example>
+     * {@example core/di/ts/metadata_spec.ts region='SkipSelf'}
      *
      * @see [Dependency Injection guide](guide/di/di-in-action#skip).
      * @see {@link Self}

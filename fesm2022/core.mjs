@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.2+sha-5f3ba06
+ * @license Angular v19.0.2+sha-7ad1f27
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -699,8 +699,7 @@ const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafePr
  *
  * </div>
  *
- * <code-example format="typescript" language="typescript" path="injection-token/src/main.ts"
- * region="InjectionToken"></code-example>
+ * {@example injection-token/src/main.ts region='InjectionToken'}
  *
  * When creating an `InjectionToken`, you can optionally specify a factory function which returns
  * (possibly by creating) a default value of the parameterized type `T`. This sets up the
@@ -18079,7 +18078,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.2+sha-5f3ba06']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.2+sha-7ad1f27']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34573,7 +34572,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.2+sha-5f3ba06');
+const VERSION = new Version('19.0.2+sha-7ad1f27');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -36176,8 +36175,7 @@ function noModuleError(id) {
  * (`CheckOnce`, rather than the default `CheckAlways`), then forces a second check
  * after an interval.
  *
- * <code-example path="core/ts/change_detect/change-detection.ts"
- * region="mark-for-check"></code-example>
+ * {@example core/ts/change_detect/change-detection.ts region='mark-for-check'}
  *
  * ### Detach change detector to limit how often check occurs
  *
@@ -36187,7 +36185,7 @@ function noModuleError(id) {
  * less often than the changes actually occur. To do that, we detach
  * the component's change detector and perform an explicit local check every five seconds.
  *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="detach"></code-example>
+ * {@example core/ts/change_detect/change-detection.ts region='detach'}
  *
  *
  * ### Reattaching a detached component
@@ -36197,7 +36195,7 @@ function noModuleError(id) {
  * when the `live` property is set to false, and reattaches it when the property
  * becomes true.
  *
- * <code-example path="core/ts/change_detect/change-detection.ts" region="reattach"></code-example>
+ * {@example core/ts/change_detect/change-detection.ts region='reattach'}
  *
  * @publicApi
  */
