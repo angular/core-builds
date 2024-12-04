@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.1+sha-ad927bc
+ * @license Angular v19.0.1+sha-b8a2ae0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -98,7 +98,7 @@ export declare interface AfterContentInit {
  * - `read`
  *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
  *
- * <div class="alert is-critical">
+ * <div class="docs-alert docs-alert-critical">
  *
  * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
  * phases when possible, to avoid performance degradation.
@@ -125,7 +125,7 @@ export declare interface AfterContentInit {
  * manual DOM access, ensuring the best experience for the end users of your application
  * or library.
  *
- * <div class="alert is-important">
+ * <div class="docs-alert docs-alert-important">
  *
  * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
  * You must use caution when directly reading or writing the DOM and layout.
@@ -173,7 +173,7 @@ export declare function afterNextRender<E = never, W = never, M = never>(spec: {
  * Register a callback to be invoked the next time the application finishes rendering, during the
  * `mixedReadWrite` phase.
  *
- * <div class="alert is-critical">
+ * <div class="docs-alert docs-alert-critical">
  *
  * You should prefer specifying an explicit phase for the callback instead, or you risk significant
  * performance degradation.
@@ -185,7 +185,7 @@ export declare function afterNextRender<E = never, W = never, M = never>(spec: {
  * - on browser platforms only
  * - during the `mixedReadWrite` phase
  *
- * <div class="alert is-important">
+ * <div class="docs-alert docs-alert-important">
  *
  * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
  * You must use caution when directly reading or writing the DOM and layout.
@@ -239,7 +239,7 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
  * - `read`
  *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
  *
- * <div class="alert is-critical">
+ * <div class="docs-alert docs-alert-critical">
  *
  * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
  * phases when possible, to avoid performance degradation.
@@ -266,7 +266,7 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
  * manual DOM access, ensuring the best experience for the end users of your application
  * or library.
  *
- * <div class="alert is-important">
+ * <div class="docs-alert docs-alert-important">
  *
  * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
  * You must use caution when directly reading or writing the DOM and layout.
@@ -312,7 +312,7 @@ export declare function afterRender<E = never, W = never, M = never>(spec: {
  * Register a callback to be invoked each time the application finishes rendering, during the
  * `mixedReadWrite` phase.
  *
- * <div class="alert is-critical">
+ * <div class="docs-alert docs-alert-critical">
  *
  * You should prefer specifying an explicit phase for the callback instead, or you risk significant
  * performance degradation.
@@ -325,7 +325,7 @@ export declare function afterRender<E = never, W = never, M = never>(spec: {
  * - on browser platforms only
  * - during the `mixedReadWrite` phase
  *
- * <div class="alert is-important">
+ * <div class="docs-alert docs-alert-important">
  *
  * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
  * You must use caution when directly reading or writing the DOM and layout.
@@ -366,7 +366,7 @@ export declare function afterRender(callback: VoidFunction, options?: AfterRende
  * Register an effect that, when triggered, is invoked when the application finishes rendering, during the
  * `mixedReadWrite` phase.
  *
- * <div class="alert is-critical">
+ * <div class="docs-alert docs-alert-critical">
  *
  * You should prefer specifying an explicit phase for the effect instead, or you risk significant
  * performance degradation.
@@ -379,7 +379,7 @@ export declare function afterRender(callback: VoidFunction, options?: AfterRende
  * - on browser platforms only
  * - during the `mixedReadWrite` phase
  *
- * <div class="alert is-important">
+ * <div class="docs-alert docs-alert-important">
  *
  * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
  * You must use caution when directly reading or writing the DOM and layout.
@@ -408,7 +408,7 @@ export declare function afterRenderEffect(callback: (onCleanup: EffectCleanupReg
  * - `read`
  *    Use this phase to **read** from the DOM. **Never** write to the DOM in this phase.
  *
- * <div class="alert is-critical">
+ * <div class="docs-alert docs-alert-critical">
  *
  * You should prefer using the `read` and `write` phases over the `earlyRead` and `mixedReadWrite`
  * phases when possible, to avoid performance degradation.
@@ -436,7 +436,7 @@ export declare function afterRenderEffect(callback: (onCleanup: EffectCleanupReg
  * manual DOM access, ensuring the best experience for the end users of your application
  * or library.
  *
- * <div class="alert is-important">
+ * <div class="docs-alert docs-alert-important">
  *
  * Components are not guaranteed to be [hydrated](guide/hydration) before the callback runs.
  * You must use caution when directly reading or writing the DOM and layout.
@@ -514,7 +514,7 @@ export declare interface AfterRenderOptions {
     /**
      * The phase the callback should be invoked in.
      *
-     * <div class="alert is-critical">
+     * <div class="docs-alert docs-alert-critical">
      *
      * Defaults to `AfterRenderPhase.MixedReadWrite`. You should choose a more specific
      * phase instead. See `AfterRenderPhase` for more information.
@@ -557,7 +557,7 @@ export declare enum AfterRenderPhase {
      * `AfterRenderPhase.EarlyRead` phase if reading can wait until after the write phase.
      * **Never** write to the DOM in this phase.
      *
-     * <div class="alert is-important">
+     * <div class="docs-alert docs-alert-important">
      *
      * Using this value can degrade performance.
      * Instead, prefer using built-in browser functionality when possible.
@@ -575,7 +575,7 @@ export declare enum AfterRenderPhase {
      * DOM, that haven't been refactored to use a different phase. **Never** use this phase if
      * it is possible to divide the work among the other phases instead.
      *
-     * <div class="alert is-critical">
+     * <div class="docs-alert docs-alert-critical">
      *
      * Using this value can **significantly** degrade performance.
      * Instead, prefer dividing work into the appropriate phase callbacks.
@@ -2976,7 +2976,7 @@ declare const DECLARATION_VIEW = 14;
  *
  * See the [i18n guide](guide/i18n/locale-id) for more information.
  *
- * <div class="alert is-helpful">
+ * <div class="docs-alert docs-alert-helpful">
  *
  * **Deprecation notice:**
  *
@@ -5873,7 +5873,7 @@ export declare enum InjectFlags {
  * `InjectionToken` is parameterized on `T` which is the type of object which will be returned by
  * the `Injector`. This provides an additional level of type safety.
  *
- * <div class="alert is-helpful">
+ * <div class="docs-alert docs-alert-helpful">
  *
  * **Important Note**: Ensure that you use the same instance of the `InjectionToken` in both the
  * provider and the injection call. Creating a new instance of `InjectionToken` in different places,
