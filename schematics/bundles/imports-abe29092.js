@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.2+sha-6ae3ce7
+ * @license Angular v19.0.2+sha-5f3ba06
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -37,7 +37,7 @@ function getImportOfIdentifier(typeChecker, node) {
  * Gets a top-level import specifier with a specific name that is imported from a particular module.
  * E.g. given a file that looks like:
  *
- * ```
+ * ```ts
  * import { Component, Directive } from '@angular/core';
  * import { Foo } from './foo';
  * ```

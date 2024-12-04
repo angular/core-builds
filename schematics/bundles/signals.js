@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.2+sha-6ae3ce7
+ * @license Angular v19.0.2+sha-5f3ba06
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,17 +14,17 @@ var signalInputMigration = require('./signal-input-migration.js');
 var outputMigration = require('./output-migration.js');
 require('./project_tsconfig_paths-e9ccccbf.js');
 require('@angular-devkit/core');
-require('./combine_units-cbbd4bf7.js');
+require('./combine_units-ce53813b.js');
 require('node:path/posix');
 require('os');
 require('typescript');
-require('./checker-a00b735e.js');
+require('./checker-c58f97d2.js');
 require('fs');
 require('module');
 require('path');
 require('url');
-require('./program-a6be5d4a.js');
-require('./migrate_ts_type_references-de34a334.js');
+require('./program-fe7d9b66.js');
+require('./migrate_ts_type_references-6bdbbda9.js');
 require('assert');
 require('./leading_space-d190b83b.js');
 

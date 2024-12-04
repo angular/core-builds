@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.2+sha-6ae3ce7
+ * @license Angular v19.0.2+sha-5f3ba06
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -10,12 +10,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
 var p = require('path');
-var compiler_host = require('./compiler_host-0a0a30bb.js');
+var compiler_host = require('./compiler_host-4568a131.js');
 var ts = require('typescript');
-var nodes = require('./nodes-0e7d45ca.js');
-var imports = require('./imports-4ac08251.js');
+var nodes = require('./nodes-a9f0b985.js');
+var imports = require('./imports-abe29092.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./checker-a00b735e.js');
+require('./checker-c58f97d2.js');
 require('os');
 require('fs');
 require('module');
@@ -346,7 +346,7 @@ function findSuperCall(root) {
  * Finds class property declarations without initializers whose constructor-based initialization
  * can be inlined into the declaration spot after migrating to `inject`. For example:
  *
- * ```
+ * ```ts
  * private foo: number;
  *
  * constructor(private service: MyService) {
@@ -413,7 +413,7 @@ function findUninitializedPropertiesToCombine(node, constructor, localTypeChecke
  * The internal-specific migration will combine such properties which will result in a compilation
  * error, for example:
  *
- * ```
+ * ```ts
  * class MyClass {
  *   foo: Foo;
  *   bar: Bar;
@@ -427,7 +427,7 @@ function findUninitializedPropertiesToCombine(node, constructor, localTypeChecke
  *
  * Will become:
  *
- * ```
+ * ```ts
  * class MyClass {
  *   foo: Foo = this.bar.getFoo();
  *   bar: Bar = inject(Bar);
@@ -481,7 +481,7 @@ function shouldCombineInInitializationOrder(toCombine, constructor) {
 /**
  * Finds the expressions from the constructor that initialize class members, for example:
  *
- * ```
+ * ```ts
  * private foo: number;
  *
  * constructor() {

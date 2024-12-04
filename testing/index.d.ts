@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.2+sha-6ae3ce7
+ * @license Angular v19.0.2+sha-5f3ba06
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -226,7 +226,7 @@ export declare function getTestBed(): TestBed;
  *
  * Example:
  *
- * ```
+ * ```ts
  * beforeEach(inject([Dependency, AClass], (dep, object) => {
  *   // some code that uses `dep` and `object`
  *   // ...
@@ -492,7 +492,7 @@ export declare interface TestModuleMetadata {
  * `processNewMacroTasksSynchronously` defaults to true, and the nested
  * function is executed on each tick.
  *
- * ```
+ * ```ts
  * it ('test with nested setTimeout', fakeAsync(() => {
  *   let nestedTimeoutInvoked = false;
  *   function funcWithNestedTimeout() {
@@ -509,7 +509,7 @@ export declare interface TestModuleMetadata {
  * In the following case, `processNewMacroTasksSynchronously` is explicitly
  * set to false, so the nested timeout function is not invoked.
  *
- * ```
+ * ```ts
  * it ('test with nested setTimeout', fakeAsync(() => {
  *   let nestedTimeoutInvoked = false;
  *   function funcWithNestedTimeout() {
@@ -538,7 +538,7 @@ export declare function tick(millis?: number, tickOptions?: {
  *
  * Example:
  *
- * ```
+ * ```ts
  * it('...', waitForAsync(inject([AClass], (object) => {
  *   object.doSomething.then(() => {
  *     expect(...);

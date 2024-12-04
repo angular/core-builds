@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.2+sha-6ae3ce7
+ * @license Angular v19.0.2+sha-5f3ba06
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28,7 +28,7 @@ const XSS_SECURITY_URL = 'https://g.co/ng/security#xss';
  * Formats and outputs the error message in a consistent way.
  *
  * Example:
- * ```
+ * ```ts
  *  throw new RuntimeError(
  *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
  *    ngDevMode && 'Injector has already been destroyed.');
@@ -415,7 +415,7 @@ const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafe
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
  *
  * ### Circular standalone reference import example
- * ```ts
+ * ```angular-ts
  * @Component({
  *   standalone: true,
  *   imports: [ChildComponent],
@@ -1154,7 +1154,7 @@ Please check that 1) the type for the parameter at index ${index} is correct and
  * In practice the `inject()` calls are allowed in a constructor, a constructor parameter and a
  * field initializer:
  *
- * ```typescript
+ * ```ts
  * @Injectable({providedIn: 'root'})
  * export class Car {
  *   radio: Radio|undefined;
@@ -1170,7 +1170,7 @@ Please check that 1) the type for the parameter at index ${index} is correct and
  *
  * It is also legal to call `inject` from a provider's factory:
  *
- * ```typescript
+ * ```ts
  * providers: [
  *   {provide: Car, useFactory: () => {
  *     // OK: a class factory
@@ -1184,7 +1184,7 @@ Please check that 1) the type for the parameter at index ${index} is correct and
  * notably, calls to `inject()` are disallowed after a class instance was created, in methods
  * (including lifecycle hooks):
  *
- * ```typescript
+ * ```ts
  * @Component({ ... })
  * export class CarComponent {
  *   ngOnInit() {
@@ -1734,7 +1734,7 @@ function makeEnvironmentProviders(providers) {
  * @usageNotes
  * The following example illustrates how to configure an initialization function using
  * `provideEnvironmentInitializer()`
- * ```
+ * ```ts
  * createEnvironmentInjector(
  *   [
  *     provideEnvironmentInitializer(() => {
@@ -1770,7 +1770,7 @@ function provideEnvironmentInitializer(initializerFn) {
  * @usageNotes
  * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
  *
- * ```typescript
+ * ```ts
  * await bootstrapApplication(RootComponent, {
  *   providers: [
  *     importProvidersFrom(NgModuleOne, NgModuleTwo)
@@ -1781,7 +1781,7 @@ function provideEnvironmentInitializer(initializerFn) {
  * You can also use the `importProvidersFrom` results in the `providers` field of a route, when a
  * standalone component is used:
  *
- * ```typescript
+ * ```ts
  * export const ROUTES: Route[] = [
  *   {
  *     path: 'foo',
@@ -2622,19 +2622,19 @@ function isType(v) {
  * it intends to capture the pattern where existing constructors have been downleveled from
  * ES2015 to ES5 using TypeScript w/ downlevel iteration. e.g.
  *
- * ```
+ * ```ts
  *   function MyClass() {
  *     var _this = _super.apply(this, arguments) || this;
  * ```
  *
  * downleveled to ES5 with `downlevelIteration` for TypeScript < 4.2:
- * ```
+ * ```ts
  *   function MyClass() {
  *     var _this = _super.apply(this, __spread(arguments)) || this;
  * ```
  *
  * or downleveled to ES5 with `downlevelIteration` for TypeScript >= 4.2:
- * ```
+ * ```ts
  *   function MyClass() {
  *     var _this = _super.apply(this, __spreadArray([], __read(arguments), false)) || this;
  * ```
@@ -3152,7 +3152,7 @@ function applyValueToInputField(instance, inputSignalNode, privateName, value) {
  *
  * Example usage:
  *
- * ```
+ * ```ts
  * static ɵcmp = defineComponent({
  *   ...
  *   inputs: {name: 'publicName'},
@@ -3552,7 +3552,7 @@ function isSkipHydrationRootTNode(tNode) {
  * Enables directive matching on elements.
  *
  *  * Example:
- * ```
+ * ```html
  * <my-comp my-directive>
  *   Should match component / directive.
  * </my-comp>
@@ -3581,7 +3581,7 @@ function enterSkipHydrationBlock(tNode) {
  * Disables directive matching on element.
  *
  *  * Example:
- * ```
+ * ```html
  * <my-comp my-directive>
  *   Should match component / directive.
  * </my-comp>
@@ -4508,11 +4508,11 @@ function isLetDeclaration(tNode) {
 /**
  * Returns `true` if the `TNode` has a directive which has `@Input()` for `class` binding.
  *
- * ```
+ * ```html
  * <div my-dir [class]="exp"></div>
  * ```
  * and
- * ```
+ * ```ts
  * @Directive({
  * })
  * class MyDirective {
@@ -4532,11 +4532,11 @@ function hasClassInput(tNode) {
 /**
  * Returns `true` if the `TNode` has a directive which has `@Input()` for `style` binding.
  *
- * ```
+ * ```html
  * <div my-dir [style]="exp"></div>
  * ```
  * and
- * ```
+ * ```ts
  * @Directive({
  * })
  * class MyDirective {
@@ -4878,7 +4878,7 @@ function isRouterOutletInjector(currentInjector) {
  *
  * Example:
  *
- * ```
+ * ```ts
  * @Injectable()
  * class MyService {
  *   constructor(public value: String) {}
@@ -5076,19 +5076,19 @@ function diPublicInInjector(injectorIndex, tView, token) {
  *
  * # Example
  * Given:
- * ```
+ * ```ts
  * @Component(...)
  * class MyComponent {
  *   constructor(@Attribute('title') title: string) { ... }
  * }
  * ```
  * When instantiated with
- * ```
+ * ```html
  * <my-component title="Hello"></my-component>
  * ```
  *
  * Then factory method generated is:
- * ```
+ * ```ts
  * MyComponent.ɵcmp = defineComponent({
  *   factory: () => new MyComponent(injectAttribute('title'))
  *   ...
@@ -5896,7 +5896,7 @@ class Injector {
  *
  * @usageNotes
  * ### Injecting an attribute that is known to exist
- * ```typescript
+ * ```ts
  * @Directive()
  * class MyDir {
  *   attr: string = inject(new HostAttributeToken('some-attr'));
@@ -5904,7 +5904,7 @@ class Injector {
  * ```
  *
  * ### Optionally injecting an attribute
- * ```typescript
+ * ```ts
  * @Directive()
  * class MyDir {
  *   attr: string | null = inject(new HostAttributeToken('some-attr'), {optional: true});
@@ -5929,7 +5929,7 @@ class HostAttributeToken {
  *
  * @usageNotes
  * ### Injecting a tag name that is known to exist
- * ```typescript
+ * ```ts
  * @Directive()
  * class MyDir {
  *   tagName: string = inject(HOST_TAG_NAME);
@@ -5937,7 +5937,7 @@ class HostAttributeToken {
  * ```
  *
  * ### Optionally injecting a tag name
- * ```typescript
+ * ```ts
  * @Directive()
  * class MyDir {
  *   tagName: string | null = inject(HOST_TAG_NAME, {optional: true});
@@ -6106,7 +6106,7 @@ class PendingTasksInternal {
  * - tests might want to delay assertions until the application becomes stable;
  *
  * @usageNotes
- * ```typescript
+ * ```ts
  * const pendingTasks = inject(PendingTasks);
  * const taskCleanup = pendingTasks.add();
  * // do work that should block application's stability and then:
@@ -6350,7 +6350,7 @@ let ngZoneInstanceId = 0;
  * @usageNotes
  * ### Example
  *
- * ```
+ * ```ts
  * import {Component, NgZone} from '@angular/core';
  * import {NgIf} from '@angular/common';
  *
@@ -6784,7 +6784,7 @@ function getNgZone(ngZoneToUse = 'zone.js', options) {
  * @usageNotes
  * ### Example
  *
- * ```
+ * ```ts
  * class MyErrorHandler implements ErrorHandler {
  *   handleError(error) {
  *     // do something with the exception
@@ -6977,7 +6977,7 @@ function inputRequiredFunction(opts) {
  * @usageNotes
  * To use signal-based inputs, import `input` from `@angular/core`.
  *
- * ```
+ * ```ts
  * import {input} from '@angular/core`;
  * ```
  *
@@ -7098,7 +7098,7 @@ function symbolIterator() {
  *
  * @usageNotes
  * ### Example
- * ```typescript
+ * ```ts
  * @Component({...})
  * class Container {
  *   @ViewChildren(Item) items:QueryList<Item>;
@@ -8227,7 +8227,7 @@ function getDocument() {
  * (for example, using `bootstrapApplication` calls). In this case, ensure that those applications
  * have different `APP_ID` value setup. For example:
  *
- * ```
+ * ```ts
  * bootstrapApplication(ComponentA, {
  *   providers: [
  *     { provide: APP_ID, useValue: 'app-a' },
@@ -8344,7 +8344,7 @@ const IMAGE_CONFIG = new InjectionToken(ngDevMode ? 'ImageConfig' : '', {
  *
  * Example:
  *
- * ```
+ * ```ts
  * const COUNTER_KEY = makeStateKey<number>('counter');
  * let value = 10;
  *
@@ -11004,7 +11004,7 @@ const COMMENT_DELIMITER_ESCAPED = '\u200B$1\u200B';
  *
  * see: https://html.spec.whatwg.org/multipage/syntax.html#comments
  *
- * ```
+ * ```ts
  * div.innerHTML = div.innerHTML
  * ```
  *
@@ -14390,7 +14390,7 @@ function renderComponent(hostLView, componentHostIdx) {
  * will be skipped. However, consider this case of two components side-by-side:
  *
  * App template:
- * ```
+ * ```html
  * <comp></comp>
  * <comp></comp>
  * ```
@@ -15239,7 +15239,7 @@ class ViewRef$1 {
      * @usageNotes
      * ### Example
      *
-     * ```typescript
+     * ```ts
      * @Component({
      *   selector: 'app-root',
      *   template: `Number of ticks: {{numberOfTicks}}`
@@ -15283,7 +15283,7 @@ class ViewRef$1 {
      * we want to check and update the list every five seconds. We can do that by detaching
      * the component's change detector and doing a local check every five seconds.
      *
-     * ```typescript
+     * ```ts
      * class DataProvider {
      *   // in a real application the returned data will be different every time
      *   get data() {
@@ -15335,7 +15335,7 @@ class ViewRef$1 {
      * its change detector from the main change detector tree when the component's live property
      * is set to false.
      *
-     * ```typescript
+     * ```ts
      * class DataProvider {
      *   data = 1;
      *
@@ -18079,7 +18079,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.2+sha-6ae3ce7']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.2+sha-5f3ba06']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -18116,7 +18116,7 @@ function projectNodes(tNode, ngContentSelectors, projectableNodes) {
  *
  * Example:
  *
- * ```
+ * ```ts
  * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
  * ```
  */
@@ -18145,7 +18145,7 @@ function LifecycleHooksFeature() {
  * Note: the example uses standalone components, but the function can also be used for
  * non-standalone components (declared in an NgModule) as well.
  *
- * ```typescript
+ * ```angular-ts
  * @Component({
  *   standalone: true,
  *   selector: 'dynamic',
@@ -19145,7 +19145,7 @@ function viewChildRequiredFn(locator, opts) {
  * Create a child query in your component by declaring a
  * class field and initializing it with the `viewChild()` function.
  *
- * ```ts
+ * ```angular-ts
  * @Component({template: '<div #el></div><my-component #cmp />'})
  * export class TestComponent {
  *   divEl = viewChild<ElementRef>('el');                   // Signal<ElementRef|undefined>
@@ -19312,7 +19312,7 @@ function modelRequiredFunction(opts) {
  *
  * To use `model()`, import the function from `@angular/core`.
  *
- * ```
+ * ```ts
  * import {model} from '@angular/core`;
  * ```
  *
@@ -19433,7 +19433,7 @@ const ViewChild = makePropDecorator('ViewChild', (selector, opts) => ({
  * Used to resolve resource URLs on `@Component` when used with JIT compilation.
  *
  * Example:
- * ```
+ * ```ts
  * @Component({
  *   selector: 'my-comp',
  *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
@@ -19836,7 +19836,7 @@ class StandaloneService {
  *
  *
  * # Example
- * ```
+ * ```ts
  * class MyComponent {
  *   // Generated by Angular Template Compiler
  *   // [Symbol] syntax will not be supported by TypeScript until v2.7
@@ -19975,7 +19975,7 @@ function ɵɵdefineDirective(directiveDefinition) {
  * Create a pipe definition object.
  *
  * # Example
- * ```
+ * ```ts
  * class MyPipe implements PipeTransform {
  *   // Generated by Angular Template Compiler
  *   static ɵpipe = definePipe({
@@ -22500,7 +22500,7 @@ const TESTABILITY_GETTER = new InjectionToken('');
  * providers using the `provideProtractorTestingSupport()` function and adding them into the
  * `options.providers` array. Example:
  *
- * ```typescript
+ * ```ts
  * import {provideProtractorTestingSupport} from '@angular/platform-browser';
  *
  * await bootstrapApplication(RootComponent, providers: [provideProtractorTestingSupport()]);
@@ -22770,7 +22770,7 @@ function isSubscribable(obj) {
  * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
  * and a function returning a promise.
  * ### Example with NgModule-based application
- * ```
+ * ```ts
  *  function initializeApp(): Promise<any> {
  *    const http = inject(HttpClient);
  *    return firstValueFrom(
@@ -22794,7 +22794,7 @@ function isSubscribable(obj) {
  * ```
  *
  * ### Example with standalone application
- * ```
+ * ```ts
  * function initializeApp() {
  *   const http = inject(HttpClient);
  *   return firstValueFrom(
@@ -22824,7 +22824,7 @@ function isSubscribable(obj) {
  * through DI.
  *
  * ### Example with NgModule-based application
- * ```
+ * ```ts
  * function initializeApp() {
  *   const http = inject(HttpClient);
  *   return firstValueFrom(
@@ -22848,7 +22848,7 @@ function isSubscribable(obj) {
  * ```
  *
  * ### Example with standalone application
- * ```
+ * ```ts
  * function initializeApp() {
  *   const http = inject(HttpClient);
  *   return firstValueFrom(
@@ -22893,7 +22893,7 @@ const APP_INITIALIZER = new InjectionToken(ngDevMode ? 'Application Initializer'
  * @usageNotes
  * The following example illustrates how to configure an initialization function using
  * `provideAppInitializer()`
- * ```
+ * ```ts
  * bootstrapApplication(App, {
  *   providers: [
  *     provideAppInitializer(() => {
@@ -23134,7 +23134,7 @@ function optionsReducer(dst, objs) {
  * (here incrementing a counter, using RxJS `interval`),
  * and at the same time subscribe to `isStable`.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef) {
  *   appRef.isStable.pipe(
  *      filter(stable => stable)
@@ -23149,7 +23149,7 @@ function optionsReducer(dst, objs) {
  * you have to wait for the application to be stable
  * before starting your polling process.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef) {
  *   appRef.isStable.pipe(
  *     first(stable => stable),
@@ -23169,7 +23169,7 @@ function optionsReducer(dst, objs) {
  * you update a field of your component
  * and display it in its template.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef) {
  *   appRef.isStable.pipe(
  *     first(stable => stable),
@@ -23183,7 +23183,7 @@ function optionsReducer(dst, objs) {
  *
  * You'll have to manually trigger the change detection to update the template.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef, cd: ChangeDetectorRef) {
  *   appRef.isStable.pipe(
  *     first(stable => stable),
@@ -23197,7 +23197,7 @@ function optionsReducer(dst, objs) {
  *
  * Or make the subscription callback run inside the zone.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef, zone: NgZone) {
  *   appRef.isStable.pipe(
  *     first(stable => stable),
@@ -25252,7 +25252,7 @@ function getTStylingRangeTail(tStylingRange) {
  * instructions can be traversed in priority order when computing the styles.
  *
  * Assume we are dealing with the following code:
- * ```
+ * ```angular-ts
  * @Component({
  *   template: `
  *     <my-cmp [style]=" {color: '#001'} "
@@ -25323,7 +25323,7 @@ function getTStylingRangeTail(tStylingRange) {
  *
  * NOTE: the comment binding location is for illustrative purposes only.
  *
- * ```
+ * ```ts
  * // Template: (ExampleComponent)
  *     ɵɵstyleMap({color: '#001'});   // Binding index: 10
  *     ɵɵstyleProp('color', '#002');  // Binding index: 12
@@ -25340,7 +25340,7 @@ function getTStylingRangeTail(tStylingRange) {
  *
  * The correct priority order of concatenation is:
  *
- * ```
+ * ```ts
  * // MyComponent
  *     ɵɵstyleMap({color: '#003'});   // Binding index: 20
  *     ɵɵstyleProp('color', '#004');  // Binding index: 22
@@ -25672,7 +25672,7 @@ function getLastParsedValue(text) {
  * Initializes `className` string for parsing and parses the first token.
  *
  * This function is intended to be used in this format:
- * ```
+ * ```ts
  * for (let i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
  *   const key = getLastParsedKey();
  *   ...
@@ -25689,7 +25689,7 @@ function parseClassName(text) {
  * Parses next `className` token.
  *
  * This function is intended to be used in this format:
- * ```
+ * ```ts
  * for (let i = parseClassName(text); i >= 0; i = parseClassNameNext(text, i)) {
  *   const key = getLastParsedKey();
  *   ...
@@ -25712,7 +25712,7 @@ function parseClassNameNext(text, index) {
  * Initializes `cssText` string for parsing and parses the first key/values.
  *
  * This function is intended to be used in this format:
- * ```
+ * ```ts
  * for (let i = parseStyle(text); i >= 0; i = parseStyleNext(text, i))) {
  *   const key = getLastParsedKey();
  *   const value = getLastParsedValue();
@@ -25730,7 +25730,7 @@ function parseStyle(text) {
  * Parses the next `cssText` key/values.
  *
  * This function is intended to be used in this format:
- * ```
+ * ```ts
  * for (let i = parseStyle(text); i >= 0; i = parseStyleNext(text, i))) {
  *   const key = getLastParsedKey();
  *   const value = getLastParsedValue();
@@ -26287,7 +26287,7 @@ function getTemplateHeadTStylingKey(tData, tNode, isClassBased) {
  * method allows us to update the first template instruction `TStylingKey` with a new value.
  *
  * Assume:
- * ```
+ * ```angular-ts
  * <div my-dir style="color: red" [style.color]="tmplExp"></div>
  *
  * @Directive({
@@ -26300,7 +26300,7 @@ function getTemplateHeadTStylingKey(tData, tNode, isClassBased) {
  * ```
  *
  * when `[style.color]="tmplExp"` executes it creates this data structure.
- * ```
+ * ```ts
  *  ['', 'color', 'color', 'red', 'width', '100px'],
  * ```
  *
@@ -26310,14 +26310,14 @@ function getTemplateHeadTStylingKey(tData, tNode, isClassBased) {
  * `color' and 'width`)
  *
  * When `'[style.color]': 'dirExp',` executes we need to insert a new data into the linked list.
- * ```
+ * ```ts
  *  ['', 'color', 'width', '100px'],  // newly inserted
  *  ['', 'color', 'color', 'red', 'width', '100px'], // this is wrong
  * ```
  *
  * Notice that the template statics is now wrong as it incorrectly contains `width` so we need to
  * update it like so:
- * ```
+ * ```ts
  *  ['', 'color', 'width', '100px'],
  *  ['', 'color', 'color', 'red'],    // UPDATE
  * ```
@@ -29356,7 +29356,7 @@ function removeInnerTemplateTranslation(message) {
  * translated message can span multiple templates.
  *
  * Example:
- * ```
+ * ```html
  * <div i18n>Translate <span *ngIf>me</span>!</div>
  * ```
  *
@@ -34573,7 +34573,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.2+sha-6ae3ce7');
+const VERSION = new Version('19.0.2+sha-5f3ba06');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -34808,7 +34808,7 @@ function internalProvideZoneChangeDetection({ ngZoneFactory, ignoreChangesOutsid
  * `BootstrapOptions` instead.
  *
  * @usageNotes
- * ```typescript
+ * ```ts
  * bootstrapApplication(MyApp, {providers: [
  *   provideZoneChangeDetection({eventCoalescing: true}),
  * ]});
@@ -35196,7 +35196,7 @@ class ChangeDetectionSchedulerImpl {
  * - registering a render hook (templates are only refreshed if render hooks do one of the above)
  *
  * @usageNotes
- * ```typescript
+ * ```ts
  * bootstrapApplication(MyApp, {providers: [
  *   provideExperimentalZonelessChangeDetection(),
  * ]});
@@ -35268,7 +35268,7 @@ function getGlobalLocale() {
  * @usageNotes
  * ### Example
  *
- * ```typescript
+ * ```ts
  * import { LOCALE_ID } from '@angular/core';
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
@@ -35311,7 +35311,7 @@ const LOCALE_ID = new InjectionToken(ngDevMode ? 'LocaleId' : '', {
  * @usageNotes
  * ### Example
  *
- * ```typescript
+ * ```ts
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
  *
@@ -35335,7 +35335,7 @@ const DEFAULT_CURRENCY_CODE = new InjectionToken(ngDevMode ? 'DefaultCurrencyCod
  * @usageNotes
  * ### Example
  *
- * ```typescript
+ * ```ts
  * import { TRANSLATIONS } from '@angular/core';
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
@@ -35360,7 +35360,7 @@ const TRANSLATIONS = new InjectionToken(ngDevMode ? 'Translations' : '');
  * @usageNotes
  * ### Example
  *
- * ```typescript
+ * ```ts
  * import { TRANSLATIONS_FORMAT } from '@angular/core';
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
@@ -35384,7 +35384,7 @@ const TRANSLATIONS_FORMAT = new InjectionToken(ngDevMode ? 'TranslationsFormat' 
  *
  * @usageNotes
  * ### Example
- * ```typescript
+ * ```ts
  * import { MissingTranslationStrategy } from '@angular/core';
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
@@ -35748,7 +35748,7 @@ class PlatformRef {
      * @usageNotes
      * ### Simple Example
      *
-     * ```typescript
+     * ```ts
      * @NgModule({
      *   imports: [BrowserModule]
      * })
@@ -36263,7 +36263,7 @@ class ViewRef extends ChangeDetectorRef {
  * The following template breaks down into two separate `TemplateRef` instances,
  * an outer one and an inner one.
  *
- * ```
+ * ```html
  * Count: {{items.length}}
  * <ul>
  *   <li *ngFor="let  item of items">{{item}}</li>
@@ -36272,7 +36272,7 @@ class ViewRef extends ChangeDetectorRef {
  *
  * This is the outer `TemplateRef`:
  *
- * ```
+ * ```html
  * Count: {{items.length}}
  * <ul>
  *   <ng-template ngFor let-item [ngForOf]="items"></ng-template>
@@ -36281,13 +36281,13 @@ class ViewRef extends ChangeDetectorRef {
  *
  * This is the inner `TemplateRef`:
  *
- * ```
+ * ```html
  *   <li>{{item}}</li>
  * ```
  *
  * The outer and inner `TemplateRef` instances are assembled into views as follows:
  *
- * ```
+ * ```html
  * <!-- ViewRef: outer-0 -->
  * Count: 2
  * <ul>
@@ -39790,7 +39790,7 @@ function verifySsrContentsIntegrity() {
  * Intended to be used as a transform function of an input.
  *
  *  @usageNotes
- *  ```typescript
+ *  ```ts
  *  @Input({ transform: booleanAttribute }) status!: boolean;
  *  ```
  * @param value Value to be transformed.
@@ -39807,7 +39807,7 @@ function booleanAttribute(value) {
  * @param fallbackValue Value to use if the provided value can't be parsed as a number.
  *
  *  @usageNotes
- *  ```typescript
+ *  ```ts
  *  @Input({ transform: numberAttribute }) id!: number;
  *  ```
  *
@@ -40928,7 +40928,7 @@ function wrapEqualityFn(equal) {
  * Note: the example uses standalone components, but the function can also be used for
  * non-standalone components (declared in an NgModule) as well.
  *
- * ```typescript
+ * ```angular-ts
  * @Component({
  *   standalone: true,
  *   template: `Hello {{ name }}!`
@@ -40993,7 +40993,7 @@ function createComponent(component, options) {
  * The example below demonstrates how to use the function and how the fields
  * of the returned object map to the component metadata.
  *
- * ```typescript
+ * ```angular-ts
  * @Component({
  *   standalone: true,
  *   selector: 'foo-component',

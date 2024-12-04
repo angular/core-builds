@@ -1,18 +1,18 @@
 'use strict';
 /**
- * @license Angular v19.0.2+sha-6ae3ce7
+ * @license Angular v19.0.2+sha-5f3ba06
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-a00b735e.js');
+var checker = require('./checker-c58f97d2.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var combine_units = require('./combine_units-cbbd4bf7.js');
+var combine_units = require('./combine_units-ce53813b.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-a6be5d4a.js');
+require('./program-fe7d9b66.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -816,7 +816,7 @@ class GroupedTsAstVisitor {
  * Phase that propagates incompatibilities to derived classes or
  * base classes. For example, consider:
  *
- * ```
+ * ```ts
  * class Base {
  *   bla = true;
  * }
@@ -1556,7 +1556,7 @@ function getFlowNode(node) {
  *
  * E.g. consider the following snippet:
  *
- * ```
+ * ```ts
  * someMethod() {
  *   if (this.bla) {
  *     this.bla.charAt(0);
@@ -1837,7 +1837,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
  * The phase takes care of control flow analysis and generates temporary variables
  * where needed to ensure narrowing continues to work. E.g.
  *
- * ```
+ * ```ts
  * someMethod() {
  *   if (this.input) {
  *     this.input.charAt(0);
@@ -1847,7 +1847,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
  *
  * will be transformed into:
  *
- * ```
+ * ```ts
  * someMethod() {
  *   const input_1 = this.input();
  *   if (input_1) {
