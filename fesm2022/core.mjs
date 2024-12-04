@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.0+sha-8d6ea5b
+ * @license Angular v19.1.0-next.0+sha-e894a5d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14660,6 +14660,7 @@ function maybeReturnReactiveLViewConsumer(consumer) {
 const REACTIVE_LVIEW_CONSUMER_NODE = {
     ...REACTIVE_NODE$1,
     consumerIsAlwaysLive: true,
+    kind: 'template',
     consumerMarkedDirty: (node) => {
         markAncestorsForTraversal(node.lView);
     },
@@ -14687,6 +14688,7 @@ function getOrCreateTemporaryConsumer(lView) {
 const TEMPORARY_CONSUMER_NODE = {
     ...REACTIVE_NODE$1,
     consumerIsAlwaysLive: true,
+    kind: 'template',
     consumerMarkedDirty: (node) => {
         let parent = getLViewParent(node.lView);
         while (parent && !viewShouldHaveReactiveConsumer(parent[TVIEW])) {
@@ -18079,7 +18081,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-8d6ea5b']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.0+sha-e894a5d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34573,7 +34575,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.0+sha-8d6ea5b');
+const VERSION = new Version('19.1.0-next.0+sha-e894a5d');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -40433,6 +40435,7 @@ const BASE_EFFECT_NODE =
     hasRun: false,
     cleanupFns: undefined,
     zone: null,
+    kind: 'effect',
     onDestroyFn: noop,
     run() {
         this.dirty = false;
