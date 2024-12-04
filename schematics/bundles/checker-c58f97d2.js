@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.1+sha-dc7d555
+ * @license Angular v19.1.0-next.1+sha-0513fbc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3776,7 +3776,7 @@ function convertFromMaybeForwardRefExpression({ expression, forwardRef, }) {
 /**
  * Generate an expression that has the given `expr` wrapped in the following form:
  *
- * ```
+ * ```ts
  * forwardRef(() => expr)
  * ```
  */
@@ -11447,14 +11447,14 @@ const MAX_CHAIN_LENGTH = 256;
  *
  * For example, two `elementStart` operations in sequence:
  *
- * ```typescript
+ * ```ts
  * elementStart(0, 'div');
  * elementStart(1, 'span');
  * ```
  *
  * Can be called as a chain instead:
  *
- * ```typescript
+ * ```ts
  * elementStart(0, 'div')(1, 'span');
  * ```
  */
@@ -20484,7 +20484,7 @@ const GOOG_GET_MSG = 'goog.getMsg';
  *
  * Generates:
  *
- * ```typescript
+ * ```ts
  * const MSG_FOO = goog.getMsg(
  *   // Message template.
  *   'Sent from {$interpolation} to {$startTagSpan}{$interpolation_1}{$closeTagSpan}.',
@@ -20928,7 +20928,7 @@ function addSubMessageParams(messageOp, subMessagePlaceholders) {
 /**
  * Generate statements that define a given translation message.
  *
- * ```
+ * ```ts
  * var I18N_1;
  * if (typeof ngI18nClosureMode !== undefined && ngI18nClosureMode) {
  *     var MSG_EXTERNAL_XXX = goog.getMsg(
@@ -20967,7 +20967,7 @@ function getTranslationDeclStmts(message, variable, closureVar, params, transfor
  * Create the expression that will be used to guard the closure mode block
  * It is equivalent to:
  *
- * ```
+ * ```ts
  * typeof ngI18nClosureMode !== undefined && ngI18nClosureMode
  * ```
  */
@@ -26048,7 +26048,7 @@ const queryAdvancePlaceholder = Symbol('queryAdvancePlaceholder');
  *
  *   --> will turn into
  *
- * ```
+ * ```ts
  *   bla();
  *   queryAdvance(2);
  *   bla();
@@ -30321,7 +30321,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.0-next.1+sha-dc7d555');
+new Version('19.1.0-next.1+sha-0513fbc');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31056,7 +31056,7 @@ exports.ErrorCode = void 0;
      * The tracking expression of a `for` loop block is accessing a variable that is unavailable,
      * for example:
      *
-     * ```
+     * ```angular-html
      * <ng-template let-ref>
      *   @for (item of items; track ref) {}
      * </ng-template>
@@ -31067,7 +31067,7 @@ exports.ErrorCode = void 0;
      * The trigger of a `defer` block cannot access its trigger element,
      * either because it doesn't exist or it's in a different view.
      *
-     * ```
+     * ```angular-html
      * @defer (on interaction(trigger)) {...}
      *
      * <ng-template>
@@ -31080,7 +31080,7 @@ exports.ErrorCode = void 0;
      * A control flow node is projected at the root of a component and is preventing its direct
      * descendants from being projected, because it has more than one root node.
      *
-     * ```
+     * ```angular-html
      * <comp>
      *  @if (expr) {
      *    <div projectsIntoSlot></div>
@@ -31115,7 +31115,7 @@ exports.ErrorCode = void 0;
      * A two way binding in a template has an incorrect syntax,
      * parentheses outside brackets. For example:
      *
-     * ```
+     * ```html
      * <div ([foo])="bar" />
      * ```
      */
@@ -31123,7 +31123,7 @@ exports.ErrorCode = void 0;
     /**
      * The left side of a nullish coalescing operation is not nullable.
      *
-     * ```
+     * ```html
      * {{ foo ?? bar }}
      * ```
      * When the type of foo doesn't include `null` or `undefined`.
@@ -31138,7 +31138,7 @@ exports.ErrorCode = void 0;
      * A text attribute is not interpreted as a binding but likely intended to be.
      *
      * For example:
-     * ```
+     * ```html
      * <div
      *   attr.x="value"
      *   class.blue="true"
@@ -31155,7 +31155,7 @@ exports.ErrorCode = void 0;
      * in their statement.
      *
      * For example:
-     * ```
+     * ```html
      * <ul><li *ngFor="item of items">{{item["name"]}};</li></ul>
      * ```
      */
@@ -31174,7 +31174,7 @@ exports.ErrorCode = void 0;
     /**
      * The left side of an optional chain operation is not nullable.
      *
-     * ```
+     * ```html
      * {{ foo?.bar }}
      * {{ foo?.['bar'] }}
      * {{ foo?.() }}
@@ -31186,7 +31186,7 @@ exports.ErrorCode = void 0;
      * `ngSkipHydration` should not be a binding (it should be a static attribute).
      *
      * For example:
-     * ```
+     * ```html
      * <my-cmp [ngSkipHydration]="someTruthyVar" />
      * ```
      *
@@ -31198,7 +31198,7 @@ exports.ErrorCode = void 0;
      * Signal functions should be invoked when interpolated in templates.
      *
      * For example:
-     * ```
+     * ```html
      * {{ mySignal() }}
      * ```
      */
@@ -31206,7 +31206,7 @@ exports.ErrorCode = void 0;
     /**
      * Initializer-based APIs can only be invoked from inside of an initializer.
      *
-     * ```
+     * ```ts
      * // Allowed
      * myInput = input();
      *
@@ -31221,7 +31221,7 @@ exports.ErrorCode = void 0;
      * A function in an event binding is not called.
      *
      * For example:
-     * ```
+     * ```html
      * <button (click)="myFunc"></button>
      * ```
      *
@@ -31233,7 +31233,7 @@ exports.ErrorCode = void 0;
      * A `@let` declaration in a template isn't used.
      *
      * For example:
-     * ```
+     * ```angular-html
      * @let used = 1; <!-- Not an error -->
      * @let notUsed = 2; <!-- Error -->
      *
@@ -31729,7 +31729,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-a00b735e.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-c58f97d2.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -36539,7 +36539,7 @@ function canEmitType(type, canEmit) {
  *
  * For example, consider the following code:
  *
- * ```
+ * ```ts
  * import {NgIterable} from '@angular/core';
  *
  * class NgForOf<T, U extends NgIterable<T>> {}
@@ -36551,7 +36551,7 @@ function canEmitType(type, canEmit) {
  * `NgIterable` type reference to a type reference that is valid in the context in which it is
  * emitted, for example:
  *
- * ```
+ * ```ts
  * import * as i0 from '@angular/core';
  * import * as i1 from '@angular/common';
  *
@@ -40241,7 +40241,7 @@ function requiresInlineTypeCtor(node, host, env) {
  * fails. This can happen when inferring a complex type from 'any'. For example, if `NgFor`'s
  * inference is done with the TCB code:
  *
- * ```
+ * ```ts
  * class NgFor<T> {
  *   ngForOf: T[];
  * }
@@ -40252,14 +40252,14 @@ function requiresInlineTypeCtor(node, host, env) {
  *
  * An invocation looks like:
  *
- * ```
+ * ```ts
  * var _t1 = ctor({ngForOf: [1, 2], ngForTrackBy: null as any, ngForTemplate: null as any});
  * ```
  *
  * This correctly infers the type `NgFor<number>` for `_t1`, since `T` is inferred from the
  * assignment of type `number[]` to `ngForOf`'s type `T[]`. However, if `any` is passed instead:
  *
- * ```
+ * ```ts
  * var _t2 = ctor({ngForOf: [1, 2] as any, ngForTrackBy: null as any, ngForTemplate: null as
  * any});
  * ```
@@ -40270,7 +40270,7 @@ function requiresInlineTypeCtor(node, host, env) {
  * Adding a default type to the generic declaration in the constructor solves this problem, as
  * the default type will be used in the event that inference fails.
  *
- * ```
+ * ```ts
  * declare function ctor<T = any>(o: Pick<NgFor<T>, 'ngForOf'>): NgFor<T>;
  *
  * var _t3 = ctor({ngForOf: [1, 2] as any});
@@ -41660,7 +41660,7 @@ class TcbGenericDirectiveTypeWithAnyParamsOp extends TcbDirectiveTypeOpBase {
  * The initializer for the variable is the variable expression for the directive, template, or
  * element the ref refers to. When the reference is used in the template, those TCB statements will
  * access this variable as well. For example:
- * ```
+ * ```ts
  * var _t1 = document.createElement('div');
  * var _t2 = _t1;
  * _t2.value

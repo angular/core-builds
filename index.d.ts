@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.1+sha-dc7d555
+ * @license Angular v19.1.0-next.1+sha-0513fbc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -141,7 +141,7 @@ export declare interface AfterContentInit {
  * for example to initialize a non-Angular library.
  *
  * ### Example
- * ```ts
+ * ```angular-ts
  * @Component({
  *   selector: 'my-chart-cmp',
  *   template: `<div #chart>{{ ... }}</div>`,
@@ -201,7 +201,7 @@ export declare function afterNextRender<E = never, W = never, M = never>(spec: {
  * for example to initialize a non-Angular library.
  *
  * ### Example
- * ```ts
+ * ```angular-ts
  * @Component({
  *   selector: 'my-chart-cmp',
  *   template: `<div #chart>{{ ... }}</div>`,
@@ -281,7 +281,7 @@ export declare function afterNextRender(callback: VoidFunction, options?: AfterR
  * Use `afterRender` to read or write the DOM after each render.
  *
  * ### Example
- * ```ts
+ * ```angular-ts
  * @Component({
  *   selector: 'my-cmp',
  *   template: `<span #content>{{ ... }}</span>`,
@@ -340,7 +340,7 @@ export declare function afterRender<E = never, W = never, M = never>(spec: {
  * Use `afterRender` to read or write the DOM after each render.
  *
  * ### Example
- * ```ts
+ * ```angular-ts
  * @Component({
  *   selector: 'my-cmp',
  *   template: `<span #content>{{ ... }}</span>`,
@@ -704,7 +704,7 @@ export declare const APP_BOOTSTRAP_LISTENER: InjectionToken<readonly ((compRef: 
  * (for example, using `bootstrapApplication` calls). In this case, ensure that those applications
  * have different `APP_ID` value setup. For example:
  *
- * ```
+ * ```ts
  * bootstrapApplication(ComponentA, {
  *   providers: [
  *     { provide: APP_ID, useValue: 'app-a' },
@@ -752,7 +752,7 @@ export declare const APP_ID: InjectionToken<string>;
  * The following example illustrates how to configure a multi-provider using `APP_INITIALIZER` token
  * and a function returning a promise.
  * ### Example with NgModule-based application
- * ```
+ * ```ts
  *  function initializeApp(): Promise<any> {
  *    const http = inject(HttpClient);
  *    return firstValueFrom(
@@ -776,7 +776,7 @@ export declare const APP_ID: InjectionToken<string>;
  * ```
  *
  * ### Example with standalone application
- * ```
+ * ```ts
  * function initializeApp() {
  *   const http = inject(HttpClient);
  *   return firstValueFrom(
@@ -806,7 +806,7 @@ export declare const APP_ID: InjectionToken<string>;
  * through DI.
  *
  * ### Example with NgModule-based application
- * ```
+ * ```ts
  * function initializeApp() {
  *   const http = inject(HttpClient);
  *   return firstValueFrom(
@@ -830,7 +830,7 @@ export declare const APP_ID: InjectionToken<string>;
  * ```
  *
  * ### Example with standalone application
- * ```
+ * ```ts
  * function initializeApp() {
  *   const http = inject(HttpClient);
  *   return firstValueFrom(
@@ -918,7 +918,7 @@ export declare class ApplicationModule {
  * (here incrementing a counter, using RxJS `interval`),
  * and at the same time subscribe to `isStable`.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef) {
  *   appRef.isStable.pipe(
  *      filter(stable => stable)
@@ -933,7 +933,7 @@ export declare class ApplicationModule {
  * you have to wait for the application to be stable
  * before starting your polling process.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef) {
  *   appRef.isStable.pipe(
  *     first(stable => stable),
@@ -953,7 +953,7 @@ export declare class ApplicationModule {
  * you update a field of your component
  * and display it in its template.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef) {
  *   appRef.isStable.pipe(
  *     first(stable => stable),
@@ -967,7 +967,7 @@ export declare class ApplicationModule {
  *
  * You'll have to manually trigger the change detection to update the template.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef, cd: ChangeDetectorRef) {
  *   appRef.isStable.pipe(
  *     first(stable => stable),
@@ -981,7 +981,7 @@ export declare class ApplicationModule {
  *
  * Or make the subscription callback run inside the zone.
  *
- * ```
+ * ```ts
  * constructor(appRef: ApplicationRef, zone: NgZone) {
  *   appRef.isStable.pipe(
  *     first(stable => stable),
@@ -1277,7 +1277,7 @@ export declare interface AttributeDecorator {
  * Intended to be used as a transform function of an input.
  *
  *  @usageNotes
- *  ```typescript
+ *  ```ts
  *  @Input({ transform: booleanAttribute }) status!: boolean;
  *  ```
  * @param value Value to be transformed.
@@ -2556,7 +2556,7 @@ declare const CONTEXT = 8;
  * Note: the example uses standalone components, but the function can also be used for
  * non-standalone components (declared in an NgModule) as well.
  *
- * ```typescript
+ * ```angular-ts
  * @Component({
  *   standalone: true,
  *   template: `Hello {{ name }}!`
@@ -2996,7 +2996,7 @@ declare const DECLARATION_VIEW = 14;
  * @usageNotes
  * ### Example
  *
- * ```typescript
+ * ```ts
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
  *
@@ -3342,7 +3342,7 @@ export declare abstract class DestroyRef {
      *
      * @usageNotes
      * ### Example
-     * ```typescript
+     * ```ts
      * const destroyRef = inject(DestroyRef);
      *
      * // register a destroy callback
@@ -3412,7 +3412,7 @@ export declare interface Directive {
      *
      * The following example creates a component with two data-bound properties.
      *
-     * ```typescript
+     * ```ts
      * @Component({
      *   selector: 'bank-account',
      *   inputs: ['bankName', {name: 'id', alias: 'account-id'}],
@@ -3448,7 +3448,7 @@ export declare interface Directive {
      *
      * @usageNotes
      *
-     * ```typescript
+     * ```ts
      * @Component({
      *   selector: 'child-dir',
      *   outputs: [ 'bankNameChange' ],
@@ -3832,7 +3832,7 @@ declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDef
  * Map of inputs for a given directive/component.
  *
  * Given:
- * ```
+ * ```ts
  * class MyComponent {
  *   @Input()
  *   publicInput1: string;
@@ -3848,7 +3848,7 @@ declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDef
  * ```
  *
  * is described as:
- * ```
+ * ```ts
  * {
  *   publicInput1: 'publicInput1',
  *   declaredInput2: [InputFlags.None, 'declaredInput2', 'publicInput2'],
@@ -3863,7 +3863,7 @@ declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDef
  * ```
  *
  * Which the minifier may translate to:
- * ```
+ * ```ts
  * {
  *   minifiedPublicInput1: 'publicInput1',
  *   minifiedDeclaredInput2: [InputFlags.None, 'publicInput2', 'declaredInput2'],
@@ -3910,7 +3910,7 @@ declare const DISCONNECTED_NODES = "d";
  * The example below uses `ApplicationRef.bootstrap()` to render the
  * `AppComponent` on the page.
  *
- * ```typescript
+ * ```ts
  * class AppModule implements DoBootstrap {
  *   ngDoBootstrap(appRef: ApplicationRef) {
  *     appRef.bootstrap(AppComponent); // Or some other component
@@ -4089,7 +4089,7 @@ declare const EMBEDDED_VIEW_INJECTOR = 20;
  * The following template breaks down into two separate `TemplateRef` instances,
  * an outer one and an inner one.
  *
- * ```
+ * ```html
  * Count: {{items.length}}
  * <ul>
  *   <li *ngFor="let  item of items">{{item}}</li>
@@ -4098,7 +4098,7 @@ declare const EMBEDDED_VIEW_INJECTOR = 20;
  *
  * This is the outer `TemplateRef`:
  *
- * ```
+ * ```html
  * Count: {{items.length}}
  * <ul>
  *   <ng-template ngFor let-item [ngForOf]="items"></ng-template>
@@ -4107,13 +4107,13 @@ declare const EMBEDDED_VIEW_INJECTOR = 20;
  *
  * This is the inner `TemplateRef`:
  *
- * ```
+ * ```html
  *   <li>{{item}}</li>
  * ```
  *
  * The outer and inner `TemplateRef` instances are assembled into views as follows:
  *
- * ```
+ * ```html
  * <!-- ViewRef: outer-0 -->
  * Count: 2
  * <ul>
@@ -4250,7 +4250,7 @@ export declare type EnvironmentProviders = {
  * @usageNotes
  * ### Example
  *
- * ```
+ * ```ts
  * class MyErrorHandler implements ErrorHandler {
  *   handleError(error) {
  *     // do something with the exception
@@ -4294,7 +4294,7 @@ declare interface EventContractDetails {
  * that create event emitters. When the title is clicked, the emitter
  * emits an open or close event to toggle the current visibility state.
  *
- * ```html
+ * ```angular-ts
  * @Component({
  *   selector: 'zippy',
  *   template: `
@@ -4497,7 +4497,7 @@ declare const FLAGS = 2;
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
  *
  * ### Circular standalone reference import example
- * ```ts
+ * ```angular-ts
  * @Component({
  *   standalone: true,
  *   imports: [ChildComponent],
@@ -4842,7 +4842,7 @@ export declare const Host: HostDecorator;
  *
  * @usageNotes
  * ### Injecting a tag name that is known to exist
- * ```typescript
+ * ```ts
  * @Directive()
  * class MyDir {
  *   tagName: string = inject(HOST_TAG_NAME);
@@ -4850,7 +4850,7 @@ export declare const Host: HostDecorator;
  * ```
  *
  * ### Optionally injecting a tag name
- * ```typescript
+ * ```ts
  * @Directive()
  * class MyDir {
  *   tagName: string | null = inject(HOST_TAG_NAME, {optional: true});
@@ -4865,7 +4865,7 @@ export declare const HOST_TAG_NAME: InjectionToken<string>;
  *
  * @usageNotes
  * ### Injecting an attribute that is known to exist
- * ```typescript
+ * ```ts
  * @Directive()
  * class MyDir {
  *   attr: string = inject(new HostAttributeToken('some-attr'));
@@ -4873,7 +4873,7 @@ export declare const HOST_TAG_NAME: InjectionToken<string>;
  * ```
  *
  * ### Optionally injecting an attribute
- * ```typescript
+ * ```ts
  * @Directive()
  * class MyDir {
  *   attr: string | null = inject(new HostAttributeToken('some-attr'), {optional: true});
@@ -4925,7 +4925,7 @@ export declare interface HostBindingDecorator {
      * The following example creates a directive that sets the `valid` and `invalid`
      * class, a style color, and an id on the DOM element that has an `ngModel` directive on it.
      *
-     * ```typescript
+     * ```ts
      * @Directive({selector: '[ngModel]'})
      * class NgModelStatus {
      *   constructor(public control: NgModel) {}
@@ -4988,7 +4988,7 @@ export declare interface HostBindingDecorator {
  *
  * ## Example
  *
- * ```
+ * ```ts
  * const hostBindingOpCodes = [
  *   ~30,                               // Select element 30
  *   40, 45, MyDir.ɵdir.hostBindings    // Invoke host bindings on MyDir on element 30;
@@ -4999,7 +4999,7 @@ export declare interface HostBindingDecorator {
  * ```
  *
  * ## Pseudocode
- * ```
+ * ```ts
  * const hostBindingOpCodes = tView.hostBindingOpCodes;
  * if (hostBindingOpCodes === null) return;
  * for (let i = 0; i < hostBindingOpCodes.length; i++) {
@@ -5232,7 +5232,7 @@ declare const I18N_DATA = "l";
  * The number is shifted and encoded according to `I18nCreateOpCode`
  *
  * Pseudocode:
- * ```
+ * ```ts
  * const i18nCreateOpCodes = [
  *   10 << I18nCreateOpCode.SHIFT, "Text Node add to DOM",
  *   11 << I18nCreateOpCode.SHIFT | I18nCreateOpCode.COMMENT, "Comment Node add to DOM",
@@ -5523,7 +5523,7 @@ export declare type ImportedNgModuleProviders = EnvironmentProviders;
  * @usageNotes
  * The results of the `importProvidersFrom` call can be used in the `bootstrapApplication` call:
  *
- * ```typescript
+ * ```ts
  * await bootstrapApplication(RootComponent, {
  *   providers: [
  *     importProvidersFrom(NgModuleOne, NgModuleTwo)
@@ -5534,7 +5534,7 @@ export declare type ImportedNgModuleProviders = EnvironmentProviders;
  * You can also use the `importProvidersFrom` results in the `providers` field of a route, when a
  * standalone component is used:
  *
- * ```typescript
+ * ```ts
  * export const ROUTES: Route[] = [
  *   {
  *     path: 'foo',
@@ -6132,7 +6132,7 @@ export declare const Input: InputDecorator;
  * @usageNotes
  * To use signal-based inputs, import `input` from `@angular/core`.
  *
- * ```
+ * ```ts
  * import {input} from '@angular/core`;
  * ```
  *
@@ -6181,7 +6181,7 @@ export declare interface InputDecorator {
      * The following example creates a component with two input properties,
      * one of which is given a special binding name.
      *
-     * ```typescript
+     * ```ts
      * import { Component, Input, numberAttribute, booleanAttribute } from '@angular/core';
      * @Component({
      *   selector: 'bank-account',
@@ -6859,7 +6859,7 @@ declare interface Listener {
  * @usageNotes
  * ### Example
  *
- * ```typescript
+ * ```ts
  * import { LOCALE_ID } from '@angular/core';
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
@@ -7285,7 +7285,7 @@ export declare function makeEnvironmentProviders(providers: (Provider | Environm
  *
  * Example:
  *
- * ```
+ * ```ts
  * const COUNTER_KEY = makeStateKey<number>('counter');
  * let value = 10;
  *
@@ -7317,7 +7317,7 @@ export declare function mergeApplicationConfig(...configs: ApplicationConfig[]):
  *
  * @usageNotes
  * ### Example
- * ```typescript
+ * ```ts
  * import { MissingTranslationStrategy } from '@angular/core';
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
@@ -7346,7 +7346,7 @@ export declare enum MissingTranslationStrategy {
  *
  * To use `model()`, import the function from `@angular/core`.
  *
- * ```
+ * ```ts
  * import {model} from '@angular/core`;
  * ```
  *
@@ -7788,7 +7788,7 @@ export declare class NgProbeToken {
  * @usageNotes
  * ### Example
  *
- * ```
+ * ```ts
  * import {Component, NgZone} from '@angular/core';
  * import {NgIf} from '@angular/common';
  *
@@ -8060,7 +8060,7 @@ declare const NUM_ROOT_NODES = "r";
  * @param fallbackValue Value to use if the provided value can't be parsed as a number.
  *
  *  @usageNotes
- *  ```typescript
+ *  ```ts
  *  @Input({ transform: numberAttribute }) id!: number;
  *  ```
  *
@@ -8370,7 +8370,7 @@ declare const PARENT = 3;
  * - tests might want to delay assertions until the application becomes stable;
  *
  * @usageNotes
- * ```typescript
+ * ```ts
  * const pendingTasks = inject(PendingTasks);
  * const taskCleanup = pendingTasks.add();
  * // do work that should block application's stability and then:
@@ -8484,7 +8484,7 @@ export declare interface PipeDecorator {
      * For example, if the name is "myPipe", use a template binding expression
      * such as the following:
      *
-     * ```
+     * ```html
      * {{ exp | myPipe }}
      * ```
      *
@@ -8600,7 +8600,7 @@ export declare class PlatformRef {
      * @usageNotes
      * ### Simple Example
      *
-     * ```typescript
+     * ```ts
      * @NgModule({
      *   imports: [BrowserModule]
      * })
@@ -8713,7 +8713,7 @@ declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
  * @usageNotes
  * The following example illustrates how to configure an initialization function using
  * `provideAppInitializer()`
- * ```
+ * ```ts
  * bootstrapApplication(App, {
  *   providers: [
  *     provideAppInitializer(() => {
@@ -8747,7 +8747,7 @@ export declare function provideAppInitializer(initializerFn: () => Observable<un
  * @usageNotes
  * The following example illustrates how to configure an initialization function using
  * `provideEnvironmentInitializer()`
- * ```
+ * ```ts
  * createEnvironmentInjector(
  *   [
  *     provideEnvironmentInitializer(() => {
@@ -8813,7 +8813,7 @@ export declare function provideExperimentalCheckNoChangesForDebug(options: {
  * - registering a render hook (templates are only refreshed if render hooks do one of the above)
  *
  * @usageNotes
- * ```typescript
+ * ```ts
  * bootstrapApplication(MyApp, {providers: [
  *   provideExperimentalZonelessChangeDetection(),
  * ]});
@@ -8873,7 +8873,7 @@ export declare type ProviderToken<T> = Type<T> | AbstractType<T> | InjectionToke
  * `BootstrapOptions` instead.
  *
  * @usageNotes
- * ```typescript
+ * ```ts
  * bootstrapApplication(MyApp, {providers: [
  *   provideZoneChangeDetection({eventCoalescing: true}),
  * ]});
@@ -8972,7 +8972,7 @@ declare const enum QueryFlags {
  *
  * @usageNotes
  * ### Example
- * ```typescript
+ * ```ts
  * @Component({...})
  * class Container {
  *   @ViewChildren(Item) items:QueryList<Item>;
@@ -9249,7 +9249,7 @@ declare interface ReactiveLViewConsumer extends ReactiveNode {
  * The example below demonstrates how to use the function and how the fields
  * of the returned object map to the component metadata.
  *
- * ```typescript
+ * ```angular-ts
  * @Component({
  *   standalone: true,
  *   selector: 'foo-component',
@@ -10247,7 +10247,7 @@ declare interface StandaloneCompScopeData extends ScopeData {
  *
  * Example:
  *
- * ```
+ * ```ts
  * const COUNTER_KEY = makeStateKey<number>('counter');
  * let value = 10;
  *
@@ -10571,7 +10571,7 @@ declare const TEMPLATES = "t";
  * providers using the `provideProtractorTestingSupport()` function and adding them into the
  * `options.providers` array. Example:
  *
- * ```typescript
+ * ```ts
  * import {provideProtractorTestingSupport} from '@angular/platform-browser';
  *
  * await bootstrapApplication(RootComponent, providers: [provideProtractorTestingSupport()]);
@@ -11494,7 +11494,7 @@ export declare class TransferState {
  * @usageNotes
  * ### Example
  *
- * ```typescript
+ * ```ts
  * import { TRANSLATIONS } from '@angular/core';
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
@@ -11520,7 +11520,7 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  * @usageNotes
  * ### Example
  *
- * ```typescript
+ * ```ts
  * import { TRANSLATIONS_FORMAT } from '@angular/core';
  * import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
  * import { AppModule } from './app/app.module';
@@ -11632,7 +11632,7 @@ declare type TStylingRange = number & {
  *
  * Imagine we have:
  *
- * ```
+ * ```angular-ts
  * <div class="TEMPLATE" my-dir>
  *
  * @Directive({
@@ -11645,7 +11645,7 @@ declare type TStylingRange = number & {
  *
  * In the above case the linked list will contain one item:
  *
- * ```
+ * ```ts
  *   // assume binding location: 10 for `ɵɵclassProp('dynamic', ctx.exp);`
  *   tData[10] = <TStylingStatic>[
  *     '': 'dynamic', // This is the wrapped value of `TStylingKey`
@@ -11662,13 +11662,13 @@ declare type TStylingRange = number & {
  * `dynamic` (there is not). Therefore it is safe to remove it.
  *
  * If setting `true` case:
- * ```
+ * ```ts
  *   lView[10] = true;     // assume `ctx.exp` is `true`
  *   lView[10 + 1] = true; // Just normalized `lView[10]`
  * ```
  * So when the function is resolving styling value, it first needs to look into the linked list
  * (there is none) and than into `TNode.residualClass` (TNode.residualStyle) which contains
- * ```
+ * ```ts
  *   tNode.residualClass = [
  *     'TEMPLATE': true,
  *   ];
@@ -11986,7 +11986,7 @@ declare type Type_2 = Function;
  * An interface implemented by all Angular type decorators, which allows them to be used as
  * decorators as well as Angular syntax.
  *
- * ```
+ * ```ts
  * @ng.Component({...})
  * class MyClass {...}
  * ```
@@ -12119,7 +12119,7 @@ export declare const ViewChild: ViewChildDecorator;
  * Create a child query in your component by declaring a
  * class field and initializing it with the `viewChild()` function.
  *
- * ```ts
+ * ```angular-ts
  * @Component({template: '<div #el></div><my-component #cmp />'})
  * export class TestComponent {
  *   divEl = viewChild<ElementRef>('el');                   // Signal<ElementRef|undefined>
@@ -12356,7 +12356,7 @@ export declare interface ViewChildrenDecorator {
  * Note: the example uses standalone components, but the function can also be used for
  * non-standalone components (declared in an NgModule) as well.
  *
- * ```typescript
+ * ```angular-ts
  * @Component({
  *   standalone: true,
  *   selector: 'dynamic',
@@ -13913,7 +13913,7 @@ export declare class ɵLContext {
  *
  * Example:
  *
- * ```
+ * ```ts
  * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
  * ```
  */
@@ -14392,7 +14392,7 @@ export declare function ɵresetJitOptions(): void;
  * Used to resolve resource URLs on `@Component` when used with JIT compilation.
  *
  * Example:
- * ```
+ * ```ts
  * @Component({
  *   selector: 'my-comp',
  *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
@@ -14431,7 +14431,7 @@ export declare function ɵrestoreComponentResolutionQueue(queue: Map<Type<any>, 
  * Formats and outputs the error message in a consistent way.
  *
  * Example:
- * ```
+ * ```ts
  *  throw new RuntimeError(
  *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
  *    ngDevMode && 'Injector has already been destroyed.');
@@ -14871,7 +14871,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
      * @usageNotes
      * ### Example
      *
-     * ```typescript
+     * ```ts
      * @Component({
      *   selector: 'app-root',
      *   template: `Number of ticks: {{numberOfTicks}}`
@@ -14911,7 +14911,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
      * we want to check and update the list every five seconds. We can do that by detaching
      * the component's change detector and doing a local check every five seconds.
      *
-     * ```typescript
+     * ```ts
      * class DataProvider {
      *   // in a real application the returned data will be different every time
      *   get data() {
@@ -14961,7 +14961,7 @@ export declare class ɵViewRef<T> implements EmbeddedViewRef<T>, ChangeDetectorR
      * its change detector from the main change detector tree when the component's live property
      * is set to false.
      *
-     * ```typescript
+     * ```ts
      * class DataProvider {
      *   data = 1;
      *
@@ -15075,18 +15075,18 @@ export declare function ɵwithIncrementalHydration(): Provider[];
  *
  * USAGE:
  * Given:
- * ```
+ * ```ts
  * interface Person {readonly name: string}
  * ```
  *
  * We would like to get a read/write version of `Person`.
- * ```
+ * ```ts
  * const WritablePerson = Writable<Person>;
  * ```
  *
  * The result is that you can do:
  *
- * ```
+ * ```ts
  * const readonlyPerson: Person = {name: 'Marry'};
  * readonlyPerson.name = 'John'; // TypeError
  * (readonlyPerson as WritablePerson).name = 'John'; // OK
@@ -16027,7 +16027,7 @@ export declare function ɵɵdeferWhen(rawValue: unknown): void;
  *
  *
  * # Example
- * ```
+ * ```ts
  * class MyComponent {
  *   // Generated by Angular Template Compiler
  *   // [Symbol] syntax will not be supported by TypeScript until v2.7
@@ -16131,7 +16131,7 @@ export declare function ɵɵdefineNgModule<T>(def: {
  * Create a pipe definition object.
  *
  * # Example
- * ```
+ * ```ts
  * class MyPipe implements PipeTransform {
  *   // Generated by Angular Template Compiler
  *   static ɵpipe = definePipe({
@@ -16202,7 +16202,7 @@ export declare function ɵɵdirectiveInject<T>(token: ProviderToken<T>, flags: I
  * Disables directive matching on element.
  *
  *  * Example:
- * ```
+ * ```html
  * <my-comp my-directive>
  *   Should match component / directive.
  * </my-comp>
@@ -16300,7 +16300,7 @@ export declare function ɵɵelementStart(index: number, name: string, attrsIndex
  * Enables directive matching on elements.
  *
  *  * Example:
- * ```
+ * ```html
  * <my-comp my-directive>
  *   Should match component / directive.
  * </my-comp>
@@ -16807,7 +16807,7 @@ export declare type ɵɵNgModuleDeclaration<T, Declarations, Imports, Exports> =
  *
  * Example usage:
  *
- * ```
+ * ```ts
  * static ɵcmp = defineComponent({
  *   ...
  *   inputs: {name: 'publicName'},
