@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.2+sha-f15ccb9
+ * @license Angular v19.1.0-next.2+sha-30e6760
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2897,6 +2897,10 @@ class Identifiers {
     static declareLet = { name: 'ɵɵdeclareLet', moduleName: CORE };
     static storeLet = { name: 'ɵɵstoreLet', moduleName: CORE };
     static readContextLet = { name: 'ɵɵreadContextLet', moduleName: CORE };
+    static attachSourceLocations = {
+        name: 'ɵɵattachSourceLocations',
+        moduleName: CORE,
+    };
     static NgOnChangesFeature = { name: 'ɵɵNgOnChangesFeature', moduleName: CORE };
     static InheritDefinitionFeature = {
         name: 'ɵɵInheritDefinitionFeature',
@@ -8507,6 +8511,10 @@ var OpKind;
      * A creation op that corresponds to i18n attributes on an element.
      */
     OpKind[OpKind["I18nAttributes"] = 49] = "I18nAttributes";
+    /**
+     * Creation op that attaches the location at which an element was defined in a template to it.
+     */
+    OpKind[OpKind["SourceLocation"] = 50] = "SourceLocation";
 })(OpKind || (OpKind = {}));
 /**
  * Distinguishes different kinds of IR expressions.
@@ -10048,6 +10056,7 @@ function transformExpressionsInOp(op, transform, flags) {
         case OpKind.I18nAttributes:
         case OpKind.IcuPlaceholder:
         case OpKind.DeclareLet:
+        case OpKind.SourceLocation:
             // These operations contain no expressions.
             break;
         default:
@@ -10835,6 +10844,15 @@ function createI18nAttributesOp(xref, handle, target) {
         ...TRAIT_CONSUMES_SLOT,
     };
 }
+/** Create a `SourceLocationOp`. */
+function createSourceLocationOp(templatePath, locations) {
+    return {
+        kind: OpKind.SourceLocation,
+        templatePath,
+        locations,
+        ...NEW_OP,
+    };
+}
 
 function createHostPropertyOp(name, expression, isAnimationTrigger, i18nContext, securityContext, sourceSpan) {
     return {
@@ -10897,12 +10915,16 @@ class ComponentCompilationJob extends CompilationJob {
     i18nUseExternalIds;
     deferMeta;
     allDeferrableDepsFn;
-    constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn) {
+    relativeTemplatePath;
+    enableDebugLocations;
+    constructor(componentName, pool, compatibility, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn, relativeTemplatePath, enableDebugLocations) {
         super(componentName, pool, compatibility);
         this.relativeContextFilePath = relativeContextFilePath;
         this.i18nUseExternalIds = i18nUseExternalIds;
         this.deferMeta = deferMeta;
         this.allDeferrableDepsFn = allDeferrableDepsFn;
+        this.relativeTemplatePath = relativeTemplatePath;
+        this.enableDebugLocations = enableDebugLocations;
         this.root = new ViewCompilationUnit(this, this.allocateXrefId(), null);
         this.views.set(this.root.xref, this.root);
     }
@@ -22393,6 +22415,9 @@ function syntheticHostProperty(name, expression, sourceSpan) {
 function pureFunction(varOffset, fn, args) {
     return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [literal$1(varOffset), fn], args, [], null);
 }
+function attachSourceLocation(templatePath, locations) {
+    return call(Identifiers.attachSourceLocations, [literal$1(templatePath), locations], null);
+}
 /**
  * Collates the string an expression arguments for an interpolation instruction.
  */
@@ -22806,6 +22831,20 @@ function reifyCreateOperations(unit, ops) {
                     emptyVars = emptyView.vars;
                 }
                 OpList.replace(op, repeaterCreate(op.handle.slot, repeaterView.fnName, op.decls, op.vars, op.tag, op.attributes, op.trackByFn, op.usesComponentInstance, emptyViewFnName, emptyDecls, emptyVars, op.emptyTag, op.emptyAttributes, op.wholeSourceSpan));
+                break;
+            case OpKind.SourceLocation:
+                const locationsLiteral = literalArr(op.locations.map(({ targetSlot, offset, line, column }) => {
+                    if (targetSlot.slot === null) {
+                        throw new Error('No slot was assigned for source location');
+                    }
+                    return literalArr([
+                        literal$1(targetSlot.slot),
+                        literal$1(offset),
+                        literal$1(line),
+                        literal$1(column),
+                    ]);
+                }));
+                OpList.replace(op, attachSourceLocation(op.templatePath, locationsLiteral));
                 break;
             case OpKind.Statement:
                 // Pass statement operations directly through.
@@ -24767,6 +24806,33 @@ function generateLocalLetReferences(job) {
 }
 
 /**
+ * Locates all of the elements defined in a creation block and outputs an op
+ * that will expose their definition location in the DOM.
+ */
+function attachSourceLocations(job) {
+    if (!job.enableDebugLocations || job.relativeTemplatePath === null) {
+        return;
+    }
+    for (const unit of job.units) {
+        const locations = [];
+        for (const op of unit.create) {
+            if (op.kind === OpKind.ElementStart || op.kind === OpKind.Element) {
+                const start = op.startSourceSpan.start;
+                locations.push({
+                    targetSlot: op.handle,
+                    offset: start.offset,
+                    line: start.line,
+                    column: start.col,
+                });
+            }
+        }
+        if (locations.length > 0) {
+            unit.create.push(createSourceLocationOp(job.relativeTemplatePath, locations));
+        }
+    }
+}
+
+/**
  *
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -24835,6 +24901,7 @@ const phases = [
     { kind: CompilationJobKind.Tmpl, fn: mergeNextContextExpressions },
     { kind: CompilationJobKind.Tmpl, fn: generateNgContainerOps },
     { kind: CompilationJobKind.Tmpl, fn: collapseEmptyInstructions },
+    { kind: CompilationJobKind.Tmpl, fn: attachSourceLocations },
     { kind: CompilationJobKind.Tmpl, fn: disableBindings$1 },
     { kind: CompilationJobKind.Both, fn: extractPureFunctions },
     { kind: CompilationJobKind.Both, fn: reify },
@@ -24953,8 +25020,8 @@ function isSingleI18nIcu(meta) {
  * representation.
  * TODO: Refactor more of the ingestion code into phases.
  */
-function ingestComponent(componentName, template, constantPool, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn) {
-    const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn);
+function ingestComponent(componentName, template, constantPool, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn, relativeTemplatePath, enableDebugLocations) {
+    const job = new ComponentCompilationJob(componentName, constantPool, compatibilityMode, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn, relativeTemplatePath, enableDebugLocations);
     ingestNodes(job.root, template);
     return job;
 }
@@ -25976,6 +26043,26 @@ function ingestControlFlowInsertionPoint(unit, xref, node) {
         return tagName === NG_TEMPLATE_TAG_NAME ? null : tagName;
     }
     return null;
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Whether to produce instructions that will attach the source location to each DOM node.
+ *
+ * !!!Important!!! at the time of writing this flag isn't exposed externally, but internal debug
+ * tools enable it via a local change. Any modifications to this flag need to update the
+ * internal tooling as well.
+ */
+let ENABLE_TEMPLATE_SOURCE_LOCATIONS = false;
+/** Gets whether template source locations are enabled. */
+function getTemplateSourceLocationsEnabled() {
+    return ENABLE_TEMPLATE_SOURCE_LOCATIONS;
 }
 
 //  if (rf & flags) { .. }
@@ -28412,7 +28499,7 @@ function compileComponentFromMetadata(meta, constantPool, bindingParser) {
         allDeferrableDepsFn = variable(fnName);
     }
     // First the template is ingested into IR:
-    const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.defer, allDeferrableDepsFn);
+    const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.defer, allDeferrableDepsFn, meta.relativeTemplatePath, getTemplateSourceLocationsEnabled());
     // Then the IR is transformed to prepare it for cod egeneration.
     transform(tpl, CompilationJobKind.Tmpl);
     // Finally we emit the template function:
@@ -29791,6 +29878,7 @@ class CompilerFacadeImpl {
             viewProviders: facade.viewProviders != null ? new WrappedNodeExpr(facade.viewProviders) : null,
             relativeContextFilePath: '',
             i18nUseExternalIds: true,
+            relativeTemplatePath: null,
         };
         const jitExpressionSourceMap = `ng:///${facade.name}.js`;
         return this.compileComponentFromMeta(angularCoreEnv, jitExpressionSourceMap, meta);
@@ -30046,6 +30134,7 @@ function convertDeclareComponentFacadeToMetadata(decl, typeSourceSpan, sourceMap
         declarationListEmitMode: 2 /* DeclarationListEmitMode.ClosureResolved */,
         relativeContextFilePath: '',
         i18nUseExternalIds: true,
+        relativeTemplatePath: null,
     };
 }
 function convertDeclarationFacadeToMetadata(declaration) {
@@ -30321,7 +30410,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.0-next.2+sha-f15ccb9');
+new Version('19.1.0-next.2+sha-30e6760');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31729,7 +31818,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-c58f97d2.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-228cb8a8.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -42255,7 +42344,7 @@ class TcbDirectiveOutputsOp extends TcbOp {
             }
             if (this.tcb.env.config.checkTypeOfOutputEvents && output.name.endsWith('Change')) {
                 const inputName = output.name.slice(0, -6);
-                isSplitTwoWayBinding(inputName, output, this.node.inputs, this.tcb);
+                checkSplitTwoWayBinding(inputName, output, this.node.inputs, this.tcb);
             }
             // TODO(alxhub): consider supporting multiple fields with the same property name for outputs.
             const field = outputs.getByBindingPropertyName(output.name)[0].classPropertyName;
@@ -42323,7 +42412,7 @@ class TcbUnclaimedOutputsOp extends TcbOp {
             }
             if (this.tcb.env.config.checkTypeOfOutputEvents && output.name.endsWith('Change')) {
                 const inputName = output.name.slice(0, -6);
-                if (isSplitTwoWayBinding(inputName, output, this.element.inputs, this.tcb)) {
+                if (checkSplitTwoWayBinding(inputName, output, this.element.inputs, this.tcb)) {
                     // Skip this event handler as the error was already handled.
                     continue;
                 }
@@ -43611,6 +43700,20 @@ const EVENT_PARAMETER = '$event';
  */
 function tcbCreateEventHandler(event, tcb, scope, eventType) {
     const handler = tcbEventHandlerExpression(event.handler, tcb, scope);
+    const statements = [];
+    // TODO(crisbeto): remove the `checkTwoWayBoundEvents` check in v20.
+    if (event.type === exports.ParsedEventType.TwoWay && tcb.env.config.checkTwoWayBoundEvents) {
+        // If we're dealing with a two-way event, we create a variable initialized to the unwrapped
+        // signal value of the expression and then we assign `$event` to it. Note that in most cases
+        // this will already be covered by the corresponding input binding, however it allows us to
+        // handle the case where the input has a wider type than the output (see #58971).
+        const target = tcb.allocateId();
+        const assignment = ts__default["default"].factory.createBinaryExpression(target, ts__default["default"].SyntaxKind.EqualsToken, ts__default["default"].factory.createIdentifier(EVENT_PARAMETER));
+        statements.push(tsCreateVariable(target, tcb.env.config.allowSignalsInTwoWayBindings ? unwrapWritableSignal(handler, tcb) : handler), ts__default["default"].factory.createExpressionStatement(assignment));
+    }
+    else {
+        statements.push(ts__default["default"].factory.createExpressionStatement(handler));
+    }
     let eventParamType;
     if (eventType === 0 /* EventParamType.Infer */) {
         eventParamType = undefined;
@@ -43624,10 +43727,10 @@ function tcbCreateEventHandler(event, tcb, scope, eventType) {
     // Obtain all guards that have been applied to the scope and its parents, as they have to be
     // repeated within the handler function for their narrowing to be in effect within the handler.
     const guards = scope.guards();
-    let body = ts__default["default"].factory.createExpressionStatement(handler);
+    let body = ts__default["default"].factory.createBlock(statements);
     if (guards !== null) {
         // Wrap the body in an `if` statement containing all guards that have to be applied.
-        body = ts__default["default"].factory.createIfStatement(guards, body);
+        body = ts__default["default"].factory.createBlock([ts__default["default"].factory.createIfStatement(guards, body)]);
     }
     const eventParam = ts__default["default"].factory.createParameterDeclaration(
     /* modifiers */ undefined, 
@@ -43643,7 +43746,7 @@ function tcbCreateEventHandler(event, tcb, scope, eventType) {
     /* parameters */ [eventParam], 
     /* type */ ts__default["default"].factory.createKeywordTypeNode(ts__default["default"].SyntaxKind.AnyKeyword), 
     /* equalsGreaterThanToken */ undefined, 
-    /* body */ ts__default["default"].factory.createBlock([body]));
+    /* body */ body);
 }
 /**
  * Similar to `tcbExpression`, this function converts the provided `AST` expression into a
@@ -43654,7 +43757,7 @@ function tcbEventHandlerExpression(ast, tcb, scope) {
     const translator = new TcbEventHandlerTranslator(tcb, scope);
     return translator.translate(ast);
 }
-function isSplitTwoWayBinding(inputName, output, inputs, tcb) {
+function checkSplitTwoWayBinding(inputName, output, inputs, tcb) {
     const input = inputs.find((input) => input.name === inputName);
     if (input === undefined || input.sourceSpan !== output.sourceSpan) {
         return false;

@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.2+sha-f15ccb9
+ * @license Angular v19.1.0-next.2+sha-30e6760
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-c58f97d2.js');
+var checker = require('./checker-228cb8a8.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -995,7 +995,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-f15ccb9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-30e6760'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1013,7 +1013,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-f15ccb9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-30e6760'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1108,7 +1108,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-f15ccb9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-30e6760'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1524,7 +1524,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-f15ccb9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-30e6760'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1559,7 +1559,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-f15ccb9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-30e6760'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1610,7 +1610,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-f15ccb9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-30e6760'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1643,7 +1643,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-f15ccb9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-30e6760'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1694,7 +1694,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-f15ccb9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.2+sha-30e6760'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -1862,18 +1862,18 @@ function normalizeSeparators(path) {
     return path.replace(/\\/g, '/');
 }
 /**
- * Attempts to generate a project-relative path
- * @param sourceFile
- * @param rootDirs
- * @param compilerHost
+ * Attempts to generate a project-relative path for a file.
+ * @param fileName Absolute path to the file.
+ * @param rootDirs Root directories of the project.
+ * @param compilerHost Host used to resolve file names.
  * @returns
  */
-function getProjectRelativePath(sourceFile, rootDirs, compilerHost) {
+function getProjectRelativePath(fileName, rootDirs, compilerHost) {
     // Note: we need to pass both the file name and the root directories through getCanonicalFileName,
     // because the root directories might've been passed through it already while the source files
     // definitely have not. This can break the relative return value, because in some platforms
     // getCanonicalFileName lowercases the path.
-    const filePath = compilerHost.getCanonicalFileName(sourceFile.fileName);
+    const filePath = compilerHost.getCanonicalFileName(fileName);
     for (const rootDir of rootDirs) {
         const rel = checker.relative(compilerHost.getCanonicalFileName(rootDir), filePath);
         if (!rel.startsWith('..')) {
@@ -5451,7 +5451,7 @@ function extractClassDebugInfo(clazz, reflection, compilerHost, rootDirs, forbid
         return null;
     }
     const srcFile = clazz.getSourceFile();
-    const srcFileMaybeRelativePath = getProjectRelativePath(srcFile, rootDirs, compilerHost);
+    const srcFileMaybeRelativePath = getProjectRelativePath(srcFile.fileName, rootDirs, compilerHost);
     return {
         type: new checker.WrappedNodeExpr(clazz.name),
         className: checker.literal(clazz.name.getText()),
@@ -10344,7 +10344,7 @@ function extractHmrMetatadata(clazz, reflection, compilerHost, rootDirs, definit
         return null;
     }
     const sourceFile = clazz.getSourceFile();
-    const filePath = getProjectRelativePath(sourceFile, rootDirs, compilerHost) ||
+    const filePath = getProjectRelativePath(sourceFile.fileName, rootDirs, compilerHost) ||
         compilerHost.getCanonicalFileName(sourceFile.fileName);
     const dependencies = extractHmrDependencies(clazz, definition, factory, classMetadata, debugInfo);
     const meta = {
@@ -10791,6 +10791,7 @@ class ComponentDecoratorHandler {
                 path: checker.absoluteFrom(template.declaration.resolvedTemplateUrl),
                 expression: template.sourceMapping.node,
             };
+        const relativeTemplatePath = getProjectRelativePath(templateResource.path ?? ts__default["default"].getOriginalNode(node).getSourceFile().fileName, this.rootDirs, this.compilerHost);
         // Figure out the set of styles. The ordering here is important: external resources (styleUrls)
         // precede inline styles, and styles defined in the template override styles defined in the
         // component.
@@ -10922,6 +10923,7 @@ class ComponentDecoratorHandler {
                     i18nUseExternalIds: this.i18nUseExternalIds,
                     relativeContextFilePath,
                     rawImports: rawImports !== null ? new checker.WrappedNodeExpr(rawImports) : undefined,
+                    relativeTemplatePath,
                 },
                 typeCheckMeta: checker.extractDirectiveTypeCheckMeta(node, inputs, this.reflector),
                 classMetadata: this.includeClassMetadata
@@ -17398,7 +17400,9 @@ class UnusedStandaloneImportsRule {
             if (ts__default["default"].isVariableStatement(current)) {
                 return !!current.modifiers?.some((m) => m.kind === ts__default["default"].SyntaxKind.ExportKeyword);
             }
-            current = current.parent;
+            // `Node.parent` can be undefined, but the TS types don't reflect it.
+            // Coerce to null so the value is consitent with the type.
+            current = current.parent ?? null;
         }
         // Otherwise the reference likely comes from an imported
         // symbol like an array of shared common components.
@@ -20162,13 +20166,13 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.1.0-next.2+sha-f15ccb9` usually means that core is at head so it supports
+    // A version of `19.1.0-next.2+sha-30e6760` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
         return true;
     }
-    return semver.satisfies(coreVersion, minVersion);
+    return semver.satisfies(coreVersion, minVersion, { includePrerelease: true });
 }
 
 /**
@@ -20326,7 +20330,7 @@ class NgCompiler {
         // version of the compiler against an older version of Angular.
         this.implicitStandaloneValue =
             this.angularCoreVersion === null ||
-                coreVersionSupportsFeature(this.angularCoreVersion, '>= 19.0.0-0');
+                coreVersionSupportsFeature(this.angularCoreVersion, '>= 19.0.0');
         this.enableHmr = !!options['_enableHmr'];
         this.constructionDiagnostics.push(...this.adapter.constructionDiagnostics, ...verifyCompatibleTypeCheckOptions(this.options));
         this.currentProgram = inputProgram;
@@ -20760,6 +20764,7 @@ class NgCompiler {
         // is not disabled when `strictTemplates` is enabled.
         const strictTemplates = !!this.options.strictTemplates;
         const useInlineTypeConstructors = this.programDriver.supportsInlineOperations;
+        const checkTwoWayBoundEvents = this.options['_checkTwoWayBoundEvents'] ?? false;
         // Check whether the loaded version of `@angular/core` in the `ts.Program` supports unwrapping
         // writable signals for type-checking. If this check fails to find a suitable .d.ts file, fall
         // back to version detection. Only Angular versions greater than 17.2 have the necessary symbols
@@ -20767,7 +20772,7 @@ class NgCompiler {
         // using Angular at head.
         let allowSignalsInTwoWayBindings = coreHasSymbol(this.inputProgram, checker.Identifiers.unwrapWritableSignal) ??
             (this.angularCoreVersion === null ||
-                coreVersionSupportsFeature(this.angularCoreVersion, '>= 17.2.0-0'));
+                coreVersionSupportsFeature(this.angularCoreVersion, '>= 17.2.0'));
         // First select a type-checking configuration, based on whether full template type-checking is
         // requested.
         let typeCheckingConfig;
@@ -20808,6 +20813,7 @@ class NgCompiler {
                 controlFlowPreventingContentProjection: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
                 unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
                 allowSignalsInTwoWayBindings,
+                checkTwoWayBoundEvents,
             };
         }
         else {
@@ -20841,6 +20847,7 @@ class NgCompiler {
                 controlFlowPreventingContentProjection: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
                 unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
                 allowSignalsInTwoWayBindings,
+                checkTwoWayBoundEvents,
             };
         }
         // Apply explicitly configured strictness flags on top of the default configuration

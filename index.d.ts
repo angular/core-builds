@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.2+sha-f15ccb9
+ * @license Angular v19.1.0-next.2+sha-30e6760
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -15127,6 +15127,18 @@ export declare const ɵZONELESS_ENABLED: InjectionToken<boolean>;
  * @codeGenApi
  */
 export declare function ɵɵadvance(delta?: number): void;
+
+/**
+ * Sets the location within the source template at which
+ * each element in the current view was defined.
+ *
+ * @param index Index at which the DOM node was created.
+ * @param templatePath Path to the template at which the node was defined.
+ * @param locations Element locations to which to attach the source location.
+ *
+ * @codeGenApi
+ */
+export declare function ɵɵattachSourceLocations(templatePath: string, locations: [index: number, offset: number, line: number, column: number][]): void;
 
 /**
  * Updates the value of or removes a bound attribute on an Element.
