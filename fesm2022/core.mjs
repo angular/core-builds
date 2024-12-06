@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.3+sha-e2c8c6f
+ * @license Angular v19.0.3+sha-34ded10
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8740,7 +8740,7 @@ class AfterRenderImpl {
     }
     maybeTrace(fn, snapshot) {
         // Only trace the execution if the snapshot is defined.
-        return snapshot?.run(TracingAction.AFTER_NEXT_RENDER, fn) ?? fn();
+        return snapshot ? snapshot.run(TracingAction.AFTER_NEXT_RENDER, fn) : fn();
     }
     /** @nocollapse */
     static ɵprov = /** @pureOrBreakMyCode */ /* @__PURE__ */ ɵɵdefineInjectable({
@@ -18078,7 +18078,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.3+sha-e2c8c6f']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.3+sha-34ded10']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34572,7 +34572,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.3+sha-e2c8c6f');
+const VERSION = new Version('19.0.3+sha-34ded10');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
