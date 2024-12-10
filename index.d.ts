@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.2+sha-46f00f9
+ * @license Angular v19.1.0-next.2+sha-f3729ce
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2962,6 +2962,31 @@ export declare class DebugNode {
     get providerTokens(): any[];
 }
 
+/**
+ * A debug representation of the signal graph.
+ */
+declare interface DebugSignalGraph {
+    nodes: DebugSignalGraphNode[];
+    edges: DebugSignalGraphEdge[];
+}
+
+declare interface DebugSignalGraphEdge {
+    /**
+     * Index of a signal node in the `nodes` array that is a consumer of the signal produced by the producer node.
+     */
+    consumer: number;
+    /**
+     * Index of a signal node in the `nodes` array that is a producer of the signal consumed by the consumer node.
+     */
+    producer: number;
+}
+
+declare interface DebugSignalGraphNode {
+    kind: string;
+    label?: string;
+    value?: unknown;
+}
+
 declare const DECLARATION_COMPONENT_VIEW = 15;
 
 declare const DECLARATION_LCONTAINER = 16;
@@ -4743,6 +4768,18 @@ export declare function getPlatform(): PlatformRef | null;
 declare function getRootComponents(elementOrDir: Element | {}): {}[];
 
 /**
+ * Returns a debug representation of the signal graph for the given injector.
+ *
+ * Currently only supports element injectors. Starts by discovering the consumer nodes
+ * and then traverses their producer nodes to build the signal graph.
+ *
+ * @param injector The injector to get the signal graph for.
+ * @returns A debug representation of the signal graph.
+ * @throws If the injector is an environment injector.
+ */
+declare function getSignalGraph(injector: Injector): DebugSignalGraph;
+
+/**
  * Adapter interface for retrieving the `Testability` service associated for a
  * particular context.
  *
@@ -4782,6 +4819,7 @@ declare const globalUtilsFunctions: {
     ɵgetInjectorResolutionPath: typeof getInjectorResolutionPath;
     ɵgetInjectorMetadata: typeof getInjectorMetadata;
     ɵsetProfiler: (profiler: ɵProfiler_2 | null) => void;
+    ɵgetSignalGraph: typeof getSignalGraph;
     getDirectiveMetadata: typeof getDirectiveMetadata;
     getComponent: typeof getComponent;
     getContext: typeof getContext;
@@ -6846,6 +6884,16 @@ declare interface Listener {
 }
 
 /**
+ * Options that can be used to configure an event listener.
+ * @publicApi
+ */
+export declare interface ListenerOptions {
+    capture?: boolean;
+    once?: boolean;
+    passive?: boolean;
+}
+
+/**
  * Provide this token to set the locale of your application.
  * It is used for i18n extraction, by i18n pipes (DatePipe, I18nPluralPipe, CurrencyPipe,
  * DecimalPipe and PercentPipe) and by ICU expressions.
@@ -8409,24 +8457,6 @@ export declare class PendingTasks {
 }
 
 /**
- * Internal implementation of the pending tasks service.
- */
-declare class PendingTasksInternal implements OnDestroy {
-    private taskId;
-    private pendingTasks;
-    private get _hasPendingTasks();
-    hasPendingTasks: BehaviorSubject<boolean>;
-    add(): number;
-    has(taskId: number): boolean;
-    remove(taskId: number): void;
-    ngOnDestroy(): void;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
-export { PendingTasksInternal as ɵPendingTasks }
-export { PendingTasksInternal as ɵPendingTasksInternal }
-
-/**
  * Type of the Pipe metadata.
  *
  * @publicApi
@@ -9332,7 +9362,7 @@ declare interface Renderer {
     removeStyle(el: RElement, style: string, flags?: RendererStyleFlags2): void;
     setProperty(el: RElement, name: string, value: any): void;
     setValue(node: RText | RComment, value: string): void;
-    listen(target: GlobalTargetName | RNode, eventName: string, callback: (event: any) => boolean | void): () => void;
+    listen(target: GlobalTargetName | RNode, eventName: string, callback: (event: any) => boolean | void, options?: ListenerOptions): () => void;
 }
 
 /**
@@ -9504,9 +9534,10 @@ export declare abstract class Renderer2 {
      * DOM element.
      * @param eventName The event to listen for.
      * @param callback A handler function to invoke when the event occurs.
+     * @param options Options that configure how the event listener is bound.
      * @returns An "unlisten" function for disposing of this handler.
      */
-    abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean | void): () => void;
+    abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean | void, options?: ListenerOptions): () => void;
 }
 
 declare interface RendererFactory {
@@ -14109,6 +14140,22 @@ export declare const enum ɵNotificationSource {
  * a given module.
  */
 export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
+
+/**
+ * Internal implementation of the pending tasks service.
+ */
+export declare class ɵPendingTasksInternal implements OnDestroy {
+    private taskId;
+    private pendingTasks;
+    private get _hasPendingTasks();
+    hasPendingTasks: BehaviorSubject<boolean>;
+    add(): number;
+    has(taskId: number): boolean;
+    remove(taskId: number): void;
+    ngOnDestroy(): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
 
 
 export declare const ɵPERFORMANCE_MARK_PREFIX = "\uD83C\uDD70\uFE0F";
