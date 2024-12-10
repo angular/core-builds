@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.3+sha-ff03fc8
+ * @license Angular v19.0.3+sha-c3cd227
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8409,24 +8409,6 @@ export declare class PendingTasks {
 }
 
 /**
- * Internal implementation of the pending tasks service.
- */
-declare class PendingTasksInternal implements OnDestroy {
-    private taskId;
-    private pendingTasks;
-    private get _hasPendingTasks();
-    hasPendingTasks: BehaviorSubject<boolean>;
-    add(): number;
-    has(taskId: number): boolean;
-    remove(taskId: number): void;
-    ngOnDestroy(): void;
-    /** @nocollapse */
-    static ɵprov: unknown;
-}
-export { PendingTasksInternal as ɵPendingTasks }
-export { PendingTasksInternal as ɵPendingTasksInternal }
-
-/**
  * Type of the Pipe metadata.
  *
  * @publicApi
@@ -14109,6 +14091,22 @@ export declare const enum ɵNotificationSource {
  * a given module.
  */
 export declare function ɵpatchComponentDefWithScope<C>(componentDef: ɵComponentDef<C>, transitiveScopes: ɵNgModuleTransitiveScopes): void;
+
+/**
+ * Internal implementation of the pending tasks service.
+ */
+export declare class ɵPendingTasksInternal implements OnDestroy {
+    private taskId;
+    private pendingTasks;
+    private get _hasPendingTasks();
+    hasPendingTasks: BehaviorSubject<boolean>;
+    add(): number;
+    has(taskId: number): boolean;
+    remove(taskId: number): void;
+    ngOnDestroy(): void;
+    /** @nocollapse */
+    static ɵprov: unknown;
+}
 
 
 export declare const ɵPERFORMANCE_MARK_PREFIX = "\uD83C\uDD70\uFE0F";
