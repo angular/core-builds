@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.4+sha-ec91da0
+ * @license Angular v19.0.4+sha-898e77e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -16623,11 +16623,15 @@ function gatherDeferBlocksCommentNodes(doc, node) {
     let currentNode;
     const nodesByBlockId = new Map();
     while ((currentNode = commentNodesIterator.nextNode())) {
-        // TODO(incremental-hydration: convert this to use string parsing rather than regex
-        const regex = new RegExp(/^\s*ngh=(d[0-9]+)/g);
-        const result = regex.exec(currentNode?.textContent ?? '');
-        if (result && result?.length > 0) {
-            nodesByBlockId.set(result[1], currentNode);
+        const nghPattern = 'ngh=';
+        const content = currentNode?.textContent;
+        const nghIdx = content?.indexOf(nghPattern) ?? -1;
+        if (nghIdx > -1) {
+            const nghValue = content.substring(nghIdx + nghPattern.length).trim();
+            // Make sure the value has an expected format.
+            ngDevMode &&
+                assertEqual(nghValue.startsWith('d'), true, 'Invalid defer block id found in a comment node.');
+            nodesByBlockId.set(nghValue, currentNode);
         }
     }
     return nodesByBlockId;
@@ -18078,7 +18082,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.4+sha-ec91da0']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.4+sha-898e77e']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -21275,15 +21279,8 @@ function renderDeferBlockState(newState, tNode, lContainer, skipTimerScheduling 
     }
 }
 function findMatchingDehydratedViewForDeferBlock(lContainer, lDetails) {
-    // TODO(incremental-hydration): extract into a separate util function and use in relevant places.
-    const views = lContainer[DEHYDRATED_VIEWS];
-    if (views === null || views.length === 0) {
-        return null;
-    }
     // Find matching view based on serialized defer block state.
-    // TODO(incremental-hydration): reconcile this logic with the regular logic that looks up
-    // dehydrated views to see if there is anything missing in this function.
-    return (views.find((view) => view.data[DEFER_BLOCK_STATE$1] === lDetails[DEFER_BLOCK_STATE]) ?? null);
+    return (lContainer[DEHYDRATED_VIEWS]?.find((view) => view.data[DEFER_BLOCK_STATE$1] === lDetails[DEFER_BLOCK_STATE]) ?? null);
 }
 /**
  * Applies changes to the DOM to reflect a given state.
@@ -21315,30 +21312,22 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
             }
         }
         const dehydratedView = findMatchingDehydratedViewForDeferBlock(lContainer, lDetails);
-        // Render either when we don't have dehydrated views at all (e.g. client rendering)
-        // or when dehydrated view is found (in which case we hydrate).
-        // Otherwise, do nothing, since we'd end up erasing SSR'ed content.
-        // TODO(incremental-hydration): Use the util function for checking dehydrated views mentioned above
-        const isClientOnly = lContainer[DEHYDRATED_VIEWS] === null || lContainer[DEHYDRATED_VIEWS].length === 0;
-        if (isClientOnly || dehydratedView) {
-            // Erase dehydrated view info, so that it's not removed later
-            // by post-hydration cleanup process.
-            // TODO(incremental-hydration): we need a better mechanism here.
-            lContainer[DEHYDRATED_VIEWS] = null;
-            const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, {
-                injector,
-                dehydratedView,
-            });
-            addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(activeBlockTNode, dehydratedView));
-            markViewDirty(embeddedLView, 2 /* NotificationSource.DeferBlockStateUpdate */);
-        }
+        // Erase dehydrated view info, so that it's not removed later
+        // by post-hydration cleanup process.
+        lContainer[DEHYDRATED_VIEWS] = null;
+        const embeddedLView = createAndRenderEmbeddedLView(hostLView, activeBlockTNode, null, {
+            injector,
+            dehydratedView,
+        });
+        addLViewToLContainer(lContainer, embeddedLView, viewIndex, shouldAddViewToDom(activeBlockTNode, dehydratedView));
+        markViewDirty(embeddedLView, 2 /* NotificationSource.DeferBlockStateUpdate */);
         // TODO(incremental-hydration):
         // - what if we had some views in `lContainer[DEHYDRATED_VIEWS]`, but
         //   we didn't find a view that matches the expected state?
         // - for example, handle a situation when a block was in the "completed" state
         //   on the server, but the loading failing on the client. How do we reconcile and cleanup?
-        // TODO(incremental-hydration): should we also invoke if newState === DeferBlockState.Error?
-        if (newState === DeferBlockState.Complete && Array.isArray(lDetails[ON_COMPLETE_FNS])) {
+        if ((newState === DeferBlockState.Complete || newState === DeferBlockState.Error) &&
+            Array.isArray(lDetails[ON_COMPLETE_FNS])) {
             for (const callback of lDetails[ON_COMPLETE_FNS]) {
                 callback();
             }
@@ -24436,7 +24425,7 @@ function ɵɵdeferHydrateOnTimer(delay) {
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
-    hydrateTriggers.set(5 /* DeferBlockTrigger.Timer */, delay);
+    hydrateTriggers.set(5 /* DeferBlockTrigger.Timer */, { delay });
     if (typeof ngServerMode !== 'undefined' && ngServerMode) {
         // We are on the server and SSR for defer blocks is enabled.
         triggerDeferBlock(2 /* TriggerType.Hydrate */, lView, tNode);
@@ -34572,7 +34561,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.4+sha-ec91da0');
+const VERSION = new Version('19.0.4+sha-898e77e');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38967,7 +38956,6 @@ function annotateForHydration(appRef, doc) {
     transferState.set(NGH_DATA_KEY, serializedViews);
     if (deferBlocks.size > 0) {
         const blocks = {};
-        // TODO(incremental-hydration): we should probably have an object here instead of a Map?
         for (const [id, info] of deferBlocks.entries()) {
             blocks[id] = info;
         }
@@ -39081,11 +39069,7 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                 serializedView[DEFER_BLOCK_STATE$1] = lDetails[DEFER_BLOCK_STATE];
             }
             if (!isHydrateNeverBlock) {
-                // TODO(incremental-hydration): avoid copying of an object here
-                serializedView = {
-                    ...serializedView,
-                    ...serializeLView(lContainer[i], parentDeferBlockId, context),
-                };
+                Object.assign(serializedView, serializeLView(lContainer[i], parentDeferBlockId, context));
             }
         }
         // Check if the previous view has the same shape (for example, it was
@@ -39122,7 +39106,7 @@ function serializeHydrateTriggers(triggerMap) {
                 triggers.push(trigger);
             }
             else {
-                triggers.push({ trigger, details });
+                triggers.push({ trigger, delay: details.delay });
             }
         }
     }
