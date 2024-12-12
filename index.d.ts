@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.2+sha-cfc1679
+ * @license Angular v19.1.0-next.3+sha-8230388
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14784,6 +14784,14 @@ export declare interface ɵTracingService<T extends ɵTracingSnapshot> {
      * snapshot.
      */
     snapshot(linkedSnapshot: T | null): T;
+    /**
+     * Wrap an event listener bound by the framework for tracing.
+     * @param element Element on which the event is bound.
+     * @param eventName Name of the event.
+     * @param handler Event handler.
+     * @return A new event handler to be bound instead of the original one.
+     */
+    wrapEventListener?<T extends Function>(element: HTMLElement, eventName: string, handler: T): T;
 }
 
 /** A single tracing snapshot. */
