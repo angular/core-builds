@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.3+sha-4c2cdd2
+ * @license Angular v19.1.0-next.3+sha-1f4ff2f
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7951,7 +7951,7 @@ export declare class NgZone {
      * Executes the `fn` function synchronously within the Angular zone as a task and returns value
      * returned by the function.
      *
-     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * Running functions via `runTask` allows you to reenter Angular zone from a task that was executed
      * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
      *
      * Any future tasks or microtasks scheduled from within this function will continue executing from
