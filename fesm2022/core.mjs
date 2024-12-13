@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.4+sha-c8b1926
+ * @license Angular v19.0.4+sha-3793218
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6508,7 +6508,7 @@ class NgZone {
      * Executes the `fn` function synchronously within the Angular zone as a task and returns value
      * returned by the function.
      *
-     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * Running functions via `runTask` allows you to reenter Angular zone from a task that was executed
      * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
      *
      * Any future tasks or microtasks scheduled from within this function will continue executing from
@@ -18082,7 +18082,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.4+sha-c8b1926']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.4+sha-3793218']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23644,9 +23644,14 @@ function detectChangesInViewIfRequired(lView, notifyErrorHandler, isFirstPass, z
 function scheduleDelayedTrigger(scheduleFn) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    renderPlaceholder(lView, tNode);
+    // Exit early to avoid invoking `scheduleFn`, which would
+    // add `setTimeout` call and potentially delay serialization
+    // on the server unnecessarily.
+    if (!shouldTriggerDeferBlock(0 /* TriggerType.Regular */, lView))
+        return;
     const injector = lView[INJECTOR];
     const lDetails = getLDeferBlockDetails(lView, tNode);
-    renderPlaceholder(lView, tNode);
     const cleanupFn = scheduleFn(() => triggerDeferBlock(0 /* TriggerType.Regular */, lView, tNode), injector);
     storeTriggerCleanupFn(0 /* TriggerType.Regular */, lDetails, cleanupFn);
 }
@@ -34561,7 +34566,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.4+sha-c8b1926');
+const VERSION = new Version('19.0.4+sha-3793218');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
