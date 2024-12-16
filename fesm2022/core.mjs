@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.4+sha-3793218
+ * @license Angular v19.0.4+sha-4d74f86
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -273,6 +273,7 @@ function ngDevModeResetPerfCounters() {
         dehydratedViewsRemoved: 0,
         dehydratedViewsCleanupRuns: 0,
         componentsSkippedHydration: 0,
+        deferBlocksWithIncrementalHydration: 0,
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
     const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
@@ -9549,7 +9550,6 @@ function retrieveHydrationInfoImpl(rNode, injector, isRootView = false) {
     const rootNgh = rootViewNgh ? `|${rootViewNgh}` : '';
     const remainingNgh = isRootView ? componentViewNgh : rootNgh;
     let data = {};
-    let nghDeferData;
     // An element might have an empty `ngh` attribute value (e.g. `<comp ngh="" />`),
     // which means that no special annotations are required. Do not attempt to read
     // from the TransferState in this case.
@@ -9557,7 +9557,6 @@ function retrieveHydrationInfoImpl(rNode, injector, isRootView = false) {
         const transferState = injector.get(TransferState, null, { optional: true });
         if (transferState !== null) {
             const nghData = transferState.get(NGH_DATA_KEY, []);
-            nghDeferData = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
             // The nghAttrValue is always a number referencing an index
             // in the hydration TransferState data.
             data = nghData[Number(nghAttrValue)];
@@ -9716,6 +9715,13 @@ function markRNodeAsSkippedByHydration(node) {
     }
     patchHydrationInfo(node, { status: HydrationStatus.Skipped });
     ngDevMode.componentsSkippedHydration++;
+}
+function countBlocksSkippedByHydration(injector) {
+    const transferState = injector.get(TransferState);
+    const nghDeferData = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
+    if (ngDevMode) {
+        ngDevMode.deferBlocksWithIncrementalHydration = Object.keys(nghDeferData).length;
+    }
 }
 function markRNodeAsHavingHydrationMismatch(node, expectedNodeDetails = null, actualNodeDetails = null) {
     if (!ngDevMode) {
@@ -18082,7 +18088,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.4+sha-3793218']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.4+sha-4d74f86']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34566,7 +34572,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.4+sha-3793218');
+const VERSION = new Version('19.0.4+sha-4d74f86');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39029,10 +39035,10 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
             // If this is a defer block, serialize extra info.
             if (isDeferBlock(lView[TVIEW], tNode)) {
                 const lDetails = getLDeferBlockDetails(lView, tNode);
-                if (context.isIncrementalHydrationEnabled) {
+                const tDetails = getTDeferBlockDetails(lView[TVIEW], tNode);
+                if (context.isIncrementalHydrationEnabled && tDetails.hydrateTriggers !== null) {
                     const deferBlockId = `d${context.deferBlocks.size}`;
-                    const tDetails = getTDeferBlockDetails(lView[TVIEW], tNode);
-                    if (tDetails.hydrateTriggers?.has(7 /* DeferBlockTrigger.Never */)) {
+                    if (tDetails.hydrateTriggers.has(7 /* DeferBlockTrigger.Never */)) {
                         isHydrateNeverBlock = true;
                     }
                     let rootNodes = [];
@@ -39042,8 +39048,11 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                         [DEFER_PARENT_BLOCK_ID]: parentDeferBlockId,
                         [NUM_ROOT_NODES]: rootNodes.length,
                         [DEFER_BLOCK_STATE$1]: lDetails[DEFER_BLOCK_STATE],
-                        [DEFER_HYDRATE_TRIGGERS]: serializeHydrateTriggers(tDetails.hydrateTriggers),
                     };
+                    const serializedTriggers = serializeHydrateTriggers(tDetails.hydrateTriggers);
+                    if (serializedTriggers.length > 0) {
+                        deferBlockInfo[DEFER_HYDRATE_TRIGGERS] = serializedTriggers;
+                    }
                     context.deferBlocks.set(deferBlockId, deferBlockInfo);
                     const node = unwrapRNode(lContainer);
                     if (node !== undefined) {
@@ -39095,9 +39104,6 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
     return views;
 }
 function serializeHydrateTriggers(triggerMap) {
-    if (triggerMap === null) {
-        return null;
-    }
     const serializableDeferBlockTrigger = new Set([
         0 /* DeferBlockTrigger.Idle */,
         1 /* DeferBlockTrigger.Immediate */,
@@ -39529,6 +39535,9 @@ function printHydrationStats(injector) {
     const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
         `and ${ngDevMode.hydratedNodes} node(s), ` +
         `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
+        (isIncrementalHydrationEnabled(injector)
+            ? `${ngDevMode.deferBlocksWithIncrementalHydration} defer block(s) were configured to use incremental hydration. `
+            : '') +
         `Learn more at https://angular.dev/guide/hydration.`;
     // tslint:disable-next-line:no-console
     console.log(message);
@@ -39652,6 +39661,7 @@ function withDomHydration() {
                         whenStableWithTimeout(appRef, injector).then(() => {
                             cleanupDehydratedViews(appRef);
                             if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+                                countBlocksSkippedByHydration(injector);
                                 printHydrationStats(injector);
                             }
                         });
