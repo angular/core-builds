@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.4+sha-b74e06e
+ * @license Angular v19.0.4+sha-b476537
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30321,7 +30321,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.4+sha-b74e06e');
+new Version('19.0.4+sha-b476537');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31729,7 +31729,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-c58f97d2.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-4376ce0c.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -38423,7 +38423,7 @@ class Chunk {
 			// '  test'.trim()
 			//     split   -> '  ' + 'test'
 			//   ✔️ edit    -> '' + 'test'
-			//   ✖️ edit    -> 'test' + '' 
+			//   ✖️ edit    -> 'test' + ''
 			// TODO is this block necessary?...
 			newChunk.edit('', false);
 			this.content = '';
@@ -38670,6 +38670,7 @@ class Mappings {
 				this.raw[this.generatedCodeLine] = this.rawSegments = [];
 				this.generatedCodeColumn = 0;
 				first = true;
+				charInHiresBoundary = false;
 			} else {
 				if (this.hires || first || sourcemapLocations.has(originalCharIndex)) {
 					const segment = [this.generatedCodeColumn, sourceIndex, loc.line, loc.column];
@@ -38747,6 +38748,7 @@ class MagicString {
 			storedNames: { writable: true, value: {} },
 			indentStr: { writable: true, value: undefined },
 			ignoreList: { writable: true, value: options.ignoreList },
+			offset: { writable: true, value: options.offset || 0 },
 		});
 
 		this.byStart[0] = chunk;
@@ -38765,6 +38767,8 @@ class MagicString {
 	}
 
 	appendLeft(index, content) {
+		index = index + this.offset;
+
 		if (typeof content !== 'string') throw new TypeError('inserted content must be a string');
 
 		this._split(index);
@@ -38780,6 +38784,8 @@ class MagicString {
 	}
 
 	appendRight(index, content) {
+		index = index + this.offset;
+
 		if (typeof content !== 'string') throw new TypeError('inserted content must be a string');
 
 		this._split(index);
@@ -38795,7 +38801,7 @@ class MagicString {
 	}
 
 	clone() {
-		const cloned = new MagicString(this.original, { filename: this.filename });
+		const cloned = new MagicString(this.original, { filename: this.filename, offset: this.offset });
 
 		let originalChunk = this.firstChunk;
 		let clonedChunk = (cloned.firstChunk = cloned.lastSearchedChunk = originalChunk.clone());
@@ -38993,7 +38999,7 @@ class MagicString {
 		if (!warned.insertLeft) {
 			console.warn(
 				'magicString.insertLeft(...) is deprecated. Use magicString.appendLeft(...) instead',
-			); // eslint-disable-line no-console
+			);
 			warned.insertLeft = true;
 		}
 
@@ -39004,7 +39010,7 @@ class MagicString {
 		if (!warned.insertRight) {
 			console.warn(
 				'magicString.insertRight(...) is deprecated. Use magicString.prependRight(...) instead',
-			); // eslint-disable-line no-console
+			);
 			warned.insertRight = true;
 		}
 
@@ -39012,6 +39018,10 @@ class MagicString {
 	}
 
 	move(start, end, index) {
+		start = start + this.offset;
+		end = end + this.offset;
+		index = index + this.offset;
+
 		if (index >= start && index <= end) throw new Error('Cannot move a selection inside itself');
 
 		this._split(start);
@@ -39054,6 +39064,9 @@ class MagicString {
 	}
 
 	update(start, end, content, options) {
+		start = start + this.offset;
+		end = end + this.offset;
+
 		if (typeof content !== 'string') throw new TypeError('replacement content must be a string');
 
 		if (this.original.length !== 0) {
@@ -39074,7 +39087,7 @@ class MagicString {
 			if (!warned.storeName) {
 				console.warn(
 					'The final argument to magicString.overwrite(...) should be an options object. See https://github.com/rich-harris/magic-string',
-				); // eslint-disable-line no-console
+				);
 				warned.storeName = true;
 			}
 
@@ -39125,6 +39138,8 @@ class MagicString {
 	}
 
 	prependLeft(index, content) {
+		index = index + this.offset;
+
 		if (typeof content !== 'string') throw new TypeError('inserted content must be a string');
 
 		this._split(index);
@@ -39140,6 +39155,8 @@ class MagicString {
 	}
 
 	prependRight(index, content) {
+		index = index + this.offset;
+
 		if (typeof content !== 'string') throw new TypeError('inserted content must be a string');
 
 		this._split(index);
@@ -39155,6 +39172,9 @@ class MagicString {
 	}
 
 	remove(start, end) {
+		start = start + this.offset;
+		end = end + this.offset;
+
 		if (this.original.length !== 0) {
 			while (start < 0) start += this.original.length;
 			while (end < 0) end += this.original.length;
@@ -39181,6 +39201,9 @@ class MagicString {
 	}
 
 	reset(start, end) {
+		start = start + this.offset;
+		end = end + this.offset;
+
 		if (this.original.length !== 0) {
 			while (start < 0) start += this.original.length;
 			while (end < 0) end += this.original.length;
@@ -39245,7 +39268,10 @@ class MagicString {
 		return this.intro + lineStr;
 	}
 
-	slice(start = 0, end = this.original.length) {
+	slice(start = 0, end = this.original.length - this.offset) {
+		start = start + this.offset;
+		end = end + this.offset;
+
 		if (this.original.length !== 0) {
 			while (start < 0) start += this.original.length;
 			while (end < 0) end += this.original.length;
@@ -39481,11 +39507,7 @@ class MagicString {
 				if (match.index != null) {
 					const replacement = getReplacement(match, this.original);
 					if (replacement !== match[0]) {
-						this.overwrite(
-							match.index,
-							match.index + match[0].length,
-							replacement
-						);
+						this.overwrite(match.index, match.index + match[0].length, replacement);
 					}
 				}
 			});
@@ -39494,11 +39516,7 @@ class MagicString {
 			if (match && match.index != null) {
 				const replacement = getReplacement(match, this.original);
 				if (replacement !== match[0]) {
-					this.overwrite(
-						match.index,
-						match.index + match[0].length,
-						replacement
-					);
+					this.overwrite(match.index, match.index + match[0].length, replacement);
 				}
 			}
 		}
@@ -39533,8 +39551,7 @@ class MagicString {
 			index = original.indexOf(string, index + stringLength)
 		) {
 			const previous = original.slice(index, index + stringLength);
-			if (previous !== replacement)
-				this.overwrite(index, index + stringLength, replacement);
+			if (previous !== replacement) this.overwrite(index, index + stringLength, replacement);
 		}
 
 		return this;
