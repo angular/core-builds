@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.4+sha-4d74f86
+ * @license Angular v19.0.4+sha-b74e06e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13455,6 +13455,28 @@ export declare abstract class ɵEffectScheduler {
     /** @nocollapse */
     static ɵprov: unknown;
 }
+
+/**
+ * InjectionToken to control root component bootstrap behavior.
+ *
+ * This token is primarily used in Angular's server-side rendering (SSR) scenarios,
+ * particularly by the `@angular/ssr` package, to manage whether the root component
+ * should be bootstrapped during the application initialization process.
+ *
+ * ## Purpose:
+ * During SSR route extraction, setting this token to `false` prevents Angular from
+ * bootstrapping the root component. This avoids unnecessary component rendering,
+ * enabling route extraction without requiring additional APIs or triggering
+ * component logic.
+ *
+ * ## Behavior:
+ * - **`false`**: Prevents the root component from being bootstrapped.
+ * - **`true`** (default): Proceeds with the normal root component bootstrap process.
+ *
+ * This mechanism ensures SSR can efficiently separate route extraction logic
+ * from component rendering.
+ */
+export declare const ɵENABLE_ROOT_COMPONENT_BOOTSTRAP: InjectionToken<boolean>;
 
 /**
  * This enables an internal performance profiler
