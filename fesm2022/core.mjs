@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.3+sha-1f4ff2f
+ * @license Angular v19.1.0-next.3+sha-9e0b50b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -273,6 +273,7 @@ function ngDevModeResetPerfCounters() {
         dehydratedViewsRemoved: 0,
         dehydratedViewsCleanupRuns: 0,
         componentsSkippedHydration: 0,
+        deferBlocksWithIncrementalHydration: 0,
     };
     // Make sure to refer to ngDevMode as ['ngDevMode'] for closure.
     const allowNgDevModeTrue = locationString.indexOf('ngDevMode=false') === -1;
@@ -9103,6 +9104,18 @@ function isDeferBlock(tView, tNode) {
     }
     return !!tDetails && isTDeferBlockDetails(tDetails);
 }
+/**
+ * Tracks debugging information about a trigger.
+ * @param tView TView in which the trigger is declared.
+ * @param tNode TNode on which the trigger is declared.
+ * @param textRepresentation Text representation of the trigger to be used for debugging purposes.
+ */
+function trackTriggerForDebugging(tView, tNode, textRepresentation) {
+    const tDetails = getTDeferBlockDetails(tView, tNode);
+    tDetails.debug ??= {};
+    tDetails.debug.triggers ??= new Set();
+    tDetails.debug.triggers.add(textRepresentation);
+}
 
 /*!
  * @license
@@ -9557,7 +9570,6 @@ function retrieveHydrationInfoImpl(rNode, injector, isRootView = false) {
     const rootNgh = rootViewNgh ? `|${rootViewNgh}` : '';
     const remainingNgh = isRootView ? componentViewNgh : rootNgh;
     let data = {};
-    let nghDeferData;
     // An element might have an empty `ngh` attribute value (e.g. `<comp ngh="" />`),
     // which means that no special annotations are required. Do not attempt to read
     // from the TransferState in this case.
@@ -9565,7 +9577,6 @@ function retrieveHydrationInfoImpl(rNode, injector, isRootView = false) {
         const transferState = injector.get(TransferState, null, { optional: true });
         if (transferState !== null) {
             const nghData = transferState.get(NGH_DATA_KEY, []);
-            nghDeferData = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
             // The nghAttrValue is always a number referencing an index
             // in the hydration TransferState data.
             data = nghData[Number(nghAttrValue)];
@@ -9724,6 +9735,13 @@ function markRNodeAsSkippedByHydration(node) {
     }
     patchHydrationInfo(node, { status: HydrationStatus.Skipped });
     ngDevMode.componentsSkippedHydration++;
+}
+function countBlocksSkippedByHydration(injector) {
+    const transferState = injector.get(TransferState);
+    const nghDeferData = transferState.get(NGH_DEFER_BLOCKS_KEY, {});
+    if (ngDevMode) {
+        ngDevMode.deferBlocksWithIncrementalHydration = Object.keys(nghDeferData).length;
+    }
 }
 function markRNodeAsHavingHydrationMismatch(node, expectedNodeDetails = null, actualNodeDetails = null) {
     if (!ngDevMode) {
@@ -18092,7 +18110,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.3+sha-1f4ff2f']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.3+sha-9e0b50b']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -21859,6 +21877,162 @@ function detectChanges(component) {
 }
 
 /**
+ * Retrieves all defer blocks in a given LView.
+ *
+ * @param lView lView with defer blocks
+ * @param deferBlocks defer block aggregator array
+ */
+function getDeferBlocks$1(lView, deferBlocks) {
+    const tView = lView[TVIEW];
+    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
+        if (isLContainer(lView[i])) {
+            const lContainer = lView[i];
+            // An LContainer may represent an instance of a defer block, in which case
+            // we store it as a result. Otherwise, keep iterating over LContainer views and
+            // look for defer blocks.
+            const isLast = i === tView.bindingStartIndex - 1;
+            if (!isLast) {
+                const tNode = tView.data[i];
+                const tDetails = getTDeferBlockDetails(tView, tNode);
+                if (isTDeferBlockDetails(tDetails)) {
+                    deferBlocks.push({ lContainer, lView, tNode, tDetails });
+                    // This LContainer represents a defer block, so we exit
+                    // this iteration and don't inspect views in this LContainer.
+                    continue;
+                }
+            }
+            for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
+                getDeferBlocks$1(lContainer[i], deferBlocks);
+            }
+        }
+        else if (isLView(lView[i])) {
+            // This is a component, enter the `getDeferBlocks` recursively.
+            getDeferBlocks$1(lView[i], deferBlocks);
+        }
+    }
+}
+
+/*!
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+/**
+ * Gets all of the `@defer` blocks that are present inside the specified DOM node.
+ * @param node Node in which to look for `@defer` blocks.
+ *
+ * @publicApi
+ */
+function getDeferBlocks(node) {
+    const results = [];
+    const lView = getLContext(node)?.lView;
+    if (lView) {
+        findDeferBlocks(node, lView, results);
+    }
+    return results;
+}
+/**
+ * Finds all the `@defer` blocks inside a specific node and view.
+ * @param node Node in which to search for blocks.
+ * @param lView View within the node in which to search for blocks.
+ * @param results Array to which to add blocks once they're found.
+ */
+function findDeferBlocks(node, lView, results) {
+    const registry = lView[INJECTOR].get(DEHYDRATED_BLOCK_REGISTRY, null, { optional: true });
+    const blocks = [];
+    getDeferBlocks$1(lView, blocks);
+    for (const details of blocks) {
+        const native = getNativeByTNode(details.tNode, details.lView);
+        const lDetails = getLDeferBlockDetails(details.lView, details.tNode);
+        // The LView from `getLContext` might be the view the element is placed in.
+        // Filter out defer blocks that aren't inside the specified root node.
+        if (!node.contains(native)) {
+            continue;
+        }
+        const tDetails = details.tDetails;
+        const renderedLView = getRendererLView(details);
+        const rootNodes = [];
+        if (renderedLView !== null) {
+            collectNativeNodes(renderedLView[TVIEW], renderedLView, renderedLView[TVIEW].firstChild, rootNodes);
+        }
+        const data = {
+            state: stringifyState(lDetails[DEFER_BLOCK_STATE]),
+            incrementalHydrationState: inferHydrationState(tDetails, lDetails, registry),
+            hasErrorBlock: tDetails.errorTmplIndex !== null,
+            loadingBlock: {
+                exists: tDetails.loadingTmplIndex !== null,
+                minimumTime: tDetails.loadingBlockConfig?.[MINIMUM_SLOT] ?? null,
+                afterTime: tDetails.loadingBlockConfig?.[LOADING_AFTER_SLOT] ?? null,
+            },
+            placeholderBlock: {
+                exists: tDetails.placeholderTmplIndex !== null,
+                minimumTime: tDetails.placeholderBlockConfig?.[MINIMUM_SLOT] ?? null,
+            },
+            triggers: tDetails.debug?.triggers ? Array.from(tDetails.debug.triggers).sort() : [],
+            rootNodes,
+        };
+        results.push(data);
+        // `getDeferBlocks` does not resolve nested defer blocks so we have to recurse manually.
+        if (renderedLView !== null) {
+            findDeferBlocks(node, renderedLView, results);
+        }
+    }
+}
+/**
+ * Turns the `DeferBlockState` into a string which is more readable than the enum form.
+ *
+ * @param lDetails Information about the
+ * @returns
+ */
+function stringifyState(state) {
+    switch (state) {
+        case DeferBlockState.Complete:
+            return 'complete';
+        case DeferBlockState.Loading:
+            return 'loading';
+        case DeferBlockState.Placeholder:
+            return 'placeholder';
+        case DeferBlockState.Error:
+            return 'error';
+        case DeferBlockInternalState.Initial:
+            return 'initial';
+        default:
+            throw new Error(`Unrecognized state ${state}`);
+    }
+}
+/**
+ * Infers the hydration state of a specific defer block.
+ * @param tDetails Static defer block information.
+ * @param lDetails Instance defer block information.
+ * @param registry Registry coordinating the hydration of defer blocks.
+ */
+function inferHydrationState(tDetails, lDetails, registry) {
+    if (registry === null ||
+        lDetails[SSR_UNIQUE_ID] === null ||
+        tDetails.hydrateTriggers === null ||
+        tDetails.hydrateTriggers.has(7 /* DeferBlockTrigger.Never */)) {
+        return 'not-configured';
+    }
+    return registry.has(lDetails[SSR_UNIQUE_ID]) ? 'dehydrated' : 'hydrated';
+}
+/**
+ * Gets the current LView that is rendered out in a defer block.
+ * @param details Instance information about the block.
+ */
+function getRendererLView(details) {
+    // Defer block containers can only ever contain one view.
+    // If they're empty, it means that nothing is rendered.
+    if (details.lContainer.length <= CONTAINER_HEADER_OFFSET) {
+        return null;
+    }
+    const lView = details.lContainer[CONTAINER_HEADER_OFFSET];
+    ngDevMode && assertLView(lView);
+    return lView;
+}
+
+/**
  * Discovers the dependencies of an injectable instance. Provides DI information about each
  * dependency that the injectable was instantiated with, including where they were provided from.
  *
@@ -22542,6 +22716,7 @@ const globalUtilsFunctions = {
     'ɵgetInjectorMetadata': getInjectorMetadata,
     'ɵsetProfiler': setProfiler,
     'ɵgetSignalGraph': getSignalGraph,
+    'ɵgetDeferBlocks': getDeferBlocks,
     'getDirectiveMetadata': getDirectiveMetadata$1,
     'getComponent': getComponent,
     'getContext': getContext,
@@ -24272,7 +24447,7 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
             loadingPromise: null,
             providers: null,
             hydrateTriggers: null,
-            prefetchTriggers: null,
+            debug: null,
             flags: flags ?? 0 /* TDeferDetailsFlags.Default */,
         };
         enableTimerScheduling?.(tView, tDetails, placeholderConfigIndex, loadingConfigIndex);
@@ -24329,6 +24504,9 @@ function ɵɵdefer(index, primaryTmplIndex, dependencyResolverFn, loadingTmplInd
 function ɵɵdeferWhen(rawValue) {
     const lView = getLView();
     const tNode = getSelectedTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'when <expression>');
+    }
     if (!shouldAttachTrigger(0 /* TriggerType.Regular */, lView, tNode))
         return;
     const bindingIndex = nextBindingIndex();
@@ -24360,6 +24538,9 @@ function ɵɵdeferWhen(rawValue) {
 function ɵɵdeferPrefetchWhen(rawValue) {
     const lView = getLView();
     const tNode = getSelectedTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'prefetch when <expression>');
+    }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
     const bindingIndex = nextBindingIndex();
@@ -24387,6 +24568,9 @@ function ɵɵdeferPrefetchWhen(rawValue) {
 function ɵɵdeferHydrateWhen(rawValue) {
     const lView = getLView();
     const tNode = getSelectedTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'hydrate when <expression>');
+    }
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     // TODO(incremental-hydration): audit all defer instructions to reduce unnecessary work by
@@ -24428,6 +24612,9 @@ function ɵɵdeferHydrateWhen(rawValue) {
 function ɵɵdeferHydrateNever() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'hydrate never');
+    }
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
@@ -24444,6 +24631,9 @@ function ɵɵdeferHydrateNever() {
 function ɵɵdeferOnIdle() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'on idle');
+    }
     if (!shouldAttachTrigger(0 /* TriggerType.Regular */, lView, tNode))
         return;
     scheduleDelayedTrigger(onIdle);
@@ -24455,6 +24645,9 @@ function ɵɵdeferOnIdle() {
 function ɵɵdeferPrefetchOnIdle() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'prefetch on idle');
+    }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
     scheduleDelayedPrefetching(onIdle, 0 /* DeferBlockTrigger.Idle */);
@@ -24466,6 +24659,9 @@ function ɵɵdeferPrefetchOnIdle() {
 function ɵɵdeferHydrateOnIdle() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'hydrate on idle');
+    }
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
@@ -24485,6 +24681,9 @@ function ɵɵdeferHydrateOnIdle() {
 function ɵɵdeferOnImmediate() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'on immediate');
+    }
     if (!shouldAttachTrigger(0 /* TriggerType.Regular */, lView, tNode))
         return;
     // Render placeholder block only if loading template is not present and we're on
@@ -24503,6 +24702,9 @@ function ɵɵdeferOnImmediate() {
 function ɵɵdeferPrefetchOnImmediate() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'prefetch on immediate');
+    }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
     const tView = lView[TVIEW];
@@ -24518,6 +24720,9 @@ function ɵɵdeferPrefetchOnImmediate() {
 function ɵɵdeferHydrateOnImmediate() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'hydrate on immediate');
+    }
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
@@ -24541,6 +24746,9 @@ function ɵɵdeferHydrateOnImmediate() {
 function ɵɵdeferOnTimer(delay) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, `on timer(${delay}ms)`);
+    }
     if (!shouldAttachTrigger(0 /* TriggerType.Regular */, lView, tNode))
         return;
     scheduleDelayedTrigger(onTimer(delay));
@@ -24553,6 +24761,9 @@ function ɵɵdeferOnTimer(delay) {
 function ɵɵdeferPrefetchOnTimer(delay) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, `prefetch on timer(${delay}ms)`);
+    }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
     scheduleDelayedPrefetching(onTimer(delay), 5 /* DeferBlockTrigger.Timer */);
@@ -24565,6 +24776,9 @@ function ɵɵdeferPrefetchOnTimer(delay) {
 function ɵɵdeferHydrateOnTimer(delay) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, `hydrate on timer(${delay}ms)`);
+    }
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
@@ -24586,6 +24800,9 @@ function ɵɵdeferHydrateOnTimer(delay) {
 function ɵɵdeferOnHover(triggerIndex, walkUpTimes) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, `on hover${walkUpTimes === -1 ? '' : '(<target>)'}`);
+    }
     if (!shouldAttachTrigger(0 /* TriggerType.Regular */, lView, tNode))
         return;
     renderPlaceholder(lView, tNode);
@@ -24603,6 +24820,9 @@ function ɵɵdeferOnHover(triggerIndex, walkUpTimes) {
 function ɵɵdeferPrefetchOnHover(triggerIndex, walkUpTimes) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, `prefetch on hover${walkUpTimes === -1 ? '' : '(<target>)'}`);
+    }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
     const tView = lView[TVIEW];
@@ -24618,6 +24838,9 @@ function ɵɵdeferPrefetchOnHover(triggerIndex, walkUpTimes) {
 function ɵɵdeferHydrateOnHover() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'hydrate on hover');
+    }
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
@@ -24638,6 +24861,9 @@ function ɵɵdeferHydrateOnHover() {
 function ɵɵdeferOnInteraction(triggerIndex, walkUpTimes) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, `on interaction${walkUpTimes === -1 ? '' : '(<target>)'}`);
+    }
     if (!shouldAttachTrigger(0 /* TriggerType.Regular */, lView, tNode))
         return;
     renderPlaceholder(lView, tNode);
@@ -24655,6 +24881,9 @@ function ɵɵdeferOnInteraction(triggerIndex, walkUpTimes) {
 function ɵɵdeferPrefetchOnInteraction(triggerIndex, walkUpTimes) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, `prefetch on interaction${walkUpTimes === -1 ? '' : '(<target>)'}`);
+    }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
     const tView = lView[TVIEW];
@@ -24670,6 +24899,9 @@ function ɵɵdeferPrefetchOnInteraction(triggerIndex, walkUpTimes) {
 function ɵɵdeferHydrateOnInteraction() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'hydrate on interaction');
+    }
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
@@ -24690,6 +24922,9 @@ function ɵɵdeferHydrateOnInteraction() {
 function ɵɵdeferOnViewport(triggerIndex, walkUpTimes) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, `on viewport${walkUpTimes === -1 ? '' : '(<target>)'}`);
+    }
     if (!shouldAttachTrigger(0 /* TriggerType.Regular */, lView, tNode))
         return;
     renderPlaceholder(lView, tNode);
@@ -24707,6 +24942,9 @@ function ɵɵdeferOnViewport(triggerIndex, walkUpTimes) {
 function ɵɵdeferPrefetchOnViewport(triggerIndex, walkUpTimes) {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, `prefetch on viewport${walkUpTimes === -1 ? '' : '(<target>)'}`);
+    }
     if (!shouldAttachTrigger(1 /* TriggerType.Prefetch */, lView, tNode))
         return;
     const tView = lView[TVIEW];
@@ -24722,6 +24960,9 @@ function ɵɵdeferPrefetchOnViewport(triggerIndex, walkUpTimes) {
 function ɵɵdeferHydrateOnViewport() {
     const lView = getLView();
     const tNode = getCurrentTNode();
+    if (ngDevMode) {
+        trackTriggerForDebugging(lView[TVIEW], tNode, 'hydrate on viewport');
+    }
     if (!shouldAttachTrigger(2 /* TriggerType.Hydrate */, lView, tNode))
         return;
     const hydrateTriggers = getHydrateTriggers(getTView(), tNode);
@@ -34740,7 +34981,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.3+sha-1f4ff2f');
+const VERSION = new Version('19.1.0-next.3+sha-9e0b50b');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -35761,6 +36002,27 @@ function logOversizedImageWarning(src) {
  */
 const PLATFORM_DESTROY_LISTENERS = new InjectionToken(ngDevMode ? 'PlatformDestroyListeners' : '');
 
+/**
+ * InjectionToken to control root component bootstrap behavior.
+ *
+ * This token is primarily used in Angular's server-side rendering (SSR) scenarios,
+ * particularly by the `@angular/ssr` package, to manage whether the root component
+ * should be bootstrapped during the application initialization process.
+ *
+ * ## Purpose:
+ * During SSR route extraction, setting this token to `false` prevents Angular from
+ * bootstrapping the root component. This avoids unnecessary component rendering,
+ * enabling route extraction without requiring additional APIs or triggering
+ * component logic.
+ *
+ * ## Behavior:
+ * - **`false`**: Prevents the root component from being bootstrapped.
+ * - **`true`** (default): Proceeds with the normal root component bootstrap process.
+ *
+ * This mechanism ensures SSR can efficiently separate route extraction logic
+ * from component rendering.
+ */
+const ENABLE_ROOT_COMPONENT_BOOTSTRAP = new InjectionToken(ngDevMode ? 'ENABLE_ROOT_COMPONENT_BOOTSTRAP' : '');
 function isApplicationBootstrapConfig(config) {
     return !config.moduleRef;
 }
@@ -35825,6 +36087,14 @@ function bootstrap(config) {
                 // If the `LOCALE_ID` provider is defined at bootstrap then we set the value for ivy
                 const localeId = envInjector.get(LOCALE_ID, DEFAULT_LOCALE_ID);
                 setLocaleId(localeId || DEFAULT_LOCALE_ID);
+                const enableRootComponentBoostrap = envInjector.get(ENABLE_ROOT_COMPONENT_BOOTSTRAP, true);
+                if (!enableRootComponentBoostrap) {
+                    if (isApplicationBootstrapConfig(config)) {
+                        return envInjector.get(ApplicationRef);
+                    }
+                    config.allPlatformModules.push(config.moduleRef);
+                    return config.moduleRef;
+                }
                 if (typeof ngDevMode === 'undefined' || ngDevMode) {
                     const imagePerformanceService = envInjector.get(ImagePerformanceWarning);
                     imagePerformanceService.start();
@@ -38735,42 +39005,6 @@ function internalCreateApplication(config) {
     }
 }
 
-/**
- * Retrieves all defer blocks in a given LView.
- *
- * @param lView lView with defer blocks
- * @param deferBlocks defer block aggregator array
- */
-function getDeferBlocks(lView, deferBlocks) {
-    const tView = lView[TVIEW];
-    for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
-        if (isLContainer(lView[i])) {
-            const lContainer = lView[i];
-            // An LContainer may represent an instance of a defer block, in which case
-            // we store it as a result. Otherwise, keep iterating over LContainer views and
-            // look for defer blocks.
-            const isLast = i === tView.bindingStartIndex - 1;
-            if (!isLast) {
-                const tNode = tView.data[i];
-                const tDetails = getTDeferBlockDetails(tView, tNode);
-                if (isTDeferBlockDetails(tDetails)) {
-                    deferBlocks.push({ lContainer, lView, tNode, tDetails });
-                    // This LContainer represents a defer block, so we exit
-                    // this iteration and don't inspect views in this LContainer.
-                    continue;
-                }
-            }
-            for (let i = CONTAINER_HEADER_OFFSET; i < lContainer.length; i++) {
-                getDeferBlocks(lContainer[i], deferBlocks);
-            }
-        }
-        else if (isLView(lView[i])) {
-            // This is a component, enter the `getDeferBlocks` recursively.
-            getDeferBlocks(lView[i], deferBlocks);
-        }
-    }
-}
-
 /** Apps in which we've enabled event replay.
  *  This is to prevent initializing event replay more than once per app.
  */
@@ -39206,10 +39440,10 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
             // If this is a defer block, serialize extra info.
             if (isDeferBlock(lView[TVIEW], tNode)) {
                 const lDetails = getLDeferBlockDetails(lView, tNode);
-                if (context.isIncrementalHydrationEnabled) {
+                const tDetails = getTDeferBlockDetails(lView[TVIEW], tNode);
+                if (context.isIncrementalHydrationEnabled && tDetails.hydrateTriggers !== null) {
                     const deferBlockId = `d${context.deferBlocks.size}`;
-                    const tDetails = getTDeferBlockDetails(lView[TVIEW], tNode);
-                    if (tDetails.hydrateTriggers?.has(7 /* DeferBlockTrigger.Never */)) {
+                    if (tDetails.hydrateTriggers.has(7 /* DeferBlockTrigger.Never */)) {
                         isHydrateNeverBlock = true;
                     }
                     let rootNodes = [];
@@ -39219,8 +39453,11 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                         [DEFER_PARENT_BLOCK_ID]: parentDeferBlockId,
                         [NUM_ROOT_NODES]: rootNodes.length,
                         [DEFER_BLOCK_STATE$1]: lDetails[DEFER_BLOCK_STATE],
-                        [DEFER_HYDRATE_TRIGGERS]: serializeHydrateTriggers(tDetails.hydrateTriggers),
                     };
+                    const serializedTriggers = serializeHydrateTriggers(tDetails.hydrateTriggers);
+                    if (serializedTriggers.length > 0) {
+                        deferBlockInfo[DEFER_HYDRATE_TRIGGERS] = serializedTriggers;
+                    }
                     context.deferBlocks.set(deferBlockId, deferBlockInfo);
                     const node = unwrapRNode(lContainer);
                     if (node !== undefined) {
@@ -39272,9 +39509,6 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
     return views;
 }
 function serializeHydrateTriggers(triggerMap) {
-    if (triggerMap === null) {
-        return null;
-    }
     const serializableDeferBlockTrigger = new Set([
         0 /* DeferBlockTrigger.Idle */,
         1 /* DeferBlockTrigger.Immediate */,
@@ -39706,6 +39940,9 @@ function printHydrationStats(injector) {
     const message = `Angular hydrated ${ngDevMode.hydratedComponents} component(s) ` +
         `and ${ngDevMode.hydratedNodes} node(s), ` +
         `${ngDevMode.componentsSkippedHydration} component(s) were skipped. ` +
+        (isIncrementalHydrationEnabled(injector)
+            ? `${ngDevMode.deferBlocksWithIncrementalHydration} defer block(s) were configured to use incremental hydration. `
+            : '') +
         `Learn more at https://angular.dev/guide/hydration.`;
     // tslint:disable-next-line:no-console
     console.log(message);
@@ -39829,6 +40066,7 @@ function withDomHydration() {
                         whenStableWithTimeout(appRef, injector).then(() => {
                             cleanupDehydratedViews(appRef);
                             if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+                                countBlocksSkippedByHydration(injector);
                                 printHydrationStats(injector);
                             }
                         });
@@ -41335,5 +41573,5 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
  * Generated bundle index. Do not edit.
  */
 
-export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, MicrotaskEffectScheduler as ɵMicrotaskEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, microtaskEffect as ɵmicrotaskEffect, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
+export { ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, AfterRenderPhase, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory$1 as ComponentFactory, ComponentFactoryResolver$1 as ComponentFactoryResolver, ComponentRef$1 as ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR$1 as INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, ResourceStatus, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterNextRender, afterRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, platformCore, provideAppInitializer, provideEnvironmentInitializer, provideExperimentalCheckNoChangesForDebug, provideExperimentalZonelessChangeDetection, providePlatformInitializer, provideZoneChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, untracked, viewChild, viewChildren, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, AfterRenderManager as ɵAfterRenderManager, CONTAINER_HEADER_OFFSET as ɵCONTAINER_HEADER_OFFSET, ChangeDetectionScheduler as ɵChangeDetectionScheduler, ChangeDetectionSchedulerImpl as ɵChangeDetectionSchedulerImpl, ComponentFactory$1 as ɵComponentFactory, Console as ɵConsole, DEFAULT_LOCALE_ID as ɵDEFAULT_LOCALE_ID, DEFER_BLOCK_CONFIG as ɵDEFER_BLOCK_CONFIG, DEFER_BLOCK_DEPENDENCY_INTERCEPTOR as ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, DeferBlockBehavior as ɵDeferBlockBehavior, DeferBlockState as ɵDeferBlockState, ENABLE_ROOT_COMPONENT_BOOTSTRAP as ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, EffectScheduler as ɵEffectScheduler, IMAGE_CONFIG as ɵIMAGE_CONFIG, IMAGE_CONFIG_DEFAULTS as ɵIMAGE_CONFIG_DEFAULTS, INJECTOR_SCOPE as ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, INTERNAL_APPLICATION_ERROR_HANDLER as ɵINTERNAL_APPLICATION_ERROR_HANDLER, IS_HYDRATION_DOM_REUSE_ENABLED as ɵIS_HYDRATION_DOM_REUSE_ENABLED, IS_INCREMENTAL_HYDRATION_ENABLED as ɵIS_INCREMENTAL_HYDRATION_ENABLED, JSACTION_EVENT_CONTRACT as ɵJSACTION_EVENT_CONTRACT, LContext as ɵLContext, LifecycleHooksFeature as ɵLifecycleHooksFeature, LocaleDataIndex as ɵLocaleDataIndex, MicrotaskEffectScheduler as ɵMicrotaskEffectScheduler, NG_COMP_DEF as ɵNG_COMP_DEF, NG_DIR_DEF as ɵNG_DIR_DEF, NG_ELEMENT_ID as ɵNG_ELEMENT_ID, NG_INJ_DEF as ɵNG_INJ_DEF, NG_MOD_DEF as ɵNG_MOD_DEF, NG_PIPE_DEF as ɵNG_PIPE_DEF, NG_PROV_DEF as ɵNG_PROV_DEF, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, NO_CHANGE as ɵNO_CHANGE, NgModuleFactory as ɵNgModuleFactory, NoopNgZone as ɵNoopNgZone, PERFORMANCE_MARK_PREFIX as ɵPERFORMANCE_MARK_PREFIX, PROVIDED_NG_ZONE as ɵPROVIDED_NG_ZONE, PendingTasksInternal as ɵPendingTasksInternal, ReflectionCapabilities as ɵReflectionCapabilities, ComponentFactory as ɵRender3ComponentFactory, ComponentRef as ɵRender3ComponentRef, NgModuleRef as ɵRender3NgModuleRef, RuntimeError as ɵRuntimeError, SSR_CONTENT_INTEGRITY_MARKER as ɵSSR_CONTENT_INTEGRITY_MARKER, TESTABILITY as ɵTESTABILITY, TESTABILITY_GETTER as ɵTESTABILITY_GETTER, TracingAction as ɵTracingAction, TracingService as ɵTracingService, USE_RUNTIME_DEPS_TRACKER_FOR_JIT as ɵUSE_RUNTIME_DEPS_TRACKER_FOR_JIT, ViewRef$1 as ɵViewRef, XSS_SECURITY_URL as ɵXSS_SECURITY_URL, ZONELESS_ENABLED as ɵZONELESS_ENABLED, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeUrl as ɵ_sanitizeUrl, allowSanitizationBypassAndThrow as ɵallowSanitizationBypassAndThrow, annotateForHydration as ɵannotateForHydration, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, clearResolutionOfComponentResourcesQueue as ɵclearResolutionOfComponentResourcesQueue, compileComponent as ɵcompileComponent, compileDirective as ɵcompileDirective, compileNgModule as ɵcompileNgModule, compileNgModuleDefs as ɵcompileNgModuleDefs, compileNgModuleFactory as ɵcompileNgModuleFactory, compilePipe as ɵcompilePipe, convertToBitFlags as ɵconvertToBitFlags, createInjector as ɵcreateInjector, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, depsTracker as ɵdepsTracker, detectChangesInViewIfRequired as ɵdetectChangesInViewIfRequired, devModeEqual as ɵdevModeEqual, disableProfiling as ɵdisableProfiling, enableProfiling as ɵenableProfiling, findLocaleData as ɵfindLocaleData, flushModuleScopingQueueAsMuchAsPossible as ɵflushModuleScopingQueueAsMuchAsPossible, formatRuntimeError as ɵformatRuntimeError, generateStandaloneInDeclarationsError as ɵgenerateStandaloneInDeclarationsError, getAsyncClassMetadataFn as ɵgetAsyncClassMetadataFn, getClosestComponentName as ɵgetClosestComponentName, getDebugNode as ɵgetDebugNode, getDeferBlocks$1 as ɵgetDeferBlocks, getDirectives as ɵgetDirectives, getHostElement as ɵgetHostElement, getInjectableDef as ɵgetInjectableDef, getLContext as ɵgetLContext, getLocaleCurrencyCode as ɵgetLocaleCurrencyCode, getLocalePluralCase as ɵgetLocalePluralCase, getOutputDestroyRef as ɵgetOutputDestroyRef, getSanitizationBypassType as ɵgetSanitizationBypassType, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, _global as ɵglobal, injectChangeDetectorRef as ɵinjectChangeDetectorRef, internalCreateApplication as ɵinternalCreateApplication, internalProvideZoneChangeDetection as ɵinternalProvideZoneChangeDetection, isBoundToModule as ɵisBoundToModule, isComponentDefPendingResolution as ɵisComponentDefPendingResolution, isEnvironmentProviders as ɵisEnvironmentProviders, isInjectable as ɵisInjectable, isNgModule as ɵisNgModule, isPromise as ɵisPromise, isSubscribable as ɵisSubscribable, microtaskEffect as ɵmicrotaskEffect, noSideEffects as ɵnoSideEffects, patchComponentDefWithScope as ɵpatchComponentDefWithScope, performanceMarkFeature as ɵperformanceMarkFeature, publishExternalGlobalUtil as ɵpublishExternalGlobalUtil, readHydrationInfo as ɵreadHydrationInfo, registerLocaleData as ɵregisterLocaleData, renderDeferBlockState as ɵrenderDeferBlockState, resetCompiledComponents as ɵresetCompiledComponents, resetJitOptions as ɵresetJitOptions, resolveComponentResources as ɵresolveComponentResources, restoreComponentResolutionQueue as ɵrestoreComponentResolutionQueue, setAllowDuplicateNgModuleIdsForTest as ɵsetAllowDuplicateNgModuleIdsForTest, setAlternateWeakRefImpl as ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, setClassMetadata as ɵsetClassMetadata, setClassMetadataAsync as ɵsetClassMetadataAsync, setCurrentInjector as ɵsetCurrentInjector, setDocument as ɵsetDocument, setInjectorProfilerContext as ɵsetInjectorProfilerContext, setLocaleId as ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, startMeasuring as ɵstartMeasuring, stopMeasuring as ɵstopMeasuring, store as ɵstore, stringify as ɵstringify, transitiveScopesFor as ɵtransitiveScopesFor, triggerResourceLoading as ɵtriggerResourceLoading, truncateMiddle as ɵtruncateMiddle, unregisterAllLocaleData as ɵunregisterLocaleData, unwrapSafeValue as ɵunwrapSafeValue, ɵunwrapWritableSignal, withDomHydration as ɵwithDomHydration, withEventReplay as ɵwithEventReplay, withI18nSupport as ɵwithI18nSupport, withIncrementalHydration as ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, FactoryTarget as ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, registerNgModuleType as ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal };
 //# sourceMappingURL=core.mjs.map

@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.3+sha-1f4ff2f
+ * @license Angular v19.1.0-next.3+sha-9e0b50b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3073,6 +3073,36 @@ declare const DEFER_BLOCK_ID = "di";
 
 declare const DEFER_BLOCK_STATE = "s";
 
+/** Retrieved information about a `@defer` block. */
+declare interface DeferBlockData {
+    /** Current state of the block. */
+    state: 'placeholder' | 'loading' | 'complete' | 'error' | 'initial';
+    /** Hydration state of the block. */
+    incrementalHydrationState: 'not-configured' | 'hydrated' | 'dehydrated';
+    /** Wherther the block has a connected `@error` block. */
+    hasErrorBlock: boolean;
+    /** Information about the connected `@loading` block. */
+    loadingBlock: {
+        /** Whether the block is defined. */
+        exists: boolean;
+        /** Minimum amount of milliseconds that the block should be shown. */
+        minimumTime: number | null;
+        /** Amount of time after which the block should be shown. */
+        afterTime: number | null;
+    };
+    /** Information about the connected `@placeholder` block. */
+    placeholderBlock: {
+        /** Whether the block is defined. */
+        exists: boolean;
+        /** Minimum amount of time that block should be shown. */
+        minimumTime: number | null;
+    };
+    /** Stringified version of the block's triggers. */
+    triggers: string[];
+    /** Element root nodes that are currently being shown in the block. */
+    rootNodes: Node[];
+}
+
 /**
  * Represents defer trigger types.
  */
@@ -4610,6 +4640,14 @@ export { getDebugNode }
 export { getDebugNode as ɵgetDebugNode }
 
 /**
+ * Gets all of the `@defer` blocks that are present inside the specified DOM node.
+ * @param node Node in which to look for `@defer` blocks.
+ *
+ * @publicApi
+ */
+declare function getDeferBlocks(node: Node): DeferBlockData[];
+
+/**
  * Discovers the dependencies of an injectable instance. Provides DI information about each
  * dependency that the injectable was instantiated with, including where they were provided from.
  *
@@ -4820,6 +4858,7 @@ declare const globalUtilsFunctions: {
     ɵgetInjectorMetadata: typeof getInjectorMetadata;
     ɵsetProfiler: (profiler: ɵProfiler_2 | null) => void;
     ɵgetSignalGraph: typeof getSignalGraph;
+    ɵgetDeferBlocks: typeof getDeferBlocks;
     getDirectiveMetadata: typeof getDirectiveMetadata;
     getComponent: typeof getComponent;
     getContext: typeof getContext;
@@ -10481,15 +10520,18 @@ declare interface TDeferBlockDetails {
      */
     hydrateTriggers: Map<DeferBlockTrigger, HydrateTriggerDetails | null> | null;
     /**
-     * List of prefetch triggers for a given block
-     */
-    prefetchTriggers: Set<DeferBlockTrigger> | null;
-    /**
      * Defer block flags, which should be used for all
      * instances of a given defer block (the flags that should be
      * placed into the `TDeferDetails` at runtime).
      */
     flags: TDeferDetailsFlags;
+    /**
+     * Tracks debugging information about the deferred block.
+     */
+    debug: {
+        /** Text representations of the block's triggers. */
+        triggers?: Set<string>;
+    } | null;
 }
 
 /**
@@ -13504,6 +13546,28 @@ export declare abstract class ɵEffectScheduler {
     /** @nocollapse */
     static ɵprov: unknown;
 }
+
+/**
+ * InjectionToken to control root component bootstrap behavior.
+ *
+ * This token is primarily used in Angular's server-side rendering (SSR) scenarios,
+ * particularly by the `@angular/ssr` package, to manage whether the root component
+ * should be bootstrapped during the application initialization process.
+ *
+ * ## Purpose:
+ * During SSR route extraction, setting this token to `false` prevents Angular from
+ * bootstrapping the root component. This avoids unnecessary component rendering,
+ * enabling route extraction without requiring additional APIs or triggering
+ * component logic.
+ *
+ * ## Behavior:
+ * - **`false`**: Prevents the root component from being bootstrapped.
+ * - **`true`** (default): Proceeds with the normal root component bootstrap process.
+ *
+ * This mechanism ensures SSR can efficiently separate route extraction logic
+ * from component rendering.
+ */
+export declare const ɵENABLE_ROOT_COMPONENT_BOOTSTRAP: InjectionToken<boolean>;
 
 /**
  * This enables an internal performance profiler
