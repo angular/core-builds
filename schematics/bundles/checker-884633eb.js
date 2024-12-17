@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.3+sha-204d109
+ * @license Angular v19.1.0-next.3+sha-47212e0
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30410,7 +30410,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.0-next.3+sha-204d109');
+new Version('19.1.0-next.3+sha-47212e0');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31818,7 +31818,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-4cf90395.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-884633eb.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -33315,6 +33315,13 @@ class TypeScriptReflectionHost {
     }
 }
 class TypeEntityToDeclarationError extends Error {
+    constructor(message) {
+        super(message);
+        // Extending `Error` ends up breaking some internal tests. This appears to be a known issue
+        // when extending errors in TS and the workaround is to explicitly set the prototype.
+        // https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
 }
 /**
  * @throws {TypeEntityToDeclarationError} if the type cannot be converted
