@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.4+sha-dd76f4e
+ * @license Angular v19.0.4+sha-fd968e8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18088,7 +18088,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.4+sha-dd76f4e']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.4+sha-fd968e8']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23939,30 +23939,25 @@ function populateHydratingStateForQueue(registry, queue) {
 }
 // Waits for the next render cycle to complete
 function nextRender(injector) {
-    let resolve;
-    const promise = new Promise((resolveFn) => {
-        resolve = resolveFn;
-    });
-    afterNextRender(() => resolve(), { injector });
-    return promise;
+    return new Promise((resolveFn) => afterNextRender(resolveFn, { injector }));
 }
-function triggerResourceLoadingForHydration(dehydratedBlockId, dehydratedBlockRegistry) {
-    let resolve;
-    const promise = new Promise((resolveFn) => (resolve = resolveFn));
+async function triggerResourceLoadingForHydration(dehydratedBlockId, dehydratedBlockRegistry) {
     const deferBlock = dehydratedBlockRegistry.get(dehydratedBlockId);
     // Since we trigger hydration for nested defer blocks in a sequence (parent -> child),
     // there is a chance that a defer block may not be present at hydration time. For example,
     // when a nested block was in an `@if` condition, which has changed.
-    if (deferBlock !== null) {
-        const { tNode, lView } = deferBlock;
-        const lDetails = getLDeferBlockDetails(lView, tNode);
-        onDeferBlockCompletion(lDetails, () => resolve());
-        triggerDeferBlock(2 /* TriggerType.Hydrate */, lView, tNode);
+    if (deferBlock === null) {
         // TODO(incremental-hydration): handle the cleanup for cases when
         // defer block is no longer present during hydration (e.g. `@if` condition
         // has changed during hydration/rendering).
+        return;
     }
-    return promise;
+    const { tNode, lView } = deferBlock;
+    const lDetails = getLDeferBlockDetails(lView, tNode);
+    return new Promise((resolve) => {
+        onDeferBlockCompletion(lDetails, resolve);
+        triggerDeferBlock(2 /* TriggerType.Hydrate */, lView, tNode);
+    });
 }
 /**
  * Registers cleanup functions for a defer block when the block has finished
@@ -34572,7 +34567,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.4+sha-dd76f4e');
+const VERSION = new Version('19.0.4+sha-fd968e8');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
