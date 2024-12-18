@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.3+sha-c181903
+ * @license Angular v19.1.0-next.3+sha-eebde48
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14325,7 +14325,81 @@ export declare const enum ɵProfilerEvent {
      * Corresponds to the point in time after the runtime has evaluated an expression associated with
      * an event or an output.
      */
-    OutputEnd = 7
+    OutputEnd = 7,
+    /**
+     * Corresponds to the point in time just before application bootstrap.
+     */
+    BootstrapApplicationStart = 8,
+    /**
+     * Corresponds to the point in time after application bootstrap.
+     */
+    BootstrapApplicationEnd = 9,
+    /**
+     * Corresponds to the point in time just before root component bootstrap.
+     */
+    BootstrapComponentStart = 10,
+    /**
+     * Corresponds to the point in time after root component bootstrap.
+     */
+    BootstrapComponentEnd = 11,
+    /**
+     * Corresponds to the point in time just before Angular starts a change detection tick.
+     */
+    ChangeDetectionStart = 12,
+    /**
+     * Corresponds to the point in time after Angular ended a change detection tick.
+     */
+    ChangeDetectionEnd = 13,
+    /**
+     * Corresponds to the point in time just before Angular starts a new synchronization pass of change detection tick.
+     */
+    ChangeDetectionSyncStart = 14,
+    /**
+     * Corresponds to the point in time after Angular ended a synchronization pass.
+     */
+    ChangeDetectionSyncEnd = 15,
+    /**
+     * Corresponds to the point in time just before Angular executes after render hooks.
+     */
+    AfterRenderHooksStart = 16,
+    /**
+     * Corresponds to the point in time after Angular executed after render hooks.
+     */
+    AfterRenderHooksEnd = 17,
+    /**
+     * Corresponds to the point in time just before Angular starts processing a component (create or update).
+     */
+    ComponentStart = 18,
+    /**
+     * Corresponds to the point in time after Angular finished processing a component.
+     */
+    ComponentEnd = 19,
+    /**
+     * Corresponds to the point in time just before a defer block transitions between states.
+     */
+    DeferBlockStateStart = 20,
+    /**
+     * Corresponds to the point in time after a defer block transitioned between states.
+     */
+    DeferBlockStateEnd = 21,
+    /**
+     * Corresponds to the point in time just before a component instance is created dynamically.
+     */
+    DynamicComponentStart = 22,
+    /**
+     * Corresponds to the point in time after a a component instance is created dynamically.
+     */
+    DynamicComponentEnd = 23,
+    /**
+     * Corresponds to the point in time before the runtime has called the host bindings function
+     * of a directive.
+     */
+    HostBindingsUpdateStart = 24,
+    /**
+     * Corresponds to the point in time after the runtime has called the host bindings function
+     * of a directive.
+     */
+    HostBindingsUpdateEnd = 25
 }
 
 /**
