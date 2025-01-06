@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.5+sha-66f2aa3
+ * @license Angular v19.0.5+sha-fdfaabb
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30321,7 +30321,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.5+sha-66f2aa3');
+new Version('19.0.5+sha-fdfaabb');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31729,7 +31729,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-883326a2.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-99fcd356.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -32828,9 +32828,16 @@ function classMemberAccessLevelToString(level) {
 class TypeScriptReflectionHost {
     checker;
     isLocalCompilation;
-    constructor(checker, isLocalCompilation = false) {
+    skipPrivateValueDeclarationTypes;
+    /**
+     * @param skipPrivateValueDeclarationTypes Avoids using a value declaration that is considered private (using a ɵ-prefix),
+     * instead using the first available declaration. This is needed for the {@link FormControl} API of
+     * which the type declaration documents the type and the value declaration corresponds with an implementation detail.
+     */
+    constructor(checker, isLocalCompilation = false, skipPrivateValueDeclarationTypes = false) {
         this.checker = checker;
         this.isLocalCompilation = isLocalCompilation;
+        this.skipPrivateValueDeclarationTypes = skipPrivateValueDeclarationTypes;
     }
     getDecoratorsOfDeclaration(declaration) {
         const decorators = ts__default["default"].canHaveDecorators(declaration)
@@ -33129,9 +33136,10 @@ class TypeScriptReflectionHost {
         while (symbol.flags & ts__default["default"].SymbolFlags.Alias) {
             symbol = this.checker.getAliasedSymbol(symbol);
         }
-        // Look at the resolved Symbol's declarations and pick one of them to return. Value declarations
-        // are given precedence over type declarations.
-        if (symbol.valueDeclaration !== undefined) {
+        // Look at the resolved Symbol's declarations and pick one of them to return.
+        // Value declarations are given precedence over type declarations if not specified otherwise
+        if (symbol.valueDeclaration !== undefined &&
+            (!this.skipPrivateValueDeclarationTypes || !isPrivateSymbol(this.checker, symbol))) {
             return {
                 node: symbol.valueDeclaration,
                 viaModule: this._viaModule(symbol.valueDeclaration, originalId, importInfo),
@@ -33441,6 +33449,14 @@ function propertyNameToString(node) {
     else {
         return null;
     }
+}
+/** Determines whether a given symbol represents a private API (symbols with names that start with `ɵ`) */
+function isPrivateSymbol(typeChecker, symbol) {
+    if (symbol.valueDeclaration !== undefined) {
+        const symbolType = typeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
+        return symbolType?.symbol?.name.startsWith('ɵ') === true;
+    }
+    return false;
 }
 /**
  * Compute the left most identifier in a qualified type chain. E.g. the `a` of `a.b.c.SomeType`.
