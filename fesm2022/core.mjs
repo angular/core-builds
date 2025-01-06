@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.5+sha-b0ab674
+ * @license Angular v19.0.5+sha-d7a34dc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18088,7 +18088,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.5+sha-b0ab674']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.5+sha-d7a34dc']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23332,7 +23332,7 @@ class ApplicationRef {
      * {@example core/ts/platform/platform.ts region='domNode'}
      */
     bootstrap(componentOrFactory, rootSelectorOrNode) {
-        (typeof ngDevMode === 'undefined' || ngDevMode) && this.warnIfDestroyed();
+        (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
         const isComponentFactory = componentOrFactory instanceof ComponentFactory$1;
         const initStatus = this._injector.get(ApplicationInitStatus);
         if (!initStatus.done) {
@@ -23402,7 +23402,7 @@ class ApplicationRef {
             snapshot.dispose();
             return;
         }
-        (typeof ngDevMode === 'undefined' || ngDevMode) && this.warnIfDestroyed();
+        (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
         if (this._runningTick) {
             throw new RuntimeError(101 /* RuntimeErrorCode.RECURSIVE_APPLICATION_REF_TICK */, ngDevMode && 'ApplicationRef.tick is called recursively');
         }
@@ -23533,7 +23533,7 @@ class ApplicationRef {
      * This will throw if the view is already attached to a ViewContainer.
      */
     attachView(viewRef) {
-        (typeof ngDevMode === 'undefined' || ngDevMode) && this.warnIfDestroyed();
+        (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
         const view = viewRef;
         this._views.push(view);
         view.attachToAppRef(this);
@@ -23542,7 +23542,7 @@ class ApplicationRef {
      * Detaches a view from dirty checking again.
      */
     detachView(viewRef) {
-        (typeof ngDevMode === 'undefined' || ngDevMode) && this.warnIfDestroyed();
+        (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
         const view = viewRef;
         remove(this._views, view);
         view.detachFromAppRef();
@@ -23586,7 +23586,7 @@ class ApplicationRef {
      * @returns A function which unregisters a listener.
      */
     onDestroy(callback) {
-        (typeof ngDevMode === 'undefined' || ngDevMode) && this.warnIfDestroyed();
+        (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
         this._destroyListeners.push(callback);
         return () => remove(this._destroyListeners, callback);
     }
@@ -23613,11 +23613,6 @@ class ApplicationRef {
     get viewCount() {
         return this._views.length;
     }
-    warnIfDestroyed() {
-        if ((typeof ngDevMode === 'undefined' || ngDevMode) && this._destroyed) {
-            console.warn(formatRuntimeError(406 /* RuntimeErrorCode.APPLICATION_REF_ALREADY_DESTROYED */, 'This instance of the `ApplicationRef` has already been destroyed.'));
-        }
-    }
     static ɵfac = function ApplicationRef_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || ApplicationRef)(); };
     static ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: ApplicationRef, factory: ApplicationRef.ɵfac, providedIn: 'root' });
 }
@@ -23625,6 +23620,11 @@ class ApplicationRef {
         type: Injectable,
         args: [{ providedIn: 'root' }]
     }], () => [], null); })();
+function warnIfDestroyed(destroyed) {
+    if (destroyed) {
+        console.warn(formatRuntimeError(406 /* RuntimeErrorCode.APPLICATION_REF_ALREADY_DESTROYED */, 'This instance of the `ApplicationRef` has already been destroyed.'));
+    }
+}
 function remove(list, el) {
     const index = list.indexOf(el);
     if (index > -1) {
@@ -34567,7 +34567,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.5+sha-b0ab674');
+const VERSION = new Version('19.0.5+sha-d7a34dc');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

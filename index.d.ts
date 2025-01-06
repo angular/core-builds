@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.5+sha-b0ab674
+ * @license Angular v19.0.5+sha-d7a34dc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1170,7 +1170,6 @@ export declare class ApplicationRef {
      * Returns the number of attached views.
      */
     get viewCount(): number;
-    private warnIfDestroyed;
     static ɵfac: i0.ɵɵFactoryDeclaration<ApplicationRef, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<ApplicationRef>;
 }

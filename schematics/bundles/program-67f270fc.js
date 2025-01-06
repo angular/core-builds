@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.5+sha-b0ab674
+ * @license Angular v19.0.5+sha-d7a34dc
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -995,7 +995,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.0.5+sha-b0ab674'));
+    definitionMap.set('version', checker.literal('19.0.5+sha-d7a34dc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1013,7 +1013,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.0.5+sha-b0ab674'));
+    definitionMap.set('version', checker.literal('19.0.5+sha-d7a34dc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1108,7 +1108,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.0.5+sha-b0ab674'));
+    definitionMap.set('version', checker.literal('19.0.5+sha-d7a34dc'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1524,7 +1524,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.0.5+sha-b0ab674'));
+    definitionMap.set('version', checker.literal('19.0.5+sha-d7a34dc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1559,7 +1559,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.0.5+sha-b0ab674'));
+    definitionMap.set('version', checker.literal('19.0.5+sha-d7a34dc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1610,7 +1610,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.0.5+sha-b0ab674'));
+    definitionMap.set('version', checker.literal('19.0.5+sha-d7a34dc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1643,7 +1643,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.0.5+sha-b0ab674'));
+    definitionMap.set('version', checker.literal('19.0.5+sha-d7a34dc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1694,7 +1694,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.0.5+sha-b0ab674'));
+    definitionMap.set('version', checker.literal('19.0.5+sha-d7a34dc'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -10132,14 +10132,15 @@ class TsCreateProgramDriver {
  * @param sourceFile File in which the file is being compiled.
  * @param definition Compiled component definition.
  * @param factory Compiled component factory.
+ * @param deferBlockMetadata Metadata about the defer blocks in the component.
  * @param classMetadata Compiled `setClassMetadata` expression, if any.
  * @param debugInfo Compiled `setClassDebugInfo` expression, if any.
  */
-function extractHmrDependencies(node, definition, factory, classMetadata, debugInfo) {
+function extractHmrDependencies(node, definition, factory, deferBlockMetadata, classMetadata, debugInfo) {
     const name = ts__default["default"].isClassDeclaration(node) && node.name ? node.name.text : null;
     const visitor = new PotentialTopLevelReadsVisitor();
     const sourceFile = node.getSourceFile();
-    // Visit all of the compiled expression to look for potential
+    // Visit all of the compiled expressions to look for potential
     // local references that would have to be retained.
     definition.expression.visitExpression(visitor, null);
     definition.statements.forEach((statement) => statement.visitStatement(visitor, null));
@@ -10147,6 +10148,12 @@ function extractHmrDependencies(node, definition, factory, classMetadata, debugI
     factory.statements.forEach((statement) => statement.visitStatement(visitor, null));
     classMetadata?.visitStatement(visitor, null);
     debugInfo?.visitStatement(visitor, null);
+    if (deferBlockMetadata.mode === 0 /* DeferBlockDepsEmitMode.PerBlock */) {
+        deferBlockMetadata.blocks.forEach((loader) => loader?.visitExpression(visitor, null));
+    }
+    else {
+        deferBlockMetadata.dependenciesFn?.visitExpression(visitor, null);
+    }
     // Filter out only the references to defined top-level symbols. This allows us to ignore local
     // variables inside of functions. Note that we filter out the class name since it is always
     // defined and it saves us having to repeat this logic wherever the locals are consumed.
@@ -10294,8 +10301,22 @@ class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
         if (ts__default["default"].isCallExpression(parent)) {
             return parent.expression === node || parent.arguments.includes(node);
         }
-        // Identifier used in a property read is only top-level if it's the expression.
-        if (ts__default["default"].isPropertyAccessExpression(parent)) {
+        // Identifier used in a nested expression is only top-level if it's the actual expression.
+        if (ts__default["default"].isPropertyAccessExpression(parent) ||
+            ts__default["default"].isComputedPropertyName(parent) ||
+            ts__default["default"].isTemplateSpan(parent) ||
+            ts__default["default"].isSpreadAssignment(parent) ||
+            ts__default["default"].isSpreadElement(parent) ||
+            ts__default["default"].isAwaitExpression(parent) ||
+            ts__default["default"].isNonNullExpression(parent) ||
+            ts__default["default"].isIfStatement(parent) ||
+            ts__default["default"].isDoStatement(parent) ||
+            ts__default["default"].isWhileStatement(parent) ||
+            ts__default["default"].isForInStatement(parent) ||
+            ts__default["default"].isForOfStatement(parent) ||
+            ts__default["default"].isSwitchStatement(parent) ||
+            ts__default["default"].isCaseClause(parent) ||
+            ts__default["default"].isThrowStatement(parent)) {
             return parent.expression === node;
         }
         // Identifier used in an array is only top-level if it's one of the elements.
@@ -10306,9 +10327,24 @@ class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
         if (ts__default["default"].isPropertyAssignment(parent)) {
             return parent.initializer === node;
         }
-        // Identifier in a class is only top level if it's the name.
-        if (ts__default["default"].isClassDeclaration(parent)) {
+        // Identifier in a declaration is only top level if it's the name.
+        // In shorthand assignments the name is also the value.
+        if (ts__default["default"].isClassDeclaration(parent) ||
+            ts__default["default"].isFunctionDeclaration(parent) ||
+            ts__default["default"].isVariableDeclaration(parent) ||
+            ts__default["default"].isShorthandPropertyAssignment(parent)) {
             return parent.name === node;
+        }
+        if (ts__default["default"].isElementAccessExpression(parent)) {
+            return parent.expression === node || parent.argumentExpression === node;
+        }
+        if (ts__default["default"].isBinaryExpression(parent)) {
+            return parent.left === node || parent.right === node;
+        }
+        // It's unlikely that we'll run into imports/exports in this use case.
+        // We handle them since it's simple and for completeness' sake.
+        if (ts__default["default"].isImportSpecifier(parent) || ts__default["default"].isExportSpecifier(parent)) {
+            return (parent.propertyName || parent.name) === node;
         }
         // Otherwise it's not top-level.
         return false;
@@ -10336,17 +10372,18 @@ class PotentialTopLevelReadsVisitor extends checker.RecursiveAstVisitor {
  * @param rootDirs Root directories configured by the user.
  * @param definition Analyzed component definition.
  * @param factory Analyzed component factory.
+ * @param deferBlockMetadata Metadata about the defer blocks in the component.
  * @param classMetadata Analyzed `setClassMetadata` expression, if any.
  * @param debugInfo Analyzed `setClassDebugInfo` expression, if any.
  */
-function extractHmrMetatadata(clazz, reflection, compilerHost, rootDirs, definition, factory, classMetadata, debugInfo) {
+function extractHmrMetatadata(clazz, reflection, compilerHost, rootDirs, definition, factory, deferBlockMetadata, classMetadata, debugInfo) {
     if (!reflection.isClass(clazz)) {
         return null;
     }
     const sourceFile = clazz.getSourceFile();
     const filePath = getProjectRelativePath(sourceFile, rootDirs, compilerHost) ||
         compilerHost.getCanonicalFileName(sourceFile.fileName);
-    const dependencies = extractHmrDependencies(clazz, definition, factory, classMetadata, debugInfo);
+    const dependencies = extractHmrDependencies(clazz, definition, factory, deferBlockMetadata, classMetadata, debugInfo);
     const meta = {
         type: new checker.WrappedNodeExpr(clazz.name),
         className: clazz.name.text,
@@ -10509,7 +10546,7 @@ class ComponentDecoratorHandler {
         };
         // Dependencies can't be deferred during HMR, because the HMR update module can't have
         // dynamic imports and its dependencies need to be passed in directly. If dependencies
-        // are deferred, their imports will be deleted so we won't may lose the reference to them.
+        // are deferred, their imports will be deleted so we may lose the reference to them.
         this.canDeferDeps = !enableHmr;
     }
     literalCache = new Map();
@@ -11445,10 +11482,11 @@ class ComponentDecoratorHandler {
         const perComponentDeferredDeps = this.canDeferDeps
             ? this.resolveAllDeferredDependencies(resolution)
             : null;
+        const defer = this.compileDeferBlocks(resolution);
         const meta = {
             ...analysis.meta,
             ...resolution,
-            defer: this.compileDeferBlocks(resolution),
+            defer,
         };
         const fac = compileNgFactoryDefField(checker.toFactoryMetadata(meta, checker.FactoryTarget.Component));
         if (perComponentDeferredDeps !== null) {
@@ -11463,7 +11501,7 @@ class ComponentDecoratorHandler {
             ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
         const hmrMeta = this.enableHmr
-            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, classMetadata, debugInfo)
+            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, defer, classMetadata, debugInfo)
             : null;
         const hmrInitializer = hmrMeta ? compileHmrInitializer(hmrMeta).toStmt() : null;
         const deferrableImports = this.canDeferDeps
@@ -11486,10 +11524,11 @@ class ComponentDecoratorHandler {
         const perComponentDeferredDeps = this.canDeferDeps
             ? this.resolveAllDeferredDependencies(resolution)
             : null;
+        const defer = this.compileDeferBlocks(resolution);
         const meta = {
             ...analysis.meta,
             ...resolution,
-            defer: this.compileDeferBlocks(resolution),
+            defer,
         };
         const fac = compileDeclareFactory(checker.toFactoryMetadata(meta, checker.FactoryTarget.Component));
         const inputTransformFields = compileInputTransformFields(analysis.inputs);
@@ -11498,7 +11537,7 @@ class ComponentDecoratorHandler {
             ? compileComponentDeclareClassMetadata(analysis.classMetadata, perComponentDeferredDeps).toStmt()
             : null;
         const hmrMeta = this.enableHmr
-            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, classMetadata, null)
+            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, defer, classMetadata, null)
             : null;
         const hmrInitializer = hmrMeta ? compileHmrInitializer(hmrMeta).toStmt() : null;
         const deferrableImports = this.canDeferDeps
@@ -11511,10 +11550,11 @@ class ComponentDecoratorHandler {
         // within the `@Component.deferredImports` array, because in this mode compiler
         // doesn't have information on which dependencies belong to which defer blocks.
         const deferrableTypes = this.canDeferDeps ? analysis.explicitlyDeferredTypes : null;
+        const defer = this.compileDeferBlocks(resolution);
         const meta = {
             ...analysis.meta,
             ...resolution,
-            defer: this.compileDeferBlocks(resolution),
+            defer,
         };
         if (deferrableTypes !== null) {
             removeDeferrableTypesFromComponentDecorator(analysis, deferrableTypes);
@@ -11529,7 +11569,7 @@ class ComponentDecoratorHandler {
             ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
         const hmrMeta = this.enableHmr
-            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, classMetadata, debugInfo)
+            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, defer, classMetadata, debugInfo)
             : null;
         const hmrInitializer = hmrMeta ? compileHmrInitializer(hmrMeta).toStmt() : null;
         const deferrableImports = this.canDeferDeps
@@ -11543,10 +11583,11 @@ class ComponentDecoratorHandler {
         }
         // Create a brand-new constant pool since there shouldn't be any constant sharing.
         const pool = new checker.ConstantPool();
+        const defer = this.compileDeferBlocks(resolution);
         const meta = {
             ...analysis.meta,
             ...resolution,
-            defer: this.compileDeferBlocks(resolution),
+            defer,
         };
         const fac = compileNgFactoryDefField(checker.toFactoryMetadata(meta, checker.FactoryTarget.Component));
         const def = checker.compileComponentFromMetadata(meta, pool, checker.makeBindingParser());
@@ -11557,7 +11598,7 @@ class ComponentDecoratorHandler {
             ? compileClassDebugInfo(analysis.classDebugInfo).toStmt()
             : null;
         const hmrMeta = this.enableHmr
-            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, classMetadata, debugInfo)
+            ? extractHmrMetatadata(node, this.reflector, this.compilerHost, this.rootDirs, def, fac, defer, classMetadata, debugInfo)
             : null;
         const res = checker.compileResults(fac, def, classMetadata, 'ɵcmp', null, null, debugInfo, null);
         return hmrMeta === null || res.length === 0
@@ -20164,7 +20205,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.0.5+sha-b0ab674` usually means that core is at head so it supports
+    // A version of `19.0.5+sha-d7a34dc` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
