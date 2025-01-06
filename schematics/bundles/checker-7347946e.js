@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.4+sha-0bf6f76
+ * @license Angular v19.1.0-next.4+sha-cc7634f
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26642,6 +26642,14 @@ class BindingParser {
         if (ast instanceof NonNullAssert) {
             return this._isAllowedAssignmentEvent(ast.expression);
         }
+        if (ast instanceof Call &&
+            ast.args.length === 1 &&
+            ast.receiver instanceof PropertyRead &&
+            ast.receiver.name === '$any' &&
+            ast.receiver.receiver instanceof ImplicitReceiver &&
+            !(ast.receiver.receiver instanceof ThisReceiver)) {
+            return this._isAllowedAssignmentEvent(ast.args[0]);
+        }
         if (ast instanceof PropertyRead || ast instanceof KeyedRead) {
             return true;
         }
@@ -30410,7 +30418,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.0-next.4+sha-0bf6f76');
+new Version('19.1.0-next.4+sha-cc7634f');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31818,7 +31826,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-4aecb98e.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-7347946e.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
