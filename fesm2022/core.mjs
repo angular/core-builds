@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.4+sha-e0401ec
+ * @license Angular v19.1.0-next.4+sha-2563f39
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -633,7 +633,7 @@ function ɵɵdefineInjector(options) {
  * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
 function getInjectableDef(type) {
-    return getOwnDefinition(type, NG_PROV_DEF);
+    return getOwnDefinition(type, NG_PROV_DEF) || getOwnDefinition(type, NG_INJECTABLE_DEF);
 }
 function isInjectable(type) {
     return getInjectableDef(type) !== null;
@@ -643,8 +643,7 @@ function isInjectable(type) {
  * class of `type`.
  */
 function getOwnDefinition(type, field) {
-    // if the ɵprov prop exist but is undefined we still want to return null
-    return (type.hasOwnProperty(field) && type[field]) || null;
+    return type.hasOwnProperty(field) ? type[field] : null;
 }
 /**
  * Read the injectable def (`ɵprov`) for `type` or read the `ɵprov` from one of its ancestors.
@@ -655,8 +654,7 @@ function getOwnDefinition(type, field) {
  *     scenario if we find the `ɵprov` on an ancestor only.
  */
 function getInheritedInjectableDef(type) {
-    // if the ɵprov prop exist but is undefined we still want to return null
-    const def = type?.[NG_PROV_DEF] ?? null;
+    const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
     if (def) {
         ngDevMode &&
             console.warn(`DEPRECATED: DI is instantiating a token "${type.name}" that inherits its @Injectable decorator but does not provide one itself.\n` +
@@ -673,10 +671,15 @@ function getInheritedInjectableDef(type) {
  * @param type type which may have an injector def (`ɵinj`)
  */
 function getInjectorDef(type) {
-    return type && type.hasOwnProperty(NG_INJ_DEF) ? type[NG_INJ_DEF] : null;
+    return type && (type.hasOwnProperty(NG_INJ_DEF) || type.hasOwnProperty(NG_INJECTOR_DEF))
+        ? type[NG_INJ_DEF]
+        : null;
 }
 const NG_PROV_DEF = getClosureSafeProperty({ ɵprov: getClosureSafeProperty });
 const NG_INJ_DEF = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });
+// We need to keep these around so we can read off old defs if new defs are unavailable
+const NG_INJECTABLE_DEF = getClosureSafeProperty({ ngInjectableDef: getClosureSafeProperty });
+const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafeProperty });
 
 /**
  * Creates a token that can be used in a DI Provider.
@@ -18107,7 +18110,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-e0401ec']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-2563f39']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34973,7 +34976,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.4+sha-e0401ec');
+const VERSION = new Version('19.1.0-next.4+sha-2563f39');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
