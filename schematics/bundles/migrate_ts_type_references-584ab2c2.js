@@ -1,18 +1,19 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.4+sha-f8d22a9
+ * @license Angular v19.1.0-next.4+sha-0bf6f76
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-884633eb.js');
+var checker = require('./checker-4aecb98e.js');
 var ts = require('typescript');
 require('os');
 var assert = require('assert');
-var combine_units = require('./combine_units-4a95b1b9.js');
+var index = require('./index-da97d141.js');
+var apply_import_manager = require('./apply_import_manager-39e33160.js');
 var leading_space = require('./leading_space-d190b83b.js');
-require('./program-094352ba.js');
+require('./program-c4863aa7.js');
 require('path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -625,7 +626,7 @@ function checkIncompatiblePatterns(inheritanceGraph, checker$1, groupedTsAstVisi
                 newTarget = checker$1.getAliasedSymbol(newTarget);
             }
             if (newTarget && inputClassSymbolsToClass.has(newTarget)) {
-                const memberName = combine_units.getMemberName(insidePropertyDeclaration);
+                const memberName = index.getMemberName(insidePropertyDeclaration);
                 if (memberName === null) {
                     break problematicReferencesCheck;
                 }
@@ -858,7 +859,7 @@ function checkInheritanceOfKnownFields(inheritanceGraph, metaRegistry, fields, o
         // Check inheritance of every input in the given "directive class".
         inputCheck: for (const fieldDescr of classFields) {
             const inputNode = fieldDescr.node;
-            const { derivedMembers, inherited } = inheritanceGraph.checkOverlappingMembers(inputClass, inputNode, combine_units.getMemberName(inputNode));
+            const { derivedMembers, inherited } = inheritanceGraph.checkOverlappingMembers(inputClass, inputNode, index.getMemberName(inputNode));
             // If we discover a derived, input re-declared via class metadata, then it
             // will cause conflicts as we cannot migrate it/ nor mark it as signal-based.
             if (fieldDescr.node.name !== undefined &&
@@ -914,7 +915,7 @@ function removeFromUnionIfPossible(union, filter) {
  */
 function insertPrecedingLine(node, info, text) {
     const leadingSpace = leading_space.getLeadingLineWhitespaceOfNode(node);
-    return new combine_units.Replacement(combine_units.projectFile(node.getSourceFile(), info), new combine_units.TextUpdate({
+    return new apply_import_manager.Replacement(apply_import_manager.projectFile(node.getSourceFile(), info), new apply_import_manager.TextUpdate({
         position: node.getStart(),
         end: node.getStart(),
         toInsert: `${text}\n${leadingSpace}`,
@@ -1255,20 +1256,20 @@ function createNewBlockToInsertVariable(node, file, toInsert) {
     const contentSpace = ' '.repeat(character + 2);
     return [
         // Delete leading whitespace of the concise body.
-        new combine_units.Replacement(file, new combine_units.TextUpdate({
+        new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
             position: node.body.getFullStart(),
             end: node.body.getStart(),
             toInsert: '',
         })),
         // Insert leading block braces, and `toInsert` content.
         // Wrap the previous expression in a return now.
-        new combine_units.Replacement(file, new combine_units.TextUpdate({
+        new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
             position: node.body.getStart(),
             end: node.body.getStart(),
             toInsert: ` {\n${contentSpace}${toInsert}\n${contentSpace}return `,
         })),
         // Add trailing brace.
-        new combine_units.Replacement(file, new combine_units.TextUpdate({
+        new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
             position: node.body.getEnd(),
             end: node.body.getEnd(),
             toInsert: `;\n${blockSpace}}`,
@@ -1296,9 +1297,9 @@ function migrateBindingElementInputReference(tsReferencesInBindingElements, info
     const nameGenerator = new UniqueNamesGenerator(['Input', 'Signal', 'Ref']);
     for (const reference of tsReferencesInBindingElements) {
         const bindingElement = reference.parent;
-        const bindingDecl = combine_units.getBindingElementDeclaration(bindingElement);
+        const bindingDecl = index.getBindingElementDeclaration(bindingElement);
         const sourceFile = bindingElement.getSourceFile();
-        const file = combine_units.projectFile(sourceFile, info);
+        const file = apply_import_manager.projectFile(sourceFile, info);
         const inputFieldName = bindingElement.propertyName ?? bindingElement.name;
         assert__default["default"](!ts__default["default"].isObjectBindingPattern(inputFieldName) && !ts__default["default"].isArrayBindingPattern(inputFieldName), 'Property of binding element cannot be another pattern.');
         const tmpName = nameGenerator.generate(reference.text, bindingElement);
@@ -1316,7 +1317,7 @@ function migrateBindingElementInputReference(tsReferencesInBindingElements, info
             console.error(`Could not migrate reference ${reference.text} in ${file.rootRelativePath}`);
             continue;
         }
-        replacements.push(new combine_units.Replacement(file, new combine_units.TextUpdate({
+        replacements.push(new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
             position: bindingElement.getStart(),
             end: bindingElement.getEnd(),
             toInsert: printer.printNode(ts__default["default"].EmitHint.Unspecified, newBindingToAccessInputField, sourceFile),
@@ -1341,7 +1342,7 @@ function insertTemporaryVariableForBindingElement(expansionDecl, file, toInsert)
         const leadingSpace = ' '.repeat(leadingSpaceCount);
         const statement = parent.parent;
         return [
-            new combine_units.Replacement(file, new combine_units.TextUpdate({
+            new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
                 position: statement.getEnd(),
                 end: statement.getEnd(),
                 toInsert: `\n${leadingSpace}${toInsert}`,
@@ -1359,7 +1360,7 @@ function insertTemporaryVariableForBindingElement(expansionDecl, file, toInsert)
         const leadingSpaceCount = ts__default["default"].getLineAndCharacterOfPosition(sf, spaceReferenceNode.getStart()).character + spaceOffset;
         const leadingSpace = ' '.repeat(leadingSpaceCount);
         return [
-            new combine_units.Replacement(file, new combine_units.TextUpdate({
+            new apply_import_manager.Replacement(file, new apply_import_manager.TextUpdate({
                 position: bodyBlock.getStart() + 1,
                 end: bodyBlock.getStart() + 1,
                 toInsert: `\n${leadingSpace}${toInsert}`,
@@ -1720,7 +1721,7 @@ function findSimilarReferenceNode(start, reference, referenceToMetadata, restrai
  * e.g. checks that they have similar property receiver accesses.
  */
 function isLexicalSameReference(checker, sharePartner, reference) {
-    const aParent = combine_units.unwrapParent(reference.parent);
+    const aParent = index.unwrapParent(reference.parent);
     // If the reference is not part a property access, return true. The references
     // are guaranteed symbol matches.
     if (!ts__default["default"].isPropertyAccessExpression(aParent) && !ts__default["default"].isElementAccessExpression(aParent)) {
@@ -1728,7 +1729,7 @@ function isLexicalSameReference(checker, sharePartner, reference) {
     }
     // If reference parent is part of a property expression, but the share
     // partner not, then this cannot be shared.
-    const bParent = combine_units.unwrapParent(sharePartner.parent);
+    const bParent = index.unwrapParent(sharePartner.parent);
     if (aParent.kind !== bParent.kind) {
         return false;
     }
@@ -1760,7 +1761,7 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             // Unwrap the signal directly.
             if (recommendedNode === 'preserve') {
                 // Append `()` to unwrap the signal.
-                replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
+                replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({
                     position: originalNode.getEnd(),
                     end: originalNode.getEnd(),
                     toInsert: '()',
@@ -1772,9 +1773,9 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             if (typeof recommendedNode === 'number') {
                 // Extract the shared field name.
                 const toInsert = idToSharedField.get(recommendedNode);
-                const replaceNode = combine_units.traverseAccess(originalNode);
+                const replaceNode = index.traverseAccess(originalNode);
                 assert__default["default"](toInsert, 'no shared variable yet available');
-                replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
+                replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({
                     position: replaceNode.getStart(),
                     end: replaceNode.getEnd(),
                     toInsert,
@@ -1793,8 +1794,8 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
                 referenceNodeInBlock = parent;
                 parent = parent.parent;
             }
-            const replaceNode = combine_units.traverseAccess(originalNode);
-            const filePath = combine_units.projectFile(sf, info);
+            const replaceNode = index.traverseAccess(originalNode);
+            const filePath = apply_import_manager.projectFile(sf, info);
             const initializer = `${replaceNode.getText()}()`;
             const fieldName = nameGenerator.generate(originalNode.text, referenceNodeInBlock);
             let sharedValueAccessExpr;
@@ -1816,13 +1817,13 @@ function migrateStandardTsReference(tsReferencesWithNarrowing, checker, info, re
             }
             else {
                 const leadingSpace = ts__default["default"].getLineAndCharacterOfPosition(sf, referenceNodeInBlock.getStart());
-                replacements.push(new combine_units.Replacement(filePath, new combine_units.TextUpdate({
+                replacements.push(new apply_import_manager.Replacement(filePath, new apply_import_manager.TextUpdate({
                     position: referenceNodeInBlock.getStart(),
                     end: referenceNodeInBlock.getStart(),
                     toInsert: `${temporaryVariableStr}\n${' '.repeat(leadingSpace.character)}`,
                 })));
             }
-            replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
+            replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({
                 position: replaceNode.getStart(),
                 end: replaceNode.getEnd(),
                 toInsert: sharedValueAccessExpr,
@@ -1862,7 +1863,7 @@ function migrateTypeScriptReferences(host, references, checker, info) {
     const seenIdentifiers = new WeakSet();
     for (const reference of references) {
         // This pass only deals with TS references.
-        if (!combine_units.isTsReference(reference)) {
+        if (!index.isTsReference(reference)) {
             continue;
         }
         // Skip references to incompatible inputs.
@@ -1905,7 +1906,7 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
     const seenTypeNodes = new WeakSet();
     for (const reference of references) {
         // This pass only deals with TS input class type references.
-        if (!combine_units.isTsClassTypeReference(reference)) {
+        if (!index.isTsClassTypeReference(reference)) {
             continue;
         }
         // Skip references to classes that are not fully migrated.
@@ -1931,12 +1932,12 @@ function migrateTypeScriptTypeReferences(host, references, importManager, info) 
                 exportSymbolName: 'UnwrapSignalInputs',
                 requestedFile: sf,
             });
-            host.replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({
+            host.replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({
                 position: firstArg.getStart(),
                 end: firstArg.getStart(),
                 toInsert: `${host.printer.printNode(ts__default["default"].EmitHint.Unspecified, unwrapImportExpr, sf)}<`,
             })));
-            host.replacements.push(new combine_units.Replacement(combine_units.projectFile(sf, info), new combine_units.TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
+            host.replacements.push(new apply_import_manager.Replacement(apply_import_manager.projectFile(sf, info), new apply_import_manager.TextUpdate({ position: firstArg.getEnd(), end: firstArg.getEnd(), toInsert: '>' })));
         }
     }
 }

@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.1.0-next.4+sha-f8d22a9
+ * @license Angular v19.1.0-next.4+sha-0bf6f76
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-884633eb.js');
+var checker = require('./checker-4aecb98e.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -995,7 +995,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-f8d22a9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-0bf6f76'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1013,7 +1013,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-f8d22a9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-0bf6f76'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1108,7 +1108,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-f8d22a9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-0bf6f76'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1524,7 +1524,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-f8d22a9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-0bf6f76'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1559,7 +1559,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-f8d22a9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-0bf6f76'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1610,7 +1610,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-f8d22a9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-0bf6f76'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1643,7 +1643,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-f8d22a9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-0bf6f76'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1694,7 +1694,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-f8d22a9'));
+    definitionMap.set('version', checker.literal('19.1.0-next.4+sha-0bf6f76'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -17017,7 +17017,7 @@ const factory = {
  *
  * @publicApi
  */
-var DiagnosticCategoryLabel;
+exports.DiagnosticCategoryLabel = void 0;
 (function (DiagnosticCategoryLabel) {
     /** Treat the diagnostic as a warning, don't fail the compilation. */
     DiagnosticCategoryLabel["Warning"] = "warning";
@@ -17025,7 +17025,7 @@ var DiagnosticCategoryLabel;
     DiagnosticCategoryLabel["Error"] = "error";
     /** Ignore the diagnostic altogether. */
     DiagnosticCategoryLabel["Suppress"] = "suppress";
-})(DiagnosticCategoryLabel || (DiagnosticCategoryLabel = {}));
+})(exports.DiagnosticCategoryLabel || (exports.DiagnosticCategoryLabel = {}));
 
 class ExtendedTemplateCheckerImpl {
     partialCtx;
@@ -17037,7 +17037,7 @@ class ExtendedTemplateCheckerImpl {
             // Read the diagnostic category from compiler options.
             const category = diagnosticLabelToCategory(options?.extendedDiagnostics?.checks?.[factory.name] ??
                 options?.extendedDiagnostics?.defaultCategory ??
-                DiagnosticCategoryLabel.Warning);
+                exports.DiagnosticCategoryLabel.Warning);
             // Skip the diagnostic if suppressed via compiler options.
             if (category === null) {
                 continue;
@@ -17083,11 +17083,11 @@ class ExtendedTemplateCheckerImpl {
  */
 function diagnosticLabelToCategory(label) {
     switch (label) {
-        case DiagnosticCategoryLabel.Warning:
+        case exports.DiagnosticCategoryLabel.Warning:
             return ts__default["default"].DiagnosticCategory.Warning;
-        case DiagnosticCategoryLabel.Error:
+        case exports.DiagnosticCategoryLabel.Error:
             return ts__default["default"].DiagnosticCategory.Error;
-        case DiagnosticCategoryLabel.Suppress:
+        case exports.DiagnosticCategoryLabel.Suppress:
             return null;
         default:
             return assertNever(label);
@@ -20166,7 +20166,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.1.0-next.4+sha-f8d22a9` usually means that core is at head so it supports
+    // A version of `19.1.0-next.4+sha-0bf6f76` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
@@ -20810,8 +20810,8 @@ class NgCompiler {
                 // (providing the full TemplateTypeChecker API) and if strict mode is not enabled. In strict
                 // mode, the user is in full control of type inference.
                 suggestionsForSuboptimalTypeInference: this.enableTemplateTypeChecker && !strictTemplates,
-                controlFlowPreventingContentProjection: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
-                unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
+                controlFlowPreventingContentProjection: this.options.extendedDiagnostics?.defaultCategory || exports.DiagnosticCategoryLabel.Warning,
+                unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || exports.DiagnosticCategoryLabel.Warning,
                 allowSignalsInTwoWayBindings,
                 checkTwoWayBoundEvents,
             };
@@ -20844,8 +20844,8 @@ class NgCompiler {
                 // In "basic" template type-checking mode, no warnings are produced since most things are
                 // not checked anyways.
                 suggestionsForSuboptimalTypeInference: false,
-                controlFlowPreventingContentProjection: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
-                unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || DiagnosticCategoryLabel.Warning,
+                controlFlowPreventingContentProjection: this.options.extendedDiagnostics?.defaultCategory || exports.DiagnosticCategoryLabel.Warning,
+                unusedStandaloneImports: this.options.extendedDiagnostics?.defaultCategory || exports.DiagnosticCategoryLabel.Warning,
                 allowSignalsInTwoWayBindings,
                 checkTwoWayBoundEvents,
             };
@@ -21235,7 +21235,7 @@ One of the following actions is required:
       `.trim(),
         });
     }
-    const allowedCategoryLabels = Array.from(Object.values(DiagnosticCategoryLabel));
+    const allowedCategoryLabels = Array.from(Object.values(exports.DiagnosticCategoryLabel));
     const defaultCategory = options.extendedDiagnostics?.defaultCategory;
     if (defaultCategory && !allowedCategoryLabels.includes(defaultCategory)) {
         yield makeConfigDiagnostic({

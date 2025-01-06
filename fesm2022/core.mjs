@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.4+sha-f8d22a9
+ * @license Angular v19.1.0-next.4+sha-0bf6f76
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18110,7 +18110,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-f8d22a9']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-0bf6f76']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -24092,7 +24092,7 @@ function triggerResourceLoading(tDetails, lView, tNode) {
             tDetails.loadingState = DeferDependenciesLoadingState.FAILED;
             if (tDetails.errorTmplIndex === null) {
                 const templateLocation = ngDevMode ? getTemplateLocationDetails(lView) : '';
-                const error = new RuntimeError(750 /* RuntimeErrorCode.DEFER_LOADING_FAILED */, ngDevMode &&
+                const error = new RuntimeError(-750 /* RuntimeErrorCode.DEFER_LOADING_FAILED */, ngDevMode &&
                     'Loading dependencies for `@defer` block failed, ' +
                         `but no \`@error\` block was configured${templateLocation}. ` +
                         'Consider using the `@error` block to render an error state.');
@@ -34976,7 +34976,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.4+sha-f8d22a9');
+const VERSION = new Version('19.1.0-next.4+sha-0bf6f76');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

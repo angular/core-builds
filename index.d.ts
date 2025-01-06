@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.4+sha-f8d22a9
+ * @license Angular v19.1.0-next.4+sha-0bf6f76
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14696,7 +14696,7 @@ export declare const enum ɵRuntimeErrorCode {
     ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT = -602,
     INVALID_I18N_STRUCTURE = 700,
     MISSING_LOCALE_DATA = 701,
-    DEFER_LOADING_FAILED = 750,
+    DEFER_LOADING_FAILED = -750,
     IMPORT_PROVIDERS_FROM_STANDALONE = 800,
     INVALID_DIFFER_INPUT = 900,
     NO_SUPPORTING_DIFFER_FACTORY = 901,
