@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.5+sha-b98416c
+ * @license Angular v19.0.5+sha-b0ab674
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -26881,7 +26881,7 @@ function parseForLoopParameters(block, errors, bindingParser) {
             }
             continue;
         }
-        errors.push(new ParseError(param.sourceSpan, `Unrecognized @for loop paramater "${param.expression}"`));
+        errors.push(new ParseError(param.sourceSpan, `Unrecognized @for loop parameter "${param.expression}"`));
     }
     return result;
 }
@@ -27028,7 +27028,7 @@ function parseConditionalBlockParameters(block, errors, bindingParser) {
         // For now conditionals can only have an `as` parameter.
         // We may want to rework this later if we add more.
         if (aliasMatch === null) {
-            errors.push(new ParseError(param.sourceSpan, `Unrecognized conditional paramater "${param.expression}"`));
+            errors.push(new ParseError(param.sourceSpan, `Unrecognized conditional parameter "${param.expression}"`));
         }
         else if (block.name !== 'if') {
             errors.push(new ParseError(param.sourceSpan, '"as" expression is only allowed on the primary @if block'));
@@ -30321,7 +30321,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.5+sha-b98416c');
+new Version('19.0.5+sha-b0ab674');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31729,7 +31729,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-eced36c5.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-883326a2.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
