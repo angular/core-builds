@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.5+sha-8b73fc2
+ * @license Angular v19.0.5+sha-c82ad87
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1707,8 +1707,7 @@ function getPipeDef$1(type) {
  */
 function isStandalone(type) {
     const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
-    // TODO: standalone as default value (invert the condition)
-    return def !== null ? def.standalone : false;
+    return def !== null && def.standalone;
 }
 
 /**
@@ -18089,7 +18088,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.5+sha-8b73fc2']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.5+sha-c82ad87']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34564,7 +34563,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.5+sha-8b73fc2');
+const VERSION = new Version('19.0.5+sha-c82ad87');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
