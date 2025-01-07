@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.4+sha-9b8f699
+ * @license Angular v19.1.0-next.4+sha-52a6710
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1715,8 +1715,7 @@ function getPipeDef$1(type) {
  */
 function isStandalone(type) {
     const def = getComponentDef(type) || getDirectiveDef(type) || getPipeDef$1(type);
-    // TODO: standalone as default value (invert the condition)
-    return def !== null ? def.standalone : false;
+    return def !== null && def.standalone;
 }
 
 /**
@@ -2985,6 +2984,7 @@ function hasI18n(lView) {
     return (lView[FLAGS] & 32 /* LViewFlags.HasI18n */) === 32 /* LViewFlags.HasI18n */;
 }
 function isDestroyed(lView) {
+    // Determines whether a given LView is marked as destroyed.
     return (lView[FLAGS] & 256 /* LViewFlags.Destroyed */) === 256 /* LViewFlags.Destroyed */;
 }
 
@@ -3465,7 +3465,7 @@ function markAncestorsForTraversal(lView) {
  * Stores a LView-specific destroy callback.
  */
 function storeLViewOnDestroy(lView, onDestroyCallback) {
-    if ((lView[FLAGS] & 256 /* LViewFlags.Destroyed */) === 256 /* LViewFlags.Destroyed */) {
+    if (isDestroyed(lView)) {
         throw new RuntimeError(911 /* RuntimeErrorCode.VIEW_ALREADY_DESTROYED */, ngDevMode && 'View has already been destroyed.');
     }
     if (lView[ON_DESTROY_HOOKS] === null) {
@@ -11859,13 +11859,14 @@ function detachView(lContainer, removeIndex) {
  * @param lView The view to be destroyed.
  */
 function destroyLView(tView, lView) {
-    if (!(lView[FLAGS] & 256 /* LViewFlags.Destroyed */)) {
-        const renderer = lView[RENDERER];
-        if (renderer.destroyNode) {
-            applyView(tView, lView, renderer, 3 /* WalkTNodeTreeAction.Destroy */, null, null);
-        }
-        destroyViewTree(lView);
+    if (isDestroyed(lView)) {
+        return;
     }
+    const renderer = lView[RENDERER];
+    if (renderer.destroyNode) {
+        applyView(tView, lView, renderer, 3 /* WalkTNodeTreeAction.Destroy */, null, null);
+    }
+    destroyViewTree(lView);
 }
 /**
  * Calls onDestroys hooks for all directives and pipes in a given view and then removes all
@@ -11876,7 +11877,7 @@ function destroyLView(tView, lView) {
  * @param lView The LView to clean up
  */
 function cleanUpView(tView, lView) {
-    if (lView[FLAGS] & 256 /* LViewFlags.Destroyed */) {
+    if (isDestroyed(lView)) {
         return;
     }
     const prevConsumer = setActiveConsumer$1(null);
@@ -14862,9 +14863,9 @@ function checkNoChangesInternal(lView, mode, notifyErrorHandler = true) {
  */
 function refreshView(tView, lView, templateFn, context) {
     ngDevMode && assertEqual(isCreationMode(lView), false, 'Should be run in update mode');
-    const flags = lView[FLAGS];
-    if ((flags & 256 /* LViewFlags.Destroyed */) === 256 /* LViewFlags.Destroyed */)
+    if (isDestroyed(lView))
         return;
+    const flags = lView[FLAGS];
     // Check no changes mode is a dev only mode used to verify that bindings have not changed
     // since they were assigned. We do not want to execute lifecycle hooks in that mode.
     const isInCheckNoChangesPass = ngDevMode && isInCheckNoChangesMode();
@@ -15230,7 +15231,7 @@ class ViewRef$1 {
         this._lView[CONTEXT] = value;
     }
     get destroyed() {
-        return (this._lView[FLAGS] & 256 /* LViewFlags.Destroyed */) === 256 /* LViewFlags.Destroyed */;
+        return isDestroyed(this._lView);
     }
     destroy() {
         if (this._appRef) {
@@ -18111,7 +18112,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-9b8f699']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-52a6710']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34973,7 +34974,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.4+sha-9b8f699');
+const VERSION = new Version('19.1.0-next.4+sha-52a6710');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
