@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.4+sha-0e23f20
+ * @license Angular v19.1.0-next.4+sha-9b8f699
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6181,7 +6181,8 @@ class PendingTasks {
 }
 
 class EventEmitter_ extends Subject {
-    __isAsync; // tslint:disable-line
+    // tslint:disable-next-line:require-internal-with-underscore
+    __isAsync;
     destroyRef = undefined;
     pendingTasks = undefined;
     constructor(isAsync = false) {
@@ -18110,7 +18111,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-0e23f20']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-9b8f699']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19709,7 +19710,6 @@ class NgModuleRef extends NgModuleRef$1 {
     _parent;
     // tslint:disable-next-line:require-internal-with-underscore
     _bootstrapComponents = [];
-    // tslint:disable-next-line:require-internal-with-underscore
     _r3Injector;
     instance;
     destroyCbs = [];
@@ -21589,7 +21589,6 @@ class Console {
     }
     // Note: for reporting errors use `DOM.logError()` as it is platform specific
     warn(message) {
-        // tslint:disable-next-line:no-console
         console.warn(message);
     }
     static ɵfac = function Console_Factory(__ngFactoryType__) { return new (__ngFactoryType__ || Console)(); };
@@ -27677,7 +27676,6 @@ function reconcile(liveCollection, newCollection, trackByFn) {
                 'Duplicated keys were: \n' +
                 duplicatedKeysMsg.join(', \n') +
                 '.');
-            // tslint:disable-next-line:no-console
             console.warn(message);
         }
     }
@@ -28505,10 +28503,8 @@ if (typeof ngI18nClosureMode === 'undefined') {
     // Make sure to refer to ngI18nClosureMode as ['ngI18nClosureMode'] for closure.
     // NOTE: we need to have it in IIFE so that the tree-shaker is happy.
     (function () {
-        // tslint:disable-next-line:no-toplevel-property-access
         _global['ngI18nClosureMode'] =
             // TODO(FW-1250): validate that this actually, you know, works.
-            // tslint:disable-next-line:no-toplevel-property-access
             typeof goog !== 'undefined' && typeof goog.getMsg === 'function';
     })();
 }
@@ -34977,7 +34973,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.4+sha-0e23f20');
+const VERSION = new Version('19.1.0-next.4+sha-9b8f699');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -40028,7 +40024,6 @@ function withDomHydration() {
                         'thus hydration was not enabled. ' +
                         'Make sure the `provideClientHydration()` is included into the list ' +
                         'of providers in the server part of the application configuration.');
-                    // tslint:disable-next-line:no-console
                     console.warn(message);
                 }
             },

@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.4+sha-0e23f20
+ * @license Angular v19.1.0-next.4+sha-9b8f699
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -498,11 +498,9 @@ function removeEventListener(element, info) {
         const options = typeof info.passive === 'boolean' ? { capture: info.capture } : info.capture;
         element.removeEventListener(info.eventType, info.handler, options);
         // `detachEvent` is an old DOM API.
-        // tslint:disable-next-line:no-any
     }
     else if (element.detachEvent) {
         // `detachEvent` is an old DOM API.
-        // tslint:disable-next-line:no-any
         element.detachEvent(`on${info.eventType}`, info.handler);
     }
 }
@@ -549,13 +547,10 @@ let isMac = typeof navigator !== 'undefined' && /Macintosh/.test(navigator.userA
 function isMiddleClick(e) {
     return (
     // `which` is an old DOM API.
-    // tslint:disable-next-line:no-any
     e.which === 2 ||
         // `which` is an old DOM API.
-        // tslint:disable-next-line:no-any
         (e.which == null &&
             // `button` is an old DOM API.
-            // tslint:disable-next-line:no-any
             e.button === 4) // middle click for IE
     );
 }
@@ -569,14 +564,11 @@ function isMiddleClick(e) {
 function isModifiedClickEvent(e) {
     return (
     // `metaKey` is an old DOM API.
-    // tslint:disable-next-line:no-any
     (isMac && e.metaKey) ||
         // `ctrlKey` is an old DOM API.
-        // tslint:disable-next-line:no-any
         (!isMac && e.ctrlKey) ||
         isMiddleClick(e) ||
         // `shiftKey` is an old DOM API.
-        // tslint:disable-next-line:no-any
         e.shiftKey);
 }
 /** Whether we are on WebKit (e.g., Chrome). */
@@ -607,7 +599,6 @@ function isValidActionKeyTarget(el) {
         return false;
     }
     // `isContentEditable` is an old DOM API.
-    // tslint:disable-next-line:no-any
     if (el.isContentEditable) {
         return false;
     }
@@ -621,16 +612,12 @@ function isValidActionKeyTarget(el) {
 function hasModifierKey(e) {
     return (
     // `ctrlKey` is an old DOM API.
-    // tslint:disable-next-line:no-any
     e.ctrlKey ||
         // `shiftKey` is an old DOM API.
-        // tslint:disable-next-line:no-any
         e.shiftKey ||
         // `altKey` is an old DOM API.
-        // tslint:disable-next-line:no-any
         e.altKey ||
         // `metaKey` is an old DOM API.
-        // tslint:disable-next-line:no-any
         e.metaKey);
 }
 /**
@@ -681,10 +668,8 @@ function shouldCallPreventDefaultOnNativeHtmlControl(e) {
 function isActionKeyEvent(e) {
     let key = 
     // `which` is an old DOM API.
-    // tslint:disable-next-line:no-any
     e.which ||
         // `keyCode` is an old DOM API.
-        // tslint:disable-next-line:no-any
         e.keyCode;
     if (!key && e.key) {
         key = ACTION_KEY_TO_KEYCODE[e.key];
@@ -750,10 +735,8 @@ const NATIVELY_FOCUSABLE_ELEMENTS = {
 function isSpaceKeyEvent(e) {
     const key = 
     // `which` is an old DOM API.
-    // tslint:disable-next-line:no-any
     e.which ||
         // `keyCode` is an old DOM API.
-        // tslint:disable-next-line:no-any
         e.keyCode;
     const el = getTarget(e);
     const elementName = (el.type || el.tagName).toUpperCase();
@@ -779,7 +762,6 @@ function isSpaceKeyEvent(e) {
  */
 function isMouseSpecialEvent(e, type, element) {
     // `relatedTarget` is an old DOM API.
-    // tslint:disable-next-line:no-any
     const related = e.relatedTarget;
     return (((e.type === EventType.MOUSEOVER && type === EventType.MOUSEENTER) ||
         (e.type === EventType.MOUSEOUT && type === EventType.MOUSELEAVE) ||
@@ -807,7 +789,6 @@ function createMouseSpecialEvent(e, target) {
     // this event into a pseudo-real mouseenter/mouseleave event by adjusting
     // its type.
     //
-    // tslint:disable-next-line:no-any
     const copy = {};
     for (const property in e) {
         if (property === 'srcElement' || property === 'target') {
@@ -815,14 +796,12 @@ function createMouseSpecialEvent(e, target) {
         }
         const key = property;
         // Making a copy requires iterating through all properties of `Event`.
-        // tslint:disable-next-line:no-dict-access-on-struct-type
         const value = e[key];
         if (typeof value === 'function') {
             continue;
         }
         // Value should be the expected type, but the value of `key` is not known
         // statically.
-        // tslint:disable-next-line:no-any
         copy[key] = value;
     }
     if (e.type === EventType.MOUSEOVER) {
@@ -884,14 +863,12 @@ function recreateTouchEventAsClick(event) {
         }
         const key = property;
         // Making a copy requires iterating through all properties of `TouchEvent`.
-        // tslint:disable-next-line:no-dict-access-on-struct-type
         const value = event[key];
         if (typeof value === 'function') {
             continue;
         }
         // Value should be the expected type, but the value of `key` is not known
         // statically.
-        // tslint:disable-next-line:no-any
         click[key] = value;
     }
     // Ensure that the event has the most recent timestamp. This timestamp
