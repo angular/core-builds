@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.4+sha-52a6710
+ * @license Angular v19.1.0-next.4+sha-d9707e1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18112,7 +18112,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-52a6710']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-d9707e1']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -21198,7 +21198,8 @@ class CachedInjectorService {
  *
  * This token is only injected in devMode
  */
-const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = new InjectionToken('DEFER_BLOCK_DEPENDENCY_INTERCEPTOR');
+const DEFER_BLOCK_DEPENDENCY_INTERCEPTOR = 
+/* @__PURE__ */ new InjectionToken('DEFER_BLOCK_DEPENDENCY_INTERCEPTOR');
 /**
  * **INTERNAL**, token used for configuring defer block behavior.
  */
@@ -34974,7 +34975,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.4+sha-52a6710');
+const VERSION = new Version('19.1.0-next.4+sha-d9707e1');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
