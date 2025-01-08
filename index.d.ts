@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.4+sha-dd1d69b
+ * @license Angular v19.1.0-next.4+sha-5c0d688
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12736,6 +12736,7 @@ declare class ZoneAwareEffectScheduler implements ɵEffectScheduler {
     private queuedEffectCount;
     private queues;
     schedule(handle: SchedulableEffect): void;
+    remove(handle: SchedulableEffect): void;
     private enqueue;
     /**
      * Run all scheduled effects.
@@ -13547,6 +13548,8 @@ export declare abstract class ɵEffectScheduler {
      * Run any scheduled effects.
      */
     abstract flush(): void;
+    /** Remove a scheduled effect */
+    abstract remove(e: SchedulableEffect): void;
     /** @nocollapse */
     static ɵprov: unknown;
 }

@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-next.4+sha-dd1d69b
+ * @license Angular v19.1.0-next.4+sha-5c0d688
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18167,7 +18167,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-dd1d69b']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-next.4+sha-5c0d688']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -23122,6 +23122,15 @@ class ZoneAwareEffectScheduler {
     queues = new Map();
     schedule(handle) {
         this.enqueue(handle);
+    }
+    remove(handle) {
+        const zone = handle.zone;
+        const queue = this.queues.get(zone);
+        if (!queue.has(handle)) {
+            return;
+        }
+        queue.delete(handle);
+        this.queuedEffectCount--;
     }
     enqueue(handle) {
         const zone = handle.zone;
@@ -35018,7 +35027,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-next.4+sha-dd1d69b');
+const VERSION = new Version('19.1.0-next.4+sha-5c0d688');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -40905,6 +40914,7 @@ const ROOT_EFFECT_NODE =
         consumerDestroy$1(this);
         this.onDestroyFn();
         this.maybeCleanup();
+        this.scheduler.remove(this);
     },
 }))();
 const VIEW_EFFECT_NODE = 
