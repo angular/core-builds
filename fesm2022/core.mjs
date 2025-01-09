@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-3638f93
+ * @license Angular v19.2.0-next.0+sha-f2e293d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18155,7 +18155,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-3638f93']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-f2e293d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -35015,7 +35015,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-3638f93');
+const VERSION = new Version('19.2.0-next.0+sha-f2e293d');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -41508,7 +41508,7 @@ function mergeApplicationConfig(...configs) {
  *
  * @developerPreview
  */
-const REQUEST = new InjectionToken('REQUEST', {
+const REQUEST = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'REQUEST' : '', {
     providedIn: 'platform',
     factory: () => null,
 });
@@ -41530,7 +41530,7 @@ const REQUEST = new InjectionToken('REQUEST', {
  *
  * @developerPreview
  */
-const RESPONSE_INIT = new InjectionToken('RESPONSE_INIT', {
+const RESPONSE_INIT = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'RESPONSE_INIT' : '', {
     providedIn: 'platform',
     factory: () => null,
 });
@@ -41544,7 +41544,7 @@ const RESPONSE_INIT = new InjectionToken('RESPONSE_INIT', {
  *
  * @developerPreview
  */
-const REQUEST_CONTEXT = new InjectionToken('REQUEST_CONTEXT', {
+const REQUEST_CONTEXT = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'REQUEST_CONTEXT' : '', {
     providedIn: 'platform',
     factory: () => null,
 });
