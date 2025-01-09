@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-a55575d
+ * @license Angular v19.2.0-next.0+sha-0621482
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -2936,18 +2936,6 @@ const MOVED_VIEWS = 9;
  * remove views from the DOM when they are no longer required.
  */
 const CONTAINER_HEADER_OFFSET = 10;
-/** Flags associated with an LContainer (saved in LContainer[FLAGS]) */
-var LContainerFlags;
-(function (LContainerFlags) {
-    LContainerFlags[LContainerFlags["None"] = 0] = "None";
-    /**
-     * Flag to signify that this `LContainer` may have transplanted views which need to be change
-     * detected. (see: `LView[DECLARATION_COMPONENT_VIEW])`.
-     *
-     * This flag, once set, is never unset for the `LContainer`.
-     */
-    LContainerFlags[LContainerFlags["HasTransplantedViews"] = 2] = "HasTransplantedViews";
-})(LContainerFlags || (LContainerFlags = {}));
 
 /**
  * True if `value` is `LView`.
@@ -11825,7 +11813,7 @@ function trackMovedView(declarationContainer, lView) {
     const parent = lView[PARENT];
     ngDevMode && assertDefined(parent, 'missing parent');
     if (isLView(parent)) {
-        declarationContainer[FLAGS] |= LContainerFlags.HasTransplantedViews;
+        declarationContainer[FLAGS] |= 2 /* LContainerFlags.HasTransplantedViews */;
     }
     else {
         const insertedComponentLView = parent[PARENT][DECLARATION_COMPONENT_VIEW];
@@ -11836,7 +11824,7 @@ function trackMovedView(declarationContainer, lView) {
             // At this point the declaration-component is not same as insertion-component; this means that
             // this is a transplanted view. Mark the declared lView as having transplanted views so that
             // those views can participate in CD.
-            declarationContainer[FLAGS] |= LContainerFlags.HasTransplantedViews;
+            declarationContainer[FLAGS] |= 2 /* LContainerFlags.HasTransplantedViews */;
         }
     }
     if (movedViews === null) {
@@ -15099,7 +15087,7 @@ function detectChangesInEmbeddedViews(lView, mode) {
  */
 function markTransplantedViewsForRefresh(lView) {
     for (let lContainer = getFirstLContainer(lView); lContainer !== null; lContainer = getNextLContainer(lContainer)) {
-        if (!(lContainer[FLAGS] & LContainerFlags.HasTransplantedViews))
+        if (!(lContainer[FLAGS] & 2 /* LContainerFlags.HasTransplantedViews */))
             continue;
         const movedViews = lContainer[MOVED_VIEWS];
         ngDevMode && assertDefined(movedViews, 'Transplanted View flags set but missing MOVED_VIEWS');
@@ -18167,7 +18155,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-a55575d']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-0621482']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -35027,7 +35015,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-a55575d');
+const VERSION = new Version('19.2.0-next.0+sha-0621482');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

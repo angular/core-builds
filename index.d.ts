@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-a55575d
+ * @license Angular v19.2.0-next.0+sha-0621482
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6869,7 +6869,7 @@ declare interface LContainer extends Array<any> {
 }
 
 /** Flags associated with an LContainer (saved in LContainer[FLAGS]) */
-declare enum LContainerFlags {
+declare const enum LContainerFlags {
     None = 0,
     /**
      * Flag to signify that this `LContainer` may have transplanted views which need to be change
