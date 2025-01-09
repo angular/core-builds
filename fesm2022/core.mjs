@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.6+sha-2b4b7c3
+ * @license Angular v19.0.6+sha-57a98c3
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18088,7 +18088,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.6+sha-2b4b7c3']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.6+sha-57a98c3']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34573,7 +34573,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.6+sha-2b4b7c3');
+const VERSION = new Version('19.0.6+sha-57a98c3');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -41113,7 +41113,7 @@ function mergeApplicationConfig(...configs) {
  *
  * @developerPreview
  */
-const REQUEST = new InjectionToken('REQUEST', {
+const REQUEST = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'REQUEST' : '', {
     providedIn: 'platform',
     factory: () => null,
 });
@@ -41135,7 +41135,7 @@ const REQUEST = new InjectionToken('REQUEST', {
  *
  * @developerPreview
  */
-const RESPONSE_INIT = new InjectionToken('RESPONSE_INIT', {
+const RESPONSE_INIT = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'RESPONSE_INIT' : '', {
     providedIn: 'platform',
     factory: () => null,
 });
@@ -41149,7 +41149,7 @@ const RESPONSE_INIT = new InjectionToken('RESPONSE_INIT', {
  *
  * @developerPreview
  */
-const REQUEST_CONTEXT = new InjectionToken('REQUEST_CONTEXT', {
+const REQUEST_CONTEXT = new InjectionToken(typeof ngDevMode === 'undefined' || ngDevMode ? 'REQUEST_CONTEXT' : '', {
     providedIn: 'platform',
     factory: () => null,
 });
