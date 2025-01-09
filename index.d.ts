@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-5884153
+ * @license Angular v19.2.0-next.0+sha-ac2dbe3
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -28,8 +28,6 @@ import { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
 export declare interface AbstractType<T> extends Function {
     prototype: T;
 }
-
-declare const AFTER_RENDER_SEQUENCES_TO_ADD = 25;
 
 /**
  * @description
@@ -488,7 +486,6 @@ declare class AfterRenderImpl {
      */
     execute(): void;
     register(sequence: AfterRenderSequence): void;
-    addSequence(sequence: AfterRenderSequence): void;
     unregister(sequence: AfterRenderSequence): void;
     protected maybeTrace<T>(fn: () => T, snapshot: ɵTracingSnapshot | null): T;
     /** @nocollapse */
@@ -608,7 +605,6 @@ export declare interface AfterRenderRef {
 declare class AfterRenderSequence implements AfterRenderRef {
     readonly impl: AfterRenderImpl;
     readonly hooks: AfterRenderHooks;
-    readonly view: LView | undefined;
     once: boolean;
     snapshot: ɵTracingSnapshot | null;
     /**
@@ -622,7 +618,7 @@ declare class AfterRenderSequence implements AfterRenderRef {
      */
     pipelinedValue: unknown;
     private unregisterOnDestroy;
-    constructor(impl: AfterRenderImpl, hooks: AfterRenderHooks, view: LView | undefined, once: boolean, destroyRef: DestroyRef | null, snapshot?: ɵTracingSnapshot | null);
+    constructor(impl: AfterRenderImpl, hooks: AfterRenderHooks, once: boolean, destroyRef: DestroyRef | null, snapshot?: ɵTracingSnapshot | null);
     afterRun(): void;
     destroy(): void;
 }
@@ -7284,7 +7280,6 @@ declare interface LView<T = unknown> extends Array<any> {
      * if any signals were read.
      */
     [REACTIVE_TEMPLATE_CONSUMER]: ReactiveLViewConsumer | null;
-    [AFTER_RENDER_SEQUENCES_TO_ADD]: AfterRenderSequence[] | null;
 }
 
 /**
@@ -14197,12 +14192,13 @@ export declare const enum ɵNotificationSource {
     Listener = 5,
     CustomElement = 6,
     RenderHook = 7,
-    ViewAttached = 8,
-    ViewDetachedFromDOM = 9,
-    AsyncAnimationsLoaded = 10,
-    PendingTaskRemoved = 11,
-    RootEffect = 12,
-    ViewEffect = 13
+    DeferredRenderHook = 8,
+    ViewAttached = 9,
+    ViewDetachedFromDOM = 10,
+    AsyncAnimationsLoaded = 11,
+    PendingTaskRemoved = 12,
+    RootEffect = 13,
+    ViewEffect = 14
 }
 
 /**
