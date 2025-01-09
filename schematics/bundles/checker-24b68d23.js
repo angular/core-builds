@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-rc.0+sha-13a51b6
+ * @license Angular v19.1.0-rc.0+sha-a6a4347
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30418,7 +30418,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.0-rc.0+sha-13a51b6');
+new Version('19.1.0-rc.0+sha-a6a4347');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
