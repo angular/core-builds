@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.0+sha-676357d
+ * @license Angular v19.2.0-next.0+sha-966a370
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -273,7 +273,7 @@ function migrate() {
             for (const c of changes) {
                 recorder
                     .remove(c.data.position, c.data.end - c.data.position)
-                    .insertLeft(c.data.position, c.data.toInsert);
+                    .insertRight(c.data.position, c.data.toInsert);
             }
             tree.commitUpdate(recorder);
         }
