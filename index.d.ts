@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.6+sha-a1069a3
+ * @license Angular v19.0.6+sha-178c619
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -6813,6 +6813,8 @@ export declare function linkedSignal<D>(computation: () => D, options?: {
 /**
  * Creates a writable signals whose value is initialized and reset by the linked, reactive computation.
  * This is an advanced API form where the computation has access to the previous value of the signal and the computation result.
+ *
+ * Note: The computation is reactive, meaning the linked signal will automatically update whenever any of the signals used within the computation change.
  *
  * @developerPreview
  */
