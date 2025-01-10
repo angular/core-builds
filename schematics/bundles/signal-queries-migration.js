@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.0+sha-17510be
+ * @license Angular v19.2.0-next.0+sha-8496fb1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1064,6 +1064,12 @@ class SignalQueriesMigration extends apply_import_manager.TsurgeComplexMigration
         }
         for (const [id, info] of Object.entries(globalMetadata.problematicQueries)) {
             if (globalMetadata.knownQueryFields[id] === undefined) {
+                continue;
+            }
+            // Do not count queries that were forcibly ignored via best effort mode.
+            if (this.config.bestEffortMode &&
+                (info.fieldReason === null ||
+                    !migrate_ts_type_references.nonIgnorableFieldIncompatibilities.includes(info.fieldReason))) {
                 continue;
             }
             incompatibleQueries++;
