@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-915593a
+ * @license Angular v19.2.0-next.0+sha-4491704
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8463,15 +8463,8 @@ function retrieveTransferredState(doc, appId) {
 const REFERENCE_NODE_HOST = 'h';
 /** Encodes that the node lookup should start from the document body node. */
 const REFERENCE_NODE_BODY = 'b';
-/**
- * Describes navigation steps that the runtime logic need to perform,
- * starting from a given (known) element.
- */
-var NodeNavigationStep;
-(function (NodeNavigationStep) {
-    NodeNavigationStep["FirstChild"] = "f";
-    NodeNavigationStep["NextSibling"] = "n";
-})(NodeNavigationStep || (NodeNavigationStep = {}));
+const NODE_NAVIGATION_STEP_FIRST_CHILD = 'f';
+const NODE_NAVIGATION_STEP_NEXT_SIBLING = 'n';
 /**
  * Keys within serialized view data structure to represent various
  * parts. See the `SerializedView` interface below for additional information.
@@ -16468,7 +16461,7 @@ function stringifyNavigationInstructions(instructions) {
         const step = instructions[i];
         const repeat = instructions[i + 1];
         for (let r = 0; r < repeat; r++) {
-            container.push(step === NodeNavigationStep.FirstChild ? 'firstChild' : 'nextSibling');
+            container.push(step === NODE_NAVIGATION_STEP_FIRST_CHILD ? 'firstChild' : 'nextSibling');
         }
     }
     return container.join('.');
@@ -16487,10 +16480,10 @@ function navigateToNode(from, instructions) {
                 throw nodeNotFoundAtPathError(from, stringifyNavigationInstructions(instructions));
             }
             switch (step) {
-                case NodeNavigationStep.FirstChild:
+                case NODE_NAVIGATION_STEP_FIRST_CHILD:
                     node = node.firstChild;
                     break;
-                case NodeNavigationStep.NextSibling:
+                case NODE_NAVIGATION_STEP_NEXT_SIBLING:
                     node = node.nextSibling;
                     break;
             }
@@ -16548,7 +16541,7 @@ function navigateBetween(start, finish) {
             // First navigate to `finish`'s parent
             ...parentPath,
             // Then to its first child.
-            NodeNavigationStep.FirstChild,
+            NODE_NAVIGATION_STEP_FIRST_CHILD,
             // And finally from that node to `finish` (maybe a no-op if we're already there).
             ...childPath,
         ];
@@ -16562,7 +16555,7 @@ function navigateBetweenSiblings(start, finish) {
     const nav = [];
     let node = null;
     for (node = start; node != null && node !== finish; node = node.nextSibling) {
-        nav.push(NodeNavigationStep.NextSibling);
+        nav.push(NODE_NAVIGATION_STEP_NEXT_SIBLING);
     }
     // If the `node` becomes `null` or `undefined` at the end, that means that we
     // didn't find the `end` node, thus return `null` (which would trigger serialization
@@ -18121,7 +18114,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-915593a']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-4491704']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -35001,7 +34994,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-915593a');
+const VERSION = new Version('19.2.0-next.0+sha-4491704');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
