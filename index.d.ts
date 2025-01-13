@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-790221b
+ * @license Angular v19.2.0-next.0+sha-435d31e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14282,7 +14282,7 @@ export declare interface ɵPipeDef<T> {
  * Profiler function which the runtime will invoke before and after user code.
  */
 export declare interface ɵProfiler {
-    (event: ɵProfilerEvent, instance: {} | null, hookOrListener?: (e?: any) => any): void;
+    (event: ɵProfilerEvent, instance?: {} | null, hookOrListener?: (e?: any) => any): void;
 }
 
 /**
