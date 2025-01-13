@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.0.6+sha-64f1bd7
+ * @license Angular v19.0.6+sha-4866cbd
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4281,7 +4281,7 @@ class TypeofExpression extends AST {
         this.expression = expression;
     }
     visit(visitor, context = null) {
-        return visitor.visitTypeofExpresion(this, context);
+        return visitor.visitTypeofExpression(this, context);
     }
 }
 class NonNullAssert extends AST {
@@ -4441,7 +4441,7 @@ class RecursiveAstVisitor {
     visitPrefixNot(ast, context) {
         this.visit(ast.expression, context);
     }
-    visitTypeofExpresion(ast, context) {
+    visitTypeofExpression(ast, context) {
         this.visit(ast.expression, context);
     }
     visitNonNullAssert(ast, context) {
@@ -19001,7 +19001,7 @@ class SerializeExpressionVisitor {
             .map((e) => e.visit(this, context))
             .join(', ')})`;
     }
-    visitTypeofExpresion(ast, context) {
+    visitTypeofExpression(ast, context) {
         return `typeof ${ast.expression.visit(this, context)}`;
     }
     visitASTWithSource(ast, context) {
@@ -30321,7 +30321,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.0.6+sha-64f1bd7');
+new Version('19.0.6+sha-4866cbd');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31729,7 +31729,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-99fcd356.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-bbad39b5.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -40978,7 +40978,7 @@ class AstTranslator {
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
-    visitTypeofExpresion(ast) {
+    visitTypeofExpression(ast) {
         const expression = wrapForDiagnostics(this.translate(ast.expression));
         const node = ts__default["default"].factory.createTypeOfExpression(expression);
         addParseSpanInfo(node, ast.sourceSpan);
@@ -41192,7 +41192,7 @@ class VeSafeLhsInferenceBugDetector {
     visitPrefixNot(ast) {
         return ast.expression.visit(this);
     }
-    visitTypeofExpresion(ast) {
+    visitTypeofExpression(ast) {
         return ast.expression.visit(this);
     }
     visitNonNullAssert(ast) {
