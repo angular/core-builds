@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-2ca2587
+ * @license Angular v19.2.0-next.0+sha-815f1b1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -3243,7 +3243,7 @@ const setProfiler = (profiler) => {
  *  execution context
  * @returns
  */
-const profiler = function (event, instance, hookOrListener) {
+const profiler = function (event, instance = null, hookOrListener) {
     if (profilerCallback != null /* both `null` and `undefined` */) {
         profilerCallback(event, instance, hookOrListener);
     }
@@ -8669,6 +8669,10 @@ class AfterRenderImpl {
      * might be scheduled.
      */
     execute() {
+        const hasSequencesToExecute = this.sequences.size > 0;
+        if (hasSequencesToExecute) {
+            profiler(16 /* ProfilerEvent.AfterRenderHooksStart */);
+        }
         this.executing = true;
         for (const phase of AFTER_RENDER_PHASES) {
             for (const sequence of this.sequences) {
@@ -8676,7 +8680,11 @@ class AfterRenderImpl {
                     continue;
                 }
                 try {
-                    sequence.pipelinedValue = this.ngZone.runOutsideAngular(() => this.maybeTrace(() => sequence.hooks[phase](sequence.pipelinedValue), sequence.snapshot));
+                    sequence.pipelinedValue = this.ngZone.runOutsideAngular(() => this.maybeTrace(() => {
+                        const hookFn = sequence.hooks[phase];
+                        const value = hookFn(sequence.pipelinedValue);
+                        return value;
+                    }, sequence.snapshot));
                 }
                 catch (err) {
                     sequence.erroredOrDestroyed = true;
@@ -8702,6 +8710,9 @@ class AfterRenderImpl {
             this.scheduler.notify(8 /* NotificationSource.DeferredRenderHook */);
         }
         this.deferredRegistrations.clear();
+        if (hasSequencesToExecute) {
+            profiler(17 /* ProfilerEvent.AfterRenderHooksEnd */);
+        }
     }
     register(sequence) {
         if (!this.executing) {
@@ -13085,7 +13096,9 @@ function processHostBindingOpCodes(tView, lView) {
                 const hostBindingFn = hostBindingOpCodes[++i];
                 setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
                 const context = lView[directiveIdx];
+                profiler(24 /* ProfilerEvent.HostBindingsUpdateStart */, context);
                 hostBindingFn(2 /* RenderFlags.Update */, context);
+                profiler(25 /* ProfilerEvent.HostBindingsUpdateEnd */, context);
             }
         }
     }
@@ -14389,7 +14402,9 @@ function renderComponent(hostLView, componentHostIdx) {
     if (hostRNode !== null && componentView[HYDRATION] === null) {
         componentView[HYDRATION] = retrieveHydrationInfo(hostRNode, componentView[INJECTOR]);
     }
+    profiler(18 /* ProfilerEvent.ComponentStart */);
     renderView(componentTView, componentView, componentView[CONTEXT]);
+    profiler(19 /* ProfilerEvent.ComponentEnd */, componentView[CONTEXT]);
 }
 /**
  * Syncs an LView instance with its blueprint if they have gotten out of sync.
@@ -15048,8 +15063,10 @@ function markTransplantedViewsForRefresh(lView) {
  */
 function detectChangesInComponent(hostLView, componentHostIdx, mode) {
     ngDevMode && assertEqual(isCreationMode(hostLView), false, 'Should be run in update mode');
+    profiler(18 /* ProfilerEvent.ComponentStart */);
     const componentView = getComponentLViewByIndex(componentHostIdx, hostLView);
     detectChangesInViewIfAttached(componentView, mode);
+    profiler(19 /* ProfilerEvent.ComponentEnd */, componentView[CONTEXT]);
 }
 /**
  * Visits a view as part of change detection traversal.
@@ -17822,6 +17839,7 @@ class ComponentFactory extends ComponentFactory$1 {
         this.isBoundToModule = !!ngModule;
     }
     create(injector, projectableNodes, rootSelectorOrNode, environmentInjector) {
+        profiler(22 /* ProfilerEvent.DynamicComponentStart */);
         const prevConsumer = setActiveConsumer$1(null);
         try {
             // Check if the component is orphan
@@ -17930,6 +17948,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 throw e;
             }
             finally {
+                profiler(23 /* ProfilerEvent.DynamicComponentEnd */);
                 leaveView();
             }
             return new ComponentRef(this.componentType, component, createElementRef(tElementNode, rootLView), rootLView, tElementNode);
@@ -18093,7 +18112,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-2ca2587']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-815f1b1']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -21297,6 +21316,7 @@ function findMatchingDehydratedViewForDeferBlock(lContainer, lDetails) {
  * Applies changes to the DOM to reflect a given state.
  */
 function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) {
+    profiler(20 /* ProfilerEvent.DeferBlockStateStart */);
     const stateTmplIndex = getTemplateIndexForState(newState, hostLView, tNode);
     if (stateTmplIndex !== null) {
         lDetails[DEFER_BLOCK_STATE] = newState;
@@ -21345,6 +21365,7 @@ function applyDeferBlockState(newState, lDetails, lContainer, tNode, hostLView) 
             lDetails[ON_COMPLETE_FNS] = null;
         }
     }
+    profiler(21 /* ProfilerEvent.DeferBlockStateEnd */);
 }
 /**
  * Extends the `applyDeferBlockState` with timer-based scheduling.
@@ -23630,6 +23651,7 @@ class ApplicationRef {
      * {@example core/ts/platform/platform.ts region='domNode'}
      */
     bootstrap(componentOrFactory, rootSelectorOrNode) {
+        profiler(10 /* ProfilerEvent.BootstrapComponentStart */);
         (typeof ngDevMode === 'undefined' || ngDevMode) && warnIfDestroyed(this._destroyed);
         const isComponentFactory = componentOrFactory instanceof ComponentFactory$1;
         const initStatus = this._injector.get(ApplicationInitStatus);
@@ -23670,6 +23692,7 @@ class ApplicationRef {
             const _console = this._injector.get(Console);
             _console.log(`Angular is running in development mode.`);
         }
+        profiler(11 /* ProfilerEvent.BootstrapComponentEnd */, compRef);
         return compRef;
     }
     /**
@@ -23690,6 +23713,7 @@ class ApplicationRef {
     }
     /** @internal */
     _tick = () => {
+        profiler(12 /* ProfilerEvent.ChangeDetectionStart */);
         if (this.tracingSnapshot !== null) {
             const snapshot = this.tracingSnapshot;
             this.tracingSnapshot = null;
@@ -23722,6 +23746,7 @@ class ApplicationRef {
             this._runningTick = false;
             setActiveConsumer$1(prevConsumer);
             this.afterTick.next();
+            profiler(13 /* ProfilerEvent.ChangeDetectionEnd */);
         }
     };
     /**
@@ -23737,7 +23762,9 @@ class ApplicationRef {
         this.deferredDirtyFlags = 0 /* ApplicationRefDirtyFlags.None */;
         let runs = 0;
         while (this.dirtyFlags !== 0 /* ApplicationRefDirtyFlags.None */ && runs++ < MAXIMUM_REFRESH_RERUNS) {
+            profiler(14 /* ProfilerEvent.ChangeDetectionSyncStart */);
             this.synchronizeOnce();
+            profiler(15 /* ProfilerEvent.ChangeDetectionSyncEnd */);
         }
         if ((typeof ngDevMode === 'undefined' || ngDevMode) && runs >= MAXIMUM_REFRESH_RERUNS) {
             throw new RuntimeError(103 /* RuntimeErrorCode.INFINITE_CHANGE_DETECTION */, ngDevMode &&
@@ -34967,7 +34994,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-2ca2587');
+const VERSION = new Version('19.2.0-next.0+sha-815f1b1');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38959,6 +38986,7 @@ function setAlternateWeakRefImpl(impl) {
  * @returns A promise that returns an `ApplicationRef` instance once resolved.
  */
 function internalCreateApplication(config) {
+    profiler(8 /* ProfilerEvent.BootstrapApplicationStart */);
     try {
         const { rootComponent, appProviders, platformProviders } = config;
         if ((typeof ngDevMode === 'undefined' || ngDevMode) && rootComponent !== undefined) {
@@ -38988,6 +39016,9 @@ function internalCreateApplication(config) {
     }
     catch (e) {
         return Promise.reject(e);
+    }
+    finally {
+        profiler(9 /* ProfilerEvent.BootstrapApplicationEnd */);
     }
 }
 
