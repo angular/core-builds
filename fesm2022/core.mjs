@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.6+sha-8f7615c
+ * @license Angular v19.0.6+sha-bb35df4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18088,7 +18088,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.6+sha-8f7615c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.6+sha-bb35df4']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34573,7 +34573,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.6+sha-8f7615c');
+const VERSION = new Version('19.0.6+sha-bb35df4');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39075,13 +39075,16 @@ function serializeLContainer(lContainer, tNode, lView, parentDeferBlockId, conte
                     collectNativeNodesInLContainer(lContainer, rootNodes);
                     // Add defer block into info context.deferBlocks
                     const deferBlockInfo = {
-                        [DEFER_PARENT_BLOCK_ID]: parentDeferBlockId,
                         [NUM_ROOT_NODES]: rootNodes.length,
                         [DEFER_BLOCK_STATE$1]: lDetails[DEFER_BLOCK_STATE],
                     };
                     const serializedTriggers = serializeHydrateTriggers(tDetails.hydrateTriggers);
                     if (serializedTriggers.length > 0) {
                         deferBlockInfo[DEFER_HYDRATE_TRIGGERS] = serializedTriggers;
+                    }
+                    if (parentDeferBlockId !== null) {
+                        // Serialize parent id only when it's present.
+                        deferBlockInfo[DEFER_PARENT_BLOCK_ID] = parentDeferBlockId;
                     }
                     context.deferBlocks.set(deferBlockId, deferBlockInfo);
                     const node = unwrapRNode(lContainer);
