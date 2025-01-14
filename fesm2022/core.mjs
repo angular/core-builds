@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.0.6+sha-bb35df4
+ * @license Angular v19.0.6+sha-f893d07
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18088,7 +18088,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.6+sha-bb35df4']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.0.6+sha-f893d07']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -33071,29 +33071,29 @@ function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals) {
 }
 /**
  * Finds all LViews matching a specific component definition and recreates them.
- * @param def Component definition to search for.
+ * @param oldDef Component definition to search for.
  * @param rootLView View from which to start the search.
  */
-function recreateMatchingLViews(def, rootLView) {
+function recreateMatchingLViews(oldDef, rootLView) {
     ngDevMode &&
-        assertDefined(def.tView, 'Expected a component definition that has been instantiated at least once');
+        assertDefined(oldDef.tView, 'Expected a component definition that has been instantiated at least once');
     const tView = rootLView[TVIEW];
     // Use `tView` to match the LView since `instanceof` can
     // produce false positives when using inheritance.
-    if (tView === def.tView) {
-        ngDevMode && assertComponentDef(def.type);
-        recreateLView(getComponentDef(def.type), rootLView);
+    if (tView === oldDef.tView) {
+        ngDevMode && assertComponentDef(oldDef.type);
+        recreateLView(getComponentDef(oldDef.type), oldDef, rootLView);
         return;
     }
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
         const current = rootLView[i];
         if (isLContainer(current)) {
             for (let i = CONTAINER_HEADER_OFFSET; i < current.length; i++) {
-                recreateMatchingLViews(def, current[i]);
+                recreateMatchingLViews(oldDef, current[i]);
             }
         }
         else if (isLView(current)) {
-            recreateMatchingLViews(def, current);
+            recreateMatchingLViews(oldDef, current);
         }
     }
 }
@@ -33112,10 +33112,11 @@ function clearRendererCache(factory, def) {
 }
 /**
  * Recreates an LView in-place from a new component definition.
- * @param def Definition from which to recreate the view.
+ * @param newDef Definition from which to recreate the view.
+ * @param oldDef Previous component definition being swapped out.
  * @param lView View to be recreated.
  */
-function recreateLView(def, lView) {
+function recreateLView(newDef, oldDef, lView) {
     const instance = lView[CONTEXT];
     const host = lView[HOST];
     // In theory the parent can also be an LContainer, but it appears like that's
@@ -33124,14 +33125,15 @@ function recreateLView(def, lView) {
     ngDevMode && assertLView(parentLView);
     const tNode = lView[T_HOST];
     ngDevMode && assertTNodeType(tNode, 2 /* TNodeType.Element */);
+    ngDevMode && assertNotEqual(newDef, oldDef, 'Expected different component definition');
     // Recreate the TView since the template might've changed.
-    const newTView = getOrCreateComponentTView(def);
+    const newTView = getOrCreateComponentTView(newDef);
     // Always force the creation of a new renderer to ensure state captured during construction
     // stays consistent with the new component definition by clearing any old cached factories.
     const rendererFactory = lView[ENVIRONMENT].rendererFactory;
-    clearRendererCache(rendererFactory, def);
+    clearRendererCache(rendererFactory, oldDef);
     // Create a new LView from the new TView, but reusing the existing TNode and DOM node.
-    const newLView = createLView(parentLView, newTView, instance, getInitialLViewFlagsFromDef(def), host, tNode, null, rendererFactory.createRenderer(host, def), null, null, null);
+    const newLView = createLView(parentLView, newTView, instance, getInitialLViewFlagsFromDef(newDef), host, tNode, null, rendererFactory.createRenderer(host, newDef), null, null, null);
     // Detach the LView from its current place in the tree so we don't
     // start traversing any siblings and modifying their structure.
     replaceLViewInTree(parentLView, lView, newLView, tNode.index);
@@ -34573,7 +34575,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.0.6+sha-bb35df4');
+const VERSION = new Version('19.0.6+sha-f893d07');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
