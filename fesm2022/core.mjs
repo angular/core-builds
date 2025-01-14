@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0-rc.0+sha-99c542a
+ * @license Angular v19.1.0-rc.0+sha-3e7ba3d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -4398,7 +4398,7 @@ class NodeInjectorFactory {
      * Example:
      *
      * If we have a component and directive active an a single element as declared here
-     * ```
+     * ```ts
      * component:
      *   providers: [ {provide: String, useValue: 'component', multi: true} ],
      *   viewProviders: [ {provide: String, useValue: 'componentView', multi: true} ],
@@ -4409,7 +4409,7 @@ class NodeInjectorFactory {
      *
      * Then the expected results are:
      *
-     * ```
+     * ```ts
      * providers: ['component', 'directive']
      * viewProviders: ['component', 'componentView', 'directive']
      * ```
@@ -4432,7 +4432,7 @@ class NodeInjectorFactory {
      * Example:
      *
      * Given:
-     * ```
+     * ```ts
      * providers: [ {provide: String, useValue: 'all', multi: true} ],
      * viewProviders: [ {provide: String, useValue: 'viewOnly', multi: true} ],
      * ```
@@ -6134,7 +6134,7 @@ class PendingTasks {
     /**
      * Runs an asynchronous function and blocks the application's stability until the function completes.
      *
-     * ```
+     * ```ts
      * pendingTasks.run(async () => {
      *   const userData = await fetch('/api/user');
      *   this.userData.set(userData);
@@ -6144,7 +6144,7 @@ class PendingTasks {
      * Application stability is at least delayed until the next tick after the `run` method resolves
      * so it is safe to make additional updates to application state that would require UI synchronization:
      *
-     * ```
+     * ```ts
      * const userData = await pendingTasks.run(() => fetch('/api/user'));
      * this.userData.set(userData);
      * ```
@@ -16211,7 +16211,7 @@ function loadIcuContainerVisitor() {
      * to determine which root belong to the ICU.
      *
      * Example of usage.
-     * ```
+     * ```ts
      * const nextRNode = icuContainerIteratorStart(tIcuContainerNode, lView);
      * let rNode: RNode|null;
      * while(rNode = nextRNode()) {
@@ -18093,7 +18093,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-rc.0+sha-99c542a']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0-rc.0+sha-3e7ba3d']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34967,7 +34967,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0-rc.0+sha-99c542a');
+const VERSION = new Version('19.1.0-rc.0+sha-3e7ba3d');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38240,7 +38240,7 @@ class IterableDiffers {
      * which will only be applied to the injector for this component and its children.
      * This step is all that's required to make a new {@link IterableDiffer} available.
      *
-     * ```
+     * ```ts
      * @Component({
      *   viewProviders: [
      *     IterableDiffers.extend([new ImmutableListDiffer()])
@@ -38314,7 +38314,7 @@ class KeyValueDiffers {
      * which will only be applied to the injector for this component and its children.
      * This step is all that's required to make a new {@link KeyValueDiffer} available.
      *
-     * ```
+     * ```ts
      * @Component({
      *   viewProviders: [
      *     KeyValueDiffers.extend([new ImmutableMapDiffer()])

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.0-rc.0+sha-99c542a
+ * @license Angular v19.1.0-rc.0+sha-3e7ba3d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7350,7 +7350,7 @@ class ShadowCss {
      *
      * For example, we convert this css:
      *
-     * ```
+     * ```scss
      * .box {
      *   animation: box-animation 1s forwards;
      * }
@@ -7364,7 +7364,7 @@ class ShadowCss {
      *
      * to this:
      *
-     * ```
+     * ```scss
      * .box {
      *   animation: scopeName_box-animation 1s forwards;
      * }
@@ -7393,7 +7393,7 @@ class ShadowCss {
      *
      * For example, it takes a rule such as:
      *
-     * ```
+     * ```scss
      * @keyframes box-animation {
      *   to {
      *     background-color: green;
@@ -7403,7 +7403,7 @@ class ShadowCss {
      *
      * and returns:
      *
-     * ```
+     * ```scss
      * @keyframes scopeName_box-animation {
      *   to {
      *     background-color: green;
@@ -17764,7 +17764,7 @@ class Parser {
      * parsing errors in case the given expression is invalid.
      *
      * For example,
-     * ```
+     * ```html
      *   <div *ngFor="let item of items">
      *         ^      ^ absoluteValueOffset for `templateValue`
      *         absoluteKeyOffset for `templateKey`
@@ -17775,7 +17775,7 @@ class Parser {
      * 3. ngForOf -> items
      *
      * This is apparent from the de-sugared template:
-     * ```
+     * ```html
      *   <ng-template ngFor let-item [ngForOf]="items">
      * ```
      *
@@ -18632,7 +18632,7 @@ class _ParseAST {
      * parsing errors in case the given expression is invalid.
      *
      * For example,
-     * ```
+     * ```html
      *   <div *ngFor="let item of items; index as i; trackBy: func">
      * ```
      * contains five bindings:
@@ -26382,7 +26382,7 @@ class BindingParser {
     }
     /**
      * Parses the bindings in a microsyntax expression, e.g.
-     * ```
+     * ```html
      *    <tag *tplKey="let value1 = prop; let value2 = localVar">
      * ```
      *
@@ -30418,7 +30418,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.1.0-rc.0+sha-99c542a');
+new Version('19.1.0-rc.0+sha-3e7ba3d');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31122,7 +31122,7 @@ exports.ErrorCode = void 0;
      * The left-hand side of an assignment expression was a template variable. Effectively, the
      * template looked like:
      *
-     * ```
+     * ```html
      * <ng-template let-something>
      *   <button (click)="something = ...">...</button>
      * </ng-template>
@@ -31826,7 +31826,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-58cde8a0.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-aa999c96.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -33161,13 +33161,13 @@ class TypeScriptReflectionHost {
      *
      * For example, if the identifier is the `Directive` part of a qualified type chain like:
      *
-     * ```
+     * ```ts
      * core.Directive
      * ```
      *
      * then it might be that `core` is a namespace import such as:
      *
-     * ```
+     * ```ts
      * import * as core from 'tslib';
      * ```
      *
