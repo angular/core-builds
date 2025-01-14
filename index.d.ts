@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-265265a
+ * @license Angular v19.2.0-next.0+sha-b9155b5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1303,7 +1303,7 @@ export declare interface BootstrapOptions {
      * Optionally specify coalescing event change detections or not.
      * Consider the following case.
      *
-     * ```
+     * ```html
      * <div (click)="doSomething()">
      *   <button (click)="doSomethingElse()"></button>
      * </div>
@@ -1326,7 +1326,7 @@ export declare interface BootstrapOptions {
      * into a single change detection.
      *
      * Consider the following case.
-     * ```
+     * ```ts
      * for (let i = 0; i < 10; i ++) {
      *   ngZone.run(() => {
      *     // do something
@@ -1946,7 +1946,7 @@ declare interface ComponentDefinition<T> extends Omit<DirectiveDefinition<T>, 'f
      *
      * This function has following structure.
      *
-     * ```
+     * ```ts
      * function Template<T>(ctx:T, creationMode: boolean) {
      *   if (creationMode) {
      *     // Contains creation mode instructions.
@@ -6635,7 +6635,7 @@ export declare class IterableDiffers {
      * which will only be applied to the injector for this component and its children.
      * This step is all that's required to make a new {@link IterableDiffer} available.
      *
-     * ```
+     * ```ts
      * @Component({
      *   viewProviders: [
      *     IterableDiffers.extend([new ImmutableListDiffer()])
@@ -6785,7 +6785,7 @@ export declare class KeyValueDiffers {
      * which will only be applied to the injector for this component and its children.
      * This step is all that's required to make a new {@link KeyValueDiffer} available.
      *
-     * ```
+     * ```ts
      * @Component({
      *   viewProviders: [
      *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
@@ -7077,7 +7077,7 @@ declare interface LView<T = unknown> extends Array<any> {
      * Store the `TNode` of the location where the current `LView` is inserted into.
      *
      * Given:
-     * ```
+     * ```html
      * <div>
      *   <ng-template><span></span></ng-template>
      * </div>
@@ -7092,7 +7092,7 @@ declare interface LView<T = unknown> extends Array<any> {
      * insertion information in the `TView` and instead we must store it in the `LView[T_HOST]`.
      *
      * So to determine where is our insertion parent we would execute:
-     * ```
+     * ```ts
      * const parentLView = lView[PARENT];
      * const parentTNode = lView[T_HOST];
      * const insertionParent = parentLView[parentTNode.index];
@@ -7178,7 +7178,7 @@ declare interface LView<T = unknown> extends Array<any> {
      * `DECLARATION_VIEW`.
      *
      * Example:
-     * ```
+     * ```html
      * <#VIEW #myComp>
      *  <div *ngIf="true">
      *   <ng-template #myTmpl>...</ng-template>
@@ -7203,7 +7203,7 @@ declare interface LView<T = unknown> extends Array<any> {
      * `DECLARATION_COMPONENT_VIEW` to differentiate them. As in this example.
      *
      * Example showing intra component `LView` movement.
-     * ```
+     * ```html
      * <#VIEW #myComp>
      *   <div *ngIf="condition; then thenBlock else elseBlock"></div>
      *   <ng-template #thenBlock>Content to render when condition is true.</ng-template>
@@ -7213,7 +7213,7 @@ declare interface LView<T = unknown> extends Array<any> {
      * The `thenBlock` and `elseBlock` is moved but not transplanted.
      *
      * Example showing inter component `LView` movement (transplanted view).
-     * ```
+     * ```html
      * <#VIEW #myComp>
      *   <ng-template #myTmpl>...</ng-template>
      *   <insertion-component [template]="myTmpl"></insertion-component>
@@ -7603,7 +7603,7 @@ export declare interface NgModule {
      * The following example defines a class that is injected in
      * the HelloWorld NgModule:
      *
-     * ```
+     * ```ts
      * class Greeter {
      *    greet(name:string) {
      *      return 'Hello ' + name + '!';
@@ -8033,7 +8033,7 @@ export declare interface NgZoneOptions {
      * Optionally specify coalescing event change detections or not.
      * Consider the following case.
      *
-     * ```
+     * ```html
      * <div (click)="doSomething()">
      *   <button (click)="doSomethingElse()"></button>
      * </div>
@@ -8055,7 +8055,7 @@ export declare interface NgZoneOptions {
      * into a single change detection.
      *
      * Consider the following case.
-     * ```
+     * ```ts
      * for (let i = 0; i < 10; i ++) {
      *   ngZone.run(() => {
      *     // do something
@@ -8474,7 +8474,7 @@ export declare class PendingTasks {
     /**
      * Runs an asynchronous function and blocks the application's stability until the function completes.
      *
-     * ```
+     * ```ts
      * pendingTasks.run(async () => {
      *   const userData = await fetch('/api/user');
      *   this.userData.set(userData);
@@ -8484,7 +8484,7 @@ export declare class PendingTasks {
      * Application stability is at least delayed until the next tick after the `run` method resolves
      * so it is safe to make additional updates to application state that would require UI synchronization:
      *
-     * ```
+     * ```ts
      * const userData = await pendingTasks.run(() => fetch('/api/user'));
      * this.userData.set(userData);
      * ```
@@ -10832,7 +10832,7 @@ declare interface TNode {
      * such a case the value stores an array of text nodes to insert.
      *
      * Example:
-     * ```
+     * ```html
      * <div i18n>
      *   Hello <span>World</span>!
      * </div>
@@ -10845,7 +10845,7 @@ declare interface TNode {
      * `<span>` itself.
      *
      * Pseudo code:
-     * ```
+     * ```ts
      *   if (insertBeforeIndex === null) {
      *     // append as normal
      *   } else if (Array.isArray(insertBeforeIndex)) {
@@ -11055,12 +11055,12 @@ declare interface TNode {
      *
      * For easier discussion assume this example:
      * `<parent>`'s view definition:
-     * ```
+     * ```html
      * <child id="c1">content1</child>
      * <child id="c2"><span>content2</span></child>
      * ```
      * `<child>`'s view definition:
-     * ```
+     * ```html
      * <ng-content id="cont1"></ng-content>
      * ```
      *
@@ -11120,7 +11120,7 @@ declare interface TNode {
      * styling than the instruction.
      *
      * Imagine:
-     * ```
+     * ```angular-ts
      * <div style="color: highest;" my-dir>
      *
      * @Directive({
@@ -12830,12 +12830,12 @@ export declare const enum ɵAttributeMarker {
      * ## Example:
      *
      * Given:
-     * ```
-     * <div class="foo bar baz">...<d/vi>
+     * ```html
+     * <div class="foo bar baz">...</div>
      * ```
      *
      * the generated code is:
-     * ```
+     * ```ts
      * var _c1 = [AttributeMarker.Classes, 'foo', 'bar', 'baz'];
      * ```
      */
@@ -12848,12 +12848,12 @@ export declare const enum ɵAttributeMarker {
      * ## Example:
      *
      * Given:
-     * ```
+     * ```html
      * <div style="width:100px; height:200px; color:red">...</div>
      * ```
      *
      * the generated code is:
-     * ```
+     * ```ts
      * var _c1 = [AttributeMarker.Styles, 'width', '100px', 'height'. '200px', 'color', 'red'];
      * ```
      */
@@ -12863,13 +12863,13 @@ export declare const enum ɵAttributeMarker {
      *
      * For example, given the following HTML:
      *
-     * ```
+     * ```html
      * <div moo="car" [foo]="exp" (bar)="doSth()">
      * ```
      *
      * the generated code is:
      *
-     * ```
+     * ```ts
      * var _c1 = ['moo', 'car', AttributeMarker.Bindings, 'foo', 'bar'];
      * ```
      */
@@ -12879,7 +12879,7 @@ export declare const enum ɵAttributeMarker {
      *
      * For example, given the following HTML:
      *
-     * ```
+     * ```html
      * <div *ngFor="let value of values; trackBy:trackBy" dirA [dirB]="value">
      * ```
      *
@@ -12904,13 +12904,13 @@ export declare const enum ɵAttributeMarker {
      *
      * For example, given the following HTML:
      *
-     * ```
+     * ```html
      * <h1 attr="value" ngProjectAs="[title]">
      * ```
      *
      * the generated code for the `element()` instruction would include:
      *
-     * ```
+     * ```ts
      * ['attr', 'value', AttributeMarker.ProjectAs, ['', 'title', '']]
      * ```
      */
@@ -12920,14 +12920,15 @@ export declare const enum ɵAttributeMarker {
      *
      * For example, given the following HTML:
      *
-     * ```
+     * ```html
      * <div moo="car" foo="value" i18n-foo [bar]="binding" i18n-bar>
      * ```
      *
      * the generated code is:
      *
-     * ```
+     * ```ts
      * var _c1 = ['moo', 'car', AttributeMarker.I18n, 'foo', 'bar'];
+     * ```
      */
     I18n = 6
 }
