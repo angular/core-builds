@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.0+sha-2e138e6
+ * @license Angular v19.2.0-next.0+sha-d0ad030
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30418,7 +30418,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.0-next.0+sha-2e138e6');
+new Version('19.2.0-next.0+sha-d0ad030');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31343,10 +31343,6 @@ exports.ErrorCode = void 0;
      */
     ErrorCode[ErrorCode["UNUSED_STANDALONE_IMPORTS"] = 8113] = "UNUSED_STANDALONE_IMPORTS";
     /**
-     * A structural directive is used in a template, but the directive is not imported.
-     */
-    ErrorCode[ErrorCode["MISSING_STRUCTURAL_DIRECTIVE"] = 8114] = "MISSING_STRUCTURAL_DIRECTIVE";
-    /**
      * The template type-checking engine would need to generate an inline type check block for a
      * component, but the current type-checking environment doesn't support it.
      */
@@ -31495,7 +31491,6 @@ exports.ExtendedTemplateDiagnosticName = void 0;
     ExtendedTemplateDiagnosticName["NULLISH_COALESCING_NOT_NULLABLE"] = "nullishCoalescingNotNullable";
     ExtendedTemplateDiagnosticName["OPTIONAL_CHAIN_NOT_NULLABLE"] = "optionalChainNotNullable";
     ExtendedTemplateDiagnosticName["MISSING_CONTROL_FLOW_DIRECTIVE"] = "missingControlFlowDirective";
-    ExtendedTemplateDiagnosticName["MISSING_STRUCTURAL_DIRECTIVE"] = "missingStructuralDirective";
     ExtendedTemplateDiagnosticName["TEXT_ATTRIBUTE_NOT_BINDING"] = "textAttributeNotBinding";
     ExtendedTemplateDiagnosticName["UNINVOKED_FUNCTION_IN_EVENT_BINDING"] = "uninvokedFunctionInEventBinding";
     ExtendedTemplateDiagnosticName["MISSING_NGFOROF_LET"] = "missingNgForOfLet";
@@ -31831,7 +31826,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-ddc3a6d5.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-aa999c96.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
