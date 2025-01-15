@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0+sha-e36e812
+ * @license Angular v19.1.0+sha-810ed6a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -175,10 +175,10 @@ class TestBedApplicationErrorHandler {
             throw e;
         }
     }
-    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.1.0+sha-e36e812", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable });
-    static ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.1.0+sha-e36e812", ngImport: i0, type: TestBedApplicationErrorHandler });
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "19.1.0+sha-810ed6a", ngImport: i0, type: TestBedApplicationErrorHandler, deps: [], target: i0.ɵɵFactoryTarget.Injectable });
+    static ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "19.1.0+sha-810ed6a", ngImport: i0, type: TestBedApplicationErrorHandler });
 }
-i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.1.0+sha-e36e812", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "19.1.0+sha-810ed6a", ngImport: i0, type: TestBedApplicationErrorHandler, decorators: [{
             type: Injectable
         }] });
 
