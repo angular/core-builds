@@ -1,12 +1,12 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.0+sha-3b3040d
+ * @license Angular v19.2.0-next.0+sha-ed705a8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 'use strict';
 
-var checker = require('./checker-aa999c96.js');
+var checker = require('./checker-ddc3a6d5.js');
 var ts = require('typescript');
 var p = require('path');
 require('os');
@@ -999,7 +999,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-3b3040d'));
+    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-ed705a8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1017,7 +1017,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-3b3040d'));
+    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-ed705a8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1112,7 +1112,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-3b3040d'));
+    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-ed705a8'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1528,7 +1528,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-3b3040d'));
+    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-ed705a8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1563,7 +1563,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-3b3040d'));
+    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-ed705a8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1614,7 +1614,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-3b3040d'));
+    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-ed705a8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1647,7 +1647,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-3b3040d'));
+    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-ed705a8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1698,7 +1698,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-3b3040d'));
+    definitionMap.set('version', checker.literal('19.2.0-next.0+sha-ed705a8'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -16663,7 +16663,7 @@ function buildDiagnosticForSignal(ctx, node, component) {
     }
     return [];
 }
-const factory$9 = {
+const factory$a = {
     code: checker.ErrorCode.INTERPOLATED_SIGNAL_NOT_INVOKED,
     name: checker.ExtendedTemplateDiagnosticName.INTERPOLATED_SIGNAL_NOT_INVOKED,
     create: () => new InterpolatedSignalCheck(),
@@ -16689,7 +16689,7 @@ class InvalidBananaInBoxCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$8 = {
+const factory$9 = {
     code: checker.ErrorCode.INVALID_BANANA_IN_BOX,
     name: checker.ExtendedTemplateDiagnosticName.INVALID_BANANA_IN_BOX,
     create: () => new InvalidBananaInBoxCheck(),
@@ -16704,7 +16704,7 @@ const factory$8 = {
  * are used as structural directives and a warning would be generated. Once the
  * `CommonModule` is included, the `ngSwitch` would also be covered.
  */
-const KNOWN_CONTROL_FLOW_DIRECTIVES = new Map([
+const KNOWN_CONTROL_FLOW_DIRECTIVES$1 = new Map([
     ['ngIf', { directive: 'NgIf', builtIn: '@if' }],
     ['ngFor', { directive: 'NgFor', builtIn: '@for' }],
     ['ngSwitchCase', { directive: 'NgSwitchCase', builtIn: '@switch with @case' }],
@@ -16732,7 +16732,7 @@ class MissingControlFlowDirectiveCheck extends TemplateCheckWithVisitor {
     visitNode(ctx, component, node) {
         if (!(node instanceof checker.Template))
             return [];
-        const controlFlowAttr = node.templateAttrs.find((attr) => KNOWN_CONTROL_FLOW_DIRECTIVES.has(attr.name));
+        const controlFlowAttr = node.templateAttrs.find((attr) => KNOWN_CONTROL_FLOW_DIRECTIVES$1.has(attr.name));
         if (!controlFlowAttr)
             return [];
         const symbol = ctx.templateTypeChecker.getSymbolOfNode(node, component);
@@ -16740,7 +16740,7 @@ class MissingControlFlowDirectiveCheck extends TemplateCheckWithVisitor {
             return [];
         }
         const sourceSpan = controlFlowAttr.keySpan || controlFlowAttr.sourceSpan;
-        const directiveAndBuiltIn = KNOWN_CONTROL_FLOW_DIRECTIVES.get(controlFlowAttr.name);
+        const directiveAndBuiltIn = KNOWN_CONTROL_FLOW_DIRECTIVES$1.get(controlFlowAttr.name);
         const errorMessage = `The \`*${controlFlowAttr.name}\` directive was used in the template, ` +
             `but neither the \`${directiveAndBuiltIn?.directive}\` directive nor the \`CommonModule\` was imported. ` +
             `Use Angular's built-in control flow ${directiveAndBuiltIn?.builtIn} or ` +
@@ -16750,7 +16750,7 @@ class MissingControlFlowDirectiveCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$7 = {
+const factory$8 = {
     code: checker.ErrorCode.MISSING_CONTROL_FLOW_DIRECTIVE,
     name: checker.ExtendedTemplateDiagnosticName.MISSING_CONTROL_FLOW_DIRECTIVE,
     create: (options) => {
@@ -16783,10 +16783,67 @@ class MissingNgForOfLetCheck extends TemplateCheckWithVisitor {
         return [diagnostic];
     }
 }
-const factory$6 = {
+const factory$7 = {
     code: checker.ErrorCode.MISSING_NGFOROF_LET,
     name: checker.ExtendedTemplateDiagnosticName.MISSING_NGFOROF_LET,
     create: () => new MissingNgForOfLetCheck(),
+};
+
+/**
+ * The list of known control flow directives present in the `CommonModule`.
+ *
+ * If these control flow directives are missing they will be reported by a separate diagnostic.
+ */
+const KNOWN_CONTROL_FLOW_DIRECTIVES = new Set([
+    'ngIf',
+    'ngFor',
+    'ngSwitch',
+    'ngSwitchCase',
+    'ngSwitchDefault',
+]);
+/**
+ * Ensures that there are no structural directives (something like *select or *featureFlag)
+ * used in a template of a *standalone* component without importing the directive. Returns
+ * diagnostics in case such a directive is detected.
+ *
+ * Note: this check only handles the cases when structural directive syntax is used (e.g. `*featureFlag`).
+ * Regular binding syntax (e.g. `[featureFlag]`) is handled separately in type checker and treated as a
+ * hard error instead of a warning.
+ */
+class MissingStructuralDirectiveCheck extends TemplateCheckWithVisitor {
+    code = checker.ErrorCode.MISSING_STRUCTURAL_DIRECTIVE;
+    run(ctx, component, template) {
+        const componentMetadata = ctx.templateTypeChecker.getDirectiveMetadata(component);
+        // Avoid running this check for non-standalone components.
+        if (!componentMetadata || !componentMetadata.isStandalone) {
+            return [];
+        }
+        return super.run(ctx, component, template);
+    }
+    visitNode(ctx, component, node) {
+        if (!(node instanceof checker.Template))
+            return [];
+        const customStructuralDirective = node.templateAttrs.find((attr) => !KNOWN_CONTROL_FLOW_DIRECTIVES.has(attr.name));
+        if (!customStructuralDirective)
+            return [];
+        const symbol = ctx.templateTypeChecker.getSymbolOfNode(node, component);
+        if (symbol === null || symbol.directives.length > 0) {
+            return [];
+        }
+        const sourceSpan = customStructuralDirective.keySpan || customStructuralDirective.sourceSpan;
+        const errorMessage = `An unknown structural directive \`${customStructuralDirective.name}\` was used in the template, ` +
+            `without a corresponding import in the component. ` +
+            `Make sure that the directive is included in the \`@Component.imports\` array of this component.`;
+        const diagnostic = ctx.makeTemplateDiagnostic(sourceSpan, errorMessage);
+        return [diagnostic];
+    }
+}
+const factory$6 = {
+    code: checker.ErrorCode.MISSING_STRUCTURAL_DIRECTIVE,
+    name: checker.ExtendedTemplateDiagnosticName.MISSING_STRUCTURAL_DIRECTIVE,
+    create: (options) => {
+        return new MissingStructuralDirectiveCheck();
+    },
 };
 
 /**
@@ -17158,14 +17215,15 @@ function assertNever(value) {
 }
 
 const ALL_DIAGNOSTIC_FACTORIES = [
-    factory$8,
+    factory$9,
     factory$5,
     factory$4,
-    factory$7,
+    factory$8,
     factory$2,
+    factory$7,
     factory$6,
     factory$3,
-    factory$9,
+    factory$a,
     factory$1,
     factory,
 ];
@@ -20226,7 +20284,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.2.0-next.0+sha-3b3040d` usually means that core is at head so it supports
+    // A version of `19.2.0-next.0+sha-ed705a8` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
