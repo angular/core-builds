@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.1+sha-d12a186
+ * @license Angular v19.1.1+sha-81f8fe6
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9729,7 +9729,7 @@ export declare interface Resource<T> {
     /**
      * The current value of the `Resource`, or `undefined` if there is no current value.
      */
-    readonly value: Signal<T | undefined>;
+    readonly value: Signal<T>;
     /**
      * The current status of the `Resource`, which describes what the resource is currently doing and
      * what can be expected of its `value`.
@@ -9748,9 +9748,7 @@ export declare interface Resource<T> {
      *
      * This function is reactive.
      */
-    hasValue(): this is Resource<T> & {
-        value: Signal<T>;
-    };
+    hasValue(): this is Resource<Exclude<T, undefined>>;
     /**
      * Instructs the resource to re-load any asynchronous dependency it may have.
      *
@@ -9772,7 +9770,7 @@ export declare interface Resource<T> {
  *
  * @experimental
  */
-export declare function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T>;
+export declare function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T | undefined>;
 
 /**
  * Loading function for a `Resource`.
@@ -12688,18 +12686,16 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
  * @experimental
  */
 export declare interface WritableResource<T> extends Resource<T> {
-    readonly value: WritableSignal<T | undefined>;
-    hasValue(): this is WritableResource<T> & {
-        value: WritableSignal<T>;
-    };
+    readonly value: WritableSignal<T>;
+    hasValue(): this is WritableResource<Exclude<T, undefined>>;
     /**
      * Convenience wrapper for `value.set`.
      */
-    set(value: T | undefined): void;
+    set(value: T): void;
     /**
      * Convenience wrapper for `value.update`.
      */
-    update(updater: (value: T | undefined) => T | undefined): void;
+    update(updater: (value: T) => T): void;
     asReadonly(): Resource<T>;
 }
 
