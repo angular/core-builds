@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-aa45d44
+ * @license Angular v19.2.0-next.0+sha-f8b8e80
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18149,7 +18149,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-aa45d44']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-f8b8e80']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34999,7 +34999,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-aa45d44');
+const VERSION = new Version('19.2.0-next.0+sha-f8b8e80');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38800,8 +38800,17 @@ const COMPUTED_NODE = /* @__PURE__ */ (() => {
             node.value = COMPUTING$1;
             const prevConsumer = consumerBeforeComputation(node);
             let newValue;
+            let wasEqual = false;
             try {
                 newValue = node.computation();
+                // We want to mark this node as errored if calling `equal` throws; however, we don't want
+                // to track any reactive reads inside `equal`.
+                setActiveConsumer(null);
+                wasEqual =
+                    oldValue !== UNSET$1 &&
+                        oldValue !== ERRORED$1 &&
+                        newValue !== ERRORED$1 &&
+                        node.equal(oldValue, newValue);
             }
             catch (err) {
                 newValue = ERRORED$1;
@@ -38810,10 +38819,7 @@ const COMPUTED_NODE = /* @__PURE__ */ (() => {
             finally {
                 consumerAfterComputation(node, prevConsumer);
             }
-            if (oldValue !== UNSET$1 &&
-                oldValue !== ERRORED$1 &&
-                newValue !== ERRORED$1 &&
-                node.equal(oldValue, newValue)) {
+            if (wasEqual) {
                 // No change to `valueVersion` - old and new values are
                 // semantically equivalent.
                 node.value = oldValue;
