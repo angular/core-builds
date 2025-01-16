@@ -1,10 +1,10 @@
 /**
- * @license Angular v19.1.0+sha-0d019e9
+ * @license Angular v19.1.0+sha-74daef1
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, producerUpdateValueVersion as producerUpdateValueVersion$1, producerMarkClean as producerMarkClean$1, defaultEquals as defaultEquals$1, createWatch as createWatch$1, isInNotificationPhase as isInNotificationPhase$1 } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, producerUpdateValueVersion as producerUpdateValueVersion$1, producerMarkClean as producerMarkClean$1, defaultEquals as defaultEquals$1, createWatch as createWatch$1, isInNotificationPhase as isInNotificationPhase$1 } from '@angular/core/primitives/signals';
 export { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { Attribute as Attribute$1, EventContract, EventContractContainer, getAppScopedQueuedEventInfos, clearAppScopedEarlyEventContract, EventDispatcher, registerDispatcher, isEarlyEventType, isCaptureEventType, EventPhase } from '@angular/core/primitives/event-dispatch';
@@ -3481,6 +3481,40 @@ function getLViewParent(lView) {
     ngDevMode && assertLView(lView);
     const parent = lView[PARENT];
     return isLContainer(parent) ? parent[PARENT] : parent;
+}
+function getOrCreateLViewCleanup(view) {
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+    return (view[CLEANUP] ??= []);
+}
+function getOrCreateTViewCleanup(tView) {
+    return (tView.cleanup ??= []);
+}
+/**
+ * Saves context for this cleanup function in LView.cleanupInstances.
+ *
+ * On the first template pass, saves in TView:
+ * - Cleanup function
+ * - Index of context we just saved in LView.cleanupInstances
+ */
+function storeCleanupWithContext(tView, lView, context, cleanupFn) {
+    const lCleanup = getOrCreateLViewCleanup(lView);
+    // Historically the `storeCleanupWithContext` was used to register both framework-level and
+    // user-defined cleanup callbacks, but over time those two types of cleanups were separated.
+    // This dev mode checks assures that user-level cleanup callbacks are _not_ stored in data
+    // structures reserved for framework-specific hooks.
+    ngDevMode &&
+        assertDefined(context, 'Cleanup context is mandatory when registering framework-level destroy hooks');
+    lCleanup.push(context);
+    if (tView.firstCreatePass) {
+        getOrCreateTViewCleanup(tView).push(cleanupFn, lCleanup.length - 1);
+    }
+    else {
+        // Make sure that no new framework-level cleanup functions are registered after the first
+        // template pass is done (and TView data structures are meant to fully constructed).
+        if (ngDevMode) {
+            Object.freeze(getOrCreateTViewCleanup(tView));
+        }
+    }
 }
 
 const instructionState = {
@@ -7074,6 +7108,76 @@ function unwrapElementRef(value) {
     return value instanceof ElementRef ? value.nativeElement : value;
 }
 
+const markedFeatures = new Set();
+// tslint:disable:ban
+/**
+ * A guarded `performance.mark` for feature marking.
+ *
+ * This method exists because while all supported browser and node.js version supported by Angular
+ * support performance.mark API. This is not the case for other environments such as JSDOM and
+ * Cloudflare workers.
+ */
+function performanceMarkFeature(feature) {
+    if (markedFeatures.has(feature)) {
+        return;
+    }
+    markedFeatures.add(feature);
+    performance?.mark?.('mark_feature_usage', { detail: { feature } });
+}
+
+/**
+ * Checks if the given `value` is a reactive `Signal`.
+ */
+function isSignal(value) {
+    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
+}
+
+/** Symbol used distinguish `WritableSignal` from other non-writable signals and functions. */
+const ɵWRITABLE_SIGNAL = /* @__PURE__ */ Symbol('WRITABLE_SIGNAL');
+/**
+ * Utility function used during template type checking to extract the value from a `WritableSignal`.
+ * @codeGenApi
+ */
+function ɵunwrapWritableSignal(value) {
+    // Note: the function uses `WRITABLE_SIGNAL` as a brand instead of `WritableSignal<T>`,
+    // because the latter incorrectly unwraps non-signal getter functions.
+    return null;
+}
+/**
+ * Create a `Signal` that can be set or updated directly.
+ */
+function signal(initialValue, options) {
+    performanceMarkFeature('NgSignals');
+    const signalFn = createSignal$1(initialValue);
+    const node = signalFn[SIGNAL$1];
+    if (options?.equal) {
+        node.equal = options.equal;
+    }
+    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
+    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
+    signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
+    if (ngDevMode) {
+        signalFn.toString = () => `[Signal: ${signalFn()}]`;
+        node.debugName = options?.debugName;
+    }
+    return signalFn;
+}
+function signalAsReadonlyFn() {
+    const node = this[SIGNAL$1];
+    if (node.readonlyFn === undefined) {
+        const readonlyFn = () => this();
+        readonlyFn[SIGNAL$1] = node;
+        node.readonlyFn = readonlyFn;
+    }
+    return node.readonlyFn;
+}
+/**
+ * Checks if the given `value` is a writeable signal.
+ */
+function isWritableSignal(value) {
+    return isSignal(value) && typeof value.set === 'function';
+}
+
 function symbolIterator() {
     // @ts-expect-error accessing a private member
     return this._results[Symbol.iterator]();
@@ -8535,23 +8639,6 @@ var TracingAction;
  */
 const TracingService = new InjectionToken(ngDevMode ? 'TracingService' : '');
 
-const markedFeatures = new Set();
-// tslint:disable:ban
-/**
- * A guarded `performance.mark` for feature marking.
- *
- * This method exists because while all supported browser and node.js version supported by Angular
- * support performance.mark API. This is not the case for other environments such as JSDOM and
- * Cloudflare workers.
- */
-function performanceMarkFeature(feature) {
-    if (markedFeatures.has(feature)) {
-        return;
-    }
-    markedFeatures.add(feature);
-    performance?.mark?.('mark_feature_usage', { detail: { feature } });
-}
-
 /**
  * Asserts that the current stack frame is not within a reactive context. Useful
  * to disallow certain code from running inside a reactive context (see {@link toSignal}).
@@ -10005,6 +10092,63 @@ function processBlockData(injector) {
         blockDetails.set(blockId, createBlockSummary(blockData[blockId]));
     }
     return blockDetails;
+}
+
+/** Refreshes all content queries declared by directives in a given view */
+function refreshContentQueries(tView, lView) {
+    const contentQueries = tView.contentQueries;
+    if (contentQueries !== null) {
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            for (let i = 0; i < contentQueries.length; i += 2) {
+                const queryStartIdx = contentQueries[i];
+                const directiveDefIdx = contentQueries[i + 1];
+                if (directiveDefIdx !== -1) {
+                    const directiveDef = tView.data[directiveDefIdx];
+                    ngDevMode && assertDefined(directiveDef, 'DirectiveDef not found.');
+                    ngDevMode &&
+                        assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
+                    setCurrentQueryIndex(queryStartIdx);
+                    directiveDef.contentQueries(2 /* RenderFlags.Update */, lView[directiveDefIdx], directiveDefIdx);
+                }
+            }
+        }
+        finally {
+            setActiveConsumer$1(prevConsumer);
+        }
+    }
+}
+function executeViewQueryFn(flags, viewQueryFn, component) {
+    ngDevMode && assertDefined(viewQueryFn, 'View queries function to execute must be defined.');
+    setCurrentQueryIndex(0);
+    const prevConsumer = setActiveConsumer$1(null);
+    try {
+        viewQueryFn(flags, component);
+    }
+    finally {
+        setActiveConsumer$1(prevConsumer);
+    }
+}
+function executeContentQueries(tView, tNode, lView) {
+    if (isContentQueryHost(tNode)) {
+        const prevConsumer = setActiveConsumer$1(null);
+        try {
+            const start = tNode.directiveStart;
+            const end = tNode.directiveEnd;
+            for (let directiveIndex = start; directiveIndex < end; directiveIndex++) {
+                const def = tView.data[directiveIndex];
+                if (def.contentQueries) {
+                    const directiveInstance = lView[directiveIndex];
+                    ngDevMode &&
+                        assertDefined(directiveIndex, 'Incorrect reference to a directive defining a content query');
+                    def.contentQueries(1 /* RenderFlags.Create */, directiveInstance, directiveIndex);
+                }
+            }
+        }
+        finally {
+            setActiveConsumer$1(prevConsumer);
+        }
+    }
 }
 
 /**
@@ -13058,41 +13202,6 @@ function writeToDirectiveInput(def, instance, publicName, privateName, flags, va
     }
 }
 
-/**
- * Invoke `HostBindingsFunction`s for view.
- *
- * This methods executes `TView.hostBindingOpCodes`. It is used to execute the
- * `HostBindingsFunction`s associated with the current `LView`.
- *
- * @param tView Current `TView`.
- * @param lView Current `LView`.
- */
-function processHostBindingOpCodes(tView, lView) {
-    const hostBindingOpCodes = tView.hostBindingOpCodes;
-    if (hostBindingOpCodes === null)
-        return;
-    try {
-        for (let i = 0; i < hostBindingOpCodes.length; i++) {
-            const opCode = hostBindingOpCodes[i];
-            if (opCode < 0) {
-                // Negative numbers are element indexes.
-                setSelectedIndex(~opCode);
-            }
-            else {
-                // Positive numbers are NumberTuple which store bindingRootIndex and directiveIndex.
-                const directiveIdx = opCode;
-                const bindingRootIndx = hostBindingOpCodes[++i];
-                const hostBindingFn = hostBindingOpCodes[++i];
-                setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
-                const context = lView[directiveIdx];
-                hostBindingFn(2 /* RenderFlags.Update */, context);
-            }
-        }
-    }
-    finally {
-        setSelectedIndex(-1);
-    }
-}
 function createLView(parentLView, tView, context, flags, host, tHostNode, environment, renderer, injector, embeddedViewInjector, hydrationInfo) {
     const lView = tView.blueprint.slice();
     lView[HOST] = host;
@@ -13237,30 +13346,6 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
             ? 3 /* ProfilerEvent.TemplateUpdateEnd */
             : 1 /* ProfilerEvent.TemplateCreateEnd */;
         profiler(postHookType, context);
-    }
-}
-//////////////////////////
-//// Element
-//////////////////////////
-function executeContentQueries(tView, tNode, lView) {
-    if (isContentQueryHost(tNode)) {
-        const prevConsumer = setActiveConsumer$1(null);
-        try {
-            const start = tNode.directiveStart;
-            const end = tNode.directiveEnd;
-            for (let directiveIndex = start; directiveIndex < end; directiveIndex++) {
-                const def = tView.data[directiveIndex];
-                if (def.contentQueries) {
-                    const directiveInstance = lView[directiveIndex];
-                    ngDevMode &&
-                        assertDefined(directiveIndex, 'Incorrect reference to a directive defining a content query');
-                    def.contentQueries(1 /* RenderFlags.Create */, directiveInstance, directiveIndex);
-                }
-            }
-        }
-        finally {
-            setActiveConsumer$1(prevConsumer);
-        }
     }
 }
 /**
@@ -13443,33 +13528,6 @@ function applyRootElementTransformImpl(rootElement) {
  */
 function enableApplyRootElementTransformImpl() {
     _applyRootElementTransformImpl = applyRootElementTransformImpl;
-}
-/**
- * Saves context for this cleanup function in LView.cleanupInstances.
- *
- * On the first template pass, saves in TView:
- * - Cleanup function
- * - Index of context we just saved in LView.cleanupInstances
- */
-function storeCleanupWithContext(tView, lView, context, cleanupFn) {
-    const lCleanup = getOrCreateLViewCleanup(lView);
-    // Historically the `storeCleanupWithContext` was used to register both framework-level and
-    // user-defined cleanup callbacks, but over time those two types of cleanups were separated.
-    // This dev mode checks assures that user-level cleanup callbacks are _not_ stored in data
-    // structures reserved for framework-specific hooks.
-    ngDevMode &&
-        assertDefined(context, 'Cleanup context is mandatory when registering framework-level destroy hooks');
-    lCleanup.push(context);
-    if (tView.firstCreatePass) {
-        getOrCreateTViewCleanup(tView).push(cleanupFn, lCleanup.length - 1);
-    }
-    else {
-        // Make sure that no new framework-level cleanup functions are registered after the first
-        // template pass is done (and TView data structures are meant to fully constructed).
-        if (ngDevMode) {
-            Object.freeze(getOrCreateTViewCleanup(tView));
-        }
-    }
 }
 function createTNode(tView, tParent, type, index, value, attrs) {
     ngDevMode &&
@@ -14214,30 +14272,6 @@ function createLContainer(hostNative, currentView, native, tNode) {
         assertEqual(lContainer.length, CONTAINER_HEADER_OFFSET, 'Should allocate correct number of slots for LContainer header.');
     return lContainer;
 }
-/** Refreshes all content queries declared by directives in a given view */
-function refreshContentQueries(tView, lView) {
-    const contentQueries = tView.contentQueries;
-    if (contentQueries !== null) {
-        const prevConsumer = setActiveConsumer$1(null);
-        try {
-            for (let i = 0; i < contentQueries.length; i += 2) {
-                const queryStartIdx = contentQueries[i];
-                const directiveDefIdx = contentQueries[i + 1];
-                if (directiveDefIdx !== -1) {
-                    const directiveDef = tView.data[directiveDefIdx];
-                    ngDevMode && assertDefined(directiveDef, 'DirectiveDef not found.');
-                    ngDevMode &&
-                        assertDefined(directiveDef.contentQueries, 'contentQueries function should be defined');
-                    setCurrentQueryIndex(queryStartIdx);
-                    directiveDef.contentQueries(2 /* RenderFlags.Update */, lView[directiveDefIdx], directiveDefIdx);
-                }
-            }
-        }
-        finally {
-            setActiveConsumer$1(prevConsumer);
-        }
-    }
-}
 /**
  * Adds LView or LContainer to the end of the current view tree.
  *
@@ -14262,20 +14296,6 @@ function addToEndOfViewTree(lView, lViewOrLContainer) {
     }
     lView[CHILD_TAIL] = lViewOrLContainer;
     return lViewOrLContainer;
-}
-///////////////////////////////
-//// Change detection
-///////////////////////////////
-function executeViewQueryFn(flags, viewQueryFn, component) {
-    ngDevMode && assertDefined(viewQueryFn, 'View queries function to execute must be defined.');
-    setCurrentQueryIndex(0);
-    const prevConsumer = setActiveConsumer$1(null);
-    try {
-        viewQueryFn(flags, component);
-    }
-    finally {
-        setActiveConsumer$1(prevConsumer);
-    }
 }
 ///////////////////////////////
 //// Bindings & interpolations
@@ -14318,13 +14338,6 @@ function storePropertyBindingMetadata(tData, tNode, propertyName, bindingIndex, 
         }
     }
 }
-function getOrCreateLViewCleanup(view) {
-    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return (view[CLEANUP] ??= []);
-}
-function getOrCreateTViewCleanup(tView) {
-    return (tView.cleanup ??= []);
-}
 /**
  * There are cases where the sub component's renderer needs to be included
  * instead of the current renderer (see the componentSyntheticHost* instructions).
@@ -14366,17 +14379,6 @@ function setInputsForProperty(tView, lView, inputs, publicName, value) {
         const def = tView.data[index];
         writeToDirectiveInput(def, instance, publicName, privateName, flags, value);
     }
-}
-/**
- * Updates a text binding at a given index in a given LView.
- */
-function textBindingInternal(lView, index, value) {
-    ngDevMode && assertString(value, 'Value should be a string');
-    ngDevMode && assertNotSame(value, NO_CHANGE, 'value should not be NO_CHANGE');
-    ngDevMode && assertIndexInRange(lView, index);
-    const element = getNativeByIndex(index, lView);
-    ngDevMode && assertDefined(element, 'native element should exist');
-    updateTextNode(lView[RENDERER], element, value);
 }
 
 function renderComponent(hostLView, componentHostIdx) {
@@ -15115,6 +15117,43 @@ function detectChangesInView(lView, mode) {
 function detectChangesInChildComponents(hostLView, components, mode) {
     for (let i = 0; i < components.length; i++) {
         detectChangesInComponent(hostLView, components[i], mode);
+    }
+}
+/**
+ * Invoke `HostBindingsFunction`s for view.
+ *
+ * This methods executes `TView.hostBindingOpCodes`. It is used to execute the
+ * `HostBindingsFunction`s associated with the current `LView`.
+ *
+ * @param tView Current `TView`.
+ * @param lView Current `LView`.
+ */
+function processHostBindingOpCodes(tView, lView) {
+    const hostBindingOpCodes = tView.hostBindingOpCodes;
+    if (hostBindingOpCodes === null)
+        return;
+    try {
+        for (let i = 0; i < hostBindingOpCodes.length; i++) {
+            const opCode = hostBindingOpCodes[i];
+            if (opCode < 0) {
+                // Negative numbers are element indexes.
+                setSelectedIndex(~opCode);
+            }
+            else {
+                // Positive numbers are NumberTuple which store bindingRootIndex and directiveIndex.
+                const directiveIdx = opCode;
+                const bindingRootIndx = hostBindingOpCodes[++i];
+                const hostBindingFn = hostBindingOpCodes[++i];
+                setBindingRootForHostBindings(bindingRootIndx, directiveIdx);
+                const context = lView[directiveIdx];
+                profiler(24 /* ProfilerEvent.HostBindingsUpdateStart */, context);
+                hostBindingFn(2 /* RenderFlags.Update */, context);
+                profiler(25 /* ProfilerEvent.HostBindingsUpdateEnd */, context);
+            }
+        }
+    }
+    finally {
+        setSelectedIndex(-1);
     }
 }
 
@@ -18093,7 +18132,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0+sha-0d019e9']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0+sha-74daef1']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -19003,59 +19042,6 @@ function getQueryResults(lView, queryIndex) {
     return tQuery.crossesNgTemplate
         ? collectQueryResults(tView, lView, queryIndex, [])
         : materializeViewResults(tView, lView, tQuery, queryIndex);
-}
-
-/**
- * Checks if the given `value` is a reactive `Signal`.
- */
-function isSignal(value) {
-    return typeof value === 'function' && value[SIGNAL$1] !== undefined;
-}
-
-/** Symbol used distinguish `WritableSignal` from other non-writable signals and functions. */
-const ɵWRITABLE_SIGNAL = /* @__PURE__ */ Symbol('WRITABLE_SIGNAL');
-/**
- * Utility function used during template type checking to extract the value from a `WritableSignal`.
- * @codeGenApi
- */
-function ɵunwrapWritableSignal(value) {
-    // Note: the function uses `WRITABLE_SIGNAL` as a brand instead of `WritableSignal<T>`,
-    // because the latter incorrectly unwraps non-signal getter functions.
-    return null;
-}
-/**
- * Create a `Signal` that can be set or updated directly.
- */
-function signal(initialValue, options) {
-    performanceMarkFeature('NgSignals');
-    const signalFn = createSignal$1(initialValue);
-    const node = signalFn[SIGNAL$1];
-    if (options?.equal) {
-        node.equal = options.equal;
-    }
-    signalFn.set = (newValue) => signalSetFn$1(node, newValue);
-    signalFn.update = (updateFn) => signalUpdateFn$1(node, updateFn);
-    signalFn.asReadonly = signalAsReadonlyFn.bind(signalFn);
-    if (ngDevMode) {
-        signalFn.toString = () => `[Signal: ${signalFn()}]`;
-        node.debugName = options?.debugName;
-    }
-    return signalFn;
-}
-function signalAsReadonlyFn() {
-    const node = this[SIGNAL$1];
-    if (node.readonlyFn === undefined) {
-        const readonlyFn = () => this();
-        readonlyFn[SIGNAL$1] = node;
-        node.readonlyFn = readonlyFn;
-    }
-    return node.readonlyFn;
-}
-/**
- * Checks if the given `value` is a writeable signal.
- */
-function isWritableSignal(value) {
-    return isSignal(value) && typeof value.set === 'function';
 }
 
 /**
@@ -32278,6 +32264,17 @@ function ɵɵtextInterpolateV(values) {
     }
     return ɵɵtextInterpolateV;
 }
+/**
+ * Updates a text binding at a given index in a given LView.
+ */
+function textBindingInternal(lView, index, value) {
+    ngDevMode && assertString(value, 'Value should be a string');
+    ngDevMode && assertNotSame(value, NO_CHANGE, 'value should not be NO_CHANGE');
+    ngDevMode && assertIndexInRange(lView, index);
+    const element = getNativeByIndex(index, lView);
+    ngDevMode && assertDefined(element, 'native element should exist');
+    updateTextNode(lView[RENDERER], element, value);
+}
 
 /*!
  * @license
@@ -34967,7 +34964,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0+sha-0d019e9');
+const VERSION = new Version('19.1.0+sha-74daef1');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
