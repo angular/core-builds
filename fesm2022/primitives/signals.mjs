@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.1+sha-5c9d739
+ * @license Angular v19.1.1+sha-d12a186
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -386,8 +386,17 @@ const COMPUTED_NODE = /* @__PURE__ */ (() => {
             node.value = COMPUTING;
             const prevConsumer = consumerBeforeComputation(node);
             let newValue;
+            let wasEqual = false;
             try {
                 newValue = node.computation();
+                // We want to mark this node as errored if calling `equal` throws; however, we don't want
+                // to track any reactive reads inside `equal`.
+                setActiveConsumer(null);
+                wasEqual =
+                    oldValue !== UNSET &&
+                        oldValue !== ERRORED &&
+                        newValue !== ERRORED &&
+                        node.equal(oldValue, newValue);
             }
             catch (err) {
                 newValue = ERRORED;
@@ -396,10 +405,7 @@ const COMPUTED_NODE = /* @__PURE__ */ (() => {
             finally {
                 consumerAfterComputation(node, prevConsumer);
             }
-            if (oldValue !== UNSET &&
-                oldValue !== ERRORED &&
-                newValue !== ERRORED &&
-                node.equal(oldValue, newValue)) {
+            if (wasEqual) {
                 // No change to `valueVersion` - old and new values are
                 // semantically equivalent.
                 node.value = oldValue;
