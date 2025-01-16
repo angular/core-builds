@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-884e0b4
+ * @license Angular v19.2.0-next.0+sha-b76be83
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18138,7 +18138,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-884e0b4']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.2.0-next.0+sha-b76be83']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -33532,17 +33532,21 @@ function recreateLView(newDef, oldDef, lView) {
     const recreate = () => {
         // Recreate the TView since the template might've changed.
         const newTView = getOrCreateComponentTView(newDef);
-        // Always force the creation of a new renderer to ensure state captured during construction
-        // stays consistent with the new component definition by clearing any old cached factories.
-        const rendererFactory = lView[ENVIRONMENT].rendererFactory;
-        clearRendererCache(rendererFactory, oldDef);
         // Create a new LView from the new TView, but reusing the existing TNode and DOM node.
-        const newLView = createLView(parentLView, newTView, instance, getInitialLViewFlagsFromDef(newDef), host, tNode, null, rendererFactory.createRenderer(host, newDef), null, null, null);
+        const newLView = createLView(parentLView, newTView, instance, getInitialLViewFlagsFromDef(newDef), host, tNode, null, null, // The renderer will be created a bit further down once the old one is destroyed.
+        null, null, null);
         // Detach the LView from its current place in the tree so we don't
         // start traversing any siblings and modifying their structure.
         replaceLViewInTree(parentLView, lView, newLView, tNode.index);
         // Destroy the detached LView.
         destroyLView(lView[TVIEW], lView);
+        // Always force the creation of a new renderer to ensure state captured during construction
+        // stays consistent with the new component definition by clearing any old ached factories.
+        const rendererFactory = lView[ENVIRONMENT].rendererFactory;
+        clearRendererCache(rendererFactory, oldDef);
+        // Patch a brand-new renderer onto the new view only after the old
+        // view is destroyed so that the runtime doesn't try to reuse it.
+        newLView[RENDERER] = rendererFactory.createRenderer(host, newDef);
         // Remove the nodes associated with the destroyed LView. This removes the
         // descendants, but not the host which we want to stay in place.
         removeViewFromDOM(lView[TVIEW], lView);
@@ -34988,7 +34992,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-884e0b4');
+const VERSION = new Version('19.2.0-next.0+sha-b76be83');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
