@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.1+sha-a4eb74c
+ * @license Angular v19.1.1+sha-4eb5418
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7,7 +7,7 @@
 import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, producerUpdateValueVersion as producerUpdateValueVersion$1, producerMarkClean as producerMarkClean$1, defaultEquals as defaultEquals$1, createWatch as createWatch$1, isInNotificationPhase as isInNotificationPhase$1 } from '@angular/core/primitives/signals';
 export { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { Attribute as Attribute$1, EventContract, EventContractContainer, getAppScopedQueuedEventInfos, clearAppScopedEarlyEventContract, EventDispatcher, registerDispatcher, isEarlyEventType, isCaptureEventType, EventPhase } from '@angular/core/primitives/event-dispatch';
+import { Attribute as Attribute$1, clearAppScopedEarlyEventContract, EventContract, EventContractContainer, getAppScopedQueuedEventInfos, EventDispatcher, registerDispatcher, isEarlyEventType, isCaptureEventType, EventPhase } from '@angular/core/primitives/event-dispatch';
 import { map } from 'rxjs/operators';
 
 /**
@@ -18121,7 +18121,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.1+sha-a4eb74c']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.1+sha-4eb5418']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -34967,7 +34967,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.1+sha-a4eb74c');
+const VERSION = new Version('19.1.1+sha-4eb5418');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39062,6 +39062,7 @@ function withEventReplay() {
         }, {
             provide: APP_BOOTSTRAP_LISTENER,
             useFactory: () => {
+                const appId = inject(APP_ID);
                 const injector = inject(Injector);
                 const appRef = inject(ApplicationRef);
                 return () => {
@@ -39072,7 +39073,16 @@ function withEventReplay() {
                         return;
                     }
                     appsWithEventReplay.add(appRef);
-                    appRef.onDestroy(() => appsWithEventReplay.delete(appRef));
+                    appRef.onDestroy(() => {
+                        appsWithEventReplay.delete(appRef);
+                        // Ensure that we're always safe calling this in the browser.
+                        if (typeof ngServerMode !== 'undefined' && !ngServerMode) {
+                            // `_ejsa` should be deleted when the app is destroyed, ensuring that
+                            // no elements are still captured in the global list and are not prevented
+                            // from being garbage collected.
+                            clearAppScopedEarlyEventContract(appId);
+                        }
+                    });
                     // Kick off event replay logic once hydration for the initial part
                     // of the application is completed. This timing is similar to the unclaimed
                     // dehydrated views cleanup timing.
