@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.0+sha-eb0b185
+ * @license Angular v19.1.0+sha-357795c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -18132,7 +18132,7 @@ function createRootComponent(componentView, rootComponentDef, rootDirectives, ho
 function setRootNodeAttributes(hostRenderer, componentDef, hostRNode, rootSelectorOrNode) {
     if (rootSelectorOrNode) {
         // The placeholder will be replaced with the actual version at build time.
-        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0+sha-eb0b185']);
+        setUpAttributes(hostRenderer, hostRNode, ['ng-version', '19.1.0+sha-357795c']);
     }
     else {
         // If host element is created as a part of this function call (i.e. `rootSelectorOrNode`
@@ -33514,30 +33514,40 @@ function recreateLView(newDef, oldDef, lView) {
     const tNode = lView[T_HOST];
     ngDevMode && assertTNodeType(tNode, 2 /* TNodeType.Element */);
     ngDevMode && assertNotEqual(newDef, oldDef, 'Expected different component definition');
-    // Recreate the TView since the template might've changed.
-    const newTView = getOrCreateComponentTView(newDef);
-    // Always force the creation of a new renderer to ensure state captured during construction
-    // stays consistent with the new component definition by clearing any old cached factories.
-    const rendererFactory = lView[ENVIRONMENT].rendererFactory;
-    clearRendererCache(rendererFactory, oldDef);
-    // Create a new LView from the new TView, but reusing the existing TNode and DOM node.
-    const newLView = createLView(parentLView, newTView, instance, getInitialLViewFlagsFromDef(newDef), host, tNode, null, rendererFactory.createRenderer(host, newDef), null, null, null);
-    // Detach the LView from its current place in the tree so we don't
-    // start traversing any siblings and modifying their structure.
-    replaceLViewInTree(parentLView, lView, newLView, tNode.index);
-    // Destroy the detached LView.
-    destroyLView(lView[TVIEW], lView);
-    // Remove the nodes associated with the destroyed LView. This removes the
-    // descendants, but not the host which we want to stay in place.
-    removeViewFromDOM(lView[TVIEW], lView);
-    // Reset the content projection state of the TNode before the first render.
-    // Note that this has to happen after the LView has been destroyed or we
-    // risk some projected nodes not being removed correctly.
-    resetProjectionState(tNode);
-    // Creation pass for the new view.
-    renderView(newTView, newLView, instance);
-    // Update pass for the new view.
-    refreshView(newTView, newLView, newTView.template, instance);
+    const zone = lView[INJECTOR].get(NgZone, null);
+    const recreate = () => {
+        // Recreate the TView since the template might've changed.
+        const newTView = getOrCreateComponentTView(newDef);
+        // Always force the creation of a new renderer to ensure state captured during construction
+        // stays consistent with the new component definition by clearing any old cached factories.
+        const rendererFactory = lView[ENVIRONMENT].rendererFactory;
+        clearRendererCache(rendererFactory, oldDef);
+        // Create a new LView from the new TView, but reusing the existing TNode and DOM node.
+        const newLView = createLView(parentLView, newTView, instance, getInitialLViewFlagsFromDef(newDef), host, tNode, null, rendererFactory.createRenderer(host, newDef), null, null, null);
+        // Detach the LView from its current place in the tree so we don't
+        // start traversing any siblings and modifying their structure.
+        replaceLViewInTree(parentLView, lView, newLView, tNode.index);
+        // Destroy the detached LView.
+        destroyLView(lView[TVIEW], lView);
+        // Remove the nodes associated with the destroyed LView. This removes the
+        // descendants, but not the host which we want to stay in place.
+        removeViewFromDOM(lView[TVIEW], lView);
+        // Reset the content projection state of the TNode before the first render.
+        // Note that this has to happen after the LView has been destroyed or we
+        // risk some projected nodes not being removed correctly.
+        resetProjectionState(tNode);
+        // Creation pass for the new view.
+        renderView(newTView, newLView, instance);
+        // Update pass for the new view.
+        refreshView(newTView, newLView, newTView.template, instance);
+    };
+    // The callback isn't guaranteed to be inside the Zone so we need to bring it in ourselves.
+    if (zone === null) {
+        recreate();
+    }
+    else {
+        zone.run(recreate);
+    }
 }
 /**
  * Replaces one LView in the tree with another one.
@@ -34964,7 +34974,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.0+sha-eb0b185');
+const VERSION = new Version('19.1.0+sha-357795c');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
