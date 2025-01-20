@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-16b0885
+ * @license Angular v19.2.0-next.0+sha-f9b13e4
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17959,7 +17959,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 const hostTNode = createRootComponentTNode(rootLView, hostRNode);
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.2.0-next.0+sha-16b0885']
+                    ? ['ng-version', '19.2.0-next.0+sha-f9b13e4']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 for (const def of rootDirectives) {
@@ -33477,8 +33477,12 @@ function recreateMatchingLViews(oldDef, rootLView) {
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
         const current = rootLView[i];
         if (isLContainer(current)) {
-            for (let i = CONTAINER_HEADER_OFFSET; i < current.length; i++) {
-                recreateMatchingLViews(oldDef, current[i]);
+            // The host can be an LView if a component is injecting `ViewContainerRef`.
+            if (isLView(current[HOST])) {
+                recreateMatchingLViews(oldDef, current[HOST]);
+            }
+            for (let j = CONTAINER_HEADER_OFFSET; j < current.length; j++) {
+                recreateMatchingLViews(oldDef, current[j]);
             }
         }
         else if (isLView(current)) {
@@ -34979,7 +34983,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-16b0885');
+const VERSION = new Version('19.2.0-next.0+sha-f9b13e4');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
