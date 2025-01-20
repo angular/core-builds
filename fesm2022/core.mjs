@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.1+sha-8dcd889
+ * @license Angular v19.1.1+sha-266a8f2
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17943,7 +17943,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 const hostTNode = createRootComponentTNode(rootLView, hostRNode);
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.1.1+sha-8dcd889']
+                    ? ['ng-version', '19.1.1+sha-266a8f2']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 for (const def of rootDirectives) {
@@ -33486,7 +33486,7 @@ function clearRendererCache(factory, def) {
  */
 function recreateLView(newDef, oldDef, lView) {
     const instance = lView[CONTEXT];
-    const host = lView[HOST];
+    let host = lView[HOST];
     // In theory the parent can also be an LContainer, but it appears like that's
     // only the case for embedded views which we won't be replacing here.
     const parentLView = lView[PARENT];
@@ -33496,6 +33496,15 @@ function recreateLView(newDef, oldDef, lView) {
     ngDevMode && assertNotEqual(newDef, oldDef, 'Expected different component definition');
     const zone = lView[INJECTOR].get(NgZone, null);
     const recreate = () => {
+        // If we're recreating a component with shadow DOM encapsulation, it will have attached a
+        // shadow root. The browser will throw if we attempt to attach another one and there's no way
+        // to detach it. Our only option is to make a clone only of the root node, replace the node
+        // with the clone and use it for the newly-created LView.
+        if (oldDef.encapsulation === ViewEncapsulation.ShadowDom) {
+            const newHost = host.cloneNode(false);
+            host.replaceWith(newHost);
+            host = newHost;
+        }
         // Recreate the TView since the template might've changed.
         const newTView = getOrCreateComponentTView(newDef);
         // Create a new LView from the new TView, but reusing the existing TNode and DOM node.
@@ -34958,7 +34967,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.1+sha-8dcd889');
+const VERSION = new Version('19.1.1+sha-266a8f2');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
