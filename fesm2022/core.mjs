@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.1+sha-95a05bb
+ * @license Angular v19.1.1+sha-8dcd889
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17943,7 +17943,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 const hostTNode = createRootComponentTNode(rootLView, hostRNode);
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.1.1+sha-95a05bb']
+                    ? ['ng-version', '19.1.1+sha-8dcd889']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 for (const def of rootDirectives) {
@@ -34958,7 +34958,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.1+sha-95a05bb');
+const VERSION = new Version('19.1.1+sha-8dcd889');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
