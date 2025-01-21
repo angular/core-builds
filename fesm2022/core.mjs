@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-2d8fa73
+ * @license Angular v19.2.0-next.0+sha-04c2447
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17959,7 +17959,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 const hostTNode = createRootComponentTNode(rootLView, hostRNode);
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.2.0-next.0+sha-2d8fa73']
+                    ? ['ng-version', '19.2.0-next.0+sha-04c2447']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 for (const def of rootDirectives) {
@@ -34992,7 +34992,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-2d8fa73');
+const VERSION = new Version('19.2.0-next.0+sha-04c2447');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38899,6 +38899,91 @@ function signalValueChanged(node) {
     producerNotifyConsumers(node);
     postSignalSetFn?.();
 }
+
+function createLinkedSignal$1(sourceFn, computationFn, equalityFn) {
+    const node = Object.create(LINKED_SIGNAL_NODE$1);
+    node.source = sourceFn;
+    node.computation = computationFn;
+    if (equalityFn != undefined) {
+        node.equal = equalityFn;
+    }
+    const linkedSignalGetter = () => {
+        // Check if the value needs updating before returning it.
+        producerUpdateValueVersion(node);
+        // Record that someone looked at this signal.
+        producerAccessed(node);
+        if (node.value === ERRORED$1) {
+            throw node.error;
+        }
+        return node.value;
+    };
+    const getter = linkedSignalGetter;
+    getter[SIGNAL] = node;
+    return getter;
+}
+function linkedSignalSetFn(node, newValue) {
+    producerUpdateValueVersion(node);
+    signalSetFn(node, newValue);
+    producerMarkClean(node);
+}
+function linkedSignalUpdateFn(node, updater) {
+    producerUpdateValueVersion(node);
+    signalUpdateFn(node, updater);
+    producerMarkClean(node);
+}
+// Note: Using an IIFE here to ensure that the spread assignment is not considered
+// a side-effect, ending up preserving `LINKED_SIGNAL_NODE` and `REACTIVE_NODE`.
+// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
+const LINKED_SIGNAL_NODE$1 = /* @__PURE__ */ (() => {
+    return {
+        ...REACTIVE_NODE,
+        value: UNSET$1,
+        dirty: true,
+        error: null,
+        equal: defaultEquals,
+        producerMustRecompute(node) {
+            // Force a recomputation if there's no current value, or if the current value is in the
+            // process of being calculated (which should throw an error).
+            return node.value === UNSET$1 || node.value === COMPUTING$1;
+        },
+        producerRecomputeValue(node) {
+            if (node.value === COMPUTING$1) {
+                // Our computation somehow led to a cyclic read of itself.
+                throw new Error('Detected cycle in computations.');
+            }
+            const oldValue = node.value;
+            node.value = COMPUTING$1;
+            const prevConsumer = consumerBeforeComputation(node);
+            let newValue;
+            try {
+                const newSourceValue = node.source();
+                const prev = oldValue === UNSET$1 || oldValue === ERRORED$1
+                    ? undefined
+                    : {
+                        source: node.sourceValue,
+                        value: oldValue,
+                    };
+                newValue = node.computation(newSourceValue, prev);
+                node.sourceValue = newSourceValue;
+            }
+            catch (err) {
+                newValue = ERRORED$1;
+                node.error = err;
+            }
+            finally {
+                consumerAfterComputation(node, prevConsumer);
+            }
+            if (oldValue !== UNSET$1 && newValue !== ERRORED$1 && node.equal(oldValue, newValue)) {
+                // No change to `valueVersion` - old and new values are
+                // semantically equivalent.
+                node.value = oldValue;
+                return;
+            }
+            node.value = newValue;
+            node.version++;
+        },
+    };
+})();
 
 function createWatch(fn, schedule, allowSignalWrites) {
     const node = Object.create(WATCH_NODE);
