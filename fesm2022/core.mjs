@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-4f46b02
+ * @license Angular v19.2.0-next.0+sha-c089d21
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12416,10 +12416,17 @@ function executeTemplate(tView, lView, templateFn, rf, context) {
 /**
  * Creates directive instances.
  */
-function createDirectivesInstances(tView, lView, tNode) {
+function createDirectivesInstancesInInstruction(tView, lView, tNode) {
     if (!getBindingsEnabled())
         return;
-    instantiateAllDirectives(tView, lView, tNode, getNativeByTNode(tNode, lView));
+    attachPatchData(getNativeByTNode(tNode, lView), lView);
+    createDirectivesInstances(tView, lView, tNode);
+}
+/**
+ * Creates directive instances.
+ */
+function createDirectivesInstances(tView, lView, tNode) {
+    instantiateAllDirectives(tView, lView, tNode);
     if ((tNode.flags & 64 /* TNodeFlags.hasHostBindings */) === 64 /* TNodeFlags.hasHostBindings */) {
         invokeDirectivesHostBindings(tView, lView, tNode);
     }
@@ -12924,19 +12931,18 @@ function lastSelectedElementIdx(hostBindingOpCodes) {
 /**
  * Instantiate all the directives that were previously resolved on the current node.
  */
-function instantiateAllDirectives(tView, lView, tNode, native) {
+function instantiateAllDirectives(tView, lView, tNode) {
     const start = tNode.directiveStart;
     const end = tNode.directiveEnd;
     // The component view needs to be created before creating the node injector
     // since it is used to inject some special symbols like `ChangeDetectorRef`.
     if (isComponentHost(tNode)) {
         ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */);
-        addComponentLogic(lView, tNode, tView.data[start + tNode.componentOffset]);
+        createComponentLView(lView, tNode, tView.data[start + tNode.componentOffset]);
     }
     if (!tView.firstCreatePass) {
         getOrCreateNodeInjectorForNode(tNode, lView);
     }
-    attachPatchData(native, lView);
     const initialInputs = tNode.initialInputs;
     for (let i = start; i < end; i++) {
         const def = tView.data[i];
@@ -13141,7 +13147,7 @@ function getInitialLViewFlagsFromDef(def) {
     }
     return flags;
 }
-function addComponentLogic(lView, hostTNode, def) {
+function createComponentLView(lView, hostTNode, def) {
     const native = getNativeByTNode(hostTNode, lView);
     const tView = getOrCreateComponentTView(def);
     // Only component views should be added to the view tree directly. Embedded views are
@@ -13150,7 +13156,7 @@ function addComponentLogic(lView, hostTNode, def) {
     const componentView = addToEndOfViewTree(lView, createLView(lView, tView, null, getInitialLViewFlagsFromDef(def), native, hostTNode, null, rendererFactory.createRenderer(native, def), null, null, null));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
-    lView[hostTNode.index] = componentView;
+    return (lView[hostTNode.index] = componentView);
 }
 function elementAttributeInternal(tNode, lView, name, value, sanitizer, namespace) {
     if (ngDevMode) {
@@ -17945,9 +17951,9 @@ class ComponentFactory extends ComponentFactory$1 {
             // `createRootComponentView` and `createRootComponent` both read global state. Fixing those
             // issues would allow us to drop this.
             enterView(rootLView);
-            let component;
             let componentView = null;
             try {
+                // TODO(pk): this is a good refactoring since it shows how to instantiate a TNOde with a set of known directive defs
                 const rootComponentDef = this.componentDef;
                 let rootDirectives;
                 let hostDirectiveDefs = null;
@@ -17963,11 +17969,15 @@ class ComponentFactory extends ComponentFactory$1 {
                 }
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.2.0-next.0+sha-4f46b02']
+                    ? ['ng-version', '19.2.0-next.0+sha-c089d21']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 // TODO: this logic is shared with the element instruction first create pass
                 const hostTNode = getOrCreateTNode(rootTView, HEADER_OFFSET, 2 /* TNodeType.Element */, '#host', tAttributes);
+                // TODO(pk): partial code duplication with resolveDirectives and other existing logic
+                markAsComponentHost(rootTView, hostTNode, rootDirectives.length - 1);
+                initializeDirectives(rootTView, rootLView, hostTNode, rootDirectives, null, hostDirectiveDefs);
+                registerPostOrderHooks(rootTView, hostTNode);
                 for (const def of rootDirectives) {
                     hostTNode.mergedAttrs = mergeHostAttrs(hostTNode.mergedAttrs, def.hostAttrs);
                 }
@@ -17978,14 +17988,17 @@ class ComponentFactory extends ComponentFactory$1 {
                 // tests so that this check can be removed.
                 if (hostRNode) {
                     setupStaticAttributes(hostRenderer, hostRNode, hostTNode);
+                    attachPatchData(hostRNode, rootLView);
                 }
-                componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, environment);
                 if (projectableNodes !== undefined) {
                     projectNodes(hostTNode, this.ngContentSelectors, projectableNodes);
                 }
-                // TODO: should LifecycleHooksFeature and other host features be generated by the compiler
-                // and executed here? Angular 5 reference: https://stackblitz.com/edit/lifecycle-hooks-vcref
-                component = createRootComponent(componentView, rootComponentDef, rootDirectives, hostDirectiveDefs, rootLView, [LifecycleHooksFeature]);
+                // TODO(pk): this logic is similar to the instruction code where a node can have directives
+                createDirectivesInstances(rootTView, rootLView, hostTNode);
+                executeContentQueries(rootTView, hostTNode, rootLView);
+                componentView = getComponentLViewByIndex(hostTNode.index, rootLView);
+                // TODO(pk): why do we need this logic?
+                rootLView[CONTEXT] = componentView[CONTEXT];
                 renderView(rootTView, rootLView, null);
             }
             catch (e) {
@@ -18002,7 +18015,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 leaveView();
             }
             const hostTNode = getTNode(rootTView, HEADER_OFFSET);
-            return new ComponentRef(this.componentType, component, createElementRef(hostTNode, rootLView), rootLView, hostTNode);
+            return new ComponentRef(this.componentType, componentView[CONTEXT], createElementRef(hostTNode, rootLView), rootLView, hostTNode);
         }
         finally {
             setActiveConsumer$1(prevConsumer);
@@ -18070,70 +18083,6 @@ class ComponentRef extends ComponentRef$1 {
     onDestroy(callback) {
         this.hostView.onDestroy(callback);
     }
-}
-/**
- * Creates the root component view and the root component node.
- *
- * @param hostRNode Render host element.
- * @param rootComponentDef ComponentDef
- * @param rootView The parent view where the host node is stored
- * @param rendererFactory Factory to be used for creating child renderers.
- * @param hostRenderer The current renderer
- * @param sanitizer The sanitizer, if provided
- *
- * @returns Component view created
- */
-function createRootComponentView(tNode, hostRNode, rootComponentDef, rootDirectives, rootView, environment) {
-    const tView = rootView[TVIEW];
-    // Hydration info is on the host element and needs to be retrieved
-    // and passed to the component LView.
-    let hydrationInfo = null;
-    if (hostRNode !== null) {
-        hydrationInfo = retrieveHydrationInfo(hostRNode, rootView[INJECTOR]);
-    }
-    const viewRenderer = environment.rendererFactory.createRenderer(hostRNode, rootComponentDef);
-    const componentView = createLView(rootView, getOrCreateComponentTView(rootComponentDef), null, getInitialLViewFlagsFromDef(rootComponentDef), rootView[tNode.index], tNode, environment, viewRenderer, null, null, hydrationInfo);
-    if (tView.firstCreatePass) {
-        markAsComponentHost(tView, tNode, rootDirectives.length - 1);
-    }
-    addToEndOfViewTree(rootView, componentView);
-    // Store component view at node index, with node as the HOST
-    return (rootView[tNode.index] = componentView);
-}
-/**
- * Creates a root component and sets it up with features and host bindings.Shared by
- * renderComponent() and ViewContainerRef.createComponent().
- */
-function createRootComponent(componentView, rootComponentDef, rootDirectives, hostDirectiveDefs, rootLView, hostFeatures) {
-    const rootTNode = getCurrentTNode();
-    ngDevMode && assertDefined(rootTNode, 'tNode should have been already created');
-    const tView = rootLView[TVIEW];
-    const native = getNativeByTNode(rootTNode, rootLView);
-    initializeDirectives(tView, rootLView, rootTNode, rootDirectives, null, hostDirectiveDefs);
-    for (let i = 0; i < rootDirectives.length; i++) {
-        const directiveIndex = rootTNode.directiveStart + i;
-        const directiveInstance = getNodeInjectable(rootLView, tView, directiveIndex, rootTNode);
-        attachPatchData(directiveInstance, rootLView);
-    }
-    invokeDirectivesHostBindings(tView, rootLView, rootTNode);
-    if (native) {
-        attachPatchData(native, rootLView);
-    }
-    // We're guaranteed for the `componentOffset` to be positive here
-    // since a root component always matches a component def.
-    ngDevMode &&
-        assertGreaterThan(rootTNode.componentOffset, -1, 'componentOffset must be great than -1');
-    const component = getNodeInjectable(rootLView, tView, rootTNode.directiveStart + rootTNode.componentOffset, rootTNode);
-    componentView[CONTEXT] = rootLView[CONTEXT] = component;
-    if (hostFeatures !== null) {
-        for (const feature of hostFeatures) {
-            feature(component, rootComponentDef);
-        }
-    }
-    // We want to generate an empty QueryList for root content queries for backwards
-    // compatibility with ViewEngine.
-    executeContentQueries(tView, rootTNode, rootLView);
-    return component;
 }
 /** Projects the `projectableNodes` that were specified when creating a root component. */
 function projectNodes(tNode, ngContentSelectors, projectableNodes) {
@@ -20733,7 +20682,7 @@ function declareTemplate(declarationLView, declarationTView, index, templateFn, 
     // In client-only mode, this function is a noop.
     populateDehydratedViewsInLContainer(lContainer, tNode, declarationLView);
     if (isDirectiveHost(tNode)) {
-        createDirectivesInstances(declarationTView, declarationLView, tNode);
+        createDirectivesInstancesInInstruction(declarationTView, declarationLView, tNode);
     }
     if (localRefsIndex != null) {
         saveResolvedLocalsInData(declarationLView, tNode, localRefExtractor);
@@ -28139,7 +28088,7 @@ function ɵɵelementStart(index, name, attrsIndex, localRefsIndex) {
     }
     increaseElementDepthCount();
     if (hasDirectives) {
-        createDirectivesInstances(tView, lView, tNode);
+        createDirectivesInstancesInInstruction(tView, lView, tNode);
         executeContentQueries(tView, tNode, lView);
     }
     if (localRefsIndex !== null) {
@@ -28310,7 +28259,7 @@ function ɵɵelementContainerStart(index, attrsIndex, localRefsIndex) {
     }
     attachPatchData(comment, lView);
     if (isDirectiveHost(tNode)) {
-        createDirectivesInstances(tView, lView, tNode);
+        createDirectivesInstancesInInstruction(tView, lView, tNode);
         executeContentQueries(tView, tNode, lView);
     }
     if (localRefsIndex != null) {
@@ -35021,7 +34970,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-4f46b02');
+const VERSION = new Version('19.2.0-next.0+sha-c089d21');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
