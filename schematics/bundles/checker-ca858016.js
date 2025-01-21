@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.0+sha-04c2447
+ * @license Angular v19.2.0-next.0+sha-8e5c0f8
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7620,6 +7620,36 @@ class ShadowCss {
      * .foo<scopeName> .bar { ... }
      */
     _convertColonHostContext(cssText) {
+        const length = cssText.length;
+        let parens = 0;
+        let prev = 0;
+        let result = '';
+        // Splits up the selectors on their top-level commas, processes the :host-context in them
+        // individually and stitches them back together. This ensures that individual selectors don't
+        // affect each other.
+        for (let i = 0; i < length; i++) {
+            const char = cssText[i];
+            // If we hit a comma and there are no open parentheses, take the current chunk and process it.
+            if (char === ',' && parens === 0) {
+                result += this._convertColonHostContextInSelectorPart(cssText.slice(prev, i)) + ',';
+                prev = i + 1;
+                continue;
+            }
+            // We've hit the end. Take everything since the last comma.
+            if (i === length - 1) {
+                result += this._convertColonHostContextInSelectorPart(cssText.slice(prev));
+                break;
+            }
+            if (char === '(') {
+                parens++;
+            }
+            else if (char === ')') {
+                parens--;
+            }
+        }
+        return result;
+    }
+    _convertColonHostContextInSelectorPart(cssText) {
         return cssText.replace(_cssColonHostContextReGlobal, (selectorText, pseudoPrefix) => {
             // We have captured a selector that contains a `:host-context` rule.
             // For backward compatibility `:host-context` may contain a comma separated list of selectors.
@@ -8007,10 +8037,13 @@ const _cssContentUnscopedRuleRe = /(polyfill-unscoped-rule)[^}]*(content:[\s]*([
 const _polyfillHost = '-shadowcsshost';
 // note: :host-context pre-processed to -shadowcsshostcontext.
 const _polyfillHostContext = '-shadowcsscontext';
-const _parenSuffix = '(?:\\((' + '(?:\\([^)(]*\\)|[^)(]*)+?' + ')\\))?([^,{]*)';
-const _cssColonHostRe = new RegExp(_polyfillHost + _parenSuffix, 'gim');
-const _cssColonHostContextReGlobal = new RegExp(_cssScopedPseudoFunctionPrefix + '(' + _polyfillHostContext + _parenSuffix + ')', 'gim');
-const _cssColonHostContextRe = new RegExp(_polyfillHostContext + _parenSuffix, 'im');
+const _parenSuffix = '(?:\\((' + '(?:\\([^)(]*\\)|[^)(]*)+?' + ')\\))';
+const _cssColonHostRe = new RegExp(_polyfillHost + _parenSuffix + '?([^,{]*)', 'gim');
+// note: :host-context patterns are terminated with `{`, as opposed to :host which
+// is both `{` and `,` because :host-context handles top-level commas differently.
+const _hostContextPattern = _polyfillHostContext + _parenSuffix + '?([^{]*)';
+const _cssColonHostContextReGlobal = new RegExp(`${_cssScopedPseudoFunctionPrefix}(${_hostContextPattern})`, 'gim');
+const _cssColonHostContextRe = new RegExp(_hostContextPattern, 'im');
 const _polyfillHostNoCombinator = _polyfillHost + '-no-combinator';
 const _polyfillHostNoCombinatorOutsidePseudoFunction = new RegExp(`${_polyfillHostNoCombinator}(?![^(]*\\))`, 'g');
 const _polyfillHostNoCombinatorRe = /-shadowcsshost-no-combinator([^\s,]*)/;
@@ -30418,7 +30451,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.0-next.0+sha-04c2447');
+new Version('19.2.0-next.0+sha-8e5c0f8');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31826,7 +31859,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-aa999c96.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-ca858016.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
