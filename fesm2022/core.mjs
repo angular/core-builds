@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.2+sha-67fe0b9
+ * @license Angular v19.1.2+sha-53160e5
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17943,7 +17943,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 const hostTNode = createRootComponentTNode(rootLView, hostRNode);
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.1.2+sha-67fe0b9']
+                    ? ['ng-version', '19.1.2+sha-53160e5']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 for (const def of rootDirectives) {
@@ -33413,13 +33413,18 @@ function ɵsetClassDebugInfo(type, debugInfo) {
  */
 function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals) {
     ngDevMode && assertComponentDef(type);
-    const oldDef = getComponentDef(type);
+    const currentDef = getComponentDef(type);
     // The reason `applyMetadata` is a callback that is invoked (almost) immediately is because
     // the compiler usually produces more code than just the component definition, e.g. there
     // can be functions for embedded views, the variables for the constant pool and `setClassMetadata`
     // calls. The callback allows us to keep them isolate from the rest of the app and to invoke
     // them at the right time.
     applyMetadata.apply(null, [type, namespaces, ...locals]);
+    const { newDef, oldDef } = mergeWithExistingDefinition(currentDef, getComponentDef(type));
+    // TODO(crisbeto): the `applyMetadata` call above will replace the definition on the type.
+    // Ideally we should adjust the compiler output so the metadata is returned, however that'll
+    // require some internal changes. We re-add the metadata here manually.
+    type[NG_COMP_DEF] = newDef;
     // If a `tView` hasn't been created yet, it means that this component hasn't been instantianted
     // before. In this case there's nothing left for us to do aside from patching it in.
     if (oldDef.tView) {
@@ -33428,17 +33433,42 @@ function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals) {
             // Note: we have the additional check, because `IsRoot` can also indicate
             // a component created through something like `createComponent`.
             if (root[FLAGS] & 512 /* LViewFlags.IsRoot */ && root[PARENT] === null) {
-                recreateMatchingLViews(oldDef, root);
+                recreateMatchingLViews(newDef, oldDef, root);
             }
         }
     }
+}
+/**
+ * Merges two component definitions while preseving the original one in place.
+ * @param currentDef Definition that should receive the new metadata.
+ * @param newDef Source of the new metadata.
+ */
+function mergeWithExistingDefinition(currentDef, newDef) {
+    // Clone the current definition since we reference its original data further
+    // down in the replacement process (e.g. when destroying the renderer).
+    const clone = { ...currentDef };
+    // Assign the new metadata in place while preserving the object literal. It's important to
+    // Keep the object in place, because there can be references to it, for example in the
+    // `directiveDefs` of another definition.
+    const replacement = Object.assign(currentDef, newDef, {
+        // We need to keep the existing directive and pipe defs, because they can get patched on
+        // by a call to `setComponentScope` from a module file. That call won't make it into the
+        // HMR replacement function, because it lives in an entirely different file.
+        directiveDefs: clone.directiveDefs,
+        pipeDefs: clone.pipeDefs,
+        // Preserve the old `setInput` function, because it has some state.
+        // This is fine, because the component instance is preserved as well.
+        setInput: clone.setInput,
+    });
+    ngDevMode && assertEqual(replacement, currentDef, 'Expected definition to be merged in place');
+    return { newDef: replacement, oldDef: clone };
 }
 /**
  * Finds all LViews matching a specific component definition and recreates them.
  * @param oldDef Component definition to search for.
  * @param rootLView View from which to start the search.
  */
-function recreateMatchingLViews(oldDef, rootLView) {
+function recreateMatchingLViews(newDef, oldDef, rootLView) {
     ngDevMode &&
         assertDefined(oldDef.tView, 'Expected a component definition that has been instantiated at least once');
     const tView = rootLView[TVIEW];
@@ -33446,7 +33476,7 @@ function recreateMatchingLViews(oldDef, rootLView) {
     // produce false positives when using inheritance.
     if (tView === oldDef.tView) {
         ngDevMode && assertComponentDef(oldDef.type);
-        recreateLView(getComponentDef(oldDef.type), oldDef, rootLView);
+        recreateLView(newDef, oldDef, rootLView);
         return;
     }
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
@@ -33454,14 +33484,14 @@ function recreateMatchingLViews(oldDef, rootLView) {
         if (isLContainer(current)) {
             // The host can be an LView if a component is injecting `ViewContainerRef`.
             if (isLView(current[HOST])) {
-                recreateMatchingLViews(oldDef, current[HOST]);
+                recreateMatchingLViews(newDef, oldDef, current[HOST]);
             }
             for (let j = CONTAINER_HEADER_OFFSET; j < current.length; j++) {
-                recreateMatchingLViews(oldDef, current[j]);
+                recreateMatchingLViews(newDef, oldDef, current[j]);
             }
         }
         else if (isLView(current)) {
-            recreateMatchingLViews(oldDef, current);
+            recreateMatchingLViews(newDef, oldDef, current);
         }
     }
 }
@@ -34967,7 +34997,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.2+sha-67fe0b9');
+const VERSION = new Version('19.1.2+sha-53160e5');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
