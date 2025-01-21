@@ -1,9 +1,14 @@
 /**
- * @license Angular v19.1.2+sha-2ec826d
+ * @license Angular v19.1.2+sha-6483621
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
+
+export declare type ComputationFn<S, D> = (source: S, previous?: {
+    source: S;
+    value: D;
+}) => D;
 
 declare type ComputedGetter<T> = (() => T) & {
     [SIGNAL]: ComputedNode<T>;
@@ -66,6 +71,8 @@ export declare function consumerPollProducersForChange(node: ReactiveNode): bool
  */
 export declare function createComputed<T>(computation: () => T): ComputedGetter<T>;
 
+export declare function createLinkedSignal<S, D>(sourceFn: () => S, computationFn: ComputationFn<S, D>, equalityFn?: ValueEqualityFn<D>): LinkedSignalGetter<S, D>;
+
 /**
  * Create a `Signal` that can be set or updated directly.
  */
@@ -83,6 +90,40 @@ export declare function getActiveConsumer(): ReactiveNode | null;
 export declare function isInNotificationPhase(): boolean;
 
 export declare function isReactive(value: unknown): value is Reactive;
+
+export declare type LinkedSignalGetter<S, D> = (() => D) & {
+    [SIGNAL]: LinkedSignalNode<S, D>;
+};
+
+export declare interface LinkedSignalNode<S, D> extends ReactiveNode {
+    /**
+     * Value of the source signal that was used to derive the computed value.
+     */
+    sourceValue: S;
+    /**
+     * Current state value, or one of the sentinel values (`UNSET`, `COMPUTING`,
+     * `ERROR`).
+     */
+    value: D;
+    /**
+     * If `value` is `ERRORED`, the error caught from the last computation attempt which will
+     * be re-thrown.
+     */
+    error: unknown;
+    /**
+     * The source function represents reactive dependency based on which the linked state is reset.
+     */
+    source: () => S;
+    /**
+     * The computation function which will produce a new value based on the source and, optionally - previous values.
+     */
+    computation: ComputationFn<S, D>;
+    equal: ValueEqualityFn<D>;
+}
+
+export declare function linkedSignalSetFn<S, D>(node: LinkedSignalNode<S, D>, newValue: D): void;
+
+export declare function linkedSignalUpdateFn<S, D>(node: LinkedSignalNode<S, D>, updater: (value: D) => D): void;
 
 /**
  * Called by implementations when a producer's signal is read.
