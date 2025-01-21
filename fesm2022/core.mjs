@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.2+sha-26f6d4c
+ * @license Angular v19.1.2+sha-0de5049
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12267,6 +12267,55 @@ function nativeRemoveNode(renderer, rNode, isHostElement) {
 function clearElementContents(rElement) {
     rElement.textContent = '';
 }
+/**
+ * Write `cssText` to `RElement`.
+ *
+ * This function does direct write without any reconciliation. Used for writing initial values, so
+ * that static styling values do not pull in the style parser.
+ *
+ * @param renderer Renderer to use
+ * @param element The element which needs to be updated.
+ * @param newValue The new class list to write.
+ */
+function writeDirectStyle(renderer, element, newValue) {
+    ngDevMode && assertString(newValue, "'newValue' should be a string");
+    renderer.setAttribute(element, 'style', newValue);
+    ngDevMode && ngDevMode.rendererSetStyle++;
+}
+/**
+ * Write `className` to `RElement`.
+ *
+ * This function does direct write without any reconciliation. Used for writing initial values, so
+ * that static styling values do not pull in the style parser.
+ *
+ * @param renderer Renderer to use
+ * @param element The element which needs to be updated.
+ * @param newValue The new class list to write.
+ */
+function writeDirectClass(renderer, element, newValue) {
+    ngDevMode && assertString(newValue, "'newValue' should be a string");
+    if (newValue === '') {
+        // There are tests in `google3` which expect `element.getAttribute('class')` to be `null`.
+        renderer.removeAttribute(element, 'class');
+    }
+    else {
+        renderer.setAttribute(element, 'class', newValue);
+    }
+    ngDevMode && ngDevMode.rendererSetClassName++;
+}
+/** Sets up the static DOM attributes on an `RNode`. */
+function setupStaticAttributes(renderer, element, tNode) {
+    const { mergedAttrs, classes, styles } = tNode;
+    if (mergedAttrs !== null) {
+        setUpAttributes(renderer, element, mergedAttrs);
+    }
+    if (classes !== null) {
+        writeDirectClass(renderer, element, classes);
+    }
+    if (styles !== null) {
+        writeDirectStyle(renderer, element, styles);
+    }
+}
 
 function createLView(parentLView, tView, context, flags, host, tHostNode, environment, renderer, injector, embeddedViewInjector, hydrationInfo) {
     const lView = tView.blueprint.slice();
@@ -12300,67 +12349,6 @@ function createLView(parentLView, tView, context, flags, host, tHostNode, enviro
     lView[DECLARATION_COMPONENT_VIEW] =
         tView.type == 2 /* TViewType.Embedded */ ? parentLView[DECLARATION_COMPONENT_VIEW] : lView;
     return lView;
-}
-function getOrCreateTNode(tView, index, type, name, attrs) {
-    ngDevMode &&
-        index !== 0 && // 0 are bogus nodes and they are OK. See `createContainerRef` in
-        // `view_engine_compatibility` for additional context.
-        assertGreaterThanOrEqual(index, HEADER_OFFSET, "TNodes can't be in the LView header.");
-    // Keep this function short, so that the VM will inline it.
-    ngDevMode && assertPureTNodeType(type);
-    let tNode = tView.data[index];
-    if (tNode === null) {
-        tNode = createTNodeAtIndex(tView, index, type, name, attrs);
-        if (isInI18nBlock()) {
-            // If we are in i18n block then all elements should be pre declared through `Placeholder`
-            // See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
-            // If the `TNode` was not pre-declared than it means it was not mentioned which means it was
-            // removed, so we mark it as detached.
-            tNode.flags |= 32 /* TNodeFlags.isDetached */;
-        }
-    }
-    else if (tNode.type & 64 /* TNodeType.Placeholder */) {
-        tNode.type = type;
-        tNode.value = name;
-        tNode.attrs = attrs;
-        const parent = getCurrentParentTNode();
-        tNode.injectorIndex = parent === null ? -1 : parent.injectorIndex;
-        ngDevMode && assertTNodeForTView(tNode, tView);
-        ngDevMode && assertEqual(index, tNode.index, 'Expecting same index');
-    }
-    setCurrentTNode(tNode, true);
-    return tNode;
-}
-function createTNodeAtIndex(tView, index, type, name, attrs) {
-    const currentTNode = getCurrentTNodePlaceholderOk();
-    const isParent = isCurrentTNodeParent();
-    const parent = isParent ? currentTNode : currentTNode && currentTNode.parent;
-    // Parents cannot cross component boundaries because components will be used in multiple places.
-    const tNode = (tView.data[index] = createTNode(tView, parent, type, index, name, attrs));
-    // Assign a pointer to the first child node of a given view. The first node is not always the one
-    // at index 0, in case of i18n, index 0 can be the instruction `i18nStart` and the first node has
-    // the index 1 or more, so we can't just check node index.
-    if (tView.firstChild === null) {
-        tView.firstChild = tNode;
-    }
-    if (currentTNode !== null) {
-        if (isParent) {
-            // FIXME(misko): This logic looks unnecessarily complicated. Could we simplify?
-            if (currentTNode.child == null && tNode.parent !== null) {
-                // We are in the same view, which means we are adding content node to the parent view.
-                currentTNode.child = tNode;
-            }
-        }
-        else {
-            if (currentTNode.next === null) {
-                // In the case of i18n the `currentTNode` may already be linked, in which case we don't want
-                // to break the links which i18n created.
-                currentTNode.next = tNode;
-                tNode.prev = currentTNode;
-            }
-        }
-    }
-    return tNode;
 }
 /**
  * When elements are created dynamically after a view blueprint is created (e.g. through
@@ -12594,62 +12582,6 @@ function applyRootElementTransformImpl(rootElement) {
  */
 function enableApplyRootElementTransformImpl() {
     _applyRootElementTransformImpl = applyRootElementTransformImpl;
-}
-function createTNode(tView, tParent, type, index, value, attrs) {
-    ngDevMode &&
-        index !== 0 && // 0 are bogus nodes and they are OK. See `createContainerRef` in
-        // `view_engine_compatibility` for additional context.
-        assertGreaterThanOrEqual(index, HEADER_OFFSET, "TNodes can't be in the LView header.");
-    ngDevMode && assertNotSame(attrs, undefined, "'undefined' is not valid value for 'attrs'");
-    ngDevMode && ngDevMode.tNode++;
-    ngDevMode && tParent && assertTNodeForTView(tParent, tView);
-    let injectorIndex = tParent ? tParent.injectorIndex : -1;
-    let flags = 0;
-    if (isInSkipHydrationBlock$1()) {
-        flags |= 128 /* TNodeFlags.inSkipHydrationBlock */;
-    }
-    const tNode = {
-        type,
-        index,
-        insertBeforeIndex: null,
-        injectorIndex,
-        directiveStart: -1,
-        directiveEnd: -1,
-        directiveStylingLast: -1,
-        componentOffset: -1,
-        propertyBindings: null,
-        flags,
-        providerIndexes: 0,
-        value: value,
-        attrs: attrs,
-        mergedAttrs: null,
-        localNames: null,
-        initialInputs: undefined,
-        inputs: null,
-        outputs: null,
-        tView: null,
-        next: null,
-        prev: null,
-        projectionNext: null,
-        child: null,
-        parent: tParent,
-        projection: null,
-        styles: null,
-        stylesWithoutHost: null,
-        residualStyles: undefined,
-        classes: null,
-        classesWithoutHost: null,
-        residualClasses: undefined,
-        classBindings: 0,
-        styleBindings: 0,
-    };
-    if (ngDevMode) {
-        // For performance reasons it is important that the tNode retains the same shape during runtime.
-        // (To make sure that all of the code is monomorphic.) For this reason we seal the object to
-        // prevent class transitions.
-        Object.seal(tNode);
-    }
-    return tNode;
 }
 function captureNodeBindings(mode, aliasMap, directiveIndex, bindingsResult, hostDirectiveAliasMap) {
     for (let publicName in aliasMap) {
@@ -14436,55 +14368,6 @@ function applyStyling(renderer, isClassBased, rNode, prop, value) {
         }
     }
 }
-/**
- * Write `cssText` to `RElement`.
- *
- * This function does direct write without any reconciliation. Used for writing initial values, so
- * that static styling values do not pull in the style parser.
- *
- * @param renderer Renderer to use
- * @param element The element which needs to be updated.
- * @param newValue The new class list to write.
- */
-function writeDirectStyle(renderer, element, newValue) {
-    ngDevMode && assertString(newValue, "'newValue' should be a string");
-    renderer.setAttribute(element, 'style', newValue);
-    ngDevMode && ngDevMode.rendererSetStyle++;
-}
-/**
- * Write `className` to `RElement`.
- *
- * This function does direct write without any reconciliation. Used for writing initial values, so
- * that static styling values do not pull in the style parser.
- *
- * @param renderer Renderer to use
- * @param element The element which needs to be updated.
- * @param newValue The new class list to write.
- */
-function writeDirectClass(renderer, element, newValue) {
-    ngDevMode && assertString(newValue, "'newValue' should be a string");
-    if (newValue === '') {
-        // There are tests in `google3` which expect `element.getAttribute('class')` to be `null`.
-        renderer.removeAttribute(element, 'class');
-    }
-    else {
-        renderer.setAttribute(element, 'class', newValue);
-    }
-    ngDevMode && ngDevMode.rendererSetClassName++;
-}
-/** Sets up the static DOM attributes on an `RNode`. */
-function setupStaticAttributes(renderer, element, tNode) {
-    const { mergedAttrs, classes, styles } = tNode;
-    if (mergedAttrs !== null) {
-        setUpAttributes(renderer, element, mergedAttrs);
-    }
-    if (classes !== null) {
-        writeDirectClass(renderer, element, classes);
-    }
-    if (styles !== null) {
-        writeDirectStyle(renderer, element, styles);
-    }
-}
 
 function createAndRenderEmbeddedLView(declarationLView, templateTNode, context, options) {
     const prevConsumer = setActiveConsumer$1(null);
@@ -15994,6 +15877,128 @@ function processI18nInsertBefore(renderer, childTNode, lView, childRNode, parent
             }
         }
     }
+}
+
+function getOrCreateTNode(tView, index, type, name, attrs) {
+    ngDevMode &&
+        index !== 0 && // 0 are bogus nodes and they are OK. See `createContainerRef` in
+        // `view_engine_compatibility` for additional context.
+        assertGreaterThanOrEqual(index, HEADER_OFFSET, "TNodes can't be in the LView header.");
+    // Keep this function short, so that the VM will inline it.
+    ngDevMode && assertPureTNodeType(type);
+    let tNode = tView.data[index];
+    if (tNode === null) {
+        tNode = createTNodeAtIndex(tView, index, type, name, attrs);
+        if (isInI18nBlock()) {
+            // If we are in i18n block then all elements should be pre declared through `Placeholder`
+            // See `TNodeType.Placeholder` and `LFrame.inI18n` for more context.
+            // If the `TNode` was not pre-declared than it means it was not mentioned which means it was
+            // removed, so we mark it as detached.
+            tNode.flags |= 32 /* TNodeFlags.isDetached */;
+        }
+    }
+    else if (tNode.type & 64 /* TNodeType.Placeholder */) {
+        tNode.type = type;
+        tNode.value = name;
+        tNode.attrs = attrs;
+        const parent = getCurrentParentTNode();
+        tNode.injectorIndex = parent === null ? -1 : parent.injectorIndex;
+        ngDevMode && assertTNodeForTView(tNode, tView);
+        ngDevMode && assertEqual(index, tNode.index, 'Expecting same index');
+    }
+    setCurrentTNode(tNode, true);
+    return tNode;
+}
+function createTNodeAtIndex(tView, index, type, name, attrs) {
+    const currentTNode = getCurrentTNodePlaceholderOk();
+    const isParent = isCurrentTNodeParent();
+    const parent = isParent ? currentTNode : currentTNode && currentTNode.parent;
+    // Parents cannot cross component boundaries because components will be used in multiple places.
+    const tNode = (tView.data[index] = createTNode(tView, parent, type, index, name, attrs));
+    // Assign a pointer to the first child node of a given view. The first node is not always the one
+    // at index 0, in case of i18n, index 0 can be the instruction `i18nStart` and the first node has
+    // the index 1 or more, so we can't just check node index.
+    linkTNodeInTView(tView, tNode, currentTNode, isParent);
+    return tNode;
+}
+function linkTNodeInTView(tView, tNode, currentTNode, isParent) {
+    if (tView.firstChild === null) {
+        tView.firstChild = tNode;
+    }
+    if (currentTNode !== null) {
+        if (isParent) {
+            // FIXME(misko): This logic looks unnecessarily complicated. Could we simplify?
+            if (currentTNode.child == null && tNode.parent !== null) {
+                // We are in the same view, which means we are adding content node to the parent view.
+                currentTNode.child = tNode;
+            }
+        }
+        else {
+            if (currentTNode.next === null) {
+                // In the case of i18n the `currentTNode` may already be linked, in which case we don't want
+                // to break the links which i18n created.
+                currentTNode.next = tNode;
+                tNode.prev = currentTNode;
+            }
+        }
+    }
+}
+function createTNode(tView, tParent, type, index, value, attrs) {
+    ngDevMode &&
+        index !== 0 && // 0 are bogus nodes and they are OK. See `createContainerRef` in
+        // `view_engine_compatibility` for additional context.
+        assertGreaterThanOrEqual(index, HEADER_OFFSET, "TNodes can't be in the LView header.");
+    ngDevMode && assertNotSame(attrs, undefined, "'undefined' is not valid value for 'attrs'");
+    ngDevMode && ngDevMode.tNode++;
+    ngDevMode && tParent && assertTNodeForTView(tParent, tView);
+    let injectorIndex = tParent ? tParent.injectorIndex : -1;
+    let flags = 0;
+    if (isInSkipHydrationBlock$1()) {
+        flags |= 128 /* TNodeFlags.inSkipHydrationBlock */;
+    }
+    // TODO: would it be helpful to use a prototypal inheritance here, similar to the way we do so with signals?
+    const tNode = {
+        type,
+        index,
+        insertBeforeIndex: null,
+        injectorIndex,
+        directiveStart: -1,
+        directiveEnd: -1,
+        directiveStylingLast: -1,
+        componentOffset: -1,
+        propertyBindings: null,
+        flags,
+        providerIndexes: 0,
+        value: value,
+        attrs: attrs,
+        mergedAttrs: null,
+        localNames: null,
+        initialInputs: undefined,
+        inputs: null,
+        outputs: null,
+        tView: null,
+        next: null,
+        prev: null,
+        projectionNext: null,
+        child: null,
+        parent: tParent,
+        projection: null,
+        styles: null,
+        stylesWithoutHost: null,
+        residualStyles: undefined,
+        classes: null,
+        classesWithoutHost: null,
+        residualClasses: undefined,
+        classBindings: 0,
+        styleBindings: 0,
+    };
+    if (ngDevMode) {
+        // For performance reasons it is important that the tNode retains the same shape during runtime.
+        // (To make sure that all of the code is monomorphic.) For this reason we seal the object to
+        // prevent class transitions.
+        Object.seal(tNode);
+    }
+    return tNode;
 }
 
 /**
@@ -17917,6 +17922,7 @@ class ComponentFactory extends ComponentFactory$1 {
             // Create the root view. Uses empty TView and ContentTemplate.
             const rootTView = createTView(0 /* TViewType.Root */, null, null, 1, 0, null, null, null, null, null, null);
             const rootLView = createLView(null, rootTView, null, rootFlags, null, null, environment, hostRenderer, rootViewInjector, null, hydrationInfo);
+            rootLView[HEADER_OFFSET] = hostRNode;
             // rootView is the parent when bootstrapping
             // TODO(misko): it looks like we are entering view here but we don't really need to as
             // `renderView` does that. However as the code is written it is needed because
@@ -17924,7 +17930,6 @@ class ComponentFactory extends ComponentFactory$1 {
             // issues would allow us to drop this.
             enterView(rootLView);
             let component;
-            let tElementNode;
             let componentView = null;
             try {
                 const rootComponentDef = this.componentDef;
@@ -17940,12 +17945,13 @@ class ComponentFactory extends ComponentFactory$1 {
                 else {
                     rootDirectives = [rootComponentDef];
                 }
-                const hostTNode = createRootComponentTNode(rootLView, hostRNode);
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.1.2+sha-26f6d4c']
+                    ? ['ng-version', '19.1.2+sha-0de5049']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
+                // TODO: this logic is shared with the element instruction first create pass
+                const hostTNode = getOrCreateTNode(rootTView, HEADER_OFFSET, 2 /* TNodeType.Element */, '#host', tAttributes);
                 for (const def of rootDirectives) {
                     hostTNode.mergedAttrs = mergeHostAttrs(hostTNode.mergedAttrs, def.hostAttrs);
                 }
@@ -17958,7 +17964,6 @@ class ComponentFactory extends ComponentFactory$1 {
                     setupStaticAttributes(hostRenderer, hostRNode, hostTNode);
                 }
                 componentView = createRootComponentView(hostTNode, hostRNode, rootComponentDef, rootDirectives, rootLView, environment);
-                tElementNode = getTNode(rootTView, HEADER_OFFSET);
                 if (projectableNodes !== undefined) {
                     projectNodes(hostTNode, this.ngContentSelectors, projectableNodes);
                 }
@@ -17979,7 +17984,8 @@ class ComponentFactory extends ComponentFactory$1 {
             finally {
                 leaveView();
             }
-            return new ComponentRef(this.componentType, component, createElementRef(tElementNode, rootLView), rootLView, tElementNode);
+            const hostTNode = getTNode(rootTView, HEADER_OFFSET);
+            return new ComponentRef(this.componentType, component, createElementRef(hostTNode, rootLView), rootLView, hostTNode);
         }
         finally {
             setActiveConsumer$1(prevConsumer);
@@ -18047,17 +18053,6 @@ class ComponentRef extends ComponentRef$1 {
     onDestroy(callback) {
         this.hostView.onDestroy(callback);
     }
-}
-/** Creates a TNode that can be used to instantiate a root component. */
-function createRootComponentTNode(lView, rNode) {
-    const tView = lView[TVIEW];
-    const index = HEADER_OFFSET;
-    ngDevMode && assertIndexInRange(lView, index);
-    lView[index] = rNode;
-    // '#host' is added here as we don't know the real host DOM name (we don't want to read it) and at
-    // the same time we want to communicate the debug `TNode` that this is a special `TNode`
-    // representing a host element.
-    return getOrCreateTNode(tView, index, 2 /* TNodeType.Element */, '#host', null);
 }
 /**
  * Creates the root component view and the root component node.
@@ -35001,7 +34996,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.2+sha-26f6d4c');
+const VERSION = new Version('19.1.2+sha-0de5049');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
