@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.0+sha-76c4a77
+ * @license Angular v19.2.0-next.0+sha-fe8a683
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1197,7 +1197,7 @@ class InvokeFunctionExpr extends Expression {
         return new InvokeFunctionExpr(this.fn.clone(), this.args.map((arg) => arg.clone()), this.type, this.sourceSpan, this.pure);
     }
 }
-class TaggedTemplateExpr extends Expression {
+class TaggedTemplateLiteralExpr extends Expression {
     tag;
     template;
     constructor(tag, template, type, sourceSpan) {
@@ -1206,19 +1206,18 @@ class TaggedTemplateExpr extends Expression {
         this.template = template;
     }
     isEquivalent(e) {
-        return (e instanceof TaggedTemplateExpr &&
+        return (e instanceof TaggedTemplateLiteralExpr &&
             this.tag.isEquivalent(e.tag) &&
-            areAllEquivalentPredicate(this.template.elements, e.template.elements, (a, b) => a.text === b.text) &&
-            areAllEquivalent(this.template.expressions, e.template.expressions));
+            this.template.isEquivalent(e.template));
     }
     isConstant() {
         return false;
     }
     visitExpression(visitor, context) {
-        return visitor.visitTaggedTemplateExpr(this, context);
+        return visitor.visitTaggedTemplateLiteralExpr(this, context);
     }
     clone() {
-        return new TaggedTemplateExpr(this.tag.clone(), this.template.clone(), this.type, this.sourceSpan);
+        return new TaggedTemplateLiteralExpr(this.tag.clone(), this.template.clone(), this.type, this.sourceSpan);
     }
 }
 class InstantiateExpr extends Expression {
@@ -1263,24 +1262,35 @@ class LiteralExpr extends Expression {
         return new LiteralExpr(this.value, this.type, this.sourceSpan);
     }
 }
-class TemplateLiteral {
+class TemplateLiteralExpr extends Expression {
     elements;
     expressions;
-    constructor(elements, expressions) {
+    constructor(elements, expressions, sourceSpan) {
+        super(null, sourceSpan);
         this.elements = elements;
         this.expressions = expressions;
     }
+    isEquivalent(e) {
+        return (e instanceof TemplateLiteralExpr &&
+            areAllEquivalentPredicate(this.elements, e.elements, (a, b) => a.text === b.text) &&
+            areAllEquivalent(this.expressions, e.expressions));
+    }
+    isConstant() {
+        return false;
+    }
+    visitExpression(visitor, context) {
+        return visitor.visitTemplateLiteralExpr(this, context);
+    }
     clone() {
-        return new TemplateLiteral(this.elements.map((el) => el.clone()), this.expressions.map((expr) => expr.clone()));
+        return new TemplateLiteralExpr(this.elements.map((el) => el.clone()), this.expressions.map((expr) => expr.clone()));
     }
 }
-class TemplateLiteralElement {
+class TemplateLiteralElementExpr extends Expression {
     text;
-    sourceSpan;
     rawText;
     constructor(text, sourceSpan, rawText) {
+        super(STRING_TYPE, sourceSpan);
         this.text = text;
-        this.sourceSpan = sourceSpan;
         // If `rawText` is not provided, try to extract the raw string from its
         // associated `sourceSpan`. If that is also not available, "fake" the raw
         // string instead by escaping the following control sequences:
@@ -1290,8 +1300,17 @@ class TemplateLiteralElement {
         this.rawText =
             rawText ?? sourceSpan?.toString() ?? escapeForTemplateLiteral(escapeSlashes(text));
     }
+    visitExpression(visitor, context) {
+        return visitor.visitTemplateLiteralElementExpr(this, context);
+    }
+    isEquivalent(e) {
+        return (e instanceof TemplateLiteralElementExpr && e.text === this.text && e.rawText === this.rawText);
+    }
+    isConstant() {
+        return true;
+    }
     clone() {
-        return new TemplateLiteralElement(this.text, this.sourceSpan, this.rawText);
+        return new TemplateLiteralElementExpr(this.text, this.sourceSpan, this.rawText);
     }
 }
 class LiteralPiece {
@@ -1973,9 +1992,9 @@ class RecursiveAstVisitor$1 {
         this.visitAllExpressions(ast.args, context);
         return this.visitExpression(ast, context);
     }
-    visitTaggedTemplateExpr(ast, context) {
+    visitTaggedTemplateLiteralExpr(ast, context) {
         ast.tag.visitExpression(this, context);
-        this.visitAllExpressions(ast.template.expressions, context);
+        ast.template.visitExpression(this, context);
         return this.visitExpression(ast, context);
     }
     visitInstantiateExpr(ast, context) {
@@ -2048,6 +2067,14 @@ class RecursiveAstVisitor$1 {
     }
     visitCommaExpr(ast, context) {
         this.visitAllExpressions(ast.parts, context);
+        return this.visitExpression(ast, context);
+    }
+    visitTemplateLiteralExpr(ast, context) {
+        this.visitAllExpressions(ast.elements, context);
+        this.visitAllExpressions(ast.expressions, context);
+        return this.visitExpression(ast, context);
+    }
+    visitTemplateLiteralElementExpr(ast, context) {
         return this.visitExpression(ast, context);
     }
     visitAllExpressions(exprs, context) {
@@ -2127,7 +2154,7 @@ function ifStmt(condition, thenClause, elseClause, sourceSpan, leadingComments) 
     return new IfStmt(condition, thenClause, elseClause, sourceSpan, leadingComments);
 }
 function taggedTemplate(tag, template, type, sourceSpan) {
-    return new TaggedTemplateExpr(tag, template, type, sourceSpan);
+    return new TaggedTemplateLiteralExpr(tag, template, type, sourceSpan);
 }
 function literal$1(value, type, sourceSpan) {
     return new LiteralExpr(value, type, sourceSpan);
@@ -3465,16 +3492,26 @@ class AbstractEmitterVisitor {
         ctx.print(expr, `)`);
         return null;
     }
-    visitTaggedTemplateExpr(expr, ctx) {
+    visitTaggedTemplateLiteralExpr(expr, ctx) {
         expr.tag.visitExpression(this, ctx);
-        ctx.print(expr, '`' + expr.template.elements[0].rawText);
-        for (let i = 1; i < expr.template.elements.length; i++) {
-            ctx.print(expr, '${');
-            expr.template.expressions[i - 1].visitExpression(this, ctx);
-            ctx.print(expr, `}${expr.template.elements[i].rawText}`);
+        expr.template.visitExpression(this, ctx);
+        return null;
+    }
+    visitTemplateLiteralExpr(expr, ctx) {
+        ctx.print(expr, '`');
+        for (let i = 0; i < expr.elements.length; i++) {
+            expr.elements[i].visitExpression(this, ctx);
+            const expression = i < expr.expressions.length ? expr.expressions[i] : null;
+            if (expression !== null) {
+                ctx.print(expression, '${');
+                expression.visitExpression(this, ctx);
+                ctx.print(expression, '}');
+            }
         }
         ctx.print(expr, '`');
-        return null;
+    }
+    visitTemplateLiteralElementExpr(expr, ctx) {
+        ctx.print(expr, expr.rawText);
     }
     visitWrappedNodeExpr(ast, ctx) {
         throw new Error('Abstract emitter cannot visit WrappedNodeExpr.');
@@ -4326,6 +4363,28 @@ class SafeCall extends AST {
         return visitor.visitSafeCall(this, context);
     }
 }
+class TemplateLiteral extends AST {
+    elements;
+    expressions;
+    constructor(span, sourceSpan, elements, expressions) {
+        super(span, sourceSpan);
+        this.elements = elements;
+        this.expressions = expressions;
+    }
+    visit(visitor, context) {
+        return visitor.visitTemplateLiteral(this, context);
+    }
+}
+class TemplateLiteralElement extends AST {
+    text;
+    constructor(span, sourceSpan, text) {
+        super(span, sourceSpan);
+        this.text = text;
+    }
+    visit(visitor, context) {
+        return visitor.visitTemplateLiteralElement(this, context);
+    }
+}
 /**
  * Records the absolute position of a text span in a source file, where `start` and `end` are the
  * starting and ending byte offsets, respectively, of the text span in a source file.
@@ -4473,6 +4532,18 @@ class RecursiveAstVisitor {
         this.visit(ast.receiver, context);
         this.visitAll(ast.args, context);
     }
+    visitTemplateLiteral(ast, context) {
+        // Iterate in the declaration order. Note that there will
+        // always be one expression less than the number of elements.
+        for (let i = 0; i < ast.elements.length; i++) {
+            this.visit(ast.elements[i], context);
+            const expression = i < ast.expressions.length ? ast.expressions[i] : null;
+            if (expression !== null) {
+                this.visit(expression, context);
+            }
+        }
+    }
+    visitTemplateLiteralElement(ast, context) { }
     // This is not part of the AstVisitor interface, just a helper method
     visitAll(asts, context) {
         for (const ast of asts) {
@@ -6570,7 +6641,7 @@ class AbstractJsEmitterVisitor extends AbstractEmitterVisitor {
         ctx.println(stmt, `;`);
         return null;
     }
-    visitTaggedTemplateExpr(ast, ctx) {
+    visitTaggedTemplateLiteralExpr(ast, ctx) {
         // The following convoluted piece of code is effectively the downlevelled equivalent of
         // ```
         // tag`...`
@@ -6589,6 +6660,23 @@ class AbstractJsEmitterVisitor extends AbstractEmitterVisitor {
             expression.visitExpression(this, ctx);
         });
         ctx.print(ast, ')');
+        return null;
+    }
+    visitTemplateLiteralExpr(expr, ctx) {
+        ctx.print(expr, '`');
+        for (let i = 0; i < expr.elements.length; i++) {
+            expr.elements[i].visitExpression(this, ctx);
+            const expression = i < expr.expressions.length ? expr.expressions[i] : null;
+            if (expression !== null) {
+                ctx.print(expression, '${');
+                expression.visitExpression(this, ctx);
+                ctx.print(expression, '}');
+            }
+        }
+        ctx.print(expr, '`');
+    }
+    visitTemplateLiteralElementExpr(expr, ctx) {
+        ctx.print(expr, expr.rawText);
         return null;
     }
     visitFunctionExpr(ast, ctx) {
@@ -10166,7 +10254,7 @@ function transformExpressionsInExpression(expr, transform, flags) {
     else if (expr instanceof NotExpr) {
         expr.condition = transformExpressionsInExpression(expr.condition, transform, flags);
     }
-    else if (expr instanceof TaggedTemplateExpr) {
+    else if (expr instanceof TaggedTemplateLiteralExpr) {
         expr.tag = transformExpressionsInExpression(expr.tag, transform, flags);
         expr.template.expressions = expr.template.expressions.map((e) => transformExpressionsInExpression(e, transform, flags));
     }
@@ -10181,6 +10269,11 @@ function transformExpressionsInExpression(expr, transform, flags) {
         }
     }
     else if (expr instanceof WrappedNodeExpr) ;
+    else if (expr instanceof TemplateLiteralExpr) {
+        for (let i = 0; i < expr.expressions.length; i++) {
+            expr.expressions[i] = transformExpressionsInExpression(expr.expressions[i], transform, flags);
+        }
+    }
     else if (expr instanceof ReadVarExpr ||
         expr instanceof ExternalExpr ||
         expr instanceof LiteralExpr) ;
@@ -11833,7 +11926,7 @@ class ElementAttributes {
                 if (!isStringLiteral(value)) {
                     throw Error('AssertionError: extracted attribute value should be string literal');
                 }
-                array.push(taggedTemplate(trustedValueFn, new TemplateLiteral([new TemplateLiteralElement(value.value)], []), undefined, value.sourceSpan));
+                array.push(taggedTemplate(trustedValueFn, new TemplateLiteralExpr([new TemplateLiteralElementExpr(value.value)], []), undefined, value.sourceSpan));
             }
             else {
                 array.push(value);
@@ -17324,6 +17417,12 @@ var TokenType;
     TokenType[TokenType["Number"] = 6] = "Number";
     TokenType[TokenType["Error"] = 7] = "Error";
 })(TokenType || (TokenType = {}));
+var StringTokenKind;
+(function (StringTokenKind) {
+    StringTokenKind[StringTokenKind["Plain"] = 0] = "Plain";
+    StringTokenKind[StringTokenKind["TemplateLiteralPart"] = 1] = "TemplateLiteralPart";
+    StringTokenKind[StringTokenKind["TemplateLiteralEnd"] = 2] = "TemplateLiteralEnd";
+})(StringTokenKind || (StringTokenKind = {}));
 const KEYWORDS = [
     'var',
     'let',
@@ -17339,14 +17438,7 @@ const KEYWORDS = [
 ];
 class Lexer {
     tokenize(text) {
-        const scanner = new _Scanner(text);
-        const tokens = [];
-        let token = scanner.scanToken();
-        while (token != null) {
-            tokens.push(token);
-            token = scanner.scanToken();
-        }
-        return tokens;
+        return new _Scanner(text).scan();
     }
 }
 class Token {
@@ -17363,55 +17455,67 @@ class Token {
         this.strValue = strValue;
     }
     isCharacter(code) {
-        return this.type == TokenType.Character && this.numValue == code;
+        return this.type === TokenType.Character && this.numValue === code;
     }
     isNumber() {
-        return this.type == TokenType.Number;
+        return this.type === TokenType.Number;
     }
     isString() {
-        return this.type == TokenType.String;
+        return this.type === TokenType.String;
     }
     isOperator(operator) {
-        return this.type == TokenType.Operator && this.strValue == operator;
+        return this.type === TokenType.Operator && this.strValue === operator;
     }
     isIdentifier() {
-        return this.type == TokenType.Identifier;
+        return this.type === TokenType.Identifier;
     }
     isPrivateIdentifier() {
-        return this.type == TokenType.PrivateIdentifier;
+        return this.type === TokenType.PrivateIdentifier;
     }
     isKeyword() {
-        return this.type == TokenType.Keyword;
+        return this.type === TokenType.Keyword;
     }
     isKeywordLet() {
-        return this.type == TokenType.Keyword && this.strValue == 'let';
+        return this.type === TokenType.Keyword && this.strValue === 'let';
     }
     isKeywordAs() {
-        return this.type == TokenType.Keyword && this.strValue == 'as';
+        return this.type === TokenType.Keyword && this.strValue === 'as';
     }
     isKeywordNull() {
-        return this.type == TokenType.Keyword && this.strValue == 'null';
+        return this.type === TokenType.Keyword && this.strValue === 'null';
     }
     isKeywordUndefined() {
-        return this.type == TokenType.Keyword && this.strValue == 'undefined';
+        return this.type === TokenType.Keyword && this.strValue === 'undefined';
     }
     isKeywordTrue() {
-        return this.type == TokenType.Keyword && this.strValue == 'true';
+        return this.type === TokenType.Keyword && this.strValue === 'true';
     }
     isKeywordFalse() {
-        return this.type == TokenType.Keyword && this.strValue == 'false';
+        return this.type === TokenType.Keyword && this.strValue === 'false';
     }
     isKeywordThis() {
-        return this.type == TokenType.Keyword && this.strValue == 'this';
+        return this.type === TokenType.Keyword && this.strValue === 'this';
     }
     isKeywordTypeof() {
         return this.type === TokenType.Keyword && this.strValue === 'typeof';
     }
     isError() {
-        return this.type == TokenType.Error;
+        return this.type === TokenType.Error;
     }
     toNumber() {
-        return this.type == TokenType.Number ? this.numValue : -1;
+        return this.type === TokenType.Number ? this.numValue : -1;
+    }
+    isTemplateLiteralPart() {
+        return this.isString() && this.kind === StringTokenKind.TemplateLiteralPart;
+    }
+    isTemplateLiteralEnd() {
+        return this.isString() && this.kind === StringTokenKind.TemplateLiteralEnd;
+    }
+    isTemplateLiteralInterpolationStart() {
+        return this.isOperator('${');
+    }
+    isTemplateLiteralInterpolationEnd() {
+        return this.isOperator('}');
     }
     toString() {
         switch (this.type) {
@@ -17430,6 +17534,13 @@ class Token {
         }
     }
 }
+class StringToken extends Token {
+    kind;
+    constructor(index, end, strValue, kind) {
+        super(index, end, TokenType.String, 0, strValue);
+        this.kind = kind;
+    }
+}
 function newCharacterToken(index, end, code) {
     return new Token(index, end, TokenType.Character, code, String.fromCharCode(code));
 }
@@ -17445,9 +17556,6 @@ function newKeywordToken(index, end, text) {
 function newOperatorToken(index, end, text) {
     return new Token(index, end, TokenType.Operator, 0, text);
 }
-function newStringToken(index, end, text) {
-    return new Token(index, end, TokenType.String, 0, text);
-}
 function newNumberToken(index, end, n) {
     return new Token(index, end, TokenType.Number, n, '');
 }
@@ -17457,20 +17565,33 @@ function newErrorToken(index, end, message) {
 const EOF = new Token(-1, -1, TokenType.Character, 0, '');
 class _Scanner {
     input;
+    tokens = [];
     length;
     peek = 0;
     index = -1;
+    literalInterpolationDepth = 0;
+    braceDepth = 0;
     constructor(input) {
         this.input = input;
         this.length = input.length;
         this.advance();
     }
+    scan() {
+        let token = this.scanToken();
+        while (token !== null) {
+            this.tokens.push(token);
+            token = this.scanToken();
+        }
+        return this.tokens;
+    }
     advance() {
         this.peek = ++this.index >= this.length ? $EOF : this.input.charCodeAt(this.index);
     }
     scanToken() {
-        const input = this.input, length = this.length;
-        let peek = this.peek, index = this.index;
+        const input = this.input;
+        const length = this.length;
+        let peek = this.peek;
+        let index = this.index;
         // Skip whitespace.
         while (peek <= $SPACE) {
             if (++index >= length) {
@@ -17487,10 +17608,12 @@ class _Scanner {
             return null;
         }
         // Handle identifiers and numbers.
-        if (isIdentifierStart(peek))
+        if (isIdentifierStart(peek)) {
             return this.scanIdentifier();
-        if (isDigit(peek))
+        }
+        if (isDigit(peek)) {
             return this.scanNumber(index);
+        }
         const start = index;
         switch (peek) {
             case $PERIOD:
@@ -17500,17 +17623,22 @@ class _Scanner {
                     : newCharacterToken(start, this.index, $PERIOD);
             case $LPAREN:
             case $RPAREN:
-            case $LBRACE:
-            case $RBRACE:
             case $LBRACKET:
             case $RBRACKET:
             case $COMMA:
             case $COLON:
             case $SEMICOLON:
                 return this.scanCharacter(start, peek);
+            case $LBRACE:
+                return this.scanOpenBrace(start, peek);
+            case $RBRACE:
+                return this.scanCloseBrace(start, peek);
             case $SQ:
             case $DQ:
                 return this.scanString();
+            case $BT:
+                this.advance();
+                return this.scanTemplateLiteralPart(start);
             case $HASH:
                 return this.scanPrivateIdentifier();
             case $PLUS:
@@ -17547,6 +17675,21 @@ class _Scanner {
     scanOperator(start, str) {
         this.advance();
         return newOperatorToken(start, this.index, str);
+    }
+    scanOpenBrace(start, code) {
+        this.braceDepth++;
+        this.advance();
+        return newCharacterToken(start, this.index, code);
+    }
+    scanCloseBrace(start, code) {
+        this.advance();
+        if (this.braceDepth === 0 && this.literalInterpolationDepth > 0) {
+            this.literalInterpolationDepth--;
+            this.tokens.push(newOperatorToken(start, this.index, '}'));
+            return this.scanTemplateLiteralPart(this.index);
+        }
+        this.braceDepth--;
+        return newCharacterToken(start, this.index, code);
     }
     /**
      * Tokenize a 2/3 char long operator
@@ -17643,28 +17786,11 @@ class _Scanner {
         const input = this.input;
         while (this.peek != quote) {
             if (this.peek == $BACKSLASH) {
-                buffer += input.substring(marker, this.index);
-                let unescapedCode;
-                this.advance(); // mutates this.peek
-                // @ts-expect-error see microsoft/TypeScript#9998
-                if (this.peek == $u) {
-                    // 4 character hex code for unicode character.
-                    const hex = input.substring(this.index + 1, this.index + 5);
-                    if (/^[0-9a-f]+$/i.test(hex)) {
-                        unescapedCode = parseInt(hex, 16);
-                    }
-                    else {
-                        return this.error(`Invalid unicode escape [\\u${hex}]`, 0);
-                    }
-                    for (let i = 0; i < 5; i++) {
-                        this.advance();
-                    }
+                const result = this.scanStringBackslash(buffer, marker);
+                if (typeof result !== 'string') {
+                    return result; // Error
                 }
-                else {
-                    unescapedCode = unescape$1(this.peek);
-                    this.advance();
-                }
-                buffer += String.fromCharCode(unescapedCode);
+                buffer = result;
                 marker = this.index;
             }
             else if (this.peek == $EOF) {
@@ -17676,7 +17802,7 @@ class _Scanner {
         }
         const last = input.substring(marker, this.index);
         this.advance(); // Skip terminating quote.
-        return newStringToken(start, this.index, buffer + last);
+        return new StringToken(start, this.index, buffer + last, StringTokenKind.Plain);
     }
     scanQuestion(start) {
         this.advance();
@@ -17688,9 +17814,67 @@ class _Scanner {
         }
         return newOperatorToken(start, this.index, str);
     }
+    scanTemplateLiteralPart(start) {
+        let buffer = '';
+        let marker = this.index;
+        while (this.peek !== $BT) {
+            if (this.peek === $BACKSLASH) {
+                const result = this.scanStringBackslash(buffer, marker);
+                if (typeof result !== 'string') {
+                    return result; // Error
+                }
+                buffer = result;
+                marker = this.index;
+            }
+            else if (this.peek === $$) {
+                const dollar = this.index;
+                this.advance();
+                // @ts-expect-error
+                if (this.peek === $LBRACE) {
+                    this.literalInterpolationDepth++;
+                    this.tokens.push(new StringToken(start, dollar, buffer + this.input.substring(marker, dollar), StringTokenKind.TemplateLiteralPart));
+                    this.advance();
+                    return newOperatorToken(dollar, this.index, this.input.substring(dollar, this.index));
+                }
+            }
+            else if (this.peek === $EOF) {
+                return this.error('Unterminated template literal', 0);
+            }
+            else {
+                this.advance();
+            }
+        }
+        const last = this.input.substring(marker, this.index);
+        this.advance();
+        return new StringToken(start, this.index, buffer + last, StringTokenKind.TemplateLiteralEnd);
+    }
     error(message, offset) {
         const position = this.index + offset;
         return newErrorToken(position, this.index, `Lexer Error: ${message} at column ${position} in expression [${this.input}]`);
+    }
+    scanStringBackslash(buffer, marker) {
+        buffer += this.input.substring(marker, this.index);
+        let unescapedCode;
+        this.advance();
+        if (this.peek === $u) {
+            // 4 character hex code for unicode character.
+            const hex = this.input.substring(this.index + 1, this.index + 5);
+            if (/^[0-9a-f]+$/i.test(hex)) {
+                unescapedCode = parseInt(hex, 16);
+            }
+            else {
+                return this.error(`Invalid unicode escape [\\u${hex}]`, 0);
+            }
+            for (let i = 0; i < 5; i++) {
+                this.advance();
+            }
+        }
+        else {
+            unescapedCode = unescape$1(this.peek);
+            this.advance();
+        }
+        buffer += String.fromCharCode(unescapedCode);
+        return buffer;
     }
 }
 function isIdentifierStart(code) {
@@ -18519,7 +18703,13 @@ class _ParseAST {
             this.advance();
             return new LiteralPrimitive(this.span(start), this.sourceSpan(start), value);
         }
-        else if (this.next.isString()) {
+        else if (this.next.isTemplateLiteralEnd()) {
+            return this.parseNoInterpolationTemplateLiteral(start);
+        }
+        else if (this.next.isTemplateLiteralPart()) {
+            return this.parseTemplateLiteral();
+        }
+        else if (this.next.isString() && this.next.kind === StringTokenKind.Plain) {
             const literalValue = this.next.toString();
             this.advance();
             return new LiteralPrimitive(this.span(start), this.sourceSpan(start), literalValue);
@@ -18844,6 +19034,42 @@ class _ParseAST {
         const sourceSpan = new AbsoluteSourceSpan(spanStart, this.currentAbsoluteOffset);
         return new VariableBinding(sourceSpan, key, value);
     }
+    parseNoInterpolationTemplateLiteral(start) {
+        const text = this.next.strValue;
+        this.advance();
+        const span = this.span(start);
+        const sourceSpan = this.sourceSpan(start);
+        return new TemplateLiteral(span, sourceSpan, [new TemplateLiteralElement(span, sourceSpan, text)], []);
+    }
+    parseTemplateLiteral() {
+        const start = this.inputIndex;
+        const elements = [];
+        const expressions = [];
+        while (this.next !== EOF) {
+            const token = this.next;
+            if (token.isTemplateLiteralPart() || token.isTemplateLiteralEnd()) {
+                elements.push(new TemplateLiteralElement(this.span(this.inputIndex), this.sourceSpan(this.inputIndex), token.strValue));
+                this.advance();
+                if (token.isTemplateLiteralEnd()) {
+                    break;
+                }
+            }
+            else if (token.isTemplateLiteralInterpolationStart()) {
+                this.advance();
+                const expression = this.parsePipe();
+                if (expression instanceof EmptyExpr$1) {
+                    this.error('Template literal interpolation cannot be empty');
+                }
+                else {
+                    expressions.push(expression);
+                }
+            }
+            else {
+                this.advance();
+            }
+        }
+        return new TemplateLiteral(this.span(start), this.sourceSpan(start), elements, expressions);
+    }
     /**
      * Consume the optional statement terminator: semicolon or comma.
      */
@@ -19061,6 +19287,20 @@ class SerializeExpressionVisitor {
     }
     visitASTWithSource(ast, context) {
         return ast.ast.visit(this, context);
+    }
+    visitTemplateLiteral(ast, context) {
+        let result = '';
+        for (let i = 0; i < ast.elements.length; i++) {
+            result += ast.elements[i].visit(this, context);
+            const expression = i < ast.expressions.length ? ast.expressions[i] : null;
+            if (expression !== null) {
+                result += '${' + expression.visit(this, context) + '}';
+            }
+        }
+        return '`' + result + '`';
+    }
+    visitTemplateLiteralElement(ast, context) {
+        return ast.text;
     }
 }
 /** Zips the two input arrays into a single array of pairs of elements at the same index. */
@@ -25705,6 +25945,11 @@ function convertAst(ast, job, baseSourceSpan) {
     else if (ast instanceof TypeofExpression) {
         return typeofExpr(convertAst(ast.expression, job, baseSourceSpan));
     }
+    else if (ast instanceof TemplateLiteral) {
+        return new TemplateLiteralExpr(ast.elements.map((el) => {
+            return new TemplateLiteralElementExpr(el.text, convertSourceSpan(el.span, baseSourceSpan));
+        }), ast.expressions.map((expr) => convertAst(expr, job, baseSourceSpan)), convertSourceSpan(ast.span, baseSourceSpan));
+    }
     else {
         throw new Error(`Unhandled expression type "${ast.constructor.name}" in file "${baseSourceSpan?.start.file.url}"`);
     }
@@ -30451,7 +30696,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.0-next.0+sha-76c4a77');
+new Version('19.2.0-next.0+sha-fe8a683');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -31859,7 +32104,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-ca858016.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-78667e44.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -36413,15 +36658,11 @@ class ExpressionTranslatorVisitor {
     visitInvokeFunctionExpr(ast, context) {
         return this.setSourceMapRange(this.factory.createCallExpression(ast.fn.visitExpression(this, context), ast.args.map((arg) => arg.visitExpression(this, context)), ast.pure), ast.sourceSpan);
     }
-    visitTaggedTemplateExpr(ast, context) {
-        return this.setSourceMapRange(this.createTaggedTemplateExpression(ast.tag.visitExpression(this, context), {
-            elements: ast.template.elements.map((e) => createTemplateElement({
-                cooked: e.text,
-                raw: e.rawText,
-                range: e.sourceSpan ?? ast.sourceSpan,
-            })),
-            expressions: ast.template.expressions.map((e) => e.visitExpression(this, context)),
-        }), ast.sourceSpan);
+    visitTaggedTemplateLiteralExpr(ast, context) {
+        return this.setSourceMapRange(this.createTaggedTemplateExpression(ast.tag.visitExpression(this, context), this.getTemplateLiteralFromAst(ast.template, context)), ast.sourceSpan);
+    }
+    visitTemplateLiteralExpr(ast, context) {
+        return this.setSourceMapRange(this.factory.createTemplateLiteral(this.getTemplateLiteralFromAst(ast, context)), ast.sourceSpan);
     }
     visitInstantiateExpr(ast, context) {
         return this.factory.createNewExpression(ast.classExpr.visitExpression(this, context), ast.args.map((arg) => arg.visitExpression(this, context)));
@@ -36587,6 +36828,9 @@ class ExpressionTranslatorVisitor {
     visitCommaExpr(ast, context) {
         throw new Error('Method not implemented.');
     }
+    visitTemplateLiteralElementExpr(ast, context) {
+        throw new Error('Method not implemented');
+    }
     visitWrappedNodeExpr(ast, _context) {
         this.recordWrappedNode(ast);
         return ast.node;
@@ -36613,6 +36857,16 @@ class ExpressionTranslatorVisitor {
             this.factory.attachComments(statement, leadingComments);
         }
         return statement;
+    }
+    getTemplateLiteralFromAst(ast, context) {
+        return {
+            elements: ast.elements.map((e) => createTemplateElement({
+                cooked: e.text,
+                raw: e.rawText,
+                range: e.sourceSpan ?? ast.sourceSpan,
+            })),
+            expressions: ast.expressions.map((e) => e.visitExpression(this, context)),
+        };
     }
 }
 /**
@@ -36884,7 +37138,13 @@ class TypeTranslatorVisitor {
     visitInvokeFunctionExpr(ast, context) {
         throw new Error('Method not implemented.');
     }
-    visitTaggedTemplateExpr(ast, context) {
+    visitTaggedTemplateLiteralExpr(ast, context) {
+        throw new Error('Method not implemented.');
+    }
+    visitTemplateLiteralExpr(ast, context) {
+        throw new Error('Method not implemented.');
+    }
+    visitTemplateLiteralElementExpr(ast, context) {
         throw new Error('Method not implemented.');
     }
     visitInstantiateExpr(ast, context) {
@@ -37166,6 +37426,9 @@ class TypeScriptAstFactory {
         return ts__default["default"].factory.createReturnStatement(expression ?? undefined);
     }
     createTaggedTemplate(tag, template) {
+        return ts__default["default"].factory.createTaggedTemplateExpression(tag, undefined, this.createTemplateLiteral(template));
+    }
+    createTemplateLiteral(template) {
         let templateLiteral;
         const length = template.elements.length;
         const head = template.elements[0];
@@ -37197,7 +37460,7 @@ class TypeScriptAstFactory {
         if (head.range !== null) {
             this.setSourceMapRange(templateLiteral, head.range);
         }
-        return ts__default["default"].factory.createTaggedTemplateExpression(tag, undefined, templateLiteral);
+        return templateLiteral;
     }
     createThrowStatement = ts__default["default"].factory.createThrowStatement;
     createTypeOfExpression = ts__default["default"].factory.createTypeOfExpression;
@@ -41241,6 +41504,30 @@ class AstTranslator {
         addParseSpanInfo(node, ast.sourceSpan);
         return node;
     }
+    visitTemplateLiteral(ast) {
+        const length = ast.elements.length;
+        const head = ast.elements[0];
+        let result;
+        if (length === 1) {
+            result = ts__default["default"].factory.createNoSubstitutionTemplateLiteral(head.text);
+        }
+        else {
+            const spans = [];
+            const tailIndex = length - 1;
+            for (let i = 1; i < tailIndex; i++) {
+                const middle = ts__default["default"].factory.createTemplateMiddle(ast.elements[i].text);
+                spans.push(ts__default["default"].factory.createTemplateSpan(this.translate(ast.expressions[i - 1]), middle));
+            }
+            const resolvedExpression = this.translate(ast.expressions[tailIndex - 1]);
+            const templateTail = ts__default["default"].factory.createTemplateTail(ast.elements[tailIndex].text);
+            spans.push(ts__default["default"].factory.createTemplateSpan(resolvedExpression, templateTail));
+            result = ts__default["default"].factory.createTemplateExpression(ts__default["default"].factory.createTemplateHead(head.text), spans);
+        }
+        return result;
+    }
+    visitTemplateLiteralElement(ast, context) {
+        throw new Error('Method not implemented');
+    }
     convertToSafeCall(ast, expr, args) {
         if (this.config.strictSafeNavigationTypes) {
             // "a?.method(...)" becomes (0 as any ? a!.method(...) : undefined)
@@ -41338,6 +41625,12 @@ class VeSafeLhsInferenceBugDetector {
         return false;
     }
     visitSafeKeyedRead(ast) {
+        return false;
+    }
+    visitTemplateLiteral(ast, context) {
+        return false;
+    }
+    visitTemplateLiteralElement(ast, context) {
         return false;
     }
 }
