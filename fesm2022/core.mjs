@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-8e5c0f8
+ * @license Angular v19.2.0-next.0+sha-431166d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17959,7 +17959,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 const hostTNode = createRootComponentTNode(rootLView, hostRNode);
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.2.0-next.0+sha-8e5c0f8']
+                    ? ['ng-version', '19.2.0-next.0+sha-431166d']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 for (const def of rootDirectives) {
@@ -20089,7 +20089,11 @@ function getComponentId(componentDef) {
     // 2147483647 = equivalent of Integer.MAX_VALUE.
     hash += 2147483647 + 1;
     const compId = 'c' + hash;
-    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
+        // Skip the check on the server since we can't guarantee the same component instance between
+        // requests. Note that we can't use DI to check if we're on the server, because the component
+        // hasn't been instantiated yet.
+        (typeof ngServerMode === 'undefined' || !ngServerMode)) {
         if (GENERATED_COMP_IDS.has(compId)) {
             const previousCompDefType = GENERATED_COMP_IDS.get(compId);
             if (previousCompDefType !== componentDef.type) {
@@ -33438,13 +33442,18 @@ function ɵsetClassDebugInfo(type, debugInfo) {
  */
 function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals) {
     ngDevMode && assertComponentDef(type);
-    const oldDef = getComponentDef(type);
+    const currentDef = getComponentDef(type);
     // The reason `applyMetadata` is a callback that is invoked (almost) immediately is because
     // the compiler usually produces more code than just the component definition, e.g. there
     // can be functions for embedded views, the variables for the constant pool and `setClassMetadata`
     // calls. The callback allows us to keep them isolate from the rest of the app and to invoke
     // them at the right time.
     applyMetadata.apply(null, [type, namespaces, ...locals]);
+    const { newDef, oldDef } = mergeWithExistingDefinition(currentDef, getComponentDef(type));
+    // TODO(crisbeto): the `applyMetadata` call above will replace the definition on the type.
+    // Ideally we should adjust the compiler output so the metadata is returned, however that'll
+    // require some internal changes. We re-add the metadata here manually.
+    type[NG_COMP_DEF] = newDef;
     // If a `tView` hasn't been created yet, it means that this component hasn't been instantianted
     // before. In this case there's nothing left for us to do aside from patching it in.
     if (oldDef.tView) {
@@ -33453,17 +33462,42 @@ function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals) {
             // Note: we have the additional check, because `IsRoot` can also indicate
             // a component created through something like `createComponent`.
             if (root[FLAGS] & 512 /* LViewFlags.IsRoot */ && root[PARENT] === null) {
-                recreateMatchingLViews(oldDef, root);
+                recreateMatchingLViews(newDef, oldDef, root);
             }
         }
     }
+}
+/**
+ * Merges two component definitions while preseving the original one in place.
+ * @param currentDef Definition that should receive the new metadata.
+ * @param newDef Source of the new metadata.
+ */
+function mergeWithExistingDefinition(currentDef, newDef) {
+    // Clone the current definition since we reference its original data further
+    // down in the replacement process (e.g. when destroying the renderer).
+    const clone = { ...currentDef };
+    // Assign the new metadata in place while preserving the object literal. It's important to
+    // Keep the object in place, because there can be references to it, for example in the
+    // `directiveDefs` of another definition.
+    const replacement = Object.assign(currentDef, newDef, {
+        // We need to keep the existing directive and pipe defs, because they can get patched on
+        // by a call to `setComponentScope` from a module file. That call won't make it into the
+        // HMR replacement function, because it lives in an entirely different file.
+        directiveDefs: clone.directiveDefs,
+        pipeDefs: clone.pipeDefs,
+        // Preserve the old `setInput` function, because it has some state.
+        // This is fine, because the component instance is preserved as well.
+        setInput: clone.setInput,
+    });
+    ngDevMode && assertEqual(replacement, currentDef, 'Expected definition to be merged in place');
+    return { newDef: replacement, oldDef: clone };
 }
 /**
  * Finds all LViews matching a specific component definition and recreates them.
  * @param oldDef Component definition to search for.
  * @param rootLView View from which to start the search.
  */
-function recreateMatchingLViews(oldDef, rootLView) {
+function recreateMatchingLViews(newDef, oldDef, rootLView) {
     ngDevMode &&
         assertDefined(oldDef.tView, 'Expected a component definition that has been instantiated at least once');
     const tView = rootLView[TVIEW];
@@ -33471,7 +33505,7 @@ function recreateMatchingLViews(oldDef, rootLView) {
     // produce false positives when using inheritance.
     if (tView === oldDef.tView) {
         ngDevMode && assertComponentDef(oldDef.type);
-        recreateLView(getComponentDef(oldDef.type), oldDef, rootLView);
+        recreateLView(newDef, oldDef, rootLView);
         return;
     }
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
@@ -33479,14 +33513,14 @@ function recreateMatchingLViews(oldDef, rootLView) {
         if (isLContainer(current)) {
             // The host can be an LView if a component is injecting `ViewContainerRef`.
             if (isLView(current[HOST])) {
-                recreateMatchingLViews(oldDef, current[HOST]);
+                recreateMatchingLViews(newDef, oldDef, current[HOST]);
             }
             for (let j = CONTAINER_HEADER_OFFSET; j < current.length; j++) {
-                recreateMatchingLViews(oldDef, current[j]);
+                recreateMatchingLViews(newDef, oldDef, current[j]);
             }
         }
         else if (isLView(current)) {
-            recreateMatchingLViews(oldDef, current);
+            recreateMatchingLViews(newDef, oldDef, current);
         }
     }
 }
@@ -34992,7 +35026,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-8e5c0f8');
+const VERSION = new Version('19.2.0-next.0+sha-431166d');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -41265,7 +41299,7 @@ var ResourceStatus;
 function resource(options) {
     options?.injector || assertInInjectionContext(resource);
     const request = (options.request ?? (() => null));
-    return new ResourceImpl(request, options.loader, undefined, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
+    return new ResourceImpl(request, getLoader(options), undefined, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
 }
 /**
  * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.
@@ -41311,9 +41345,13 @@ class ResourceImpl extends BaseWritableResource {
     resolvePendingTask = undefined;
     destroyed = false;
     constructor(request, loaderFn, defaultValue, equal, injector) {
+        super(
         // Feed a computed signal for the value to `BaseWritableResource`, which will upgrade it to a
         // `WritableSignal` that delegates to `ResourceImpl.set`.
-        super(computed(() => this.state().value, { equal }));
+        computed(() => {
+            const stream = this.state()?.stream?.();
+            return stream && isResolved(stream) ? stream.value : this.defaultValue;
+        }, { equal }));
         this.loaderFn = loaderFn;
         this.defaultValue = defaultValue;
         this.equal = equal;
@@ -41342,13 +41380,10 @@ class ResourceImpl extends BaseWritableResource {
                 status,
                 // When the state of the resource changes due to the request, remember the previous status
                 // for the loader to consider.
-                previousStatus: previous?.value.status ?? ResourceStatus.Idle,
+                previousStatus: computeStatusOfState(previous?.value),
                 // In `Reloading` state, we keep the previous value if there is one, since the identity of
                 // the request hasn't changed. Otherwise, we switch back to the default value.
-                value: previous && status === ResourceStatus.Reloading
-                    ? previous.value.value
-                    : this.defaultValue,
-                error: undefined,
+                stream: previous && status === ResourceStatus.Reloading ? previous.value.stream : undefined,
             }),
         });
         this.effectRef = effect(this.loadEffect.bind(this), {
@@ -41358,8 +41393,16 @@ class ResourceImpl extends BaseWritableResource {
         // Cancel any pending request when the resource itself is destroyed.
         injector.get(DestroyRef).onDestroy(() => this.destroy());
     }
-    status = computed(() => this.state().status);
-    error = computed(() => this.state().error);
+    status = computed(() => {
+        if (this.state().status !== ResourceStatus.Resolved) {
+            return this.state().status;
+        }
+        return isResolved(this.state().stream()) ? ResourceStatus.Resolved : ResourceStatus.Error;
+    });
+    error = computed(() => {
+        const stream = this.state().stream?.();
+        return stream && !isResolved(stream) ? stream.error : undefined;
+    });
     /**
      * Called either directly via `WritableResource.set` or via `.value.set()`.
      */
@@ -41367,16 +41410,15 @@ class ResourceImpl extends BaseWritableResource {
         if (this.destroyed) {
             return;
         }
-        const currentState = untracked(this.state);
-        if (this.equal ? this.equal(currentState.value, value) : currentState.value === value) {
+        const current = untracked(this.value);
+        if (this.equal ? this.equal(current, value) : current === value) {
             return;
         }
         // Enter Local state with the user-defined value.
         this.state.set({
             status: ResourceStatus.Local,
             previousStatus: ResourceStatus.Local,
-            value,
-            error: undefined,
+            stream: signal({ value }),
         });
         // We're departing from whatever state the resource was in previously, so cancel any in-progress
         // loading operations.
@@ -41402,8 +41444,7 @@ class ResourceImpl extends BaseWritableResource {
         this.state.set({
             status: ResourceStatus.Idle,
             previousStatus: ResourceStatus.Idle,
-            value: this.defaultValue,
-            error: undefined,
+            stream: undefined,
         });
     }
     async loadEffect() {
@@ -41436,49 +41477,43 @@ class ResourceImpl extends BaseWritableResource {
         // After the loading operation is cancelled, `this.resolvePendingTask` no longer represents this
         // particular task, but this `await` may eventually resolve/reject. Thus, when we cancel in
         // response to (1) below, we need to cancel the locally saved task.
-        const resolvePendingTask = (this.resolvePendingTask = this.pendingTasks.add());
+        let resolvePendingTask = (this.resolvePendingTask =
+            this.pendingTasks.add());
         const { signal: abortSignal } = (this.pendingController = new AbortController());
         try {
             // The actual loading is run through `untracked` - only the request side of `resource` is
             // reactive. This avoids any confusion with signals tracking or not tracking depending on
             // which side of the `await` they are.
-            const result = await untracked(() => this.loaderFn({
-                abortSignal,
+            const stream = await untracked(() => this.loaderFn({
                 request: request,
+                abortSignal,
                 previous: {
                     status: previousStatus,
                 },
             }));
             if (abortSignal.aborted) {
-                // This load operation was cancelled.
                 return;
             }
-            // Success :)
             this.state.set({
                 status: ResourceStatus.Resolved,
                 previousStatus: ResourceStatus.Resolved,
-                value: result,
-                error: undefined,
+                stream,
             });
         }
         catch (err) {
             if (abortSignal.aborted) {
-                // This load operation was cancelled.
                 return;
             }
-            // Fail :(
             this.state.set({
-                status: ResourceStatus.Error,
+                status: ResourceStatus.Resolved,
                 previousStatus: ResourceStatus.Error,
-                value: this.defaultValue,
-                error: err,
+                stream: signal({ error: err }),
             });
         }
         finally {
-            // Resolve the pending task now that loading is done.
-            resolvePendingTask();
-            // Free the abort controller to drop any registered 'abort' callbacks.
-            this.pendingController = undefined;
+            // Resolve the pending task now that the resource has a value.
+            resolvePendingTask?.();
+            resolvePendingTask = undefined;
         }
     }
     abortInProgressLoad() {
@@ -41494,6 +41529,35 @@ class ResourceImpl extends BaseWritableResource {
  */
 function wrapEqualityFn(equal) {
     return (a, b) => (a === undefined || b === undefined ? a === b : equal(a, b));
+}
+function getLoader(options) {
+    if (isStreamingResourceOptions(options)) {
+        return options.stream;
+    }
+    return async (params) => {
+        try {
+            return signal({ value: await options.loader(params) });
+        }
+        catch (err) {
+            return signal({ error: err });
+        }
+    };
+}
+function isStreamingResourceOptions(options) {
+    return !!options.stream;
+}
+function computeStatusOfState(state) {
+    switch (state?.status) {
+        case undefined:
+            return ResourceStatus.Idle;
+        case ResourceStatus.Resolved:
+            return isResolved(untracked(state.stream)) ? ResourceStatus.Resolved : ResourceStatus.Error;
+        default:
+            return state.status;
+    }
+}
+function isResolved(state) {
+    return state.error === undefined;
 }
 
 /**

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.0+sha-8e5c0f8
+ * @license Angular v19.2.0-next.0+sha-431166d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,9 +9,9 @@
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-ca858016.js');
-var program = require('./program-ec5afa4d.js');
+var program = require('./program-59e644b2.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-778106cf.js');
+var apply_import_manager = require('./apply_import_manager-6ffb84b3.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 

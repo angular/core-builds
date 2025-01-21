@@ -1,10 +1,11 @@
 /**
- * @license Angular v19.2.0-next.0+sha-8e5c0f8
+ * @license Angular v19.2.0-next.0+sha-431166d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 
+import { BaseResourceOptions } from '@angular/core';
 import { DestroyRef } from '@angular/core';
 import { Injector } from '@angular/core';
 import { MonoTypeOperatorFunction } from 'rxjs';
@@ -12,7 +13,6 @@ import { Observable } from 'rxjs';
 import { OutputOptions } from '@angular/core';
 import { OutputRef } from '@angular/core';
 import { ResourceLoaderParams } from '@angular/core';
-import { ResourceOptions } from '@angular/core';
 import { ResourceRef } from '@angular/core';
 import { Signal } from '@angular/core';
 import { Subscribable } from 'rxjs';
@@ -78,7 +78,7 @@ export declare function rxResource<T, R>(opts: RxResourceOptions<T, R>): Resourc
  *
  * @experimental
  */
-export declare interface RxResourceOptions<T, R> extends Omit<ResourceOptions<T, R>, 'loader'> {
+export declare interface RxResourceOptions<T, R> extends BaseResourceOptions<T, R> {
     loader: (params: ResourceLoaderParams<R>) => Observable<T>;
 }
 

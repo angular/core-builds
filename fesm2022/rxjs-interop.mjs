@@ -1,12 +1,12 @@
 /**
- * @license Angular v19.2.0-next.0+sha-8e5c0f8
+ * @license Angular v19.2.0-next.0+sha-431166d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
 import { assertInInjectionContext, inject, DestroyRef, ɵRuntimeError, ɵgetOutputDestroyRef, Injector, effect, untracked, ɵmicrotaskEffect, assertNotInReactiveContext, signal, computed, PendingTasks, resource } from '@angular/core';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { takeUntil, take } from 'rxjs/operators';
+import { Observable, ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 /**
  * Operator which completes the Observable when the calling context (component, directive, service,
@@ -314,21 +314,32 @@ function rxResource(opts) {
     opts?.injector || assertInInjectionContext(rxResource);
     return resource({
         ...opts,
-        loader: (params) => {
-            const cancelled = new Subject();
-            params.abortSignal.addEventListener('abort', () => cancelled.next());
-            // Note: this is identical to `firstValueFrom` which we can't use,
-            // because at the time of writing, `core` still supports rxjs 6.x.
-            return new Promise((resolve, reject) => {
-                opts
-                    .loader(params)
-                    .pipe(take(1), takeUntil(cancelled))
-                    .subscribe({
-                    next: resolve,
-                    error: reject,
-                    complete: () => reject(new Error('Resource completed before producing a value')),
-                });
+        stream: (params) => {
+            let sub;
+            // Track the abort listener so it can be removed if the Observable completes (as a memory
+            // optimization).
+            const onAbort = () => sub.unsubscribe();
+            params.abortSignal.addEventListener('abort', onAbort);
+            // Start off stream as undefined.
+            const stream = signal({ value: undefined });
+            let resolve;
+            const promise = new Promise((r) => (resolve = r));
+            function send(value) {
+                stream.set(value);
+                resolve?.(stream);
+                resolve = undefined;
+            }
+            sub = opts.loader(params).subscribe({
+                next: (value) => send({ value }),
+                error: (error) => send({ error }),
+                complete: () => {
+                    if (resolve) {
+                        send({ error: new Error('Resource completed before producing a value') });
+                    }
+                    params.abortSignal.removeEventListener('abort', onAbort);
+                },
             });
+            return promise;
         },
     });
 }

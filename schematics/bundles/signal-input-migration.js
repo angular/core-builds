@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.0+sha-8e5c0f8
+ * @license Angular v19.2.0-next.0+sha-431166d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9,14 +9,14 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var schematics = require('@angular-devkit/schematics');
-var migrate_ts_type_references = require('./migrate_ts_type_references-15aa07b9.js');
+var migrate_ts_type_references = require('./migrate_ts_type_references-fc0ac83f.js');
 var ts = require('typescript');
 require('os');
 var checker = require('./checker-ca858016.js');
-var program = require('./program-ec5afa4d.js');
+var program = require('./program-59e644b2.js');
 require('path');
-var apply_import_manager = require('./apply_import_manager-778106cf.js');
-var index = require('./index-88c43127.js');
+var apply_import_manager = require('./apply_import_manager-6ffb84b3.js');
+var index = require('./index-6dc17b3f.js');
 var assert = require('assert');
 var project_tsconfig_paths = require('./project_tsconfig_paths-e9ccccbf.js');
 require('./leading_space-d190b83b.js');

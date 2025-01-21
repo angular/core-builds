@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-8e5c0f8
+ * @license Angular v19.2.0-next.0+sha-431166d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1268,6 +1268,29 @@ export declare interface AttributeDecorator {
      */
     (name: string): any;
     new (name: string): Attribute;
+}
+
+/**
+ * Options to the `resource` function, for creating a resource.
+ *
+ * @experimental
+ */
+export declare interface BaseResourceOptions<T, R> {
+    /**
+     * A reactive function which determines the request to be made. Whenever the request changes, the
+     * loader will be triggered to fetch a new value for the resource.
+     *
+     * If a request function isn't provided, the loader won't rerun unless the resource is reloaded.
+     */
+    request?: () => R;
+    /**
+     * Equality function used to compare the return value of the loader.
+     */
+    equal?: ValueEqualityFn<T>;
+    /**
+     * Overrides the `Injector` used by `resource`.
+     */
+    injector?: Injector;
 }
 
 
@@ -8759,6 +8782,18 @@ declare type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
 declare type ProjectionSlots = (ɵCssSelectorList | '*')[];
 
 /**
+ * Options to the `resource` function, for creating a resource.
+ *
+ * @experimental
+ */
+export declare interface PromiseResourceOptions<T, R> extends BaseResourceOptions<T, R> {
+    /**
+     * Loading function which returns a `Promise` of the resource's value for a given request.
+     */
+    loader: ResourceLoader<T, R>;
+}
+
+/**
  * @description
  * The provided function is injected at application startup and executed during
  * app initialization. If the function returns a Promise or an Observable, initialization
@@ -9794,31 +9829,9 @@ export declare interface ResourceLoaderParams<R> {
 }
 
 /**
- * Options to the `resource` function, for creating a resource.
- *
  * @experimental
  */
-export declare interface ResourceOptions<T, R> {
-    /**
-     * A reactive function which determines the request to be made. Whenever the request changes, the
-     * loader will be triggered to fetch a new value for the resource.
-     *
-     * If a request function isn't provided, the loader won't rerun unless the resource is reloaded.
-     */
-    request?: () => R;
-    /**
-     * Loading function which returns a `Promise` of the resource's value for a given request.
-     */
-    loader: ResourceLoader<T, R>;
-    /**
-     * Equality function used to compare the return value of the loader.
-     */
-    equal?: ValueEqualityFn<T>;
-    /**
-     * Overrides the `Injector` used by `resource`.
-     */
-    injector?: Injector;
-}
+export declare type ResourceOptions<T, R> = PromiseResourceOptions<T, R> | StreamingResourceOptions<T, R>;
 
 /**
  * A `WritableResource` created through the `resource` function.
@@ -9871,6 +9884,17 @@ export declare enum ResourceStatus {
      */
     Local = 5
 }
+
+/**
+ * Streaming loader for a `Resource`.
+ *
+ * @experimental
+ */
+export declare type ResourceStreamingLoader<T, R> = (param: ResourceLoaderParams<R>) => PromiseLike<Signal<{
+    value: T;
+} | {
+    error: unknown;
+}>>;
 
 /**
  * Injection token for response initialization options.
@@ -10382,6 +10406,19 @@ export declare interface StaticClassSansProvider {
  * @publicApi
  */
 export declare type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider | any[];
+
+/**
+ * Options to the `resource` function, for creating a resource.
+ *
+ * @experimental
+ */
+export declare interface StreamingResourceOptions<T, R> extends BaseResourceOptions<T, R> {
+    /**
+     * Loading function which returns a `Promise` of a signal of the resource's value for a given
+     * request, which can change over time as new values are received from a stream.
+     */
+    stream: ResourceStreamingLoader<T, R>;
+}
 
 declare const T_HOST = 5;
 
