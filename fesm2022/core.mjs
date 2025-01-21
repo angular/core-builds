@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.2+sha-53160e5
+ * @license Angular v19.1.2+sha-26f6d4c
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17943,7 +17943,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 const hostTNode = createRootComponentTNode(rootLView, hostRNode);
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.1.2+sha-53160e5']
+                    ? ['ng-version', '19.1.2+sha-26f6d4c']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 for (const def of rootDirectives) {
@@ -20072,7 +20072,11 @@ function getComponentId(componentDef) {
     // 2147483647 = equivalent of Integer.MAX_VALUE.
     hash += 2147483647 + 1;
     const compId = 'c' + hash;
-    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    if ((typeof ngDevMode === 'undefined' || ngDevMode) &&
+        // Skip the check on the server since we can't guarantee the same component instance between
+        // requests. Note that we can't use DI to check if we're on the server, because the component
+        // hasn't been instantiated yet.
+        (typeof ngServerMode === 'undefined' || !ngServerMode)) {
         if (GENERATED_COMP_IDS.has(compId)) {
             const previousCompDefType = GENERATED_COMP_IDS.get(compId);
             if (previousCompDefType !== componentDef.type) {
@@ -34997,7 +35001,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.2+sha-53160e5');
+const VERSION = new Version('19.1.2+sha-26f6d4c');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
