@@ -1,10 +1,10 @@
 /**
- * @license Angular v19.1.3+sha-66d07e7
+ * @license Angular v19.1.3+sha-7dc5116
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
 
-import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, producerUpdateValueVersion as producerUpdateValueVersion$1, producerMarkClean as producerMarkClean$1, defaultEquals as defaultEquals$1, createWatch as createWatch$1, isInNotificationPhase as isInNotificationPhase$1 } from '@angular/core/primitives/signals';
+import { SIGNAL_NODE as SIGNAL_NODE$1, signalSetFn as signalSetFn$1, producerAccessed as producerAccessed$1, SIGNAL as SIGNAL$1, getActiveConsumer as getActiveConsumer$1, setActiveConsumer as setActiveConsumer$1, createSignal as createSignal$1, signalUpdateFn as signalUpdateFn$1, consumerDestroy as consumerDestroy$1, REACTIVE_NODE as REACTIVE_NODE$1, consumerBeforeComputation as consumerBeforeComputation$1, consumerAfterComputation as consumerAfterComputation$1, consumerPollProducersForChange as consumerPollProducersForChange$1, createComputed as createComputed$1, setThrowInvalidWriteToSignalError as setThrowInvalidWriteToSignalError$1, createLinkedSignal as createLinkedSignal$1, linkedSignalSetFn as linkedSignalSetFn$1, linkedSignalUpdateFn as linkedSignalUpdateFn$1, createWatch as createWatch$1, isInNotificationPhase as isInNotificationPhase$1 } from '@angular/core/primitives/signals';
 export { SIGNAL as ɵSIGNAL } from '@angular/core/primitives/signals';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { Attribute as Attribute$1, clearAppScopedEarlyEventContract, EventContract, EventContractContainer, getAppScopedQueuedEventInfos, EventDispatcher, registerDispatcher, isEarlyEventType, isCaptureEventType, EventPhase } from '@angular/core/primitives/event-dispatch';
@@ -2963,6 +2963,7 @@ function isComponentDef(def) {
     return !!def.template;
 }
 function isRootView(target) {
+    // Determines whether a given LView is marked as a root view.
     return (target[FLAGS] & 512 /* LViewFlags.IsRoot */) !== 0;
 }
 function isProjectionTNode(tNode) {
@@ -5617,7 +5618,7 @@ function lookupTokenUsingEmbeddedInjector(tNode, lView, token, flags, notFoundVa
     while (currentTNode !== null &&
         currentLView !== null &&
         currentLView[FLAGS] & 2048 /* LViewFlags.HasEmbeddedViewInjector */ &&
-        !(currentLView[FLAGS] & 512 /* LViewFlags.IsRoot */)) {
+        !isRootView(currentLView)) {
         ngDevMode && assertTNodeForLView(currentTNode, currentLView);
         // Note that this lookup on the node injector is using the `Self` flag, because
         // we don't want the node injector to look at any parent injectors since we
@@ -7829,7 +7830,7 @@ function discoverLocalRefs(lView, nodeIndex) {
 function getRootView(componentOrLView) {
     ngDevMode && assertDefined(componentOrLView, 'component');
     let lView = isLView(componentOrLView) ? componentOrLView : readPatchedLView(componentOrLView);
-    while (lView && !(lView[FLAGS] & 512 /* LViewFlags.IsRoot */)) {
+    while (lView && !isRootView(lView)) {
         lView = getLViewParent(lView);
     }
     ngDevMode && assertLView(lView);
@@ -7947,7 +7948,7 @@ function getOwningComponent(elementOrDir) {
     while (lView[TVIEW].type === 2 /* TViewType.Embedded */ && (parent = getLViewParent(lView))) {
         lView = parent;
     }
-    return lView[FLAGS] & 512 /* LViewFlags.IsRoot */ ? null : lView[CONTEXT];
+    return isRootView(lView) ? null : lView[CONTEXT];
 }
 /**
  * Retrieves all root components associated with a DOM element, directive or component instance.
@@ -17947,7 +17948,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 }
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.1.3+sha-66d07e7']
+                    ? ['ng-version', '19.1.3+sha-7dc5116']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 // TODO: this logic is shared with the element instruction first create pass
@@ -33431,7 +33432,7 @@ function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals) {
         for (const root of trackedViews) {
             // Note: we have the additional check, because `IsRoot` can also indicate
             // a component created through something like `createComponent`.
-            if (root[FLAGS] & 512 /* LViewFlags.IsRoot */ && root[PARENT] === null) {
+            if (isRootView(root) && root[PARENT] === null) {
                 recreateMatchingLViews(newDef, oldDef, root);
             }
         }
@@ -34996,7 +34997,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.3+sha-66d07e7');
+const VERSION = new Version('19.1.3+sha-7dc5116');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -38747,7 +38748,7 @@ function createComputed(computation) {
         producerUpdateValueVersion(node);
         // Record that someone looked at this signal.
         producerAccessed(node);
-        if (node.value === ERRORED$1) {
+        if (node.value === ERRORED) {
             throw node.error;
         }
         return node.value;
@@ -38759,26 +38760,26 @@ function createComputed(computation) {
  * A dedicated symbol used before a computed value has been calculated for the first time.
  * Explicitly typed as `any` so we can use it as signal's value.
  */
-const UNSET$1 = /* @__PURE__ */ Symbol('UNSET');
+const UNSET = /* @__PURE__ */ Symbol('UNSET');
 /**
  * A dedicated symbol used in place of a computed signal value to indicate that a given computation
  * is in progress. Used to detect cycles in computation chains.
  * Explicitly typed as `any` so we can use it as signal's value.
  */
-const COMPUTING$1 = /* @__PURE__ */ Symbol('COMPUTING');
+const COMPUTING = /* @__PURE__ */ Symbol('COMPUTING');
 /**
  * A dedicated symbol used in place of a computed signal value to indicate that a given computation
  * failed. The thrown error is cached until the computation gets dirty again.
  * Explicitly typed as `any` so we can use it as signal's value.
  */
-const ERRORED$1 = /* @__PURE__ */ Symbol('ERRORED');
+const ERRORED = /* @__PURE__ */ Symbol('ERRORED');
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
 // a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
 // TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
 const COMPUTED_NODE = /* @__PURE__ */ (() => {
     return {
         ...REACTIVE_NODE,
-        value: UNSET$1,
+        value: UNSET,
         dirty: true,
         error: null,
         equal: defaultEquals,
@@ -38786,15 +38787,15 @@ const COMPUTED_NODE = /* @__PURE__ */ (() => {
         producerMustRecompute(node) {
             // Force a recomputation if there's no current value, or if the current value is in the
             // process of being calculated (which should throw an error).
-            return node.value === UNSET$1 || node.value === COMPUTING$1;
+            return node.value === UNSET || node.value === COMPUTING;
         },
         producerRecomputeValue(node) {
-            if (node.value === COMPUTING$1) {
+            if (node.value === COMPUTING) {
                 // Our computation somehow led to a cyclic read of itself.
                 throw new Error('Detected cycle in computations.');
             }
             const oldValue = node.value;
-            node.value = COMPUTING$1;
+            node.value = COMPUTING;
             const prevConsumer = consumerBeforeComputation(node);
             let newValue;
             let wasEqual = false;
@@ -38804,13 +38805,13 @@ const COMPUTED_NODE = /* @__PURE__ */ (() => {
                 // to track any reactive reads inside `equal`.
                 setActiveConsumer(null);
                 wasEqual =
-                    oldValue !== UNSET$1 &&
-                        oldValue !== ERRORED$1 &&
-                        newValue !== ERRORED$1 &&
+                    oldValue !== UNSET &&
+                        oldValue !== ERRORED &&
+                        newValue !== ERRORED &&
                         node.equal(oldValue, newValue);
             }
             catch (err) {
-                newValue = ERRORED$1;
+                newValue = ERRORED;
                 node.error = err;
             }
             finally {
@@ -38904,8 +38905,8 @@ function signalValueChanged(node) {
     postSignalSetFn?.();
 }
 
-function createLinkedSignal$1(sourceFn, computationFn, equalityFn) {
-    const node = Object.create(LINKED_SIGNAL_NODE$1);
+function createLinkedSignal(sourceFn, computationFn, equalityFn) {
+    const node = Object.create(LINKED_SIGNAL_NODE);
     node.source = sourceFn;
     node.computation = computationFn;
     if (equalityFn != undefined) {
@@ -38916,7 +38917,7 @@ function createLinkedSignal$1(sourceFn, computationFn, equalityFn) {
         producerUpdateValueVersion(node);
         // Record that someone looked at this signal.
         producerAccessed(node);
-        if (node.value === ERRORED$1) {
+        if (node.value === ERRORED) {
             throw node.error;
         }
         return node.value;
@@ -38938,30 +38939,30 @@ function linkedSignalUpdateFn(node, updater) {
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
 // a side-effect, ending up preserving `LINKED_SIGNAL_NODE` and `REACTIVE_NODE`.
 // TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const LINKED_SIGNAL_NODE$1 = /* @__PURE__ */ (() => {
+const LINKED_SIGNAL_NODE = /* @__PURE__ */ (() => {
     return {
         ...REACTIVE_NODE,
-        value: UNSET$1,
+        value: UNSET,
         dirty: true,
         error: null,
         equal: defaultEquals,
         producerMustRecompute(node) {
             // Force a recomputation if there's no current value, or if the current value is in the
             // process of being calculated (which should throw an error).
-            return node.value === UNSET$1 || node.value === COMPUTING$1;
+            return node.value === UNSET || node.value === COMPUTING;
         },
         producerRecomputeValue(node) {
-            if (node.value === COMPUTING$1) {
+            if (node.value === COMPUTING) {
                 // Our computation somehow led to a cyclic read of itself.
                 throw new Error('Detected cycle in computations.');
             }
             const oldValue = node.value;
-            node.value = COMPUTING$1;
+            node.value = COMPUTING;
             const prevConsumer = consumerBeforeComputation(node);
             let newValue;
             try {
                 const newSourceValue = node.source();
-                const prev = oldValue === UNSET$1 || oldValue === ERRORED$1
+                const prev = oldValue === UNSET || oldValue === ERRORED
                     ? undefined
                     : {
                         source: node.sourceValue,
@@ -38971,13 +38972,13 @@ const LINKED_SIGNAL_NODE$1 = /* @__PURE__ */ (() => {
                 node.sourceValue = newSourceValue;
             }
             catch (err) {
-                newValue = ERRORED$1;
+                newValue = ERRORED;
                 node.error = err;
             }
             finally {
                 consumerAfterComputation(node, prevConsumer);
             }
-            if (oldValue !== UNSET$1 && newValue !== ERRORED$1 && node.equal(oldValue, newValue)) {
+            if (oldValue !== UNSET && newValue !== ERRORED && node.equal(oldValue, newValue)) {
                 // No change to `valueVersion` - old and new values are
                 // semantically equivalent.
                 node.value = oldValue;
@@ -40591,123 +40592,28 @@ function computed(computation, options) {
 }
 
 const identityFn = (v) => v;
-/**
- * Create a linked signal which represents state that is (re)set from a linked reactive expression.
- */
-function createLinkedSignal(node) {
-    const linkedSignalGetter = () => {
-        // Check if the value needs updating before returning it.
-        producerUpdateValueVersion$1(node);
-        // Record that someone looked at this signal.
-        producerAccessed$1(node);
-        if (node.value === ERRORED) {
-            throw node.error;
-        }
-        return node.value;
-    };
-    const getter = linkedSignalGetter;
-    getter[SIGNAL$1] = node;
+function linkedSignal(optionsOrComputation, options) {
+    performanceMarkFeature('NgSignals');
+    if (typeof optionsOrComputation === 'function') {
+        const getter = createLinkedSignal$1(optionsOrComputation, (identityFn), options?.equal);
+        return upgradeLinkedSignalGetter(getter);
+    }
+    else {
+        const getter = createLinkedSignal$1(optionsOrComputation.source, optionsOrComputation.computation, optionsOrComputation.equal);
+        return upgradeLinkedSignalGetter(getter);
+    }
+}
+function upgradeLinkedSignalGetter(getter) {
     if (ngDevMode) {
         getter.toString = () => `[LinkedSignal: ${getter()}]`;
     }
-    getter.set = (newValue) => {
-        producerUpdateValueVersion$1(node);
-        signalSetFn$1(node, newValue);
-        producerMarkClean$1(node);
-    };
-    getter.update = (updateFn) => {
-        producerUpdateValueVersion$1(node);
-        signalUpdateFn$1(node, updateFn);
-        producerMarkClean$1(node);
-    };
-    getter.asReadonly = signalAsReadonlyFn.bind(getter);
-    return getter;
+    const node = getter[SIGNAL$1];
+    const upgradedGetter = getter;
+    upgradedGetter.set = (newValue) => linkedSignalSetFn$1(node, newValue);
+    upgradedGetter.update = (updateFn) => linkedSignalUpdateFn$1(node, updateFn);
+    upgradedGetter.asReadonly = signalAsReadonlyFn.bind(getter);
+    return upgradedGetter;
 }
-function linkedSignal(optionsOrComputation, options) {
-    performanceMarkFeature('NgSignals');
-    const isShorthand = typeof optionsOrComputation === 'function';
-    const node = Object.create(LINKED_SIGNAL_NODE);
-    node.source = isShorthand ? optionsOrComputation : optionsOrComputation.source;
-    if (!isShorthand) {
-        node.computation = optionsOrComputation.computation;
-    }
-    const equal = isShorthand ? options?.equal : optionsOrComputation.equal;
-    if (equal) {
-        node.equal = equal;
-    }
-    return createLinkedSignal(node);
-}
-/**
- * A dedicated symbol used before a state value has been set / calculated for the first time.
- * Explicitly typed as `any` so we can use it as signal's value.
- */
-const UNSET = /* @__PURE__ */ Symbol('UNSET');
-/**
- * A dedicated symbol used in place of a linked signal value to indicate that a given computation
- * is in progress. Used to detect cycles in computation chains.
- * Explicitly typed as `any` so we can use it as signal's value.
- */
-const COMPUTING = /* @__PURE__ */ Symbol('COMPUTING');
-/**
- * A dedicated symbol used in place of a linked signal value to indicate that a given computation
- * failed. The thrown error is cached until the computation gets dirty again or the state is set.
- * Explicitly typed as `any` so we can use it as signal's value.
- */
-const ERRORED = /* @__PURE__ */ Symbol('ERRORED');
-// Note: Using an IIFE here to ensure that the spread assignment is not considered
-// a side-effect, ending up preserving `LINKED_SIGNAL_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const LINKED_SIGNAL_NODE = /* @__PURE__ */ (() => {
-    return {
-        ...REACTIVE_NODE$1,
-        value: UNSET,
-        dirty: true,
-        error: null,
-        equal: defaultEquals$1,
-        computation: identityFn,
-        producerMustRecompute(node) {
-            // Force a recomputation if there's no current value, or if the current value is in the
-            // process of being calculated (which should throw an error).
-            return node.value === UNSET || node.value === COMPUTING;
-        },
-        producerRecomputeValue(node) {
-            if (node.value === COMPUTING) {
-                // Our computation somehow led to a cyclic read of itself.
-                throw new Error('Detected cycle in computations.');
-            }
-            const oldValue = node.value;
-            node.value = COMPUTING;
-            const prevConsumer = consumerBeforeComputation$1(node);
-            let newValue;
-            try {
-                const newSourceValue = node.source();
-                const prev = oldValue === UNSET || oldValue === ERRORED
-                    ? undefined
-                    : {
-                        source: node.sourceValue,
-                        value: oldValue,
-                    };
-                newValue = node.computation(newSourceValue, prev);
-                node.sourceValue = newSourceValue;
-            }
-            catch (err) {
-                newValue = ERRORED;
-                node.error = err;
-            }
-            finally {
-                consumerAfterComputation$1(node, prevConsumer);
-            }
-            if (oldValue !== UNSET && newValue !== ERRORED && node.equal(oldValue, newValue)) {
-                // No change to `valueVersion` - old and new values are
-                // semantically equivalent.
-                node.value = oldValue;
-                return;
-            }
-            node.value = newValue;
-            node.version++;
-        },
-    };
-})();
 
 /**
  * Execute an arbitrary function in a non-reactive (non-tracking) context. The executed function
