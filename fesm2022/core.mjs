@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.3+sha-1de822c
+ * @license Angular v19.1.3+sha-cdb439b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -7800,8 +7800,7 @@ function getDirectivesAtNodeIndex(nodeIndex, lView) {
 }
 function getComponentAtNodeIndex(nodeIndex, lView) {
     const tNode = lView[TVIEW].data[nodeIndex];
-    const { directiveStart, componentOffset } = tNode;
-    return componentOffset > -1 ? lView[directiveStart + componentOffset] : null;
+    return isComponentHost(tNode) ? lView[tNode.directiveStart + tNode.componentOffset] : null;
 }
 /**
  * Returns a map of local references (local reference name => element or directive instance) that
@@ -14012,10 +14011,9 @@ function getClosestRElement(tView, tNode, lView) {
     }
     else {
         ngDevMode && assertTNodeType(parentTNode, 3 /* TNodeType.AnyRNode */ | 4 /* TNodeType.Container */);
-        const { componentOffset } = parentTNode;
-        if (componentOffset > -1) {
+        if (isComponentHost(parentTNode)) {
             ngDevMode && assertTNodeForLView(parentTNode, lView);
-            const { encapsulation } = tView.data[parentTNode.directiveStart + componentOffset];
+            const { encapsulation } = tView.data[parentTNode.directiveStart + parentTNode.componentOffset];
             // We've got a parent which is an element in the current view. We just need to verify if the
             // parent element is not a component. Component's content nodes are not inserted immediately
             // because they will be projected, and so doing insert at this point would be wasteful.
@@ -17948,7 +17946,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 }
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.1.3+sha-1de822c']
+                    ? ['ng-version', '19.1.3+sha-cdb439b']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 // TODO: this logic is shared with the element instruction first create pass
@@ -30466,7 +30464,7 @@ function wrapListener(tNode, lView, context, listenerFn) {
         }
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
-        const startView = tNode.componentOffset > -1 ? getComponentLViewByIndex(tNode.index, lView) : lView;
+        const startView = isComponentHost(tNode) ? getComponentLViewByIndex(tNode.index, lView) : lView;
         markViewDirty(startView, 5 /* NotificationSource.Listener */);
         let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
@@ -34997,7 +34995,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.3+sha-1de822c');
+const VERSION = new Version('19.1.3+sha-cdb439b');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
