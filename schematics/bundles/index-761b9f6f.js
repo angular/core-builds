@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.3+sha-4574ece
+ * @license Angular v19.1.3+sha-f8b8a3e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17,7 +17,7 @@ require('path');
  * @description
  * Entry point for all public APIs of the compiler-cli package.
  */
-new checker.Version('19.1.3+sha-4574ece');
+new checker.Version('19.1.3+sha-f8b8a3e');
 
 var LogLevel;
 (function (LogLevel) {
