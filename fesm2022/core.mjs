@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-edb8407
+ * @license Angular v19.2.0-next.0+sha-1685164
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17967,7 +17967,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 }
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.2.0-next.0+sha-edb8407']
+                    ? ['ng-version', '19.2.0-next.0+sha-1685164']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 // TODO: this logic is shared with the element instruction first create pass
@@ -34969,7 +34969,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-edb8407');
+const VERSION = new Version('19.2.0-next.0+sha-1685164');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -41134,20 +41134,10 @@ var ResourceStatus;
     ResourceStatus[ResourceStatus["Local"] = 5] = "Local";
 })(ResourceStatus || (ResourceStatus = {}));
 
-/**
- * Constructs a `Resource` that projects a reactive request to an asynchronous operation defined by
- * a loader function, which exposes the result of the loading operation via signals.
- *
- * Note that `resource` is intended for _read_ operations, not operations which perform mutations.
- * `resource` will cancel in-progress loads via the `AbortSignal` when destroyed or when a new
- * request object becomes available, which could prematurely abort mutations.
- *
- * @experimental
- */
 function resource(options) {
     options?.injector || assertInInjectionContext(resource);
     const request = (options.request ?? (() => null));
-    return new ResourceImpl(request, getLoader(options), undefined, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
+    return new ResourceImpl(request, getLoader(options), options.defaultValue, options.equal ? wrapEqualityFn(options.equal) : undefined, options.injector ?? inject(Injector));
 }
 /**
  * Base class which implements `.value` as a `WritableSignal` by delegating `.set` and `.update`.

@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-edb8407
+ * @license Angular v19.2.0-next.0+sha-1685164
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1283,6 +1283,11 @@ export declare interface BaseResourceOptions<T, R> {
      * If a request function isn't provided, the loader won't rerun unless the resource is reloaded.
      */
     request?: () => R;
+    /**
+     * The value which will be returned from the resource when a server value is unavailable, such as
+     * when the resource is still loading, or in an error state.
+     */
+    defaultValue?: NoInfer<T>;
     /**
      * Equality function used to compare the return value of the loader.
      */
@@ -9794,6 +9799,20 @@ export declare interface Resource<T> {
      */
     reload(): boolean;
 }
+
+/**
+ * Constructs a `Resource` that projects a reactive request to an asynchronous operation defined by
+ * a loader function, which exposes the result of the loading operation via signals.
+ *
+ * Note that `resource` is intended for _read_ operations, not operations which perform mutations.
+ * `resource` will cancel in-progress loads via the `AbortSignal` when destroyed or when a new
+ * request object becomes available, which could prematurely abort mutations.
+ *
+ * @experimental
+ */
+export declare function resource<T, R>(options: ResourceOptions<T, R> & {
+    defaultValue: NoInfer<T>;
+}): ResourceRef<T>;
 
 /**
  * Constructs a `Resource` that projects a reactive request to an asynchronous operation defined by

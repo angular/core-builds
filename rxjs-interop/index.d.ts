@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-edb8407
+ * @license Angular v19.2.0-next.0+sha-1685164
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -67,7 +67,17 @@ export declare function pendingUntilEvent<T>(injector?: Injector): MonoTypeOpera
 
 /**
  * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
- * resource's value. Like `firstValueFrom`, only the first emission of the Observable is considered.
+ * resource's value.
+ *
+ * @experimental
+ */
+export declare function rxResource<T, R>(opts: RxResourceOptions<T, R> & {
+    defaultValue: NoInfer<T>;
+}): ResourceRef<T>;
+
+/**
+ * Like `resource` but uses an RxJS based `loader` which maps the request to an `Observable` of the
+ * resource's value.
  *
  * @experimental
  */
