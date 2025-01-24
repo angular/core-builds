@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-1685164
+ * @license Angular v19.2.0-next.0+sha-10cdf0a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13555,6 +13555,15 @@ function ensureIcuContainerVisitorLoaded(loader) {
 }
 
 /**
+ * Checks whether a TNode is considered detached, i.e. not present in the
+ * translated i18n template. We should not attempt hydration for such nodes
+ * and instead, use a regular "creation mode".
+ */
+function isDetachedByI18n(tNode) {
+    return (tNode.flags & 32 /* TNodeFlags.isDetached */) === 32 /* TNodeFlags.isDetached */;
+}
+
+/**
  * NOTE: for performance reasons, the possible actions are inlined within the function instead of
  * being passed as an argument.
  */
@@ -14223,7 +14232,7 @@ function applyNodes(renderer, action, tNode, lView, parentRElement, beforeNode, 
                 tNode.flags |= 2 /* TNodeFlags.isProjected */;
             }
         }
-        if ((tNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
+        if (!isDetachedByI18n(tNode)) {
             if (tNodeType & 8 /* TNodeType.ElementContainer */) {
                 applyNodes(renderer, action, tNode.child, lView, parentRElement, beforeNode, false);
                 applyToElementOrContainer(action, renderer, parentRElement, rawSlotValue, beforeNode);
@@ -17967,7 +17976,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 }
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.2.0-next.0+sha-1685164']
+                    ? ['ng-version', '19.2.0-next.0+sha-10cdf0a']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         getRootTAttributesFromSelector(this.componentDef.selectors[0]);
                 // TODO: this logic is shared with the element instruction first create pass
@@ -20621,15 +20630,6 @@ function bindingUpdated3(lView, bindingIndex, exp1, exp2, exp3) {
 function bindingUpdated4(lView, bindingIndex, exp1, exp2, exp3, exp4) {
     const different = bindingUpdated2(lView, bindingIndex, exp1, exp2);
     return bindingUpdated2(lView, bindingIndex + 2, exp3, exp4) || different;
-}
-
-/**
- * Checks whether a TNode is considered detached, i.e. not present in the
- * translated i18n template. We should not attempt hydration for such nodes
- * and instead, use a regular "creation mode".
- */
-function isDetachedByI18n(tNode) {
-    return (tNode.flags & 32 /* TNodeFlags.isDetached */) === 32 /* TNodeFlags.isDetached */;
 }
 
 function templateFirstCreatePass(index, tView, lView, templateFn, decls, vars, tagName, attrs, localRefsIndex) {
@@ -30602,8 +30602,7 @@ function ɵɵprojection(nodeIndex, selectorIndex = 0, attrs, fallbackTemplateFn,
     if (isEmpty && fallbackIndex !== null) {
         insertFallbackContent(lView, tView, fallbackIndex);
     }
-    else if (isNodeCreationMode &&
-        (tProjectionNode.flags & 32 /* TNodeFlags.isDetached */) !== 32 /* TNodeFlags.isDetached */) {
+    else if (isNodeCreationMode && !isDetachedByI18n(tProjectionNode)) {
         // re-distribution of projectable nodes is stored on a component's view level
         applyProjection(tView, lView, tProjectionNode);
     }
@@ -33431,6 +33430,10 @@ function mergeWithExistingDefinition(currentDef, newDef) {
         // Preserve the old `setInput` function, because it has some state.
         // This is fine, because the component instance is preserved as well.
         setInput: clone.setInput,
+        // Externally this is redundant since we redeclare the definition using the original type.
+        // Internally we may receive a definition with an alternate, but identical, type so we have
+        // to ensure that the original one is preserved.
+        type: clone.type,
     });
     ngDevMode && assertEqual(replacement, currentDef, 'Expected definition to be merged in place');
     return { newDef: replacement, oldDef: clone };
@@ -34969,7 +34972,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-1685164');
+const VERSION = new Version('19.2.0-next.0+sha-10cdf0a');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
