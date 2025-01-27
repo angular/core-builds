@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.3+sha-0a9c03c
+ * @license Angular v19.1.3+sha-068cf29
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -13994,21 +13994,6 @@ export declare class ɵLContext {
 }
 
 /**
- * Used to enable lifecycle hooks on the root component.
- *
- * Include this feature when calling `renderComponent` if the root component
- * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
- * be called properly.
- *
- * Example:
- *
- * ```ts
- * renderComponent(AppComponent, {hostFeatures: [LifecycleHooksFeature]});
- * ```
- */
-export declare function ɵLifecycleHooksFeature(): void;
-
-/**
  * Index of each type of locale data from the locale data array
  */
 export declare enum ɵLocaleDataIndex {
@@ -14505,15 +14490,15 @@ export declare class ɵRender3ComponentFactory<T> extends ComponentFactory<T> {
  *
  */
 export declare class ɵRender3ComponentRef<T> extends ComponentRef<T> {
-    location: ElementRef;
     private _rootLView;
-    private _tNode;
     instance: T;
     hostView: ɵViewRef<T>;
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
+    location: ElementRef;
     private previousInputValues;
-    constructor(componentType: Type<T>, instance: T, location: ElementRef, _rootLView: LView, _tNode: TElementNode | TContainerNode | TElementContainerNode);
+    private _tNode;
+    constructor(componentType: Type<T>, _rootLView: LView);
     setInput(name: string, value: unknown): void;
     get injector(): Injector;
     destroy(): void;
