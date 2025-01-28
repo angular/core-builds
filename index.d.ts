@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-3373b4f
+ * @license Angular v19.2.0-next.0+sha-6c92d65
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -9858,6 +9858,7 @@ export declare type ResourceOptions<T, R> = PromiseResourceOptions<T, R> | Strea
  * @experimental
  */
 export declare interface ResourceRef<T> extends WritableResource<T> {
+    hasValue(): this is ResourceRef<Exclude<T, undefined>>;
     /**
      * Manually destroy the resource, which cancels pending requests and returns it to `idle` state.
      */

@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-3373b4f
+ * @license Angular v19.2.0-next.0+sha-6c92d65
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17968,7 +17968,7 @@ class ComponentFactory extends ComponentFactory$1 {
                 }
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.2.0-next.0+sha-3373b4f']
+                    ? ['ng-version', '19.2.0-next.0+sha-6c92d65']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
                 // TODO: this logic is shared with the element instruction first create pass
@@ -34945,7 +34945,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-3373b4f');
+const VERSION = new Version('19.2.0-next.0+sha-6c92d65');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -41264,7 +41264,7 @@ class ResourceImpl extends BaseWritableResource {
     async loadEffect() {
         // Capture the previous status before any state transitions. Note that this is `untracked` since
         // we do not want the effect to depend on the state of the resource, only on the request.
-        const { status: previousStatus } = untracked(this.state);
+        const { status: currentStatus, previousStatus } = untracked(this.state);
         const { request, reload: reloadCounter } = this.extendedRequest();
         // Subscribe side-effectfully to `reloadCounter`, although we don't actually care about its
         // value. This is used to rerun the effect when `reload()` is triggered.
@@ -41273,8 +41273,8 @@ class ResourceImpl extends BaseWritableResource {
             // Nothing to load (and we should already be in a non-loading state).
             return;
         }
-        else if (previousStatus !== ResourceStatus.Loading &&
-            previousStatus !== ResourceStatus.Reloading) {
+        else if (currentStatus !== ResourceStatus.Loading &&
+            currentStatus !== ResourceStatus.Reloading) {
             // We might've transitioned into a loading state, but has since been overwritten (likely via
             // `.set`).
             // In this case, the resource has nothing to do.
@@ -41298,13 +41298,15 @@ class ResourceImpl extends BaseWritableResource {
             // The actual loading is run through `untracked` - only the request side of `resource` is
             // reactive. This avoids any confusion with signals tracking or not tracking depending on
             // which side of the `await` they are.
-            const stream = await untracked(() => this.loaderFn({
-                request: request,
-                abortSignal,
-                previous: {
-                    status: previousStatus,
-                },
-            }));
+            const stream = await untracked(() => {
+                return this.loaderFn({
+                    request: request,
+                    abortSignal,
+                    previous: {
+                        status: previousStatus,
+                    },
+                });
+            });
             if (abortSignal.aborted) {
                 return;
             }
