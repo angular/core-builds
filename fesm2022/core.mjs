@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.0+sha-6c92d65
+ * @license Angular v19.2.0-next.0+sha-c202682
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12096,6 +12096,122 @@ function extractAttrsAndClassesFromSelector(selector) {
 /** A special value which designates that a value has not changed. */
 const NO_CHANGE = typeof ngDevMode === 'undefined' || ngDevMode ? { __brand__: 'NO_CHANGE' } : {};
 
+function createTextNode(renderer, value) {
+    ngDevMode && ngDevMode.rendererCreateTextNode++;
+    ngDevMode && ngDevMode.rendererSetText++;
+    return renderer.createText(value);
+}
+function updateTextNode(renderer, rNode, value) {
+    ngDevMode && ngDevMode.rendererSetText++;
+    renderer.setValue(rNode, value);
+}
+function createCommentNode(renderer, value) {
+    ngDevMode && ngDevMode.rendererCreateComment++;
+    return renderer.createComment(escapeCommentText(value));
+}
+/**
+ * Creates a native element from a tag name, using a renderer.
+ * @param renderer A renderer to use
+ * @param name the tag name
+ * @param namespace Optional namespace for element.
+ * @returns the element created
+ */
+function createElementNode(renderer, name, namespace) {
+    ngDevMode && ngDevMode.rendererCreateElement++;
+    return renderer.createElement(name, namespace);
+}
+/**
+ * Inserts a native node before another native node for a given parent.
+ * This is a utility function that can be used when native nodes were determined.
+ */
+function nativeInsertBefore(renderer, parent, child, beforeNode, isMove) {
+    ngDevMode && ngDevMode.rendererInsertBefore++;
+    renderer.insertBefore(parent, child, beforeNode, isMove);
+}
+function nativeAppendChild(renderer, parent, child) {
+    ngDevMode && ngDevMode.rendererAppendChild++;
+    ngDevMode && assertDefined(parent, 'parent node must be defined');
+    renderer.appendChild(parent, child);
+}
+function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode, isMove) {
+    if (beforeNode !== null) {
+        nativeInsertBefore(renderer, parent, child, beforeNode, isMove);
+    }
+    else {
+        nativeAppendChild(renderer, parent, child);
+    }
+}
+/**
+ * Removes a native node itself using a given renderer. To remove the node we are looking up its
+ * parent from the native tree as not all platforms / browsers support the equivalent of
+ * node.remove().
+ *
+ * @param renderer A renderer to be used
+ * @param rNode The native node that should be removed
+ * @param isHostElement A flag indicating if a node to be removed is a host of a component.
+ */
+function nativeRemoveNode(renderer, rNode, isHostElement) {
+    ngDevMode && ngDevMode.rendererRemoveNode++;
+    renderer.removeChild(null, rNode, isHostElement);
+}
+/**
+ * Clears the contents of a given RElement.
+ *
+ * @param rElement the native RElement to be cleared
+ */
+function clearElementContents(rElement) {
+    rElement.textContent = '';
+}
+/**
+ * Write `cssText` to `RElement`.
+ *
+ * This function does direct write without any reconciliation. Used for writing initial values, so
+ * that static styling values do not pull in the style parser.
+ *
+ * @param renderer Renderer to use
+ * @param element The element which needs to be updated.
+ * @param newValue The new class list to write.
+ */
+function writeDirectStyle(renderer, element, newValue) {
+    ngDevMode && assertString(newValue, "'newValue' should be a string");
+    renderer.setAttribute(element, 'style', newValue);
+    ngDevMode && ngDevMode.rendererSetStyle++;
+}
+/**
+ * Write `className` to `RElement`.
+ *
+ * This function does direct write without any reconciliation. Used for writing initial values, so
+ * that static styling values do not pull in the style parser.
+ *
+ * @param renderer Renderer to use
+ * @param element The element which needs to be updated.
+ * @param newValue The new class list to write.
+ */
+function writeDirectClass(renderer, element, newValue) {
+    ngDevMode && assertString(newValue, "'newValue' should be a string");
+    if (newValue === '') {
+        // There are tests in `google3` which expect `element.getAttribute('class')` to be `null`.
+        renderer.removeAttribute(element, 'class');
+    }
+    else {
+        renderer.setAttribute(element, 'class', newValue);
+    }
+    ngDevMode && ngDevMode.rendererSetClassName++;
+}
+/** Sets up the static DOM attributes on an `RNode`. */
+function setupStaticAttributes(renderer, element, tNode) {
+    const { mergedAttrs, classes, styles } = tNode;
+    if (mergedAttrs !== null) {
+        setUpAttributes(renderer, element, mergedAttrs);
+    }
+    if (classes !== null) {
+        writeDirectClass(renderer, element, classes);
+    }
+    if (styles !== null) {
+        writeDirectStyle(renderer, element, styles);
+    }
+}
+
 /**
  * Advances to an element for later binding instructions.
  *
@@ -12212,122 +12328,6 @@ function writeToDirectiveInput(def, instance, publicName, privateName, flags, va
     }
     finally {
         setActiveConsumer$1(prevConsumer);
-    }
-}
-
-function createTextNode(renderer, value) {
-    ngDevMode && ngDevMode.rendererCreateTextNode++;
-    ngDevMode && ngDevMode.rendererSetText++;
-    return renderer.createText(value);
-}
-function updateTextNode(renderer, rNode, value) {
-    ngDevMode && ngDevMode.rendererSetText++;
-    renderer.setValue(rNode, value);
-}
-function createCommentNode(renderer, value) {
-    ngDevMode && ngDevMode.rendererCreateComment++;
-    return renderer.createComment(escapeCommentText(value));
-}
-/**
- * Creates a native element from a tag name, using a renderer.
- * @param renderer A renderer to use
- * @param name the tag name
- * @param namespace Optional namespace for element.
- * @returns the element created
- */
-function createElementNode(renderer, name, namespace) {
-    ngDevMode && ngDevMode.rendererCreateElement++;
-    return renderer.createElement(name, namespace);
-}
-/**
- * Inserts a native node before another native node for a given parent.
- * This is a utility function that can be used when native nodes were determined.
- */
-function nativeInsertBefore(renderer, parent, child, beforeNode, isMove) {
-    ngDevMode && ngDevMode.rendererInsertBefore++;
-    renderer.insertBefore(parent, child, beforeNode, isMove);
-}
-function nativeAppendChild(renderer, parent, child) {
-    ngDevMode && ngDevMode.rendererAppendChild++;
-    ngDevMode && assertDefined(parent, 'parent node must be defined');
-    renderer.appendChild(parent, child);
-}
-function nativeAppendOrInsertBefore(renderer, parent, child, beforeNode, isMove) {
-    if (beforeNode !== null) {
-        nativeInsertBefore(renderer, parent, child, beforeNode, isMove);
-    }
-    else {
-        nativeAppendChild(renderer, parent, child);
-    }
-}
-/**
- * Removes a native node itself using a given renderer. To remove the node we are looking up its
- * parent from the native tree as not all platforms / browsers support the equivalent of
- * node.remove().
- *
- * @param renderer A renderer to be used
- * @param rNode The native node that should be removed
- * @param isHostElement A flag indicating if a node to be removed is a host of a component.
- */
-function nativeRemoveNode(renderer, rNode, isHostElement) {
-    ngDevMode && ngDevMode.rendererRemoveNode++;
-    renderer.removeChild(null, rNode, isHostElement);
-}
-/**
- * Clears the contents of a given RElement.
- *
- * @param rElement the native RElement to be cleared
- */
-function clearElementContents(rElement) {
-    rElement.textContent = '';
-}
-/**
- * Write `cssText` to `RElement`.
- *
- * This function does direct write without any reconciliation. Used for writing initial values, so
- * that static styling values do not pull in the style parser.
- *
- * @param renderer Renderer to use
- * @param element The element which needs to be updated.
- * @param newValue The new class list to write.
- */
-function writeDirectStyle(renderer, element, newValue) {
-    ngDevMode && assertString(newValue, "'newValue' should be a string");
-    renderer.setAttribute(element, 'style', newValue);
-    ngDevMode && ngDevMode.rendererSetStyle++;
-}
-/**
- * Write `className` to `RElement`.
- *
- * This function does direct write without any reconciliation. Used for writing initial values, so
- * that static styling values do not pull in the style parser.
- *
- * @param renderer Renderer to use
- * @param element The element which needs to be updated.
- * @param newValue The new class list to write.
- */
-function writeDirectClass(renderer, element, newValue) {
-    ngDevMode && assertString(newValue, "'newValue' should be a string");
-    if (newValue === '') {
-        // There are tests in `google3` which expect `element.getAttribute('class')` to be `null`.
-        renderer.removeAttribute(element, 'class');
-    }
-    else {
-        renderer.setAttribute(element, 'class', newValue);
-    }
-    ngDevMode && ngDevMode.rendererSetClassName++;
-}
-/** Sets up the static DOM attributes on an `RNode`. */
-function setupStaticAttributes(renderer, element, tNode) {
-    const { mergedAttrs, classes, styles } = tNode;
-    if (mergedAttrs !== null) {
-        setUpAttributes(renderer, element, mergedAttrs);
-    }
-    if (classes !== null) {
-        writeDirectClass(renderer, element, classes);
-    }
-    if (styles !== null) {
-        writeDirectStyle(renderer, element, styles);
     }
 }
 
@@ -12813,16 +12813,9 @@ function resolveDirectives(tView, lView, tNode, localRefs) {
     ngDevMode && assertFirstCreatePass(tView);
     if (getBindingsEnabled()) {
         const exportsMap = localRefs === null ? null : { '': -1 };
-        const matchResult = findDirectiveDefMatches(tView, tNode);
-        let directiveDefs;
-        let hostDirectiveDefs;
-        if (matchResult === null) {
-            directiveDefs = hostDirectiveDefs = null;
-        }
-        else {
-            [directiveDefs, hostDirectiveDefs] = matchResult;
-        }
-        if (directiveDefs !== null) {
+        const matchedDirectiveDefs = findDirectiveDefMatches(tView, tNode);
+        if (matchedDirectiveDefs !== null) {
+            const [directiveDefs, hostDirectiveDefs] = resolveHostDirectives(tView, tNode, matchedDirectiveDefs);
             initializeDirectives(tView, lView, tNode, directiveDefs, exportsMap, hostDirectiveDefs);
         }
         if (exportsMap)
@@ -13001,60 +12994,63 @@ function findDirectiveDefMatches(tView, tNode) {
     ngDevMode && assertTNodeType(tNode, 3 /* TNodeType.AnyRNode */ | 12 /* TNodeType.AnyContainer */);
     const registry = tView.directiveRegistry;
     let matches = null;
-    let hostDirectiveDefs = null;
     if (registry) {
         for (let i = 0; i < registry.length; i++) {
             const def = registry[i];
             if (isNodeMatchingSelectorList(tNode, def.selectors, /* isProjectionMode */ false)) {
-                matches || (matches = []);
+                matches ??= [];
                 if (isComponentDef(def)) {
                     if (ngDevMode) {
                         assertTNodeType(tNode, 2 /* TNodeType.Element */, `"${tNode.value}" tags cannot be used as component hosts. ` +
                             `Please use a different tag to activate the ${stringify(def.type)} component.`);
-                        if (isComponentHost(tNode)) {
+                        if (matches.length && isComponentDef(matches[0])) {
                             throwMultipleComponentError(tNode, matches.find(isComponentDef).type, def.type);
                         }
                     }
-                    // Components are inserted at the front of the matches array so that their lifecycle
-                    // hooks run before any directive lifecycle hooks. This appears to be for ViewEngine
-                    // compatibility. This logic doesn't make sense with host directives, because it
-                    // would allow the host directives to undo any overrides the host may have made.
-                    // To handle this case, the host directives of components are inserted at the beginning
-                    // of the array, followed by the component. As such, the insertion order is as follows:
-                    // 1. Host directives belonging to the selector-matched component.
-                    // 2. Selector-matched component.
-                    // 3. Host directives belonging to selector-matched directives.
-                    // 4. Selector-matched directives.
-                    if (def.findHostDirectiveDefs !== null) {
-                        const hostDirectiveMatches = [];
-                        hostDirectiveDefs = hostDirectiveDefs || new Map();
-                        def.findHostDirectiveDefs(def, hostDirectiveMatches, hostDirectiveDefs);
-                        // Add all host directives declared on this component, followed by the component itself.
-                        // Host directives should execute first so the host has a chance to override changes
-                        // to the DOM made by them.
-                        matches.unshift(...hostDirectiveMatches, def);
-                        // Component is offset starting from the beginning of the host directives array.
-                        const componentOffset = hostDirectiveMatches.length;
-                        markAsComponentHost(tView, tNode, componentOffset);
-                    }
-                    else {
-                        // No host directives on this component, just add the
-                        // component def to the beginning of the matches.
-                        matches.unshift(def);
-                        markAsComponentHost(tView, tNode, 0);
-                    }
+                    matches.unshift(def);
                 }
                 else {
-                    // Append any host directives to the matches first.
-                    hostDirectiveDefs = hostDirectiveDefs || new Map();
-                    def.findHostDirectiveDefs?.(def, matches, hostDirectiveDefs);
                     matches.push(def);
                 }
             }
         }
     }
-    ngDevMode && matches !== null && assertNoDuplicateDirectives(matches);
-    return matches === null ? null : [matches, hostDirectiveDefs];
+    return matches;
+}
+function resolveHostDirectives(tView, tNode, matches) {
+    const allDirectiveDefs = [];
+    let hostDirectiveDefs = null;
+    for (const def of matches) {
+        if (def.findHostDirectiveDefs !== null) {
+            // TODO(pk): probably could return matches instead of taking in an array to fill in?
+            hostDirectiveDefs ??= new Map();
+            // Components are inserted at the front of the matches array so that their lifecycle
+            // hooks run before any directive lifecycle hooks. This appears to be for ViewEngine
+            // compatibility. This logic doesn't make sense with host directives, because it
+            // would allow the host directives to undo any overrides the host may have made.
+            // To handle this case, the host directives of components are inserted at the beginning
+            // of the array, followed by the component. As such, the insertion order is as follows:
+            // 1. Host directives belonging to the selector-matched component.
+            // 2. Selector-matched component.
+            // 3. Host directives belonging to selector-matched directives.
+            // 4. Selector-matched directives.
+            def.findHostDirectiveDefs(def, allDirectiveDefs, hostDirectiveDefs);
+        }
+        if (isComponentDef(def)) {
+            allDirectiveDefs.push(def);
+            markAsComponentHost(tView, tNode, allDirectiveDefs.length - 1);
+        }
+    }
+    if (isComponentHost(tNode)) {
+        allDirectiveDefs.push(...matches.slice(1));
+    }
+    else {
+        allDirectiveDefs.push(...matches);
+    }
+    if (ngDevMode) {
+        assertNoDuplicateDirectives(allDirectiveDefs);
+    }
+    return [allDirectiveDefs, hostDirectiveDefs];
 }
 /**
  * Marks a given TNode as a component's host. This consists of:
@@ -17953,30 +17949,18 @@ class ComponentFactory extends ComponentFactory$1 {
             enterView(rootLView);
             let componentView = null;
             try {
-                const rootComponentDef = this.componentDef;
-                let rootDirectives;
-                let hostDirectiveDefs = null;
-                if (rootComponentDef.findHostDirectiveDefs) {
-                    rootDirectives = [];
-                    hostDirectiveDefs = new Map();
-                    rootComponentDef.findHostDirectiveDefs(rootComponentDef, rootDirectives, hostDirectiveDefs);
-                    rootDirectives.push(rootComponentDef);
-                    ngDevMode && assertNoDuplicateDirectives(rootDirectives);
-                }
-                else {
-                    rootDirectives = [rootComponentDef];
-                }
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.2.0-next.0+sha-6c92d65']
+                    ? ['ng-version', '19.2.0-next.0+sha-c202682']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
                 // TODO: this logic is shared with the element instruction first create pass
                 const hostTNode = getOrCreateTNode(rootTView, HEADER_OFFSET, 2 /* TNodeType.Element */, '#host', tAttributes);
-                // TODO(pk): partial code duplication with resolveDirectives and other existing logic
-                markAsComponentHost(rootTView, hostTNode, rootDirectives.length - 1);
-                initializeDirectives(rootTView, rootLView, hostTNode, rootDirectives, null, hostDirectiveDefs);
-                for (const def of rootDirectives) {
+                const [directiveDefs, hostDirectiveDefs] = resolveHostDirectives(rootTView, hostTNode, [
+                    this.componentDef,
+                ]);
+                initializeDirectives(rootTView, rootLView, hostTNode, directiveDefs, {}, hostDirectiveDefs);
+                for (const def of directiveDefs) {
                     hostTNode.mergedAttrs = mergeHostAttrs(hostTNode.mergedAttrs, def.hostAttrs);
                 }
                 hostTNode.mergedAttrs = mergeHostAttrs(hostTNode.mergedAttrs, tAttributes);
@@ -34945,7 +34929,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.2.0-next.0+sha-6c92d65');
+const VERSION = new Version('19.2.0-next.0+sha-c202682');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
