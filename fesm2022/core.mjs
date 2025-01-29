@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.3+sha-68dbaf5
+ * @license Angular v19.1.3+sha-4418064
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17935,7 +17935,7 @@ class ComponentFactory extends ComponentFactory$1 {
             try {
                 // If host dom element is created (instead of being provided as part of the dynamic component creation), also apply attributes and classes extracted from component selector.
                 const tAttributes = rootSelectorOrNode
-                    ? ['ng-version', '19.1.3+sha-68dbaf5']
+                    ? ['ng-version', '19.1.3+sha-4418064']
                     : // Extract attributes and classes from the first selector only to match VE behavior.
                         extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
                 // TODO: this logic is shared with the element instruction first create pass
@@ -34904,7 +34904,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.3+sha-68dbaf5');
+const VERSION = new Version('19.1.3+sha-4418064');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.
@@ -39981,12 +39981,12 @@ function printHydrationStats(injector) {
 /**
  * Returns a Promise that is resolved when an application becomes stable.
  */
-function whenStableWithTimeout(appRef, injector) {
+function whenStableWithTimeout(appRef) {
     const whenStablePromise = appRef.whenStable();
     if (typeof ngDevMode !== 'undefined' && ngDevMode) {
         const timeoutTime = APPLICATION_IS_STABLE_TIMEOUT;
-        const console = injector.get(Console);
-        const ngZone = injector.get(NgZone);
+        const console = appRef.injector.get(Console);
+        const ngZone = appRef.injector.get(NgZone);
         // The following call should not and does not prevent the app to become stable
         // We cannot use RxJS timer here because the app would remain unstable.
         // This also avoids an extra change detection cycle.
@@ -40084,7 +40084,6 @@ function withDomHydration() {
             useFactory: () => {
                 if (inject(IS_HYDRATION_DOM_REUSE_ENABLED)) {
                     const appRef = inject(ApplicationRef);
-                    const injector = inject(Injector);
                     return () => {
                         // Wait until an app becomes stable and cleanup all views that
                         // were not claimed during the application bootstrap process.
@@ -40093,11 +40092,20 @@ function withDomHydration() {
                         //
                         // Note: the cleanup task *MUST* be scheduled within the Angular zone in Zone apps
                         // to ensure that change detection is properly run afterward.
-                        whenStableWithTimeout(appRef, injector).then(() => {
+                        whenStableWithTimeout(appRef).then(() => {
+                            // Note: we have to check whether the application is destroyed before
+                            // performing other operations with the `injector`.
+                            // The application may be destroyed **before** it becomes stable, so when
+                            // the `whenStableWithTimeout` resolves, the injector might already be in
+                            // a destroyed state. Thus, calling `injector.get` would throw an error
+                            // indicating that the injector has already been destroyed.
+                            if (appRef.destroyed) {
+                                return;
+                            }
                             cleanupDehydratedViews(appRef);
                             if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-                                countBlocksSkippedByHydration(injector);
-                                printHydrationStats(injector);
+                                countBlocksSkippedByHydration(appRef.injector);
+                                printHydrationStats(appRef.injector);
                             }
                         });
                     };
