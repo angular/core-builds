@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.1+sha-9723f03
+ * @license Angular v19.2.0-next.1+sha-146ab9a
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -30696,7 +30696,7 @@ function publishFacade(global) {
  * @description
  * Entry point for all public APIs of the compiler package.
  */
-new Version('19.2.0-next.1+sha-9723f03');
+new Version('19.2.0-next.1+sha-146ab9a');
 
 const _I18N_ATTR = 'i18n';
 const _I18N_ATTR_PREFIX = 'i18n-';
@@ -32104,7 +32104,7 @@ class NodeJSPathManipulation {
 // G3-ESM-MARKER: G3 uses CommonJS, but externally everything in ESM.
 // CommonJS/ESM interop for determining the current file name and containing dir.
 const isCommonJS = typeof __filename !== 'undefined';
-const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-78667e44.js', document.baseURI).href));
+const currentFileUrl = isCommonJS ? null : (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('checker-9af84be9.js', document.baseURI).href));
 const currentFileName = isCommonJS ? __filename : url.fileURLToPath(currentFileUrl);
 /**
  * A wrapper around the Node.js file-system that supports readonly operations and path manipulation.
@@ -35155,10 +35155,10 @@ class StaticInterpreter {
     visitEnumDeclaration(node, context) {
         const enumRef = this.getReference(node, context);
         const map = new Map();
-        node.members.forEach((member) => {
+        node.members.forEach((member, index) => {
             const name = this.stringNameFromPropertyName(member.name, context);
             if (name !== undefined) {
-                const resolved = member.initializer && this.visit(member.initializer, context);
+                const resolved = member.initializer ? this.visit(member.initializer, context) : index;
                 map.set(name, new EnumValue(enumRef, name, resolved));
             }
         });
@@ -46339,6 +46339,7 @@ exports.PropertyRead = PropertyRead;
 exports.PropertyWrite = PropertyWrite;
 exports.QUERY_INITIALIZER_FNS = QUERY_INITIALIZER_FNS;
 exports.R3TargetBinder = R3TargetBinder;
+exports.ReadVarExpr = ReadVarExpr;
 exports.RecursiveAstVisitor = RecursiveAstVisitor$1;
 exports.RecursiveAstVisitor$1 = RecursiveAstVisitor;
 exports.RecursiveVisitor = RecursiveVisitor;
