@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.1+sha-146ab9a
+ * @license Angular v19.2.0-next.1+sha-4d2684d
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1118,6 +1118,7 @@ export declare class ApplicationRef {
      * detection pass during which all change detection must complete.
      */
     tick(): void;
+    private tickImpl;
     /**
      * Performs the core work of synchronizing the application state with the UI, resolving any
      * pending dirtiness (potentially in a loop).
