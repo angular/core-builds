@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.1+sha-8ee91bc
+ * @license Angular v19.2.0-next.1+sha-951155e
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -8797,6 +8797,10 @@ export declare interface PromiseResourceOptions<T, R> extends BaseResourceOption
      * Loading function which returns a `Promise` of the resource's value for a given request.
      */
     loader: ResourceLoader<T, R>;
+    /**
+     * Cannot specify `stream` and `loader` at the same time.
+     */
+    stream?: never;
 }
 
 /**
@@ -9911,11 +9915,16 @@ export declare enum ResourceStatus {
  *
  * @experimental
  */
-export declare type ResourceStreamingLoader<T, R> = (param: ResourceLoaderParams<R>) => PromiseLike<Signal<{
+export declare type ResourceStreamingLoader<T, R> = (param: ResourceLoaderParams<R>) => PromiseLike<Signal<ResourceStreamItem<T>>>;
+
+/**
+ * @experimental
+ */
+export declare type ResourceStreamItem<T> = {
     value: T;
 } | {
     error: unknown;
-}>>;
+};
 
 /**
  * Injection token for response initialization options.
@@ -10439,6 +10448,10 @@ export declare interface StreamingResourceOptions<T, R> extends BaseResourceOpti
      * request, which can change over time as new values are received from a stream.
      */
     stream: ResourceStreamingLoader<T, R>;
+    /**
+     * Cannot specify `stream` and `loader` at the same time.
+     */
+    loader?: never;
 }
 
 declare const T_HOST = 5;
