@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.2.0-next.2+sha-a7f20eb
+ * @license Angular v19.2.0-next.2+sha-b0266bd
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -894,29 +894,32 @@ function compileClassDebugInfo(debugInfo) {
  * @param meta HMR metadata extracted from the class.
  */
 function compileHmrInitializer(meta) {
-    const id = encodeURIComponent(`${meta.filePath}@${meta.className}`);
-    const urlPartial = `./@ng/component?c=${id}&t=`;
     const moduleName = 'm';
     const dataName = 'd';
     const timestampName = 't';
+    const idName = 'id';
     const importCallbackName = `${meta.className}_HmrLoad`;
     const namespaces = meta.namespaceDependencies.map((dep) => {
         return new checker.ExternalExpr({ moduleName: dep.moduleName, name: null });
     });
     // m.default
     const defaultRead = checker.variable(moduleName).prop('default');
-    // ɵɵreplaceMetadata(Comp, m.default, [...namespaces], [...locals]);
+    // ɵɵreplaceMetadata(Comp, m.default, [...namespaces], [...locals], import.meta, id);
     const replaceCall = checker.importExpr(checker.Identifiers.replaceMetadata)
         .callFn([
         meta.type,
         defaultRead,
         checker.literalArr(namespaces),
         checker.literalArr(meta.localDependencies.map((l) => l.runtimeRepresentation)),
+        checker.variable('import').prop('meta'),
+        checker.variable(idName),
     ]);
     // (m) => m.default && ɵɵreplaceMetadata(...)
     const replaceCallback = checker.arrowFn([new checker.FnParam(moduleName)], defaultRead.and(replaceCall));
-    // '<urlPartial>' + encodeURIComponent(t)
-    const urlValue = checker.literal(urlPartial)
+    // '<url>?c=' + id + '&t=' + encodeURIComponent(t)
+    const urlValue = checker.literal(`./@ng/component?c=`)
+        .plus(checker.variable(idName))
+        .plus(checker.literal('&t='))
         .plus(checker.variable('encodeURIComponent').callFn([checker.variable(timestampName)]));
     // import.meta.url
     const urlBase = checker.variable('import').prop('meta').prop('url');
@@ -934,10 +937,10 @@ function compileHmrInitializer(meta) {
             .callFn([replaceCallback])
             .toStmt(),
     ], null, checker.StmtModifier.Final);
-    // (d) => d.id === <id> && Cmp_HmrLoad(d.timestamp)
+    // (d) => d.id === id && Cmp_HmrLoad(d.timestamp)
     const updateCallback = checker.arrowFn([new checker.FnParam(dataName)], checker.variable(dataName)
         .prop('id')
-        .identical(checker.literal(id))
+        .identical(checker.variable(idName))
         .and(checker.variable(importCallbackName).callFn([checker.variable(dataName).prop('timestamp')])));
     // Cmp_HmrLoad(Date.now());
     // Initial call to kick off the loading in order to avoid edge cases with components
@@ -952,6 +955,8 @@ function compileHmrInitializer(meta) {
         .prop('on')
         .callFn([checker.literal('angular:component-update'), updateCallback]);
     return checker.arrowFn([], [
+        // const id = <id>;
+        new checker.DeclareVarStmt(idName, checker.literal(encodeURIComponent(`${meta.filePath}@${meta.className}`)), null, checker.StmtModifier.Final),
         // function Cmp_HmrLoad() {...}.
         importCallback,
         // ngDevMode && Cmp_HmrLoad(Date.now());
@@ -1006,7 +1011,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-a7f20eb'));
+    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-b0266bd'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1024,7 +1029,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-a7f20eb'));
+    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-b0266bd'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1119,7 +1124,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-a7f20eb'));
+    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-b0266bd'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1535,7 +1540,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-a7f20eb'));
+    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-b0266bd'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1570,7 +1575,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-a7f20eb'));
+    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-b0266bd'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1621,7 +1626,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-a7f20eb'));
+    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-b0266bd'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1654,7 +1659,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-a7f20eb'));
+    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-b0266bd'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1705,7 +1710,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-a7f20eb'));
+    definitionMap.set('version', checker.literal('19.2.0-next.2+sha-b0266bd'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -20330,7 +20335,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.2.0-next.2+sha-a7f20eb` usually means that core is at head so it supports
+    // A version of `19.2.0-next.2+sha-b0266bd` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {

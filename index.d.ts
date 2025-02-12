@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.2.0-next.2+sha-a7f20eb
+ * @license Angular v19.2.0-next.2+sha-b0266bd
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -5611,6 +5611,13 @@ declare const ID = 19;
  * @deprecated replaced by `EnvironmentProviders`
  */
 export declare type ImportedNgModuleProviders = EnvironmentProviders;
+
+/** Represents `import.meta` plus some information that's not in the built-in types. */
+declare type ImportMetaExtended = ImportMeta & {
+    hot?: {
+        send?: (name: string, payload: unknown) => void;
+    };
+};
 
 /**
  * Collects providers from all NgModules and standalone components, including transitively imported
@@ -17938,9 +17945,13 @@ export declare function ɵɵrepeaterTrackByIndex(index: number): number;
  * @param applyMetadata Callback that will apply a new set of metadata on the `type` when invoked.
  * @param environment Syntehtic namespace imports that need to be passed along to the callback.
  * @param locals Local symbols from the source location that have to be exposed to the callback.
+ * @param importMeta `import.meta` from the call site of the replacement function. Optional since
+ *   it isn't used internally.
+ * @param id ID to the class being replaced. **Not** the same as the component definition ID.
+ *   Optional since the ID might not be available internally.
  * @codeGenApi
  */
-export declare function ɵɵreplaceMetadata(type: Type<unknown>, applyMetadata: (...args: [Type<unknown>, unknown[], ...unknown[]]) => void, namespaces: unknown[], locals: unknown[]): void;
+export declare function ɵɵreplaceMetadata(type: Type<unknown>, applyMetadata: (...args: [Type<unknown>, unknown[], ...unknown[]]) => void, namespaces: unknown[], locals: unknown[], importMeta?: ImportMetaExtended | null, id?: string | null): void;
 
 /**
  * Clears the view set in `ɵɵrestoreView` from memory. Returns the passed in
