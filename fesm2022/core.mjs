@@ -1,5 +1,5 @@
 /**
- * @license Angular v19.1.5+sha-27c39f5
+ * @license Angular v19.1.5+sha-cab7a9b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -17951,7 +17951,7 @@ class ComponentFactory extends ComponentFactory$1 {
             const cmpDef = this.componentDef;
             ngDevMode && verifyNotAnOrphanComponent(cmpDef);
             const tAttributes = rootSelectorOrNode
-                ? ['ng-version', '19.1.5+sha-27c39f5']
+                ? ['ng-version', '19.1.5+sha-cab7a9b']
                 : // Extract attributes and classes from the first selector only to match VE behavior.
                     extractAttrsAndClassesFromSelector(this.componentDef.selectors[0]);
             // Create the root view. Uses empty TView and ContentTemplate.
@@ -33305,9 +33305,13 @@ function ɵsetClassDebugInfo(type, debugInfo) {
  * @param applyMetadata Callback that will apply a new set of metadata on the `type` when invoked.
  * @param environment Syntehtic namespace imports that need to be passed along to the callback.
  * @param locals Local symbols from the source location that have to be exposed to the callback.
+ * @param importMeta `import.meta` from the call site of the replacement function. Optional since
+ *   it isn't used internally.
+ * @param id ID to the class being replaced. **Not** the same as the component definition ID.
+ *   Optional since the ID might not be available internally.
  * @codeGenApi
  */
-function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals) {
+function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals, importMeta = null, id = null) {
     ngDevMode && assertComponentDef(type);
     const currentDef = getComponentDef(type);
     // The reason `applyMetadata` is a callback that is invoked (almost) immediately is because
@@ -33329,7 +33333,7 @@ function ɵɵreplaceMetadata(type, applyMetadata, namespaces, locals) {
             // Note: we have the additional check, because `IsRoot` can also indicate
             // a component created through something like `createComponent`.
             if (isRootView(root) && root[PARENT] === null) {
-                recreateMatchingLViews(newDef, oldDef, root);
+                recreateMatchingLViews(importMeta, id, newDef, oldDef, root);
             }
         }
     }
@@ -33365,10 +33369,12 @@ function mergeWithExistingDefinition(currentDef, newDef) {
 }
 /**
  * Finds all LViews matching a specific component definition and recreates them.
+ * @param importMeta `import.meta` information.
+ * @param id HMR ID of the component.
  * @param oldDef Component definition to search for.
  * @param rootLView View from which to start the search.
  */
-function recreateMatchingLViews(newDef, oldDef, rootLView) {
+function recreateMatchingLViews(importMeta, id, newDef, oldDef, rootLView) {
     ngDevMode &&
         assertDefined(oldDef.tView, 'Expected a component definition that has been instantiated at least once');
     const tView = rootLView[TVIEW];
@@ -33376,7 +33382,7 @@ function recreateMatchingLViews(newDef, oldDef, rootLView) {
     // produce false positives when using inheritance.
     if (tView === oldDef.tView) {
         ngDevMode && assertComponentDef(oldDef.type);
-        recreateLView(newDef, oldDef, rootLView);
+        recreateLView(importMeta, id, newDef, oldDef, rootLView);
         return;
     }
     for (let i = HEADER_OFFSET; i < tView.bindingStartIndex; i++) {
@@ -33384,14 +33390,14 @@ function recreateMatchingLViews(newDef, oldDef, rootLView) {
         if (isLContainer(current)) {
             // The host can be an LView if a component is injecting `ViewContainerRef`.
             if (isLView(current[HOST])) {
-                recreateMatchingLViews(newDef, oldDef, current[HOST]);
+                recreateMatchingLViews(importMeta, id, newDef, oldDef, current[HOST]);
             }
             for (let j = CONTAINER_HEADER_OFFSET; j < current.length; j++) {
-                recreateMatchingLViews(newDef, oldDef, current[j]);
+                recreateMatchingLViews(importMeta, id, newDef, oldDef, current[j]);
             }
         }
         else if (isLView(current)) {
-            recreateMatchingLViews(newDef, oldDef, current);
+            recreateMatchingLViews(importMeta, id, newDef, oldDef, current);
         }
     }
 }
@@ -33410,11 +33416,13 @@ function clearRendererCache(factory, def) {
 }
 /**
  * Recreates an LView in-place from a new component definition.
+ * @param importMeta `import.meta` information.
+ * @param id HMR ID for the component.
  * @param newDef Definition from which to recreate the view.
  * @param oldDef Previous component definition being swapped out.
  * @param lView View to be recreated.
  */
-function recreateLView(newDef, oldDef, lView) {
+function recreateLView(importMeta, id, newDef, oldDef, lView) {
     const instance = lView[CONTEXT];
     let host = lView[HOST];
     // In theory the parent can also be an LContainer, but it appears like that's
@@ -33466,10 +33474,29 @@ function recreateLView(newDef, oldDef, lView) {
     };
     // The callback isn't guaranteed to be inside the Zone so we need to bring it in ourselves.
     if (zone === null) {
-        recreate();
+        executeWithInvalidateFallback(importMeta, id, recreate);
     }
     else {
-        zone.run(recreate);
+        zone.run(() => executeWithInvalidateFallback(importMeta, id, recreate));
+    }
+}
+/**
+ * Runs an HMR-related function and falls back to
+ * invalidating the HMR data if it throws an error.
+ */
+function executeWithInvalidateFallback(importMeta, id, callback) {
+    try {
+        callback();
+    }
+    catch (e) {
+        const errorMessage = e.message;
+        // If we have all the necessary information and APIs to send off the invalidation
+        // request, send it before rethrowing so the dev server can decide what to do.
+        if (id !== null && errorMessage) {
+            importMeta?.hot?.send?.('angular:invalidate', { id, message: errorMessage, error: true });
+        }
+        // Throw the error in case the page doesn't get refreshed.
+        throw e;
     }
 }
 /**
@@ -34897,7 +34924,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('19.1.5+sha-27c39f5');
+const VERSION = new Version('19.1.5+sha-cab7a9b');
 
 /**
  * Combination of NgModuleFactory and ComponentFactories.

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.5+sha-27c39f5
+ * @license Angular v19.1.5+sha-cab7a9b
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -14,7 +14,7 @@ var signalInputMigration = require('./signal-input-migration.js');
 var outputMigration = require('./output-migration.js');
 require('./project_tsconfig_paths-e9ccccbf.js');
 require('@angular-devkit/core');
-require('./apply_import_manager-60bf832a.js');
+require('./apply_import_manager-556789fb.js');
 require('node:path/posix');
 require('os');
 require('typescript');
@@ -23,10 +23,10 @@ require('fs');
 require('module');
 require('path');
 require('url');
-require('./program-5512058c.js');
-require('./migrate_ts_type_references-14afad8e.js');
+require('./program-c07c92e9.js');
+require('./migrate_ts_type_references-28d85913.js');
 require('assert');
-require('./index-8c9715dc.js');
+require('./index-277b89b5.js');
 require('./leading_space-d190b83b.js');
 
 function migrate(options) {
