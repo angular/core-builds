@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @license Angular v19.1.5+sha-cab7a9b
+ * @license Angular v19.1.5+sha-f9e5900
  * (c) 2010-2024 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -1011,7 +1011,7 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 function compileDeclareClassMetadata(metadata) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-    definitionMap.set('version', checker.literal('19.1.5+sha-cab7a9b'));
+    definitionMap.set('version', checker.literal('19.1.5+sha-f9e5900'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('decorators', metadata.decorators);
@@ -1029,7 +1029,7 @@ function compileComponentDeclareClassMetadata(metadata, dependencies) {
     callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? checker.literal(null));
     callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? checker.literal(null));
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-    definitionMap.set('version', checker.literal('19.1.5+sha-cab7a9b'));
+    definitionMap.set('version', checker.literal('19.1.5+sha-f9e5900'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', metadata.type);
     definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
@@ -1124,7 +1124,7 @@ function createDirectiveDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     const minVersion = getMinimumVersionForPartialOutput(meta);
     definitionMap.set('minVersion', checker.literal(minVersion));
-    definitionMap.set('version', checker.literal('19.1.5+sha-cab7a9b'));
+    definitionMap.set('version', checker.literal('19.1.5+sha-f9e5900'));
     // e.g. `type: MyDirective`
     definitionMap.set('type', meta.type.value);
     if (meta.isStandalone !== undefined) {
@@ -1540,7 +1540,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-    definitionMap.set('version', checker.literal('19.1.5+sha-cab7a9b'));
+    definitionMap.set('version', checker.literal('19.1.5+sha-f9e5900'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('deps', compileDependencies(meta.deps));
@@ -1575,7 +1575,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-    definitionMap.set('version', checker.literal('19.1.5+sha-cab7a9b'));
+    definitionMap.set('version', checker.literal('19.1.5+sha-f9e5900'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // Only generate providedIn property if it has a non-null value
@@ -1626,7 +1626,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-    definitionMap.set('version', checker.literal('19.1.5+sha-cab7a9b'));
+    definitionMap.set('version', checker.literal('19.1.5+sha-f9e5900'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     definitionMap.set('providers', meta.providers);
@@ -1659,7 +1659,7 @@ function createNgModuleDefinitionMap(meta) {
         throw new Error('Invalid path! Local compilation mode should not get into the partial compilation path');
     }
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-    definitionMap.set('version', checker.literal('19.1.5+sha-cab7a9b'));
+    definitionMap.set('version', checker.literal('19.1.5+sha-f9e5900'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     definitionMap.set('type', meta.type.value);
     // We only generate the keys in the metadata if the arrays contain values.
@@ -1710,7 +1710,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
     const definitionMap = new checker.DefinitionMap();
     definitionMap.set('minVersion', checker.literal(MINIMUM_PARTIAL_LINKER_VERSION));
-    definitionMap.set('version', checker.literal('19.1.5+sha-cab7a9b'));
+    definitionMap.set('version', checker.literal('19.1.5+sha-f9e5900'));
     definitionMap.set('ngImport', checker.importExpr(checker.Identifiers.core));
     // e.g. `type: MyPipe`
     definitionMap.set('type', meta.type.value);
@@ -11755,18 +11755,27 @@ class ComponentDecoratorHandler {
      * the `@Component.imports` field and their usage in `@defer` blocks.
      */
     resolveAllDeferredDependencies(resolution) {
+        const seenDeps = new Set();
         const deferrableTypes = [];
         // Go over all dependencies of all defer blocks and update the value of
         // the `isDeferrable` flag and the `importPath` to reflect the current
         // state after visiting all components during the `resolve` phase.
         for (const [_, deps] of resolution.deferPerBlockDependencies) {
             for (const deferBlockDep of deps) {
-                const importDecl = resolution.deferrableDeclToImportDecl.get(deferBlockDep.declaration.node) ?? null;
+                const node = deferBlockDep.declaration.node;
+                const importDecl = resolution.deferrableDeclToImportDecl.get(node) ?? null;
                 if (importDecl !== null && this.deferredSymbolTracker.canDefer(importDecl)) {
                     deferBlockDep.isDeferrable = true;
                     deferBlockDep.importPath = importDecl.moduleSpecifier.text;
                     deferBlockDep.isDefaultImport = isDefaultImport(importDecl);
-                    deferrableTypes.push(deferBlockDep);
+                    // The same dependency may be used across multiple deferred blocks. De-duplicate it
+                    // because it can throw off other logic further down the compilation pipeline.
+                    // Note that the logic above needs to run even if the dependency is seen before,
+                    // because the object literals are different between each block.
+                    if (!seenDeps.has(node)) {
+                        seenDeps.add(node);
+                        deferrableTypes.push(deferBlockDep);
+                    }
                 }
             }
         }
@@ -20335,7 +20344,7 @@ var semver = /*@__PURE__*/getDefaultExportFromCjs(semverExports);
  * @param minVersion Minimum required version for the feature.
  */
 function coreVersionSupportsFeature(coreVersion, minVersion) {
-    // A version of `19.1.5+sha-cab7a9b` usually means that core is at head so it supports
+    // A version of `19.1.5+sha-f9e5900` usually means that core is at head so it supports
     // all features. Use string interpolation prevent the placeholder from being replaced
     // with the current version during build time.
     if (coreVersion === `0.0.0-${'PLACEHOLDER'}`) {
